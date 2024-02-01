@@ -9,10 +9,10 @@
 struct plPerInstanceData;
 
 /// \brief Implements rendering of static meshes
-class PLASMA_KRAUTPLUGIN_DLL plKrautRenderer : public plRenderer
+class PL_KRAUTPLUGIN_DLL plKrautRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plKrautRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plKrautRenderer);
 
 public:
   plKrautRenderer();

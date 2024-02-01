@@ -8,28 +8,28 @@
 #include <JoltPlugin/System/JoltWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltSliderConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltSliderConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("LimitMode", plJoltConstraintLimitMode, GetLimitMode, SetLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitDistance, SetLowerLimitDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitDistance, SetUpperLimitDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("DriveMode", plJoltConstraintDriveMode, GetDriveMode, SetDriveMode),
-    PLASMA_ACCESSOR_PROPERTY("DriveTargetValue", GetDriveTargetValue, SetDriveTargetValue),
-    PLASMA_ACCESSOR_PROPERTY("DriveStrength", GetDriveStrength, SetDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum")),
+    PL_ENUM_ACCESSOR_PROPERTY("LimitMode", plJoltConstraintLimitMode, GetLimitMode, SetLimitMode),
+    PL_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitDistance, SetLowerLimitDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitDistance, SetUpperLimitDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ENUM_ACCESSOR_PROPERTY("DriveMode", plJoltConstraintDriveMode, GetDriveMode, SetDriveMode),
+    PL_ACCESSOR_PROPERTY("DriveTargetValue", GetDriveTargetValue, SetDriveTargetValue),
+    PL_ACCESSOR_PROPERTY("DriveStrength", GetDriveStrength, SetDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum")),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::Orange, nullptr, "UpperLimit"),
     new plDirectionVisualizerAttribute(plBasisAxis::NegativeX, 1.0f, plColor::Teal, nullptr, "LowerLimit"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltSliderConstraintComponent::plJoltSliderConstraintComponent() = default;
@@ -214,4 +214,4 @@ void plJoltSliderConstraintComponent::CreateContstraintType(JPH::Body* pBody0, J
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltSliderConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltSliderConstraintComponent);

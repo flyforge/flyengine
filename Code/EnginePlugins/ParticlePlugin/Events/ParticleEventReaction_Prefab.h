@@ -6,9 +6,9 @@
 
 using plPrefabResourceHandle = plTypedResourceHandle<class plPrefabResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReactionFactory_Prefab final : public plParticleEventReactionFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEventReactionFactory_Prefab final : public plParticleEventReactionFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory_Prefab, plParticleEventReactionFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory_Prefab, plParticleEventReactionFactory);
 
 public:
   plParticleEventReactionFactory_Prefab();
@@ -16,8 +16,8 @@ public:
   virtual const plRTTI* GetEventReactionType() const override;
   virtual void CopyReactionProperties(plParticleEventReaction* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plString m_sPrefab;
   plEnum<plSurfaceInteractionAlignment> m_Alignment;
@@ -34,9 +34,9 @@ private:
   // plSharedPtr<plParticlePrefabParameters> m_Parameters;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReaction_Prefab final : public plParticleEventReaction
+class PL_PARTICLEPLUGIN_DLL plParticleEventReaction_Prefab final : public plParticleEventReaction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReaction_Prefab, plParticleEventReaction);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReaction_Prefab, plParticleEventReaction);
 
 public:
   plParticleEventReaction_Prefab();

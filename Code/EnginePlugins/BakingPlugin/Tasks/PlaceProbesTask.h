@@ -7,7 +7,7 @@ struct plBakingSettings;
 
 namespace plBakingInternal
 {
-  class PLASMA_BAKINGPLUGIN_DLL PlaceProbesTask : public plTask
+  class PL_BAKINGPLUGIN_DLL PlaceProbesTask : public plTask
   {
   public:
     PlaceProbesTask(const plBakingSettings& settings, const plBoundingBox& bounds, plArrayPtr<const Volume> volumes);
@@ -25,8 +25,8 @@ namespace plBakingInternal
     plBoundingBox m_Bounds;
     plArrayPtr<const Volume> m_Volumes;
 
-    plVec3 m_vGridOrigin = plVec3::ZeroVector();
-    plVec3U32 m_vProbeCount = plVec3U32::ZeroVector();
+    plVec3 m_vGridOrigin = plVec3::MakeZero();
+    plVec3U32 m_vProbeCount = plVec3U32::MakeZero();
     plDynamicArray<plVec3> m_ProbePositions;
   };
 } // namespace plBakingInternal

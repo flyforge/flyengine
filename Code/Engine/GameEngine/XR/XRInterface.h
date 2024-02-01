@@ -65,7 +65,7 @@ public:
   ///
   /// If SupportsCompanionView is true (VR only), a normal window and window output can be passed in.
   /// The window will be used to blit the VR output into the window.
-  virtual plUniquePtr<plActor> CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount = plGALMSAASampleCount::None, plUniquePtr<plWindowBase> companionWindow = nullptr, plUniquePtr<plWindowOutputTargetGAL> companionWindowOutput = nullptr) = 0;
+  virtual plUniquePtr<plActor> CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount = plGALMSAASampleCount::None, plUniquePtr<plWindowBase> pCompanionWindow = nullptr, plUniquePtr<plWindowOutputTargetGAL> pCompanionWindowOutput = nullptr) = 0;
 
   ///@}
   /// \name Internal

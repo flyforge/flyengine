@@ -4,26 +4,26 @@
 #include <EnginePluginAssets/EnginePluginAssetsDLL.h>
 #include <RendererCore/Declarations.h>
 
-class PLASMA_ENGINEPLUGINASSETS_DLL plAnimationClipContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINASSETS_DLL plAnimationClipContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimationClipContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimationClipContext, plEngineProcessDocumentContext);
 
 public:
   plAnimationClipContext();
 
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
 
   bool m_bDisplayGrid = true;
 
 protected:
   virtual void OnInitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
 
 private:
-  void QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg);
+  void QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg);
   void SetPlaybackPosition(double pos);
 
   plGameObject* m_pGameObject = nullptr;

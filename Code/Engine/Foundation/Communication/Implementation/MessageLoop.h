@@ -16,9 +16,9 @@ class plLoopThread;
 /// This sub-system creates a background thread as soon as the first plIpcChannel
 /// is added to it. This class should never be needed to be accessed outside
 /// of plIpcChannel implementations.
-class PLASMA_FOUNDATION_DLL plMessageLoop
+class PL_FOUNDATION_DLL plMessageLoop
 {
-  PLASMA_DECLARE_SINGLETON(plMessageLoop);
+  PL_DECLARE_SINGLETON(plMessageLoop);
 
 public:
   plMessageLoop();
@@ -31,7 +31,7 @@ public:
   void RemoveChannel(plIpcChannel* pChannel);
 
 protected:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, MessageLoop);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, MessageLoop);
   friend class plLoopThread;
   friend class plIpcChannel;
 

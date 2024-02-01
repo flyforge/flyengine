@@ -65,7 +65,7 @@ void plPipelineBarrierVulkan::Flush()
     {
       it.Value().m_dirty.ClearAllBits();
     }
-    FullBarrier();
+    // FullBarrier();
   }
 }
 
@@ -364,7 +364,7 @@ void plPipelineBarrierVulkan::EnsureImageLayout(const plGALTextureVulkan* pTextu
 void plPipelineBarrierVulkan::SetInitialImageState(const plGALTextureVulkan* pTexture, vk::ImageLayout dstLayout, vk::PipelineStageFlags dstStages, vk::AccessFlags dstAccess)
 {
   auto it = m_imageState.Find(pTexture->GetImage());
-  PLASMA_ASSERT_DEBUG(!it.IsValid(), "Can't set initial state, texture is already tracked.");
+  PL_ASSERT_DEBUG(!it.IsValid(), "Can't set initial state, texture is already tracked.");
 
   ImageState state;
   state.m_pTexture = pTexture;

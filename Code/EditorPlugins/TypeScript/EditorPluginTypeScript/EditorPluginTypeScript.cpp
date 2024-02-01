@@ -24,19 +24,20 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("TypeScriptAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("TypeScriptAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plStandardMenus::MapActions("TypeScriptAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("TypeScriptAssetMenuBar");
-      plDocumentActions::MapActions("TypeScriptAssetMenuBar", "Menu.File", false);
-      plCommandHistoryActions::MapActions("TypeScriptAssetMenuBar", "Menu.Edit");
+      plDocumentActions::MapMenuActions("TypeScriptAssetMenuBar");
+      plAssetActions::MapMenuActions("TypeScriptAssetMenuBar");
+      plCommandHistoryActions::MapActions("TypeScriptAssetMenuBar");
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("TypeScriptAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("TypeScriptAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("TypeScriptAssetToolBar");
       plCommandHistoryActions::MapActions("TypeScriptAssetToolBar", "");
       plAssetActions::MapToolBarActions("TypeScriptAssetToolBar", true);
-      plTypeScriptActions::MapActions("TypeScriptAssetToolBar", "");
+      plTypeScriptActions::MapActions("TypeScriptAssetToolBar");
     }
   }
 }
@@ -46,12 +47,12 @@ void OnUnloadPlugin()
   plTypeScriptActions::UnregisterActions();
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

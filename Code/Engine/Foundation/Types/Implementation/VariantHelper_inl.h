@@ -1,7 +1,7 @@
 
 
 // for some reason MSVC does not accept the template keyword here
-#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC_PURE)
+#if PL_ENABLED(PL_COMPILER_MSVC_PURE)
 #  define CALL_FUNCTOR(functor, type) return functor.operator()<type>(std::forward<Args>(args)...)
 #else
 #  define CALL_FUNCTOR(functor, type) return functor.template operator()<type>(std::forward<Args>(args)...)
@@ -161,7 +161,7 @@ auto plVariant::DispatchTo(Functor& ref_functor, Type::Enum type, Args&&... args
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Could not dispatch type '{0}'", type);
+      PL_REPORT_FAILURE("Could not dispatch type '{0}'", type);
       // Intended fall through to disable warning.
     case Type::TypedPointer:
       CALL_FUNCTOR(ref_functor, plTypedPointer);
@@ -185,14 +185,14 @@ class plVariantHelper
     else if (value.GetType() == plVariant::Type::String || value.GetType() == plVariant::Type::HashedString)
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
-      if (plConversionUtils::StringToBool(s, result) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToBool(s, result) == PL_FAILURE)
       {
         result = false;
         bSuccessful = false;
       }
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to bool failed");
+      PL_REPORT_FAILURE("Conversion to bool failed");
   }
 
   static void To(const plVariant& value, plInt8& result, bool& bSuccessful)
@@ -232,14 +232,14 @@ class plVariantHelper
     else if (value.GetType() == plVariant::Type::String || value.GetType() == plVariant::Type::HashedString)
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
-      if (plConversionUtils::StringToInt(s, result) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToInt(s, result) == PL_FAILURE)
       {
         result = 0;
         bSuccessful = false;
       }
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to int failed");
+      PL_REPORT_FAILURE("Conversion to int failed");
   }
 
   static void To(const plVariant& value, plUInt32& result, bool& bSuccessful)
@@ -252,7 +252,7 @@ class plVariantHelper
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
       plInt64 tmp = result;
-      if (plConversionUtils::StringToInt64(s, tmp) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToInt64(s, tmp) == PL_FAILURE)
       {
         result = 0;
         bSuccessful = false;
@@ -261,7 +261,7 @@ class plVariantHelper
         result = (plUInt32)tmp;
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to uint failed");
+      PL_REPORT_FAILURE("Conversion to uint failed");
   }
 
   static void To(const plVariant& value, plInt64& result, bool& bSuccessful)
@@ -273,14 +273,14 @@ class plVariantHelper
     else if (value.GetType() == plVariant::Type::String || value.GetType() == plVariant::Type::HashedString)
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
-      if (plConversionUtils::StringToInt64(s, result) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToInt64(s, result) == PL_FAILURE)
       {
         result = 0;
         bSuccessful = false;
       }
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to int64 failed");
+      PL_REPORT_FAILURE("Conversion to int64 failed");
   }
 
   static void To(const plVariant& value, plUInt64& result, bool& bSuccessful)
@@ -293,7 +293,7 @@ class plVariantHelper
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
       plInt64 tmp = result;
-      if (plConversionUtils::StringToInt64(s, tmp) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToInt64(s, tmp) == PL_FAILURE)
       {
         result = 0;
         bSuccessful = false;
@@ -302,7 +302,7 @@ class plVariantHelper
         result = (plUInt64)tmp;
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to uint64 failed");
+      PL_REPORT_FAILURE("Conversion to uint64 failed");
   }
 
   static void To(const plVariant& value, float& result, bool& bSuccessful)
@@ -315,7 +315,7 @@ class plVariantHelper
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
       double tmp = result;
-      if (plConversionUtils::StringToFloat(s, tmp) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToFloat(s, tmp) == PL_FAILURE)
       {
         result = 0.0f;
         bSuccessful = false;
@@ -324,7 +324,7 @@ class plVariantHelper
         result = (float)tmp;
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to float failed");
+      PL_REPORT_FAILURE("Conversion to float failed");
   }
 
   static void To(const plVariant& value, double& result, bool& bSuccessful)
@@ -336,14 +336,14 @@ class plVariantHelper
     else if (value.GetType() == plVariant::Type::String || value.GetType() == plVariant::Type::HashedString)
     {
       plStringView s = value.IsA<plString>() ? value.Cast<plString>().GetView() : value.Cast<plHashedString>().GetView();
-      if (plConversionUtils::StringToFloat(s, result) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToFloat(s, result) == PL_FAILURE)
       {
         result = 0.0;
         bSuccessful = false;
       }
     }
     else
-      PLASMA_REPORT_FAILURE("Conversion to double failed");
+      PL_REPORT_FAILURE("Conversion to double failed");
   }
 
   static void To(const plVariant& value, plString& result, bool& bSuccessful)
@@ -373,7 +373,7 @@ class plVariantHelper
   static void To(const plVariant& value, plTypedPointer& result, bool& bSuccessful)
   {
     bSuccessful = true;
-    PLASMA_ASSERT_DEBUG(value.GetType() == plVariant::Type::TypedPointer, "Only ptr can be converted to void*!");
+    PL_ASSERT_DEBUG(value.GetType() == plVariant::Type::TypedPointer, "Only ptr can be converted to void*!");
     result = value.Cast<plTypedPointer>();
   }
 
@@ -384,7 +384,7 @@ class plVariantHelper
     if (value.GetType() == plVariant::Type::ColorGamma)
       result = value.Cast<plColorGammaUB>();
     else
-      PLASMA_REPORT_FAILURE("Conversion to plColor failed");
+      PL_REPORT_FAILURE("Conversion to plColor failed");
   }
 
   static void To(const plVariant& value, plColorGammaUB& result, bool& bSuccessful)
@@ -394,7 +394,7 @@ class plVariantHelper
     if (value.GetType() == plVariant::Type::Color)
       result = value.Cast<plColor>();
     else
-      PLASMA_REPORT_FAILURE("Conversion to plColorGammaUB failed");
+      PL_REPORT_FAILURE("Conversion to plColorGammaUB failed");
   }
 
   template <typename T, typename V1, typename V2>
@@ -414,7 +414,7 @@ class plVariantHelper
     }
     else
     {
-      PLASMA_REPORT_FAILURE("Conversion to plVec2X failed");
+      PL_REPORT_FAILURE("Conversion to plVec2X failed");
       bSuccessful = false;
     }
   }
@@ -442,7 +442,7 @@ class plVariantHelper
     }
     else
     {
-      PLASMA_REPORT_FAILURE("Conversion to plVec3X failed");
+      PL_REPORT_FAILURE("Conversion to plVec3X failed");
       bSuccessful = false;
     }
   }
@@ -470,7 +470,7 @@ class plVariantHelper
     }
     else
     {
-      PLASMA_REPORT_FAILURE("Conversion to plVec4X failed");
+      PL_REPORT_FAILURE("Conversion to plVec4X failed");
       bSuccessful = false;
     }
   }
@@ -518,14 +518,14 @@ class plVariantHelper
   template <typename T>
   static void To(const plVariant& value, T& result, bool& bSuccessful)
   {
-    PLASMA_REPORT_FAILURE("Conversion function not implemented for target type '{0}'", plVariant::TypeDeduction<T>::value);
+    PL_REPORT_FAILURE("Conversion function not implemented for target type '{0}'", plVariant::TypeDeduction<T>::value);
     bSuccessful = false;
   }
 
   struct ToStringFunc
   {
     template <typename T>
-    PLASMA_ALWAYS_INLINE void operator()()
+    PL_ALWAYS_INLINE void operator()()
     {
       plStringBuilder tmp;
       *m_pResult = plConversionUtils::ToString(m_pThis->Cast<T>(), tmp);

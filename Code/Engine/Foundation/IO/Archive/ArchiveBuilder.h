@@ -8,7 +8,7 @@
 /// \brief Utility class to build an plArchive file from files/folders on disk
 ///
 /// All functionality for writing an plArchive file is available through plArchiveUtils.
-class PLASMA_FOUNDATION_DLL plArchiveBuilder
+class PL_FOUNDATION_DLL plArchiveBuilder
 {
 public:
   struct SourceEntry

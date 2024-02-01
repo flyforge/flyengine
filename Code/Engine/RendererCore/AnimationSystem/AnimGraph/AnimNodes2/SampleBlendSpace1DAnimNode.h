@@ -4,7 +4,7 @@
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 
-struct PLASMA_RENDERERCORE_DLL plAnimationClip1D
+struct PL_RENDERERCORE_DLL plAnimationClip1D
 {
   plHashedString m_sClip;
   float m_fPosition = 0.0f;
@@ -14,11 +14,11 @@ struct PLASMA_RENDERERCORE_DLL plAnimationClip1D
   const char* GetAnimationFile() const;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plAnimationClip1D);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plAnimationClip1D);
 
-class PLASMA_RENDERERCORE_DLL plSampleBlendSpace1DAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSampleBlendSpace1DAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSampleBlendSpace1DAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSampleBlendSpace1DAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

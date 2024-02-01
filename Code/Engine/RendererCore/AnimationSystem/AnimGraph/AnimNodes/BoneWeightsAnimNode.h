@@ -6,9 +6,9 @@ class plSkeletonResource;
 class plStreamWriter;
 class plStreamReader;
 
-class PLASMA_RENDERERCORE_DLL plBoneWeightsAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plBoneWeightsAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoneWeightsAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plBoneWeightsAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

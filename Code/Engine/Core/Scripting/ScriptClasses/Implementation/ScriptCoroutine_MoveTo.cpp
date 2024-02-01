@@ -4,20 +4,20 @@
 #include <Core/World/World.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_MoveTo, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_MoveTo>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_MoveTo, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_MoveTo>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Start, In, "Object", In, "TargetPos", In, "Duration", In, "Easing"),
+    PL_SCRIPT_FUNCTION_PROPERTY(Start, In, "Object", In, "TargetPos", In, "Duration", In, "Easing"),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Coroutine::MoveTo {TargetPos}"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plScriptCoroutine_MoveTo::Start(plGameObjectHandle hObject, const plVec3& vTargetPos, plTime duration, plEnum<plCurveFunction> easing)
@@ -35,7 +35,7 @@ void plScriptCoroutine_MoveTo::Start(plGameObjectHandle hObject, const plVec3& v
   m_Easing = easing;
 
   m_Duration = duration;
-  m_TimePassed = plTime::Zero();
+  m_TimePassed = plTime::MakeZero();
 }
 
 plScriptCoroutine::Result plScriptCoroutine_MoveTo::Update(plTime deltaTimeSinceLastUpdate)
@@ -65,3 +65,7 @@ plScriptCoroutine::Result plScriptCoroutine_MoveTo::Update(plTime deltaTimeSince
 
   return Result::Completed();
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_ScriptClasses_Implementation_ScriptCoroutine_MoveTo);
+

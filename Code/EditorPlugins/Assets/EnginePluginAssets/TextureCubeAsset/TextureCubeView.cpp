@@ -5,14 +5,15 @@
 
 #include <RendererCore/Debug/DebugRenderer.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
+#include <RendererFoundation/RendererReflection.h>
 
 plTextureCubeViewContext::plTextureCubeViewContext(plTextureCubeContext* pContext)
-  : PlasmaEngineProcessViewContext(pContext)
+  : plEngineProcessViewContext(pContext)
 {
   m_pTextureContext = pContext;
 }
 
-plTextureCubeViewContext::~plTextureCubeViewContext() {}
+plTextureCubeViewContext::~plTextureCubeViewContext() = default;
 
 plViewHandle plTextureCubeViewContext::CreateView()
 {
@@ -24,7 +25,7 @@ plViewHandle plTextureCubeViewContext::CreateView()
   pView->SetRenderPassProperty("DepthPrePass", "Active", false);
   pView->SetRenderPassProperty("AOPass", "Active", false);
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();
@@ -46,8 +47,6 @@ void plTextureCubeViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
     plResourceLock<plTextureCubeResource> pResource(hResource, plResourceAcquireMode::AllowLoadingFallback);
     plGALResourceFormat::Enum format = pResource->GetFormat();
     plUInt32 uiWidthAndHeight = pResource->GetWidthAndHeight();
-
-    const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
 
     plStringBuilder sText;
     if (!plReflectionUtils::EnumerationToString(plGetStaticRTTI<plGALResourceFormat>(), format, sText, plReflectionUtils::EnumConversionMode::ValueNameOnly))

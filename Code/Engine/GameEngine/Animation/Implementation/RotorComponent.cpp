@@ -6,22 +6,22 @@
 #include <GameEngine/Animation/RotorComponent.h>
 
 float CalculateAcceleratedMovement(
-  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& fTimeSinceStartInSec);
+  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& ref_timeSinceStartInSec);
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plRotorComponent, 3, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plRotorComponent, 3, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
-    PLASMA_MEMBER_PROPERTY("AxisDeviation", m_AxisDeviation)->AddAttributes(new plClampValueAttribute(plAngle::Degree(-180), plAngle::Degree(180))),
-    PLASMA_MEMBER_PROPERTY("DegreesToRotate", m_iDegreeToRotate),
-    PLASMA_MEMBER_PROPERTY("Acceleration", m_fAcceleration),
-    PLASMA_MEMBER_PROPERTY("Deceleration", m_fDeceleration),
+    PL_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
+    PL_MEMBER_PROPERTY("AxisDeviation", m_AxisDeviation)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(-180), plAngle::MakeFromDegree(180))),
+    PL_MEMBER_PROPERTY("DegreesToRotate", m_iDegreeToRotate),
+    PL_MEMBER_PROPERTY("Acceleration", m_fAcceleration),
+    PL_MEMBER_PROPERTY("Deceleration", m_fDeceleration),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRotorComponent::plRotorComponent() = default;
@@ -41,10 +41,9 @@ void plRotorComponent::Update()
       const float fNewDistance =
         CalculateAcceleratedMovement((float)m_iDegreeToRotate, m_fAcceleration, m_fAnimationSpeed, m_fDeceleration, m_AnimationTime);
 
-      plQuat qRotation;
-      qRotation.SetFromAxisAndAngle(m_vRotationAxis, plAngle::Degree(fNewDistance));
+      plQuat qRotation = plQuat::MakeFromAxisAndAngle(m_vRotationAxis, plAngle::MakeFromDegree(fNewDistance));
 
-      GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * -m_qLastRotation * qRotation);
+      GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * m_qLastRotation.GetInverse() * qRotation);
 
       m_qLastRotation = qRotation;
 
@@ -85,19 +84,18 @@ void plRotorComponent::Update()
     {
       /// \todo This will probably give precision issues pretty quickly
 
-      plQuat qRotation;
-      qRotation.SetFromAxisAndAngle(m_vRotationAxis, plAngle::Degree(m_fAnimationSpeed * GetWorld()->GetClock().GetTimeDiff().AsFloatInSeconds()));
+      plQuat qRotation = plQuat::MakeFromAxisAndAngle(m_vRotationAxis, plAngle::MakeFromDegree(m_fAnimationSpeed * GetWorld()->GetClock().GetTimeDiff().AsFloatInSeconds()));
 
       GetOwner()->SetLocalRotation(GetOwner()->GetLocalRotation() * qRotation);
     }
   }
 }
 
-void plRotorComponent::SerializeComponent(plWorldWriter& stream) const
+void plRotorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s << m_iDegreeToRotate;
   s << m_fAcceleration;
@@ -108,12 +106,12 @@ void plRotorComponent::SerializeComponent(plWorldWriter& stream) const
 }
 
 
-void plRotorComponent::DeserializeComponent(plWorldReader& stream)
+void plRotorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_iDegreeToRotate;
   s >> m_fAcceleration;
@@ -130,6 +128,9 @@ void plRotorComponent::DeserializeComponent(plWorldReader& stream)
 void plRotorComponent::OnSimulationStarted()
 {
   SUPER::OnSimulationStarted();
+
+  // reset to start state
+  m_qLastRotation = plQuat::MakeIdentity();
 
   switch (m_Axis)
   {
@@ -155,13 +156,13 @@ void plRotorComponent::OnSimulationStarted()
 
   if (m_AxisDeviation.GetRadian() != 0.0f)
   {
-    if (m_AxisDeviation > plAngle::Degree(179))
+    if (m_AxisDeviation > plAngle::MakeFromDegree(179))
     {
-      m_vRotationAxis = plVec3::CreateRandomDirection(GetWorld()->GetRandomNumberGenerator());
+      m_vRotationAxis = plVec3::MakeRandomDirection(GetWorld()->GetRandomNumberGenerator());
     }
     else
     {
-      m_vRotationAxis = plVec3::CreateRandomDeviation(GetWorld()->GetRandomNumberGenerator(), m_AxisDeviation, m_vRotationAxis);
+      m_vRotationAxis = plVec3::MakeRandomDeviation(GetWorld()->GetRandomNumberGenerator(), m_AxisDeviation, m_vRotationAxis);
 
       if (m_AxisDeviation.GetRadian() > 0 && GetWorld()->GetRandomNumberGenerator().Bool())
         m_vRotationAxis = -m_vRotationAxis;
@@ -183,10 +184,10 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     // Base class
-    context.PatchBaseClass("plTransformComponent", 2, true);
+    ref_context.PatchBaseClass("plTransformComponent", 2, true);
 
     // this class
     pNode->RenameProperty("Degrees to Rotate", "DegreesToRotate");
@@ -196,4 +197,4 @@ public:
 plRotorComponentPatch_1_2 g_plRotorComponentPatch_1_2;
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_RotorComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_RotorComponent);

@@ -3,10 +3,10 @@
 #include <Core/Interfaces/WindWorldModule.h>
 #include <GameEngine/GameEngineDLL.h>
 
-class PLASMA_GAMEENGINE_DLL plSimpleWindWorldModule : public plWindWorldModuleInterface
+class PL_GAMEENGINE_DLL plSimpleWindWorldModule : public plWindWorldModuleInterface
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimpleWindWorldModule, plWindWorldModuleInterface);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plSimpleWindWorldModule, plWindWorldModuleInterface);
 
 public:
   plSimpleWindWorldModule(plWorld* pWorld);

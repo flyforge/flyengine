@@ -5,7 +5,7 @@
 #include <Foundation/Math/Declarations.h>
 
 /// \brief A random number generator. Currently uses the WELL512 algorithm.
-class PLASMA_FOUNDATION_DLL plRandom
+class PL_FOUNDATION_DLL plRandom
 {
 public:
   plRandom();
@@ -42,13 +42,13 @@ public:
   plInt32 IntMinMax(plInt32 iMinValue, plInt32 iMaxValue); // [tested]
 
   /// \brief Returns a boolean either being true or false
-  PLASMA_ALWAYS_INLINE bool Bool() { return static_cast<bool>(UInt() & 1); } // [tested]
+  PL_ALWAYS_INLINE bool Bool() { return static_cast<bool>(UInt() & 1); } // [tested]
 
   /// \brief Returns a value in range [0.0 ; 1.0), ie. including zero, but excluding one
-  PLASMA_ALWAYS_INLINE double DoubleZeroToOneExclusive() { return (double)UInt() / (double)(0xFFFFFFFFUL); } // [tested]
+  PL_ALWAYS_INLINE double DoubleZeroToOneExclusive() { return (double)UInt() / (double)(0xFFFFFFFFUL); } // [tested]
 
   /// \brief Returns a value in range [0.0 ; 1.0], ie. including zero and one
-  PLASMA_ALWAYS_INLINE double DoubleZeroToOneInclusive() { return (double)UInt() / (double)(0xFFFFFFFFUL + 1.0); } // [tested]
+  PL_ALWAYS_INLINE double DoubleZeroToOneInclusive() { return (double)UInt() / (double)(0xFFFFFFFFUL + 1.0); } // [tested]
 
   /// \brief Returns a double value in range [fMinValue ; fMinValue + fRange)
   double DoubleInRange(double fMinValue, double fRange); // [tested]
@@ -63,22 +63,22 @@ public:
   double DoubleVarianceAroundZero(double fAbsMaxValue);
 
   /// \brief Returns a value in range [0.0 ; 1.0), ie. including zero, but excluding one
-  PLASMA_ALWAYS_INLINE float FloatZeroToOneExclusive() { return static_cast<float>(DoubleZeroToOneExclusive()); } // [tested]
+  PL_ALWAYS_INLINE float FloatZeroToOneExclusive() { return static_cast<float>(DoubleZeroToOneExclusive()); } // [tested]
 
   /// \brief Returns a value in range [0.0 ; 1.0], ie. including zero and one
-  PLASMA_ALWAYS_INLINE float FloatZeroToOneInclusive() { return static_cast<float>(DoubleZeroToOneInclusive()); } // [tested]
+  PL_ALWAYS_INLINE float FloatZeroToOneInclusive() { return static_cast<float>(DoubleZeroToOneInclusive()); } // [tested]
 
   /// \brief Returns a float value in range [fMinValue ; fMinValue + fRange)
-  PLASMA_ALWAYS_INLINE float FloatInRange(float fMinValue, float fRange) { return static_cast<float>(DoubleInRange(fMinValue, fRange)); } // [tested]
+  PL_ALWAYS_INLINE float FloatInRange(float fMinValue, float fRange) { return static_cast<float>(DoubleInRange(fMinValue, fRange)); } // [tested]
 
   /// \brief Returns a float value in range [fMinValue ; fMaxValue]
-  PLASMA_ALWAYS_INLINE float FloatMinMax(float fMinValue, float fMaxValue) { return static_cast<float>(DoubleMinMax(fMinValue, fMaxValue)); } // [tested]
+  PL_ALWAYS_INLINE float FloatMinMax(float fMinValue, float fMaxValue) { return static_cast<float>(DoubleMinMax(fMinValue, fMaxValue)); } // [tested]
 
   /// \brief Returns a float value around fValue with a given variance (0 - 1 range)
-  PLASMA_ALWAYS_INLINE float FloatVariance(float fValue, float fVariance) { return static_cast<float>(DoubleVariance(fValue, fVariance)); }
+  PL_ALWAYS_INLINE float FloatVariance(float fValue, float fVariance) { return static_cast<float>(DoubleVariance(fValue, fVariance)); }
 
   /// \brief Returns a float value between [-fAbsMaxValue; +fAbsMaxValue] with a Gaussian distribution.
-  PLASMA_ALWAYS_INLINE float FloatVarianceAroundZero(float fAbsMaxValue) { return static_cast<float>(DoubleVarianceAroundZero(fAbsMaxValue)); }
+  PL_ALWAYS_INLINE float FloatVarianceAroundZero(float fAbsMaxValue) { return static_cast<float>(DoubleVarianceAroundZero(fAbsMaxValue)); }
 
 private:
   plUInt32 m_uiIndex;
@@ -87,7 +87,7 @@ private:
 
 
 /// \brief A random number generator that produces values with a normal / Gaussian distribution
-class PLASMA_FOUNDATION_DLL plRandomGauss
+class PL_FOUNDATION_DLL plRandomGauss
 {
 public:
   /// \brief Initializes the RNG and sets the maximum value that the functions UnsignedValue() and SignedValue() may return

@@ -18,11 +18,11 @@ class plEventMessageHandlerComponent;
 /// * Actual deletion of dead objects and components are done now.
 /// * Transform update: The global transformation of dynamic objects is updated.
 /// * Post-transform phase: Another synchronous phase like the pre-async phase after the transformation has been updated.
-class PLASMA_CORE_DLL plWorld final
+class PL_CORE_DLL plWorld final
 {
 public:
   /// \brief Creates a new world with the given name.
-  plWorld(plWorldDesc& desc);
+  plWorld(plWorldDesc& ref_desc);
   ~plWorld();
 
   /// \brief Deletes all game objects in a world
@@ -49,26 +49,26 @@ public:
   /// Use DeleteObjectDelayed() instead for safe removal at the end of the frame.
   ///
   /// If bAlsoDeleteEmptyParents is set, any ancestor object that has no other children and no components, will also get deleted.
-  void DeleteObjectNow(const plGameObjectHandle& object, bool bAlsoDeleteEmptyParents = true);
+  void DeleteObjectNow(const plGameObjectHandle& hObject, bool bAlsoDeleteEmptyParents = true);
 
   /// \brief Deletes the given object at the beginning of the next world update. The object and its components and children stay completely
   /// valid until then.
   ///
   /// If bAlsoDeleteEmptyParents is set, any ancestor object that has no other children and no components, will also get deleted.
-  void DeleteObjectDelayed(const plGameObjectHandle& object, bool bAlsoDeleteEmptyParents = true);
+  void DeleteObjectDelayed(const plGameObjectHandle& hObject, bool bAlsoDeleteEmptyParents = true);
 
   /// \brief Returns the event that is triggered before an object is deleted. This can be used for external systems to cleanup data
   /// which is associated with the deleted object.
   const plEvent<const plGameObject*>& GetObjectDeletionEvent() const;
 
   /// \brief Returns whether the given handle corresponds to a valid object.
-  bool IsValidObject(const plGameObjectHandle& object) const;
+  bool IsValidObject(const plGameObjectHandle& hObject) const;
 
   /// \brief Returns whether an object with the given handle exists and if so writes out the corresponding pointer to out_pObject.
-  [[nodiscard]] bool TryGetObject(const plGameObjectHandle& object, plGameObject*& out_pObject);
+  [[nodiscard]] bool TryGetObject(const plGameObjectHandle& hObject, plGameObject*& out_pObject);
 
   /// \brief Returns whether an object with the given handle exists and if so writes out the corresponding pointer to out_pObject.
-  [[nodiscard]] bool TryGetObject(const plGameObjectHandle& object, const plGameObject*& out_pObject) const;
+  [[nodiscard]] bool TryGetObject(const plGameObjectHandle& hObject, const plGameObject*& out_pObject) const;
 
   /// \brief Returns whether an object with the given global key exists and if so writes out the corresponding pointer to out_pObject.
   [[nodiscard]] bool TryGetObjectWithGlobalKey(const plTempHashedString& sGlobalKey, plGameObject*& out_pObject);
@@ -89,7 +89,7 @@ public:
   /// \brief Defines a visitor function that is called for every game-object when using the traverse method.
   /// The function takes a pointer to the game object as argument and returns a bool which indicates whether to continue (true) or abort
   /// (false) traversal.
-  typedef plInternal::WorldData::VisitorFunc VisitorFunc;
+  using VisitorFunc = plInternal::WorldData::VisitorFunc;
 
   enum TraversalMethod
   {
@@ -167,15 +167,15 @@ public:
   const plComponentManagerBase* GetManagerForComponentType(const plRTTI* pComponentRtti) const;
 
   /// \brief Checks whether the given handle references a valid component.
-  bool IsValidComponent(const plComponentHandle& component) const;
+  bool IsValidComponent(const plComponentHandle& hComponent) const;
 
   /// \brief Returns whether a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
   template <typename ComponentType>
-  [[nodiscard]] bool TryGetComponent(const plComponentHandle& component, ComponentType*& out_pComponent);
+  [[nodiscard]] bool TryGetComponent(const plComponentHandle& hComponent, ComponentType*& out_pComponent);
 
   /// \brief Returns whether a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
   template <typename ComponentType>
-  [[nodiscard]] bool TryGetComponent(const plComponentHandle& component, const ComponentType*& out_pComponent) const;
+  [[nodiscard]] bool TryGetComponent(const plComponentHandle& hComponent, const ComponentType*& out_pComponent) const;
 
   /// \brief Creates a new component init batch.
   /// It is ensured that the Initialize function is called for all components in a batch before the OnSimulationStarted is called.
@@ -184,50 +184,50 @@ public:
   plComponentInitBatchHandle CreateComponentInitBatch(plStringView sBatchName, bool bMustFinishWithinOneFrame = true);
 
   /// \brief Deletes a component init batch. It must be completely processed before it can be deleted.
-  void DeleteComponentInitBatch(const plComponentInitBatchHandle& batch);
+  void DeleteComponentInitBatch(const plComponentInitBatchHandle& hBatch);
 
   /// \brief All components that are created between an BeginAddingComponentsToInitBatch/EndAddingComponentsToInitBatch scope are added to the
   /// given init batch.
-  void BeginAddingComponentsToInitBatch(const plComponentInitBatchHandle& batch);
+  void BeginAddingComponentsToInitBatch(const plComponentInitBatchHandle& hBatch);
 
   /// \brief End adding components to the given batch. Components created after this call are added to the default init batch.
-  void EndAddingComponentsToInitBatch(const plComponentInitBatchHandle& batch);
+  void EndAddingComponentsToInitBatch(const plComponentInitBatchHandle& hBatch);
 
   /// \brief After all components have been added to the init batch call submit to start processing the batch.
-  void SubmitComponentInitBatch(const plComponentInitBatchHandle& batch);
+  void SubmitComponentInitBatch(const plComponentInitBatchHandle& hBatch);
 
   /// \brief Returns whether the init batch has been completely processed and all corresponding components are initialized
   /// and their OnSimulationStarted function was called.
-  bool IsComponentInitBatchCompleted(const plComponentInitBatchHandle& batch, double* pCompletionFactor = nullptr);
+  bool IsComponentInitBatchCompleted(const plComponentInitBatchHandle& hBatch, double* pCompletionFactor = nullptr);
 
   /// \brief Cancel the init batch if it is still active. This might leave outstanding components in an inconsistent state,
   /// so this function has be used with care.
-  void CancelComponentInitBatch(const plComponentInitBatchHandle& batch);
+  void CancelComponentInitBatch(const plComponentInitBatchHandle& hBatch);
 
   ///@}
   /// \name Message Functions
   ///@{
 
   /// \brief Sends a message to all components of the receiverObject.
-  void SendMessage(const plGameObjectHandle& receiverObject, plMessage& msg);
+  void SendMessage(const plGameObjectHandle& hReceiverObject, plMessage& ref_msg);
 
   /// \brief Sends a message to all components of the receiverObject and all its children.
-  void SendMessageRecursive(const plGameObjectHandle& receiverObject, plMessage& msg);
+  void SendMessageRecursive(const plGameObjectHandle& hReceiverObject, plMessage& ref_msg);
 
   /// \brief Queues the message for the given phase. The message is send to the receiverObject after the given delay in the corresponding phase.
-  void PostMessage(const plGameObjectHandle& receiverObject, const plMessage& msg, plTime delay,
+  void PostMessage(const plGameObjectHandle& hReceiverObject, const plMessage& msg, plTime delay,
     plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
 
   /// \brief Queues the message for the given phase. The message is send to the receiverObject and all its children after the given delay in
   /// the corresponding phase.
-  void PostMessageRecursive(const plGameObjectHandle& receiverObject, const plMessage& msg, plTime delay,
+  void PostMessageRecursive(const plGameObjectHandle& hReceiverObject, const plMessage& msg, plTime delay,
     plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
 
   /// \brief Sends a message to the component.
-  void SendMessage(const plComponentHandle& receiverComponent, plMessage& msg);
+  void SendMessage(const plComponentHandle& hReceiverComponent, plMessage& ref_msg);
 
   /// \brief Queues the message for the given phase. The message is send to the receiverComponent after the given delay in the corresponding phase.
-  void PostMessage(const plComponentHandle& receiverComponent, const plMessage& msg, plTime delay,
+  void PostMessage(const plComponentHandle& hReceiverComponent, const plMessage& msg, plTime delay,
     plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
 
   /// \brief Finds the closest (parent) object, starting at pSearchObject, which has an plComponent that handles the given message and returns all
@@ -255,12 +255,11 @@ public:
   /// \brief Returns a task implementation that calls Update on this world.
   const plSharedPtr<plTask>& GetUpdateTask();
 
+  /// \brief Returns the number of update calls. Can be used to determine whether an operation has already been done during a frame.
+  plUInt32 GetUpdateCounter() const;
 
   /// \brief Returns the spatial system that is associated with this world.
   plSpatialSystem* GetSpatialSystem();
-
-  /// \brief Returns the number of update calls. Can be used to determine whether an operation has already been done during a frame.
-  plUInt32 GetUpdateCounter() const;
 
   /// \brief Returns the spatial system that is associated with this world.
   const plSpatialSystem* GetSpatialSystem() const;
@@ -269,7 +268,7 @@ public:
   /// \brief Returns the coordinate system for the given position.
   /// By default this always returns a coordinate system with forward = +X, right = +Y and up = +Z.
   /// This can be customized by setting a different coordinate system provider.
-  void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_CoordinateSystem) const;
+  void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_coordinateSystem) const;
 
   /// \brief Sets the coordinate system provider that should be used in this world.
   void SetCoordinateSystemProvider(const plSharedPtr<plCoordinateSystemProvider>& pProvider);
@@ -293,19 +292,19 @@ public:
 
 
   /// \brief Returns the allocator used by this world.
-  plAllocatorBase* GetAllocator();
+  plAllocator* GetAllocator();
 
   /// \brief Returns the block allocator used by this world.
   plInternal::WorldLargeBlockAllocator* GetBlockAllocator();
 
   /// \brief Returns the stack allocator used by this world.
-  plDoubleBufferedStackAllocator* GetStackAllocator();
+  plDoubleBufferedLinearAllocator* GetStackAllocator();
 
-  /// \brief Mark the world for reading by using PLASMA_LOCK(world.GetReadMarker()). Multiple threads can read simultaneously if none is
+  /// \brief Mark the world for reading by using PL_LOCK(world.GetReadMarker()). Multiple threads can read simultaneously if none is
   /// writing.
   plInternal::WorldData::ReadMarker& GetReadMarker() const;
 
-  /// \brief Mark the world for writing by using PLASMA_LOCK(world.GetWriteMarker()). Only one thread can write at a time.
+  /// \brief Mark the world for writing by using PL_LOCK(world.GetWriteMarker()). Only one thread can write at a time.
   plInternal::WorldData::WriteMarker& GetWriteMarker();
 
   /// \brief Allows re-setting the maximum time that is spent on component initialization per frame, which is first configured on construction.
@@ -327,6 +326,13 @@ public:
   /// \sa SetGameObjectReferenceResolver()
   const ReferenceResolver& GetGameObjectReferenceResolver() const;
 
+  using ResourceReloadContext = plInternal::WorldData::ResourceReloadContext;
+  using ResourceReloadFunc = plInternal::WorldData::ResourceReloadFunc;
+
+  /// \brief Add a function that is called when the given resource has been reloaded.
+  void AddResourceReloadFunction(plTypelessResourceHandle hResource, plComponentHandle hComponent, void* pUserData, ResourceReloadFunc function);
+  void RemoveResourceReloadFunction(plTypelessResourceHandle hResource, plComponentHandle hComponent, void* pUserData);
+
   /// \name Helper methods to query plWorld limits
   ///@{
   static constexpr plUInt64 GetMaxNumGameObjects();
@@ -345,17 +351,17 @@ public:
   static plWorld* GetWorld(plUInt32 uiIndex);
 
   /// \brief Returns the world for the given game object handle.
-  static plWorld* GetWorld(const plGameObjectHandle& object);
+  static plWorld* GetWorld(const plGameObjectHandle& hObject);
 
   /// \brief Returns the world for the given component handle.
-  static plWorld* GetWorld(const plComponentHandle& component);
+  static plWorld* GetWorld(const plComponentHandle& hComponent);
 
 private:
   friend class plGameObject;
   friend class plWorldModule;
   friend class plComponentManagerBase;
   friend class plComponent;
-  PLASMA_ALLOW_PRIVATE_PROPERTIES(plWorld);
+  PL_ALLOW_PRIVATE_PROPERTIES(plWorld);
 
   plGameObject* Reflection_TryGetObjectWithGlobalKey(plTempHashedString sGlobalKey);
   plClock* Reflection_GetClock();
@@ -403,6 +409,8 @@ private:
   void PatchHierarchyData(plGameObject* pObject, plGameObject::TransformPreservation preserve);
   void RecreateHierarchyData(plGameObject* pObject, bool bWasDynamic);
 
+  void ProcessResourceReloadFunctions();
+
   bool ReportErrorWhenStaticObjectMoves() const;
 
   float GetInvDeltaSeconds() const;
@@ -411,12 +419,12 @@ private:
 
   plInternal::WorldData m_Data;
 
-  typedef plInternal::WorldData::QueuedMsgMetaData QueuedMsgMetaData;
+  using QueuedMsgMetaData = plInternal::WorldData::QueuedMsgMetaData;
 
   plUInt32 m_uiIndex;
-  static plStaticArray<plWorld*, PLASMA_MAX_WORLDS> s_Worlds;
+  static plStaticArray<plWorld*, PL_MAX_WORLDS> s_Worlds;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plWorld);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plWorld);
 
 #include <Core/World/Implementation/World_inl.h>

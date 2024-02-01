@@ -16,10 +16,10 @@
 /// To convert from numerical values to strings, use plStringBuilder::Format, which provides a rich set of formatting options.
 namespace plConversionUtils
 {
-  /// \brief Parses szString and converts it to an integer value. Returns PLASMA_FAILURE if the string contains no parsable integer value.
+  /// \brief Parses szString and converts it to an integer value. Returns PL_FAILURE if the string contains no parsable integer value.
   ///
   /// \param szString
-  ///   If szString is nullptr or an empty string or starts with an some non-whitespace and non-sign character, PLASMA_FAILURE is returned.
+  ///   If szString is nullptr or an empty string or starts with an some non-whitespace and non-sign character, PL_FAILURE is returned.
   ///   All whitespace at the start of the string are skipped. Each minus sign flips the sign of the output value, so --3 will return 3.
   ///   Plus signs are skipped and have no effect, so -+3 will still return -3.
   /// \param out_Res
@@ -28,27 +28,27 @@ namespace plConversionUtils
   /// \param out_LastParsePosition
   ///   On success out_LastParsePosition will contain the address of the character in szString that stopped the parser. This might point
   ///   to the zero terminator of szString, or to some non-digit character, since for example "5+6" will parse as '5' and '+' will be the
-  ///   position where the parser stopped (returning PLASMA_SUCCESS).
+  ///   position where the parser stopped (returning PL_SUCCESS).
   ///   If szString is supposed to only contain one full integer and nothing else, then out_LastParsePosition should always point to a zero
   ///   terminator (otherwise the string was malformed).
   /// \return
-  ///   PLASMA_SUCCESS if any integer value could get properly extracted from szString (including 0). This includes that only some part of the
+  ///   PL_SUCCESS if any integer value could get properly extracted from szString (including 0). This includes that only some part of the
   ///   string was parsed until a non-digit character was encountered.
-  ///   PLASMA_FAILURE if the string starts with something that can not be interpreted as an integer.
-  PLASMA_FOUNDATION_DLL plResult StringToInt(plStringView sText, plInt32& out_iRes, const char** out_pLastParsePosition = nullptr); // [tested]
+  ///   PL_FAILURE if the string starts with something that can not be interpreted as an integer.
+  PL_FOUNDATION_DLL plResult StringToInt(plStringView sText, plInt32& out_iRes, const char** out_pLastParsePosition = nullptr); // [tested]
 
   /// \brief Same as StringToInt() but expects the string to be a uint32.
   ///
-  /// If the parsed value is a valid int but outside the uint32 value range, the function returns PLASMA_FAILURE.
-  PLASMA_FOUNDATION_DLL plResult StringToUInt(plStringView sText, plUInt32& out_uiRes, const char** out_pLastParsePosition = nullptr); // [tested]
+  /// If the parsed value is a valid int but outside the uint32 value range, the function returns PL_FAILURE.
+  PL_FOUNDATION_DLL plResult StringToUInt(plStringView sText, plUInt32& out_uiRes, const char** out_pLastParsePosition = nullptr); // [tested]
 
   /// \brief Same as StringToInt but converts to a 64bit integer value instead.
-  PLASMA_FOUNDATION_DLL plResult StringToInt64(plStringView sText, plInt64& out_iRes, const char** out_pLastParsePosition = nullptr); // [tested]
+  PL_FOUNDATION_DLL plResult StringToInt64(plStringView sText, plInt64& out_iRes, const char** out_pLastParsePosition = nullptr); // [tested]
 
-  /// \brief Parses szString and converts it to a double value. Returns PLASMA_FAILURE if the string contains no parseable floating point value.
+  /// \brief Parses szString and converts it to a double value. Returns PL_FAILURE if the string contains no parseable floating point value.
   ///
   /// \param szString
-  ///   If szString is nullptr or an empty string or starts with some non-whitespace and non-sign character, PLASMA_FAILURE is returned.
+  ///   If szString is nullptr or an empty string or starts with some non-whitespace and non-sign character, PL_FAILURE is returned.
   ///   All whitespace at the start of the string are skipped. Each minus sign flips the sign of the output value, so --3 will return 3.
   ///   Plus signs are skipped and have no effect, so -+3 will still return -3.
   ///   The value string may contain one '.' to separate integer and fractional part. It may also contain an 'e' for scientific notation
@@ -57,18 +57,18 @@ namespace plConversionUtils
   ///   through out_LastParsePosition, and it will terminate further parsing, but it will not affect the precision of the result.
   ///   Commas (',') are never treated as fractional part separators (as in the German locale).
   /// \param out_Res
-  ///   If PLASMA_SUCCESS is returned, out_Res will contain the result. Otherwise it stays unmodified.
+  ///   If PL_SUCCESS is returned, out_Res will contain the result. Otherwise it stays unmodified.
   ///   The result may have rounding errors, i.e. even though a double may be able to represent the string value exactly, there is no
   ///   guarantee that out_Res will be 100% identical. If that is required, use the C lib atof() function.
   /// \param out_LastParsePosition
   ///   On success out_LastParsePosition will contain the address of the character in szString that stopped the parser. This might point
   ///   to the zero terminator of szString, or to some unexpected character, since for example "5+6" will parse as '5' and '+' will be the
-  ///   position where the parser stopped (returning PLASMA_SUCCESS).
+  ///   position where the parser stopped (returning PL_SUCCESS).
   ///   If you want to parse strictly (e.g. you do not want to parse "5+6" as "5") you can use this result to check that only certain
   ///   characters were encountered after the float (e.g. only '\0' or ',').
   /// \return
-  ///   PLASMA_SUCCESS if any text was encountered that can be interpreted as a floating point value.
-  ///   PLASMA_FAILURE otherwise.
+  ///   PL_SUCCESS if any text was encountered that can be interpreted as a floating point value.
+  ///   PL_FAILURE otherwise.
   ///
   /// \note
   ///   The difference to the C lib atof() function is that this function properly returns whether something could get parsed as a floating
@@ -78,28 +78,28 @@ namespace plConversionUtils
   ///   stopped. On the down-side StringToFloat() is probably not as precise as atof(), because of a very simplistic conversion algorithm.
   ///   If you require the features of StringToFloat() and the precision of atof(), you can let StringToFloat() handle the cases for
   ///   detecting the validity, the sign and where the value ends and then use atof to parse only that substring with maximum precision.
-  PLASMA_FOUNDATION_DLL plResult StringToFloat(plStringView sText, double& out_fRes, const char** out_pLastParsePosition = nullptr); // [tested]
+  PL_FOUNDATION_DLL plResult StringToFloat(plStringView sText, double& out_fRes, const char** out_pLastParsePosition = nullptr); // [tested]
 
   /// \brief Parses szString and checks that the first word it finds starts with a phrase that can be interpreted as a boolean value.
   ///
   /// \param szString
-  ///   If szString starts with whitespace characters, they are skipped. PLASMA_SUCCESS is returned (and out_Res is filled with true/false),
+  ///   If szString starts with whitespace characters, they are skipped. PL_SUCCESS is returned (and out_Res is filled with true/false),
   ///   if the string then starts with any of the following phrases: "true", "false", "on", "off", "yes", "no", "1", "0", "enable",
-  ///   "disable". PLASMA_FAILURE is returned if none of those is encountered (or the string is empty). It does not matter, whether the string
+  ///   "disable". PL_FAILURE is returned if none of those is encountered (or the string is empty). It does not matter, whether the string
   ///   continues with some other text, e.g. "nolf" is still interpreted as "no". That means you can pass strings such as "true, a = false"
   ///   into this function to just parse the next piece of a command line.
   /// \param out_Res
-  ///   If PLASMA_SUCCESS is returned, out_Res contains a valid value. Otherwise it is not modified. That means you can initialize it with a
-  ///   default value that can be used even if PLASMA_FAILURE is returned.
+  ///   If PL_SUCCESS is returned, out_Res contains a valid value. Otherwise it is not modified. That means you can initialize it with a
+  ///   default value that can be used even if PL_FAILURE is returned.
   /// \param out_LastParsePosition
   ///   On success out_LastParsePosition will contain the address of the character in szString that stopped the parser. This might point
   ///   to the zero terminator of szString, or to the next character after the phrase "true", "false", "on", "off", etc. which was
   ///   interpreted as a boolean value. If you want to parse strictly (e.g. you do not want to parse "Nolf" as "no") you can use this result
   ///   to check that only certain characters were encountered after the boolean phrase (such as '\0' or ',' etc.).
   /// \return
-  ///   PLASMA_SUCCESS if any phrase was encountered that can be interpreted as a boolean value.
-  ///   PLASMA_FAILURE otherwise.
-  PLASMA_FOUNDATION_DLL plResult StringToBool(plStringView sText, bool& out_bRes, const char** out_pLastParsePosition = nullptr); // [tested]
+  ///   PL_SUCCESS if any phrase was encountered that can be interpreted as a boolean value.
+  ///   PL_FAILURE otherwise.
+  PL_FOUNDATION_DLL plResult StringToBool(plStringView sText, bool& out_bRes, const char** out_pLastParsePosition = nullptr); // [tested]
 
 
   /// \brief Parses \a szText and tries to find up to \a uiNumFloats float values to extract. Skips all characters that cannot be
@@ -121,27 +121,27 @@ namespace plConversionUtils
   ///   or uiNumFloats values were successfully extracted.
   /// \return
   ///   The number of successfully extracted values (and thus valid values in out_pFloats).
-  PLASMA_FOUNDATION_DLL plUInt32 ExtractFloatsFromString(plStringView sText, plUInt32 uiNumFloats, float* out_pFloats, const char** out_pLastParsePosition = nullptr); // [tested]
+  PL_FOUNDATION_DLL plUInt32 ExtractFloatsFromString(plStringView sText, plUInt32 uiNumFloats, float* out_pFloats, const char** out_pLastParsePosition = nullptr); // [tested]
 
   /// \brief Converts a hex character ('0', '1', ... '9', 'A'/'a', ... 'F'/'f') to the corresponding int value 0 - 15.
   ///
   /// \note Returns -1 for invalid HEX characters.
-  PLASMA_FOUNDATION_DLL plInt8 HexCharacterToIntValue(plUInt32 uiCharacter); // [tested]
+  PL_FOUNDATION_DLL plInt8 HexCharacterToIntValue(plUInt32 uiCharacter); // [tested]
 
   /// \brief Same as ConvertHexStringToUInt() with uiMaxHexCharacters set to 8.
-  PLASMA_FOUNDATION_DLL plResult ConvertHexStringToUInt32(plStringView sHex, plUInt32& out_uiResult); // [tested]
+  PL_FOUNDATION_DLL plResult ConvertHexStringToUInt32(plStringView sHex, plUInt32& out_uiResult); // [tested]
 
   /// \brief Same as ConvertHexStringToUInt() with uiMaxHexCharacters set to 16.
-  PLASMA_FOUNDATION_DLL plResult ConvertHexStringToUInt64(plStringView sHex, plUInt64& out_uiResult); // [tested]
+  PL_FOUNDATION_DLL plResult ConvertHexStringToUInt64(plStringView sHex, plUInt64& out_uiResult); // [tested]
 
   /// \brief Converts a hex string (i.e. 0xAABBCCDD) into its uint64 value.
   ///
   /// "0x" at the beginning is ignored.
-  /// Empty strings are interpreted as 'valid', representing the value 0 (returns PLASMA_SUCCESS).
+  /// Empty strings are interpreted as 'valid', representing the value 0 (returns PL_SUCCESS).
   /// If the plStringView is shorter than uiMaxHexCharacters, this is interpreted as a valid HEX value with a smaller value.
   /// If the string is longer than uiMaxHexCharacters (after the '0x'), the additional characters are not parsed, at all.
-  /// If the first uiMaxHexCharacters (after the '0x') contain any non-HEX characters, parsing is interrupted and PLASMA_FAILURE is returned.
-  PLASMA_FOUNDATION_DLL plResult ConvertHexStringToUInt(plStringView sHex, plUInt64& out_uiResult, plUInt32 uiMaxHexCharacters, plUInt32* pTotalCharactersParsed); // [tested]
+  /// If the first uiMaxHexCharacters (after the '0x') contain any non-HEX characters, parsing is interrupted and PL_FAILURE is returned.
+  PL_FOUNDATION_DLL plResult ConvertHexStringToUInt(plStringView sHex, plUInt64& out_uiResult, plUInt32 uiMaxHexCharacters, plUInt32* pTotalCharactersParsed); // [tested]
 
   /// \brief Converts a HEX string to a binary value.
   ///
@@ -154,7 +154,7 @@ namespace plConversionUtils
   ///
   /// \note This function does not validate that the incoming string is actually valid HEX. If an invalid character is used, the result will
   /// be invalid and there is no error reported.
-  PLASMA_FOUNDATION_DLL void ConvertHexToBinary(plStringView sText, plUInt8* pBinary, plUInt32 uiBinaryBuffer); // [tested]
+  PL_FOUNDATION_DLL void ConvertHexToBinary(plStringView sText, plUInt8* pBinary, plUInt32 uiBinaryBuffer); // [tested]
 
   /// \brief Converts a binary stream to a HEX string.
   ///
@@ -166,113 +166,112 @@ namespace plConversionUtils
   inline void ConvertBinaryToHex(const void* pBinaryData, plUInt32 uiBytes, APPEND_CONTAINER_LAMBDA append); // [tested]
 
   /// \brief Converts a string that was written with plConversionUtils::ToString(plUuid) back to an plUuid object.
-  PLASMA_FOUNDATION_DLL plUuid ConvertStringToUuid(plStringView sText); // [tested]
+  PL_FOUNDATION_DLL plUuid ConvertStringToUuid(plStringView sText); // [tested]
 
   /// \brief Returns true when the given string is in the exact format "{ 05af8d07-0b38-44a6-8d50-49731ae2625d }"
   /// This includes braces, whitespaces and dashes. This is the format that ToString produces.
-  PLASMA_FOUNDATION_DLL bool IsStringUuid(plStringView sText); // [tested]
+  PL_FOUNDATION_DLL bool IsStringUuid(plStringView sText); // [tested]
 
   /// \brief Converts a bool to a string
-  PLASMA_ALWAYS_INLINE const plStringBuilder& ToString(bool value, plStringBuilder& out_sResult) // [tested]
+  PL_ALWAYS_INLINE const plStringBuilder& ToString(bool value, plStringBuilder& out_sResult) // [tested]
   {
     out_sResult = value ? "true" : "false";
     return out_sResult;
   }
 
   /// \brief Converts a 8bit signed integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plInt8 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plInt8 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 8bit unsigned integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plUInt8 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plUInt8 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 16bit signed integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plInt16 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plInt16 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 16bit unsigned integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plUInt16 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plUInt16 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 32bit signed integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plInt32 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plInt32 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 32bit unsigned integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plUInt32 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plUInt32 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 64bit signed integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plInt64 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plInt64 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a 64bit unsigned integer to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(plUInt64 value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(plUInt64 value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a float to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(float value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(float value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a double to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(double value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(double value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a color to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plColor& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plColor& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a color to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plColorGammaUB& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plColorGammaUB& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec2 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec2& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec2& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec3 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec3& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec3& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec4 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec4& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec4& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec2I32 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec2I32& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec2I32& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec3I32 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec3I32& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec3I32& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a vec4I32 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plVec4I32& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plVec4I32& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a quat to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plQuat& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plQuat& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a mat3 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plMat3& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plMat3& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a mat4 to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plMat4& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plMat4& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a transform to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plTransform& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plTransform& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a Uuid to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plUuid& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plUuid& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts an angle to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plAngle& value, plStringBuilder& out_sResult); // [tested]
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plAngle& value, plStringBuilder& out_sResult); // [tested]
 
   /// \brief Converts a time to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plTime& value, plStringBuilder& out_sResult);
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plTime& value, plStringBuilder& out_sResult);
 
   /// \brief Converts a plStringView to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plStringView& value, plStringBuilder& out_sResult);
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plStringView& value, plStringBuilder& out_sResult);
 
   /// \brief Converts a hashed string to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plHashedString& value, plStringBuilder& out_sResult);
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plHashedString& value, plStringBuilder& out_sResult);
 
   /// \brief Converts a temp hashed string to a string. Will print the hash value since the original string can't be restored from a temp hashed string.
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plTempHashedString& value, plStringBuilder& out_sResult);
-
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plTempHashedString& value, plStringBuilder& out_sResult);
 
   /// \brief Converts a plVariantArray to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plDynamicArray<plVariant>& value, plStringBuilder& out_sResult);
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plDynamicArray<plVariant>& value, plStringBuilder& out_sResult);
 
   /// \brief Converts a plVariantDictionary to a string
-  PLASMA_FOUNDATION_DLL const plStringBuilder& ToString(const plHashTable<plString, plVariant>& value, plStringBuilder& out_sResult);
+  PL_FOUNDATION_DLL const plStringBuilder& ToString(const plHashTable<plString, plVariant>& value, plStringBuilder& out_sResult);
 
   /// \brief Fallback ToString implementation for all types that don't have one
   template <typename T>
-  PLASMA_ALWAYS_INLINE const plStringBuilder& ToString(const T& value, plStringBuilder& out_sResult)
+  PL_ALWAYS_INLINE const plStringBuilder& ToString(const T& value, plStringBuilder& out_sResult)
   {
     out_sResult = "N/A";
     return out_sResult;
@@ -282,10 +281,10 @@ namespace plConversionUtils
   ///
   /// Allowed are all predefined color names (case-insensitive), as well as Hex-Values in the form '#RRGGBB' and '#RRGGBBAA'
   /// If out_ValidColorName is a valid pointer, it contains true if the color name was known, otherwise false
-  PLASMA_FOUNDATION_DLL plColor GetColorByName(plStringView sText, bool* out_pValidColorName = nullptr); // [tested]
+  PL_FOUNDATION_DLL plColor GetColorByName(plStringView sText, bool* out_pValidColorName = nullptr); // [tested]
 
   /// \brief The inverse of GetColorByName
-  PLASMA_FOUNDATION_DLL plString GetColorName(const plColor& col); // [tested]
+  PL_FOUNDATION_DLL plString GetColorName(const plColor& col); // [tested]
 };                                                             // namespace plConversionUtils
 
 template <typename APPEND_CONTAINER_LAMBDA>

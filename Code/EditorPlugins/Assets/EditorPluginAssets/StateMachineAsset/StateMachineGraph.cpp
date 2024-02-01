@@ -6,7 +6,7 @@
 #include <GuiFoundation/UIServices/DynamicStringEnum.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, StateMachine)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, StateMachine)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager"
@@ -15,7 +15,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, StateMachine)
   ON_CORESYSTEMS_STARTUP
   {
     plQtNodeScene::GetPinFactory().RegisterCreator(plGetStaticRTTI<plStateMachinePin>(), [](const plRTTI* pRtti)->plQtPin* { return new plQtStateMachinePin(); });
-    plQtNodeScene::GetConnectionFactory().RegisterCreator(plGetStaticRTTI<plStateMachineConnection>(), [](const plRTTI* pRtti)->plQtConnection* { return new plQtStateMachineConnection(); });    
+    plQtNodeScene::GetConnectionFactory().RegisterCreator(plGetStaticRTTI<plStateMachineConnection>(), [](const plRTTI* pRtti)->plQtConnection* { return new plQtStateMachineConnection(); });
     plQtNodeScene::GetNodeFactory().RegisterCreator(plGetStaticRTTI<plStateMachineNodeBase>(), [](const plRTTI* pRtti)->plQtNode* { return new plQtStateMachineNode(); });
   }
 
@@ -26,12 +26,12 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, StateMachine)
     plQtNodeScene::GetNodeFactory().UnregisterCreator(plGetStaticRTTI<plStateMachineNodeBase>());
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachinePin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachinePin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachinePin::plStateMachinePin(Type type, const plDocumentObject* pObject)
@@ -42,44 +42,44 @@ plStateMachinePin::plStateMachinePin(Type type, const plDocumentObject* pObject)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineConnection, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineConnection, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner)
+    PL_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNodeBase, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNodeBase, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNode, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNode, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sName)->AddAttributes(new plDefaultValueAttribute(plStringView("State"))), // wrap in plStringView to prevent a memory leak report
-    PLASMA_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_MEMBER_PROPERTY("Name", m_sName)->AddAttributes(new plDefaultValueAttribute(plStringView("State"))), // wrap in plStringView to prevent a memory leak report
+    PL_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNodeAny, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineNodeAny, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -99,7 +99,7 @@ void plStateMachineNodeManager::SetInitialState(const plDocumentObject* pObject)
   if (m_pInitialStateObject == pObject)
     return;
 
-  PLASMA_ASSERT_DEV(IsAnyState(pObject) == false, "'Any State' can't be initial state");
+  PL_ASSERT_DEV(IsAnyState(pObject) == false, "'Any State' can't be initial state");
 
   auto BroadcastEvent = [this](const plDocumentObject* pObject) {
     if (pObject != nullptr)
@@ -143,7 +143,7 @@ bool plStateMachineNodeManager::InternalIsNode(const plDocumentObject* pObject) 
 plStatus plStateMachineNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const
 {
   out_Result = CanConnectResult::ConnectNtoN;
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plStateMachineNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node)
@@ -153,12 +153,12 @@ void plStateMachineNodeManager::InternalCreatePins(const plDocumentObject* pObje
 
   if (IsAnyState(pObject) == false)
   {
-    auto pPin = PLASMA_DEFAULT_NEW(plStateMachinePin, plPin::Type::Input, pObject);
+    auto pPin = PL_DEFAULT_NEW(plStateMachinePin, plPin::Type::Input, pObject);
     node.m_Inputs.PushBack(pPin);
   }
 
   {
-    auto pPin = PLASMA_DEFAULT_NEW(plStateMachinePin, plPin::Type::Output, pObject);
+    auto pPin = PL_DEFAULT_NEW(plStateMachinePin, plPin::Type::Output, pObject);
     node.m_Outputs.PushBack(pPin);
   }
 }
@@ -188,15 +188,15 @@ void plStateMachineNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachine_SetInitialStateCommand, 1, plRTTIDefaultAllocator<plStateMachine_SetInitialStateCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachine_SetInitialStateCommand, 1, plRTTIDefaultAllocator<plStateMachine_SetInitialStateCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("NewInitialStateObject", m_NewInitialStateObject),
+    PL_MEMBER_PROPERTY("NewInitialStateObject", m_NewInitialStateObject),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachine_SetInitialStateCommand::plStateMachine_SetInitialStateCommand() = default;
@@ -213,7 +213,7 @@ plStatus plStateMachine_SetInitialStateCommand::DoInternal(bool bRedo)
   }
 
   pManager->SetInitialState(m_pNewInitialStateObject);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plStateMachine_SetInitialStateCommand::UndoInternal(bool bFireEvents)
@@ -222,5 +222,5 @@ plStatus plStateMachine_SetInitialStateCommand::UndoInternal(bool bFireEvents)
   auto pManager = static_cast<plStateMachineNodeManager*>(pDocument->GetObjectManager());
 
   pManager->SetInitialState(m_pOldInitialStateObject);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

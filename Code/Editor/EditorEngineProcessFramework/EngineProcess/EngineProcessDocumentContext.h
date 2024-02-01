@@ -6,24 +6,24 @@
 #include <RendererFoundation/Device/SwapChain.h>
 #include <RendererFoundation/Resources/RenderTargetSetup.h>
 
-class PlasmaEditorEngineSyncObjectMsg;
-class PlasmaEditorEngineSyncObject;
-class PlasmaEditorEngineDocumentMsg;
-class PlasmaEngineProcessViewContext;
-class PlasmaEngineProcessCommunicationChannel;
+class plEditorEngineSyncObjectMsg;
+class plEditorEngineSyncObject;
+class plEditorEngineDocumentMsg;
+class plEngineProcessViewContext;
+class plEngineProcessCommunicationChannel;
 class plProcessMessage;
 class plExportDocumentMsgToEngine;
 class plCreateThumbnailMsgToEngine;
 struct plResourceEvent;
 
-struct PlasmaEngineProcessDocumentContextFlags
+struct plEngineProcessDocumentContextFlags
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
     None = 0,
-    CreateWorld = PLASMA_BIT(0),
+    CreateWorld = PL_BIT(0),
     Default = None
   };
 
@@ -32,31 +32,31 @@ struct PlasmaEngineProcessDocumentContextFlags
     StorageType CreateWorld : 1;
   };
 };
-PLASMA_DECLARE_FLAGS_OPERATORS(PlasmaEngineProcessDocumentContextFlags);
+PL_DECLARE_FLAGS_OPERATORS(plEngineProcessDocumentContextFlags);
 
 /// \brief A document context is the counter part to an editor document on the engine side.
 ///
-/// For every document in the editor that requires engine output (rendering, picking, etc.), there is a PlasmaEngineProcessDocumentContext
+/// For every document in the editor that requires engine output (rendering, picking, etc.), there is a plEngineProcessDocumentContext
 /// created in the engine process.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineProcessDocumentContext : public plReflectedClass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineProcessDocumentContext : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEngineProcessDocumentContext, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEngineProcessDocumentContext, plReflectedClass);
 
 public:
-  PlasmaEngineProcessDocumentContext(plBitflags<PlasmaEngineProcessDocumentContextFlags> flags);
-  virtual ~PlasmaEngineProcessDocumentContext();
+  plEngineProcessDocumentContext(plBitflags<plEngineProcessDocumentContextFlags> flags);
+  virtual ~plEngineProcessDocumentContext();
 
-  virtual void Initialize(const plUuid& DocumentGuid, const plVariant& metaData, PlasmaEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType);
+  virtual void Initialize(const plUuid& documentGuid, const plVariant& metaData, plEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType);
   void Deinitialize();
 
   /// \brief Returns the document type for which this context was created. Useful in case a context may be used for multiple document types.
   plStringView GetDocumentType() const { return m_sDocumentType; }
 
   void SendProcessMessage(plProcessMessage* pMsg = nullptr);
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg);
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg);
 
-  static PlasmaEngineProcessDocumentContext* GetDocumentContext(plUuid guid);
-  static void AddDocumentContext(plUuid guid, const plVariant& metaData, PlasmaEngineProcessDocumentContext* pView, PlasmaEngineProcessCommunicationChannel* pIPC,  plStringView sDocumentType);
+  static plEngineProcessDocumentContext* GetDocumentContext(plUuid guid);
+  static void AddDocumentContext(plUuid guid, const plVariant& metaData, plEngineProcessDocumentContext* pView, plEngineProcessCommunicationChannel* pIPC, plStringView sDocumentType);
   static bool PendingOperationsInProgress();
   static void UpdateDocumentContexts();
   static void DestroyDocumentContext(plUuid guid);
@@ -64,7 +64,7 @@ public:
   // \brief Returns the bounding box of the objects in the world.
   plBoundingBoxSphere GetWorldBounds(plWorld* pWorld);
 
-  void ProcessEditorEngineSyncObjectMsg(const PlasmaEditorEngineSyncObjectMsg& msg);
+  void ProcessEditorEngineSyncObjectMsg(const plEditorEngineSyncObjectMsg& msg);
 
   const plUuid& GetDocumentGuid() const { return m_DocumentGuid; }
 
@@ -73,6 +73,8 @@ public:
 
   plIPCObjectMirrorEngine m_Mirror;
   plWorldRttiConverterContext m_Context; // TODO: Move actual context into the EngineProcessDocumentContext
+  virtual plWorldRttiConverterContext& GetContext() { return m_Context; }
+  virtual const plWorldRttiConverterContext& GetContext() const { return m_Context; }
 
   plWorld* GetWorld() const { return m_pWorld; }
 
@@ -84,9 +86,9 @@ protected:
   virtual void OnDeinitialize();
 
   /// \brief Needs to be implemented to create a view context used for windows and thumbnails rendering.
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() = 0;
+  virtual plEngineProcessViewContext* CreateViewContext() = 0;
   /// \brief Needs to be implemented to destroy the view context created in CreateViewContext.
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) = 0;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) = 0;
 
   /// \brief Should return true if this context has any operation in progress like thumbnail rendering
   /// and thus needs to continue rendering even if no new messages from the editor come in.
@@ -116,7 +118,7 @@ protected:
   /// This is to allow e.g. camera updates after more resources have been streamed in. The frame counter
   /// will start over to count to 'ThumbnailConvergenceFramesTarget' when a new resource is being loaded
   /// to make sure we do not make an image of half-streamed in data.
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext);
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext);
 
   /// \brief Called before a thumbnail context is created.
   virtual void OnThumbnailViewContextRequested() {}
@@ -136,50 +138,50 @@ protected:
   void ClearTagRecursive(plGameObject* pObject, const plTag& tag);
 
 protected:
-  const PlasmaEngineProcessViewContext* GetViewContext(plUInt32 uiView) const
+  const plEngineProcessViewContext* GetViewContext(plUInt32 uiView) const
   {
     return uiView >= m_ViewContexts.GetCount() ? nullptr : m_ViewContexts[uiView];
   }
 
 private:
-  friend class PlasmaEditorEngineSyncObject;
+  friend class plEditorEngineSyncObject;
 
-  void AddSyncObject(PlasmaEditorEngineSyncObject* pSync);
-  void RemoveSyncObject(PlasmaEditorEngineSyncObject* pSync);
-  PlasmaEditorEngineSyncObject* FindSyncObject(const plUuid& guid);
+  void AddSyncObject(plEditorEngineSyncObject* pSync);
+  void RemoveSyncObject(plEditorEngineSyncObject* pSync);
+  plEditorEngineSyncObject* FindSyncObject(const plUuid& guid);
 
 
 private:
   void ClearViewContexts();
 
   // Maps a document guid to the corresponding context that handles that document on the engine side
-  static plHashTable<plUuid, PlasmaEngineProcessDocumentContext*> s_DocumentContexts;
+  static plHashTable<plUuid, plEngineProcessDocumentContext*> s_DocumentContexts;
 
   /// Removes all sync objects that are tied to this context
   void CleanUpContextSyncObjects();
 
 protected:
-  plBitflags<PlasmaEngineProcessDocumentContextFlags> m_Flags;
+  plBitflags<plEngineProcessDocumentContextFlags> m_Flags;
   plUuid m_DocumentGuid;
   plVariant m_MetaData;
 
-  PlasmaEngineProcessCommunicationChannel* m_pIPC = nullptr;
-  plHybridArray<PlasmaEngineProcessViewContext*, 4> m_ViewContexts;
+  plEngineProcessCommunicationChannel* m_pIPC = nullptr;
+  plHybridArray<plEngineProcessViewContext*, 4> m_ViewContexts;
 
-  plMap<plUuid, PlasmaEditorEngineSyncObject*> m_SyncObjects;
+  plMap<plUuid, plEditorEngineSyncObject*> m_SyncObjects;
 
 private:
   enum Constants
   {
     ThumbnailSuperscaleFactor =
-      2, ///< Thumbnail render target size is multiplied by this and then the final image is downscaled again. Needs to be power-of-two.
+      2,                                 ///< Thumbnail render target size is multiplied by this and then the final image is downscaled again. Needs to be power-of-two.
     ThumbnailConvergenceFramesTarget = 4 ///< Due to multi-threaded rendering, this must be at least 4
   };
 
   plUInt8 m_uiThumbnailConvergenceFrames = 0;
   plUInt16 m_uiThumbnailWidth = 0;
   plUInt16 m_uiThumbnailHeight = 0;
-  PlasmaEngineProcessViewContext* m_pThumbnailViewContext = nullptr;
+  plEngineProcessViewContext* m_pThumbnailViewContext = nullptr;
   plGALRenderTargets m_ThumbnailRenderTargets;
   plGALTextureHandle m_hThumbnailColorRT;
   plGALTextureHandle m_hThumbnailDepthRT;
@@ -191,13 +193,13 @@ private:
 private:
   struct GoReferenceTo
   {
-    plStringView m_sComponentProperty = nullptr;
+    plStringView m_sComponentProperty;
     plUuid m_ReferenceToGameObject;
   };
 
   struct GoReferencedBy
   {
-    plStringView m_sComponentProperty = nullptr;
+    plStringView m_sComponentProperty;
     plUuid m_ReferencedByComponent;
   };
 

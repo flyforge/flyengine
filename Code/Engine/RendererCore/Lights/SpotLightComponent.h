@@ -4,28 +4,24 @@
 #include <RendererCore/Pipeline/Declarations.h>
 #include <RendererCore/Textures/Texture2DResource.h>
 
-typedef plComponentManager<class plSpotLightComponent, plBlockStorageType::Compact> plSpotLightComponentManager;
+using plSpotLightComponentManager = plComponentManager<class plSpotLightComponent, plBlockStorageType::Compact>;
 
 /// \brief The render data object for spot lights.
-class PLASMA_RENDERERCORE_DLL plSpotLightRenderData : public plLightRenderData
+class PL_RENDERERCORE_DLL plSpotLightRenderData : public plLightRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpotLightRenderData, plLightRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plSpotLightRenderData, plLightRenderData);
 
 public:
   float m_fRange;
-  float m_fFalloff;
-  float m_fSize;
-  float m_fLength;
   plAngle m_InnerSpotAngle;
   plAngle m_OuterSpotAngle;
-  plTexture2DResourceHandle m_hProjectedTexture;
+  // plTexture2DResourceHandle m_hProjectedTexture;
 };
 
-/// \brief The standard spot light component.
-/// This component represents spot lights with various properties (e.g. a projected texture, range, spot angle, etc.)
-class PLASMA_RENDERERCORE_DLL plSpotLightComponent : public plLightComponent
+/// \brief Adds a spotlight to the scene, optionally casting shadows.
+class PL_RENDERERCORE_DLL plSpotLightComponent : public plLightComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSpotLightComponent, plLightComponent, plSpotLightComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSpotLightComponent, plLightComponent, plSpotLightComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -49,50 +45,44 @@ public:
   plSpotLightComponent();
   ~plSpotLightComponent();
 
+  /// \brief Sets the radius (or length of the cone) of the lightsource. If zero, it is automatically determined from the intensity.
   void SetRange(float fRange); // [ property ]
   float GetRange() const;      // [ property ]
 
-  void SetFalloff(float fFalloff); // [ property ]
-  float GetFalloff() const;      // [ property ]
+  /// \brief Returns the final radius of the lightsource.
+  float GetEffectiveRange() const;
 
-  void SetSize(float fSize); // [ property ]
-  float GetSize() const;      // [ property ]
+  /// \brief Sets the inner angle where the spotlight has equal brightness.
+  void SetInnerSpotAngle(plAngle spotAngle); // [ property ]
+  plAngle GetInnerSpotAngle() const;         // [ property ]
 
-  void SetLength(float fLength); // [ property ]
-  float GetLength() const;      // [ property ]
+  /// \brief Sets the outer angle of the spotlight's cone. The light will fade out between the inner and outer angle.
+  void SetOuterSpotAngle(plAngle spotAngle); // [ property ]
+  plAngle GetOuterSpotAngle() const;         // [ property ]
 
-  void SetInnerSpotAngle(plAngle fSpotAngle); // [ property ]
-  plAngle GetInnerSpotAngle() const;          // [ property ]
+  // void SetProjectedTextureFile(const char* szFile); // [ property ]
+  // const char* GetProjectedTextureFile() const;      // [ property ]
 
-  void SetOuterSpotAngle(plAngle spotAngle);  // [ property ]
-  plAngle GetOuterSpotAngle() const;          // [ property ]
-
-  void SetProjectedTextureFile(const char* szFile); // [ property ]
-  const char* GetProjectedTextureFile() const;      // [ property ]
-
-  void SetProjectedTexture(const plTexture2DResourceHandle& hProjectedTexture);
-  const plTexture2DResourceHandle& GetProjectedTexture() const;
+  // void SetProjectedTexture(const plTexture2DResourceHandle& hProjectedTexture);
+  // const plTexture2DResourceHandle& GetProjectedTexture() const;
 
 protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   plBoundingSphere CalculateBoundingSphere(const plTransform& t, float fRange) const;
 
   float m_fRange = 0.0f;
+  float m_fEffectiveRange = 0.0f;
 
-  float m_fFalloff = 1.0f;
-  float m_fSize = 0;
-  float m_fLength = 0;
+  plAngle m_InnerSpotAngle = plAngle::MakeFromDegree(15.0f);
+  plAngle m_OuterSpotAngle = plAngle::MakeFromDegree(30.0f);
 
-  plAngle m_InnerSpotAngle = plAngle::Degree(15.0f);
-  plAngle m_OuterSpotAngle = plAngle::Degree(30.0f);
-
-  plTexture2DResourceHandle m_hProjectedTexture;
+  // plTexture2DResourceHandle m_hProjectedTexture;
 };
 
 /// \brief A special visualizer attribute for spot lights
-class PLASMA_RENDERERCORE_DLL plSpotLightVisualizerAttribute : public plVisualizerAttribute
+class PL_RENDERERCORE_DLL plSpotLightVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpotLightVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plSpotLightVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plSpotLightVisualizerAttribute();

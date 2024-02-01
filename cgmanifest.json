@@ -1,0 +1,16 @@
+{
+  "Registrations": [
+    {
+      "component": {
+        "type": "git",
+        "git": {
+          "name": "PlasmaEngine",
+          "repositoryUrl": "https://github.com/flyforge/flyengine",
+          "commitHash": "b6766ea6289556bee278245c158f0f08456b1a07"
+        }
+      },
+      "license": "MIT"
+    }
+  ],
+  "$schema": "https://json.schemastore.org/component-detection-manifest.json"
+}

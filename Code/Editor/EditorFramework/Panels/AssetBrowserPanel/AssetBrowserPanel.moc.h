@@ -11,11 +11,11 @@ struct plToolsProjectEvent;
 class plQtCuratorControl;
 
 /// \brief The application wide panel that shows and asset browser.
-class PLASMA_EDITORFRAMEWORK_DLL plQtAssetBrowserPanel : public plQtApplicationPanel, public Ui_AssetBrowserPanel
+class PL_EDITORFRAMEWORK_DLL plQtAssetBrowserPanel : public plQtApplicationPanel, public Ui_AssetBrowserPanel
 {
   Q_OBJECT
 
-  PLASMA_DECLARE_SINGLETON(plQtAssetBrowserPanel);
+  PL_DECLARE_SINGLETON(plQtAssetBrowserPanel);
 
 public:
   plQtAssetBrowserPanel();
@@ -24,8 +24,8 @@ public:
   const plUuid& GetLastSelectedAsset() const { return m_LastSelected; }
 
 private Q_SLOTS:
-  void SlotAssetChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
-  void SlotAssetSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute);
+  void SlotAssetChosen(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
+  void SlotAssetSelected(plUuid guid, QString sAssetPathRelative, QString sAssetPathAbsolute, plUInt8 uiAssetBrowserItemFlags);
   void SlotAssetCleared();
 
 private:
@@ -33,5 +33,6 @@ private:
   void ProjectEvents(const plToolsProjectEvent& e);
 
   plUuid m_LastSelected;
+  QStatusBar* m_pStatusBar;
+  plQtCuratorControl* m_pCuratorControl;
 };
-

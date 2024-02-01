@@ -5,13 +5,13 @@
 #include <Foundation/Application/Config/FileSystemConfig.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtDataDirsDlg : public QDialog, public Ui_plQtDataDirsDlg
+class PL_EDITORFRAMEWORK_DLL plQtDataDirsDlg : public QDialog, public Ui_plQtDataDirsDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtDataDirsDlg(QWidget* parent);
+  plQtDataDirsDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_ButtonOK_clicked();

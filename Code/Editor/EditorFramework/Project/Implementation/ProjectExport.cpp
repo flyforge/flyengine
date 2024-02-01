@@ -1,5 +1,6 @@
 #include <Core/Configuration/PlatformProfile.h>
 #include <EditorFramework/Assets/AssetCurator.h>
+#include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/Project/ProjectExport.h>
 #include <Foundation/Application/Config/FileSystemConfig.h>
 #include <Foundation/Containers/HybridArray.h>
@@ -14,16 +15,16 @@ plResult plProjectExport::ClearTargetFolder(const char* szAbsFolderPath)
   if (plOSFile::DeleteFolder(szAbsFolderPath).Failed())
   {
     plLog::Error("Target folder could not be removed:\n'{}'", szAbsFolderPath);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (plOSFile::CreateDirectoryStructure(szAbsFolderPath).Failed())
   {
     plLog::Error("Target folder could not be created:\n'{}'", szAbsFolderPath);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szFolder, const plPathPatternFilter& filter, plAssetCurator* pCurator, plDynamicArray<plString>* pSceneFiles, const plPlatformProfile* pPlatformProfile)
@@ -41,7 +42,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
     if (plProgress::GetGlobalProgressbar()->WasCanceled())
     {
       plLog::Warning("Folder scanning canceled by user");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     it.GetStats().GetFullPath(sAbsFilePath);
@@ -74,7 +75,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
         // redirect to asset output
         plAssetDocumentManager* pAssetMan = plStaticCast<plAssetDocumentManager*>(asset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_pManager);
 
-        sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_sAbsolutePath, nullptr, pPlatformProfile);
+        sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_Path, nullptr, pPlatformProfile);
 
         sRelFilePath.Prepend("AssetCache/");
         out_Files.Insert(sRelFilePath);
@@ -86,7 +87,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
 
         for (const plString& outputTag : asset->m_pAssetInfo->m_Info->m_Outputs)
         {
-          sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_sAbsolutePath, outputTag, pPlatformProfile);
+          sRelFilePath = pAssetMan->GetRelativeOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, sRootFolder, asset->m_pAssetInfo->m_Path, outputTag, pPlatformProfile);
 
           sRelFilePath.Prepend("AssetCache/");
           out_Files.Insert(sRelFilePath);
@@ -101,7 +102,7 @@ plResult plProjectExport::ScanFolder(plSet<plString>& out_Files, const char* szF
     it.Next();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::CopyFiles(const char* szSrcFolder, const char* szDstFolder, const plSet<plString>& files, plProgressRange* pProgressRange)
@@ -116,7 +117,7 @@ plResult plProjectExport::CopyFiles(const char* szSrcFolder, const char* szDstFo
     if (plProgress::GetGlobalProgressbar()->WasCanceled())
     {
       plLog::Info("File copy operation canceled by user.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (pProgressRange)
@@ -138,7 +139,7 @@ plResult plProjectExport::CopyFiles(const char* szSrcFolder, const char* szDstFo
   }
 
   plLog::Success("Finished copying files to destination '{}'", szDstFolder);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::GatherGeneratedAssetManagerFiles(plSet<plString>& out_Files)
@@ -149,7 +150,7 @@ plResult plProjectExport::GatherGeneratedAssetManagerFiles(plSet<plString>& out_
   {
     if (auto pAssMan = plDynamicCast<plAssetDocumentManager*>(pMan))
     {
-      pAssMan->GetAdditionalOutputs(addFiles).IgnoreResult();
+      pAssMan->GetAdditionalOutputs(addFiles).AssertSuccess();
 
       for (const auto& file : addFiles)
       {
@@ -160,13 +161,13 @@ plResult plProjectExport::GatherGeneratedAssetManagerFiles(plSet<plString>& out_
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::CreateExportFilterFile(const char* szExpectedFile, const char* szFallbackFile)
 {
   if (plFileSystem::ExistsFile(szExpectedFile))
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plStringBuilder src;
   src.Set("#include <", szFallbackFile, ">\n\n\n[EXCLUDE]\n\n// TODO: add exclude patterns\n\n\n[INCLUDE]\n\n//TODO: add include patterns\n\n\n");
@@ -175,17 +176,17 @@ plResult plProjectExport::CreateExportFilterFile(const char* szExpectedFile, con
   if (file.Open(szExpectedFile).Failed())
   {
     plLog::Error("Failed to open '{}' for writing.", szExpectedFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   file.WriteBytes(src.GetData(), src.GetElementCount()).AssertSuccess();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::ReadExportFilters(plPathPatternFilter& out_DataFilter, plPathPatternFilter& out_BinariesFilter, const plPlatformProfile* pPlatformProfile)
 {
   plStringBuilder sDefine;
-  sDefine.Format("PLATFORM_PROFILE_{} 1", pPlatformProfile->GetConfigName());
+  sDefine.SetFormat("PLATFORM_PROFILE_{} 1", pPlatformProfile->GetConfigName());
   sDefine.ToUpper();
 
   plHybridArray<plString, 1> ppDefines;
@@ -194,28 +195,28 @@ plResult plProjectExport::ReadExportFilters(plPathPatternFilter& out_DataFilter,
   if (plProjectExport::CreateExportFilterFile(":project/ProjectData.plExportFilter", "CommonData.plExportFilter").Failed())
   {
     plLog::Error("The file 'ProjectData.plExportFilter' could not be created.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (plProjectExport::CreateExportFilterFile(":project/ProjectBinaries.plExportFilter", "CommonBinaries.plExportFilter").Failed())
   {
     plLog::Error("The file 'ProjectBinaries.plExportFilter' could not be created.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (out_DataFilter.ReadConfigFile("ProjectData.plExportFilter", ppDefines).Failed())
   {
     plLog::Error("The file 'ProjectData.plExportFilter' could not be read.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (out_BinariesFilter.ReadConfigFile("ProjectBinaries.plExportFilter", ppDefines).Failed())
   {
     plLog::Error("The file 'ProjectBinaries.plExportFilter' could not be read.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::CreateDataDirectoryDDL(const DirectoryMapping& mapping, const char* szTargetDirectory)
@@ -243,10 +244,10 @@ plResult plProjectExport::CreateDataDirectoryDDL(const DirectoryMapping& mapping
   if (cfg.Save(sPath).Failed())
   {
     plLog::Error("Failed to write DataDirectories.ddl file.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::GatherAssetLookupTableFiles(DirectoryMapping& mapping, const plApplicationFileSystemConfig& dirConfig, const plPlatformProfile* pPlatformProfile)
@@ -258,7 +259,7 @@ plResult plProjectExport::GatherAssetLookupTableFiles(DirectoryMapping& mapping,
     if (plFileSystem::ResolveSpecialDirectory(dataDir.m_sDataDirSpecialPath, sDataDirPath).Failed())
     {
       plLog::Error("Failed to resolve data directory path '{}'", dataDir.m_sDataDirSpecialPath);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     sDataDirPath.Trim("/\\");
@@ -268,7 +269,7 @@ plResult plProjectExport::GatherAssetLookupTableFiles(DirectoryMapping& mapping,
     mapping[sDataDirPath].m_Files.Insert(sAidltPath);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::ScanDataDirectories(DirectoryMapping& mapping, const plApplicationFileSystemConfig& dirConfig, const plPathPatternFilter& dataFilter, plDynamicArray<plString>* pSceneFiles, const plPlatformProfile* pPlatformProfile)
@@ -286,7 +287,7 @@ plResult plProjectExport::ScanDataDirectories(DirectoryMapping& mapping, const p
     if (plFileSystem::ResolveSpecialDirectory(dataDir.m_sDataDirSpecialPath, sDataDirPath).Failed())
     {
       plLog::Error("Failed to get special directory '{0}'", dataDir.m_sDataDirSpecialPath);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     sDataDirPath.Trim("/\\");
@@ -302,16 +303,16 @@ plResult plProjectExport::ScanDataDirectories(DirectoryMapping& mapping, const p
     }
     else
     {
-      sDstPath.Format("Data/Extra{}", uiDataDirNumber);
+      sDstPath.SetFormat("Data/Extra{}", uiDataDirNumber);
       ++uiDataDirNumber;
 
       ddInfo.m_sTargetDirPath = sDstPath;
     }
 
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::ScanFolder(ddInfo.m_Files, sDataDirPath, dataFilter, plAssetCurator::GetSingleton(), pSceneFiles, pPlatformProfile));
+    PL_SUCCEED_OR_RETURN(plProjectExport::ScanFolder(ddInfo.m_Files, sDataDirPath, dataFilter, plAssetCurator::GetSingleton(), pSceneFiles, pPlatformProfile));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::CopyAllFiles(DirectoryMapping& mapping, const char* szTargetDirectory)
@@ -331,11 +332,11 @@ plResult plProjectExport::CopyAllFiles(DirectoryMapping& mapping, const char* sz
     sTargetFolder.Set(szTargetDirectory, "/", itDir.Value().m_sTargetDirPath);
 
     if (plProjectExport::CopyFiles(itDir.Key(), sTargetFolder, itDir.Value().m_Files, &range).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plLog::Success("Finished copying all files.");
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::GatherBinaries(DirectoryMapping& mapping, const plPathPatternFilter& filter)
@@ -350,9 +351,9 @@ plResult plProjectExport::GatherBinaries(DirectoryMapping& mapping, const plPath
   ddInfo.m_sTargetDirRootName = "-"; // don't add to data dir config
 
   if (plProjectExport::ScanFolder(ddInfo.m_Files, sAppDir, filter, nullptr, nullptr, nullptr).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::CreateLaunchConfig(const plDynamicArray<plString>& sceneFiles, const char* szTargetDirectory)
@@ -360,22 +361,22 @@ plResult plProjectExport::CreateLaunchConfig(const plDynamicArray<plString>& sce
   for (const auto& sf : sceneFiles)
   {
     plStringBuilder cmd;
-    cmd.Format("start Bin/Player.exe -project \"Data/project\" -scene \"{}\"", sf);
+    cmd.SetFormat("start Bin/Player.exe -project \"Data/project\" -scene \"{}\"", sf);
 
     plStringBuilder bat;
-    bat.Format("{}/Launch {}.bat", szTargetDirectory, plPathUtils::GetFileName(sf));
+    bat.SetFormat("{}/Launch {}.bat", szTargetDirectory, plPathUtils::GetFileName(sf));
 
     plOSFile file;
     if (file.Open(bat, plFileOpenMode::Write).Failed())
     {
       plLog::Error("Couldn't create '{}'", bat);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     file.Write(cmd.GetData(), cmd.GetElementCount()).AssertSuccess();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::GatherGeneratedAssetFiles(plSet<plString>& out_Files, const char* szProjectDirectory)
@@ -384,7 +385,7 @@ plResult plProjectExport::GatherGeneratedAssetFiles(plSet<plString>& out_Files, 
 
   plPathPatternFilter filter;
   plSet<plString> files;
-  PLASMA_SUCCEED_OR_RETURN(ScanFolder(files, sRoot, filter, nullptr, nullptr, nullptr));
+  PL_SUCCEED_OR_RETURN(ScanFolder(files, sRoot, filter, nullptr, nullptr, nullptr));
 
   plStringBuilder sFilePath;
 
@@ -394,7 +395,7 @@ plResult plProjectExport::GatherGeneratedAssetFiles(plSet<plString>& out_Files, 
     out_Files.Insert(sFilePath);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProjectExport::ExportProject(const char* szTargetDirectory, const plPlatformProfile* pPlatformProfile, const plApplicationFileSystemConfig& dataDirs)
@@ -418,7 +419,7 @@ plResult plProjectExport::ExportProject(const char* szTargetDirectory, const plP
   // 0
   {
     mainProgress.BeginNextStep("Preparing output folder");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::ClearTargetFolder(szTargetDirectory));
+    PL_SUCCEED_OR_RETURN(plProjectExport::ClearTargetFolder(szTargetDirectory));
   }
 
   // 0
@@ -426,46 +427,76 @@ plResult plProjectExport::ExportProject(const char* szTargetDirectory, const plP
     plFileSystem::ResolveSpecialDirectory(">project", sProjectRootDir).AssertSuccess();
     sProjectRootDir.Trim("/\\");
 
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::GatherAssetLookupTableFiles(fileList, dataDirs, pPlatformProfile));
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::ReadExportFilters(dataFilter, binariesFilter, pPlatformProfile));
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::GatherGeneratedAssetFiles(fileList[sProjectRootDir].m_Files, sProjectRootDir));
+    PL_SUCCEED_OR_RETURN(plProjectExport::GatherAssetLookupTableFiles(fileList, dataDirs, pPlatformProfile));
+    PL_SUCCEED_OR_RETURN(plProjectExport::ReadExportFilters(dataFilter, binariesFilter, pPlatformProfile));
+    PL_SUCCEED_OR_RETURN(plProjectExport::GatherGeneratedAssetFiles(fileList[sProjectRootDir].m_Files, sProjectRootDir));
   }
 
   // 1
   {
     mainProgress.BeginNextStep("Generating special files");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::GatherGeneratedAssetManagerFiles(fileList[sProjectRootDir].m_Files));
+    PL_SUCCEED_OR_RETURN(plProjectExport::GatherGeneratedAssetManagerFiles(fileList[sProjectRootDir].m_Files));
   }
 
   // 2
   {
     mainProgress.BeginNextStep("Scanning data directories");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::ScanDataDirectories(fileList, dataDirs, dataFilter, &sceneFiles, pPlatformProfile));
+    PL_SUCCEED_OR_RETURN(plProjectExport::ScanDataDirectories(fileList, dataDirs, dataFilter, &sceneFiles, pPlatformProfile));
   }
 
   // 3
   {
+    // by default all DLLs are excluded by CommonBinaries.plExportFilter
+    // we want to override this for all the runtime DLLs and indirect DLL dependencies
+    // so we add those to the 'include filter'
+
+    for (auto it : plQtEditorApp::GetSingleton()->GetPluginBundles().m_Plugins)
+    {
+      if (!it.Value().m_bSelected)
+        continue;
+
+      for (const auto& dep : it.Value().m_PackageDependencies)
+      {
+        binariesFilter.AddFilter(dep, true);
+      }
+
+      for (const auto& dep : it.Value().m_RuntimePlugins)
+      {
+        plStringBuilder tmp = dep;
+
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+        tmp.Append(".dll");
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+        tmp.Append(".so");
+#else
+#  error "Platform not implemented"
+#endif
+
+        binariesFilter.AddFilter(tmp, true);
+      }
+    }
+
     mainProgress.BeginNextStep("Gathering binaries");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::GatherBinaries(fileList, binariesFilter));
+    PL_SUCCEED_OR_RETURN(plProjectExport::GatherBinaries(fileList, binariesFilter));
   }
 
   // 4
   {
     mainProgress.BeginNextStep("Copying files");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::CopyAllFiles(fileList, szTargetDirectory));
+    PL_SUCCEED_OR_RETURN(plProjectExport::CopyAllFiles(fileList, szTargetDirectory));
   }
 
   // 5
   {
     mainProgress.BeginNextStep("Writing data directory config");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::CreateDataDirectoryDDL(fileList, szTargetDirectory));
+    PL_SUCCEED_OR_RETURN(plProjectExport::CreateDataDirectoryDDL(fileList, szTargetDirectory));
   }
 
   // 6
   {
     mainProgress.BeginNextStep("Finishing up");
-    PLASMA_SUCCEED_OR_RETURN(plProjectExport::CreateLaunchConfig(sceneFiles, szTargetDirectory));
+    PL_SUCCEED_OR_RETURN(plProjectExport::CreateLaunchConfig(sceneFiles, szTargetDirectory));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

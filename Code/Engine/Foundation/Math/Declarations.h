@@ -4,11 +4,14 @@
 
 #include <Foundation/Basics.h>
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
-#  define PLASMA_NAN_ASSERT(obj) (obj)->AssertNotNaN();
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
+#  define PL_NAN_ASSERT(obj) (obj)->AssertNotNaN();
 #else
-#  define PLASMA_NAN_ASSERT(obj)
+#  define PL_NAN_ASSERT(obj)
 #endif
+
+#define PL_DECLARE_IF_FLOAT_TYPE template <typename = typename std::enable_if<std::is_floating_point_v<Type> == true>>
+#define PL_IMPLEMENT_IF_FLOAT_TYPE template <typename ENABLE_IF_FLOAT>
 
 /// \brief Simple helper union to store ints and floats to modify their bit patterns.
 union plIntFloatUnion
@@ -81,7 +84,7 @@ struct plClipSpaceDepthRange
   /// \brief Holds the default value for the projection depth range on each platform.
   /// This can be overridden by renderers to ensure the proper range is used when they become active.
   /// On Windows/D3D this is initialized with 'ZeroToOne' by default on all other platforms/OpenGL it is initialized with 'MinusOneToOne' by default.
-  PLASMA_FOUNDATION_DLL static Enum Default;
+  PL_FOUNDATION_DLL static Enum Default;
 };
 
 /// \brief Specifies whether a projection matrix should flip the result along the Y axis or not.
@@ -105,7 +108,7 @@ struct plClipSpaceYMode
   /// \brief Holds the platform default value for the clip space Y mode when rendering to a texture.
   /// This can be overridden by renderers to ensure the proper mode is used when they become active.
   /// On Windows/D3D this is initialized with 'Regular' by default on all other platforms/OpenGL it is initialized with 'Flipped' by default.
-  PLASMA_FOUNDATION_DLL static Enum RenderToTextureDefault;
+  PL_FOUNDATION_DLL static Enum RenderToTextureDefault;
 };
 
 /// \brief For selecting a left-handed or right-handed convention
@@ -118,7 +121,7 @@ struct plHandedness
   };
 
   /// \brief Holds the default handedness value to use. pl uses 'LeftHanded' by default.
-  PLASMA_FOUNDATION_DLL static Enum Default /*= plHandedness::LeftHanded*/;
+  PL_FOUNDATION_DLL static Enum Default /*= plHandedness::LeftHanded*/;
 };
 
 // forward declarations
@@ -210,9 +213,21 @@ class plColorGammaUB;
 
 class plRandom;
 
+template <typename Type>
+class plRectTemplate;
+
+using plRectU32 = plRectTemplate<plUInt32>;
+using plRectU16 = plRectTemplate<plUInt16>;
+using plRectI32 = plRectTemplate<plInt32>;
+using plRectI16 = plRectTemplate<plInt16>;
+using plRectFloat = plRectTemplate<float>;
+using plRectDouble = plRectTemplate<double>;
+
+class plFrustum;
+
 
 /// \brief An enum that allows to select on of the six main axis (positive / negative)
-struct PLASMA_FOUNDATION_DLL plBasisAxis
+struct PL_FOUNDATION_DLL plBasisAxis
 {
   using StorageType = plInt8;
 
@@ -248,7 +263,7 @@ struct PLASMA_FOUNDATION_DLL plBasisAxis
 };
 
 /// \brief An enum that represents the operator of a comparison
-struct PLASMA_FOUNDATION_DLL plComparisonOperator
+struct PL_FOUNDATION_DLL plComparisonOperator
 {
   using StorageType = plUInt8;
 

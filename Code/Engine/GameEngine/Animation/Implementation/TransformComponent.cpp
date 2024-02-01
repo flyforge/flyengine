@@ -7,53 +7,63 @@
 #include <GameEngine/Animation/TransformComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformComponent, 3, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformComponent, 3, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Speed", m_fAnimationSpeed), // How many units per second the animation should do.
-    PLASMA_ACCESSOR_PROPERTY("Running", IsRunning, SetRunning)->AddAttributes(new plDefaultValueAttribute(true)), // Whether the animation should start right away.
-    PLASMA_ACCESSOR_PROPERTY("ReverseAtEnd", GetReverseAtEnd, SetReverseAtEnd)->AddAttributes(new plDefaultValueAttribute(true)), // If true, after coming back to the start point, the animation won't stop but turn around and continue.
-    PLASMA_ACCESSOR_PROPERTY("ReverseAtStart", GetReverseAtStart, SetReverseAtStart)->AddAttributes(new plDefaultValueAttribute(true)), // If true, it will not stop at the end, but turn around and continue.
+    PL_MEMBER_PROPERTY("Speed", m_fAnimationSpeed), // How many units per second the animation should do.
+    PL_ACCESSOR_PROPERTY("Running", IsRunning, SetRunning)->AddAttributes(new plDefaultValueAttribute(true)), // Whether the animation should start right away.
+    PL_ACCESSOR_PROPERTY("ReverseAtEnd", GetReverseAtEnd, SetReverseAtEnd)->AddAttributes(new plDefaultValueAttribute(true)), // If true, after coming back to the start point, the animation won't stop but turn around and continue.
+    PL_ACCESSOR_PROPERTY("ReverseAtStart", GetReverseAtStart, SetReverseAtStart)->AddAttributes(new plDefaultValueAttribute(true)), // If true, it will not stop at the end, but turn around and continue.
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetDirectionForwards, In, "Forwards"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsDirectionForwards),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(ToggleDirection),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetDirectionForwards, In, "Forwards"),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsDirectionForwards),
+    PL_SCRIPT_FUNCTION_PROPERTY(ToggleDirection),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plTransformComponent::SerializeComponent(plWorldWriter& stream) const
+void plTransformComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  stream.GetStream() << m_Flags.GetValue();
-  stream.GetStream() << m_AnimationTime;
-  stream.GetStream() << m_fAnimationSpeed;
+  inout_stream.GetStream() << m_Flags.GetValue();
+  inout_stream.GetStream() << m_AnimationTime;
+  inout_stream.GetStream() << m_fAnimationSpeed;
 }
 
 
-void plTransformComponent::DeserializeComponent(plWorldReader& stream)
+void plTransformComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
 
   plTransformComponentFlags::StorageType flags;
-  stream.GetStream() >> flags;
+  inout_stream.GetStream() >> flags;
   m_Flags.SetValue(flags);
 
-  stream.GetStream() >> m_AnimationTime;
-  stream.GetStream() >> m_fAnimationSpeed;
+  inout_stream.GetStream() >> m_AnimationTime;
+  inout_stream.GetStream() >> m_fAnimationSpeed;
+}
+
+void plTransformComponent::OnSimulationStarted()
+{
+  SUPER::OnSimulationStarted();
+
+  // reset to start state
+  m_AnimationTime = plTime::MakeZero();
+  m_Flags.Add(plTransformComponentFlags::Running);
+  m_Flags.Remove(plTransformComponentFlags::AnimationReversed);
 }
 
 bool plTransformComponent::IsRunning(void) const
@@ -111,16 +121,16 @@ negative, internally the absolute value is used. Distance, acceleration, max vel
 */
 
 float CalculateAcceleratedMovement(
-  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& fTimeSinceStartInSec)
+  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& ref_timeSinceStartInSec)
 {
   // linear motion, if no acceleration or deceleration is present
   if ((fAcceleration <= 0.0f) && (fDeceleration <= 0.0f))
   {
-    const float fDist = fMaxVelocity * (float)fTimeSinceStartInSec.GetSeconds();
+    const float fDist = fMaxVelocity * (float)ref_timeSinceStartInSec.GetSeconds();
 
     if (fDist > fDistanceInMeters)
     {
-      fTimeSinceStartInSec = plTime::Seconds(fDistanceInMeters / fMaxVelocity);
+      ref_timeSinceStartInSec = plTime::MakeFromSeconds(fDistanceInMeters / fMaxVelocity);
       return fDistanceInMeters;
     }
 
@@ -128,7 +138,7 @@ float CalculateAcceleratedMovement(
   }
 
   // do some sanity-checks
-  if ((fTimeSinceStartInSec.GetSeconds() <= 0.0) || (fMaxVelocity <= 0.0f) || (fDistanceInMeters <= 0.0f))
+  if ((ref_timeSinceStartInSec.GetSeconds() <= 0.0) || (fMaxVelocity <= 0.0f) || (fDistanceInMeters <= 0.0f))
     return 0.0f;
 
   // calculate the duration and distance of accelerated movement
@@ -164,26 +174,26 @@ float CalculateAcceleratedMovement(
   }
 
   // if the time is still within the acceleration phase, return accelerated distance
-  if (fTimeSinceStartInSec.GetSeconds() <= fAccTime)
-    return static_cast<float>(0.5 * fAcceleration * plMath::Square(fTimeSinceStartInSec.GetSeconds()));
+  if (ref_timeSinceStartInSec.GetSeconds() <= fAccTime)
+    return static_cast<float>(0.5 * fAcceleration * plMath::Square(ref_timeSinceStartInSec.GetSeconds()));
 
   // calculate duration and length of the path, that has maximum velocity
   const double fMaxVelDistance = fDistanceInMeters - (fAccDist + fDecDist);
   const double fMaxVelTime = fMaxVelDistance / fMaxVelocity;
 
   // if the time is within this phase, return the accelerated path plus the constant velocity path
-  if (fTimeSinceStartInSec.GetSeconds() <= fAccTime + fMaxVelTime)
-    return static_cast<float>(fAccDist + (fTimeSinceStartInSec.GetSeconds() - fAccTime) * fMaxVelocity);
+  if (ref_timeSinceStartInSec.GetSeconds() <= fAccTime + fMaxVelTime)
+    return static_cast<float>(fAccDist + (ref_timeSinceStartInSec.GetSeconds() - fAccTime) * fMaxVelocity);
 
   // if the time is, however, outside the whole path, just return the upper end
-  if (fTimeSinceStartInSec.GetSeconds() >= fAccTime + fMaxVelTime + fDecTime)
+  if (ref_timeSinceStartInSec.GetSeconds() >= fAccTime + fMaxVelTime + fDecTime)
   {
-    fTimeSinceStartInSec = plTime::Seconds(fAccTime + fMaxVelTime + fDecTime); // clamp the time
+    ref_timeSinceStartInSec = plTime::MakeFromSeconds(fAccTime + fMaxVelTime + fDecTime); // clamp the time
     return fDistanceInMeters;
   }
 
   // calculate the time into the decelerated movement
-  const double fDecTime2 = fTimeSinceStartInSec.GetSeconds() - (fAccTime + fMaxVelTime);
+  const double fDecTime2 = ref_timeSinceStartInSec.GetSeconds() - (fAccTime + fMaxVelTime);
 
   // return the distance with the decelerated movement
   return static_cast<float>(fDistanceInMeters - 0.5 * fDeceleration * plMath::Square(fDecTime - fDecTime2));
@@ -204,7 +214,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Run at Startup", "RunAtStartup");
     pNode->RenameProperty("Reverse at Start", "ReverseAtStart");
@@ -224,7 +234,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("RunAtStartup", "Running");
   }
@@ -232,4 +242,4 @@ public:
 
 plTransformComponentPatch_2_3 g_plTransformComponentPatch_2_3;
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_TransformComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_TransformComponent);

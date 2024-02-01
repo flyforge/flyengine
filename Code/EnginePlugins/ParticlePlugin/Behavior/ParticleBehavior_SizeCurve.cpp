@@ -7,20 +7,20 @@
 #include <ParticlePlugin/Effect/ParticleEffectInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_SizeCurve, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_SizeCurve>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_SizeCurve, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_SizeCurve>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("SizeCurve", GetSizeCurveFile, SetSizeCurveFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Curve")),
-    PLASMA_MEMBER_PROPERTY("BaseSize", m_fBaseSize)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("CurveScale", m_fCurveScale)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizeCurve", GetSizeCurveFile, SetSizeCurveFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Curve")),
+    PL_MEMBER_PROPERTY("BaseSize", m_fBaseSize)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("CurveScale", m_fCurveScale)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_SizeCurve, 1, plRTTIDefaultAllocator<plParticleBehavior_SizeCurve>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_SizeCurve, 1, plRTTIDefaultAllocator<plParticleBehavior_SizeCurve>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleBehaviorFactory_SizeCurve::GetBehaviorType() const
@@ -37,24 +37,24 @@ void plParticleBehaviorFactory_SizeCurve::CopyBehaviorProperties(plParticleBehav
   pBehavior->m_fCurveScale = m_fCurveScale;
 }
 
-void plParticleBehaviorFactory_SizeCurve::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_SizeCurve::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_hCurve;
-  stream << m_fBaseSize;
-  stream << m_fCurveScale;
+  inout_stream << m_hCurve;
+  inout_stream << m_fBaseSize;
+  inout_stream << m_fCurveScale;
 }
 
-void plParticleBehaviorFactory_SizeCurve::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_SizeCurve::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_hCurve;
-  stream >> m_fBaseSize;
-  stream >> m_fCurveScale;
+  inout_stream >> m_hCurve;
+  inout_stream >> m_fBaseSize;
+  inout_stream >> m_fCurveScale;
 }
 
 void plParticleBehaviorFactory_SizeCurve::SetSizeCurveFile(const char* szFile)
@@ -110,7 +110,7 @@ void plParticleBehavior_SizeCurve::Process(plUInt64 uiNumElements)
   if (!m_hCurve.IsValid())
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Size Curve");
+  PL_PROFILE_SCOPE("PFX: Size Curve");
 
   plProcessingStreamIterator<plFloat16Vec2> itLifeTime(m_pStreamLifeTime, uiNumElements, 0);
   plProcessingStreamIterator<plFloat16> itSize(m_pStreamSize, uiNumElements, 0);
@@ -167,4 +167,4 @@ void plParticleBehavior_SizeCurve::Process(plUInt64 uiNumElements)
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_SizeCurve);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_SizeCurve);

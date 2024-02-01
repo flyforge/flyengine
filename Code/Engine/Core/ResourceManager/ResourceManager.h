@@ -12,7 +12,7 @@
 class plResourceManagerState;
 
 /// \brief The central class for managing all types derived from plResource
-class PLASMA_CORE_DLL plResourceManager
+class PL_CORE_DLL plResourceManager
 {
   friend class plResourceManagerState;
   static plUniquePtr<plResourceManagerState> s_pState;
@@ -441,7 +441,7 @@ private:
 
   // Startup / shutdown
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, ResourceManager);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, ResourceManager);
   static void OnEngineShutdown();
   static void OnCoreShutdown();
   static void OnCoreStartup();
@@ -459,8 +459,8 @@ private:
     float m_fPriority = 0;
     plResource* m_pResource = nullptr;
 
-    PLASMA_ALWAYS_INLINE bool operator==(const LoadingInfo& rhs) const { return m_pResource == rhs.m_pResource; }
-    PLASMA_ALWAYS_INLINE bool operator<(const LoadingInfo& rhs) const { return m_fPriority < rhs.m_fPriority; }
+    PL_ALWAYS_INLINE bool operator==(const LoadingInfo& rhs) const { return m_pResource == rhs.m_pResource; }
+    PL_ALWAYS_INLINE bool operator<(const LoadingInfo& rhs) const { return m_fPriority < rhs.m_fPriority; }
   };
   static void EnsureResourceLoadingState(plResource* pResource, const plResourceState RequestedState);
   static void PreloadResource(plResource* pResource);
@@ -479,7 +479,7 @@ private:
   static plHashTable<const plRTTI*, LoadedResources>& GetLoadedResources();
   static plDynamicArray<plResource*>& GetLoadedResourceOfTypeTempContainer();
 
-  PLASMA_ALWAYS_INLINE static bool IsQueuedForLoading(plResource* pResource) { return pResource->m_Flags.IsSet(plResourceFlags::IsQueuedForLoading); }
+  PL_ALWAYS_INLINE static bool IsQueuedForLoading(plResource* pResource) { return pResource->m_Flags.IsSet(plResourceFlags::IsQueuedForLoading); }
   [[nodiscard]] static plResult RemoveFromLoadingQueue(plResource* pResource);
   static void AddToLoadingQueue(plResource* pResource, bool bHighPriority);
 

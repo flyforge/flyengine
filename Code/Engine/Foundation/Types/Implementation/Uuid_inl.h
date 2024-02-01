@@ -5,19 +5,6 @@ plUuid::plUuid()
 {
 }
 
-void plUuid::SetInvalid()
-{
-  m_uiHigh = 0;
-  m_uiLow = 0;
-}
-
-plUuid plUuid::CreateUuid()
-{
-  plUuid guid;
-  guid.CreateNewUuid();
-  return guid;
-}
-
 bool plUuid::operator==(const plUuid& other) const
 {
   return m_uiHigh == other.m_uiHigh && m_uiLow == other.m_uiLow;
@@ -64,7 +51,7 @@ void plUuid::HashCombine(const plUuid& guid)
 template <>
 struct plHashHelper<plUuid>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plUuid& value) { return plHashingUtils::xxHash32(&value, sizeof(plUuid)); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plUuid& value) { return plHashingUtils::xxHash32(&value, sizeof(plUuid)); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plUuid& a, const plUuid& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plUuid& a, const plUuid& b) { return a == b; }
 };

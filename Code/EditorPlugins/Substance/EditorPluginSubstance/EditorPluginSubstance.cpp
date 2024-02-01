@@ -20,18 +20,18 @@ void OnLoadPlugin()
   plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
   plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
   plProjectActions::MapActions(szMenuBar);
-  plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
-  plAssetActions::MapMenuActions(szMenuBar, "Menu.File");
-  plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
+  plDocumentActions::MapMenuActions(szMenuBar);
+  plAssetActions::MapMenuActions(szMenuBar);
+  plCommandHistoryActions::MapActions(szMenuBar);
 
-  plEditActions::MapActions("SubstanceAssetMenuBar", "Menu.Edit", false, false);
+  plEditActions::MapActions("SubstanceAssetMenuBar", false, false);
 }
 
 // Tool Bar
 {
   const char* szToolBar = "SubstanceAssetToolBar";
   plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
-  plDocumentActions::MapActions(szToolBar, "", true);
+  plDocumentActions::MapToolbarActions(szToolBar);
   plCommandHistoryActions::MapActions(szToolBar, "");
   plAssetActions::MapToolBarActions(szToolBar, true);
 }
@@ -52,12 +52,12 @@ void OnUnloadPlugin()
 {
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

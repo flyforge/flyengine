@@ -4,6 +4,7 @@
 #include <Core/ActorSystem/Actor.h>
 #include <Core/ActorSystem/ActorManager.h>
 #include <Core/ActorSystem/ActorPluginWindow.h>
+#include <Core/GameApplication/GameApplicationBase.h>
 #include <Core/GameState/GameStateWindow.h>
 #include <Core/Prefabs/PrefabResource.h>
 #include <Core/World/World.h>
@@ -22,19 +23,19 @@
 #include <RendererCore/Pipeline/RenderPipelineResource.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
+#include <RendererCore/Utils/CoreRenderProfile.h>
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/SwapChain.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameState, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameState, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_GameState_Implementation_GameState);
+PL_STATICLINK_FILE(GameEngine, GameEngine_GameState_Implementation_GameState);
 // clang-format on
 
-plGameState::plGameState() {}
-
-plGameState::~plGameState() {}
+plGameState::plGameState() = default;
+plGameState::~plGameState() = default;
 
 void plGameState::OnActivation(plWorld* pWorld, const plTransform* pStartPosition)
 {
@@ -80,7 +81,7 @@ void plGameState::ScheduleRendering()
 
 plUniquePtr<plActor> plGameState::CreateXRActor()
 {
-  PLASMA_LOG_BLOCK("CreateXRActor");
+  PL_LOG_BLOCK("CreateXRActor");
   // Init XR
   const plXRConfig* pConfig = plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetTypeConfig<plXRConfig>();
   if (!pConfig)
@@ -93,9 +94,9 @@ plUniquePtr<plActor> plGameState::CreateXRActor()
   if (!pXRInterface)
   {
     plLog::Warning("No plXRInterface interface found. Please load a XR plugin to enable XR. Loading dummyXR interface.");
-    m_pDummyXR = PLASMA_DEFAULT_NEW(plDummyXR);
+    m_pDummyXR = PL_DEFAULT_NEW(plDummyXR);
     pXRInterface = plSingletonRegistry::GetSingletonInstance<plXRInterface>();
-    PLASMA_ASSERT_DEV(pXRInterface, "Creating dummyXR did not register the plXRInterface.");
+    PL_ASSERT_DEV(pXRInterface, "Creating dummyXR did not register the plXRInterface.");
   }
 
   plXRRemotingInterface* pXRRemotingInterface = plSingletonRegistry::GetSingletonInstance<plXRRemotingInterface>();
@@ -132,17 +133,17 @@ plUniquePtr<plActor> plGameState::CreateXRActor()
   {
     // XR Window with added companion window (allows keyboard / mouse input).
     pMainWindow = CreateMainWindow();
-    PLASMA_ASSERT_DEV(pMainWindow != nullptr, "To change the main window creation behavior, override plGameState::CreateActors().");
+    PL_ASSERT_DEV(pMainWindow != nullptr, "To change the main window creation behavior, override plGameState::CreateActors().");
     pOutput = CreateMainOutputTarget(pMainWindow.Borrow());
     ConfigureMainWindowInputDevices(pMainWindow.Borrow());
     CreateMainView();
-    SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetRenderAreaSize(), pMainWindow->GetClientAreaSize());
+    SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetClientAreaSize());
   }
   else
   {
     // XR Window (no companion window)
     CreateMainView();
-    SetupMainView({}, {}, {});
+    SetupMainView({}, {});
   }
 
   if (m_bXRRemotingEnabled)
@@ -154,14 +155,14 @@ plUniquePtr<plActor> plGameState::CreateXRActor()
   }
 
   plView* pView = nullptr;
-  PLASMA_VERIFY(plRenderWorld::TryGetView(m_hMainView, pView), "");
+  PL_VERIFY(plRenderWorld::TryGetView(m_hMainView, pView), "");
   plUniquePtr<plActor> pXRActor = pXRInterface->CreateActor(pView, plGALMSAASampleCount::Default, std::move(pMainWindow), std::move(pOutput));
   return std::move(pXRActor);
 }
 
 void plGameState::CreateActors()
 {
-  PLASMA_LOG_BLOCK("CreateActors");
+  PL_LOG_BLOCK("CreateActors");
   plUniquePtr<plActor> pXRActor = CreateXRActor();
   if (pXRActor != nullptr)
   {
@@ -170,18 +171,18 @@ void plGameState::CreateActors()
   }
 
   plUniquePtr<plWindow> pMainWindow = CreateMainWindow();
-  PLASMA_ASSERT_DEV(pMainWindow != nullptr, "To change the main window creation behavior, override plGameState::CreateActors().");
+  PL_ASSERT_DEV(pMainWindow != nullptr, "To change the main window creation behavior, override plGameState::CreateActors().");
   plUniquePtr<plWindowOutputTargetGAL> pOutput = CreateMainOutputTarget(pMainWindow.Borrow());
   ConfigureMainWindowInputDevices(pMainWindow.Borrow());
   CreateMainView();
-  SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetRenderAreaSize(), pMainWindow->GetClientAreaSize());
+  SetupMainView(pOutput->m_hSwapChain, pMainWindow->GetClientAreaSize());
 
   {
     // Default flat window
-    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PLASMA_DEFAULT_NEW(plActorPluginWindowOwner);
+    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PL_DEFAULT_NEW(plActorPluginWindowOwner);
     pWindowPlugin->m_pWindow = std::move(pMainWindow);
     pWindowPlugin->m_pWindowOutputTarget = std::move(pOutput);
-    plUniquePtr<plActor> pActor = PLASMA_DEFAULT_NEW(plActor, "Main Window", this);
+    plUniquePtr<plActor> pActor = PL_DEFAULT_NEW(plActor, "Main Window", this);
     pActor->AddPlugin(std::move(pWindowPlugin));
     plActorManager::GetSingleton()->AddActor(std::move(pActor));
   }
@@ -191,7 +192,7 @@ void plGameState::ConfigureMainWindowInputDevices(plWindow* pWindow) {}
 
 void plGameState::ConfigureInputActions() {}
 
-void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 renderSize, plSizeU32 windowSize)
+void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 viewportSize)
 {
   plView* pView = nullptr;
   if (!plRenderWorld::TryGetView(m_hMainView, pView))
@@ -199,10 +200,10 @@ void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 rende
     plLog::Error("Main view is invalid, SetupMainView canceled.");
     return;
   }
+
   if (m_bXREnabled)
   {
     const plXRConfig* pConfig = plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetTypeConfig<plXRConfig>();
-    plXRInterface* pXRInterface = plSingletonRegistry::GetSingletonInstance<plXRInterface>();
 
     auto renderPipeline = plResourceManager::LoadResource<plRenderPipelineResource>(pConfig->m_sXRRenderPipeline);
     pView->SetRenderPipelineResource(renderPipeline);
@@ -216,8 +217,7 @@ void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 rende
       auto renderPipeline = plResourceManager::LoadResource<plRenderPipelineResource>(pConfig->m_sMainRenderPipeline);
       pView->SetRenderPipelineResource(renderPipeline);
       pView->SetSwapChain(hSwapChain);
-      pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)renderSize.width, (float)renderSize.height));
-      pView->SetTargetViewport(plRectFloat(0.0f, 0.0f, (float)windowSize.width, (float)windowSize.height));
+      pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)viewportSize.width, (float)viewportSize.height));
       pView->ForceUpdate();
     }
   }
@@ -225,9 +225,9 @@ void plGameState::SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 rende
 
 plView* plGameState::CreateMainView()
 {
-  PLASMA_ASSERT_DEV(m_hMainView.IsInvalidated(), "CreateMainView was already called.");
+  PL_ASSERT_DEV(m_hMainView.IsInvalidated(), "CreateMainView was already called.");
 
-  PLASMA_LOG_BLOCK("CreateMainView");
+  PL_LOG_BLOCK("CreateMainView");
   plView* pView = nullptr;
   m_hMainView = plRenderWorld::CreateView("MainView", pView);
   pView->SetCameraUsageHint(plCameraUsageHint::MainView);
@@ -244,13 +244,13 @@ plView* plGameState::CreateMainView()
 plResult plGameState::SpawnPlayer(const plTransform* pStartPosition)
 {
   if (m_pMainWorld == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_LOCK(m_pMainWorld->GetWriteMarker());
+  PL_LOCK(m_pMainWorld->GetWriteMarker());
 
   plPlayerStartPointComponentManager* pMan = m_pMainWorld->GetComponentManager<plPlayerStartPointComponentManager>();
   if (pMan == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   for (auto it = pMan->GetComponents(); it.IsValid(); ++it)
   {
@@ -275,12 +275,12 @@ plResult plGameState::SpawnPlayer(const plTransform* pStartPosition)
 
         pPrefab->InstantiatePrefab(*m_pMainWorld, startPos, options, &(it->m_Parameters));
 
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plGameState::ChangeMainWorld(plWorld* pNewMainWorld)
@@ -340,7 +340,7 @@ plUniquePtr<plWindow> plGameState::CreateMainWindow()
 
   if (sWndCfg.IsEmpty())
   {
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
     const plStringView sCfgAppData = plFileSystem::MigrateFileLocation(":appdata/Window.ddl", ":appdata/RuntimeConfigs/Window.ddl");
     const plStringView sCfgProject = plFileSystem::MigrateFileLocation(":project/Window.ddl", ":project/RuntimeConfigs/Window.ddl");
 #else
@@ -357,8 +357,9 @@ plUniquePtr<plWindow> plGameState::CreateMainWindow()
   plWindowCreationDesc wndDesc;
   wndDesc.LoadFromDDL(sWndCfg).IgnoreResult();
 
-  plUniquePtr<plGameStateWindow> pWindow = PLASMA_DEFAULT_NEW(plGameStateWindow, wndDesc, [] {});
-  pWindow->ResetOnClickClose([this]() { this->RequestQuit(); });
+  plUniquePtr<plGameStateWindow> pWindow = PL_DEFAULT_NEW(plGameStateWindow, wndDesc, [] {});
+  pWindow->ResetOnClickClose([this]()
+    { this->RequestQuit(); });
   if (pWindow->GetInputDevice())
     pWindow->GetInputDevice()->SetMouseSpeed(plVec2(0.002f));
 
@@ -367,10 +368,8 @@ plUniquePtr<plWindow> plGameState::CreateMainWindow()
 
 plUniquePtr<plWindowOutputTargetGAL> plGameState::CreateMainOutputTarget(plWindow* pMainWindow)
 {
-  plUniquePtr<plWindowOutputTargetGAL> pOutput = PLASMA_DEFAULT_NEW(plWindowOutputTargetGAL, [this, pMainWindow](plGALSwapChainHandle hSwapChain, plSizeU32 size)
-  {
-      SetupMainView(hSwapChain, pMainWindow->GetRenderAreaSize(), size);
-  });
+  plUniquePtr<plWindowOutputTargetGAL> pOutput = PL_DEFAULT_NEW(plWindowOutputTargetGAL, [this](plGALSwapChainHandle hSwapChain, plSizeU32 size)
+    { SetupMainView(hSwapChain, size); });
 
   plGALWindowSwapChainCreationDescription desc;
   desc.m_pWindow = pMainWindow;

@@ -4,7 +4,7 @@
 #include <Foundation/Strings/String.h>
 
 /// \brief This is a helper class to interact with environment variables.
-class PLASMA_FOUNDATION_DLL plEnvironmentVariableUtils
+class PL_FOUNDATION_DLL plEnvironmentVariableUtils
 {
 public:
   /// \brief Returns the current value of the request environment variable. If it isn't set szDefault will be returned.

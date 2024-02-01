@@ -8,9 +8,9 @@
 struct plManipulatorManagerEvent;
 class plDocument;
 
-class PLASMA_EDITORFRAMEWORK_DLL plManipulatorAdapterRegistry
+class PL_EDITORFRAMEWORK_DLL plManipulatorAdapterRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plManipulatorAdapterRegistry);
+  PL_DECLARE_SINGLETON(plManipulatorAdapterRegistry);
 
 public:
   plManipulatorAdapterRegistry();
@@ -18,7 +18,7 @@ public:
 
   plRttiMappedObjectFactory<plManipulatorAdapter> m_Factory;
 
-  void QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& outGridSettings);
+  void QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& out_gridSettings);
 
 private:
   void ManipulatorManagerEventHandler(const plManipulatorManagerEvent& e);

@@ -9,9 +9,9 @@
 using plMeshBufferResourceHandle = plTypedResourceHandle<class plMeshBufferResource>;
 class plGeometry;
 
-struct PLASMA_RENDERERCORE_DLL plVertexStreamInfo : public plHashableStruct<plVertexStreamInfo>
+struct PL_RENDERERCORE_DLL plVertexStreamInfo : public plHashableStruct<plVertexStreamInfo>
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plGALVertexAttributeSemantic::Enum m_Semantic;
   plUInt8 m_uiVertexBufferSlot = 0;
@@ -20,7 +20,7 @@ struct PLASMA_RENDERERCORE_DLL plVertexStreamInfo : public plHashableStruct<plVe
   plUInt16 m_uiElementSize; ///< the number of bytes for this element type (depends on the format); this is not the stride between elements!
 };
 
-struct PLASMA_RENDERERCORE_DLL plVertexDeclarationInfo
+struct PL_RENDERERCORE_DLL plVertexDeclarationInfo
 {
   void ComputeHash();
 
@@ -29,7 +29,7 @@ struct PLASMA_RENDERERCORE_DLL plVertexDeclarationInfo
 };
 
 
-struct PLASMA_RENDERERCORE_DLL plMeshBufferResourceDescriptor
+struct PL_RENDERERCORE_DLL plMeshBufferResourceDescriptor
 {
 public:
   plMeshBufferResourceDescriptor();
@@ -130,23 +130,27 @@ private:
   plDynamicArray<plUInt8, plAlignedAllocatorWrapper> m_IndexBufferData;
 };
 
-class PLASMA_RENDERERCORE_DLL plMeshBufferResource : public plResource
+class PL_RENDERERCORE_DLL plMeshBufferResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMeshBufferResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plMeshBufferResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plMeshBufferResource, plMeshBufferResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plMeshBufferResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plMeshBufferResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plMeshBufferResource, plMeshBufferResourceDescriptor);
 
 public:
-  plMeshBufferResource();
+  plMeshBufferResource()
+    : plResource(DoUpdate::OnAnyThread, 1)
+
+  {
+  }
   ~plMeshBufferResource();
 
-  PLASMA_ALWAYS_INLINE plUInt32 GetPrimitiveCount() const { return m_uiPrimitiveCount; }
+  PL_ALWAYS_INLINE plUInt32 GetPrimitiveCount() const { return m_uiPrimitiveCount; }
 
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetVertexBuffer() const { return m_hVertexBuffer; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetVertexBuffer() const { return m_hVertexBuffer; }
 
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetIndexBuffer() const { return m_hIndexBuffer; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetIndexBuffer() const { return m_hIndexBuffer; }
 
-  PLASMA_ALWAYS_INLINE plGALPrimitiveTopology::Enum GetTopology() const { return m_Topology; }
+  PL_ALWAYS_INLINE plGALPrimitiveTopology::Enum GetTopology() const { return m_Topology; }
 
   /// \brief Returns the vertex declaration used by this mesh buffer.
   const plVertexDeclarationInfo& GetVertexDeclaration() const { return m_VertexDeclaration; }
@@ -161,8 +165,8 @@ private:
 
   plBoundingBoxSphere m_Bounds;
   plVertexDeclarationInfo m_VertexDeclaration;
-  plUInt32 m_uiPrimitiveCount;
+  plUInt32 m_uiPrimitiveCount = 0;
   plGALBufferHandle m_hVertexBuffer;
   plGALBufferHandle m_hIndexBuffer;
-  plGALPrimitiveTopology::Enum m_Topology;
+  plGALPrimitiveTopology::Enum m_Topology = plGALPrimitiveTopology::Enum::Default;
 };

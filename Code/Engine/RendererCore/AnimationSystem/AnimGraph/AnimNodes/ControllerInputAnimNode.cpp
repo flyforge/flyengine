@@ -4,94 +4,94 @@
 #include <RendererCore/AnimationSystem/AnimGraph/AnimNodes/ControllerInputAnimNode.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plControllerInputAnimNode, 1, plRTTIDefaultAllocator<plControllerInputAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plControllerInputAnimNode, 1, plRTTIDefaultAllocator<plControllerInputAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("LeftStickX", m_OutLeftStickX)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("LeftStickY", m_OutLeftStickY)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("LeftStickX", m_OutLeftStickX)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("LeftStickY", m_OutLeftStickY)->AddAttributes(new plHiddenAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("RightStickX", m_OutRightStickX)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("RightStickY", m_OutRightStickY)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("RightStickX", m_OutRightStickX)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("RightStickY", m_OutRightStickY)->AddAttributes(new plHiddenAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("LeftTrigger", m_OutLeftTrigger)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("RightTrigger", m_OutRightTrigger)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("LeftTrigger", m_OutLeftTrigger)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("RightTrigger", m_OutRightTrigger)->AddAttributes(new plHiddenAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("ButtonA", m_OutButtonA)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ButtonB", m_OutButtonB)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ButtonX", m_OutButtonX)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ButtonY", m_OutButtonY)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ButtonA", m_OutButtonA)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ButtonB", m_OutButtonB)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ButtonX", m_OutButtonX)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ButtonY", m_OutButtonY)->AddAttributes(new plHiddenAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("LeftShoulder", m_OutLeftShoulder)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("RightShoulder", m_OutRightShoulder)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("LeftShoulder", m_OutLeftShoulder)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("RightShoulder", m_OutRightShoulder)->AddAttributes(new plHiddenAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("PadLeft", m_OutPadLeft)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("PadRight", m_OutPadRight)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("PadUp", m_OutPadUp)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("PadDown", m_OutPadDown)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("PadLeft", m_OutPadLeft)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("PadRight", m_OutPadRight)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("PadUp", m_OutPadUp)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("PadDown", m_OutPadDown)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Input"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Pink)),
     new plTitleAttribute("Controller"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plControllerInputAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftStickX.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftStickY.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightStickX.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightStickY.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftTrigger.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightTrigger.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonA.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonB.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonX.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonY.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftShoulder.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightShoulder.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadLeft.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadRight.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadUp.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadDown.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftStickX.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftStickY.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightStickX.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightStickY.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftTrigger.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightTrigger.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonA.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonB.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonX.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonY.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftShoulder.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightShoulder.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadLeft.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadRight.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadUp.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadDown.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plControllerInputAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftStickX.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftStickY.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightStickX.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightStickY.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftTrigger.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightTrigger.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonA.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonB.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonX.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutButtonY.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutLeftShoulder.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutRightShoulder.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadLeft.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadRight.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadUp.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPadDown.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftStickX.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftStickY.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightStickX.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightStickY.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftTrigger.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightTrigger.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonA.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonB.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonX.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutButtonY.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutLeftShoulder.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutRightShoulder.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadLeft.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadRight.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadUp.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPadDown.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plControllerInputAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
@@ -157,4 +157,4 @@ void plControllerInputAnimNode::Step(plAnimController& ref_controller, plAnimGra
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_ControllerInputAnimNode);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_ControllerInputAnimNode);

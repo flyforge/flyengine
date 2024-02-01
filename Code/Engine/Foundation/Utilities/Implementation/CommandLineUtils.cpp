@@ -4,7 +4,7 @@
 #include <Foundation/Utilities/CommandLineUtils.h>
 #include <Foundation/Utilities/ConversionUtils.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #  include <shellapi.h>
 #endif
@@ -21,12 +21,12 @@ void plCommandLineUtils::SplitCommandLineString(const char* szCommandString, boo
   // Add application dir as first argument as customary on other platforms.
   if (bAddExecutableDir)
   {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
     wchar_t moduleFilename[256];
     GetModuleFileNameW(nullptr, moduleFilename, 256);
     out_args.PushBack(plStringUtf8(moduleFilename).GetData());
 #else
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
 #endif
   }
 
@@ -45,7 +45,7 @@ void plCommandLineUtils::SplitCommandLineString(const char* szCommandString, boo
       out_args.PushBack(path);
       lastEnd = currentChar + 1;
     }
-    plUnicodeUtils::MoveToNextUtf8(currentChar);
+    plUnicodeUtils::MoveToNextUtf8(currentChar).IgnoreResult();
   }
 
   out_argsV.Reserve(out_argsV.GetCount());
@@ -55,7 +55,7 @@ void plCommandLineUtils::SplitCommandLineString(const char* szCommandString, boo
 
 void plCommandLineUtils::SetCommandLine(plUInt32 uiArgc, const char** pArgv, ArgMode mode /*= UseArgcArgv*/)
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   if (mode == ArgMode::PreferOsArgs)
   {
     SetCommandLine();
@@ -75,7 +75,7 @@ void plCommandLineUtils::SetCommandLine(plArrayPtr<plString> commands)
   m_Commands = commands;
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 void plCommandLineUtils::SetCommandLine()
 {
@@ -83,10 +83,10 @@ void plCommandLineUtils::SetCommandLine()
 
   LPWSTR* argvw = CommandLineToArgvW(::GetCommandLineW(), &argc);
 
-  PLASMA_ASSERT_RELEASE(argvw != nullptr, "CommandLineToArgvW failed");
+  PL_ASSERT_RELEASE(argvw != nullptr, "CommandLineToArgvW failed");
 
-  plArrayPtr<plStringUtf8> ArgvUtf8 = PLASMA_DEFAULT_NEW_ARRAY(plStringUtf8, argc);
-  plArrayPtr<const char*> argv = PLASMA_DEFAULT_NEW_ARRAY(const char*, argc);
+  plArrayPtr<plStringUtf8> ArgvUtf8 = PL_DEFAULT_NEW_ARRAY(plStringUtf8, argc);
+  plArrayPtr<const char*> argv = PL_DEFAULT_NEW_ARRAY(const char*, argc);
 
   for (plInt32 i = 0; i < argc; ++i)
   {
@@ -97,18 +97,18 @@ void plCommandLineUtils::SetCommandLine()
   SetCommandLine(argc, argv.GetPtr(), ArgMode::UseArgcArgv);
 
 
-  PLASMA_DEFAULT_DELETE_ARRAY(ArgvUtf8);
-  PLASMA_DEFAULT_DELETE_ARRAY(argv);
+  PL_DEFAULT_DELETE_ARRAY(ArgvUtf8);
+  PL_DEFAULT_DELETE_ARRAY(argv);
   LocalFree(argvw);
 }
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 // Not implemented on Windows UWP.
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#elif PL_ENABLED(PL_PLATFORM_OSX)
 // Not implemented on OSX.
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
 // Not implemented on Linux.
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_ANDROID)
 // Not implemented on Android.
 #else
 #  error "plCommandLineUtils::SetCommandLine(): Abstraction missing."
@@ -148,7 +148,7 @@ const plString& plCommandLineUtils::GetParameter(plUInt32 uiParam) const
 
 plInt32 plCommandLineUtils::GetOptionIndex(plStringView sOption, bool bCaseSensitive) const
 {
-  PLASMA_ASSERT_DEV(sOption.StartsWith("-"), "All command line option names must start with a hyphen (e.g. -file)");
+  PL_ASSERT_DEV(sOption.StartsWith("-"), "All command line option names must start with a hyphen (e.g. -file)");
 
   for (plUInt32 i = 0; i < m_Commands.GetCount(); ++i)
   {
@@ -296,4 +296,4 @@ void plCommandLineUtils::InjectCustomArgument(plStringView sArgument)
   m_Commands.PushBack(sArgument);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_CommandLineUtils);
+

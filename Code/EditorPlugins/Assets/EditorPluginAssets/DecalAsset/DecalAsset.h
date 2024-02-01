@@ -8,7 +8,7 @@ struct plPropertyMetaStateEvent;
 
 struct plDecalMode
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -22,11 +22,11 @@ struct plDecalMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plDecalMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plDecalMode);
 
 class plDecalAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalAssetProperties, plReflectedClass);
 
 public:
   plDecalAssetProperties();
@@ -51,13 +51,13 @@ public:
 
 class plDecalAssetDocument : public plSimpleAssetDocument<plDecalAssetProperties>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalAssetDocument, plSimpleAssetDocument<plDecalAssetProperties>);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalAssetDocument, plSimpleAssetDocument<plDecalAssetProperties>);
 
 public:
-  plDecalAssetDocument(const char* szDocumentPath);
+  plDecalAssetDocument(plStringView sDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
@@ -67,16 +67,14 @@ protected:
 
 class plDecalAssetDocumentGenerator : public plAssetDocumentGenerator
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalAssetDocumentGenerator, plAssetDocumentGenerator);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalAssetDocumentGenerator, plAssetDocumentGenerator);
 
 public:
   plDecalAssetDocumentGenerator();
   ~plDecalAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
-  virtual plStatus Generate(
-    plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
+  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plDecalAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "Images"; }
-  virtual plStringView GetNameSuffix() const override { return "img"; }
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
 };

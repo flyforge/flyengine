@@ -5,8 +5,8 @@ PluginInfo
 {
 	string %DisplayName{"Scene Editing"}
 	string %Description{"Adds support for scenes and prefabs."}
-	string %EditorPlugins{"plasmaEditorPluginScene"}
-	string %EditorEnginePlugins{"PlasmaEnginePluginScene"}
+	string %EditorPlugins{"plEditorPluginScene"}
+	string %EditorEnginePlugins{"plEnginePluginScene"}
 	string %RuntimePlugins{}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}

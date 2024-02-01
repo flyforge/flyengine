@@ -9,11 +9,11 @@
 #include <EditorFramework/Preferences/EditorPreferences.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewLightButtonAction, 1, plRTTINoAllocator);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewLightButtonAction, 1, plRTTINoAllocator);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewLightSliderAction, 1, plRTTINoAllocator);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewLightSliderAction, 1, plRTTINoAllocator);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plActionDescriptorHandle plViewLightActions::s_hLightMenu;
@@ -30,28 +30,28 @@ plActionDescriptorHandle plViewLightActions::s_hSetAsDefault;
 
 void plViewLightActions::RegisterActions()
 {
-  s_hLightMenu = PLASMA_REGISTER_MENU_WITH_ICON("View.LightMenu", ":/EditorFramework/Icons/ViewLightMenu.svg");
-  s_hSkyBox = PLASMA_REGISTER_ACTION_1(
-    "View.SkyBox", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::SkyBoxChanged);
-  s_hSkyLight = PLASMA_REGISTER_ACTION_1(
-    "View.SkyLight", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::SkyLightChanged);
-  s_hSkyLightCubeMap = PLASMA_REGISTER_ACTION_1(
-    "View.SkyLightCubeMap", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged);
-  s_hSkyLightIntensity = PLASMA_REGISTER_ACTION_1(
-    "View.SkyLightIntensity", plActionScope::Document, "View", "", plViewLightSliderAction, PlasmaEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged);
+  s_hLightMenu = PL_REGISTER_MENU_WITH_ICON("View.LightMenu", ":/EditorFramework/Icons/ViewLightMenu.svg");
+  s_hSkyBox = PL_REGISTER_ACTION_1(
+    "View.SkyBox", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::SkyBoxChanged);
+  s_hSkyLight = PL_REGISTER_ACTION_1(
+    "View.SkyLight", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::SkyLightChanged);
+  s_hSkyLightCubeMap = PL_REGISTER_ACTION_1(
+    "View.SkyLightCubeMap", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged);
+  s_hSkyLightIntensity = PL_REGISTER_ACTION_1(
+    "View.SkyLightIntensity", plActionScope::Document, "View", "", plViewLightSliderAction, plEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged);
 
-  s_hDirLight = PLASMA_REGISTER_ACTION_1(
-    "View.DirectionalLight", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightChanged);
-  s_hDirLightAngle = PLASMA_REGISTER_ACTION_1(
-    "View.DirLightAngle", plActionScope::Document, "View", "", plViewLightSliderAction, PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged);
-  s_hDirLightShadows = PLASMA_REGISTER_ACTION_1(
-    "View.DirectionalLightShadows", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged);
-  s_hDirLightIntensity = PLASMA_REGISTER_ACTION_1(
-    "View.DirLightIntensity", plActionScope::Document, "View", "", plViewLightSliderAction, PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged);
-  s_hFog = PLASMA_REGISTER_ACTION_1(
-    "View.Fog", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::FogChanged);
-  s_hSetAsDefault = PLASMA_REGISTER_ACTION_1(
-    "View.SetAsDefault", plActionScope::Document, "View", "", plViewLightButtonAction, PlasmaEngineViewLightSettingsEvent::Type::DefaultValuesChanged);
+  s_hDirLight = PL_REGISTER_ACTION_1(
+    "View.DirectionalLight", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::DirectionalLightChanged);
+  s_hDirLightAngle = PL_REGISTER_ACTION_1(
+    "View.DirLightAngle", plActionScope::Document, "View", "", plViewLightSliderAction, plEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged);
+  s_hDirLightShadows = PL_REGISTER_ACTION_1(
+    "View.DirectionalLightShadows", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged);
+  s_hDirLightIntensity = PL_REGISTER_ACTION_1(
+    "View.DirLightIntensity", plActionScope::Document, "View", "", plViewLightSliderAction, plEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged);
+  s_hFog = PL_REGISTER_ACTION_1(
+    "View.Fog", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::FogChanged);
+  s_hSetAsDefault = PL_REGISTER_ACTION_1(
+    "View.SetAsDefault", plActionScope::Document, "View", "", plViewLightButtonAction, plEngineViewLightSettingsEvent::Type::DefaultValuesChanged);
 }
 
 void plViewLightActions::UnregisterActions()
@@ -69,13 +69,13 @@ void plViewLightActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSetAsDefault);
 }
 
-void plViewLightActions::MapActions(const char* szMapping, const char* szPath)
+void plViewLightActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  pMap->MapAction(s_hLightMenu, szPath, 2.5f);
-  plStringBuilder sSubPath(szPath, "/View.LightMenu");
+  pMap->MapAction(s_hLightMenu, "", 2.5f);
+  const plStringView sSubPath = "View.LightMenu";
   pMap->MapAction(s_hSkyBox, sSubPath, 1.0f);
   pMap->MapAction(s_hSkyLight, sSubPath, 1.0f);
   pMap->MapAction(s_hSkyLightCubeMap, sSubPath, 2.0f);
@@ -90,46 +90,46 @@ void plViewLightActions::MapActions(const char* szMapping, const char* szPath)
 
 //////////////////////////////////////////////////////////////////////////
 
-plViewLightButtonAction::plViewLightButtonAction(const plActionContext& context, const char* szName, PlasmaEngineViewLightSettingsEvent::Type button)
+plViewLightButtonAction::plViewLightButtonAction(const plActionContext& context, const char* szName, plEngineViewLightSettingsEvent::Type button)
   : plButtonAction(context, szName, false, "")
 {
   m_ButtonType = button;
   plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(m_Context.m_pWindow);
-  m_pSettings = static_cast<PlasmaEngineViewLightSettings*>(pView->GetDocumentWindow()->GetDocument()->FindSyncObject(PlasmaEngineViewLightSettings::GetStaticRTTI()));
-  PLASMA_ASSERT_DEV(m_pSettings != nullptr, "The asset document does not have a PlasmaEngineViewLightSettings sync object.");
+  m_pSettings = static_cast<plEngineViewLightSettings*>(pView->GetDocumentWindow()->GetDocument()->FindSyncObject(plEngineViewLightSettings::GetStaticRTTI()));
+  PL_ASSERT_DEV(m_pSettings != nullptr, "The asset document does not have a plEngineViewLightSettings sync object.");
   m_SettingsID = m_pSettings->m_EngineViewLightSettingsEvents.AddEventHandler(plMakeDelegate(&plViewLightButtonAction::LightSettingsEventHandler, this));
 
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyBoxChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyBoxChanged:
       SetCheckable(true);
       SetIconPath(":/TypeIcons/plSkyBoxComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightChanged:
       SetCheckable(true);
       SetIconPath(":/TypeIcons/plSkyLightComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
       SetIconPath(":/TypeIcons/plSkyLightComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
       SetCheckable(true);
       SetIconPath(":/TypeIcons/plDirectionalLightComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
       SetCheckable(true);
       SetIconPath(":/TypeIcons/plDirectionalLightComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::FogChanged:
+    case plEngineViewLightSettingsEvent::Type::FogChanged:
       SetCheckable(true);
       SetIconPath(":/TypeIcons/plFogComponent.svg");
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DefaultValuesChanged:
+    case plEngineViewLightSettingsEvent::Type::DefaultValuesChanged:
       SetCheckable(false);
       SetIconPath(":/EditorFramework/Icons/ViewLightMenu.svg");
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   UpdateAction();
@@ -146,17 +146,17 @@ void plViewLightButtonAction::Execute(const plVariant& value)
 
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyBoxChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyBoxChanged:
     {
       m_pSettings->SetSkyBox(value.ConvertTo<bool>());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightChanged:
     {
       m_pSettings->SetSkyLight(value.ConvertTo<bool>());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
     {
       plStringBuilder sFile = m_pSettings->GetSkyLightCubeMap();
       plUuid assetGuid = plConversionUtils::ConvertStringToUuid(sFile);
@@ -187,27 +187,27 @@ void plViewLightButtonAction::Execute(const plVariant& value)
       m_pSettings->SetSkyLightCubeMap(sFile);
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
     {
       m_pSettings->SetDirectionalLight(value.ConvertTo<bool>());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
     {
       m_pSettings->SetDirectionalLightShadows(value.ConvertTo<bool>());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::FogChanged:
+    case plEngineViewLightSettingsEvent::Type::FogChanged:
     {
       m_pSettings->SetFog(value.ConvertTo<bool>());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DefaultValuesChanged:
+    case plEngineViewLightSettingsEvent::Type::DefaultValuesChanged:
     {
       if (plQtUiServices::MessageBoxQuestion("Do you want to make the current light settings the global default?",
             QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::Yes) == QMessageBox::StandardButton::Yes)
       {
-        PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+        plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
         pPreferences->SetAsDefaultValues(*m_pSettings);
       }
     }
@@ -217,7 +217,7 @@ void plViewLightButtonAction::Execute(const plVariant& value)
   }
 }
 
-void plViewLightButtonAction::LightSettingsEventHandler(const PlasmaEngineViewLightSettingsEvent& e)
+void plViewLightButtonAction::LightSettingsEventHandler(const plEngineViewLightSettingsEvent& e)
 {
   if (m_ButtonType == e.m_Type)
   {
@@ -229,31 +229,31 @@ void plViewLightButtonAction::UpdateAction()
 {
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyBoxChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyBoxChanged:
     {
       SetChecked(m_pSettings->GetSkyBox());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightChanged:
     {
       SetChecked(m_pSettings->GetSkyLight());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged:
     {
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightChanged:
     {
       SetChecked(m_pSettings->GetDirectionalLight());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged:
     {
       SetChecked(m_pSettings->GetDirectionalLightShadows());
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::FogChanged:
+    case plEngineViewLightSettingsEvent::Type::FogChanged:
     {
       SetChecked(m_pSettings->GetFog());
     }
@@ -264,31 +264,31 @@ void plViewLightButtonAction::UpdateAction()
 }
 //////////////////////////////////////////////////////////////////////////
 
-plViewLightSliderAction::plViewLightSliderAction(const plActionContext& context, const char* szName, PlasmaEngineViewLightSettingsEvent::Type button)
+plViewLightSliderAction::plViewLightSliderAction(const plActionContext& context, const char* szName, plEngineViewLightSettingsEvent::Type button)
   : plSliderAction(context, szName)
 {
   m_ButtonType = button;
   plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(m_Context.m_pWindow);
-  m_pSettings = static_cast<PlasmaEngineViewLightSettings*>(pView->GetDocumentWindow()->GetDocument()->FindSyncObject(PlasmaEngineViewLightSettings::GetStaticRTTI()));
-  PLASMA_ASSERT_DEV(m_pSettings != nullptr, "The asset document does not have a PlasmaEngineViewLightSettings sync object.");
+  m_pSettings = static_cast<plEngineViewLightSettings*>(pView->GetDocumentWindow()->GetDocument()->FindSyncObject(plEngineViewLightSettings::GetStaticRTTI()));
+  PL_ASSERT_DEV(m_pSettings != nullptr, "The asset document does not have a plEngineViewLightSettings sync object.");
   m_SettingsID = m_pSettings->m_EngineViewLightSettingsEvents.AddEventHandler(plMakeDelegate(&plViewLightSliderAction::LightSettingsEventHandler, this));
 
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
       SetIconPath(":/TypeIcons/plSkyLightComponent.svg");
       SetRange(0, 20);
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
       SetIconPath(":/TypeIcons/plDirectionalLightComponent.svg");
       SetRange(-90, 90);
       break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
       SetIconPath(":/TypeIcons/plDirectionalLightComponent.svg");
       SetRange(0, 200);
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   UpdateAction();
@@ -301,21 +301,19 @@ plViewLightSliderAction::~plViewLightSliderAction()
 
 void plViewLightSliderAction::Execute(const plVariant& value)
 {
-  plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(m_Context.m_pWindow);
-
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
     {
       m_pSettings->SetSkyLightIntensity(value.ConvertTo<float>() / 10.0f);
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
     {
-      m_pSettings->SetDirectionalLightAngle(plAngle::Degree(value.ConvertTo<float>()));
+      m_pSettings->SetDirectionalLightAngle(plAngle::MakeFromDegree(value.ConvertTo<float>()));
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
     {
       m_pSettings->SetDirectionalLightIntensity(value.ConvertTo<float>() / 10.0f);
     }
@@ -325,7 +323,7 @@ void plViewLightSliderAction::Execute(const plVariant& value)
   }
 }
 
-void plViewLightSliderAction::LightSettingsEventHandler(const PlasmaEngineViewLightSettingsEvent& e)
+void plViewLightSliderAction::LightSettingsEventHandler(const plEngineViewLightSettingsEvent& e)
 {
   if (m_ButtonType == e.m_Type)
   {
@@ -337,17 +335,17 @@ void plViewLightSliderAction::UpdateAction()
 {
   switch (m_ButtonType)
   {
-    case PlasmaEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged:
     {
       SetValue(plMath::Clamp((plInt32)(m_pSettings->GetSkyLightIntensity() * 10.0f), 0, 20));
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged:
     {
       SetValue(plMath::Clamp((plInt32)(m_pSettings->GetDirectionalLightAngle().GetDegree()), -90, 90));
     }
     break;
-    case PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
+    case plEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged:
     {
       SetValue(plMath::Clamp((plInt32)(m_pSettings->GetDirectionalLightIntensity() * 10.0f), 1, 200));
     }

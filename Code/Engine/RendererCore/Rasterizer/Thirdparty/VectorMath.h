@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_X86)
+#if PL_ENABLED(PL_PLATFORM_ARCH_X86)
 
 #  include <smmintrin.h>
 

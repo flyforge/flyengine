@@ -12,10 +12,10 @@ plMap<plString, plSharedPtr<plRasterizerObject>> plRasterizerObject::s_Objects;
 plRasterizerObject::plRasterizerObject() = default;
 plRasterizerObject::~plRasterizerObject() = default;
 
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
 
 // needed for plHybridArray below
-PLASMA_DEFINE_AS_POD_TYPE(__m128);
+PL_DEFINE_AS_POD_TYPE(__m128);
 
 void plRasterizerObject::CreateMesh(const plGeometry& geo)
 {
@@ -66,11 +66,11 @@ void plRasterizerObject::CreateMesh(const plGeometry& geo)
     {
       const plUInt32 n = vertices.GetCount();
 
-      // swap two vertices in the quad to flip the front face (different convention between PLASMA and the rasterizer)
+      // swap two vertices in the quad to flip the front face (different convention between PL and the rasterizer)
       plMath::Swap(vertices[n - 1], vertices[n - 3]);
     }
 
-    PLASMA_ASSERT_DEV(uiQuadVtx == 4, "Degenerate polygon encountered");
+    PL_ASSERT_DEV(uiQuadVtx == 4, "Degenerate polygon encountered");
   }
 
   // pad vertices to 32 for proper alignment during baking
@@ -84,7 +84,7 @@ void plRasterizerObject::CreateMesh(const plGeometry& geo)
 
 plSharedPtr<const plRasterizerObject> plRasterizerObject::GetObject(plStringView sUniqueName)
 {
-  PLASMA_LOCK(s_Mutex);
+  PL_LOCK(s_Mutex);
 
   auto it = s_Objects.Find(sUniqueName);
 
@@ -96,16 +96,16 @@ plSharedPtr<const plRasterizerObject> plRasterizerObject::GetObject(plStringView
 
 plSharedPtr<const plRasterizerObject> plRasterizerObject::CreateBox(const plVec3& vFullExtents)
 {
-  PLASMA_LOCK(s_Mutex);
+  PL_LOCK(s_Mutex);
 
   plStringBuilder sName;
-  sName.Format("Box-{}-{}-{}", vFullExtents.x, vFullExtents.y, vFullExtents.z);
+  sName.SetFormat("Box-{}-{}-{}", vFullExtents.x, vFullExtents.y, vFullExtents.z);
 
   plSharedPtr<plRasterizerObject>& pObj = s_Objects[sName];
 
   if (pObj == nullptr)
   {
-    pObj = PLASMA_NEW(plFoundation::GetAlignedAllocator(), plRasterizerObject);
+    pObj = PL_NEW(plFoundation::GetAlignedAllocator(), plRasterizerObject);
 
     plGeometry geometry;
     geometry.AddBox(vFullExtents, false, {});
@@ -118,13 +118,13 @@ plSharedPtr<const plRasterizerObject> plRasterizerObject::CreateBox(const plVec3
 
 plSharedPtr<const plRasterizerObject> plRasterizerObject::CreateMesh(plStringView sUniqueName, const plGeometry& geometry)
 {
-  PLASMA_LOCK(s_Mutex);
+  PL_LOCK(s_Mutex);
 
   plSharedPtr<plRasterizerObject>& pObj = s_Objects[sUniqueName];
 
   if (pObj == nullptr)
   {
-    pObj = PLASMA_NEW(plFoundation::GetAlignedAllocator(), plRasterizerObject);
+    pObj = PL_NEW(plFoundation::GetAlignedAllocator(), plRasterizerObject);
 
     pObj->CreateMesh(geometry);
   }
@@ -156,4 +156,3 @@ plSharedPtr<const plRasterizerObject> plRasterizerObject::CreateMesh(plStringVie
 #endif
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Rasterizer_Implementation_RasterizerObject);

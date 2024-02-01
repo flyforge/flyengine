@@ -3,16 +3,16 @@
 #include <Core/Curves/Curve1DResource.h>
 #include <ParticlePlugin/Behavior/ParticleBehavior.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_SizeCurve final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_SizeCurve final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_SizeCurve, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_SizeCurve, plParticleBehaviorFactory);
 
 public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   void SetSizeCurveFile(const char* szFile);
   const char* GetSizeCurveFile() const;
@@ -22,9 +22,9 @@ public:
   plCurve1DResourceHandle m_hCurve;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_SizeCurve final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_SizeCurve final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_SizeCurve, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_SizeCurve, plParticleBehavior);
 
 public:
   float m_fBaseSize;

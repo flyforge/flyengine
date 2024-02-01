@@ -10,16 +10,16 @@
 #include <Core/Graphics/Camera.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStereoTestPass, 1, plRTTIDefaultAllocator<plStereoTestPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStereoTestPass, 1, plRTTIDefaultAllocator<plStereoTestPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput)
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStereoTestPass::plStereoTestPass()
@@ -28,11 +28,11 @@ plStereoTestPass::plStereoTestPass()
   {
     // Load shader.
     m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/StereoTest.plShader");
-    PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load stereo test shader!");
+    PL_ASSERT_DEV(m_hShader.IsValid(), "Could not load stereo test shader!");
   }
 }
 
-plStereoTestPass::~plStereoTestPass() {}
+plStereoTestPass::~plStereoTestPass() = default;
 
 bool plStereoTestPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
@@ -81,4 +81,4 @@ void plStereoTestPass::Execute(const plRenderViewContext& renderViewContext, con
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_StereoTestPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_StereoTestPass);

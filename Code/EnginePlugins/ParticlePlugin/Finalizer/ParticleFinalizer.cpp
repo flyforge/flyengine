@@ -4,11 +4,11 @@
 #include <ParticlePlugin/Finalizer/ParticleFinalizer.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleFinalizer* plParticleFinalizerFactory::CreateFinalizer(plParticleSystemInstance* pOwner) const
@@ -29,3 +29,7 @@ plParticleFinalizer::plParticleFinalizer()
   // run after the behaviors, before the types
   m_fPriority = +500.0f;
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer);
+

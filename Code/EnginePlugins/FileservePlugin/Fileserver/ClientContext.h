@@ -14,7 +14,7 @@ enum class plFileserveFileState
   Different = 5,
 };
 
-class PLASMA_FILESERVEPLUGIN_DLL plFileserveClientContext
+class PL_FILESERVEPLUGIN_DLL plFileserveClientContext
 {
 public:
   struct DataDir
@@ -33,8 +33,8 @@ public:
     plUInt64 m_uiFileSize = 0;
   };
 
-  plFileserveFileState GetFileStatus(plUInt16& inout_uiDataDirID, const char* szRequestedFile, FileStatus& inout_Status,
-    plDynamicArray<plUInt8>& out_FileContent, bool bForceThisDataDir) const;
+  plFileserveFileState GetFileStatus(plUInt16& inout_uiDataDirID, const char* szRequestedFile, FileStatus& inout_status,
+    plDynamicArray<plUInt8>& out_fileContent, bool bForceThisDataDir) const;
 
   bool m_bLostConnection = false;
   plUInt32 m_uiApplicationID = 0;

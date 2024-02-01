@@ -5,11 +5,11 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleInitializer* plParticleInitializerFactory::CreateInitializer(plParticleSystemInstance* pOwner) const
@@ -36,4 +36,4 @@ plParticleInitializer::plParticleInitializer()
   m_fPriority = -500.0f;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer);

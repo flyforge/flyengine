@@ -261,7 +261,7 @@ plColor plColorScheme::GetCategoryColor(plStringView sCategory, CategoryColorUsa
   if (usage == plColorScheme::CategoryColorUsage::BorderIconColor)
   {
     // don't color these icons at all
-    return plColor::ZeroColor();
+    return plColor::MakeZero();
   }
 
   if (usage == plColorScheme::CategoryColorUsage::MenuEntryIcon || usage == plColorScheme::CategoryColorUsage::AssetMenuIcon)
@@ -341,7 +341,7 @@ plColor plColorScheme::GetCategoryColor(plStringView sCategory, CategoryColorUsa
   if (sCategory.IsEqual_NoCase("Scripting"))
     return plColorScheme::GetColor(plColorScheme::Green, uiBrightness, fSaturation) * DarkUIFactor;
 
-  if (sCategory.IsEqual_NoCase("Audio"))
+  if (sCategory.IsEqual_NoCase("Sound"))
     return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
 
   if (sCategory.IsEqual_NoCase("Utilities") || sCategory.IsEqual_NoCase("Editing"))
@@ -354,5 +354,7 @@ plColor plColorScheme::GetCategoryColor(plStringView sCategory, CategoryColorUsa
     return plColorScheme::GetColor(plColorScheme::Yellow, uiBrightness, fSaturation) * DarkUIFactor;
 
   plLog::Warning("Color for category '{}' is undefined.", sCategory);
-  return plColor::ZeroColor();
+  return plColor::MakeZero();
 }
+
+

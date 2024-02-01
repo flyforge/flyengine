@@ -4,11 +4,11 @@
 #include <Texture/Image/Conversions/PixelConversions.h>
 #include <Texture/Image/ImageConversion.h>
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE && PLASMA_SSE_LEVEL >= PLASMA_SSE_20
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE && PL_SSE_LEVEL >= PL_SSE_20
 #  include <emmintrin.h>
 #endif
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE && PLASMA_SSE_LEVEL >= PLASMA_SSE_30
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE && PL_SSE_LEVEL >= PL_SSE_30
 #  include <tmmintrin.h>
 #endif
 
@@ -174,7 +174,7 @@ class plImageConversionStep_Decompress16bpp : plImageConversionStepLinear
   virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
   {
     plImageFormat::Enum sourceFormatSrgb = plImageFormat::AsSrgb(templateSourceFormat);
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       sourceFormatSrgb != templateSourceFormat, "Format '%s' should have a corresponding sRGB format", plImageFormat::GetName(templateSourceFormat));
 
     static plImageConversionEntry supportedConversions[] = {
@@ -203,7 +203,7 @@ class plImageConversionStep_Decompress16bpp : plImageConversionStepLinear
       numElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -213,7 +213,7 @@ class plImageConversionStep_Compress16bpp : plImageConversionStepLinear
   virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
   {
     plImageFormat::Enum targetFormatSrgb = plImageFormat::AsSrgb(templateTargetFormat);
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       targetFormatSrgb != templateTargetFormat, "Format '%s' should have a corresponding sRGB format", plImageFormat::GetName(templateTargetFormat));
 
     static plImageConversionEntry supportedConversions[] = {
@@ -242,15 +242,15 @@ class plImageConversionStep_Compress16bpp : plImageConversionStepLinear
       numElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
 
-static bool IsAligned(const void* pointer)
+static bool IsAligned(const void* pPointer)
 {
-  return reinterpret_cast<size_t>(pointer) % 16 == 0;
+  return reinterpret_cast<size_t>(pPointer) % 16 == 0;
 }
 
 #endif
@@ -270,7 +270,7 @@ struct plImageSwizzleConversion32_2103 : public plImageConversionStepLinear
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = 4;
@@ -279,16 +279,16 @@ struct plImageSwizzleConversion32_2103 : public plImageConversionStepLinear
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
     if (IsAligned(sourcePointer) && IsAligned(targetPointer))
     {
-#  if PLASMA_SSE_LEVEL >= PLASMA_SSE_30
+#  if PL_SSE_LEVEL >= PL_SSE_30
       const plUInt32 elementsPerBatch = 8;
 
       __m128i shuffleMask = _mm_set_epi8(15, 12, 13, 14, 11, 8, 9, 10, 7, 4, 5, 6, 3, 0, 1, 2);
 
       // Intel optimization manual, Color Pixel Format Conversion Using SSE3
-      while (numElements >= elementsPerBatch)
+      while (uiNumElements >= elementsPerBatch)
       {
         __m128i in0 = reinterpret_cast<const __m128i*>(sourcePointer)[0];
         __m128i in1 = reinterpret_cast<const __m128i*>(sourcePointer)[1];
@@ -298,7 +298,7 @@ struct plImageSwizzleConversion32_2103 : public plImageConversionStepLinear
 
         sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride * elementsPerBatch);
         targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride * elementsPerBatch);
-        numElements -= elementsPerBatch;
+        uiNumElements -= elementsPerBatch;
       }
 #  else
       const plUInt32 elementsPerBatch = 8;
@@ -325,7 +325,7 @@ struct plImageSwizzleConversion32_2103 : public plImageConversionStepLinear
     }
 #endif
 
-    while (numElements)
+    while (uiNumElements)
     {
       plUInt8 a, b, c, d;
       a = reinterpret_cast<const plUInt8*>(sourcePointer)[2];
@@ -339,10 +339,10 @@ struct plImageSwizzleConversion32_2103 : public plImageConversionStepLinear
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -357,7 +357,7 @@ struct plImageConversion_BGRX_BGRA : public plImageConversionStepLinear
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = 4;
@@ -366,14 +366,14 @@ struct plImageConversion_BGRX_BGRA : public plImageConversionStepLinear
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE && PLASMA_SSE_LEVEL >= PLASMA_SSE_20
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE && PL_SSE_LEVEL >= PL_SSE_20
     if (IsAligned(sourcePointer) && IsAligned(targetPointer))
     {
       const plUInt32 elementsPerBatch = 4;
 
       __m128i mask = _mm_set1_epi32(0xFF000000);
 
-      while (numElements >= elementsPerBatch)
+      while (uiNumElements >= elementsPerBatch)
       {
         const __m128i* pSource = reinterpret_cast<const __m128i*>(sourcePointer);
         __m128i* pTarget = reinterpret_cast<__m128i*>(targetPointer);
@@ -382,16 +382,16 @@ struct plImageConversion_BGRX_BGRA : public plImageConversionStepLinear
 
         sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride * elementsPerBatch);
         targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride * elementsPerBatch);
-        numElements -= elementsPerBatch;
+        uiNumElements -= elementsPerBatch;
       }
     }
 #endif
 
-    while (numElements)
+    while (uiNumElements)
     {
       plUInt32 x = *(reinterpret_cast<const plUInt32*>(sourcePointer));
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LITTLE_ENDIAN)
+#if PL_ENABLED(PL_PLATFORM_LITTLE_ENDIAN)
       x |= 0xFF000000;
 #else
       x |= 0x000000FF;
@@ -401,10 +401,10 @@ struct plImageConversion_BGRX_BGRA : public plImageConversionStepLinear
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -422,11 +422,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 8;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 8;
 
     plUInt32 sourceStride = 4;
     plUInt32 targetStride = 1;
@@ -434,7 +434,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE && PLASMA_SSE_LEVEL >= PLASMA_SSE_20
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE && PL_SSE_LEVEL >= PL_SSE_20
     {
       const plUInt32 elementsPerBatch = 16;
 
@@ -443,7 +443,7 @@ public:
       __m128 scale = _mm_set1_ps(255.0f);
       __m128 half = _mm_set1_ps(0.5f);
 
-      while (numElements >= elementsPerBatch)
+      while (uiNumElements >= elementsPerBatch)
       {
         __m128 float0 = _mm_loadu_ps(static_cast<const float*>(sourcePointer) + 0);
         __m128 float1 = _mm_loadu_ps(static_cast<const float*>(sourcePointer) + 4);
@@ -485,22 +485,22 @@ public:
 
         sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride * elementsPerBatch);
         targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride * elementsPerBatch);
-        numElements -= elementsPerBatch;
+        uiNumElements -= elementsPerBatch;
       }
     }
 #endif
 
-    while (numElements)
+    while (uiNumElements)
     {
 
       *reinterpret_cast<plUInt8*>(targetPointer) = plMath::ColorFloatToByte(*reinterpret_cast<const float*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -515,7 +515,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = 16;
@@ -524,16 +524,16 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<plColorGammaUB*>(targetPointer) = *reinterpret_cast<const plColor*>(sourcePointer);
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -551,11 +551,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 16;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 16;
 
     plUInt32 sourceStride = 4;
     plUInt32 targetStride = 2;
@@ -563,17 +563,17 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
 
       *reinterpret_cast<plUInt16*>(targetPointer) = plMath::ColorFloatToShort(*reinterpret_cast<const float*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -590,11 +590,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 16;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 16;
 
     plUInt32 sourceStride = 4;
     plUInt32 targetStride = 2;
@@ -602,17 +602,17 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
 
       *reinterpret_cast<plFloat16*>(targetPointer) = *reinterpret_cast<const float*>(sourcePointer);
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -630,11 +630,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 8;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 8;
 
     plUInt32 sourceStride = 4;
     plUInt32 targetStride = 1;
@@ -642,17 +642,17 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
 
       *reinterpret_cast<plInt8*>(targetPointer) = plMath::ColorFloatToSignedByte(*reinterpret_cast<const float*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -670,11 +670,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
 
     plUInt32 sourceStride = 1;
     plUInt32 targetStride = 4;
@@ -682,16 +682,16 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<float*>(targetPointer) = plMath::ColorByteToFloat(*reinterpret_cast<const plUInt8*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -706,7 +706,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = 4;
@@ -715,16 +715,16 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<plColor*>(targetPointer) = *reinterpret_cast<const plColorGammaUB*>(sourcePointer);
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -742,11 +742,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
 
     plUInt32 sourceStride = 2;
     plUInt32 targetStride = 4;
@@ -754,16 +754,54 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<float*>(targetPointer) = plMath::ColorShortToFloat(*reinterpret_cast<const plUInt16*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
+  }
+};
+
+class plImageConversion_S16_F32 : public plImageConversionStepLinear
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R16_SNORM, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16_SNORM, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16B16A16_SNORM, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
+    plImageFormat::Enum targetFormat) const override
+  {
+    // Work with single channels instead of pixels
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+
+    plUInt32 sourceStride = 2;
+    plUInt32 targetStride = 4;
+
+    const void* sourcePointer = source.GetPtr();
+    void* targetPointer = target.GetPtr();
+
+    while (uiNumElements)
+    {
+      *reinterpret_cast<float*>(targetPointer) = plMath::ColorSignedShortToFloat(*reinterpret_cast<const plInt16*>(sourcePointer));
+
+      sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
+      targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
+      uiNumElements--;
+    }
+
+    return PL_SUCCESS;
   }
 };
 
@@ -780,11 +818,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
 
     plUInt32 sourceStride = 2;
     plUInt32 targetStride = 4;
@@ -792,16 +830,16 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<float*>(targetPointer) = *reinterpret_cast<const plFloat16*>(sourcePointer);
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -818,11 +856,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     // Work with single channels instead of pixels
-    numElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
 
     plUInt32 sourceStride = 1;
     plUInt32 targetStride = 4;
@@ -830,16 +868,16 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       *reinterpret_cast<float*>(targetPointer) = plMath::ColorSignedByteToFloat(*reinterpret_cast<const plInt8*>(sourcePointer));
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -859,7 +897,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -870,13 +908,13 @@ public:
 
     const plUInt32 numChannels = sourceStride / sizeof(plUInt8);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LITTLE_ENDIAN)
+#if PL_ENABLED(PL_PLATFORM_LITTLE_ENDIAN)
     if (numChannels == 3)
     {
       // Fast path for RGB -> RGBA
       const plUInt32 elementsPerBatch = 4;
 
-      while (numElements >= elementsPerBatch)
+      while (uiNumElements >= elementsPerBatch)
       {
         plUInt32 source0 = reinterpret_cast<const plUInt32*>(sourcePointer)[0];
         plUInt32 source1 = reinterpret_cast<const plUInt32*>(sourcePointer)[1];
@@ -894,13 +932,13 @@ public:
 
         sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride * elementsPerBatch);
         targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride * elementsPerBatch);
-        numElements -= elementsPerBatch;
+        uiNumElements -= elementsPerBatch;
       }
     }
 #endif
 
 
-    while (numElements)
+    while (uiNumElements)
     {
       // Copy existing channels
       memcpy(targetPointer, sourcePointer, numChannels);
@@ -913,10 +951,10 @@ public:
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -933,7 +971,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -944,7 +982,7 @@ public:
 
     const plUInt32 numChannels = sourceStride / sizeof(float);
 
-    while (numElements)
+    while (uiNumElements)
     {
       // Copy existing channels
       memcpy(targetPointer, sourcePointer, numChannels * sizeof(float));
@@ -957,10 +995,10 @@ public:
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -1031,7 +1069,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -1043,7 +1081,7 @@ public:
     if (plImageFormat::GetBitsPerPixel(sourceFormat) == 32 && plImageFormat::GetBitsPerPixel(targetFormat) == 24)
     {
       // Fast path for RGBA -> RGB
-      while (numElements)
+      while (uiNumElements)
       {
         const plUInt8* src = static_cast<const plUInt8*>(sourcePointer);
         plUInt8* dst = static_cast<plUInt8*>(targetPointer);
@@ -1054,20 +1092,20 @@ public:
 
         sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
         targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-        numElements--;
+        uiNumElements--;
       }
     }
 
-    while (numElements)
+    while (uiNumElements)
     {
       memcpy(targetPointer, sourcePointer, targetStride);
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -1083,7 +1121,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -1092,7 +1130,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       // Adapted from DirectXMath's XMStoreFloat3PK
       plUInt32 IValue[3];
@@ -1200,10 +1238,10 @@ public:
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -1220,7 +1258,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -1229,7 +1267,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       const R11G11B10* pSource = reinterpret_cast<const R11G11B10*>(sourcePointer);
       plUInt32* targetUi = reinterpret_cast<plUInt32*>(targetPointer);
@@ -1346,10 +1384,10 @@ public:
       }
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -1363,7 +1401,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     plUInt32 sourceStride = plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -1372,7 +1410,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    while (numElements)
+    while (uiNumElements)
     {
       plUInt16* result = reinterpret_cast<plUInt16*>(targetPointer);
       const R11G11B10* r11g11b10 = reinterpret_cast<const R11G11B10*>(sourcePointer);
@@ -1386,13 +1424,129 @@ public:
 
       sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
-      numElements--;
+      uiNumElements--;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
+
+template <typename T>
+class plImageConversion_Int_To_F32 : public plImageConversionStepLinear
+{
+public:
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
+    plImageFormat::Enum targetFormat) const override
+  {
+    // Work with single channels instead of pixels
+    uiNumElements *= plImageFormat::GetBitsPerPixel(targetFormat) / 32;
+
+    const plUInt32 sourceStride = sizeof(T);
+    const plUInt32 targetStride = 4;
+
+    const void* sourcePointer = source.GetPtr();
+    void* targetPointer = target.GetPtr();
+
+    while (uiNumElements)
+    {
+      *reinterpret_cast<float*>(targetPointer) = static_cast<float>(*reinterpret_cast<const T*>(sourcePointer));
+
+      sourcePointer = plMemoryUtils::AddByteOffset(sourcePointer, sourceStride);
+      targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
+      uiNumElements--;
+    }
+
+    return PL_SUCCESS;
+  }
+};
+
+
+class plImageConversion_UINT8_F32 : public plImageConversion_Int_To_F32<plUInt8>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R8_UINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R8G8_UINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R8G8B8A8_UINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
+
+class plImageConversion_SINT8_F32 : public plImageConversion_Int_To_F32<plInt8>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R8_SINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R8G8_SINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R8G8B8A8_SINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
+
+class plImageConversion_UINT16_F32 : public plImageConversion_Int_To_F32<plUInt16>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R16_UINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16_UINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16B16A16_UINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
+
+class plImageConversion_SINT16_F32 : public plImageConversion_Int_To_F32<plInt16>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R16_SINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16_SINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R16G16B16A16_SINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
+
+class plImageConversion_UINT32_F32 : public plImageConversion_Int_To_F32<plUInt32>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R32_UINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32_UINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32B32_UINT, plImageFormat::R32G32B32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32B32A32_UINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
+
+class plImageConversion_SINT32_F32 : public plImageConversion_Int_To_F32<plInt32>
+{
+public:
+  virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
+  {
+    static plImageConversionEntry supportedConversions[] = {
+      plImageConversionEntry(plImageFormat::R32_SINT, plImageFormat::R32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32_SINT, plImageFormat::R32G32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32B32_SINT, plImageFormat::R32G32B32_FLOAT, plImageConversionFlags::Default),
+      plImageConversionEntry(plImageFormat::R32G32B32A32_SINT, plImageFormat::R32G32B32A32_FLOAT, plImageConversionFlags::Default),
+    };
+    return supportedConversions;
+  }
+};
 
 
 #define ADD_16BPP_CONVERSION(format)                                                                                                                 \
@@ -1407,6 +1561,7 @@ ADD_16BPP_CONVERSION(B5G5R5A1);
 ADD_16BPP_CONVERSION(X1B5G5R5);
 ADD_16BPP_CONVERSION(A1B5G5R5);
 
+// PL_STATICLINK_FORCE
 static plImageSwizzleConversion32_2103 s_conversion_swizzle2103;
 static plImageConversion_BGRX_BGRA s_conversion_BGRX_BGRA;
 static plImageConversion_F32_U8 s_conversion_F32_U8;
@@ -1417,8 +1572,16 @@ static plImageConversion_F32_S8 s_conversion_F32_S8;
 static plImageConversion_U8_F32 s_conversion_U8_F32;
 static plImageConversion_sRGB_F32 s_conversion_sRGB_F32;
 static plImageConversion_U16_F32 s_conversion_U16_F32;
+static plImageConversion_S16_F32 s_conversion_S16_F32;
 static plImageConversion_F16_F32 s_conversion_F16_F32;
 static plImageConversion_S8_F32 s_conversion_S8_F32;
+static plImageConversion_UINT8_F32 s_conversion_UINT8_F32;
+static plImageConversion_SINT8_F32 s_conversion_SINT8_F32;
+static plImageConversion_UINT16_F32 s_conversion_UINT16_F32;
+static plImageConversion_SINT16_F32 s_conversion_SINT16_F32;
+static plImageConversion_UINT32_F32 s_conversion_UINT32_F32;
+static plImageConversion_SINT32_F32 s_conversion_SINT32_F32;
+
 static plImageConversion_Pad_To_RGBA_U8 s_conversion_Pad_To_RGBA_U8;
 static plImageConversion_Pad_To_RGBA_F32 s_conversion_Pad_To_RGBA_F32;
 static plImageConversion_DiscardChannels s_conversion_DiscardChannels;
@@ -1427,4 +1590,8 @@ static plImageConversion_R11G11B10_to_FLOAT s_conversion_R11G11B10_to_FLOAT;
 static plImageConversion_R11G11B10_to_HALF s_conversion_R11G11B10_to_HALF;
 static plImageConversion_FLOAT_to_R11G11B10 s_conversion_FLOAT_to_R11G11B10;
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Conversions_PixelConversions);
+
+
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Conversions_PixelConversions);
+

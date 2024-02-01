@@ -3,8 +3,8 @@
 #include <Core/World/World.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plComponentManagerBase, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plComponentManagerBase, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plComponentManagerBase::plComponentManagerBase(plWorld* pWorld)
@@ -13,7 +13,7 @@ plComponentManagerBase::plComponentManagerBase(plWorld* pWorld)
 {
 }
 
-plComponentManagerBase::~plComponentManagerBase() {}
+plComponentManagerBase::~plComponentManagerBase() = default;
 
 plComponentHandle plComponentManagerBase::CreateComponent(plGameObject* pOwnerObject)
 {
@@ -21,10 +21,10 @@ plComponentHandle plComponentManagerBase::CreateComponent(plGameObject* pOwnerOb
   return CreateComponent(pOwnerObject, pDummy);
 }
 
-void plComponentManagerBase::DeleteComponent(const plComponentHandle& component)
+void plComponentManagerBase::DeleteComponent(const plComponentHandle& hComponent)
 {
   plComponent* pComponent = nullptr;
-  if (!m_Components.TryGetValue(component, pComponent))
+  if (!m_Components.TryGetValue(hComponent, pComponent))
     return;
 
   DeleteComponent(pComponent);
@@ -57,7 +57,7 @@ void plComponentManagerBase::Deinitialize()
 
 plComponentHandle plComponentManagerBase::CreateComponentNoInit(plGameObject* pOwnerObject, plComponent*& out_pComponent)
 {
-  PLASMA_ASSERT_DEV(m_Components.GetCount() < plWorld::GetMaxNumComponentsPerType(), "Max number of components per type reached: {}",
+  PL_ASSERT_DEV(m_Components.GetCount() < plWorld::GetMaxNumComponentsPerType(), "Max number of components per type reached: {}",
     plWorld::GetMaxNumComponentsPerType());
 
   plComponent* pComponent = CreateComponentStorage();
@@ -116,4 +116,4 @@ void plComponentManagerBase::PatchIdTable(plComponent* pComponent)
     m_Components[id] = pComponent;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_ComponentManager);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_ComponentManager);

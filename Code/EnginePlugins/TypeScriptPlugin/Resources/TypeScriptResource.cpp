@@ -1,6 +1,6 @@
 #include <TypeScriptPlugin/TypeScriptPluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Scripting/DuktapeContext.h>
 #include <Foundation/Configuration/Startup.h>
 #include <TypeScriptPlugin/Components/TypeScriptComponent.h>
@@ -38,14 +38,14 @@ namespace
         duk.CallPreparedMethod().IgnoreResult(); // [ comp result ]
         duk.PopStack(2);                         // [ ]
 
-        PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+        PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
       }
       else
       {
         // remove 'this'   [ comp ]
         duk.PopStack(); // [ ]
 
-        PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+        PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
       }
     }
   };
@@ -59,7 +59,7 @@ plTypeScriptInstance::plTypeScriptInstance(plComponent& inout_owner, plWorld* pW
 {
 }
 
-void plTypeScriptInstance::ApplyParameters(const plArrayMap<plHashedString, plVariant>& parameters)
+void plTypeScriptInstance::SetInstanceVariables(const plArrayMap<plHashedString, plVariant>& parameters)
 {
   plDuktapeHelper duk(m_Binding.GetDukTapeContext());
 
@@ -74,17 +74,45 @@ void plTypeScriptInstance::ApplyParameters(const plArrayMap<plHashedString, plVa
 
   duk.PopStack(); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_VERIFY_STACK(duk, 0);
+}
+
+void plTypeScriptInstance::SetInstanceVariable(const plHashedString& sName, const plVariant& value)
+{
+  plDuktapeHelper duk(m_Binding.GetDukTapeContext());
+
+  m_Binding.DukPutComponentObject(&GetComponent()); // [ comp ]
+
+  plTypeScriptBinding::SetVariantProperty(duk, sName, -1, value); // [ comp ]
+  
+  duk.PopStack(); // [ ]
+
+  PL_DUK_VERIFY_STACK(duk, 0);
+}
+
+plVariant plTypeScriptInstance::GetInstanceVariable(const plHashedString& sName)
+{
+  plDuktapeHelper duk(m_Binding.GetDukTapeContext());
+
+  m_Binding.DukPutComponentObject(&GetComponent()); // [ comp ]
+
+  plVariant value = plTypeScriptBinding::GetVariantProperty(duk, sName, -1, nullptr); // [ comp ]
+
+  duk.PopStack(); // [ ]
+
+  PL_DUK_VERIFY_STACK(duk, 0);
+
+  return value;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptClassResource, 1, plRTTIDefaultAllocator<plTypeScriptClassResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plTypeScriptClassResource);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptClassResource, 1, plRTTIDefaultAllocator<plTypeScriptClassResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plTypeScriptClassResource);
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(TypeScript, ClassResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(TypeScript, ClassResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ResourceManager" 
@@ -102,7 +130,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(TypeScript, ClassResource)
     plResourceManager::UnregisterResourceOverrideType(plGetStaticRTTI<plTypeScriptClassResource>());
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plTypeScriptClassResource::plTypeScriptClassResource() = default;
@@ -152,9 +180,9 @@ plResourceLoadDesc plTypeScriptClassResource::UpdateContent(plStreamReader* pStr
   // TODO: this list should be generated during asset transform and stored in the resource
   const char* szFunctionNames[] = {"Initialize", "Deinitialize", "OnActivated", "OnDeactivated", "OnSimulationStarted", "Tick"};
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(szFunctionNames); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(szFunctionNames); ++i)
   {
-    functions.PushBack(PLASMA_DEFAULT_NEW(TypeScriptFunctionProperty, szFunctionNames[i]));
+    functions.PushBack(PL_DEFAULT_NEW(TypeScriptFunctionProperty, szFunctionNames[i]));
   }
 
   const plRTTI* pParentType = plGetStaticRTTI<plComponent>();
@@ -193,5 +221,5 @@ plUniquePtr<plScriptInstance> plTypeScriptClassResource::Instantiate(plReflected
     return nullptr;
   }
 
-  return PLASMA_DEFAULT_NEW(plTypeScriptInstance, *pComponent, pWorld, binding);
+  return PL_DEFAULT_NEW(plTypeScriptInstance, *pComponent, pWorld, binding);
 }

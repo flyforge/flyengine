@@ -19,27 +19,27 @@ namespace
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, 1)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Value", GetValue, SetValue)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("SortOrder", GetSortOrder, SetSortOrder)->AddAttributes(new plClampValueAttribute(-64.0f, 64.0f)),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("BlendMode", plProcGenBlendMode, GetBlendMode, SetBlendMode)->AddAttributes(new plDefaultValueAttribute(plProcGenBlendMode::Set)),
+    PL_ACCESSOR_PROPERTY("Value", GetValue, SetValue)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("SortOrder", GetSortOrder, SetSortOrder)->AddAttributes(new plClampValueAttribute(-64.0f, 64.0f)),
+    PL_ENUM_ACCESSOR_PROPERTY("BlendMode", plProcGenBlendMode, GetBlendMode, SetBlendMode)->AddAttributes(new plDefaultValueAttribute(plProcGenBlendMode::Set)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged)
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Construction/Procedural Generation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plEvent<const plProcGenInternal::InvalidatedArea&> plProcVolumeComponent::s_AreaInvalidatedEvent;
@@ -94,6 +94,8 @@ void plProcVolumeComponent::SetValue(float fValue)
 
 void plProcVolumeComponent::SetSortOrder(float fOrder)
 {
+  fOrder = plMath::Clamp(fOrder, -64.0f, 64.0f);
+
   if (m_fSortOrder != fOrder)
   {
     m_fSortOrder = fOrder;
@@ -112,32 +114,32 @@ void plProcVolumeComponent::SetBlendMode(plEnum<plProcGenBlendMode> blendMode)
   }
 }
 
-void plProcVolumeComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcVolumeComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_fValue;
   s << m_fSortOrder;
   s << m_BlendMode;
 }
 
-void plProcVolumeComponent::DeserializeComponent(plWorldReader& stream)
+void plProcVolumeComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_fValue;
   s >> m_fSortOrder;
   s >> m_BlendMode;
 }
 
-void plProcVolumeComponent::OnTransformChanged(plMsgTransformChanged& msg)
+void plProcVolumeComponent::OnTransformChanged(plMsgTransformChanged& ref_msg)
 {
   plBoundingBoxSphere combined = GetOwner()->GetLocalBounds();
-  combined.Transform(msg.m_OldGlobalTransform.GetAsMat4());
+  combined.Transform(ref_msg.m_OldGlobalTransform.GetAsMat4());
 
   combined.ExpandToInclude(GetOwner()->GetGlobalBounds());
 
@@ -168,29 +170,28 @@ void plProcVolumeComponent::InvalidateArea(const plBoundingBox& box)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plProcVolumeSphereComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plProcVolumeSphereComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Procedural Generation"),
     new plSphereManipulatorAttribute("Radius"),
     new plSphereVisualizerAttribute("Radius", plColor::LimeGreen),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plProcVolumeSphereComponent::plProcVolumeSphereComponent() = default;
@@ -211,82 +212,86 @@ void plProcVolumeSphereComponent::SetRadius(float fRadius)
   }
 }
 
-void plProcVolumeSphereComponent::SetFadeOutStart(float fFadeOutStart)
+void plProcVolumeSphereComponent::SetFalloff(float fFalloff)
 {
-  if (m_fFadeOutStart != fFadeOutStart)
+  if (m_fFalloff != fFalloff)
   {
-    m_fFadeOutStart = fFadeOutStart;
+    m_fFalloff = fFalloff;
 
     InvalidateArea();
   }
 }
 
-void plProcVolumeSphereComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcVolumeSphereComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_fRadius;
-  s << m_fFadeOutStart;
+  s << m_fFalloff;
 }
 
-void plProcVolumeSphereComponent::DeserializeComponent(plWorldReader& stream)
+void plProcVolumeSphereComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_fRadius;
-  s >> m_fFadeOutStart;
+  s >> m_fFalloff;
+
+  if (uiVersion < 2)
+  {
+    m_fFalloff = 1.0f - m_fFalloff;
+  }
 }
 
-void plProcVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
+void plProcVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const
 {
-  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), s_ProcVolumeCategory);
+  ref_msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), s_ProcVolumeCategory);
 }
 
-void plProcVolumeSphereComponent::OnExtractVolumes(plMsgExtractVolumes& msg) const
+void plProcVolumeSphereComponent::OnExtractVolumes(plMsgExtractVolumes& ref_msg) const
 {
-  msg.m_pCollection->AddSphere(GetOwner()->GetGlobalTransformSimd(), m_fRadius, m_BlendMode, m_fSortOrder, m_fValue, m_fFadeOutStart);
+  ref_msg.m_pCollection->AddSphere(GetOwner()->GetGlobalTransformSimd(), m_fRadius, m_BlendMode, m_fSortOrder, m_fValue, m_fFalloff);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plProcVolumeBoxComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plProcVolumeBoxComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plDefaultValueAttribute(plVec3(0.5f)), new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f))),
+    PL_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
+    PL_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plDefaultValueAttribute(plVec3(0.5f)), new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Procedural Generation"),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColor::LimeGreen),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plProcVolumeBoxComponent::plProcVolumeBoxComponent() = default;
 plProcVolumeBoxComponent::~plProcVolumeBoxComponent() = default;
 
-void plProcVolumeBoxComponent::SetExtents(const plVec3& extents)
+void plProcVolumeBoxComponent::SetExtents(const plVec3& vExtents)
 {
-  if (m_vExtents != extents)
+  if (m_vExtents != vExtents)
   {
-    m_vExtents = extents;
+    m_vExtents = vExtents;
 
     if (IsActiveAndInitialized())
     {
@@ -297,89 +302,94 @@ void plProcVolumeBoxComponent::SetExtents(const plVec3& extents)
   }
 }
 
-void plProcVolumeBoxComponent::SetFadeOutStart(const plVec3& fadeOutStart)
+void plProcVolumeBoxComponent::SetFalloff(const plVec3& vFalloff)
 {
-  if (m_vFadeOutStart != fadeOutStart)
+  if (m_vFalloff != vFalloff)
   {
-    m_vFadeOutStart = fadeOutStart;
+    m_vFalloff = vFalloff;
 
     InvalidateArea();
   }
 }
 
-void plProcVolumeBoxComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcVolumeBoxComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_vExtents;
-  s << m_vFadeOutStart;
+  s << m_vFalloff;
 }
 
-void plProcVolumeBoxComponent::DeserializeComponent(plWorldReader& stream)
+void plProcVolumeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_vExtents;
-  s >> m_vFadeOutStart;
+  s >> m_vFalloff;
+
+  if (uiVersion < 2)
+  {
+    m_vFalloff = plVec3(1.0f) - m_vFalloff;
+  }
 }
 
-void plProcVolumeBoxComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
+void plProcVolumeBoxComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const
 {
-  msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), s_ProcVolumeCategory);
+  ref_msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), s_ProcVolumeCategory);
 }
 
-void plProcVolumeBoxComponent::OnExtractVolumes(plMsgExtractVolumes& msg) const
+void plProcVolumeBoxComponent::OnExtractVolumes(plMsgExtractVolumes& ref_msg) const
 {
-  msg.m_pCollection->AddBox(GetOwner()->GetGlobalTransformSimd(), m_vExtents, m_BlendMode, m_fSortOrder, m_fValue, m_vFadeOutStart);
+  ref_msg.m_pCollection->AddBox(GetOwner()->GetGlobalTransformSimd(), m_vExtents, m_BlendMode, m_fSortOrder, m_fValue, m_vFalloff);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plProcVolumeImageComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plProcVolumeImageComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Image", GetImageFile, SetImageFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_2D")),
+    PL_ACCESSOR_PROPERTY("Image", GetImageFile, SetImageFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_2D")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
+    PL_MESSAGE_HANDLER(plMsgExtractVolumes, OnExtractVolumes)
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plProcVolumeImageComponent::plProcVolumeImageComponent() = default;
 plProcVolumeImageComponent::~plProcVolumeImageComponent() = default;
 
-void plProcVolumeImageComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcVolumeImageComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_hImage;
 }
 
-void plProcVolumeImageComponent::DeserializeComponent(plWorldReader& stream)
+void plProcVolumeImageComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_hImage;
 }
 
-void plProcVolumeImageComponent::OnExtractVolumes(plMsgExtractVolumes& msg) const
+void plProcVolumeImageComponent::OnExtractVolumes(plMsgExtractVolumes& ref_msg) const
 {
-  msg.m_pCollection->AddImage(GetOwner()->GetGlobalTransformSimd(), m_vExtents, m_BlendMode, m_fSortOrder, m_fValue, m_vFadeOutStart, m_hImage);
+  ref_msg.m_pCollection->AddImage(GetOwner()->GetGlobalTransformSimd(), m_vExtents, m_BlendMode, m_fSortOrder, m_fValue, m_vFalloff, m_hImage);
 }
 
 void plProcVolumeImageComponent::SetImageFile(const char* szFile)
@@ -406,3 +416,49 @@ void plProcVolumeImageComponent::SetImage(const plImageDataResourceHandle& hReso
 {
   m_hImage = hResource;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+#include <Foundation/Serialization/GraphPatch.h>
+
+class plProcVolumeSphereComponent_1_2 : public plGraphPatch
+{
+public:
+  plProcVolumeSphereComponent_1_2()
+    : plGraphPatch("plProcVolumeSphereComponent", 2)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    auto* pFadeOutStart = pNode->FindProperty("FadeOutStart");
+    if (pFadeOutStart && pFadeOutStart->m_Value.IsA<float>())
+    {
+      float fFalloff = 1.0f - pFadeOutStart->m_Value.Get<float>();
+      pNode->AddProperty("Falloff", fFalloff);
+    }
+  }
+};
+
+plProcVolumeSphereComponent_1_2 g_plProcVolumeSphereComponent_1_2;
+
+class plProcVolumeBoxComponent_1_2 : public plGraphPatch
+{
+public:
+  plProcVolumeBoxComponent_1_2()
+    : plGraphPatch("plProcVolumeBoxComponent", 2)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    auto* pFadeOutStart = pNode->FindProperty("FadeOutStart");
+    if (pFadeOutStart && pFadeOutStart->m_Value.IsA<plVec3>())
+    {
+      plVec3 vFalloff = plVec3(1.0f) - pFadeOutStart->m_Value.Get<plVec3>();
+      pNode->AddProperty("Falloff", vFalloff);
+    }
+  }
+};
+
+plProcVolumeBoxComponent_1_2 g_plProcVolumeBoxComponent_1_2;

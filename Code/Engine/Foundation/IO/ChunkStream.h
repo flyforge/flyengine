@@ -8,7 +8,7 @@
 ///
 /// This stream writer allows to subdivide a stream into chunks, where each chunk stores a chunk name,
 /// version and size in bytes.
-class PLASMA_FOUNDATION_DLL plChunkStreamWriter : public plStreamWriter
+class PL_FOUNDATION_DLL plChunkStreamWriter : public plStreamWriter
 {
 public:
   /// \brief Pass the underlying stream writer to the constructor.
@@ -43,7 +43,7 @@ private:
 /// \brief Reader for the chunk format that plChunkStreamWriter writes.
 ///
 ///
-class PLASMA_FOUNDATION_DLL plChunkStreamReader : public plStreamReader
+class PL_FOUNDATION_DLL plChunkStreamReader : public plStreamReader
 {
 public:
   /// \brief Pass the underlying stream writer to the constructor.

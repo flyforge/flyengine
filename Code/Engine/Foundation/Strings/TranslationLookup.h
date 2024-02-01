@@ -17,14 +17,14 @@ enum class plTranslationUsage
 };
 
 /// \brief Base class to translate one string into another
-class PLASMA_FOUNDATION_DLL plTranslator
+class PL_FOUNDATION_DLL plTranslator
 {
 public:
   plTranslator();
   virtual ~plTranslator();
 
   /// \brief The given string (with the given hash) shall be translated
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) = 0;
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) = 0;
 
   /// \brief Called to reset internal state
   virtual void Reset();
@@ -45,22 +45,22 @@ private:
 };
 
 /// \brief Just returns the same string that is passed into it. Can be used to display the actually untranslated strings
-class PLASMA_FOUNDATION_DLL plTranslatorPassThrough : public plTranslator
+class PL_FOUNDATION_DLL plTranslatorPassThrough : public plTranslator
 {
 public:
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) override { return szString; }
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) override { return sString; }
 };
 
 /// \brief Can store translated strings and all translation requests will come from that storage. Returns nullptr if the requested string is
 /// not known
-class PLASMA_FOUNDATION_DLL plTranslatorStorage : public plTranslator
+class PL_FOUNDATION_DLL plTranslatorStorage : public plTranslator
 {
 public:
   /// \brief Stores szString as the translation for the string with the given hash
-  virtual void StoreTranslation(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage);
+  virtual void StoreTranslation(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage);
 
   /// \brief Returns the translated string for uiStringHash, or nullptr, if not available
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) override;
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) override;
 
   /// \brief Clears all stored translation strings
   virtual void Reset() override;
@@ -74,17 +74,17 @@ protected:
 
 /// \brief Outputs a 'Missing Translation' warning the first time a string translation is requested.
 /// Otherwise always returns nullptr, allowing the next translator to take over.
-class PLASMA_FOUNDATION_DLL plTranslatorLogMissing : public plTranslatorStorage
+class PL_FOUNDATION_DLL plTranslatorLogMissing : public plTranslatorStorage
 {
 public:
   /// Can be used from external code to (temporarily) deactivate error logging (a bit hacky)
   static bool s_bActive;
 
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) override;
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) override;
 };
 
 /// \brief Loads translations from files. Each translator can have different search paths, but the files to be loaded are the same for all of them.
-class PLASMA_FOUNDATION_DLL plTranslatorFromFiles : public plTranslatorStorage
+class PL_FOUNDATION_DLL plTranslatorFromFiles : public plTranslatorStorage
 {
 public:
   /// \brief Loads all files recursively from the specified folder as translation files.
@@ -94,7 +94,7 @@ public:
   /// This function depends on plFileSystemIterator to be available.
   void AddTranslationFilesFromFolder(const char* szFolder);
 
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) override;
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) override;
 
   virtual void Reload() override;
 
@@ -105,16 +105,16 @@ private:
 };
 
 /// \brief Returns the same string that is passed into it, but strips off class names and separates the text at CamelCase boundaries.
-class PLASMA_FOUNDATION_DLL plTranslatorMakeMoreReadable : public plTranslatorStorage
+class PL_FOUNDATION_DLL plTranslatorMakeMoreReadable : public plTranslatorStorage
 {
 public:
-  virtual const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage) override;
+  virtual plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage) override;
 };
 
 /// \brief Handles looking up translations for strings.
 ///
 /// Multiple translators can be registered to get translations from different sources.
-class PLASMA_FOUNDATION_DLL plTranslationLookup
+class PL_FOUNDATION_DLL plTranslationLookup
 {
 public:
   /// \brief Translators will be queried in the reverse order that they were added.
@@ -122,7 +122,7 @@ public:
 
   /// \brief Prefer to use the plTranslate macro instead of calling this function directly. Will query all translators for a translation,
   /// until one is found.
-  static const char* Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage);
+  static plStringView Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage);
 
   /// \brief Deletes all translators.
   static void Clear();

@@ -9,7 +9,7 @@ class plVec4Template
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using ComponentType = Type;
 
@@ -25,30 +25,24 @@ public:
   /// \brief Initializes the vector with x,y,z,w
   plVec4Template(Type x, Type y, Type z, Type w); // [tested]
 
+  /// \brief Initializes the vector from a vec3 and a float.
+  plVec4Template(plVec3Template<Type> vXyz, Type w);
+
   /// \brief Initializes all 4 components with xyzw
   explicit plVec4Template(Type v); // [tested]
   // no copy-constructor and operator= since the default-generated ones will be faster
 
+  /// \brief Returns a vector with all components set to Not-a-Number (NaN).
+  PL_DECLARE_IF_FLOAT_TYPE
+  [[nodiscard]] static plVec4Template<Type> MakeNaN() { return plVec4Template<Type>(plMath::NaN<Type>()); }
+
   /// \brief Returns a vector with all components set to zero.
-  static const plVec4Template<Type> ZeroVector() { return plVec4Template<Type>(0); } // [tested]
-  /// \brief Returns a vector with all components set to one.
-  static const plVec4Template<Type> OneVector() { return plVec4Template<Type>(1); }
+  [[nodiscard]] static plVec4Template<Type> MakeZero() { return plVec4Template<Type>(0); } // [tested]
 
-  /// \brief Returns a vector initialized to the origin point (0, 0, 0, 1).
-  static const plVec4Template<Type> OriginPoint() { return plVec4Template<Type>(0, 0, 0, 1); }
-  /// \brief Returns a vector initialized to the x unit vector (1, 0, 0, 0).
-  static const plVec4Template<Type> UnitXAxis() { return plVec4Template<Type>(1, 0, 0, 0); }
-  /// \brief Returns a vector initialized to the y unit vector (0, 1, 0, 0).
-  static const plVec4Template<Type> UnitYAxis() { return plVec4Template<Type>(0, 1, 0, 0); }
-  /// \brief Returns a vector initialized to the z unit vector (1, 0, 0, 0).
-  static const plVec4Template<Type> UnitZAxis() { return plVec4Template<Type>(0, 0, 1, 0); }
-  /// \brief Returns a vector initialized to the w unit vector (0, 0, 0, 1).
-  static const plVec4Template<Type> UnitWAxis() { return plVec4Template<Type>(0, 0, 0, 1); }
-
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
                                "check that all code-paths properly initialize this object.");
   }
 #endif
@@ -81,6 +75,7 @@ public:
   // *** Functions dealing with length ***
 public:
   /// \brief Returns the length of the vector.
+  PL_DECLARE_IF_FLOAT_TYPE
   Type GetLength() const; // [tested]
 
   /// \brief Returns the squared length. Faster, since no square-root is taken. Useful, if one only wants to compare the lengths of two
@@ -89,16 +84,20 @@ public:
 
   /// \brief Normalizes this vector and returns its previous length in one operation. More efficient than calling GetLength and then
   /// Normalize.
+  PL_DECLARE_IF_FLOAT_TYPE
   Type GetLengthAndNormalize(); // [tested]
 
   /// \brief Returns a normalized version of this vector, leaves the vector itself unchanged.
+  PL_DECLARE_IF_FLOAT_TYPE
   const plVec4Template<Type> GetNormalized() const; // [tested]
 
   /// \brief Normalizes this vector.
+  PL_DECLARE_IF_FLOAT_TYPE
   void Normalize(); // [tested]
 
-  /// \brief Tries to normalize this vector. If the vector is too close to zero, PLASMA_FAILURE is returned and the vector is set to the given
+  /// \brief Tries to normalize this vector. If the vector is too close to zero, PL_FAILURE is returned and the vector is set to the given
   /// fallback value.
+  PL_DECLARE_IF_FLOAT_TYPE
   plResult NormalizeIfNotZero(const plVec4Template<Type>& vFallback = plVec4Template<Type>(1, 0, 0, 0), Type fEpsilon = plMath::SmallEpsilon<Type>()); // [tested]
 
   /// \brief Returns, whether this vector is (0, 0, 0, 0).
@@ -108,6 +107,7 @@ public:
   bool IsZero(Type fEpsilon) const; // [tested]
 
   /// \brief Returns, whether the squared length of this vector is between 0.999f and 1.001f.
+  PL_DECLARE_IF_FLOAT_TYPE
   bool IsNormalized(Type fEpsilon = plMath::HugeEpsilon<Type>()) const; // [tested]
 
   /// \brief Returns true, if any of x, y, z or w is NaN.
@@ -164,8 +164,6 @@ public:
   /// brief Returns the component-wise absolute of *this.
   const plVec4Template<Type> Abs() const; // [tested]
 };
-
-
 
 // *** Operators ***
 

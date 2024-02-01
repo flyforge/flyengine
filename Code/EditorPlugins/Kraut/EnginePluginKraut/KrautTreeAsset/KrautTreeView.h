@@ -4,7 +4,7 @@
 
 class plKrautTreeContext;
 
-class plKrautTreeViewContext : public PlasmaEngineProcessViewContext
+class plKrautTreeViewContext : public plEngineProcessViewContext
 {
 public:
   plKrautTreeViewContext(plKrautTreeContext* pKrautTreeContext);

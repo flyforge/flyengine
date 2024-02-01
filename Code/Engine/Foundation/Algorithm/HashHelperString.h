@@ -8,11 +8,11 @@
 #include <Foundation/Strings/StringUtils.h>
 
 /// \brief Hash helper to be used as a template argument to plHashTable / plHashSet for case insensitive string keys.
-struct PLASMA_FOUNDATION_DLL plHashHelperString_NoCase
+struct PL_FOUNDATION_DLL plHashHelperString_NoCase
 {
   inline static plUInt32 Hash(plStringView sValue); // [tested]
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plStringView lhs, plStringView rhs); // [tested]
+  PL_ALWAYS_INLINE static bool Equal(plStringView lhs, plStringView rhs); // [tested]
 };
 
 #include <Foundation/Algorithm/Implementation/HashHelperString_inl.h>

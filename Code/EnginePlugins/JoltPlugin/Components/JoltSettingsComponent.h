@@ -6,9 +6,9 @@
 
 using plJoltSettingsComponentManager = plSettingsComponentManager<class plJoltSettingsComponent>;
 
-class PLASMA_JOLTPLUGIN_DLL plJoltSettingsComponent : public plSettingsComponent
+class PL_JOLTPLUGIN_DLL plJoltSettingsComponent : public plSettingsComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltSettingsComponent, plSettingsComponent, plJoltSettingsComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltSettingsComponent, plSettingsComponent, plJoltSettingsComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

@@ -35,14 +35,14 @@ plStringView plFormatString::BuildFormattedText(plStringBuilder& ref_sStorage, p
       }
       else
       {
-        PLASMA_ASSERT_DEBUG(false, "Single percentage signs are not allowed in plFormatString. Did you forgot to migrate a printf-style "
+        PL_ASSERT_DEBUG(false, "Single percentage signs are not allowed in plFormatString. Did you forgot to migrate a printf-style "
                                "string? Use double percentage signs for the actual character.");
       }
     }
     else if (sString.GetElementCount() >= 3 && *sString.GetStartPointer() == '{' && *(sString.GetStartPointer() + 1) >= '0' && *(sString.GetStartPointer() + 1) <= '9' && *(sString.GetStartPointer() + 2) == '}')
     {
       uiLastParam = *(sString.GetStartPointer() + 1) - '0';
-      PLASMA_ASSERT_DEV(uiLastParam < uiNumArgs, "Too many placeholders in format string");
+      PL_ASSERT_DEV(uiLastParam < uiNumArgs, "Too many placeholders in format string");
 
       if (uiLastParam < uiNumArgs)
       {
@@ -56,7 +56,7 @@ plStringView plFormatString::BuildFormattedText(plStringBuilder& ref_sStorage, p
     else if (sString.TrimWordStart("{}"))
     {
       ++uiLastParam;
-      PLASMA_ASSERT_DEV(uiLastParam < uiNumArgs, "Too many placeholders in format string");
+      PL_ASSERT_DEV(uiLastParam < uiNumArgs, "Too many placeholders in format string");
 
       if (uiLastParam < uiNumArgs)
       {
@@ -231,8 +231,8 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const plAngle& arg)
   plStringUtils::OutputFormattedFloat(szTmp, uiLength - 2, writepos, arg.GetDegree(), 1, false, 1, false);
 
   // Utf-8 representation of the degree sign
-  szTmp[writepos + 0] = (char)0xC2;
-  szTmp[writepos + 1] = (char)0xB0;
+  szTmp[writepos + 0] = /*(char)0xC2;*/ -62;
+  szTmp[writepos + 1] = /*(char)0xB0;*/ -80;
   szTmp[writepos + 2] = '\0';
 
   return plStringView(szTmp, szTmp + writepos + 2);
@@ -275,8 +275,8 @@ plStringView BuildString(char* pTmp, plUInt32 uiLength, const plTime& arg)
 
     // szTmp[writepos++] = ' ';
     // Utf-8 representation of the microsecond (us) sign
-    pTmp[writepos++] = (char)0xC2;
-    pTmp[writepos++] = (char)0xB5;
+    pTmp[writepos++] = /*(char)0xC2;*/ -62;
+    pTmp[writepos++] = /*(char)0xB5;*/ -75;
     pTmp[writepos++] = 's';
   }
   else if (fAbsSec < 1.0)
@@ -385,7 +385,7 @@ plStringView plArgSensitive::BuildString_SensitiveUserData_Hash(char* szTmp, plU
   return szTmp;
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 
 plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& arg)
@@ -409,10 +409,21 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& a
   // we need a bigger boat
   static thread_local char FullMessage[256];
 
-  plStringUtils::snprintf(FullMessage, PLASMA_ARRAY_SIZE(FullMessage), "%i (\"%s\")", arg.m_ErrorCode, plStringUtf8((LPWSTR)lpMsgBuf).GetData());
+  plStringUtils::snprintf(FullMessage, PL_ARRAY_SIZE(FullMessage), "%i (\"%s\")", arg.m_ErrorCode, plStringUtf8((LPWSTR)lpMsgBuf).GetData());
   LocalFree(lpMsgBuf);
   return plStringView(FullMessage);
 }
 #endif
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_FormatString);
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+#  include <string.h>
+
+plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrno& arg)
+{
+  const char* szErrorMsg = std::strerror(arg.m_iErrno);
+  plStringUtils::snprintf(szTmp, uiLength, "%i (\"%s\")", arg.m_iErrno, szErrorMsg);
+  return plStringView(szTmp);
+}
+#endif
+
+

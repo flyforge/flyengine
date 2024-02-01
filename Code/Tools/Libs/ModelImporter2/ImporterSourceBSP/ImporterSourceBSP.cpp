@@ -143,10 +143,10 @@ namespace SourceBSP
     {
     }
 
-    Vertex_t(float _x, float _y, float _z)
-      : x(_x)
-      , y(_y)
-      , z(_z)
+    Vertex_t(float fX, float fY, float fZ)
+      : x(fX)
+      , y(fY)
+      , z(fZ)
     {
     }
 
@@ -275,7 +275,7 @@ namespace SourceBSP
     float m_alpha;
   };
 
-  struct File
+  struct File // NOLINT(*Padding): We don't care about excessive padding here, because this struct is rarely used.
   {
     File(plArrayPtr<plUInt8> memory);
 
@@ -321,7 +321,7 @@ namespace SourceBSP
     DispVertex_t* dispVertices = nullptr;
     plUInt32 numDispVertices = 0;
 
-    const char* getTexDataString(plUInt32 index) const;
+    const char* getTexDataString(plUInt32 uiIndex) const;
 
     bool m_valid = false;
   };
@@ -392,11 +392,11 @@ namespace SourceBSP
     m_valid = true;
   }
 
-  const char* File::getTexDataString(plUInt32 index) const
+  const char* File::getTexDataString(plUInt32 uiIndex) const
   {
-    PLASMA_ASSERT_ALWAYS(index < numTexDataStringOffsets, "BSP file tex data string out of bounds.");
+    PL_ASSERT_ALWAYS(uiIndex < numTexDataStringOffsets, "BSP file tex data string out of bounds.");
 
-    return texDataStrings + texDataStringOffsets[index];
+    return texDataStrings + texDataStringOffsets[uiIndex];
   }
 
 
@@ -413,7 +413,7 @@ namespace SourceBSP
 
   struct TempVertex
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     float x, y, z;
     float nx, ny, nz;
@@ -472,7 +472,7 @@ namespace SourceBSP
       }
       else
       {
-        plUniquePtr<plModelImporter::Material> newMat(PLASMA_DEFAULT_NEW(plModelImporter::Material));
+        plUniquePtr<plModelImporter::Material> newMat(PL_DEFAULT_NEW(plModelImporter::Material));
         newMat->m_Name = material;
 
         materialHandle = pScene->AddMaterial(std::move(newMat));
@@ -668,7 +668,7 @@ namespace SourceBSP
     if ((indices.GetCount() % 3) != 0)
     {
       plLog::Error("Index count of BSP import are not divisible by 3, can't build triangles.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Add vertices and triangles
@@ -703,7 +703,7 @@ namespace SourceBSP
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 #endif
@@ -717,10 +717,13 @@ namespace plModelImporter2
 
   plResult ImporterSourceBSP::DoImport()
   {
-    const char* szFileName = m_Options.m_sSourceFile;
+    PL_ASSERT_NOT_IMPLEMENTED;
+    return PL_FAILURE;
 
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
-    return PLASMA_FAILURE;
+// TODO: adapt BSP import code to new model importer
+#if 0
+
+    const char* szFileName = m_Options.m_sSourceFile;
 
     plDynamicArray<plUInt8> fileContent;
     fileContent.Reserve(1024 * 1024);
@@ -732,12 +735,12 @@ namespace plModelImporter2
       if (fileReader.Open(szFileName, 1024 * 1024).Failed())
       {
         plLog::Error("Couldn't open '{}' for BSP import.", szFileName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       plUInt8 Temp[1024 * 4];
 
-      while (plUInt64 uiRead = fileReader.ReadBytes(Temp, PLASMA_ARRAY_SIZE(Temp)))
+      while (plUInt64 uiRead = fileReader.ReadBytes(Temp, PL_ARRAY_SIZE(Temp)))
       {
         fileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
       }
@@ -748,16 +751,14 @@ namespace plModelImporter2
     if (!bspFile.m_valid)
     {
       plLog::Error("BSP header not valid for file '{}'.", szFileName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
 
-    // TODO: adapt BSP import code to new model importer
-#if 0
 
     // Import the complete BSP geometry as a single mesh
-    plSharedPtr<Scene> outScene = PLASMA_DEFAULT_NEW(Scene);
-    plUniquePtr<Mesh> mesh(PLASMA_DEFAULT_NEW(Mesh));
+    plSharedPtr<Scene> outScene = PL_DEFAULT_NEW(Scene);
+    plUniquePtr<Mesh> mesh(PL_DEFAULT_NEW(Mesh));
     mesh->m_Name = "BSP Geometry";
 
     mesh->AddDataStream(plGALVertexAttributeSemantic::Position, 3, VertexElementType::FLOAT);
@@ -780,7 +781,5 @@ namespace plModelImporter2
 
     return outScene;
 #endif
-
-    return PLASMA_SUCCESS;
   }
 } // namespace plModelImporter2

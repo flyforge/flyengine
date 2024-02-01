@@ -1,6 +1,6 @@
 pl_cmake_init()
 
-pl_requires_one_of(PLASMA_CMAKE_PLATFORM_WINDOWS_DESKTOP PLASMA_CMAKE_PLATFORM_LINUX)
+pl_requires_one_of(PL_CMAKE_PLATFORM_WINDOWS_DESKTOP PL_CMAKE_PLATFORM_LINUX)
 pl_requires_renderer()
 
 # Get the name of this folder as the project name

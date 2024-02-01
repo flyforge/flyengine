@@ -74,4 +74,4 @@ float plMathExpression::Evaluate(plArrayPtr<Input> inputs)
   return fOutput;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_MathExpression);
+

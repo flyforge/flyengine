@@ -5,19 +5,15 @@
 #include <Foundation/Utilities/DGMLWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptPin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptPin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plVisualScriptPin::plVisualScriptPin(Type type, plStringView sName, const plVisualScriptNodeRegistry::PinDesc& pinDesc, const plDocumentObject* pObject, plUInt32 uiDataPinIndex)
+plVisualScriptPin::plVisualScriptPin(Type type, plStringView sName, const plVisualScriptNodeRegistry::PinDesc& pinDesc, const plDocumentObject* pObject, plUInt32 uiDataPinIndex, plUInt32 uiElementIndex)
   : plPin(type, sName, pinDesc.GetColor(), pObject)
-  , m_pDataType(pinDesc.m_pDataType)
-  , m_DeductTypeFunc(pinDesc.m_DeductTypeFunc)
+  , m_pDesc(&pinDesc)
   , m_uiDataPinIndex(uiDataPinIndex)
-  , m_ScriptDataType(pinDesc.m_ScriptDataType)
-  , m_bRequired(pinDesc.m_bRequired)
-  , m_bHasDynamicPinProperty(pinDesc.m_sDynamicPinProperty.IsEmpty() == false)
-  , m_bSplitExecution(pinDesc.m_bSplitExecution)
+  , m_uiElementIndex(uiElementIndex)
 {
   if (pinDesc.IsExecutionPin())
   {
@@ -37,13 +33,14 @@ plVisualScriptPin::~plVisualScriptPin()
 
 plVisualScriptDataType::Enum plVisualScriptPin::GetResolvedScriptDataType() const
 {
-  if (m_ScriptDataType == plVisualScriptDataType::AnyPointer || m_ScriptDataType == plVisualScriptDataType::Any)
+  auto scriptDataType = GetScriptDataType();
+  if (scriptDataType == plVisualScriptDataType::AnyPointer || scriptDataType == plVisualScriptDataType::Any)
   {
     auto pManager = static_cast<const plVisualScriptNodeManager*>(GetParent()->GetDocumentObjectManager());
     return pManager->GetDeductedType(*this);
   }
 
-  return m_ScriptDataType;
+  return scriptDataType;
 }
 
 plStringView plVisualScriptPin::GetDataTypeName() const
@@ -51,12 +48,12 @@ plStringView plVisualScriptPin::GetDataTypeName() const
   plVisualScriptDataType::Enum resolvedDataType = GetResolvedScriptDataType();
   if (resolvedDataType == plVisualScriptDataType::Invalid)
   {
-    return plVisualScriptDataType::GetName(m_ScriptDataType);
+    return plVisualScriptDataType::GetName(GetScriptDataType());
   }
 
-  if ((resolvedDataType == plVisualScriptDataType::TypedPointer || resolvedDataType == plVisualScriptDataType::EnumValue) && m_pDataType != nullptr)
+  if ((resolvedDataType == plVisualScriptDataType::TypedPointer || resolvedDataType == plVisualScriptDataType::EnumValue) && GetDataType() != nullptr)
   {
-    return m_pDataType->GetTypeName();
+    return GetDataType()->GetTypeName();
   }
 
   return plVisualScriptDataType::GetName(resolvedDataType);
@@ -67,7 +64,7 @@ bool plVisualScriptPin::CanConvertTo(const plVisualScriptPin& targetPin, bool bU
   plVisualScriptDataType::Enum sourceScriptDataType = bUseResolvedDataTypes ? GetResolvedScriptDataType() : GetScriptDataType();
   plVisualScriptDataType::Enum targetScriptDataType = bUseResolvedDataTypes ? targetPin.GetResolvedScriptDataType() : targetPin.GetScriptDataType();
 
-  const plRTTI* pSourceDataType = m_pDataType;
+  const plRTTI* pSourceDataType = GetDataType();
   const plRTTI* pTargetDataType = targetPin.GetDataType();
 
   if (plVisualScriptDataType::IsPointer(sourceScriptDataType) &&
@@ -160,11 +157,11 @@ plResult plVisualScriptNodeManager::GetVariableDefaultValue(plTempHashedString s
         continue;
 
       out_value = pVariableObject->GetTypeAccessor().GetValue("DefaultValue");
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plVisualScriptNodeManager::GetInputExecutionPins(const plDocumentObject* pObject, plDynamicArray<const plVisualScriptPin*>& out_pins) const
@@ -340,7 +337,7 @@ bool plVisualScriptNodeManager::InternalIsDynamicPinProperty(const plDocumentObj
 
   if (pNodeDesc != nullptr && pNodeDesc->m_bHasDynamicPins)
   {
-    plTempHashedString sPropNameHashed = plStringView(pProp->GetPropertyName());
+    plTempHashedString sPropNameHashed = plTempHashedString(pProp->GetPropertyName());
     for (auto& pinDesc : pNodeDesc->m_InputPins)
     {
       if (pinDesc.m_sDynamicPinProperty == sPropNameHashed)
@@ -388,18 +385,18 @@ plStatus plVisualScriptNodeManager::InternalCanConnect(const plPin& source, cons
   if (pinTarget.IsDataPin() && HasConnections(pinTarget))
   {
     out_result = CanConnectResult::ConnectNto1;
-    return plStatus(PLASMA_FAILURE);
+    return plStatus(PL_FAILURE);
   }
 
   // only one outgoing connection is allowed on EXECUTION pins, data pins may have multiple outgoing connections
   if (pinSource.IsExecutionPin() && HasConnections(pinSource))
   {
     out_result = CanConnectResult::Connect1toN;
-    return plStatus(PLASMA_FAILURE);
+    return plStatus(PL_FAILURE);
   }
 
   out_result = CanConnectResult::ConnectNtoN;
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plVisualScriptNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& ref_node)
@@ -410,7 +407,8 @@ void plVisualScriptNodeManager::InternalCreatePins(const plDocumentObject* pObje
     return;
 
   plHybridArray<plString, 16> dynamicPinNames;
-  auto CreatePins = [&](const plVisualScriptNodeRegistry::PinDesc& pinDesc, plPin::Type type, plDynamicArray<plUniquePtr<plPin>>& out_pins, plUInt32& inout_dataPinIndex) {
+  auto CreatePins = [&](const plVisualScriptNodeRegistry::PinDesc& pinDesc, plPin::Type type, plDynamicArray<plUniquePtr<plPin>>& out_pins, plUInt32& inout_dataPinIndex)
+  {
     if (pinDesc.m_sDynamicPinProperty.IsEmpty() == false)
     {
       GetDynamicPinNames(pObject, pinDesc.m_sDynamicPinProperty, pinDesc.m_sName, dynamicPinNames);
@@ -430,7 +428,7 @@ void plVisualScriptNodeManager::InternalCreatePins(const plDocumentObject* pObje
         ++inout_dataPinIndex;
       }
 
-      auto pPin = PLASMA_DEFAULT_NEW(plVisualScriptPin, type, dynamicPinNames[i], pinDesc, pObject, uiDataPinIndex);
+      auto pPin = PL_DEFAULT_NEW(plVisualScriptPin, type, dynamicPinNames[i], pinDesc, pObject, uiDataPinIndex, i);
       out_pins.PushBack(pPin);
     }
   };
@@ -448,18 +446,84 @@ void plVisualScriptNodeManager::InternalCreatePins(const plDocumentObject* pObje
   }
 }
 
-void plVisualScriptNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
+void plVisualScriptNodeManager::GetNodeCreationTemplates(plDynamicArray<plNodeCreationTemplate>& out_templates) const
 {
+  auto pRegistry = plVisualScriptNodeRegistry::GetSingleton();
+  auto propertyValues = pRegistry->GetPropertyValues();
   plHashedString sBaseClass = GetScriptBaseClass();
 
-  for (auto it : plVisualScriptNodeRegistry::GetSingleton()->GetAllNodeTypes())
+  for (auto& nodeTemplate : pRegistry->GetNodeCreationTemplates())
   {
-    if (IsFilteredByBaseClass(it.Key(), it.Value(), sBaseClass))
+    const plRTTI* pNodeType = nodeTemplate.m_pType;
+
+    if (IsFilteredByBaseClass(pNodeType, *pRegistry->GetNodeDescForType(pNodeType), sBaseClass))
       continue;
 
-    if (!it.Key()->GetTypeFlags().IsSet(plTypeFlags::Abstract))
+    if (!pNodeType->GetTypeFlags().IsSet(plTypeFlags::Abstract))
     {
-      Types.PushBack(it.Key());
+      auto& temp = out_templates.ExpandAndGetRef();
+      temp.m_pType = pNodeType;
+      temp.m_sTypeName = nodeTemplate.m_sTypeName;
+      temp.m_sCategory = nodeTemplate.m_sCategory;
+      temp.m_PropertyValues = propertyValues.GetSubArray(nodeTemplate.m_uiPropertyValuesStart, nodeTemplate.m_uiPropertyValuesCount);
+    }
+  }
+
+  // Getter and setter templates for variables
+  if (GetRootObject()->GetChildren().IsEmpty() == false)
+  {
+    static plHashedString sVariables = plMakeHashedString("Variables");
+    static plHashedString sName = plMakeHashedString("Name");
+
+    m_PropertyValues.Clear();
+    m_VariableNodeTypeNames.Clear();
+
+    plStringBuilder sNodeTypeName;
+
+    auto& typeAccessor = GetRootObject()->GetChildren()[0]->GetTypeAccessor();
+    const plUInt32 uiNumVariables = typeAccessor.GetCount(sVariables.GetView());
+    for (plUInt32 i = 0; i < uiNumVariables; ++i)
+    {
+      plVariant variableUuid = typeAccessor.GetValue(sVariables.GetView(), i);
+      if (variableUuid.IsA<plUuid>() == false)
+        continue;
+
+      auto pVariableObject = GetObject(variableUuid.Get<plUuid>());
+      if (pVariableObject == nullptr)
+        continue;
+
+      plVariant nameVar = pVariableObject->GetTypeAccessor().GetValue(sName.GetView());
+      if (nameVar.IsA<plHashedString>() == false)
+        continue;
+
+      plHashedString sVariableName = nameVar.Get<plHashedString>();
+
+      plUInt32 uiStart = m_PropertyValues.GetCount();
+      m_PropertyValues.PushBack({sName, nameVar});
+
+      // Setter
+      {
+        sNodeTypeName.Set("Set", sVariableName);
+        m_VariableNodeTypeNames.PushBack(sNodeTypeName);
+
+        auto& temp = out_templates.ExpandAndGetRef();
+        temp.m_pType = pRegistry->GetVariableSetterType();
+        temp.m_sTypeName = m_VariableNodeTypeNames.PeekBack();
+        temp.m_sCategory = sVariables;
+        temp.m_PropertyValues = m_PropertyValues.GetArrayPtr().GetSubArray(uiStart, 1);
+      }
+
+      // Getter
+      {
+        sNodeTypeName.Set("Get", sVariableName);
+        m_VariableNodeTypeNames.PushBack(sNodeTypeName);
+
+        auto& temp = out_templates.ExpandAndGetRef();
+        temp.m_pType = pRegistry->GetVariableGetterType();
+        temp.m_sTypeName = m_VariableNodeTypeNames.PeekBack();
+        temp.m_sCategory = sVariables;
+        temp.m_PropertyValues = m_PropertyValues.GetArrayPtr().GetSubArray(uiStart, 1);
+      }
     }
   }
 }

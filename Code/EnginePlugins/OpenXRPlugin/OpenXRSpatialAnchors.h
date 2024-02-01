@@ -9,9 +9,9 @@
 class plOpenXR;
 
 
-class PLASMA_OPENXRPLUGIN_DLL plOpenXRSpatialAnchors : public plXRSpatialAnchorsInterface
+class PL_OPENXRPLUGIN_DLL plOpenXRSpatialAnchors : public plXRSpatialAnchorsInterface
 {
-  PLASMA_DECLARE_SINGLETON_OF_INTERFACE(plOpenXRSpatialAnchors, plXRSpatialAnchorsInterface);
+  PL_DECLARE_SINGLETON_OF_INTERFACE(plOpenXRSpatialAnchors, plXRSpatialAnchorsInterface);
 
 public:
   plOpenXRSpatialAnchors(plOpenXR* pOpenXR);
@@ -25,7 +25,7 @@ private:
   friend class plOpenXR;
   struct AnchorData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     XrSpatialAnchorMSFT m_Anchor;
     XrSpace m_Space;
   };

@@ -23,7 +23,7 @@ plResult plPreprocessor::StoreDefine(const plToken* pMacroNameToken, const Token
   if ((pMacroNameToken->m_DataView.IsEqual("defined")) || (pMacroNameToken->m_DataView.IsEqual("__FILE__")) || (pMacroNameToken->m_DataView.IsEqual("__LINE__")))
   {
     PP_LOG(Error, "Macro name '{0}' is reserved", pMacroNameToken, pMacroNameToken->m_DataView);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   MacroDefinition md;
@@ -39,7 +39,7 @@ plResult plPreprocessor::StoreDefine(const plToken* pMacroNameToken, const Token
   if (!md.m_Replacement.IsEmpty() && md.m_Replacement.PeekBack()->m_DataView == "#")
   {
     PP_LOG(Error, "Macro '{0}' ends with invalid character '#'", md.m_Replacement.PeekBack(), pMacroNameToken->m_DataView);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   /* make sure all replacements are not empty
@@ -64,11 +64,11 @@ plResult plPreprocessor::StoreDefine(const plToken* pMacroNameToken, const Token
   if (bExisted)
   {
     PP_LOG(Warning, "Redefinition of macro '{0}'", pMacroNameToken, pMacroNameToken->m_DataView);
-    // return PLASMA_FAILURE;
+    // return PL_FAILURE;
   }
 
   it.Value() = md;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleDefine(const TokenStream& Tokens, plUInt32& uiCurToken)
@@ -78,7 +78,7 @@ plResult plPreprocessor::HandleDefine(const TokenStream& Tokens, plUInt32& uiCur
   plUInt32 uiNameToken = uiCurToken;
 
   if (Expect(Tokens, uiCurToken, plTokenType::Identifier, &uiNameToken).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // check if we got an empty macro definition
   if (IsEndOfLine(Tokens, uiCurToken, true))
@@ -101,7 +101,7 @@ plResult plPreprocessor::HandleDefine(const TokenStream& Tokens, plUInt32& uiCur
 
     // skip the opening parenthesis (
     if (Expect(Tokens, uiCurToken, "(").Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     plHybridArray<plString, 16> parameters;
 
@@ -110,22 +110,22 @@ plResult plPreprocessor::HandleDefine(const TokenStream& Tokens, plUInt32& uiCur
       if (uiCurToken >= Tokens.GetCount())
       {
         PP_LOG(Error, "Could not extract macro parameter {0}, reached end of token stream first", Tokens[Tokens.GetCount() - 1], parameters.GetCount());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       const plUInt32 uiCurParamToken = uiCurToken;
 
       plString sParam;
-      if (ExtractParameterName(Tokens, uiCurToken, sParam) == PLASMA_FAILURE)
+      if (ExtractParameterName(Tokens, uiCurToken, sParam) == PL_FAILURE)
       {
         PP_LOG(Error, "Could not extract macro parameter {0}", Tokens[uiCurParamToken], parameters.GetCount());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       if (bVarArgsFounds)
       {
         PP_LOG0(Error, "No additional parameters are allowed after '...'", Tokens[uiCurParamToken]);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       /// \todo Make sure the same parameter name is not used twice
@@ -142,10 +142,10 @@ plResult plPreprocessor::HandleDefine(const TokenStream& Tokens, plUInt32& uiCur
     TokenStream ReplacementTokens;
     CopyTokensReplaceParams(Tokens, uiCurToken, ReplacementTokens, parameters);
 
-    PLASMA_SUCCEED_OR_RETURN(StoreDefine(Tokens[uiNameToken], &ReplacementTokens, 0, parameters.GetCount(), bVarArgsFounds));
+    PL_SUCCEED_OR_RETURN(StoreDefine(Tokens[uiNameToken], &ReplacementTokens, 0, parameters.GetCount(), bVarArgsFounds));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::AddCustomDefine(plStringView sDefinition)
@@ -159,7 +159,7 @@ plResult plPreprocessor::AddCustomDefine(plStringView sDefinition)
   plHybridArray<const plToken*, 32> Tokens;
 
   if (m_CustomDefines.PeekBack().m_Tokenized.GetNextLine(uiFirstToken, Tokens).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plDeque<plToken>& NewTokens = m_CustomDefines.PeekBack().m_Tokenized.GetTokens();
 
@@ -181,5 +181,3 @@ plResult plPreprocessor::AddCustomDefine(plStringView sDefinition)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Defines);

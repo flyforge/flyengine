@@ -11,9 +11,9 @@
 
 struct plOSFileData;
 
-#if PLASMA_ENABLED(PLASMA_USE_POSIX_FILE_API)
+#if PL_ENABLED(PL_USE_POSIX_FILE_API)
 #  include <Foundation/IO/Implementation/Posix/OSFileDeclarations_posix.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/IO/Implementation/Win/OSFileDeclarations_win.h>
 #endif
 
@@ -30,7 +30,7 @@ struct plFileOpenMode
 };
 
 /// \brief Holds the stats for a file.
-struct PLASMA_FOUNDATION_DLL plFileStats
+struct PL_FOUNDATION_DLL plFileStats
 {
   plFileStats();
   ~plFileStats();
@@ -56,7 +56,7 @@ struct PLASMA_FOUNDATION_DLL plFileStats
   bool m_bIsDirectory = false;
 };
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS) || defined(PL_DOCS)
 
 struct plFileIterationData;
 
@@ -66,9 +66,9 @@ struct plFileSystemIteratorFlags
 
   enum Enum : plUInt8
   {
-    Recursive = PLASMA_BIT(0),
-    ReportFiles = PLASMA_BIT(1),
-    ReportFolders = PLASMA_BIT(2),
+    Recursive = PL_BIT(0),
+    ReportFiles = PL_BIT(1),
+    ReportFolders = PL_BIT(2),
 
     ReportFilesRecursive = Recursive | ReportFiles,
     ReportFoldersRecursive = Recursive | ReportFolders,
@@ -85,14 +85,14 @@ struct plFileSystemIteratorFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plFileSystemIteratorFlags);
+PL_DECLARE_FLAGS_OPERATORS(plFileSystemIteratorFlags);
 
 /// \brief An plFileSystemIterator allows to iterate over all files in a certain directory.
 ///
 /// The search can be recursive, and it can contain wildcards (* and ?) to limit the search to specific file types.
-class PLASMA_FOUNDATION_DLL plFileSystemIterator
+class PL_FOUNDATION_DLL plFileSystemIterator
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFileSystemIterator);
+  PL_DISALLOW_COPY_AND_ASSIGN(plFileSystemIterator);
 
 public:
   plFileSystemIterator();
@@ -106,9 +106,9 @@ public:
   /// If bRecursive is false, the iterator will only iterate over the files in the start folder, and will not recurse into subdirectories.
   /// If bReportFolders is false, only files will be reported, folders will be skipped (though they will be recursed into, if bRecursive is true).
   ///
-  /// If PLASMA_SUCCESS is returned, the iterator points to a valid file, and the functions GetCurrentPath() and GetStats() will return
+  /// If PL_SUCCESS is returned, the iterator points to a valid file, and the functions GetCurrentPath() and GetStats() will return
   /// the information about that file. To advance to the next file, use Next() or SkipFolder().
-  /// When no iteration is possible (the directory does not exist or the wild-cards are used incorrectly), PLASMA_FAILURE is returned.
+  /// When no iteration is possible (the directory does not exist or the wild-cards are used incorrectly), PL_FAILURE is returned.
   void StartSearch(plStringView sSearchTerm, plBitflags<plFileSystemIteratorFlags> flags = plFileSystemIteratorFlags::Default); // [tested]
 
   /// \brief The same as StartSearch() but executes the same search on multiple folders.
@@ -166,15 +166,15 @@ private:
 /// All paths must be absolute paths, relative paths and current working directories are not supported,
 /// since that cannot be guaranteed to work equally on all platforms under all circumstances.
 /// A few static functions allow to query the most important data about files, to delete files and create directories.
-class PLASMA_FOUNDATION_DLL plOSFile
+class PL_FOUNDATION_DLL plOSFile
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plOSFile);
+  PL_DISALLOW_COPY_AND_ASSIGN(plOSFile);
 
 public:
   plOSFile();
   ~plOSFile();
 
-  /// \brief Opens a file for reading or writing. Returns PLASMA_SUCCESS if the file could be opened successfully.
+  /// \brief Opens a file for reading or writing. Returns PL_SUCCESS if the file could be opened successfully.
   plResult Open(plStringView sFile, plFileOpenMode::Enum openMode, plFileShareMode::Enum fileShareMode = plFileShareMode::Default); // [tested]
 
   /// \brief Returns true if a file is currently open.
@@ -228,7 +228,13 @@ public:
   /// \brief Checks whether the given file exists.
   static bool ExistsDirectory(plStringView sDirectory); // [tested]
 
-  /// \brief Deletes the given file. Returns PLASMA_SUCCESS, if the file was deleted or did not exist in the first place. Returns PLASMA_FAILURE
+  /// \brief If the given file already exists, determines a file path that doesn't exist yet.
+  ///
+  /// If the original file already exists, sSuffix is appended and then a number starting at 1.
+  /// Loops until it finds a filename that is not yet taken.
+  static void FindFreeFilename(plStringBuilder& inout_sPath, plStringView sSuffix = "-");
+
+  /// \brief Deletes the given file. Returns PL_SUCCESS, if the file was deleted or did not exist in the first place. Returns PL_FAILURE
   static plResult DeleteFile(plStringView sFile); // [tested]
 
   /// \brief Creates the given directory structure (meaning all directories in the path, that do not exist). Returns false, if any directory could not
@@ -236,24 +242,24 @@ public:
   static plResult CreateDirectoryStructure(plStringView sDirectory); // [tested]
 
   /// \brief Renames / Moves an existing directory. The file / directory at szFrom must exist. The parent directory of szTo must exist.
-  /// Returns PLASMA_FAILURE if the move failed.
+  /// Returns PL_FAILURE if the move failed.
   static plResult MoveFileOrDirectory(plStringView sFrom, plStringView sTo);
 
   /// \brief Copies the source file into the destination file.
   static plResult CopyFile(plStringView sSource, plStringView sDestination); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS) || defined(PL_DOCS)
   /// \brief Gets the stats about the given file or folder. Returns false, if the stats could not be determined.
   static plResult GetFileStats(plStringView sFileOrFolder, plFileStats& out_stats); // [tested]
 
-#  if (PLASMA_ENABLED(PLASMA_SUPPORTS_CASE_INSENSITIVE_PATHS) && PLASMA_ENABLED(PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS)) || defined(PLASMA_DOCS)
+#  if (PL_ENABLED(PL_SUPPORTS_CASE_INSENSITIVE_PATHS) && PL_ENABLED(PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS)) || defined(PL_DOCS)
   /// \brief Useful on systems that are not strict about the casing of file names. Determines the correct name of a file.
   static plResult GetFileCasing(plStringView sFileOrFolder, plStringBuilder& out_sCorrectSpelling); // [tested]
 #  endif
 
 #endif
 
-#if (PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) && PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)) || defined(PLASMA_DOCS)
+#if (PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS) && PL_ENABLED(PL_SUPPORTS_FILE_STATS)) || defined(PL_DOCS)
 
   /// \brief Returns the plFileStats for all files and folders in the given folder
   static void GatherAllItemsInFolder(plDynamicArray<plFileStats>& out_itemList, plStringView sFolder, plBitflags<plFileSystemIteratorFlags> flags = plFileSystemIteratorFlags::Default);
@@ -296,7 +302,7 @@ public:
   /// On Windows this is the 'Documents' directory.
   /// On Posix systems this is the '~' (home) directory.
   ///
-  /// If sSubFolder is specified, it will be appended to the result.
+  /// If szSubFolder is specified, it will be appended to the result.
   static plString GetUserDocumentsFolder(plStringView sSubFolder = {});
 
 
@@ -378,7 +384,7 @@ private:
   static plResult InternalCreateDirectory(plStringView sFile);
   static plResult InternalMoveFileOrDirectory(plStringView sDirectoryFrom, plStringView sDirectoryTo);
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   static plResult InternalGetFileStats(plStringView sFileOrFolder, plFileStats& out_Stats);
 #endif
 

@@ -20,7 +20,7 @@ static plStringView ToString(plTexConvChannelValue::Enum e)
       return "White";
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return "";
@@ -29,17 +29,17 @@ static plStringView ToString(plTexConvChannelValue::Enum e)
 plResult plTexConv::ParseChannelMappings()
 {
   if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   auto& mappings = m_Processor.m_Descriptor.m_ChannelMappings;
 
-  PLASMA_SUCCEED_OR_RETURN(ParseChannelSliceMapping(-1));
+  PL_SUCCEED_OR_RETURN(ParseChannelSliceMapping(-1));
 
   for (plUInt32 slice = 0; slice < 64; ++slice)
   {
     const plUInt32 uiPrevMappings = mappings.GetCount();
 
-    PLASMA_SUCCEED_OR_RETURN(ParseChannelSliceMapping(slice));
+    PL_SUCCEED_OR_RETURN(ParseChannelSliceMapping(slice));
 
     if (uiPrevMappings == mappings.GetCount())
     {
@@ -60,7 +60,7 @@ plResult plTexConv::ParseChannelMappings()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
@@ -81,10 +81,10 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[3], tmp, 3, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[3], tmp, 3, false));
     }
 
     param = "-rgb";
@@ -95,9 +95,9 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, false));
     }
 
     param = "-rg";
@@ -108,8 +108,8 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, false));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, false));
     }
 
     param = "-r";
@@ -120,7 +120,7 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, true));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[0], tmp, 0, true));
     }
 
     param = "-g";
@@ -131,7 +131,7 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, true));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[1], tmp, 1, true));
     }
 
     param = "-b";
@@ -142,7 +142,7 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, true));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[2], tmp, 2, true));
     }
 
     param = "-a";
@@ -153,10 +153,10 @@ plResult plTexConv::ParseChannelSliceMapping(plInt32 iSlice)
     if (!tmp.IsEmpty())
     {
       mappings.EnsureCount(uiMappingIdx + 1);
-      PLASMA_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[3], tmp, 3, true));
+      PL_SUCCEED_OR_RETURN(ParseChannelMappingConfig(mappings[uiMappingIdx].m_Channel[3], tmp, 3, true));
     }
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mapping, plStringView sCfg, plInt32 iChannelIndex, bool bSingleChannel)
@@ -170,14 +170,14 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
   if (tmp.IsEqual_NoCase("black"))
   {
     out_mapping.m_ChannelValue = plTexConvChannelValue::Black;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // '-r white' for setting it to 255
   if (tmp.IsEqual_NoCase("white"))
   {
     out_mapping.m_ChannelValue = plTexConvChannelValue::White;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // skip the 'in', if found
@@ -199,7 +199,7 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
     if (plConversionUtils::StringToInt(tmp, num, &szLastPos).Failed())
     {
       plLog::Error("Could not parse channel mapping '{0}'", sCfg);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // valid index after the 'in'
@@ -210,7 +210,7 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
     else
     {
       plLog::Error("Invalid channel mapping input file index '{0}'", num);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plStringBuilder dummy = szLastPos;
@@ -223,13 +223,13 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
   if (tmp.IsEmpty())
   {
     out_mapping.m_ChannelValue = (plTexConvChannelValue::Enum)((plInt32)plTexConvChannelValue::Red + iChannelIndex);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (!tmp.StartsWith("."))
   {
     plLog::Error("Invalid channel mapping: Expected '.' after input file index in '{0}'", sCfg);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   tmp.Shrink(1, 0);
@@ -246,7 +246,7 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
   if (tmp.IsEmpty())
   {
     plLog::Error("Invalid channel mapping: Too few channel identifiers '{0}'", sCfg);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   {
@@ -271,11 +271,11 @@ plResult plTexConv::ParseChannelMappingConfig(plTexConvChannelMapping& out_mappi
     else
     {
       plLog::Error("Invalid channel mapping: Unexpected channel identifier in '{}'", sCfg);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     tmp.Shrink(1, 0);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

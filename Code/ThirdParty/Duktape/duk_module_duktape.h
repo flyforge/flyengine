@@ -13,7 +13,7 @@ extern "C" {
  */
 #define  DUK_COMMONJS_MODULE_ID_LIMIT  256
 
-// PLASMA MODIFICATION: enable DLL export (added DUK_EXTERNAL_DECL)
+// PL MODIFICATION: enable DLL export (added DUK_EXTERNAL_DECL)
 DUK_EXTERNAL_DECL void duk_module_duktape_init(duk_context *ctx);
 
 #if defined(__cplusplus)

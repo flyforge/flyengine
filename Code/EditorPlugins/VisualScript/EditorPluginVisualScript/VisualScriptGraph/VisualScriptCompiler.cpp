@@ -3,6 +3,9 @@
 #include <Core/World/World.h>
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptCompiler.h>
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptTypeDeduction.h>
+#include <Foundation/CodeUtils/Expression/ExpressionByteCode.h>
+#include <Foundation/CodeUtils/Expression/ExpressionCompiler.h>
+#include <Foundation/CodeUtils/Expression/ExpressionParser.h>
 #include <Foundation/IO/ChunkStream.h>
 #include <Foundation/IO/StringDeduplicationContext.h>
 #include <Foundation/SimdMath/SimdRandom.h>
@@ -10,28 +13,12 @@
 
 namespace
 {
-  plResult ExtractPropertyName(plStringView sPinName, plStringView& out_sPropertyName, plUInt32* out_pArrayIndex = nullptr)
-  {
-    const char* szBracket = sPinName.FindSubString("[");
-    if (szBracket == nullptr)
-      return PLASMA_FAILURE;
-
-    out_sPropertyName = plStringView(sPinName.GetStartPointer(), szBracket);
-
-    if (out_pArrayIndex != nullptr)
-    {
-      return plConversionUtils::StringToUInt(szBracket + 1, *out_pArrayIndex);
-    }
-
-    return PLASMA_SUCCESS;
-  }
-
   void MakeSubfunctionName(const plDocumentObject* pObject, const plDocumentObject* pEntryObject, plStringBuilder& out_sName)
   {
     plVariant sNameProperty = pObject->GetTypeAccessor().GetValue("Name");
     plUInt32 uiHash = plHashHelper<plUuid>::Hash(pObject->GetGuid());
 
-    out_sName.Format("{}_{}_{}", pEntryObject != nullptr ? plVisualScriptNodeManager::GetNiceFunctionName(pEntryObject) : "", sNameProperty, plArgU(uiHash, 8, true, 16));
+    out_sName.SetFormat("{}_{}_{}", pEntryObject != nullptr ? plVisualScriptNodeManager::GetNiceFunctionName(pEntryObject) : "", sNameProperty, plArgU(uiHash, 8, true, 16));
   }
 
   plVisualScriptDataType::Enum FinalizeDataType(plVisualScriptDataType::Enum dataType)
@@ -48,7 +35,7 @@ namespace
   static plResult FillUserData_CoroutineMode(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
   {
     inout_astNode.m_Value = pObject->GetTypeAccessor().GetValue("CoroutineMode");
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_ReflectedPropertyOrFunction(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
@@ -67,7 +54,7 @@ namespace
 
     inout_astNode.m_Value = propertyNames;
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_DynamicReflectedProperty(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
@@ -75,7 +62,7 @@ namespace
     auto pTargetType = plVisualScriptTypeDeduction::GetReflectedType(pObject);
     auto pTargetProperty = plVisualScriptTypeDeduction::GetReflectedProperty(pObject);
     if (pTargetType == nullptr || pTargetProperty == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     inout_astNode.m_sTargetTypeName.Assign(pTargetType->GetTypeName());
 
@@ -88,14 +75,14 @@ namespace
 
     inout_astNode.m_Value = propertyNames;
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_ConstantValue(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
   {
     inout_astNode.m_Value = pObject->GetTypeAccessor().GetValue("Value");
     inout_astNode.m_DeductedDataType = plVisualScriptDataType::FromVariantType(inout_astNode.m_Value.GetType());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_VariableName(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
@@ -105,13 +92,13 @@ namespace
     plStringView sName = inout_astNode.m_Value.Get<plString>().GetView();
 
     plVariant defaultValue;
-    if (static_cast<const plVisualScriptNodeManager*>(pObject->GetDocumentObjectManager())->GetVariableDefaultValue(sName, defaultValue).Failed())
+    if (static_cast<const plVisualScriptNodeManager*>(pObject->GetDocumentObjectManager())->GetVariableDefaultValue(plTempHashedString(sName), defaultValue).Failed())
     {
       plLog::Error("Invalid variable named '{}'", sName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_Switch(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
@@ -150,13 +137,53 @@ namespace
     }
 
     inout_astNode.m_Value = casesVarArray;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_Builtin_Compare(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
   {
     inout_astNode.m_Value = pObject->GetTypeAccessor().GetValue("Operator");
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
+  }
+
+  static plResult FillUserData_Builtin_Expression(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
+  {
+    auto pManager = static_cast<const plVisualScriptNodeManager*>(pObject->GetDocumentObjectManager());
+
+    plHybridArray<const plVisualScriptPin*, 16> pins;
+
+    plHybridArray<plExpression::StreamDesc, 8> inputs;
+    pManager->GetInputDataPins(pObject, pins);
+    for (auto pPin : pins)
+    {
+      auto& input = inputs.ExpandAndGetRef();
+      input.m_sName.Assign(pPin->GetName());
+      input.m_DataType = plVisualScriptDataType::GetStreamDataType(pPin->GetResolvedScriptDataType());
+    }
+
+    plHybridArray<plExpression::StreamDesc, 8> outputs;
+    pManager->GetOutputDataPins(pObject, pins);
+    for (auto pPin : pins)
+    {
+      auto& output = outputs.ExpandAndGetRef();
+      output.m_sName.Assign(pPin->GetName());
+      output.m_DataType = plVisualScriptDataType::GetStreamDataType(pPin->GetResolvedScriptDataType());
+    }
+
+    plString sExpressionSource = pObject->GetTypeAccessor().GetValue("Expression").Get<plString>();
+
+    plExpressionParser parser;
+    plExpressionParser::Options options = {};
+    plExpressionAST ast;
+    PL_SUCCEED_OR_RETURN(parser.Parse(sExpressionSource, inputs, outputs, options, ast));
+
+    plExpressionCompiler compiler;
+    plExpressionByteCode byteCode;
+    PL_SUCCEED_OR_RETURN(compiler.Compile(ast, byteCode));
+
+    inout_astNode.m_Value = byteCode;
+
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_Builtin_TryGetComponentOfBaseType(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
@@ -166,16 +193,16 @@ namespace
     if (pType == nullptr)
     {
       plLog::Error("Invalid type '{}' for GameObject::TryGetComponentOfBaseType node.", typeName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     inout_astNode.m_sTargetTypeName.Assign(pType->GetTypeName());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult FillUserData_Builtin_StartCoroutine(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
   {
-    PLASMA_SUCCEED_OR_RETURN(FillUserData_CoroutineMode(inout_astNode, pCompiler, pObject, pEntryObject));
+    PL_SUCCEED_OR_RETURN(FillUserData_CoroutineMode(inout_astNode, pCompiler, pObject, pEntryObject));
 
     auto pManager = static_cast<const plVisualScriptNodeManager*>(pObject->GetDocumentObjectManager());
     plHybridArray<const plVisualScriptPin*, 16> pins;
@@ -196,7 +223,7 @@ namespace
       return pCompiler->AddFunction(sFunctionName, connections[0]->GetTargetPin().GetParent(), pObject);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static FillUserDataFunction s_TypeToFillUserDataFunctions[] = {
@@ -237,11 +264,11 @@ namespace
     nullptr,                       // Builtin_IsValid,
     nullptr,                       // Builtin_Select,
 
-    nullptr, // Builtin_Add,
-    nullptr, // Builtin_Subtract,
-    nullptr, // Builtin_Multiply,
-    nullptr, // Builtin_Divide,
-    nullptr, // Builtin_Expression,
+    nullptr,                          // Builtin_Add,
+    nullptr,                          // Builtin_Subtract,
+    nullptr,                          // Builtin_Multiply,
+    nullptr,                          // Builtin_Divide,
+    &FillUserData_Builtin_Expression, // Builtin_Expression,
 
     nullptr, // Builtin_ToBool,
     nullptr, // Builtin_ToByte,
@@ -280,23 +307,23 @@ namespace
     nullptr, // LastBuiltin,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_TypeToFillUserDataFunctions) == plVisualScriptNodeDescription::Type::Count);
+  static_assert(PL_ARRAY_SIZE(s_TypeToFillUserDataFunctions) == plVisualScriptNodeDescription::Type::Count);
 
   plResult FillUserData(plVisualScriptCompiler::AstNode& inout_astNode, plVisualScriptCompiler* pCompiler, const plDocumentObject* pObject, const plDocumentObject* pEntryObject)
   {
     if (pObject == nullptr)
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     auto nodeType = inout_astNode.m_Type;
-    PLASMA_ASSERT_DEBUG(nodeType >= 0 && nodeType < PLASMA_ARRAY_SIZE(s_TypeToFillUserDataFunctions), "Out of bounds access");
+    PL_ASSERT_DEBUG(nodeType >= 0 && nodeType < PL_ARRAY_SIZE(s_TypeToFillUserDataFunctions), "Out of bounds access");
     auto func = s_TypeToFillUserDataFunctions[nodeType];
 
     if (func != nullptr)
     {
-      PLASMA_SUCCEED_OR_RETURN(func(inout_astNode, pCompiler, pObject, pEntryObject));
+      PL_SUCCEED_OR_RETURN(func(inout_astNode, pCompiler, pObject, pEntryObject));
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 } // namespace
@@ -312,7 +339,7 @@ plVisualScriptCompiler::CompiledModule::CompiledModule()
 
 plResult plVisualScriptCompiler::CompiledModule::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_ASSERT_DEV(m_sScriptClassName.IsEmpty() == false, "Invalid script class name");
+  PL_ASSERT_DEV(m_sScriptClassName.IsEmpty() == false, "Invalid script class name");
 
   plStringDeduplicationWriteContext stringDedup(inout_stream);
 
@@ -336,7 +363,7 @@ plResult plVisualScriptCompiler::CompiledModule::Serialize(plStreamWriter& inout
       chunk << function.m_Type;
       chunk << function.m_CoroutineCreationMode;
 
-      PLASMA_SUCCEED_OR_RETURN(plVisualScriptGraphDescription::Serialize(function.m_NodeDescriptions, function.m_LocalDataDesc, chunk));
+      PL_SUCCEED_OR_RETURN(plVisualScriptGraphDescription::Serialize(function.m_NodeDescriptions, function.m_LocalDataDesc, chunk));
     }
 
     chunk.EndChunk();
@@ -344,15 +371,15 @@ plResult plVisualScriptCompiler::CompiledModule::Serialize(plStreamWriter& inout
 
   {
     chunk.BeginChunk("ConstantData", 1);
-    PLASMA_SUCCEED_OR_RETURN(m_ConstantDataDesc.Serialize(chunk));
-    PLASMA_SUCCEED_OR_RETURN(m_ConstantDataStorage.Serialize(chunk));
+    PL_SUCCEED_OR_RETURN(m_ConstantDataDesc.Serialize(chunk));
+    PL_SUCCEED_OR_RETURN(m_ConstantDataStorage.Serialize(chunk));
     chunk.EndChunk();
   }
 
   {
     chunk.BeginChunk("InstanceData", 1);
-    PLASMA_SUCCEED_OR_RETURN(m_InstanceDataDesc.Serialize(chunk));
-    PLASMA_SUCCEED_OR_RETURN(chunk.WriteHashTable(m_InstanceDataMapping.m_Content));
+    PL_SUCCEED_OR_RETURN(m_InstanceDataDesc.Serialize(chunk));
+    PL_SUCCEED_OR_RETURN(chunk.WriteHashTable(m_InstanceDataMapping.m_Content));
     chunk.EndChunk();
   }
 
@@ -401,20 +428,20 @@ plResult plVisualScriptCompiler::AddFunction(plStringView sName, const plDocumen
   {
     m_pManager = static_cast<const plVisualScriptNodeManager*>(pEntryObject->GetDocumentObjectManager());
   }
-  PLASMA_ASSERT_DEV(m_pManager == pEntryObject->GetDocumentObjectManager(), "Can't add functions from different document");
+  PL_ASSERT_DEV(m_pManager == pEntryObject->GetDocumentObjectManager(), "Can't add functions from different document");
 
   for (auto& existingFunction : m_Module.m_Functions)
   {
     if (existingFunction.m_sName == sName)
     {
       plLog::Error("A function named '{}' already exists. Function names need to unique.", sName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
   AstNode* pEntryAstNode = BuildAST(pEntryObject);
   if (pEntryAstNode == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   auto& function = m_Module.m_Functions.ExpandAndGetRef();
   function.m_sName = sName;
@@ -434,9 +461,9 @@ plResult plVisualScriptCompiler::AddFunction(plStringView sName, const plDocumen
   }
 
   m_EntryAstNodes.PushBack(pEntryAstNode);
-  PLASMA_ASSERT_DEBUG(m_Module.m_Functions.GetCount() == m_EntryAstNodes.GetCount(), "");
+  PL_ASSERT_DEBUG(m_Module.m_Functions.GetCount() == m_EntryAstNodes.GetCount(), "");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::Compile(plStringView sDebugAstOutputPath)
@@ -448,33 +475,33 @@ plResult plVisualScriptCompiler::Compile(plStringView sDebugAstOutputPath)
 
     DumpAST(pEntryAstNode, sDebugAstOutputPath, function.m_sName, "_00");
 
-    PLASMA_SUCCEED_OR_RETURN(ReplaceUnsupportedNodes(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(ReplaceUnsupportedNodes(pEntryAstNode));
 
     DumpAST(pEntryAstNode, sDebugAstOutputPath, function.m_sName, "_01_Replaced");
 
-    PLASMA_SUCCEED_OR_RETURN(InlineConstants(pEntryAstNode));
-    PLASMA_SUCCEED_OR_RETURN(InsertTypeConversions(pEntryAstNode));
-    PLASMA_SUCCEED_OR_RETURN(InlineVariables(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(InlineConstants(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(InsertTypeConversions(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(InlineVariables(pEntryAstNode));
 
     DumpAST(pEntryAstNode, sDebugAstOutputPath, function.m_sName, "_02_TypeConv");
 
-    PLASMA_SUCCEED_OR_RETURN(BuildDataExecutions(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(BuildDataExecutions(pEntryAstNode));
 
     DumpAST(pEntryAstNode, sDebugAstOutputPath, function.m_sName, "_03_FlattenedExec");
 
-    PLASMA_SUCCEED_OR_RETURN(FillDataOutputConnections(pEntryAstNode));
-    PLASMA_SUCCEED_OR_RETURN(AssignLocalVariables(pEntryAstNode, function.m_LocalDataDesc));
-    PLASMA_SUCCEED_OR_RETURN(BuildNodeDescriptions(pEntryAstNode, function.m_NodeDescriptions));
+    PL_SUCCEED_OR_RETURN(FillDataOutputConnections(pEntryAstNode));
+    PL_SUCCEED_OR_RETURN(AssignLocalVariables(pEntryAstNode, function.m_LocalDataDesc));
+    PL_SUCCEED_OR_RETURN(BuildNodeDescriptions(pEntryAstNode, function.m_NodeDescriptions));
 
     DumpGraph(function.m_NodeDescriptions, sDebugAstOutputPath, function.m_sName, "_Graph");
 
     m_PinIdToDataDesc.Clear();
   }
 
-  PLASMA_SUCCEED_OR_RETURN(FinalizeDataOffsets());
-  PLASMA_SUCCEED_OR_RETURN(FinalizeConstantData());
+  PL_SUCCEED_OR_RETURN(FinalizeDataOffsets());
+  PL_SUCCEED_OR_RETURN(FinalizeConstantData());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plVisualScriptCompiler::GetPinId(const plVisualScriptPin* pPin)
@@ -498,7 +525,7 @@ plVisualScriptCompiler::DataOutput& plVisualScriptCompiler::GetDataOutput(const 
     return dataInput.m_pSourceNode->m_Outputs[dataInput.m_uiSourcePinIndex];
   }
 
-  PLASMA_ASSERT_DEBUG(false, "This code should be never reached");
+  PL_ASSERT_DEBUG(false, "This code should be never reached");
   static DataOutput dummy;
   return dummy;
 }
@@ -582,7 +609,7 @@ plVisualScriptCompiler::DataOffset plVisualScriptCompiler::GetInstanceDataOffset
   plVisualScriptInstanceData instanceData;
   if (m_Module.m_InstanceDataMapping.m_Content.TryGetValue(sName, instanceData) == false)
   {
-    PLASMA_ASSERT_DEBUG(dataType < plVisualScriptDataType::Count, "Invalid data type");
+    PL_ASSERT_DEBUG(dataType < plVisualScriptDataType::Count, "Invalid data type");
     auto& offsetAndCount = m_Module.m_InstanceDataDesc.m_PerTypeInfo[dataType];
     instanceData.m_DataOffset.m_uiByteOffset = offsetAndCount.m_uiCount;
     instanceData.m_DataOffset.m_uiType = dataType;
@@ -607,7 +634,7 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
   auto CreateAstNodeFromObject = [&](const plDocumentObject* pObject) -> AstNode*
   {
     auto pNodeDesc = plVisualScriptNodeRegistry::GetSingleton()->GetNodeDescForType(pObject->GetType());
-    PLASMA_ASSERT_DEV(pNodeDesc != nullptr, "Invalid node type");
+    PL_ASSERT_DEV(pNodeDesc != nullptr, "Invalid node type");
 
     auto& astNode = CreateAstNode(pNodeDesc->m_Type, FinalizeDataType(GetDeductedType(pObject)), pNodeDesc->m_bImplicitExecution);
     if (FillUserData(astNode, this, pObject, pEntryObject).Failed())
@@ -639,7 +666,7 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
     nodeStack.PopBack();
 
     AstNode* pAstNode = nullptr;
-    PLASMA_VERIFY(objectToAstNode.TryGetValue(pObject, pAstNode), "Implementation error");
+    PL_VERIFY(objectToAstNode.TryGetValue(pObject, pAstNode), "Implementation error");
 
     if (plVisualScriptNodeDescription::Type::MakesOuterCoroutine(pAstNode->m_Type))
     {
@@ -657,7 +684,7 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
 
       AstNode* pAstNodeToAddInput = pAstNode;
       bool bArrayInput = false;
-      if (pNodeDesc->m_Type != plVisualScriptNodeDescription::Type::Builtin_MakeArray && pinDesc.m_sDynamicPinProperty.IsEmpty() == false)
+      if (pinDesc.m_bReplaceWithArray && pinDesc.m_sDynamicPinProperty.IsEmpty() == false)
       {
         const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(pinDesc.m_sDynamicPinProperty);
         if (pProp == nullptr)
@@ -679,11 +706,7 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
       {
         auto pPin = pins[uiNextInputPinIndex];
 
-        plStringView sPropertyName = pPin->GetName();
-        plUInt32 uiArrayIndex = 0;
-        ExtractPropertyName(sPropertyName, sPropertyName, &uiArrayIndex).IgnoreResult();
-
-        if (pinDesc.m_sName.GetView() != sPropertyName)
+        if (pPin->GetDynamicPinProperty() != pinDesc.m_sDynamicPinProperty)
           break;
 
         auto connections = m_pManager->GetConnections(*pPin);
@@ -717,14 +740,18 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
           }
           else
           {
-            plStringBuilder sTmp;
-            const char* szPropertyName = sPropertyName.GetData(sTmp);
+            plStringView sPropertyName = pPin->HasDynamicPinProperty() ? pPin->GetDynamicPinProperty() : pPin->GetName();
 
-            plVariant value = pObject->GetTypeAccessor().GetValue(szPropertyName);
+            plVariant value = pObject->GetTypeAccessor().GetValue(sPropertyName);
             if (value.IsValid() && pPin->HasDynamicPinProperty())
             {
-              PLASMA_ASSERT_DEBUG(value.IsA<plVariantArray>(), "Implementation error");
-              value = value.Get<plVariantArray>()[uiArrayIndex];
+              PL_ASSERT_DEBUG(value.IsA<plVariantArray>(), "Implementation error");
+              value = value.Get<plVariantArray>()[pPin->GetElementIndex()];
+            }
+
+            if (value.IsA<plUuid>())
+            {
+              value = 0;
             }
 
             plVisualScriptDataType::Enum valueDataType = plVisualScriptDataType::FromVariantType(value.GetType());
@@ -796,7 +823,7 @@ plVisualScriptCompiler::AstNode* plVisualScriptCompiler::BuildAST(const plDocume
         continue;
       }
 
-      PLASMA_ASSERT_DEV(connections.GetCount() == 1, "Output execution pins should only have one connection");
+      PL_ASSERT_DEV(connections.GetCount() == 1, "Output execution pins should only have one connection");
       const plDocumentObject* pNextNode = connections[0]->GetTargetPin().GetParent();
 
       AstNode* pNextAstNode;
@@ -830,13 +857,13 @@ void plVisualScriptCompiler::MarkAsCoroutine(AstNode* pEntryAstNode)
     case plVisualScriptNodeDescription::Type::MessageHandler_Coroutine:
       // Already a coroutine
       break;
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }
 
 plResult plVisualScriptCompiler::ReplaceUnsupportedNodes(AstNode* pEntryAstNode)
 {
-  PLASMA_SUCCEED_OR_RETURN(TraverseExecutionConnections(pEntryAstNode,
+  PL_SUCCEED_OR_RETURN(TraverseExecutionConnections(pEntryAstNode,
     [&](Connection& connection)
     {
       AstNode* pNode = connection.m_pCurrent;
@@ -902,12 +929,12 @@ plResult plVisualScriptCompiler::ReplaceLoop(Connection& connection)
     pLoopConditionEnd = pLoopNode->m_Inputs[0].m_pSourceNode;
     pLoopConditionEnd->m_bImplicitExecution = false;
 
-    PLASMA_SUCCEED_OR_RETURN(InlineConstants(pLoopConditionEnd));
-    PLASMA_SUCCEED_OR_RETURN(InsertTypeConversions(pLoopConditionEnd));
-    PLASMA_SUCCEED_OR_RETURN(InlineVariables(pLoopConditionEnd));
+    PL_SUCCEED_OR_RETURN(InlineConstants(pLoopConditionEnd));
+    PL_SUCCEED_OR_RETURN(InsertTypeConversions(pLoopConditionEnd));
+    PL_SUCCEED_OR_RETURN(InlineVariables(pLoopConditionEnd));
 
     plHybridArray<AstNode*, 64> nodeStack;
-    PLASMA_SUCCEED_OR_RETURN(BuildDataStack(pLoopConditionEnd, nodeStack));
+    PL_SUCCEED_OR_RETURN(BuildDataStack(pLoopConditionEnd, nodeStack));
 
     if (nodeStack.IsEmpty())
     {
@@ -1052,7 +1079,7 @@ plResult plVisualScriptCompiler::ReplaceLoop(Connection& connection)
   }
   else
   {
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   pLoopNode->m_Inputs.Clear();
@@ -1094,7 +1121,7 @@ plResult plVisualScriptCompiler::ReplaceLoop(Connection& connection)
     pJumpNode = pLoopIncrementStart;
   }
 
-  PLASMA_SUCCEED_OR_RETURN(TraverseAllConnections(pLoopBody,
+  PL_SUCCEED_OR_RETURN(TraverseAllConnections(pLoopBody,
     [&](Connection& connection)
     {
       if (connection.m_pPrev == nullptr)
@@ -1159,7 +1186,7 @@ plResult plVisualScriptCompiler::ReplaceLoop(Connection& connection)
   connection.m_pCurrent = pLoopCompleted;
   connection.m_uiPrevPinIndex = 1;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::InsertTypeConversions(AstNode* pEntryAstNode)
@@ -1301,7 +1328,7 @@ plResult plVisualScriptCompiler::BuildDataStack(AstNode* pEntryAstNode, plDynami
   plHashSet<const AstNode*> visitedNodes;
   out_Stack.Clear();
 
-  PLASMA_SUCCEED_OR_RETURN(TraverseDataConnections(
+  PL_SUCCEED_OR_RETURN(TraverseDataConnections(
     pEntryAstNode,
     [&](const Connection& connection)
     {
@@ -1349,7 +1376,7 @@ plResult plVisualScriptCompiler::BuildDataStack(AstNode* pEntryAstNode, plDynami
         AstNode* pSourceNode = dataInput.m_pSourceNode;
         if (oldToNewNodes.TryGetValue(dataInput.m_pSourceNode, pSourceNode) == false)
         {
-          PLASMA_ASSERT_DEBUG(dataInput.m_pSourceNode == nullptr || dataInput.m_pSourceNode->m_bImplicitExecution == false, "");
+          PL_ASSERT_DEBUG(dataInput.m_pSourceNode == nullptr || dataInput.m_pSourceNode->m_bImplicitExecution == false, "");
         }
 
         AddDataInput(newDataNode, pSourceNode, dataInput.m_uiSourcePinIndex, dataInput.m_DataType);
@@ -1398,14 +1425,14 @@ plResult plVisualScriptCompiler::BuildDataStack(AstNode* pEntryAstNode, plDynami
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::BuildDataExecutions(AstNode* pEntryAstNode)
 {
   plHybridArray<Connection, 64> allExecConnections;
 
-  PLASMA_SUCCEED_OR_RETURN(TraverseExecutionConnections(pEntryAstNode,
+  PL_SUCCEED_OR_RETURN(TraverseExecutionConnections(pEntryAstNode,
     [&](const Connection& connection)
     {
       allExecConnections.PushBack(connection);
@@ -1421,7 +1448,7 @@ plResult plVisualScriptCompiler::BuildDataExecutions(AstNode* pEntryAstNode)
     if (nodeToFirstDataNode.TryGetValue(connection.m_pCurrent, pFirstDataNode) == false)
     {
       if (BuildDataStack(connection.m_pCurrent, nodeStack).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (nodeStack.IsEmpty() == false)
       {
@@ -1439,7 +1466,7 @@ plResult plVisualScriptCompiler::BuildDataExecutions(AstNode* pEntryAstNode)
     nodeToFirstDataNode.Insert(connection.m_pCurrent, pFirstDataNode);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::FillDataOutputConnections(AstNode* pEntryAstNode)
@@ -1452,7 +1479,7 @@ plResult plVisualScriptCompiler::FillDataOutputConnections(AstNode* pEntryAstNod
         auto& dataInput = connection.m_pPrev->m_Inputs[connection.m_uiPrevPinIndex];
         auto& dataOutput = GetDataOutput(dataInput);
 
-        PLASMA_ASSERT_DEBUG(dataInput.m_pSourceNode == connection.m_pCurrent, "");
+        PL_ASSERT_DEBUG(dataInput.m_pSourceNode == connection.m_pCurrent, "");
         if (dataOutput.m_TargetNodes.Contains(connection.m_pPrev) == false)
         {
           dataOutput.m_TargetNodes.PushBack(connection.m_pPrev);
@@ -1494,7 +1521,7 @@ plResult plVisualScriptCompiler::AssignLocalVariables(AstNode* pEntryAstNode, pl
 
           if (dataOffset.IsValid() == false)
           {
-            PLASMA_ASSERT_DEBUG(dataOffset.GetType() < plVisualScriptDataType::Count, "Invalid data type");
+            PL_ASSERT_DEBUG(dataOffset.GetType() < plVisualScriptDataType::Count, "Invalid data type");
             auto& offsetAndCount = inout_localDataDesc.m_PerTypeInfo[dataOffset.m_uiType];
             dataOffset.m_uiByteOffset = offsetAndCount.m_uiCount;
             ++offsetAndCount.m_uiCount;
@@ -1566,11 +1593,11 @@ plResult plVisualScriptCompiler::BuildNodeDescriptions(AstNode* pEntryAstNode, p
     }
 
     astNodeToNodeDescIndices.Insert(&astNode, out_uiNodeDescIndex);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   };
 
   plUInt32 uiNodeDescIndex = 0;
-  PLASMA_SUCCEED_OR_RETURN(CreateNodeDesc(*pEntryAstNode, uiNodeDescIndex));
+  PL_SUCCEED_OR_RETURN(CreateNodeDesc(*pEntryAstNode, uiNodeDescIndex));
 
   return TraverseExecutionConnections(pEntryAstNode,
     [&](const Connection& connection)
@@ -1633,9 +1660,9 @@ plResult plVisualScriptCompiler::TraverseExecutionConnections(AstNode* pEntryAst
     Connection connection = {nullptr, pEntryAstNode, ConnectionType::Execution, plInvalidIndex};
     auto res = func(connection);
     if (res == VisitorResult::Skip || res == VisitorResult::Stop)
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     if (res == VisitorResult::Error)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (connection.m_pCurrent != nullptr)
     {
@@ -1651,7 +1678,7 @@ plResult plVisualScriptCompiler::TraverseExecutionConnections(AstNode* pEntryAst
     for (plUInt32 i = 0; i < pCurrentAstNode->m_Next.GetCount(); ++i)
     {
       auto pNextAstNode = pCurrentAstNode->m_Next[i];
-      PLASMA_ASSERT_DEBUG(pNextAstNode != pCurrentAstNode, "");
+      PL_ASSERT_DEBUG(pNextAstNode != pCurrentAstNode, "");
 
       if (pNextAstNode == nullptr)
         continue;
@@ -1664,9 +1691,9 @@ plResult plVisualScriptCompiler::TraverseExecutionConnections(AstNode* pEntryAst
       if (res == VisitorResult::Skip)
         continue;
       if (res == VisitorResult::Stop)
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       if (res == VisitorResult::Error)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (connection.m_pCurrent != nullptr)
       {
@@ -1675,7 +1702,7 @@ plResult plVisualScriptCompiler::TraverseExecutionConnections(AstNode* pEntryAst
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::TraverseDataConnections(AstNode* pEntryAstNode, AstNodeVisitorFunc func, bool bDeduplicate /*= true*/, bool bClearReportedConnections /*= true*/)
@@ -1709,9 +1736,9 @@ plResult plVisualScriptCompiler::TraverseDataConnections(AstNode* pEntryAstNode,
       if (res == VisitorResult::Skip)
         continue;
       if (res == VisitorResult::Stop)
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       if (res == VisitorResult::Error)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (connection.m_pCurrent != nullptr)
       {
@@ -1720,7 +1747,7 @@ plResult plVisualScriptCompiler::TraverseDataConnections(AstNode* pEntryAstNode,
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::TraverseAllConnections(AstNode* pEntryAstNode, AstNodeVisitorFunc func, bool bDeduplicate /*= true*/)
@@ -1756,7 +1783,7 @@ plResult plVisualScriptCompiler::FinalizeDataOffsets()
         return &m_Module.m_InstanceDataDesc;
       case DataOffset::Source::Constant:
         return &m_Module.m_ConstantDataDesc;
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     return nullptr;
@@ -1775,7 +1802,7 @@ plResult plVisualScriptCompiler::FinalizeDataOffsets()
 
       for (auto& dataOffset : nodeDesc.m_OutputDataOffsets)
       {
-        PLASMA_ASSERT_DEBUG(dataOffset.IsConstant() == false, "Cannot write to constant data");
+        PL_ASSERT_DEBUG(dataOffset.IsConstant() == false, "Cannot write to constant data");
         dataOffset = GetDataDesc(function, dataOffset)->GetOffset(dataOffset.GetType(), dataOffset.m_uiByteOffset, dataOffset.GetSource());
       }
     }
@@ -1787,7 +1814,7 @@ plResult plVisualScriptCompiler::FinalizeDataOffsets()
     dataOffset = m_Module.m_InstanceDataDesc.GetOffset(dataOffset.GetType(), dataOffset.m_uiByteOffset, dataOffset.GetSource());
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptCompiler::FinalizeConstantData()
@@ -1810,7 +1837,7 @@ plResult plVisualScriptCompiler::FinalizeConstantData()
     m_Module.m_ConstantDataStorage.SetDataFromVariant(dataOffset, value, 0);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plVisualScriptCompiler::DumpAST(AstNode* pEntryAstNode, plStringView sOutputPath, plStringView sFunctionName, plStringView sSuffix)
@@ -1847,7 +1874,7 @@ void plVisualScriptCompiler::DumpAST(AstNode* pEntryAstNode, plStringView sOutpu
           {
             sb.AppendFormat("\nValue: {}", pAstNode->m_Value);
           }
-          
+
           float colorX = plSimdRandom::FloatZeroToOne(plSimdVec4i(plHashingUtils::StringHash(szTypeName))).x();
 
           plDGMLGraph::NodeDesc nd;
@@ -1859,7 +1886,7 @@ void plVisualScriptCompiler::DumpAST(AstNode* pEntryAstNode, plStringView sOutpu
         if (connection.m_pPrev != nullptr)
         {
           plUInt32 uiPrevGraphNode = 0;
-          PLASMA_VERIFY(nodeCache.TryGetValue(connection.m_pPrev, uiPrevGraphNode), "");
+          PL_VERIFY(nodeCache.TryGetValue(connection.m_pPrev, uiPrevGraphNode), "");
 
           if (connection.m_Type == ConnectionType::Execution)
           {

@@ -4,9 +4,9 @@
 
 struct plGALRenderTargets;
 
-class PLASMA_RENDERERCORE_DLL plTargetPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plTargetPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTargetPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plTargetPass, plRenderPipelinePass);
 
 public:
   plTargetPass(const char* szName = "TargetPass");

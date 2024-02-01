@@ -1,6 +1,9 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+
+PL_WARNING_PUSH()
+PL_WARNING_DISABLE_CLANG("-Wunused-but-set-variable")
 
 //-------------------------------------------------------------------------------------
 // DirectXTexD3D12.cpp
@@ -264,7 +267,7 @@ namespace
                 }
             }
 
-            copySource = pTemp;
+            copySource = std::move(pTemp);
         }
 
         // Create a staging texture
@@ -831,7 +834,8 @@ HRESULT DirectX::CaptureTexture(
     return S_OK;
 }
 
+PL_WARNING_POP()
+
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexD3D12);
 

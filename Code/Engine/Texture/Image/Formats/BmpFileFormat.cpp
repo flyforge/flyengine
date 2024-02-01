@@ -6,6 +6,7 @@
 #include <Texture/Image/Formats/BmpFileFormat.h>
 #include <Texture/Image/ImageConversion.h>
 
+// PL_STATICLINK_FORCE
 plBmpFileFormat g_bmpFormat;
 
 enum plBmpCompression
@@ -72,11 +73,11 @@ struct plBmpFileInfoHeaderV4
   plUInt32 m_gammaBlue = 0;
 };
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plCIEXYZTRIPLE) == 3 * 3 * 4);
+PL_CHECK_AT_COMPILETIME(sizeof(plCIEXYZTRIPLE) == 3 * 3 * 4);
 
 // just to be on the safe side
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plCIEXYZTRIPLE) == sizeof(CIEXYZTRIPLE));
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+PL_CHECK_AT_COMPILETIME(sizeof(plCIEXYZTRIPLE) == sizeof(CIEXYZTRIPLE));
 #endif
 
 struct plBmpFileInfoHeaderV5
@@ -91,7 +92,7 @@ static const plUInt16 plBmpFileMagic = 0x4D42u;
 
 struct plBmpBgrxQuad
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plBmpBgrxQuad() = default;
 
@@ -126,18 +127,18 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   if (format == plImageFormat::UNKNOWN)
   {
     plLog::Error("No conversion from format '{0}' to a format suitable for BMP files known.", plImageFormat::GetName(image.GetImageFormat()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Convert if not already in a compatible format
   if (format != image.GetImageFormat())
   {
     plImage convertedImage;
-    if (plImageConversion::Convert(image, convertedImage, format) != PLASMA_SUCCESS)
+    if (plImageConversion::Convert(image, convertedImage, format) != PL_SUCCESS)
     {
       // This should never happen
-      PLASMA_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
-      return PLASMA_FAILURE;
+      PL_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
+      return PL_FAILURE;
     }
 
     return WriteImage(inout_stream, convertedImage, sFileExtension);
@@ -150,8 +151,8 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   plUInt64 dataSize = uiRowPitch * uiHeight;
   if (dataSize >= plMath::MaxValue<plUInt32>())
   {
-    PLASMA_ASSERT_DEV(false, "Size overflow in BMP file format.");
-    return PLASMA_FAILURE;
+    PL_ASSERT_DEV(false, "Size overflow in BMP file format.");
+    return PL_FAILURE;
   }
 
   plBmpFileInfoHeader fileInfoHeader;
@@ -191,10 +192,10 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
       break;
 
     default:
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(!bWriteColorMask || uiHeaderVersion <= 3, "Internal bug");
+  PL_ASSERT_DEV(!bWriteColorMask || uiHeaderVersion <= 3, "Internal bug");
 
   plUInt32 uiFileInfoHeaderSize = sizeof(plBmpFileInfoHeader);
   plUInt32 uiHeaderSize = sizeof(plBmpFileHeader);
@@ -220,16 +221,16 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   header.m_offBits = uiHeaderSize;
 
   // Write all data
-  if (inout_stream.WriteBytes(&header, sizeof(header)) != PLASMA_SUCCESS)
+  if (inout_stream.WriteBytes(&header, sizeof(header)) != PL_SUCCESS)
   {
     plLog::Error("Failed to write header.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  if (inout_stream.WriteBytes(&fileInfoHeader, sizeof(fileInfoHeader)) != PLASMA_SUCCESS)
+  if (inout_stream.WriteBytes(&fileInfoHeader, sizeof(fileInfoHeader)) != PL_SUCCESS)
   {
     plLog::Error("Failed to write fileInfoHeader.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (uiHeaderVersion >= 4)
@@ -242,10 +243,10 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     fileInfoHeaderV4.m_blueMask = plImageFormat::GetBlueMask(format);
     fileInfoHeaderV4.m_alphaMask = plImageFormat::GetAlphaMask(format);
 
-    if (inout_stream.WriteBytes(&fileInfoHeaderV4, sizeof(fileInfoHeaderV4)) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(&fileInfoHeaderV4, sizeof(fileInfoHeaderV4)) != PL_SUCCESS)
     {
       plLog::Error("Failed to write fileInfoHeaderV4.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else if (bWriteColorMask)
@@ -262,10 +263,10 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     colorMask.m_green = plImageFormat::GetGreenMask(format);
     colorMask.m_blue = plImageFormat::GetBlueMask(format);
 
-    if (inout_stream.WriteBytes(&colorMask, sizeof(colorMask)) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(&colorMask, sizeof(colorMask)) != PL_SUCCESS)
     {
       plLog::Error("Failed to write colorMask.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -273,21 +274,21 @@ plResult plBmpFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   // Write rows in reverse order
   for (plInt32 iRow = uiHeight - 1; iRow >= 0; iRow--)
   {
-    if (inout_stream.WriteBytes(image.GetPixelPointer<void>(0, 0, 0, 0, iRow, 0), uiRowPitch) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(image.GetPixelPointer<void>(0, 0, 0, 0, iRow, 0), uiRowPitch) != PL_SUCCESS)
     {
       plLog::Error("Failed to write data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plUInt8 zeroes[4] = {0, 0, 0, 0};
-    if (inout_stream.WriteBytes(zeroes, uiPaddedRowPitch - uiRowPitch) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(zeroes, uiPaddedRowPitch - uiRowPitch) != PL_SUCCESS)
     {
       plLog::Error("Failed to write data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 namespace
@@ -307,14 +308,14 @@ namespace
     if (inout_stream.ReadBytes(&ref_fileHeader, sizeof(plBmpFileHeader)) != sizeof(plBmpFileHeader))
     {
       plLog::Error("Failed to read header data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Some very old BMP variants may have different magic numbers, but we don't support them.
     if (ref_fileHeader.m_type != plBmpFileMagic)
     {
       plLog::Error("The file is not a recognized BMP file.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // We expect at least header version 3
@@ -322,7 +323,7 @@ namespace
     if (inout_stream.ReadBytes(&ref_fileInfoHeader, sizeof(plBmpFileInfoHeader)) != sizeof(plBmpFileInfoHeader))
     {
       plLog::Error("Failed to read header data (V3).");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     int remainingHeaderBytes = ref_fileInfoHeader.m_size - sizeof(ref_fileInfoHeader);
@@ -331,7 +332,7 @@ namespace
     if (remainingHeaderBytes < 0)
     {
       plLog::Error("The file header was shorter than expected.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Newer files may have a header version 4 (required for transparency)
@@ -342,7 +343,7 @@ namespace
       if (inout_stream.ReadBytes(&fileInfoHeaderV4, sizeof(plBmpFileInfoHeaderV4)) != sizeof(plBmpFileInfoHeaderV4))
       {
         plLog::Error("Failed to read header data (V4).");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       remainingHeaderBytes -= sizeof(plBmpFileInfoHeaderV4);
     }
@@ -351,7 +352,7 @@ namespace
     if (inout_stream.SkipBytes(remainingHeaderBytes) != remainingHeaderBytes)
     {
       plLog::Error("Failed to skip remaining header data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     ref_uiBpp = ref_fileInfoHeader.m_bitCount;
@@ -406,7 +407,7 @@ namespace
 
               if (inout_stream.ReadBytes(&colorMask, sizeof(colorMask)) != sizeof(colorMask))
               {
-                return PLASMA_FAILURE;
+                return PL_FAILURE;
               }
 
               format = plImageFormat::FromPixelMask(colorMask.m_red, colorMask.m_green, colorMask.m_blue, 0, ref_uiBpp);
@@ -441,13 +442,13 @@ namespace
         break;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
     }
 
     if (format == plImageFormat::UNKNOWN)
     {
       plLog::Error("Unknown or unsupported BMP encoding.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     const plUInt32 uiWidth = ref_fileInfoHeader.m_width;
@@ -455,7 +456,7 @@ namespace
     if (uiWidth > 65536)
     {
       plLog::Error("Image specifies width > 65536. Header corrupted?");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     const plUInt32 uiHeight = ref_fileInfoHeader.m_height;
@@ -463,7 +464,7 @@ namespace
     if (uiHeight > 65536)
     {
       plLog::Error("Image specifies height > 65536. Header corrupted?");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     ref_uiDataSize = ref_fileInfoHeader.m_sizeImage;
@@ -471,7 +472,7 @@ namespace
     if (ref_uiDataSize > 1024 * 1024 * 1024)
     {
       plLog::Error("Image specifies data size > 1GiB. Header corrupted?");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     const int uiRowPitchIn = (uiWidth * ref_uiBpp + 31) / 32 * 4;
@@ -481,7 +482,7 @@ namespace
       if (ref_fileInfoHeader.m_compression != RGB)
       {
         plLog::Error("The data size wasn't specified in the header.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       ref_uiDataSize = uiRowPitchIn * uiHeight;
     }
@@ -496,14 +497,14 @@ namespace
     ref_header.SetHeight(uiHeight);
     ref_header.SetDepth(1);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 } // namespace
 
 plResult plBmpFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plBmpFileFormat::ReadImage");
+  PL_PROFILE_SCOPE("plBmpFileFormat::ReadImage");
 
   plBmpFileHeader fileHeader;
   plBmpFileInfoHeader fileInfoHeader;
@@ -516,7 +517,7 @@ plResult plBmpFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageH
 
 plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_image, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plBmpFileFormat::ReadImage");
+  PL_PROFILE_SCOPE("plBmpFileFormat::ReadImage");
 
   plBmpFileHeader fileHeader;
   plImageHeader header;
@@ -525,7 +526,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
   plUInt32 uiBpp = 0;
   plUInt32 uiDataSize = 0;
 
-  PLASMA_SUCCEED_OR_RETURN(ReadImageInfo(inout_stream, header, fileHeader, fileInfoHeader, bIndexed, bCompressed, uiBpp, uiDataSize));
+  PL_SUCCEED_OR_RETURN(ReadImageInfo(inout_stream, header, fileHeader, fileInfoHeader, bIndexed, bCompressed, uiBpp, uiDataSize));
 
   ref_image.ResetAndAlloc(header);
 
@@ -544,7 +545,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     else if (paletteSize > 65536)
     {
       plLog::Error("Palette size > 65536.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plDynamicArray<plBmpBgrxQuad> palette;
@@ -552,7 +553,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     if (inout_stream.ReadBytes(&palette[0], paletteSize * sizeof(plBmpBgrxQuad)) != paletteSize * sizeof(plBmpBgrxQuad))
     {
       plLog::Error("Failed to read palette data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (bCompressed)
@@ -561,7 +562,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
       if (uiDataSize % 2 != 0)
       {
         plLog::Error("The data size is not a multiple of 2 bytes in an RLE-compressed file.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       plDynamicArray<plUInt8> compressedData;
@@ -570,7 +571,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
       if (inout_stream.ReadBytes(&compressedData[0], uiDataSize) != uiDataSize)
       {
         plLog::Error("Failed to read data.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       const plUInt8* pIn = &compressedData[0];
@@ -648,13 +649,13 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
               if (uiRow != 0 && uiCol != fileInfoHeader.m_height - 1)
               {
                 plLog::Error("Unexpected end of image marker found.");
-                return PLASMA_FAILURE;
+                return PL_FAILURE;
               }
               break;
 
             case 2:
               plLog::Error("Found a RLE compression position delta - this is not supported.");
-              return PLASMA_FAILURE;
+              return PL_FAILURE;
 
             default:
               // Read uiByte2 number of indices
@@ -662,7 +663,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
               // More data than fits into the image or can be read?
               if (uiCol + uiByte2 > fileInfoHeader.m_width || pIn + (uiByte2 + 1) / 2 > pInEnd)
               {
-                return PLASMA_FAILURE;
+                return PL_FAILURE;
               }
 
               if (uiBpp == 4)
@@ -703,7 +704,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
       if (inout_stream.ReadBytes(&indexedData[0], uiDataSize) != uiDataSize)
       {
         plLog::Error("Failed to read data.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // Convert to non-indexed
@@ -719,7 +720,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
           if (uiIndex >= palette.GetCount())
           {
             plLog::Error("Image contains invalid palette indices.");
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
           pOut[uiCol] = palette[uiIndex];
         }
@@ -733,7 +734,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     {
       plLog::Error("The number of bits per pixel specified in the file ({0}) does not match the expected value of {1} for the format '{2}'.",
         uiBpp, plImageFormat::GetBitsPerPixel(header.GetImageFormat()), plImageFormat::GetName(header.GetImageFormat()));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Skip palette data. Having a palette here doesn't make sense, but is not explicitly disallowed by the standard.
@@ -741,7 +742,7 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     if (inout_stream.SkipBytes(paletteSize) != paletteSize)
     {
       plLog::Error("Failed to skip palette data.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Read rows in reverse order
@@ -750,17 +751,17 @@ plResult plBmpFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
       if (inout_stream.ReadBytes(ref_image.GetPixelPointer<void>(0, 0, 0, 0, iRow, 0), uiRowPitch) != uiRowPitch)
       {
         plLog::Error("Failed to read row data.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       if (inout_stream.SkipBytes(uiRowPitchIn - uiRowPitch) != uiRowPitchIn - uiRowPitch)
       {
         plLog::Error("Failed to skip row data.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plBmpFileFormat::CanReadFileType(plStringView sExtension) const
@@ -775,4 +776,6 @@ bool plBmpFileFormat::CanWriteFileType(plStringView sExtension) const
 
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Formats_BmpFileFormat);
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Formats_BmpFileFormat);
+

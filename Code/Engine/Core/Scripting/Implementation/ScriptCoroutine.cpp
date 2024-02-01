@@ -6,31 +6,31 @@
 #include <Foundation/Types/VariantTypeRegistry.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutineHandle, plNoBase, 1, plRTTIDefaultAllocator<plScriptCoroutineHandle>)
-PLASMA_END_STATIC_REFLECTED_TYPE;
-PLASMA_DEFINE_CUSTOM_VARIANT_TYPE(plScriptCoroutineHandle);
+PL_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutineHandle, plNoBase, 1, plRTTIDefaultAllocator<plScriptCoroutineHandle>)
+PL_END_STATIC_REFLECTED_TYPE;
+PL_DEFINE_CUSTOM_VARIANT_TYPE(plScriptCoroutineHandle);
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("Name", GetName),
+    PL_ACCESSOR_PROPERTY_READ_ONLY("Name", GetName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(UpdateAndSchedule),
+    PL_FUNCTION_PROPERTY(UpdateAndSchedule),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptCoroutine::plScriptCoroutine() = default;
 
 plScriptCoroutine::~plScriptCoroutine()
 {
-  PLASMA_ASSERT_DEV(m_pOwnerModule == nullptr, "Deinitialize was not called");
+  PL_ASSERT_DEV(m_pOwnerModule == nullptr, "Deinitialize was not called");
 }
 
 void plScriptCoroutine::UpdateAndSchedule(plTime deltaTimeSinceLastUpdate)
@@ -90,9 +90,9 @@ const plAbstractFunctionProperty* plScriptCoroutine::GetUpdateFunctionProperty()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plScriptCoroutineCreationMode, 1)
-  PLASMA_ENUM_CONSTANTS(plScriptCoroutineCreationMode::StopOther, plScriptCoroutineCreationMode::DontCreateNew, plScriptCoroutineCreationMode::AllowOverlap)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plScriptCoroutineCreationMode, 1)
+  PL_ENUM_CONSTANTS(plScriptCoroutineCreationMode::StopOther, plScriptCoroutineCreationMode::DontCreateNew, plScriptCoroutineCreationMode::AllowOverlap)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ plScriptCoroutineFunctionProperty::~plScriptCoroutineFunctionProperty() = defaul
 
 void plScriptCoroutineFunctionProperty::Execute(void* pInstance, plArrayPtr<plVariant> arguments, plVariant& out_returnValue) const
 {
-  PLASMA_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
+  PL_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
   auto pScriptInstance = static_cast<plScriptInstance*>(pInstance);
 
   plWorld* pWorld = pScriptInstance->GetWorld();
@@ -170,7 +170,7 @@ plScriptCoroutineMessageHandler::~plScriptCoroutineMessageHandler() = default;
 // static
 void plScriptCoroutineMessageHandler::Dispatch(plAbstractMessageHandler* pSelf, void* pInstance, plMessage& ref_msg)
 {
-  PLASMA_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
+  PL_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
   auto pHandler = static_cast<plScriptCoroutineMessageHandler*>(pSelf);
   auto pComponent = static_cast<plScriptComponent*>(pInstance);
   auto pScriptInstance = pComponent->GetScriptInstance();
@@ -196,3 +196,7 @@ void plScriptCoroutineMessageHandler::Dispatch(plAbstractMessageHandler* pSelf, 
     pModule->StartCoroutine(hCoroutine, arguments);
   }
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_Implementation_ScriptCoroutine);
+

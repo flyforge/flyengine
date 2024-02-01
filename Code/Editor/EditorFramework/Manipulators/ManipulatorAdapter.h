@@ -12,7 +12,7 @@ struct plQtDocumentWindowEvent;
 class plObjectAccessorBase;
 class plGridSettingsMsgToEngine;
 
-class PLASMA_EDITORFRAMEWORK_DLL plManipulatorAdapter
+class PL_EDITORFRAMEWORK_DLL plManipulatorAdapter
 {
 public:
   plManipulatorAdapter();
@@ -20,7 +20,7 @@ public:
 
   void SetManipulator(const plManipulatorAttribute* pAttribute, const plDocumentObject* pObject);
 
-  virtual void QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings) {}
+  virtual void QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings) {}
 
 private:
   void DocumentObjectPropertyEventHandler(const plDocumentObjectPropertyEvent& e);

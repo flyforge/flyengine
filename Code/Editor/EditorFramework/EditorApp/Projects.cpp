@@ -41,7 +41,7 @@ plResult plQtEditorApp::OpenProject(const char* szProject, bool bImmediate /*= f
   else
   {
     QMetaObject::invokeMethod(this, "SlotQueuedOpenProject", Qt::ConnectionType::QueuedConnection, Q_ARG(QString, szProject));
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
@@ -64,9 +64,10 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
         plQtUiServices::GetSingleton()->MessageBoxStatus(status, "Opening remote project failed.");
       }
 
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
+
   // check that we don't attempt to open a project from a different repository, due to code changes this often doesn't work too well
   if (!IsInHeadlessMode())
   {
@@ -74,24 +75,24 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
     if (plFileSystem::FindFolderWithSubPath(sdkDirFromProject, sFile, "Data/Base", "plSdkRoot.txt").Succeeded())
     {
       sdkDirFromProject.MakeCleanPath();
-      sdkDirFromProject.TrimWordEnd("/");
+      sdkDirFromProject.Trim(nullptr, "/");
 
       plStringView sdkDir = plFileSystem::GetSdkRootDirectory();
-      sdkDir.TrimWordEnd("/");
+      sdkDir.Trim(nullptr, "/");
 
       if (sdkDirFromProject != sdkDir)
       {
         if (plQtUiServices::MessageBoxQuestion(plFmt("You are attempting to open a project that's located in a different SDK directory.\n\nSDK location: '{}'\nProject path: '{}'\n\nThis may make problems.\n\nContinue anyway?", sdkDir, sFile), QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
   }
 
-  PLASMA_PROFILE_SCOPE("CreateOrOpenProject");
+  PL_PROFILE_SCOPE("CreateOrOpenProject");
   m_bLoadingProjectInProgress = true;
-  PLASMA_SCOPE_EXIT(m_bLoadingProjectInProgress = false;);
+  PL_SCOPE_EXIT(m_bLoadingProjectInProgress = false;);
 
   CloseSplashScreen();
 
@@ -106,11 +107,11 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
   if (plToolsProject::IsProjectOpen() && plToolsProject::GetSingleton()->GetProjectFile() == sProjectFile)
   {
     plQtUiServices::MessageBoxInformation("The selected project is already open");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!plToolsProject::CanCloseProject())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plToolsProject::CloseProject();
 
@@ -128,15 +129,36 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
       LaunchEditor(sProjectFile, true);
 
       QApplication::closeAllWindows();
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else
     {
       // once we start loading any plugins, we can't reuse the same instance again for another project
       m_bAnyProjectOpened = true;
 
-      plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
-      sTemp.AppendPath("PlasmaEditorCrashIndicator");
+      LoadPluginBundleDlls(sProjectFile);
+
+      res = plToolsProject::CreateProject(sProjectFile);
+    }
+  }
+  else
+  {
+    if (m_bAnyProjectOpened)
+    {
+      // if we opened any project before, spawn a new editor instance and open the project there
+      // this way, a different set of editor plugins can be loaded
+      LaunchEditor(sProjectFile, false);
+
+      QApplication::closeAllWindows();
+      return PL_SUCCESS;
+    }
+    else
+    {
+      // once we start loading any plugins, we can't reuse the same instance again for another project
+      m_bAnyProjectOpened = true;
+
+      plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
+      sTemp.AppendPath("plEditorCrashIndicator");
       plOSFile f;
       if (f.Open(sTemp, plFileOpenMode::Write, plFileShareMode::Exclusive).Succeeded())
       {
@@ -163,27 +185,6 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
         LoadPluginBundleDlls(sProjectFile);
       }
 
-      res = plToolsProject::CreateProject(sProjectFile);
-    }
-  }
-  else
-  {
-    if (m_bAnyProjectOpened)
-    {
-      // if we opened any project before, spawn a new editor instance and open the project there
-      // this way, a different set of editor plugins can be loaded
-      LaunchEditor(sProjectFile, false);
-
-      QApplication::closeAllWindows();
-      return PLASMA_SUCCESS;
-    }
-    else
-    {
-      // once we start loading any plugins, we can't reuse the same instance again for another project
-      m_bAnyProjectOpened = true;
-
-      LoadPluginBundleDlls(sProjectFile);
-
       res = plToolsProject::OpenProject(sProjectFile);
     }
   }
@@ -191,10 +192,10 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
   if (res.m_Result.Failed())
   {
     plStringBuilder s;
-    s.Format("Failed to open project:\n'{0}'", sProjectFile);
+    s.SetFormat("Failed to open project:\n'{0}'", sProjectFile);
 
     plQtUiServices::MessageBoxStatus(res, s);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 
@@ -243,7 +244,7 @@ plResult plQtEditorApp::CreateOrOpenProject(bool bCreate, plStringView sFile0)
       plQtContainerWindow::GetContainerWindow()->ScheduleRestoreWindowLayout();
     }
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
@@ -257,7 +258,7 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
 
     case plToolsProjectEvent::Type::ProjectOpened:
     {
-      PLASMA_PROFILE_SCOPE("ProjectOpened");
+      PL_PROFILE_SCOPE("ProjectOpened");
       plDynamicStringEnum::s_RequestUnknownCallback = plMakeDelegate(&plQtEditorApp::OnDemandDynamicStringEnumLoad, this);
       LoadProjectPreferences();
       SetupDataDirectories();
@@ -271,13 +272,13 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
       }
 
       // tell the engine process which file system and plugin configuration to use
-      PlasmaEditorEngineProcessConnection::GetSingleton()->SetFileSystemConfig(m_FileSystemConfig);
-      PlasmaEditorEngineProcessConnection::GetSingleton()->SetPluginConfig(GetRuntimePluginConfig(true));
+      plEditorEngineProcessConnection::GetSingleton()->SetFileSystemConfig(m_FileSystemConfig);
+      plEditorEngineProcessConnection::GetSingleton()->SetPluginConfig(GetRuntimePluginConfig(true));
 
       plAssetCurator::GetSingleton()->StartInitialize(m_FileSystemConfig);
-      if (PlasmaEditorEngineProcessConnection::GetSingleton()->RestartProcess().Failed())
+      if (plEditorEngineProcessConnection::GetSingleton()->RestartProcess().Failed())
       {
-        PLASMA_PROFILE_SCOPE("ErrorLog");
+        PL_PROFILE_SCOPE("ErrorLog");
         plLog::Error("Failed to start the engine process. Project loading incomplete.");
       }
       plAssetCurator::GetSingleton()->WaitForInitialize();
@@ -287,7 +288,7 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
 
       m_RecentProjects.Insert(plToolsProject::GetSingleton()->GetProjectFile(), 0);
 
-      PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+      plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
 
       // Make sure preferences are saved, this is important when the project was just created.
       if (m_bSavePreferencesAfterOpenProject)
@@ -301,7 +302,7 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
         SaveRecentFiles();
       }
 
-      if (m_StartupFlags.AreNoneSet(plQtEditorApp::StartupFlags::Headless | plQtEditorApp::StartupFlags::SafeMode | plQtEditorApp::StartupFlags::UnitTest))
+      if (m_StartupFlags.AreNoneSet(plQtEditorApp::StartupFlags::Headless | plQtEditorApp::StartupFlags::SafeMode | plQtEditorApp::StartupFlags::UnitTest | plQtEditorApp::StartupFlags::Background))
       {
         if (plCppProject::ExistsProjectCMakeListsTxt())
         {
@@ -309,7 +310,7 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
           if (compilerStatus.Failed())
           {
             plQtUiServices::MessageBoxWarning(plFmt("<html>The compiler preferences are invalid.<br><br>\
-              This project has <a href='https://ezengine.net/pages/docs/custom-code/cpp/cpp-project-generation.html'>a dedicated C++ plugin</a> with custom code.<br><br>\
+              This project has <a href='https://plengine.net/pages/docs/custom-code/cpp/cpp-project-generation.html'>a dedicated C++ plugin</a> with custom code.<br><br>\
               The compiler set in the preferences does not appear to work, as a result the plugin cannot be compiled <br><br><b>Error:</b> {}</html>",
               compilerStatus.m_sMessage.GetView()));
             break;
@@ -317,9 +318,9 @@ void plQtEditorApp::ProjectEventHandler(const plToolsProjectEvent& r)
           else if (plCppProject::IsBuildRequired())
           {
             const auto clicked = plQtUiServices::MessageBoxQuestion("<html>Compile this project's C++ plugin?<br><br>\
-Explanation: This project has <a href='https://plasmaengine.github.io/PlasmaDocs/#custom-code/cpp/cpp-project-generation/'>a dedicated C++ plugin</a> with custom code. The plugin is currently not compiled and therefore the project won't fully work and certain assets will fail to transform.<br><br>\
+Explanation: This project has <a href='https://plengine.net/pages/docs/custom-code/cpp/cpp-project-generation.html'>a dedicated C++ plugin</a> with custom code. The plugin is currently not compiled and therefore the project won't fully work and certain assets will fail to transform.<br><br>\
 It is advised to compile the plugin now, but you can also do so later.</html>",
-            QMessageBox::StandardButton::Apply | QMessageBox::StandardButton::Ignore, QMessageBox::StandardButton::Apply);
+              QMessageBox::StandardButton::Apply | QMessageBox::StandardButton::Ignore, QMessageBox::StandardButton::Apply);
 
             if (clicked == QMessageBox::StandardButton::Ignore)
               break;
@@ -328,16 +329,17 @@ It is advised to compile the plugin now, but you can also do so later.</html>",
           }
         }
 
+
         plTimestamp lastTransform = plAssetCurator::GetSingleton()->GetLastFullTransformDate().GetTimestamp();
 
         if (pPreferences->m_bBackgroundAssetProcessing)
         {
-          QTimer::singleShot(1000, this, [this]() { plAssetProcessor::GetSingleton()->StartProcessTask(); });
+          QTimer::singleShot(2000, this, [this]() { plAssetProcessor::GetSingleton()->StartProcessTask(); });
         }
         else if (!lastTransform.IsValid() || (plTimestamp::CurrentTimestamp() - lastTransform).GetHours() > 5 * 24)
         {
           const auto clicked = plQtUiServices::MessageBoxQuestion("<html>Apply asset transformation now?<br><br>\
-Explanation: For assets to work properly, they must be <a href='https://https://plasmaengine.github.io/PlasmaDocs/#assets/assets-overview/#asset-transform'>transformed</a>. Otherwise they don't function as they should or don't even show up.<br>You can manually run the asset transform from the <a href='https://plasmaengine.github.io/PlasmaDocs/#assets/asset-browser.html#transform-assets'>asset browser</a> at any time.</html>",
+Explanation: For assets to work properly, they must be <a href='https://plengine.net/pages/docs/assets/assets-overview.html#asset-transform'>transformed</a>. Otherwise they don't function as they should or don't even show up.<br>You can manually run the asset transform from the <a href='https://plengine.net/pages/docs/assets/asset-browser.html#transform-assets'>asset browser</a> at any time.</html>",
             QMessageBox::StandardButton::Apply | QMessageBox::StandardButton::Ignore, QMessageBox::StandardButton::Apply);
 
           if (clicked == QMessageBox::StandardButton::Ignore)
@@ -347,7 +349,7 @@ Explanation: For assets to work properly, they must be <a href='https://https://
           }
 
           // check whether the project needs to be transformed
-          QTimer::singleShot(1000, this, [this]() { plAssetCurator::GetSingleton()->TransformAllAssets(plTransformFlags::Default).IgnoreResult(); });
+          QTimer::singleShot(2000, this, [this]() { plAssetCurator::GetSingleton()->TransformAllAssets(plTransformFlags::Default).IgnoreResult(); });
         }
       }
 
@@ -364,13 +366,13 @@ Explanation: For assets to work properly, they must be <a href='https://https://
     case plToolsProjectEvent::Type::ProjectClosing:
     {
       plShutdownProcessMsgToEngine msg;
-      PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+      plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
       break;
     }
 
     case plToolsProjectEvent::Type::ProjectClosed:
     {
-      PlasmaEditorEngineProcessConnection::GetSingleton()->ShutdownProcess();
+      plEditorEngineProcessConnection::GetSingleton()->ShutdownProcess();
 
       plAssetCurator::GetSingleton()->Deinitialize();
 
@@ -466,7 +468,7 @@ void plQtEditorApp::ProjectRequestHandler(plToolsProjectRequest& r)
     {
       if (plAssetCurator::plLockedSubAsset pSubAsset = plAssetCurator::GetSingleton()->GetSubAsset(r.m_documentGuid))
       {
-        r.m_sAbsDocumentPath = pSubAsset->m_pAssetInfo->m_sAbsolutePath;
+        r.m_sAbsDocumentPath = pSubAsset->m_pAssetInfo->m_Path;
       }
     }
     break;

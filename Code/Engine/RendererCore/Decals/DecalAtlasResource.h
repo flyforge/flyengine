@@ -15,11 +15,11 @@ struct plDecalAtlasResourceDescriptor
 {
 };
 
-class PLASMA_RENDERERCORE_DLL plDecalAtlasResource : public plResource
+class PL_RENDERERCORE_DLL plDecalAtlasResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalAtlasResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plDecalAtlasResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plDecalAtlasResource, plDecalAtlasResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalAtlasResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plDecalAtlasResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plDecalAtlasResource, plDecalAtlasResourceDescriptor);
 
 public:
   plDecalAtlasResource();

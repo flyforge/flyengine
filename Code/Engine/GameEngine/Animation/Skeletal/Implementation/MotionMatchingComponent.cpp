@@ -10,22 +10,21 @@
 //#include <RendererFoundation/Device/Device.h>
 //
 //// clang-format off
-//PLASMA_BEGIN_COMPONENT_TYPE(plMotionMatchingComponent, 2, plComponentMode::Dynamic);
+//PL_BEGIN_COMPONENT_TYPE(plMotionMatchingComponent, 2, plComponentMode::Dynamic);
 //{
-//  PLASMA_BEGIN_PROPERTIES
+//  PL_BEGIN_PROPERTIES
 //  {
-//    PLASMA_ARRAY_ACCESSOR_PROPERTY("Animations", Animations_GetCount, Animations_GetValue, Animations_SetValue, Animations_Insert, Animations_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
+//    PL_ARRAY_ACCESSOR_PROPERTY("Animations", Animations_GetCount, Animations_GetValue, Animations_SetValue, Animations_Insert, Animations_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
 //  }
-//  PLASMA_END_PROPERTIES;
+//  PL_END_PROPERTIES;
 //
-//  PLASMA_BEGIN_ATTRIBUTES
+//  PL_BEGIN_ATTRIBUTES
 //  {
 //      new plCategoryAttribute("Animation"),
-//      new plColorAttribute(plColorScheme::Animation),
 //  }
-//  PLASMA_END_ATTRIBUTES;
+//  PL_END_ATTRIBUTES;
 //}
-//PLASMA_END_COMPONENT_TYPE
+//PL_END_COMPONENT_TYPE
 //// clang-format on
 //
 //plMotionMatchingComponent::plMotionMatchingComponent() = default;
@@ -56,7 +55,7 @@
 //  SUPER::OnSimulationStarted();
 //
 //  // make sure the skinning buffer is deleted
-//  PLASMA_ASSERT_DEBUG(m_hSkinningTransformsBuffer.IsInvalidated(), "The skinning buffer should not exist at this time");
+//  PL_ASSERT_DEBUG(m_hSkinningTransformsBuffer.IsInvalidated(), "The skinning buffer should not exist at this time");
 //
 //  if (m_hMesh.IsValid())
 //  {
@@ -158,7 +157,7 @@
 //  dir.x = r - l;
 //  dir.z = 0;
 //
-//  // dir.NormalizeIfNotZero(plVec3::ZeroVector());
+//  // dir.NormalizeIfNotZero(plVec3::MakeZero());
 //  return dir * 3.0f;
 //}
 //
@@ -169,7 +168,7 @@
 //  plInputManager::GetInputActionState("mm", "turnleft", &tl);
 //  plInputManager::GetInputActionState("mm", "turnright", &tr);
 //
-//  const plAngle turn = plAngle::Degree((tr - tl) * 90.0f);
+//  const plAngle turn = plAngle::MakeFromDegree((tr - tl) * 90.0f);
 //
 //  plQuat q;
 //  q.SetFromAxisAndAngle(plVec3(0, 0, 1), turn);
@@ -193,7 +192,7 @@
 //    const plVec3 vTargetDir = GetInputDirection() / GetOwner()->GetGlobalScaling().x;
 //
 //    plStringBuilder tmp;
-//    tmp.Format("Gamepad: {0} / {1}", plArgF(vTargetDir.x, 1), plArgF(vTargetDir.y, 1));
+//    tmp.SetFormat("Gamepad: {0} / {1}", plArgF(vTargetDir.x, 1), plArgF(vTargetDir.y, 1));
 //    plDebugRenderer::DrawInfoText(GetWorld(), tmp, plVec2I32(10, 10), plColor::White);
 //
 //    m_fKeyframeLerp += fKeyframeFraction;
@@ -277,7 +276,7 @@
 //  if (uiLeftFootJoint != plInvalidJointIndex && uiRightFootJoint != plInvalidJointIndex)
 //  {
 //    plTransform tLeft, tRight;
-//    plBoundingSphere sphere(plVec3::ZeroVector(), 0.5f);
+//    plBoundingSphere sphere(plVec3::MakeZero(), 0.5f);
 //
 //    tLeft.SetFromMat4(m_AnimationPose.GetTransform(uiLeftFootJoint));
 //    tRight.SetFromMat4(m_AnimationPose.GetTransform(uiRightFootJoint));
@@ -296,7 +295,7 @@
 //
 //  m_AnimationPose.ConvertFromObjectSpaceToSkinningSpace(skeleton);
 //
-//  plArrayPtr<plMat4> pRenderMatrices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plMat4, m_AnimationPose.GetTransformCount());
+//  plArrayPtr<plMat4> pRenderMatrices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plMat4, m_AnimationPose.GetTransformCount());
 //  plMemoryUtils::Copy(pRenderMatrices.GetPtr(), m_AnimationPose.GetAllTransforms().GetPtr(), m_AnimationPose.GetTransformCount());
 //
 //  m_SkinningMatrices = pRenderMatrices;
@@ -444,7 +443,7 @@
 //    md.m_vLeftFootVelocity.SetZero();
 //    md.m_vRightFootVelocity.SetZero();
 //    md.m_vRootVelocity =
-//      animClip.HasRootMotion() ? fRootMotionToVelocity * animClip.GetJointKeyframes(uiRootJoint)[uiFrameIdx].m_vPosition : plVec3::ZeroVector();
+//      animClip.HasRootMotion() ? fRootMotionToVelocity * animClip.GetJointKeyframes(uiRootJoint)[uiFrameIdx].m_vPosition : plVec3::MakeZero();
 //  }
 //
 //  // now compute the velocity
@@ -515,4 +514,4 @@
 //  return uiClosest;
 //}
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_MotionMatchingComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_MotionMatchingComponent);

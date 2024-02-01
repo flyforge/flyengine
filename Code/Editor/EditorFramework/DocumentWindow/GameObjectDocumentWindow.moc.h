@@ -8,7 +8,7 @@ class plQtGameObjectViewWidget;
 struct plGameObjectEvent;
 struct plSnapProviderEvent;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectDocumentWindow : public plQtEngineDocumentWindow
+class PL_EDITORFRAMEWORK_DLL plQtGameObjectDocumentWindow : public plQtEngineDocumentWindow
 {
   Q_OBJECT
 public:
@@ -20,7 +20,7 @@ public:
 protected:
   plWorldSettingsMsgToEngine GetWorldSettings() const;
   plGridSettingsMsgToEngine GetGridSettings() const;
-  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
 
 private:
   void GameObjectEventHandler(const plGameObjectEvent& e);

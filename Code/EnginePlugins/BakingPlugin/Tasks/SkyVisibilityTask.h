@@ -9,7 +9,7 @@ class plTracerInterface;
 
 namespace plBakingInternal
 {
-  class PLASMA_BAKINGPLUGIN_DLL SkyVisibilityTask : public plTask
+  class PL_BAKINGPLUGIN_DLL SkyVisibilityTask : public plTask
   {
   public:
     SkyVisibilityTask(const plBakingSettings& settings, plTracerInterface& tracer, plArrayPtr<const plVec3> probePositions);

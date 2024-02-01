@@ -10,7 +10,7 @@ class plManipulatorAttribute;
 struct plPhantomRttiManagerEvent;
 struct plSelectionManagerEvent;
 
-struct PLASMA_GUIFOUNDATION_DLL plManipulatorManagerEvent
+struct PL_GUIFOUNDATION_DLL plManipulatorManagerEvent
 {
   const plDocument* m_pDocument;
   const plManipulatorAttribute* m_pManipulator;
@@ -18,15 +18,15 @@ struct PLASMA_GUIFOUNDATION_DLL plManipulatorManagerEvent
   bool m_bHideManipulators;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plManipulatorManager
+class PL_GUIFOUNDATION_DLL plManipulatorManager
 {
-  PLASMA_DECLARE_SINGLETON(plManipulatorManager);
+  PL_DECLARE_SINGLETON(plManipulatorManager);
 
 public:
   plManipulatorManager();
   ~plManipulatorManager();
 
-  const plManipulatorAttribute* GetActiveManipulator(const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_Selection) const;
+  const plManipulatorAttribute* GetActiveManipulator(const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_pSelection) const;
 
   void SetActiveManipulator(
     const plDocument* pDoc, const plManipulatorAttribute* pManipulator, const plHybridArray<plPropertySelection, 8>& selection);

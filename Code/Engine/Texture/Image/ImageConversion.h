@@ -6,7 +6,7 @@
 
 #include <Texture/Image/Image.h>
 
-PLASMA_DECLARE_FLAGS(plUInt8, plImageConversionFlags, InPlace);
+PL_DECLARE_FLAGS(plUInt8, plImageConversionFlags, InPlace);
 
 /// A structure describing the pairs of source/target format that may be converted using the conversion routine.
 struct plImageConversionEntry
@@ -33,9 +33,9 @@ struct plImageConversionEntry
 /// The actual functionality is implemented as either plImageConversionStepLinear or plImageConversionStepDecompressBlocks.
 /// Depending on the types on conversion advertised by GetSupportedConversions(), users of this class need to cast it to a derived type
 /// first to access the desired functionality.
-class PLASMA_TEXTURE_DLL plImageConversionStep : public plEnumerable<plImageConversionStep>
+class PL_TEXTURE_DLL plImageConversionStep : public plEnumerable<plImageConversionStep>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plImageConversionStep);
+  PL_DECLARE_ENUMERABLE_CLASS(plImageConversionStep);
 
 protected:
   plImageConversionStep();
@@ -49,53 +49,53 @@ public:
 };
 
 /// \brief Interface for a single image conversion step where both the source and target format are uncompressed.
-class PLASMA_TEXTURE_DLL plImageConversionStepLinear : public plImageConversionStep
+class PL_TEXTURE_DLL plImageConversionStepLinear : public plImageConversionStep
 {
 public:
   /// \brief Converts a batch of pixels.
-  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 numElements, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plConstByteBlobPtr source, plByteBlobPtr target, plUInt64 uiNumElements, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const = 0;
 };
 
 /// \brief Interface for a single image conversion step where the source format is compressed and the target format is uncompressed.
-class PLASMA_TEXTURE_DLL plImageConversionStepDecompressBlocks : public plImageConversionStep
+class PL_TEXTURE_DLL plImageConversionStepDecompressBlocks : public plImageConversionStep
 {
 public:
   /// \brief Decompresses the given number of blocks.
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const = 0;
 };
 
 /// \brief Interface for a single image conversion step where the source format is uncompressed and the target format is compressed.
-class PLASMA_TEXTURE_DLL plImageConversionStepCompressBlocks : public plImageConversionStep
+class PL_TEXTURE_DLL plImageConversionStepCompressBlocks : public plImageConversionStep
 {
 public:
   /// \brief Compresses the given number of blocks.
-  virtual plResult CompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocksX, plUInt32 numBlocksY,
+  virtual plResult CompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocksX, plUInt32 uiNumBlocksY,
     plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat) const = 0;
 };
 
 /// \brief Interface for a single image conversion step from a linear to a planar format.
-class PLASMA_TEXTURE_DLL plImageConversionStepPlanarize : public plImageConversionStep
+class PL_TEXTURE_DLL plImageConversionStepPlanarize : public plImageConversionStep
 {
 public:
   /// \brief Converts a batch of pixels into the given target planes.
-  virtual plResult ConvertPixels(const plImageView& source, plArrayPtr<plImage> target, plUInt32 numPixelsX, plUInt32 numPixelsY, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(const plImageView& source, plArrayPtr<plImage> target, plUInt32 uiNumPixelsX, plUInt32 uiNumPixelsY, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const = 0;
 };
 
 /// \brief Interface for a single image conversion step from a planar to a linear format.
-class PLASMA_TEXTURE_DLL plImageConversionStepDeplanarize : public plImageConversionStep
+class PL_TEXTURE_DLL plImageConversionStepDeplanarize : public plImageConversionStep
 {
 public:
   /// \brief Converts a batch of pixels from the given source planes.
-  virtual plResult ConvertPixels(plArrayPtr<plImageView> source, plImage target, plUInt32 numPixelsX, plUInt32 numPixelsY, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plArrayPtr<plImageView> source, plImage target, plUInt32 uiNumPixelsX, plUInt32 uiNumPixelsY, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const = 0;
 };
 
 
 /// \brief Helper class containing utilities to convert between different image formats and layouts.
-class PLASMA_TEXTURE_DLL plImageConversion
+class PL_TEXTURE_DLL plImageConversion
 {
 public:
   /// \brief Checks if there is a known conversion path between the two formats
@@ -107,7 +107,7 @@ public:
   /// \brief A single node along a computed conversion path.
   struct ConversionPathNode
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const plImageConversionStep* m_step;
     plImageFormat::Enum m_sourceFormat;
@@ -131,23 +131,23 @@ public:
   ///                               correctly when source and target are the same.
   /// \param path_out               The generated path.
   /// \param numScratchBuffers_out The number of scratch buffers required for the conversion path.
-  /// \returns                      pl_SUCCESS if a path was found, pl_FAILURE otherwise.
-  static plResult BuildPath(plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat, bool sourceEqualsTarget,
-    plHybridArray<ConversionPathNode, 16>& path_out, plUInt32& numScratchBuffers_out);
+  /// \returns                      PL_SUCCESS if a path was found, PL_FAILURE otherwise.
+  static plResult BuildPath(plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat, bool bSourceEqualsTarget,
+    plHybridArray<ConversionPathNode, 16>& ref_path_out, plUInt32& ref_uiNumScratchBuffers_out);
 
   /// \brief  Converts the source image into a target image with the given format. Source and target may be the same.
-  static plResult Convert(const plImageView& source, plImage& target, plImageFormat::Enum targetFormat);
+  static plResult Convert(const plImageView& source, plImage& ref_target, plImageFormat::Enum targetFormat);
 
   /// \brief Converts the source image into a target image using a precomputed conversion path.
-  static plResult Convert(const plImageView& source, plImage& target, plArrayPtr<ConversionPathNode> path, plUInt32 numScratchBuffers);
+  static plResult Convert(const plImageView& source, plImage& ref_target, plArrayPtr<ConversionPathNode> path, plUInt32 uiNumScratchBuffers);
 
   /// \brief Converts the raw source data into a target data buffer with the given format. Source and target may be the same.
   static plResult ConvertRaw(
-    plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numElements, plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat);
+    plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumElements, plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat);
 
   /// \brief Converts the raw source data into a target data buffer using a precomputed conversion path.
   static plResult ConvertRaw(
-    plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numElements, plArrayPtr<ConversionPathNode> path, plUInt32 numScratchBuffers);
+    plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumElements, plArrayPtr<ConversionPathNode> path, plUInt32 uiNumScratchBuffers);
 
 private:
   plImageConversion();

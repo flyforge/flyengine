@@ -11,7 +11,7 @@
 using plOsProcessHandle = void*;
 using plOsProcessID = plUInt32;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_PROCESSES)
+#if PL_ENABLED(PL_SUPPORTS_PROCESSES)
 enum class plProcessState
 {
   NotStarted,
@@ -20,7 +20,7 @@ enum class plProcessState
 };
 
 /// \brief Options that describe how to run an external process
-struct PLASMA_FOUNDATION_DLL plProcessOptions
+struct PL_FOUNDATION_DLL plProcessOptions
 {
   /// Path to the binary to launch
   plString m_sProcess;
@@ -71,8 +71,8 @@ struct plProcessLaunchFlags
   enum Enum
   {
     None = 0,
-    Detached = PLASMA_BIT(0),  ///< The process will be detached right after launch, as if plProcess::Detach() was called.
-    Suspended = PLASMA_BIT(1), ///< The process will be launched in a suspended state. Call plProcess::ResumeSuspended() to unpause it.
+    Detached = PL_BIT(0),  ///< The process will be detached right after launch, as if plProcess::Detach() was called.
+    Suspended = PL_BIT(1), ///< The process will be launched in a suspended state. Call plProcess::ResumeSuspended() to unpause it.
     Default = None
   };
 
@@ -83,12 +83,12 @@ struct plProcessLaunchFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plProcessLaunchFlags);
+PL_DECLARE_FLAGS_OPERATORS(plProcessLaunchFlags);
 
 /// \brief Provides functionality to launch other processes
-class PLASMA_FOUNDATION_DLL plProcess
+class PL_FOUNDATION_DLL plProcess
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plProcess);
+  PL_DISALLOW_COPY_AND_ASSIGN(plProcess);
 
 public:
   plProcess();
@@ -113,17 +113,17 @@ public:
   /// \sa plProcessLaunchFlags
   plResult Launch(const plProcessOptions& opt, plBitflags<plProcessLaunchFlags> launchFlags = plProcessLaunchFlags::None);
 
-  /// \brief Resumes a process that was launched in a suspended state. Returns PLASMA_FAILURE if the process has not been launched or already
+  /// \brief Resumes a process that was launched in a suspended state. Returns PL_FAILURE if the process has not been launched or already
   /// resumed.
   plResult ResumeSuspended();
 
   /// \brief Waits the given amount of time for the previously launched process to finish.
   ///
-  /// Pass in plTime::Zero() to wait indefinitely.
-  /// Returns PLASMA_FAILURE, if the process did not finish within the given time.
+  /// Pass in plTime::MakeZero() to wait indefinitely.
+  /// Returns PL_FAILURE, if the process did not finish within the given time.
   ///
   /// \note Asserts that the plProcess instance was used to successfully launch a process before.
-  plResult WaitToFinish(plTime timeout = plTime::Zero());
+  plResult WaitToFinish(plTime timeout = plTime::MakeZero());
 
   /// \brief Kills the detached process, if possible.
   plResult Terminate();
@@ -162,5 +162,6 @@ private:
   plString m_sProcess;
   plDelegate<void(plStringView)> m_OnStdOut;
   plDelegate<void(plStringView)> m_OnStdError;
+  mutable plTime m_ProcessExited = plTime::MakeZero();
 };
 #endif

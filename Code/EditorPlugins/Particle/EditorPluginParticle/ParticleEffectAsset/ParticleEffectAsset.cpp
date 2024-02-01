@@ -12,12 +12,12 @@
 #include <ParticlePlugin/Type/Trail/ParticleTypeTrail.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectAssetDocument, 6, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectAssetDocument, 6, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleEffectAssetDocument::plParticleEffectAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plParticleEffectDescriptor>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
+plParticleEffectAssetDocument::plParticleEffectAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plParticleEffectDescriptor>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
   plVisualizerManager::GetSingleton()->SetVisualizersActive(this, m_bRenderVisualizers);
 }
@@ -111,11 +111,11 @@ void plParticleEffectAssetDocument::PropertyMetaStateEventHandler(plPropertyMeta
   }
 }
 
-void plParticleEffectAssetDocument::WriteResource(plStreamWriter& stream) const
+void plParticleEffectAssetDocument::WriteResource(plStreamWriter& inout_stream) const
 {
   const plParticleEffectDescriptor* pProp = GetProperties();
 
-  pProp->Save(stream);
+  pProp->Save(inout_stream);
 }
 
 
@@ -129,12 +129,12 @@ void plParticleEffectAssetDocument::TriggerRestartEffect()
 }
 
 
-void plParticleEffectAssetDocument::SetAutoRestart(bool enable)
+void plParticleEffectAssetDocument::SetAutoRestart(bool bEnable)
 {
-  if (m_bAutoRestart == enable)
+  if (m_bAutoRestart == bEnable)
     return;
 
-  m_bAutoRestart = enable;
+  m_bAutoRestart = bEnable;
 
   plParticleEffectAssetEvent e;
   e.m_pDocument = this;
@@ -158,12 +158,12 @@ void plParticleEffectAssetDocument::SetSimulationPaused(bool bPaused)
   m_Events.Broadcast(e);
 }
 
-void plParticleEffectAssetDocument::SetSimulationSpeed(float speed)
+void plParticleEffectAssetDocument::SetSimulationSpeed(float fSpeed)
 {
-  if (m_fSimulationSpeed == speed)
+  if (m_fSimulationSpeed == fSpeed)
     return;
 
-  m_fSimulationSpeed = speed;
+  m_fSimulationSpeed = fSpeed;
 
   plParticleEffectAssetEvent e;
   e.m_pDocument = this;
@@ -189,11 +189,11 @@ void plParticleEffectAssetDocument::SetRenderVisualizers(bool b)
   m_Events.Broadcast(e);
 }
 
-plResult plParticleEffectAssetDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const
+plResult plParticleEffectAssetDocument::ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const
 {
   // currently the preview particle effect is always at the origin
-  out_Result.SetIdentity();
-  return PLASMA_SUCCESS;
+  out_result.SetIdentity();
+  return PL_SUCCESS;
 }
 
 void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
@@ -211,7 +211,7 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
         if (pType->m_RenderMode != plParticleTypeRenderMode::Distortion)
         {
           // remove unused dependencies
-          pInfo->m_AssetTransformDependencies.Remove(pType->m_sDistortionTexture);
+          pInfo->m_TransformDependencies.Remove(pType->m_sDistortionTexture);
         }
       }
 
@@ -220,7 +220,7 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
         if (pType->m_RenderMode != plParticleTypeRenderMode::Distortion)
         {
           // remove unused dependencies
-          pInfo->m_AssetTransformDependencies.Remove(pType->m_sDistortionTexture);
+          pInfo->m_TransformDependencies.Remove(pType->m_sDistortionTexture);
         }
       }
     }
@@ -229,17 +229,17 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
   // shared effects do not support parameters
   if (!desc->m_bAlwaysShared)
   {
-    plExposedParameters* pExposedParams = PLASMA_DEFAULT_NEW(plExposedParameters);
+    plExposedParameters* pExposedParams = PL_DEFAULT_NEW(plExposedParameters);
     for (auto it = desc->m_FloatParameters.GetIterator(); it.IsValid(); ++it)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = it.Key();
       param->m_DefaultValue = it.Value();
     }
     for (auto it = desc->m_ColorParameters.GetIterator(); it.IsValid(); ++it)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = it.Key();
       param->m_DefaultValue = it.Value();
@@ -250,11 +250,11 @@ void plParticleEffectAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo*
   }
 }
 
-plTransformStatus plParticleEffectAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag,
+plTransformStatus plParticleEffectAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag,
   const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   WriteResource(stream);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plTransformStatus plParticleEffectAssetDocument::InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo)

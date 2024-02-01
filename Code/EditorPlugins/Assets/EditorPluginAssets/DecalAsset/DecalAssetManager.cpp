@@ -13,8 +13,8 @@ const char* ToCompressionMode(plTexConvCompressionMode::Enum mode);
 const char* ToMipmapMode(plTexConvMipmapMode::Enum mode);
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocumentManager, 1, plRTTIDefaultAllocator<plDecalAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocumentManager, 1, plRTTIDefaultAllocator<plDecalAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDecalAssetDocumentManager::plDecalAssetDocumentManager()
@@ -42,19 +42,19 @@ plDecalAssetDocumentManager::~plDecalAssetDocumentManager()
   plDocumentManager::s_Events.RemoveEventHandler(plMakeDelegate(&plDecalAssetDocumentManager::OnDocumentManagerEvent, this));
 }
 
-void plDecalAssetDocumentManager::AddEntriesToAssetTable(const char* szDataDirectory, const plPlatformProfile* pAssetProfile, plMap<plString, plString>& inout_GuidToPath) const
+void plDecalAssetDocumentManager::AddEntriesToAssetTable(plStringView sDataDirectory, const plPlatformProfile* pAssetProfile, plDelegate<void(plStringView sGuid, plStringView sPath, plStringView sType)> addEntry) const
 {
   plStringBuilder projectDir = plToolsProject::GetSingleton()->GetProjectDirectory();
   projectDir.MakeCleanPath();
   projectDir.Append("/");
 
-  if (projectDir.StartsWith_NoCase(szDataDirectory))
+  if (projectDir.StartsWith_NoCase(sDataDirectory))
   {
-    inout_GuidToPath["{ ProjectDecalAtlas }"] = "PC/Decals.plTextureAtlas";
+    addEntry("{ ProjectDecalAtlas }", "PC/Decals.plTextureAtlas", "Decal Atlas");
   }
 }
 
-plString plDecalAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, const char* szDataDirectory, const plPlatformProfile* pAssetProfile) const
+plString plDecalAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, plStringView sDataDirectory, const plPlatformProfile* pAssetProfile) const
 {
   // means NO table entry will be written, because for decals we don't need a redirection
   return plString();
@@ -68,7 +68,7 @@ void plDecalAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plDecalAssetDocument>())
       {
-        plQtDecalAssetDocumentWindow* pDocWnd = new plQtDecalAssetDocumentWindow(static_cast<plDecalAssetDocument*>(e.m_pDocument));
+        new plQtDecalAssetDocumentWindow(static_cast<plDecalAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -78,9 +78,9 @@ void plDecalAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
   }
 }
 
-void plDecalAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plDecalAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plDecalAssetDocument(szPath);
+  out_pDocument = new plDecalAssetDocument(sPath);
 }
 
 void plDecalAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const
@@ -115,7 +115,7 @@ plStatus plDecalAssetDocumentManager::GenerateDecalTexture(const plPlatformProfi
   decalFile.AppendPath("AssetCache", GetDecalTexturePath(pAssetProfile));
 
   if (IsDecalTextureUpToDate(decalFile, uiAssetHash))
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
   plTextureAtlasCreationDesc atlasDesc;
 
@@ -139,18 +139,18 @@ plStatus plDecalAssetDocumentManager::GenerateDecalTexture(const plPlatformProfi
       if (asset.m_pAssetInfo->GetManager() != this)
         continue;
 
-      PLASMA_LOG_BLOCK("Decal", asset.m_pAssetInfo->m_sDataDirParentRelativePath);
+      PL_LOG_BLOCK("Decal", asset.m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
 
       // does the document already exist and is it open ?
       bool bWasOpen = false;
-      plDocument* pDoc = GetDocumentByPath(asset.m_pAssetInfo->m_sAbsolutePath);
+      plDocument* pDoc = GetDocumentByPath(asset.m_pAssetInfo->m_Path.GetAbsolutePath());
       if (pDoc)
         bWasOpen = true;
       else
-        pDoc = pEditorApp->OpenDocument(asset.m_pAssetInfo->m_sAbsolutePath, plDocumentFlags::None);
+        pDoc = pEditorApp->OpenDocument(asset.m_pAssetInfo->m_Path.GetAbsolutePath(), plDocumentFlags::None);
 
       if (pDoc == nullptr)
-        return plStatus(plFmt("Could not open asset document '{0}'", asset.m_pAssetInfo->m_sDataDirParentRelativePath));
+        return plStatus(plFmt("Could not open asset document '{0}'", asset.m_pAssetInfo->m_Path.GetDataDirParentRelativePath()));
 
       plDecalAssetDocument* pDecalAsset = static_cast<plDecalAssetDocument*>(pDoc);
 
@@ -258,7 +258,7 @@ plStatus plDecalAssetDocumentManager::GenerateDecalTexture(const plPlatformProfi
     // if the file was touched, but nothing written to it, delete the file
     // might happen if TexConv crashed or had an error
     plOSFile::DeleteFile(decalFile).IgnoreResult();
-    result.m_Result = PLASMA_FAILURE;
+    result.m_Result = PL_FAILURE;
   }
 
   return result;
@@ -306,11 +306,11 @@ plStatus plDecalAssetDocumentManager::RunTexConv(const char* szTargetFile, const
     const plUInt32 uiHashLow32 = uiHash64 & 0xFFFFFFFF;
     const plUInt32 uiHashHigh32 = (uiHash64 >> 32) & 0xFFFFFFFF;
 
-    temp.Format("{0}", plArgU(uiHashLow32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashLow32, 8, true, 16, true));
     arguments << "-assetHashLow";
     arguments << temp.GetData();
 
-    temp.Format("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
     arguments << "-assetHashHigh";
     arguments << temp.GetData();
   }
@@ -331,7 +331,7 @@ plStatus plDecalAssetDocumentManager::RunTexConv(const char* szTargetFile, const
   arguments << "-atlasDesc";
   arguments << QString(szInputFile);
 
-  PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
+  PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

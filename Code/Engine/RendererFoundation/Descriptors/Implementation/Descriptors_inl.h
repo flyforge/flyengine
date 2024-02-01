@@ -1,16 +1,4 @@
-inline bool plShaderResourceType::IsArray(plShaderResourceType::Enum format)
-{
-  switch (format)
-  {
-    case plShaderResourceType::Texture1DArray:
-    case plShaderResourceType::Texture2DArray:
-    case plShaderResourceType::Texture2DMSArray:
-    case plShaderResourceType::TextureCubeArray:
-      return true;
-    default:
-      return false;
-  }
-}
+
 
 inline plGALShaderCreationDescription::plGALShaderCreationDescription()
   : plHashableStruct()
@@ -21,13 +9,7 @@ inline plGALShaderCreationDescription::~plGALShaderCreationDescription()
 {
   for (plUInt32 i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
   {
-    plGALShaderByteCode* pByteCode = m_ByteCodes[i];
     m_ByteCodes[i] = nullptr;
-
-    if (pByteCode != nullptr && pByteCode->GetRefCount() == 0)
-    {
-      PLASMA_DEFAULT_DELETE(pByteCode);
-    }
   }
 }
 
@@ -56,7 +38,7 @@ inline void plGALTextureCreationDescription::SetAsRenderTarget(
   m_pExisitingNativeObject = nullptr;
 }
 
-PLASMA_FORCE_INLINE plGALVertexAttribute::plGALVertexAttribute(
+PL_FORCE_INLINE plGALVertexAttribute::plGALVertexAttribute(
   plGALVertexAttributeSemantic::Enum semantic, plGALResourceFormat::Enum format, plUInt16 uiOffset, plUInt8 uiVertexBufferSlot, bool bInstanceData)
   : m_eSemantic(semantic)
   , m_eFormat(format)

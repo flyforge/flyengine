@@ -5,8 +5,8 @@
 #include <EditorPluginProcGen/ProcGenGraphAsset/ProcGenGraphAssetWindow.moc.h>
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphAssetDocumentManager, 1, plRTTIDefaultAllocator<plProcGenGraphAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphAssetDocumentManager, 1, plRTTIDefaultAllocator<plProcGenGraphAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plProcGenGraphAssetDocumentManager::plProcGenGraphAssetDocumentManager()
 {
@@ -39,7 +39,7 @@ void plProcGenGraphAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plProcGenGraphAssetDocument>())
       {
-        auto pDocWnd = new plProcGenGraphAssetDocumentWindow(static_cast<plProcGenGraphAssetDocument*>(e.m_pDocument));
+        new plProcGenGraphAssetDocumentWindow(static_cast<plProcGenGraphAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -50,9 +50,9 @@ void plProcGenGraphAssetDocumentManager::OnDocumentManagerEvent(const plDocument
 }
 
 void plProcGenGraphAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plProcGenGraphAssetDocument(szPath);
+  out_pDocument = new plProcGenGraphAssetDocument(sPath);
 }
 
 void plProcGenGraphAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

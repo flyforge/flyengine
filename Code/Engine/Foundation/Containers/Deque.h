@@ -26,13 +26,13 @@ class plDequeBase
 {
 protected:
   /// \brief No memory is allocated during construction.
-  explicit plDequeBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plDequeBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Constructs this deque by copying from rhs.
-  plDequeBase(const plDequeBase<T, Construct>& rhs, plAllocatorBase* pAllocator); // [tested]
+  plDequeBase(const plDequeBase<T, Construct>& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Constructs this deque by moving from rhs.
-  plDequeBase(plDequeBase<T, Construct>&& rhs, plAllocatorBase* pAllocator); // [tested]
+  plDequeBase(plDequeBase<T, Construct>&& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plDequeBase(); // [tested]
@@ -164,7 +164,7 @@ public:
   void Sort(); // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const { return m_pAllocator; }
+  plAllocator* GetAllocator() const { return m_pAllocator; }
 
   using const_iterator = const_iterator_base<plDequeBase<T, Construct>, T, false>;
   using const_reverse_iterator = const_iterator_base<plDequeBase<T, Construct>, T, true>;
@@ -179,15 +179,14 @@ public:
   /// \brief Comparison operator
   bool operator==(const plDequeBase<T, Construct>& rhs) const; // [tested]
 
-  /// \brief Comparison operator
-  bool operator!=(const plDequeBase<T, Construct>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plDequeBase<T, Construct>&);
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const; // [tested]
 
 private:
   /// \brief A common constructor function.
-  void Constructor(plAllocatorBase* pAllocator);
+  void Constructor(plAllocator* pAllocator);
 
   /// \brief Reduces the index array to take up less memory.
   void CompactIndexArray(plUInt32 uiMinChunksToKeep);
@@ -248,7 +247,7 @@ private:
   /// \brief Deallocates all data, resets the deque to the state after construction.
   void DeallocateAll();
 
-  plAllocatorBase* m_pAllocator;
+  plAllocator* m_pAllocator;
   T** m_pChunks;                ///< The chunk index array for redirecting accesses. Not all chunks must be allocated.
   plUInt32 m_uiChunks;          ///< The size of the m_pChunks array. Determines how many elements could theoretically be stored in the deque.
   plUInt32 m_uiFirstElement;    ///< Which element (across all chunks) is considered to be the first.
@@ -259,7 +258,7 @@ private:
   plUInt32 m_uiMaxCount;        ///< How many elements were maximally active since the last 'garbage collection' to prevent deallocating too much
                                 ///< memory.
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   plUInt32 m_uiChunkSize; // needed for debugger visualization
 #endif
 };
@@ -270,7 +269,7 @@ class plDeque : public plDequeBase<T, Construct>
 {
 public:
   plDeque();
-  plDeque(plAllocatorBase* pAllocator);
+  plDeque(plAllocator* pAllocator);
 
   plDeque(const plDeque<T, AllocatorWrapper, Construct>& other);
   plDeque(const plDequeBase<T, Construct>& other);

@@ -37,7 +37,7 @@ class plEventBase
 {
 protected:
   /// \brief Constructor.
-  plEventBase(plAllocatorBase* pAllocator);
+  plEventBase(plAllocator* pAllocator);
   ~plEventBase();
 
 public:
@@ -48,7 +48,7 @@ public:
   /// and automatically remove the event handler upon destruction.
   class Unsubscriber
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(Unsubscriber);
+    PL_DISALLOW_COPY_AND_ASSIGN(Unsubscriber);
 
   public:
     Unsubscriber() = default;
@@ -143,7 +143,7 @@ public:
   bool IsEmpty() const;
 
   // it would be a problem if the plEvent moves in memory, for instance the Unsubscriber's would point to invalid memory
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plEventBase);
+  PL_DISALLOW_COPY_AND_ASSIGN(plEventBase);
 
 private:
   // Used to detect recursive broadcasts and then throw asserts at you.
@@ -152,7 +152,7 @@ private:
 
   mutable MutexType m_Mutex;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   const void* m_pSelf = nullptr;
 #endif
 
@@ -177,7 +177,7 @@ class plEvent : public plEventBase<EventData, MutexType, EventType>
 {
 public:
   plEvent();
-  plEvent(plAllocatorBase* pAllocator);
+  plEvent(plAllocator* pAllocator);
 };
 
 template <typename EventData, typename MutexType = plNoMutex, typename AllocatorWrapper = plDefaultAllocatorWrapper>

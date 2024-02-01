@@ -6,11 +6,11 @@
 plRopeSimulator::plRopeSimulator() = default;
 plRopeSimulator::~plRopeSimulator() = default;
 
-void plRopeSimulator::SimulateRope(const plTime& tDiff)
+void plRopeSimulator::SimulateRope(const plTime& diff)
 {
-  m_LeftOverTimeStep += tDiff;
+  m_LeftOverTimeStep += diff;
 
-  constexpr plTime tStep = plTime::Seconds(1.0 / 60.0);
+  constexpr plTime tStep = plTime::MakeFromSeconds(1.0 / 60.0);
   const plSimdFloat tStepSqr = static_cast<float>(tStep.GetSeconds() * tStep.GetSeconds());
   const plSimdFloat fAllowedError = m_fSegmentLength;
 
@@ -22,12 +22,12 @@ void plRopeSimulator::SimulateRope(const plTime& tDiff)
   }
 }
 
-void plRopeSimulator::SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError)
+void plRopeSimulator::SimulateStep(const plSimdFloat fDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError)
 {
   if (m_Nodes.GetCount() < 2)
     return;
 
-  UpdateNodePositions(tDiffSqr);
+  UpdateNodePositions(fDiffSqr);
 
   // repeatedly apply the distance constraint, until the overall error is low enough
   for (plUInt32 i = 0; i < uiMaxIterations; ++i)
@@ -41,7 +41,7 @@ void plRopeSimulator::SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIte
 
 void plRopeSimulator::SimulateTillEquilibrium(plSimdFloat fAllowedMovement, plUInt32 uiMaxIterations)
 {
-  constexpr plTime tStep = plTime::Seconds(1.0 / 60.0);
+  constexpr plTime tStep = plTime::MakeFromSeconds(1.0 / 60.0);
   plSimdFloat tStepSqr = static_cast<float>(tStep.GetSeconds() * tStep.GetSeconds());
 
   plUInt8 uiInEquilibrium = 0;
@@ -95,10 +95,10 @@ float plRopeSimulator::GetTotalLength() const
   return len;
 }
 
-plSimdVec4f plRopeSimulator::GetPositionAtLength(float length) const
+plSimdVec4f plRopeSimulator::GetPositionAtLength(float fLength) const
 {
   if (m_Nodes.IsEmpty())
-    return plSimdVec4f::ZeroVector();
+    return plSimdVec4f::MakeZero();
 
   plSimdVec4f prev = m_Nodes[0].m_vPosition;
   for (plUInt32 i = 1; i < m_Nodes.GetCount(); ++i)
@@ -108,13 +108,13 @@ plSimdVec4f plRopeSimulator::GetPositionAtLength(float length) const
     const plSimdVec4f dir = cur - prev;
     const float dist = dir.GetLength<3>();
 
-    if (length <= dist)
+    if (fLength <= dist)
     {
-      const float interpolate = length / dist;
+      const float interpolate = fLength / dist;
       return prev + dir * interpolate;
     }
 
-    length -= dist;
+    fLength -= dist;
     prev = cur;
   }
 
@@ -128,7 +128,7 @@ plSimdVec4f plRopeSimulator::MoveTowards(const plSimdVec4f posThis, const plSimd
 
   if (fLen < m_fSegmentLength)
   {
-    return plSimdVec4f::ZeroVector();
+    return plSimdVec4f::MakeZero();
   }
 
   vDir /= fLen;
@@ -155,7 +155,7 @@ plSimdFloat plRopeSimulator::EnforceDistanceConstraint()
   auto& firstNode = m_Nodes[0];
   auto& lastNode = m_Nodes.PeekBack();
 
-  plSimdFloat fError = plSimdFloat::Zero();
+  plSimdFloat fError = plSimdFloat::MakeZero();
 
   if (!m_bFirstNodeIsFixed)
   {
@@ -221,3 +221,5 @@ void plRopeSimulator::UpdateNodePositions(const plSimdFloat tDiffSqr)
     m_Nodes.PeekBack().m_vPreviousPosition = m_Nodes.PeekBack().m_vPosition;
   }
 }
+
+

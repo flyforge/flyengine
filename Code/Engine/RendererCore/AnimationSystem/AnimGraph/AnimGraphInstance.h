@@ -11,9 +11,9 @@ class plGameObject;
 class plAnimGraph;
 class plAnimController;
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphInstance
+class PL_RENDERERCORE_DLL plAnimGraphInstance
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAnimGraphInstance);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAnimGraphInstance);
 
 public:
   plAnimGraphInstance();

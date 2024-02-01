@@ -1,12 +1,12 @@
 #pragma once
 
 #include <Foundation/CodeUtils/Expression/ExpressionDeclarations.h>
-#include <Foundation/Containers/DynamicArray.h>
+#include <Foundation/Containers/Blob.h>
 
 class plStreamWriter;
 class plStreamReader;
 
-class PLASMA_FOUNDATION_DLL plExpressionByteCode
+class PL_FOUNDATION_DLL plExpressionByteCode
 {
 public:
   struct OpCode
@@ -181,16 +181,20 @@ public:
   using StorageType = plUInt32;
 
   plExpressionByteCode();
+  plExpressionByteCode(const plExpressionByteCode& other);
   ~plExpressionByteCode();
+
+  void operator=(const plExpressionByteCode& other);
 
   bool operator==(const plExpressionByteCode& other) const;
   bool operator!=(const plExpressionByteCode& other) const { return !(*this == other); }
 
   void Clear();
-  bool IsEmpty() const { return m_ByteCode.IsEmpty(); }
+  bool IsEmpty() const { return m_uiByteCodeCount == 0; }
 
-  const StorageType* GetByteCode() const;
+  const StorageType* GetByteCodeStart() const;
   const StorageType* GetByteCodeEnd() const;
+  plArrayPtr<const StorageType> GetByteCode() const;
 
   plUInt32 GetNumInstructions() const;
   plUInt32 GetNumTempRegisters() const;
@@ -206,19 +210,37 @@ public:
 
   void Disassemble(plStringBuilder& out_sDisassembly) const;
 
-  void Save(plStreamWriter& inout_stream) const;
-  plResult Load(plStreamReader& inout_stream);
+  plResult Save(plStreamWriter& inout_stream) const;
+  plResult Load(plStreamReader& inout_stream, plByteArrayPtr externalMemory = plByteArrayPtr());
+
+  plConstByteBlobPtr GetDataBlob() const { return m_Data.GetByteBlobPtr(); }
 
 private:
   friend class plExpressionCompiler;
 
-  plDynamicArray<StorageType> m_ByteCode;
-  plDynamicArray<plExpression::StreamDesc> m_Inputs;
-  plDynamicArray<plExpression::StreamDesc> m_Outputs;
-  plDynamicArray<plExpression::FunctionDesc> m_Functions;
+  void Init(plArrayPtr<const StorageType> byteCode, plArrayPtr<const plExpression::StreamDesc> inputs, plArrayPtr<const plExpression::StreamDesc> outputs, plArrayPtr<const plExpression::FunctionDesc> functions, plUInt32 uiNumTempRegisters, plUInt32 uiNumInstructions);
 
+  plBlob m_Data;
+
+  plExpression::StreamDesc* m_pInputs = nullptr;
+  plExpression::StreamDesc* m_pOutputs = nullptr;
+  plExpression::FunctionDesc* m_pFunctions = nullptr;
+  StorageType* m_pByteCode = nullptr;
+
+  plUInt32 m_uiByteCodeCount = 0;
+  plUInt16 m_uiNumInputs = 0;
+  plUInt16 m_uiNumOutputs = 0;
+  plUInt16 m_uiNumFunctions = 0;
+
+  plUInt16 m_uiNumTempRegisters = 0;
   plUInt32 m_uiNumInstructions = 0;
-  plUInt32 m_uiNumTempRegisters = 0;
 };
+
+#if PL_ENABLED(PL_PLATFORM_64BIT)
+static_assert(sizeof(plExpressionByteCode) == 64);
+#endif
+
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plExpressionByteCode);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plExpressionByteCode);
 
 #include <Foundation/CodeUtils/Expression/Implementation/ExpressionByteCode_inl.h>

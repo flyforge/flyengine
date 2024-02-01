@@ -4,7 +4,7 @@
 #include <GuiFoundation/Models/LogModel.moc.h>
 
 
-PLASMA_IMPLEMENT_SINGLETON(plQtLogPanel);
+PL_IMPLEMENT_SINGLETON(plQtLogPanel);
 
 plQtLogPanel::plQtLogPanel()
   : plQtApplicationPanel("Panel.Log")
@@ -16,14 +16,14 @@ plQtLogPanel::plQtLogPanel()
   pDummy->layout()->setContentsMargins(0, 0, 0, 0);
 
   setIcon(plQtUiServices::GetCachedIconResource(":/GuiFoundation/Icons/Log.svg"));
-  setWindowTitle(QString::fromUtf8(plTranslate("Panel.Log")));
+  setWindowTitle(plMakeQString(plTranslate("Panel.Log")));
   setWidget(pDummy);
 
   EditorLog->GetSearchWidget()->setPlaceholderText(QStringLiteral("Search Editor Log"));
   EngineLog->GetSearchWidget()->setPlaceholderText(QStringLiteral("Search Engine Log"));
 
   plGlobalLog::AddLogWriter(plMakeDelegate(&plQtLogPanel::LogWriter, this));
-  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtLogPanel::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtLogPanel::EngineProcessMsgHandler, this));
 
   QSettings Settings;
   Settings.beginGroup(QLatin1String("LogPanel"));
@@ -48,7 +48,7 @@ plQtLogPanel::~plQtLogPanel()
   Settings.endGroup();
 
   plGlobalLog::RemoveLogWriter(plMakeDelegate(&plQtLogPanel::LogWriter, this));
-  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtLogPanel::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtLogPanel::EngineProcessMsgHandler, this));
   plQtUiServices::GetSingleton()->s_Events.RemoveEventHandler(plMakeDelegate(&plQtLogPanel::UiServiceEventHandler, this));
 }
 
@@ -90,7 +90,7 @@ void plQtLogPanel::OnNewWarningsOrErrors(const char* szText, bool bError)
   }
   if (uiShowNumWarnings > 0)
   {
-    tmp.AppendWithSeparator(", ", "");
+    tmp.AppendWithSeparator(",", " ");
     tmp.AppendFormat("{} Warnings", uiShowNumWarnings);
   }
 
@@ -99,7 +99,7 @@ void plQtLogPanel::OnNewWarningsOrErrors(const char* szText, bool bError)
   if (!plStringUtils::IsNullOrEmpty(szText))
   {
     plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(
-      plFmt("{}: {}", bError ? "Error" : "Warning", szText), plTime::Seconds(10));
+      plFmt("{}: {}", bError ? "Error" : "Warning", szText), plTime::MakeFromSeconds(10));
   }
 }
 
@@ -131,15 +131,15 @@ void plQtLogPanel::LogWriter(const plLoggingEventData& e)
 
   if (msg.m_sTag == "EditorStatus")
   {
-    plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt(msg.m_sMsg), plTime::Seconds(5));
+    plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt(msg.m_sMsg), plTime::MakeFromSeconds(5));
   }
 }
 
-void plQtLogPanel::EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e)
+void plQtLogPanel::EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessMessage:
+    case plEditorEngineProcessConnection::Event::Type::ProcessMessage:
     {
       if (const plLogMsgToEditor* pMsg = plDynamicCast<const plLogMsgToEditor*>(e.m_pMsg))
       {

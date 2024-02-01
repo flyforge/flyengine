@@ -1,4 +1,4 @@
-pl_cmake_init()
+PL_cmake_init()
 
 
 

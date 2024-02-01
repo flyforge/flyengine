@@ -1,9 +1,9 @@
 #pragma once
 
 #include <Foundation/FoundationInternal.h>
-PLASMA_FOUNDATION_INTERNAL_HEADER
+PL_FOUNDATION_INTERNAL_HEADER
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 #  include <Foundation/Basics.h>
 #  include <Foundation/Strings/String.h>

@@ -7,7 +7,7 @@
 #include <RenderDocPlugin/RenderDocSingleton.h>
 #include <RenderDocPlugin/ThirdParty/renderdoc_app.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plRenderDoc);
+PL_IMPLEMENT_SINGLETON(plRenderDoc);
 
 static plCommandLineOptionBool opt_NoCaptures("RenderDoc", "-NoCaptures", "Disables RenderDoc capture support.", false);
 
@@ -85,6 +85,7 @@ plStringView plRenderDoc::GetAbsCaptureFilePathTemplate() const
   {
     return m_pRenderDocAPI->GetCaptureFilePathTemplate();
   }
+
   return {};
 }
 
@@ -130,11 +131,11 @@ plResult plRenderDoc::GetLastAbsCaptureFileName(plStringBuilder& out_sFileName) 
       m_pRenderDocAPI->GetCapture(uiNumCaptures - 1, filePathBuffer.GetArrayPtr().GetPtr(), nullptr, nullptr);
       out_sFileName = filePathBuffer.GetArrayPtr().GetPtr();
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-PLASMA_STATICLINK_FILE(RenderDocPlugin, RenderDocPlugin_RenderDocSingleton);
+PL_STATICLINK_FILE(RenderDocPlugin, RenderDocPlugin_RenderDocSingleton);

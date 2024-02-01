@@ -5,9 +5,9 @@
 #include <EditorPluginAssets/MaterialAsset/MaterialAssetWindow.moc.h>
 #include <ToolsFoundation/Assets/AssetFileExtensionWhitelist.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetDocumentManager, 1, plRTTIDefaultAllocator<plMaterialAssetDocumentManager>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetDocumentManager, 1, plRTTIDefaultAllocator<plMaterialAssetDocumentManager>)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 const char* const plMaterialAssetDocumentManager::s_szShaderOutputTag = "VISUAL_SHADER";
 
@@ -35,28 +35,28 @@ plMaterialAssetDocumentManager::~plMaterialAssetDocumentManager()
   plDocumentManager::s_Events.RemoveEventHandler(plMakeDelegate(&plMaterialAssetDocumentManager::OnDocumentManagerEvent, this));
 }
 
-plString plMaterialAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, const char* szDataDirectory, const char* szDocumentPath, const char* szOutputTag, const plPlatformProfile* pAssetProfile) const
+plString plMaterialAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, plStringView sDataDirectory, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile) const
 {
-  if (plStringUtils::IsEqual(szOutputTag, s_szShaderOutputTag))
+  if (sOutputTag.IsEqual(s_szShaderOutputTag))
   {
-    plStringBuilder sRelativePath(szDocumentPath);
-    sRelativePath.MakeRelativeTo(szDataDirectory).IgnoreResult();
+    plStringBuilder sRelativePath(sDocumentPath);
+    sRelativePath.MakeRelativeTo(sDataDirectory).IgnoreResult();
     plAssetDocumentManager::GenerateOutputFilename(sRelativePath, pAssetProfile, "autogen.plShader", false);
     return sRelativePath;
   }
 
-  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, szDataDirectory, szDocumentPath, szOutputTag, pAssetProfile);
+  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, sDataDirectory, sDocumentPath, sOutputTag, pAssetProfile);
 }
 
 
-bool plMaterialAssetDocumentManager::IsOutputUpToDate(const char* szDocumentPath, const char* szOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
+bool plMaterialAssetDocumentManager::IsOutputUpToDate(plStringView sDocumentPath, plStringView sOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
 {
-  if (plStringUtils::IsEqual(szOutputTag, s_szShaderOutputTag))
+  if (sOutputTag.IsEqual(s_szShaderOutputTag))
   {
-    const plString sTargetFile = GetAbsoluteOutputFileName(pTypeDescriptor, szDocumentPath, szOutputTag);
+    const plString sTargetFile = GetAbsoluteOutputFileName(pTypeDescriptor, sDocumentPath, sOutputTag);
 
     plStringBuilder sExpectedHeader;
-    sExpectedHeader.Format("//{0}|{1}\n", uiHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion());
+    sExpectedHeader.SetFormat("//{0}|{1}\n", uiHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion());
 
     plFileReader file;
     if (file.Open(sTargetFile, 256).Failed())
@@ -73,7 +73,7 @@ bool plMaterialAssetDocumentManager::IsOutputUpToDate(const char* szDocumentPath
     return sFileHeader.IsEqual(sExpectedHeader);
   }
 
-  return plAssetDocumentManager::IsOutputUpToDate(szDocumentPath, szOutputTag, uiHash, pTypeDescriptor);
+  return plAssetDocumentManager::IsOutputUpToDate(sDocumentPath, sOutputTag, uiHash, pTypeDescriptor);
 }
 
 
@@ -85,7 +85,7 @@ void plMaterialAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plMaterialAssetDocument>())
       {
-        plQtMaterialAssetDocumentWindow* pDocWnd = new plQtMaterialAssetDocumentWindow(static_cast<plMaterialAssetDocument*>(e.m_pDocument));
+        new plQtMaterialAssetDocumentWindow(static_cast<plMaterialAssetDocument*>(e.m_pDocument)); // NOLINT: not a memory leak
       }
     }
     break;
@@ -95,9 +95,9 @@ void plMaterialAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
   }
 }
 
-void plMaterialAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plMaterialAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plMaterialAssetDocument(szPath);
+  out_pDocument = new plMaterialAssetDocument(sPath);
 }
 
 void plMaterialAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

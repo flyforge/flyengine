@@ -6,23 +6,23 @@
 #include <RendererFoundation/Resources/RenderTargetView.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTargetPass, 1, plRTTIDefaultAllocator<plTargetPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTargetPass, 1, plRTTIDefaultAllocator<plTargetPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color0", m_PinColor0),
-    PLASMA_MEMBER_PROPERTY("Color1", m_PinColor1),
-    PLASMA_MEMBER_PROPERTY("Color2", m_PinColor2),
-    PLASMA_MEMBER_PROPERTY("Color3", m_PinColor3),
-    PLASMA_MEMBER_PROPERTY("Color4", m_PinColor4),
-    PLASMA_MEMBER_PROPERTY("Color5", m_PinColor5),
-    PLASMA_MEMBER_PROPERTY("Color6", m_PinColor6),
-    PLASMA_MEMBER_PROPERTY("Color7", m_PinColor7),
-    PLASMA_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
+    PL_MEMBER_PROPERTY("Color0", m_PinColor0),
+    PL_MEMBER_PROPERTY("Color1", m_PinColor1),
+    PL_MEMBER_PROPERTY("Color2", m_PinColor2),
+    PL_MEMBER_PROPERTY("Color3", m_PinColor3),
+    PL_MEMBER_PROPERTY("Color4", m_PinColor4),
+    PL_MEMBER_PROPERTY("Color5", m_PinColor5),
+    PL_MEMBER_PROPERTY("Color6", m_PinColor6),
+    PL_MEMBER_PROPERTY("Color7", m_PinColor7),
+    PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTargetPass::plTargetPass(const char* szName)
@@ -30,7 +30,7 @@ plTargetPass::plTargetPass(const char* szName)
 {
 }
 
-plTargetPass::~plTargetPass() {}
+plTargetPass::~plTargetPass() = default;
 
 const plGALTextureHandle* plTargetPass::GetTextureHandle(const plGALRenderTargets& renderTargets, const plRenderPipelineNodePin* pPin)
 {
@@ -68,7 +68,7 @@ bool plTargetPass::GetRenderTargetDescriptions(const plView& view, const plArray
     "DepthStencil",
   };
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(pinNames); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(pinNames); ++i)
   {
     if (!VerifyInput(view, inputs, pinNames[i]))
       return false;
@@ -104,4 +104,4 @@ bool plTargetPass::VerifyInput(const plView& view, const plArrayPtr<plGALTexture
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_TargetPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_TargetPass);

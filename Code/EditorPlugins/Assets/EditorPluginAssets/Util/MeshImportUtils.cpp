@@ -11,9 +11,9 @@
 
 namespace plMeshImportUtils
 {
-  void FillFileFilter(plDynamicArray<plString>& out_List, plStringView sSeparated)
+  void FillFileFilter(plDynamicArray<plString>& out_list, plStringView sSeparated)
   {
-    sSeparated.Split(false, out_List, ";", "*", ".");
+    sSeparated.Split(false, out_list, ";", "*", ".");
   }
 
   plString ImportOrResolveTexture(const char* szImportSourceFolder, const char* szImportTargetFolder, plStringView sTexturePath, plModelImporter2::TextureSemantic hint, bool bTextureClamp, const plModelImporter2::Importer* pImporter)
@@ -41,22 +41,14 @@ namespace plMeshImportUtils
         return plString();
       }
 
-      sFinalTextureName.Prepend("Embedded");
+      itTex.Value().GenerateFileName(sFinalTextureName);
 
       plStringBuilder sEmbededFile;
       sEmbededFile = szImportTargetFolder;
       sEmbededFile.AppendPath(sFinalTextureName);
-      sEmbededFile.ChangeFileExtension(itTex.Value().m_sFileFormatExtension);
-
-      // plFileWriter out;
-      // if (out.Open(sEmbededFile).Succeeded())
-      //{
-      //   out.WriteBytes(itTex.Value().m_RawData.GetPtr(), itTex.Value().m_RawData.GetCount()).AssertSuccess();
-      // }
 
       relTexturePath = sEmbededFile;
     }
-
 
     plStringBuilder newAssetPathAbs = szImportTargetFolder;
     newAssetPathAbs.AppendPath(sFinalTextureName);
@@ -147,7 +139,7 @@ namespace plMeshImportUtils
       // TODO: Set... something else?
 
       pAccessor->FinishTransaction();
-      textureDocument->SaveDocument().IgnoreResult();
+      textureDocument->SaveDocument().LogFailure();
 
       plStringBuilder guid;
       plConversionUtils::ToString(textureDocument->GetGuid(), guid);
@@ -186,7 +178,7 @@ namespace plMeshImportUtils
   {
     plStringBuilder materialName = plPathUtils::GetFileName(pMaterialDoc->GetDocumentPath());
 
-    PLASMA_LOG_BLOCK("Apply Material Settings", materialName.GetData());
+    PL_LOG_BLOCK("Apply Material Settings", materialName.GetData());
 
     plObjectAccessorBase* pAccessor = pMaterialDoc->GetObjectAccessor();
     pAccessor->StartTransaction("Apply Material Settings");
@@ -372,11 +364,13 @@ namespace plMeshImportUtils
     pAccessor->FinishTransaction();
   }
 
-  void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, const char* szDocumentDirectory, const plModelImporter2::Importer* pImporter)
+  void ImportMeshAssetMaterials(plHybridArray<plMaterialResourceSlot, 8>& inout_materialSlots, plStringView sDocumentDirectory, const plModelImporter2::Importer* pImporter)
   {
-    PLASMA_PROFILE_SCOPE("ImportMeshAssetMaterials");
+    PL_PROFILE_SCOPE("ImportMeshAssetMaterials");
 
-    const plStringBuilder targetDirectory(szDocumentDirectory, "_data/");
+    plStringBuilder targetDirectory = sDocumentDirectory;
+    targetDirectory.RemoveFileExtension();
+    targetDirectory.Append("_data/");
     const plStringBuilder sourceDirectory = plPathUtils::GetFileDirectory(pImporter->GetImportOptions().m_sSourceFile);
 
     plStringBuilder tmp;
@@ -391,7 +385,7 @@ namespace plMeshImportUtils
     plHybridArray<plDocument*, 32> pendingSaveTasks;
 
     auto WaitForPendingTasks = [&pendingSaveTasks]() {
-      PLASMA_PROFILE_SCOPE("WaitForPendingTasks");
+      PL_PROFILE_SCOPE("WaitForPendingTasks");
       for (plDocument* pDoc : pendingSaveTasks)
       {
         pDoc->GetDocumentManager()->CloseDocument(pDoc);
@@ -411,13 +405,11 @@ namespace plMeshImportUtils
       }
 
       plStringBuilder sFinalTextureName;
-      plPathUtils::MakeValidFilename(itTex.Key().GetFileName(), '_', sFinalTextureName);
-      sFinalTextureName.Prepend("Embedded");
+      itTex.Value().GenerateFileName(sFinalTextureName);
 
       plStringBuilder sEmbededFile;
       sEmbededFile = targetDirectory;
       sEmbededFile.AppendPath(sFinalTextureName);
-      sEmbededFile.ChangeFileExtension(itTex.Value().m_sFileFormatExtension);
 
       plDeferredFileWriter out;
       out.SetOutput(sEmbededFile, true);
@@ -474,7 +466,7 @@ namespace plMeshImportUtils
       // If we have a material now, fill the mapping.
       // It is important to do this even for "old"/known materials since a mesh might have gotten a new slot that points to the same
       // material as previous slots.
-      if (inout_materialSlots[subMeshIdx].m_sResource)
+      if (!inout_materialSlots[subMeshIdx].m_sResource.IsEmpty())
       {
         importMatToGuid.Insert(&impMaterial, inout_materialSlots[subMeshIdx].m_sResource);
       }

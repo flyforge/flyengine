@@ -12,11 +12,11 @@
 #include <cstdlib>
 #include <ctime>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS) && PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) && PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 #  include <crtdbg.h>
 #endif
 
-#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC)
+#if PL_ENABLED(PL_COMPILER_MSVC)
 void MSVC_OutOfLine_DebugBreak(...)
 {
   __debugbreak();
@@ -26,7 +26,7 @@ void MSVC_OutOfLine_DebugBreak(...)
 bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const char* szFunction, const char* szExpression, const char* szAssertMsg)
 {
   char szTemp[1024 * 4] = "";
-  plStringUtils::snprintf(szTemp, PLASMA_ARRAY_SIZE(szTemp),
+  plStringUtils::snprintf(szTemp, PL_ARRAY_SIZE(szTemp),
     "\n\n *** Assertion ***\n\n    Expression: \"%s\"\n    Function: \"%s\"\n    File: \"%s\"\n    Line: %u\n    Message: \"%s\"\n\n", szExpression,
     szFunction, szSourceFile, uiLine, szAssertMsg);
   szTemp[1024 * 4 - 1] = '\0';
@@ -43,7 +43,7 @@ bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const cha
     tm* ptm = gmtime(&timeUTC);
 
     char szTimeStr[256] = {0};
-    sprintf(szTimeStr, "UTC: %s", asctime(ptm));
+    plStringUtils::snprintf(szTimeStr, 256, "UTC: %s", asctime(ptm));
     fputs(szTimeStr, assertLogFP);
 
     fputs(szTemp, assertLogFP);
@@ -51,23 +51,23 @@ bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const cha
     fclose(assertLogFP);
   }
 
-  // if the environment variable "PLASMA_SILENT_ASSERTS" is set to a value like "1", "on", "true", "enable" or "yes"
+  // if the environment variable "PL_SILENT_ASSERTS" is set to a value like "1", "on", "true", "enable" or "yes"
   // the assert handler will never show a GUI that may block the application from continuing to run
   // this should be set on machines that run tests which should never get stuck but rather crash asap
   bool bSilentAsserts = false;
 
-  if (plEnvironmentVariableUtils::IsVariableSet("PLASMA_SILENT_ASSERTS"))
+  if (plEnvironmentVariableUtils::IsVariableSet("PL_SILENT_ASSERTS"))
   {
-    bSilentAsserts = plEnvironmentVariableUtils::GetValueInt("PLASMA_SILENT_ASSERTS", bSilentAsserts ? 1 : 0) != 0;
+    bSilentAsserts = plEnvironmentVariableUtils::GetValueInt("PL_SILENT_ASSERTS", bSilentAsserts ? 1 : 0) != 0;
   }
 
   if (bSilentAsserts)
     return true;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
     // make sure the cursor is definitely shown, since the user must be able to click buttons
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
     // Todo: Use modern Windows API to show cursor in current window.
     // http://stackoverflow.com/questions/37956628/change-mouse-pointer-in-uwp-app
 #  else
@@ -76,7 +76,7 @@ bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const cha
     ++iHideCursor;
 #  endif
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 
   plInt32 iRes = _CrtDbgReport(_CRT_ASSERT, szSourceFile, uiLine, nullptr, "'%s'\nFunction: %s\nMessage: %s", szExpression, szFunction, szAssertMsg);
 
@@ -84,7 +84,7 @@ bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const cha
   if (iRes == 0)
   {
     // when the user ignores the assert, restore the cursor show/hide state to the previous count
-#    if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#    if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
     // Todo: Use modern Windows API to restore cursor.
 #    else
     for (plInt32 i = 0; i < iHideCursor; ++i)
@@ -97,7 +97,7 @@ bool plDefaultAssertHandler(const char* szSourceFile, plUInt32 uiLine, const cha
 #  else
 
 
-#    if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#    if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   MessageBoxA(nullptr, szTemp, "Assertion", MB_ICONERROR);
 #    endif
 
@@ -138,4 +138,3 @@ bool plFailedCheck(const char* szSourceFile, plUInt32 uiLine, const char* szFunc
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Assert);

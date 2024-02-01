@@ -11,17 +11,17 @@ class plApplication;
 
 /// \brief Platform independent run function for main loop based systems (e.g. Win32, ..)
 ///
-/// This is automatically called by PLASMA_APPLICATION_ENTRY_POINT() and PLASMA_CONSOLEAPP_ENTRY_POINT().
+/// This is automatically called by PL_APPLICATION_ENTRY_POINT() and PL_CONSOLEAPP_ENTRY_POINT().
 ///
 /// plRun simply calls plRun_Startup(), plRun_MainLoop() and plRun_Shutdown().
-PLASMA_FOUNDATION_DLL void plRun(plApplication* pApplicationInstance);
+PL_FOUNDATION_DLL void plRun(plApplication* pApplicationInstance);
 
 /// \brief [internal] Called by plRun()
-PLASMA_FOUNDATION_DLL plResult plRun_Startup(plApplication* pApplicationInstance);
+PL_FOUNDATION_DLL plResult plRun_Startup(plApplication* pApplicationInstance);
 /// \brief [internal] Called by plRun()
-PLASMA_FOUNDATION_DLL void plRun_MainLoop(plApplication* pApplicationInstance);
+PL_FOUNDATION_DLL void plRun_MainLoop(plApplication* pApplicationInstance);
 /// \brief [internal] Called by plRun()
-PLASMA_FOUNDATION_DLL void plRun_Shutdown(plApplication* pApplicationInstance);
+PL_FOUNDATION_DLL void plRun_Shutdown(plApplication* pApplicationInstance);
 
 /// \brief Base class to be used by applications based on plEngine.
 ///
@@ -29,7 +29,7 @@ PLASMA_FOUNDATION_DLL void plRun_Shutdown(plApplication* pApplicationInstance);
 /// (traditional or event-based). Derive an application specific class from plApplication and implement at least the abstract Run()
 /// function. Additional virtual functions allow to hook into specific events to run application specific code at the correct times.
 ///
-/// Finally pass the name of your derived class to one of the macros PLASMA_APPLICATION_ENTRY_POINT() or PLASMA_CONSOLEAPP_ENTRY_POINT().
+/// Finally pass the name of your derived class to one of the macros PL_APPLICATION_ENTRY_POINT() or PL_CONSOLEAPP_ENTRY_POINT().
 /// Those are used to abstract away the platform specific code to run an application.
 ///
 /// A simple example how to get started is as follows:
@@ -58,11 +58,11 @@ PLASMA_FOUNDATION_DLL void plRun_Shutdown(plApplication* pApplicationInstance);
 ///     }
 ///   };
 ///
-///   PLASMA_APPLICATION_ENTRY_POINT(plSampleApp);
+///   PL_APPLICATION_ENTRY_POINT(plSampleApp);
 /// \endcode
-class PLASMA_FOUNDATION_DLL plApplication
+class PL_FOUNDATION_DLL plApplication
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plApplication);
+  PL_DISALLOW_COPY_AND_ASSIGN(plApplication);
 
 public:
   /// \brief Defines the possible return values for the plApplication::Run() function.
@@ -154,7 +154,7 @@ public:
   virtual const char* TranslateReturnCode() const { return ""; }
 
   /// \brief Will set the command line arguments that were passed to the app by the OS.
-  /// This is automatically called by PLASMA_APPLICATION_ENTRY_POINT() and PLASMA_CONSOLEAPP_ENTRY_POINT().
+  /// This is automatically called by PL_APPLICATION_ENTRY_POINT() and PL_CONSOLEAPP_ENTRY_POINT().
   void SetCommandLineArguments(plUInt32 uiArgumentCount, const char** pArguments);
 
   /// \brief Returns the one instance of plApplication that is available.
@@ -184,7 +184,7 @@ public:
   virtual void RequestQuit();
 
   /// \brief Returns whether RequestQuit() was called.
-  PLASMA_ALWAYS_INLINE bool WasQuitRequested() const { return m_bWasQuitRequested; }
+  PL_ALWAYS_INLINE bool WasQuitRequested() const { return m_bWasQuitRequested; }
 
 protected:
   bool m_bWasQuitRequested = false;
@@ -202,8 +202,8 @@ private:
 
   static plApplication* s_pApplicationInstance;
 
-  friend PLASMA_FOUNDATION_DLL_FRIEND void plRun(plApplication* pApplicationInstance);
-  friend PLASMA_FOUNDATION_DLL_FRIEND plResult plRun_Startup(plApplication* pApplicationInstance);
-  friend PLASMA_FOUNDATION_DLL_FRIEND void plRun_MainLoop(plApplication* pApplicationInstance);
-  friend PLASMA_FOUNDATION_DLL_FRIEND void plRun_Shutdown(plApplication* pApplicationInstance);
+  friend PL_FOUNDATION_DLL_FRIEND void plRun(plApplication* pApplicationInstance);
+  friend PL_FOUNDATION_DLL_FRIEND plResult plRun_Startup(plApplication* pApplicationInstance);
+  friend PL_FOUNDATION_DLL_FRIEND void plRun_MainLoop(plApplication* pApplicationInstance);
+  friend PL_FOUNDATION_DLL_FRIEND void plRun_Shutdown(plApplication* pApplicationInstance);
 };

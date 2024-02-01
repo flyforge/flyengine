@@ -7,11 +7,11 @@
 ///
 /// For any calculations or conversions use plColor.
 /// \see plColor
-class PLASMA_FOUNDATION_DLL plColorLinear16f
+class PL_FOUNDATION_DLL plColorLinear16f
 {
 public:
   // Means that colors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   // *** Data ***
 public:

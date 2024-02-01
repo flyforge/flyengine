@@ -5,12 +5,12 @@
 
 class plSurfaceAssetDocument : public plSimpleAssetDocument<plSurfaceResourceDescriptor>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSurfaceAssetDocument, plSimpleAssetDocument<plSurfaceResourceDescriptor>);
+  PL_ADD_DYNAMIC_REFLECTION(plSurfaceAssetDocument, plSimpleAssetDocument<plSurfaceResourceDescriptor>);
 
 public:
-  plSurfaceAssetDocument(const char* szDocumentPath);
+  plSurfaceAssetDocument(plStringView sDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 };

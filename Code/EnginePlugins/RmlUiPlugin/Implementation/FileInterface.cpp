@@ -8,50 +8,50 @@ namespace plRmlUiInternal
 {
   FileInterface::FileInterface() = default;
 
-  FileInterface::~FileInterface() { PLASMA_ASSERT_DEV(m_OpenFiles.IsEmpty(), "FileInterface has still open files"); }
+  FileInterface::~FileInterface() { PL_ASSERT_DEV(m_OpenFiles.IsEmpty(), "FileInterface has still open files"); }
 
-  Rml::FileHandle FileInterface::Open(const Rml::String& path)
+  Rml::FileHandle FileInterface::Open(const Rml::String& sPath)
   {
     plFileReader fileReader;
-    if (fileReader.Open(path.c_str()).Failed())
+    if (fileReader.Open(sPath.c_str()).Failed())
     {
       return 0;
     }
 
-    plUniquePtr<OpenFile> pOpenFile = PLASMA_DEFAULT_NEW(OpenFile);
+    plUniquePtr<OpenFile> pOpenFile = PL_DEFAULT_NEW(OpenFile);
     pOpenFile->m_Storage.ReadAll(fileReader);
     pOpenFile->m_Reader.SetStorage(&pOpenFile->m_Storage);
 
     return m_OpenFiles.Insert(std::move(pOpenFile)).ToRml();
   }
 
-  void FileInterface::Close(Rml::FileHandle file) { PLASMA_VERIFY(m_OpenFiles.Remove(FileId::FromRml(file)), "Invalid file handle {}", file); }
+  void FileInterface::Close(Rml::FileHandle hFile) { PL_VERIFY(m_OpenFiles.Remove(FileId::FromRml(hFile)), "Invalid file handle {}", hFile); }
 
-  size_t FileInterface::Read(void* buffer, size_t size, Rml::FileHandle file)
+  size_t FileInterface::Read(void* pBuffer, size_t uiSize, Rml::FileHandle hFile)
   {
-    auto& pOpenFile = m_OpenFiles[FileId::FromRml(file)];
+    auto& pOpenFile = m_OpenFiles[FileId::FromRml(hFile)];
 
-    return static_cast<size_t>(pOpenFile->m_Reader.ReadBytes(buffer, size));
+    return static_cast<size_t>(pOpenFile->m_Reader.ReadBytes(pBuffer, uiSize));
   }
 
-  bool FileInterface::Seek(Rml::FileHandle file, long offset, int origin)
+  bool FileInterface::Seek(Rml::FileHandle hFile, long iOffset, int iOrigin)
   {
-    auto& pOpenFile = m_OpenFiles[FileId::FromRml(file)];
+    auto& pOpenFile = m_OpenFiles[FileId::FromRml(hFile)];
 
     int iNewReadPosition = 0;
     int iEndPosition = static_cast<int>(pOpenFile->m_Reader.GetByteCount32());
 
-    if (origin == SEEK_SET)
+    if (iOrigin == SEEK_SET)
     {
-      iNewReadPosition = offset;
+      iNewReadPosition = iOffset;
     }
-    else if (origin == SEEK_CUR)
+    else if (iOrigin == SEEK_CUR)
     {
-      iNewReadPosition = static_cast<int>(pOpenFile->m_Reader.GetReadPosition() + offset);
+      iNewReadPosition = static_cast<int>(pOpenFile->m_Reader.GetReadPosition() + iOffset);
     }
-    else if (origin == SEEK_END)
+    else if (iOrigin == SEEK_END)
     {
-      iNewReadPosition = iEndPosition + offset;
+      iNewReadPosition = iEndPosition + iOffset;
     }
 
     if (iNewReadPosition >= 0 && iNewReadPosition <= iEndPosition)
@@ -60,20 +60,20 @@ namespace plRmlUiInternal
       return true;
     }
 
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
     return false;
   }
 
-  size_t FileInterface::Tell(Rml::FileHandle file)
+  size_t FileInterface::Tell(Rml::FileHandle hFile)
   {
-    auto& pOpenFile = m_OpenFiles[FileId::FromRml(file)];
+    auto& pOpenFile = m_OpenFiles[FileId::FromRml(hFile)];
 
     return pOpenFile->m_Reader.GetReadPosition();
   }
 
-  size_t FileInterface::Length(Rml::FileHandle file)
+  size_t FileInterface::Length(Rml::FileHandle hFile)
   {
-    auto& pOpenFile = m_OpenFiles[FileId::FromRml(file)];
+    auto& pOpenFile = m_OpenFiles[FileId::FromRml(hFile)];
 
     return pOpenFile->m_Reader.GetByteCount64();
   }

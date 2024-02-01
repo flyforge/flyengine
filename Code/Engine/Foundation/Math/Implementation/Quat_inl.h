@@ -4,68 +4,78 @@
 #include <Foundation/Math/Vec3.h>
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE plQuatTemplate<Type>::plQuatTemplate()
+PL_ALWAYS_INLINE plQuatTemplate<Type>::plQuatTemplate()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   // Initialize all data to NaN in debug mode to find problems with uninitialized data easier.
   const Type TypeNaN = plMath::NaN<Type>();
+  x = TypeNaN;
+  y = TypeNaN;
+  z = TypeNaN;
   w = TypeNaN;
 #endif
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE plQuatTemplate<Type>::plQuatTemplate(Type x, Type y, Type z, Type w)
-  : v(x, y, z)
-  , w(w)
+PL_ALWAYS_INLINE plQuatTemplate<Type>::plQuatTemplate(Type inX, Type inY, Type inZ, Type inW)
+  : x(inX)
+  , y(inY)
+  , z(inZ)
+  , w(inW)
 {
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plQuatTemplate<Type> plQuatTemplate<Type>::IdentityQuaternion()
+PL_ALWAYS_INLINE const plQuatTemplate<Type> plQuatTemplate<Type>::MakeIdentity()
 {
   return plQuatTemplate(0, 0, 0, 1);
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE void plQuatTemplate<Type>::SetElements(Type inX, Type inY, Type inZ, Type inW)
+PL_ALWAYS_INLINE plQuatTemplate<Type> plQuatTemplate<Type>::MakeFromElements(Type inX, Type inY, Type inZ, Type inW)
 {
-  v.Set(inX, inY, inZ);
-  w = inW;
+  return plQuatTemplate<Type>(inX, inY, inZ, inW);
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE void plQuatTemplate<Type>::SetIdentity()
+PL_ALWAYS_INLINE void plQuatTemplate<Type>::SetIdentity()
 {
-  v.SetZero();
+  x = (Type)0;
+  y = (Type)0;
+  z = (Type)0;
   w = (Type)1;
 }
 
 template <typename Type>
-void plQuatTemplate<Type>::SetFromAxisAndAngle(const plVec3Template<Type>& vRotationAxis, plAngle angle)
+plQuatTemplate<Type> plQuatTemplate<Type>::MakeFromAxisAndAngle(const plVec3Template<Type>& vRotationAxis, plAngle angle)
 {
   const plAngle halfAngle = angle * 0.5f;
 
-  v = static_cast<Type>(plMath::Sin(halfAngle)) * vRotationAxis;
-  w = plMath::Cos(halfAngle);
+  plVec3 v = static_cast<Type>(plMath::Sin(halfAngle)) * vRotationAxis;
+  float w = plMath::Cos(halfAngle);
+
+  return plQuatTemplate<Type>(v.x, v.y, v.z, w);
 }
 
 template <typename Type>
 void plQuatTemplate<Type>::Normalize()
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
-  Type n = v.x * v.x + v.y * v.y + v.z * v.z + w * w;
+  Type n = x * x + y * y + z * z + w * w;
 
   n = plMath::Invert(plMath::Sqrt(n));
 
-  v *= n;
+  x *= n;
+  y *= n;
+  z *= n;
   w *= n;
 }
 
 template <typename Type>
 void plQuatTemplate<Type>::GetRotationAxisAndAngle(plVec3Template<Type>& out_vAxis, plAngle& out_angle, Type fEpsilon) const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   out_angle = 2 * plMath::ACos(static_cast<float>(w));
 
@@ -78,78 +88,93 @@ void plQuatTemplate<Type>::GetRotationAxisAndAngle(plVec3Template<Type>& out_vAx
   else
   {
     const float ds = 1.0f / s;
-    out_vAxis.x = v.x * ds;
-    out_vAxis.y = v.y * ds;
-    out_vAxis.z = v.z * ds;
+    out_vAxis.x = x * ds;
+    out_vAxis.y = y * ds;
+    out_vAxis.z = z * ds;
   }
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE void plQuatTemplate<Type>::Invert()
+PL_FORCE_INLINE void plQuatTemplate<Type>::Invert()
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
-  *this = -(*this);
+  *this = GetInverse();
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE const plQuatTemplate<Type> plQuatTemplate<Type>::operator-() const
+PL_FORCE_INLINE const plQuatTemplate<Type> plQuatTemplate<Type>::GetInverse() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
-  return (plQuatTemplate(-v.x, -v.y, -v.z, w));
+  return (plQuatTemplate(-x, -y, -z, w));
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE Type plQuatTemplate<Type>::Dot(const plQuatTemplate& rhs) const
+PL_FORCE_INLINE const plQuatTemplate<Type> plQuatTemplate<Type>::GetNegated() const
 {
-  PLASMA_NAN_ASSERT(this);
-  PLASMA_NAN_ASSERT(&rhs);
+  PL_NAN_ASSERT(this);
 
-  return v.Dot(rhs.v) + w * rhs.w;
+  return (plQuatTemplate(-x, -y, -z, -w));
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plVec3Template<Type> operator*(const plQuatTemplate<Type>& q, const plVec3Template<Type>& v)
+PL_FORCE_INLINE Type plQuatTemplate<Type>::Dot(const plQuatTemplate& rhs) const
 {
-  plVec3Template<Type> t = q.v.CrossRH(v) * (Type)2;
-  return v + q.w * t + q.v.CrossRH(t);
+  PL_NAN_ASSERT(this);
+  PL_NAN_ASSERT(&rhs);
+
+  return GetVectorPart().Dot(rhs.GetVectorPart()) + w * rhs.w;
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plQuatTemplate<Type> operator*(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
+PL_ALWAYS_INLINE const plVec3Template<Type> operator*(const plQuatTemplate<Type>& q, const plVec3Template<Type>& v)
+{
+  plVec3Template<Type> t = q.GetVectorPart().CrossRH(v) * (Type)2;
+  return v + q.w * t + q.GetVectorPart().CrossRH(t);
+}
+
+template <typename Type>
+PL_ALWAYS_INLINE const plQuatTemplate<Type> operator*(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
 {
   plQuatTemplate<Type> q;
 
-  q.w = q1.w * q2.w - q1.v.Dot(q2.v);
-  q.v = q1.w * q2.v + q2.w * q1.v + q1.v.CrossRH(q2.v);
+  q.w = q1.w * q2.w - (q1.x * q2.x + q1.y * q2.y + q1.z * q2.z);
 
-  return (q);
+  const plVec3 v1 = q1.GetVectorPart();
+  const plVec3 v2 = q2.GetVectorPart();
+
+  const plVec3 vr = q1.w * v2 + q2.w * v1 + v1.CrossRH(v2);
+  q.x = vr.x;
+  q.y = vr.y;
+  q.z = vr.z;
+
+  return q;
 }
 
 template <typename Type>
 bool plQuatTemplate<Type>::IsValid(Type fEpsilon) const
 {
-  if (!v.IsValid())
+  if (!GetVectorPart().IsValid())
     return false;
   if (!plMath::IsFinite(w))
     return false;
 
-  Type n = v.x * v.x + v.y * v.y + v.z * v.z + w * w;
+  Type n = x * x + y * y + z * z + w * w;
 
-  return (plMath::IsEqual(n, (Type)1, fEpsilon));
+  return plMath::IsEqual(n, (Type)1, fEpsilon);
 }
 
 template <typename Type>
 bool plQuatTemplate<Type>::IsNaN() const
 {
-  return v.IsNaN() || plMath::IsNaN(w);
+  return plMath::IsNaN(x) || plMath::IsNaN(y) || plMath::IsNaN(z) || plMath::IsNaN(w);
 }
 
 template <typename Type>
 bool plQuatTemplate<Type>::IsEqualRotation(const plQuatTemplate<Type>& qOther, Type fEpsilon) const
 {
-  if (v.IsEqual(qOther.v, (Type)0.00001) && plMath::IsEqual(w, qOther.w, (Type)0.00001))
+  if (GetVectorPart().IsEqual(qOther.GetVectorPart(), (Type)0.00001) && plMath::IsEqual(w, qOther.w, (Type)0.00001))
   {
     return true;
   }
@@ -160,10 +185,10 @@ bool plQuatTemplate<Type>::IsEqualRotation(const plQuatTemplate<Type>& qOther, T
   GetRotationAxisAndAngle(vA1, A1);
   qOther.GetRotationAxisAndAngle(vA2, A2);
 
-  if ((A1.IsEqualSimple(A2, plAngle::Degree(static_cast<float>(fEpsilon)))) && (vA1.IsEqual(vA2, fEpsilon)))
+  if ((A1.IsEqualSimple(A2, plAngle::MakeFromDegree(static_cast<float>(fEpsilon)))) && (vA1.IsEqual(vA2, fEpsilon)))
     return true;
 
-  if ((A1.IsEqualSimple(-A2, plAngle::Degree(static_cast<float>(fEpsilon)))) && (vA1.IsEqual(-vA2, fEpsilon)))
+  if ((A1.IsEqualSimple(-A2, plAngle::MakeFromDegree(static_cast<float>(fEpsilon)))) && (vA1.IsEqual(-vA2, fEpsilon)))
     return true;
 
   return false;
@@ -172,22 +197,22 @@ bool plQuatTemplate<Type>::IsEqualRotation(const plQuatTemplate<Type>& qOther, T
 template <typename Type>
 const plMat3Template<Type> plQuatTemplate<Type>::GetAsMat3() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   plMat3Template<Type> m;
 
-  const Type fTx = v.x + v.x;
-  const Type fTy = v.y + v.y;
-  const Type fTz = v.z + v.z;
+  const Type fTx = x + x;
+  const Type fTy = y + y;
+  const Type fTz = z + z;
   const Type fTwx = fTx * w;
   const Type fTwy = fTy * w;
   const Type fTwz = fTz * w;
-  const Type fTxx = fTx * v.x;
-  const Type fTxy = fTy * v.x;
-  const Type fTxz = fTz * v.x;
-  const Type fTyy = fTy * v.y;
-  const Type fTyz = fTz * v.y;
-  const Type fTzz = fTz * v.z;
+  const Type fTxx = fTx * x;
+  const Type fTxy = fTy * x;
+  const Type fTxz = fTz * x;
+  const Type fTyy = fTy * y;
+  const Type fTyz = fTz * y;
+  const Type fTzz = fTz * z;
 
   m.Element(0, 0) = (Type)1 - (fTyy + fTzz);
   m.Element(1, 0) = fTxy - fTwz;
@@ -204,22 +229,22 @@ const plMat3Template<Type> plQuatTemplate<Type>::GetAsMat3() const
 template <typename Type>
 const plMat4Template<Type> plQuatTemplate<Type>::GetAsMat4() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   plMat4Template<Type> m;
 
-  const Type fTx = v.x + v.x;
-  const Type fTy = v.y + v.y;
-  const Type fTz = v.z + v.z;
+  const Type fTx = x + x;
+  const Type fTy = y + y;
+  const Type fTz = z + z;
   const Type fTwx = fTx * w;
   const Type fTwy = fTy * w;
   const Type fTwz = fTz * w;
-  const Type fTxx = fTx * v.x;
-  const Type fTxy = fTy * v.x;
-  const Type fTxz = fTz * v.x;
-  const Type fTyy = fTy * v.y;
-  const Type fTyz = fTz * v.y;
-  const Type fTzz = fTz * v.z;
+  const Type fTxx = fTx * x;
+  const Type fTxy = fTy * x;
+  const Type fTxz = fTz * x;
+  const Type fTyy = fTy * y;
+  const Type fTyz = fTz * y;
+  const Type fTzz = fTz * z;
 
   m.Element(0, 0) = (Type)1 - (fTyy + fTzz);
   m.Element(1, 0) = fTxy - fTwz;
@@ -241,9 +266,9 @@ const plMat4Template<Type> plQuatTemplate<Type>::GetAsMat4() const
 }
 
 template <typename Type>
-void plQuatTemplate<Type>::SetFromMat3(const plMat3Template<Type>& m)
+plQuatTemplate<Type> plQuatTemplate<Type>::MakeFromMat3(const plMat3Template<Type>& m)
 {
-  PLASMA_NAN_ASSERT(&m);
+  PL_NAN_ASSERT(&m);
 
   const Type trace = m.Element(0, 0) + m.Element(1, 1) + m.Element(2, 2);
   const Type half = (Type)0.5;
@@ -284,10 +309,12 @@ void plQuatTemplate<Type>::SetFromMat3(const plMat3Template<Type>& m)
     val[k] = (m.Element(i, k) + m.Element(k, i)) * t;
   }
 
-  v.x = val[0];
-  v.y = val[1];
-  v.z = val[2];
-  w = val[3];
+  plQuatTemplate<Type> q;
+  q.x = val[0];
+  q.y = val[1];
+  q.z = val[2];
+  q.w = val[3];
+  return q;
 }
 
 template <typename Type>
@@ -302,7 +329,7 @@ void plQuatTemplate<Type>::ReconstructFromMat3(const plMat3Template<Type>& mMat)
   m.SetColumn(1, y);
   m.SetColumn(2, z);
 
-  SetFromMat3(m);
+  *this = plQuat::MakeFromMat3(m);
 }
 
 template <typename Type>
@@ -317,7 +344,7 @@ void plQuatTemplate<Type>::ReconstructFromMat4(const plMat4Template<Type>& mMat)
   m.SetColumn(1, y);
   m.SetColumn(2, z);
 
-  SetFromMat3(m);
+  *this = plQuat::MakeFromMat3(m);
 }
 
 /*! \note This function will ALWAYS return a quaternion that rotates from one direction to another.
@@ -327,7 +354,7 @@ void plQuatTemplate<Type>::ReconstructFromMat4(const plMat4Template<Type>& mMat)
   such a rotation with other means.
 */
 template <typename Type>
-void plQuatTemplate<Type>::SetShortestRotation(const plVec3Template<Type>& vDirFrom, const plVec3Template<Type>& vDirTo)
+plQuatTemplate<Type> plQuatTemplate<Type>::MakeShortestRotation(const plVec3Template<Type>& vDirFrom, const plVec3Template<Type>& vDirTo)
 {
   const plVec3Template<Type> v0 = vDirFrom.GetNormalized();
   const plVec3Template<Type> v1 = vDirTo.GetNormalized();
@@ -337,41 +364,44 @@ void plQuatTemplate<Type>::SetShortestRotation(const plVec3Template<Type>& vDirF
   // if both vectors are identical -> no rotation needed
   if (plMath::IsEqual(fDot, (Type)1, (Type)0.0000001))
   {
-    SetIdentity();
-    return;
+    return MakeIdentity();
   }
   else if (plMath::IsEqual(fDot, (Type)-1, (Type)0.0000001)) // if both vectors are opposing
   {
     // find an axis, that is not identical and not opposing, plVec3Template::Cross-product to find perpendicular vector, rotate around that
     if (plMath::Abs(v0.Dot(plVec3Template<Type>(1, 0, 0))) < (Type)0.8)
-      SetFromAxisAndAngle(v0.CrossRH(plVec3Template<Type>(1, 0, 0)).GetNormalized(), plAngle::Radian(plMath::Pi<float>()));
+      return MakeFromAxisAndAngle(v0.CrossRH(plVec3Template<Type>(1, 0, 0)).GetNormalized(), plAngle::MakeFromRadian(plMath::Pi<float>()));
     else
-      SetFromAxisAndAngle(v0.CrossRH(plVec3Template<Type>(0, 1, 0)).GetNormalized(), plAngle::Radian(plMath::Pi<float>()));
-
-    return;
+      return MakeFromAxisAndAngle(v0.CrossRH(plVec3Template<Type>(0, 1, 0)).GetNormalized(), plAngle::MakeFromRadian(plMath::Pi<float>()));
   }
 
   const plVec3Template<Type> c = v0.CrossRH(v1);
   const Type d = v0.Dot(v1);
   const Type s = plMath::Sqrt(((Type)1 + d) * (Type)2);
 
-  PLASMA_ASSERT_DEBUG(c.IsValid(), "SetShortestRotation failed.");
+  PL_ASSERT_DEBUG(c.IsValid(), "SetShortestRotation failed.");
 
-  v = c / s;
-  w = s / (Type)2;
+  const Type fOneDivS = 1.0f / s;
 
-  Normalize();
+  plQuatTemplate<Type> q;
+  q.x = c.x * fOneDivS;
+  q.y = c.y * fOneDivS;
+  q.z = c.z * fOneDivS;
+  q.w = s / (Type)2;
+  q.Normalize();
+
+  return q;
 }
 
 template <typename Type>
-void plQuatTemplate<Type>::SetSlerp(const plQuatTemplate<Type>& qFrom, const plQuatTemplate<Type>& qTo, Type t)
+plQuatTemplate<Type> plQuatTemplate<Type>::MakeSlerp(const plQuatTemplate<Type>& qFrom, const plQuatTemplate<Type>& qTo, Type t)
 {
-  PLASMA_ASSERT_DEBUG((t >= (Type)0) && (t <= (Type)1), "Invalid lerp factor.");
+  PL_ASSERT_DEBUG((t >= (Type)0) && (t <= (Type)1), "Invalid lerp factor.");
 
   const Type one = 1;
   const Type qdelta = (Type)1 - (Type)0.001;
 
-  const Type fDot = (qFrom.v.x * qTo.v.x + qFrom.v.y * qTo.v.y + qFrom.v.z * qTo.v.z + qFrom.w * qTo.w);
+  const Type fDot = (qFrom.x * qTo.x + qFrom.y * qTo.y + qFrom.z * qTo.z + qFrom.w * qTo.w);
 
   Type cosTheta = fDot;
 
@@ -408,27 +438,31 @@ void plQuatTemplate<Type>::SetSlerp(const plQuatTemplate<Type>& qFrom, const plQ
   if (bFlipSign)
     t1 = -t1;
 
-  v.x = t0 * qFrom.v.x;
-  v.y = t0 * qFrom.v.y;
-  v.z = t0 * qFrom.v.z;
-  w = t0 * qFrom.w;
+  plQuatTemplate<Type> q;
 
-  v.x += t1 * qTo.v.x;
-  v.y += t1 * qTo.v.y;
-  v.z += t1 * qTo.v.z;
-  w += t1 * qTo.w;
+  q.x = t0 * qFrom.x;
+  q.y = t0 * qFrom.y;
+  q.z = t0 * qFrom.z;
+  q.w = t0 * qFrom.w;
 
-  Normalize();
+  q.x += t1 * qTo.x;
+  q.y += t1 * qTo.y;
+  q.z += t1 * qTo.z;
+  q.w += t1 * qTo.w;
+
+  q.Normalize();
+
+  return q;
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator==(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
+PL_ALWAYS_INLINE bool operator==(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
 {
-  return q1.v.IsIdentical(q2.v) && q1.w == q2.w;
+  return q1.x == q2.x && q1.y == q2.y && q1.z == q2.z && q1.w == q2.w;
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator!=(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
+PL_ALWAYS_INLINE bool operator!=(const plQuatTemplate<Type>& q1, const plQuatTemplate<Type>& q2)
 {
   return !(q1 == q2);
 }
@@ -444,40 +478,40 @@ void plQuatTemplate<Type>::GetAsEulerAngles(plAngle& out_x, plAngle& out_y, plAn
   auto& pitch = out_y;
   auto& roll = out_x;
 
-  const double fSingularityTest = w * v.y - v.z * v.x;
+  const double fSingularityTest = w * y - z * x;
   const double fSingularityThreshold = 0.4999995;
 
   if (fSingularityTest > fSingularityThreshold) // singularity at north pole
   {
-    yaw = -2.0f * plMath::ATan2(v.x, w);
-    pitch = plAngle::Degree(90.0f);
-    roll = plAngle::Degree(0.0f);
+    yaw = -2.0f * plMath::ATan2(x, w);
+    pitch = plAngle::MakeFromDegree(90.0f);
+    roll = plAngle::MakeFromDegree(0.0f);
   }
   else if (fSingularityTest < -fSingularityThreshold) // singularity at south pole
   {
-    yaw = 2.0f * plMath::ATan2(v.x, w);
-    pitch = plAngle::Degree(-90.0f);
-    roll = plAngle::Degree(0.0f);
+    yaw = 2.0f * plMath::ATan2(x, w);
+    pitch = plAngle::MakeFromDegree(-90.0f);
+    roll = plAngle::MakeFromDegree(0.0f);
   }
   else
   {
     // yaw (z-axis rotation)
-    const double siny = 2.0 * (w * v.z + v.x * v.y);
-    const double cosy = 1.0 - 2.0 * (v.y * v.y + v.z * v.z);
+    const double siny = 2.0 * (w * z + x * y);
+    const double cosy = 1.0 - 2.0 * (y * y + z * z);
     yaw = plMath::ATan2((float)siny, (float)cosy);
 
     // pitch (y-axis rotation)
     pitch = plMath::ASin(2.0f * (float)fSingularityTest);
 
     // roll (x-axis rotation)
-    const double sinr = 2.0 * (w * v.x + v.y * v.z);
-    const double cosr = 1.0 - 2.0 * (v.x * v.x + v.y * v.y);
+    const double sinr = 2.0 * (w * x + y * z);
+    const double cosr = 1.0 - 2.0 * (x * x + y * y);
     roll = plMath::ATan2((float)sinr, (float)cosr);
   }
 }
 
 template <typename Type>
-void plQuatTemplate<Type>::SetFromEulerAngles(const plAngle& x, const plAngle& y, const plAngle& z)
+plQuatTemplate<Type> plQuatTemplate<Type>::MakeFromEulerAngles(const plAngle& x, const plAngle& y, const plAngle& z)
 {
   /// Taken from here (yaw->pitch->roll, ZYX order or 3-2-1 order):
   /// https://en.wikipedia.org/wiki/Conversion_between_quaternions_and_Euler_angles
@@ -491,8 +525,10 @@ void plQuatTemplate<Type>::SetFromEulerAngles(const plAngle& x, const plAngle& y
   const double cr = plMath::Cos(roll * 0.5);
   const double sr = plMath::Sin(roll * 0.5);
 
-  w = (float)(cy * cp * cr + sy * sp * sr);
-  v.x = (float)(cy * cp * sr - sy * sp * cr);
-  v.y = (float)(cy * sp * cr + sy * cp * sr);
-  v.z = (float)(sy * cp * cr - cy * sp * sr);
+  plQuatTemplate<Type> q;
+  q.w = (float)(cy * cp * cr + sy * sp * sr);
+  q.x = (float)(cy * cp * sr - sy * sp * cr);
+  q.y = (float)(cy * sp * cr + sy * cp * sr);
+  q.z = (float)(sy * cp * cr - cy * sp * sr);
+  return q;
 }

@@ -8,24 +8,24 @@
 #include <JoltPlugin/System/JoltWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltDistanceConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltDistanceConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("MinDistance", GetMinDistance, SetMinDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("MaxDistance", GetMaxDistance, SetMaxDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Frequency", GetFrequency, SetFrequency)->AddAttributes(new plClampValueAttribute(0.0f, 120.0f), new plDefaultValueAttribute(2.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Damping", GetDamping, SetDamping)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.5f)),
+    PL_ACCESSOR_PROPERTY("MinDistance", GetMinDistance, SetMinDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("MaxDistance", GetMaxDistance, SetMaxDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Frequency", GetFrequency, SetFrequency)->AddAttributes(new plClampValueAttribute(0.0f, 120.0f), new plDefaultValueAttribute(2.0f)),
+    PL_ACCESSOR_PROPERTY("Damping", GetDamping, SetDamping)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.5f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plSphereVisualizerAttribute("MinDistance", plColor::IndianRed),
     new plSphereVisualizerAttribute("MaxDistance", plColor::LightSkyBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltDistanceConstraintComponent::plJoltDistanceConstraintComponent() = default;
@@ -136,4 +136,4 @@ void plJoltDistanceConstraintComponent::CreateContstraintType(JPH::Body* pBody0,
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltDistanceConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltDistanceConstraintComponent);

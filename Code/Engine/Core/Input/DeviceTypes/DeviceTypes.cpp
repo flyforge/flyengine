@@ -4,11 +4,11 @@
 #include <Core/Input/DeviceTypes/MouseKeyboard.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceMouseKeyboard, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceMouseKeyboard, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceController, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceController, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plInt32 plInputDeviceMouseKeyboard::s_iMouseIsOverWindowNumber = -1;
@@ -34,39 +34,39 @@ plInputDeviceController::plInputDeviceController()
 
 void plInputDeviceController::EnableVibration(plUInt8 uiVirtual, bool bEnable)
 {
-  PLASMA_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
+  PL_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
 
   m_bVibrationEnabled[uiVirtual] = bEnable;
 }
 
 bool plInputDeviceController::IsVibrationEnabled(plUInt8 uiVirtual) const
 {
-  PLASMA_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
+  PL_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
 
   return m_bVibrationEnabled[uiVirtual];
 }
 
-void plInputDeviceController::SetVibrationStrength(plUInt8 uiVirtual, Motor::Enum eMotor, float fValue)
+void plInputDeviceController::SetVibrationStrength(plUInt8 uiVirtual, Motor::Enum motor, float fValue)
 {
-  PLASMA_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
-  PLASMA_ASSERT_DEV(eMotor < Motor::ENUM_COUNT, "Invalid Vibration Motor Index.");
+  PL_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
+  PL_ASSERT_DEV(motor < Motor::ENUM_COUNT, "Invalid Vibration Motor Index.");
 
-  m_fVibrationStrength[uiVirtual][eMotor] = plMath::Clamp(fValue, 0.0f, 1.0f);
+  m_fVibrationStrength[uiVirtual][motor] = plMath::Clamp(fValue, 0.0f, 1.0f);
 }
 
-float plInputDeviceController::GetVibrationStrength(plUInt8 uiVirtual, Motor::Enum eMotor)
+float plInputDeviceController::GetVibrationStrength(plUInt8 uiVirtual, Motor::Enum motor)
 {
-  PLASMA_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
-  PLASMA_ASSERT_DEV(eMotor < Motor::ENUM_COUNT, "Invalid Vibration Motor Index.");
+  PL_ASSERT_DEV(uiVirtual < MaxControllers, "Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
+  PL_ASSERT_DEV(motor < Motor::ENUM_COUNT, "Invalid Vibration Motor Index.");
 
-  return m_fVibrationStrength[uiVirtual][eMotor];
+  return m_fVibrationStrength[uiVirtual][motor];
 }
 
 void plInputDeviceController::SetControllerMapping(plUInt8 uiVirtualController, plInt8 iTakeInputFromPhysical)
 {
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     uiVirtualController < MaxControllers, "Virtual Controller Index {0} is larger than allowed ({1}).", uiVirtualController, MaxControllers);
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     iTakeInputFromPhysical < MaxControllers, "Physical Controller Index {0} is larger than allowed ({1}).", iTakeInputFromPhysical, MaxControllers);
 
   if (iTakeInputFromPhysical < 0)
@@ -93,21 +93,21 @@ void plInputDeviceController::SetControllerMapping(plUInt8 uiVirtualController, 
 
 plInt8 plInputDeviceController::GetControllerMapping(plUInt8 uiVirtual) const
 {
-  PLASMA_ASSERT_DEV(uiVirtual < MaxControllers, "Virtual Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
+  PL_ASSERT_DEV(uiVirtual < MaxControllers, "Virtual Controller Index {0} is larger than allowed ({1}).", uiVirtual, MaxControllers);
 
   return m_iControllerMapping[uiVirtual];
 }
 
 void plInputDeviceController::AddVibrationTrack(
-  plUInt8 uiVirtual, Motor::Enum eMotor, float* fVibrationTrackValue, plUInt32 uiSamples, float fScalingFactor)
+  plUInt8 uiVirtual, Motor::Enum motor, float* pVibrationTrackValue, plUInt32 uiSamples, float fScalingFactor)
 {
   uiSamples = plMath::Min<plUInt32>(uiSamples, MaxVibrationSamples);
 
   for (plUInt32 s = 0; s < uiSamples; ++s)
   {
-    float& fVal = m_fVibrationTracks[uiVirtual][eMotor][(m_uiVibrationTrackPos + 1 + s) % MaxVibrationSamples];
+    float& fVal = m_fVibrationTracks[uiVirtual][motor][(m_uiVibrationTrackPos + 1 + s) % MaxVibrationSamples];
 
-    fVal = plMath::Max(fVal, fVibrationTrackValue[s] * fScalingFactor);
+    fVal = plMath::Max(fVal, pVibrationTrackValue[s] * fScalingFactor);
     fVal = plMath::Clamp(fVal, 0.0f, 1.0f);
   }
 }
@@ -117,7 +117,7 @@ void plInputDeviceController::UpdateVibration(plTime tTimeDifference)
   static plTime tElapsedTime;
   tElapsedTime += tTimeDifference;
 
-  const plTime tTimePerSample = plTime::Seconds(1.0 / VibrationSamplesPerSecond);
+  const plTime tTimePerSample = plTime::MakeFromSeconds(1.0 / (double)VibrationSamplesPerSecond);
 
   // advance the vibration track sampling
   while (tElapsedTime >= tTimePerSample)
@@ -191,7 +191,7 @@ void plInputDeviceMouseKeyboard::UpdateInputSlotValues()
         if (tNow - m_LastMouseClick[i] <= m_DoubleClickTime)
         {
           m_InputSlotValues[dlbSlots[i]] = 1.0f;
-          m_LastMouseClick[i].SetZero(); // this prevents triple-clicks from appearing as two double clicks
+          m_LastMouseClick[i] = plTime::MakeZero(); // this prevents triple-clicks from appearing as two double clicks
         }
         else
         {
@@ -204,4 +204,4 @@ void plInputDeviceMouseKeyboard::UpdateInputSlotValues()
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Input_DeviceTypes_DeviceTypes);
+PL_STATICLINK_FILE(Core, Core_Input_DeviceTypes_DeviceTypes);

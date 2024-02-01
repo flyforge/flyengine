@@ -93,4 +93,4 @@ void RemoveMemoryEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Memory);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Memory);

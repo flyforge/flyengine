@@ -8,7 +8,7 @@ plActionDescriptorHandle plVisualShaderActions::s_hCleanGraph;
 
 void plVisualShaderActions::RegisterActions()
 {
-  s_hCleanGraph = PLASMA_REGISTER_ACTION_0("VisualShader.CleanGraph", plActionScope::Document, "Visual Shader", "", plVisualShaderAction);
+  s_hCleanGraph = PL_REGISTER_ACTION_0("VisualShader.CleanGraph", plActionScope::Document, "Visual Shader", "", plVisualShaderAction);
 }
 
 void plVisualShaderActions::UnregisterActions()
@@ -16,17 +16,17 @@ void plVisualShaderActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hCleanGraph);
 }
 
-void plVisualShaderActions::MapActions(const char* szMapping)
+void plVisualShaderActions::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCleanGraph, "", 30.0f);
 }
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualShaderAction, 0, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualShaderAction, 0, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plVisualShaderAction::plVisualShaderAction(const plActionContext& context, const char* szName)
   : plButtonAction(context, szName, false, "")
@@ -34,7 +34,7 @@ plVisualShaderAction::plVisualShaderAction(const plActionContext& context, const
   SetIconPath(":/EditorPluginAssets/Cleanup.svg");
 }
 
-plVisualShaderAction::~plVisualShaderAction() {}
+plVisualShaderAction::~plVisualShaderAction() = default;
 
 void plVisualShaderAction::Execute(const plVariant& value)
 {

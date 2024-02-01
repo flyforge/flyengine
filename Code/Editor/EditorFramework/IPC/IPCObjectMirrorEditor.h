@@ -8,18 +8,18 @@
 ///
 /// One instance on the editor side needs to be initialized as sender and another
 /// one on the engine side as receiver.
-class PLASMA_EDITORFRAMEWORK_DLL plIPCObjectMirrorEditor : public plDocumentObjectMirror
+class PL_EDITORFRAMEWORK_DLL plIPCObjectMirrorEditor : public plDocumentObjectMirror
 {
 public:
   plIPCObjectMirrorEditor();
   ~plIPCObjectMirrorEditor();
 
-  void SetIPC(PlasmaEditorEngineConnection* pIPC);
-  PlasmaEditorEngineConnection* GetIPC();
-  virtual void ApplyOp(plObjectChange& change) override;
+  void SetIPC(plEditorEngineConnection* pIPC);
+  plEditorEngineConnection* GetIPC();
+  virtual void ApplyOp(plObjectChange& ref_change) override;
 
 private:
   void SendOp(plObjectChange& change);
 
-  PlasmaEditorEngineConnection* m_pIPC;
+  plEditorEngineConnection* m_pIPC;
 };

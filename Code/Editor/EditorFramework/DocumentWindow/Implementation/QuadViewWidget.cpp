@@ -27,7 +27,7 @@ plQtQuadViewWidget::~plQtQuadViewWidget()
   SaveViewConfigs();
 }
 
-void plQtQuadViewWidget::SaveViewConfig(const PlasmaEngineViewConfig& cfg, PlasmaEngineViewPreferences& pref) const
+void plQtQuadViewWidget::SaveViewConfig(const plEngineViewConfig& cfg, plEngineViewPreferences& pref) const
 {
   pref.m_vCamPos = cfg.m_Camera.GetPosition();
   pref.m_vCamDir = cfg.m_Camera.GetDirForwards();
@@ -37,7 +37,7 @@ void plQtQuadViewWidget::SaveViewConfig(const PlasmaEngineViewConfig& cfg, Plasm
   pref.m_fFov = cfg.m_Camera.GetFovOrDim();
 }
 
-void plQtQuadViewWidget::LoadViewConfig(PlasmaEngineViewConfig& cfg, PlasmaEngineViewPreferences& pref)
+void plQtQuadViewWidget::LoadViewConfig(plEngineViewConfig& cfg, plEngineViewPreferences& pref)
 {
   cfg.m_Perspective = (plSceneViewPerspective::Enum)pref.m_PerspectiveMode;
   cfg.m_RenderMode = (plViewRenderMode::Enum)pref.m_RenderMode;
@@ -45,7 +45,7 @@ void plQtQuadViewWidget::LoadViewConfig(PlasmaEngineViewConfig& cfg, PlasmaEngin
 
   if (cfg.m_Perspective == plSceneViewPerspective::Perspective)
   {
-    PlasmaEditorPreferencesUser* pPref = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+    plEditorPreferencesUser* pPref = plPreferences::QueryPreferences<plEditorPreferencesUser>();
     cfg.ApplyPerspectiveSetting(pPref->m_fPerspectiveFieldOfView);
   }
   else
@@ -116,7 +116,7 @@ void plQtQuadViewWidget::CreateViews(bool bQuad)
 void plQtQuadViewWidget::ToggleViews(QWidget* pView)
 {
   plQtEngineViewWidget* pViewport = qobject_cast<plQtEngineViewWidget*>(pView);
-  PLASMA_ASSERT_DEV(pViewport != nullptr, "plQtSceneDocumentWindow::ToggleViews must be called with a plQtSceneViewWidget as parameter!");
+  PL_ASSERT_DEV(pViewport != nullptr, "plQtSceneDocumentWindow::ToggleViews must be called with a plQtSceneViewWidget as parameter!");
   bool bIsQuad = m_ActiveMainViews.GetCount() == 4;
   if (bIsQuad)
   {

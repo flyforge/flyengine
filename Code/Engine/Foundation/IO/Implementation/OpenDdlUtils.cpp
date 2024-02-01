@@ -14,13 +14,13 @@
 plResult plOpenDdlUtils::ConvertToColor(const plOpenDdlReaderElement* pElement, plColor& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
@@ -36,7 +36,7 @@ plResult plOpenDdlUtils::ConvertToColor(const plOpenDdlReaderElement* pElement, 
       out_result.b = pValues[2];
       out_result.a = pValues[3];
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetNumPrimitives() == 3)
@@ -46,7 +46,7 @@ plResult plOpenDdlUtils::ConvertToColor(const plOpenDdlReaderElement* pElement, 
       out_result.b = pValues[2];
       out_result.a = 1.0f;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
   else if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt8)
@@ -57,30 +57,30 @@ plResult plOpenDdlUtils::ConvertToColor(const plOpenDdlReaderElement* pElement, 
     {
       out_result = plColorGammaUB(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetNumPrimitives() == 3)
     {
       out_result = plColorGammaUB(pValues[0], pValues[1], pValues[2]);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToColorGamma(const plOpenDdlReaderElement* pElement, plColorGammaUB& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
@@ -93,14 +93,14 @@ plResult plOpenDdlUtils::ConvertToColorGamma(const plOpenDdlReaderElement* pElem
     {
       out_result = plColor(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetNumPrimitives() == 3)
     {
       out_result = plColor(pValues[0], pValues[1], pValues[2]);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
   else if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt8)
@@ -114,7 +114,7 @@ plResult plOpenDdlUtils::ConvertToColorGamma(const plOpenDdlReaderElement* pElem
       out_result.b = pValues[2];
       out_result.a = pValues[3];
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetNumPrimitives() == 3)
@@ -124,67 +124,67 @@ plResult plOpenDdlUtils::ConvertToColorGamma(const plOpenDdlReaderElement* pElem
       out_result.b = pValues[2];
       out_result.a = 255;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToTime(const plOpenDdlReaderElement* pElement, plTime& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 1)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_result = plTime::Seconds(pValues[0]);
+    out_result = plTime::MakeFromSeconds(pValues[0]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Double)
   {
     const double* pValues = pElement->GetPrimitivesDouble();
 
-    out_result = plTime::Seconds(pValues[0]);
+    out_result = plTime::MakeFromSeconds(pValues[0]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec2(const plOpenDdlReaderElement* pElement, plVec2& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 2)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
@@ -192,28 +192,28 @@ plResult plOpenDdlUtils::ConvertToVec2(const plOpenDdlReaderElement* pElement, p
 
     out_vResult.Set(pValues[0], pValues[1]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec3(const plOpenDdlReaderElement* pElement, plVec3& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 3)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
@@ -221,28 +221,28 @@ plResult plOpenDdlUtils::ConvertToVec3(const plOpenDdlReaderElement* pElement, p
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec4(const plOpenDdlReaderElement* pElement, plVec4& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
@@ -250,28 +250,28 @@ plResult plOpenDdlUtils::ConvertToVec4(const plOpenDdlReaderElement* pElement, p
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec2I(const plOpenDdlReaderElement* pElement, plVec2I32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 2)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Int32)
   {
@@ -279,28 +279,28 @@ plResult plOpenDdlUtils::ConvertToVec2I(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec3I(const plOpenDdlReaderElement* pElement, plVec3I32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 3)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Int32)
   {
@@ -308,28 +308,28 @@ plResult plOpenDdlUtils::ConvertToVec3I(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec4I(const plOpenDdlReaderElement* pElement, plVec4I32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Int32)
   {
@@ -337,29 +337,29 @@ plResult plOpenDdlUtils::ConvertToVec4I(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
 plResult plOpenDdlUtils::ConvertToVec2U(const plOpenDdlReaderElement* pElement, plVec2U32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 2)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt32)
   {
@@ -367,28 +367,28 @@ plResult plOpenDdlUtils::ConvertToVec2U(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec3U(const plOpenDdlReaderElement* pElement, plVec3U32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 3)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt32)
   {
@@ -396,28 +396,28 @@ plResult plOpenDdlUtils::ConvertToVec3U(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVec4U(const plOpenDdlReaderElement* pElement, plVec4U32& out_vResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt32)
   {
@@ -425,10 +425,10 @@ plResult plOpenDdlUtils::ConvertToVec4U(const plOpenDdlReaderElement* pElement, 
 
     out_vResult.Set(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -436,78 +436,78 @@ plResult plOpenDdlUtils::ConvertToVec4U(const plOpenDdlReaderElement* pElement, 
 plResult plOpenDdlUtils::ConvertToMat3(const plOpenDdlReaderElement* pElement, plMat3& out_mResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 9)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_mResult.SetFromArray(pValues, plMatrixLayout::ColumnMajor);
+    out_mResult = plMat3::MakeFromColumnMajorArray(pValues);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToMat4(const plOpenDdlReaderElement* pElement, plMat4& out_mResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 16)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_mResult.SetFromArray(pValues, plMatrixLayout::ColumnMajor);
+    out_mResult = plMat4::MakeFromColumnMajorArray(pValues);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
 plResult plOpenDdlUtils::ConvertToTransform(const plOpenDdlReaderElement* pElement, plTransform& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 10)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
@@ -516,65 +516,65 @@ plResult plOpenDdlUtils::ConvertToTransform(const plOpenDdlReaderElement* pEleme
     out_result.m_vPosition.x = pValues[0];
     out_result.m_vPosition.y = pValues[1];
     out_result.m_vPosition.z = pValues[2];
-    out_result.m_qRotation.v.x = pValues[3];
-    out_result.m_qRotation.v.y = pValues[4];
-    out_result.m_qRotation.v.z = pValues[5];
+    out_result.m_qRotation.x = pValues[3];
+    out_result.m_qRotation.y = pValues[4];
+    out_result.m_qRotation.z = pValues[5];
     out_result.m_qRotation.w = pValues[6];
     out_result.m_vScale.x = pValues[7];
     out_result.m_vScale.y = pValues[8];
     out_result.m_vScale.z = pValues[9];
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToQuat(const plOpenDdlReaderElement* pElement, plQuat& out_qResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
-    out_qResult.SetElements(pValues[0], pValues[1], pValues[2], pValues[3]);
+    out_qResult = plQuat(pValues[0], pValues[1], pValues[2], pValues[3]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToUuid(const plOpenDdlReaderElement* pElement, plUuid& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 2)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt64)
   {
@@ -582,104 +582,104 @@ plResult plOpenDdlUtils::ConvertToUuid(const plOpenDdlReaderElement* pElement, p
 
     out_result = plUuid(pValues[0], pValues[1]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToAngle(const plOpenDdlReaderElement* pElement, plAngle& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 1)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::Float)
   {
     const float* pValues = pElement->GetPrimitivesFloat();
 
     // have to use radians to prevent precision loss
-    out_result = plAngle::Radian(pValues[0]);
+    out_result = plAngle::MakeFromRadian(pValues[0]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_result)
+plResult plOpenDdlUtils::ConvertToHashedString(const plOpenDdlReaderElement* pElement, plHashedString& out_sResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 1)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::String)
   {
     const plStringView* pValues = pElement->GetPrimitivesString();
 
-    out_result.Assign(pValues[0]);
+    out_sResult.Assign(pValues[0]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-plResult plOpenDdlUtils::ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_result)
+plResult plOpenDdlUtils::ConvertToTempHashedString(const plOpenDdlReaderElement* pElement, plTempHashedString& out_sResult)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // go into the element, if we are at the group level
   if (pElement->IsCustomType())
   {
     if (pElement->GetNumChildObjects() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pElement = pElement->GetFirstChild();
   }
 
   if (pElement->GetNumPrimitives() != 1)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::UInt64)
   {
     const plUInt64* pValues = pElement->GetPrimitivesUInt64();
 
-    out_result = plTempHashedString(pValues[0]);
+    out_sResult = plTempHashedString(pValues[0]);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement, plVariant& out_result)
 {
   if (pElement == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // expect a custom type
   if (pElement->IsCustomType())
@@ -695,13 +695,13 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
       for (const plOpenDdlReaderElement* pChild = pElement->GetFirstChild(); pChild != nullptr; pChild = pChild->GetSibling())
       {
         if (ConvertToVariant(pChild, varChild).Failed())
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         value.PushBack(varChild);
       }
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "VarDict")
@@ -719,13 +719,13 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
           continue;
 
         if (ConvertToVariant(pChild, varChild).Failed())
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         value[pChild->GetName()] = varChild;
       }
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "VarDataBuffer")
@@ -737,7 +737,7 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
       const plOpenDdlReaderElement* pString = pElement->GetFirstChild();
 
       if (!pString->HasPrimitives(plOpenDdlPrimitiveType::String))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       const plStringView* pValues = pString->GetPrimitivesString();
 
@@ -745,213 +745,213 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
       plConversionUtils::ConvertHexToBinary(pValues[0].GetStartPointer(), value.GetData(), value.GetCount());
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Color")
     {
       plColor value;
       if (ConvertToColor(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "ColorGamma")
     {
       plColorGammaUB value;
       if (ConvertToColorGamma(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Time")
     {
       plTime value;
       if (ConvertToTime(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec2")
     {
       plVec2 value;
       if (ConvertToVec2(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec3")
     {
       plVec3 value;
       if (ConvertToVec3(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec4")
     {
       plVec4 value;
       if (ConvertToVec4(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec2i")
     {
       plVec2I32 value;
       if (ConvertToVec2I(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec3i")
     {
       plVec3I32 value;
       if (ConvertToVec3I(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec4i")
     {
       plVec4I32 value;
       if (ConvertToVec4I(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec2u")
     {
       plVec2U32 value;
       if (ConvertToVec2U(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec3u")
     {
       plVec3U32 value;
       if (ConvertToVec3U(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Vec4u")
     {
       plVec4U32 value;
       if (ConvertToVec4U(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Mat3")
     {
       plMat3 value;
       if (ConvertToMat3(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Mat4")
     {
       plMat4 value;
       if (ConvertToMat4(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Transform")
     {
       plTransform value;
       if (ConvertToTransform(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Quat")
     {
       plQuat value;
       if (ConvertToQuat(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Uuid")
     {
       plUuid value;
       if (ConvertToUuid(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Angle")
     {
       plAngle value;
       if (ConvertToAngle(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "HashedString")
     {
       plHashedString value;
       if (ConvertToHashedString(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "TempHashedString")
     {
       plTempHashedString value;
       if (ConvertToTempHashedString(pElement, value).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_result = value;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (pElement->GetCustomType() == "Invalid")
     {
       out_result = plVariant();
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (const plRTTI* pRTTI = plRTTI::FindTypeByName(pElement->GetCustomType()))
@@ -959,7 +959,7 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
       if (plVariantTypeRegistry::GetSingleton()->FindVariantTypeInfo(pRTTI))
       {
         if (pElement == nullptr)
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         void* pObject = pRTTI->GetAllocator()->Allocate<void>();
 
@@ -982,11 +982,11 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
           }
         }
         out_result.MoveTypedObject(pObject, pRTTI);
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
       else
       {
-        plLog::Error("The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", pElement->GetCustomType());
+        plLog::Error("The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", pElement->GetCustomType());
       }
     }
     else
@@ -998,65 +998,65 @@ plResult plOpenDdlUtils::ConvertToVariant(const plOpenDdlReaderElement* pElement
   {
     // always expect exactly one value
     if (pElement->GetNumPrimitives() != 1)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     switch (pElement->GetPrimitivesType())
     {
       case plOpenDdlPrimitiveType::Bool:
         out_result = pElement->GetPrimitivesBool()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Int8:
         out_result = pElement->GetPrimitivesInt8()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Int16:
         out_result = pElement->GetPrimitivesInt16()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Int32:
         out_result = pElement->GetPrimitivesInt32()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Int64:
         out_result = pElement->GetPrimitivesInt64()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::UInt8:
         out_result = pElement->GetPrimitivesUInt8()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::UInt16:
         out_result = pElement->GetPrimitivesUInt16()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::UInt32:
         out_result = pElement->GetPrimitivesUInt32()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::UInt64:
         out_result = pElement->GetPrimitivesUInt64()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Float:
         out_result = pElement->GetPrimitivesFloat()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::Double:
         out_result = pElement->GetPrimitivesDouble()[0];
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       case plOpenDdlPrimitiveType::String:
         out_result = plString(pElement->GetPrimitivesString()[0]); // make sure this isn't stored as a string view by copying to to an plString first
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         break;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plOpenDdlUtils::StoreColor(plOpenDdlWriter& ref_writer, const plColor& value, plStringView sName /*= {}*/, bool bGlobalName /*= false*/)
@@ -1235,9 +1235,9 @@ void plOpenDdlUtils::StoreTransform(plOpenDdlWriter& ref_writer, const plTransfo
     f[1] = value.m_vPosition.y;
     f[2] = value.m_vPosition.z;
 
-    f[3] = value.m_qRotation.v.x;
-    f[4] = value.m_qRotation.v.y;
-    f[5] = value.m_qRotation.v.z;
+    f[3] = value.m_qRotation.x;
+    f[4] = value.m_qRotation.y;
+    f[5] = value.m_qRotation.z;
     f[6] = value.m_qRotation.w;
 
     f[7] = value.m_vScale.x;
@@ -1255,7 +1255,7 @@ void plOpenDdlUtils::StoreQuat(plOpenDdlWriter& ref_writer, const plQuat& value,
   ref_writer.BeginObject("Quat", sName, bGlobalName, true);
   {
     ref_writer.BeginPrimitiveList(plOpenDdlPrimitiveType::Float);
-    ref_writer.WriteFloat(value.v.GetData(), 4);
+    ref_writer.WriteFloat(&value.x, 4);
     ref_writer.EndPrimitiveList();
   }
   ref_writer.EndObject();
@@ -1523,7 +1523,7 @@ void plOpenDdlUtils::StoreVariant(plOpenDdlWriter& ref_writer, const plVariant& 
               case plPropertyCategory::Array:
               case plPropertyCategory::Set:
               case plPropertyCategory::Map:
-                PLASMA_REPORT_FAILURE("Only member properties are supported in custom variant types!");
+                PL_REPORT_FAILURE("Only member properties are supported in custom variant types!");
                 break;
               case plPropertyCategory::Constant:
               case plPropertyCategory::Function:
@@ -1535,12 +1535,12 @@ void plOpenDdlUtils::StoreVariant(plOpenDdlWriter& ref_writer, const plVariant& 
       }
       else
       {
-        plLog::Error("The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", obj.m_pType->GetTypeName());
+        plLog::Error("The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", obj.m_pType->GetTypeName());
       }
     }
       return;
     default:
-      PLASMA_REPORT_FAILURE("Can't write this type of Variant");
+      PL_REPORT_FAILURE("Can't write this type of Variant");
   }
 }
 
@@ -1628,10 +1628,10 @@ void plOpenDdlUtils::StoreUInt64(plOpenDdlWriter& ref_writer, plUInt64 value, pl
   ref_writer.EndPrimitiveList();
 }
 
-PLASMA_FOUNDATION_DLL void plOpenDdlUtils::StoreInvalid(plOpenDdlWriter& ref_writer, plStringView sName /*= {}*/, bool bGlobalName /*= false*/)
+PL_FOUNDATION_DLL void plOpenDdlUtils::StoreInvalid(plOpenDdlWriter& ref_writer, plStringView sName /*= {}*/, bool bGlobalName /*= false*/)
 {
   ref_writer.BeginObject("Invalid", sName, bGlobalName, true);
   ref_writer.EndObject();
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_OpenDdlUtils);
+

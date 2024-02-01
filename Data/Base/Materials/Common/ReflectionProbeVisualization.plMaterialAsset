@@ -14,10 +14,14 @@ o
 			s{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
 		}
 		Uuid %DocumentID{u4{4746343837574186671,4963508747386251216}}
-		u4 %Hash{11418137837332591521}
+		u4 %Hash{4322716520249289002}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %References{}
+		VarArray %PackageDeps{}
+		VarArray %References
+		{
+			s{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+		}
 	}
 }
 }
@@ -67,41 +71,7 @@ Types
 {
 o
 {
-	Uuid %id{u4{14831359824912569370,1828982774811006507}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plMaterialAssetProperties"}
-		u3 %TypeVersion{4}
-	}
-}
-o
-{
-	Uuid %id{u4{18200256455121510126,5460019644832151135}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"ShaderTypes"}
-		VarArray %Properties{}
-		s %TypeName{"plShaderTypeBase"}
-		u3 %TypeVersion{2}
-	}
-}
-o
-{
-	Uuid %id{u4{7844678448146089445,6309018175614680192}}
+	Uuid %id{u4{3270466148737379935,441008084526360175}}
 	s %t{"plCategoryAttribute"}
 	u3 %v{1}
 	p
@@ -111,32 +81,15 @@ o
 }
 o
 {
-	Uuid %id{u4{12123694589359637393,6797358509465135799}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plMaterialShaderMode"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{5472468647564224469,8361537235818373684}}
+	Uuid %id{u4{12550783910237440706,1987938545914168248}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
 	p
 	{
 		VarArray %Attributes
 		{
-			Uuid{u4{8535422935335121264,11593030280177656100}}
-			Uuid{u4{2577061129434477094,9164274921392258157}}
+			Uuid{u4{3270466148737379935,441008084526360175}}
+			Uuid{u4{5849102467259526275,4866623058304370910}}
 		}
 		s %Category{"plPropertyCategory::Member"}
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
@@ -146,7 +99,35 @@ o
 }
 o
 {
-	Uuid %id{u4{2577061129434477094,9164274921392258157}}
+	Uuid %id{u4{16414309601595087911,2980480029773925046}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{6612198110850368429,3101784417950706008}}
+			Uuid{u4{9160964964946952189,7549479378294713679}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MipLevel"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{6612198110850368429,3101784417950706008}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{5849102467259526275,4866623058304370910}}
 	s %t{"plDefaultValueAttribute"}
 	u3 %v{1}
 	p
@@ -156,7 +137,17 @@ o
 }
 o
 {
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{9160964964946952189,7549479378294713679}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i4 %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -173,25 +164,45 @@ o
 }
 o
 {
-	Uuid %id{u4{13516823575585411199,11073926677079700052}}
-	s %t{"plReflectedPropertyDescriptor"}
-	u3 %v{2}
+	Uuid %id{u4{17717897218099796308,9033184167245688007}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
 	p
 	{
-		VarArray %Attributes
-		{
-			Uuid{u4{7844678448146089445,6309018175614680192}}
-			Uuid{u4{6902669273487170564,14465707370782787784}}
-		}
-		s %Category{"plPropertyCategory::Member"}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"MipLevel"}
-		s %Type{"plInt32"}
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plShaderTypeBase"}
+		u3 %TypeVersion{2}
 	}
 }
 o
 {
-	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	Uuid %id{u4{2079520840758382673,11967134684400015451}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plShaderTypeBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{16414309601595087911,2980480029773925046}}
+			Uuid{u4{12550783910237440706,1987938545914168248}}
+		}
+		s %TypeName{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{2947336711354777548,15013008608905564043}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -208,27 +219,24 @@ o
 }
 o
 {
-	Uuid %id{u4{8535422935335121264,11593030280177656100}}
-	s %t{"plCategoryAttribute"}
+	Uuid %id{u4{8721322561248882817,17579066505604714242}}
+	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
-		s %Category{"Constant"}
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialShaderMode"}
+		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{6902669273487170564,14465707370782787784}}
-	s %t{"plDefaultValueAttribute"}
-	u3 %v{1}
-	p
-	{
-		i4 %Value{0}
-	}
-}
-o
-{
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -245,23 +253,19 @@ o
 }
 o
 {
-	Uuid %id{u4{17872226537824524141,18333869227736755619}}
+	Uuid %id{u4{5030680158680079231,18410952876772242771}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
 		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
-		s %ParentTypeName{"plShaderTypeBase"}
-		s %PluginName{"ShaderTypes"}
-		VarArray %Properties
-		{
-			Uuid{u4{13516823575585411199,11073926677079700052}}
-			Uuid{u4{5472468647564224469,8361537235818373684}}
-		}
-		s %TypeName{"Shaders/Materials/ReflectionProbeVisualization.plShader"}
-		u3 %TypeVersion{2}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialAssetProperties"}
+		u3 %TypeVersion{4}
 	}
 }
 }

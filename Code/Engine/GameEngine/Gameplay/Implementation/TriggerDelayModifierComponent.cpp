@@ -7,29 +7,29 @@
 #include <GameEngine/Gameplay/TriggerDelayModifierComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plTriggerDelayModifierComponent, 1 /* version */, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plTriggerDelayModifierComponent, 1 /* version */, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ActivationDelay", m_ActivationDelay),
-    PLASMA_MEMBER_PROPERTY("DeactivationDelay", m_DeactivationDelay),
+    PL_MEMBER_PROPERTY("ActivationDelay", m_ActivationDelay),
+    PL_MEMBER_PROPERTY("DeactivationDelay", m_DeactivationDelay),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnMsgComponentInternalTrigger),
-    PLASMA_MESSAGE_HANDLER(plMsgTriggerTriggered, OnMsgTriggerTriggered),
+    PL_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnMsgComponentInternalTrigger),
+    PL_MESSAGE_HANDLER(plMsgTriggerTriggered, OnMsgTriggerTriggered),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Gameplay/Logic"), // Component menu group
+    new plCategoryAttribute("Logic"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plTriggerDelayModifierComponent::plTriggerDelayModifierComponent() = default;
@@ -40,20 +40,20 @@ void plTriggerDelayModifierComponent::Initialize()
   SUPER::Initialize();
 }
 
-void plTriggerDelayModifierComponent::SerializeComponent(plWorldWriter& stream) const
+void plTriggerDelayModifierComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_ActivationDelay;
   s << m_DeactivationDelay;
 }
 
-void plTriggerDelayModifierComponent::DeserializeComponent(plWorldReader& stream)
+void plTriggerDelayModifierComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_ActivationDelay;
   s >> m_DeactivationDelay;
@@ -139,7 +139,7 @@ void plTriggerDelayModifierComponent::OnMsgComponentInternalTrigger(plMsgCompone
       newMsg.m_sMessage = m_sMessage;
       newMsg.m_TriggerState = plTriggerState::Activated;
 
-      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
+      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
     }
   }
   else if (msg.m_sMessage == plTempHashedString("Deactivate"))
@@ -152,7 +152,10 @@ void plTriggerDelayModifierComponent::OnMsgComponentInternalTrigger(plMsgCompone
       newMsg.m_sMessage = m_sMessage;
       newMsg.m_TriggerState = plTriggerState::Deactivated;
 
-      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
+      m_TriggerEventSender.PostEventMessage(newMsg, this, GetOwner()->GetParent(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
     }
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_TriggerDelayModifierComponent);

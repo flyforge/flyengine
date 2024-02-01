@@ -19,8 +19,8 @@
 // plMaterialModelAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialModelAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialModelAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plMaterialModelAction::plMaterialModelAction(const plActionContext& context, const char* szName, const char* szIconPath)
   : plEnumerationMenuAction(context, szName, szIconPath)
@@ -46,7 +46,7 @@ plActionDescriptorHandle plMaterialAssetActions::s_hMaterialModelAction;
 
 void plMaterialAssetActions::RegisterActions()
 {
-  s_hMaterialModelAction = PLASMA_REGISTER_DYNAMIC_MENU("MaterialAsset.Model", plMaterialModelAction, ":/EditorFramework/Icons/Perspective.svg");
+  s_hMaterialModelAction = PL_REGISTER_DYNAMIC_MENU("MaterialAsset.Model", plMaterialModelAction, ":/EditorFramework/Icons/Perspective.svg");
 }
 
 void plMaterialAssetActions::UnregisterActions()
@@ -54,12 +54,12 @@ void plMaterialAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hMaterialModelAction);
 }
 
-void plMaterialAssetActions::MapActions(const char* szMapping, const char* szPath)
+void plMaterialAssetActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  pMap->MapAction(s_hMaterialModelAction, szPath, 45.0f);
+  pMap->MapAction(s_hMaterialModelAction, "", 45.0f);
 }
 
 
@@ -123,7 +123,7 @@ plQtMaterialAssetDocumentWindow::plQtMaterialAssetDocumentWindow(plMaterialAsset
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("MaterialAssetDockWidget");
-    pPropertyPanel->setWindowTitle("MATERIAL PROPERTIES");
+    pPropertyPanel->setWindowTitle("Material Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -136,7 +136,7 @@ plQtMaterialAssetDocumentWindow::plQtMaterialAssetDocumentWindow(plMaterialAsset
   {
     m_pVsePanel = new plQtDocumentPanel(this, pDocument);
     m_pVsePanel->setObjectName("VisualShaderDockWidget");
-    m_pVsePanel->setWindowTitle("VISUAL SHADER EDITOR");
+    m_pVsePanel->setWindowTitle("Visual Shader Editor");
 
     QSplitter* pSplitter = new QSplitter(Qt::Orientation::Horizontal, m_pVsePanel);
 
@@ -217,7 +217,7 @@ void plQtMaterialAssetDocumentWindow::SetupDirectoryWatcher(bool needIt)
 
     if (s_pNodeConfigWatcher == nullptr)
     {
-      s_pNodeConfigWatcher = PLASMA_DEFAULT_NEW(plDirectoryWatcher);
+      s_pNodeConfigWatcher = PL_DEFAULT_NEW(plDirectoryWatcher);
 
       plStringBuilder sSearchDir = plApplicationServices::GetSingleton()->GetApplicationDataFolder();
       sSearchDir.AppendPath("VisualShader");
@@ -232,7 +232,7 @@ void plQtMaterialAssetDocumentWindow::SetupDirectoryWatcher(bool needIt)
 
     if (s_iNodeConfigWatchers == 0)
     {
-      PLASMA_DEFAULT_DELETE(s_pNodeConfigWatcher);
+      PL_DEFAULT_DELETE(s_pNodeConfigWatcher);
     }
   }
 }
@@ -244,7 +244,7 @@ plMaterialAssetDocument* plQtMaterialAssetDocumentWindow::GetMaterialDocument()
 
 void plQtMaterialAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   if (s_pNodeConfigWatcher)
   {
@@ -274,7 +274,7 @@ void plQtMaterialAssetDocumentWindow::OnOpenShaderClicked(bool)
   else
   {
     plStringBuilder msg;
-    msg.Format("The auto generated file does not exist (yet).\nThe supposed location is '{0}'", sAutoGenShader);
+    msg.SetFormat("The auto generated file does not exist (yet).\nThe supposed location is '{0}'", sAutoGenShader);
 
     plQtUiServices::GetSingleton()->MessageBoxInformation(msg);
   }
@@ -282,7 +282,7 @@ void plQtMaterialAssetDocumentWindow::OnOpenShaderClicked(bool)
 
 void plQtMaterialAssetDocumentWindow::UpdatePreview()
 {
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -307,9 +307,10 @@ void plQtMaterialAssetDocumentWindow::UpdatePreview()
   // Write Asset Data
   if (GetMaterialDocument()->WriteMaterialAsset(memoryWriter, plAssetCurator::GetSingleton()->GetActiveAssetProfile(), false).Failed())
     return;
+
   msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtMaterialAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)
@@ -339,19 +340,18 @@ void plQtMaterialAssetDocumentWindow::SelectionEventHandler(const plSelectionMan
   {
     // delayed execution
     QTimer::singleShot(1, [this]() {
-        // Check again if the selection is empty. This could have changed due to the delayed execution.
-        if (GetDocument()->GetSelectionManager()->IsSelectionEmpty())
-        {
-          GetDocument()->GetSelectionManager()->SetSelection(GetMaterialDocument()->GetPropertyObject());
-        }
-      });
+      // Check again if the selection is empty. This could have changed due to the delayed execution.
+      if (GetDocument()->GetSelectionManager()->IsSelectionEmpty())
+      {
+        GetDocument()->GetSelectionManager()->SetSelection(GetMaterialDocument()->GetPropertyObject());
+      } });
   }
 }
 
 void plQtMaterialAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -380,7 +380,7 @@ void plQtMaterialAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtMaterialAssetDocumentWindow::UpdateNodeEditorVisibility()
@@ -407,7 +407,7 @@ void plQtMaterialAssetDocumentWindow::OnVseConfigChanged(plStringView sFilename,
     return;
 
   // lalala ... this is to allow writes to the file to 'hopefully' finish before we try to read it
-  plThreadUtils::Sleep(plTime::Milliseconds(100));
+  plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
 
   plVisualShaderTypeRegistry::GetSingleton()->UpdateNodeData(sFilename);
 
@@ -416,7 +416,7 @@ void plQtMaterialAssetDocumentWindow::OnVseConfigChanged(plStringView sFilename,
   // not what we want.
   plAssetFileHeader AssetHeader;
   AssetHeader.SetFileHashAndVersion(0, GetMaterialDocument()->GetAssetTypeVersion());
-  GetMaterialDocument()->RecreateVisualShaderFile(AssetHeader).IgnoreResult();
+  GetMaterialDocument()->RecreateVisualShaderFile(AssetHeader).LogFailure();
 }
 
 void plQtMaterialAssetDocumentWindow::VisualShaderEventHandler(const plMaterialVisualShaderEvent& e)

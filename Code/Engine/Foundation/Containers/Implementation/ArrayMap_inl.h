@@ -1,14 +1,14 @@
 #pragma once
 
 template <typename KEY, typename VALUE>
-inline plArrayMapBase<KEY, VALUE>::plArrayMapBase(plAllocatorBase* pAllocator)
+inline plArrayMapBase<KEY, VALUE>::plArrayMapBase(plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   m_bSorted = true;
 }
 
 template <typename KEY, typename VALUE>
-inline plArrayMapBase<KEY, VALUE>::plArrayMapBase(const plArrayMapBase& rhs, plAllocatorBase* pAllocator)
+inline plArrayMapBase<KEY, VALUE>::plArrayMapBase(const plArrayMapBase& rhs, plAllocator* pAllocator)
   : m_bSorted(rhs.m_bSorted)
   , m_Data(pAllocator)
 {
@@ -23,13 +23,13 @@ inline void plArrayMapBase<KEY, VALUE>::operator=(const plArrayMapBase& rhs)
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE plUInt32 plArrayMapBase<KEY, VALUE>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plArrayMapBase<KEY, VALUE>::GetCount() const
 {
   return m_Data.GetCount();
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE bool plArrayMapBase<KEY, VALUE>::IsEmpty() const
+PL_ALWAYS_INLINE bool plArrayMapBase<KEY, VALUE>::IsEmpty() const
 {
   return m_Data.IsEmpty();
 }
@@ -160,13 +160,13 @@ plUInt32 plArrayMapBase<KEY, VALUE>::UpperBound(const CompatibleKeyType& key) co
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE const KEY& plArrayMapBase<KEY, VALUE>::GetKey(plUInt32 uiIndex) const
+PL_ALWAYS_INLINE const KEY& plArrayMapBase<KEY, VALUE>::GetKey(plUInt32 uiIndex) const
 {
   return m_Data[uiIndex].key;
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE const VALUE& plArrayMapBase<KEY, VALUE>::GetValue(plUInt32 uiIndex) const
+PL_ALWAYS_INLINE const VALUE& plArrayMapBase<KEY, VALUE>::GetValue(plUInt32 uiIndex) const
 {
   return m_Data[uiIndex].value;
 }
@@ -178,14 +178,14 @@ VALUE& plArrayMapBase<KEY, VALUE>::GetValue(plUInt32 uiIndex)
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE plDynamicArray<typename plArrayMapBase<KEY, VALUE>::Pair>& plArrayMapBase<KEY, VALUE>::GetData()
+PL_ALWAYS_INLINE plDynamicArray<typename plArrayMapBase<KEY, VALUE>::Pair>& plArrayMapBase<KEY, VALUE>::GetData()
 {
   m_bSorted = false;
   return m_Data;
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE const plDynamicArray<typename plArrayMapBase<KEY, VALUE>::Pair>& plArrayMapBase<KEY, VALUE>::GetData() const
+PL_ALWAYS_INLINE const plDynamicArray<typename plArrayMapBase<KEY, VALUE>::Pair>& plArrayMapBase<KEY, VALUE>::GetData() const
 {
   return m_Data;
 }
@@ -209,13 +209,13 @@ VALUE& plArrayMapBase<KEY, VALUE>::FindOrAdd(const CompatibleKeyType& key, bool*
 
 template <typename KEY, typename VALUE>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE VALUE& plArrayMapBase<KEY, VALUE>::operator[](const CompatibleKeyType& key)
+PL_ALWAYS_INLINE VALUE& plArrayMapBase<KEY, VALUE>::operator[](const CompatibleKeyType& key)
 {
   return FindOrAdd(key);
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE const typename plArrayMapBase<KEY, VALUE>::Pair& plArrayMapBase<KEY, VALUE>::GetPair(plUInt32 uiIndex) const
+PL_ALWAYS_INLINE const typename plArrayMapBase<KEY, VALUE>::Pair& plArrayMapBase<KEY, VALUE>::GetPair(plUInt32 uiIndex) const
 {
   return m_Data[uiIndex];
 }
@@ -249,7 +249,7 @@ bool plArrayMapBase<KEY, VALUE>::RemoveAndCopy(const CompatibleKeyType& key, boo
 
 template <typename KEY, typename VALUE>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plArrayMapBase<KEY, VALUE>::Contains(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE bool plArrayMapBase<KEY, VALUE>::Contains(const CompatibleKeyType& key) const
 {
   return Find(key) != plInvalidIndex;
 }
@@ -279,13 +279,13 @@ bool plArrayMapBase<KEY, VALUE>::Contains(const CompatibleKeyType& key, const VA
 
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE void plArrayMapBase<KEY, VALUE>::Reserve(plUInt32 uiSize)
+PL_ALWAYS_INLINE void plArrayMapBase<KEY, VALUE>::Reserve(plUInt32 uiSize)
 {
   m_Data.Reserve(uiSize);
 }
 
 template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE void plArrayMapBase<KEY, VALUE>::Compact()
+PL_ALWAYS_INLINE void plArrayMapBase<KEY, VALUE>::Compact()
 {
   m_Data.Compact();
 }
@@ -299,12 +299,6 @@ bool plArrayMapBase<KEY, VALUE>::operator==(const plArrayMapBase<KEY, VALUE>& rh
   return m_Data == rhs.m_Data;
 }
 
-template <typename KEY, typename VALUE>
-PLASMA_ALWAYS_INLINE bool plArrayMapBase<KEY, VALUE>::operator!=(const plArrayMapBase<KEY, VALUE>& rhs) const
-{
-  return !(*this == rhs);
-}
-
 template <typename KEY, typename VALUE, typename A>
 plArrayMap<KEY, VALUE, A>::plArrayMap()
   : plArrayMapBase<KEY, VALUE>(A::GetAllocator())
@@ -312,7 +306,7 @@ plArrayMap<KEY, VALUE, A>::plArrayMap()
 }
 
 template <typename KEY, typename VALUE, typename A>
-plArrayMap<KEY, VALUE, A>::plArrayMap(plAllocatorBase* pAllocator)
+plArrayMap<KEY, VALUE, A>::plArrayMap(plAllocator* pAllocator)
   : plArrayMapBase<KEY, VALUE>(pAllocator)
 {
 }

@@ -1,8 +1,8 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b() {}
+PL_ALWAYS_INLINE plSimdVec4b::plSimdVec4b() {}
 
-PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool b)
+PL_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool b)
 {
   m_v.x = b ? 0xFFFFFFFF : 0;
   m_v.y = b ? 0xFFFFFFFF : 0;
@@ -10,7 +10,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool b)
   m_v.w = b ? 0xFFFFFFFF : 0;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool x, bool y, bool z, bool w)
+PL_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool x, bool y, bool z, bool w)
 {
   m_v.x = x ? 0xFFFFFFFF : 0;
   m_v.y = y ? 0xFFFFFFFF : 0;
@@ -18,39 +18,39 @@ PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(bool x, bool y, bool z, bool w)
   m_v.w = w ? 0xFFFFFFFF : 0;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(plInternal::QuadBool v)
+PL_ALWAYS_INLINE plSimdVec4b::plSimdVec4b(plInternal::QuadBool v)
 {
   m_v = v;
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::GetComponent() const
+PL_ALWAYS_INLINE bool plSimdVec4b::GetComponent() const
 {
   return (&m_v.x)[N] != 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::x() const
+PL_ALWAYS_INLINE bool plSimdVec4b::x() const
 {
   return m_v.x != 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::y() const
+PL_ALWAYS_INLINE bool plSimdVec4b::y() const
 {
   return m_v.y != 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::z() const
+PL_ALWAYS_INLINE bool plSimdVec4b::z() const
 {
   return m_v.z != 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::w() const
+PL_ALWAYS_INLINE bool plSimdVec4b::w() const
 {
   return m_v.w != 0;
 }
 
 template <plSwizzle::Enum s>
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::Get() const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::Get() const
 {
   plSimdVec4b result;
 
@@ -63,7 +63,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::Get() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator&&(const plSimdVec4b& rhs) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator&&(const plSimdVec4b& rhs) const
 {
   plSimdVec4b result;
   result.m_v.x = m_v.x & rhs.m_v.x;
@@ -74,7 +74,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator&&(const plSimdVec4b& rhs)
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator||(const plSimdVec4b& rhs) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator||(const plSimdVec4b& rhs) const
 {
   plSimdVec4b result;
   result.m_v.x = m_v.x | rhs.m_v.x;
@@ -85,7 +85,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator||(const plSimdVec4b& rhs)
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!() const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!() const
 {
   plSimdVec4b result;
   result.m_v.x = m_v.x ^ 0xFFFFFFFF;
@@ -96,12 +96,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator==(const plSimdVec4b& rhs) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator==(const plSimdVec4b& rhs) const
 {
   return !(*this != rhs);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!=(const plSimdVec4b& rhs) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!=(const plSimdVec4b& rhs) const
 {
   plSimdVec4b result;
   result.m_v.x = m_v.x ^ rhs.m_v.x;
@@ -113,7 +113,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::operator!=(const plSimdVec4b& rhs)
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::AllSet() const
+PL_ALWAYS_INLINE bool plSimdVec4b::AllSet() const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -125,7 +125,7 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4b::AllSet() const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::AnySet() const
+PL_ALWAYS_INLINE bool plSimdVec4b::AnySet() const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -137,13 +137,13 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4b::AnySet() const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4b::NoneSet() const
+PL_ALWAYS_INLINE bool plSimdVec4b::NoneSet() const
 {
   return !AnySet<N>();
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4b::Select(const plSimdVec4b& cmp, const plSimdVec4b& ifTrue, const plSimdVec4b& ifFalse)
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4b::Select(const plSimdVec4b& cmp, const plSimdVec4b& ifTrue, const plSimdVec4b& ifFalse)
 {
   plSimdVec4b result;
   result.m_v.x = (cmp.m_v.x != 0) ? ifTrue.m_v.x : ifFalse.m_v.x;

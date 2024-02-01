@@ -5,8 +5,8 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshComponentDragDropHandler, 1, plRTTIDefaultAllocator<plMeshComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshComponentDragDropHandler, 1, plRTTIDefaultAllocator<plMeshComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plMeshComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 {
@@ -31,8 +31,8 @@ void plMeshComponentDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo)
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshComponentDragDropHandler, 1, plRTTIDefaultAllocator<plAnimatedMeshComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshComponentDragDropHandler, 1, plRTTIDefaultAllocator<plAnimatedMeshComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plAnimatedMeshComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 {

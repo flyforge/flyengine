@@ -7,22 +7,22 @@
 template <typename T>
 class plUniquePtr
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plUniquePtr);
+  PL_DISALLOW_COPY_AND_ASSIGN(plUniquePtr);
 
 public:
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   /// \brief Creates an empty unique ptr.
   plUniquePtr();
 
-  /// \brief Creates a unique ptr from a freshly created instance through PLASMA_NEW or PLASMA_DEFAULT_NEW.
+  /// \brief Creates a unique ptr from a freshly created instance through PL_NEW or PL_DEFAULT_NEW.
   template <typename U>
   plUniquePtr(const plInternal::NewInstance<U>& instance);
 
   /// \brief Creates a unique ptr from a pointer and an allocator. The passed allocator will be used to destroy the instance when the unique
   /// ptr goes out of scope.
   template <typename U>
-  plUniquePtr(U* pInstance, plAllocatorBase* pAllocator);
+  plUniquePtr(U* pInstance, plAllocator* pAllocator);
 
   /// \brief Move constructs a unique ptr from another. The other unique ptr will be empty afterwards to guarantee that there is only one
   /// unique ptr managing the same object.
@@ -35,7 +35,7 @@ public:
   /// \brief Destroys the managed object using the stored allocator.
   ~plUniquePtr();
 
-  /// \brief Sets the unique ptr from a freshly created instance through PLASMA_NEW or PLASMA_DEFAULT_NEW.
+  /// \brief Sets the unique ptr from a freshly created instance through PL_NEW or PL_DEFAULT_NEW.
   template <typename U>
   plUniquePtr<T>& operator=(const plInternal::NewInstance<U>& instance);
 
@@ -52,7 +52,7 @@ public:
 
   /// \brief Releases the managed object without destroying it. The unique ptr will be empty afterwards. Also returns the allocator that
   /// should be used to destroy the object.
-  T* Release(plAllocatorBase*& out_pAllocator);
+  T* Release(plAllocator*& out_pAllocator);
 
   /// \brief Borrows the managed object. The unique ptr stays unmodified.
   T* Borrow() const;
@@ -90,7 +90,7 @@ private:
   friend class plUniquePtr;
 
   T* m_pInstance = nullptr;
-  plAllocatorBase* m_pAllocator = nullptr;
+  plAllocator* m_pAllocator = nullptr;
 };
 
 #include <Foundation/Types/Implementation/UniquePtr_inl.h>

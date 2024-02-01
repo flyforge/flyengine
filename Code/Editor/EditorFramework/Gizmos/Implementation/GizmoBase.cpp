@@ -2,8 +2,8 @@
 
 #include <EditorFramework/Gizmos/GizmoBase.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmo, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmo, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plGizmo::plGizmo()
 {

@@ -7,7 +7,7 @@
 class plOpenDdlWriter;
 class plOpenDdlReaderElement;
 
-class PLASMA_GAMEENGINE_DLL plGameAppInputConfig
+class PL_GAMEENGINE_DLL plGameAppInputConfig
 {
 public:
   constexpr static plUInt32 MaxInputSlotAlternatives = 3;
@@ -17,12 +17,12 @@ public:
   plGameAppInputConfig();
 
   void Apply() const;
-  void WriteToDDL(plOpenDdlWriter& writer) const;
+  void WriteToDDL(plOpenDdlWriter& ref_writer) const;
   void ReadFromDDL(const plOpenDdlReaderElement* pAction);
 
   static void ApplyAll(const plArrayPtr<plGameAppInputConfig>& actions);
-  static void WriteToDDL(plStreamWriter& stream, const plArrayPtr<plGameAppInputConfig>& actions);
-  static void ReadFromDDL(plStreamReader& stream, plHybridArray<plGameAppInputConfig, 32>& out_actions);
+  static void WriteToDDL(plStreamWriter& inout_stream, const plArrayPtr<plGameAppInputConfig>& actions);
+  static void ReadFromDDL(plStreamReader& inout_stream, plHybridArray<plGameAppInputConfig, 32>& out_actions);
 
   plString m_sInputSet;
   plString m_sInputAction;

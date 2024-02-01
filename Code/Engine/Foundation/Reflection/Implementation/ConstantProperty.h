@@ -42,7 +42,7 @@ public:
     : plTypedConstantProperty<Type>(szPropertyName)
     , m_Value(value)
   {
-    PLASMA_ASSERT_DEBUG(this->m_Flags.IsSet(plPropertyFlags::StandardType), "Only constants that can be put in an plVariant are currently supported!");
+    PL_ASSERT_DEBUG(this->m_Flags.IsSet(plPropertyFlags::StandardType), "Only constants that can be put in an plVariant are currently supported!");
   }
 
   /// \brief Returns a pointer to the member property.

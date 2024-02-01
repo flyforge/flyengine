@@ -9,7 +9,7 @@ plResult plGraphicsUtils::ConvertWorldPosToScreenPos(const plMat4& mModelViewPro
   plVec4 vClipSpace = mModelViewProjection * vToProject;
 
   if (vClipSpace.w == 0.0f)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plVec3 vProjected = vClipSpace.GetAsVec3() / vClipSpace.w;
   if (vClipSpace.w < 0.0f)
@@ -25,7 +25,7 @@ plResult plGraphicsUtils::ConvertWorldPosToScreenPos(const plMat4& mModelViewPro
   else
     out_vScreenPos.z = vProjected.z;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGraphicsUtils::ConvertScreenPosToWorldPos(
@@ -50,7 +50,7 @@ plResult plGraphicsUtils::ConvertScreenPosToWorldPos(
   plVec4 vWorldSpacePoint = mInverseModelViewProjection * vToUnProject;
 
   if (vWorldSpacePoint.w == 0.0f)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   out_vPoint = vWorldSpacePoint.GetAsVec3() / vWorldSpacePoint.w;
 
@@ -60,14 +60,14 @@ plResult plGraphicsUtils::ConvertScreenPosToWorldPos(
 
     const plVec4 vWorldSpacePoint2 = mInverseModelViewProjection * vToUnProject;
 
-    PLASMA_ASSERT_DEV(vWorldSpacePoint2.w != 0.0f, "It should not be possible that the first projected point has a w other than zero, but the second one has!");
+    PL_ASSERT_DEV(vWorldSpacePoint2.w != 0.0f, "It should not be possible that the first projected point has a w other than zero, but the second one has!");
 
     const plVec3 vPoint2 = vWorldSpacePoint2.GetAsVec3() / vWorldSpacePoint2.w;
 
     *out_pDirection = (vPoint2 - out_vPoint).GetNormalized();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGraphicsUtils::ConvertScreenPosToWorldPos(const plMat4d& mInverseModelViewProjection, const plUInt32 uiViewportX, const plUInt32 uiViewportY, const plUInt32 uiViewportWidth, const plUInt32 uiViewportHeight, const plVec3& vScreenPos, plVec3& out_vPoint, plVec3* out_pDirection /*= nullptr*/,
@@ -92,7 +92,7 @@ plResult plGraphicsUtils::ConvertScreenPosToWorldPos(const plMat4d& mInverseMode
   plVec4d vWorldSpacePoint = mInverseModelViewProjection * vToUnProject;
 
   if (vWorldSpacePoint.w == 0.0)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plVec3d outTemp = vWorldSpacePoint.GetAsVec3() / vWorldSpacePoint.w;
   out_vPoint.Set((float)outTemp.x, (float)outTemp.y, (float)outTemp.z);
@@ -103,7 +103,7 @@ plResult plGraphicsUtils::ConvertScreenPosToWorldPos(const plMat4d& mInverseMode
 
     const plVec4d vWorldSpacePoint2 = mInverseModelViewProjection * vToUnProject;
 
-    PLASMA_ASSERT_DEV(vWorldSpacePoint2.w != 0.0, "It should not be possible that the first projected point has a w other than zero, but the second one has!");
+    PL_ASSERT_DEV(vWorldSpacePoint2.w != 0.0, "It should not be possible that the first projected point has a w other than zero, but the second one has!");
 
     const plVec3d vPoint2 = vWorldSpacePoint2.GetAsVec3() / vWorldSpacePoint2.w;
 
@@ -111,7 +111,7 @@ plResult plGraphicsUtils::ConvertScreenPosToWorldPos(const plMat4d& mInverseMode
     out_pDirection->Set((float)outDir.x, (float)outDir.y, (float)outDir.z);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plGraphicsUtils::IsTriangleFlipRequired(const plMat3& mTransformation)
@@ -159,8 +159,8 @@ void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProject
   const plVec3 bottomPlane = (row3 + row1).GetNormalized();
   const plVec3 topPlane = (row3 - row1).GetNormalized();
 
-  out_fovX = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(leftPlane.Dot(rightPlane));
-  out_fovY = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(bottomPlane));
+  out_fovX = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(leftPlane.Dot(rightPlane));
+  out_fovY = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(bottomPlane));
 }
 
 void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProjectionMatrix, plAngle& out_fovLeft, plAngle& out_fovRight, plAngle& out_fovBottom, plAngle& out_fovTop, plClipSpaceYMode::Enum range)
@@ -175,9 +175,9 @@ void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProject
   const plVec3 topPlane = (row3 - row1).GetNormalized();
 
   out_fovLeft = -plMath::ACos(leftPlane.Dot(plVec3(1.0f, 0, 0)));
-  out_fovRight = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(rightPlane.Dot(plVec3(1.0f, 0, 0)));
+  out_fovRight = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(rightPlane.Dot(plVec3(1.0f, 0, 0)));
   out_fovBottom = -plMath::ACos(bottomPlane.Dot(plVec3(0, 1.0f, 0)));
-  out_fovTop = plAngle::Radian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(plVec3(0, 1.0f, 0)));
+  out_fovTop = plAngle::MakeFromRadian(plMath::Pi<float>()) - plMath::ACos(topPlane.Dot(plVec3(0, 1.0f, 0)));
 
   if (range == plClipSpaceYMode::Flipped)
     plMath::Swap(out_fovBottom, out_fovTop);
@@ -186,7 +186,7 @@ void plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProject
 plResult plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mProjectionMatrix, float& out_fLeft, float& out_fRight, float& out_fBottom, float& out_fTop, plClipSpaceDepthRange::Enum depthRange, plClipSpaceYMode::Enum range)
 {
   float fNear, fFar;
-  PLASMA_SUCCEED_OR_RETURN(ExtractNearAndFarClipPlaneDistances(fNear, fFar, mProjectionMatrix, depthRange));
+  PL_SUCCEED_OR_RETURN(ExtractNearAndFarClipPlaneDistances(fNear, fFar, mProjectionMatrix, depthRange));
   // Compensate for inverse-Z.
   const float fMinDepth = plMath::Min(fNear, fFar);
 
@@ -200,7 +200,7 @@ plResult plGraphicsUtils::ExtractPerspectiveMatrixFieldOfView(const plMat4& mPro
   out_fRight = plMath::Tan(fFovRight) * fMinDepth;
   out_fBottom = plMath::Tan(fFovBottom) * fMinDepth;
   out_fTop = plMath::Tan(fFovTop) * fMinDepth;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGraphicsUtils::ExtractNearAndFarClipPlaneDistances(float& out_fNear, float& out_fFar, const plMat4& mProjectionMatrix, plClipSpaceDepthRange::Enum depthRange)
@@ -226,7 +226,7 @@ plResult plGraphicsUtils::ExtractNearAndFarClipPlaneDistances(float& out_fNear, 
   if ((nearLength < plMath::SmallEpsilon<float>() && farLength < plMath::SmallEpsilon<float>()) ||
       nearW < plMath::SmallEpsilon<float>() || farW < plMath::SmallEpsilon<float>())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const float fNear = nearW / nearLength;
@@ -234,13 +234,13 @@ plResult plGraphicsUtils::ExtractNearAndFarClipPlaneDistances(float& out_fNear, 
 
   if (plMath::IsEqual(fNear, fFar, plMath::SmallEpsilon<float>()))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   out_fNear = fNear;
   out_fFar = fFar;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plPlane plGraphicsUtils::ComputeInterpolatedFrustumPlane(FrustumPlaneInterpolation direction, float fLerpFactor, const plMat4& mProjectionMatrix, plClipSpaceDepthRange::Enum depthRange)
@@ -317,7 +317,7 @@ plMat4 plGraphicsUtils::CreateOrthographicProjectionMatrix(float fViewWidth, flo
 
 plMat4 plGraphicsUtils::CreateOrthographicProjectionMatrix(float fLeft, float fRight, float fBottom, float fTop, float fNearZ, float fFarZ, plClipSpaceDepthRange::Enum depthRange, plClipSpaceYMode::Enum range, plHandedness::Enum handedness)
 {
-  PLASMA_ASSERT_DEBUG(plMath::IsFinite(fNearZ) && plMath::IsFinite(fFarZ), "Infinite plane values are not supported for orthographic projections!");
+  PL_ASSERT_DEBUG(plMath::IsFinite(fNearZ) && plMath::IsFinite(fFarZ), "Infinite plane values are not supported for orthographic projections!");
 
   plMat4 res;
   res.SetIdentity();
@@ -364,7 +364,7 @@ plMat4 plGraphicsUtils::CreateOrthographicProjectionMatrix(float fLeft, float fR
 
 plMat4 plGraphicsUtils::CreatePerspectiveProjectionMatrix(float fLeft, float fRight, float fBottom, float fTop, float fNearZ, float fFarZ, plClipSpaceDepthRange::Enum depthRange, plClipSpaceYMode::Enum range, plHandedness::Enum handedness)
 {
-  PLASMA_ASSERT_DEBUG(plMath::IsFinite(fNearZ) || plMath::IsFinite(fFarZ), "fNearZ and fFarZ cannot both be infinite at the same time!");
+  PL_ASSERT_DEBUG(plMath::IsFinite(fNearZ) || plMath::IsFinite(fFarZ), "fNearZ and fFarZ cannot both be infinite at the same time!");
 
   plMat4 res;
   res.SetZero();
@@ -458,10 +458,10 @@ plMat4 plGraphicsUtils::CreatePerspectiveProjectionMatrix(float fLeft, float fRi
 
 plMat3 plGraphicsUtils::CreateLookAtViewMatrix(const plVec3& vTarget, const plVec3& vUpDir, plHandedness::Enum handedness)
 {
-  PLASMA_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
+  PL_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
 
   plVec3 vLookDir = vTarget;
-  vLookDir.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
+  vLookDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
 
   plVec3 vNormalizedUpDir = vUpDir.GetNormalized();
 
@@ -486,10 +486,10 @@ plMat3 plGraphicsUtils::CreateLookAtViewMatrix(const plVec3& vTarget, const plVe
 
 plMat3 plGraphicsUtils::CreateInverseLookAtViewMatrix(const plVec3& vTarget, const plVec3& vUpDir, plHandedness::Enum handedness)
 {
-  PLASMA_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
+  PL_ASSERT_DEBUG(!vTarget.IsZero(), "The target must not be at the origin.");
 
   plVec3 vLookDir = vTarget;
-  vLookDir.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
+  vLookDir.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
 
   plVec3 vNormalizedUpDir = vUpDir.GetNormalized();
 
@@ -626,7 +626,7 @@ plResult plGraphicsUtils::ComputeBarycentricCoordinates(plVec3& out_vCoordinates
   const float denom = d00 * d11 - d01 * d01;
 
   if (plMath::IsZero(denom, plMath::SmallEpsilon<float>()))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const float invDenom = 1.0f / denom;
 
@@ -636,7 +636,7 @@ plResult plGraphicsUtils::ComputeBarycentricCoordinates(plVec3& out_vCoordinates
 
   out_vCoordinates.Set(u, v, w);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGraphicsUtils::ComputeBarycentricCoordinates(plVec3& out_vCoordinates, const plVec2& a, const plVec2& b, const plVec2& c, const plVec2& p)
@@ -650,7 +650,7 @@ plResult plGraphicsUtils::ComputeBarycentricCoordinates(plVec3& out_vCoordinates
   const float denom = v0.x * v1.y - v1.x * v0.y;
 
   if (plMath::IsZero(denom, plMath::SmallEpsilon<float>()))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const float invDenom = 1.0f / denom;
   const float v = (v2.x * v1.y - v1.x * v2.y) * invDenom;
@@ -659,7 +659,7 @@ plResult plGraphicsUtils::ComputeBarycentricCoordinates(plVec3& out_vCoordinates
 
   out_vCoordinates.Set(u, v, w);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_GraphicsUtils);
+

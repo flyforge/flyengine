@@ -11,7 +11,7 @@ class plQtDeltaTransformDlg : public QDialog, public Ui_DeltaTransformDlg
   Q_OBJECT
 
 public:
-  plQtDeltaTransformDlg(QWidget* parent, plSceneDocument* pSceneDoc);
+  plQtDeltaTransformDlg(QWidget* pParent, plSceneDocument* pSceneDoc);
 
   enum Mode
   {

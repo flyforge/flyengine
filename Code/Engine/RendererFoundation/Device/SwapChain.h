@@ -7,7 +7,7 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/Resources/RenderTargetSetup.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALSwapChain : public plGALObject<plGALSwapChainCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALSwapChain : public plGALObject<plGALSwapChainCreationDescription>
 {
 public:
   const plGALRenderTargets& GetRenderTargets() const { return m_RenderTargets; }
@@ -31,10 +31,10 @@ protected:
   plGALRenderTargets m_RenderTargets;
   plSizeU32 m_CurrentSize = {};
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERFOUNDATION_DLL, plGALSwapChain);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERFOUNDATION_DLL, plGALSwapChain);
 
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALWindowSwapChain : public plGALSwapChain
+class PL_RENDERERFOUNDATION_DLL plGALWindowSwapChain : public plGALSwapChain
 {
 public:
   using Functor = plDelegate<plGALSwapChainHandle(const plGALWindowSwapChainCreationDescription&)>;
@@ -54,6 +54,6 @@ protected:
 protected:
   plGALWindowSwapChainCreationDescription m_WindowDesc;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERFOUNDATION_DLL, plGALWindowSwapChain);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERFOUNDATION_DLL, plGALWindowSwapChain);
 
 #include <RendererFoundation/Device/Implementation/SwapChain_inl.h>

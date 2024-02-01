@@ -4,7 +4,7 @@
 
 class plJoltCollisionMeshComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshComponentDragDropHandler, plComponentDragDropHandler);
 
 public:
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;

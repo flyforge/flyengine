@@ -8,7 +8,7 @@ void plStreamUtils::ReadAllAndAppend(plStreamReader& inout_stream, plDynamicArra
 
   while (true)
   {
-    const plUInt32 uiRead = (plUInt32)inout_stream.ReadBytes(temp, PLASMA_ARRAY_SIZE(temp));
+    const plUInt32 uiRead = (plUInt32)inout_stream.ReadBytes(temp, PL_ARRAY_SIZE(temp));
 
     if (uiRead == 0)
       return;
@@ -18,4 +18,3 @@ void plStreamUtils::ReadAllAndAppend(plStreamReader& inout_stream, plDynamicArra
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_StreamUtils);

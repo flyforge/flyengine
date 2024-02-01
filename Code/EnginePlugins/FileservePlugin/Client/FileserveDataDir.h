@@ -27,11 +27,11 @@ namespace plDataDirectory
   };
 
   /// \brief A data directory type to handle access to files that are served from a network host.
-  class PLASMA_FILESERVEPLUGIN_DLL FileserveType : public FolderType
+  class PL_FILESERVEPLUGIN_DLL FileserveType : public FolderType
   {
   public:
     /// \brief The factory that can be registered at plFileSystem to create data directories of this type.
-    static plDataDirectoryType* Factory(plStringView sDataDirectory, plStringView sGroup, plStringView sRootName, plFileSystem::DataDirUsage Usage);
+    static plDataDirectoryType* Factory(plStringView sDataDirectory, plStringView sGroup, plStringView sRootName, plFileSystem::DataDirUsage usage);
 
     /// \brief [internal] Makes sure the redirection config files are up to date and then reloads them.
     virtual void ReloadExternalConfigs() override;

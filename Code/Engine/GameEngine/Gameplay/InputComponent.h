@@ -6,12 +6,12 @@
 #include <Core/World/World.h>
 #include <GameEngine/GameEngineDLL.h>
 
-typedef plComponentManagerSimple<class plInputComponent, plComponentUpdateType::WhenSimulating> plInputComponentManager;
+using plInputComponentManager = plComponentManagerSimple<class plInputComponent, plComponentUpdateType::WhenSimulating>;
 
 /// \brief Which types of input events are broadcast
-struct PLASMA_GAMEENGINE_DLL plInputMessageGranularity
+struct PL_GAMEENGINE_DLL plInputMessageGranularity
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   /// \brief Which types of input events are broadcast
   enum Enum
@@ -24,12 +24,12 @@ struct PLASMA_GAMEENGINE_DLL plInputMessageGranularity
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plInputMessageGranularity);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plInputMessageGranularity);
 
 /// \brief plInputComponent raises this event when it detects input
-struct PLASMA_GAMEENGINE_DLL plMsgInputActionTriggered : public plEventMessage
+struct PL_GAMEENGINE_DLL plMsgInputActionTriggered : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgInputActionTriggered, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgInputActionTriggered, plEventMessage);
 
   /// The input action string.
   plHashedString m_sInputAction;
@@ -49,19 +49,19 @@ private:
 /// object.
 ///
 /// To deactivate input handling, just deactivate the entire component.
-/// To use the input data, add a message handler on another component and handle messages of type plTriggerMessage.
+/// To use the input data, add a message handler on another component and handle messages of type plMsgInputActionTriggered.
 /// For every input event, one such message is sent every frame.
 /// The granularity property defines for which input events (key pressed, released or down) messages are sent.
-class PLASMA_GAMEENGINE_DLL plInputComponent : public plComponent
+class PL_GAMEENGINE_DLL plInputComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plInputComponent, plComponent, plInputComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plInputComponent, plComponent, plInputComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -71,6 +71,10 @@ public:
   plInputComponent();
   ~plInputComponent();
 
+  /// \brief Returns the amount to which szInputAction is active (0 to 1).
+  ///
+  /// If bOnlyKeyPressed is set to true, only key press events return a non-zero value,
+  /// ie key down and key released events are ignored.
   float GetCurrentInputState(const char* szInputAction, bool bOnlyKeyPressed = false) const; // [ scriptable ]
 
   plString m_sInputSet;                            // [ property ]

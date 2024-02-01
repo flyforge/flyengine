@@ -3,9 +3,9 @@
 #include <Foundation/Math/Mat4.h>
 
 template <typename Type>
-PLASMA_FORCE_INLINE plPlaneTemplate<Type>::plPlaneTemplate()
+PL_FORCE_INLINE plPlaneTemplate<Type>::plPlaneTemplate()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   // Initialize all data to NaN in debug mode to find problems with uninitialized data easier.
   const Type TypeNaN = plMath::NaN<Type>();
   m_vNormal.Set(TypeNaN);
@@ -14,27 +14,33 @@ PLASMA_FORCE_INLINE plPlaneTemplate<Type>::plPlaneTemplate()
 }
 
 template <typename Type>
-plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
+plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeInvalid()
 {
-  SetFromNormalAndPoint(vNormal, vPointOnPlane);
+  plPlaneTemplate<Type> res;
+  res.m_vNormal.Set(0);
+  res.m_fNegDistance = 0;
+  return res;
 }
 
 template <typename Type>
-plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>& v1, const plVec3Template<Type>& v2, const plVec3Template<Type>& v3)
+plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeFromNormalAndPoint(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
 {
-  SetFromPoints(v1, v2, v3).IgnoreResult();
+  PL_ASSERT_DEV(vNormal.IsNormalized(), "Normal must be normalized.");
+
+  plPlaneTemplate<Type> res;
+  res.m_vNormal = vNormal;
+  res.m_fNegDistance = -vNormal.Dot(vPointOnPlane);
+  return res;
 }
 
 template <typename Type>
-plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>* const pVertices)
+plPlaneTemplate<Type> plPlaneTemplate<Type>::MakeFromPoints(const plVec3Template<Type>& v1, const plVec3Template<Type>& v2, const plVec3Template<Type>& v3)
 {
-  SetFromPoints(pVertices).IgnoreResult();
-}
+  plPlaneTemplate<Type> res;
+  PL_VERIFY(res.m_vNormal.CalculateNormal(v1, v2, v3).Succeeded(), "The 3 provided points do not form a plane");
 
-template <typename Type>
-plPlaneTemplate<Type>::plPlaneTemplate(const plVec3Template<Type>* const pVertices, plUInt32 uiMaxVertices)
-{
-  SetFromPoints(pVertices, uiMaxVertices).IgnoreResult();
+  res.m_fNegDistance = -res.m_vNormal.Dot(v1);
+  return res;
 }
 
 template <typename Type>
@@ -44,32 +50,23 @@ plVec4Template<Type> plPlaneTemplate<Type>::GetAsVec4() const
 }
 
 template <typename Type>
-void plPlaneTemplate<Type>::SetFromNormalAndPoint(const plVec3Template<Type>& vNormal, const plVec3Template<Type>& vPointOnPlane)
-{
-  PLASMA_ASSERT_DEBUG(vNormal.IsNormalized(), "Normal must be normalized.");
-
-  m_vNormal = vNormal;
-  m_fNegDistance = -m_vNormal.Dot(vPointOnPlane);
-}
-
-template <typename Type>
 plResult plPlaneTemplate<Type>::SetFromPoints(const plVec3Template<Type>& v1, const plVec3Template<Type>& v2, const plVec3Template<Type>& v3)
 {
-  if (m_vNormal.CalculateNormal(v1, v2, v3) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (m_vNormal.CalculateNormal(v1, v2, v3) == PL_FAILURE)
+    return PL_FAILURE;
 
   m_fNegDistance = -m_vNormal.Dot(v1);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename Type>
 plResult plPlaneTemplate<Type>::SetFromPoints(const plVec3Template<Type>* const pVertices)
 {
-  if (m_vNormal.CalculateNormal(pVertices[0], pVertices[1], pVertices[2]) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (m_vNormal.CalculateNormal(pVertices[0], pVertices[1], pVertices[2]) == PL_FAILURE)
+    return PL_FAILURE;
 
   m_fNegDistance = -m_vNormal.Dot(pVertices[0]);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename Type>
@@ -99,8 +96,8 @@ void plPlaneTemplate<Type>::Transform(const plMat3Template<Type>& m)
   }
   else
   {
-    SetFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
-  } 
+    *this = plPlane::MakeFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
+  }
 }
 
 template <typename Type>
@@ -119,25 +116,25 @@ void plPlaneTemplate<Type>::Transform(const plMat4Template<Type>& m)
   }
   else
   {
-    SetFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
+    *this = plPlane::MakeFromNormalAndPoint(vTransformedNormal, m * vPointOnPlane);
   }
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE void plPlaneTemplate<Type>::Flip()
+PL_FORCE_INLINE void plPlaneTemplate<Type>::Flip()
 {
   m_fNegDistance = -m_fNegDistance;
   m_vNormal = -m_vNormal;
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE Type plPlaneTemplate<Type>::GetDistanceTo(const plVec3Template<Type>& vPoint) const
+PL_FORCE_INLINE Type plPlaneTemplate<Type>::GetDistanceTo(const plVec3Template<Type>& vPoint) const
 {
   return (m_vNormal.Dot(vPoint) + m_fNegDistance);
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE plPositionOnPlane::Enum plPlaneTemplate<Type>::GetPointPosition(const plVec3Template<Type>& vPoint) const
+PL_FORCE_INLINE plPositionOnPlane::Enum plPlaneTemplate<Type>::GetPointPosition(const plVec3Template<Type>& vPoint) const
 {
   return (m_vNormal.Dot(vPoint) < -m_fNegDistance ? plPositionOnPlane::Back : plPositionOnPlane::Front);
 }
@@ -157,13 +154,13 @@ plPositionOnPlane::Enum plPlaneTemplate<Type>::GetPointPosition(const plVec3Temp
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE const plVec3Template<Type> plPlaneTemplate<Type>::ProjectOntoPlane(const plVec3Template<Type>& vPoint) const
+PL_FORCE_INLINE const plVec3Template<Type> plPlaneTemplate<Type>::ProjectOntoPlane(const plVec3Template<Type>& vPoint) const
 {
   return vPoint - m_vNormal * (m_vNormal.Dot(vPoint) + m_fNegDistance);
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE const plVec3Template<Type> plPlaneTemplate<Type>::Mirror(const plVec3Template<Type>& vPoint) const
+PL_FORCE_INLINE const plVec3Template<Type> plPlaneTemplate<Type>::Mirror(const plVec3Template<Type>& vPoint) const
 {
   return vPoint - (Type)2 * GetDistanceTo(vPoint) * m_vNormal;
 }
@@ -189,13 +186,13 @@ bool plPlaneTemplate<Type>::IsEqual(const plPlaneTemplate& rhs, Type fEpsilon) c
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator==(const plPlaneTemplate<Type>& lhs, const plPlaneTemplate<Type>& rhs)
+PL_ALWAYS_INLINE bool operator==(const plPlaneTemplate<Type>& lhs, const plPlaneTemplate<Type>& rhs)
 {
   return lhs.IsIdentical(rhs);
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator!=(const plPlaneTemplate<Type>& lhs, const plPlaneTemplate<Type>& rhs)
+PL_ALWAYS_INLINE bool operator!=(const plPlaneTemplate<Type>& lhs, const plPlaneTemplate<Type>& rhs)
 {
   return !lhs.IsIdentical(rhs);
 }
@@ -210,13 +207,6 @@ bool plPlaneTemplate<Type>::FlipIfNecessary(const plVec3Template<Type>& vPoint, 
   }
 
   return false;
-}
-
-template <typename Type>
-void plPlaneTemplate<Type>::SetInvalid()
-{
-  m_vNormal.Set(0);
-  m_fNegDistance = 0;
 }
 
 template <typename Type>
@@ -245,14 +235,14 @@ plResult plPlaneTemplate<Type>::SetFromPoints(const plVec3Template<Type>* const 
 {
   plInt32 iPoints[3];
 
-  if (FindSupportPoints(pVertices, uiMaxVertices, iPoints[0], iPoints[1], iPoints[2]) == PLASMA_FAILURE)
+  if (FindSupportPoints(pVertices, uiMaxVertices, iPoints[0], iPoints[1], iPoints[2]) == PL_FAILURE)
   {
     SetFromPoints(pVertices).IgnoreResult();
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   SetFromPoints(pVertices[iPoints[0]], pVertices[iPoints[1]], pVertices[iPoints[2]]).IgnoreResult();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename Type>
@@ -275,7 +265,7 @@ plResult plPlaneTemplate<Type>::FindSupportPoints(const plVec3Template<Type>* co
   }
 
   if (!bFoundSecond)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plVec3Template<Type> v2 = pVertices[i];
 
@@ -292,13 +282,13 @@ plResult plPlaneTemplate<Type>::FindSupportPoints(const plVec3Template<Type>* co
     if ((pVertices[i].IsEqual(v2, 0.001f) == false) && (plMath::Abs((pVertices[i] - v2).GetNormalized().Dot(vDir1)) < (Type)0.999))
     {
       out_i3 = i;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     ++i;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 template <typename Type>
@@ -367,8 +357,8 @@ plPositionOnPlane::Enum plPlaneTemplate<Type>::GetObjectPosition(const plVec3Tem
 template <typename Type>
 bool plPlaneTemplate<Type>::GetRayIntersection(const plVec3Template<Type>& vRayStartPos, const plVec3Template<Type>& vRayDir, Type* out_pIntersectionDistance, plVec3Template<Type>* out_pIntersection) const
 {
-  PLASMA_ASSERT_DEBUG(vRayStartPos.IsValid(), "Ray start position must be valid.");
-  PLASMA_ASSERT_DEBUG(vRayDir.IsValid(), "Ray direction must be valid.");
+  PL_ASSERT_DEBUG(vRayStartPos.IsValid(), "Ray start position must be valid.");
+  PL_ASSERT_DEBUG(vRayDir.IsValid(), "Ray direction must be valid.");
 
   const Type fPlaneSide = GetDistanceTo(vRayStartPos);
   const Type fCosAlpha = m_vNormal.Dot(vRayDir);
@@ -393,8 +383,8 @@ bool plPlaneTemplate<Type>::GetRayIntersection(const plVec3Template<Type>& vRayS
 template <typename Type>
 bool plPlaneTemplate<Type>::GetRayIntersectionBiDirectional(const plVec3Template<Type>& vRayStartPos, const plVec3Template<Type>& vRayDir, Type* out_pIntersectionDistance, plVec3Template<Type>* out_pIntersection) const
 {
-  PLASMA_ASSERT_DEBUG(vRayStartPos.IsValid(), "Ray start position must be valid.");
-  PLASMA_ASSERT_DEBUG(vRayDir.IsValid(), "Ray direction must be valid.");
+  PL_ASSERT_DEBUG(vRayStartPos.IsValid(), "Ray start position must be valid.");
+  PL_ASSERT_DEBUG(vRayDir.IsValid(), "Ray direction must be valid.");
 
   const Type fPlaneSide = GetDistanceTo(vRayStartPos);
   const Type fCosAlpha = m_vNormal.Dot(vRayDir);
@@ -430,9 +420,9 @@ bool plPlaneTemplate<Type>::GetLineSegmentIntersection(const plVec3Template<Type
 template <typename Type>
 Type plPlaneTemplate<Type>::GetMinimumDistanceTo(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof (plVec3Template<Type>) */) const
 {
-  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "Array may not be nullptr.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Stride must be at least sizeof(plVec3Template) to not have overlapping data.");
-  PLASMA_ASSERT_DEBUG(uiNumPoints >= 1, "Array must contain at least one point.");
+  PL_ASSERT_DEBUG(pPoints != nullptr, "Array may not be nullptr.");
+  PL_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Stride must be at least sizeof(plVec3Template) to not have overlapping data.");
+  PL_ASSERT_DEBUG(uiNumPoints >= 1, "Array must contain at least one point.");
 
   Type fMinDist = plMath::MaxValue<Type>();
 
@@ -451,9 +441,9 @@ Type plPlaneTemplate<Type>::GetMinimumDistanceTo(const plVec3Template<Type>* pPo
 template <typename Type>
 void plPlaneTemplate<Type>::GetMinMaxDistanceTo(Type& out_fMin, Type& out_fMax, const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride /* = sizeof (plVec3Template<Type>) */) const
 {
-  PLASMA_ASSERT_DEBUG(pPoints != nullptr, "Array may not be nullptr.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Stride must be at least sizeof(plVec3Template) to not have overlapping data.");
-  PLASMA_ASSERT_DEBUG(uiNumPoints >= 1, "Array must contain at least one point.");
+  PL_ASSERT_DEBUG(pPoints != nullptr, "Array may not be nullptr.");
+  PL_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Stride must be at least sizeof(plVec3Template) to not have overlapping data.");
+  PL_ASSERT_DEBUG(uiNumPoints >= 1, "Array must contain at least one point.");
 
   out_fMin = plMath::MaxValue<Type>();
   out_fMax = -plMath::MaxValue<Type>();
@@ -484,11 +474,11 @@ plResult plPlaneTemplate<Type>::GetPlanesIntersectionPoint(const plPlaneTemplate
   const Type det = n1.Dot(n2.CrossRH(n3));
 
   if (plMath::IsZero<Type>(det, plMath::LargeEpsilon<Type>()))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   out_vResult = (-p0.m_fNegDistance * n2.CrossRH(n3) + -p1.m_fNegDistance * n3.CrossRH(n1) + -p2.m_fNegDistance * n1.CrossRH(n2)) / det;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #include <Foundation/Math/Implementation/AllClasses_inl.h>

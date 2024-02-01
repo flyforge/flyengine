@@ -56,6 +56,9 @@ namespace
     {"%"_plsv, plExpressionAST::NodeType::Modulo, 5},
   };
 
+  static plHashTable<plHashedString, plEnum<plExpressionAST::DataType>> s_KnownTypes;
+  static plHashTable<plHashedString, plEnum<plExpressionAST::NodeType>> s_BuiltinFunctions;
+
 } // namespace
 
 using namespace plTokenParseUtils;
@@ -68,9 +71,25 @@ plExpressionParser::plExpressionParser()
 
 plExpressionParser::~plExpressionParser() = default;
 
+// static
+const plHashTable<plHashedString, plEnum<plExpressionAST::DataType>>& plExpressionParser::GetKnownTypes()
+{
+  RegisterKnownTypes();
+
+  return s_KnownTypes;
+}
+
+// static
+const plHashTable<plHashedString, plEnum<plExpressionAST::NodeType>>& plExpressionParser::GetBuiltinFunctions()
+{
+  RegisterBuiltinFunctions();
+
+  return s_BuiltinFunctions;
+}
+
 void plExpressionParser::RegisterFunction(const plExpression::FunctionDesc& funcDesc)
 {
-  PLASMA_ASSERT_DEV(funcDesc.m_uiNumRequiredInputs <= funcDesc.m_InputTypes.GetCount(), "Not enough input types defined. {} inputs are required but only {} types given.", funcDesc.m_uiNumRequiredInputs, funcDesc.m_InputTypes.GetCount());
+  PL_ASSERT_DEV(funcDesc.m_uiNumRequiredInputs <= funcDesc.m_InputTypes.GetCount(), "Not enough input types defined. {} inputs are required but only {} types given.", funcDesc.m_uiNumRequiredInputs, funcDesc.m_InputTypes.GetCount());
 
   auto& functionDescs = m_FunctionDescs[funcDesc.m_sName];
   if (functionDescs.Contains(funcDesc) == false)
@@ -90,7 +109,7 @@ void plExpressionParser::UnregisterFunction(const plExpression::FunctionDesc& fu
 plResult plExpressionParser::Parse(plStringView sCode, plArrayPtr<plExpression::StreamDesc> inputs, plArrayPtr<plExpression::StreamDesc> outputs, const Options& options, plExpressionAST& out_ast)
 {
   if (sCode.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Options = options;
 
@@ -107,33 +126,37 @@ plResult plExpressionParser::Parse(plStringView sCode, plArrayPtr<plExpression::
 
     while (m_uiCurrentToken < m_TokenStream.GetCount())
     {
-      PLASMA_SUCCEED_OR_RETURN(ParseStatement());
+      PL_SUCCEED_OR_RETURN(ParseStatement());
 
       if (m_uiCurrentToken < m_TokenStream.GetCount() && AcceptStatementTerminator() == false)
       {
         auto pCurrentToken = m_TokenStream[m_uiCurrentToken];
         ReportError(pCurrentToken, plFmt("Syntax error, unexpected token '{}'", pCurrentToken->m_DataView));
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(CheckOutputs());
+  PL_SUCCEED_OR_RETURN(CheckOutputs());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
+// static
 void plExpressionParser::RegisterKnownTypes()
 {
-  m_KnownTypes.Insert(plMakeHashedString("var"), plExpressionAST::DataType::Unknown);
+  if (s_KnownTypes.IsEmpty() == false)
+    return;
 
-  m_KnownTypes.Insert(plMakeHashedString("vec2"), plExpressionAST::DataType::Float2);
-  m_KnownTypes.Insert(plMakeHashedString("vec3"), plExpressionAST::DataType::Float3);
-  m_KnownTypes.Insert(plMakeHashedString("vec4"), plExpressionAST::DataType::Float4);
+  s_KnownTypes.Insert(plMakeHashedString("var"), plExpressionAST::DataType::Unknown);
 
-  m_KnownTypes.Insert(plMakeHashedString("vec2i"), plExpressionAST::DataType::Int2);
-  m_KnownTypes.Insert(plMakeHashedString("vec3i"), plExpressionAST::DataType::Int3);
-  m_KnownTypes.Insert(plMakeHashedString("vec4i"), plExpressionAST::DataType::Int4);
+  s_KnownTypes.Insert(plMakeHashedString("vec2"), plExpressionAST::DataType::Float2);
+  s_KnownTypes.Insert(plMakeHashedString("vec3"), plExpressionAST::DataType::Float3);
+  s_KnownTypes.Insert(plMakeHashedString("vec4"), plExpressionAST::DataType::Float4);
+
+  s_KnownTypes.Insert(plMakeHashedString("vec2i"), plExpressionAST::DataType::Int2);
+  s_KnownTypes.Insert(plMakeHashedString("vec3i"), plExpressionAST::DataType::Int3);
+  s_KnownTypes.Insert(plMakeHashedString("vec4i"), plExpressionAST::DataType::Int4);
 
   plStringBuilder sTypeName;
   for (plUInt32 type = plExpressionAST::DataType::Bool; type < plExpressionAST::DataType::Count; ++type)
@@ -144,54 +167,59 @@ void plExpressionParser::RegisterKnownTypes()
     plHashedString sTypeNameHashed;
     sTypeNameHashed.Assign(sTypeName);
 
-    m_KnownTypes.Insert(sTypeNameHashed, static_cast<plExpressionAST::DataType::Enum>(type));
+    s_KnownTypes.Insert(sTypeNameHashed, static_cast<plExpressionAST::DataType::Enum>(type));
   }
 }
 
 void plExpressionParser::RegisterBuiltinFunctions()
 {
+  if (s_BuiltinFunctions.IsEmpty() == false)
+    return;
+
   // Unary
-  m_BuiltinFunctions.Insert(plMakeHashedString("abs"), plExpressionAST::NodeType::Absolute);
-  m_BuiltinFunctions.Insert(plMakeHashedString("saturate"), plExpressionAST::NodeType::Saturate);
-  m_BuiltinFunctions.Insert(plMakeHashedString("sqrt"), plExpressionAST::NodeType::Sqrt);
-  m_BuiltinFunctions.Insert(plMakeHashedString("exp"), plExpressionAST::NodeType::Exp);
-  m_BuiltinFunctions.Insert(plMakeHashedString("ln"), plExpressionAST::NodeType::Ln);
-  m_BuiltinFunctions.Insert(plMakeHashedString("log2"), plExpressionAST::NodeType::Log2);
-  m_BuiltinFunctions.Insert(plMakeHashedString("log10"), plExpressionAST::NodeType::Log10);
-  m_BuiltinFunctions.Insert(plMakeHashedString("pow2"), plExpressionAST::NodeType::Pow2);
-  m_BuiltinFunctions.Insert(plMakeHashedString("sin"), plExpressionAST::NodeType::Sin);
-  m_BuiltinFunctions.Insert(plMakeHashedString("cos"), plExpressionAST::NodeType::Cos);
-  m_BuiltinFunctions.Insert(plMakeHashedString("tan"), plExpressionAST::NodeType::Tan);
-  m_BuiltinFunctions.Insert(plMakeHashedString("asin"), plExpressionAST::NodeType::ASin);
-  m_BuiltinFunctions.Insert(plMakeHashedString("acos"), plExpressionAST::NodeType::ACos);
-  m_BuiltinFunctions.Insert(plMakeHashedString("atan"), plExpressionAST::NodeType::ATan);
-  m_BuiltinFunctions.Insert(plMakeHashedString("radToDeg"), plExpressionAST::NodeType::RadToDeg);
-  m_BuiltinFunctions.Insert(plMakeHashedString("rad_to_deg"), plExpressionAST::NodeType::RadToDeg);
-  m_BuiltinFunctions.Insert(plMakeHashedString("degToRad"), plExpressionAST::NodeType::DegToRad);
-  m_BuiltinFunctions.Insert(plMakeHashedString("deg_to_rad"), plExpressionAST::NodeType::DegToRad);
-  m_BuiltinFunctions.Insert(plMakeHashedString("round"), plExpressionAST::NodeType::Round);
-  m_BuiltinFunctions.Insert(plMakeHashedString("floor"), plExpressionAST::NodeType::Floor);
-  m_BuiltinFunctions.Insert(plMakeHashedString("ceil"), plExpressionAST::NodeType::Ceil);
-  m_BuiltinFunctions.Insert(plMakeHashedString("trunc"), plExpressionAST::NodeType::Trunc);
-  m_BuiltinFunctions.Insert(plMakeHashedString("frac"), plExpressionAST::NodeType::Frac);
-  m_BuiltinFunctions.Insert(plMakeHashedString("length"), plExpressionAST::NodeType::Length);
-  m_BuiltinFunctions.Insert(plMakeHashedString("normalize"), plExpressionAST::NodeType::Normalize);
-  m_BuiltinFunctions.Insert(plMakeHashedString("all"), plExpressionAST::NodeType::All);
-  m_BuiltinFunctions.Insert(plMakeHashedString("any"), plExpressionAST::NodeType::Any);
+  s_BuiltinFunctions.Insert(plMakeHashedString("abs"), plExpressionAST::NodeType::Absolute);
+  s_BuiltinFunctions.Insert(plMakeHashedString("saturate"), plExpressionAST::NodeType::Saturate);
+  s_BuiltinFunctions.Insert(plMakeHashedString("sqrt"), plExpressionAST::NodeType::Sqrt);
+  s_BuiltinFunctions.Insert(plMakeHashedString("exp"), plExpressionAST::NodeType::Exp);
+  s_BuiltinFunctions.Insert(plMakeHashedString("ln"), plExpressionAST::NodeType::Ln);
+  s_BuiltinFunctions.Insert(plMakeHashedString("log2"), plExpressionAST::NodeType::Log2);
+  s_BuiltinFunctions.Insert(plMakeHashedString("log10"), plExpressionAST::NodeType::Log10);
+  s_BuiltinFunctions.Insert(plMakeHashedString("pow2"), plExpressionAST::NodeType::Pow2);
+  s_BuiltinFunctions.Insert(plMakeHashedString("sin"), plExpressionAST::NodeType::Sin);
+  s_BuiltinFunctions.Insert(plMakeHashedString("cos"), plExpressionAST::NodeType::Cos);
+  s_BuiltinFunctions.Insert(plMakeHashedString("tan"), plExpressionAST::NodeType::Tan);
+  s_BuiltinFunctions.Insert(plMakeHashedString("asin"), plExpressionAST::NodeType::ASin);
+  s_BuiltinFunctions.Insert(plMakeHashedString("acos"), plExpressionAST::NodeType::ACos);
+  s_BuiltinFunctions.Insert(plMakeHashedString("atan"), plExpressionAST::NodeType::ATan);
+  s_BuiltinFunctions.Insert(plMakeHashedString("radToDeg"), plExpressionAST::NodeType::RadToDeg);
+  s_BuiltinFunctions.Insert(plMakeHashedString("rad_to_deg"), plExpressionAST::NodeType::RadToDeg);
+  s_BuiltinFunctions.Insert(plMakeHashedString("degToRad"), plExpressionAST::NodeType::DegToRad);
+  s_BuiltinFunctions.Insert(plMakeHashedString("deg_to_rad"), plExpressionAST::NodeType::DegToRad);
+  s_BuiltinFunctions.Insert(plMakeHashedString("round"), plExpressionAST::NodeType::Round);
+  s_BuiltinFunctions.Insert(plMakeHashedString("floor"), plExpressionAST::NodeType::Floor);
+  s_BuiltinFunctions.Insert(plMakeHashedString("ceil"), plExpressionAST::NodeType::Ceil);
+  s_BuiltinFunctions.Insert(plMakeHashedString("trunc"), plExpressionAST::NodeType::Trunc);
+  s_BuiltinFunctions.Insert(plMakeHashedString("frac"), plExpressionAST::NodeType::Frac);
+  s_BuiltinFunctions.Insert(plMakeHashedString("length"), plExpressionAST::NodeType::Length);
+  s_BuiltinFunctions.Insert(plMakeHashedString("normalize"), plExpressionAST::NodeType::Normalize);
+  s_BuiltinFunctions.Insert(plMakeHashedString("all"), plExpressionAST::NodeType::All);
+  s_BuiltinFunctions.Insert(plMakeHashedString("any"), plExpressionAST::NodeType::Any);
 
   // Binary
-  m_BuiltinFunctions.Insert(plMakeHashedString("mod"), plExpressionAST::NodeType::Modulo);
-  m_BuiltinFunctions.Insert(plMakeHashedString("log"), plExpressionAST::NodeType::Log);
-  m_BuiltinFunctions.Insert(plMakeHashedString("pow"), plExpressionAST::NodeType::Pow);
-  m_BuiltinFunctions.Insert(plMakeHashedString("min"), plExpressionAST::NodeType::Min);
-  m_BuiltinFunctions.Insert(plMakeHashedString("max"), plExpressionAST::NodeType::Max);
-  m_BuiltinFunctions.Insert(plMakeHashedString("dot"), plExpressionAST::NodeType::Dot);
-  m_BuiltinFunctions.Insert(plMakeHashedString("cross"), plExpressionAST::NodeType::Cross);
-  m_BuiltinFunctions.Insert(plMakeHashedString("reflect"), plExpressionAST::NodeType::Reflect);
+  s_BuiltinFunctions.Insert(plMakeHashedString("mod"), plExpressionAST::NodeType::Modulo);
+  s_BuiltinFunctions.Insert(plMakeHashedString("log"), plExpressionAST::NodeType::Log);
+  s_BuiltinFunctions.Insert(plMakeHashedString("pow"), plExpressionAST::NodeType::Pow);
+  s_BuiltinFunctions.Insert(plMakeHashedString("min"), plExpressionAST::NodeType::Min);
+  s_BuiltinFunctions.Insert(plMakeHashedString("max"), plExpressionAST::NodeType::Max);
+  s_BuiltinFunctions.Insert(plMakeHashedString("dot"), plExpressionAST::NodeType::Dot);
+  s_BuiltinFunctions.Insert(plMakeHashedString("cross"), plExpressionAST::NodeType::Cross);
+  s_BuiltinFunctions.Insert(plMakeHashedString("reflect"), plExpressionAST::NodeType::Reflect);
 
   // Ternary
-  m_BuiltinFunctions.Insert(plMakeHashedString("clamp"), plExpressionAST::NodeType::Clamp);
-  m_BuiltinFunctions.Insert(plMakeHashedString("lerp"), plExpressionAST::NodeType::Lerp);
+  s_BuiltinFunctions.Insert(plMakeHashedString("clamp"), plExpressionAST::NodeType::Clamp);
+  s_BuiltinFunctions.Insert(plMakeHashedString("lerp"), plExpressionAST::NodeType::Lerp);
+  s_BuiltinFunctions.Insert(plMakeHashedString("smoothstep"), plExpressionAST::NodeType::SmoothStep);
+  s_BuiltinFunctions.Insert(plMakeHashedString("smootherstep"), plExpressionAST::NodeType::SmootherStep);
 }
 
 void plExpressionParser::SetupInAndOutputs(plArrayPtr<plExpression::StreamDesc> inputs, plArrayPtr<plExpression::StreamDesc> outputs)
@@ -201,6 +229,7 @@ void plExpressionParser::SetupInAndOutputs(plArrayPtr<plExpression::StreamDesc> 
   for (auto& inputDesc : inputs)
   {
     auto pInput = m_pAST->CreateInput(inputDesc);
+    m_pAST->m_InputNodes.PushBack(pInput);
     m_KnownVariables.Insert(inputDesc.m_sName, pInput);
   }
 
@@ -219,11 +248,11 @@ plResult plExpressionParser::ParseStatement()
   if (AcceptStatementTerminator())
   {
     // empty statement
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (m_uiCurrentToken >= m_TokenStream.GetCount())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plToken* pIdentifierToken = m_TokenStream[m_uiCurrentToken];
   if (pIdentifierToken->m_iType != plTokenType::Identifier)
@@ -243,21 +272,21 @@ plResult plExpressionParser::ParseStatement()
 plResult plExpressionParser::ParseType(plStringView sTypeName, plEnum<plExpressionAST::DataType>& out_type)
 {
   plTempHashedString sTypeNameHashed(sTypeName);
-  if (m_KnownTypes.TryGetValue(sTypeNameHashed, out_type))
+  if (s_KnownTypes.TryGetValue(sTypeNameHashed, out_type))
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plExpressionParser::ParseVariableDefinition(plEnum<plExpressionAST::DataType> type)
 {
   // skip type
-  PLASMA_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier));
+  PL_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier));
 
   const plToken* pIdentifierToken = nullptr;
-  PLASMA_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier, &pIdentifierToken));
+  PL_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier, &pIdentifierToken));
 
   plHashedString sHashedVarName;
   sHashedVarName.Assign(pIdentifierToken->m_DataView);
@@ -276,29 +305,29 @@ plResult plExpressionParser::ParseVariableDefinition(plEnum<plExpressionAST::Dat
     }
 
     ReportError(pIdentifierToken, plFmt("Local variable '{}' cannot be defined because {} of the same name already exists", pIdentifierToken->m_DataView, szExisting));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_SUCCEED_OR_RETURN(Expect("="));
+  PL_SUCCEED_OR_RETURN(Expect("="));
   plExpressionAST::Node* pExpression = ParseExpression();
   if (pExpression == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_KnownVariables.Insert(sHashedVarName, EnsureExpectedType(pExpression, type));
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionParser::ParseAssignment()
 {
   const plToken* pIdentifierToken = nullptr;
-  PLASMA_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier, &pIdentifierToken));
+  PL_SUCCEED_OR_RETURN(Expect(plTokenType::Identifier, &pIdentifierToken));
 
   const plStringView sIdentifier = pIdentifierToken->m_DataView;
   plExpressionAST::Node* pVarNode = GetVariable(sIdentifier);
   if (pVarNode == nullptr)
   {
     ReportError(pIdentifierToken, "Syntax error, expected a valid variable");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringView sPartialAssignmentMask;
@@ -308,7 +337,7 @@ plResult plExpressionParser::ParseAssignment()
     if (Expect(plTokenType::Identifier, &pSwizzleToken).Failed())
     {
       ReportError(m_TokenStream[m_uiCurrentToken], "Invalid partial assignment");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     sPartialAssignmentMask = pSwizzleToken->m_DataView;
@@ -317,7 +346,7 @@ plResult plExpressionParser::ParseAssignment()
   SkipWhitespace(m_TokenStream, m_uiCurrentToken);
 
   plExpressionAST::NodeType::Enum assignOperator = plExpressionAST::NodeType::Invalid;
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_assignOperators); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_assignOperators); ++i)
   {
     auto& op = s_assignOperators[i];
     if (AcceptOperator(op.m_sName))
@@ -330,12 +359,12 @@ plResult plExpressionParser::ParseAssignment()
 
   if (assignOperator == plExpressionAST::NodeType::Invalid)
   {
-    PLASMA_SUCCEED_OR_RETURN(Expect("="));
+    PL_SUCCEED_OR_RETURN(Expect("="));
   }
 
   plExpressionAST::Node* pExpression = ParseExpression();
   if (pExpression == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (assignOperator != plExpressionAST::NodeType::Invalid)
   {
@@ -348,7 +377,7 @@ plResult plExpressionParser::ParseAssignment()
     if (pConstructor == nullptr)
     {
       ReportError(pIdentifierToken, plFmt("Invalid partial assignment .{} = {}", sPartialAssignmentMask, plExpressionAST::DataType::GetName(pExpression->m_ReturnType)));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     pExpression = pConstructor;
@@ -357,19 +386,19 @@ plResult plExpressionParser::ParseAssignment()
   if (plExpressionAST::NodeType::IsInput(pVarNode->m_Type))
   {
     ReportError(pIdentifierToken, plFmt("Input '{}' is not assignable", sIdentifier));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else if (plExpressionAST::NodeType::IsOutput(pVarNode->m_Type))
   {
     auto pOutput = static_cast<plExpressionAST::Output*>(pVarNode);
     pOutput->m_pExpression = pExpression;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plHashedString sHashedVarName;
   sHashedVarName.Assign(sIdentifier);
   m_KnownVariables[sHashedVarName] = EnsureExpectedType(pExpression, pVarNode->m_ReturnType);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plExpressionAST::Node* plExpressionParser::ParseFactor()
@@ -379,8 +408,6 @@ plExpressionAST::Node* plExpressionParser::ParseFactor()
   {
     auto pIdentifierToken = m_TokenStream[uiIdentifierToken];
     const plStringView sIdentifier = pIdentifierToken->m_DataView;
-
-    plExpressionAST::Node* pNode = nullptr;
 
     if (Accept(m_TokenStream, m_uiCurrentToken, "("))
     {
@@ -542,20 +569,21 @@ plExpressionAST::Node* plExpressionParser::ParseFunctionCall(plStringView sFunct
       return nullptr;
   }
 
-  auto CheckArgumentCount = [&](plUInt32 uiExpectedArgumentCount) -> plResult {
+  auto CheckArgumentCount = [&](plUInt32 uiExpectedArgumentCount) -> plResult
+  {
     if (arguments.GetCount() != uiExpectedArgumentCount)
     {
       ReportError(pFunctionToken, plFmt("Invalid argument count for '{}'. Expected {} but got {}", sFunctionName, uiExpectedArgumentCount, arguments.GetCount()));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   };
 
   plHashedString sHashedFuncName;
   sHashedFuncName.Assign(sFunctionName);
 
   plEnum<plExpressionAST::DataType> dataType;
-  if (m_KnownTypes.TryGetValue(sHashedFuncName, dataType))
+  if (s_KnownTypes.TryGetValue(sHashedFuncName, dataType))
   {
     plUInt32 uiElementCount = plExpressionAST::DataType::GetElementCount(dataType);
     if (arguments.GetCount() > uiElementCount)
@@ -568,7 +596,7 @@ plExpressionAST::Node* plExpressionParser::ParseFunctionCall(plStringView sFunct
   }
 
   plEnum<plExpressionAST::NodeType> builtinType;
-  if (m_BuiltinFunctions.TryGetValue(sHashedFuncName, builtinType))
+  if (s_BuiltinFunctions.TryGetValue(sHashedFuncName, builtinType))
   {
     if (plExpressionAST::NodeType::IsUnary(builtinType))
     {
@@ -592,7 +620,7 @@ plExpressionAST::Node* plExpressionParser::ParseFunctionCall(plStringView sFunct
       return m_pAST->CreateTernaryOperator(builtinType, arguments[0], arguments[1], arguments[2]);
     }
 
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
     return nullptr;
   }
 
@@ -661,7 +689,7 @@ bool plExpressionParser::AcceptBinaryOperator(plExpressionAST::NodeType::Enum& o
 {
   SkipWhitespace(m_TokenStream, m_uiCurrentToken);
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_binaryOperators); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_binaryOperators); ++i)
   {
     auto& op = s_binaryOperators[i];
     if (AcceptOperator(op.m_sName))
@@ -736,12 +764,9 @@ plResult plExpressionParser::CheckOutputs()
     if (pOutputNode->m_pExpression == nullptr)
     {
       plLog::Error("Output '{}' was never written", pOutputNode->m_Desc.m_sName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Expression_Implementation_ExpressionParser);

@@ -10,7 +10,7 @@ namespace plRmlUiInternal
 {
   struct Vertex
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_Position;
     plVec2 m_TexCoord;
@@ -27,7 +27,7 @@ namespace plRmlUiInternal
 
   struct Batch
   {
-    plMat4 m_Transform = plMat4::IdentityMatrix();
+    plMat4 m_Transform = plMat4::MakeIdentity();
     plVec2 m_Translation = plVec2(0);
     CompiledGeometry m_CompiledGeometry;
     plRectFloat m_ScissorRect = plRectFloat(0, 0);
@@ -38,10 +38,10 @@ namespace plRmlUiInternal
 
 class plRmlUiRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plRmlUiRenderData, plRenderData);
 
 public:
-  plRmlUiRenderData(plAllocatorBase* pAllocator)
+  plRmlUiRenderData(plAllocator* pAllocator)
     : m_Batches(pAllocator)
   {
   }

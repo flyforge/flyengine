@@ -9,51 +9,51 @@
 #include <GameEngine/Gameplay/InputComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plInputMessageGranularity, 1)
-  PLASMA_ENUM_CONSTANT(plInputMessageGranularity::PressOnly),
-  PLASMA_ENUM_CONSTANT(plInputMessageGranularity::PressAndRelease),
-  PLASMA_ENUM_CONSTANT(plInputMessageGranularity::PressReleaseAndDown),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plInputMessageGranularity, 1)
+  PL_ENUM_CONSTANT(plInputMessageGranularity::PressOnly),
+  PL_ENUM_CONSTANT(plInputMessageGranularity::PressAndRelease),
+  PL_ENUM_CONSTANT(plInputMessageGranularity::PressReleaseAndDown),
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgInputActionTriggered);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgInputActionTriggered, 1, plRTTIDefaultAllocator<plMsgInputActionTriggered>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgInputActionTriggered);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgInputActionTriggered, 1, plRTTIDefaultAllocator<plMsgInputActionTriggered>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("InputAction", GetInputAction, SetInputAction),
-    PLASMA_MEMBER_PROPERTY("KeyPressValue", m_fKeyPressValue),
-    PLASMA_ENUM_MEMBER_PROPERTY("TriggerState", plTriggerState, m_TriggerState),
+    PL_ACCESSOR_PROPERTY("InputAction", GetInputAction, SetInputAction),
+    PL_MEMBER_PROPERTY("KeyPressValue", m_fKeyPressValue),
+    PL_ENUM_MEMBER_PROPERTY("TriggerState", plTriggerState, m_TriggerState),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plInputComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plInputComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("InputSet", m_sInputSet)->AddAttributes(new plDynamicStringEnumAttribute("InputSet")),
-    PLASMA_ENUM_MEMBER_PROPERTY("Granularity", plInputMessageGranularity, m_Granularity),
-    PLASMA_MEMBER_PROPERTY("ForwardToBlackboard", m_bForwardToBlackboard),
+    PL_MEMBER_PROPERTY("InputSet", m_sInputSet)->AddAttributes(new plDynamicStringEnumAttribute("InputSet")),
+    PL_ENUM_MEMBER_PROPERTY("Granularity", plInputMessageGranularity, m_Granularity),
+    PL_MEMBER_PROPERTY("ForwardToBlackboard", m_bForwardToBlackboard),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Input"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGESENDERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGESENDERS
   {
-    PLASMA_MESSAGE_SENDER(m_InputEventSender)
+    PL_MESSAGE_SENDER(m_InputEventSender)
   }
-  PLASMA_END_MESSAGESENDERS;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_MESSAGESENDERS;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetCurrentInputState, In, "InputAction", In, "OnlyKeyPressed"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetCurrentInputState, In, "InputAction", In, "OnlyKeyPressed"),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plInputComponent::plInputComponent() = default;
@@ -93,8 +93,7 @@ void plInputComponent::Update()
 
     if (pBlackboard)
     {
-      // we don't mind if the entry doesn't exist, that just means nobody is interested in reading the value
-      pBlackboard->SetEntryValue(plTempHashedString(actionName), fValue).IgnoreResult();
+      pBlackboard->SetEntryValue(actionName, fValue);
     }
 
     if (state == plKeyState::Up)
@@ -123,18 +122,13 @@ float plInputComponent::GetCurrentInputState(const char* szInputAction, bool bOn
   if (bOnlyKeyPressed && state != plKeyState::Pressed)
     return 0;
 
-  if (state != plKeyState::Up)
-  {
-    return fValue;
-  }
-
   return fValue;
 }
 
-void plInputComponent::SerializeComponent(plWorldWriter& stream) const
+void plInputComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_sInputSet;
   s << m_Granularity;
@@ -143,11 +137,11 @@ void plInputComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_bForwardToBlackboard;
 }
 
-void plInputComponent::DeserializeComponent(plWorldReader& stream)
+void plInputComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
 
   s >> m_sInputSet;
@@ -173,7 +167,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Input Set", "InputSet");
   }
@@ -183,4 +177,4 @@ plInputComponentPatch_1_2 g_plInputComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_InputComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_InputComponent);

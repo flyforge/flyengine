@@ -19,11 +19,11 @@ class plMeshResourceDescriptor;
 using plMeshResourceHandle = plTypedResourceHandle<class plMeshResource>;
 using plMaterialResourceHandle = plTypedResourceHandle<class plMaterialResource>;
 
-typedef plComponentManager<class plGreyBoxComponent, plBlockStorageType::Compact> plGreyBoxComponentManager;
+using plGreyBoxComponentManager = plComponentManager<class plGreyBoxComponent, plBlockStorageType::Compact>;
 
-struct PLASMA_GAMEENGINE_DLL plGreyBoxShape
+struct PL_GAMEENGINE_DLL plGreyBoxShape
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -41,18 +41,23 @@ struct PLASMA_GAMEENGINE_DLL plGreyBoxShape
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plGreyBoxShape)
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plGreyBoxShape)
 
-class PLASMA_GAMEENGINE_DLL plGreyBoxComponent : public plRenderComponent
+/// \brief Creates basic geometry for prototyping levels.
+///
+/// It automatically creates physics collision geometry and also sets up rendering occluders to improve performance.
+class PL_GAMEENGINE_DLL plGreyBoxComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plGreyBoxComponent, plRenderComponent, plGreyBoxComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plGreyBoxComponent, plRenderComponent, plGreyBoxComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+public:
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
+protected:
   virtual void OnActivated() override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -68,39 +73,69 @@ public:
   plGreyBoxComponent();
   ~plGreyBoxComponent();
 
+  /// \brief The geometry type to build.
   void SetShape(plEnum<plGreyBoxShape> shape);                // [ property ]
   plEnum<plGreyBoxShape> GetShape() const { return m_Shape; } // [ property ]
-  void SetMaterialFile(const char* szFile);                   // [ property ]
-  const char* GetMaterialFile() const;                        // [ property ]
-  void SetSizeNegX(float f);                                  // [ property ]
-  float GetSizeNegX() const { return m_fSizeNegX; }           // [ property ]
-  void SetSizePosX(float f);                                  // [ property ]
-  float GetSizePosX() const { return m_fSizePosX; }           // [ property ]
-  void SetSizeNegY(float f);                                  // [ property ]
-  float GetSizeNegY() const { return m_fSizeNegY; }           // [ property ]
-  void SetSizePosY(float f);                                  // [ property ]
-  float GetSizePosY() const { return m_fSizePosY; }           // [ property ]
-  void SetSizeNegZ(float f);                                  // [ property ]
-  float GetSizeNegZ() const { return m_fSizeNegZ; }           // [ property ]
-  void SetSizePosZ(float f);                                  // [ property ]
-  float GetSizePosZ() const { return m_fSizePosZ; }           // [ property ]
-  void SetDetail(plUInt32 uiDetail);                          // [ property ]
-  plUInt32 GetDetail() const { return m_uiDetail; }           // [ property ]
-  void SetCurvature(plAngle curvature);                       // [ property ]
-  plAngle GetCurvature() const { return m_Curvature; }        // [ property ]
-  void SetSlopedTop(bool b);                                  // [ property ]
-  bool GetSlopedTop() const { return m_bSlopedTop; }          // [ property ]
-  void SetSlopedBottom(bool b);                               // [ property ]
-  bool GetSlopedBottom() const { return m_bSlopedBottom; }    // [ property ]
-  void SetThickness(float f);                                 // [ property ]
-  float GetThickness() const { return m_fThickness; }         // [ property ]
 
+  /// \brief The plMaterialResource file to use.
+  void SetMaterialFile(const char* szFile); // [ property ]
+  const char* GetMaterialFile() const;      // [ property ]
+
+  /// \brief Sets the extent along the negative X axis of the bounding box.
+  void SetSizeNegX(float f);                        // [ property ]
+  float GetSizeNegX() const { return m_fSizeNegX; } // [ property ]
+
+  /// \brief Sets the extent along the positive X axis of the bounding box.
+  void SetSizePosX(float f);                        // [ property ]
+  float GetSizePosX() const { return m_fSizePosX; } // [ property ]
+
+  /// \brief Sets the extent along the negative Y axis of the bounding box.
+  void SetSizeNegY(float f);                        // [ property ]
+  float GetSizeNegY() const { return m_fSizeNegY; } // [ property ]
+
+  /// \brief Sets the extent along the positive Y axis of the bounding box.
+  void SetSizePosY(float f);                        // [ property ]
+  float GetSizePosY() const { return m_fSizePosY; } // [ property ]
+
+  /// \brief Sets the extent along the negative Z axis of the bounding box.
+  void SetSizeNegZ(float f);                        // [ property ]
+  float GetSizeNegZ() const { return m_fSizeNegZ; } // [ property ]
+
+  /// \brief Sets the extent along the positive Z axis of the bounding box.
+  void SetSizePosZ(float f);                        // [ property ]
+  float GetSizePosZ() const { return m_fSizePosZ; } // [ property ]
+
+  /// \brief Sets the detail of the geometry. The meaning is geometry type specific, e.g. for cylinders this is the number of polygons around the perimeter.
+  void SetDetail(plUInt32 uiDetail);                // [ property ]
+  plUInt32 GetDetail() const { return m_uiDetail; } // [ property ]
+
+  /// \brief Geometry type specific: Sets an angle, used to curve stairs, etc.
+  void SetCurvature(plAngle curvature);                // [ property ]
+  plAngle GetCurvature() const { return m_Curvature; } // [ property ]
+
+  /// \brief For curved stairs to make the top smooth.
+  void SetSlopedTop(bool b);                         // [ property ]
+  bool GetSlopedTop() const { return m_bSlopedTop; } // [ property ]
+
+  /// \brief For curved stairs to make the bottom smooth.
+  void SetSlopedBottom(bool b);                            // [ property ]
+  bool GetSlopedBottom() const { return m_bSlopedBottom; } // [ property ]
+
+  /// \brief Geometry type specific: Sets a thickness, e.g. for curved stairs.
+  void SetThickness(float f);                         // [ property ]
+  float GetThickness() const { return m_fThickness; } // [ property ]
+
+  /// \brief Whether the mesh should be used as a collider.
   void SetGenerateCollision(bool b);                                 // [ property ]
   bool GetGenerateCollision() const { return m_bGenerateCollision; } // [ property ]
 
+  /// \brief Whether the mesh should be an obstacle in the navmesh.
+  /// \note This may or may not work, depending on how the navmesh generation works.
+  /// Dynamic navmesh generation at runtime usually uses the physics colliders and thus this flag would have no effect there.
   void SetIncludeInNavmesh(bool b);                                // [ property ]
   bool GetIncludeInNavmesh() const { return m_bIncludeInNavmesh; } // [ property ]
 
+  /// \brief Sets the plMaterialResource to use for rendering.
   void SetMaterial(const plMaterialResourceHandle& hMaterial) { m_hMaterial = hMaterial; }
   plMaterialResourceHandle GetMaterial() const { return m_hMaterial; }
 

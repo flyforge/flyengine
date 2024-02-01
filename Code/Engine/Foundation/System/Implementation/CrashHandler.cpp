@@ -7,11 +7,6 @@
 #include <Foundation/System/Process.h>
 #include <Foundation/Time/Timestamp.h>
 
-static void PrintHelper(const char* szString)
-{
-  plLog::Printf("%s", szString);
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 plCrashHandler* plCrashHandler::s_pActiveHandler = nullptr;
@@ -55,11 +50,11 @@ void plCrashHandler_WriteMiniDump::SetDumpFilePath(plStringView sAbsDirectoryPat
 
   if (flags.IsSet(PathFlags::AppendDate))
   {
-    const plDateTime date = plTimestamp::CurrentTimestamp();
+    const plDateTime date = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
     sOutputPath.AppendFormat("_{}", date);
   }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_PROCESSES)
+#if PL_ENABLED(PL_SUPPORTS_PROCESSES)
   if (flags.IsSet(PathFlags::AppendPID))
   {
     const plUInt32 pid = plProcess::GetCurrentProcessID();
@@ -82,7 +77,7 @@ void plCrashHandler_WriteMiniDump::HandleCrash(void* pOsSpecificData)
   bool crashDumpWritten = false;
   if (!m_sDumpFilePath.IsEmpty())
   {
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_CRASH_DUMPS)
+#if PL_ENABLED(PL_SUPPORTS_CRASH_DUMPS)
     if (plMiniDumpUtils::LaunchMiniDumpTool(m_sDumpFilePath).Failed())
     {
       plLog::Print("Could not launch MiniDumpTool, trying to write crash-dump from crashed process directly.\n");
@@ -110,15 +105,4 @@ void plCrashHandler_WriteMiniDump::HandleCrash(void* pOsSpecificData)
   }
 }
 
-//////////////////////////////////////////////////////////////////////////
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/System/Implementation/Win/CrashHandler_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
-#  include <Foundation/System/Implementation/Posix/CrashHandler_posix.h>
-#else
-#  error "plCrashHandler is not implemented on current platform"
-#endif
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_System_Implementation_CrashHandler);

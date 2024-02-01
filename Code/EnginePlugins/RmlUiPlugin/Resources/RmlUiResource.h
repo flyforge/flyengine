@@ -4,7 +4,7 @@
 #include <Foundation/IO/DependencyFile.h>
 #include <RmlUiPlugin/RmlUiPluginDLL.h>
 
-struct PLASMA_RMLUIPLUGIN_DLL plRmlUiScaleMode
+struct PL_RMLUIPLUGIN_DLL plRmlUiScaleMode
 {
   using StorageType = plUInt8;
 
@@ -17,12 +17,12 @@ struct PLASMA_RMLUIPLUGIN_DLL plRmlUiScaleMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RMLUIPLUGIN_DLL, plRmlUiScaleMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RMLUIPLUGIN_DLL, plRmlUiScaleMode);
 
-struct PLASMA_RMLUIPLUGIN_DLL plRmlUiResourceDescriptor
+struct PL_RMLUIPLUGIN_DLL plRmlUiResourceDescriptor
 {
-  plResult Save(plStreamWriter& stream);
-  plResult Load(plStreamReader& stream);
+  plResult Save(plStreamWriter& inout_stream);
+  plResult Load(plStreamReader& inout_stream);
 
   plDependencyFile m_DependencyFile;
 
@@ -33,11 +33,11 @@ struct PLASMA_RMLUIPLUGIN_DLL plRmlUiResourceDescriptor
 
 using plRmlUiResourceHandle = plTypedResourceHandle<class plRmlUiResource>;
 
-class PLASMA_RMLUIPLUGIN_DLL plRmlUiResource : public plResource
+class PL_RMLUIPLUGIN_DLL plRmlUiResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plRmlUiResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plRmlUiResource, plRmlUiResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plRmlUiResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plRmlUiResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plRmlUiResource, plRmlUiResourceDescriptor);
 
 public:
   plRmlUiResource();
@@ -53,7 +53,7 @@ private:
 
   plString m_sRmlFile;
   plEnum<plRmlUiScaleMode> m_ScaleMode;
-  plVec2U32 m_vReferenceResolution = plVec2U32::ZeroVector();
+  plVec2U32 m_vReferenceResolution = plVec2U32::MakeZero();
 };
 
 class plRmlUiResourceLoader : public plResourceLoaderFromFile

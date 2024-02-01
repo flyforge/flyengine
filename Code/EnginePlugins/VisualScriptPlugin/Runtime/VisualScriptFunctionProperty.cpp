@@ -10,7 +10,7 @@ plVisualScriptFunctionProperty::plVisualScriptFunctionProperty(plStringView sNam
   , m_pDesc(pDesc)
   , m_LocalDataStorage(pDesc->GetLocalDataDesc())
 {
-  PLASMA_ASSERT_DEBUG(m_pDesc->IsCoroutine() == false, "Must not be a coroutine");
+  PL_ASSERT_DEBUG(m_pDesc->IsCoroutine() == false, "Must not be a coroutine");
 
   m_LocalDataStorage.AllocateStorage();
 }
@@ -19,14 +19,14 @@ plVisualScriptFunctionProperty::~plVisualScriptFunctionProperty() = default;
 
 void plVisualScriptFunctionProperty::Execute(void* pInstance, plArrayPtr<plVariant> arguments, plVariant& out_returnValue) const
 {
-  PLASMA_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
+  PL_ASSERT_DEBUG(pInstance != nullptr, "Invalid instance");
   auto pVisualScriptInstance = static_cast<plVisualScriptInstance*>(pInstance);
 
   plVisualScriptExecutionContext context(m_pDesc);
   context.Initialize(*pVisualScriptInstance, m_LocalDataStorage, arguments);
 
-  auto result = context.Execute(plTime::Zero());
-  PLASMA_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
+  auto result = context.Execute(plTime::MakeZero());
+  PL_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
 
   // TODO: return value
 }
@@ -38,7 +38,7 @@ plVisualScriptMessageHandler::plVisualScriptMessageHandler(const plScriptMessage
   , m_pDesc(pDesc)
   , m_LocalDataStorage(pDesc->GetLocalDataDesc())
 {
-  PLASMA_ASSERT_DEBUG(m_pDesc->IsCoroutine() == false, "Must not be a coroutine");
+  PL_ASSERT_DEBUG(m_pDesc->IsCoroutine() == false, "Must not be a coroutine");
 
   m_DispatchFunc = &Dispatch;
   m_LocalDataStorage.AllocateStorage();
@@ -59,6 +59,6 @@ void plVisualScriptMessageHandler::Dispatch(plAbstractMessageHandler* pSelf, voi
   plVisualScriptExecutionContext context(pHandler->m_pDesc);
   context.Initialize(*pVisualScriptInstance, pHandler->m_LocalDataStorage, arguments);
 
-  auto result = context.Execute(plTime::Zero());
-  PLASMA_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
+  auto result = context.Execute(plTime::MakeZero());
+  PL_ASSERT_DEBUG(result.m_NextExecAndState != plVisualScriptExecutionContext::ExecResult::State::ContinueLater, "A non-coroutine function must not return 'ContinueLater'");
 }

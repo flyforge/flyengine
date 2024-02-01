@@ -5,7 +5,7 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plConsoleFunctionBase);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plConsoleFunctionBase);
 
 plQuakeConsole::plQuakeConsole()
 {
@@ -18,7 +18,7 @@ plQuakeConsole::plQuakeConsole()
   EnableLogOutput(true);
 
 #ifdef BUILDSYSTEM_ENABLE_LUA_SUPPORT
-  SetCommandInterpreter(PLASMA_DEFAULT_NEW(plCommandInterpreterLua));
+  SetCommandInterpreter(PL_DEFAULT_NEW(plCommandInterpreterLua));
 #endif
 }
 
@@ -27,20 +27,20 @@ plQuakeConsole::~plQuakeConsole()
   EnableLogOutput(false);
 }
 
-void plQuakeConsole::AddConsoleString(plStringView text, plConsoleString::Type type)
+void plQuakeConsole::AddConsoleString(plStringView sText, plConsoleString::Type type)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   m_ConsoleStrings.PushFront();
 
   plConsoleString& cs = m_ConsoleStrings.PeekFront();
-  cs.m_sText = text;
+  cs.m_sText = sText;
   cs.m_Type = type;
 
   if (m_ConsoleStrings.GetCount() > m_uiMaxConsoleStrings)
     m_ConsoleStrings.PopBack(m_ConsoleStrings.GetCount() - m_uiMaxConsoleStrings);
 
-  plConsole::AddConsoleString(text, type);
+  plConsole::AddConsoleString(sText, type);
 }
 
 const plDeque<plConsoleString>& plQuakeConsole::GetConsoleStrings() const
@@ -97,7 +97,7 @@ void plQuakeConsole::LogHandler(const plLoggingEventData& data)
   }
 
   plStringBuilder sFormat;
-  sFormat.Printf("%*s", data.m_uiIndentation, "");
+  sFormat.SetPrintf("%*s", data.m_uiIndentation, "");
   sFormat.Append(data.m_sText);
 
   AddConsoleString(sFormat.GetData(), type);
@@ -150,54 +150,54 @@ void plQuakeConsole::EnableLogOutput(bool bEnable)
   }
 }
 
-void plQuakeConsole::SaveState(plStreamWriter& Stream) const
+void plQuakeConsole::SaveState(plStreamWriter& inout_stream) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   const plUInt8 uiVersion = 1;
-  Stream << uiVersion;
+  inout_stream << uiVersion;
 
-  Stream << m_InputHistory.GetCount();
+  inout_stream << m_InputHistory.GetCount();
   for (plUInt32 i = 0; i < m_InputHistory.GetCount(); ++i)
   {
-    Stream << m_InputHistory[i];
+    inout_stream << m_InputHistory[i];
   }
 
-  Stream << m_BoundKeys.GetCount();
+  inout_stream << m_BoundKeys.GetCount();
   for (auto it = m_BoundKeys.GetIterator(); it.IsValid(); ++it)
   {
-    Stream << it.Key();
-    Stream << it.Value();
+    inout_stream << it.Key();
+    inout_stream << it.Value();
   }
 }
 
-void plQuakeConsole::LoadState(plStreamReader& Stream)
+void plQuakeConsole::LoadState(plStreamReader& inout_stream)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plUInt8 uiVersion = 0;
-  Stream >> uiVersion;
+  inout_stream >> uiVersion;
 
   if (uiVersion == 1)
   {
     plUInt32 count = 0;
-    Stream >> count;
+    inout_stream >> count;
     m_InputHistory.SetCount(count);
 
     for (plUInt32 i = 0; i < m_InputHistory.GetCount(); ++i)
     {
-      Stream >> m_InputHistory[i];
+      inout_stream >> m_InputHistory[i];
     }
 
-    Stream >> count;
+    inout_stream >> count;
 
     plString sKey;
     plString sValue;
 
     for (plUInt32 i = 0; i < count; ++i)
     {
-      Stream >> sKey;
-      Stream >> sValue;
+      inout_stream >> sKey;
+      inout_stream >> sValue;
 
       m_BoundKeys[sKey] = sValue;
     }
@@ -250,7 +250,7 @@ plColor plConsoleString::GetColor() const
     case plConsoleString::Type::Debug:
       return plColor(0.4f, 0.6f, 0.8f);
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return plColor::White;
@@ -261,9 +261,7 @@ plColor plConsoleString::GetColor() const
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-plConsole::plConsole()
-{
-}
+plConsole::plConsole() = default;
 
 plConsole::~plConsole()
 {
@@ -285,14 +283,14 @@ plConsole* plConsole::GetMainConsole()
 
 plConsole* plConsole::s_pMainConsole = nullptr;
 
-bool plConsole::AutoComplete(plStringBuilder& text)
+bool plConsole::AutoComplete(plStringBuilder& ref_sText)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_pCommandInterpreter)
   {
     plCommandInterpreterState s;
-    s.m_sInput = text;
+    s.m_sInput = ref_sText;
 
     m_pCommandInterpreter->AutoComplete(s);
 
@@ -301,9 +299,9 @@ bool plConsole::AutoComplete(plStringBuilder& text)
       AddConsoleString(l.m_sText, l.m_Type);
     }
 
-    if (text != s.m_sInput)
+    if (ref_sText != s.m_sInput)
     {
-      text = s.m_sInput;
+      ref_sText = s.m_sInput;
       return true;
     }
   }
@@ -311,17 +309,17 @@ bool plConsole::AutoComplete(plStringBuilder& text)
   return false;
 }
 
-void plConsole::ExecuteCommand(plStringView input)
+void plConsole::ExecuteCommand(plStringView sInput)
 {
-  if (input.IsEmpty())
+  if (sInput.IsEmpty())
     return;
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_pCommandInterpreter)
   {
     plCommandInterpreterState s;
-    s.m_sInput = input;
+    s.m_sInput = sInput;
     m_pCommandInterpreter->Interpret(s);
 
     for (auto& l : s.m_sOutput)
@@ -331,14 +329,14 @@ void plConsole::ExecuteCommand(plStringView input)
   }
   else
   {
-    AddConsoleString(input);
+    AddConsoleString(sInput);
   }
 }
 
-void plConsole::AddConsoleString(plStringView text, plConsoleString::Type type /*= plConsoleString::Type::Default*/)
+void plConsole::AddConsoleString(plStringView sText, plConsoleString::Type type /*= plConsoleString::Type::Default*/)
 {
   plConsoleString cs;
-  cs.m_sText = text;
+  cs.m_sText = sText;
   cs.m_Type = type;
 
   // Broadcast that we have added a string to the console
@@ -349,25 +347,25 @@ void plConsole::AddConsoleString(plStringView text, plConsoleString::Type type /
   m_Events.Broadcast(e);
 }
 
-void plConsole::AddToInputHistory(plStringView text)
+void plConsole::AddToInputHistory(plStringView sText)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   m_iCurrentInputHistoryElement = -1;
 
-  if (text.IsEmpty())
+  if (sText.IsEmpty())
     return;
 
   for (plInt32 i = 0; i < (plInt32)m_InputHistory.GetCount(); i++)
   {
-    if (m_InputHistory[i] == text) // already in the History
+    if (m_InputHistory[i] == sText) // already in the History
     {
       // just move it to the front
 
       for (plInt32 j = i - 1; j >= 0; j--)
         m_InputHistory[j + 1] = m_InputHistory[j];
 
-      m_InputHistory[0] = text;
+      m_InputHistory[0] = sText;
       return;
     }
   }
@@ -377,12 +375,12 @@ void plConsole::AddToInputHistory(plStringView text)
   for (plUInt32 i = m_InputHistory.GetCount() - 1; i > 0; i--)
     m_InputHistory[i] = m_InputHistory[i - 1];
 
-  m_InputHistory[0] = text;
+  m_InputHistory[0] = sText;
 }
 
-void plConsole::RetrieveInputHistory(plInt32 iHistoryUp, plStringBuilder& result)
+void plConsole::RetrieveInputHistory(plInt32 iHistoryUp, plStringBuilder& ref_sResult)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_InputHistory.IsEmpty())
     return;
@@ -391,14 +389,14 @@ void plConsole::RetrieveInputHistory(plInt32 iHistoryUp, plStringBuilder& result
 
   if (!m_InputHistory[m_iCurrentInputHistoryElement].IsEmpty())
   {
-    result = m_InputHistory[m_iCurrentInputHistoryElement];
+    ref_sResult = m_InputHistory[m_iCurrentInputHistoryElement];
   }
 }
 
 plResult plConsole::SaveInputHistory(plStringView sFile)
 {
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plStringBuilder str;
 
@@ -409,10 +407,10 @@ plResult plConsole::SaveInputHistory(plStringView sFile)
 
     str.Set(line, "\n");
 
-    PLASMA_SUCCEED_OR_RETURN(file.WriteBytes(str.GetData(), str.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(file.WriteBytes(str.GetData(), str.GetElementCount()));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plConsole::LoadInputHistory(plStringView sFile)
@@ -433,4 +431,4 @@ void plConsole::LoadInputHistory(plStringView sFile)
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Console_Implementation_Console);
+

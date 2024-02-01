@@ -1,7 +1,7 @@
 
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/Configuration/CVar.h>
 #include <Foundation/Configuration/Startup.h>
 
@@ -15,11 +15,11 @@
 #include <Texture/plTexFormat/plTexFormat.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTexture3DResource, 1, plRTTIDefaultAllocator<plTexture3DResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTexture3DResource, 1, plRTTIDefaultAllocator<plTexture3DResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plTexture3DResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plTexture3DResource);
 
 plTexture3DResource::plTexture3DResource()
   : plResource(DoUpdate::OnAnyThread, plTextureUtils::s_bForceFullQualityAlways ? 1 : 2)
@@ -110,7 +110,7 @@ void plTexture3DResource::FillOutDescriptor(plTexture3DResourceDescriptor& ref_t
           id.m_uiRowPitch = static_cast<plUInt32>(pImage->GetRowPitch(mip));
         }
 
-        PLASMA_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
+        PL_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
         id.m_uiSlicePitch = static_cast<plUInt32>(pImage->GetDepthPitch(mip));
 
         out_uiMemoryUsed += id.m_uiSlicePitch;
@@ -153,7 +153,7 @@ plResourceLoadDesc plTexture3DResource::UpdateContent(plStreamReader* Stream)
   }
 
   const bool bIsRenderTarget = texFormat.m_iRenderTargetResolutionX != 0;
-  PLASMA_ASSERT_DEV(!bIsRenderTarget, "Render targets are not supported by regular 2D texture resources");
+  PL_ASSERT_DEV(!bIsRenderTarget, "Render targets are not supported by regular 2D texture resources");
 
   {
 
@@ -202,7 +202,7 @@ plResourceLoadDesc plTexture3DResource::UpdateContent(plStreamReader* Stream)
 
     if (uiUploadNumMipLevels > 0)
     {
-      PLASMA_ASSERT_DEBUG(m_uiLoadedTextures < 2, "Invalid texture upload");
+      PL_ASSERT_DEBUG(m_uiLoadedTextures < 2, "Invalid texture upload");
 
       plHybridArray<plGALSystemMemoryDescription, 32> initData;
       FillOutDescriptor(td, pImage, texFormat.m_bSRGB, uiUploadNumMipLevels, m_uiMemoryGPU[m_uiLoadedTextures], initData);
@@ -230,7 +230,7 @@ void plTexture3DResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = m_uiMemoryGPU[0] + m_uiMemoryGPU[1];
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture3DResource, plTexture3DResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plTexture3DResource, plTexture3DResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = descriptor.m_uiQualityLevelsDiscardable;
@@ -246,7 +246,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture3DResource, plTexture3DResourceDes
   m_uiDepth = descriptor.m_DescGAL.m_uiDepth;
 
   m_hGALTexture[m_uiLoadedTextures] = pDevice->CreateTexture(descriptor.m_DescGAL, descriptor.m_InitialContent);
-  PLASMA_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
+  PL_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
 
   pDevice->GetTexture(m_hGALTexture[m_uiLoadedTextures])->SetDebugName(GetResourceDescription());
 
@@ -256,11 +256,11 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture3DResource, plTexture3DResourceDes
   }
 
   m_hSamplerState = pDevice->CreateSamplerState(descriptor.m_SamplerDesc);
-  PLASMA_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
+  PL_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
 
   ++m_uiLoadedTextures;
 
   return ret;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Textures_Texture3DResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Textures_Texture3DResource);

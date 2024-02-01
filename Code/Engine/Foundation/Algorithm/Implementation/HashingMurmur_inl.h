@@ -7,7 +7,7 @@ namespace plInternal
   template <size_t N, size_t Loop>
   struct CompileTimeMurmurHash
   {
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
     {
       return CompileTimeMurmurHash<N, Loop - 4>()(CompileTimeMurmurHash<N, 4>()(uiHash, str, i), str, i + 4);
     }
@@ -16,9 +16,9 @@ namespace plInternal
   template <size_t N>
   struct CompileTimeMurmurHash<N, 4>
   {
-    static constexpr PLASMA_ALWAYS_INLINE plUInt32 helper(plUInt32 k) { return (k ^ (k >> MURMUR_R)) * MURMUR_M; }
+    static constexpr PL_ALWAYS_INLINE plUInt32 helper(plUInt32 k) { return (k ^ (k >> MURMUR_R)) * MURMUR_M; }
 
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
     {
       // In C++11 constexpr local variables are not allowed. Need to express the following without "plUInt32 k"
       // (this restriction is lifted in C++14's generalized constexpr)
@@ -35,7 +35,7 @@ namespace plInternal
   template <size_t N>
   struct CompileTimeMurmurHash<N, 3>
   {
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
     {
       return (uiHash ^ (str[i + 2] << 16) ^ (str[i + 1] << 8) ^ (str[i + 0])) * MURMUR_M;
     }
@@ -44,7 +44,7 @@ namespace plInternal
   template <size_t N>
   struct CompileTimeMurmurHash<N, 2>
   {
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const
     {
       return (uiHash ^ (str[i + 1] << 8) ^ (str[i])) * MURMUR_M;
     }
@@ -53,20 +53,20 @@ namespace plInternal
   template <size_t N>
   struct CompileTimeMurmurHash<N, 1>
   {
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const { return (uiHash ^ (str[i])) * MURMUR_M; }
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const { return (uiHash ^ (str[i])) * MURMUR_M; }
   };
 
   template <size_t N>
   struct CompileTimeMurmurHash<N, 0>
   {
-    constexpr PLASMA_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const { return uiHash; }
+    constexpr PL_ALWAYS_INLINE plUInt32 operator()(plUInt32 uiHash, const char (&str)[N], size_t i) const { return uiHash; }
   };
 
   constexpr plUInt32 rightShift_and_xorWithPrevSelf(plUInt32 h, plUInt32 uiShift) { return h ^ (h >> uiShift); }
 } // namespace plInternal
 
 template <size_t N>
-constexpr PLASMA_ALWAYS_INLINE plUInt32 plHashingUtils::MurmurHash32String(const char (&str)[N], plUInt32 uiSeed)
+constexpr PL_ALWAYS_INLINE plUInt32 plHashingUtils::MurmurHash32String(const char (&str)[N], plUInt32 uiSeed)
 {
   // In C++11 constexpr local variables are not allowed. Need to express the following without "plUInt32 h"
   // (this restriction is lifted in C++14's generalized constexpr)
@@ -83,7 +83,7 @@ constexpr PLASMA_ALWAYS_INLINE plUInt32 plHashingUtils::MurmurHash32String(const
     15);
 }
 
-PLASMA_ALWAYS_INLINE plUInt32 plHashingUtils::MurmurHash32String(plStringView sStr, plUInt32 uiSeed)
+PL_ALWAYS_INLINE plUInt32 plHashingUtils::MurmurHash32String(plStringView sStr, plUInt32 uiSeed)
 {
   return MurmurHash32(sStr.GetStartPointer(), sStr.GetElementCount(), uiSeed);
 }

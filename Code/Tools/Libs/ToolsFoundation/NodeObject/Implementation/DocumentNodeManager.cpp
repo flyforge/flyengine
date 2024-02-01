@@ -9,8 +9,8 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
@@ -19,20 +19,20 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 
 struct DocumentNodeManager_NodeMetaData
 {
-  plVec2 m_Pos = plVec2::ZeroVector();
+  plVec2 m_Pos = plVec2::MakeZero();
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, DocumentNodeManager_NodeMetaData);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, DocumentNodeManager_NodeMetaData);
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(DocumentNodeManager_NodeMetaData, plNoBase, 1, plRTTIDefaultAllocator<DocumentNodeManager_NodeMetaData>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(DocumentNodeManager_NodeMetaData, plNoBase, 1, plRTTIDefaultAllocator<DocumentNodeManager_NodeMetaData>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Node::Pos", m_Pos),
+    PL_MEMBER_PROPERTY("Node::Pos", m_Pos),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 struct DocumentNodeManager_ConnectionMetaData
@@ -42,31 +42,31 @@ struct DocumentNodeManager_ConnectionMetaData
   plString m_SourcePin;
   plString m_TargetPin;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, DocumentNodeManager_ConnectionMetaData);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, DocumentNodeManager_ConnectionMetaData);
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(DocumentNodeManager_ConnectionMetaData, plNoBase, 1, plRTTIDefaultAllocator<DocumentNodeManager_ConnectionMetaData>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(DocumentNodeManager_ConnectionMetaData, plNoBase, 1, plRTTIDefaultAllocator<DocumentNodeManager_ConnectionMetaData>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Connection::Source", m_Source),
-    PLASMA_MEMBER_PROPERTY("Connection::Target", m_Target),
-    PLASMA_MEMBER_PROPERTY("Connection::SourcePin", m_SourcePin),    
-    PLASMA_MEMBER_PROPERTY("Connection::TargetPin", m_TargetPin),
+    PL_MEMBER_PROPERTY("Connection::Source", m_Source),
+    PL_MEMBER_PROPERTY("Connection::Target", m_Target),
+    PL_MEMBER_PROPERTY("Connection::SourcePin", m_SourcePin),
+    PL_MEMBER_PROPERTY("Connection::TargetPin", m_TargetPin),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 class DocumentNodeManager_DefaultConnection : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(DocumentNodeManager_DefaultConnection, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(DocumentNodeManager_DefaultConnection, plReflectedClass);
 };
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(DocumentNodeManager_DefaultConnection, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(DocumentNodeManager_DefaultConnection, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
@@ -87,6 +87,18 @@ plDocumentNodeManager::~plDocumentNodeManager()
   m_PropertyEvents.RemoveEventHandler(plMakeDelegate(&plDocumentNodeManager::PropertyEventsHandler, this));
 }
 
+void plDocumentNodeManager::GetNodeCreationTemplates(plDynamicArray<plNodeCreationTemplate>& out_templates) const
+{
+  plHybridArray<const plRTTI*, 32> types;
+  GetCreateableTypes(types);
+
+  for (auto pType : types)
+  {
+    auto& nodeTemplate = out_templates.ExpandAndGetRef();
+    nodeTemplate.m_pType = pType;
+  }
+}
+
 const plRTTI* plDocumentNodeManager::GetConnectionType() const
 {
   return plGetStaticRTTI<DocumentNodeManager_DefaultConnection>();
@@ -94,41 +106,48 @@ const plRTTI* plDocumentNodeManager::GetConnectionType() const
 
 plVec2 plDocumentNodeManager::GetNodePos(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get pos of objects that aren't nodes!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get pos of objects that aren't nodes!");
   return it.Value().m_vPos;
 }
 
 const plConnection& plDocumentNodeManager::GetConnection(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToConnection.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get connection for objects that aren't connections!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get connection for objects that aren't connections!");
   return *it.Value();
 }
 
-const plPin* plDocumentNodeManager::GetInputPinByName(const plDocumentObject* pObject, const char* szName) const
+const plConnection* plDocumentNodeManager::GetConnectionIfExists(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  auto it = m_ObjectToConnection.Find(pObject->GetGuid());
+  return it.IsValid() ? it.Value().Borrow() : nullptr;
+}
+
+const plPin* plDocumentNodeManager::GetInputPinByName(const plDocumentObject* pObject, plStringView sName) const
+{
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   for (auto& pPin : it.Value().m_Inputs)
   {
-    if (plStringUtils::IsEqual(pPin->GetName(), szName))
+    if (pPin->GetName() == sName)
       return pPin.Borrow();
   }
   return nullptr;
 }
 
-const plPin* plDocumentNodeManager::GetOutputPinByName(const plDocumentObject* pObject, const char* szName) const
+const plPin* plDocumentNodeManager::GetOutputPinByName(const plDocumentObject* pObject, plStringView sName) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   for (auto& pPin : it.Value().m_Outputs)
   {
-    if (plStringUtils::IsEqual(pPin->GetName(), szName))
+    if (pPin->GetName() == sName)
       return pPin.Borrow();
   }
   return nullptr;
@@ -136,23 +155,23 @@ const plPin* plDocumentNodeManager::GetOutputPinByName(const plDocumentObject* p
 
 plArrayPtr<const plUniquePtr<const plPin>> plDocumentNodeManager::GetInputPins(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   return plMakeArrayPtr((plUniquePtr<const plPin>*)it.Value().m_Inputs.GetData(), it.Value().m_Inputs.GetCount());
 }
 
 plArrayPtr<const plUniquePtr<const plPin>> plDocumentNodeManager::GetOutputPins(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
+  PL_ASSERT_DEV(it.IsValid(), "Can't get input pins of objects that aren't nodes!");
   return plMakeArrayPtr((plUniquePtr<const plPin>*)it.Value().m_Outputs.GetData(), it.Value().m_Outputs.GetCount());
 }
 
 bool plDocumentNodeManager::IsNode(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   if (pObject == nullptr)
     return false;
   if (pObject == GetRootObject())
@@ -163,7 +182,7 @@ bool plDocumentNodeManager::IsNode(const plDocumentObject* pObject) const
 
 bool plDocumentNodeManager::IsConnection(const plDocumentObject* pObject) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   if (pObject == nullptr)
     return false;
   if (pObject == GetRootObject())
@@ -215,9 +234,9 @@ bool plDocumentNodeManager::IsConnected(const plPin& source, const plPin& target
   return false;
 }
 
-plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& out_Result) const
+plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& out_result) const
 {
-  out_Result = CanConnectResult::ConnectNever;
+  out_result = CanConnectResult::ConnectNever;
 
   if (pObjectType == nullptr || pObjectType->IsDerivedFrom(GetConnectionType()) == false)
     return plStatus("Invalid connection object type");
@@ -233,7 +252,7 @@ plStatus plDocumentNodeManager::CanConnect(const plRTTI* pObjectType, const plPi
   if (IsConnected(source, target))
     return plStatus("Pins already connected.");
 
-  return InternalCanConnect(source, target, out_Result);
+  return InternalCanConnect(source, target, out_result);
 }
 
 plStatus plDocumentNodeManager::CanDisconnect(const plConnection* pConnection) const
@@ -255,7 +274,7 @@ plStatus plDocumentNodeManager::CanDisconnect(const plDocumentObject* pObject) c
 
 plStatus plDocumentNodeManager::CanMoveNode(const plDocumentObject* pObject, const plVec2& vPos) const
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid input!");
+  PL_ASSERT_DEV(pObject != nullptr, "Invalid input!");
   if (!IsNode(pObject))
     return plStatus("The given object is not a node!");
 
@@ -265,10 +284,10 @@ plStatus plDocumentNodeManager::CanMoveNode(const plDocumentObject* pObject, con
 void plDocumentNodeManager::Connect(const plDocumentObject* pObject, const plPin& source, const plPin& target)
 {
   plDocumentNodeManager::CanConnectResult res = CanConnectResult::ConnectNever;
-  PLASMA_IGNORE_UNUSED(res);
-  PLASMA_ASSERT_DEBUG(CanConnect(pObject->GetType(), source, target, res).m_Result.Succeeded(), "Connect: Sanity check failed!");
+  PL_IGNORE_UNUSED(res);
+  PL_ASSERT_DEBUG(CanConnect(pObject->GetType(), source, target, res).m_Result.Succeeded(), "Connect: Sanity check failed!");
 
-  auto pConnection = PLASMA_DEFAULT_NEW(plConnection, source, target, pObject);
+  auto pConnection = PL_DEFAULT_NEW(plConnection, source, target, pObject);
   m_ObjectToConnection.Insert(pObject->GetGuid(), pConnection);
 
   m_Connections[&source].PushBack(pConnection);
@@ -283,8 +302,8 @@ void plDocumentNodeManager::Connect(const plDocumentObject* pObject, const plPin
 void plDocumentNodeManager::Disconnect(const plDocumentObject* pObject)
 {
   auto it = m_ObjectToConnection.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEBUG(it.IsValid(), "Sanity check failed!");
-  PLASMA_ASSERT_DEBUG(CanDisconnect(pObject).m_Result.Succeeded(), "Disconnect: Sanity check failed!");
+  PL_ASSERT_DEBUG(it.IsValid(), "Sanity check failed!");
+  PL_ASSERT_DEBUG(CanDisconnect(pObject).m_Result.Succeeded(), "Disconnect: Sanity check failed!");
 
   {
     plDocumentNodeManagerEvent e(plDocumentNodeManagerEvent::Type::BeforePinsDisonnected, pObject);
@@ -302,25 +321,25 @@ void plDocumentNodeManager::Disconnect(const plDocumentObject* pObject)
 
 void plDocumentNodeManager::MoveNode(const plDocumentObject* pObject, const plVec2& vPos)
 {
-  PLASMA_ASSERT_DEBUG(CanMoveNode(pObject, vPos).m_Result.Succeeded(), "MoveNode: Sanity check failed!");
+  PL_ASSERT_DEBUG(CanMoveNode(pObject, vPos).m_Result.Succeeded(), "MoveNode: Sanity check failed!");
 
   auto it = m_ObjectToNode.Find(pObject->GetGuid());
-  PLASMA_ASSERT_DEBUG(it.IsValid(), "Moveable node does not exist, CanMoveNode impl invalid!");
+  PL_ASSERT_DEBUG(it.IsValid(), "Moveable node does not exist, CanMoveNode impl invalid!");
   it.Value().m_vPos = vPos;
 
   plDocumentNodeManagerEvent e(plDocumentNodeManagerEvent::Type::NodeMoved, pObject);
   m_NodeEvents.Broadcast(e);
 }
 
-void plDocumentNodeManager::AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const
+void plDocumentNodeManager::AttachMetaDataBeforeSaving(plAbstractObjectGraph& ref_graph) const
 {
   auto pNodeMetaDataType = plGetStaticRTTI<DocumentNodeManager_NodeMetaData>();
   auto pConnectionMetaDataType = plGetStaticRTTI<DocumentNodeManager_ConnectionMetaData>();
 
   plRttiConverterContext context;
-  plRttiConverterWriter rttiConverter(&graph, &context, true, true);
+  plRttiConverterWriter rttiConverter(&ref_graph, &context, true, true);
 
-  for (auto it = graph.GetAllNodes().GetIterator(); it.IsValid(); ++it)
+  for (auto it = ref_graph.GetAllNodes().GetIterator(); it.IsValid(); ++it)
   {
     auto* pAbstractObject = it.Value();
     const plUuid& guid = pAbstractObject->GetGuid();
@@ -366,6 +385,21 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
   plRttiConverterContext context;
   plRttiConverterReader rttiConverter(&graph, &context);
 
+  // Ensure that all nodes have their pins created
+  for (auto it : graph.GetAllNodes())
+  {
+    auto pAbstractObject = it.Value();
+    plDocumentObject* pObject = GetObject(pAbstractObject->GetGuid());
+    if (pObject != nullptr && IsNode(pObject))
+    {
+      auto& nodeInternal = m_ObjectToNode[pObject->GetGuid()];
+      if (nodeInternal.m_Inputs.IsEmpty() && nodeInternal.m_Outputs.IsEmpty())
+      {
+        InternalCreatePins(pObject, nodeInternal);
+      }
+    }
+  }
+
   for (auto it : graph.GetAllNodes())
   {
     auto pAbstractObject = it.Value();
@@ -385,7 +419,7 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
           plMoveNodeCommand move;
           move.m_Object = pObject->GetGuid();
           move.m_NewPos = nodeMetaData.m_Pos;
-          history->AddCommand(move).IgnoreResult();
+          history->AddCommand(move).LogFailure();
         }
         else
         {
@@ -396,7 +430,7 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
       // Backwards compatibility to old file format
       if (auto pOldConnections = pAbstractObject->FindProperty("Node::Connections"))
       {
-        PLASMA_ASSERT_DEV(bUndoable == false, "Undo not supported for old file format");
+        PL_ASSERT_DEV(bUndoable == false, "Undo not supported for old file format");
         RestoreOldMetaDataAfterLoading(graph, *pOldConnections, pObject);
       }
     }
@@ -433,22 +467,26 @@ void plDocumentNodeManager::RestoreMetaDataAfterLoading(const plAbstractObjectGr
       }
 
       plDocumentNodeManager::CanConnectResult res;
-      if (CanConnect(pObject->GetType(), *pSourcePin, *pTargetPin, res).m_Result.Succeeded())
+      if (CanConnect(pObject->GetType(), *pSourcePin, *pTargetPin, res).m_Result.Failed())
       {
-        if (bUndoable)
-        {
-          plConnectNodePinsCommand cmd;
-          cmd.m_ConnectionObject = pObject->GetGuid();
-          cmd.m_ObjectSource = connectionMetaData.m_Source;
-          cmd.m_ObjectTarget = connectionMetaData.m_Target;
-          cmd.m_sSourcePin = connectionMetaData.m_SourcePin;
-          cmd.m_sTargetPin = connectionMetaData.m_TargetPin;
-          history->AddCommand(cmd).IgnoreResult();
-        }
-        else
-        {
-          Connect(pObject, *pSourcePin, *pTargetPin);
-        }
+        RemoveObject(pObject);
+        DestroyObject(pObject);
+        continue;
+      }
+
+      if (bUndoable)
+      {
+        plConnectNodePinsCommand cmd;
+        cmd.m_ConnectionObject = pObject->GetGuid();
+        cmd.m_ObjectSource = connectionMetaData.m_Source;
+        cmd.m_ObjectTarget = connectionMetaData.m_Target;
+        cmd.m_sSourcePin = connectionMetaData.m_SourcePin;
+        cmd.m_sTargetPin = connectionMetaData.m_TargetPin;
+        history->AddCommand(cmd).LogFailure();
+      }
+      else
+      {
+        Connect(pObject, *pSourcePin, *pTargetPin);
       }
     }
   }
@@ -510,7 +548,7 @@ bool plDocumentNodeManager::CopySelectedObjects(plAbstractObjectGraph& out_objec
       {
         const plDocumentObject* pConnectionObject = pConnection->GetParent();
 
-        PLASMA_ASSERT_DEV(pSourcePin == &pConnection->GetSourcePin(), "");
+        PL_ASSERT_DEV(pSourcePin == &pConnection->GetSourcePin(), "");
         if (copiedConnections.Contains(pConnectionObject) == false && copiedNodes.Contains(pConnection->GetTargetPin().GetParent()))
         {
           writer.AddObjectToGraph(pConnectionObject, "root");
@@ -525,7 +563,7 @@ bool plDocumentNodeManager::CopySelectedObjects(plAbstractObjectGraph& out_objec
   return true;
 }
 
-bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& pickedPosition, bool bAllowPickedPosition)
+bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& vPickedPosition, bool bAllowPickedPosition)
 {
   bool bAddedAll = true;
   plDeque<const plDocumentObject*> AddedObjects;
@@ -562,7 +600,7 @@ bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>
     }
 
     vAvgPos /= (float)nodeCount;
-    const plVec2 vMoveNode = -vAvgPos + pickedPosition;
+    const plVec2 vMoveNode = -vAvgPos + vPickedPosition;
 
     for (const plDocumentObject* pObject : AddedObjects)
     {
@@ -571,7 +609,7 @@ bool plDocumentNodeManager::PasteObjects(const plArrayPtr<plDocument::PasteInfo>
         plMoveNodeCommand move;
         move.m_Object = pObject->GetGuid();
         move.m_NewPos = GetNodePos(pObject) + vMoveNode;
-        history->AddCommand(move).IgnoreResult();
+        history->AddCommand(move).LogFailure();
       }
     }
 
@@ -619,19 +657,19 @@ bool plDocumentNodeManager::WouldConnectionCreateCircle(const plPin& source, con
   return CanReachNode(pTargetNode, pSourceNode, Visited);
 }
 
-void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, const char* szPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const
+void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, plStringView sPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const
 {
   out_Names.Clear();
 
-  const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(szPropertyName);
+  const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(sPropertyName);
   if (pProp == nullptr)
   {
-    plLog::Warning("Property '{0}' not found in type '{1}'", szPropertyName, pObject->GetType()->GetTypeName());
+    plLog::Warning("Property '{0}' not found in type '{1}'", sPropertyName, pObject->GetType()->GetTypeName());
     return;
   }
 
   plStringBuilder sTemp;
-  plVariant value = pObject->GetTypeAccessor().GetValue(szPropertyName);
+  plVariant value = pObject->GetTypeAccessor().GetValue(sPropertyName);
 
   if (pProp->GetCategory() == plPropertyCategory::Member)
   {
@@ -640,7 +678,7 @@ void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, 
       plUInt32 uiCount = value.ConvertTo<plUInt32>();
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        sTemp.Format("{}[{}]", sPinName, i);
+        sTemp.SetFormat("{}[{}]", sPinName, i);
         out_Names.PushBack(sTemp);
       }
     }
@@ -652,18 +690,47 @@ void plDocumentNodeManager::GetDynamicPinNames(const plDocumentObject* pObject, 
     auto& a = value.Get<plVariantArray>();
     const plUInt32 uiCount = a.GetCount();
 
-    if (pArrayProp->GetSpecificType() == plGetStaticRTTI<plString>())
+    auto variantType = pArrayProp->GetSpecificType()->GetVariantType();
+    if (variantType >= plVariantType::Int8 && variantType <= plVariantType::UInt64)
     {
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        out_Names.PushBack(a[i].Get<plString>());
+        sTemp.SetFormat("{}", a[i]);
+        out_Names.PushBack(sTemp);
+      }
+    }
+    else if (variantType == plVariantType::String || variantType == plVariantType::HashedString)
+    {
+      for (plUInt32 i = 0; i < uiCount; ++i)
+      {
+        out_Names.PushBack(a[i].ConvertTo<plString>());
+      }
+    }
+    else if (pArrayProp->GetSpecificType()->GetTypeFlags().IsSet(plTypeFlags::Class))
+    {
+      for (plUInt32 i = 0; i < uiCount; ++i)
+      {
+        auto pInnerObject = GetObject(a[i].Get<plUuid>());
+        if (pInnerObject == nullptr)
+          continue;
+
+        plVariant nameVar = pInnerObject->GetTypeAccessor().GetValue("Name");
+        if (nameVar.IsString() || nameVar.IsHashedString())
+        {
+          out_Names.PushBack(nameVar.ConvertTo<plString>());
+        }
+        else
+        {
+          sTemp.SetFormat("{}[{}]", sPinName, i);
+          out_Names.PushBack(sTemp);
+        }
       }
     }
     else
     {
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        sTemp.Format("{}[{}]", sPinName, i);
+        sTemp.SetFormat("{}[{}]", sPinName, i);
         out_Names.PushBack(sTemp);
       }
     }
@@ -680,13 +747,19 @@ bool plDocumentNodeManager::TryRecreatePins(const plDocumentObject* pObject)
   for (auto& pPin : nodeInternal.m_Inputs)
   {
     if (HasConnections(*pPin))
+    {
+      plLog::Error("Can't re-create pins if they are still connected");
       return false;
+    }
   }
 
   for (auto& pPin : nodeInternal.m_Outputs)
   {
     if (HasConnections(*pPin))
+    {
+      plLog::Error("Can't re-create pins if they are still connected");
       return false;
+    }
   }
 
   {
@@ -720,7 +793,7 @@ bool plDocumentNodeManager::InternalIsConnection(const plDocumentObject* pObject
 plStatus plDocumentNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const
 {
   out_Result = CanConnectResult::ConnectNtoN;
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plDocumentNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
@@ -731,7 +804,7 @@ void plDocumentNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
     {
       if (IsNode(e.m_pObject))
       {
-        PLASMA_ASSERT_DEBUG(!m_ObjectToNode.Contains(e.m_pObject->GetGuid()), "Sanity check failed!");
+        PL_ASSERT_DEBUG(!m_ObjectToNode.Contains(e.m_pObject->GetGuid()), "Sanity check failed!");
         m_ObjectToNode[e.m_pObject->GetGuid()] = NodeInternal();
       }
       else if (IsConnection(e.m_pObject))
@@ -745,7 +818,7 @@ void plDocumentNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
       if (IsNode(e.m_pObject))
       {
         auto it = m_ObjectToNode.Find(e.m_pObject->GetGuid());
-        PLASMA_ASSERT_DEBUG(it.IsValid(), "Sanity check failed!");
+        PL_ASSERT_DEBUG(it.IsValid(), "Sanity check failed!");
 
         m_ObjectToNode.Remove(it);
       }
@@ -755,6 +828,8 @@ void plDocumentNodeManager::ObjectHandler(const plDocumentObjectEvent& e)
       }
     }
     break;
+    default:
+      PL_ASSERT_NOT_IMPLEMENTED
   }
 }
 
@@ -785,6 +860,10 @@ void plDocumentNodeManager::StructureEventHandler(const plDocumentObjectStructur
         plDocumentNodeManagerEvent e2(plDocumentNodeManagerEvent::Type::AfterNodeAdded, e.m_pObject);
         m_NodeEvents.Broadcast(e2);
       }
+      else
+      {
+        HandlePotentialDynamicPinPropertyChanged(e.m_pNewParent, e.m_sParentProperty);
+      }
     }
     break;
     case plDocumentObjectStructureEvent::Type::BeforeObjectRemoved:
@@ -793,7 +872,7 @@ void plDocumentNodeManager::StructureEventHandler(const plDocumentObjectStructur
       {
         plDocumentNodeManagerEvent e2(plDocumentNodeManagerEvent::Type::BeforeNodeRemoved, e.m_pObject);
         m_NodeEvents.Broadcast(e2);
-      }
+      }      
     }
     break;
     case plDocumentObjectStructureEvent::Type::AfterObjectRemoved:
@@ -802,6 +881,10 @@ void plDocumentNodeManager::StructureEventHandler(const plDocumentObjectStructur
       {
         plDocumentNodeManagerEvent e2(plDocumentNodeManagerEvent::Type::AfterNodeRemoved, e.m_pObject);
         m_NodeEvents.Broadcast(e2);
+      }
+      else
+      {
+        HandlePotentialDynamicPinPropertyChanged(e.m_pPreviousParent, e.m_sParentProperty);
       }
     }
     break;
@@ -813,13 +896,27 @@ void plDocumentNodeManager::StructureEventHandler(const plDocumentObjectStructur
 
 void plDocumentNodeManager::PropertyEventsHandler(const plDocumentObjectPropertyEvent& e)
 {
-  const plAbstractProperty* pProp = e.m_pObject->GetType()->FindPropertyByName(e.m_sProperty);
+  HandlePotentialDynamicPinPropertyChanged(e.m_pObject, e.m_sProperty);
+
+  if (const plDocumentObject* pParent = e.m_pObject->GetParent())
+  {
+    HandlePotentialDynamicPinPropertyChanged(pParent, e.m_pObject->GetParentProperty());
+  }
+}
+
+
+void plDocumentNodeManager::HandlePotentialDynamicPinPropertyChanged(const plDocumentObject* pObject, plStringView sPropertyName)
+{
+  if (pObject == nullptr)
+    return;
+
+  const plAbstractProperty* pProp = pObject->GetType()->FindPropertyByName(sPropertyName);
   if (pProp == nullptr)
     return;
 
-  if (IsDynamicPinProperty(e.m_pObject, pProp))
+  if (IsDynamicPinProperty(pObject, pProp))
   {
-    TryRecreatePins(e.m_pObject);
+    TryRecreatePins(pObject);
   }
 }
 
@@ -860,9 +957,7 @@ void plDocumentNodeManager::RestoreOldMetaDataAfterLoading(const plAbstractObjec
     plDocumentNodeManager::CanConnectResult res;
     if (CanConnect(pConnectionType, *pSourcePin, *pTargetPin, res).m_Result.Succeeded())
     {
-      plUuid ObjectGuid;
-      ObjectGuid.CreateNewUuid();
-      plDocumentObject* pConnectionObject = CreateObject(pConnectionType, ObjectGuid);
+      plDocumentObject* pConnectionObject = CreateObject(pConnectionType, plUuid::MakeUuid());
 
       AddObject(pConnectionObject, nullptr, "", -1);
 

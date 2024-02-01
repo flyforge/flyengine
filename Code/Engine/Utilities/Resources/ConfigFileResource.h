@@ -43,11 +43,11 @@ using plConfigFileResourceHandle = plTypedResourceHandle<class plConfigFileResou
 /// Using C preprocessor logic (#define, #if, #else, etc) you can quickly select between different configuration sets.
 ///
 /// Once loaded, accessing the data is very efficient.
-class PLASMA_UTILITIES_DLL plConfigFileResource : public plResource
+class PL_UTILITIES_DLL plConfigFileResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConfigFileResource, plResource);
+  PL_ADD_DYNAMIC_REFLECTION(plConfigFileResource, plResource);
 
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plConfigFileResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plConfigFileResource);
 
 public:
   plConfigFileResource();
@@ -94,7 +94,7 @@ private:
 };
 
 
-class PLASMA_UTILITIES_DLL plConfigFileResourceLoader : public plResourceTypeLoader
+class PL_UTILITIES_DLL plConfigFileResourceLoader : public plResourceTypeLoader
 {
 public:
   struct LoadedData

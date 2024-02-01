@@ -7,24 +7,24 @@ class plPin;
 
 class plProcGenGraphAssetDocument : public plAssetDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGenGraphAssetDocument, plAssetDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGenGraphAssetDocument, plAssetDocument);
 
 public:
-  plProcGenGraphAssetDocument(const char* szDocumentPath);
+  plProcGenGraphAssetDocument(plStringView sDocumentPath);
 
   void SetDebugPin(const plPin* pDebugPin);
 
-  plStatus WriteAsset(plStreamWriter& stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const;
+  plStatus WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const;
 
 protected:
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const override;
   virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const override;
   virtual bool Paste(
-    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType) override;
+    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType) override;
 
   virtual void AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const override;
   virtual void RestoreMetaDataAfterLoading(const plAbstractObjectGraph& graph, bool bUndoable) override;

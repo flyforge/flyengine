@@ -12,11 +12,11 @@ class plQuakeConsole;
 
 // TODO: update comments below
 
-/// \brief The base class for all typical game applications made with PlasmaEngine
+/// \brief The base class for all typical game applications made with plEngine
 ///
 /// While plApplication is an abstraction for the operating system entry point,
 /// plGameApplication extends this to implement startup and tear down functionality
-/// of a typical game that uses the standard functionality of PlasmaEngine.
+/// of a typical game that uses the standard functionality of plEngine.
 ///
 /// plGameApplication implements a lot of functionality needed by most games,
 /// such as setting up data directories, loading plugins, configuring the input system, etc.
@@ -24,7 +24,7 @@ class plQuakeConsole;
 /// For every such step a virtual function is called, allowing to override steps in custom applications.
 ///
 /// The default implementation tries to do as much of this in a data-driven way. E.g. plugin and data
-/// directory configurations are read from DDL files. These can be configured by hand or using PlasmaEditor.
+/// directory configurations are read from DDL files. These can be configured by hand or using plEditor.
 ///
 /// You are NOT supposed to implement game functionality by deriving from plGameApplication.
 /// Instead see plGameState.
@@ -32,15 +32,14 @@ class plQuakeConsole;
 /// plGameApplication will create exactly one plGameState by looping over all available plGameState types
 /// (through reflection) and picking the one whose DeterminePriority function returns the highest priority.
 /// That game state will live throughout the entire application life-time and will be stepped every frame.
-class PLASMA_GAMEENGINE_DLL plGameApplication : public plGameApplicationBase
+class PL_GAMEENGINE_DLL plGameApplication : public plGameApplicationBase
 {
 public:
   static plCVarBool cvar_AppVSync;
   static plCVarBool cvar_AppShowFPS;
-  static plCVarBool cvar_AppShowInfo;
 
 public:
-  typedef plGameApplicationBase SUPER;
+  using SUPER = plGameApplicationBase;
 
   /// szProjectPath may be nullptr, if FindProjectDirectory() is overridden.
   plGameApplication(const char* szAppName, const char* szProjectPath);

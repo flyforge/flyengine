@@ -30,7 +30,7 @@ plGALCommandEncoderImplVulkan::~plGALCommandEncoderImplVulkan() = default;
 
 void plGALCommandEncoderImplVulkan::Reset()
 {
-  PLASMA_ASSERT_DEBUG(!m_bRenderPassActive, "Render pass was not closed");
+  PL_ASSERT_DEBUG(!m_bRenderPassActive, "Render pass was not closed");
 
   m_bPipelineStateDirty = true;
   m_bViewportDirty = true;
@@ -45,7 +45,7 @@ void plGALCommandEncoderImplVulkan::Reset()
   m_viewport = vk::Viewport();
   m_scissor = vk::Rect2D();
 
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_RENDERTARGET_COUNT; i++)
+  for (plUInt32 i = 0; i < PL_GAL_MAX_RENDERTARGET_COUNT; i++)
   {
     m_pBoundRenderTargets[i] = nullptr;
   }
@@ -53,23 +53,20 @@ void plGALCommandEncoderImplVulkan::Reset()
   m_uiBoundRenderTargetCount = 0;
 
   m_pIndexBuffer = nullptr;
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
+  for (plUInt32 i = 0; i < PL_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
   {
     m_pBoundVertexBuffers[i] = nullptr;
     m_VertexBufferOffsets[i] = 0;
   }
 
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT; i++)
+  // Don't clear m_Resources as otherwise we need to re-create the sub-arrays for each set on every reset.
+  for (plUInt32 i = 0; i < m_Resources.GetCount(); i++)
   {
-    m_pBoundConstantBuffers[i] = nullptr;
+    m_Resources[i].m_pBoundConstantBuffers.Clear();
+    m_Resources[i].m_pBoundShaderResourceViews.Clear();
+    m_Resources[i].m_pBoundUnoderedAccessViews.Clear();
+    m_Resources[i].m_pBoundSamplerStates.Clear();
   }
-  for (plUInt32 i = 0; i < plGALShaderStage::ENUM_COUNT; i++)
-  {
-    m_pBoundShaderResourceViews[i].Clear();
-  }
-  m_pBoundUnoderedAccessViews.Clear();
-
-  plMemoryUtils::ZeroFill(&m_pBoundSamplerStates[0][0], plGALShaderStage::ENUM_COUNT * PLASMA_GAL_MAX_SAMPLER_COUNT);
 
   m_renderPass = vk::RenderPassBeginInfo();
   m_clearValues.Clear();
@@ -77,14 +74,14 @@ void plGALCommandEncoderImplVulkan::Reset()
 
 void plGALCommandEncoderImplVulkan::MarkDirty()
 {
-  PLASMA_ASSERT_DEBUG(!m_bRenderPassActive, "Render pass was not closed");
+  PL_ASSERT_DEBUG(!m_bRenderPassActive, "Render pass was not closed");
 
   m_bPipelineStateDirty = true;
   m_bViewportDirty = true;
   m_bIndexBufferDirty = true;
   m_bDescriptorsDirty = true;
   m_BoundVertexBuffersRange.Reset();
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
+  for (plUInt32 i = 0; i < PL_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
   {
     if (m_pBoundVertexBuffers[i])
       m_BoundVertexBuffersRange.SetToIncludeValue(i);
@@ -109,33 +106,48 @@ void plGALCommandEncoderImplVulkan::SetShaderPlatform(const plGALShader* pShader
   }
 }
 
-void plGALCommandEncoderImplVulkan::SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer)
+void plGALCommandEncoderImplVulkan::SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer)
 {
   // \todo Check if the device supports the slot index?
-  m_pBoundConstantBuffers[uiSlot] = pBuffer != nullptr ? static_cast<const plGALBufferVulkan*>(pBuffer) : nullptr;
+  m_Resources.EnsureCount(binding.m_iSet + 1);
+  auto& resources = m_Resources[binding.m_iSet];
+  resources.m_pBoundConstantBuffers.EnsureCount(binding.m_iSlot + 1);
+  resources.m_pBoundConstantBuffers[binding.m_iSlot] = pBuffer != nullptr ? static_cast<const plGALBufferVulkan*>(pBuffer) : nullptr;
   m_bDescriptorsDirty = true;
 }
 
-void plGALCommandEncoderImplVulkan::SetSamplerStatePlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState)
+void plGALCommandEncoderImplVulkan::SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState)
 {
   // \todo Check if the device supports the stage / the slot index
-  m_pBoundSamplerStates[Stage][uiSlot] = pSamplerState != nullptr ? static_cast<const plGALSamplerStateVulkan*>(pSamplerState) : nullptr;
+  m_Resources.EnsureCount(binding.m_iSet + 1);
+  auto& resources = m_Resources[binding.m_iSet];
+  resources.m_pBoundSamplerStates.EnsureCount(binding.m_iSlot + 1);
+  resources.m_pBoundSamplerStates[binding.m_iSlot] = pSamplerState != nullptr ? static_cast<const plGALSamplerStateVulkan*>(pSamplerState) : nullptr;
   m_bDescriptorsDirty = true;
 }
 
-void plGALCommandEncoderImplVulkan::SetResourceViewPlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALResourceView* pResourceView)
+void plGALCommandEncoderImplVulkan::SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView)
 {
-  auto& boundShaderResourceViews = m_pBoundShaderResourceViews[Stage];
-  boundShaderResourceViews.EnsureCount(uiSlot + 1);
-  boundShaderResourceViews[uiSlot] = pResourceView != nullptr ? static_cast<const plGALResourceViewVulkan*>(pResourceView) : nullptr;
+  m_Resources.EnsureCount(binding.m_iSet + 1);
+  auto& resources = m_Resources[binding.m_iSet];
+  resources.m_pBoundShaderResourceViews.EnsureCount(binding.m_iSlot + 1);
+  resources.m_pBoundShaderResourceViews[binding.m_iSlot] = pResourceView != nullptr ? static_cast<const plGALResourceViewVulkan*>(pResourceView) : nullptr;
   m_bDescriptorsDirty = true;
 }
 
-void plGALCommandEncoderImplVulkan::SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView)
+void plGALCommandEncoderImplVulkan::SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView)
 {
-  m_pBoundUnoderedAccessViews.EnsureCount(uiSlot + 1);
-  m_pBoundUnoderedAccessViews[uiSlot] = pUnorderedAccessView != nullptr ? static_cast<const plGALUnorderedAccessViewVulkan*>(pUnorderedAccessView) : nullptr;
+  m_Resources.EnsureCount(binding.m_iSet + 1);
+  auto& resources = m_Resources[binding.m_iSet];
+  resources.m_pBoundUnoderedAccessViews.EnsureCount(binding.m_iSlot + 1);
+  resources.m_pBoundUnoderedAccessViews[binding.m_iSlot] = pUnorderedAccessView != nullptr ? static_cast<const plGALUnorderedAccessViewVulkan*>(pUnorderedAccessView) : nullptr;
   m_bDescriptorsDirty = true;
+}
+
+void plGALCommandEncoderImplVulkan::SetPushConstantsPlatform(plArrayPtr<const plUInt8> data)
+{
+  m_bPushConstantsDirty = true;
+  m_PushConstants = data;
 }
 
 // Query functions
@@ -161,7 +173,7 @@ plResult plGALCommandEncoderImplVulkan::GetQueryResultPlatform(const plGALQuery*
   auto pVulkanQuery = static_cast<const plGALQueryVulkan*>(pQuery);
   vk::Result result = m_vkDevice.getQueryPoolResults(pVulkanQuery->GetPool(), pVulkanQuery->GetID(), 1u, sizeof(plUInt64), &uiQueryResult, 0, vk::QueryResultFlagBits::e64);
 
-  return result == vk::Result::eSuccess ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return result == vk::Result::eSuccess ? PL_SUCCESS : PL_FAILURE;
 }
 
 void plGALCommandEncoderImplVulkan::InsertTimestampPlatform(plGALTimestampHandle hTimestamp)
@@ -176,14 +188,14 @@ void plGALCommandEncoderImplVulkan::ClearUnorderedAccessViewPlatform(const plGAL
   // this looks to require custom code, either using buffer copies or
   // clearing via a compute shader
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 void plGALCommandEncoderImplVulkan::ClearUnorderedAccessViewPlatform(const plGALUnorderedAccessView* pUnorderedAccessView, plVec4U32 clearValues)
 {
   // Same as the other clearing variant
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 void plGALCommandEncoderImplVulkan::CopyBufferPlatform(const plGALBuffer* pDestination, const plGALBuffer* pSource)
@@ -191,13 +203,13 @@ void plGALCommandEncoderImplVulkan::CopyBufferPlatform(const plGALBuffer* pDesti
   auto pDestinationVulkan = static_cast<const plGALBufferVulkan*>(pDestination);
   auto pSourceVulkan = static_cast<const plGALBufferVulkan*>(pSource);
 
-  PLASMA_ASSERT_DEV(pSource->GetSize() != pDestination->GetSize(), "Source and destination buffer sizes mismatch!");
+  PL_ASSERT_DEV(pSource->GetSize() != pDestination->GetSize(), "Source and destination buffer sizes mismatch!");
 
   // TODO do this in an immediate command buffer?
   vk::BufferCopy bufferCopy = {};
   bufferCopy.size = pSource->GetSize();
 
-  //#TODO_VULKAN better barrier management of buffers.
+  // #TODO_VULKAN better barrier management of buffers.
   m_pPipelineBarrier->Flush();
 
   m_pCommandBuffer->copyBuffer(pSourceVulkan->GetVkBuffer(), pDestinationVulkan->GetVkBuffer(), 1, &bufferCopy);
@@ -217,7 +229,7 @@ void plGALCommandEncoderImplVulkan::CopyBufferRegionPlatform(const plGALBuffer* 
   bufferCopy.srcOffset = uiSourceOffset;
   bufferCopy.size = uiByteCount;
 
-  //#TODO_VULKAN better barrier management of buffers.
+  // #TODO_VULKAN better barrier management of buffers.
   m_pPipelineBarrier->Flush();
 
   m_pCommandBuffer->copyBuffer(pSourceVulkan->GetVkBuffer(), pDestinationVulkan->GetVkBuffer(), 1, &bufferCopy);
@@ -229,7 +241,7 @@ void plGALCommandEncoderImplVulkan::CopyBufferRegionPlatform(const plGALBuffer* 
 void plGALCommandEncoderImplVulkan::UpdateBufferPlatform(const plGALBuffer* pDestination, plUInt32 uiDestOffset, plArrayPtr<const plUInt8> pSourceData,
   plGALUpdateMode::Enum updateMode)
 {
-  PLASMA_CHECK_ALIGNMENT_16(pSourceData.GetPtr());
+  PL_CHECK_ALIGNMENT_16(pSourceData.GetPtr());
 
   auto pVulkanDestination = static_cast<const plGALBufferVulkan*>(pDestination);
 
@@ -243,7 +255,7 @@ void plGALCommandEncoderImplVulkan::UpdateBufferPlatform(const plGALBuffer* pDes
       plVulkanAllocation alloc = pVulkanDestination->GetAllocation();
       void* pData = nullptr;
       VK_ASSERT_DEV(plMemoryAllocatorVulkan::MapMemory(alloc, &pData));
-      PLASMA_ASSERT_DEV(pData, "Implementation error");
+      PL_ASSERT_DEV(pData, "Implementation error");
       plMemoryUtils::Copy(plMemoryUtils::AddByteOffset((plUInt8*)pData, uiDestOffset), pSourceData.GetPtr(), pSourceData.GetCount());
       plMemoryAllocatorVulkan::UnmapMemory(alloc);
     }
@@ -256,7 +268,7 @@ void plGALCommandEncoderImplVulkan::UpdateBufferPlatform(const plGALBuffer* pDes
         m_bRenderPassActive = false;
       }
 
-      PLASMA_ASSERT_DEBUG(!m_bRenderPassActive, "Vulkan does not support copying buffers while a render pass is active. TODO: Fix high level render code to make this impossible.");
+      PL_ASSERT_DEBUG(!m_bRenderPassActive, "Vulkan does not support copying buffers while a render pass is active. TODO: Fix high level render code to make this impossible.");
 
       m_GALDeviceVulkan.UploadBufferStaging(&m_GALDeviceVulkan.GetStagingBufferPool(), m_pPipelineBarrier, *m_pCommandBuffer, pVulkanDestination, pSourceData, uiDestOffset);
     }
@@ -280,12 +292,12 @@ void plGALCommandEncoderImplVulkan::CopyTexturePlatform(const plGALTexture* pDes
   const plGALTextureCreationDescription& destDesc = pDestination->GetDescription();
   const plGALTextureCreationDescription& srcDesc = pSource->GetDescription();
 
-  PLASMA_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
-  PLASMA_ASSERT_DEBUG(destDesc.m_uiArraySize == srcDesc.m_uiArraySize, "");
-  PLASMA_ASSERT_DEBUG(destDesc.m_uiMipLevelCount == srcDesc.m_uiMipLevelCount, "");
-  PLASMA_ASSERT_DEBUG(destDesc.m_uiWidth == srcDesc.m_uiWidth, "");
-  PLASMA_ASSERT_DEBUG(destDesc.m_uiHeight == srcDesc.m_uiHeight, "");
-  PLASMA_ASSERT_DEBUG(destDesc.m_uiDepth == srcDesc.m_uiDepth, "");
+  PL_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
+  PL_ASSERT_DEBUG(destDesc.m_uiArraySize == srcDesc.m_uiArraySize, "");
+  PL_ASSERT_DEBUG(destDesc.m_uiMipLevelCount == srcDesc.m_uiMipLevelCount, "");
+  PL_ASSERT_DEBUG(destDesc.m_uiWidth == srcDesc.m_uiWidth, "");
+  PL_ASSERT_DEBUG(destDesc.m_uiHeight == srcDesc.m_uiHeight, "");
+  PL_ASSERT_DEBUG(destDesc.m_uiDepth == srcDesc.m_uiDepth, "");
 
   vk::ImageAspectFlagBits imageAspect = plGALResourceFormat::IsDepthFormat(destDesc.m_Format) ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
@@ -328,7 +340,7 @@ void plGALCommandEncoderImplVulkan::CopyTextureRegionPlatform(const plGALTexture
   const plGALTextureCreationDescription& destDesc = pDestination->GetDescription();
   const plGALTextureCreationDescription& srcDesc = pSource->GetDescription();
 
-  PLASMA_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
+  PL_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
 
   vk::ImageAspectFlagBits imageAspect = plGALResourceFormat::IsDepthFormat(destDesc.m_Format) ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
 
@@ -368,7 +380,6 @@ void plGALCommandEncoderImplVulkan::UpdateTexturePlatform(const plGALTexture* pD
   m_pPipelineBarrier->EnsureImageLayout(pDestVulkan, range, vk::ImageLayout::eTransferDstOptimal, vk::PipelineStageFlagBits::eTransfer, vk::AccessFlagBits::eTransferWrite);
   m_pPipelineBarrier->Flush();
 
-  //aaa
   plUInt32 uiWidth = plMath::Max(DestinationBox.m_vMax.x - DestinationBox.m_vMin.x, 1u);
   plUInt32 uiHeight = plMath::Max(DestinationBox.m_vMax.y - DestinationBox.m_vMin.y, 1u);
   plUInt32 uiDepth = plMath::Max(DestinationBox.m_vMax.z - DestinationBox.m_vMin.z, 1u);
@@ -386,7 +397,7 @@ void plGALCommandEncoderImplVulkan::UpdateTexturePlatform(const plGALTexture* pD
 
   const plUInt32 uiBufferRowPitch = uiBlockSize * blockCount.width;
   const plUInt32 uiBufferSlicePitch = uiBufferRowPitch * blockCount.height;
-  PLASMA_ASSERT_DEV(uiBufferRowPitch == data.m_uiRowPitch, "Row pitch with padding is not implemented yet.");
+  PL_ASSERT_DEV(uiBufferRowPitch == data.m_uiRowPitch, "Row pitch with padding is not implemented yet.");
 
   void* pData = nullptr;
   plMemoryAllocatorVulkan::MapMemory(stagingBuffer.m_alloc, &pData);
@@ -419,7 +430,7 @@ void plGALCommandEncoderImplVulkan::ResolveTexturePlatform(const plGALTexture* p
   const plGALTextureCreationDescription& destDesc = pDestination->GetDescription();
   const plGALTextureCreationDescription& srcDesc = pSource->GetDescription();
 
-  PLASMA_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
+  PL_ASSERT_DEBUG(plGALResourceFormat::IsDepthFormat(destDesc.m_Format) == plGALResourceFormat::IsDepthFormat(srcDesc.m_Format), "");
 
   // TODO need to determine size of the subresource
   vk::ImageResolve resolveRegion = {};
@@ -525,15 +536,15 @@ void plGALCommandEncoderImplVulkan::ReadbackTexturePlatform(const plGALTexture* 
     m_bRenderPassActive = false;
   }
 
-  PLASMA_ASSERT_DEV(!m_bRenderPassActive, "Can't readback within a render pass");
+  PL_ASSERT_DEV(!m_bRenderPassActive, "Can't readback within a render pass");
 
   const plGALTextureVulkan* pVulkanTexture = static_cast<const plGALTextureVulkan*>(pTexture->GetParentResource());
   const plGALTextureCreationDescription& textureDesc = pVulkanTexture->GetDescription();
   const vk::ImageAspectFlagBits imageAspect = plGALResourceFormat::IsDepthFormat(textureDesc.m_Format) ? vk::ImageAspectFlagBits::eDepth : vk::ImageAspectFlagBits::eColor;
   const bool bMSAASourceTexture = textureDesc.m_SampleCount != plGALMSAASampleCount::None;
-  PLASMA_ASSERT_DEV(!bMSAASourceTexture, "MSAA read-back not implemented!");
+  PL_ASSERT_DEV(!bMSAASourceTexture, "MSAA read-back not implemented!");
   const plGALTextureVulkan::StagingMode stagingMode = pVulkanTexture->GetStagingMode();
-  PLASMA_ASSERT_DEV(stagingMode != plGALTextureVulkan::StagingMode::None, "No staging resource available for read-back");
+  PL_ASSERT_DEV(stagingMode != plGALTextureVulkan::StagingMode::None, "No staging resource available for read-back");
 
   if (stagingMode == plGALTextureVulkan::StagingMode::Buffer)
   {
@@ -624,8 +635,8 @@ void plGALCommandEncoderImplVulkan::ReadbackTexturePlatform(const plGALTexture* 
   // There is no need to change the layout back of this texture right now but as the next layout will most certainly not be another eTransferSrcOptimal we might as well change it back to its default state.
   m_pPipelineBarrier->EnsureImageLayout(pVulkanTexture, pVulkanTexture->GetPreferredLayout(), pVulkanTexture->GetUsedByPipelineStage(), pVulkanTexture->GetAccessMask());
 
-  //#TODO_VULKAN readback fence
-  m_GALDeviceVulkan.Submit({}, {}, {});
+  // #TODO_VULKAN readback fence
+  m_GALDeviceVulkan.Submit();
   m_vkDevice.waitIdle();
   m_pPipelineBarrier = &m_GALDeviceVulkan.GetCurrentPipelineBarrier();
   m_pCommandBuffer = &m_GALDeviceVulkan.GetCurrentCommandBuffer();
@@ -642,11 +653,11 @@ plUInt32 GetMipSize(plUInt32 uiSize, plUInt32 uiMipLevel)
 
 void plGALCommandEncoderImplVulkan::CopyTextureReadbackResultPlatform(const plGALTexture* pTexture, plArrayPtr<plGALTextureSubresource> SourceSubResource, plArrayPtr<plGALSystemMemoryDescription> TargetData)
 {
-  //#TODO_VULKAN readback fence
+  // #TODO_VULKAN readback fence
   auto pVulkanTexture = static_cast<const plGALTextureVulkan*>(pTexture->GetParentResource());
   const plGALTextureCreationDescription& textureDesc = pVulkanTexture->GetDescription();
   const plGALTextureVulkan::StagingMode stagingMode = pVulkanTexture->GetStagingMode();
-  PLASMA_ASSERT_DEV(stagingMode != plGALTextureVulkan::StagingMode::None, "No staging resource available for read-back");
+  PL_ASSERT_DEV(stagingMode != plGALTextureVulkan::StagingMode::None, "No staging resource available for read-back");
 
   if (stagingMode == plGALTextureVulkan::StagingMode::Texture)
   {
@@ -695,7 +706,7 @@ void plGALCommandEncoderImplVulkan::CopyTextureReadbackResultPlatform(const plGA
   else // One of the buffer variants.
   {
     const plGALBufferVulkan* pStagingBuffer = static_cast<const plGALBufferVulkan*>(m_GALDeviceVulkan.GetBuffer(pVulkanTexture->GetStagingBuffer()));
-    const vk::Format stagingFormat = m_GALDeviceVulkan.GetFormatLookupTable().GetFormatInfo(pVulkanTexture->GetDescription().m_Format).m_eStorage;
+    const vk::Format stagingFormat = m_GALDeviceVulkan.GetFormatLookupTable().GetFormatInfo(pVulkanTexture->GetDescription().m_Format).m_readback;
 
     plHybridArray<plGALTextureVulkan::SubResourceOffset, 8> subResourceOffsets;
     const plUInt32 uiBufferSize = pVulkanTexture->ComputeSubResourceOffsets(subResourceOffsets);
@@ -768,7 +779,7 @@ void plGALCommandEncoderImplVulkan::GenerateMipMapsPlatform(const plGALResourceV
   const bool bMSAASourceTexture = textureDesc.m_SampleCount != plGALMSAASampleCount::None;
   if (bMSAASourceTexture)
   {
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
   }
   else
   {
@@ -890,34 +901,41 @@ void plGALCommandEncoderImplVulkan::GenerateMipMapsPlatform(const plGALResourceV
 
 void plGALCommandEncoderImplVulkan::FlushPlatform()
 {
-  //FlushDeferredStateChanges();
 }
 
 // Debug helper functions
 
 void plGALCommandEncoderImplVulkan::PushMarkerPlatform(const char* szMarker)
 {
-  // TODO early out if device doesn't support debug markers
-  constexpr float markerColor[4] = {1, 1, 1, 1};
-  vk::DebugUtilsLabelEXT markerInfo = {};
-  plMemoryUtils::Copy(markerInfo.color.data(), markerColor, PLASMA_ARRAY_SIZE(markerColor));
-  markerInfo.pLabelName = szMarker;
+  if (m_GALDeviceVulkan.GetExtensions().m_bDebugUtilsMarkers)
+  {
+    constexpr float markerColor[4] = {1, 1, 1, 1};
+    vk::DebugUtilsLabelEXT markerInfo = {};
+    plMemoryUtils::Copy(markerInfo.color.data(), markerColor, PL_ARRAY_SIZE(markerColor));
+    markerInfo.pLabelName = szMarker;
 
-  m_pCommandBuffer->beginDebugUtilsLabelEXT(markerInfo);
+    m_pCommandBuffer->beginDebugUtilsLabelEXT(markerInfo);
+  }
 }
 
 void plGALCommandEncoderImplVulkan::PopMarkerPlatform()
 {
-  m_pCommandBuffer->endDebugUtilsLabelEXT();
+  if (m_GALDeviceVulkan.GetExtensions().m_bDebugUtilsMarkers)
+  {
+    m_pCommandBuffer->endDebugUtilsLabelEXT();
+  }
 }
 
 void plGALCommandEncoderImplVulkan::InsertEventMarkerPlatform(const char* szMarker)
 {
-  constexpr float markerColor[4] = {1, 1, 1, 1};
-  vk::DebugUtilsLabelEXT markerInfo = {};
-  plMemoryUtils::Copy(markerInfo.color.data(), markerColor, PLASMA_ARRAY_SIZE(markerColor));
-  markerInfo.pLabelName = szMarker;
-  m_pCommandBuffer->insertDebugUtilsLabelEXT(markerInfo);
+  if (m_GALDeviceVulkan.GetExtensions().m_bDebugUtilsMarkers)
+  {
+    constexpr float markerColor[4] = {1, 1, 1, 1};
+    vk::DebugUtilsLabelEXT markerInfo = {};
+    plMemoryUtils::Copy(markerInfo.color.data(), markerColor, PL_ARRAY_SIZE(markerColor));
+    markerInfo.pLabelName = szMarker;
+    m_pCommandBuffer->insertDebugUtilsLabelEXT(markerInfo);
+  }
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -998,17 +1016,22 @@ void plGALCommandEncoderImplVulkan::ClearPlatform(const plColor& ClearColor, plU
 {
   if (!m_bRenderPassActive && !m_bInsideCompute)
   {
+    if (m_pPipelineBarrier->IsDirty())
+    {
+      m_pPipelineBarrier->Flush();
+    }
+
     m_pCommandBuffer->beginRenderPass(m_renderPass, vk::SubpassContents::eInline);
     m_bClearSubmitted = true;
     m_bRenderPassActive = true;
   }
-  //#TODO_VULKAN Not sure if we need barriers here.
+  // #TODO_VULKAN Not sure if we need barriers here.
   plHybridArray<vk::ClearAttachment, 8> attachments;
 
   // Clear color
   if (uiRenderTargetClearMask != 0)
   {
-    for (plUInt32 i = 0; i < PLASMA_GAL_MAX_RENDERTARGET_COUNT; i++)
+    for (plUInt32 i = 0; i < PL_GAL_MAX_RENDERTARGET_COUNT; i++)
     {
       if (uiRenderTargetClearMask & (1u << i) && i < m_PipelineDesc.m_uiAttachmentCount)
       {
@@ -1020,7 +1043,7 @@ void plGALCommandEncoderImplVulkan::ClearPlatform(const plColor& ClearColor, plU
     }
   }
   // Clear depth / stencil
-  if (bClearDepth || bClearStencil)
+  if ((bClearDepth || bClearStencil) && m_depthMask != vk::ImageAspectFlagBits::eNone)
   {
     vk::ClearAttachment& attachment = attachments.ExpandAndGetRef();
     if (bClearDepth && (m_depthMask & vk::ImageAspectFlagBits::eDepth))
@@ -1044,63 +1067,52 @@ void plGALCommandEncoderImplVulkan::ClearPlatform(const plColor& ClearColor, plU
 
 // Draw functions
 
-void plGALCommandEncoderImplVulkan::DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
+plResult plGALCommandEncoderImplVulkan::DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->draw(uiVertexCount, 1, uiStartVertex, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
+plResult plGALCommandEncoderImplVulkan::DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->drawIndexed(uiIndexCount, 1, uiStartIndex, 0, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
+plResult plGALCommandEncoderImplVulkan::DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->drawIndexed(uiIndexCountPerInstance, uiInstanceCount, uiStartIndex, 0, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplVulkan::DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->drawIndexedIndirect(static_cast<const plGALBufferVulkan*>(pIndirectArgumentBuffer)->GetVkBuffer(), uiArgumentOffsetInBytes, 1, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
+plResult plGALCommandEncoderImplVulkan::DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->draw(uiVertexCountPerInstance, uiInstanceCount, uiStartVertex, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplVulkan::DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pCommandBuffer->drawIndirect(static_cast<const plGALBufferVulkan*>(pIndirectArgumentBuffer)->GetVkBuffer(), uiArgumentOffsetInBytes, 1, 0);
-}
-
-void plGALCommandEncoderImplVulkan::DrawAutoPlatform()
-{
-  //FlushDeferredStateChanges();
-
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-}
-
-void plGALCommandEncoderImplVulkan::BeginStreamOutPlatform()
-{
-  FlushDeferredStateChanges();
-}
-
-void plGALCommandEncoderImplVulkan::EndStreamOutPlatform()
-{
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  return PL_SUCCESS;
 }
 
 void plGALCommandEncoderImplVulkan::SetIndexBufferPlatform(const plGALBuffer* pIndexBuffer)
@@ -1114,7 +1126,7 @@ void plGALCommandEncoderImplVulkan::SetIndexBufferPlatform(const plGALBuffer* pI
 
 void plGALCommandEncoderImplVulkan::SetVertexBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pVertexBuffer)
 {
-  PLASMA_ASSERT_DEV(uiSlot < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT, "Invalid slot index");
+  PL_ASSERT_DEV(uiSlot < PL_GAL_MAX_VERTEX_BUFFER_COUNT, "Invalid slot index");
   vk::Buffer buffer = pVertexBuffer != nullptr ? static_cast<const plGALBufferVulkan*>(pVertexBuffer)->GetVkBuffer() : nullptr;
   plUInt32 stride = pVertexBuffer != nullptr ? pVertexBuffer->GetDescription().m_uiStructSize : 0;
 
@@ -1151,7 +1163,7 @@ void plGALCommandEncoderImplVulkan::SetPrimitiveTopologyPlatform(plGALPrimitiveT
 
 void plGALCommandEncoderImplVulkan::SetBlendStatePlatform(const plGALBlendState* pBlendState, const plColor& BlendFactor, plUInt32 uiSampleMask)
 {
-  //#TODO_VULKAN BlendFactor / uiSampleMask ?
+  // #TODO_VULKAN BlendFactor / uiSampleMask ?
   if (m_PipelineDesc.m_pCurrentBlendState != pBlendState)
   {
     m_PipelineDesc.m_pCurrentBlendState = pBlendState != nullptr ? static_cast<const plGALBlendStateVulkan*>(pBlendState) : nullptr;
@@ -1161,7 +1173,7 @@ void plGALCommandEncoderImplVulkan::SetBlendStatePlatform(const plGALBlendState*
 
 void plGALCommandEncoderImplVulkan::SetDepthStencilStatePlatform(const plGALDepthStencilState* pDepthStencilState, plUInt8 uiStencilRefValue)
 {
-  //#TODO_VULKAN uiStencilRefValue ?
+  // #TODO_VULKAN uiStencilRefValue ?
   if (m_PipelineDesc.m_pCurrentDepthStencilState != pDepthStencilState)
   {
     m_PipelineDesc.m_pCurrentDepthStencilState = pDepthStencilState != nullptr ? static_cast<const plGALDepthStencilStateVulkan*>(pDepthStencilState) : nullptr;
@@ -1207,11 +1219,6 @@ void plGALCommandEncoderImplVulkan::SetScissorRectPlatform(const plRectU32& rect
   }
 }
 
-void plGALCommandEncoderImplVulkan::SetStreamOutBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer, plUInt32 uiOffset)
-{
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 void plGALCommandEncoderImplVulkan::BeginCompute()
@@ -1226,120 +1233,52 @@ void plGALCommandEncoderImplVulkan::EndCompute()
   m_bInsideCompute = false;
 }
 
-void plGALCommandEncoderImplVulkan::DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
+plResult plGALCommandEncoderImplVulkan::DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
   m_pCommandBuffer->dispatch(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplVulkan::DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplVulkan::DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
   m_pCommandBuffer->dispatchIndirect(static_cast<const plGALBufferVulkan*>(pIndirectArgumentBuffer)->GetVkBuffer(), uiArgumentOffsetInBytes);
+  return PL_SUCCESS;
 }
 
-//////////////////////////////////////////////////////////////////////////
+#define PL_VULKAN_CHECK_STATE(bCondition, szErrorMsg, ...)                                  \
+  do                                                                                        \
+  {                                                                                         \
+    /*PL_ASSERT_DEBUG(bCondition, szErrorMsg, ##__VA_ARGS__); */                            \
+    PL_MSVC_ANALYSIS_WARNING_PUSH                                                           \
+    PL_MSVC_ANALYSIS_WARNING_DISABLE(6326) /* disable static analysis for the comparison */ \
+    if (!!(bCondition) == false)                                                            \
+    {                                                                                       \
+      plLog::Error(szErrorMsg, ##__VA_ARGS__);                                              \
+      return PL_FAILURE;                                                                    \
+    }                                                                                       \
+    PL_MSVC_ANALYSIS_WARNING_POP                                                            \
+  } while (false)
 
-#if 0
-static void SetShaderResources(plGALShaderStage::Enum stage, ID3D11DeviceContext* pContext, plUInt32 uiStartSlot, plUInt32 uiNumSlots,
-  ID3D11ShaderResourceView** pShaderResourceViews)
+plResult plGALCommandEncoderImplVulkan::FlushDeferredStateChanges()
 {
-  switch (stage)
-  {
-    case plGALShaderStage::VertexShader:
-      pContext->VSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    case plGALShaderStage::HullShader:
-      pContext->HSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    case plGALShaderStage::DomainShader:
-      pContext->DSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    case plGALShaderStage::GeometryShader:
-      pContext->GSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    case plGALShaderStage::PixelShader:
-      pContext->PSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    case plGALShaderStage::ComputeShader:
-      pContext->CSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
-      break;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-  }
-}
-
-static void SetConstantBuffers(plGALShaderStage::Enum stage, ID3D11DeviceContext* pContext, plUInt32 uiStartSlot, plUInt32 uiNumSlots,
-  ID3D11Buffer** pConstantBuffers)
-{
-  switch (stage)
-  {
-    case plGALShaderStage::VertexShader:
-      pContext->VSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    case plGALShaderStage::HullShader:
-      pContext->HSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    case plGALShaderStage::DomainShader:
-      pContext->DSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    case plGALShaderStage::GeometryShader:
-      pContext->GSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    case plGALShaderStage::PixelShader:
-      pContext->PSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    case plGALShaderStage::ComputeShader:
-      pContext->CSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
-      break;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-  }
-}
-
-static void SetSamplers(plGALShaderStage::Enum stage, ID3D11DeviceContext* pContext, plUInt32 uiStartSlot, plUInt32 uiNumSlots,
-  ID3D11SamplerState** pSamplerStates)
-{
-  switch (stage)
-  {
-    case plGALShaderStage::VertexShader:
-      pContext->VSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    case plGALShaderStage::HullShader:
-      pContext->HSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    case plGALShaderStage::DomainShader:
-      pContext->DSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    case plGALShaderStage::GeometryShader:
-      pContext->GSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    case plGALShaderStage::PixelShader:
-      pContext->PSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    case plGALShaderStage::ComputeShader:
-      pContext->CSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
-      break;
-    default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-  }
-}
-#endif
-
-void plGALCommandEncoderImplVulkan::FlushDeferredStateChanges()
-{
-
-
   if (m_bPipelineStateDirty)
   {
     if (!m_PipelineDesc.m_pCurrentShader)
     {
       plLog::Error("No shader set");
-      return;
+      return PL_FAILURE;
     }
-    const plGALShaderVulkan::DescriptorSetLayoutDesc& descriptorLayoutDesc = m_PipelineDesc.m_pCurrentShader->GetDescriptorSetLayout();
 
-    m_LayoutDesc.m_layout = plResourceCacheVulkan::RequestDescriptorSetLayout(descriptorLayoutDesc);
+    const plUInt32 uiSets = m_PipelineDesc.m_pCurrentShader->GetSetCount();
+    m_LayoutDesc.m_layout.SetCount(uiSets);
+    m_LayoutDesc.m_pushConstants = m_PipelineDesc.m_pCurrentShader->GetPushConstantRange();
+    for (plUInt32 uiSet = 0; uiSet < uiSets; ++uiSet)
+    {
+      m_LayoutDesc.m_layout[uiSet] = m_PipelineDesc.m_pCurrentShader->GetDescriptorSetLayout(uiSet);
+    }
+
     m_PipelineDesc.m_layout = plResourceCacheVulkan::RequestPipelineLayout(m_LayoutDesc);
     m_ComputeDesc.m_layout = m_PipelineDesc.m_layout;
 
@@ -1407,101 +1346,125 @@ void plGALCommandEncoderImplVulkan::FlushDeferredStateChanges()
 
   if (true /*m_bDescriptorsDirty*/)
   {
-    //#TODO_VULKAN we always create a new descriptor set as we don't know if a buffer was modified since the last draw call (plGALBufferVulkan::DiscardBuffer).
-    // Need to figure out a fast check if any buffer or buffer of a resource view was discarded.
+    // #TODO_VULKAN we always create a new descriptor set as we don't know if a buffer was modified since the last draw call (plGALBufferVulkan::DiscardBuffer).
+    //  Need to figure out a fast check if any buffer or buffer of a resource view was discarded.
     m_bDescriptorsDirty = false;
 
     m_DescriptorWrites.Clear();
-    vk::DescriptorSet descriptorSet = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout);
-
-    plArrayPtr<const plGALShaderVulkan::BindingMapping> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindingMapping();
-    const plUInt32 uiCount = bindingMapping.GetCount();
-    for (plUInt32 i = 0; i < uiCount; i++)
+    m_TextureAndSampler.Clear();
+    const plUInt32 uiSets = m_PipelineDesc.m_pCurrentShader->GetSetCount();
+    m_DescriptorSets.SetCount(uiSets);
+    for (plUInt32 uiSet = 0; uiSet < uiSets; ++uiSet)
     {
-      const plGALShaderVulkan::BindingMapping& mapping = bindingMapping[i];
-      vk::WriteDescriptorSet& write = m_DescriptorWrites.ExpandAndGetRef();
-      write.dstArrayElement = 0;
-      write.descriptorType = mapping.m_descriptorType;
-      write.dstBinding = mapping.m_uiTarget;
-      write.dstSet = descriptorSet;
-      write.descriptorCount = 1;
-      switch (mapping.m_type)
+      m_DescriptorSets[uiSet] = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout[uiSet]);
+
+      plArrayPtr<const plShaderResourceBinding> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindings(uiSet);
+      const plUInt32 uiCount = bindingMapping.GetCount();
+
+      m_Resources.EnsureCount(uiSet + 1);
+      auto& resources = m_Resources[uiSet];
+
+      for (plUInt32 i = 0; i < uiCount; i++)
       {
-        case plGALShaderVulkan::BindingMapping::ConstantBuffer:
+        const plShaderResourceBinding& mapping = bindingMapping[i];
+        vk::WriteDescriptorSet& write = m_DescriptorWrites.ExpandAndGetRef();
+        write.dstArrayElement = 0;
+        write.descriptorType = plConversionUtilsVulkan::GetDescriptorType(mapping.m_ResourceType);
+        write.dstBinding = mapping.m_iSlot; // #TODO_VULKAN this should be i + arrayIndex or something?
+        write.dstSet = m_DescriptorSets[uiSet];
+        write.descriptorCount = mapping.m_uiArraySize;
+        switch (mapping.m_ResourceType)
         {
-          const plGALBufferVulkan* pBuffer = m_pBoundConstantBuffers[mapping.m_uiSource];
-          write.pBufferInfo = &pBuffer->GetBufferInfo();
-        }
-        break;
-        case plGALShaderVulkan::BindingMapping::ResourceView:
-        {
-          const plGALResourceViewVulkan* pResourceView = nullptr;
-          if (mapping.m_uiSource < m_pBoundShaderResourceViews[mapping.m_stage].GetCount())
+          case plGALShaderResourceType::ConstantBuffer:
           {
-            pResourceView = m_pBoundShaderResourceViews[mapping.m_stage][mapping.m_uiSource];
+            const plGALBufferVulkan* pBuffer = mapping.m_iSlot < resources.m_pBoundConstantBuffers.GetCount() ? resources.m_pBoundConstantBuffers[mapping.m_iSlot] : nullptr;
+            PL_VULKAN_CHECK_STATE(pBuffer != nullptr, "No CB bound at '{}'", mapping.m_sName.GetView());
+            write.pBufferInfo = &pBuffer->GetBufferInfo();
           }
-
-          if (!pResourceView)
+          break;
+          case plGALShaderResourceType::Texture:
+          case plGALShaderResourceType::TextureAndSampler:
           {
-            plStringBuilder bla = mapping.m_sName;
-            bool bDepth = bla.FindSubString_NoCase("shadow") != nullptr || bla.FindSubString_NoCase("depth");
-            pResourceView = plFallbackResourcesVulkan::GetFallbackResourceView(mapping.m_descriptorType, mapping.m_plType, bDepth);
-          }
-          if (!pResourceView->GetDescription().m_hTexture.IsInvalidated())
-          {
-            write.pImageInfo = &pResourceView->GetImageInfo(plShaderResourceType::IsArray(mapping.m_plType));
+            const plGALResourceViewVulkan* pResourceView = GetShaderResourceView(resources, mapping);
+            PL_VULKAN_CHECK_STATE(!pResourceView->GetDescription().m_hTexture.IsInvalidated(), "Texture resource view expected to be bound at '{}'", mapping.m_sName.GetView());
+            write.pImageInfo = &pResourceView->GetImageInfo(plGALShaderTextureType::IsArray(mapping.m_TextureType));
 
-            const plGALTextureVulkan* pTexture = static_cast<const plGALTextureVulkan*>(pResourceView->GetResource()->GetParentResource());
+            const auto* pTexture = static_cast<const plGALTextureVulkan*>(pResourceView->GetResource()->GetParentResource());
             const bool bIsDepth = plGALResourceFormat::IsDepthFormat(pTexture->GetDescription().m_Format);
 
-            m_pPipelineBarrier->EnsureImageLayout(pResourceView, pTexture->GetPreferredLayout(bIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal), mapping.m_targetStages, vk::AccessFlagBits::eShaderRead);
-          }
-          else
-          {
-            if (auto& bufferView = pResourceView->GetBufferView())
+            m_pPipelineBarrier->EnsureImageLayout(pResourceView, pTexture->GetPreferredLayout(bIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal), plConversionUtilsVulkan::GetPipelineStages(mapping.m_Stages), vk::AccessFlagBits::eShaderRead);
+
+            if (mapping.m_ResourceType == plGALShaderResourceType::TextureAndSampler)
             {
-              write.pTexelBufferView = &bufferView;
-            }
-            else
-            {
-              write.pBufferInfo = &pResourceView->GetBufferInfo();
+              // TextureAndSampler is the only one where we have to combine two resources, requiring us to create a dynamic entry for the pImageInfo field.
+              const plGALSamplerStateVulkan* pSampler = mapping.m_iSlot < resources.m_pBoundSamplerStates.GetCount() ? resources.m_pBoundSamplerStates[mapping.m_iSlot] : nullptr;
+              PL_VULKAN_CHECK_STATE(pSampler != nullptr, "No sampler bound at '{}'", mapping.m_sName.GetView());
+              m_TextureAndSampler.PushBack(*write.pImageInfo);
+              m_TextureAndSampler.PeekBack().sampler = pSampler->GetImageInfo().sampler;
+              write.pImageInfo = &m_TextureAndSampler.PeekBack();
             }
           }
-        }
-        break;
-        case plGALShaderVulkan::BindingMapping::UAV:
-        {
-          const plGALUnorderedAccessViewVulkan* pUAV = m_pBoundUnoderedAccessViews[mapping.m_uiSource];
-          if (pUAV == nullptr)
+          break;
+          case plGALShaderResourceType::TexelBuffer:
           {
-            pUAV = plFallbackResourcesVulkan::GetFallbackUnorderedAccessView(mapping.m_descriptorType, mapping.m_plType);
+            const plGALResourceViewVulkan* pResourceView = GetShaderResourceView(resources, mapping);
+            PL_VULKAN_CHECK_STATE(pResourceView != nullptr, "No SRV bound at '{}'", mapping.m_sName.GetView());
+            write.pTexelBufferView = &pResourceView->GetBufferView();
           }
-          if (!pUAV->GetDescription().m_hTexture.IsInvalidated())
+          break;
+          case plGALShaderResourceType::StructuredBuffer:
           {
+            const plGALResourceViewVulkan* pResourceView = GetShaderResourceView(resources, mapping);
+            PL_VULKAN_CHECK_STATE(pResourceView != nullptr, "No SRV bound at '{}'", mapping.m_sName.GetView());
+            write.pBufferInfo = &pResourceView->GetBufferInfo();
+          }
+          break;
+          case plGALShaderResourceType::TextureRW:
+          {
+            const plGALUnorderedAccessViewVulkan* pUAV = GetShaderUAV(resources, mapping);
+            PL_VULKAN_CHECK_STATE(!pUAV->GetDescription().m_hTexture.IsInvalidated(), "Texture resource view expected to be bound at '{}'", mapping.m_sName.GetView());
             write.pImageInfo = &pUAV->GetImageInfo();
 
-            const plGALTextureVulkan* pTexture = static_cast<const plGALTextureVulkan*>(pUAV->GetResource()->GetParentResource());
-            m_pPipelineBarrier->EnsureImageLayout(pUAV, pTexture->GetPreferredLayout(vk::ImageLayout::eGeneral), mapping.m_targetStages, vk::AccessFlagBits::eShaderRead);
+            const auto* pTexture = static_cast<const plGALTextureVulkan*>(pUAV->GetResource()->GetParentResource());
+            m_pPipelineBarrier->EnsureImageLayout(pUAV, pTexture->GetPreferredLayout(vk::ImageLayout::eGeneral), plConversionUtilsVulkan::GetPipelineStages(mapping.m_Stages), vk::AccessFlagBits::eShaderRead);
           }
-          else
+          break;
+          case plGALShaderResourceType::TexelBufferRW:
           {
+            const plGALUnorderedAccessViewVulkan* pUAV = GetShaderUAV(resources, mapping);
+            PL_VULKAN_CHECK_STATE(pUAV != nullptr, "No UAV bound at '{}'", mapping.m_sName.GetView());
+            write.pTexelBufferView = &pUAV->GetBufferView();
+          }
+          break;
+          case plGALShaderResourceType::StructuredBufferRW:
+          {
+            const plGALUnorderedAccessViewVulkan* pUAV = GetShaderUAV(resources, mapping);
+            PL_VULKAN_CHECK_STATE(pUAV != nullptr, "No UAV bound at '{}'", mapping.m_sName.GetView());
             write.pBufferInfo = &pUAV->GetBufferInfo();
           }
-        }
-        break;
-        case plGALShaderVulkan::BindingMapping::Sampler:
-        {
-          const plGALSamplerStateVulkan* pSampler = m_pBoundSamplerStates[mapping.m_stage][mapping.m_uiSource];
-          write.pImageInfo = &pSampler->GetImageInfo();
-        }
-        break;
-        default:
           break;
+          case plGALShaderResourceType::Sampler:
+          {
+            const plGALSamplerStateVulkan* pSampler = mapping.m_iSlot < resources.m_pBoundSamplerStates.GetCount() ? resources.m_pBoundSamplerStates[mapping.m_iSlot] : nullptr;
+            PL_VULKAN_CHECK_STATE(pSampler != nullptr, "No sampler bound at '{}'", mapping.m_sName.GetView());
+            write.pImageInfo = &pSampler->GetImageInfo();
+          }
+          break;
+          default:
+            break;
+        }
       }
-    }
 
-    plDescriptorSetPoolVulkan::UpdateDescriptorSet(descriptorSet, m_DescriptorWrites);
-    m_pCommandBuffer->bindDescriptorSets(m_bInsideCompute ? vk::PipelineBindPoint::eCompute : vk::PipelineBindPoint::eGraphics, m_PipelineDesc.m_layout, 0, 1, &descriptorSet, 0, nullptr);
+      plDescriptorSetPoolVulkan::UpdateDescriptorSet(m_DescriptorSets[uiSet], m_DescriptorWrites);
+    }
+    m_pCommandBuffer->bindDescriptorSets(m_bInsideCompute ? vk::PipelineBindPoint::eCompute : vk::PipelineBindPoint::eGraphics, m_PipelineDesc.m_layout, 0, m_DescriptorSets.GetCount(), m_DescriptorSets.GetData(), 0, nullptr);
+  }
+
+  if (m_bPushConstantsDirty && m_LayoutDesc.m_pushConstants.size > 0)
+  {
+    PL_ASSERT_DEBUG(m_LayoutDesc.m_pushConstants.size == m_PushConstants.GetCount(), "");
+
+    m_pCommandBuffer->pushConstants(m_PipelineDesc.m_layout, m_LayoutDesc.m_pushConstants.stageFlags, m_LayoutDesc.m_pushConstants.offset, m_PushConstants.GetCount(), m_PushConstants.GetData());
   }
 
   if (m_bRenderPassActive && m_pPipelineBarrier->IsDirty())
@@ -1517,4 +1480,37 @@ void plGALCommandEncoderImplVulkan::FlushDeferredStateChanges()
     m_bClearSubmitted = true;
     m_bRenderPassActive = true;
   }
+  return PL_SUCCESS;
+}
+
+const plGALResourceViewVulkan* plGALCommandEncoderImplVulkan::GetShaderResourceView(const SetResources& resources, const plShaderResourceBinding& mapping)
+{
+  const plGALResourceViewVulkan* pResourceView = nullptr;
+  if (mapping.m_iSlot < resources.m_pBoundShaderResourceViews.GetCount())
+  {
+    pResourceView = resources.m_pBoundShaderResourceViews[mapping.m_iSlot];
+  }
+
+  if (!pResourceView)
+  {
+    plStringBuilder sName = mapping.m_sName.GetData();
+    bool bDepth = sName.FindSubString_NoCase("shadow") != nullptr || sName.FindSubString_NoCase("depth");
+    pResourceView = plFallbackResourcesVulkan::GetFallbackResourceView(mapping.m_ResourceType, mapping.m_TextureType, bDepth);
+  }
+  return pResourceView;
+}
+
+const plGALUnorderedAccessViewVulkan* plGALCommandEncoderImplVulkan::GetShaderUAV(const SetResources& resources, const plShaderResourceBinding& mapping)
+{
+  const plGALUnorderedAccessViewVulkan* pUAV = nullptr;
+  if (mapping.m_iSlot < resources.m_pBoundUnoderedAccessViews.GetCount())
+  {
+    pUAV = resources.m_pBoundUnoderedAccessViews[mapping.m_iSlot];
+  }
+
+  if (!pUAV)
+  {
+    pUAV = plFallbackResourcesVulkan::GetFallbackUnorderedAccessView(mapping.m_ResourceType, mapping.m_TextureType);
+  }
+  return pUAV;
 }

@@ -2,30 +2,30 @@
 
 #include <RendererCore/Pipeline/RenderPipelineNode.h>
 
-// PLASMA_CHECK_AT_COMPILETIME(sizeof(plRenderPipelineNodePin) == 4);
+// PL_CHECK_AT_COMPILETIME(sizeof(plRenderPipelineNodePin) == 4);
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineNode, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineNode, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodePin, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodePin, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
    new plHiddenAttribute(),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodeInputPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodeInputPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodeOutputPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodeOutputPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodePassThrougPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plRenderPipelineNodePassThrougPin, plRenderPipelineNodePin, 1, plRTTINoAllocator)
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plRenderPipelineNode::InitializePins()
@@ -50,7 +50,7 @@ void plRenderPipelineNode::InitializePins()
     pPin->m_pParent = this;
     if (pPin->m_Type == plRenderPipelineNodePin::Type::Unknown)
     {
-      PLASMA_REPORT_FAILURE("Pin '{0}' has an invalid type. Do not use plRenderPipelineNodePin directly as member but one of its derived types", pProp->GetPropertyName());
+      PL_REPORT_FAILURE("Pin '{0}' has an invalid type. Do not use plRenderPipelineNodePin directly as member but one of its derived types", pProp->GetPropertyName());
       continue;
     }
 
@@ -102,4 +102,4 @@ const plRenderPipelineNodePin* plRenderPipelineNode::GetPinByName(plHashedString
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelineNode);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelineNode);

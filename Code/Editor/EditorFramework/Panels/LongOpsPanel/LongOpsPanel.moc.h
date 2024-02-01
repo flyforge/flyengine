@@ -10,11 +10,11 @@
 struct plLongOpControllerEvent;
 
 /// \brief This panel listens to events from plLongOpControllerManager and displays all currently known long operations
-class PLASMA_EDITORFRAMEWORK_DLL plQtLongOpsPanel : public plQtApplicationPanel, public Ui_LongOpsPanel
+class PL_EDITORFRAMEWORK_DLL plQtLongOpsPanel : public plQtApplicationPanel, public Ui_LongOpsPanel
 {
   Q_OBJECT
 
-  PLASMA_DECLARE_SINGLETON(plQtLongOpsPanel);
+  PL_DECLARE_SINGLETON(plQtLongOpsPanel);
 
 public:
   plQtLongOpsPanel();

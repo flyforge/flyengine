@@ -1,0 +1,58 @@
+# Asset Types
+
+Jolt_Colmesh_Convex;Jolt Convex Collision Mesh
+Jolt_Colmesh_Triangle;Jolt Triangle Collision Mesh
+
+# Component Types
+
+plJoltDynamicActorComponent;Dynamic Actor (Jolt)
+plJoltStaticActorComponent;Static Actor (Jolt)
+plJoltShapeConvexHullComponent;Convex Hull Shape (Jolt)
+plJoltShapeSphereComponent;Sphere Shape (Jolt)
+plJoltShapeCylinderComponent;Cylinder Shape (Jolt)
+plJoltShapeCapsuleComponent;Capsule Shape (Jolt)
+plJoltTriggerComponent;Physics Trigger (Jolt)
+plJoltVisColMeshComponent;Collision Mesh Visualizer (Jolt)
+plJoltSettingsComponent;Physics Settings (Jolt)
+plJolt6DOFConstraintComponent;6DOF Constraint (Jolt)
+plJoltDistanceConstraintComponent;Distance Constraint (Jolt)
+plJoltFixedConstraintComponent;Fixed Constraint (Jolt)
+plJoltSliderConstraintComponent;Slider Constraint (Jolt)
+plJoltHingeConstraintComponent;Hinge Constraint (Jolt)
+plJoltPointConstraintComponent;Point Constraint (Jolt)
+plJoltRopeComponent;Physical Rope (Jolt)
+plJoltRagdollComponent;Ragdoll (Jolt)
+plJoltConeConstraintComponent;Cone Constraint (Jolt)
+plJoltQueryShapeActorComponent;Query Shape (Jolt)
+plJoltSwingTwistConstraintComponent;Swing Twist Constraint (Jolt)
+plJoltHitboxComponent;Hitboxes (Jolt)
+plJoltCharacterControllerComponent;Character Controller (Jolt)
+plJoltDefaultCharacterComponent;Default Character Controller (Jolt)
+plJoltGrabObjectComponent;Grab Object (Jolt)
+plJoltClothSheetComponent;Cloth Sheet (Jolt)
+
+# UI
+
+Jolt.Settings.Project;Jolt Project Settings...
+
+# Enums
+
+plJoltSurfaceResourceSlot;Surface
+
+plJoltSteppingMode::Variable;Variable Stepping
+plJoltSteppingMode::Fixed;Fixed Stepping
+plJoltSteppingMode::SemiFixed;Semi-Fixed Stepping
+
+plJoltConstraintDriveMode::DriveVelocity;Reach Velocity
+plJoltConstraintDriveMode::DrivePosition;Reach Position
+
+plOnJoltContact::SendReportMsg;Send Report Message
+
+plJoltCharacterDebugFlags::VisShape;Visualize Shape
+plJoltCharacterDebugFlags::VisGroundContact;Visualize Ground Contact
+plJoltCharacterDebugFlags::VisCasts;Visualize Casts
+plJoltCharacterDebugFlags::PrintState;Print Stats
+plJoltCharacterDebugFlags::VisContacts;Visualize All Contacts
+plJoltCharacterDebugFlags::VisFootCheck;Visualize Foot Check
+
+

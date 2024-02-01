@@ -29,12 +29,12 @@ void OnUnloadPlugin()
   plToolsProject::GetSingleton()->s_Events.RemoveEventHandler(ToolsProjectEventHandler);
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

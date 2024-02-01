@@ -4,117 +4,117 @@
 
 namespace plMath
 {
-  PLASMA_ALWAYS_INLINE double GetCurveValue_Linear(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_Linear(double t)
   {
     return t;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_ConstantZero(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_ConstantZero(double t)
   {
     return 0.0;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_ConstantOne(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_ConstantOne(double t)
   {
     return 1.0;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInSine(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInSine(double t)
   {
     return 1.0 - cos((t * plMath::Pi<double>()) / 2.0);
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutSine(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutSine(double t)
   {
     return sin((t * plMath::Pi<double>()) / 2.0);
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutSine(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutSine(double t)
   {
     return -(cos(plMath::Pi<double>() * t) - 1.0) / 2.0;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInQuad(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInQuad(double t)
   {
     return t * t;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutQuad(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutQuad(double t)
   {
     return 1.0 - (1.0 - t) * (1.0 - t);
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutQuad(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutQuad(double t)
   {
     return t < 0.5 ? 2.0 * t * t : 1.0 - plMath::Pow(-2.0 * t + 2, 2.0) / 2;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInCubic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInCubic(double t)
   {
     return t * t * t;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutCubic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutCubic(double t)
   {
     return 1.0 - pow(1 - t, 3.0);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutCubic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutCubic(double t)
   {
     return t < 0.5 ? 4.0 * t * t * t : 1.0 - plMath::Pow(-2.0 * t + 2.0, 3.0) / 2.0;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInQuartic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInQuartic(double t)
   {
     return t * t * t * t;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutQuartic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutQuartic(double t)
   {
     return 1.0 - plMath::Pow(1.0 - t, 4.0);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutQuartic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutQuartic(double t)
   {
     return t < 0.5 ? 8.0 * t * t * t * t : 1.0 - plMath::Pow(-2.0 * t + 2.0, 4.0) / 2.0;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInQuintic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInQuintic(double t)
   {
     return t * t * t * t * t;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutQuintic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutQuintic(double t)
   {
     return 1.0 - plMath::Pow(1.0 - t, 5.0);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutQuintic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutQuintic(double t)
   {
     return t < 0.5 ? 16.0 * t * t * t * t * t : 1.0 - plMath::Pow(-2.0 * t + 2.0, 5.0) / 2.0;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInExpo(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInExpo(double t)
   {
     return t == 0 ? 0 : plMath::Pow(2.0, 10.0 * t - 10.0);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutExpo(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutExpo(double t)
   {
     return t == 1.0 ? 1.0 : 1.0 - plMath::Pow(2.0, -10.0 * t);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutExpo(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutExpo(double t)
   {
     if (t == 0.0)
     {
@@ -132,19 +132,19 @@ namespace plMath
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInCirc(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInCirc(double t)
   {
     return 1.0 - plMath::Sqrt(1.0 - plMath::Pow(t, 2.0));
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutCirc(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutCirc(double t)
   {
     return plMath::Sqrt(1.0 - plMath::Pow(t - 1.0, 2.0));
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutCirc(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutCirc(double t)
   {
     return t < 0.5
              ? (1.0 - plMath::Sqrt(1.0 - plMath::Pow(2.0 * t, 2.0))) / 2.0
@@ -152,19 +152,19 @@ namespace plMath
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInBack(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInBack(double t)
   {
     return 2.70158 * t * t * t - 1.70158 * t * t;
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutBack(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutBack(double t)
   {
     return 1 + 2.70158 * plMath::Pow(t - 1.0, 3.0) + 1.70158 * plMath::Pow(t - 1.0, 2.0);
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutBack(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutBack(double t)
   {
     return t < 0.5
              ? (plMath::Pow(2.0 * t, 2.0) * (((1.70158 * 1.525) + 1.0) * 2 * t - (1.70158 * 1.525))) / 2.0
@@ -172,7 +172,7 @@ namespace plMath
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInElastic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInElastic(double t)
   {
     if (t == 0.0)
     {
@@ -189,7 +189,7 @@ namespace plMath
   }
 
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutElastic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutElastic(double t)
   {
     if (t == 0.0)
     {
@@ -205,7 +205,7 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutElastic(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutElastic(double t)
   {
     if (t == 0.0)
     {
@@ -223,12 +223,12 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInBounce(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInBounce(double t)
   {
     return 1.0 - GetCurveValue_EaseOutBounce(1.0 - t);
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseOutBounce(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseOutBounce(double t)
   {
     if (t < 1.0 / 2.75)
     {
@@ -251,14 +251,14 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_EaseInOutBounce(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_EaseInOutBounce(double t)
   {
     return t < 0.5
              ? (1.0 - GetCurveValue_EaseOutBounce(1.0 - 2.0 * t)) / 2.0
              : (1.0 + GetCurveValue_EaseOutBounce(2.0 * t - 1.0)) / 2.0;
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_Conical(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_Conical(double t)
   {
     if (t < 0.2)
     {
@@ -272,7 +272,7 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_FadeInHoldFadeOut(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_FadeInHoldFadeOut(double t)
   {
     if (t < 0.2)
     {
@@ -288,7 +288,7 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_FadeInFadeOut(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_FadeInFadeOut(double t)
   {
     if (t < 0.5)
     {
@@ -300,7 +300,7 @@ namespace plMath
     }
   }
 
-  PLASMA_ALWAYS_INLINE double GetCurveValue_Bell(double t)
+  PL_ALWAYS_INLINE double GetCurveValue_Bell(double t)
   {
     if (t < 0.25)
     {
@@ -401,7 +401,7 @@ inline double plCurveFunction::GetValue(Enum function, double x)
     case Bell:
       return plMath::GetCurveValue_Bell(x);
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return 0.0;

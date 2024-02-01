@@ -19,13 +19,15 @@ class plQuatTemplate
 {
 public:
   // Means this object can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using ComponentType = Type;
 
   // *** Data ***
 public:
-  plVec3Template<Type> v;
+  Type x;
+  Type y;
+  Type z;
   Type w;
 
   // *** Constructors ***
@@ -35,16 +37,16 @@ public:
   /// \brief For internal use. You should never construct quaternions this way.
   plQuatTemplate(Type x, Type y, Type z, Type w); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
                                "all code-paths properly initialize this object.");
   }
 #endif
 
   /// \brief Static function that returns a quaternion that represents the identity rotation (none).
-  static const plQuatTemplate<Type> IdentityQuaternion(); // [tested]
+  [[nodiscard]] static const plQuatTemplate<Type> MakeIdentity(); // [tested]
 
   // *** Functions to create a quaternion ***
 public:
@@ -55,16 +57,16 @@ public:
   /// angle.
   ///
   /// Use this function only if you have good understanding of quaternion math and know exactly what you are doing.
-  void SetElements(Type x, Type y, Type z, Type w); // [tested]
+  [[nodiscard]] static plQuatTemplate<Type> MakeFromElements(Type x, Type y, Type z, Type w); // [tested]
 
   /// \brief Creates a quaternion from a rotation-axis and an angle.
-  void SetFromAxisAndAngle(const plVec3Template<Type>& vRotationAxis, plAngle angle); // [tested]
+  [[nodiscard]] static plQuatTemplate<Type> MakeFromAxisAndAngle(const plVec3Template<Type>& vRotationAxis, plAngle angle); // [tested]
 
   /// \brief Creates a quaternion, that rotates through the shortest arc from "vDirFrom" to "vDirTo".
-  void SetShortestRotation(const plVec3Template<Type>& vDirFrom, const plVec3Template<Type>& vDirTo); // [tested]
+  [[nodiscard]] static plQuatTemplate<Type> MakeShortestRotation(const plVec3Template<Type>& vDirFrom, const plVec3Template<Type>& vDirTo); // [tested]
 
   /// \brief Creates a quaternion from the given matrix.
-  void SetFromMat3(const plMat3Template<Type>& m); // [tested]
+  [[nodiscard]] static plQuatTemplate<Type> MakeFromMat3(const plMat3Template<Type>& m); // [tested]
 
   /// \brief Reconstructs a rotation quaternion from a matrix that may contain scaling and mirroring.
   ///
@@ -79,8 +81,8 @@ public:
   /// \sa ReconstructFromMat3()
   void ReconstructFromMat4(const plMat4Template<Type>& m);
 
-  /// \brief Sets this quaternion to be the spherical linear interpolation of the other two.
-  void SetSlerp(const plQuatTemplate& qFrom, const plQuatTemplate& qTo, Type t); // [tested]
+  /// \brief Returns a quaternion that is the spherical linear interpolation of the other two.
+  [[nodiscard]] static plQuatTemplate<Type> MakeSlerp(const plQuatTemplate& qFrom, const plQuatTemplate& qTo, Type t); // [tested]
 
   // *** Common Functions ***
 public:
@@ -89,6 +91,9 @@ public:
 
   /// \brief Returns the rotation-axis and angle, that this quaternion rotates around.
   void GetRotationAxisAndAngle(plVec3Template<Type>& out_vAxis, plAngle& out_angle, Type fEpsilon = plMath::DefaultEpsilon<Type>()) const; // [tested]
+
+  /// \brief Returns the x,y,z components as a vector.
+  plVec3Template<Type> GetVectorPart() const { return plVec3Template<Type>(x, y, z); }
 
   /// \brief Returns the Quaternion as a matrix.
   const plMat3Template<Type> GetAsMat3() const; // [tested]
@@ -111,16 +116,15 @@ public:
 
   /// \brief Inverts the rotation, so instead of rotating N degrees around an axis, the quaternion will rotate -N degrees around its axis.
   ///
-  /// This modifies the quaternion in place. If you want to get the inverse as a copy, use the negation operator (-).
+  /// This modifies the quaternion in place. If you want to get the inverse as a copy, use GetInverse().
   void Invert();
 
-  // *** Operators ***
-public:
-  /// \brief Returns a Quaternion that represents the negative / inverted rotation.
-  const plQuatTemplate operator-() const; // [tested]
+  /// \brief Returns a quaternion that represents the negative / inverted rotation. E.g. the one that would rotate back to identity.
+  const plQuatTemplate<Type> GetInverse() const; // [tested]
 
-  // *** Common Quaternion operations ***
-public:
+  /// \brief Returns the Quaternion with all 4 components negated. This is not the same as the inverted rotation!
+  const plQuatTemplate<Type> GetNegated() const;
+
   /// \brief Returns the dot-product of the two quaternions (commutative, order does not matter).
   Type Dot(const plQuatTemplate& rhs) const; // [tested]
 
@@ -130,7 +134,7 @@ public:
   void GetAsEulerAngles(plAngle& out_x, plAngle& out_y, plAngle& out_z) const; // [tested]
 
   /// \brief Sets the quaternion from Euler angles
-  void SetFromEulerAngles(const plAngle& x, const plAngle& y, const plAngle& z); // [tested]
+  [[nodiscard]] static plQuatTemplate<Type> MakeFromEulerAngles(const plAngle& x, const plAngle& y, const plAngle& z); // [tested]
 };
 
 /// \brief Rotates v by q

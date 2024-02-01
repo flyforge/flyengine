@@ -5,27 +5,27 @@
 #include <Foundation/Strings/StringBuilder.h>
 
 template <plUInt16 Size>
-plHybridStringBase<Size>::plHybridStringBase(const plStringBuilder& rhs, plAllocatorBase* pAllocator)
+plHybridStringBase<Size>::plHybridStringBase(const plStringBuilder& rhs, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = rhs;
 }
 
 template <plUInt16 Size>
-plHybridStringBase<Size>::plHybridStringBase(plStringBuilder&& rhs, plAllocatorBase* pAllocator)
+plHybridStringBase<Size>::plHybridStringBase(plStringBuilder&& rhs, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = std::move(rhs);
 }
 
 template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(const plStringBuilder& rhs)
+PL_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(const plStringBuilder& rhs)
   : plHybridStringBase<Size>(rhs, A::GetAllocator())
 {
 }
 
 template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(plStringBuilder&& rhs)
+PL_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(plStringBuilder&& rhs)
   : plHybridStringBase<Size>(std::move(rhs), A::GetAllocator())
 {
 }
@@ -33,25 +33,23 @@ PLASMA_ALWAYS_INLINE plHybridString<Size, A>::plHybridString(plStringBuilder&& r
 template <plUInt16 Size>
 void plHybridStringBase<Size>::operator=(const plStringBuilder& rhs)
 {
-  m_uiCharacterCount = rhs.m_uiCharacterCount;
   m_Data = rhs.m_Data;
 }
 
 template <plUInt16 Size>
 void plHybridStringBase<Size>::operator=(plStringBuilder&& rhs)
 {
-  m_uiCharacterCount = rhs.m_uiCharacterCount;
   m_Data = std::move(rhs.m_Data);
 }
 
 template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const plStringBuilder& rhs)
+PL_ALWAYS_INLINE void plHybridString<Size, A>::operator=(const plStringBuilder& rhs)
 {
   plHybridStringBase<Size>::operator=(rhs);
 }
 
 template <plUInt16 Size, typename A>
-PLASMA_ALWAYS_INLINE void plHybridString<Size, A>::operator=(plStringBuilder&& rhs)
+PL_ALWAYS_INLINE void plHybridString<Size, A>::operator=(plStringBuilder&& rhs)
 {
   plHybridStringBase<Size>::operator=(std::move(rhs));
 }

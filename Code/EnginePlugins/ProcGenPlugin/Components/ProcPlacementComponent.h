@@ -11,7 +11,7 @@ struct plMsgExtractRenderData;
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_PROCGENPLUGIN_DLL plProcPlacementComponentManager : public plComponentManager<plProcPlacementComponent, plBlockStorageType::Compact>
+class PL_PROCGENPLUGIN_DLL plProcPlacementComponentManager : public plComponentManager<plProcPlacementComponent, plBlockStorageType::Compact>
 {
 public:
   plProcPlacementComponentManager(plWorld* pWorld);
@@ -62,9 +62,9 @@ private:
 
   struct ProcessingTask
   {
-    PLASMA_ALWAYS_INLINE bool IsValid() const { return m_uiTileIndex != plInvalidIndex; }
-    PLASMA_ALWAYS_INLINE bool IsScheduled() const { return m_PlacementTaskGroupID.IsValid(); }
-    PLASMA_ALWAYS_INLINE void Invalidate()
+    PL_ALWAYS_INLINE bool IsValid() const { return m_uiTileIndex != plInvalidIndex; }
+    PL_ALWAYS_INLINE bool IsScheduled() const { return m_PlacementTaskGroupID.IsValid(); }
+    PL_ALWAYS_INLINE void Invalidate()
     {
       m_uiScheduledFrame = -1;
       m_PlacementTaskGroupID.Invalidate();
@@ -98,19 +98,19 @@ private:
 
 struct plProcGenBoxExtents
 {
-  plVec3 m_vOffset = plVec3::ZeroVector();
-  plQuat m_Rotation = plQuat::IdentityQuaternion();
+  plVec3 m_vOffset = plVec3::MakeZero();
+  plQuat m_Rotation = plQuat::MakeIdentity();
   plVec3 m_vExtents = plVec3(10);
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcGenBoxExtents);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcGenBoxExtents);
 
-class PLASMA_PROCGENPLUGIN_DLL plProcPlacementComponent : public plComponent
+class PL_PROCGENPLUGIN_DLL plProcPlacementComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plProcPlacementComponent, plComponent, plProcPlacementComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plProcPlacementComponent, plComponent, plProcPlacementComponentManager);
 
 public:
   plProcPlacementComponent();
@@ -127,11 +127,11 @@ public:
   void SetResource(const plProcGenGraphResourceHandle& hResource);
   const plProcGenGraphResourceHandle& GetResource() const { return m_hResource; }
 
-  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg);
-  void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
+  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg);
+  void OnMsgExtractRenderData(plMsgExtractRenderData& ref_msg) const;
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 private:
   plUInt32 BoxExtents_GetCount() const;
@@ -151,7 +151,7 @@ private:
 
   struct Bounds
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plSimdBBox m_GlobalBoundingBox;
     plSimdMat4f m_GlobalToLocalBoxTransform;
@@ -165,7 +165,7 @@ private:
 
     struct TileIndexAndAge
     {
-      PLASMA_DECLARE_POD_TYPE();
+      PL_DECLARE_POD_TYPE();
 
       plUInt32 m_uiIndex;
       plUInt64 m_uiLastSeenFrame;

@@ -6,9 +6,9 @@
 
 using plScriptComponentManager = plComponentManager<class plScriptComponent, plBlockStorageType::FreeList>;
 
-class PLASMA_CORE_DLL plScriptComponent : public plEventMessageHandlerComponent
+class PL_CORE_DLL plScriptComponent : public plEventMessageHandlerComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plScriptComponent, plEventMessageHandlerComponent, plScriptComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plScriptComponent, plEventMessageHandlerComponent, plScriptComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -28,8 +28,8 @@ public:
   plScriptComponent();
   ~plScriptComponent();
 
-  bool SendEventMessage(plMessage& inout_msg);
-  void PostEventMessage(plMessage& inout_msg, plTime delay);
+  void SetScriptVariable(const plHashedString& sName, const plVariant& value); // [ scriptable ]
+  plVariant GetScriptVariable(const plHashedString& sName) const;              // [ scriptable ]
 
   void SetScriptClass(const plScriptClassResourceHandle& hScript);
   const plScriptClassResourceHandle& GetScriptClass() const { return m_hScriptClass; }
@@ -47,32 +47,23 @@ public:
   void RemoveParameter(const char* szKey);
   bool GetParameter(const char* szKey, plVariant& out_value) const;
 
-  PLASMA_ALWAYS_INLINE plScriptInstance* GetScriptInstance() { return m_pInstance.Borrow(); }
+  PL_ALWAYS_INLINE plScriptInstance* GetScriptInstance() { return m_pInstance.Borrow(); }
 
 private:
   void InstantiateScript(bool bActivate);
   void ClearInstance(bool bDeactivate);
-  void UpdateScheduling();
+  void AddUpdateFunctionToSchedule();
+  void RemoveUpdateFunctionToSchedule();
 
   const plAbstractFunctionProperty* GetScriptFunction(plUInt32 uiFunctionIndex);
   void CallScriptFunction(plUInt32 uiFunctionIndex);
 
   void ReloadScript();
 
-  plEventMessageSender<plMessage>& FindSender(plMessage& inout_msg);
-
-  struct EventSender
-  {
-    const plRTTI* m_pMsgType = nullptr;
-    plEventMessageSender<plMessage> m_Sender;
-  };
-
-  plHybridArray<EventSender, 2> m_EventSenders;
-
   plArrayMap<plHashedString, plVariant> m_Parameters;
 
   plScriptClassResourceHandle m_hScriptClass;
-  plTime m_UpdateInterval = plTime::Zero();
+  plTime m_UpdateInterval = plTime::MakeZero();
 
   plSharedPtr<plScriptRTTI> m_pScriptType;
   plUniquePtr<plScriptInstance> m_pInstance;

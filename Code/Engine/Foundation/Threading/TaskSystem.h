@@ -21,7 +21,7 @@
 ///
 /// Note that it is crucial to call 'FinishFrameTasks' once per frame, otherwise tasks that need to be executed on the
 /// main thread are never executed.
-class PLASMA_FOUNDATION_DLL plTaskSystem
+class PL_FOUNDATION_DLL plTaskSystem
 {
 public:
   /// \name Managing Tasks
@@ -58,11 +58,11 @@ public:
 
   /// \brief This function will try to remove the given task from the work queue, to prevent it from being executed.
   ///
-  /// The function will return PLASMA_SUCCESS, if the task could be removed and thus its execution could be prevented.
-  /// It will also return PLASMA_SUCCESS, if the task was already finished and nothing needed to be done.
+  /// The function will return PL_SUCCESS, if the task could be removed and thus its execution could be prevented.
+  /// It will also return PL_SUCCESS, if the task was already finished and nothing needed to be done.
   /// Tasks that are removed without execution will still be marked as 'finished' and dependent tasks will be scheduled.
   ///
-  /// PLASMA_FAILURE is returned, if the task had already been started and thus could not be prevented from running.
+  /// PL_FAILURE is returned, if the task had already been started and thus could not be prevented from running.
   ///
   /// In case of failure, \a bWaitForIt determines whether 'WaitForTask' is called (with all its consequences),
   /// or whether the function will return immediately.
@@ -147,8 +147,8 @@ public:
 
   /// \brief Cancels all the tasks in the given group.
   ///
-  /// PLASMA_SUCCESS is returned, if all tasks were already finished or could be removed without waiting for any of them.
-  /// PLASMA_FAILURE is returned, if at least one task was being processed by another thread and could not be removed without waiting.
+  /// PL_SUCCESS is returned, if all tasks were already finished or could be removed without waiting for any of them.
+  /// PL_FAILURE is returned, if at least one task was being processed by another thread and could not be removed without waiting.
   /// If bWaitForIt is false, the function cancels all tasks, but returns without blocking, even if not all tasks have been finished.
   /// If bWaitForIt is true, the function returns only after it is guaranteed that all tasks are properly terminated.
   static plResult CancelGroup(plTaskGroupID group, plOnTaskRunning::Enum onTaskRunning = plOnTaskRunning::WaitTillFinished); // [tested]
@@ -298,10 +298,10 @@ public:
   /// \brief Sets the target frame time that is supposed to not be exceeded.
   ///
   /// \see FinishFrameTasks() for more details.
-  static void SetTargetFrameTime(plTime targetFrameTime = plTime::Seconds(1.0 / 40.0) /* 40 FPS -> 25 ms */);
+  static void SetTargetFrameTime(plTime targetFrameTime = plTime::MakeFromSeconds(1.0 / 40.0) /* 40 FPS -> 25 ms */);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, TaskSystem);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, TaskSystem);
 
   static void Startup();
   static void Shutdown();

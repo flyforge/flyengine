@@ -5,7 +5,7 @@
 
 class plExpressionByteCode;
 
-class PLASMA_FOUNDATION_DLL plExpressionCompiler
+class PL_FOUNDATION_DLL plExpressionCompiler
 {
 public:
   plExpressionCompiler();
@@ -19,7 +19,7 @@ private:
   plResult UpdateRegisterLifetime(const plExpressionAST& ast);
   plResult AssignRegisters();
   plResult GenerateByteCode(const plExpressionAST& ast, plExpressionByteCode& out_byteCode);
-  plResult GenerateConstantByteCode(const plExpressionAST::Constant* pConstant, plExpressionByteCode& out_byteCode);
+  plResult GenerateConstantByteCode(const plExpressionAST::Constant* pConstant);
 
   using TransformFunc = plDelegate<plExpressionAST::Node*(plExpressionAST::Node*)>;
   plResult TransformASTPreOrder(plExpressionAST& ast, TransformFunc func);
@@ -38,9 +38,11 @@ private:
   plHashTable<plHashedString, plUInt32> m_OutputToIndex;
   plHashTable<plHashedString, plUInt32> m_FunctionToIndex;
 
+  plDynamicArray<plUInt32> m_ByteCode;
+
   struct LiveInterval
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiStart;
     plUInt32 m_uiEnd;

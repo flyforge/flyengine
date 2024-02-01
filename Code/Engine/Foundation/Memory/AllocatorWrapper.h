@@ -2,33 +2,33 @@
 
 struct plNullAllocatorWrapper
 {
-  PLASMA_FORCE_INLINE static plAllocatorBase* GetAllocator()
+  PL_FORCE_INLINE static plAllocator* GetAllocator()
   {
-    PLASMA_REPORT_FAILURE("This method should never be called");
+    PL_REPORT_FAILURE("This method should never be called");
     return nullptr;
   }
 };
 
 struct plDefaultAllocatorWrapper
 {
-  PLASMA_ALWAYS_INLINE static plAllocatorBase* GetAllocator() { return plFoundation::GetDefaultAllocator(); }
+  PL_ALWAYS_INLINE static plAllocator* GetAllocator() { return plFoundation::GetDefaultAllocator(); }
 };
 
-struct plStaticAllocatorWrapper
+struct plStaticsAllocatorWrapper
 {
-  PLASMA_ALWAYS_INLINE static plAllocatorBase* GetAllocator() { return plFoundation::GetStaticAllocator(); }
+  PL_ALWAYS_INLINE static plAllocator* GetAllocator() { return plFoundation::GetStaticsAllocator(); }
 };
 
 struct plAlignedAllocatorWrapper
 {
-  PLASMA_ALWAYS_INLINE static plAllocatorBase* GetAllocator() { return plFoundation::GetAlignedAllocator(); }
+  PL_ALWAYS_INLINE static plAllocator* GetAllocator() { return plFoundation::GetAlignedAllocator(); }
 };
 
-struct PLASMA_FOUNDATION_DLL plLocalAllocatorWrapper
+struct PL_FOUNDATION_DLL plLocalAllocatorWrapper
 {
-  plLocalAllocatorWrapper(plAllocatorBase* pAllocator);
+  plLocalAllocatorWrapper(plAllocator* pAllocator);
 
   void Reset();
 
-  static plAllocatorBase* GetAllocator();
+  static plAllocator* GetAllocator();
 };

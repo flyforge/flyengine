@@ -7,18 +7,18 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypePointFactory, 1, plRTTIDefaultAllocator<plParticleTypePointFactory>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypePointFactory, 1, plRTTIDefaultAllocator<plParticleTypePointFactory>)
 {
-  //PLASMA_BEGIN_ATTRIBUTES
+  //PL_BEGIN_ATTRIBUTES
   //{
   //  new plHiddenAttribute()
   //}
-  //PLASMA_END_ATTRIBUTES;
+  //PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypePoint, 1, plRTTIDefaultAllocator<plParticleTypePoint>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypePoint, 1, plRTTIDefaultAllocator<plParticleTypePoint>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleTypePointFactory::GetTypeType() const
@@ -41,18 +41,18 @@ enum class TypePointVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleTypePointFactory::Save(plStreamWriter& stream) const
+void plParticleTypePointFactory::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)TypePointVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 }
 
-void plParticleTypePointFactory::Load(plStreamReader& stream)
+void plParticleTypePointFactory::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)TypePointVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)TypePointVersion::Version_Current, "Invalid version {0}", uiVersion);
 }
 
 void plParticleTypePoint::CreateRequiredStreams()
@@ -61,9 +61,9 @@ void plParticleTypePoint::CreateRequiredStreams()
   CreateStream("Color", plProcessingStream::DataType::Half4, &m_pStreamColor, false);
 }
 
-void plParticleTypePoint::ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleTypePoint::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
-  PLASMA_PROFILE_SCOPE("PFX: Point");
+  PL_PROFILE_SCOPE("PFX: Point");
 
   const plUInt32 numParticles = (plUInt32)GetOwnerSystem()->GetNumActiveParticles();
 
@@ -79,8 +79,8 @@ void plParticleTypePoint::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
     const plColorLinear16f* pColor = m_pStreamColor->GetData<plColorLinear16f>();
 
     // this will automatically be deallocated at the end of the frame
-    m_BaseParticleData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBaseParticleShaderData, numParticles);
-    m_BillboardParticleData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBillboardQuadParticleShaderData, numParticles);
+    m_BaseParticleData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBaseParticleShaderData, numParticles);
+    m_BillboardParticleData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBillboardQuadParticleShaderData, numParticles);
 
     for (plUInt32 p = 0; p < numParticles; ++p)
     {
@@ -97,9 +97,9 @@ void plParticleTypePoint::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
   pRenderData->m_BaseParticleData = m_BaseParticleData;
   pRenderData->m_BillboardParticleData = m_BillboardParticleData;
 
-  msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::LitTransparent, plRenderData::Caching::Never);
+  ref_msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::LitTransparent, plRenderData::Caching::Never);
 }
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Point_ParticleTypePoint);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Point_ParticleTypePoint);

@@ -4,7 +4,7 @@
 #include <Foundation/Communication/Event.h>
 #include <Foundation/Math/Declarations.h>
 
-struct PlasmaEditorAppEvent;
+struct plEditorAppEvent;
 class plPreferences;
 
 struct plSnapProviderEvent
@@ -19,7 +19,7 @@ struct plSnapProviderEvent
   Type m_Type;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plSnapProvider
+class PL_EDITORFRAMEWORK_DLL plSnapProvider
 {
 public:
   static void Startup();
@@ -37,19 +37,19 @@ public:
   static void SnapTranslation(plVec3& value);
 
   /// \brief Inverts the rotation, applies that to the translation, snaps it and then transforms it back into the original space
-  static void SnapTranslationInLocalSpace(const plQuat& rotation, plVec3& translation);
+  static void SnapTranslationInLocalSpace(const plQuat& qRotation, plVec3& ref_vTranslation);
 
-  static void SnapRotation(plAngle& rotation);
+  static void SnapRotation(plAngle& ref_rotation);
 
-  static void SnapScale(float& scale);
-  static void SnapScale(plVec3& scale);
+  static void SnapScale(float& ref_fScale);
+  static void SnapScale(plVec3& ref_vScale);
 
-  static plVec3 GetScaleSnapped(const plVec3& scale);
+  static plVec3 GetScaleSnapped(const plVec3& vScale);
 
   static plEvent<const plSnapProviderEvent&> s_Events;
 
 private:
-  static void EditorEventHandler(const PlasmaEditorAppEvent& e);
+  static void EditorEventHandler(const plEditorAppEvent& e);
   static void PreferenceChangedEventHandler(plPreferences* pPreferenceBase);
 
   static plAngle s_RotationSnapValue;

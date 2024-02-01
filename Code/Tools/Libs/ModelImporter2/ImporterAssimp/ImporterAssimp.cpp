@@ -71,7 +71,7 @@ namespace plModelImporter2
     if (m_pScene == nullptr)
     {
       plLog::Error("Assimp failed to import '{}'", m_Options.m_sSourceFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (m_pScene->mMetaData != nullptr)
@@ -83,8 +83,7 @@ namespace plModelImporter2
         // Only FBX files have this unit scale factor and the default unit for FBX is cm. We want meters.
         fUnitScale /= 100.0f;
 
-        plMat3 s;
-        s.SetScalingMatrix(plVec3(fUnitScale));
+        plMat3 s = plMat3::MakeScaling(plVec3(fUnitScale));
 
         m_Options.m_RootTransform = s * m_Options.m_RootTransform;
       }
@@ -102,15 +101,15 @@ namespace plModelImporter2
       node->mTransformation = transform * node->mTransformation;
     }
 
-    PLASMA_SUCCEED_OR_RETURN(ImportMaterials());
+    PL_SUCCEED_OR_RETURN(ImportMaterials());
 
-    PLASMA_SUCCEED_OR_RETURN(TraverseAiScene());
+    PL_SUCCEED_OR_RETURN(TraverseAiScene());
 
-    PLASMA_SUCCEED_OR_RETURN(PrepareOutputMesh());
+    PL_SUCCEED_OR_RETURN(PrepareOutputMesh());
 
-    PLASMA_SUCCEED_OR_RETURN(ImportAnimations());
+    PL_SUCCEED_OR_RETURN(ImportAnimations());
 
-    PLASMA_SUCCEED_OR_RETURN(ImportBoneColliders(nullptr));
+    PL_SUCCEED_OR_RETURN(ImportBoneColliders(nullptr));
 
     if (m_Options.m_pMeshOutput)
     {
@@ -135,17 +134,20 @@ namespace plModelImporter2
 
     if (m_pScene->mNumTextures > 0 && m_pScene->mTextures)
     {
+      plStringBuilder refName;
+
       for (plUInt32 i = 0; i < m_pScene->mNumTextures; ++i)
       {
         const auto& st = *m_pScene->mTextures[i];
-        plStringBuilder fileName = st.mFilename.C_Str();
 
-        if (fileName.IsEmpty())
+        refName.SetFormat("*{}", i);
+
+        auto& tex = m_OutputTextures[refName];
+        tex.m_sFilename = st.mFilename.C_Str();
+        if (tex.m_sFilename.IsEmpty())
         {
-          fileName.Format("*{}", i);
+          tex.m_sFilename = refName;
         }
-
-        auto& tex = m_OutputTextures[fileName];
 
         if (st.mHeight == 0 && st.mWidth > 0)
         {
@@ -155,28 +157,28 @@ namespace plModelImporter2
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult ImporterAssimp::TraverseAiScene()
   {
     if (m_Options.m_pSkeletonOutput != nullptr)
     {
-      m_Options.m_pSkeletonOutput->m_Children.PushBack(PLASMA_DEFAULT_NEW(plEditableSkeletonJoint));
-      PLASMA_SUCCEED_OR_RETURN(TraverseAiNode(m_pScene->mRootNode, plMat4::IdentityMatrix(), m_Options.m_pSkeletonOutput->m_Children.PeekBack()));
+      m_Options.m_pSkeletonOutput->m_Children.PushBack(PL_DEFAULT_NEW(plEditableSkeletonJoint));
+      PL_SUCCEED_OR_RETURN(TraverseAiNode(m_pScene->mRootNode, plMat4::MakeIdentity(), m_Options.m_pSkeletonOutput->m_Children.PeekBack()));
     }
     else
     {
-      PLASMA_SUCCEED_OR_RETURN(TraverseAiNode(m_pScene->mRootNode, plMat4::IdentityMatrix(), nullptr));
+      PL_SUCCEED_OR_RETURN(TraverseAiNode(m_pScene->mRootNode, plMat4::MakeIdentity(), nullptr));
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult ImporterAssimp::TraverseAiNode(aiNode* pNode, const plMat4& parentTransform, plEditableSkeletonJoint* pCurJoint)
   {
     plMat4 invTrans = parentTransform;
-    PLASMA_ASSERT_DEBUG(invTrans.Invert(0.0f).Succeeded(), "inversion failed");
+    PL_ASSERT_DEBUG(invTrans.Invert(0.0f).Succeeded(), "inversion failed");
 
     const plMat4 localTransform = ConvertAssimpType(pNode->mTransformation);
     const plMat4 globalTransform = parentTransform * localTransform;
@@ -184,14 +186,14 @@ namespace plModelImporter2
     if (pCurJoint)
     {
       pCurJoint->m_sName.Assign(pNode->mName.C_Str());
-      pCurJoint->m_LocalTransform.SetFromMat4(localTransform);
+      pCurJoint->m_LocalTransform = plTransform::MakeFromMat4(localTransform);
     }
 
     if (pNode->mNumMeshes > 0)
     {
       for (plUInt32 meshIdx = 0; meshIdx < pNode->mNumMeshes; ++meshIdx)
       {
-        PLASMA_SUCCEED_OR_RETURN(ProcessAiMesh(m_pScene->mMeshes[pNode->mMeshes[meshIdx]], globalTransform));
+        PL_SUCCEED_OR_RETURN(ProcessAiMesh(m_pScene->mMeshes[pNode->mMeshes[meshIdx]], globalTransform));
       }
     }
 
@@ -199,39 +201,39 @@ namespace plModelImporter2
     {
       if (pCurJoint)
       {
-        pCurJoint->m_Children.PushBack(PLASMA_DEFAULT_NEW(plEditableSkeletonJoint));
+        pCurJoint->m_Children.PushBack(PL_DEFAULT_NEW(plEditableSkeletonJoint));
 
-        PLASMA_SUCCEED_OR_RETURN(TraverseAiNode(pNode->mChildren[childIdx], globalTransform, pCurJoint->m_Children.PeekBack()));
+        PL_SUCCEED_OR_RETURN(TraverseAiNode(pNode->mChildren[childIdx], globalTransform, pCurJoint->m_Children.PeekBack()));
       }
       else
       {
-        PLASMA_SUCCEED_OR_RETURN(TraverseAiNode(pNode->mChildren[childIdx], globalTransform, nullptr));
+        PL_SUCCEED_OR_RETURN(TraverseAiNode(pNode->mChildren[childIdx], globalTransform, nullptr));
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 
   plResult ImporterAssimp::ImportBoneColliders(plEditableSkeletonJoint* pJoint)
   {
     if (m_Options.m_pSkeletonOutput == nullptr)
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     if (pJoint == nullptr)
     {
       for (plEditableSkeletonJoint* pJoint : m_Options.m_pSkeletonOutput->m_Children)
       {
-        PLASMA_SUCCEED_OR_RETURN(ImportBoneColliders(pJoint));
+        PL_SUCCEED_OR_RETURN(ImportBoneColliders(pJoint));
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else
     {
       for (plEditableSkeletonJoint* pChild : pJoint->m_Children)
       {
-        PLASMA_SUCCEED_OR_RETURN(ImportBoneColliders(pChild));
+        PL_SUCCEED_OR_RETURN(ImportBoneColliders(pChild));
       }
     }
 
@@ -253,8 +255,8 @@ namespace plModelImporter2
           {
             // mesh is named "UCX_BoneName_xyz" or "UCX_BoneName" -> use mesh as convex collider for this bone
 
-            PLASMA_ASSERT_DEV(pMesh->HasPositions(), "TODO: early out");
-            PLASMA_ASSERT_DEV(pMesh->HasFaces(), "TODO: early out");
+            PL_ASSERT_DEV(pMesh->HasPositions(), "TODO: early out");
+            PL_ASSERT_DEV(pMesh->HasFaces(), "TODO: early out");
 
             plEditableSkeletonBoneCollider& col = pJoint->m_BoneColliders.ExpandAndGetRef();
             col.m_sIdentifier = pMesh->mName.C_Str();
@@ -275,13 +277,13 @@ namespace plModelImporter2
           }
           else
           {
-            //plLog::Error("TODO: error message");
+            // plLog::Error("TODO: error message");
           }
         }
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 } // namespace plModelImporter2

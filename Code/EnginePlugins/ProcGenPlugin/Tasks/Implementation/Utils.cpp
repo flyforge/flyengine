@@ -60,7 +60,7 @@ namespace
     plSimdMat4f helperMat;
     while (pPosX < pPosXEnd)
     {
-      helperMat.SetRows(pPosX->f, pPosY->f, pPosZ->f, plSimdVec4f::ZeroVector());
+      helperMat.SetRows(pPosX->f, pPosY->f, pPosZ->f, plSimdVec4f::MakeZero());
 
       const float x = pVolumeCollection->EvaluateAtGlobalPosition(helperMat.m_col0, pInitialValues->f.x(), imgMode, refColor);
       const float y = pVolumeCollection->EvaluateAtGlobalPosition(helperMat.m_col1, pInitialValues->f.y(), imgMode, refColor);
@@ -84,12 +84,12 @@ namespace
       {
         if (pValue->GetType() == plVariantType::VariantArray)
         {
-          return PLASMA_SUCCESS;
+          return PL_SUCCESS;
         }
       }
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -121,12 +121,12 @@ namespace
       {
         if (pValue->GetType() == plVariantType::Int32)
         {
-          return PLASMA_SUCCESS;
+          return PL_SUCCESS;
         }
       }
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 } // namespace
 
@@ -144,14 +144,14 @@ plExpressionFunction plProcGenExpressionFunctions::s_GetInstanceSeedFunc = {
 
 //////////////////////////////////////////////////////////////////////////
 
-void plProcGenInternal::ExtractVolumeCollections(const plWorld& world, const plBoundingBox& box, const Output& output, plDeque<plVolumeCollection>& volumeCollections, plExpression::GlobalData& globalData)
+void plProcGenInternal::ExtractVolumeCollections(const plWorld& world, const plBoundingBox& box, const Output& output, plDeque<plVolumeCollection>& ref_volumeCollections, plExpression::GlobalData& ref_globalData)
 {
   auto& volumeTagSetIndices = output.m_VolumeTagSetIndices;
   if (volumeTagSetIndices.IsEmpty())
     return;
 
   plVariantArray volumes;
-  if (plVariant* volumesVar = globalData.GetValue(s_sVolumes))
+  if (plVariant* volumesVar = ref_globalData.GetValue(s_sVolumes))
   {
     volumes = volumesVar->Get<plVariantArray>();
   }
@@ -166,17 +166,17 @@ void plProcGenInternal::ExtractVolumeCollections(const plWorld& world, const plB
     auto pGraphSharedData = static_cast<const plProcGenInternal::GraphSharedData*>(output.m_pGraphSharedData.Borrow());
     auto& includeTags = pGraphSharedData->GetTagSet(tagSetIndex);
 
-    auto& volumeCollection = volumeCollections.ExpandAndGetRef();
+    auto& volumeCollection = ref_volumeCollections.ExpandAndGetRef();
     plVolumeCollection::ExtractVolumesInBox(world, box, s_ProcVolumeCategory, includeTags, volumeCollection, plGetStaticRTTI<plProcVolumeComponent>());
 
     volumes.EnsureCount(tagSetIndex + 1);
     volumes[tagSetIndex] = plVariant(&volumeCollection);
   }
 
-  globalData.Insert(s_sVolumes, volumes);
+  ref_globalData.Insert(s_sVolumes, volumes);
 }
 
-void plProcGenInternal::SetInstanceSeed(plUInt32 uiSeed, plExpression::GlobalData& globalData)
+void plProcGenInternal::SetInstanceSeed(plUInt32 uiSeed, plExpression::GlobalData& ref_globalData)
 {
-  globalData.Insert(s_sInstanceSeed, (int)uiSeed);
+  ref_globalData.Insert(s_sInstanceSeed, (int)uiSeed);
 }

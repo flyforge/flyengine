@@ -16,9 +16,9 @@ struct plDynamicMeshBufferResourceDescriptor
   bool m_bColorStream = false;
 };
 
-struct PLASMA_RENDERERCORE_DLL plDynamicMeshVertex
+struct PL_RENDERERCORE_DLL plDynamicMeshVertex
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plVec3 m_vPosition;
   plVec2 m_vTexCoord;
@@ -26,7 +26,7 @@ struct PLASMA_RENDERERCORE_DLL plDynamicMeshVertex
   plVec4 m_vEncodedTangent;
   //plColorLinearUB m_Color;
 
-  PLASMA_ALWAYS_INLINE void EncodeNormal(const plVec3& vNormal)
+  PL_ALWAYS_INLINE void EncodeNormal(const plVec3& vNormal)
   {
     // store in [0; 1] range
     m_vEncodedNormal = vNormal * 0.5f + plVec3(0.5f);
@@ -35,7 +35,7 @@ struct PLASMA_RENDERERCORE_DLL plDynamicMeshVertex
     //plMeshBufferUtils::EncodeNormal(normal, plByteArrayPtr(reinterpret_cast<plUInt8*>(&m_vEncodedNormal), sizeof(plVec3)), plMeshNormalPrecision::_32Bit).IgnoreResult();
   }
 
-  PLASMA_ALWAYS_INLINE void EncodeTangent(const plVec3& vTangent, float fBitangentSign)
+  PL_ALWAYS_INLINE void EncodeTangent(const plVec3& vTangent, float fBitangentSign)
   {
     // store in [0; 1] range
     m_vEncodedTangent.x = vTangent.x * 0.5f + 0.5f;
@@ -48,20 +48,20 @@ struct PLASMA_RENDERERCORE_DLL plDynamicMeshVertex
   }
 };
 
-class PLASMA_RENDERERCORE_DLL plDynamicMeshBufferResource : public plResource
+class PL_RENDERERCORE_DLL plDynamicMeshBufferResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicMeshBufferResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plDynamicMeshBufferResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshBufferResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicMeshBufferResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plDynamicMeshBufferResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshBufferResourceDescriptor);
 
 public:
   plDynamicMeshBufferResource();
   ~plDynamicMeshBufferResource();
 
-  PLASMA_ALWAYS_INLINE const plDynamicMeshBufferResourceDescriptor& GetDescriptor() const { return m_Descriptor; }
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetVertexBuffer() const { return m_hVertexBuffer; }
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetIndexBuffer() const { return m_hIndexBuffer; }
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetColorBuffer() const { return m_hColorBuffer; }
+  PL_ALWAYS_INLINE const plDynamicMeshBufferResourceDescriptor& GetDescriptor() const { return m_Descriptor; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetVertexBuffer() const { return m_hVertexBuffer; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetIndexBuffer() const { return m_hIndexBuffer; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetColorBuffer() const { return m_hColorBuffer; }
 
   /// \brief Grants write access to the vertex data, and flags the data as 'dirty'.
   plArrayPtr<plDynamicMeshVertex> AccessVertexData()

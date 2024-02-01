@@ -30,9 +30,9 @@ plQtGameObjectAdapter::~plQtGameObjectAdapter()
   m_pObjectMetaData->m_DataModifiedEvent.RemoveEventHandler(m_DocumentObjectMetaDataSubscription);
 }
 
-QVariant plQtGameObjectAdapter::data(const plDocumentObject* pObject, int row, int column, int role) const
+QVariant plQtGameObjectAdapter::data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const
 {
-  switch (role)
+  switch (iRole)
   {
     case Qt::DisplayRole:
     {
@@ -88,7 +88,7 @@ QVariant plQtGameObjectAdapter::data(const plDocumentObject* pObject, int row, i
         auto pInfo = plAssetCurator::GetSingleton()->GetSubAsset(prefab);
 
         if (pInfo)
-          return QString::fromUtf8(pInfo->m_pAssetInfo->m_sDataDirParentRelativePath, pInfo->m_pAssetInfo->m_sDataDirParentRelativePath.GetElementCount());
+          return plMakeQString(pInfo->m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
 
         return QStringLiteral("Prefab asset could not be found");
       }
@@ -132,19 +132,18 @@ QVariant plQtGameObjectAdapter::data(const plDocumentObject* pObject, int row, i
 
       if (sName.IsEmpty())
       {
-        // uses an auto generated name
         return QVariant();
       }
     }
     break;
   }
 
-  return plQtNameableAdapter::data(pObject, row, column, role);
+  return plQtNameableAdapter::data(pObject, iRow, iColumn, iRole);
 }
 
-bool plQtGameObjectAdapter::setData(const plDocumentObject* pObject, int row, int column, const QVariant& value, int role) const
+bool plQtGameObjectAdapter::setData(const plDocumentObject* pObject, int iRow, int iColumn, const QVariant& value, int iRole) const
 {
-  if (role == Qt::EditRole)
+  if (iRole == Qt::EditRole)
   {
     auto pMetaWrite = m_pGameObjectMetaData->BeginModifyMetaData(pObject->GetGuid());
 
@@ -160,7 +159,7 @@ bool plQtGameObjectAdapter::setData(const plDocumentObject* pObject, int row, in
 
     sNewValue.Trim("[]{}() \t\r"); // forbid these
 
-    return plQtNameableAdapter::setData(pObject, row, column, QString::fromUtf8(sNewValue.GetData()), role);
+    return plQtNameableAdapter::setData(pObject, iRow, iColumn, QString::fromUtf8(sNewValue.GetData()), iRole);
   }
 
   return false;
@@ -217,4 +216,4 @@ plQtGameObjectModel::plQtGameObjectModel(const plDocumentObjectManager* pObjectM
 {
 }
 
-plQtGameObjectModel::~plQtGameObjectModel() {}
+plQtGameObjectModel::~plQtGameObjectModel() = default;

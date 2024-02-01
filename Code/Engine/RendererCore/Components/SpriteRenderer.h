@@ -3,15 +3,15 @@
 #include <Core/ResourceManager/ResourceHandle.h>
 #include <RendererCore/Pipeline/Renderer.h>
 
-struct SpriteData;
+struct plPerSpriteData;
 class plRenderDataBatch;
 using plShaderResourceHandle = plTypedResourceHandle<class plShaderResource>;
 
 /// \brief Implements rendering of sprites
-class PLASMA_RENDERERCORE_DLL plSpriteRenderer : public plRenderer
+class PL_RENDERERCORE_DLL plSpriteRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpriteRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSpriteRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plSpriteRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSpriteRenderer);
 
 public:
   plSpriteRenderer();
@@ -24,10 +24,10 @@ public:
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 
 protected:
-  plGALBufferHandle CreateSpriteDataBuffer() const;
+  plGALBufferHandle CreateSpriteDataBuffer(plUInt32 uiBufferSize) const;
   void DeleteSpriteDataBuffer(plGALBufferHandle hBuffer) const;
-  virtual void FillSpriteData(const plRenderDataBatch& batch, plUInt32 uiStartIndex, plUInt32 uiCount) const;
+  virtual void FillSpriteData(const plRenderDataBatch& batch) const;
 
   plShaderResourceHandle m_hShader;
-  mutable plDynamicArray<SpriteData, plAlignedAllocatorWrapper> m_SpriteData;
+  mutable plDynamicArray<plPerSpriteData, plAlignedAllocatorWrapper> m_SpriteData;
 };

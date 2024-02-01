@@ -23,7 +23,7 @@ namespace ozz::animation
 /// \brief Describes a single joint.
 /// The transforms of the joints are in their local space and thus need to be correctly multiplied with their parent transforms to get the
 /// final transform.
-class PLASMA_RENDERERCORE_DLL plSkeletonJoint
+class PL_RENDERERCORE_DLL plSkeletonJoint
 {
 public:
   const plTransform& GetRestPoseLocalTransform() const { return m_RestPoseLocal; }
@@ -62,7 +62,7 @@ private:
   plUInt8 m_uiCollisionLayer = 0;
 
   plEnum<plSkeletonJointType> m_JointType;
-  plQuat m_qLocalJointOrientation = plQuat::IdentityQuaternion();
+  plQuat m_qLocalJointOrientation = plQuat::MakeIdentity();
   plAngle m_HalfSwingLimitY;
   plAngle m_HalfSwingLimitZ;
   plAngle m_TwistLimitHalfAngle;
@@ -71,9 +71,9 @@ private:
 };
 
 /// \brief The skeleton class encapsulates the information about the joint structure for a model.
-class PLASMA_RENDERERCORE_DLL plSkeleton
+class PL_RENDERERCORE_DLL plSkeleton
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSkeleton);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSkeleton);
 
 public:
   plSkeleton();

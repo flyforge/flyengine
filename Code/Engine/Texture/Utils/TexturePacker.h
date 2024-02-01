@@ -4,12 +4,12 @@
 #include <Foundation/Math/Vec2.h>
 #include <Texture/TextureDLL.h>
 
-class PLASMA_TEXTURE_DLL plTexturePacker
+class PL_TEXTURE_DLL plTexturePacker
 {
 public:
   struct Texture
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec2U32 m_Size;
     plVec2U32 m_Position;

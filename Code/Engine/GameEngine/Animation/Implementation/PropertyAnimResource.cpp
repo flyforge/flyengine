@@ -1,24 +1,24 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Curves/ColorGradientResource.h>
 #include <Core/Curves/Curve1DResource.h>
 #include <GameEngine/Animation/PropertyAnimResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimResource, 1, plRTTIDefaultAllocator<plPropertyAnimResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimResource, 1, plRTTIDefaultAllocator<plPropertyAnimResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plPropertyAnimTarget, 1)
-PLASMA_ENUM_CONSTANTS(plPropertyAnimTarget::Number, plPropertyAnimTarget::VectorX, plPropertyAnimTarget::VectorY, plPropertyAnimTarget::VectorZ, plPropertyAnimTarget::VectorW)
-PLASMA_ENUM_CONSTANTS(plPropertyAnimTarget::RotationX, plPropertyAnimTarget::RotationY, plPropertyAnimTarget::RotationZ, plPropertyAnimTarget::Color)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plPropertyAnimTarget, 1)
+PL_ENUM_CONSTANTS(plPropertyAnimTarget::Number, plPropertyAnimTarget::VectorX, plPropertyAnimTarget::VectorY, plPropertyAnimTarget::VectorZ, plPropertyAnimTarget::VectorW)
+PL_ENUM_CONSTANTS(plPropertyAnimTarget::RotationX, plPropertyAnimTarget::RotationY, plPropertyAnimTarget::RotationZ, plPropertyAnimTarget::Color)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plPropertyAnimMode, 1)
-PLASMA_ENUM_CONSTANTS(plPropertyAnimMode::Once, plPropertyAnimMode::Loop, plPropertyAnimMode::BackAndForth)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plPropertyAnimMode, 1)
+PL_ENUM_CONSTANTS(plPropertyAnimMode::Once, plPropertyAnimMode::Loop, plPropertyAnimMode::BackAndForth)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plPropertyAnimResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plPropertyAnimResource);
 // clang-format on
 
 plPropertyAnimResource::plPropertyAnimResource()
@@ -26,9 +26,9 @@ plPropertyAnimResource::plPropertyAnimResource()
 {
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plPropertyAnimResource, plPropertyAnimResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plPropertyAnimResource, plPropertyAnimResourceDescriptor)
 {
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plPropertyAnimResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plPropertyAnimResourceDescriptor);
   *m_pDescriptor = descriptor;
 
   plResourceLoadDesc res;
@@ -53,7 +53,7 @@ plResourceLoadDesc plPropertyAnimResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plPropertyAnimResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plPropertyAnimResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plPropertyAnimResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -75,7 +75,7 @@ plResourceLoadDesc plPropertyAnimResource::UpdateContent(plStreamReader* Stream)
   plAssetFileHeader AssetHash;
   AssetHash.Read(*Stream).IgnoreResult();
 
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plPropertyAnimResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plPropertyAnimResourceDescriptor);
   m_pDescriptor->Load(*Stream);
 
   res.m_State = plResourceState::Loaded;
@@ -100,7 +100,7 @@ void plPropertyAnimResourceDescriptor::Save(plStreamWriter& inout_stream) const
   const plUInt16 uiNumFloatAnimations = static_cast<plUInt16>(m_FloatAnimations.GetCount());
   const plUInt16 uiNumColorAnimations = static_cast<plUInt16>(m_ColorAnimations.GetCount());
 
-  PLASMA_ASSERT_DEV(m_AnimationDuration.GetSeconds() > 0, "Animation duration must be positive");
+  PL_ASSERT_DEV(m_AnimationDuration.GetSeconds() > 0, "Animation duration must be positive");
 
   inout_stream << uiVersion;
   inout_stream << uiIdentifier;
@@ -150,8 +150,8 @@ void plPropertyAnimResourceDescriptor::Load(plStreamReader& inout_stream)
   inout_stream >> uiVersion;
   inout_stream >> uiIdentifier;
 
-  PLASMA_ASSERT_DEV(uiIdentifier == 0x0A, "File does not contain a valid plPropertyAnimResourceDescriptor");
-  PLASMA_ASSERT_DEV(uiVersion == 4 || uiVersion == 5 || uiVersion == 6, "Invalid file version {0}", uiVersion);
+  PL_ASSERT_DEV(uiIdentifier == 0x0A, "File does not contain a valid plPropertyAnimResourceDescriptor");
+  PL_ASSERT_DEV(uiVersion == 4 || uiVersion == 5 || uiVersion == 6, "Invalid file version {0}", uiVersion);
 
   inout_stream >> m_AnimationDuration;
 
@@ -205,4 +205,4 @@ void plPropertyAnimResourceDescriptor::Load(plStreamReader& inout_stream)
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_PropertyAnimResource);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_PropertyAnimResource);

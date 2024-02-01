@@ -49,7 +49,7 @@ private:
   void VisualShaderEventHandler(const plMaterialVisualShaderEvent& e);
   void SetupDirectoryWatcher(bool needIt);
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget = nullptr;
   plQtVisualShaderScene* m_pScene = nullptr;
   plQtNodeView* m_pNodeView = nullptr;
@@ -64,7 +64,7 @@ private:
 
 class plMaterialModelAction : public plEnumerationMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialModelAction, plEnumerationMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plMaterialModelAction, plEnumerationMenuAction);
 
 public:
   plMaterialModelAction(const plActionContext& context, const char* szName, const char* szIconPath);
@@ -78,7 +78,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hMaterialModelAction;
 };

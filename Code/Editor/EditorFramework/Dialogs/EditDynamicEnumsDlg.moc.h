@@ -8,13 +8,13 @@
 
 class plDynamicStringEnum;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtEditDynamicEnumsDlg : public QDialog, public Ui_plQtEditDynamicEnumsDlg
+class PL_EDITORFRAMEWORK_DLL plQtEditDynamicEnumsDlg : public QDialog, public Ui_plQtEditDynamicEnumsDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtEditDynamicEnumsDlg(plDynamicStringEnum* pEnum, QWidget* parent);
+  plQtEditDynamicEnumsDlg(plDynamicStringEnum* pEnum, QWidget* pParent);
 
   plInt32 GetSelectedItem() const { return m_iSelectedItem; }
 

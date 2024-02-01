@@ -8,7 +8,7 @@
 template <typename Derived>
 class plSerializationContext
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSerializationContext);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSerializationContext);
 
 public:
   plSerializationContext() { Derived::SetContext(this); }
@@ -22,7 +22,7 @@ public:
 };
 
 /// \brief Declares the necessary functions to access a serialization context
-#define PLASMA_DECLARE_SERIALIZATION_CONTEXT(type) \
+#define PL_DECLARE_SERIALIZATION_CONTEXT(type) \
 public:                                        \
   static type* GetContext();                   \
                                                \
@@ -32,11 +32,11 @@ protected:                                     \
 
 
 /// \brief Implements the necessary functions to access a serialization context through GetContext.
-#define PLASMA_IMPLEMENT_SERIALIZATION_CONTEXT(type)                                                                                     \
-  thread_local type* PLASMA_CONCAT(s_pActiveContext, type);                                                                              \
-  type* type::GetContext() { return PLASMA_CONCAT(s_pActiveContext, type); }                                                             \
+#define PL_IMPLEMENT_SERIALIZATION_CONTEXT(type)                                                                                     \
+  thread_local type* PL_CONCAT(s_pActiveContext, type);                                                                              \
+  type* type::GetContext() { return PL_CONCAT(s_pActiveContext, type); }                                                             \
   void type::SetContext(plSerializationContext* pContext)                                                                            \
   {                                                                                                                                  \
-    PLASMA_ASSERT_DEV(pContext == nullptr || PLASMA_CONCAT(s_pActiveContext, type) == nullptr, "Only one context can be active at a time."); \
-    PLASMA_CONCAT(s_pActiveContext, type) = static_cast<type*>(pContext);                                                                \
+    PL_ASSERT_DEV(pContext == nullptr || PL_CONCAT(s_pActiveContext, type) == nullptr, "Only one context can be active at a time."); \
+    PL_CONCAT(s_pActiveContext, type) = static_cast<type*>(pContext);                                                                \
   }

@@ -5,7 +5,7 @@
 #include <ParticlePlugin/Resources/ParticleEffectResource.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Particle, ParticlePlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Particle, ParticlePlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -34,8 +34,8 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Particle, ParticlePlugin)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Startup);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Startup);

@@ -3,9 +3,9 @@
 #include <Foundation/Types/VarianceTypes.h>
 #include <ParticlePlugin/Initializer/ParticleInitializer.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory_VelocityCone final : public plParticleInitializerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory_VelocityCone final : public plParticleInitializerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_VelocityCone, plParticleInitializerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_VelocityCone, plParticleInitializerFactory);
 
 public:
   plParticleInitializerFactory_VelocityCone();
@@ -13,10 +13,10 @@ public:
   virtual const plRTTI* GetInitializerType() const override;
   virtual void CopyInitializerProperties(plParticleInitializer* pInitializer, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
 public:
   plAngle m_Angle;
@@ -24,9 +24,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer_VelocityCone final : public plParticleInitializer
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer_VelocityCone final : public plParticleInitializer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer_VelocityCone, plParticleInitializer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer_VelocityCone, plParticleInitializer);
 
 public:
   plAngle m_Angle;

@@ -80,7 +80,7 @@ public:
 private:
   struct plProbeMappingFlags
   {
-    typedef plUInt8 StorageType;
+    using StorageType = plUInt8;
 
     enum Enum
     {
@@ -89,8 +89,8 @@ private:
       Sphere = plProbeFlags::Sphere,
       Box = plProbeFlags::Box,
       Dynamic = plProbeFlags::Dynamic,
-      Dirty = PLASMA_BIT(5),
-      Usable = PLASMA_BIT(6),
+      Dirty = PL_BIT(5),
+      Usable = PL_BIT(6),
       Default = 0
     };
 
@@ -106,13 +106,13 @@ private:
     };
   };
 
-  //PLASMA_DECLARE_FLAGS_OPERATORS(plProbeMappingFlags);
+  //PL_DECLARE_FLAGS_OPERATORS(plProbeMappingFlags);
 
   struct SortedProbes
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
-    PLASMA_ALWAYS_INLINE bool operator<(const SortedProbes& other) const
+    PL_ALWAYS_INLINE bool operator<(const SortedProbes& other) const
     {
       if (m_fPriority > other.m_fPriority) // we want to sort descending (higher priority first)
         return true;

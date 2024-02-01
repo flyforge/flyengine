@@ -7,10 +7,10 @@
 class plWorld;
 using plScriptClassResourceHandle = plTypedResourceHandle<class plScriptClassResource>;
 
-class PLASMA_CORE_DLL plScriptClassResource : public plResource
+class PL_CORE_DLL plScriptClassResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScriptClassResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plScriptClassResource);
+  PL_ADD_DYNAMIC_REFLECTION(plScriptClassResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plScriptClassResource);
 
 public:
   plScriptClassResource();

@@ -21,7 +21,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, bool bValue)
 inline plStreamReader& operator>>(plStreamReader& inout_stream, bool& out_bValue)
 {
   plUInt8 uiValue = 0;
-  PLASMA_VERIFY(inout_stream.ReadBytes(&uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
   out_bValue = (uiValue != 0);
   return inout_stream;
 }
@@ -36,7 +36,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, plUInt8 uiValue)
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plUInt8& out_uiValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&out_uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&out_uiValue, sizeof(plUInt8)) == sizeof(plUInt8), "End of stream reached.");
   return inout_stream;
 }
 
@@ -49,9 +49,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plUInt8* pArray, 
 {
   const plUInt64 uiNumBytes = sizeof(plUInt8) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -76,9 +76,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plUInt16* pArray,
 {
   const plUInt64 uiNumBytes = sizeof(plUInt16) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -103,9 +103,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plUInt32* pArray,
 {
   const plUInt64 uiNumBytes = sizeof(plUInt32) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -130,9 +130,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plUInt64* pArray,
 {
   const plUInt64 uiNumBytes = sizeof(plUInt64) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 /// signed int versions
@@ -145,7 +145,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, plInt8 iValue)
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plInt8& ref_iValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(reinterpret_cast<plUInt8*>(&ref_iValue), sizeof(plInt8)) == sizeof(plInt8), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(reinterpret_cast<plUInt8*>(&ref_iValue), sizeof(plInt8)) == sizeof(plInt8), "End of stream reached.");
   return inout_stream;
 }
 
@@ -158,9 +158,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plInt8* pArray, p
 {
   const plUInt64 uiNumBytes = sizeof(plInt8) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -185,9 +185,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plInt16* pArray, 
 {
   const plUInt64 uiNumBytes = sizeof(plInt16) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -212,9 +212,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plInt32* pArray, 
 {
   const plUInt64 uiNumBytes = sizeof(plInt32) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -239,9 +239,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, plInt64* pArray, 
 {
   const plUInt64 uiNumBytes = sizeof(plInt64) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -268,9 +268,9 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, float* pArray, pl
 {
   const plUInt64 uiNumBytes = sizeof(float) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -295,17 +295,17 @@ inline plResult DeserializeArray(plStreamReader& inout_stream, double* pArray, p
 {
   const plUInt64 uiNumBytes = sizeof(double) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
 // C-style strings
 // No read equivalent for C-style strings (but can be read as plString & plStringBuilder instances)
 
-PLASMA_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, const char* szValue);
-PLASMA_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, plStringView sValue);
+PL_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, const char* szValue);
+PL_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, plStringView sValue);
 
 // plHybridString
 
@@ -328,8 +328,8 @@ inline plStreamReader& operator>>(plStreamReader& inout_stream, plHybridString<S
 
 // plStringBuilder
 
-PLASMA_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, const plStringBuilder& sValue);
-PLASMA_FOUNDATION_DLL plStreamReader& operator>>(plStreamReader& inout_stream, plStringBuilder& out_sValue);
+PL_FOUNDATION_DLL plStreamWriter& operator<<(plStreamWriter& inout_stream, const plStringBuilder& sValue);
+PL_FOUNDATION_DLL plStreamReader& operator>>(plStreamReader& inout_stream, plStringBuilder& out_sValue);
 
 // plEnum
 

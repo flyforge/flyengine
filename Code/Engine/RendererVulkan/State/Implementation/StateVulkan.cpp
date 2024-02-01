@@ -32,7 +32,7 @@ static vk::BlendOp ToVulkanBlendOp(plGALBlendOp::Enum e)
     case plGALBlendOp::Subtract:
       return vk::BlendOp::eSubtract;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return vk::BlendOp::eAdd;
@@ -43,14 +43,14 @@ static vk::BlendFactor ToVulkanBlendFactor(plGALBlend::Enum e)
   switch (e)
   {
     case plGALBlend::BlendFactor:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::BlendFactor::eZero;
     case plGALBlend::DestAlpha:
       return vk::BlendFactor::eDstAlpha;
     case plGALBlend::DestColor:
       return vk::BlendFactor::eDstColor;
     case plGALBlend::InvBlendFactor:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::BlendFactor::eZero;
     case plGALBlend::InvDestAlpha:
       return vk::BlendFactor::eOneMinusDstAlpha;
@@ -72,7 +72,7 @@ static vk::BlendFactor ToVulkanBlendFactor(plGALBlend::Enum e)
       return vk::BlendFactor::eZero;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return vk::BlendFactor::eOne;
@@ -96,12 +96,12 @@ plResult plGALBlendStateVulkan::InitPlatform(plGALDevice* pDevice)
     m_blendAttachmentState[i].colorWriteMask = (vk::ColorComponentFlags)(m_Description.m_RenderTargetBlendDescriptions[i].m_uiWriteMask & 0x0F);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALBlendStateVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // Depth Stencil state
@@ -137,12 +137,12 @@ plResult plGALDepthStencilStateVulkan::InitPlatform(plGALDevice* pDevice)
   m_depthStencilState.back.failOp = GALStencilOpTableIndexToVulkan[backFaceStencilOp.m_FailOp];
   m_depthStencilState.back.passOp = GALStencilOpTableIndexToVulkan[backFaceStencilOp.m_PassOp];
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALDepthStencilStateVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -172,13 +172,13 @@ plResult plGALRasterizerStateVulkan::InitPlatform(plGALDevice* pDevice)
   m_rasterizerState.lineWidth = 1.f;
   m_rasterizerState.polygonMode = m_Description.m_bWireFrame ? vk::PolygonMode::eLine : vk::PolygonMode::eFill;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 plResult plGALRasterizerStateVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // Sampler state
@@ -251,8 +251,8 @@ plResult plGALSamplerStateVulkan::InitPlatform(plGALDevice* pDevice)
   samplerCreateInfo.mipmapMode = GALFilterToVulkanMipmapMode[m_Description.m_MipFilter];
 
   m_resourceImageInfo.imageLayout = vk::ImageLayout::eUndefined;
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createSampler(&samplerCreateInfo, nullptr, &m_resourceImageInfo.sampler));
-  return PLASMA_SUCCESS;
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createSampler(&samplerCreateInfo, nullptr, &m_resourceImageInfo.sampler));
+  return PL_SUCCESS;
 }
 
 
@@ -260,7 +260,7 @@ plResult plGALSamplerStateVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
   plGALDeviceVulkan* pVulkanDevice = static_cast<plGALDeviceVulkan*>(pDevice);
   pVulkanDevice->DeleteLater(m_resourceImageInfo.sampler);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_State_Implementation_StateVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_State_Implementation_StateVulkan);

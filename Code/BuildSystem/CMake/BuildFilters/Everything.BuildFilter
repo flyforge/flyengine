@@ -1,2 +1,2 @@
 # special case, having a single item (no matter what) means 'everything'
-set_property(GLOBAL PROPERTY PLASMA_BUILD_FILTER_Everything "*")
+set_property(GLOBAL PROPERTY PL_BUILD_FILTER_Everything "*")

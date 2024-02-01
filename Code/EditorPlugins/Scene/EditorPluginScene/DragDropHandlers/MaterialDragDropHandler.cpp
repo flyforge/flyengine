@@ -8,8 +8,8 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialDragDropHandler, 1, plRTTIDefaultAllocator<plMaterialDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialDragDropHandler, 1, plRTTIDefaultAllocator<plMaterialDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 void plMaterialDragDropHandler::RequestConfiguration(plDragDropConfig* pConfigToFillOut)
 {
@@ -32,7 +32,7 @@ float plMaterialDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 void plMaterialDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo)
 {
   m_pDocument = plDocumentManager::GetDocumentByGuid(pInfo->m_TargetDocument);
-  PLASMA_ASSERT_DEV(m_pDocument != nullptr, "Invalid document GUID in drag & drop operation");
+  PL_ASSERT_DEV(m_pDocument != nullptr, "Invalid document GUID in drag & drop operation");
 
   m_pDocument->GetCommandHistory()->BeginTemporaryCommands("Drag Material", true);
 }
@@ -62,7 +62,7 @@ void plMaterialDragDropHandler::OnDragUpdate(const plDragDropInfo* pInfo)
     cmd.m_NewValue = GetAssetGuidString(pInfo);
 
     m_pDocument->GetCommandHistory()->StartTransaction("Assign Material");
-    m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
+    m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
     m_pDocument->GetCommandHistory()->FinishTransaction();
   }
 
@@ -74,7 +74,7 @@ void plMaterialDragDropHandler::OnDragUpdate(const plDragDropInfo* pInfo)
     cmd.m_NewValue = GetAssetGuidString(pInfo);
 
     m_pDocument->GetCommandHistory()->StartTransaction("Assign Material");
-    m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
+    m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
     m_pDocument->GetCommandHistory()->FinishTransaction();
   }
 }

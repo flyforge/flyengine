@@ -12,7 +12,7 @@
 template <typename ComponentType>
 class plSettingsComponentManager : public plComponentManagerBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSettingsComponentManager);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSettingsComponentManager);
 
 public:
   plSettingsComponentManager(plWorld* pWorld);
@@ -25,8 +25,8 @@ public:
   static plWorldModuleTypeId TypeId();
 
   // plComponentManagerBase implementation
-  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_AllComponents, bool bOnlyActive) override;
-  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_AllComponents, bool bOnlyActive) override;
+  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_allComponents, bool bOnlyActive) override;
+  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_allComponents, bool bOnlyActive) override;
 
 private:
   friend class plComponentManagerFactory;

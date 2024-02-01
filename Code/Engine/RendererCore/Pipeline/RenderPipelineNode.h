@@ -8,11 +8,11 @@ class plRenderPipelineNode;
 
 struct plRenderPipelineNodePin
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   struct Type
   {
-    typedef plUInt8 StorageType;
+    using StorageType = plUInt8;
 
     enum Enum
     {
@@ -33,31 +33,31 @@ struct plRenderPipelineNodePin
 
 struct plRenderPipelineNodeInputPin : public plRenderPipelineNodePin
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
-  PLASMA_ALWAYS_INLINE plRenderPipelineNodeInputPin() { m_Type = Type::Input; }
+  PL_ALWAYS_INLINE plRenderPipelineNodeInputPin() { m_Type = Type::Input; }
 };
 
 struct plRenderPipelineNodeOutputPin : public plRenderPipelineNodePin
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
-  PLASMA_ALWAYS_INLINE plRenderPipelineNodeOutputPin() { m_Type = Type::Output; }
+  PL_ALWAYS_INLINE plRenderPipelineNodeOutputPin() { m_Type = Type::Output; }
 };
 
 struct plRenderPipelineNodePassThrougPin : public plRenderPipelineNodePin
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
-  PLASMA_ALWAYS_INLINE plRenderPipelineNodePassThrougPin() { m_Type = Type::PassThrough; }
+  PL_ALWAYS_INLINE plRenderPipelineNodePassThrougPin() { m_Type = Type::PassThrough; }
 };
 
-class PLASMA_RENDERERCORE_DLL plRenderPipelineNode : public plReflectedClass
+class PL_RENDERERCORE_DLL plRenderPipelineNode : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRenderPipelineNode, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plRenderPipelineNode, plReflectedClass);
 
 public:
-  virtual ~plRenderPipelineNode() {}
+  virtual ~plRenderPipelineNode() = default;
 
   void InitializePins();
 
@@ -73,7 +73,7 @@ private:
   plHashTable<plHashedString, const plRenderPipelineNodePin*> m_NameToPin;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plRenderPipelineNodePin);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plRenderPipelineNodeInputPin);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plRenderPipelineNodeOutputPin);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plRenderPipelineNodePassThrougPin);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plRenderPipelineNodePin);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plRenderPipelineNodeInputPin);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plRenderPipelineNodeOutputPin);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plRenderPipelineNodePassThrougPin);

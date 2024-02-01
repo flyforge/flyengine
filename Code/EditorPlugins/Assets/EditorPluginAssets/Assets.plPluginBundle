@@ -7,10 +7,10 @@ PluginInfo
 	string %Description{"Adds support for the central pl asset types."}
 	
 	// List of plugins (without path or extension) to load into the editor process.
-	string %EditorPlugins{"plasmaEditorPluginAssets"}
+	string %EditorPlugins{"plEditorPluginAssets"}
 
 	// List of plugins (without path or extension) to load into the editor engine process.
-	string %EditorEnginePlugins{"PlasmaEnginePluginAssets"}
+	string %EditorEnginePlugins{"plEnginePluginAssets"}
 
 	// List of plugins (without path or extension) to load into the engine process (e.g. also Player.exe and stand-alone apps).
 	string %RuntimePlugins{}

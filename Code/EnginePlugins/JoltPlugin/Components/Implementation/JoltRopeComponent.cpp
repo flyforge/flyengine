@@ -25,46 +25,46 @@
 #include <RendererCore/AnimationSystem/Declarations.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plJoltRopeAnchorConstraintMode, 1)
-  PLASMA_ENUM_CONSTANTS(plJoltRopeAnchorConstraintMode::None, plJoltRopeAnchorConstraintMode::Point, plJoltRopeAnchorConstraintMode::Fixed, plJoltRopeAnchorConstraintMode::Cone)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plJoltRopeAnchorConstraintMode, 1)
+  PL_ENUM_CONSTANTS(plJoltRopeAnchorConstraintMode::None, plJoltRopeAnchorConstraintMode::Point, plJoltRopeAnchorConstraintMode::Fixed, plJoltRopeAnchorConstraintMode::Cone)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltRopeComponent, 2, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plJoltRopeComponent, 2, plComponentMode::Dynamic)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_ACCESSOR_PROPERTY("Anchor1", DummyGetter, SetAnchor1Reference)->AddAttributes(new plGameObjectReferenceAttribute()),
-      PLASMA_ACCESSOR_PROPERTY("Anchor2", DummyGetter, SetAnchor2Reference)->AddAttributes(new plGameObjectReferenceAttribute()),
-      PLASMA_ENUM_ACCESSOR_PROPERTY("Anchor1Constraint", plJoltRopeAnchorConstraintMode, GetAnchor1ConstraintMode, SetAnchor1ConstraintMode),
-      PLASMA_ENUM_ACCESSOR_PROPERTY("Anchor2Constraint", plJoltRopeAnchorConstraintMode, GetAnchor2ConstraintMode, SetAnchor2ConstraintMode),
-      PLASMA_MEMBER_PROPERTY("Pieces", m_uiPieces)->AddAttributes(new plDefaultValueAttribute(16), new plClampValueAttribute(2, 64)),
-      PLASMA_MEMBER_PROPERTY("Slack", m_fSlack)->AddAttributes(new plDefaultValueAttribute(0.3f)),
-      PLASMA_MEMBER_PROPERTY("Mass", m_fTotalMass)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, 1000.0f)),
-      PLASMA_MEMBER_PROPERTY("Thickness", m_fThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 0.5f)),
-      PLASMA_MEMBER_PROPERTY("BendStiffness", m_fBendStiffness)->AddAttributes(new plClampValueAttribute(0.0f,   plVariant())),
-      PLASMA_MEMBER_PROPERTY("MaxBend", m_MaxBend)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(5), plAngle::Degree(90))),
-      PLASMA_MEMBER_PROPERTY("MaxTwist", m_MaxTwist)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(0.01f), plAngle::Degree(90))),
-      PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-      PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
-      PLASMA_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-      PLASMA_MEMBER_PROPERTY("SelfCollision", m_bSelfCollision),
-      PLASMA_MEMBER_PROPERTY("ContinuousCollisionDetection", m_bCCD),
+      PL_ACCESSOR_PROPERTY("Anchor1", DummyGetter, SetAnchor1Reference)->AddAttributes(new plGameObjectReferenceAttribute()),
+      PL_ACCESSOR_PROPERTY("Anchor2", DummyGetter, SetAnchor2Reference)->AddAttributes(new plGameObjectReferenceAttribute()),
+      PL_ENUM_ACCESSOR_PROPERTY("Anchor1Constraint", plJoltRopeAnchorConstraintMode, GetAnchor1ConstraintMode, SetAnchor1ConstraintMode),
+      PL_ENUM_ACCESSOR_PROPERTY("Anchor2Constraint", plJoltRopeAnchorConstraintMode, GetAnchor2ConstraintMode, SetAnchor2ConstraintMode),
+      PL_MEMBER_PROPERTY("Pieces", m_uiPieces)->AddAttributes(new plDefaultValueAttribute(16), new plClampValueAttribute(2, 64)),
+      PL_MEMBER_PROPERTY("Slack", m_fSlack)->AddAttributes(new plDefaultValueAttribute(0.3f)),
+      PL_MEMBER_PROPERTY("Mass", m_fTotalMass)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, 1000.0f)),
+      PL_MEMBER_PROPERTY("Thickness", m_fThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 0.5f)),
+      PL_MEMBER_PROPERTY("BendStiffness", m_fBendStiffness)->AddAttributes(new plClampValueAttribute(0.0f,   plVariant())),
+      PL_MEMBER_PROPERTY("MaxBend", m_MaxBend)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(5), plAngle::MakeFromDegree(90))),
+      PL_MEMBER_PROPERTY("MaxTwist", m_MaxTwist)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(0.01f), plAngle::MakeFromDegree(90))),
+      PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+      PL_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+      PL_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+      PL_MEMBER_PROPERTY("SelfCollision", m_bSelfCollision),
+      PL_MEMBER_PROPERTY("ContinuousCollisionDetection", m_bCCD),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_MESSAGEHANDLERS
+    PL_END_PROPERTIES;
+    PL_BEGIN_MESSAGEHANDLERS
     {
-      PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddForce, AddForceAtPos),
-      PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, AddImpulseAtPos),
-      PLASMA_MESSAGE_HANDLER(plJoltMsgDisconnectConstraints, OnJoltMsgDisconnectConstraints),
+      PL_MESSAGE_HANDLER(plMsgPhysicsAddForce, AddForceAtPos),
+      PL_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, AddImpulseAtPos),
+      PL_MESSAGE_HANDLER(plJoltMsgDisconnectConstraints, OnJoltMsgDisconnectConstraints),
     }
-    PLASMA_END_MESSAGEHANDLERS;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_MESSAGEHANDLERS;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Physics/Jolt/Effects"),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltRopeComponent::plJoltRopeComponent() = default;
@@ -242,7 +242,7 @@ void plJoltRopeComponent::CreateRope()
   JPH::RotatedTranslatedShapeSettings capsOffset;
   capsOffset.mInnerShapePtr = capsule.Create().Get();
   capsOffset.mPosition = JPH::Vec3(fPieceLength * 0.5f, 0, 0);
-  capsOffset.mRotation = JPH::Quat::sRotation(JPH::Vec3::sAxisZ(), plAngle::Degree(-90).GetRadian());
+  capsOffset.mRotation = JPH::Quat::sRotation(JPH::Vec3::sAxisZ(), plAngle::MakeFromDegree(-90).GetRadian());
   capsOffset.mUserData = reinterpret_cast<plUInt64>(pUserData);
 
   for (plUInt32 idx = 0; idx < numPieces; ++idx)
@@ -254,7 +254,7 @@ void plJoltRopeComponent::CreateRope()
       // set previous name as parent name
       joint.mParentName = name;
 
-      name.Format("Link{}", idx);
+      name.SetFormat("Link{}", idx);
       joint.mName = name;
       joint.mParentJointIndex = static_cast<plInt32>(idx) - 1;
     }
@@ -324,7 +324,7 @@ void plJoltRopeComponent::CreateRope()
   if (m_Anchor2ConstraintMode != plJoltRopeAnchorConstraintMode::None)
   {
     plTransform end = nodes.PeekBack();
-    end.m_qRotation = -end.m_qRotation;
+    end.m_qRotation = end.m_qRotation.GetInverse();
     m_pConstraintAnchor2 = CreateConstraint(hAnchor2, end, m_pRagdoll->GetBodyIDs().back().GetIndexAndSequenceNumber(), m_Anchor2ConstraintMode, m_uiAnchor2BodyID);
   }
 }
@@ -422,7 +422,7 @@ JPH::Constraint* plJoltRopeComponent::CreateConstraint(const plGameObjectHandle&
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
 
     pConstraint->AddRef();
@@ -482,7 +482,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
   out_fPieceLength = 0.0f;
 
   if (m_uiPieces == 0)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // plPathComponent* pPath;
   // if (GetOwner()->TryGetComponentOfBaseType(pPath))
@@ -494,7 +494,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
   //  const float fLength = pPath->GetLinearizedRepresentationLength();
 
   //  if (plMath::IsZero(fLength, 0.001f))
-  //    return PLASMA_FAILURE;
+  //    return PL_FAILURE;
 
   //  const plTransform ownTrans = GetOwner()->GetGlobalTransform();
 
@@ -522,7 +522,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
   //  transforms.PeekBack().m_vScale.Set(1);
   //  transforms.PeekBack().m_qRotation = transforms[m_uiPieces - 1].m_qRotation;
 
-  //  return PLASMA_SUCCESS;
+  //  return PL_SUCCESS;
   //}
   // else
   {
@@ -530,9 +530,9 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
     const plGameObject* pAnchor2 = nullptr;
 
     if (!GetWorld()->TryGetObject(hAnchor1, pAnchor1))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     if (!GetWorld()->TryGetObject(hAnchor2, pAnchor2))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const plVec3 vOrgAnchor1 = pAnchor1->GetGlobalPosition();
     const plVec3 vOrgAnchor2 = pAnchor2->GetGlobalPosition();
@@ -542,7 +542,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
 
     const float fLength = (vAnchor2 - vAnchor1).GetLength<3>();
     if (plMath::IsZero(fLength, 0.001f))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // the rope simulation always introduces some sag,
     // (m_fSlack - 0.1f) puts the rope under additional tension to counteract the imprecise simulation
@@ -625,7 +625,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
 
       transforms[idx2].m_vScale.Set(1);
       transforms[idx2].m_vPosition = plSimdConversion::ToVec3(p0);
-      transforms[idx2].m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), plSimdConversion::ToVec3(dir));
+      transforms[idx2].m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plSimdConversion::ToVec3(dir));
 
       ++idx2;
       p0 = p1;
@@ -648,7 +648,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
       transforms[idx2].m_qRotation = pAnchor2->GetGlobalRotation();
 
       plVec3 dir = transforms[idx2].m_qRotation * plVec3(1, 0, 0);
-      transforms[idx2].m_qRotation.SetShortestRotation(plVec3(1, 0, 0), -dir);
+      transforms[idx2].m_qRotation = plQuat::MakeShortestRotation(plVec3(1, 0, 0), -dir);
 
       // transforms[idx2].m_qRotation.Flip();
       transforms[idx2].m_qRotation.Normalize();
@@ -657,7 +657,7 @@ plResult plJoltRopeComponent::CreateSegmentTransforms(plDynamicArray<plTransform
 
     out_fPieceLength /= m_uiPieces;
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
@@ -777,7 +777,7 @@ void plJoltRopeComponent::Update()
       global.m_vPosition = plJoltConversionUtils::ToVec3(pBody->GetPosition());
       global.m_qRotation = plJoltConversionUtils::ToQuat(pBody->GetRotation());
 
-      poses[i].SetLocalTransform(rootTransform, global);
+      poses[i] = plTransform::MakeLocalTransform(rootTransform, global);
     }
   }
 
@@ -789,7 +789,7 @@ void plJoltRopeComponent::Update()
     tLocal.SetIdentity();
     tLocal.m_vPosition.x = (poses[uiLastIdx - 1].m_vPosition - poses[uiLastIdx - 2].m_vPosition).GetLength();
 
-    poses.PeekBack().SetGlobalTransform(poses[uiLastIdx - 1], tLocal);
+    poses.PeekBack() = plTransform::MakeGlobalTransform(poses[uiLastIdx - 1], tLocal);
   }
 
   GetOwner()->SendMessage(poseMsg);
@@ -823,11 +823,11 @@ void plJoltRopeComponent::SendPreviewPose()
 
     for (auto& n : pieces)
     {
-      n.SetLocalTransform(tOwner, n);
+      n = plTransform::MakeLocalTransform(tOwner, n);
     }
   }
 
-  GetOwner()->PostMessage(poseMsg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
+  GetOwner()->PostMessage(poseMsg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
 }
 
 void plJoltRopeComponent::SetGravityFactor(float fGravity)
@@ -1002,7 +1002,7 @@ void plJoltRopeComponentManager::Initialize()
   SUPER::Initialize();
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltRopeComponentManager::Update, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltRopeComponentManager::Update, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostAsync;
     desc.m_bOnlyUpdateWhenSimulating = false;
 
@@ -1012,7 +1012,7 @@ void plJoltRopeComponentManager::Initialize()
 
 void plJoltRopeComponentManager::Update(const plWorldModule::UpdateContext& context)
 {
-  PLASMA_PROFILE_SCOPE("UpdateRopes");
+  PL_PROFILE_SCOPE("UpdateRopes");
 
   if (!GetWorld()->GetWorldSimulationEnabled())
   {
@@ -1036,4 +1036,4 @@ void plJoltRopeComponentManager::Update(const plWorldModule::UpdateContext& cont
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltRopeComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltRopeComponent);

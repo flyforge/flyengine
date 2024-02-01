@@ -6,6 +6,6 @@
 
 namespace plRmlUiConversionUtils
 {
-  PLASMA_RMLUIPLUGIN_DLL plVariant ToVariant(const Rml::Variant& value, plVariant::Type::Enum targetType = plVariant::Type::Invalid);
-  PLASMA_RMLUIPLUGIN_DLL Rml::Variant ToVariant(const plVariant& value);
+  PL_RMLUIPLUGIN_DLL plVariant ToVariant(const Rml::Variant& value, plVariant::Type::Enum targetType = plVariant::Type::Invalid);
+  PL_RMLUIPLUGIN_DLL Rml::Variant ToVariant(const plVariant& value);
 } // namespace plRmlUiConversionUtils

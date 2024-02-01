@@ -16,7 +16,7 @@
 ///   plGALDeviceVulkan* pDevice = ...;
 ///   pDevice->ReclaimLater(f);
 /// \endcode
-class PLASMA_RENDERERVULKAN_DLL plFencePoolVulkan
+class PL_RENDERERVULKAN_DLL plFencePoolVulkan
 {
 public:
   static void Initialize(vk::Device device);

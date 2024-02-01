@@ -15,9 +15,9 @@ using plPropertyAnimComponentManager = plComponentManagerSimple<class plProperty
 ///
 /// Notes:
 ///  - There is no messages to change speed, simply modify the speed property.
-class PLASMA_GAMEENGINE_DLL plPropertyAnimComponent : public plComponent
+class PL_GAMEENGINE_DLL plPropertyAnimComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plPropertyAnimComponent, plComponent, plPropertyAnimComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plPropertyAnimComponent, plComponent, plPropertyAnimComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -40,7 +40,7 @@ public:
   const char* GetPropertyAnimFile() const;      // [ property ]
 
   void SetPropertyAnim(const plPropertyAnimResourceHandle& hResource);                                     // [ property ]
-  PLASMA_ALWAYS_INLINE const plPropertyAnimResourceHandle& GetPropertyAnim() const { return m_hPropertyAnim; } // [ property ]
+  PL_ALWAYS_INLINE const plPropertyAnimResourceHandle& GetPropertyAnim() const { return m_hPropertyAnim; } // [ property ]
 
   /// \brief Sets the animation playback range and resets the playing position to the range start position. Also activates the component if it isn't.
   void PlayAnimationRange(plTime rangeLow, plTime rangeHigh); // [ scriptable ]

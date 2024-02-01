@@ -55,7 +55,7 @@ plUInt32 plEventTrack::FindControlPointAfter(plTime x) const
 {
   // searches for a control point after OR AT x
 
-  PLASMA_ASSERT_DEBUG(!m_ControlPoints.IsEmpty(), "");
+  PL_ASSERT_DEBUG(!m_ControlPoints.IsEmpty(), "");
 
   plUInt32 uiLowIdx = 0;
   plUInt32 uiHighIdx = m_ControlPoints.GetCount() - 1;
@@ -80,7 +80,7 @@ plUInt32 plEventTrack::FindControlPointAfter(plTime x) const
     }
   }
 
-  PLASMA_ASSERT_DEBUG(uiHighIdx + 1 == m_ControlPoints.GetCount(), "Unexpected event track entry index");
+  PL_ASSERT_DEBUG(uiHighIdx + 1 == m_ControlPoints.GetCount(), "Unexpected event track entry index");
   return m_ControlPoints.GetCount();
 }
 
@@ -88,7 +88,7 @@ plInt32 plEventTrack::FindControlPointBefore(plTime x) const
 {
   // searches for a control point before OR AT x
 
-  PLASMA_ASSERT_DEBUG(!m_ControlPoints.IsEmpty(), "");
+  PL_ASSERT_DEBUG(!m_ControlPoints.IsEmpty(), "");
 
   plInt32 iLowIdx = 0;
   plInt32 iHighIdx = (plInt32)m_ControlPoints.GetCount() - 1;
@@ -113,7 +113,7 @@ plInt32 plEventTrack::FindControlPointBefore(plTime x) const
     }
   }
 
-  PLASMA_ASSERT_DEBUG(iLowIdx == 0, "Unexpected event track entry index");
+  PL_ASSERT_DEBUG(iLowIdx == 0, "Unexpected event track entry index");
   return -1;
 }
 
@@ -190,7 +190,7 @@ void plEventTrack::Load(plStreamReader& inout_stream)
   plUInt8 uiVersion = 0;
   inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion == 1, "Invalid event track version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion == 1, "Invalid event track version {0}", uiVersion);
 
   plUInt32 count = 0;
   plStringBuilder tmp;
@@ -213,5 +213,3 @@ void plEventTrack::Load(plStreamReader& inout_stream)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Tracks_Implementation_EventTrack);

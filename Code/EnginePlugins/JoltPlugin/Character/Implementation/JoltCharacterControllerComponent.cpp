@@ -14,29 +14,29 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltCharacterDebugFlags, 1)
-PLASMA_BITFLAGS_CONSTANTS(plJoltCharacterDebugFlags::PrintState, plJoltCharacterDebugFlags::VisShape, plJoltCharacterDebugFlags::VisContacts,  plJoltCharacterDebugFlags::VisCasts, plJoltCharacterDebugFlags::VisGroundContact, plJoltCharacterDebugFlags::VisFootCheck)
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltCharacterDebugFlags, 1)
+PL_BITFLAGS_CONSTANTS(plJoltCharacterDebugFlags::PrintState, plJoltCharacterDebugFlags::VisShape, plJoltCharacterDebugFlags::VisContacts,  plJoltCharacterDebugFlags::VisCasts, plJoltCharacterDebugFlags::VisGroundContact, plJoltCharacterDebugFlags::VisFootCheck)
+PL_END_STATIC_REFLECTED_BITFLAGS;
 
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltCharacterControllerComponent, 1)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_MEMBER_PROPERTY("PresenceCollisionLayer", m_uiPresenceCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_ACCESSOR_PROPERTY("Mass", GetMass, SetMass)->AddAttributes(new plDefaultValueAttribute(70.0f), new plClampValueAttribute(0.1f, 10000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Strength", GetStrength, SetStrength)->AddAttributes(new plDefaultValueAttribute(500.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("MaxClimbingSlope", GetMaxClimbingSlope, SetMaxClimbingSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(40))),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("DebugFlags", plJoltCharacterDebugFlags , m_DebugFlags),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("PresenceCollisionLayer", m_uiPresenceCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_ACCESSOR_PROPERTY("Mass", GetMass, SetMass)->AddAttributes(new plDefaultValueAttribute(70.0f), new plClampValueAttribute(0.1f, 10000.0f)),
+    PL_ACCESSOR_PROPERTY("Strength", GetStrength, SetStrength)->AddAttributes(new plDefaultValueAttribute(500.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("MaxClimbingSlope", GetMaxClimbingSlope, SetMaxClimbingSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(40))),
+    PL_BITFLAGS_MEMBER_PROPERTY("DebugFlags", plJoltCharacterDebugFlags , m_DebugFlags),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Character"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 // clang-format on
 
 plJoltCharacterControllerComponent::plJoltCharacterControllerComponent() = default;
@@ -93,6 +93,8 @@ void plJoltCharacterControllerComponent::OnDeactivated()
     m_pCharacter->Release();
     m_pCharacter = nullptr;
   }
+
+  RemovePresenceBody();
 
   SUPER::OnDeactivated();
 }
@@ -163,10 +165,10 @@ plResult plJoltCharacterControllerComponent::TryChangeShape(JPH::Shape* pNewShap
     RemovePresenceBody();
     CreatePresenceBody();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plJoltCharacterControllerComponent::RawMoveWithVelocity(const plVec3& vVelocity, float fMaxStairStepUp, float fMaxStepDown)
@@ -315,7 +317,7 @@ void plJoltCharacterControllerComponent::CollectContacts(plDynamicArray<ContactP
 plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const ContactPoint& contact, float fPushForce)
 {
   if (contact.m_BodyID.IsInvalid())
-    return plVec3::ZeroVector();
+    return plVec3::MakeZero();
 
   plJoltWorldModule* pModule = GetWorld()->GetModule<plJoltWorldModule>();
   auto pJoltSystem = pModule->GetJoltSystem();
@@ -323,7 +325,7 @@ plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const C
   JPH::BodyLockWrite bodyLock(pJoltSystem->GetBodyLockInterface(), contact.m_BodyID);
 
   if (!bodyLock.Succeeded())
-    return plVec3::ZeroVector();
+    return plVec3::MakeZero();
 
   const JPH::Vec3 vGroundPos = plJoltConversionUtils::ToVec3(contact.m_vPosition);
 
@@ -335,7 +337,7 @@ plVec3 plJoltCharacterControllerComponent::GetContactVelocityAndPushAway(const C
     pJoltSystem->GetBodyInterfaceNoLock().ActivateBody(contact.m_BodyID);
   }
 
-  plVec3 vGroundVelocity = plVec3::ZeroVector();
+  plVec3 vGroundVelocity = plVec3::MakeZero();
 
   if (bodyLock.GetBody().IsKinematic())
   {
@@ -376,10 +378,10 @@ void plJoltCharacterControllerComponent::VisualizeContact(const ContactPoint& co
 {
   plTransform trans;
   trans.m_vPosition = contact.m_vPosition;
-  trans.m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), contact.m_vContactNormal);
+  trans.m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), contact.m_vContactNormal);
   trans.m_vScale.Set(1.0f);
 
-  plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.1f, plColor::ZeroColor(), color, trans);
+  plDebugRenderer::DrawCylinder(GetWorld(), 0, 0.05f, 0.1f, plColor::MakeZero(), color, trans);
 }
 
 void plJoltCharacterControllerComponent::VisualizeContacts(const plDynamicArray<ContactPoint>& contacts, const plColor& color) const
@@ -480,4 +482,4 @@ void plJoltCharacterControllerComponent::MovePresenceBody(plTime deltaTime)
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Character_Implementation_JoltCharacterControllerComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Character_Implementation_JoltCharacterControllerComponent);

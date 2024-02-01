@@ -14,7 +14,7 @@ class plDocumentObject;
 class plAbstractProperty;
 
 /// \brief Registry for all plDefaultStateProvider factory functions.
-class PLASMA_GUIFOUNDATION_DLL plDefaultState
+class PL_GUIFOUNDATION_DLL plDefaultState
 {
 public:
   /// \brief The functor interface for the plDefaultStateProvider factory function
@@ -22,7 +22,7 @@ public:
   /// The return value is a sharedPtr as each implementation can decide whether to provide the same instance for all objects or whether a custom instance should be created for each object to allow for state caching (e.g. prefab root information). Returning nullptr is also valid for objects / containers for which the factory has no use (e.g. prefab default state provider on an object that does not belong to a prefab).
   /// The function is called for plDefaultObjectState usage with the pProp field left blank.
   /// For plDefaultContainerState usage pProp will point to the container property.
-  typedef plSharedPtr<plDefaultStateProvider> (*CreateStateProviderFunc)(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);
+  using CreateStateProviderFunc = plSharedPtr<plDefaultStateProvider> (*)(plObjectAccessorBase*, const plDocumentObject*, const plAbstractProperty*);
 
   /// \brief Registers a plDefaultStateProvider factory method. It is safe to register / unregister factories at any time.
   static void RegisterDefaultStateProvider(CreateStateProviderFunc func);
@@ -38,9 +38,9 @@ private:
 /// \brief Object used to query and revert to the default state of all properties of an object.
 ///
 /// This class should not be persisted in memory and just used on the stack to query all property states and then destroyed. It should also not be used across hierarchical changes of any kind (deleting objects etc).
-class PLASMA_GUIFOUNDATION_DLL plDefaultObjectState
+class PL_GUIFOUNDATION_DLL plDefaultObjectState
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDefaultObjectState);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDefaultObjectState);
 
 public:
   /// \brief Constructor. Will collect the appropriate plDefaultStateProviders to query the states.
@@ -71,9 +71,9 @@ private:
 /// \brief Object used to query and revert to the default state of all elements of a container of an object.
 ///
 /// This class should not be persisted in memory and just used on the stack to query all element states and then destroyed. It should also not be used across hierarchical changes of any kind (deleting objects etc).
-class PLASMA_GUIFOUNDATION_DLL plDefaultContainerState
+class PL_GUIFOUNDATION_DLL plDefaultContainerState
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDefaultContainerState);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDefaultContainerState);
 
 public:
   /// \brief Constructor. Will collect the appropriate plDefaultStateProviders to query the states.
@@ -106,7 +106,7 @@ private:
 /// \brief Interface for querying and restoring the default state of objects and containers.
 ///
 /// The high level functions IsDefaultValue, RevertProperty, RevertObjectContainer don't need to be overwritten in most cases. Instead, just implementing the pure virtual methods is enough.
-class PLASMA_GUIFOUNDATION_DLL plDefaultStateProvider : public plRefCounted
+class PL_GUIFOUNDATION_DLL plDefaultStateProvider : public plRefCounted
 {
 public:
   /// \brief Parent hierarchy of state providers.

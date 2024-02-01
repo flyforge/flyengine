@@ -11,7 +11,7 @@ plUniquePtr<plTaskSystemState> plTaskSystem::s_pState;
 plUniquePtr<plTaskSystemThreadState> plTaskSystem::s_pThreadState;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, TaskSystem)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, TaskSystem)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ThreadUtils",
@@ -20,6 +20,9 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, TaskSystem)
 
   ON_CORESYSTEMS_STARTUP
   {
+    if (plStartup::HasApplicationTag("NoTaskSystem"))
+      return;
+
     plTaskSystem::Startup();
   }
 
@@ -28,13 +31,13 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, TaskSystem)
     plTaskSystem::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 void plTaskSystem::Startup()
 {
-  s_pThreadState = PLASMA_DEFAULT_NEW(plTaskSystemThreadState);
-  s_pState = PLASMA_DEFAULT_NEW(plTaskSystemState);
+  s_pThreadState = PL_DEFAULT_NEW(plTaskSystemThreadState);
+  s_pState = PL_DEFAULT_NEW(plTaskSystemState);
 
   tl_TaskWorkerInfo.m_WorkerType = plWorkerThreadType::MainThread;
   tl_TaskWorkerInfo.m_iWorkerIndex = 0;
@@ -45,6 +48,9 @@ void plTaskSystem::Startup()
 
 void plTaskSystem::Shutdown()
 {
+  if (s_pThreadState == nullptr)
+    return;
+
   StopWorkerThreads();
 
   s_pState.Clear();
@@ -56,4 +62,4 @@ void plTaskSystem::SetTargetFrameTime(plTime targetFrameTime)
   s_pState->m_TargetFrameTime = targetFrameTime;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystem);
+PL_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystem);

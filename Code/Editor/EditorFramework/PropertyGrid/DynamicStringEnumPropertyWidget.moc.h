@@ -7,7 +7,7 @@ class QHBoxLayout;
 class QComboBox;
 class plDynamicStringEnum;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtDynamicStringEnumPropertyWidget : public plQtStandardPropertyWidget
+class PL_EDITORFRAMEWORK_DLL plQtDynamicStringEnumPropertyWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 

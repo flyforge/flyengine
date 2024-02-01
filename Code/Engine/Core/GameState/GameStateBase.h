@@ -34,9 +34,9 @@ enum class plGameStatePriority
 /// it is the best fit for that level.
 ///
 /// \note Do not forget to reflect your derived class, otherwise plGameApplication may not find it.
-class PLASMA_CORE_DLL plGameStateBase : public plReflectedClass
+class PL_CORE_DLL plGameStateBase : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameStateBase, plReflectedClass)
+  PL_ADD_DYNAMIC_REFLECTION(plGameStateBase, plReflectedClass)
 
 public:
   plGameStateBase();
@@ -79,7 +79,7 @@ public:
 
   /// \brief Call this to signal that a game state requested the application to quit.
   ///
-  /// plGameApplication will shut down when this happens. PlasmaEditor will stop play-the-game mode when it is running.
+  /// plGameApplication will shut down when this happens. plEditor will stop play-the-game mode when it is running.
   virtual void RequestQuit();
 
   /// \brief Returns whether the game state wants to quit the application.

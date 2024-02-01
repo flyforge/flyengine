@@ -4,12 +4,13 @@
 #include <Foundation/Containers/Blob.h>
 #include <VisualScriptPlugin/Runtime/VisualScript.h>
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptInstance : public plScriptInstance
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptInstance : public plScriptInstance
 {
 public:
   plVisualScriptInstance(plReflectedClass& inout_owner, plWorld* pWorld, const plSharedPtr<plVisualScriptDataStorage>& pConstantDataStorage, const plSharedPtr<const plVisualScriptDataDescription>& pInstanceDataDesc, const plSharedPtr<plVisualScriptInstanceDataMapping>& pInstanceDataMapping);
 
-  virtual void ApplyParameters(const plArrayMap<plHashedString, plVariant>& parameters) override;
+  virtual void SetInstanceVariable(const plHashedString& sName, const plVariant& value) override;
+  virtual plVariant GetInstanceVariable(const plHashedString& sName) override;
 
   plVisualScriptDataStorage* GetConstantDataStorage() { return m_pConstantDataStorage.Borrow(); }
   plVisualScriptDataStorage* GetInstanceDataStorage() { return m_pInstanceDataStorage.Borrow(); }

@@ -5,11 +5,11 @@
 
 struct plActorImpl;
 
-class PLASMA_CORE_DLL plActor : public plReflectedClass
+class PL_CORE_DLL plActor : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActor, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plActor, plReflectedClass);
 
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plActor);
+  PL_DISALLOW_COPY_AND_ASSIGN(plActor);
 
 public:
   plActor(plStringView sActorName, const void* pCreatedBy);
@@ -38,7 +38,7 @@ public:
   void DestroyPlugin(plActorPlugin* pPlugin);
 
   /// \brief Fills the list with all plugins that have been added to the actor.
-  void GetAllPlugins(plHybridArray<plActorPlugin*, 8>& out_AllPlugins);
+  void GetAllPlugins(plHybridArray<plActorPlugin*, 8>& out_allPlugins);
 
   /// \brief Checks whether the actor is queued for destruction at the end of the frame
   bool IsActorQueuedForDestruction() const

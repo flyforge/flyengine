@@ -14,8 +14,19 @@ plSelectionContext::plSelectionContext(plQtEngineDocumentWindow* pOwnerWindow, p
 
   SetOwner(pOwnerWindow, pOwnerView);
 
-  m_hMarqueeGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineBox, plColor::CadetBlue, plGizmoFlags::ShowInOrtho | plGizmoFlags::OnTop);
+  m_hMarqueeGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineBox, plColor::CadetBlue, plGizmoFlags::ShowInOrtho | plGizmoFlags::OnTop);
   pOwnerWindow->GetDocument()->AddSyncObject(&m_hMarqueeGizmo);
+}
+
+plSelectionContext::~plSelectionContext()
+{
+  // if anyone is registered for object picking, tell them that nothing was picked,
+  // so that they reset their state
+  if (m_PickObjectOverride.IsValid())
+  {
+    m_PickObjectOverride(nullptr);
+    ResetPickObjectOverride();
+  }
 }
 
 void plSelectionContext::SetPickObjectOverride(plDelegate<void(const plDocumentObject*)> pickOverride)
@@ -26,11 +37,14 @@ void plSelectionContext::SetPickObjectOverride(plDelegate<void(const plDocumentO
 
 void plSelectionContext::ResetPickObjectOverride()
 {
-  m_PickObjectOverride.Invalidate();
-  GetOwnerView()->unsetCursor();
+  if (m_PickObjectOverride.IsValid())
+  {
+    m_PickObjectOverride.Invalidate();
+    GetOwnerView()->unsetCursor();
+  }
 }
 
-PlasmaEditorInput plSelectionContext::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plSelectionContext::DoMousePressEvent(QMouseEvent* e)
 {
   if (e->button() == Qt::MouseButton::LeftButton)
   {
@@ -58,7 +72,7 @@ PlasmaEditorInput plSelectionContext::DoMousePressEvent(QMouseEvent* e)
 
     m_Mode = Mode::Single;
 
-    if (m_bPressedSpace)
+    if (m_bPressedSpace && !m_PickObjectOverride.IsValid())
     {
       m_uiMarqueeID += 23;
       m_vMarqueeStartPos.Set(e->pos().x(), e->pos().y(), 0.01f);
@@ -72,17 +86,15 @@ PlasmaEditorInput plSelectionContext::DoMousePressEvent(QMouseEvent* e)
       else
         m_hMarqueeGizmo.SetColor(plColor::PaleVioletRed);
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plSelectionContext::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plSelectionContext::DoMouseReleaseEvent(QMouseEvent* e)
 {
-  auto* pDocument = GetOwnerWindow()->GetDocument();
-
   if (e->button() == Qt::MouseButton::MiddleButton)
   {
     if (e->modifiers() & Qt::KeyboardModifier::ControlModifier)
@@ -107,7 +119,7 @@ PlasmaEditorInput plSelectionContext::DoMouseReleaseEvent(QMouseEvent* e)
 
       // we handled the mouse click event
       // but this is it, we don't stay active
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_Mode == Mode::MarqueeAdd || m_Mode == Mode::MarqueeRemove)
@@ -117,11 +129,11 @@ PlasmaEditorInput plSelectionContext::DoMouseReleaseEvent(QMouseEvent* e)
       const bool bPressedSpace = m_bPressedSpace;
       DoFocusLost(false);
       m_bPressedSpace = bPressedSpace;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 
@@ -185,7 +197,7 @@ void plSelectionContext::SendMarqueeMsg(QMouseEvent* e, plUInt8 uiWhatToDo)
   if (mInvViewProj.Invert(0.0f).Failed())
   {
     // if this fails, the marquee will not be rendered correctly
-    PLASMA_ASSERT_DEBUG(false, "Failed to invert view projection matrix.");
+    PL_ASSERT_DEBUG(false, "Failed to invert view projection matrix.");
   }
 
   const plVec3 vMousePos(e->pos().x(), e->pos().y(), 0.01f);
@@ -201,13 +213,13 @@ void plSelectionContext::SendMarqueeMsg(QMouseEvent* e, plUInt8 uiWhatToDo)
   plTransform t;
   t.SetIdentity();
   t.m_vPosition = plMath::Lerp(vPosOnNearPlane0, vPosOnNearPlane1, 0.5f);
-  t.m_qRotation.SetFromMat3(m_pCamera->GetViewMatrix().GetRotationalPart());
+  t.m_qRotation = plQuat::MakeFromMat3(m_pCamera->GetViewMatrix().GetRotationalPart());
 
   // box coordinates in screen space
   plVec3 vBoxPosSS0 = t.m_qRotation * vPosOnNearPlane0;
   plVec3 vBoxPosSS1 = t.m_qRotation * vPosOnNearPlane1;
 
-  t.m_qRotation = -t.m_qRotation;
+  t.m_qRotation = t.m_qRotation.GetInverse();
 
   t.m_vScale.x = plMath::Abs(vBoxPosSS0.x - vBoxPosSS1.x);
   t.m_vScale.y = plMath::Abs(vBoxPosSS0.y - vBoxPosSS1.y);
@@ -230,13 +242,13 @@ void plSelectionContext::SendMarqueeMsg(QMouseEvent* e, plUInt8 uiWhatToDo)
   }
 }
 
-PlasmaEditorInput plSelectionContext::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plSelectionContext::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext() && (m_Mode == Mode::MarqueeAdd || m_Mode == Mode::MarqueeRemove))
   {
     SendMarqueeMsg(e, 0xFF);
 
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
   else
   {
@@ -256,24 +268,24 @@ PlasmaEditorInput plSelectionContext::DoMouseMoveEvent(QMouseEvent* e)
     GetOwnerWindow()->GetEditorEngineConnection()->SendHighlightObjectMessage(&msg);
 
     // we only updated the highlight, so others may do additional stuff, if they like
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   }
 }
 
-PlasmaEditorInput plSelectionContext::DoKeyPressEvent(QKeyEvent* e)
+plEditorInput plSelectionContext::DoKeyPressEvent(QKeyEvent* e)
 {
   /// \todo Handle the current cursor (icon) across all active input contexts
 
   if (e->key() == Qt::Key_Space)
   {
     m_bPressedSpace = true;
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   }
 
   if (e->key() == Qt::Key_Delete)
   {
     GetOwnerWindow()->GetDocument()->DeleteSelectedObjects();
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
 
   if (e->key() == Qt::Key_Escape)
@@ -281,6 +293,7 @@ PlasmaEditorInput plSelectionContext::DoKeyPressEvent(QKeyEvent* e)
     if (m_PickObjectOverride.IsValid())
     {
       m_PickObjectOverride(nullptr);
+      ResetPickObjectOverride();
     }
     else
     {
@@ -296,39 +309,39 @@ PlasmaEditorInput plSelectionContext::DoKeyPressEvent(QKeyEvent* e)
       }
     }
 
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plSelectionContext::DoKeyReleaseEvent(QKeyEvent* e)
+plEditorInput plSelectionContext::DoKeyReleaseEvent(QKeyEvent* e)
 {
   if (e->key() == Qt::Key_Space)
   {
     m_bPressedSpace = false;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-static const bool IsInSelection(const plDeque<const plDocumentObject*>& selection, const plDocumentObject* pObject, const plDocumentObject*& out_ParentInSelection, const plDocumentObject*& out_ParentChild, const plDocumentObject* pRootObject)
+static const bool IsInSelection(const plDeque<const plDocumentObject*>& selection, const plDocumentObject* pObject, const plDocumentObject*& out_pParentInSelection, const plDocumentObject*& out_pParentChild, const plDocumentObject* pRootObject)
 {
   if (pObject == pRootObject)
     return false;
 
   if (selection.IndexOf(pObject) != plInvalidIndex)
   {
-    out_ParentInSelection = pObject;
+    out_pParentInSelection = pObject;
     return true;
   }
 
   const plDocumentObject* pParent = pObject->GetParent();
 
-  if (IsInSelection(selection, pParent, out_ParentInSelection, out_ParentChild, pRootObject))
+  if (IsInSelection(selection, pParent, out_pParentInSelection, out_pParentChild, pRootObject))
   {
-    if (out_ParentChild == nullptr)
-      out_ParentChild = pObject;
+    if (out_pParentChild == nullptr)
+      out_pParentChild = pObject;
 
     return true;
   }
@@ -410,7 +423,7 @@ const plDocumentObject* plSelectionContext::determineObjectToSelect(const plDocu
 
 void plSelectionContext::DoFocusLost(bool bCancel)
 {
-  PlasmaEditorInputContext::DoFocusLost(bCancel);
+  plEditorInputContext::DoFocusLost(bCancel);
 
   m_bPressedSpace = false;
   m_Mode = Mode::None;

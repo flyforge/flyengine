@@ -1,10 +1,10 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_PROCESSES)
+#if PL_ENABLED(PL_SUPPORTS_PROCESSES)
 // Include inline file
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #    include <Foundation/System/Implementation/Win/Process_win.h>
-#  elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID) || PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#  elif PL_ENABLED(PL_PLATFORM_LINUX) || PL_ENABLED(PL_PLATFORM_ANDROID) || PL_ENABLED(PL_PLATFORM_OSX)
 #    include <Foundation/System/Implementation/Posix/Process_posix.h>
 #  else
 #    error "Process functions are not implemented on current platform"
@@ -129,4 +129,4 @@ void plProcess::BuildFullCommandLineString(const plProcessOptions& opt, plString
 }
 #endif
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_System_Implementation_Process);
+

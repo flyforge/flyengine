@@ -4,7 +4,7 @@
 
 class plVisualScriptComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVisualScriptComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plVisualScriptComponentDragDropHandler, plComponentDragDropHandler);
 
 public:
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;

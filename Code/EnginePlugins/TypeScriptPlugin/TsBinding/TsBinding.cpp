@@ -34,7 +34,7 @@ static int __CPP_Time_Get(duk_context* pDuk)
     }
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return duk.ReturnFloat(0.0f);
 }
 
@@ -62,7 +62,7 @@ plResult plTypeScriptBinding::Init_Time()
   m_Duk.RegisterGlobalFunction("__CPP_Time_GetGameTime", __CPP_Time_Get, 0, 1);
   m_Duk.RegisterGlobalFunction("__CPP_Time_GetGameTimeDiff", __CPP_Time_Get, 0, 2);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plTypeScriptBinding* plTypeScriptBinding::RetrieveBinding(duk_context* pDuk)
@@ -75,10 +75,10 @@ plTypeScriptBinding* plTypeScriptBinding::RetrieveBinding(duk_context* pDuk)
 plResult plTypeScriptBinding::Initialize(plWorld& ref_world)
 {
   if (m_bInitialized)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  PLASMA_LOG_BLOCK("Initialize TypeScript Binding");
-  PLASMA_PROFILE_SCOPE("Initialize TypeScript Binding");
+  PL_LOG_BLOCK("Initialize TypeScript Binding");
+  PL_PROFILE_SCOPE("Initialize TypeScript Binding");
 
   m_hScriptCompendium = plResourceManager::LoadResource<plScriptCompendiumResource>(":project/AssetCache/Common/Scripts.plScriptCompendium");
 
@@ -92,29 +92,29 @@ plResult plTypeScriptBinding::Initialize(plWorld& ref_world)
   SetupRttiFunctionBindings();
   SetupRttiPropertyBindings();
 
-  PLASMA_SUCCEED_OR_RETURN(Init_RequireModules());
-  PLASMA_SUCCEED_OR_RETURN(Init_Log());
-  PLASMA_SUCCEED_OR_RETURN(Init_Utils());
-  PLASMA_SUCCEED_OR_RETURN(Init_Time());
-  PLASMA_SUCCEED_OR_RETURN(Init_GameObject());
-  PLASMA_SUCCEED_OR_RETURN(Init_FunctionBinding());
-  PLASMA_SUCCEED_OR_RETURN(Init_PropertyBinding());
-  PLASMA_SUCCEED_OR_RETURN(Init_Component());
-  PLASMA_SUCCEED_OR_RETURN(Init_World());
-  PLASMA_SUCCEED_OR_RETURN(Init_Clock());
-  PLASMA_SUCCEED_OR_RETURN(Init_Debug());
-  PLASMA_SUCCEED_OR_RETURN(Init_Random());
-  PLASMA_SUCCEED_OR_RETURN(Init_Physics());
+  PL_SUCCEED_OR_RETURN(Init_RequireModules());
+  PL_SUCCEED_OR_RETURN(Init_Log());
+  PL_SUCCEED_OR_RETURN(Init_Utils());
+  PL_SUCCEED_OR_RETURN(Init_Time());
+  PL_SUCCEED_OR_RETURN(Init_GameObject());
+  PL_SUCCEED_OR_RETURN(Init_FunctionBinding());
+  PL_SUCCEED_OR_RETURN(Init_PropertyBinding());
+  PL_SUCCEED_OR_RETURN(Init_Component());
+  PL_SUCCEED_OR_RETURN(Init_World());
+  PL_SUCCEED_OR_RETURN(Init_Clock());
+  PL_SUCCEED_OR_RETURN(Init_Debug());
+  PL_SUCCEED_OR_RETURN(Init_Random());
+  PL_SUCCEED_OR_RETURN(Init_Physics());
 
   m_bInitialized = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTypeScriptBinding::LoadComponent(const plUuid& typeGuid, TsComponentTypeInfo& out_typeInfo)
 {
   if (!m_bInitialized || !typeGuid.IsValid())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // check if this component type has been loaded before
@@ -124,11 +124,11 @@ plResult plTypeScriptBinding::LoadComponent(const plUuid& typeGuid, TsComponentT
     if (itLoaded.IsValid())
     {
       out_typeInfo = m_TsComponentTypes.Find(typeGuid);
-      return itLoaded.Value() ? PLASMA_SUCCESS : PLASMA_FAILURE;
+      return itLoaded.Value() ? PL_SUCCESS : PL_FAILURE;
     }
   }
 
-  PLASMA_PROFILE_SCOPE("Load Script Component");
+  PL_PROFILE_SCOPE("Load Script Component");
 
   bool& bLoaded = m_LoadedComponents[typeGuid];
   bLoaded = false;
@@ -136,13 +136,13 @@ plResult plTypeScriptBinding::LoadComponent(const plUuid& typeGuid, TsComponentT
   plResourceLock<plScriptCompendiumResource> pCompendium(m_hScriptCompendium, plResourceAcquireMode::BlockTillLoaded_NeverFail);
   if (pCompendium.GetAcquireResult() != plResourceAcquireResult::Final)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   auto itType = pCompendium->GetDescriptor().m_AssetGuidToInfo.Find(typeGuid);
   if (!itType.IsValid())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plString& sComponentPath = itType.Value().m_sComponentFilePath;
@@ -153,11 +153,11 @@ plResult plTypeScriptBinding::LoadComponent(const plUuid& typeGuid, TsComponentT
   m_Duk.PushGlobalObject();
 
   plStringBuilder req;
-  req.Format("var {} = require(\"./{}\");", sCompModule, itType.Value().m_sComponentFilePath);
+  req.SetFormat("var {} = require(\"./{}\");", sCompModule, itType.Value().m_sComponentFilePath);
   if (m_Duk.ExecuteString(req).Failed())
   {
     plLog::Error("Could not load component");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_Duk.PopStack();
@@ -169,7 +169,7 @@ plResult plTypeScriptBinding::LoadComponent(const plUuid& typeGuid, TsComponentT
 
   out_typeInfo = m_TsComponentTypes.FindOrAdd(typeGuid, nullptr);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTypeScriptBinding::FindScriptComponentInfo(const char* szComponentType, TsComponentTypeInfo& out_typeInfo)
@@ -179,11 +179,11 @@ plResult plTypeScriptBinding::FindScriptComponentInfo(const char* szComponentTyp
     if (it.Value().m_sComponentTypeName == szComponentType)
     {
       out_typeInfo = it;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plTypeScriptBinding::Update()
@@ -238,7 +238,7 @@ void plTypeScriptBinding::CleanupStash(plUInt32 uiNumIterations)
 
   duk.PopStack(); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 plUInt32 plTypeScriptBinding::AcquireStashObjIndex()
@@ -272,7 +272,7 @@ void plTypeScriptBinding::StoreReferenceInStash(duk_context* pDuk, plUInt32 uiSt
   duk_put_prop_index(duk, -2, uiStashIdx); // [ object stash ]
   duk.PopStack();                          // [ object ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 bool plTypeScriptBinding::DukPushStashObject(duk_context* pDuk, plUInt32 uiStashIdx)
@@ -286,16 +286,16 @@ bool plTypeScriptBinding::DukPushStashObject(duk_context* pDuk, plUInt32 uiStash
   {
     duk_pop_2(duk);     // [ ]
     duk_push_null(duk); // [ null ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, false, +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, false, +1);
   }
   else // [ stash obj ]
   {
     duk_replace(duk, -2); // [ obj ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, +1);
   }
 }
 
-void plTypeScriptBinding::SyncTsObjectEzTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx)
+void plTypeScriptBinding::SyncTsObjectPlTsObject(duk_context* pDuk, const plRTTI* pRtti, void* pObject, plInt32 iObjIdx)
 {
   plHybridArray<const plAbstractProperty*, 32> properties;
   pRtti->GetAllProperties(properties);
@@ -316,7 +316,7 @@ void plTypeScriptBinding::SyncTsObjectEzTsObject(duk_context* pDuk, const plRTTI
   }
 }
 
-void plTypeScriptBinding::SyncEzObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx)
+void plTypeScriptBinding::SyncPlObjectToTsObject(duk_context* pDuk, const plRTTI* pRtti, const void* pObject, plInt32 iObjIdx)
 {
   plDuktapeHelper duk(pDuk);
 
@@ -349,7 +349,7 @@ void plTypeScriptBinding::SyncEzObjectToTsObject(duk_context* pDuk, const plRTTI
     }
   }
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plTypeScriptBinding::GenerateConstructorString(plStringBuilder& out_String, const plVariant& value)
@@ -386,77 +386,77 @@ void plTypeScriptBinding::GenerateConstructorString(plStringBuilder& out_String,
     case plVariant::Type::ColorGamma:
     {
       const plColor c = value.ConvertTo<plColor>();
-      out_String.Format("new Color({}, {}, {}, {})", c.r, c.g, c.b, c.a);
+      out_String.SetFormat("new Color({}, {}, {}, {})", c.r, c.g, c.b, c.a);
       break;
     }
 
     case plVariant::Type::Vector2:
     {
       const plVec2 v = value.Get<plVec2>();
-      out_String.Format("new Vec2({}, {})", v.x, v.y);
+      out_String.SetFormat("new Vec2({}, {})", v.x, v.y);
       break;
     }
 
     case plVariant::Type::Vector3:
     {
       const plVec3 v = value.Get<plVec3>();
-      out_String.Format("new Vec3({}, {}, {})", v.x, v.y, v.z);
+      out_String.SetFormat("new Vec3({}, {}, {})", v.x, v.y, v.z);
       break;
     }
 
     case plVariant::Type::Vector4:
     {
       const plVec4 v = value.Get<plVec4>();
-      out_String.Format("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
+      out_String.SetFormat("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
       break;
     }
 
     case plVariant::Type::Vector2I:
     {
       const plVec2I32 v = value.Get<plVec2I32>();
-      out_String.Format("new Vec2({}, {})", v.x, v.y);
+      out_String.SetFormat("new Vec2({}, {})", v.x, v.y);
       break;
     }
 
     case plVariant::Type::Vector3I:
     {
       const plVec3I32 v = value.Get<plVec3I32>();
-      out_String.Format("new Vec3({}, {}, {})", v.x, v.y, v.z);
+      out_String.SetFormat("new Vec3({}, {}, {})", v.x, v.y, v.z);
       break;
     }
 
     case plVariant::Type::Vector4I:
     {
       const plVec4I32 v = value.Get<plVec4I32>();
-      out_String.Format("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
+      out_String.SetFormat("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
       break;
     }
 
     case plVariant::Type::Vector2U:
     {
       const plVec2U32 v = value.Get<plVec2U32>();
-      out_String.Format("new Vec2({}, {})", v.x, v.y);
+      out_String.SetFormat("new Vec2({}, {})", v.x, v.y);
       break;
     }
 
     case plVariant::Type::Vector3U:
     {
       const plVec3U32 v = value.Get<plVec3U32>();
-      out_String.Format("new Vec3({}, {}, {})", v.x, v.y, v.z);
+      out_String.SetFormat("new Vec3({}, {}, {})", v.x, v.y, v.z);
       break;
     }
 
     case plVariant::Type::Vector4U:
     {
       const plVec4U32 v = value.Get<plVec4U32>();
-      out_String.Format("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
+      out_String.SetFormat("new Vec4({}, {}, {}, {})", v.x, v.y, v.z, v.w);
       break;
     }
 
     case plVariant::Type::Quaternion:
     {
       const plQuat q = value.Get<plQuat>();
-      out_String.Format("new Quat({}, {}, {}, {})", q.v.x, q.v.y, q.v.z, q.w);
+      out_String.SetFormat("new Quat({}, {}, {}, {})", q.x, q.y, q.z, q.w);
       break;
     }
 
@@ -479,11 +479,11 @@ void plTypeScriptBinding::GenerateConstructorString(plStringBuilder& out_String,
     }
 
     case plVariant::Type::Time:
-      out_String.Format("{0}", value.Get<plTime>().GetSeconds());
+      out_String.SetFormat("{0}", value.Get<plTime>().GetSeconds());
       break;
 
     case plVariant::Type::Angle:
-      out_String.Format("{0}", value.Get<plAngle>().GetRadian());
+      out_String.SetFormat("{0}", value.Get<plAngle>().GetRadian());
       break;
 
     case plVariant::Type::Uuid:
@@ -493,7 +493,7 @@ void plTypeScriptBinding::GenerateConstructorString(plStringBuilder& out_String,
     case plVariant::Type::TypedPointer:
     case plVariant::Type::TypedObject:
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 }

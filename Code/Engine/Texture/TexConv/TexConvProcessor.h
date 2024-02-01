@@ -6,9 +6,9 @@
 
 struct plTextureAtlasCreationDesc;
 
-class PLASMA_TEXTURE_DLL plTexConvProcessor
+class PL_TEXTURE_DLL plTexConvProcessor
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plTexConvProcessor);
+  PL_DISALLOW_COPY_AND_ASSIGN(plTexConvProcessor);
 
 public:
   plTexConvProcessor();
@@ -34,6 +34,7 @@ private:
   plResult ClampInputValues(plArrayPtr<plImage> images, float maxValue) const;
   plResult ClampInputValues(plImage& image, float maxValue) const;
   plResult DetectNumChannels(plArrayPtr<const plTexConvSliceChannelMapping> channelMapping, plUInt32& uiNumChannels);
+  plResult InvertNormalMap(plImage& img);
 
   //////////////////////////////////////////////////////////////////////////
   // Reading from the descriptor

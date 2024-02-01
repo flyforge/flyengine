@@ -26,9 +26,9 @@ struct plLongOpControllerEvent
 /// Through the controller long ops can be started or canceled, which is exposed in the UI by the plQtLongOpsPanel.
 ///
 /// Through the broadcast plLongOpControllerEvent, one can track the state of all long ops.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpControllerManager final : public plLongOpManager
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpControllerManager final : public plLongOpManager
 {
-  PLASMA_DECLARE_SINGLETON(plLongOpControllerManager);
+  PL_DECLARE_SINGLETON(plLongOpControllerManager);
 
 public:
   plLongOpControllerManager();
@@ -69,7 +69,7 @@ public:
   void CancelAndRemoveAllOpsForDocument(const plUuid& documentGuid);
 
   /// \brief Returns a pointer to the given long op, or null if the GUID does not exist.
-  ProxyOpInfo* GetOperation(const plUuid& guid);
+  ProxyOpInfo* GetOperation(const plUuid& opGuid);
 
   /// \brief Gives access to all currently available long ops. Make sure the lock m_Mutex (of the plLongOpManager base class) while accessing this.
   const plDynamicArray<plUniquePtr<ProxyOpInfo>>& GetOperations() const { return m_ProxyOps; }

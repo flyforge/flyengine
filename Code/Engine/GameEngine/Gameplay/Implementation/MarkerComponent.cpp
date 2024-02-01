@@ -9,27 +9,27 @@
 #include <GameEngine/Messages/DamageMessage.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plMarkerComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plMarkerComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Marker", GetMarkerType, SetMarkerType)->AddAttributes(new plDynamicStringEnumAttribute("SpatialDataCategoryEnum")),
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.1)),
+    PL_ACCESSOR_PROPERTY("Marker", GetMarkerType, SetMarkerType)->AddAttributes(new plDynamicStringEnumAttribute("SpatialDataCategoryEnum")),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.1)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnMsgUpdateLocalBounds)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnMsgUpdateLocalBounds)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Gameplay/Logic"),
+    new plCategoryAttribute("Gameplay"),
     new plSphereVisualizerAttribute("Radius", plColor::LightSkyBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMarkerComponent::plMarkerComponent() = default;
@@ -47,9 +47,9 @@ const char* plMarkerComponent::GetMarkerType() const
   return m_sMarkerType;
 }
 
-void plMarkerComponent::SetRadius(float radius)
+void plMarkerComponent::SetRadius(float fRadius)
 {
-  m_fRadius = radius;
+  m_fRadius = fRadius;
 
   UpdateMarker();
 }
@@ -61,7 +61,7 @@ float plMarkerComponent::GetRadius() const
 
 void plMarkerComponent::OnMsgUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere(plVec3(0), m_fRadius), m_SpatialCategory);
+  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0), m_fRadius), m_SpatialCategory);
 }
 
 void plMarkerComponent::UpdateMarker()
@@ -81,20 +81,20 @@ void plMarkerComponent::UpdateMarker()
   }
 }
 
-void plMarkerComponent::SerializeComponent(plWorldWriter& stream) const
+void plMarkerComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_sMarkerType;
   s << m_fRadius;
 }
 
-void plMarkerComponent::DeserializeComponent(plWorldReader& stream)
+void plMarkerComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_sMarkerType;
   s >> m_fRadius;
@@ -114,4 +114,4 @@ void plMarkerComponent::OnDeactivated()
   GetOwner()->UpdateLocalBounds();
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_MarkerComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_MarkerComponent);

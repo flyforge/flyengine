@@ -18,9 +18,9 @@ enum plParticleTypeSortingKey
   BlendedForeground,
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleTypeFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetTypeType() const = 0;
@@ -28,22 +28,22 @@ public:
 
   plParticleType* CreateType(plParticleSystemInstance* pOwner) const;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const {}
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const {}
 
-  virtual void Save(plStreamWriter& stream) const = 0;
-  virtual void Load(plStreamReader& stream) = 0;
+  virtual void Save(plStreamWriter& inout_stream) const = 0;
+  virtual void Load(plStreamReader& inout_stream) = 0;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleType : public plParticleModule
+class PL_PARTICLEPLUGIN_DLL plParticleType : public plParticleModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleType, plParticleModule);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleType, plParticleModule);
 
   friend class plParticleSystemInstance;
 
 public:
   virtual float GetMaxParticleRadius(float fParticleSize) const { return fParticleSize * 0.5f; }
 
-  virtual void ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const = 0;
+  virtual void ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const = 0;
 
 protected:
   plParticleType();

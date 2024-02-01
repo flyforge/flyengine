@@ -1523,7 +1523,7 @@ void _glfwPlatformSetCursorPos(_GLFWwindow* window, double x, double y)
     }
 
     // HACK: Calling this right after setting the cursor position prevents macOS
-    //       from frepling the cursor for a fraction of a second afterwards
+    //       from freezing the cursor for a fraction of a second afterwards
     if (window->cursorMode != GLFW_CURSOR_DISABLED)
         CGAssociateMouseAndMouseCursorPosition(true);
 

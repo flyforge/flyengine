@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Debug/DebugRenderer.h>
 #include <RendererCore/Lights/ClusteredDataProvider.h>
 #include <RendererCore/Lights/SimplifiedDataProvider.h>
@@ -12,22 +13,21 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plForwardRenderPass, 2, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plForwardRenderPass, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_PinColor),
-    PLASMA_MEMBER_PROPERTY("Velocity", m_PinVelocity),
-    PLASMA_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
-    PLASMA_ENUM_MEMBER_PROPERTY("ShadingQuality", plForwardRenderShadingQuality, m_ShadingQuality)->AddAttributes(new plDefaultValueAttribute((int)plForwardRenderShadingQuality::Normal)),
+    PL_MEMBER_PROPERTY("Color", m_PinColor),
+    PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
+    PL_ENUM_MEMBER_PROPERTY("ShadingQuality", plForwardRenderShadingQuality, m_ShadingQuality)->AddAttributes(new plDefaultValueAttribute((int)plForwardRenderShadingQuality::Normal)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plForwardRenderShadingQuality, 1)
-  PLASMA_ENUM_CONSTANTS(plForwardRenderShadingQuality::Normal, plForwardRenderShadingQuality::Simplified)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plForwardRenderShadingQuality, 1)
+  PL_ENUM_CONSTANTS(plForwardRenderShadingQuality::Normal, plForwardRenderShadingQuality::Simplified)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plForwardRenderPass::plForwardRenderPass(const char* szName)
@@ -36,7 +36,7 @@ plForwardRenderPass::plForwardRenderPass(const char* szName)
 {
 }
 
-plForwardRenderPass::~plForwardRenderPass() {}
+plForwardRenderPass::~plForwardRenderPass() = default;
 
 bool plForwardRenderPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
@@ -49,12 +49,6 @@ bool plForwardRenderPass::GetRenderTargetDescriptions(const plView& view, const 
   {
     plLog::Error("No color input connected to pass '{0}'!", GetName());
     return false;
-  }
-
-  // Velocity
-  if (inputs[m_PinVelocity.m_uiInputIndex])
-  {
-    outputs[m_PinVelocity.m_uiOutputIndex] = *inputs[m_PinVelocity.m_uiInputIndex];
   }
 
   // DepthStencil
@@ -87,6 +81,22 @@ void plForwardRenderPass::Execute(const plRenderViewContext& renderViewContext, 
   pDevice->EndPass(pGALPass);
 }
 
+plResult plForwardRenderPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_ShadingQuality;
+  return PL_SUCCESS;
+}
+
+plResult plForwardRenderPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_ShadingQuality;
+  return PL_SUCCESS;
+}
+
 void plForwardRenderPass::SetupResources(plGALPass* pGALPass, const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs)
 {
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
@@ -96,11 +106,6 @@ void plForwardRenderPass::SetupResources(plGALPass* pGALPass, const plRenderView
   if (inputs[m_PinColor.m_uiInputIndex])
   {
     renderingSetup.m_RenderTargetSetup.SetRenderTarget(0, pDevice->GetDefaultRenderTargetView(inputs[m_PinColor.m_uiInputIndex]->m_TextureHandle));
-  }
-
-  if (inputs[m_PinVelocity.m_uiInputIndex])
-  {
-    renderingSetup.m_RenderTargetSetup.SetRenderTarget(1, pDevice->GetDefaultRenderTargetView(inputs[m_PinVelocity.m_uiInputIndex]->m_TextureHandle));
   }
 
   if (inputs[m_PinDepthStencil.m_uiInputIndex])
@@ -139,7 +144,7 @@ void plForwardRenderPass::SetupPermutationVars(const plRenderViewContext& render
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Unknown shading quality setting.");
+    PL_REPORT_FAILURE("Unknown shading quality setting.");
   }
 }
 
@@ -160,27 +165,4 @@ void plForwardRenderPass::SetupLighting(const plRenderViewContext& renderViewCon
   }
 }
 
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////
-
-#include <Foundation/Serialization/AbstractObjectGraph.h>
-#include <Foundation/Serialization/GraphPatch.h>
-
-class plForwardRenderPassPatch_1_2 : public plGraphPatch
-{
-public:
-  plForwardRenderPassPatch_1_2()
-    : plGraphPatch("plForwardRenderPass", 2)
-  {
-  }
-
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
-  {
-    pNode->AddProperty("Velocity", {});
-  }
-};
-
-plForwardRenderPassPatch_1_2 g_plForwardRenderPassPatch_1_2;
-
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_ForwardRenderPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_ForwardRenderPass);

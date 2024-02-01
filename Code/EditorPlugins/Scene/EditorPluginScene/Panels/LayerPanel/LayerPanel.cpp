@@ -12,7 +12,7 @@ plQtLayerPanel::plQtLayerPanel(QWidget* pParent, plScene2Document* pDocument)
   : plQtDocumentPanel(pParent, pDocument)
 {
   setObjectName("LayerPanel");
-  setWindowTitle("LAYERS");
+  setWindowTitle("Layers");
   m_pSceneDocument = pDocument;
   m_pDelegate = new plQtLayerDelegate(this, pDocument);
 
@@ -27,13 +27,13 @@ plQtLayerPanel::plQtLayerPanel(QWidget* pParent, plScene2Document* pDocument)
   m_pTreeWidget->setItemDelegate(m_pDelegate);
 
   m_pTreeWidget->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-  PLASMA_VERIFY(connect(m_pTreeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnRequestContextMenu(QPoint))) != nullptr,
+  PL_VERIFY(connect(m_pTreeWidget, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnRequestContextMenu(QPoint))) != nullptr,
     "signal/slot connection failed");
 
   setWidget(m_pTreeWidget);
 }
 
-plQtLayerPanel::~plQtLayerPanel() {}
+plQtLayerPanel::~plQtLayerPanel() = default;
 
 void plQtLayerPanel::OnRequestContextMenu(QPoint pos)
 {

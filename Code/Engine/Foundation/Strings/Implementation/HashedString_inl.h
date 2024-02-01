@@ -6,20 +6,20 @@ inline plHashedString::plHashedString(const plHashedString& rhs)
 {
   m_Data = rhs.m_Data;
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   // the string has a refcount of at least one (rhs holds a reference), thus it will definitely not get deleted on some other thread
   // therefore we can simply increase the refcount without locking
   m_Data.Value().m_iRefCount.Increment();
 #endif
 }
 
-PLASMA_FORCE_INLINE plHashedString::plHashedString(plHashedString&& rhs)
+PL_FORCE_INLINE plHashedString::plHashedString(plHashedString&& rhs)
 {
   m_Data = rhs.m_Data;
   rhs.m_Data = HashedType(); // This leaves the string in an invalid state, all operations will fail except the destructor
 }
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
 inline plHashedString::~plHashedString()
 {
   // Explicit check if data is still valid. It can be invalid if this string has been moved.
@@ -29,8 +29,6 @@ inline plHashedString::~plHashedString()
     m_Data.Value().m_iRefCount.Decrement();
   }
 }
-#else
-PLASMA_FORCE_INLINE plHashedString::~plHashedString() = default;
 #endif
 
 inline void plHashedString::operator=(const plHashedString& rhs)
@@ -38,7 +36,7 @@ inline void plHashedString::operator=(const plHashedString& rhs)
   // first increase the other refcount, then decrease ours
   HashedType tmp = rhs.m_Data;
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   tmp.Value().m_iRefCount.Increment();
 
   m_Data.Value().m_iRefCount.Decrement();
@@ -47,9 +45,9 @@ inline void plHashedString::operator=(const plHashedString& rhs)
   m_Data = tmp;
 }
 
-PLASMA_FORCE_INLINE void plHashedString::operator=(plHashedString&& rhs)
+PL_FORCE_INLINE void plHashedString::operator=(plHashedString&& rhs)
 {
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   m_Data.Value().m_iRefCount.Decrement();
 #endif
 
@@ -58,28 +56,28 @@ PLASMA_FORCE_INLINE void plHashedString::operator=(plHashedString&& rhs)
 }
 
 template <size_t N>
-PLASMA_FORCE_INLINE void plHashedString::Assign(const char (&string)[N])
+PL_FORCE_INLINE void plHashedString::Assign(const char (&string)[N])
 {
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   HashedType tmp = m_Data;
 #endif
   // this function will already increase the refcount as needed
   m_Data = AddHashedString(string, plHashingUtils::StringHash(string));
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   tmp.Value().m_iRefCount.Decrement();
 #endif
 }
 
-PLASMA_FORCE_INLINE void plHashedString::Assign(plStringView sString)
+PL_FORCE_INLINE void plHashedString::Assign(plStringView sString)
 {
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   HashedType tmp = m_Data;
 #endif
   // this function will already increase the refcount as needed
   m_Data = AddHashedString(sString, plHashingUtils::StringHash(sString));
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   tmp.Value().m_iRefCount.Decrement();
 #endif
 }
@@ -89,19 +87,9 @@ inline bool plHashedString::operator==(const plHashedString& rhs) const
   return m_Data == rhs.m_Data;
 }
 
-inline bool plHashedString::operator!=(const plHashedString& rhs) const
-{
-  return !(*this == rhs);
-}
-
 inline bool plHashedString::operator==(const plTempHashedString& rhs) const
 {
   return m_Data.Key() == rhs.m_uiHash;
-}
-
-inline bool plHashedString::operator!=(const plTempHashedString& rhs) const
-{
-  return !(*this == rhs);
 }
 
 inline bool plHashedString::operator<(const plHashedString& rhs) const
@@ -114,23 +102,23 @@ inline bool plHashedString::operator<(const plTempHashedString& rhs) const
   return m_Data.Key() < rhs.m_uiHash;
 }
 
-PLASMA_ALWAYS_INLINE const plString& plHashedString::GetString() const
+PL_ALWAYS_INLINE const plString& plHashedString::GetString() const
 {
   return m_Data.Value().m_sString;
 }
 
-PLASMA_ALWAYS_INLINE const char* plHashedString::GetData() const
+PL_ALWAYS_INLINE const char* plHashedString::GetData() const
 {
   return m_Data.Value().m_sString.GetData();
 }
 
-PLASMA_ALWAYS_INLINE plUInt64 plHashedString::GetHash() const
+PL_ALWAYS_INLINE plUInt64 plHashedString::GetHash() const
 {
   return m_Data.Key();
 }
 
 template <size_t N>
-PLASMA_FORCE_INLINE plHashedString plMakeHashedString(const char (&string)[N])
+PL_FORCE_INLINE plHashedString plMakeHashedString(const char (&string)[N])
 {
   plHashedString sResult;
   sResult.Assign(string);
@@ -139,86 +127,81 @@ PLASMA_FORCE_INLINE plHashedString plMakeHashedString(const char (&string)[N])
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString()
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString()
 {
   constexpr plUInt64 uiEmptyHash = plHashingUtils::StringHash("");
   m_uiHash = uiEmptyHash;
 }
 
 template <size_t N>
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString(const char (&string)[N])
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString(const char (&string)[N])
 {
   m_uiHash = plHashingUtils::StringHash<N>(string);
 }
 
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString(plStringView sString)
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString(plStringView sString)
 {
   m_uiHash = plHashingUtils::StringHash(sString);
 }
 
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString(const plTempHashedString& rhs)
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString(const plTempHashedString& rhs)
 {
   m_uiHash = rhs.m_uiHash;
 }
 
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString(const plHashedString& rhs)
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString(const plHashedString& rhs)
 {
   m_uiHash = rhs.GetHash();
 }
 
-PLASMA_ALWAYS_INLINE plTempHashedString::plTempHashedString(plUInt64 uiHash)
+PL_ALWAYS_INLINE plTempHashedString::plTempHashedString(plUInt64 uiHash)
 {
   m_uiHash = uiHash;
 }
 
 template <size_t N>
-PLASMA_ALWAYS_INLINE void plTempHashedString::operator=(const char (&string)[N])
+PL_ALWAYS_INLINE void plTempHashedString::operator=(const char (&string)[N])
 {
   m_uiHash = plHashingUtils::StringHash<N>(string);
 }
 
-PLASMA_ALWAYS_INLINE void plTempHashedString::operator=(plStringView sString)
+PL_ALWAYS_INLINE void plTempHashedString::operator=(plStringView sString)
 {
   m_uiHash = plHashingUtils::StringHash(sString);
 }
 
-PLASMA_ALWAYS_INLINE void plTempHashedString::operator=(const plTempHashedString& rhs)
+PL_ALWAYS_INLINE void plTempHashedString::operator=(const plTempHashedString& rhs)
 {
   m_uiHash = rhs.m_uiHash;
 }
 
-PLASMA_ALWAYS_INLINE void plTempHashedString::operator=(const plHashedString& rhs)
+PL_ALWAYS_INLINE void plTempHashedString::operator=(const plHashedString& rhs)
 {
   m_uiHash = rhs.GetHash();
 }
 
-PLASMA_ALWAYS_INLINE bool plTempHashedString::operator==(const plTempHashedString& rhs) const
+PL_ALWAYS_INLINE bool plTempHashedString::operator==(const plTempHashedString& rhs) const
 {
   return m_uiHash == rhs.m_uiHash;
 }
 
-PLASMA_ALWAYS_INLINE bool plTempHashedString::operator!=(const plTempHashedString& rhs) const
-{
-  return !(m_uiHash == rhs.m_uiHash);
-}
-
-PLASMA_ALWAYS_INLINE bool plTempHashedString::operator<(const plTempHashedString& rhs) const
+PL_ALWAYS_INLINE bool plTempHashedString::operator<(const plTempHashedString& rhs) const
 {
   return m_uiHash < rhs.m_uiHash;
 }
 
-PLASMA_ALWAYS_INLINE bool plTempHashedString::IsEmpty() const
+PL_ALWAYS_INLINE bool plTempHashedString::IsEmpty() const
 {
   constexpr plUInt64 uiEmptyHash = plHashingUtils::StringHash("");
   return m_uiHash == uiEmptyHash;
 }
 
-PLASMA_ALWAYS_INLINE void plTempHashedString::Clear()
+PL_ALWAYS_INLINE void plTempHashedString::Clear()
 {
   *this = plTempHashedString();
 }
 
-PLASMA_ALWAYS_INLINE plUInt64 plTempHashedString::GetHash() const
+PL_ALWAYS_INLINE plUInt64 plTempHashedString::GetHash() const
 {
   return m_uiHash;
 }
@@ -228,28 +211,28 @@ PLASMA_ALWAYS_INLINE plUInt64 plTempHashedString::GetHash() const
 template <>
 struct plHashHelper<plHashedString>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plHashedString& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plHashedString& value)
   {
     return plHashingUtils::StringHashTo32(value.GetHash());
   }
 
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plTempHashedString& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plTempHashedString& value)
   {
     return plHashingUtils::StringHashTo32(value.GetHash());
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plHashedString& a, const plHashedString& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plHashedString& a, const plHashedString& b) { return a == b; }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plHashedString& a, const plTempHashedString& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plHashedString& a, const plTempHashedString& b) { return a == b; }
 };
 
 template <>
 struct plHashHelper<plTempHashedString>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plTempHashedString& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plTempHashedString& value)
   {
     return plHashingUtils::StringHashTo32(value.GetHash());
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plTempHashedString& a, const plTempHashedString& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plTempHashedString& a, const plTempHashedString& b) { return a == b; }
 };

@@ -805,7 +805,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMaterialShaderMode"}
 		u3 %TypeVersion{1}
@@ -877,7 +877,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"PlasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMaterialAssetProperties"}
 		u3 %TypeVersion{4}

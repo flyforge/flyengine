@@ -14,11 +14,11 @@
 
 plResult plRmlUiConfiguration::Save(plStringView sFile) const
 {
-  PLASMA_LOG_BLOCK("plRmlUiConfiguration::Save()");
+  PL_LOG_BLOCK("plRmlUiConfiguration::Save()");
 
   plFileWriter file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlWriter writer;
   writer.SetOutputStream(&file);
@@ -32,16 +32,16 @@ plResult plRmlUiConfiguration::Save(plStringView sFile) const
   }
   writer.EndObject();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plRmlUiConfiguration::Load(plStringView sFile)
 {
-  PLASMA_LOG_BLOCK("plRmlUiConfiguration::Load()");
+  PL_LOG_BLOCK("plRmlUiConfiguration::Load()");
 
   m_Fonts.Clear();
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   if (sFile == s_sConfigFile)
   {
     sFile = plFileSystem::MigrateFileLocation(":project/RmlUiConfig.ddl", s_sConfigFile);
@@ -50,13 +50,13 @@ plResult plRmlUiConfiguration::Load(plStringView sFile)
 
   plFileReader file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlReader reader;
   if (reader.ParseDocument(file, 0, plLog::GetThreadLocalLogSystem()).Failed())
   {
     plLog::Error("Failed to parse RmlUi config file '{0}'", sFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plOpenDdlReaderElement* pTree = reader.GetRootElement();
@@ -72,7 +72,7 @@ plResult plRmlUiConfiguration::Load(plStringView sFile)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plRmlUiConfiguration::operator==(const plRmlUiConfiguration& rhs) const
@@ -82,7 +82,7 @@ bool plRmlUiConfiguration::operator==(const plRmlUiConfiguration& rhs) const
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_SINGLETON(plRmlUi);
+PL_IMPLEMENT_SINGLETON(plRmlUi);
 
 struct plRmlUi::Data
 {
@@ -103,7 +103,7 @@ struct plRmlUi::Data
 plRmlUi::plRmlUi()
   : m_SingletonRegistrar(this)
 {
-  m_pData = PLASMA_DEFAULT_NEW(Data);
+  m_pData = PL_DEFAULT_NEW(Data);
 
   Rml::SetRenderInterface(&m_pData->m_Extractor);
   Rml::SetFileInterface(&m_pData->m_FileInterface);
@@ -134,9 +134,9 @@ plRmlUi::~plRmlUi()
   Rml::Shutdown();
 }
 
-plRmlUiContext* plRmlUi::CreateContext(const char* szName, const plVec2U32& initialSize)
+plRmlUiContext* plRmlUi::CreateContext(const char* szName, const plVec2U32& vInitialSize)
 {
-  plRmlUiContext* pContext = static_cast<plRmlUiContext*>(Rml::CreateContext(szName, Rml::Vector2i(initialSize.x, initialSize.y)));
+  plRmlUiContext* pContext = static_cast<plRmlUiContext*>(Rml::CreateContext(szName, Rml::Vector2i(vInitialSize.x, vInitialSize.y)));
 
   m_pData->m_Contexts.PushBack(pContext);
 
@@ -161,18 +161,18 @@ bool plRmlUi::AnyContextWantsInput()
   return false;
 }
 
-void plRmlUi::ExtractContext(plRmlUiContext& context, plMsgExtractRenderData& msg)
+void plRmlUi::ExtractContext(plRmlUiContext& ref_context, plMsgExtractRenderData& ref_msg)
 {
-  if (context.HasDocument() == false)
+  if (ref_context.HasDocument() == false)
     return;
 
   // Unfortunately we need to hold a lock for the whole extraction of a context since RmlUi is not thread safe.
-  PLASMA_LOCK(m_pData->m_ExtractionMutex);
+  PL_LOCK(m_pData->m_ExtractionMutex);
 
-  context.ExtractRenderData(m_pData->m_Extractor);
+  ref_context.ExtractRenderData(m_pData->m_Extractor);
 
-  if (context.m_pRenderData != nullptr)
+  if (ref_context.m_pRenderData != nullptr)
   {
-    msg.AddRenderData(context.m_pRenderData, plDefaultRenderDataCategories::GUI, plRenderData::Caching::Never);
+    ref_msg.AddRenderData(ref_context.m_pRenderData, plDefaultRenderDataCategories::GUI, plRenderData::Caching::Never);
   }
 }

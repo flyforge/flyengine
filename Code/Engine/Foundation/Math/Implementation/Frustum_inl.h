@@ -2,7 +2,7 @@
 
 #include <Foundation/Math/Frustum.h>
 
-PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
+PL_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
 {
   plSimdVec4f center2 = object.m_Min + object.m_Max;
   plSimdVec4f extents = object.GetExtents();
@@ -10,9 +10,9 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
   // We're working with center and extents scaled by two - but the plane equation still works out
   // correctly since we set W = 2 here.
   center2.SetW(plSimdFloat(2.0f));
-  extents.SetW(plSimdFloat::Zero());
+  extents.SetW(plSimdFloat::MakeZero());
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
   plSimdVec4f minusZero;
   minusZero.Set(-0.0f);
 #endif
@@ -25,17 +25,17 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
     // Change signs of extents to match signs of plane normal
     plSimdVec4f maxExtent;
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
     // Specialized for SSE - this is faster than FlipSign for multiple calls since we can preload the constant -0.0f
     maxExtent.m_v = _mm_xor_ps(extents.m_v, _mm_andnot_ps(equation.m_v, minusZero.m_v));
 #else
-    maxExtent = extents.FlipSign(equation >= plSimdVec4f::ZeroVector());
+    maxExtent = extents.FlipSign(equation >= plSimdVec4f::MakeZero());
 #endif
 
     // Compute AABB corner which is the furthest along the plane normal
     const plSimdVec4f offset = center2 + maxExtent;
 
-    if (equation.Dot<4>(offset) > plSimdFloat::Zero())
+    if (equation.Dot<4>(offset) > plSimdFloat::MakeZero())
     {
       // outside
       return false;
@@ -46,7 +46,7 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBBox& object) const
   return true;
 }
 
-PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBSphere& object) const
+PL_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBSphere& object) const
 {
   // Calculate the minimum distance of the given sphere's center to all frustum planes.
   plSimdFloat xSphere = object.m_CenterAndRadius.x();
@@ -109,5 +109,5 @@ PLASMA_FORCE_INLINE bool plFrustum::Overlaps(const plSimdBSphere& object) const
   minDist += radius;
 
   // If the distance is still less than zero, the sphere is completely "outside" of at least one plane.
-  return (minDist < plSimdVec4f::ZeroVector()).NoneSet();
+  return (minDist < plSimdVec4f::MakeZero()).NoneSet();
 }

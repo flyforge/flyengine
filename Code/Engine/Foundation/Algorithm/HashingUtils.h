@@ -4,7 +4,7 @@
 #include <Foundation/Basics.h>
 
 /// \brief This class provides implementations of different hashing algorithms.
-class PLASMA_FOUNDATION_DLL plHashingUtils
+class PL_FOUNDATION_DLL plHashingUtils
 {
 public:
   /// \brief Calculates the CRC32 checksum of the given key.

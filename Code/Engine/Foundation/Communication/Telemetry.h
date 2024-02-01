@@ -11,7 +11,7 @@
 
 
 /// \todo document and test (and finish)
-class PLASMA_FOUNDATION_DLL plTelemetry
+class PL_FOUNDATION_DLL plTelemetry
 {
 public:
   /// \brief The port over which plTelemetry will connect.
@@ -128,7 +128,7 @@ public:
 
   /// \brief Checks whether any message for the system with the given ID exists and returns that.
   ///
-  /// If no message for the given system is available, PLASMA_FAILURE is returned.
+  /// If no message for the given system is available, PL_FAILURE is returned.
   /// This function will not poll the network to check whether new messages arrived.
   /// Use UpdateNetwork() and RetrieveMessage() in a loop, if you are waiting for a specific message,
   /// to continuously update the network state and check whether the desired message has arrived.

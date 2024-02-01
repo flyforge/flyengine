@@ -8,13 +8,13 @@ class plScene2Document;
 struct plScene2LayerEvent;
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plLayerActions
+class PL_EDITORPLUGINSCENE_DLL plLayerActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hLayerCategory;
   static plActionDescriptorHandle s_hCreateLayer;
@@ -26,9 +26,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plLayerAction : public plButtonAction
+class PL_EDITORPLUGINSCENE_DLL plLayerAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLayerAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plLayerAction, plButtonAction);
 
 public:
   enum class ActionType
@@ -44,7 +44,7 @@ public:
   plLayerAction(const plActionContext& context, const char* szName, ActionType type);
   ~plLayerAction();
 
-  static void ToggleLayerLoaded(plScene2Document* m_pSceneDocument, plUuid layerGuid);
+  static void ToggleLayerLoaded(plScene2Document* pM_pSceneDocument, plUuid layerGuid);
   virtual void Execute(const plVariant& value) override;
 
 private:

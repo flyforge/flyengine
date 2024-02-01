@@ -28,7 +28,7 @@ struct plRenderWorldRenderEvent;
 // plRenderContext
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plRenderContext
+class PL_RENDERERCORE_DLL plRenderContext
 {
 private:
   plRenderContext();
@@ -64,10 +64,10 @@ public:
   template <typename T>
   class CommandEncoderScope
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(CommandEncoderScope);
+    PL_DISALLOW_COPY_AND_ASSIGN(CommandEncoderScope);
 
   public:
-    PLASMA_ALWAYS_INLINE ~CommandEncoderScope()
+    PL_ALWAYS_INLINE ~CommandEncoderScope()
     {
       m_RenderContext.EndCommandEncoder(m_pGALCommandEncoder);
 
@@ -77,13 +77,13 @@ public:
       }
     }
 
-    PLASMA_ALWAYS_INLINE T* operator->() { return m_pGALCommandEncoder; }
-    PLASMA_ALWAYS_INLINE operator const T*() { return m_pGALCommandEncoder; }
+    PL_ALWAYS_INLINE T* operator->() { return m_pGALCommandEncoder; }
+    PL_ALWAYS_INLINE operator const T*() { return m_pGALCommandEncoder; }
 
   private:
     friend class plRenderContext;
 
-    PLASMA_ALWAYS_INLINE CommandEncoderScope(plRenderContext& renderContext, plGALPass* pGALPass, T* pGALCommandEncoder)
+    PL_ALWAYS_INLINE CommandEncoderScope(plRenderContext& renderContext, plGALPass* pGALPass, T* pGALCommandEncoder)
       : m_RenderContext(renderContext)
       , m_pGALPass(pGALPass)
       , m_pGALCommandEncoder(pGALCommandEncoder)
@@ -96,12 +96,12 @@ public:
   };
 
   using RenderingScope = CommandEncoderScope<plGALRenderCommandEncoder>;
-  PLASMA_ALWAYS_INLINE static RenderingScope BeginRenderingScope(plGALPass* pGALPass, const plRenderViewContext& viewContext, const plGALRenderingSetup& renderingSetup, const char* szName = "", bool bStereoRendering = false)
+  PL_ALWAYS_INLINE static RenderingScope BeginRenderingScope(plGALPass* pGALPass, const plRenderViewContext& viewContext, const plGALRenderingSetup& renderingSetup, const char* szName = "", bool bStereoRendering = false)
   {
     return RenderingScope(*viewContext.m_pRenderContext, nullptr, viewContext.m_pRenderContext->BeginRendering(pGALPass, renderingSetup, viewContext.m_pViewData->m_ViewPortRect, szName, bStereoRendering));
   }
 
-  PLASMA_ALWAYS_INLINE static RenderingScope BeginPassAndRenderingScope(const plRenderViewContext& viewContext, const plGALRenderingSetup& renderingSetup, const char* szName, bool bStereoRendering = false)
+  PL_ALWAYS_INLINE static RenderingScope BeginPassAndRenderingScope(const plRenderViewContext& viewContext, const plGALRenderingSetup& renderingSetup, const char* szName, bool bStereoRendering = false)
   {
     plGALPass* pGALPass = plGALDevice::GetDefaultDevice()->BeginPass(szName);
 
@@ -109,33 +109,33 @@ public:
   }
 
   using ComputeScope = CommandEncoderScope<plGALComputeCommandEncoder>;
-  PLASMA_ALWAYS_INLINE static ComputeScope BeginComputeScope(plGALPass* pGALPass, const plRenderViewContext& viewContext, const char* szName = "")
+  PL_ALWAYS_INLINE static ComputeScope BeginComputeScope(plGALPass* pGALPass, const plRenderViewContext& viewContext, const char* szName = "")
   {
     return ComputeScope(*viewContext.m_pRenderContext, nullptr, viewContext.m_pRenderContext->BeginCompute(pGALPass, szName));
   }
 
-  PLASMA_ALWAYS_INLINE static ComputeScope BeginPassAndComputeScope(const plRenderViewContext& viewContext, const char* szName)
+  PL_ALWAYS_INLINE static ComputeScope BeginPassAndComputeScope(const plRenderViewContext& viewContext, const char* szName)
   {
     plGALPass* pGALPass = plGALDevice::GetDefaultDevice()->BeginPass(szName);
 
     return ComputeScope(*viewContext.m_pRenderContext, pGALPass, viewContext.m_pRenderContext->BeginCompute(pGALPass));
   }
 
-  PLASMA_ALWAYS_INLINE plGALCommandEncoder* GetCommandEncoder()
+  PL_ALWAYS_INLINE plGALCommandEncoder* GetCommandEncoder()
   {
-    PLASMA_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr, "BeginRendering/Compute has not been called");
+    PL_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr, "BeginRendering/Compute has not been called");
     return m_pGALCommandEncoder;
   }
 
-  PLASMA_ALWAYS_INLINE plGALRenderCommandEncoder* GetRenderCommandEncoder()
+  PL_ALWAYS_INLINE plGALRenderCommandEncoder* GetRenderCommandEncoder()
   {
-    PLASMA_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr && !m_bCompute, "BeginRendering has not been called");
+    PL_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr && !m_bCompute, "BeginRendering has not been called");
     return static_cast<plGALRenderCommandEncoder*>(m_pGALCommandEncoder);
   }
 
-  PLASMA_ALWAYS_INLINE plGALComputeCommandEncoder* GetComputeCommandEncoder()
+  PL_ALWAYS_INLINE plGALComputeCommandEncoder* GetComputeCommandEncoder()
   {
-    PLASMA_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr && m_bCompute, "BeginCompute has not been called");
+    PL_ASSERT_DEBUG(m_pGALCommandEncoder != nullptr && m_bCompute, "BeginCompute has not been called");
     return static_cast<plGALComputeCommandEncoder*>(m_pGALCommandEncoder);
   }
 
@@ -164,6 +164,22 @@ public:
   void BindConstantBuffer(const plTempHashedString& sSlotName, plGALBufferHandle hConstantBuffer);
   void BindConstantBuffer(const plTempHashedString& sSlotName, plConstantBufferStorageHandle hConstantBufferStorage);
 
+  /// \brief Sets push constants to the given data block.
+  /// Note that for platforms that don't support push constants, this is emulated via a constant buffer. Thus, a slot name must be provided as well which matches the name of the BEGIN_PUSH_CONSTANTS block in the shader.
+  /// \param sSlotName Name of the BEGIN_PUSH_CONSTANTS block in the shader.
+  /// \param data Data of the push constants. If more than 128 bytes, plGALDeviceCapabilities::m_uiMaxPushConstantsSize should be checked to ensure the data block is not too big for the platform.
+  void SetPushConstants(const plTempHashedString& sSlotName, plArrayPtr<const plUInt8> data);
+
+  /// Templated version of SetPushConstants.
+  /// \tparam T Type of the push constants struct.
+  /// \param sSlotName Name of the BEGIN_PUSH_CONSTANTS block in the shader.
+  /// \param constants Instance of type T that contains the push constants.
+  template <typename T>
+  PL_ALWAYS_INLINE void SetPushConstants(const plTempHashedString& sSlotName, const T& constants)
+  {
+    SetPushConstants(sSlotName, plArrayPtr<const plUInt8>(reinterpret_cast<const plUInt8*>(&constants), sizeof(T)));
+  }
+
   /// \brief Sets the currently active shader on the given render context.
   ///
   /// This function has no effect until the next draw or dispatch call on the context.
@@ -172,7 +188,7 @@ public:
   void BindMeshBuffer(const plDynamicMeshBufferResourceHandle& hDynamicMeshBuffer);
   void BindMeshBuffer(const plMeshBufferResourceHandle& hMeshBuffer);
   void BindMeshBuffer(plGALBufferHandle hVertexBuffer, plGALBufferHandle hIndexBuffer, const plVertexDeclarationInfo* pVertexDeclarationInfo, plGALPrimitiveTopology::Enum topology, plUInt32 uiPrimitiveCount, plGALBufferHandle hVertexBuffer2 = {}, plGALBufferHandle hVertexBuffer3 = {}, plGALBufferHandle hVertexBuffer4 = {});
-  PLASMA_ALWAYS_INLINE void BindNullMeshBuffer(plGALPrimitiveTopology::Enum topology, plUInt32 uiPrimitiveCount)
+  PL_ALWAYS_INLINE void BindNullMeshBuffer(plGALPrimitiveTopology::Enum topology, plUInt32 uiPrimitiveCount)
   {
     BindMeshBuffer(plGALBufferHandle(), plGALBufferHandle(), nullptr, topology, uiPrimitiveCount);
   }
@@ -215,13 +231,13 @@ public:
 public:
   // Constant buffer storage handling
   template <typename T>
-  PLASMA_ALWAYS_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage()
+  PL_ALWAYS_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage()
   {
     return CreateConstantBufferStorage(sizeof(T));
   }
 
   template <typename T>
-  PLASMA_FORCE_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage(plConstantBufferStorage<T>*& out_pStorage)
+  PL_FORCE_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage(plConstantBufferStorage<T>*& out_pStorage)
   {
     plConstantBufferStorageBase* pStorage;
     plConstantBufferStorageHandle hStorage = CreateConstantBufferStorage(sizeof(T), pStorage);
@@ -229,7 +245,7 @@ public:
     return hStorage;
   }
 
-  PLASMA_FORCE_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage(plUInt32 uiSizeInBytes)
+  PL_FORCE_INLINE static plConstantBufferStorageHandle CreateConstantBufferStorage(plUInt32 uiSizeInBytes)
   {
     plConstantBufferStorageBase* pStorage;
     return CreateConstantBufferStorage(uiSizeInBytes, pStorage);
@@ -239,7 +255,7 @@ public:
   static void DeleteConstantBufferStorage(plConstantBufferStorageHandle hStorage);
 
   template <typename T>
-  PLASMA_FORCE_INLINE static bool TryGetConstantBufferStorage(plConstantBufferStorageHandle hStorage, plConstantBufferStorage<T>*& out_pStorage)
+  PL_FORCE_INLINE static bool TryGetConstantBufferStorage(plConstantBufferStorageHandle hStorage, plConstantBufferStorage<T>*& out_pStorage)
   {
     plConstantBufferStorageBase* pStorage = nullptr;
     bool bResult = TryGetConstantBufferStorage(hStorage, pStorage);
@@ -250,7 +266,7 @@ public:
   static bool TryGetConstantBufferStorage(plConstantBufferStorageHandle hStorage, plConstantBufferStorageBase*& out_pStorage);
 
   template <typename T>
-  PLASMA_FORCE_INLINE static T* GetConstantBufferData(plConstantBufferStorageHandle hStorage)
+  PL_FORCE_INLINE static T* GetConstantBufferData(plConstantBufferStorageHandle hStorage)
   {
     plConstantBufferStorage<T>* pStorage = nullptr;
     if (TryGetConstantBufferStorage(hStorage, pStorage))
@@ -262,12 +278,14 @@ public:
   }
 
   // Default sampler state
-  static plGALSamplerStateHandle GetDefaultSamplerState(plBitflags<plDefaultSamplerFlags> flags);
+  static plGALSamplerStateCreationDescription GetDefaultSamplerState(plBitflags<plDefaultSamplerFlags> flags);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, RendererContext);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, RendererContext);
 
   static void LoadBuiltinShader(plShaderUtils::plBuiltinShaderType type, plShaderUtils::plBuiltinShader& out_shader);
+  static void RegisterImmutableSamplers();
+  static void OnEngineStartup();
   static void OnEngineShutdown();
 
 private:
@@ -299,12 +317,13 @@ private:
   plHashTable<plUInt64, plGALUnorderedAccessViewHandle> m_BoundUAVs;
   plHashTable<plUInt64, plGALSamplerStateHandle> m_BoundSamplers;
   plHashTable<plUInt64, plGALResourceViewHandle> m_BoundBuffer;
+  plGALSamplerStateHandle m_hFallbackSampler;
 
   struct BoundConstantBuffer
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
-    BoundConstantBuffer() {}
+    BoundConstantBuffer() = default;
     BoundConstantBuffer(plGALBufferHandle hConstantBuffer)
       : m_hConstantBuffer(hConstantBuffer)
     {
@@ -321,13 +340,14 @@ private:
   plHashTable<plUInt64, BoundConstantBuffer> m_BoundConstantBuffers;
 
   plConstantBufferStorageHandle m_hGlobalConstantBufferStorage;
+  plConstantBufferStorageHandle m_hPushConstantsStorage;
 
   struct ShaderVertexDecl
   {
     plGALShaderHandle m_hShader;
     plUInt32 m_uiVertexDeclarationHash;
 
-    PLASMA_FORCE_INLINE bool operator<(const ShaderVertexDecl& rhs) const
+    PL_FORCE_INLINE bool operator<(const ShaderVertexDecl& rhs) const
     {
       if (m_hShader < rhs.m_hShader)
         return true;
@@ -336,7 +356,7 @@ private:
       return m_uiVertexDeclarationHash < rhs.m_uiVertexDeclarationHash;
     }
 
-    PLASMA_FORCE_INLINE bool operator==(const ShaderVertexDecl& rhs) const
+    PL_FORCE_INLINE bool operator==(const ShaderVertexDecl& rhs) const
     {
       return (m_hShader == rhs.m_hShader && m_uiVertexDeclarationHash == rhs.m_uiVertexDeclarationHash);
     }
@@ -350,13 +370,11 @@ private:
   static plIdTable<plConstantBufferStorageId, plConstantBufferStorageBase*> s_ConstantBufferStorageTable;
   static plMap<plUInt32, plDynamicArray<plConstantBufferStorageBase*>> s_FreeConstantBufferStorage;
 
-  static plGALSamplerStateHandle s_hDefaultSamplerStates[4];
-
 private: // Per Renderer States
   friend RenderingScope;
   friend ComputeScope;
-  PLASMA_ALWAYS_INLINE void EndCommandEncoder(plGALRenderCommandEncoder*) { EndRendering(); }
-  PLASMA_ALWAYS_INLINE void EndCommandEncoder(plGALComputeCommandEncoder*) { EndCompute(); }
+  PL_ALWAYS_INLINE void EndCommandEncoder(plGALRenderCommandEncoder*) { EndRendering(); }
+  PL_ALWAYS_INLINE void EndCommandEncoder(plGALComputeCommandEncoder*) { EndCompute(); }
 
   plGALPass* m_pGALPass = nullptr;
   plGALCommandEncoder* m_pGALCommandEncoder = nullptr;
@@ -369,9 +387,9 @@ private: // Per Renderer States
   void BindShaderInternal(const plShaderResourceHandle& hShader, plBitflags<plShaderBindFlags> flags);
   plShaderPermutationResource* ApplyShaderState();
   plMaterialResource* ApplyMaterialState();
-  void ApplyConstantBufferBindings(const plShaderStageBinary* pBinary);
-  void ApplyTextureBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
-  void ApplyUAVBindings(const plShaderStageBinary* pBinary);
-  void ApplySamplerBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
-  void ApplyBufferBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary);
+  void ApplyConstantBufferBindings(const plGALShader* pShader);
+  void ApplyTextureBindings(const plGALShader* pShader);
+  void ApplyUAVBindings(const plGALShader* pShader);
+  void ApplySamplerBindings(const plGALShader* pShader);
+  void ApplyBufferBindings(const plGALShader* pShader);
 };

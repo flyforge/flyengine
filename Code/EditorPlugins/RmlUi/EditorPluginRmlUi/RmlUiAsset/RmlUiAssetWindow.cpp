@@ -51,7 +51,7 @@ plQtRmlUiAssetDocumentWindow::plQtRmlUiAssetDocumentWindow(plAssetDocument* pDoc
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("RmlUiAssetDockWidget");
-    pPropertyPanel->setWindowTitle("RMLUI PROPERTIES");
+    pPropertyPanel->setWindowTitle("RmlUi Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -69,7 +69,7 @@ plQtRmlUiAssetDocumentWindow::plQtRmlUiAssetDocumentWindow(plAssetDocument* pDoc
 
 void plQtRmlUiAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -77,7 +77,7 @@ void plQtRmlUiAssetDocumentWindow::InternalRedraw()
 void plQtRmlUiAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)

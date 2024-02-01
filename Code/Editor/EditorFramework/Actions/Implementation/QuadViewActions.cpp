@@ -7,13 +7,10 @@
 plActionDescriptorHandle plQuadViewActions::s_hToggleViews;
 plActionDescriptorHandle plQuadViewActions::s_hSpawnView;
 
-
 void plQuadViewActions::RegisterActions()
 {
-  s_hToggleViews =
-    PLASMA_REGISTER_ACTION_1("Scene.View.Toggle", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::ToggleViews);
-  s_hSpawnView =
-    PLASMA_REGISTER_ACTION_1("Scene.View.Span", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::SpawnView);
+  s_hToggleViews = PL_REGISTER_ACTION_1("Scene.View.Toggle", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::ToggleViews);
+  s_hSpawnView = PL_REGISTER_ACTION_1("Scene.View.Span", plActionScope::Window, "Scene", "", plQuadViewAction, plQuadViewAction::ButtonType::SpawnView);
 }
 
 void plQuadViewActions::UnregisterActions()
@@ -22,28 +19,27 @@ void plQuadViewActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSpawnView);
 }
 
-void plQuadViewActions::MapActions(const char* szMapping, const char* szPath)
+void plQuadViewActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  pMap->MapAction(s_hToggleViews, szPath, 3.0f);
-  // pMap->MapAction(s_hSpawnView, szPath, 4.0f);
+  pMap->MapAction(s_hToggleViews, "", 3.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////
 // plSceneViewAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plQuadViewAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plQuadViewAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plQuadViewAction::plQuadViewAction(const plActionContext& context, const char* szName, ButtonType button)
   : plButtonAction(context, szName, false, "")
 {
   m_ButtonType = button;
   plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(context.m_pWindow);
-  PLASMA_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtGameObjectViewWidget'!");
+  PL_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtGameObjectViewWidget'!");
   switch (m_ButtonType)
   {
     case ButtonType::ToggleViews:
@@ -55,7 +51,7 @@ plQuadViewAction::plQuadViewAction(const plActionContext& context, const char* s
   }
 }
 
-plQuadViewAction::~plQuadViewAction() {}
+plQuadViewAction::~plQuadViewAction() = default;
 
 void plQuadViewAction::Execute(const plVariant& value)
 {

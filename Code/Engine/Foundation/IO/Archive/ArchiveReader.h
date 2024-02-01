@@ -8,7 +8,7 @@ class plRawMemoryStreamReader;
 class plStreamReader;
 
 /// \brief A utility class for reading from plArchive files
-class PLASMA_FOUNDATION_DLL plArchiveReader
+class PL_FOUNDATION_DLL plArchiveReader
 {
 public:
   /// \brief Opens the given file and validates that it is a valid archive file.

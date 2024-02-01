@@ -29,7 +29,7 @@ To fix this, this tool inserts macros into each and every file which reference e
 have reference every other file in that same library and thus once a library is used in any way in some program, the entire library
 will be pulled in and will then work as intended.
 
-These references are accomplished through empty functions that are called in one central location (where PLASMA_STATICLINK_LIBRARY is defined),
+These references are accomplished through empty functions that are called in one central location (where PL_STATICLINK_LIBRARY is defined),
 though the code actually never really calls those functions, but it is enough to force the linker to look at all the other files.
 
 Usage of this tool:
@@ -39,7 +39,7 @@ Call this tool with the path to the root folder of some library as the sole comm
 StaticLinkUtil.exe "C:\plEngine\Trunk\Code\Engine\Foundation"
 
 This will iterate over all files below that folder and insert the proper macros.
-Also make sure that exactly one file in each library contains the text 'PLASMA_STATICLINK_LIBRARY();'
+Also make sure that exactly one file in each library contains the text 'PL_STATICLINK_LIBRARY();'
 
 The parameters and function body will be automatically generated and later updated, you do not need to provide more.
 
@@ -70,6 +70,9 @@ private:
   plSet<plString> m_GlobalIncludes;
 
   plMap<plString, FileContent> m_ModifiedFiles;
+
+  plSet<plString> m_FilesToModify;
+  plSet<plString> m_FilesToLink;
 
 
 public:
@@ -179,13 +182,16 @@ public:
 
   void SanitizeSourceCode(plStringBuilder& ref_sInOut)
   {
-    ref_sInOut.ReplaceAll("\r\n", "\n");
+    // this is now handled by clang-format and .editorconfig files
 
-    if (!ref_sInOut.EndsWith("\n"))
-      ref_sInOut.Append("\n");
+    // ref_sInOut.ReplaceAll("\r\n", "\n");
+    // if (!ref_sInOut.EndsWith("\n"))
+    //  ref_sInOut.Append("\n");
 
     while (ref_sInOut.EndsWith("\n\n\n\n"))
       ref_sInOut.Shrink(0, 1);
+    while (ref_sInOut.EndsWith("\r\n\r\n\r\n\r\n"))
+      ref_sInOut.Shrink(0, 2);
   }
 
   plResult ReadEntireFile(plStringView sFile, plStringBuilder& ref_sOut)
@@ -196,14 +202,14 @@ public:
     if (!m_ModifiedFiles[sFile].m_sFileContent.IsEmpty())
     {
       ref_sOut = m_ModifiedFiles[sFile].m_sFileContent.GetData();
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     plFileReader File;
-    if (File.Open(sFile) == PLASMA_FAILURE)
+    if (File.Open(sFile) == PL_FAILURE)
     {
       plLog::Error("Could not open for reading: '{0}'", sFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plDynamicArray<plUInt8> FileContent;
@@ -225,7 +231,7 @@ public:
       plLog::Error("The file \"{0}\" contains characters that are not valid Utf8. This often happens when you type special characters in an editor "
                    "that does not save the file in Utf8 encoding.",
         sFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     ref_sOut = (const char*)&FileContent[0];
@@ -234,7 +240,7 @@ public:
 
     SanitizeSourceCode(ref_sOut);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   void OverwriteFile(plStringView sFile, const plStringBuilder& sFileContent)
@@ -252,7 +258,7 @@ public:
 
   void OverwriteModifiedFiles()
   {
-    PLASMA_LOG_BLOCK("Overwriting modified files");
+    PL_LOG_BLOCK("Overwriting modified files");
 
     if (m_bHadSeriousWarnings || m_bHadErrors)
     {
@@ -272,7 +278,7 @@ public:
         continue;
 
       plFileWriter FileOut;
-      if (FileOut.Open(it.Key().GetData()) == PLASMA_FAILURE)
+      if (FileOut.Open(it.Key().GetData()) == PL_FAILURE)
       {
         plLog::Error("Could not open the file for writing: '{0}'", it.Key());
         return;
@@ -407,7 +413,7 @@ public:
 
     {
       plFileReader File;
-      if (File.Open(sPCHFile.GetData()) == PLASMA_FAILURE)
+      if (File.Open(sPCHFile.GetData()) == PL_FAILURE)
       {
         plLog::Warning("This project has no PCH file.");
         return;
@@ -417,7 +423,7 @@ public:
     plLog::Info("Rewriting PCH: '{0}'", sPCHFile);
 
     plStringBuilder sFileContent;
-    if (ReadEntireFile(sPCHFile.GetData(), sFileContent) == PLASMA_FAILURE)
+    if (ReadEntireFile(sPCHFile.GetData(), sFileContent) == PL_FAILURE)
       return;
 
     while (RemoveLineWithPrefix(sFileContent, "#include"))
@@ -444,7 +450,7 @@ public:
   void FixFileContents(plStringView sFile)
   {
     plStringBuilder sFileContent;
-    if (ReadEntireFile(sFile, sFileContent) == PLASMA_FAILURE)
+    if (ReadEntireFile(sFile, sFileContent) == PL_FAILURE)
       return;
 
     if (sFile.EndsWith("PCH.h"))
@@ -473,28 +479,30 @@ public:
 
   void InsertRefPoint(plStringView sFile)
   {
-    PLASMA_LOG_BLOCK("InsertRefPoint", sFile);
+    PL_LOG_BLOCK("InsertRefPoint", sFile);
 
     plStringBuilder sFileContent;
-    if (ReadEntireFile(sFile, sFileContent) == PLASMA_FAILURE)
+    if (ReadEntireFile(sFile, sFileContent) == PL_FAILURE)
       return;
 
-    // if we find this macro in here, we don't need to insert PLASMA_STATICLINK_FILE in this file
-    // but once we are done with all files, we want to come back to this file and rewrite the PLASMA_STATICLINK_LIBRARY
+    // if we find this macro in here, we don't need to insert PL_STATICLINK_FILE in this file
+    // but once we are done with all files, we want to come back to this file and rewrite the PL_STATICLINK_LIBRARY
     // part such that it will reference all the other files
-    if (sFileContent.FindSubString("PLASMA_STATICLINK_LIBRARY"))
+    if (sFileContent.FindSubString("PL_STATICLINK_LIBRARY"))
       return;
-
 
     plString sLibraryMarker = GetLibraryMarkerName();
     plString sFileMarker = GetFileMarkerName(sFile);
 
     plStringBuilder sNewMarker;
-    sNewMarker.Format("PLASMA_STATICLINK_FILE({0}, {1});", sLibraryMarker, sFileMarker);
 
-    m_AllRefPoints.Insert(sFileMarker.GetData());
+    if (m_FilesToLink.Contains(sFile))
+    {
+      m_AllRefPoints.Insert(sFileMarker.GetData());
+      sNewMarker.SetFormat("PL_STATICLINK_FILE({0}, {1});", sLibraryMarker, sFileMarker);
+    }
 
-    const char* szMarker = sFileContent.FindSubString("PLASMA_STATICLINK_FILE");
+    const char* szMarker = sFileContent.FindSubString("PL_STATICLINK_FILE");
 
     // if the marker already exists, replace it with the updated string
     if (szMarker != nullptr)
@@ -523,19 +531,19 @@ public:
 
     plStringView sFile = m_sRefPointGroupFile;
 
-    PLASMA_LOG_BLOCK("RewriteRefPointGroup", sFile);
+    PL_LOG_BLOCK("RewriteRefPointGroup", sFile);
 
-    plLog::Info("Replacing macro PLASMA_STATICLINK_LIBRARY in file '{0}'.", m_sRefPointGroupFile);
+    plLog::Info("Replacing macro PL_STATICLINK_LIBRARY in file '{0}'.", m_sRefPointGroupFile);
 
     plStringBuilder sFileContent;
-    if (ReadEntireFile(sFile, sFileContent) == PLASMA_FAILURE)
+    if (ReadEntireFile(sFile, sFileContent) == PL_FAILURE)
       return;
 
-    // remove all instances of PLASMA_STATICLINK_FILE from this file, it already contains PLASMA_STATICLINK_LIBRARY
-    const char* szMarker = sFileContent.FindSubString("PLASMA_STATICLINK_FILE");
+    // remove all instances of PL_STATICLINK_FILE from this file, it already contains PL_STATICLINK_LIBRARY
+    const char* szMarker = sFileContent.FindSubString("PL_STATICLINK_FILE");
     while (szMarker != nullptr)
     {
-      plLog::Warning("Found macro PLASMA_STATICLINK_FILE inside the same file where PLASMA_STATICLINK_LIBRARY is located. Removing it.");
+      plLog::Warning("Found macro PL_STATICLINK_FILE inside the same file where PL_STATICLINK_LIBRARY is located. Removing it.");
 
       const char* szMarkerEnd = szMarker;
 
@@ -545,7 +553,7 @@ public:
       // no ref point allowed in a file that has already a ref point group
       sFileContent.Remove(szMarker, szMarkerEnd);
 
-      szMarker = sFileContent.FindSubString("PLASMA_STATICLINK_FILE");
+      szMarker = sFileContent.FindSubString("PL_STATICLINK_FILE");
     }
 
     plStringBuilder sNewGroupMarker;
@@ -553,24 +561,24 @@ public:
     // generate the code that should be inserted into this file
     // this code will reference all the other files in the library
     {
-      sNewGroupMarker.Format("PLASMA_STATICLINK_LIBRARY({0})\n{\n  if (bReturn)\n    return;\n\n", GetLibraryMarkerName());
+      sNewGroupMarker.SetFormat("PL_STATICLINK_LIBRARY({0})\n{\n  if (bReturn)\n    return;\n\n", GetLibraryMarkerName());
 
       auto it = m_AllRefPoints.GetIterator();
 
       while (it.IsValid())
       {
-        sNewGroupMarker.AppendFormat("  PLASMA_STATICLINK_REFERENCE({0});\n", it.Key());
+        sNewGroupMarker.AppendFormat("  PL_STATICLINK_REFERENCE({0});\n", it.Key());
         ++it;
       }
 
       sNewGroupMarker.Append("}\n");
     }
 
-    const char* szGroupMarker = sFileContent.FindSubString("PLASMA_STATICLINK_LIBRARY");
+    const char* szGroupMarker = sFileContent.FindSubString("PL_STATICLINK_LIBRARY");
 
     if (szGroupMarker != nullptr)
     {
-      // if we could find the macro PLASMA_STATICLINK_LIBRARY, just replace it with the new code
+      // if we could find the macro PL_STATICLINK_LIBRARY, just replace it with the new code
 
       const char* szMarkerEnd = szGroupMarker;
 
@@ -591,7 +599,7 @@ public:
       if (*szMarkerEnd == '\n')
         ++szMarkerEnd;
 
-      // now replace the existing PLASMA_STATICLINK_LIBRARY and its code block with the new block
+      // now replace the existing PL_STATICLINK_LIBRARY and its code block with the new block
       sFileContent.ReplaceSubString(szGroupMarker, szMarkerEnd, sNewGroupMarker.GetData());
     }
     else
@@ -609,50 +617,26 @@ public:
     if (m_bHadSeriousWarnings || m_bHadErrors)
       return;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) || defined(PLASMA_DOCS)
-    const plUInt32 uiSearchDirLength = m_sSearchDir.GetElementCount() + 1;
+    plStringBuilder b, sExt;
 
-    // get a directory iterator for the search directory
-    plFileSystemIterator it;
-    it.StartSearch(m_sSearchDir.GetData(), plFileSystemIteratorFlags::ReportFilesRecursive);
-
-    if (it.IsValid())
+    for (const plString& sFile : m_FilesToModify)
     {
-      plStringBuilder b, sExt;
-
-      // while there are additional files / folders
-      for (; it.IsValid(); it.Next())
+      if (sFile.HasExtension("h") || sFile.HasExtension("inl"))
       {
-        // build the absolute path to the current file
-        b = it.GetCurrentPath();
-        b.AppendPath(it.GetStats().m_sName.GetData());
+        PL_LOG_BLOCK("Header", sFile.GetFileNameAndExtension().GetStartPointer());
+        FixFileContents(sFile);
+        continue;
+      }
 
-        // file extensions are always converted to lower-case actually
-        sExt = b.GetFileExtension();
+      if (sFile.HasExtension("cpp"))
+      {
+        PL_LOG_BLOCK("Source", sFile.GetFileNameAndExtension().GetStartPointer());
+        FixFileContents(sFile);
 
-        if (sExt.IsEqual_NoCase("h") || sExt.IsEqual_NoCase("inl"))
-        {
-          PLASMA_LOG_BLOCK("Header", &b.GetData()[uiSearchDirLength]);
-          FixFileContents(b.GetData());
-          continue;
-        }
-
-        if (sExt.IsEqual_NoCase("cpp"))
-        {
-          PLASMA_LOG_BLOCK("Source", &b.GetData()[uiSearchDirLength]);
-          FixFileContents(b.GetData());
-
-          InsertRefPoint(b.GetData());
-          continue;
-        }
+        InsertRefPoint(sFile);
+        continue;
       }
     }
-    else
-      plLog::Error("Could not search the directory '{0}'", m_sSearchDir);
-
-#else
-    PLASMA_REPORT_FAILURE("No file system iterator support, StaticLinkUtil sample can't run.");
-#endif
   }
 
   void MakeSureStaticLinkLibraryMacroExists()
@@ -660,7 +644,7 @@ public:
     if (m_bHadSeriousWarnings || m_bHadErrors)
       return;
 
-    // The macro PLASMA_STATICLINK_LIBRARY was not found in any cpp file
+    // The macro PL_STATICLINK_LIBRARY was not found in any cpp file
     // try to insert it into a PCH.cpp, if there is one
     if (!m_sRefPointGroupFile.IsEmpty())
       return;
@@ -673,16 +657,16 @@ public:
     if (it.IsValid())
     {
       plStringBuilder sPCHcpp = it.Value().m_sFileContent.GetData();
-      sPCHcpp.Append("\n\n\n\nPLASMA_STATICLINK_LIBRARY() { }");
+      sPCHcpp.Append("\n\n\n\nPL_STATICLINK_LIBRARY() { }");
 
       OverwriteFile(sFilePath.GetData(), sPCHcpp);
 
       m_sRefPointGroupFile = sFilePath;
 
-      plLog::Warning("No PLASMA_STATICLINK_LIBRARY found in any cpp file, inserting it into the PCH.cpp file.");
+      plLog::Warning("No PL_STATICLINK_LIBRARY found in any cpp file, inserting it into the PCH.cpp file.");
     }
     else
-      plLog::Error("The macro PLASMA_STATICLINK_LIBRARY was not found in any cpp file in this library. It is required that it exists in exactly one "
+      plLog::Error("The macro PL_STATICLINK_LIBRARY was not found in any cpp file in this library. It is required that it exists in exactly one "
                    "file, otherwise the generated code will not compile.");
   }
 
@@ -691,9 +675,9 @@ public:
     if (m_bHadSeriousWarnings || m_bHadErrors)
       return;
 
-    PLASMA_LOG_BLOCK("FindRefPointGroupFile");
+    PL_LOG_BLOCK("FindRefPointGroupFile");
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS) || defined(PL_DOCS)
     // get a directory iterator for the search directory
     plFileSystemIterator it;
     it.StartSearch(m_sSearchDir.GetData(), plFileSystemIteratorFlags::ReportFilesRecursive);
@@ -712,31 +696,60 @@ public:
         // file extensions are always converted to lower-case actually
         sExt = sFile.GetFileExtension();
 
+        if (sExt.IsEqual_NoCase("h") || sExt.IsEqual_NoCase("inl"))
+        {
+          m_FilesToModify.Insert(sFile);
+        }
+
         if (sExt.IsEqual_NoCase("cpp"))
         {
           plStringBuilder sFileContent;
-          if (ReadEntireFile(sFile.GetData(), sFileContent) == PLASMA_FAILURE)
+          if (ReadEntireFile(sFile.GetData(), sFileContent) == PL_FAILURE)
             return;
 
-          // if we find this macro in here, we don't need to insert PLASMA_STATICLINK_FILE in this file
-          // but once we are done with all files, we want to come back to this file and rewrite the PLASMA_STATICLINK_LIBRARY
+          // if we find this macro in here, we don't need to insert PL_STATICLINK_FILE in this file
+          // but once we are done with all files, we want to come back to this file and rewrite the PL_STATICLINK_LIBRARY
           // part such that it will reference all the other files
-          if (sFileContent.FindSubString("PLASMA_STATICLINK_LIBRARY"))
+          if (sFileContent.FindSubString("PL_STATICLINK_LIBRARY"))
           {
-            plLog::Info("Found macro 'PLASMA_STATICLINK_LIBRARY' in file '{0}'.", &sFile[m_sSearchDir.GetElementCount() + 1]);
+            m_FilesToModify.Insert(sFile);
+
+            plLog::Info("Found macro 'PL_STATICLINK_LIBRARY' in file '{0}'.", &sFile.GetData()[m_sSearchDir.GetElementCount() + 1]);
 
             if (!m_sRefPointGroupFile.IsEmpty())
-              plLog::Error("The macro 'PLASMA_STATICLINK_LIBRARY' was already found in file '{0}' before. You cannot have this macro twice in the same library!", m_sRefPointGroupFile);
+              plLog::Error("The macro 'PL_STATICLINK_LIBRARY' was already found in file '{0}' before. You cannot have this macro twice in the same library!", m_sRefPointGroupFile);
             else
               m_sRefPointGroupFile = sFile;
           }
+
+          if (sFileContent.FindSubString("PL_STATICLINK_FILE_DISABLE"))
+            continue;
+
+          m_FilesToModify.Insert(sFile);
+
+          bool bContainsGlobals = false;
+
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("PL_STATICLINK_FORCE") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("PL_STATICLINK_LIBRARY") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("PL_BEGIN_") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("PL_PLUGIN_") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("PL_ON_GLOBAL_EVENT") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("plCVarBool ") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("plCVarFloat ") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("plCVarInt ") != nullptr);
+          bContainsGlobals = bContainsGlobals || (sFileContent.FindSubString("plCVarString ") != nullptr);
+
+          if (!bContainsGlobals)
+            continue;
+
+          m_FilesToLink.Insert(sFile);
         }
       }
     }
     else
       plLog::Error("Could not search the directory '{0}'", m_sSearchDir);
 #else
-    PLASMA_REPORT_FAILURE("No file system iterator support, StaticLinkUtil sample can't run.");
+    PL_REPORT_FAILURE("No file system iterator support, StaticLinkUtil sample can't run.");
 #endif
     MakeSureStaticLinkLibraryMacroExists();
   }
@@ -761,4 +774,4 @@ public:
   }
 };
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plStaticLinkerApp);
+PL_CONSOLEAPP_ENTRY_POINT(plStaticLinkerApp);

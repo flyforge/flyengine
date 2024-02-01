@@ -2,7 +2,7 @@
 
 #include <VisualScriptPlugin/Runtime/VisualScript.h>
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptFunctionProperty : public plScriptFunctionProperty
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptFunctionProperty : public plScriptFunctionProperty
 {
 public:
   plVisualScriptFunctionProperty(plStringView sName, const plSharedPtr<const plVisualScriptGraphDescription>& pDesc);
@@ -22,7 +22,7 @@ private:
   mutable plVisualScriptDataStorage m_LocalDataStorage;
 };
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptMessageHandler : public plScriptMessageHandler
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptMessageHandler : public plScriptMessageHandler
 {
 public:
   plVisualScriptMessageHandler(const plScriptMessageDesc& desc, const plSharedPtr<const plVisualScriptGraphDescription>& pDesc);

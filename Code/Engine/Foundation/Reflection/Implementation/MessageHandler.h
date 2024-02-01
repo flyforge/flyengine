@@ -8,22 +8,22 @@
 class plMessage;
 
 /// \brief The base class for all message handlers that a type provides.
-class PLASMA_FOUNDATION_DLL plAbstractMessageHandler
+class PL_FOUNDATION_DLL plAbstractMessageHandler
 {
 public:
   virtual ~plAbstractMessageHandler() = default;
 
-  PLASMA_ALWAYS_INLINE void operator()(void* pInstance, plMessage& ref_msg) { (*m_DispatchFunc)(this, pInstance, ref_msg); }
+  PL_ALWAYS_INLINE void operator()(void* pInstance, plMessage& ref_msg) { (*m_DispatchFunc)(this, pInstance, ref_msg); }
 
-  PLASMA_FORCE_INLINE void operator()(const void* pInstance, plMessage& ref_msg)
+  PL_FORCE_INLINE void operator()(const void* pInstance, plMessage& ref_msg)
   {
-    PLASMA_ASSERT_DEV(m_bIsConst, "Calling a non const message handler with a const instance.");
+    PL_ASSERT_DEV(m_bIsConst, "Calling a non const message handler with a const instance.");
     (*m_ConstDispatchFunc)(this, pInstance, ref_msg);
   }
 
-  PLASMA_ALWAYS_INLINE plMessageId GetMessageId() const { return m_Id; }
+  PL_ALWAYS_INLINE plMessageId GetMessageId() const { return m_Id; }
 
-  PLASMA_ALWAYS_INLINE bool IsConst() const { return m_bIsConst; }
+  PL_ALWAYS_INLINE bool IsConst() const { return m_bIsConst; }
 
 protected:
   using DispatchFunc = void (*)(plAbstractMessageHandler* pSelf, void* pInstance, plMessage&);
@@ -99,5 +99,5 @@ namespace plInternal
   };
 } // namespace plInternal
 
-#define PLASMA_IS_CONST_MESSAGE_HANDLER(Class, MessageType, Method) \
+#define PL_IS_CONST_MESSAGE_HANDLER(Class, MessageType, Method) \
   (sizeof(plInternal::MessageHandlerTraits<Class, MessageType>::IsConst(Method)) == sizeof(plCompileTimeTrueType))

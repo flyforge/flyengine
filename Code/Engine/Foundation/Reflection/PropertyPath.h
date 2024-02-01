@@ -8,12 +8,12 @@ class plAbstractProperty;
 
 
 ///\brief Reflected property step that can be used to init an plPropertyPath
-struct PLASMA_FOUNDATION_DLL plPropertyPathStep
+struct PL_FOUNDATION_DLL plPropertyPathStep
 {
   plString m_sProperty;
   plVariant m_Index;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plPropertyPathStep);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plPropertyPathStep);
 
 ///\brief Stores a path from an object of a given type to a property inside of it.
 /// Once initialized to a specific path, the target property/object of the path can be read or written on
@@ -21,7 +21,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plPropertyPathStep);
 /// An empty path is allowed in which case WriteToLeafObject/ReadFromLeafObject will return pRootObject directly.
 ///
 /// TODO: read/write methods and ResolvePath should return a failure state.
-class PLASMA_FOUNDATION_DLL plPropertyPath
+class PL_FOUNDATION_DLL plPropertyPath
 {
 public:
   plPropertyPath();
@@ -52,7 +52,7 @@ public:
   void SetValue(void* pRootObject, const plRTTI& type, const plVariant& value) const;
   ///\brief Convenience function that writes 'value' to the 'pRootObject' at the current path.
   template <typename T>
-  PLASMA_ALWAYS_INLINE void SetValue(T* pRootObject, const plVariant& value) const
+  PL_ALWAYS_INLINE void SetValue(T* pRootObject, const plVariant& value) const
   {
     SetValue(pRootObject, *plGetStaticRTTI<T>(), value);
   }
@@ -61,7 +61,7 @@ public:
   void GetValue(void* pRootObject, const plRTTI& type, plVariant& out_value) const;
   ///\brief Convenience function that reads the value from 'pRootObject' at the current path and stores it in 'out_value'.
   template <typename T>
-  PLASMA_ALWAYS_INLINE void GetValue(T* pRootObject, plVariant& out_value) const
+  PL_ALWAYS_INLINE void GetValue(T* pRootObject, plVariant& out_value) const
   {
     GetValue(pRootObject, *plGetStaticRTTI<T>(), out_value);
   }

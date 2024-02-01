@@ -13,12 +13,12 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDragDropHandler, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDragDropHandler, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 const plRTTI* plLayerDragDropHandler::GetCommonBaseType(const plDragDropInfo* pInfo) const
 {
-  QByteArray encodedData = pInfo->m_pMimeData->data("application/PlasmaEditor.ObjectSelection");
+  QByteArray encodedData = pInfo->m_pMimeData->data("application/plEditor.ObjectSelection");
   QDataStream stream(&encodedData, QIODevice::ReadOnly);
   plHybridArray<plDocumentObject*, 32> Dragged;
   stream >> Dragged;
@@ -34,12 +34,12 @@ const plRTTI* plLayerDragDropHandler::GetCommonBaseType(const plDragDropInfo* pI
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerOnLayerDragDropHandler, 1, plRTTIDefaultAllocator<plLayerOnLayerDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerOnLayerDragDropHandler, 1, plRTTIDefaultAllocator<plLayerOnLayerDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plLayerOnLayerDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 {
-  if (pInfo->m_sTargetContext == "layertree" && pInfo->m_pMimeData->hasFormat("application/PlasmaEditor.ObjectSelection"))
+  if (pInfo->m_sTargetContext == "layertree" && pInfo->m_pMimeData->hasFormat("application/plEditor.ObjectSelection"))
   {
     if (plScene2Document* pDoc = plDynamicCast<plScene2Document*>(plDocumentManager::GetDocumentByGuid(pInfo->m_TargetDocument)))
     {
@@ -59,28 +59,26 @@ void plLayerOnLayerDragDropHandler::OnDrop(const plDragDropInfo* pInfo)
 {
   if (plScene2Document* pDoc = plDynamicCast<plScene2Document*>(plDocumentManager::GetDocumentByGuid(pInfo->m_TargetDocument)))
   {
-    const plDocumentObject* pTarget = pDoc->GetSceneObjectManager()->GetObject(pInfo->m_TargetObject);
-
     const plUuid activeDoc = pDoc->GetActiveLayer();
-    PLASMA_VERIFY(pDoc->SetActiveLayer(pDoc->GetGuid()).Succeeded(), "Failed to set active document.");
+    PL_VERIFY(pDoc->SetActiveLayer(pDoc->GetGuid()).Succeeded(), "Failed to set active document.");
     {
       // We need to make a copy of the info as the target document is actually the scene here, not the active document.
       plDragDropInfo info = *pInfo;
       info.m_TargetDocument = pDoc->GetGuid();
       plQtDocumentTreeModel::MoveObjects(info);
     }
-    PLASMA_VERIFY(pDoc->SetActiveLayer(activeDoc).Succeeded(), "Failed to set active document.");
+    PL_VERIFY(pDoc->SetActiveLayer(activeDoc).Succeeded(), "Failed to set active document.");
   }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectOnLayerDragDropHandler, 1, plRTTIDefaultAllocator<plGameObjectOnLayerDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectOnLayerDragDropHandler, 1, plRTTIDefaultAllocator<plGameObjectOnLayerDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plGameObjectOnLayerDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 {
-  if (pInfo->m_sTargetContext == "layertree" && pInfo->m_pMimeData->hasFormat("application/PlasmaEditor.ObjectSelection"))
+  if (pInfo->m_sTargetContext == "layertree" && pInfo->m_pMimeData->hasFormat("application/plEditor.ObjectSelection"))
   {
     if (plScene2Document* pDoc = plDynamicCast<plScene2Document*>(plDocumentManager::GetDocumentByGuid(pInfo->m_TargetDocument)))
     {
@@ -103,7 +101,7 @@ void plGameObjectOnLayerDragDropHandler::OnDrop(const plDragDropInfo* pInfo)
   {
     const plDocumentObject* pTarget = pDoc->GetSceneObjectManager()->GetObject(pInfo->m_TargetObject);
 
-    QByteArray encodedData = pInfo->m_pMimeData->data("application/PlasmaEditor.ObjectSelection");
+    QByteArray encodedData = pInfo->m_pMimeData->data("application/plEditor.ObjectSelection");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     plHybridArray<plDocumentObject*, 32> Dragged;
     stream >> Dragged;
@@ -119,7 +117,7 @@ void plGameObjectOnLayerDragDropHandler::OnDrop(const plDragDropInfo* pInfo)
       const plUuid activeDoc = pDoc->GetActiveLayer();
       {
         // activeDoc should already match pSourceDoc, but just to be sure.
-        PLASMA_VERIFY(pDoc->SetActiveLayer(pSourceDoc->GetGuid()).Succeeded(), "Failed to set active document.");
+        PL_VERIFY(pDoc->SetActiveLayer(pSourceDoc->GetGuid()).Succeeded(), "Failed to set active document.");
 
         plResult res = plActionManager::ExecuteAction(nullptr, "Selection.Copy", pSourceDoc, plVariant());
         if (res.Failed())
@@ -135,7 +133,7 @@ void plGameObjectOnLayerDragDropHandler::OnDrop(const plDragDropInfo* pInfo)
         }
       }
       {
-        PLASMA_VERIFY(pDoc->SetActiveLayer(pTargetDoc->GetGuid()).Succeeded(), "Failed to set active document.");
+        PL_VERIFY(pDoc->SetActiveLayer(pTargetDoc->GetGuid()).Succeeded(), "Failed to set active document.");
         plResult res = plActionManager::ExecuteAction(nullptr, "Selection.PasteAtOriginalLocation", pTargetDoc, plVariant());
         if (res.Failed())
         {
@@ -143,7 +141,7 @@ void plGameObjectOnLayerDragDropHandler::OnDrop(const plDragDropInfo* pInfo)
           return;
         }
       }
-      PLASMA_VERIFY(pDoc->SetActiveLayer(activeDoc).Succeeded(), "Failed to set active document.");
+      PL_VERIFY(pDoc->SetActiveLayer(activeDoc).Succeeded(), "Failed to set active document.");
     }
   }
 }

@@ -13,15 +13,15 @@
 
 class plTypeScriptBinding;
 
-struct PLASMA_TYPESCRIPTPLUGIN_DLL plMsgTypeScriptMsgProxy : public plMessage
+struct PL_TYPESCRIPTPLUGIN_DLL plMsgTypeScriptMsgProxy : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgTypeScriptMsgProxy, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgTypeScriptMsgProxy, plMessage);
 
   plUInt32 m_uiTypeNameHash = 0;
   plUInt32 m_uiStashIndex = 0;
 };
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plTypeScriptComponentManager : public plComponentManager<class plTypeScriptComponent, plBlockStorageType::FreeList>
+class PL_TYPESCRIPTPLUGIN_DLL plTypeScriptComponentManager : public plComponentManager<class plTypeScriptComponent, plBlockStorageType::FreeList>
 {
   using SUPER = plComponentManager<class plTypeScriptComponent, plBlockStorageType::FreeList>;
 
@@ -43,9 +43,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plTypeScriptComponent : public plEventMessageHandlerComponent
+class PL_TYPESCRIPTPLUGIN_DLL plTypeScriptComponent : public plEventMessageHandlerComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plTypeScriptComponent, plEventMessageHandlerComponent, plTypeScriptComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plTypeScriptComponent, plEventMessageHandlerComponent, plTypeScriptComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -72,11 +72,11 @@ public:
   plTypeScriptComponent();
   ~plTypeScriptComponent();
 
-  void BroadcastEventMsg(plEventMessage& msg);
+  void BroadcastEventMsg(plEventMessage& ref_msg);
 
   void SetUpdateInterval(plTime interval) { m_UpdateInterval = interval; }
 
-  void SetTypeScriptComponentGuid(const plUuid& hResource);
+  void SetTypeScriptComponentGuid(const plUuid& resource);
   const plUuid& GetTypeScriptComponentGuid() const;
 
 private:
@@ -111,7 +111,7 @@ private:
 private:
   plUuid m_TypeScriptComponentGuid;
   plTime m_LastUpdate;
-  plTime m_UpdateInterval = plTime::Zero();
+  plTime m_UpdateInterval = plTime::MakeZero();
 
   //////////////////////////////////////////////////////////////////////////
   // Exposed Parameters

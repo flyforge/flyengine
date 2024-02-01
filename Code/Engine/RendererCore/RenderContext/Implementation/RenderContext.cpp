@@ -13,6 +13,7 @@
 #include <RendererCore/Textures/Texture3DResource.h>
 #include <RendererCore/Textures/TextureCubeResource.h>
 #include <RendererFoundation/CommandEncoder/CommandEncoder.h>
+#include <RendererFoundation/Device/ImmutableSamplers.h>
 #include <RendererFoundation/Resources/RenderTargetView.h>
 #include <RendererFoundation/Resources/Texture.h>
 
@@ -25,36 +26,36 @@ plMutex plRenderContext::s_ConstantBufferStorageMutex;
 plIdTable<plConstantBufferStorageId, plConstantBufferStorageBase*> plRenderContext::s_ConstantBufferStorageTable;
 plMap<plUInt32, plDynamicArray<plConstantBufferStorageBase*>> plRenderContext::s_FreeConstantBufferStorage;
 
-plGALSamplerStateHandle plRenderContext::s_hDefaultSamplerStates[4];
-
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RendererContext)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RendererContext)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation",
-  "Core"
+  "Core",
+  "ImmutableSamplers"
   END_SUBSYSTEM_DEPENDENCIES
 
   ON_CORESYSTEMS_STARTUP
   {
+    plRenderContext::RegisterImmutableSamplers();
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
+
   }
 
   ON_HIGHLEVELSYSTEMS_STARTUP
   {
-    plShaderUtils::g_RequestBuiltinShaderCallback = plMakeDelegate(plRenderContext::LoadBuiltinShader);
+    plRenderContext::OnEngineStartup();
   }
 
   ON_HIGHLEVELSYSTEMS_SHUTDOWN
   {
-    plShaderUtils::g_RequestBuiltinShaderCallback = {};
     plRenderContext::OnEngineShutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -81,12 +82,12 @@ plRenderContext* plRenderContext::GetDefaultInstance()
 
 plRenderContext* plRenderContext::CreateInstance()
 {
-  return PLASMA_DEFAULT_NEW(plRenderContext);
+  return PL_DEFAULT_NEW(plRenderContext);
 }
 
 void plRenderContext::DestroyInstance(plRenderContext* pRenderer)
 {
-  PLASMA_DEFAULT_DELETE(pRenderer);
+  PL_DEFAULT_DELETE(pRenderer);
 }
 
 plRenderContext::plRenderContext()
@@ -106,12 +107,21 @@ plRenderContext::plRenderContext()
 
   m_hGlobalConstantBufferStorage = CreateConstantBufferStorage<plGlobalConstants>();
 
+  // If no push constants are supported, they are emulated via constant buffers.
+  if (plGALDevice::GetDefaultDevice()->GetCapabilities().m_uiMaxPushConstantsSize == 0)
+  {
+    m_hPushConstantsStorage = CreateConstantBufferStorage(128);
+  }
   ResetContextState();
 }
 
 plRenderContext::~plRenderContext()
 {
   DeleteConstantBufferStorage(m_hGlobalConstantBufferStorage);
+  if (!m_hPushConstantsStorage.IsInvalidated())
+  {
+    DeleteConstantBufferStorage(m_hPushConstantsStorage);
+  }
 
   if (s_pDefaultInstance == this)
     s_pDefaultInstance = nullptr;
@@ -155,12 +165,6 @@ plGALRenderCommandEncoder* plRenderContext::BeginRendering(plGALPass* pGALPass, 
     SetShaderPermutationVariable("MSAA", "FALSE");
   }
 
-  #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-    SetShaderPermutationVariable("GAMEOBJECT_VELOCITY", "TRUE");
-  #else
-    SetShaderPermutationVariable("GAMEOBJECT_VELOCITY", "FALSE");
-  #endif
-
   auto& gc = WriteGlobalConstants();
   gc.ViewportSize = plVec4(viewport.width, viewport.height, 1.0f / viewport.width, 1.0f / viewport.height);
   gc.NumMsaaSamples = msaaSampleCount;
@@ -188,7 +192,7 @@ void plRenderContext::EndRendering()
   // TODO: The render context needs to reset its state after every encoding block if we want to record to separate command buffers.
   // Although this is currently not possible since a lot of high level code binds stuff only once per frame on the render context.
   // Resetting the state after every encoding block breaks those assumptions.
-  //ResetContextState();
+  // ResetContextState();
 }
 
 plGALComputeCommandEncoder* plRenderContext::BeginCompute(plGALPass* pGALPass, const char* szName /*= ""*/)
@@ -210,7 +214,7 @@ void plRenderContext::EndCompute()
   m_pGALCommandEncoder = nullptr;
 
   // TODO: See EndRendering
-  //ResetContextState();
+  // ResetContextState();
 }
 
 void plRenderContext::SetShaderPermutationVariable(const char* szName, const plTempHashedString& sTempValue)
@@ -361,10 +365,10 @@ void plRenderContext::BindUAV(const plTempHashedString& sSlotName, plGALUnordere
 
 void plRenderContext::BindSamplerState(const plTempHashedString& sSlotName, plGALSamplerStateHandle hSamplerSate)
 {
-  PLASMA_ASSERT_DEBUG(sSlotName != "LinearSampler", "'LinearSampler' is a resevered sampler name and must not be set manually.");
-  PLASMA_ASSERT_DEBUG(sSlotName != "LinearClampSampler", "'LinearClampSampler' is a resevered sampler name and must not be set manually.");
-  PLASMA_ASSERT_DEBUG(sSlotName != "PointSampler", "'PointSampler' is a resevered sampler name and must not be set manually.");
-  PLASMA_ASSERT_DEBUG(sSlotName != "PointClampSampler", "'PointClampSampler' is a resevered sampler name and must not be set manually.");
+  PL_ASSERT_DEBUG(sSlotName != "LinearSampler", "'LinearSampler' is a resevered sampler name and must not be set manually.");
+  PL_ASSERT_DEBUG(sSlotName != "LinearClampSampler", "'LinearClampSampler' is a resevered sampler name and must not be set manually.");
+  PL_ASSERT_DEBUG(sSlotName != "PointSampler", "'PointSampler' is a resevered sampler name and must not be set manually.");
+  PL_ASSERT_DEBUG(sSlotName != "PointClampSampler", "'PointClampSampler' is a resevered sampler name and must not be set manually.");
 
   plGALSamplerStateHandle* pOldSamplerState = nullptr;
   if (m_BoundSamplers.TryGetValue(sSlotName.GetHash(), pOldSamplerState))
@@ -438,6 +442,25 @@ void plRenderContext::BindConstantBuffer(const plTempHashedString& sSlotName, pl
   m_StateFlags.Add(plRenderContextFlags::ConstantBufferBindingChanged);
 }
 
+void plRenderContext::SetPushConstants(const plTempHashedString& sSlotName, plArrayPtr<const plUInt8> data)
+{
+
+  if (!m_hPushConstantsStorage.IsInvalidated())
+  {
+    PL_ASSERT_DEBUG(data.GetCount() <= 128, "Push constants are not allowed to be bigger than 128 bytes.");
+    plConstantBufferStorageBase* pStorage = nullptr;
+    bool bResult = TryGetConstantBufferStorage(m_hPushConstantsStorage, pStorage);
+    plArrayPtr<plUInt8> targetStorage = pStorage->GetRawDataForWriting();
+    plMemoryUtils::Copy(targetStorage.GetPtr(), data.GetPtr(), data.GetCount());
+    BindConstantBuffer(sSlotName, m_hPushConstantsStorage);
+  }
+  else
+  {
+    PL_ASSERT_DEBUG(data.GetCount() <= plGALDevice::GetDefaultDevice()->GetCapabilities().m_uiMaxPushConstantsSize, "Push constants are not allowed to be bigger than {} bytes.", plGALDevice::GetDefaultDevice()->GetCapabilities().m_uiMaxPushConstantsSize);
+    m_pGALCommandEncoder->SetPushConstants(data);
+  }
+}
+
 void plRenderContext::BindShader(const plShaderResourceHandle& hShader, plBitflags<plShaderBindFlags> flags)
 {
   m_hMaterial.Invalidate();
@@ -461,7 +484,7 @@ void plRenderContext::BindMeshBuffer(plGALBufferHandle hVertexBuffer, plGALBuffe
     return;
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (pVertexDeclarationInfo)
   {
     for (plUInt32 i1 = 0; i1 < pVertexDeclarationInfo->m_VertexStreams.GetCount(); ++i1)
@@ -470,7 +493,7 @@ void plRenderContext::BindMeshBuffer(plGALBufferHandle hVertexBuffer, plGALBuffe
       {
         if (i1 != i2)
         {
-          PLASMA_ASSERT_DEBUG(pVertexDeclarationInfo->m_VertexStreams[i1].m_Semantic != pVertexDeclarationInfo->m_VertexStreams[i2].m_Semantic,
+          PL_ASSERT_DEBUG(pVertexDeclarationInfo->m_VertexStreams[i1].m_Semantic != pVertexDeclarationInfo->m_VertexStreams[i2].m_Semantic,
             "Same semantic cannot be used twice in the same vertex declaration");
         }
       }
@@ -510,13 +533,13 @@ plResult plRenderContext::DrawMeshBuffer(plUInt32 uiPrimitiveCount, plUInt32 uiF
   if (ApplyContextStates().Failed() || uiPrimitiveCount == 0 || uiInstanceCount == 0)
   {
     m_Statistics.m_uiFailedDrawcalls++;
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(uiFirstPrimitive < m_uiMeshBufferPrimitiveCount, "Invalid primitive range: first primitive ({0}) can't be larger than number of primitives ({1})", uiFirstPrimitive, uiPrimitiveCount);
+  PL_ASSERT_DEV(uiFirstPrimitive < m_uiMeshBufferPrimitiveCount, "Invalid primitive range: first primitive ({0}) can't be larger than number of primitives ({1})", uiFirstPrimitive, uiPrimitiveCount);
 
   uiPrimitiveCount = plMath::Min(uiPrimitiveCount, m_uiMeshBufferPrimitiveCount - uiFirstPrimitive);
-  PLASMA_ASSERT_DEV(uiPrimitiveCount > 0, "Invalid primitive range: number of primitives can't be zero.");
+  PL_ASSERT_DEV(uiPrimitiveCount > 0, "Invalid primitive range: number of primitives can't be zero.");
 
   auto pCommandEncoder = GetRenderCommandEncoder();
 
@@ -533,26 +556,26 @@ plResult plRenderContext::DrawMeshBuffer(plUInt32 uiPrimitiveCount, plUInt32 uiF
   {
     if (!m_hIndexBuffer.IsInvalidated())
     {
-      pCommandEncoder->DrawIndexedInstanced(uiPrimitiveCount, uiInstanceCount, uiFirstPrimitive);
+      return pCommandEncoder->DrawIndexedInstanced(uiPrimitiveCount, uiInstanceCount, uiFirstPrimitive);
     }
     else
     {
-      pCommandEncoder->DrawInstanced(uiPrimitiveCount, uiInstanceCount, uiFirstPrimitive);
+      return pCommandEncoder->DrawInstanced(uiPrimitiveCount, uiInstanceCount, uiFirstPrimitive);
     }
   }
   else
   {
     if (!m_hIndexBuffer.IsInvalidated())
     {
-      pCommandEncoder->DrawIndexed(uiPrimitiveCount, uiFirstPrimitive);
+      return pCommandEncoder->DrawIndexed(uiPrimitiveCount, uiFirstPrimitive);
     }
     else
     {
-      pCommandEncoder->Draw(uiPrimitiveCount, uiFirstPrimitive);
+      return pCommandEncoder->Draw(uiPrimitiveCount, uiFirstPrimitive);
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plRenderContext::Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
@@ -560,12 +583,10 @@ plResult plRenderContext::Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThre
   if (ApplyContextStates().Failed())
   {
     m_Statistics.m_uiFailedDrawcalls++;
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  GetComputeCommandEncoder()->Dispatch(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
-
-  return PLASMA_SUCCESS;
+  return GetComputeCommandEncoder()->Dispatch(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
 }
 
 plResult plRenderContext::ApplyContextStates(bool bForce)
@@ -574,7 +595,7 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
   // Note ApplyMaterialState only returns a valid material pointer if the constant buffer of this material needs to be updated.
   // This needs to be done once we have determined the correct shader permutation.
   plMaterialResource* pMaterial = nullptr;
-  PLASMA_SCOPE_EXIT(if (pMaterial != nullptr) { plResourceManager::EndAcquireResource(pMaterial); });
+  PL_SCOPE_EXIT(if (pMaterial != nullptr) { plResourceManager::EndAcquireResource(pMaterial); });
 
   if (bForce || m_StateFlags.IsSet(plRenderContextFlags::MaterialBindingChanged))
   {
@@ -584,7 +605,7 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
   }
 
   plShaderPermutationResource* pShaderPermutation = nullptr;
-  PLASMA_SCOPE_EXIT(if (pShaderPermutation != nullptr) { plResourceManager::EndAcquireResource(pShaderPermutation); });
+  PL_SCOPE_EXIT(if (pShaderPermutation != nullptr) { plResourceManager::EndAcquireResource(pShaderPermutation); });
 
   bool bRebuildVertexDeclaration = m_StateFlags.IsAnySet(plRenderContextFlags::ShaderStateChanged | plRenderContextFlags::MeshBufferBindingChanged);
 
@@ -594,7 +615,7 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
     if (pShaderPermutation == nullptr)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     m_StateFlags.Remove(plRenderContextFlags::ShaderStateChanged);
@@ -602,70 +623,55 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
   if (m_hActiveShaderPermutation.IsValid())
   {
-    if ((bForce || m_StateFlags.IsAnySet(plRenderContextFlags::TextureBindingChanged | plRenderContextFlags::UAVBindingChanged |
-                                         plRenderContextFlags::SamplerBindingChanged | plRenderContextFlags::BufferBindingChanged |
-                                         plRenderContextFlags::ConstantBufferBindingChanged)))
+    const bool bDirty = (bForce || m_StateFlags.IsAnySet(plRenderContextFlags::TextureBindingChanged | plRenderContextFlags::UAVBindingChanged |
+                                                         plRenderContextFlags::SamplerBindingChanged | plRenderContextFlags::BufferBindingChanged |
+                                                         plRenderContextFlags::ConstantBufferBindingChanged));
+
+    const plGALShader* pShader = nullptr;
+    if (bDirty)
     {
       if (pShaderPermutation == nullptr)
+      {
         pShaderPermutation = plResourceManager::BeginAcquireResource(m_hActiveShaderPermutation, plResourceAcquireMode::BlockTillLoaded);
+      }
+      if (pShaderPermutation == nullptr)
+      {
+        return PL_FAILURE;
+      }
+      // #TODO_SHADER It's a bit unclean that we need to acquire the GAL shader on this level. Unfortunately, we need the resource binding on both the GAL and the high level renderer and the only alternative is some kind of duplication of the data.
+      pShader = plGALDevice::GetDefaultDevice()->GetShader(m_hActiveGALShader);
     }
 
-    plLogBlock applyBindingsBlock("Applying Shader Bindings", pShaderPermutation != nullptr ? pShaderPermutation->GetResourceDescription().GetData() : "");
+    plLogBlock applyBindingsBlock("Applying Shader Bindings", pShaderPermutation ? pShaderPermutation->GetResourceDescription().GetData() : "");
 
-    if (bForce || m_StateFlags.IsSet(plRenderContextFlags::UAVBindingChanged))
+    if (bDirty)
     {
-      // RWTextures/UAV are usually only supported in compute and pixel shader.
-      if (auto pBin = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::ComputeShader))
+      if (bForce || m_StateFlags.IsSet(plRenderContextFlags::UAVBindingChanged))
       {
-        ApplyUAVBindings(pBin);
-      }
-      if (auto pBin = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader))
-      {
-        ApplyUAVBindings(pBin);
+        ApplyUAVBindings(pShader);
+        m_StateFlags.Remove(plRenderContextFlags::UAVBindingChanged);
       }
 
-      m_StateFlags.Remove(plRenderContextFlags::UAVBindingChanged);
+      if (bForce || m_StateFlags.IsSet(plRenderContextFlags::TextureBindingChanged))
+      {
+        ApplyTextureBindings(pShader);
+        m_StateFlags.Remove(plRenderContextFlags::TextureBindingChanged);
+      }
+
+      if (bForce || m_StateFlags.IsSet(plRenderContextFlags::SamplerBindingChanged))
+      {
+        ApplySamplerBindings(pShader);
+        m_StateFlags.Remove(plRenderContextFlags::SamplerBindingChanged);
+      }
+
+      if (bForce || m_StateFlags.IsSet(plRenderContextFlags::BufferBindingChanged))
+      {
+        ApplyBufferBindings(pShader);
+        m_StateFlags.Remove(plRenderContextFlags::BufferBindingChanged);
+      }
     }
 
-    if (bForce || m_StateFlags.IsSet(plRenderContextFlags::TextureBindingChanged))
-    {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyTextureBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
-      m_StateFlags.Remove(plRenderContextFlags::TextureBindingChanged);
-    }
-
-    if (bForce || m_StateFlags.IsSet(plRenderContextFlags::SamplerBindingChanged))
-    {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplySamplerBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
-      m_StateFlags.Remove(plRenderContextFlags::SamplerBindingChanged);
-    }
-
-    if (bForce || m_StateFlags.IsSet(plRenderContextFlags::BufferBindingChanged))
-    {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyBufferBindings((plGALShaderStage::Enum)stage, pBin);
-        }
-      }
-
-      m_StateFlags.Remove(plRenderContextFlags::BufferBindingChanged);
-    }
-
+    // Note that pMaterial is only valid, if material constants have changed, so this also always implies that ConstantBufferBindingChanged is set.
     if (pMaterial != nullptr)
     {
       pMaterial->UpdateConstantBuffer(pShaderPermutation);
@@ -674,24 +680,20 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
     UploadConstants();
 
-    if (bForce || m_StateFlags.IsSet(plRenderContextFlags::ConstantBufferBindingChanged))
+    if (bDirty)
     {
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+      if (bForce || m_StateFlags.IsSet(plRenderContextFlags::ConstantBufferBindingChanged))
       {
-        if (auto pBin = pShaderPermutation->GetShaderStageBinary((plGALShaderStage::Enum)stage))
-        {
-          ApplyConstantBufferBindings(pBin);
-        }
+        ApplyConstantBufferBindings(pShader);
+        m_StateFlags.Remove(plRenderContextFlags::ConstantBufferBindingChanged);
       }
-
-      m_StateFlags.Remove(plRenderContextFlags::ConstantBufferBindingChanged);
     }
   }
 
   if ((bForce || bRebuildVertexDeclaration) && !m_bCompute)
   {
     if (m_hActiveGALShader.IsInvalidated())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     auto pCommandEncoder = GetRenderCommandEncoder();
 
@@ -699,7 +701,7 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
     {
       pCommandEncoder->SetPrimitiveTopology(m_Topology);
 
-      for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hVertexBuffers); ++i)
+      for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_hVertexBuffers); ++i)
       {
         pCommandEncoder->SetVertexBuffer(i, m_hVertexBuffers[i]);
       }
@@ -710,18 +712,18 @@ plResult plRenderContext::ApplyContextStates(bool bForce)
 
     plGALVertexDeclarationHandle hVertexDeclaration;
     if (m_pVertexDeclarationInfo != nullptr && BuildVertexDeclaration(m_hActiveGALShader, *m_pVertexDeclarationInfo, hVertexDeclaration).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // If there is a vertex buffer we need a valid vertex declaration as well.
     if ((!m_hVertexBuffers[0].IsInvalidated() || !m_hVertexBuffers[1].IsInvalidated() || !m_hVertexBuffers[2].IsInvalidated() || !m_hVertexBuffers[3].IsInvalidated()) && hVertexDeclaration.IsInvalidated())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pCommandEncoder->SetVertexDeclaration(hVertexDeclaration);
 
     m_StateFlags.Remove(plRenderContextFlags::MeshBufferBindingChanged);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRenderContext::ResetContextState()
@@ -737,7 +739,7 @@ void plRenderContext::ResetContextState()
 
   m_hActiveShaderPermutation.Invalidate();
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hVertexBuffers); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_hVertexBuffers); ++i)
   {
     m_hVertexBuffers[i].Invalidate();
   }
@@ -753,10 +755,18 @@ void plRenderContext::ResetContextState()
   m_BoundBuffer.Clear();
 
   m_BoundSamplers.Clear();
-  m_BoundSamplers.Insert(plHashingUtils::StringHash("LinearSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering));
-  m_BoundSamplers.Insert(plHashingUtils::StringHash("LinearClampSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering | plDefaultSamplerFlags::Clamp));
-  m_BoundSamplers.Insert(plHashingUtils::StringHash("PointSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::PointFiltering));
-  m_BoundSamplers.Insert(plHashingUtils::StringHash("PointClampSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::PointFiltering | plDefaultSamplerFlags::Clamp));
+  // Platforms that do not support immutable samples like DX11 still need them to be bound manually, so they are bound here.
+  plTempHashedString sLinearSampler("LinearSampler");
+  for (auto it : plGALImmutableSamplers::GetImmutableSamplers())
+  {
+    m_BoundSamplers.Insert(it.Key().GetHash(), it.Value());
+
+    if (it.Key() == sLinearSampler)
+    {
+      m_hFallbackSampler = it.Value();
+    }
+  }
+  PL_ASSERT_DEBUG(!m_hFallbackSampler.IsInvalidated(), "'LinearSampler' should have been registered as an immutable sampler.");
 
   m_BoundUAVs.Clear();
   m_BoundConstantBuffers.Clear();
@@ -765,23 +775,23 @@ void plRenderContext::ResetContextState()
 plGlobalConstants& plRenderContext::WriteGlobalConstants()
 {
   plConstantBufferStorage<plGlobalConstants>* pStorage = nullptr;
-  PLASMA_VERIFY(TryGetConstantBufferStorage(m_hGlobalConstantBufferStorage, pStorage), "Invalid Global Constant Storage");
+  PL_VERIFY(TryGetConstantBufferStorage(m_hGlobalConstantBufferStorage, pStorage), "Invalid Global Constant Storage");
   return pStorage->GetDataForWriting();
 }
 
 const plGlobalConstants& plRenderContext::ReadGlobalConstants() const
 {
   plConstantBufferStorage<plGlobalConstants>* pStorage = nullptr;
-  PLASMA_VERIFY(TryGetConstantBufferStorage(m_hGlobalConstantBufferStorage, pStorage), "Invalid Global Constant Storage");
+  PL_VERIFY(TryGetConstantBufferStorage(m_hGlobalConstantBufferStorage, pStorage), "Invalid Global Constant Storage");
   return pStorage->GetDataForReading();
 }
 
 // static
 plConstantBufferStorageHandle plRenderContext::CreateConstantBufferStorage(plUInt32 uiSizeInBytes, plConstantBufferStorageBase*& out_pStorage)
 {
-  PLASMA_ASSERT_DEV(plMemoryUtils::IsSizeAligned(uiSizeInBytes, 16u), "Storage struct for constant buffer is not aligned to 16 bytes");
+  PL_ASSERT_DEV(plMemoryUtils::IsSizeAligned(uiSizeInBytes, 16u), "Storage struct for constant buffer is not aligned to 16 bytes");
 
-  PLASMA_LOCK(s_ConstantBufferStorageMutex);
+  PL_LOCK(s_ConstantBufferStorageMutex);
 
   plConstantBufferStorageBase* pStorage = nullptr;
 
@@ -798,7 +808,7 @@ plConstantBufferStorageHandle plRenderContext::CreateConstantBufferStorage(plUIn
 
   if (pStorage == nullptr)
   {
-    pStorage = PLASMA_DEFAULT_NEW(plConstantBufferStorageBase, uiSizeInBytes);
+    pStorage = PL_DEFAULT_NEW(plConstantBufferStorageBase, uiSizeInBytes);
   }
 
   out_pStorage = pStorage;
@@ -808,7 +818,7 @@ plConstantBufferStorageHandle plRenderContext::CreateConstantBufferStorage(plUIn
 // static
 void plRenderContext::DeleteConstantBufferStorage(plConstantBufferStorageHandle hStorage)
 {
-  PLASMA_LOCK(s_ConstantBufferStorageMutex);
+  PL_LOCK(s_ConstantBufferStorageMutex);
 
   plConstantBufferStorageBase* pStorage = nullptr;
   if (!s_ConstantBufferStorageTable.Remove(hStorage.m_InternalId, &pStorage))
@@ -831,31 +841,22 @@ void plRenderContext::DeleteConstantBufferStorage(plConstantBufferStorageHandle 
 // static
 bool plRenderContext::TryGetConstantBufferStorage(plConstantBufferStorageHandle hStorage, plConstantBufferStorageBase*& out_pStorage)
 {
-  PLASMA_LOCK(s_ConstantBufferStorageMutex);
+  PL_LOCK(s_ConstantBufferStorageMutex);
   return s_ConstantBufferStorageTable.TryGetValue(hStorage.m_InternalId, out_pStorage);
 }
 
 // static
-plGALSamplerStateHandle plRenderContext::GetDefaultSamplerState(plBitflags<plDefaultSamplerFlags> flags)
+plGALSamplerStateCreationDescription plRenderContext::GetDefaultSamplerState(plBitflags<plDefaultSamplerFlags> flags)
 {
-  plUInt32 uiSamplerStateIndex = flags.GetValue();
-  PLASMA_ASSERT_DEV(uiSamplerStateIndex < PLASMA_ARRAY_SIZE(s_hDefaultSamplerStates), "");
+  plGALSamplerStateCreationDescription desc;
+  desc.m_MinFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
+  desc.m_MagFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
+  desc.m_MipFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
 
-  if (s_hDefaultSamplerStates[uiSamplerStateIndex].IsInvalidated())
-  {
-    plGALSamplerStateCreationDescription desc;
-    desc.m_MinFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
-    desc.m_MagFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
-    desc.m_MipFilter = flags.IsSet(plDefaultSamplerFlags::LinearFiltering) ? plGALTextureFilterMode::Linear : plGALTextureFilterMode::Point;
-
-    desc.m_AddressU = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
-    desc.m_AddressV = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
-    desc.m_AddressW = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
-
-    s_hDefaultSamplerStates[uiSamplerStateIndex] = plGALDevice::GetDefaultDevice()->CreateSamplerState(desc);
-  }
-
-  return s_hDefaultSamplerStates[uiSamplerStateIndex];
+  desc.m_AddressU = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
+  desc.m_AddressV = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
+  desc.m_AddressW = flags.IsSet(plDefaultSamplerFlags::Clamp) ? plImageAddressMode::Clamp : plImageAddressMode::Repeat;
+  return desc;
 }
 
 // private functions
@@ -872,7 +873,7 @@ void plRenderContext::LoadBuiltinShader(plShaderUtils::plBuiltinShaderType type,
       bStereo = true;
       [[fallthrough]];
     case plShaderUtils::plBuiltinShaderType::CopyImage:
-      hActiveShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Copy_FS.plShader");
+      hActiveShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Copy.plShader");
       break;
     case plShaderUtils::plBuiltinShaderType::DownscaleImageArray:
       bStereo = true;
@@ -882,7 +883,7 @@ void plRenderContext::LoadBuiltinShader(plShaderUtils::plBuiltinShaderType type,
       break;
   }
 
-  PLASMA_ASSERT_DEV(hActiveShader.IsValid(), "Could not load builtin shader!");
+  PL_ASSERT_DEV(hActiveShader.IsValid(), "Could not load builtin shader!");
 
   plHashTable<plHashedString, plHashedString> permutationVariables;
   static plHashedString sVSRTAI = plMakeHashedString("VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX");
@@ -901,14 +902,14 @@ void plRenderContext::LoadBuiltinShader(plShaderUtils::plBuiltinShaderType type,
 
   plShaderPermutationResourceHandle hActiveShaderPermutation = plShaderManager::PreloadSinglePermutation(hActiveShader, permutationVariables, false);
 
-  PLASMA_ASSERT_DEV(hActiveShaderPermutation.IsValid(), "Could not load builtin shader permutation!");
+  PL_ASSERT_DEV(hActiveShaderPermutation.IsValid(), "Could not load builtin shader permutation!");
 
   plResourceLock<plShaderPermutationResource> pShaderPermutation(hActiveShaderPermutation, plResourceAcquireMode::BlockTillLoaded);
 
-  PLASMA_ASSERT_DEV(pShaderPermutation->IsShaderValid(), "Builtin shader permutation shader is invalid!");
+  PL_ASSERT_DEV(pShaderPermutation->IsShaderValid(), "Builtin shader permutation shader is invalid!");
 
   out_shader.m_hActiveGALShader = pShaderPermutation->GetGALShader();
-  PLASMA_ASSERT_DEV(!out_shader.m_hActiveGALShader.IsInvalidated(), "Invalid GAL Shader handle.");
+  PL_ASSERT_DEV(!out_shader.m_hActiveGALShader.IsInvalidated(), "Invalid GAL Shader handle.");
 
   out_shader.m_hBlendState = pShaderPermutation->GetBlendState();
   out_shader.m_hDepthStencilState = pShaderPermutation->GetDepthStencilState();
@@ -916,24 +917,30 @@ void plRenderContext::LoadBuiltinShader(plShaderUtils::plBuiltinShaderType type,
 }
 
 // static
+void plRenderContext::RegisterImmutableSamplers()
+{
+  plGALImmutableSamplers::RegisterImmutableSampler(plMakeHashedString("LinearSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering)).AssertSuccess("Failed to register immutable sampler");
+  plGALImmutableSamplers::RegisterImmutableSampler(plMakeHashedString("LinearClampSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering | plDefaultSamplerFlags::Clamp)).AssertSuccess("Failed to register immutable sampler");
+  plGALImmutableSamplers::RegisterImmutableSampler(plMakeHashedString("PointSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::PointFiltering)).AssertSuccess("Failed to register immutable sampler");
+  plGALImmutableSamplers::RegisterImmutableSampler(plMakeHashedString("PointClampSampler"), GetDefaultSamplerState(plDefaultSamplerFlags::PointFiltering | plDefaultSamplerFlags::Clamp)).AssertSuccess("Failed to register immutable sampler");
+}
+
+// static
+void plRenderContext::OnEngineStartup()
+{
+  plShaderUtils::g_RequestBuiltinShaderCallback = plMakeDelegate(plRenderContext::LoadBuiltinShader);
+}
+
+// static
 void plRenderContext::OnEngineShutdown()
 {
+  plShaderUtils::g_RequestBuiltinShaderCallback = {};
   plShaderStageBinary::OnEngineShutdown();
 
   for (auto rc : s_Instances)
-    PLASMA_DEFAULT_DELETE(rc);
+    PL_DEFAULT_DELETE(rc);
 
   s_Instances.Clear();
-
-  // Cleanup sampler states
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_hDefaultSamplerStates); ++i)
-  {
-    if (!s_hDefaultSamplerStates[i].IsInvalidated())
-    {
-      plGALDevice::GetDefaultDevice()->DestroySamplerState(s_hDefaultSamplerStates[i]);
-      s_hDefaultSamplerStates[i].Invalidate();
-    }
-  }
 
   // Cleanup vertex declarations
   {
@@ -950,7 +957,7 @@ void plRenderContext::OnEngineShutdown()
     for (auto it = s_ConstantBufferStorageTable.GetIterator(); it.IsValid(); ++it)
     {
       plConstantBufferStorageBase* pStorage = it.Value();
-      PLASMA_DEFAULT_DELETE(pStorage);
+      PL_DEFAULT_DELETE(pStorage);
     }
 
     s_ConstantBufferStorageTable.Clear();
@@ -960,7 +967,7 @@ void plRenderContext::OnEngineShutdown()
       plDynamicArray<plConstantBufferStorageBase*>& storageForSize = it.Value();
       for (auto& pStorage : storageForSize)
       {
-        PLASMA_DEFAULT_DELETE(pStorage);
+        PL_DEFAULT_DELETE(pStorage);
       }
     }
 
@@ -1020,14 +1027,14 @@ plResult plRenderContext::BuildVertexDeclaration(plGALShaderHandle hShader, cons
       */
 
       plLog::Warning("Failed to create vertex declaration");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     it.Value() = out_Declaration;
   }
 
   out_Declaration = it.Value();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRenderContext::UploadConstants()
@@ -1093,7 +1100,7 @@ plShaderPermutationResource* plRenderContext::ApplyShaderState()
   }
 
   m_hActiveGALShader = pShaderPermutation->GetGALShader();
-  PLASMA_ASSERT_DEV(!m_hActiveGALShader.IsInvalidated(), "Invalid GAL Shader handle.");
+  PL_ASSERT_DEV(!m_hActiveGALShader.IsInvalidated(), "Invalid GAL Shader handle.");
 
   m_pGALCommandEncoder->SetShader(m_hActiveGALShader);
 
@@ -1147,11 +1154,6 @@ plMaterialResource* plRenderContext::ApplyMaterialState()
       BindTexture2D(it.Key(), it.Value());
     }
 
-    for(auto it = pCachedValues->m_Texture3DBindings.GetIterator(); it.IsValid(); ++it)
-    {
-      BindTexture3D(it.Key(), it.Value());
-    }
-
     for (auto it = pCachedValues->m_TextureCubeBindings.GetIterator(); it.IsValid(); ++it)
     {
       BindTextureCube(it.Key(), it.Value());
@@ -1161,7 +1163,7 @@ plMaterialResource* plRenderContext::ApplyMaterialState()
   }
 
   // The material needs its constant buffer updated.
-  // Thus we keep it acquired until we have the correct shader permutation for the constant buffer layout.
+  // Thus, we keep it acquired until we have the correct shader permutation for the constant buffer layout.
   if (pMaterial->AreConstantsModified())
   {
     m_StateFlags.Add(plRenderContextFlags::ConstantBufferBindingChanged);
@@ -1173,11 +1175,12 @@ plMaterialResource* plRenderContext::ApplyMaterialState()
   return nullptr;
 }
 
-void plRenderContext::ApplyConstantBufferBindings(const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyConstantBufferBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::ConstantBuffer)
+    if (binding.m_ResourceType != plGALShaderResourceType::ConstantBuffer)
       continue;
 
     const plUInt64 uiResourceHash = binding.m_sName.GetHash();
@@ -1186,118 +1189,133 @@ void plRenderContext::ApplyConstantBufferBindings(const plShaderStageBinary* pBi
     if (!m_BoundConstantBuffers.TryGetValue(uiResourceHash, boundConstantBuffer))
     {
       // If the shader was compiled with debug info the shader compiler will not strip unused resources and
-      // thus this error would trigger although the shader doesn't actually uses the resource.
-      if (!pBinary->m_bWasCompiledWithDebug)
+      // thus this error would trigger although the shader doesn't actually use the resource.
+      // #TODO_SHADER if (!pBinary->GetByteCode()->m_bWasCompiledWithDebug)
       {
         plLog::Error("No resource is bound for constant buffer slot '{0}'", binding.m_sName);
       }
-      m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, plGALBufferHandle());
+      m_pGALCommandEncoder->SetConstantBuffer(binding, plGALBufferHandle());
       continue;
     }
 
     if (!boundConstantBuffer.m_hConstantBuffer.IsInvalidated())
     {
-      m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, boundConstantBuffer.m_hConstantBuffer);
+      m_pGALCommandEncoder->SetConstantBuffer(binding, boundConstantBuffer.m_hConstantBuffer);
     }
     else
     {
       plConstantBufferStorageBase* pConstantBufferStorage = nullptr;
       if (TryGetConstantBufferStorage(boundConstantBuffer.m_hConstantBufferStorage, pConstantBufferStorage))
       {
-        m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, pConstantBufferStorage->GetGALBufferHandle());
+        m_pGALCommandEncoder->SetConstantBuffer(binding, pConstantBufferStorage->GetGALBufferHandle());
       }
       else
       {
         plLog::Error("Invalid constant buffer storage is bound for slot '{0}'", binding.m_sName);
-        m_pGALCommandEncoder->SetConstantBuffer(binding.m_iSlot, plGALBufferHandle());
+        m_pGALCommandEncoder->SetConstantBuffer(binding, plGALBufferHandle());
       }
     }
   }
 }
 
-void plRenderContext::ApplyTextureBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyTextureBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    // we currently only support 2D and cube textures
-
     const plUInt64 uiResourceHash = binding.m_sName.GetHash();
     plGALResourceViewHandle hResourceView;
 
-    if (binding.m_Type >= plShaderResourceType::Texture2D && binding.m_Type <= plShaderResourceType::Texture2DMSArray)
+    if (binding.m_ResourceType == plGALShaderResourceType::Texture || binding.m_ResourceType == plGALShaderResourceType::TextureAndSampler)
     {
-      m_BoundTextures2D.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
-    }
-
-    if (binding.m_Type == plShaderResourceType::Texture3D)
-    {
-      m_BoundTextures3D.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
-    }
-
-    if (binding.m_Type >= plShaderResourceType::TextureCube && binding.m_Type <= plShaderResourceType::TextureCubeArray)
-    {
-      m_BoundTexturesCube.TryGetValue(uiResourceHash, hResourceView);
-      m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
+      switch (binding.m_TextureType)
+      {
+        case plGALShaderTextureType::Texture2D:
+        case plGALShaderTextureType::Texture2DArray:
+        case plGALShaderTextureType::Texture2DMS:
+        case plGALShaderTextureType::Texture2DMSArray:
+          m_BoundTextures2D.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::Texture3D:
+          m_BoundTextures3D.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::TextureCube:
+        case plGALShaderTextureType::TextureCubeArray:
+          m_BoundTexturesCube.TryGetValue(uiResourceHash, hResourceView);
+          m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+          break;
+        case plGALShaderTextureType::Texture1D:
+        case plGALShaderTextureType::Texture1DArray:
+        default:
+          PL_ASSERT_NOT_IMPLEMENTED;
+          break;
+      }
     }
   }
 }
 
-void plRenderContext::ApplyUAVBindings(const plShaderStageBinary* pBinary)
+void plRenderContext::ApplyUAVBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::UAV)
-      continue;
-
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
-
-    plGALUnorderedAccessViewHandle hResourceView;
-    m_BoundUAVs.TryGetValue(uiResourceHash, hResourceView);
-
-    m_pGALCommandEncoder->SetUnorderedAccessView(binding.m_iSlot, hResourceView);
-  }
-}
-
-void plRenderContext::ApplySamplerBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
-{
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
-  {
-    if (binding.m_Type != plShaderResourceType::Sampler)
-      continue;
-
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
-
-    plGALSamplerStateHandle hSamplerState;
-    if (!m_BoundSamplers.TryGetValue(uiResourceHash, hSamplerState))
+    auto type = plGALShaderResourceCategory::MakeFromShaderDescriptorType(binding.m_ResourceType);
+    if (type.IsSet(plGALShaderResourceCategory::UAV))
     {
-      hSamplerState = GetDefaultSamplerState(plDefaultSamplerFlags::LinearFiltering); // Bind a default state to avoid DX11 errors.
-    }
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
 
-    m_pGALCommandEncoder->SetSamplerState(stage, binding.m_iSlot, hSamplerState);
+      plGALUnorderedAccessViewHandle hResourceView;
+      m_BoundUAVs.TryGetValue(uiResourceHash, hResourceView);
+
+      m_pGALCommandEncoder->SetUnorderedAccessView(binding, hResourceView);
+    }
   }
 }
 
-void plRenderContext::ApplyBufferBindings(plGALShaderStage::Enum stage, const plShaderStageBinary* pBinary)
+void plRenderContext::ApplySamplerBindings(const plGALShader* pShader)
 {
-  for (const auto& binding : pBinary->m_ShaderResourceBindings)
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
   {
-    if (binding.m_Type != plShaderResourceType::GenericBuffer)
-      continue;
+    auto type = plGALShaderResourceCategory::MakeFromShaderDescriptorType(binding.m_ResourceType);
+    if (type.IsSet(plGALShaderResourceCategory::Sampler))
+    {
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
 
-    const plUInt64 uiResourceHash = binding.m_sName.GetHash();
+      plGALSamplerStateHandle hSamplerState;
+      if (!m_BoundSamplers.TryGetValue(uiResourceHash, hSamplerState))
+      {
+        // Fallback in case no sampler was set.
+        hSamplerState = m_hFallbackSampler;
+      }
 
-    plGALResourceViewHandle hResourceView;
-    m_BoundBuffer.TryGetValue(uiResourceHash, hResourceView);
+      m_pGALCommandEncoder->SetSamplerState(binding, hSamplerState);
+    }
+  }
+}
 
-    m_pGALCommandEncoder->SetResourceView(stage, binding.m_iSlot, hResourceView);
+void plRenderContext::ApplyBufferBindings(const plGALShader* pShader)
+{
+  const auto& bindings = pShader->GetBindingMapping();
+  for (const plShaderResourceBinding& binding : bindings)
+  {
+    if (binding.m_ResourceType >= plGALShaderResourceType::TexelBuffer && binding.m_ResourceType >= plGALShaderResourceType::StructuredBuffer)
+    {
+      const plUInt64 uiResourceHash = binding.m_sName.GetHash();
+
+      plGALResourceViewHandle hResourceView;
+      m_BoundBuffer.TryGetValue(uiResourceHash, hResourceView);
+
+      m_pGALCommandEncoder->SetResourceView(binding, hResourceView);
+    }
   }
 }
 
 void plRenderContext::SetDefaultTextureFilter(plTextureFilterSetting::Enum filter)
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     filter >= plTextureFilterSetting::FixedBilinear && filter <= plTextureFilterSetting::FixedAnisotropic16x, "Invalid default texture filter");
   filter = plMath::Clamp(filter, plTextureFilterSetting::FixedBilinear, plTextureFilterSetting::FixedAnisotropic16x);
 
@@ -1347,4 +1365,4 @@ bool plRenderContext::GetAllowAsyncShaderLoading()
   return m_bAllowAsyncShaderLoading;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_RenderContext_Implementation_RenderContext);
+PL_STATICLINK_FILE(RendererCore, RendererCore_RenderContext_Implementation_RenderContext);

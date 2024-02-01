@@ -28,7 +28,7 @@ namespace plModelImporter2
   plResult ImporterAssimp::ProcessAiMesh(aiMesh* pMesh, const plMat4& transform)
   {
     if ((pMesh->mPrimitiveTypes & aiPrimitiveType::aiPrimitiveType_TRIANGLE) == 0) // no triangles in there ?
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     {
       auto& mi = m_MeshInstances[pMesh->mMaterialIndex].ExpandAndGetRef();
@@ -39,7 +39,7 @@ namespace plModelImporter2
       m_uiTotalMeshTriangles += pMesh->mNumFaces;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static void SetMeshTriangleIndices(plMeshBufferResourceDescriptor& ref_mb, const aiMesh* pMesh, plUInt32 uiTriangleIndexOffset, plUInt32 uiVertexIndexOffset, bool bFlipTriangles)
@@ -72,7 +72,7 @@ namespace plModelImporter2
     }
   }
 
-  static void SetMeshBoneData(plMeshBufferResourceDescriptor& ref_mb, plMeshResourceDescriptor& ref_mrd, float& inout_fMaxBoneOffset, const aiMesh* pMesh, plUInt32 uiVertexIndexOffset, const StreamIndices& streams, bool b8BitBoneIndices, plMeshBoneWeigthPrecision::Enum weightsPrecision)
+  static void SetMeshBoneData(plMeshBufferResourceDescriptor& ref_mb, plMeshResourceDescriptor& ref_mrd, float& inout_fMaxBoneOffset, const aiMesh* pMesh, plUInt32 uiVertexIndexOffset, const StreamIndices& streams, bool b8BitBoneIndices, plMeshBoneWeigthPrecision::Enum weightsPrecision, bool bNormalizeWeights)
   {
     if (!pMesh->HasBones())
       return;
@@ -129,27 +129,32 @@ namespace plModelImporter2
       }
     }
 
-    // normalize the bone weights
-    // NOTE: This is absolutely crucial for some meshes to work right
-    // On the other hand, it is also possible that some meshes don't like this
-    // if we come across meshes where normalization breaks them, we may need to add a user-option to select whether bone weights should be normalized
     for (plUInt32 vtx = 0; vtx < ref_mb.GetVertexCount(); ++vtx)
     {
-      const plVec3 vVertexPos = *reinterpret_cast<const plVec3*>(ref_mb.GetVertexData(streams.uiPositions, vtx).GetPtr());
-      const plUInt8* pBoneIndices8 = reinterpret_cast<const plUInt8*>(ref_mb.GetVertexData(streams.uiBoneIdx, vtx).GetPtr());
-      const plUInt16* pBoneIndices16 = reinterpret_cast<const plUInt16*>(ref_mb.GetVertexData(streams.uiBoneIdx, vtx).GetPtr());
       plByteArrayPtr pBoneWeights = ref_mb.GetVertexData(streams.uiBoneWgt, vtx);
 
       plVec4 wgt;
       plMeshBufferUtils::DecodeToVec4(pBoneWeights, plMeshBoneWeigthPrecision::ToResourceFormat(weightsPrecision), wgt).AssertSuccess();
 
-      const float len = wgt.x + wgt.y + wgt.z + wgt.w;
-      if (len > 1.0f)
+      // normalize the bone weights
+      if (bNormalizeWeights)
       {
-        wgt.Normalize();
+        // NOTE: This is absolutely crucial for some meshes to work right
+        // On the other hand, it is also possible that some meshes don't like this
+        // if we come across meshes where normalization breaks them, we may need to add a user-option to select whether bone weights should be normalized
 
-        // plMeshBufferUtils::EncodeBoneWeights(wgt, pBoneWeights, weightsPrecision).AssertSuccess();
+        const float len = wgt.x + wgt.y + wgt.z + wgt.w;
+        if (len > 1.0f)
+        {
+          wgt /= len;
+
+          plMeshBufferUtils::EncodeBoneWeights(wgt, pBoneWeights, weightsPrecision).AssertSuccess();
+        }
       }
+
+      const plVec3 vVertexPos = *reinterpret_cast<const plVec3*>(ref_mb.GetVertexData(streams.uiPositions, vtx).GetPtr());
+      const plUInt8* pBoneIndices8 = reinterpret_cast<const plUInt8*>(ref_mb.GetVertexData(streams.uiBoneIdx, vtx).GetPtr());
+      const plUInt16* pBoneIndices16 = reinterpret_cast<const plUInt16*>(ref_mb.GetVertexData(streams.uiBoneIdx, vtx).GetPtr());
 
       // also find the maximum distance of any vertex to its influencing bones
       // this is used to adjust the bounding box for culling at runtime
@@ -218,7 +223,7 @@ namespace plModelImporter2
       if (streams.uiNormals != plInvalidIndex && pMesh->HasNormals())
       {
         plVec3 normal = normalsTransform * ConvertAssimpType(pMesh->mNormals[vertIdx]);
-        normal.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+        normal.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 
         plMeshBufferUtils::EncodeNormal(normal, ref_mb.GetVertexData(streams.uiNormals, finalVertIdx), meshNormalsPrecision).IgnoreResult();
       }
@@ -255,9 +260,9 @@ namespace plModelImporter2
         plVec3 tangent = normalsTransform * ConvertAssimpType(pMesh->mTangents[vertIdx]);
         plVec3 bitangent = normalsTransform * ConvertAssimpType(pMesh->mBitangents[vertIdx]);
 
-        normal.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
-        tangent.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
-        bitangent.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+        normal.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+        tangent.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+        bitangent.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 
         const float fBitangentSign = plMath::Abs(tangent.CrossRH(bitangent).Dot(normal));
 
@@ -327,9 +332,9 @@ namespace plModelImporter2
       auto pBone = pMesh->mBones[b];
 
       auto invPose = ConvertAssimpType(pBone->mOffsetMatrix);
-      PLASMA_VERIFY(invPose.Invert(0.0f).Succeeded(), "Inverting the bind pose matrix failed");
+      PL_VERIFY(invPose.Invert(0.0f).Succeeded(), "Inverting the bind pose matrix failed");
       invPose = mGlobalTransform * invPose;
-      PLASMA_VERIFY(invPose.Invert(0.0f).Succeeded(), "Inverting the bind pose matrix failed");
+      PL_VERIFY(invPose.Invert(0.0f).Succeeded(), "Inverting the bind pose matrix failed");
 
       hs.Assign(pBone->mName.C_Str());
       ref_mrd.m_Bones[hs].m_GlobalInverseRestPoseMatrix = invPose;
@@ -477,7 +482,7 @@ namespace plModelImporter2
     }
 
     if (mikkd.m_pPositions == nullptr || mikkd.m_pTexCoords == nullptr || mikkd.m_pNormals == nullptr || mikkd.m_pTangents == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // Use Morton S. Mikkelsen's tangent calculation.
     SMikkTSpaceContext context;
@@ -505,15 +510,15 @@ namespace plModelImporter2
     }
 
     if (!genTangSpaceDefault(&context))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult ImporterAssimp::PrepareOutputMesh()
   {
     if (m_Options.m_pMeshOutput == nullptr)
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     auto& mb = m_Options.m_pMeshOutput->MeshBufferDesc();
 
@@ -565,7 +570,7 @@ namespace plModelImporter2
 
         if (m_Options.m_bImportSkinningData)
         {
-          SetMeshBoneData(mb, *m_Options.m_pMeshOutput, m_Options.m_pMeshOutput->m_fMaxBoneVertexOffset, mi.m_pMesh, uiMeshCurVertexIdx, streams, b8BitBoneIndices, m_Options.m_MeshBoneWeightPrecision);
+          SetMeshBoneData(mb, *m_Options.m_pMeshOutput, m_Options.m_pMeshOutput->m_fMaxBoneVertexOffset, mi.m_pMesh, uiMeshCurVertexIdx, streams, b8BitBoneIndices, m_Options.m_MeshBoneWeightPrecision, m_Options.m_bNormalizeWeights);
         }
 
         SetMeshTriangleIndices(mb, mi.m_pMesh, uiMeshCurTriangleIdx, uiMeshCurVertexIdx, bFlipTriangles);
@@ -598,6 +603,6 @@ namespace plModelImporter2
 
     m_Options.m_pMeshOutput->ComputeBounds();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 } // namespace plModelImporter2

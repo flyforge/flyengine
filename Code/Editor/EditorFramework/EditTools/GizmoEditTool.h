@@ -3,7 +3,7 @@
 #include <EditorFramework/EditTools/EditTool.h>
 #include <EditorFramework/EditorFrameworkDLL.h>
 
-struct PlasmaEngineWindowEvent;
+struct plEngineWindowEvent;
 struct plGameObjectEvent;
 struct plDocumentObjectStructureEvent;
 struct plManipulatorManagerEvent;
@@ -11,9 +11,9 @@ struct plSelectionManagerEvent;
 struct plCommandHistoryEvent;
 struct plGizmoEvent;
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectGizmoEditTool : public plGameObjectEditTool
+class PL_EDITORFRAMEWORK_DLL plGameObjectGizmoEditTool : public plGameObjectEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectGizmoEditTool, plGameObjectEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectGizmoEditTool, plGameObjectEditTool);
 
 public:
   plGameObjectGizmoEditTool();
@@ -45,6 +45,6 @@ private:
   void CommandHistoryEventHandler(const plCommandHistoryEvent& e);
   void SelectionManagerEventHandler(const plSelectionManagerEvent& e);
   void ManipulatorManagerEventHandler(const plManipulatorManagerEvent& e);
-  void EngineWindowEventHandler(const PlasmaEngineWindowEvent& e);
+  void EngineWindowEventHandler(const plEngineWindowEvent& e);
   void ObjectStructureEventHandler(const plDocumentObjectStructureEvent& e);
 };

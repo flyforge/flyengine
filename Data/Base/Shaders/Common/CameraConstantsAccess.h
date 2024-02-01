@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
 
 // For stereo support, set this at the beginning of the shader to access the correct values in all camera getters.
 static uint s_ActiveCameraEyeIndex = 0;
@@ -11,13 +11,6 @@ float4x4 GetWorldToCameraMatrix()   { return WorldToCameraMatrix[s_ActiveCameraE
 float4x4 GetCameraToWorldMatrix()   { return CameraToWorldMatrix[s_ActiveCameraEyeIndex]; }
 float4x4 GetWorldToScreenMatrix()   { return WorldToScreenMatrix[s_ActiveCameraEyeIndex]; }
 float4x4 GetScreenToWorldMatrix()   { return ScreenToWorldMatrix[s_ActiveCameraEyeIndex]; }
-
-float4x4 GetLastCameraToScreenMatrix()  { return LastCameraToScreenMatrix[s_ActiveCameraEyeIndex]; }
-float4x4 GetLastScreenToCameraMatrix()  { return LastScreenToCameraMatrix[s_ActiveCameraEyeIndex]; }
-float4x4 GetLastWorldToCameraMatrix()   { return LastWorldToCameraMatrix[s_ActiveCameraEyeIndex]; }
-float4x4 GetLastCameraToWorldMatrix()   { return LastCameraToWorldMatrix[s_ActiveCameraEyeIndex]; }
-float4x4 GetLastWorldToScreenMatrix()   { return LastWorldToScreenMatrix[s_ActiveCameraEyeIndex]; }
-float4x4 GetLastScreenToWorldMatrix()   { return LastScreenToWorldMatrix[s_ActiveCameraEyeIndex]; }
 
 float3 GetCameraPosition()     { return GetCameraToWorldMatrix()._m03_m13_m23; };
 float3 GetCameraDirForwards()  { return GetCameraToWorldMatrix()._m02_m12_m22; };

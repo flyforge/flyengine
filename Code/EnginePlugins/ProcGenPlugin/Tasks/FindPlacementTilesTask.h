@@ -37,7 +37,7 @@ namespace plProcGenInternal
 
     struct TileByAge
     {
-      PLASMA_DECLARE_POD_TYPE();
+      PL_DECLARE_POD_TYPE();
 
       plUInt64 m_uiTileKey;
       plUInt64 m_uiLastSeenFrame;
@@ -46,7 +46,7 @@ namespace plProcGenInternal
     plDynamicArray<TileByAge> m_TilesByAge;
   };
 
-  PLASMA_ALWAYS_INLINE plUInt64 GetTileKey(plInt32 x, plInt32 y)
+  PL_ALWAYS_INLINE plUInt64 GetTileKey(plInt32 x, plInt32 y)
   {
     plUInt64 sx = (plUInt32)x;
     plUInt64 sy = (plUInt32)y;

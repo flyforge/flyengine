@@ -6,9 +6,9 @@
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
-plAbstractObjectNode* plDocumentObjectConverterWriter::AddObjectToGraph(const plDocumentObject* pObject, const char* szNodeName)
+plAbstractObjectNode* plDocumentObjectConverterWriter::AddObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName)
 {
-  plAbstractObjectNode* pNode = AddSubObjectToGraph(pObject, szNodeName);
+  plAbstractObjectNode* pNode = AddSubObjectToGraph(pObject, sNodeName);
 
   while (!m_QueuedObjects.IsEmpty())
   {
@@ -65,7 +65,7 @@ void plDocumentObjectConverterWriter::AddProperty(plAbstractObjectNode* pNode, c
         else if (pProp->GetFlags().IsSet(plPropertyFlags::Class))
         {
           const plUuid guid = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName()).Get<plUuid>();
-          PLASMA_ASSERT_DEV(guid.IsValid(), "Embedded class cannot be null.");
+          PL_ASSERT_DEV(guid.IsValid(), "Embedded class cannot be null.");
           pNode->AddProperty(pProp->GetPropertyName(), guid);
           m_QueuedObjects.Insert(m_pManager->GetObject(guid));
         }
@@ -78,7 +78,7 @@ void plDocumentObjectConverterWriter::AddProperty(plAbstractObjectNode* pNode, c
     case plPropertyCategory::Set:
     {
       const plInt32 iCount = pObject->GetTypeAccessor().GetCount(pProp->GetPropertyName());
-      PLASMA_ASSERT_DEV(iCount >= 0, "Invalid array property size {0}", iCount);
+      PL_ASSERT_DEV(iCount >= 0, "Invalid array property size {0}", iCount);
 
       plVariantArray values;
       values.SetCount(iCount);
@@ -97,7 +97,7 @@ void plDocumentObjectConverterWriter::AddProperty(plAbstractObjectNode* pNode, c
     case plPropertyCategory::Map:
     {
       const plInt32 iCount = pObject->GetTypeAccessor().GetCount(pProp->GetPropertyName());
-      PLASMA_ASSERT_DEV(iCount >= 0, "Invalid map property size {0}", iCount);
+      PL_ASSERT_DEV(iCount >= 0, "Invalid map property size {0}", iCount);
 
       plVariantDictionary values;
       values.Reserve(iCount);
@@ -120,7 +120,7 @@ void plDocumentObjectConverterWriter::AddProperty(plAbstractObjectNode* pNode, c
       // Nothing to do here.
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED
+      PL_ASSERT_NOT_IMPLEMENTED
   }
 }
 
@@ -135,9 +135,9 @@ void plDocumentObjectConverterWriter::AddProperties(plAbstractObjectNode* pNode,
   }
 }
 
-plAbstractObjectNode* plDocumentObjectConverterWriter::AddSubObjectToGraph(const plDocumentObject* pObject, const char* szNodeName)
+plAbstractObjectNode* plDocumentObjectConverterWriter::AddSubObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName)
 {
-  plAbstractObjectNode* pNode = m_pGraph->AddNode(pObject->GetGuid(), pObject->GetType()->GetTypeName(), pObject->GetType()->GetTypeVersion(), szNodeName);
+  plAbstractObjectNode* pNode = m_pGraph->AddNode(pObject->GetGuid(), pObject->GetType()->GetTypeName(), pObject->GetType()->GetTypeVersion(), sNodeName);
   AddProperties(pNode, pObject);
   return pNode;
 }
@@ -170,22 +170,22 @@ plDocumentObject* plDocumentObjectConverterReader::CreateObjectFromNode(const pl
   return pObject;
 }
 
-void plDocumentObjectConverterReader::AddObject(plDocumentObject* pObject, plDocumentObject* pParent, const char* szParentProperty, plVariant index)
+void plDocumentObjectConverterReader::AddObject(plDocumentObject* pObject, plDocumentObject* pParent, plStringView sParentProperty, plVariant index)
 {
-  PLASMA_ASSERT_DEV(pObject && pParent, "Need to have valid objects to add them to the document");
+  PL_ASSERT_DEV(pObject && pParent, "Need to have valid objects to add them to the document");
   if (m_Mode == plDocumentObjectConverterReader::Mode::CreateAndAddToDocument && pParent->GetDocumentObjectManager()->GetObject(pParent->GetGuid()))
   {
-    m_pManager->AddObject(pObject, pParent, szParentProperty, index);
+    m_pManager->AddObject(pObject, pParent, sParentProperty, index);
   }
   else
   {
-    pParent->InsertSubObject(pObject, szParentProperty, index);
+    pParent->InsertSubObject(pObject, sParentProperty, index);
   }
 }
 
 void plDocumentObjectConverterReader::ApplyPropertiesToObject(const plAbstractObjectNode* pNode, plDocumentObject* pObject)
 {
-  // PLASMA_ASSERT_DEV(pObject->GetChildren().GetCount() == 0, "Can only apply properties to empty objects!");
+  // PL_ASSERT_DEV(pObject->GetChildren().GetCount() == 0, "Can only apply properties to empty objects!");
   plHybridArray<const plAbstractProperty*, 32> properties;
   pObject->GetTypeAccessor().GetType()->GetAllProperties(properties);
 
@@ -282,7 +282,7 @@ void plDocumentObjectConverterReader::ApplyDiff(plObjectAccessorBase* pObjectAcc
               }
 
               const plDocumentObject* pChild = pObject->GetChild(newGuid);
-              PLASMA_ASSERT_DEV(pChild != nullptr, "References child object does not exist!");
+              PL_ASSERT_DEV(pChild != nullptr, "References child object does not exist!");
             }
           }
           else
@@ -348,7 +348,7 @@ void plDocumentObjectConverterReader::ApplyDiff(plObjectAccessorBase* pObjectAcc
     {
       const plVariantDictionary& values = op.m_Value.Get<plVariantDictionary>();
       plHybridArray<plVariant, 16> keys;
-      PLASMA_VERIFY(pObjectAccessor->GetKeys(pObject, pProp, keys).Succeeded(), "Property is not a map, getting keys failed.");
+      PL_VERIFY(pObjectAccessor->GetKeys(pObject, pProp, keys).Succeeded(), "Property is not a map, getting keys failed.");
 
       if (bIsValueType || (pProp->GetFlags().IsAnySet(plPropertyFlags::Pointer) && !pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner)))
       {
@@ -357,7 +357,7 @@ void plDocumentObjectConverterReader::ApplyDiff(plObjectAccessorBase* pObjectAcc
           const plString& sKey = key.Get<plString>();
           if (!values.Contains(sKey))
           {
-            PLASMA_VERIFY(pObjectAccessor->RemoveValue(pObject, pProp, key).Succeeded(), "RemoveValue failed.");
+            PL_VERIFY(pObjectAccessor->RemoveValue(pObject, pProp, key).Succeeded(), "RemoveValue failed.");
           }
         }
         for (auto it = values.GetIterator(); it.IsValid(); ++it)
@@ -374,7 +374,7 @@ void plDocumentObjectConverterReader::ApplyDiff(plObjectAccessorBase* pObjectAcc
         for (const plVariant& key : keys)
         {
           plVariant value;
-          PLASMA_VERIFY(pObjectAccessor->GetValue(pObject, pProp, value, key).Succeeded(), "");
+          PL_VERIFY(pObjectAccessor->GetValue(pObject, pProp, value, key).Succeeded(), "");
           if (NeedsToBeDeleted(value.Get<plUuid>()))
           {
             pObjectAccessor->RemoveObject(pObjectAccessor->GetObject(value.Get<plUuid>())).IgnoreResult();
@@ -421,7 +421,7 @@ void plDocumentObjectConverterReader::ApplyProperty(plDocumentObject* pObject, c
           if (guid.IsValid())
           {
             auto* pSubNode = m_pGraph->GetNode(guid);
-            PLASMA_ASSERT_DEV(pSubNode != nullptr, "invalid document");
+            PL_ASSERT_DEV(pSubNode != nullptr, "invalid document");
 
             if (auto* pSubObject = CreateObjectFromNode(pSubNode))
             {
@@ -447,9 +447,9 @@ void plDocumentObjectConverterReader::ApplyProperty(plDocumentObject* pObject, c
 
           const plUuid subObjectGuid = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName()).Get<plUuid>();
           plDocumentObject* pEmbeddedClassObject = pObject->GetChild(subObjectGuid);
-          PLASMA_ASSERT_DEV(pEmbeddedClassObject != nullptr, "CreateObject should have created all embedded classes!");
+          PL_ASSERT_DEV(pEmbeddedClassObject != nullptr, "CreateObject should have created all embedded classes!");
           auto* pSubNode = m_pGraph->GetNode(nodeGuid);
-          PLASMA_ASSERT_DEV(pSubNode != nullptr, "invalid document");
+          PL_ASSERT_DEV(pSubNode != nullptr, "invalid document");
 
           ApplyPropertiesToObject(pSubNode, pEmbeddedClassObject);
         }
@@ -487,7 +487,7 @@ void plDocumentObjectConverterReader::ApplyProperty(plDocumentObject* pObject, c
           if (guid.IsValid())
           {
             auto* pSubNode = m_pGraph->GetNode(guid);
-            PLASMA_ASSERT_DEV(pSubNode != nullptr, "invalid document");
+            PL_ASSERT_DEV(pSubNode != nullptr, "invalid document");
 
             if (i < (plUInt32)iCurrentCount)
             {
@@ -510,7 +510,7 @@ void plDocumentObjectConverterReader::ApplyProperty(plDocumentObject* pObject, c
         }
         for (plInt32 i = iCurrentCount - 1; i >= (plInt32)array.GetCount(); i--)
         {
-          PLASMA_REPORT_FAILURE("Not implemented");
+          PL_REPORT_FAILURE("Not implemented");
         }
       }
       break;
@@ -544,7 +544,7 @@ void plDocumentObjectConverterReader::ApplyProperty(plDocumentObject* pObject, c
           if (guid.IsValid())
           {
             auto* pSubNode = m_pGraph->GetNode(guid);
-            PLASMA_ASSERT_DEV(pSubNode != nullptr, "invalid document");
+            PL_ASSERT_DEV(pSubNode != nullptr, "invalid document");
             if (plDocumentObject* pSubObject = CreateObjectFromNode(pSubNode))
             {
               ApplyPropertiesToObject(pSubNode, pSubObject);

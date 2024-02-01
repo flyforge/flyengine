@@ -10,33 +10,33 @@
 #  include <ToolsFoundation/Document/DocumentManager.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLongOpWorker_BakeScene, 1, plRTTIDefaultAllocator<plLongOpWorker_BakeScene>);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLongOpWorker_BakeScene, 1, plRTTIDefaultAllocator<plLongOpWorker_BakeScene>);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plLongOpWorker_BakeScene::InitializeExecution(plStreamReader& config, const plUuid& DocumentGuid)
 {
-  PlasmaEngineProcessDocumentContext* pDocContext = PlasmaEngineProcessDocumentContext::GetDocumentContext(DocumentGuid);
+  plEngineProcessDocumentContext* pDocContext = plEngineProcessDocumentContext::GetDocumentContext(DocumentGuid);
 
   if (pDocContext == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   config >> m_sOutputPath;
 
   {
     m_pScene = plBaking::GetSingleton()->GetOrCreateScene(*pDocContext->GetWorld());
 
-    PLASMA_SUCCEED_OR_RETURN(m_pScene->Extract());
+    PL_SUCCEED_OR_RETURN(m_pScene->Extract());
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plLongOpWorker_BakeScene::Execute(plProgress& progress, plStreamWriter& proxydata)
 {
-  PLASMA_SUCCEED_OR_RETURN(m_pScene->Bake(m_sOutputPath, progress));
+  PL_SUCCEED_OR_RETURN(m_pScene->Bake(m_sOutputPath, progress));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #endif

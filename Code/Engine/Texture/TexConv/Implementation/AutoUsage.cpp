@@ -55,7 +55,7 @@ static plTexConvUsage::Enum DetectUsageFromFilename(plStringView sFile)
   plStringBuilder name = plPathUtils::GetFileName(sFile);
   name.ToLower();
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(suffixToUsageMap); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(suffixToUsageMap); ++i)
   {
     if (name.EndsWith_NoCase(suffixToUsageMap[i].m_szSuffix))
     {
@@ -121,6 +121,7 @@ static plTexConvUsage::Enum DetectUsageFromImage(const plImage& image)
     plUInt32 uiExtremeNormals = 0;
 
     plUInt32 uiNumPixels = header.GetWidth() * header.GetHeight();
+    PL_ASSERT_DEBUG(uiNumPixels > 0, "Unexpected empty image");
 
     // Sample no more than 10000 pixels
     plUInt32 uiStride = plMath::Max(1U, uiNumPixels / 10000);
@@ -141,9 +142,9 @@ static plTexConvUsage::Enum DetectUsageFromImage(const plImage& image)
     }
 
     // the average color in the image
-    sr /= uiNumPixels;
-    sg /= uiNumPixels;
-    sb /= uiNumPixels;
+    sr /= uiNumPixels; // NOLINT: not a division by zero
+    sg /= uiNumPixels; // NOLINT: not a division by zero
+    sb /= uiNumPixels; // NOLINT: not a division by zero
 
     if (sb < 230 || sr < 128 - 60 || sr > 128 + 60 || sg < 128 - 60 || sg > 128 + 60)
     {
@@ -164,7 +165,7 @@ static plTexConvUsage::Enum DetectUsageFromImage(const plImage& image)
 
 plResult plTexConvProcessor::AdjustUsage(plStringView sFilename, const plImage& srcImg, plEnum<plTexConvUsage>& inout_Usage)
 {
-  PLASMA_PROFILE_SCOPE("AdjustUsage");
+  PL_PROFILE_SCOPE("AdjustUsage");
 
   if (inout_Usage == plTexConvUsage::Auto)
   {
@@ -179,10 +180,10 @@ plResult plTexConvProcessor::AdjustUsage(plStringView sFilename, const plImage& 
   if (inout_Usage == plTexConvUsage::Auto)
   {
     plLog::Error("Failed to deduce target format.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_AutoUsage);
+

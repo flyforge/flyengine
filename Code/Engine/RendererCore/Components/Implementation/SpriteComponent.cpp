@@ -9,9 +9,9 @@
 #include <RendererCore/Textures/Texture2DResource.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSpriteBlendMode, 1)
-  PLASMA_ENUM_CONSTANTS(plSpriteBlendMode::Masked, plSpriteBlendMode::Transparent, plSpriteBlendMode::Additive)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSpriteBlendMode, 1)
+  PL_ENUM_CONSTANTS(plSpriteBlendMode::Masked, plSpriteBlendMode::Transparent, plSpriteBlendMode::Additive)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 // static
@@ -32,8 +32,8 @@ plTempHashedString plSpriteBlendMode::GetPermutationValue(Enum blendMode)
 }
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSpriteRenderData, 1, plRTTIDefaultAllocator<plSpriteRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSpriteRenderData, 1, plRTTIDefaultAllocator<plSpriteRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plSpriteRenderData::FillBatchIdAndSortingKey()
@@ -52,31 +52,31 @@ void plSpriteRenderData::FillBatchIdAndSortingKey()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSpriteComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSpriteComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Texture", GetTextureFile, SetTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
-    PLASMA_ENUM_MEMBER_PROPERTY("BlendMode", plSpriteBlendMode, m_BlendMode),
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f), new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("MaxScreenSize", GetMaxScreenSize, SetMaxScreenSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(64.0f), new plSuffixAttribute(" px")),
-    PLASMA_MEMBER_PROPERTY("AspectRatio", m_fAspectRatio)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Texture", GetTextureFile, SetTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
+    PL_ENUM_MEMBER_PROPERTY("BlendMode", plSpriteBlendMode, m_BlendMode),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f), new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("MaxScreenSize", GetMaxScreenSize, SetMaxScreenSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(64.0f), new plSuffixAttribute(" px")),
+    PL_MEMBER_PROPERTY("AspectRatio", m_fAspectRatio)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plSpriteComponent::plSpriteComponent() = default;
@@ -84,8 +84,8 @@ plSpriteComponent::~plSpriteComponent() = default;
 
 plResult plSpriteComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  ref_bounds = plBoundingSphere(plVec3::ZeroVector(), m_fSize * 0.5f);
-  return PLASMA_SUCCESS;
+  ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fSize * 0.5f);
+  return PL_SUCCESS;
 }
 
 void plSpriteComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -255,4 +255,4 @@ plSpriteComponentPatch_1_2 g_plSpriteComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_SpriteComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_SpriteComponent);

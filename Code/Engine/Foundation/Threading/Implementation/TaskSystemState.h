@@ -24,7 +24,7 @@ private:
   friend class plTaskSystem;
 
   // The target frame time used by FinishFrameTasks()
-  plTime m_TargetFrameTime = plTime::Seconds(1.0 / 40.0); // => 25 ms
+  plTime m_TargetFrameTime = plTime::MakeFromSeconds(1.0 / 40.0); // => 25 ms
 
   // The deque can grow without relocating existing data, therefore the plTaskGroupID's can store pointers directly to the data
   plDeque<plTaskGroup> m_TaskGroups;

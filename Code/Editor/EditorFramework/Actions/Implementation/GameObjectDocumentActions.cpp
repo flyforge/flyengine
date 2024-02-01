@@ -5,11 +5,11 @@
 #include <EditorFramework/Preferences/ScenePreferences.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectDocumentAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectDocumentAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCameraSpeedSliderAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCameraSpeedSliderAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plActionDescriptorHandle plGameObjectDocumentActions::s_hGameObjectCategory;
@@ -25,44 +25,44 @@ plActionDescriptorHandle plGameObjectDocumentActions::s_hPickTransparent;
 
 void plGameObjectDocumentActions::RegisterActions()
 {
-  s_hGameObjectCategory = PLASMA_REGISTER_CATEGORY("GameObjectCategory");
-  s_hRenderSelectionOverlay = PLASMA_REGISTER_ACTION_1("Scene.Render.SelectionOverlay", plActionScope::Document, "Scene", "S", plGameObjectDocumentAction,
+  s_hGameObjectCategory = PL_REGISTER_CATEGORY("GameObjectCategory");
+  s_hRenderSelectionOverlay = PL_REGISTER_ACTION_1("Scene.Render.SelectionOverlay", plActionScope::Document, "Scene", "S", plGameObjectDocumentAction,
     plGameObjectDocumentAction::ActionType::RenderSelectionOverlay);
-  s_hRenderVisualizers = PLASMA_REGISTER_ACTION_1("Scene.Render.Visualizers", plActionScope::Document, "Scene", "V", plGameObjectDocumentAction,
+  s_hRenderVisualizers = PL_REGISTER_ACTION_1("Scene.Render.Visualizers", plActionScope::Document, "Scene", "V", plGameObjectDocumentAction,
     plGameObjectDocumentAction::ActionType::RenderVisualizers);
-  s_hRenderShapeIcons = PLASMA_REGISTER_ACTION_1("Scene.Render.ShapeIcons", plActionScope::Document, "Scene", "I", plGameObjectDocumentAction,
+  s_hRenderShapeIcons = PL_REGISTER_ACTION_1("Scene.Render.ShapeIcons", plActionScope::Document, "Scene", "I", plGameObjectDocumentAction,
     plGameObjectDocumentAction::ActionType::RenderShapeIcons);
-  s_hRenderGrid = PLASMA_REGISTER_ACTION_1(
+  s_hRenderGrid = PL_REGISTER_ACTION_1(
     "Scene.Render.Grid", plActionScope::Document, "Scene", "G", plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::RenderGrid);
-  s_hAddAmbientLight = PLASMA_REGISTER_ACTION_1("Scene.Render.AddAmbient", plActionScope::Document, "Scene", "", plGameObjectDocumentAction,
+  s_hAddAmbientLight = PL_REGISTER_ACTION_1("Scene.Render.AddAmbient", plActionScope::Document, "Scene", "", plGameObjectDocumentAction,
     plGameObjectDocumentAction::ActionType::AddAmbientLight);
 
-  s_hSimulationSpeedMenu = PLASMA_REGISTER_MENU_WITH_ICON("Scene.Simulation.Speed.Menu", "");
-  s_hSimulationSpeed[0] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.01", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeedMenu = PL_REGISTER_MENU_WITH_ICON("Scene.Simulation.Speed.Menu", "");
+  s_hSimulationSpeed[0] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.01", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 0.1f);
-  s_hSimulationSpeed[1] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.025", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[1] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.025", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 0.25f);
-  s_hSimulationSpeed[2] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.05", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[2] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.05", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 0.5f);
-  s_hSimulationSpeed[3] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.1", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[3] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.1", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 1.0f);
-  s_hSimulationSpeed[4] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.15", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[4] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.15", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 1.5f);
-  s_hSimulationSpeed[5] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.2", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[5] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.2", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 2.0f);
-  s_hSimulationSpeed[6] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.3", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[6] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.3", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 3.0f);
-  s_hSimulationSpeed[7] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.4", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[7] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.4", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 4.0f);
-  s_hSimulationSpeed[8] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.5", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[8] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.5", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 5.0f);
-  s_hSimulationSpeed[9] = PLASMA_REGISTER_ACTION_2("Scene.Simulation.Speed.10", plActionScope::Document, "Simulation - Speed", "",
+  s_hSimulationSpeed[9] = PL_REGISTER_ACTION_2("Scene.Simulation.Speed.10", plActionScope::Document, "Simulation - Speed", "",
     plGameObjectDocumentAction, plGameObjectDocumentAction::ActionType::SimulationSpeed, 10.0f);
 
-  s_hCameraSpeed = PLASMA_REGISTER_ACTION_1(
+  s_hCameraSpeed = PL_REGISTER_ACTION_1(
     "Scene.Camera.Speed", plActionScope::Document, "Camera", "", plCameraSpeedSliderAction, plCameraSpeedSliderAction::ActionType::CameraSpeed);
 
-  s_hPickTransparent = PLASMA_REGISTER_ACTION_1("Scene.Render.PickTransparent", plActionScope::Document, "Scene", "U", plGameObjectDocumentAction,
+  s_hPickTransparent = PL_REGISTER_ACTION_1("Scene.Render.PickTransparent", plActionScope::Document, "Scene", "U", plGameObjectDocumentAction,
     plGameObjectDocumentAction::ActionType::PickTransparent);
 }
 
@@ -76,22 +76,22 @@ void plGameObjectDocumentActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hAddAmbientLight);
 
   plActionManager::UnregisterAction(s_hSimulationSpeedMenu);
-  for (int i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+  for (int i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
     plActionManager::UnregisterAction(s_hSimulationSpeed[i]);
 
   plActionManager::UnregisterAction(s_hCameraSpeed);
   plActionManager::UnregisterAction(s_hPickTransparent);
 }
 
-void plGameObjectDocumentActions::MapMenuActions(const char* szMapping, const char* szPath)
+void plGameObjectDocumentActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    pMap->MapAction(s_hGameObjectCategory, szPath, 0.9f);
+    pMap->MapAction(s_hGameObjectCategory, "G.View", 0.9f);
 
-    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
+    const plStringView sSubPath = "GameObjectCategory";
     pMap->MapAction(s_hRenderSelectionOverlay, sSubPath, 1.0f);
     pMap->MapAction(s_hRenderVisualizers, sSubPath, 2.0f);
     pMap->MapAction(s_hRenderShapeIcons, sSubPath, 3.0f);
@@ -102,32 +102,32 @@ void plGameObjectDocumentActions::MapMenuActions(const char* szMapping, const ch
   }
 }
 
-void plGameObjectDocumentActions::MapMenuSimulationSpeed(const char* szMapping, const char* szPath)
+void plGameObjectDocumentActions::MapMenuSimulationSpeed(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
+    const plStringView sSubPath = "GameObjectCategory";
 
-    pMap->MapAction(s_hGameObjectCategory, szPath, 1.0f);
+    pMap->MapAction(s_hGameObjectCategory, "G.Scene", 1.0f);
     pMap->MapAction(s_hSimulationSpeedMenu, sSubPath, 3.0f);
 
     plStringBuilder sSubPathSim(sSubPath, "/Scene.Simulation.Speed.Menu");
-    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
-      pMap->MapAction(s_hSimulationSpeed[i], sSubPathSim, i + 1.0f);
+    for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+      pMap->MapAction(s_hSimulationSpeed[i], "G.Scene", sSubPathSim, i + 1.0f);
   }
 }
 
-void plGameObjectDocumentActions::MapToolbarActions(const char* szMapping, const char* szPath)
+void plGameObjectDocumentActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    pMap->MapAction(s_hGameObjectCategory, szPath, 12.0f);
+    pMap->MapAction(s_hGameObjectCategory, "", 12.0f);
 
-    plStringBuilder sSubPath(szPath, "/GameObjectCategory");
+    const plStringView sSubPath("GameObjectCategory");
     pMap->MapAction(s_hRenderSelectionOverlay, sSubPath, 4.0f);
     pMap->MapAction(s_hRenderVisualizers, sSubPath, 5.0f);
     pMap->MapAction(s_hRenderShapeIcons, sSubPath, 6.0f);
@@ -373,8 +373,6 @@ plCameraSpeedSliderAction::~plCameraSpeedSliderAction()
 
 void plCameraSpeedSliderAction::Execute(const plVariant& value)
 {
-  const plInt32 iValue = value.Get<plInt32>();
-
   switch (m_Type)
   {
     case ActionType::CameraSpeed:

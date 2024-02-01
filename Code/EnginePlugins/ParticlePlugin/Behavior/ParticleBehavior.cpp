@@ -3,11 +3,11 @@
 #include <Foundation/DataProcessing/Stream/ProcessingStreamGroup.h>
 #include <ParticlePlugin/Behavior/ParticleBehavior.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 plParticleBehavior* plParticleBehaviorFactory::CreateBehavior(plParticleSystemInstance* pOwner) const
@@ -29,4 +29,4 @@ plParticleBehavior::plParticleBehavior()
   m_fPriority = 0.0f;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior);

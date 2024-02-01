@@ -23,7 +23,7 @@ plActionDescriptor::plActionDescriptor(plActionType::Enum type, plActionScope::E
 
 plAction* plActionDescriptor::CreateAction(const plActionContext& context) const
 {
-  PLASMA_ASSERT_DEV(!m_Handle.IsInvalidated(), "Handle invalid!");
+  PL_ASSERT_DEV(!m_Handle.IsInvalidated(), "Handle invalid!");
   auto pAction = m_CreateAction(context);
   pAction->m_hDescriptorHandle = m_Handle;
 
@@ -37,7 +37,7 @@ void plActionDescriptor::DeleteAction(plAction* pAction) const
 
   if (m_DeleteAction == nullptr)
   {
-    PLASMA_DEFAULT_DELETE(pAction);
+    PL_DEFAULT_DELETE(pAction);
   }
   else
     m_DeleteAction(pAction);
@@ -57,5 +57,5 @@ void plAction::TriggerUpdate()
   m_StatusUpdateEvent.Broadcast(this);
 }
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;

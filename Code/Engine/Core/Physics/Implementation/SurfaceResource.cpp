@@ -1,16 +1,16 @@
 #include <Core/CorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Messages/ApplyOnlyToMessage.h>
 #include <Core/Messages/CommonMessages.h>
 #include <Core/Physics/SurfaceResource.h>
 #include <Core/Prefabs/PrefabResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResource, 1, plRTTIDefaultAllocator<plSurfaceResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResource, 1, plRTTIDefaultAllocator<plSurfaceResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plSurfaceResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plSurfaceResource);
 // clang-format on
 
 plEvent<const plSurfaceResourceEvent&, plMutex> plSurfaceResource::s_Events;
@@ -22,8 +22,8 @@ plSurfaceResource::plSurfaceResource()
 
 plSurfaceResource::~plSurfaceResource()
 {
-  PLASMA_ASSERT_DEV(m_pPhysicsMaterialPhysX == nullptr, "Physics material has not been cleaned up properly");
-  PLASMA_ASSERT_DEV(m_pPhysicsMaterialJolt == nullptr, "Physics material has not been cleaned up properly");
+  PL_ASSERT_DEV(m_pPhysicsMaterialPhysX == nullptr, "Physics material has not been cleaned up properly");
+  PL_ASSERT_DEV(m_pPhysicsMaterialJolt == nullptr, "Physics material has not been cleaned up properly");
 }
 
 plResourceLoadDesc plSurfaceResource::UnloadData(Unload WhatToUnload)
@@ -43,7 +43,7 @@ plResourceLoadDesc plSurfaceResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plSurfaceResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plSurfaceResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plSurfaceResource::UpdateContent", GetResourceIdOrDescription());
 
   m_Interactions.Clear();
 
@@ -89,8 +89,7 @@ plResourceLoadDesc plSurfaceResource::UpdateContent(plStreamReader* Stream)
       if (lhs.m_uiInteractionTypeHash != rhs.m_uiInteractionTypeHash)
         return lhs.m_uiInteractionTypeHash < rhs.m_uiInteractionTypeHash;
 
-      return lhs.m_pInteraction->m_fImpulseThreshold > rhs.m_pInteraction->m_fImpulseThreshold;
-    });
+      return lhs.m_pInteraction->m_fImpulseThreshold > rhs.m_pInteraction->m_fImpulseThreshold; });
   }
 
   res.m_State = plResourceState::Loaded;
@@ -103,7 +102,7 @@ void plSurfaceResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plSurfaceResource, plSurfaceResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plSurfaceResource, plSurfaceResourceDescriptor)
 {
   m_Descriptor = descriptor;
 
@@ -217,13 +216,12 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
   {
     double randomAngle = pWorld->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0);
 
-    plMat3 rotMat;
-    rotMat.SetRotationMatrix(vDir, plAngle::Radian((float)randomAngle));
+    plMat3 rotMat = plMat3::MakeAxisRotation(vDir, plAngle::MakeFromRadian((float)randomAngle));
 
     vTangent = rotMat * vTangent;
   }
 
-  if (pIA->m_Deviation > plAngle::Radian(0.0f))
+  if (pIA->m_Deviation > plAngle::MakeFromRadian(0.0f))
   {
     plAngle maxDeviation;
 
@@ -236,7 +234,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         const float fCosAngle = vDir.Dot(-vSurfaceNormal);
         const float fMaxDeviation = plMath::Pi<float>() - plMath::ACos(fCosAngle).GetRadian();
 
-        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::Radian(fMaxDeviation));
+        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::MakeFromRadian(fMaxDeviation));
       }
       break;
 
@@ -246,7 +244,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         const float fCosAngle = vDir.Dot(vSurfaceNormal);
         const float fMaxDeviation = plMath::Pi<float>() - plMath::ACos(fCosAngle).GetRadian();
 
-        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::Radian(fMaxDeviation));
+        maxDeviation = plMath::Min(pIA->m_Deviation, plAngle::MakeFromRadian(fMaxDeviation));
       }
       break;
 
@@ -255,11 +253,10 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
         break;
     }
 
-    const plAngle deviation = plAngle::Radian((float)pWorld->GetRandomNumberGenerator().DoubleMinMax(-maxDeviation.GetRadian(), maxDeviation.GetRadian()));
+    const plAngle deviation = plAngle::MakeFromRadian((float)pWorld->GetRandomNumberGenerator().DoubleMinMax(-maxDeviation.GetRadian(), maxDeviation.GetRadian()));
 
     // tilt around the tangent (we don't want to compute another random rotation here)
-    plMat3 matTilt;
-    matTilt.SetRotationMatrix(vTangent, deviation);
+    plMat3 matTilt = plMat3::MakeAxisRotation(vTangent, deviation);
 
     vDir = matTilt * vDir;
   }
@@ -275,7 +272,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
   plTransform t;
   t.m_vPosition = vPosition;
-  t.m_qRotation.SetFromMat3(mRot);
+  t.m_qRotation = plQuat::MakeFromMat3(mRot);
   t.m_vScale.Set(1.0f);
 
   // attach to dynamic objects
@@ -285,7 +282,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
   if (pWorld->TryGetObject(hObject, pObject) && pObject->IsDynamic())
   {
     hParent = hObject;
-    t.SetLocalTransform(pObject->GetGlobalTransform(), t);
+    t = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), t);
   }
 
   plHybridArray<plGameObject*, 8> rootObjects;
@@ -304,7 +301,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
     for (auto pRootObject : rootObjects)
     {
-      pRootObject->PostMessageRecursive(msgSetFloat, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
+      pRootObject->PostMessageRecursive(msgSetFloat, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
     }
   }
 
@@ -315,7 +312,7 @@ bool plSurfaceResource::InteractWithSurface(plWorld* pWorld, plGameObjectHandle 
 
     for (auto pRootObject : rootObjects)
     {
-      pRootObject->PostMessageRecursive(msg, plTime::Zero(), plObjectMsgQueueType::AfterInitialized);
+      pRootObject->PostMessageRecursive(msg, plTime::MakeZero(), plObjectMsgQueueType::AfterInitialized);
     }
   }
 
@@ -343,3 +340,6 @@ bool plSurfaceResource::IsBasedOn(const plSurfaceResourceHandle hThisOrBaseSurfa
 
   return IsBasedOn(pThisOrBaseSurface.GetPointer());
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Physics_Implementation_SurfaceResource);

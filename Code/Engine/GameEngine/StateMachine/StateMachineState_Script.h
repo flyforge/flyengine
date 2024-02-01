@@ -5,9 +5,9 @@
 #include <GameEngine/StateMachine/StateMachine.h>
 
 /// \brief A state machine state implementation that can be scripted using e.g. visual scripting.
-class PLASMA_GAMEENGINE_DLL plStateMachineState_Script : public plStateMachineState
+class PL_GAMEENGINE_DLL plStateMachineState_Script : public plStateMachineState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState_Script, plStateMachineState);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_Script, plStateMachineState);
 
 public:
   plStateMachineState_Script(plStringView sName = plStringView());

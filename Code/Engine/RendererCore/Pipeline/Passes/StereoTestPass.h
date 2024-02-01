@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
-class PLASMA_RENDERERCORE_DLL plStereoTestPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plStereoTestPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStereoTestPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plStereoTestPass, plRenderPipelinePass);
 
 public:
   plStereoTestPass();

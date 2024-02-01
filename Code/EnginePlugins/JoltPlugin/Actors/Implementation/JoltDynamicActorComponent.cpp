@@ -25,7 +25,7 @@ plJoltDynamicActorComponentManager::~plJoltDynamicActorComponentManager() = defa
 
 void plJoltDynamicActorComponentManager::UpdateDynamicActors()
 {
-  PLASMA_PROFILE_SCOPE("UpdateDynamicActors");
+  PL_PROFILE_SCOPE("UpdateDynamicActors");
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
   auto* pSystem = pModule->GetJoltSystem();
@@ -56,7 +56,7 @@ void plJoltDynamicActorComponentManager::UpdateDynamicActors()
 
 void plJoltDynamicActorComponentManager::UpdateKinematicActors(plTime deltaTime)
 {
-  PLASMA_PROFILE_SCOPE("UpdateKinematicActors");
+  PL_PROFILE_SCOPE("UpdateKinematicActors");
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
   auto* pSystem = pModule->GetJoltSystem();
@@ -85,45 +85,45 @@ void plJoltDynamicActorComponentManager::UpdateKinematicActors(plTime deltaTime)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltDynamicActorComponent, 3, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plJoltDynamicActorComponent, 3, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-      PLASMA_ACCESSOR_PROPERTY("Kinematic", GetKinematic, SetKinematic),
-      PLASMA_MEMBER_PROPERTY("StartAsleep", m_bStartAsleep),
-      PLASMA_MEMBER_PROPERTY("Mass", m_fInitialMass)->AddAttributes(new plSuffixAttribute(" kg"), new plClampValueAttribute(0.0f, plVariant())),
-      PLASMA_MEMBER_PROPERTY("Density", m_fDensity)->AddAttributes(new plDefaultValueAttribute(100.0f), new plSuffixAttribute(" kg/m^3")),
-      PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
-      PLASMA_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-      PLASMA_MEMBER_PROPERTY("LinearDamping", m_fLinearDamping)->AddAttributes(new plDefaultValueAttribute(0.2f)),
-      PLASMA_MEMBER_PROPERTY("AngularDamping", m_fAngularDamping)->AddAttributes(new plDefaultValueAttribute(0.2f)),
-      PLASMA_MEMBER_PROPERTY("ContinuousCollisionDetection", m_bCCD),
-      PLASMA_BITFLAGS_MEMBER_PROPERTY("OnContact", plOnJoltContact, m_OnContact),
-      PLASMA_ACCESSOR_PROPERTY("CustomCenterOfMass", GetUseCustomCoM, SetUseCustomCoM),
-      PLASMA_MEMBER_PROPERTY("CenterOfMass", m_vCenterOfMass),
+      PL_ACCESSOR_PROPERTY("Kinematic", GetKinematic, SetKinematic),
+      PL_MEMBER_PROPERTY("StartAsleep", m_bStartAsleep),
+      PL_MEMBER_PROPERTY("Mass", m_fInitialMass)->AddAttributes(new plSuffixAttribute(" kg"), new plClampValueAttribute(0.0f, plVariant())),
+      PL_MEMBER_PROPERTY("Density", m_fDensity)->AddAttributes(new plDefaultValueAttribute(100.0f), new plSuffixAttribute(" kg/m^3")),
+      PL_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+      PL_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+      PL_MEMBER_PROPERTY("LinearDamping", m_fLinearDamping)->AddAttributes(new plDefaultValueAttribute(0.2f)),
+      PL_MEMBER_PROPERTY("AngularDamping", m_fAngularDamping)->AddAttributes(new plDefaultValueAttribute(0.2f)),
+      PL_MEMBER_PROPERTY("ContinuousCollisionDetection", m_bCCD),
+      PL_BITFLAGS_MEMBER_PROPERTY("OnContact", plOnJoltContact, m_OnContact),
+      PL_ACCESSOR_PROPERTY("CustomCenterOfMass", GetUseCustomCoM, SetUseCustomCoM),
+      PL_MEMBER_PROPERTY("CenterOfMass", m_vCenterOfMass),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-      PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddForce, AddForceAtPos),
-      PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, AddImpulseAtPos),
+      PL_MESSAGE_HANDLER(plMsgPhysicsAddForce, AddForceAtPos),
+      PL_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, AddImpulseAtPos),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(AddLinearForce, In, "vForce"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(AddLinearImpulse, In, "vImpulse"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(AddAngularForce, In, "vForce"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(AddAngularImpulse, In, "vImpulse"),
+    PL_SCRIPT_FUNCTION_PROPERTY(AddLinearForce, In, "vForce"),
+    PL_SCRIPT_FUNCTION_PROPERTY(AddLinearImpulse, In, "vImpulse"),
+    PL_SCRIPT_FUNCTION_PROPERTY(AddAngularForce, In, "vForce"),
+    PL_SCRIPT_FUNCTION_PROPERTY(AddAngularImpulse, In, "vImpulse"),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTransformManipulatorAttribute("CenterOfMass")
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plJoltDynamicActorComponent::plJoltDynamicActorComponent()
@@ -457,4 +457,4 @@ const char* plJoltDynamicActorComponent::GetSurfaceFile() const
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltDynamicActorComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltDynamicActorComponent);

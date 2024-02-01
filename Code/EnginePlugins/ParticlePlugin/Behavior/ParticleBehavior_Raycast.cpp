@@ -15,25 +15,25 @@
 #include <ParticlePlugin/WorldModule/ParticleWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Raycast, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Raycast>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Raycast, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Raycast>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Reaction", plParticleRaycastHitReaction, m_Reaction),
-    PLASMA_MEMBER_PROPERTY("BounceFactor", m_fBounceFactor)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_MEMBER_PROPERTY("OnCollideEvent", m_sOnCollideEvent),
+    PL_ENUM_MEMBER_PROPERTY("Reaction", plParticleRaycastHitReaction, m_Reaction),
+    PL_MEMBER_PROPERTY("BounceFactor", m_fBounceFactor)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("OnCollideEvent", m_sOnCollideEvent),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Raycast, 1, plRTTIDefaultAllocator<plParticleBehavior_Raycast>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Raycast, 1, plRTTIDefaultAllocator<plParticleBehavior_Raycast>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plParticleRaycastHitReaction, 1)
-  PLASMA_ENUM_CONSTANTS(plParticleRaycastHitReaction::Bounce, plParticleRaycastHitReaction::Die, plParticleRaycastHitReaction::Stop)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plParticleRaycastHitReaction, 1)
+  PL_ENUM_CONSTANTS(plParticleRaycastHitReaction::Bounce, plParticleRaycastHitReaction::Die, plParticleRaycastHitReaction::Stop)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plParticleBehaviorFactory_Raycast::plParticleBehaviorFactory_Raycast() = default;
@@ -69,47 +69,47 @@ enum class BehaviorRaycastVersion
 };
 
 
-void plParticleBehaviorFactory_Raycast::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_Raycast::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)BehaviorRaycastVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_uiCollisionLayer;
-  stream << m_sOnCollideEvent;
+  inout_stream << m_uiCollisionLayer;
+  inout_stream << m_sOnCollideEvent;
 
   plParticleRaycastHitReaction::StorageType hr = m_Reaction.GetValue();
-  stream << hr;
+  inout_stream << hr;
 
-  stream << m_fBounceFactor;
+  inout_stream << m_fBounceFactor;
 }
 
-void plParticleBehaviorFactory_Raycast::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_Raycast::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)BehaviorRaycastVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)BehaviorRaycastVersion::Version_Current, "Invalid version {0}", uiVersion);
 
   if (uiVersion >= 2)
   {
-    stream >> m_uiCollisionLayer;
-    stream >> m_sOnCollideEvent;
+    inout_stream >> m_uiCollisionLayer;
+    inout_stream >> m_sOnCollideEvent;
 
     plParticleRaycastHitReaction::StorageType hr;
-    stream >> hr;
+    inout_stream >> hr;
     m_Reaction.SetValue(hr);
   }
 
   if (uiVersion >= 3)
   {
-    stream >> m_fBounceFactor;
+    inout_stream >> m_fBounceFactor;
   }
 }
 
-void plParticleBehaviorFactory_Raycast::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleBehaviorFactory_Raycast::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_LastPosition>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_LastPosition>());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -129,7 +129,7 @@ void plParticleBehavior_Raycast::CreateRequiredStreams()
 
 void plParticleBehavior_Raycast::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Raycast");
+  PL_PROFILE_SCOPE("PFX: Raycast");
 
   const float tDiff = (float)m_TimeDiff.GetSeconds();
 
@@ -213,4 +213,4 @@ void plParticleBehavior_Raycast::RequestRequiredWorldModulesForCache(plParticleW
   pParticleModule->CacheWorldModule<plPhysicsWorldModuleInterface>();
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Raycast);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Raycast);

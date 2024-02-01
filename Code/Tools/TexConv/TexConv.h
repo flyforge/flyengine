@@ -1,13 +1,27 @@
 #pragma once
 
 #include <Foundation/Application/Application.h>
+#include <Texture/TexConv/TexComparer.h>
 
 class plStreamWriter;
+
+struct plTexConvMode
+{
+  using StorageType = plUInt8;
+
+  enum Enum
+  {
+    Convert,
+    Compare,
+
+    Default = Convert
+  };
+};
 
 class plTexConv : public plApplication
 {
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   struct KeyEnumValuePair
   {
@@ -30,6 +44,8 @@ public:
   virtual void BeforeCoreSystemsShutdown() override;
 
   plResult ParseCommandLine();
+  plResult ParseMode();
+  plResult ParseCompareMode();
   plResult ParseOutputType();
   plResult DetectOutputFormat();
   plResult ParseInputFiles();
@@ -54,9 +70,8 @@ public:
   void PrintOptionValuesHelp(plStringView sOption, const plDynamicArray<KeyEnumValuePair>& allowed) const;
   bool ParseFile(plStringView sOption, plString& ref_sResult) const;
 
-
   bool IsTexFormat() const;
-  plResult WriteTexFile(plStreamWriter& stream, const plImage& image);
+  plResult WriteTexFile(plStreamWriter& inout_stream, const plImage& image);
   plResult WriteOutputFile(plStringView sFile, const plImage& image);
 
 private:
@@ -72,5 +87,11 @@ private:
   bool m_bOutputSupportsFiltering = false;
   bool m_bOutputSupportsCompression = false;
 
+  plEnum<plTexConvMode> m_Mode;
   plTexConvProcessor m_Processor;
+
+  // Comparer specific
+
+  plTexComparer m_Comparer;
+  plString m_sHtmlTitle;
 };

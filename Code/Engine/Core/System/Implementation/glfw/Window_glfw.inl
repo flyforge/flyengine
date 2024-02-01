@@ -3,7 +3,7 @@
 
 #include <GLFW/glfw3.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 #  ifdef APIENTRY
 #    undef APIENTRY
 #endif
@@ -23,7 +23,7 @@ namespace
 
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, Window)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, Window)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -58,7 +58,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, Window)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace {
@@ -69,24 +69,24 @@ namespace {
     if(errorCode != GLFW_NO_ERROR)
     {
       plLog::Error("GLFW error {} ({}): {} - {}", file, line, errorCode, desc);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
-#define PLASMA_GLFW_RETURN_FAILURE_ON_ERROR() do { if(plGlfwError(__FILE__, __LINE__).Failed()) return PLASMA_FAILURE; } while(false)
+#define PL_GLFW_RETURN_FAILURE_ON_ERROR() do { if(plGlfwError(__FILE__, __LINE__).Failed()) return PL_FAILURE; } while(false)
 
 plResult plWindow::Initialize()
 {
-  PLASMA_LOG_BLOCK("plWindow::Initialize", m_CreationDescription.m_Title.GetData());
+  PL_LOG_BLOCK("plWindow::Initialize", m_CreationDescription.m_Title.GetData());
 
   if (m_bInitialized)
   {
     Destroy().IgnoreResult();
   }
 
-  PLASMA_ASSERT_RELEASE(m_CreationDescription.m_Resolution.HasNonZeroArea(), "The client area size can't be zero sized!");
+  PL_ASSERT_RELEASE(m_CreationDescription.m_Resolution.HasNonZeroArea(), "The client area size can't be zero sized!");
 
   GLFWmonitor* pMonitor = nullptr; // nullptr for windowed, fullscreen otherwise
 
@@ -94,28 +94,28 @@ plResult plWindow::Initialize()
   {
     case plWindowMode::WindowResizable:
       glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
-      PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+      PL_GLFW_RETURN_FAILURE_ON_ERROR();
       break;
     case plWindowMode::WindowFixedResolution:
       glfwWindowHint(GLFW_RESIZABLE, GLFW_FALSE);
-      PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+      PL_GLFW_RETURN_FAILURE_ON_ERROR();
       break;
     case plWindowMode::FullscreenFixedResolution:
     case plWindowMode::FullscreenBorderlessNativeResolution:
       if (m_CreationDescription.m_iMonitor == -1)
       {
         pMonitor = glfwGetPrimaryMonitor();
-        PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+        PL_GLFW_RETURN_FAILURE_ON_ERROR();
       }
       else
       {
         int iMonitorCount = 0;
         GLFWmonitor** pMonitors = glfwGetMonitors(&iMonitorCount);
-        PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+        PL_GLFW_RETURN_FAILURE_ON_ERROR();
         if (m_CreationDescription.m_iMonitor >= iMonitorCount)
         {
           plLog::Error("Can not create window on monitor {} only {} monitors connected", m_CreationDescription.m_iMonitor, iMonitorCount);
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
         pMonitor = pMonitors[m_CreationDescription.m_iMonitor];
       }
@@ -123,11 +123,11 @@ plResult plWindow::Initialize()
       if (m_CreationDescription.m_WindowMode == plWindowMode::FullscreenBorderlessNativeResolution)
       {
         const GLFWvidmode* pVideoMode = glfwGetVideoMode(pMonitor);
-        PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+        PL_GLFW_RETURN_FAILURE_ON_ERROR();
         if(pVideoMode == nullptr)
         {
           plLog::Error("Failed to get video mode for monitor");
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
         m_CreationDescription.m_Resolution.width = pVideoMode->width;
         m_CreationDescription.m_Resolution.height = pVideoMode->height;
@@ -135,7 +135,7 @@ plResult plWindow::Initialize()
         m_CreationDescription.m_Position.y = 0;
 
         glfwWindowHint(GLFW_DECORATED, GLFW_FALSE);
-        PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+        PL_GLFW_RETURN_FAILURE_ON_ERROR();
       }
 
       break;
@@ -143,20 +143,20 @@ plResult plWindow::Initialize()
 
 
   glfwWindowHint(GLFW_FOCUS_ON_SHOW, m_CreationDescription.m_bSetForegroundOnInit ? GLFW_TRUE : GLFW_FALSE);
-  PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+  PL_GLFW_RETURN_FAILURE_ON_ERROR();
 
   glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
-  PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+  PL_GLFW_RETURN_FAILURE_ON_ERROR();
 
   GLFWwindow* pWindow = glfwCreateWindow(m_CreationDescription.m_Resolution.width, m_CreationDescription.m_Resolution.height, m_CreationDescription.m_Title.GetData(), pMonitor, NULL);
-  PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+  PL_GLFW_RETURN_FAILURE_ON_ERROR();
 
   if (pWindow == nullptr)
   {
     plLog::Error("Failed to create glfw window");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
   m_hWindowHandle.type = plWindowHandle::Type::GLFW;
   m_hWindowHandle.glfwWindow = pWindow;
 #else
@@ -166,7 +166,7 @@ plResult plWindow::Initialize()
   if (m_CreationDescription.m_Position != plVec2I32(0x80000000, 0x80000000))
   {
     glfwSetWindowPos(pWindow, m_CreationDescription.m_Position.x, m_CreationDescription.m_Position.y);
-    PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+    PL_GLFW_RETURN_FAILURE_ON_ERROR();
   }
 
   glfwSetWindowUserPointer(pWindow, this);
@@ -179,13 +179,13 @@ plResult plWindow::Initialize()
   glfwSetCursorPosCallback(pWindow, &plWindow::CursorPositionCallback);
   glfwSetMouseButtonCallback(pWindow, &plWindow::MouseButtonCallback);
   glfwSetScrollCallback(pWindow, &plWindow::ScrollCallback);
-  PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+  PL_GLFW_RETURN_FAILURE_ON_ERROR();
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-  PLASMA_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "not a GLFW handle");
-  m_pInputDevice = PLASMA_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber, m_hWindowHandle.glfwWindow);
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+  PL_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "not a GLFW handle");
+  m_pInputDevice = PL_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber, m_hWindowHandle.glfwWindow);
 #else
-  m_pInputDevice = PLASMA_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber, m_hWindowHandle);
+  m_pInputDevice = PL_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber, m_hWindowHandle);
 #endif
 
   m_pInputDevice->SetClipMouseCursor(m_CreationDescription.m_bClipMouseCursor ? plMouseCursorClipMode::ClipToWindowImmediate : plMouseCursorClipMode::NoClip);
@@ -194,19 +194,19 @@ plResult plWindow::Initialize()
   m_bInitialized = true;
   plLog::Success("Created glfw window successfully. Resolution is {0}*{1}", GetClientAreaSize().width, GetClientAreaSize().height);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plWindow::Destroy()
 {
   if (m_bInitialized)
   {
-    PLASMA_LOG_BLOCK("plWindow::Destroy");
+    PL_LOG_BLOCK("plWindow::Destroy");
 
     m_pInputDevice = nullptr;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-    PLASMA_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "GLFW handle expected");
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+    PL_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "GLFW handle expected");
     glfwDestroyWindow(m_hWindowHandle.glfwWindow);
 #else
     glfwDestroyWindow(m_hWindowHandle);
@@ -216,23 +216,23 @@ plResult plWindow::Destroy()
     m_bInitialized = false;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plWindow::Resize(const plSizeU32& newWindowSize)
 {
   if (!m_bInitialized)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-  PLASMA_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "Expected GLFW handle");
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+  PL_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "Expected GLFW handle");
   glfwSetWindowSize(m_hWindowHandle.glfwWindow, newWindowSize.width, newWindowSize.height);
 #else
   glfwSetWindowSize(m_hWindowHandle, newWindowSize.width, newWindowSize.height);
 #endif
-  PLASMA_GLFW_RETURN_FAILURE_ON_ERROR();
+  PL_GLFW_RETURN_FAILURE_ON_ERROR();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plWindow::ProcessWindowMessages()
@@ -246,8 +246,8 @@ void plWindow::ProcessWindowMessages()
     glfwPollEvents();
   }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-  PLASMA_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "Expected GLFW handle");
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+  PL_ASSERT_DEV(m_hWindowHandle.type == plWindowHandle::Type::GLFW, "Expected GLFW handle");
   if (glfwWindowShouldClose(m_hWindowHandle.glfwWindow))
   {
     Destroy().IgnoreResult();
@@ -348,7 +348,7 @@ void plWindow::ScrollCallback(GLFWwindow* window, double xoffset, double yoffset
 
 plWindowHandle plWindow::GetNativeWindowHandle() const
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   return plMinWindows::FromNative<HWND>(glfwGetWin32Window(m_hWindowHandle));
 #else
   return m_hWindowHandle;

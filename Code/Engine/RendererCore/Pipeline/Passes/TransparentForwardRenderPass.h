@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/Passes/ForwardRenderPass.h>
 
 /// \brief A forward render pass that renders all transparent objects into the color target.
-class PLASMA_RENDERERCORE_DLL plTransparentForwardRenderPass : public plForwardRenderPass
+class PL_RENDERERCORE_DLL plTransparentForwardRenderPass : public plForwardRenderPass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTransparentForwardRenderPass, plForwardRenderPass);
+  PL_ADD_DYNAMIC_REFLECTION(plTransparentForwardRenderPass, plForwardRenderPass);
 
 public:
   plTransparentForwardRenderPass(const char* szName = "TransparentForwardRenderPass");

@@ -1,6 +1,6 @@
 #include <EditorPluginTypeScript/EditorPluginTypeScriptPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorFramework/Document/GameObjectDocument.h>
 #include <EditorPluginTypeScript/TypeScriptAsset/TypeScriptAsset.h>
@@ -21,8 +21,8 @@
 #include <TypeScriptPlugin/TsBinding/TsBinding.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAssetDocumentManager, 1, plRTTIDefaultAllocator<plTypeScriptAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAssetDocumentManager, 1, plRTTIDefaultAllocator<plTypeScriptAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTypeScriptAssetDocumentManager::plTypeScriptAssetDocumentManager()
@@ -35,9 +35,10 @@ plTypeScriptAssetDocumentManager::plTypeScriptAssetDocumentManager()
   m_DocTypeDesc.m_sAssetCategory = "Scripting";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTypeScriptAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
-
-  // TODO: Get typescript working with new script interface
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Code_TypeScript");
+
+  // Typescript doesn't fully work with the new scripting infrastructure yet. Uncomment at your own risk.
+  // m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_ScriptClass");
 
   m_DocTypeDesc.m_sResourceFileExtension = "plTypeScriptRes";
   m_DocTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::None;
@@ -71,7 +72,7 @@ void plTypeScriptAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plTypeScriptAssetDocument>())
       {
-        plQtTypeScriptAssetDocumentWindow* pDocWnd = new plQtTypeScriptAssetDocumentWindow(static_cast<plTypeScriptAssetDocument*>(e.m_pDocument));
+        new plQtTypeScriptAssetDocumentWindow(static_cast<plTypeScriptAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -81,9 +82,9 @@ void plTypeScriptAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
   }
 }
 
-void plTypeScriptAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plTypeScriptAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plTypeScriptAssetDocument(szPath);
+  out_pDocument = new plTypeScriptAssetDocument(sPath);
 }
 
 void plTypeScriptAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const
@@ -134,7 +135,7 @@ void plTypeScriptAssetDocumentManager::GameObjectDocumentEventHandler(const plGa
 
 void plTypeScriptAssetDocumentManager::ModifyTsBeforeTranspilation(plStringBuilder& content)
 {
-  const char* szTagBegin = "PLASMA_DECLARE_MESSAGE_TYPE;";
+  const char* szTagBegin = "PL_DECLARE_MESSAGE_TYPE;";
 
   plUInt32 uiContinueAfterOffset = 0;
   plStringBuilder sAutoGen;
@@ -180,7 +181,7 @@ void plTypeScriptAssetDocumentManager::ModifyTsBeforeTranspilation(plStringBuild
       uiTypeNameHash = plHashingUtils::StringHashTo32(plHashingUtils::StringHash(sClassName.GetData()));
     }
 
-    sAutoGen.Format("public static GetTypeNameHash(): number { return {0}; }\nconstructor() { super(); this.TypeNameHash = {0}; }\n", uiTypeNameHash);
+    sAutoGen.SetFormat("public static GetTypeNameHash(): number { return {0}; }\nconstructor() { super(); this.TypeNameHash = {0}; }\n", uiTypeNameHash);
 
     uiContinueAfterOffset = szBeginAG - content.GetData();
 
@@ -197,7 +198,7 @@ void plTypeScriptAssetDocumentManager::InitializeTranspiler()
 
   if (plFileSystem::FindDataDirectoryWithRoot("TypeScript") == nullptr)
   {
-    plFileSystem::AddDataDirectory(">sdk/Data/Tools/PlasmaEditor/Typescript", "TypeScript", "TypeScript").IgnoreResult();
+    plFileSystem::AddDataDirectory(">sdk/Data/Tools/plEditor/Typescript", "TypeScript", "TypeScript").IgnoreResult();
   }
 
   m_Transpiler.SetOutputFolder(":project/AssetCache/Temp");
@@ -231,7 +232,7 @@ void plTypeScriptAssetDocumentManager::SetupProjectForTypeScript(bool bForce)
 
 plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<plTransformFlags> transformFlags)
 {
-  PLASMA_LOG_BLOCK("Generating Script Compendium");
+  PL_LOG_BLOCK("Generating Script Compendium");
 
   plHybridArray<plAssetInfo*, 256> allTsAssets;
 
@@ -252,7 +253,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
   if (allTsAssets.IsEmpty())
   {
     plLog::Debug("Skipping script compendium creation - no TypeScript assets in project.");
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 
@@ -316,7 +317,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
   if (!transformFlags.IsSet(plTransformFlags::ForceTransform))
   {
     if (bAnythingNew == false && plFileSystem::ExistsFile(sOutFile))
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
   }
 
   plMap<plString, plString> filenameToSourceTsPath;
@@ -336,7 +337,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
     for (auto it : compendium.m_PathToSource)
     {
       if (!progress.BeginNextStep(it.Key()))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       sOutputFolder = plFileSystem::GetDataDirectory(relPathToDataDirIdx[it.Key()])->GetRedirectedDataDirectoryPath();
       sOutputFolder.MakeCleanPath();
@@ -346,7 +347,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
       if (m_Transpiler.TranspileFileAndStoreJS(it.Key(), sTranspiledJs).Failed())
       {
         plLog::Error("Failed to transpile '{}'", it.Key());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       it.Value() = sTranspiledJs;
@@ -371,7 +372,7 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
   {
     for (auto pAssetInfo : allTsAssets)
     {
-      const plString& docPath = pAssetInfo->m_sDataDirParentRelativePath;
+      const plString& docPath = pAssetInfo->m_Path.GetDataDirParentRelativePath();
       const plUuid& docGuid = pAssetInfo->m_Info->m_DocumentID;
 
       sFilename = plPathUtils::GetFileName(docPath);
@@ -389,11 +390,11 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
     plAssetFileHeader header;
     header.SetFileHashAndVersion(1, 1);
 
-    PLASMA_SUCCEED_OR_RETURN(header.Write(file));
+    PL_SUCCEED_OR_RETURN(header.Write(file));
 
-    PLASMA_SUCCEED_OR_RETURN(compendium.Serialize(file));
+    PL_SUCCEED_OR_RETURN(compendium.Serialize(file));
 
-    PLASMA_SUCCEED_OR_RETURN(file.Close());
+    PL_SUCCEED_OR_RETURN(file.Close());
   }
 
   // write m_CheckedTsFiles cache
@@ -404,36 +405,36 @@ plResult plTypeScriptAssetDocumentManager::GenerateScriptCompendium(plBitflags<p
     plFileWriter file;
     if (file.Open(sFile).Succeeded())
     {
-      PLASMA_SUCCEED_OR_RETURN(file.WriteMap(m_CheckedTsFiles));
+      PL_SUCCEED_OR_RETURN(file.WriteMap(m_CheckedTsFiles));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plStatus plTypeScriptAssetDocumentManager::GetAdditionalOutputs(plDynamicArray<plString>& files)
+plStatus plTypeScriptAssetDocumentManager::GetAdditionalOutputs(plDynamicArray<plString>& ref_files)
 {
   if (GenerateScriptCompendium(plTransformFlags::Default).Failed())
     return plStatus("Failed to build TypeScript compendium.");
 
-  files.PushBack("AssetCache/Common/Scripts.plScriptCompendium");
+  ref_files.PushBack("AssetCache/Common/Scripts.plScriptCompendium");
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptPreferences, 1, plRTTIDefaultAllocator<plTypeScriptPreferences>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptPreferences, 1, plRTTIDefaultAllocator<plTypeScriptPreferences>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("CompileForSimulation", m_bAutoUpdateScriptsForSimulation),
-    PLASMA_MEMBER_PROPERTY("CompileForPlayTheGame", m_bAutoUpdateScriptsForPlayTheGame),
+    PL_MEMBER_PROPERTY("CompileForSimulation", m_bAutoUpdateScriptsForSimulation),
+    PL_MEMBER_PROPERTY("CompileForPlayTheGame", m_bAutoUpdateScriptsForPlayTheGame),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTypeScriptPreferences::plTypeScriptPreferences()

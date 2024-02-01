@@ -1,6 +1,5 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
-#include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 #include <EditorFramework/Actions/AssetActions.h>
 #include <EditorFramework/Actions/CommonAssetActions.h>
 #include <EditorFramework/Actions/GameObjectContextActions.h>
@@ -13,6 +12,7 @@
 #include <EditorFramework/Actions/ViewLightActions.h>
 #include <EditorFramework/CodeGen/CompilerPreferencesWidget.moc.h>
 #include <EditorFramework/CodeGen/CppProject.h>
+#include <EditorFramework/EditorApp/CheckVersion.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/GUI/DynamicDefaultStateProvider.h>
 #include <EditorFramework/GUI/ExposedParametersDefaultStateProvider.h>
@@ -26,6 +26,7 @@
 #include <EditorFramework/Manipulators/SphereManipulatorAdapter.h>
 #include <EditorFramework/Manipulators/TransformManipulatorAdapter.h>
 #include <EditorFramework/Panels/AssetBrowserPanel/AssetBrowserPanel.moc.h>
+#include <EditorFramework/Panels/AssetCuratorPanel/AssetCuratorPanel.moc.h>
 #include <EditorFramework/Panels/CVarPanel/CVarPanel.moc.h>
 #include <EditorFramework/Panels/LogPanel/LogPanel.moc.h>
 #include <EditorFramework/Panels/LongOpsPanel/LongOpsPanel.moc.h>
@@ -48,6 +49,7 @@
 #include <Foundation/Application/Application.h>
 #include <Foundation/Configuration/Startup.h>
 #include <Foundation/Logging/ConsoleWriter.h>
+#include <Foundation/Logging/ETWWriter.h>
 #include <Foundation/Logging/VisualStudioWriter.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <Foundation/Reflection/Implementation/PropertyAttributes.h>
@@ -56,6 +58,7 @@
 #include <GuiFoundation/Action/StandardMenus.h>
 #include <GuiFoundation/PropertyGrid/DefaultState.h>
 #include <GuiFoundation/PropertyGrid/PropertyGridWidget.moc.h>
+#include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 #include <GuiFoundation/UIServices/QtProgressbar.h>
 #include <QSvgRenderer>
@@ -67,7 +70,7 @@
 void plCompilerPreferences_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "GuiFoundation",
@@ -93,7 +96,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plCommonAssetActions::RegisterActions();
 
     plActionMapManager::RegisterActionMap("SettingsTabMenuBar").IgnoreResult();
-    plStandardMenus::MapActions("SettingsTabMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+    plStandardMenus::MapActions("SettingsTabMenuBar", plStandardMenuTypes::Default);
     plProjectActions::MapActions("SettingsTabMenuBar");
 
     plActionMapManager::RegisterActionMap("AssetBrowserToolBar").IgnoreResult();
@@ -107,23 +110,24 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plGameObjectReferenceAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtGameObjectReferencePropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plExposedBone>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtExposedBoneWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plCompilerPreferences>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtCompilerPreferencesWidget(); });
+    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plImageSliderUiAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtPropertyEditorSliderWidget(); });
 
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSphereManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plSphereManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCapsuleManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plCapsuleManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoxManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plBoxManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeAngleManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plConeAngleManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeLengthManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plConeLengthManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plNonUniformBoxManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plNonUniformBoxManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plTransformManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plTransformManipulatorAdapter); });
-    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoneManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PLASMA_DEFAULT_NEW(plBoneManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSphereManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plSphereManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCapsuleManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plCapsuleManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoxManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plBoxManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeAngleManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plConeAngleManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeLengthManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plConeLengthManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plNonUniformBoxManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plNonUniformBoxManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plTransformManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plTransformManipulatorAdapter); });
+    plManipulatorAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoneManipulatorAttribute>(), [](const plRTTI* pRtti)->plManipulatorAdapter* { return PL_DEFAULT_NEW(plBoneManipulatorAdapter); });
 
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoxVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plBoxVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSphereVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plSphereVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCapsuleVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plCapsuleVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCylinderVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plCylinderVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plDirectionVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plDirectionVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plConeVisualizerAdapter); });
-    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCameraVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PLASMA_DEFAULT_NEW(plCameraVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoxVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plBoxVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSphereVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plSphereVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCapsuleVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plCapsuleVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCylinderVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plCylinderVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plDirectionVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plDirectionVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plConeVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plConeVisualizerAdapter); });
+    plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plCameraVisualizerAttribute>(), [](const plRTTI* pRtti)->plVisualizerAdapter* { return PL_DEFAULT_NEW(plCameraVisualizerAdapter); });
 
     plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plCompilerPreferences_PropertyMetaStateEventHandler);
   }
@@ -152,6 +156,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExposedParametersAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExposedBone>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plCompilerPreferences>());
+    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plImageSliderUiAttribute>());
 
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plSphereManipulatorAttribute>());
     plManipulatorAdapterRegistry::GetSingleton()->m_Factory.UnregisterCreator(plGetStaticRTTI<plCapsuleManipulatorAttribute>());
@@ -173,18 +178,17 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plCompilerPreferences_PropertyMetaStateEventHandler);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plCommandLineOptionBool opt_Safe("_Editor", "-safe", "In safe-mode the editor minimizes the risk of crashing, for instance by not loading previous projects and scenes.", false);
 plCommandLineOptionBool opt_NoRecent("_Editor", "-noRecent", "Disables automatic loading of recent projects and documents.", false);
-plCommandLineOptionBool opt_Debug("_Editor", "-debug", "Enables debug-mode, which makes the editor wait for a debugger to attach, and disables risky features, such as recent file loading.", false);
 
 void plQtEditorApp::StartupEditor()
 {
   {
-    plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
-    sTemp.AppendPath("PlasmaEditorCrashIndicator");
+    plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
+    sTemp.AppendPath("plEditorCrashIndicator");
 
     if (plOSFile::ExistsFile(sTemp))
     {
@@ -202,17 +206,16 @@ void plQtEditorApp::StartupEditor()
 
   startupFlags.AddOrRemove(StartupFlags::SafeMode, opt_Safe.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
   startupFlags.AddOrRemove(StartupFlags::NoRecent, opt_NoRecent.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
-  startupFlags.AddOrRemove(StartupFlags::Debug, opt_Debug.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
 
   StartupEditor(startupFlags);
 }
 
 void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const char* szUserDataFolder)
 {
-  PLASMA_PROFILE_SCOPE("StartupEditor");
+  PL_PROFILE_SCOPE("StartupEditor");
 
   QCoreApplication::setOrganizationDomain("www.plengine.net");
-  QCoreApplication::setOrganizationName("PlasmaEngine Project");
+  QCoreApplication::setOrganizationName("plEngine Project");
   QCoreApplication::setApplicationName(plApplication::GetApplicationInstance()->GetApplicationName().GetData());
   QCoreApplication::setApplicationVersion("1.0.0");
 
@@ -224,8 +227,8 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   {
     SetupAndShowSplashScreen();
 
-    m_pProgressbar = PLASMA_DEFAULT_NEW(plProgress);
-    m_pQtProgressbar = PLASMA_DEFAULT_NEW(plQtProgressbar);
+    m_pProgressbar = PL_DEFAULT_NEW(plProgress);
+    m_pQtProgressbar = PL_DEFAULT_NEW(plQtProgressbar);
 
     plProgress::SetGlobalProgressbar(m_pProgressbar);
     m_pQtProgressbar->SetProgressbar(m_pProgressbar);
@@ -244,18 +247,13 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
   QLocale::setDefault(QLocale(QLocale::English));
 
-  plStringBuilder tmp;
-
-  m_pEngineViewProcess = new PlasmaEditorEngineProcessConnection;
-
-  m_pEngineViewProcess->SetWaitForDebugger(m_StartupFlags.IsSet(StartupFlags::Debug));
-  m_pEngineViewProcess->SetRenderer(pCmd->GetStringOption("-renderer", 0, "").GetData(tmp));
+  m_pEngineViewProcess = new plEditorEngineProcessConnection;
 
   m_LongOpControllerManager.Startup(&m_pEngineViewProcess->GetCommunicationChannel());
 
   if (!IsInHeadlessMode())
   {
-    PLASMA_PROFILE_SCOPE("plQtContainerWindow");
+    PL_PROFILE_SCOPE("plQtContainerWindow");
     SetStyleSheet();
 
     plQtContainerWindow* pContainer = new plQtContainerWindow();
@@ -267,7 +265,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   plDocument::s_EventsAny.AddEventHandler(plMakeDelegate(&plQtEditorApp::DocumentEventHandler, this));
   plToolsProject::s_Requests.AddEventHandler(plMakeDelegate(&plQtEditorApp::ProjectRequestHandler, this));
   plToolsProject::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::ProjectEventHandler, this));
-  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
   plQtDocumentWindow::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::DocumentWindowEventHandler, this));
   plQtUiServices::s_Events.AddEventHandler(plMakeDelegate(&plQtEditorApp::UiServicesEvents, this));
 
@@ -285,7 +283,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   }
 
   {
-    PLASMA_PROFILE_SCOPE("Filesystem");
+    PL_PROFILE_SCOPE("Filesystem");
     plFileSystem::DetectSdkRootDirectory().IgnoreResult();
 
     const plString sAppDir = plApplicationServices::GetSingleton()->GetApplicationDataFolder();
@@ -305,25 +303,27 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
   }
 
   {
-    PLASMA_PROFILE_SCOPE("Logging");
+    PL_PROFILE_SCOPE("Logging");
     plInt32 iApplicationID = pCmd->GetIntOption("-appid", 0);
     plStringBuilder sLogFile;
-    sLogFile.Format(":appdata/Log_{0}.htm", iApplicationID);
+    sLogFile.SetFormat(":appdata/Log_{0}.htm", iApplicationID);
     m_LogHTML.BeginLog(sLogFile, sApplicationName);
 
     plGlobalLog::AddLogWriter(plLogWriter::Console::LogMessageHandler);
     plGlobalLog::AddLogWriter(plLogWriter::VisualStudio::LogMessageHandler);
     plGlobalLog::AddLogWriter(plLoggingEvent::Handler(&plLogWriter::HTML::LogMessageHandler, &m_LogHTML));
+    plGlobalLog::AddLogWriter(plLogWriter::ETW::LogMessageHandler);
   }
-  plUniquePtr<plTranslatorFromFiles> pTranslatorEn = PLASMA_DEFAULT_NEW(plTranslatorFromFiles);
+  plUniquePtr<plTranslatorFromFiles> pTranslatorEn = PL_DEFAULT_NEW(plTranslatorFromFiles);
   m_pTranslatorFromFiles = pTranslatorEn.Borrow();
 
-  // plUniquePtr<plTranslatorFromFiles> pTranslatorDe = PLASMA_DEFAULT_NEW(plTranslatorFromFiles);
+  // plUniquePtr<plTranslatorFromFiles> pTranslatorDe = PL_DEFAULT_NEW(plTranslatorFromFiles);
 
   pTranslatorEn->AddTranslationFilesFromFolder(":app/Localization/en");
   // pTranslatorDe->LoadTranslationFilesFromFolder(":app/Localization/de");
 
-  plTranslationLookup::AddTranslator(PLASMA_DEFAULT_NEW(plTranslatorMakeMoreReadable));
+  plTranslationLookup::AddTranslator(PL_DEFAULT_NEW(plTranslatorMakeMoreReadable));
+  // plTranslationLookup::AddTranslator(PL_DEFAULT_NEW(plTranslatorLogMissing));
   plTranslationLookup::AddTranslator(std::move(pTranslatorEn));
   // plTranslationLookup::AddTranslator(std::move(pTranslatorDe));
 
@@ -342,22 +342,25 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
     ShowSettingsDocument();
 
-    connect(&m_VersionChecker, &plQtVersionChecker::VersionCheckCompleted, this, &plQtEditorApp::SlotVersionCheckCompleted, Qt::QueuedConnection);
+    if (!IsInUnitTestMode())
+    {
+      connect(m_pVersionChecker.Borrow(), &plQtVersionChecker::VersionCheckCompleted, this, &plQtEditorApp::SlotVersionCheckCompleted, Qt::QueuedConnection);
 
-    m_VersionChecker.Initialize();
-    m_VersionChecker.Check(false);
+      m_pVersionChecker->Initialize();
+      m_pVersionChecker->Check(false);
+    }
   }
 
   LoadEditorPlugins();
   CloseSplashScreen();
 
   {
-    PlasmaEditorAppEvent e;
-    e.m_Type = PlasmaEditorAppEvent::Type::EditorStarted;
+    plEditorAppEvent e;
+    e.m_Type = plEditorAppEvent::Type::EditorStarted;
     m_Events.Broadcast(e);
   }
 
-  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
+  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
 
   if (pCmd->GetStringOptionArguments("-newproject") > 0)
   {
@@ -372,7 +375,7 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
     CreateOrOpenProject(false, pCmd->GetAbsolutePathOption("-project")).IgnoreResult();
   }
-  else if (!bNoRecent && !m_StartupFlags.IsSet(StartupFlags::Debug) && pPreferences->m_bLoadLastProjectAtStartup)
+  else if (!bNoRecent && pPreferences->m_bLoadLastProjectAtStartup)
   {
     if (!m_RecentProjects.GetFileList().IsEmpty())
     {
@@ -392,8 +395,9 @@ void plQtEditorApp::StartupEditor(plBitflags<StartupFlags> startupFlags, const c
 
   if (m_bWroteCrashIndicatorFile)
   {
-    QTimer::singleShot(2000, [this]() {
-        plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
+    QTimer::singleShot(1000, [this]()
+      {
+        plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
         sTemp.AppendPath("plEditorCrashIndicator");
         plOSFile::DeleteFile(sTemp).IgnoreResult();
         m_bWroteCrashIndicatorFile = false;
@@ -417,7 +421,7 @@ void plQtEditorApp::ShutdownEditor()
 
   m_LongOpControllerManager.Shutdown();
 
-  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::EngineProcessMsgHandler, this));
   plToolsProject::s_Requests.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::ProjectRequestHandler, this));
   plToolsProject::s_Events.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::ProjectEventHandler, this));
   plDocument::s_EventsAny.RemoveEventHandler(plMakeDelegate(&plQtEditorApp::DocumentEventHandler, this));
@@ -446,12 +450,11 @@ void plQtEditorApp::ShutdownEditor()
     const auto& Panels = plQtApplicationPanel::GetAllApplicationPanels();
     plUInt32 uiNumPanels = Panels.GetCount();
 
-    PLASMA_ASSERT_DEBUG(uiNumPanels == 0, "Not all panels have been cleaned up correctly");
+    PL_ASSERT_DEBUG(uiNumPanels == 0, "Not all panels have been cleaned up correctly");
 
     for (plUInt32 i = 0; i < uiNumPanels; ++i)
     {
       plQtApplicationPanel* pPanel = Panels[i];
-      QObject* pParent = pPanel->parent();
       delete pPanel;
     }
   }
@@ -469,7 +472,7 @@ void plQtEditorApp::ShutdownEditor()
   if (m_bWroteCrashIndicatorFile)
   {
     // orderly shutdown -> make sure the crash indicator file is gone
-    plStringBuilder sTemp = plOSFile::GetTempDataFolder("PlasmaEditor");
+    plStringBuilder sTemp = plOSFile::GetTempDataFolder("plEditor");
     sTemp.AppendPath("plEditorCrashIndicator");
     plOSFile::DeleteFile(sTemp).IgnoreResult();
     m_bWroteCrashIndicatorFile = false;
@@ -485,26 +488,28 @@ void plQtEditorApp::ShutdownEditor()
   plGlobalLog::RemoveLogWriter(plLoggingEvent::Handler(&plLogWriter::HTML::LogMessageHandler, &m_LogHTML));
   m_LogHTML.EndLog();
 
-  PLASMA_DEFAULT_DELETE(m_pQtProgressbar);
-  PLASMA_DEFAULT_DELETE(m_pProgressbar);
+  PL_DEFAULT_DELETE(m_pQtProgressbar);
+  PL_DEFAULT_DELETE(m_pProgressbar);
 }
 
 
 
 void plQtEditorApp::CreatePanels()
 {
-  PLASMA_PROFILE_SCOPE("CreatePanels");
+  PL_PROFILE_SCOPE("CreatePanels");
   plQtApplicationPanel* pAssetBrowserPanel = new plQtAssetBrowserPanel();
   plQtApplicationPanel* pLogPanel = new plQtLogPanel();
   plQtApplicationPanel* pLongOpsPanel = new plQtLongOpsPanel();
   plQtApplicationPanel* pCVarPanel = new plQtCVarPanel();
+  plQtApplicationPanel* pAssetCuratorPanel = new plQtAssetCuratorPanel();
 
   plQtContainerWindow* pMainWnd = plQtContainerWindow::GetContainerWindow();
   ads::CDockManager* pDockManager = pMainWnd->GetDockManager();
-  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pAssetBrowserPanel);
-  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLogPanel);
-  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pCVarPanel);
-  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLongOpsPanel);
+  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetBrowserPanel);
+  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLogPanel);
+  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetCuratorPanel);
+  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pCVarPanel);
+  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLongOpsPanel);
 
   pAssetBrowserPanel->raise();
 }
@@ -513,7 +518,7 @@ plCommandLineOptionBool opt_NoSplashScreen("_Editor", "-NoSplash", "Disables the
 
 void plQtEditorApp::SetupAndShowSplashScreen()
 {
-  PLASMA_ASSERT_DEV(m_pSplashScreen == nullptr, "Splash screen shouldn't exist already.");
+  PL_ASSERT_DEV(m_pSplashScreen == nullptr, "Splash screen shouldn't exist already.");
 
   if (m_StartupFlags.IsAnySet(plQtEditorApp::StartupFlags::UnitTest))
     return;
@@ -569,7 +574,7 @@ void plQtEditorApp::CloseSplashScreen()
   if (!m_pSplashScreen)
     return;
 
-  PLASMA_ASSERT_DEBUG(QThread::currentThread() == this->thread(), "CloseSplashScreen must be called from the main thread");
+  PL_ASSERT_DEBUG(QThread::currentThread() == this->thread(), "CloseSplashScreen must be called from the main thread");
   QSplashScreen* pLocalSplashScreen = m_pSplashScreen;
   m_pSplashScreen = nullptr;
 

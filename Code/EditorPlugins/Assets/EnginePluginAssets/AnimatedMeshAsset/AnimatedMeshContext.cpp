@@ -6,26 +6,26 @@
 #include <GameEngine/Animation/Skeletal/AnimatedMeshComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshContext, 1, plRTTIDefaultAllocator<plAnimatedMeshContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshContext, 1, plRTTIDefaultAllocator<plAnimatedMeshContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Animated Mesh"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Animated Mesh"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAnimatedMeshContext::plAnimatedMeshContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pAnimatedMeshObject = nullptr;
 }
 
-void plAnimatedMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
+void plAnimatedMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
 {
-  if (auto* pMsg = plDynamicCast<const PlasmaEditorEngineSetMaterialsMsg*>(pDocMsg))
+  if (auto* pMsg = plDynamicCast<const plEditorEngineSetMaterialsMsg*>(pDocMsg))
   {
     plAnimatedMeshComponent* pAnimatedMesh;
     if (m_pAnimatedMeshObject && m_pAnimatedMeshObject->TryGetComponentOfBaseType(pAnimatedMesh))
@@ -64,13 +64,13 @@ void plAnimatedMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* p
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plAnimatedMeshContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   plAnimatedMeshComponent* pAnimatedMesh;
 
@@ -92,17 +92,17 @@ void plAnimatedMeshContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plAnimatedMeshContext::CreateViewContext()
+plEngineProcessViewContext* plAnimatedMeshContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plAnimatedMeshViewContext, this);
+  return PL_DEFAULT_NEW(plAnimatedMeshViewContext, this);
 }
 
-void plAnimatedMeshContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plAnimatedMeshContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plAnimatedMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plAnimatedMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -111,16 +111,15 @@ bool plAnimatedMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewCo
 }
 
 
-void plAnimatedMeshContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plAnimatedMeshContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_pAnimatedMeshObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pAnimatedMeshObject->UpdateLocalBounds();
     m_pAnimatedMeshObject->UpdateGlobalTransformAndBounds();

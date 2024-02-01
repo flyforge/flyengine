@@ -8,7 +8,7 @@
 ///
 /// Since the thread class needs a platform specific entry-point it is usually
 /// recommended to use the plThread class instead as the base for long running threads.
-class PLASMA_FOUNDATION_DLL plOSThread
+class PL_FOUNDATION_DLL plOSThread
 {
 public:
   /// \brief Initializes the thread instance (e.g. thread creation etc.)
@@ -50,5 +50,5 @@ private:
   /// Stores how many plOSThread are currently active.
   static plAtomicInteger32 s_iThreadCount;
 
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plOSThread);
+  PL_DISALLOW_COPY_AND_ASSIGN(plOSThread);
 };

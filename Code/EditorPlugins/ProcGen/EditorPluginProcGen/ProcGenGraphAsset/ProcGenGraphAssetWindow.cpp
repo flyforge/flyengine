@@ -1,6 +1,6 @@
 #include <EditorPluginProcGen/EditorPluginProcGenPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorPluginProcGen/ProcGenGraphAsset/ProcGenGraphAsset.h>
 #include <EditorPluginProcGen/ProcGenGraphAsset/ProcGenGraphAssetWindow.moc.h>
@@ -43,7 +43,7 @@ plProcGenGraphAssetDocumentWindow::plProcGenGraphAssetDocumentWindow(plProcGenGr
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("ProcGenAssetDockWidget");
-    pPropertyPanel->setWindowTitle("NODE PROPERTIES");
+    pPropertyPanel->setWindowTitle("Node Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -79,7 +79,7 @@ plProcGenGraphAssetDocument* plProcGenGraphAssetDocumentWindow::GetProcGenGraphD
 
 void plProcGenGraphAssetDocumentWindow::UpdatePreview()
 {
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   plResourceUpdateMsgToEngine msg;
@@ -105,7 +105,7 @@ void plProcGenGraphAssetDocumentWindow::UpdatePreview()
   {
     msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
 
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 }
 
@@ -117,7 +117,7 @@ void plProcGenGraphAssetDocumentWindow::RestoreResource()
   plStringBuilder tmp;
   msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
 
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plProcGenGraphAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)

@@ -8,7 +8,7 @@ macro(pl_include_plExport)
 	# with the absolute paths to this installation
 	pl_get_export_location(EXP_FILE)
 	set(IMP_FILE "${CMAKE_BINARY_DIR}/plExport.cmake")
-	set(EXPINFO_FILE "${PLASMA_OUTPUT_DIRECTORY_DLL}/plExportInfo.cmake")
+	set(EXPINFO_FILE "${PL_OUTPUT_DIRECTORY_DLL}/plExportInfo.cmake")
 
 	# read the file that contains the original paths
 	include(${EXPINFO_FILE})
@@ -17,9 +17,9 @@ macro(pl_include_plExport)
 	file(READ ${EXP_FILE} IMP_CONTENT)
 
 	# replace the original paths with our paths
-	string(REPLACE ${EXPINP_OUTPUT_DIRECTORY_DLL} ${PLASMA_OUTPUT_DIRECTORY_DLL} IMP_CONTENT "${IMP_CONTENT}")
-	string(REPLACE ${EXPINP_OUTPUT_DIRECTORY_LIB} ${PLASMA_OUTPUT_DIRECTORY_LIB} IMP_CONTENT "${IMP_CONTENT}")
-	string(REPLACE ${EXPINP_SOURCE_DIR} ${PLASMA_SDK_DIR} IMP_CONTENT "${IMP_CONTENT}")
+	string(REPLACE ${EXPINP_OUTPUT_DIRECTORY_DLL} ${PL_OUTPUT_DIRECTORY_DLL} IMP_CONTENT "${IMP_CONTENT}")
+	string(REPLACE ${EXPINP_OUTPUT_DIRECTORY_LIB} ${PL_OUTPUT_DIRECTORY_LIB} IMP_CONTENT "${IMP_CONTENT}")
+	string(REPLACE ${EXPINP_SOURCE_DIR} ${PL_SDK_DIR} IMP_CONTENT "${IMP_CONTENT}")
 
 	# write the modified plExport file to disk
 	file(WRITE ${IMP_FILE} "${IMP_CONTENT}")
@@ -32,16 +32,22 @@ endmacro()
 # ## pl_configure_external_project()
 # #####################################
 macro(pl_configure_external_project)
-	file(RELATIVE_PATH PLASMA_SUBMODULE_PREFIX_PATH ${CMAKE_SOURCE_DIR} ${PLASMA_SDK_DIR})
-	set_property(GLOBAL PROPERTY PLASMA_SUBMODULE_PREFIX_PATH ${PLASMA_SUBMODULE_PREFIX_PATH})
 
-	if(PLASMA_SUBMODULE_PREFIX_PATH STREQUAL "")
-		set(PLASMA_SUBMODULE_MODE FALSE)
+	if (PL_SDK_DIR STREQUAL "")
+		file(RELATIVE_PATH PL_SUBMODULE_PREFIX_PATH ${CMAKE_SOURCE_DIR} ${PL_SDK_DIR})
 	else()
-		set(PLASMA_SUBMODULE_MODE FALSE)
+		set(PL_SUBMODULE_PREFIX_PATH "")
+	endif()
+	
+	set_property(GLOBAL PROPERTY PL_SUBMODULE_PREFIX_PATH ${PL_SUBMODULE_PREFIX_PATH})
+
+	if(PL_SUBMODULE_PREFIX_PATH STREQUAL "")
+		set(PL_SUBMODULE_MODE FALSE)
+	else()
+		set(PL_SUBMODULE_MODE TRUE)
 	endif()
 
-	set_property(GLOBAL PROPERTY PLASMA_SUBMODULE_MODE ${PLASMA_SUBMODULE_MODE})
+	set_property(GLOBAL PROPERTY PL_SUBMODULE_MODE ${PL_SUBMODULE_MODE})
 
 	pl_build_filter_init()
 

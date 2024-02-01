@@ -2,6 +2,7 @@
 
 #include <Core/Graphics/Camera.h>
 #include <Foundation/Configuration/CVar.h>
+#include <Foundation/IO/TypeVersionContext.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererCore/Components/FogComponent.h>
 #include <RendererCore/Debug/DebugRenderer.h>
@@ -11,7 +12,7 @@
 #include <RendererCore/Pipeline/ExtractedRenderData.h>
 #include <RendererCore/Pipeline/View.h>
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 plCVarBool cvar_RenderingLightingVisClusterData("Rendering.Lighting.VisClusterData", false, plCVarFlags::Default, "Enables debug visualization of clustered light data");
 plCVarInt cvar_RenderingLightingVisClusterDepthSlice("Rendering.Lighting.VisClusterDepthSlice", -1, plCVarFlags::Default, "Show the debug visualization only for the given depth slice");
 
@@ -30,7 +31,7 @@ namespace
     float fAspectRatio = view.GetViewport().width / view.GetViewport().height;
 
     plMat4 mProj;
-    pCamera->GetProjectionMatrix(view.GetViewport().width / (float)view.GetViewport().height, mProj);
+    pCamera->GetProjectionMatrix(fAspectRatio, mProj);
 
     plAngle fFovLeft;
     plAngle fFovRight;
@@ -148,16 +149,16 @@ namespace
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataCPU, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataCPU, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plClusteredDataCPU::plClusteredDataCPU() = default;
 plClusteredDataCPU::~plClusteredDataCPU() = default;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataExtractor, 1, plRTTIDefaultAllocator<plClusteredDataExtractor>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataExtractor, 1, plRTTIDefaultAllocator<plClusteredDataExtractor>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plClusteredDataExtractor::plClusteredDataExtractor(const char* szName)
   : plExtractor(szName)
@@ -170,19 +171,19 @@ plClusteredDataExtractor::plClusteredDataExtractor(const char* szName)
   m_ClusterBoundingSpheres.SetCountUninitialized(NUM_CLUSTERS);
 }
 
-plClusteredDataExtractor::~plClusteredDataExtractor() {}
+plClusteredDataExtractor::~plClusteredDataExtractor() = default;
 
 void plClusteredDataExtractor::PostSortAndBatch(
   const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData)
 {
-  PLASMA_PROFILE_SCOPE("PostSortAndBatch");
+  PL_PROFILE_SCOPE("PostSortAndBatch");
 
   const plCamera* pCamera = view.GetCullingCamera();
   const float fAspectRatio = view.GetViewport().width / view.GetViewport().height;
 
   FillClusterBoundingSpheres(*pCamera, fAspectRatio, m_ClusterBoundingSpheres);
-  plClusteredDataCPU* pData = PLASMA_NEW(plFrameAllocator::GetCurrentAllocator(), plClusteredDataCPU);
-  pData->m_ClusterData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerClusterData, NUM_CLUSTERS);
+  plClusteredDataCPU* pData = PL_NEW(plFrameAllocator::GetCurrentAllocator(), plClusteredDataCPU);
+  pData->m_ClusterData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerClusterData, NUM_CLUSTERS);
 
   plMat4 tmp = pCamera->GetViewMatrix();
   plSimdMat4f viewMatrix = plSimdConversion::ToMat4(tmp);
@@ -194,7 +195,7 @@ void plClusteredDataExtractor::PostSortAndBatch(
 
   // Lights
   {
-    PLASMA_PROFILE_SCOPE("Lights");
+    PL_PROFILE_SCOPE("Lights");
     m_TempLightData.Clear();
     plMemoryUtils::ZeroFill(m_TempLightsClusters.GetData(), NUM_CLUSTERS);
 
@@ -280,7 +281,7 @@ void plClusteredDataExtractor::PostSortAndBatch(
       }
     }
 
-    pData->m_LightData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerLightData, m_TempLightData.GetCount());
+    pData->m_LightData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerLightData, m_TempLightData.GetCount());
     pData->m_LightData.CopyFrom(m_TempLightData);
 
     pData->m_uiSkyIrradianceIndex = view.GetWorld()->GetIndex();
@@ -289,7 +290,7 @@ void plClusteredDataExtractor::PostSortAndBatch(
 
   // Decals
   {
-    PLASMA_PROFILE_SCOPE("Decals");
+    PL_PROFILE_SCOPE("Decals");
     m_TempDecalData.Clear();
     plMemoryUtils::ZeroFill(m_TempDecalsClusters.GetData(), NUM_CLUSTERS);
 
@@ -322,13 +323,13 @@ void plClusteredDataExtractor::PostSortAndBatch(
       }
     }
 
-    pData->m_DecalData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerDecalData, m_TempDecalData.GetCount());
+    pData->m_DecalData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerDecalData, m_TempDecalData.GetCount());
     pData->m_DecalData.CopyFrom(m_TempDecalData);
   }
 
   // Reflection Probes
   {
-    PLASMA_PROFILE_SCOPE("Probes");
+    PL_PROFILE_SCOPE("Probes");
     m_TempReflectionProbeData.Clear();
     plMemoryUtils::ZeroFill(m_TempReflectionProbeClusters.GetData(), NUM_CLUSTERS);
 
@@ -395,7 +396,7 @@ void plClusteredDataExtractor::PostSortAndBatch(
       }
     }
 
-    pData->m_ReflectionProbeData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerReflectionProbeData, m_TempReflectionProbeData.GetCount());
+    pData->m_ReflectionProbeData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerReflectionProbeData, m_TempReflectionProbeData.GetCount());
     pData->m_ReflectionProbeData.CopyFrom(m_TempReflectionProbeData);
   }
 
@@ -403,9 +404,24 @@ void plClusteredDataExtractor::PostSortAndBatch(
 
   ref_extractedRenderData.AddFrameData(pData);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   VisualizeClusteredData(view, pData, m_ClusterBoundingSpheres);
 #endif
+}
+
+plResult plClusteredDataExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
+
+
+plResult plClusteredDataExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
 }
 
 namespace
@@ -417,7 +433,7 @@ namespace
 
 void plClusteredDataExtractor::FillItemListAndClusterData(plClusteredDataCPU* pData)
 {
-  PLASMA_PROFILE_SCOPE("FillItemListAndClusterData");
+  PL_PROFILE_SCOPE("FillItemListAndClusterData");
   m_TempClusterItemList.Clear();
 
   const plUInt32 uiNumLights = m_TempLightData.GetCount();
@@ -529,10 +545,10 @@ void plClusteredDataExtractor::FillItemListAndClusterData(plClusteredDataCPU* pD
     clusterData.counts = PackReflectionProbeIndex(PackIndex(uiLightCount, uiDecalCount), uiReflectionProbeCount);
   }
 
-  pData->m_ClusterItemList = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt32, m_TempClusterItemList.GetCount());
+  pData->m_ClusterItemList = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt32, m_TempClusterItemList.GetCount());
   pData->m_ClusterItemList.CopyFrom(m_TempClusterItemList);
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ClusteredDataExtractor);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ClusteredDataExtractor);

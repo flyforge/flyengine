@@ -46,7 +46,7 @@ plQtRenderPipelineAssetDocumentWindow::plQtRenderPipelineAssetDocumentWindow(plD
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("RenderPipelineAssetDockWidget");
-    pPropertyPanel->setWindowTitle("PROPERTIES");
+    pPropertyPanel->setWindowTitle("Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -58,4 +58,4 @@ plQtRenderPipelineAssetDocumentWindow::plQtRenderPipelineAssetDocumentWindow(plD
   FinishWindowCreation();
 }
 
-plQtRenderPipelineAssetDocumentWindow::~plQtRenderPipelineAssetDocumentWindow() {}
+plQtRenderPipelineAssetDocumentWindow::~plQtRenderPipelineAssetDocumentWindow() = default;

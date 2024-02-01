@@ -2,13 +2,9 @@
 
 #include <Utilities/DataStructures/DynamicOctree.h>
 
-const float plDynamicOctree::s_LooseOctreeFactor = 1.1f;
+const float plDynamicOctree::s_fLooseOctreeFactor = 1.1f;
 
-plDynamicOctree::plDynamicOctree()
-  : m_uiMaxTreeDepth(0)
-  , m_uiAddIDTopLevel(0)
-{
-}
+plDynamicOctree::plDynamicOctree() = default;
 
 void plDynamicOctree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExtents, float fMinNodeSize)
 {
@@ -28,7 +24,7 @@ void plDynamicOctree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExten
   // the bounding box should be square, so use the maximum of the x, y and z extents
   float fMax = plMath::Max(vHalfExtents.x, plMath::Max(vHalfExtents.y, vHalfExtents.z));
 
-  m_BBox.SetCenterAndHalfExtents(vCenter, plVec3(fMax));
+  m_BBox = plBoundingBox::MakeFromCenterAndHalfExtents(vCenter, plVec3(fMax));
 
   float fLength = fMax * 2.0f;
 
@@ -36,7 +32,7 @@ void plDynamicOctree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExten
   while (fLength > fMinNodeSize)
   {
     ++m_uiMaxTreeDepth;
-    fLength = (fLength / 2.0f) * s_LooseOctreeFactor;
+    fLength = (fLength / 2.0f) * s_fLooseOctreeFactor;
   }
 
   m_uiAddIDTopLevel = 0;
@@ -50,30 +46,30 @@ void plDynamicOctree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExten
 ///
 /// If bOnlyIfInside is true, the object is discarded, if it is not inside the actual bounding box of the tree.
 plResult plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHalfExtents, plInt32 iObjectType, plInt32 iObjectInstance,
-  plDynamicTreeObject* out_Object, bool bOnlyIfInside)
+  plDynamicTreeObject* out_pObject, bool bOnlyIfInside)
 {
-  if (out_Object)
-    *out_Object = plDynamicTreeObject();
+  if (out_pObject)
+    *out_pObject = plDynamicTreeObject();
 
   if (bOnlyIfInside)
   {
     if (vCenter.x + vHalfExtents.x < m_fRealMinX)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.x - vHalfExtents.x > m_fRealMaxX)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.y + vHalfExtents.y < m_fRealMinY)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.y - vHalfExtents.y > m_fRealMaxY)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.z + vHalfExtents.z < m_fRealMinZ)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.z - vHalfExtents.z > m_fRealMaxZ)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plDynamicTree::plObjectData oData;
@@ -82,7 +78,7 @@ plResult plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHal
 
   // insert the object into the best child
   if (!InsertObject(vCenter, vHalfExtents, oData, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
-        m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel, plMath::Pow(8, m_uiMaxTreeDepth - 1), out_Object))
+        m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel, plMath::Pow(8, m_uiMaxTreeDepth - 1), out_pObject))
   {
     if (!bOnlyIfInside)
     {
@@ -92,16 +88,16 @@ plResult plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHal
 
       auto key = m_NodeMap.Insert(mmk, oData);
 
-      if (out_Object)
-        *out_Object = key;
+      if (out_pObject)
+        *out_pObject = key;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHalfExtents, const plDynamicTree::plObjectData& Obj, float minx, float maxx,
@@ -122,9 +118,9 @@ bool plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHalfExt
 
   if (uiAddID > 0)
   {
-    const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-    const float ly = ((maxy - miny) * 0.5f) * s_LooseOctreeFactor;
-    const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+    const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+    const float ly = ((maxy - miny) * 0.5f) * s_fLooseOctreeFactor;
+    const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
     const plUInt32 uiNodeIDBase = uiNodeID + 1;
     const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -168,7 +164,7 @@ bool plDynamicOctree::InsertObject(const plVec3& vCenter, const plVec3& vHalfExt
   return true;
 }
 
-void plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
   if (m_NodeMap.IsEmpty())
     return;
@@ -176,22 +172,22 @@ void plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OB
   if (!m_BBox.Contains(vPoint))
     return;
 
-  FindObjectsInRange(vPoint, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
+  FindObjectsInRange(vPoint, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
     m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel, plMath::Pow(8, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-void plDynamicOctree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicOctree::FindVisibleObjects(const plFrustum& viewfrustum, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicOctree::FindVisibleObjects: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicOctree::FindVisibleObjects: You have to first create the tree.");
 
   if (m_NodeMap.IsEmpty())
     return;
 
-  FindVisibleObjects(Viewfrustum, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
+  FindVisibleObjects(viewfrustum, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
     m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel, plMath::Pow(4, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-void plDynamicOctree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
+void plDynamicOctree::FindVisibleObjects(const plFrustum& Viewfrustum, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
   float miny, float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   plVec3 v[8];
@@ -247,9 +243,9 @@ void plDynamicOctree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VI
 
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float ly = ((maxy - miny) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float ly = ((maxy - miny) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -310,7 +306,7 @@ void plDynamicOctree::RemoveObjectsOfType(plInt32 iObjectType)
 
 
 
-bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
+bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
   float miny, float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   if (vPoint.x < minx)
@@ -354,9 +350,9 @@ bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OB
 
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float ly = ((maxy - miny) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float ly = ((maxy - miny) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -392,18 +388,18 @@ bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OB
   return true;
 }
 
-void plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicOctree::FindObjectsInRange: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicOctree::FindObjectsInRange: You have to first create the tree.");
 
   if (m_NodeMap.IsEmpty())
     return;
 
-  FindObjectsInRange(vPoint, fRadius, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
+  FindObjectsInRange(vPoint, fRadius, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.y, m_BBox.m_vMax.y, m_BBox.m_vMin.z,
     m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel, plMath::Pow(8, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx,
+bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx,
   float maxx, float miny, float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   if (vPoint.x + fRadius < minx)
@@ -446,9 +442,9 @@ bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL
     // if the node has children
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float ly = ((maxy - miny) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float ly = ((maxy - miny) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -485,5 +481,3 @@ bool plDynamicOctree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_DataStructures_Implementation_DynamicOctree);

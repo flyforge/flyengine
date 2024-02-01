@@ -81,14 +81,14 @@ namespace
   template <>
   void GetVariantFunc::operator()<plAngle>()
   {
-    m_Value = plAngle::Degree((float)m_fValue);
+    m_Value = plAngle::MakeFromDegree((float)m_fValue);
     m_bValid = true;
   }
 
   template <>
   void GetVariantFunc::operator()<plTime>()
   {
-    m_Value = plTime::Seconds(m_fValue);
+    m_Value = plTime::MakeFromSeconds(m_fValue);
     m_bValid = true;
   }
 } // namespace
@@ -181,12 +181,12 @@ void plToolsReflectionUtils::GetReflectedTypeDescriptorFromRtti(const plRTTI* pR
         if (plReflectionUtils::IsBasicType(pPropRtti))
         {
           plVariant value = constantProp->GetConstant();
-          PLASMA_ASSERT_DEV(pPropRtti->GetVariantType() == value.GetType(), "Variant value type and property type should always match!");
+          PL_ASSERT_DEV(pPropRtti->GetVariantType() == value.GetType(), "Variant value type and property type should always match!");
           out_desc.m_Properties.PushBack(plReflectedPropertyDescriptor(constantProp->GetPropertyName(), value, prop->GetAttributes()));
         }
         else
         {
-          PLASMA_ASSERT_DEV(false, "Non-pod constants are not supported yet!");
+          PL_ASSERT_DEV(false, "Non-pod constants are not supported yet!");
         }
       }
       break;
@@ -233,7 +233,7 @@ void plToolsReflectionUtils::GetReflectedTypeDescriptorFromRtti(const plRTTI* pR
 
 void plToolsReflectionUtils::GetMinimalReflectedTypeDescriptorFromRtti(const plRTTI* pRtti, plReflectedTypeDescriptor& out_desc)
 {
-  PLASMA_ASSERT_DEV(pRtti != nullptr, "Type to process must not be null!");
+  PL_ASSERT_DEV(pRtti != nullptr, "Type to process must not be null!");
   out_desc.m_sTypeName = pRtti->GetTypeName();
   out_desc.m_sPluginName = pRtti->GetPluginName();
   out_desc.m_Flags = pRtti->GetTypeFlags() | plTypeFlags::Minimal;

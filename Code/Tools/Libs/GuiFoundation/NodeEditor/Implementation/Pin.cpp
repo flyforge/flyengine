@@ -1,5 +1,6 @@
 #include <GuiFoundation/GuiFoundationPCH.h>
 
+#include <Foundation/Strings/TranslationLookup.h>
 #include <GuiFoundation/NodeEditor/Connection.h>
 #include <GuiFoundation/NodeEditor/Pin.h>
 #include <QApplication>
@@ -11,7 +12,7 @@ plQtPin::plQtPin()
 
   QPen pen(palette.light().color(), 3, Qt::SolidLine);
   setPen(pen);
-  setBrush(palette.light());
+  setBrush(palette.base());
 
   setFlag(QGraphicsItem::ItemSendsGeometryChanges);
   setFlag(QGraphicsItem::ItemSendsScenePositionChanges);
@@ -23,7 +24,7 @@ plQtPin::~plQtPin() = default;
 
 void plQtPin::AddConnection(plQtConnection* pConnection)
 {
-  PLASMA_ASSERT_DEBUG(!m_Connections.Contains(pConnection), "Connection already present!");
+  PL_ASSERT_DEBUG(!m_Connections.Contains(pConnection), "Connection already present!");
   m_Connections.PushBack(pConnection);
 
   ConnectedStateChanged(true);
@@ -33,7 +34,7 @@ void plQtPin::AddConnection(plQtConnection* pConnection)
 
 void plQtPin::RemoveConnection(plQtConnection* pConnection)
 {
-  PLASMA_ASSERT_DEBUG(m_Connections.Contains(pConnection), "Connection not present!");
+  PL_ASSERT_DEBUG(m_Connections.Contains(pConnection), "Connection not present!");
   m_Connections.RemoveAndSwap(pConnection);
 
   if (m_Connections.IsEmpty())
@@ -51,7 +52,7 @@ void plQtPin::SetPin(const plPin& pin)
 
   if (m_bTranslatePinName)
   {
-    m_pLabel->setPlainText(plTranslate(pin.GetName()));
+    m_pLabel->setPlainText(plMakeQString(plTranslate(pin.GetName())));
   }
   else
   {
@@ -80,16 +81,12 @@ void plQtPin::SetPin(const plPin& pin)
 
   {
     QPainterPath p;
-    const int rectShrink = 1;
-
     switch (m_pPin->m_Shape)
     {
       case plPin::Shape::Circle:
         p.addEllipse(bounds);
         break;
       case plPin::Shape::Rect:
-        bounds.adjust(rectShrink, rectShrink, -rectShrink, -rectShrink);
-        m_PinCenter = bounds.center();
         p.addRect(bounds);
         break;
       case plPin::Shape::RoundRect:
@@ -108,7 +105,7 @@ void plQtPin::SetPin(const plPin& pin)
         p.addPolygon(arrow);
         break;
       }
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     setPath(p);
@@ -181,9 +178,9 @@ void plQtPin::SetHighlightState(plQtPinHighlightState state)
   }
 }
 
-void plQtPin::SetActive(bool active)
+void plQtPin::SetActive(bool bActive)
 {
-  m_bIsActive = active;
+  m_bIsActive = bActive;
 
   if (UpdatePinColors())
   {
@@ -194,10 +191,10 @@ void plQtPin::SetActive(bool active)
 bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
 {
   plColorGammaUB pinColor = pOverwriteColor != nullptr ? *pOverwriteColor : GetPin()->GetColor();
-  QColor light = QApplication::palette().light().color();
+  QColor base = QApplication::palette().window().color();
 
   if (!m_bIsActive)
-    pinColor = plMath::Lerp<plColor>(plColorGammaUB(light.red(), light.green(), light.blue()), pinColor, 0.2f);
+    pinColor = plMath::Lerp<plColor>(plColorGammaUB(base.red(), base.green(), base.blue()), pinColor, 0.2f);
 
   switch (m_HighlightState)
   {
@@ -207,7 +204,7 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
       p.setColor(plToQtColor(pinColor));
       setPen(p);
 
-      setBrush(HasAnyConnections() ? pen().color().darker(125) : light);
+      setBrush(HasAnyConnections() ? pen().color().darker(125) : base);
     }
     break;
 
@@ -215,10 +212,10 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
     case plQtPinHighlightState::CannotConnectSameDirection:
     {
       QPen p = pen();
-      p.setColor(light.lighter());
+      p.setColor(base.lighter());
       setPen(p);
 
-      setBrush(light);
+      setBrush(base);
     }
     break;
 
@@ -229,7 +226,7 @@ bool plQtPin::UpdatePinColors(const plColorGammaUB* pOverwriteColor)
       p.setColor(plToQtColor(pinColor));
       setPen(p);
 
-      setBrush(light);
+      setBrush(base);
     }
     break;
   }

@@ -2,7 +2,7 @@
 
 #include <Foundation/Basics.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #endif
 

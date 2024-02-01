@@ -16,22 +16,25 @@ struct plMaterialData
   float perceptualRoughness;
   float metalness;
   float occlusion;
-  float cavity;
   float opacity;
 
+#if defined(USE_MATERIAL_SPECULAR_ANISOTROPIC)
+  float anisotropic;
+  float anisotropicRotation;
+#endif
+
+#if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
   float clearcoat;
   float clearcoatRoughness;
   float3 clearcoatNormal;
+#endif
 
-  float anisotropic;
-  float anisotropicRotation;
-
+#if defined(USE_MATERIAL_SPECULAR_SHEEN)
   float sheen;
   float sheenTintFactor;
-
-  float2 velocity;
+#endif
 
   float3 subsurfaceColor;
   float subsurfaceScatterPower;
-  float subsurfaceStrength;
+  float subsurfaceShadowFalloff;
 };

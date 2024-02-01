@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/CapsuleManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plCapsuleManipulatorAdapter::plCapsuleManipulatorAdapter() {}
+plCapsuleManipulatorAdapter::plCapsuleManipulatorAdapter() = default;
 
-plCapsuleManipulatorAdapter::~plCapsuleManipulatorAdapter() {}
+plCapsuleManipulatorAdapter::~plCapsuleManipulatorAdapter() = default;
 
 void plCapsuleManipulatorAdapter::Finalize()
 {
@@ -15,7 +15,7 @@ void plCapsuleManipulatorAdapter::Finalize()
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
 
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmo.SetTransformation(GetObjectTransform());
   m_Gizmo.SetVisible(m_bManipulatorIsVisible);

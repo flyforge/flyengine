@@ -12,11 +12,11 @@ public:
   {
   }
 
-  virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_CoordinateSystem) const override
+  virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_coordinateSystem) const override
   {
-    out_CoordinateSystem.m_vForwardDir = plBasisAxis::GetBasisVector(m_ForwardAxis);
-    out_CoordinateSystem.m_vRightDir = plBasisAxis::GetBasisVector(m_RightAxis);
-    out_CoordinateSystem.m_vUpDir = plBasisAxis::GetBasisVector(m_UpAxis);
+    out_coordinateSystem.m_vForwardDir = plBasisAxis::GetBasisVector(m_ForwardAxis);
+    out_coordinateSystem.m_vRightDir = plBasisAxis::GetBasisVector(m_RightAxis);
+    out_coordinateSystem.m_vUpDir = plBasisAxis::GetBasisVector(m_UpAxis);
   }
 
   plBasisAxis::Enum m_ForwardAxis = plBasisAxis::PositiveX;
@@ -25,12 +25,12 @@ public:
 };
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plCameraMode, 1)
-  PLASMA_ENUM_CONSTANT(plCameraMode::PerspectiveFixedFovX),
-  PLASMA_ENUM_CONSTANT(plCameraMode::PerspectiveFixedFovY),
-  PLASMA_ENUM_CONSTANT(plCameraMode::OrthoFixedWidth),
-  PLASMA_ENUM_CONSTANT(plCameraMode::OrthoFixedHeight),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plCameraMode, 1)
+  PL_ENUM_CONSTANT(plCameraMode::PerspectiveFixedFovX),
+  PL_ENUM_CONSTANT(plCameraMode::PerspectiveFixedFovY),
+  PL_ENUM_CONSTANT(plCameraMode::OrthoFixedWidth),
+  PL_ENUM_CONSTANT(plCameraMode::OrthoFixedHeight),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plCamera::plCamera()
@@ -45,19 +45,19 @@ plCamera::plCamera()
   SetCoordinateSystem(plBasisAxis::PositiveX, plBasisAxis::PositiveY, plBasisAxis::PositiveZ);
 }
 
-void plCamera::SetCoordinateSystem(plBasisAxis::Enum forwardAxis, plBasisAxis::Enum rightAxis, plBasisAxis::Enum upAxis)
+void plCamera::SetCoordinateSystem(plBasisAxis::Enum forwardAxis, plBasisAxis::Enum rightAxis, plBasisAxis::Enum axis)
 {
-  auto provider = PLASMA_DEFAULT_NEW(RemapCoordinateSystemProvider);
+  auto provider = PL_DEFAULT_NEW(RemapCoordinateSystemProvider);
   provider->m_ForwardAxis = forwardAxis;
   provider->m_RightAxis = rightAxis;
-  provider->m_UpAxis = upAxis;
+  provider->m_UpAxis = axis;
 
   m_pCoordinateSystem = provider;
 }
 
-void plCamera::SetCoordinateSystem(const plSharedPtr<plCoordinateSystemProvider>& provider)
+void plCamera::SetCoordinateSystem(const plSharedPtr<plCoordinateSystemProvider>& pProvider)
 {
-  m_pCoordinateSystem = provider;
+  m_pCoordinateSystem = pProvider;
 }
 
 plVec3 plCamera::GetPosition(plCameraEye eye) const
@@ -157,32 +157,32 @@ plVec3 plCamera::MapInternalToExternal(const plVec3& v) const
 plAngle plCamera::GetFovX(float fAspectRatioWidthDivHeight) const
 {
   if (m_Mode == plCameraMode::PerspectiveFixedFovX)
-    return plAngle::Degree(m_fFovOrDim);
+    return plAngle::MakeFromDegree(m_fFovOrDim);
 
   if (m_Mode == plCameraMode::PerspectiveFixedFovY)
-    return plMath::ATan(plMath::Tan(plAngle::Degree(m_fFovOrDim) * 0.5f) * fAspectRatioWidthDivHeight) * 2.0f;
+    return plMath::ATan(plMath::Tan(plAngle::MakeFromDegree(m_fFovOrDim) * 0.5f) * fAspectRatioWidthDivHeight) * 2.0f;
 
   // TODO: HACK
   if (m_Mode == plCameraMode::Stereo)
-    return plAngle::Degree(90);
+    return plAngle::MakeFromDegree(90);
 
-  PLASMA_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
+  PL_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
   return plAngle();
 }
 
 plAngle plCamera::GetFovY(float fAspectRatioWidthDivHeight) const
 {
   if (m_Mode == plCameraMode::PerspectiveFixedFovX)
-    return plMath::ATan(plMath::Tan(plAngle::Degree(m_fFovOrDim) * 0.5f) / fAspectRatioWidthDivHeight) * 2.0f;
+    return plMath::ATan(plMath::Tan(plAngle::MakeFromDegree(m_fFovOrDim) * 0.5f) / fAspectRatioWidthDivHeight) * 2.0f;
 
   if (m_Mode == plCameraMode::PerspectiveFixedFovY)
-    return plAngle::Degree(m_fFovOrDim);
+    return plAngle::MakeFromDegree(m_fFovOrDim);
 
   // TODO: HACK
   if (m_Mode == plCameraMode::Stereo)
-    return plAngle::Degree(90);
+    return plAngle::MakeFromDegree(90);
 
-  PLASMA_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
+  PL_REPORT_FAILURE("You cannot get the camera FOV when it is not a perspective camera.");
   return plAngle();
 }
 
@@ -195,7 +195,7 @@ float plCamera::GetDimensionX(float fAspectRatioWidthDivHeight) const
   if (m_Mode == plCameraMode::OrthoFixedHeight)
     return m_fFovOrDim * fAspectRatioWidthDivHeight;
 
-  PLASMA_REPORT_FAILURE("You cannot get the camera dimensions when it is not an orthographic camera.");
+  PL_REPORT_FAILURE("You cannot get the camera dimensions when it is not an orthographic camera.");
   return 0;
 }
 
@@ -208,19 +208,19 @@ float plCamera::GetDimensionY(float fAspectRatioWidthDivHeight) const
   if (m_Mode == plCameraMode::OrthoFixedHeight)
     return m_fFovOrDim;
 
-  PLASMA_REPORT_FAILURE("You cannot get the camera dimensions when it is not an orthographic camera.");
+  PL_REPORT_FAILURE("You cannot get the camera dimensions when it is not an orthographic camera.");
   return 0;
 }
 
-void plCamera::SetCameraMode(plCameraMode::Enum Mode, float fFovOrDim, float fNearPlane, float fFarPlane)
+void plCamera::SetCameraMode(plCameraMode::Enum mode, float fFovOrDim, float fNearPlane, float fFarPlane)
 {
   // early out if no change
-  if (m_Mode == Mode && m_fFovOrDim == fFovOrDim && m_fNearPlane == fNearPlane && m_fFarPlane == fFarPlane)
+  if (m_Mode == mode && m_fFovOrDim == fFovOrDim && m_fNearPlane == fNearPlane && m_fFarPlane == fFarPlane)
   {
     return;
   }
 
-  m_Mode = Mode;
+  m_Mode = mode;
   m_fFovOrDim = fFovOrDim;
   m_fNearPlane = fNearPlane;
   m_fFarPlane = fFarPlane;
@@ -247,7 +247,7 @@ void plCamera::LookAt(const plVec3& vCameraPos0, const plVec3& vTargetPos0, cons
 
   if (m_Mode == plCameraMode::Stereo)
   {
-    PLASMA_REPORT_FAILURE("plCamera::LookAt is not possible for stereo cameras.");
+    PL_REPORT_FAILURE("plCamera::LookAt is not possible for stereo cameras.");
     return;
   }
 
@@ -277,51 +277,51 @@ void plCamera::SetViewMatrix(const plMat4& mLookAtMatrix, plCameraEye eye)
   CameraOrientationChanged(true, true);
 }
 
-void plCamera::GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out_projectionMatrix, plCameraEye eye, plClipSpaceDepthRange::Enum depthRange) const
+void plCamera::GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out_mProjectionMatrix, plCameraEye eye, plClipSpaceDepthRange::Enum depthRange) const
 {
   switch (m_Mode)
   {
     case plCameraMode::PerspectiveFixedFovX:
-      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+      out_mProjectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
         m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
     case plCameraMode::PerspectiveFixedFovY:
-      out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+      out_mProjectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
         m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
     case plCameraMode::OrthoFixedWidth:
-      out_projectionMatrix = plGraphicsUtils::CreateOrthographicProjectionMatrix(m_fFovOrDim, m_fFovOrDim / fAspectRatioWidthDivHeight, m_fNearPlane,
+      out_mProjectionMatrix = plGraphicsUtils::CreateOrthographicProjectionMatrix(m_fFovOrDim, m_fFovOrDim / fAspectRatioWidthDivHeight, m_fNearPlane,
         m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
     case plCameraMode::OrthoFixedHeight:
-      out_projectionMatrix = plGraphicsUtils::CreateOrthographicProjectionMatrix(m_fFovOrDim * fAspectRatioWidthDivHeight, m_fFovOrDim, m_fNearPlane,
+      out_mProjectionMatrix = plGraphicsUtils::CreateOrthographicProjectionMatrix(m_fFovOrDim * fAspectRatioWidthDivHeight, m_fFovOrDim, m_fNearPlane,
         m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       break;
 
     case plCameraMode::Stereo:
       if (plMath::IsEqual(m_fAspectOfPrecomputedStereoProjection, fAspectRatioWidthDivHeight, plMath::LargeEpsilon<float>()))
-        out_projectionMatrix = m_mStereoProjectionMatrix[static_cast<int>(eye)];
+        out_mProjectionMatrix = m_mStereoProjectionMatrix[static_cast<int>(eye)];
       else
       {
         // Evade to FixedFovY
-        out_projectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::Degree(m_fFovOrDim), fAspectRatioWidthDivHeight,
+        out_mProjectionMatrix = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovY(plAngle::MakeFromDegree(m_fFovOrDim), fAspectRatioWidthDivHeight,
           m_fNearPlane, m_fFarPlane, depthRange, plClipSpaceYMode::Regular, plHandedness::LeftHanded);
       }
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Invalid Camera Mode {0}", (int)m_Mode);
+      PL_REPORT_FAILURE("Invalid Camera Mode {0}", (int)m_Mode);
   }
 }
 
 void plCamera::CameraSettingsChanged()
 {
-  PLASMA_ASSERT_DEV(m_Mode != plCameraMode::None, "Invalid Camera Mode.");
-  PLASMA_ASSERT_DEV(m_fNearPlane < m_fFarPlane, "Near and Far Plane are invalid.");
-  PLASMA_ASSERT_DEV(m_fFovOrDim > 0.0f, "FOV or Camera Dimension is invalid.");
+  PL_ASSERT_DEV(m_Mode != plCameraMode::None, "Invalid Camera Mode.");
+  PL_ASSERT_DEV(m_fNearPlane < m_fFarPlane, "Near and Far Plane are invalid.");
+  PL_ASSERT_DEV(m_fFovOrDim > 0.0f, "FOV or Camera Dimension is invalid.");
 
   ++m_uiSettingsModificationCounter;
 }
@@ -365,19 +365,19 @@ void plCamera::ClampRotationAngles(bool bLocalSpace, plAngle& forwardAxis, plAng
       // Limit how much the camera can look up and down, to prevent it from overturning
 
       const float fDot = InternalGetDirForwards().Dot(plVec3(0, 0, -1));
-      const plAngle fCurAngle = plMath::ACos(fDot) - plAngle::Degree(90.0f);
+      const plAngle fCurAngle = plMath::ACos(fDot) - plAngle::MakeFromDegree(90.0f);
       const plAngle fNewAngle = fCurAngle + rightAxis;
 
-      const plAngle fAllowedAngle = plMath::Clamp(fNewAngle, plAngle::Degree(-85.0f), plAngle::Degree(85.0f));
+      const plAngle fAllowedAngle = plMath::Clamp(fNewAngle, plAngle::MakeFromDegree(-85.0f), plAngle::MakeFromDegree(85.0f));
 
       rightAxis = fAllowedAngle - fCurAngle;
     }
   }
 }
 
-void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upAxis)
+void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle axis)
 {
-  ClampRotationAngles(true, forwardAxis, rightAxis, upAxis);
+  ClampRotationAngles(true, forwardAxis, rightAxis, axis);
 
   plVec3 vDirForwards = InternalGetDirForwards();
   plVec3 vDirUp = InternalGetDirUp();
@@ -385,8 +385,7 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
 
   if (forwardAxis.GetRadian() != 0.0f)
   {
-    plMat3 m;
-    m.SetRotationMatrix(vDirForwards, forwardAxis);
+    plMat3 m = plMat3::MakeAxisRotation(vDirForwards, forwardAxis);
 
     vDirUp = m * vDirUp;
     vDirRight = m * vDirRight;
@@ -394,17 +393,15 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
 
   if (rightAxis.GetRadian() != 0.0f)
   {
-    plMat3 m;
-    m.SetRotationMatrix(vDirRight, rightAxis);
+    plMat3 m = plMat3::MakeAxisRotation(vDirRight, rightAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
   }
 
-  if (upAxis.GetRadian() != 0.0f)
+  if (axis.GetRadian() != 0.0f)
   {
-    plMat3 m;
-    m.SetRotationMatrix(vDirUp, upAxis);
+    plMat3 m = plMat3::MakeAxisRotation(vDirUp, axis);
 
     vDirRight = m * vDirRight;
     vDirForwards = m * vDirForwards;
@@ -419,9 +416,9 @@ void plCamera::RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upA
   CameraOrientationChanged(false, true);
 }
 
-void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle upAxis)
+void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle axis)
 {
-  ClampRotationAngles(false, forwardAxis, rightAxis, upAxis);
+  ClampRotationAngles(false, forwardAxis, rightAxis, axis);
 
   plVec3 vDirForwards = InternalGetDirForwards();
   plVec3 vDirUp = InternalGetDirUp();
@@ -429,7 +426,7 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
   if (forwardAxis.GetRadian() != 0.0f)
   {
     plMat3 m;
-    m.SetRotationMatrixX(forwardAxis);
+    m = plMat3::MakeRotationX(forwardAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
@@ -438,16 +435,16 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
   if (rightAxis.GetRadian() != 0.0f)
   {
     plMat3 m;
-    m.SetRotationMatrixY(rightAxis);
+    m = plMat3::MakeRotationY(rightAxis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
   }
 
-  if (upAxis.GetRadian() != 0.0f)
+  if (axis.GetRadian() != 0.0f)
   {
     plMat3 m;
-    m.SetRotationMatrixZ(upAxis);
+    m = plMat3::MakeRotationZ(axis);
 
     vDirUp = m * vDirUp;
     vDirForwards = m * vDirForwards;
@@ -464,4 +461,4 @@ void plCamera::RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle up
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Graphics_Implementation_Camera);
+PL_STATICLINK_FILE(Core, Core_Graphics_Implementation_Camera);

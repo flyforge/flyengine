@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plLogAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLogAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -23,9 +23,9 @@ protected:
   plHybridArray<plAnimGraphNumberInputPin, 2> m_InNumbers; // [ property ]
 };
 
-class PLASMA_RENDERERCORE_DLL plLogInfoAnimNode : public plLogAnimNode
+class PL_RENDERERCORE_DLL plLogInfoAnimNode : public plLogAnimNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogInfoAnimNode, plLogAnimNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogInfoAnimNode, plLogAnimNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plLogAnimNode
@@ -34,9 +34,9 @@ protected:
   virtual void Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const override;
 };
 
-class PLASMA_RENDERERCORE_DLL plLogErrorAnimNode : public plLogAnimNode
+class PL_RENDERERCORE_DLL plLogErrorAnimNode : public plLogAnimNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogErrorAnimNode, plLogAnimNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogErrorAnimNode, plLogAnimNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plLogAnimNode

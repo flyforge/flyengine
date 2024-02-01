@@ -7,8 +7,8 @@
 #include <ToolsFoundation/Document/Document.h>
 #include <ToolsFoundation/Object/DocumentObjectManager.h>
 
-class PlasmaEditorEngineConnection;
-class PlasmaEditorEngineSyncObject;
+class plEditorEngineConnection;
+class plEditorEngineSyncObject;
 class plAssetDocumentManager;
 class plPlatformProfile;
 class QImage;
@@ -26,38 +26,38 @@ struct plCommonAssetUiState
 {
   enum Enum : plUInt32
   {
-    Pause = PLASMA_BIT(0),
-    Restart = PLASMA_BIT(1),
-    Loop = PLASMA_BIT(2),
-    SimulationSpeed = PLASMA_BIT(3),
-    Grid = PLASMA_BIT(4),
-    Visualizers = PLASMA_BIT(5),
+    Pause = PL_BIT(0),
+    Restart = PL_BIT(1),
+    Loop = PL_BIT(2),
+    SimulationSpeed = PL_BIT(3),
+    Grid = PL_BIT(4),
+    Visualizers = PL_BIT(5),
   };
 
   Enum m_State;
   double m_fValue = 0;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plAssetDocument : public plDocument
+class PL_EDITORFRAMEWORK_DLL plAssetDocument : public plDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetDocument, plDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetDocument, plDocument);
 
 public:
   /// \brief The thumbnail info containing the hash of the file is appended to assets.
   /// The serialized size of this class can't change since it is found by seeking to the end of the file.
-  class PLASMA_EDITORFRAMEWORK_DLL ThumbnailInfo
+  class PL_EDITORFRAMEWORK_DLL ThumbnailInfo
   {
   public:
-    plResult Deserialize(plStreamReader& Reader);
-    plResult Serialize(plStreamWriter& Writer) const;
+    plResult Deserialize(plStreamReader& inout_reader);
+    plResult Serialize(plStreamWriter& inout_writer) const;
 
     /// \brief Checks whether the stored file contains the same hash.
     bool IsThumbnailUpToDate(plUInt64 uiExpectedHash, plUInt16 uiVersion) const { return (m_uiHash == uiExpectedHash && m_uiVersion == uiVersion); }
 
     /// \brief Sets the asset file hash
-    void SetFileHashAndVersion(plUInt64 hash, plUInt16 v)
+    void SetFileHashAndVersion(plUInt64 uiHash, plUInt16 v)
     {
-      m_uiHash = hash;
+      m_uiHash = uiHash;
       m_uiVersion = v;
     }
 
@@ -71,7 +71,7 @@ public:
     plUInt16 m_uiReserved = 0;
   };
 
-  plAssetDocument(const char* szDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType);
+  plAssetDocument(plStringView sDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType);
   ~plAssetDocument();
 
   /// \name Asset Functions
@@ -118,39 +118,45 @@ public:
   /// \brief Returns the current state of the engine process side of this document.
   EngineStatus GetEngineStatus() const { return m_EngineStatus; }
 
-  /// \brief Passed into PlasmaEngineProcessDocumentContext::Initialize on the engine process side. Allows the document to provide additional data to the engine process during context creation.
+  /// \brief Passed into plEngineProcessDocumentContext::Initialize on the engine process side. Allows the document to provide additional data to the engine process during context creation.
   virtual plVariant GetCreateEngineMetaData() const { return plVariant(); }
 
-  /// \brief Sends a message to the corresponding PlasmaEngineProcessDocumentContext on the engine process.
-  void SendMessageToEngine(PlasmaEditorEngineDocumentMsg* pMessage) const;
+  /// \brief Sends a message to the corresponding plEngineProcessDocumentContext on the engine process.
+  bool SendMessageToEngine(plEditorEngineDocumentMsg* pMessage) const;
 
-  /// \brief Handles all messages received from the corresponding PlasmaEngineProcessDocumentContext on the engine process.
-  virtual void HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg);
+  /// \brief Handles all messages received from the corresponding plEngineProcessDocumentContext on the engine process.
+  virtual void HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg);
 
-  /// \brief Returns the PlasmaEditorEngineConnection for this document.
-  PlasmaEditorEngineConnection* GetEditorEngineConnection() const { return m_pEngineConnection; }
+  /// \brief Returns the plEditorEngineConnection for this document.
+  plEditorEngineConnection* GetEditorEngineConnection() const { return m_pEngineConnection; }
 
-  /// \brief Registers a sync object for this document. It will be mirrored to the PlasmaEngineProcessDocumentContext on the engine process.
-  void AddSyncObject(PlasmaEditorEngineSyncObject* pSync) const;
+  /// \brief Registers a sync object for this document. It will be mirrored to the plEngineProcessDocumentContext on the engine process.
+  void AddSyncObject(plEditorEngineSyncObject* pSync) const;
 
   /// \brief Removes a previously registered sync object. It will be removed on the engine process side.
-  void RemoveSyncObject(PlasmaEditorEngineSyncObject* pSync) const;
+  void RemoveSyncObject(plEditorEngineSyncObject* pSync) const;
 
   /// \brief Returns the sync object registered under the given guid.
-  PlasmaEditorEngineSyncObject* FindSyncObject(const plUuid& guid) const;
+  plEditorEngineSyncObject* FindSyncObject(const plUuid& guid) const;
 
   /// \brief Returns the first sync object registered with the given type.
-  PlasmaEditorEngineSyncObject* FindSyncObject(const plRTTI* pType) const;
+  plEditorEngineSyncObject* FindSyncObject(const plRTTI* pType) const;
 
   /// \brief Sends messages to sync all sync objects to the engine process side.
   void SyncObjectsToEngine() const;
 
+  /// /brief Sends a message that the document has been opened or closed. Resends all document data.
+  ///
+  /// Calling this will always clear the existing document on the engine side and reset the state to the editor state.
+  void SendDocumentOpenMessage(bool bOpen);
+
+
   ///@}
 
-  plEvent<const PlasmaEditorEngineDocumentMsg*> m_ProcessMessageEvent;
+  plEvent<const plEditorEngineDocumentMsg*> m_ProcessMessageEvent;
 
 protected:
-  void EngineConnectionEventHandler(const PlasmaEditorEngineProcessConnection::Event& e);
+  void EngineConnectionEventHandler(const plEditorEngineProcessConnection::Event& e);
 
   /// \name Hash Functions
   ///@{
@@ -174,6 +180,7 @@ protected:
   /// \brief Implements auto transform on save
   virtual void InternalAfterSaveDocument() override;
 
+  virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
   virtual void InitializeAfterLoadingAndSaving() override;
 
   ///@}
@@ -196,7 +203,7 @@ protected:
   /// \param szPlatform Platform for which is the output is to be created. Default is 'PC'.
   /// \param AssetHeader Header already written to the stream, provided for reference.
   /// \param transformFlags flags that affect the transform process, see plTransformFlags.
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) = 0;
 
   /// \brief Only override this function, if the transformed file for the given szOutputTag must be written from another process.
@@ -204,7 +211,7 @@ protected:
   /// szTargetFile is where the transformed asset should be written to. The overriding function must ensure to first
   /// write \a AssetHeader to the file, to make it a valid asset file or provide a custom plAssetDocumentManager::IsOutputUpToDate function.
   /// See plTransformFlags for definition of transform flags.
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags);
 
   plStatus RemoteExport(const plAssetFileHeader& header, const char* szOutputTarget) const;
@@ -217,10 +224,10 @@ protected:
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& thumbnailInfo);
 
   /// \brief Returns the full path to the jpg file in which the thumbnail for this asset is supposed to be
-  plString GetThumbnailFilePath() const;
+  plString GetThumbnailFilePath(plStringView sSubAssetName = plStringView()) const;
 
   /// \brief Should be called after manually changing the thumbnail, such that the system will reload it
-  void InvalidateAssetThumbnail(plStringView sThumbnailFile = plStringView()) const;
+  void InvalidateAssetThumbnail(plStringView sSubAssetName = plStringView()) const;
 
   /// \brief Requests the engine side to render a thumbnail, will call SaveThumbnail on success.
   plStatus RemoteCreateThumbnail(const ThumbnailInfo& thumbnailInfo, plArrayPtr<plStringView> viewExclusionTags /*= plStringView("SkyLight")*/) const;
@@ -270,20 +277,19 @@ protected:
   void AddReferences(const plDocumentObject* pObject, plAssetDocumentInfo* pInfo, bool bInsidePrefab) const;
 
 protected:
-  plIPCObjectMirrorEditor m_Mirror;
+  plUniquePtr<plIPCObjectMirrorEditor> m_pMirror;
 
   virtual plDocumentInfo* CreateDocumentInfo() override;
 
-private:
   plTransformStatus DoTransformAsset(const plPlatformProfile* pAssetProfile, plBitflags<plTransformFlags> transformFlags);
 
   EngineStatus m_EngineStatus;
   plAssetDocEngineConnection m_EngineConnectionType = plAssetDocEngineConnection::None;
 
-  PlasmaEditorEngineConnection* m_pEngineConnection;
+  plEditorEngineConnection* m_pEngineConnection;
 
-  mutable plHashTable<plUuid, PlasmaEditorEngineSyncObject*> m_AllSyncObjects;
-  mutable plDeque<PlasmaEditorEngineSyncObject*> m_SyncObjects;
+  mutable plHashTable<plUuid, plEditorEngineSyncObject*> m_AllSyncObjects;
+  mutable plDeque<plEditorEngineSyncObject*> m_SyncObjects;
 
   mutable plHybridArray<plUuid, 32> m_DeletedObjects;
 };

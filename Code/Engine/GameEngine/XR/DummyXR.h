@@ -13,15 +13,15 @@ struct plGALDeviceEvent;
 struct plGameApplicationExecutionEvent;
 class plWindowOutputTargetXR;
 
-class PLASMA_GAMEENGINE_DLL plDummyXRInput : public plXRInputDevice
+class PL_GAMEENGINE_DLL plDummyXRInput : public plXRInputDevice
 {
 
 public:
-  void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_Devices) const override;
+  void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_devices) const override;
   plXRDeviceID GetDeviceIDByType(plXRDeviceType::Enum type) const override;
-  const plXRDeviceState& GetDeviceState(plXRDeviceID iDeviceID) const override;
-  plString GetDeviceName(plXRDeviceID iDeviceID) const override;
-  plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID iDeviceID) const override;
+  const plXRDeviceState& GetDeviceState(plXRDeviceID deviceID) const override;
+  plString GetDeviceName(plXRDeviceID deviceID) const override;
+  plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID deviceID) const override;
 
 protected:
   void InitializeDevice() override;
@@ -34,13 +34,13 @@ protected:
   plXRDeviceState m_DeviceState[1];
 };
 
-class PLASMA_GAMEENGINE_DLL plDummyXR : public plXRInterface
+class PL_GAMEENGINE_DLL plDummyXR : public plXRInterface
 {
-  PLASMA_DECLARE_SINGLETON_OF_INTERFACE(plDummyXR, plXRInterface);
+  PL_DECLARE_SINGLETON_OF_INTERFACE(plDummyXR, plXRInterface);
 
 public:
   plDummyXR();
-  ~plDummyXR();
+  ~plDummyXR() = default;
 
   bool IsHmdPresent() const override;
   plResult Initialize() override;
@@ -49,7 +49,7 @@ public:
   const plHMDInfo& GetHmdInfo() const override;
   plXRInputDevice& GetXRInput() const override;
   bool SupportsCompanionView() override;
-  plUniquePtr<plActor> CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount = plGALMSAASampleCount::None, plUniquePtr<plWindowBase> companionWindow = nullptr, plUniquePtr<plWindowOutputTargetGAL> companionWindowOutput = nullptr) override;
+  plUniquePtr<plActor> CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount = plGALMSAASampleCount::None, plUniquePtr<plWindowBase> pCompanionWindow = nullptr, plUniquePtr<plWindowOutputTargetGAL> pCompanionWindowOutput = nullptr) override;
   plGALTextureHandle GetCurrentTexture() override;
   void OnActorDestroyed() override;
   void GALDeviceEventHandler(const plGALDeviceEvent& e);

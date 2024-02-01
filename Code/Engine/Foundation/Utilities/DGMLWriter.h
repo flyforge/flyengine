@@ -6,7 +6,7 @@
 class plFormatString;
 
 /// \brief This class encapsulates building a DGML compatible graph.
-class PLASMA_FOUNDATION_DLL plDGMLGraph
+class PL_FOUNDATION_DLL plDGMLGraph
 {
 public:
   enum class Direction : plUInt8
@@ -113,7 +113,7 @@ protected:
 };
 
 /// \brief This class encapsulates the output of DGML compatible graphs to files and streams.
-class PLASMA_FOUNDATION_DLL plDGMLGraphWriter
+class PL_FOUNDATION_DLL plDGMLGraphWriter
 {
 public:
   /// \brief Helper method to write the graph to a file.

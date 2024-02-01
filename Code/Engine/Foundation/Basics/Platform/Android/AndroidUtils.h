@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_DISABLED(PL_PLATFORM_ANDROID)
 #  error "android util header should only be included in android builds!"
 #endif
 
@@ -12,7 +12,7 @@ using JNIEnv = _JNIEnv;
 class _jobject;
 using jobject = _jobject*;
 
-class PLASMA_FOUNDATION_DLL plAndroidUtils
+class PL_FOUNDATION_DLL plAndroidUtils
 {
 public:
   static void SetAndroidApp(android_app* app);

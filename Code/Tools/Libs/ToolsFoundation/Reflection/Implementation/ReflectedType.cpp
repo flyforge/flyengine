@@ -7,16 +7,16 @@
 #include <ToolsFoundation/Reflection/ReflectedType.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plAttributeHolder, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plAttributeHolder, plNoBase, 1, plRTTINoAllocator)
 {
   flags.Add(plTypeFlags::Abstract);
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Attributes", GetCount, GetValue, SetValue, Insert, Remove)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_ARRAY_ACCESSOR_PROPERTY("Attributes", GetCount, GetValue, SetValue, Insert, Remove)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plAttributeHolder::plAttributeHolder() = default;
@@ -33,8 +33,8 @@ plAttributeHolder::~plAttributeHolder()
 {
   for (auto pAttr : m_Attributes)
   {
-    if(pAttr)
-     pAttr->GetDynamicRTTI()->GetAllocator()->Deallocate(const_cast<plPropertyAttribute*>(pAttr));
+  if (pAttr)
+    pAttr->GetDynamicRTTI()->GetAllocator()->Deallocate(const_cast<plPropertyAttribute*>(pAttr));
   }
 }
 
@@ -82,19 +82,19 @@ void plAttributeHolder::Remove(plUInt32 uiIndex)
 ////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plReflectedPropertyDescriptor, plAttributeHolder, 2, plRTTIDefaultAllocator<plReflectedPropertyDescriptor>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plReflectedPropertyDescriptor, plAttributeHolder, 2, plRTTIDefaultAllocator<plReflectedPropertyDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Category", plPropertyCategory, m_Category),
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_MEMBER_PROPERTY("Type", m_sType),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
-    PLASMA_MEMBER_PROPERTY("ConstantValue", m_ConstantValue),
+    PL_ENUM_MEMBER_PROPERTY("Category", plPropertyCategory, m_Category),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("Type", m_sType),
+    PL_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
+    PL_MEMBER_PROPERTY("ConstantValue", m_ConstantValue),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 class plReflectedPropertyDescriptorPatch_1_2 : public plGraphPatch
@@ -201,16 +201,16 @@ plReflectedPropertyDescriptor::~plReflectedPropertyDescriptor() = default;
 ////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plFunctionArgumentDescriptor, plNoBase, 1, plRTTIDefaultAllocator<plFunctionArgumentDescriptor>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plFunctionArgumentDescriptor, plNoBase, 1, plRTTIDefaultAllocator<plFunctionArgumentDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Type", m_sType),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
+    PL_MEMBER_PROPERTY("Type", m_sType),
+    PL_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plFunctionArgumentDescriptor::plFunctionArgumentDescriptor() = default;
@@ -227,19 +227,19 @@ plFunctionArgumentDescriptor::plFunctionArgumentDescriptor(plStringView sType, p
 ////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plReflectedFunctionDescriptor, plAttributeHolder, 1, plRTTIDefaultAllocator<plReflectedFunctionDescriptor>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plReflectedFunctionDescriptor, plAttributeHolder, 1, plRTTIDefaultAllocator<plReflectedFunctionDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
-    PLASMA_ENUM_MEMBER_PROPERTY("Type", plFunctionType, m_Type),
-    PLASMA_MEMBER_PROPERTY("ReturnValue", m_ReturnValue),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Arguments", m_Arguments),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_BITFLAGS_MEMBER_PROPERTY("Flags", plPropertyFlags, m_Flags),
+    PL_ENUM_MEMBER_PROPERTY("Type", plFunctionType, m_Type),
+    PL_MEMBER_PROPERTY("ReturnValue", m_ReturnValue),
+    PL_ARRAY_MEMBER_PROPERTY("Arguments", m_Arguments),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plReflectedFunctionDescriptor::plReflectedFunctionDescriptor() = default;
@@ -274,21 +274,21 @@ void plReflectedFunctionDescriptor::operator=(const plReflectedFunctionDescripto
 ////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plReflectedTypeDescriptor, plAttributeHolder, 1, plRTTIDefaultAllocator<plReflectedTypeDescriptor>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plReflectedTypeDescriptor, plAttributeHolder, 1, plRTTIDefaultAllocator<plReflectedTypeDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("TypeName", m_sTypeName),
-    PLASMA_MEMBER_PROPERTY("PluginName", m_sPluginName),
-    PLASMA_MEMBER_PROPERTY("ParentTypeName", m_sParentTypeName),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("Flags", plTypeFlags, m_Flags),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Properties", m_Properties),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Functions", m_Functions),
-    PLASMA_MEMBER_PROPERTY("TypeVersion", m_uiTypeVersion),
+    PL_MEMBER_PROPERTY("TypeName", m_sTypeName),
+    PL_MEMBER_PROPERTY("PluginName", m_sPluginName),
+    PL_MEMBER_PROPERTY("ParentTypeName", m_sParentTypeName),
+    PL_BITFLAGS_MEMBER_PROPERTY("Flags", plTypeFlags, m_Flags),
+    PL_ARRAY_MEMBER_PROPERTY("Properties", m_Properties),
+    PL_ARRAY_MEMBER_PROPERTY("Functions", m_Functions),
+    PL_MEMBER_PROPERTY("TypeVersion", m_uiTypeVersion),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plReflectedTypeDescriptor::~plReflectedTypeDescriptor() = default;

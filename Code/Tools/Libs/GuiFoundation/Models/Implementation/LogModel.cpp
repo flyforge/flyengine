@@ -5,8 +5,8 @@
 #include <QThread>
 
 
-plQtLogModel::plQtLogModel(QObject* parent)
-  : QAbstractItemModel(parent)
+plQtLogModel::plQtLogModel(QObject* pParent)
+  : QAbstractItemModel(pParent)
 {
   m_bIsValid = true;
   m_LogLevel = plLogMsgType::InfoMsg;
@@ -28,7 +28,7 @@ void plQtLogModel::Clear()
     return;
 
   {
-    PLASMA_LOCK(m_NewMessagesMutex);
+    PL_LOCK(m_NewMessagesMutex);
 
     m_uiNumErrors = 0;
     m_uiNumSeriousWarnings = 0;
@@ -44,12 +44,12 @@ void plQtLogModel::Clear()
   Q_EMIT NewErrorsOrWarnings(nullptr, false);
 }
 
-void plQtLogModel::SetLogLevel(plLogMsgType::Enum LogLevel)
+void plQtLogModel::SetLogLevel(plLogMsgType::Enum logLevel)
 {
-  if (m_LogLevel == LogLevel)
+  if (m_LogLevel == logLevel)
     return;
 
-  m_LogLevel = LogLevel;
+  m_LogLevel = logLevel;
   Invalidate();
 }
 
@@ -65,7 +65,7 @@ void plQtLogModel::SetSearchText(const char* szText)
 void plQtLogModel::AddLogMsg(const plLogEntry& msg)
 {
   {
-    PLASMA_LOCK(m_NewMessagesMutex);
+    PL_LOCK(m_NewMessagesMutex);
     m_NewMessages.PushBack(msg);
   }
 
@@ -97,7 +97,7 @@ bool plQtLogModel::IsFiltered(const plLogEntry& lm) const
 // plQtLogModel QAbstractItemModel functions
 ////////////////////////////////////////////////////////////////////////
 
-QVariant plQtLogModel::data(const QModelIndex& index, int role) const
+QVariant plQtLogModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid() || index.column() != 0)
     return QVariant();
@@ -110,12 +110,21 @@ QVariant plQtLogModel::data(const QModelIndex& index, int role) const
 
   const plLogEntry& msg = *m_VisibleMessages[iRow];
 
-  switch (role)
+  switch (iRole)
   {
     case Qt::DisplayRole:
+    {
+      if (msg.m_sMsg.FindSubString("\n") != nullptr)
+      {
+        plStringBuilder sTemp = msg.m_sMsg;
+        sTemp.ReplaceAll("\n", " ");
+        return plMakeQString(sTemp);
+      }
+      return plMakeQString(msg.m_sMsg);
+    }
     case Qt::ToolTipRole:
     {
-      return QString::fromUtf8(msg.m_sMsg.GetData());
+      return plMakeQString(msg.m_sMsg);
     }
     case Qt::ForegroundRole:
     {
@@ -155,17 +164,17 @@ Qt::ItemFlags plQtLogModel::flags(const QModelIndex& index) const
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QVariant plQtLogModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant plQtLogModel::headerData(int iSection, Qt::Orientation orientation, int iRole) const
 {
   return QVariant();
 }
 
-QModelIndex plQtLogModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex plQtLogModel::index(int iRow, int iColumn, const QModelIndex& parent) const
 {
-  if (parent.isValid() || column != 0)
+  if (parent.isValid() || iColumn != 0)
     return QModelIndex();
 
-  return createIndex(row, column, row);
+  return createIndex(iRow, iColumn, iRow);
 }
 
 QModelIndex plQtLogModel::parent(const QModelIndex& index) const
@@ -196,7 +205,7 @@ void plQtLogModel::ProcessNewMessages()
   plStringBuilder sLatestError;
 
   {
-    PLASMA_LOCK(m_NewMessagesMutex);
+    PL_LOCK(m_NewMessagesMutex);
     plStringBuilder s;
     for (const auto& msg : m_NewMessages)
     {
@@ -204,7 +213,7 @@ void plQtLogModel::ProcessNewMessages()
 
       if (msg.m_Type == plLogMsgType::BeginGroup || msg.m_Type == plLogMsgType::EndGroup)
       {
-        s.Printf("%*s<<< %s", msg.m_uiIndentation, "", msg.m_sMsg.GetData());
+        s.SetPrintf("%*s<<< %s", msg.m_uiIndentation, "", msg.m_sMsg.GetData());
 
         if (msg.m_Type == plLogMsgType::EndGroup)
         {
@@ -223,7 +232,7 @@ void plQtLogModel::ProcessNewMessages()
       }
       else
       {
-        s.Printf("%*s%s", 4 * msg.m_uiIndentation, "", msg.m_sMsg.GetData());
+        s.SetPrintf("%*s%s", 4 * msg.m_uiIndentation, "", msg.m_sMsg.GetData());
         m_AllMessages.PeekBack().m_sMsg = s;
 
         if (msg.m_Type == plLogMsgType::ErrorMsg)

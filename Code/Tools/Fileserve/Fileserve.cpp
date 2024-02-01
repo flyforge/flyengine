@@ -5,14 +5,14 @@
 #include <Foundation/IO/FileSystem/FileSystem.h>
 #include <Foundation/Utilities/CommandLineUtils.h>
 
-#ifdef PLASMA_USE_QT
+#ifdef PL_USE_QT
 #  include <Fileserve/Gui.moc.h>
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #  include <QApplication>
 #endif
 
-#ifdef PLASMA_USE_QT
-int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#ifdef PL_USE_QT
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR pCmdLine, int iCmdShow)
 {
 #else
 int main(int argc, const char** argv)
@@ -20,15 +20,15 @@ int main(int argc, const char** argv)
 #endif
   plFileserverApp* pApp = new plFileserverApp();
 
-#ifdef PLASMA_USE_QT
+#ifdef PL_USE_QT
   plCommandLineUtils::GetGlobalInstance()->SetCommandLine();
 
   int argc = 0;
   char** argv = nullptr;
   QApplication* pQtApplication = new QApplication(argc, const_cast<char**>(argv));
   pQtApplication->setApplicationName("plFileserve");
-  pQtApplication->setOrganizationDomain("www.PlasmaEngine.net");
-  pQtApplication->setOrganizationName("PlasmaEngine Project");
+  pQtApplication->setOrganizationDomain("www.plEngine.net");
+  pQtApplication->setOrganizationName("plEngine Project");
   pQtApplication->setApplicationVersion("1.0.0");
 
   plRun_Startup(pApp).IgnoreResult();
@@ -50,7 +50,12 @@ int main(int argc, const char** argv)
       printf("Return Code: '%s'\n", text.c_str());
   }
 
+#ifdef PL_USE_QT
+  delete pQtApplication;
+#endif
+
   delete pApp;
+
 
   return iReturnCode;
 }
@@ -70,7 +75,7 @@ void plFileserverApp::FileserverEventHandler(const plFileserverEvent& e)
     case plFileserverEvent::Type::ClientConnected:
     case plFileserverEvent::Type::ClientReconnected:
       ++m_uiConnections;
-      m_TimeTillClosing.SetZero();
+      m_TimeTillClosing = plTime::MakeZero();
       break;
     case plFileserverEvent::Type::ClientDisconnected:
       --m_uiConnections;

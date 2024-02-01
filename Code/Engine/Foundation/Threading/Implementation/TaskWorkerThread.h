@@ -8,7 +8,7 @@
 /// \internal Internal task worker thread class.
 class plTaskWorkerThread final : public plThread
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plTaskWorkerThread);
+  PL_DISALLOW_COPY_AND_ASSIGN(plTaskWorkerThread);
 
   /// \name Execution
   ///@{
@@ -57,7 +57,7 @@ private:
   ///@{
 
 public:
-  /// \brief If the thread is currently idle, this will wake it up and return PLASMA_SUCCESS.
+  /// \brief If the thread is currently idle, this will wake it up and return PL_SUCCESS.
   plTaskWorkerState WakeUpIfIdle();
 
 private:

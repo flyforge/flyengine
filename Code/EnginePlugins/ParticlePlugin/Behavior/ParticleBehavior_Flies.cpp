@@ -10,21 +10,21 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Flies, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Flies>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Flies, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Flies>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("FlySpeed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1000.0f)),
-    PLASMA_MEMBER_PROPERTY("PathLength", m_fPathLength)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxEmitterDistance", m_fMaxEmitterDistance)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxSteeringAngle", m_MaxSteeringAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(1.0f), plAngle::Degree(180.0f))),
+    PL_MEMBER_PROPERTY("FlySpeed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1000.0f)),
+    PL_MEMBER_PROPERTY("PathLength", m_fPathLength)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 100.0f)),
+    PL_MEMBER_PROPERTY("MaxEmitterDistance", m_fMaxEmitterDistance)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 100.0f)),
+    PL_MEMBER_PROPERTY("MaxSteeringAngle", m_MaxSteeringAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(1.0f), plAngle::MakeFromDegree(180.0f))),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Flies, 1, plRTTIDefaultAllocator<plParticleBehavior_Flies>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Flies, 1, plRTTIDefaultAllocator<plParticleBehavior_Flies>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleBehaviorFactory_Flies::plParticleBehaviorFactory_Flies() = default;
@@ -45,9 +45,9 @@ void plParticleBehaviorFactory_Flies::CopyBehaviorProperties(plParticleBehavior*
   pBehavior->m_MaxSteeringAngle = m_MaxSteeringAngle;
 }
 
-void plParticleBehaviorFactory_Flies::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleBehaviorFactory_Flies::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
 }
 
 enum class BehaviorFliesVersion
@@ -60,28 +60,28 @@ enum class BehaviorFliesVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleBehaviorFactory_Flies::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_Flies::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)BehaviorFliesVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fSpeed;
-  stream << m_fPathLength;
-  stream << m_fMaxEmitterDistance;
-  stream << m_MaxSteeringAngle;
+  inout_stream << m_fSpeed;
+  inout_stream << m_fPathLength;
+  inout_stream << m_fMaxEmitterDistance;
+  inout_stream << m_MaxSteeringAngle;
 }
 
-void plParticleBehaviorFactory_Flies::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_Flies::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)BehaviorFliesVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)BehaviorFliesVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_fSpeed;
-  stream >> m_fPathLength;
-  stream >> m_fMaxEmitterDistance;
-  stream >> m_MaxSteeringAngle;
+  inout_stream >> m_fSpeed;
+  inout_stream >> m_fPathLength;
+  inout_stream >> m_fMaxEmitterDistance;
+  inout_stream >> m_MaxSteeringAngle;
 }
 
 void plParticleBehavior_Flies::CreateRequiredStreams()
@@ -89,12 +89,12 @@ void plParticleBehavior_Flies::CreateRequiredStreams()
   CreateStream("Position", plProcessingStream::DataType::Float4, &m_pStreamPosition, false);
   CreateStream("Velocity", plProcessingStream::DataType::Float3, &m_pStreamVelocity, false);
 
-  m_TimeToChangeDir.SetZero();
+  m_TimeToChangeDir = plTime::MakeZero();
 }
 
 void plParticleBehavior_Flies::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Flies");
+  PL_PROFILE_SCOPE("PFX: Flies");
 
   const plTime tCur = GetOwnerEffect()->GetTotalEffectLifeTime();
   const bool bChangeDirection = tCur >= m_TimeToChangeDir;
@@ -102,7 +102,7 @@ void plParticleBehavior_Flies::Process(plUInt64 uiNumElements)
   if (!bChangeDirection)
     return;
 
-  m_TimeToChangeDir = tCur + plTime::Seconds(m_fPathLength / m_fSpeed);
+  m_TimeToChangeDir = tCur + plTime::MakeFromSeconds(m_fPathLength / m_fSpeed);
 
   const plVec3 vEmitterPos = GetOwnerSystem()->GetTransform().m_vPosition;
   const float fMaxDistanceToEmitterSquared = plMath::Square(m_fMaxEmitterDistance);
@@ -128,16 +128,20 @@ void plParticleBehavior_Flies::Process(plUInt64 uiNumElements)
       vPivot = vDir.CrossRH(vPartToEm);
       vPivot.NormalizeIfNotZero().IgnoreResult();
 
-      qRot.SetFromAxisAndAngle(vPivot, m_MaxSteeringAngle);
+      qRot = plQuat::MakeFromAxisAndAngle(vPivot, m_MaxSteeringAngle);
 
       itVelocity.Current() = qRot * vVelocity;
     }
     else
     {
-      itVelocity.Current() = plVec3::CreateRandomDeviation(GetRNG(), m_MaxSteeringAngle, vDir) * m_fSpeed;
+      itVelocity.Current() = plVec3::MakeRandomDeviation(GetRNG(), m_MaxSteeringAngle, vDir) * m_fSpeed;
     }
 
     itPosition.Advance();
     itVelocity.Advance();
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Flies);
+

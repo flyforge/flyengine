@@ -14,7 +14,7 @@ target_link_libraries(${PROJECT_NAME}
   GameEngine
 )
 
-if (PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
+if (PL_CMAKE_PLATFORM_WINDOWS_UWP)
   # Due to app sandboxing we need to explicitly name required plugins for UWP.
   target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -23,15 +23,15 @@ if (PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
     TypeScriptPlugin
   )
 
-  if (PLASMA_BUILD_PHYSX)
+  if (PL_BUILD_PHYSX)
     target_link_libraries(${PROJECT_NAME} PUBLIC PhysXPlugin)
   endif()
 
-  if (PLASMA_BUILD_FMOD)
+  if (PL_BUILD_FMOD)
     target_link_libraries(${PROJECT_NAME} PUBLIC FmodPlugin)
   endif()
 
-  if (PLASMA_BUILD_OPENXR)
+  if (PL_BUILD_OPENXR)
     find_package(plOpenXR REQUIRED)
     target_link_libraries(${PROJECT_NAME} PUBLIC OpenXRPlugin)
   endif()

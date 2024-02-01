@@ -5,10 +5,10 @@
 class plSimdVec4u;
 
 /// \brief A SIMD 4-component vector class of signed 32b integers
-class PLASMA_FOUNDATION_DLL plSimdVec4i
+class PL_FOUNDATION_DLL plSimdVec4i
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plSimdVec4i(); // [tested]
 
@@ -17,6 +17,9 @@ public:
   plSimdVec4i(plInt32 x, plInt32 y, plInt32 z, plInt32 w = 1); // [tested]
 
   plSimdVec4i(plInternal::QuadInt v); // [tested]
+
+  /// \brief Creates an plSimdVec4i that is initialized to zero.
+  [[nodiscard]] static plSimdVec4i MakeZero(); // [tested]
 
   void Set(plInt32 iXyzw); // [tested]
 
@@ -36,7 +39,7 @@ public:
 public:
   plSimdVec4f ToFloat() const; // [tested]
 
-  static plSimdVec4i Truncate(const plSimdVec4f& f); // [tested]
+  [[nodiscard]] static plSimdVec4i Truncate(const plSimdVec4f& f); // [tested]
 
 public:
   template <int N>
@@ -51,22 +54,22 @@ public:
   plSimdVec4i Get() const; // [tested]
 
 public:
-  plSimdVec4i operator-() const;                     // [tested]
-  plSimdVec4i operator+(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i operator-(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator-() const;                     // [tested]
+  [[nodiscard]] plSimdVec4i operator+(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator-(const plSimdVec4i& v) const; // [tested]
 
-  plSimdVec4i CompMul(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i CompDiv(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i CompMul(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i CompDiv(const plSimdVec4i& v) const; // [tested]
 
-  plSimdVec4i operator|(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i operator&(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i operator^(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i operator~() const;                     // [tested]
+  [[nodiscard]] plSimdVec4i operator|(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator&(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator^(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator~() const;                     // [tested]
 
-  plSimdVec4i operator<<(plUInt32 uiShift) const; // [tested]
-  plSimdVec4i operator>>(plUInt32 uiShift) const; // [tested]
-  plSimdVec4i operator<<(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i operator>>(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator<<(plUInt32 uiShift) const;     // [tested]
+  [[nodiscard]] plSimdVec4i operator>>(plUInt32 uiShift) const;     // [tested]
+  [[nodiscard]] plSimdVec4i operator<<(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i operator>>(const plSimdVec4i& v) const; // [tested]
 
   plSimdVec4i& operator+=(const plSimdVec4i& v); // [tested]
   plSimdVec4i& operator-=(const plSimdVec4i& v); // [tested]
@@ -78,30 +81,28 @@ public:
   plSimdVec4i& operator<<=(plUInt32 uiShift); // [tested]
   plSimdVec4i& operator>>=(plUInt32 uiShift); // [tested]
 
-  plSimdVec4i CompMin(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i CompMax(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4i Abs() const;                         // [tested]
+  [[nodiscard]] plSimdVec4i CompMin(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i CompMax(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4i Abs() const;                         // [tested]
 
-  plSimdVec4b operator==(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4b operator!=(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4b operator<=(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4b operator<(const plSimdVec4i& v) const;  // [tested]
-  plSimdVec4b operator>=(const plSimdVec4i& v) const; // [tested]
-  plSimdVec4b operator>(const plSimdVec4i& v) const;  // [tested]
+  [[nodiscard]] plSimdVec4b operator==(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4b operator!=(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4b operator<=(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4b operator<(const plSimdVec4i& v) const;  // [tested]
+  [[nodiscard]] plSimdVec4b operator>=(const plSimdVec4i& v) const; // [tested]
+  [[nodiscard]] plSimdVec4b operator>(const plSimdVec4i& v) const;  // [tested]
 
-  static plSimdVec4i ZeroVector(); // [tested]
-
-  static plSimdVec4i Select(const plSimdVec4b& vCmp, const plSimdVec4i& vTrue, const plSimdVec4i& vFalse); // [tested]
+  [[nodiscard]] static plSimdVec4i Select(const plSimdVec4b& vCmp, const plSimdVec4i& vTrue, const plSimdVec4i& vFalse); // [tested]
 
 public:
   plInternal::QuadInt m_v;
 };
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
 #  include <Foundation/SimdMath/Implementation/SSE/SSEVec4i_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_FPU
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_FPU
 #  include <Foundation/SimdMath/Implementation/FPU/FPUVec4i_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_NEON
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_NEON
 #  include <Foundation/SimdMath/Implementation/NEON/NEONVec4i_inl.h>
 #else
 #  error "Unknown SIMD implementation."

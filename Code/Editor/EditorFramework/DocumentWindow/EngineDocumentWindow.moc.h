@@ -11,13 +11,13 @@ class QHBoxLayout;
 class QPushButton;
 class plQtEngineViewWidget;
 class plAssetDocument;
-class PlasmaEditorEngineDocumentMsg;
+class plEditorEngineDocumentMsg;
 struct plObjectPickingResult;
-struct PlasmaEngineViewConfig;
+struct plEngineViewConfig;
 struct plCommonAssetUiState;
 
 
-struct PLASMA_EDITORFRAMEWORK_DLL PlasmaEngineWindowEvent
+struct PL_EDITORFRAMEWORK_DLL plEngineWindowEvent
 {
   enum class Type
   {
@@ -31,9 +31,9 @@ struct PLASMA_EDITORFRAMEWORK_DLL PlasmaEngineWindowEvent
 
 /// \brief Base class for all document windows that need a connection to the engine process, and might want to render 3D content.
 ///
-/// This class has an PlasmaEditorEngineConnection object for sending messages between the editor and the engine process.
+/// This class has an plEditorEngineConnection object for sending messages between the editor and the engine process.
 /// It also allows to embed plQtEngineViewWidget objects into the UI, which enable 3D rendering by the engine process.
-class PLASMA_EDITORFRAMEWORK_DLL plQtEngineDocumentWindow : public plQtDocumentWindow
+class PL_EDITORFRAMEWORK_DLL plQtEngineDocumentWindow : public plQtDocumentWindow
 {
   Q_OBJECT
 
@@ -41,7 +41,7 @@ public:
   plQtEngineDocumentWindow(plAssetDocument* pDocument);
   virtual ~plQtEngineDocumentWindow();
 
-  PlasmaEditorEngineConnection* GetEditorEngineConnection() const;
+  plEditorEngineConnection* GetEditorEngineConnection() const;
   const plObjectPickingResult& PickObject(plUInt16 uiScreenPosX, plUInt16 uiScreenPosY, plQtEngineViewWidget* pView) const;
 
   plAssetDocument* GetDocument() const;
@@ -59,7 +59,7 @@ public:
   void AddViewWidget(plQtEngineViewWidget* pView);
 
 public:
-  mutable plEvent<const PlasmaEngineWindowEvent&> m_EngineWindowEvent;
+  mutable plEvent<const plEngineWindowEvent&> m_EngineWindowEvent;
 
 protected:
   friend class plQtEngineViewWidget;
@@ -67,9 +67,8 @@ protected:
 
   virtual void CommonAssetUiEventHandler(const plCommonAssetUiState& e);
 
-  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg);
+  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg);
   void RemoveViewWidget(plQtEngineViewWidget* pView);
   void DestroyAllViews();
   virtual void InternalRedraw() override;
 };
-

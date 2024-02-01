@@ -8,7 +8,7 @@
 #include <Texture/Image/Image.h>
 #include <Texture/plTexFormat/plTexFormat.h>
 
-class PLASMA_RENDERERCORE_DLL plTextureResourceLoader : public plResourceTypeLoader
+class PL_RENDERERCORE_DLL plTextureResourceLoader : public plResourceTypeLoader
 {
 public:
   struct LoadedData

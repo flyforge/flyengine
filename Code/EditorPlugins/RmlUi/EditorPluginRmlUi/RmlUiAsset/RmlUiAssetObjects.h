@@ -4,7 +4,7 @@
 
 class plRmlUiAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plRmlUiAssetProperties, plReflectedClass);
 
 public:
   plRmlUiAssetProperties();

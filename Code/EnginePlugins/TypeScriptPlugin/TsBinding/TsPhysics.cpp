@@ -33,36 +33,36 @@ plResult plTypeScriptBinding::Init_Physics()
   m_Duk.RegisterGlobalFunction("__CPP_Physics_GetGravity", __CPP_Physics_GetGravity, 0);
   m_Duk.RegisterGlobalFunction("__CPP_Physics_QueryShapesInSphere", __CPP_Physics_QueryShapesInSphere, 6);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-static void PutHitResult(plDuktapeHelper& duk, const plPhysicsCastResult& res)
+static void PutHitResult(plDuktapeHelper& ref_duk, const plPhysicsCastResult& res)
 {
-  plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
+  plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(ref_duk);
 
-  duk.PushGlobalObject();                                       // [ global ]
-  duk.PushLocalObject("__Physics").IgnoreResult();              // [ global __Physics ]
-  duk.PushLocalObject("Physics").IgnoreResult();                // [ global __Physics Physics ]
-  duk_get_prop_string(duk, -1, "HitResult");                    // [ global __Physics Physics HitResult ]
-  duk_new(duk, 0);                                              // [ global __Physics Physics HitResultObj ]
-  duk_remove(duk, -2);                                          // [ global __Physics HitResultObj ]
-  duk_remove(duk, -2);                                          // [ global HitResultObj ]
-  duk_remove(duk, -2);                                          // [ HitResultObj ]
+  ref_duk.PushGlobalObject();                                   // [ global ]
+  ref_duk.PushLocalObject("__Physics").IgnoreResult();          // [ global __Physics ]
+  ref_duk.PushLocalObject("Physics").IgnoreResult();            // [ global __Physics Physics ]
+  duk_get_prop_string(ref_duk, -1, "HitResult");                // [ global __Physics Physics HitResult ]
+  duk_new(ref_duk, 0);                                          // [ global __Physics Physics HitResultObj ]
+  duk_remove(ref_duk, -2);                                      // [ global __Physics HitResultObj ]
+  duk_remove(ref_duk, -2);                                      // [ global HitResultObj ]
+  duk_remove(ref_duk, -2);                                      // [ HitResultObj ]
   ;                                                             //
-  duk.SetNumberProperty("distance", res.m_fDistance, -1);       // [ HitResultObj ]
-  duk.SetNumberProperty("shapeId", res.m_uiObjectFilterID, -1); // [ HitResultObj ]
+  ref_duk.SetNumberProperty("distance", res.m_fDistance, -1);   // [ HitResultObj ]
+  ref_duk.SetNumberProperty("shapeId", res.m_uiObjectFilterID, -1); // [ HitResultObj ]
   ;                                                             //
-  plTypeScriptBinding::PushVec3(duk, res.m_vPosition);          // [ HitResultObj pos ]
-  duk.SetCustomProperty("position", -1);                        // [ HitResultObj ]
+  plTypeScriptBinding::PushVec3(ref_duk, res.m_vPosition);      // [ HitResultObj pos ]
+  ref_duk.SetCustomProperty("position", -1);                    // [ HitResultObj ]
   ;                                                             //
-  plTypeScriptBinding::PushVec3(duk, res.m_vNormal);            // [ HitResultObj normal ]
-  duk.SetCustomProperty("normal", -1);                          // [ HitResultObj ]
+  plTypeScriptBinding::PushVec3(ref_duk, res.m_vNormal);        // [ HitResultObj normal ]
+  ref_duk.SetCustomProperty("normal", -1);                      // [ HitResultObj ]
   ;                                                             //
   pBinding->DukPutGameObject(res.m_hShapeObject);               // [ HitResultObj GO ]
-  duk.SetCustomProperty("shapeObject", -1);                     // [ HitResultObj ]
+  ref_duk.SetCustomProperty("shapeObject", -1);                 // [ HitResultObj ]
   ;                                                             //
   pBinding->DukPutGameObject(res.m_hActorObject);               // [ HitResultObj GO ]
-  duk.SetCustomProperty("actorObject", -1);                     // [ HitResultObj ]
+  ref_duk.SetCustomProperty("actorObject", -1);                 // [ HitResultObj ]
 }
 
 static int __CPP_Physics_Raycast(duk_context* pDuk)
@@ -79,7 +79,7 @@ static int __CPP_Physics_Raycast(duk_context* pDuk)
   const plPhysicsShapeType::Enum shapeTypes = static_cast<plPhysicsShapeType::Enum>(duk.GetUIntValue(4));
   const plUInt32 uiIgnoreShapeID = duk.GetIntValue(5);
 
-  if (vDir.NormalizeIfNotZero(plVec3::UnitXAxis()).Failed())
+  if (vDir.NormalizeIfNotZero(plVec3::MakeAxisX()).Failed())
   {
     plLog::Warning("TS: pl.Physics.Raycast() called with degenerate ray direction.");
     return duk.ReturnNull();
@@ -96,7 +96,7 @@ static int __CPP_Physics_Raycast(duk_context* pDuk)
 
   PutHitResult(duk, res);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Physics_SweepTestSphere(duk_context* pDuk)
@@ -124,7 +124,7 @@ static int __CPP_Physics_SweepTestSphere(duk_context* pDuk)
 
   PutHitResult(duk, res);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Physics_SweepTestBox(duk_context* pDuk)
@@ -152,7 +152,7 @@ static int __CPP_Physics_SweepTestBox(duk_context* pDuk)
 
   PutHitResult(duk, res);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Physics_SweepTestCapsule(duk_context* pDuk)
@@ -181,7 +181,7 @@ static int __CPP_Physics_SweepTestCapsule(duk_context* pDuk)
 
   PutHitResult(duk, res);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Physics_OverlapTestSphere(duk_context* pDuk)
@@ -272,5 +272,5 @@ int __CPP_Physics_QueryShapesInSphere(duk_context* pDuk)
     duk_pop(pDuk); // [ ]
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }

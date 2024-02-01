@@ -6,8 +6,8 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plComponentDragDropHandler, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plComponentDragDropHandler, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 void plComponentDragDropHandler::CreateDropObject(const plVec3& vPosition, const char* szType, const char* szProperty, const plVariant& value, plUuid parent, plInt32 iInsertChildIndex)
 {
@@ -16,8 +16,7 @@ void plComponentDragDropHandler::CreateDropObject(const plVec3& vPosition, const
   if (vPos.IsNaN())
     vPos.SetZero();
 
-  plUuid ObjectGuid;
-  ObjectGuid.CreateNewUuid();
+  plUuid ObjectGuid = plUuid::MakeUuid();
 
   plAddObjectCommand cmd;
   cmd.m_Parent = parent;
@@ -28,14 +27,14 @@ void plComponentDragDropHandler::CreateDropObject(const plVec3& vPosition, const
 
   auto history = m_pDocument->GetCommandHistory();
 
-  PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+  PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
   plSetObjectPropertyCommand cmd2;
   cmd2.m_Object = ObjectGuid;
 
   cmd2.m_sProperty = "LocalPosition";
   cmd2.m_NewValue = vPos;
-  PLASMA_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
+  PL_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
 
   AttachComponentToObject(szType, szProperty, value, ObjectGuid);
 
@@ -46,8 +45,7 @@ void plComponentDragDropHandler::AttachComponentToObject(const char* szType, con
 {
   auto history = m_pDocument->GetCommandHistory();
 
-  plUuid CmpGuid;
-  CmpGuid.CreateNewUuid();
+  plUuid CmpGuid = plUuid::MakeUuid();
 
   plAddObjectCommand cmd;
 
@@ -56,7 +54,7 @@ void plComponentDragDropHandler::AttachComponentToObject(const char* szType, con
   cmd.m_Index = -1;
   cmd.m_NewObjectGuid = CmpGuid;
   cmd.m_Parent = ObjectGuid;
-  PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+  PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
   if (value.IsA<plVariantArray>())
   {
@@ -65,7 +63,7 @@ void plComponentDragDropHandler::AttachComponentToObject(const char* szType, con
     cmd2.m_sProperty = szProperty;
     cmd2.m_NewValue = value.Get<plVariantArray>()[0];
     cmd2.m_Index = 0;
-    PLASMA_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
   }
   else
   {
@@ -73,7 +71,7 @@ void plComponentDragDropHandler::AttachComponentToObject(const char* szType, con
     cmd2.m_Object = CmpGuid;
     cmd2.m_sProperty = szProperty;
     cmd2.m_NewValue = value;
-    PLASMA_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
   }
 }
 
@@ -86,13 +84,13 @@ void plComponentDragDropHandler::MoveObjectToPosition(const plUuid& guid, const 
 
   cmd2.m_sProperty = "LocalPosition";
   cmd2.m_NewValue = vPosition;
-  history->AddCommand(cmd2).IgnoreResult();
+  history->AddCommand(cmd2).AssertSuccess();
 
   if (qRotation.IsValid())
   {
     cmd2.m_sProperty = "LocalRotation";
     cmd2.m_NewValue = qRotation;
-    history->AddCommand(cmd2).IgnoreResult();
+    history->AddCommand(cmd2).AssertSuccess();
   }
 }
 
@@ -115,7 +113,7 @@ void plComponentDragDropHandler::MoveDraggedObjectsToPosition(plVec3 vPosition, 
 
   if (normal.IsValid() && !m_vAlignAxisWithNormal.IsZero(0.01f))
   {
-    rot.SetShortestRotation(m_vAlignAxisWithNormal, normal);
+    rot = plQuat::MakeShortestRotation(m_vAlignAxisWithNormal, normal);
   }
 
   for (const auto& guid : m_DraggedObjects)
@@ -160,7 +158,7 @@ void plComponentDragDropHandler::CancelTemporaryCommands()
 void plComponentDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo)
 {
   m_pDocument = plDocumentManager::GetDocumentByGuid(pInfo->m_TargetDocument);
-  PLASMA_ASSERT_DEV(m_pDocument != nullptr, "Invalid document GUID in drag & drop operation");
+  PL_ASSERT_DEV(m_pDocument != nullptr, "Invalid document GUID in drag & drop operation");
 
   m_pDocument->GetCommandHistory()->StartTransaction("Drag Object");
 }

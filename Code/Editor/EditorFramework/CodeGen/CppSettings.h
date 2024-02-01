@@ -3,7 +3,7 @@
 #include <EditorFramework/EditorFrameworkDLL.h>
 #include <Foundation/Strings/String.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plCppSettings
+class PL_EDITORFRAMEWORK_DLL plCppSettings
 {
 public:
   plResult Save(plStringView sFile = ":project/Editor/CppProject.ddl");

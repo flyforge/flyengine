@@ -7,6 +7,7 @@
 #include <EditorFramework/PropertyGrid/AssetBrowserPropertyWidget.moc.h>
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 #include <ToolsFoundation/Assets/AssetFileExtensionWhitelist.h>
+#include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
 plQtAssetPropertyWidget::plQtAssetPropertyWidget()
   : plQtStandardPropertyWidget()
@@ -24,8 +25,8 @@ plQtAssetPropertyWidget::plQtAssetPropertyWidget()
   m_pWidget->m_pOwner = this;
   setFocusProxy(m_pWidget);
 
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(editingFinished()), this, SLOT(on_TextFinished_triggered())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(textChanged(const QString&)), this, SLOT(on_TextChanged_triggered(const QString&))) != nullptr,
+  PL_VERIFY(connect(m_pWidget, SIGNAL(editingFinished()), this, SLOT(on_TextFinished_triggered())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pWidget, SIGNAL(textChanged(const QString&)), this, SLOT(on_TextChanged_triggered(const QString&))) != nullptr,
     "signal/slot connection failed");
 
   m_pButton = new QToolButton(this);
@@ -42,8 +43,8 @@ plQtAssetPropertyWidget::plQtAssetPropertyWidget()
   m_pLayout->addWidget(m_pWidget);
   m_pLayout->addWidget(m_pButton);
 
-  PLASMA_VERIFY(connect(plQtImageCache::GetSingleton(), &plQtImageCache::ImageLoaded, this, &plQtAssetPropertyWidget::ThumbnailLoaded) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(
+  PL_VERIFY(connect(plQtImageCache::GetSingleton(), &plQtImageCache::ImageLoaded, this, &plQtAssetPropertyWidget::ThumbnailLoaded) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(
     connect(plQtImageCache::GetSingleton(), &plQtImageCache::ImageInvalidated, this, &plQtAssetPropertyWidget::ThumbnailInvalidated) != nullptr, "signal/slot connection failed");
 }
 
@@ -100,7 +101,7 @@ bool plQtAssetPropertyWidget::IsValidAssetType(const char* szAssetReference) con
 
 void plQtAssetPropertyWidget::OnInit()
 {
-  PLASMA_ASSERT_DEV(m_pProp->GetAttributeByType<plAssetBrowserAttribute>() != nullptr, "plQtAssetPropertyWidget was created without a plAssetBrowserAttribute!");
+  PL_ASSERT_DEV(m_pProp->GetAttributeByType<plAssetBrowserAttribute>() != nullptr, "plQtAssetPropertyWidget was created without a plAssetBrowserAttribute!");
 }
 
 void plQtAssetPropertyWidget::UpdateThumbnail(const plUuid& guid, const char* szThumbnailPath)
@@ -156,9 +157,8 @@ void plQtAssetPropertyWidget::InternalSetValue(const plVariant& value)
       {
         m_uiThumbnailID = 0;
 
-        m_pWidget->setText(QString());
-        m_pWidget->setPlaceholderText(QStringLiteral("<Selected Invalid Asset Type>"));
-
+        m_pWidget->setText(plMakeQString(sText));
+        
         m_pButton->setIcon(QIcon());
         m_pButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextOnly);
 
@@ -168,18 +168,39 @@ void plQtAssetPropertyWidget::InternalSetValue(const plVariant& value)
         return;
       }
 
-      m_AssetGuid = plConversionUtils::ConvertStringToUuid(sText);
+      plUuid newAssetGuid = plConversionUtils::ConvertStringToUuid(sText);
 
+      // If this is a thumbnail or transform dependency, make sure the target is not in our inverse hull, i.e. we don't create a circular dependency.
+      const plAssetBrowserAttribute* pAssetAttribute = m_pProp->GetAttributeByType<plAssetBrowserAttribute>();
+      if (pAssetAttribute->GetDependencyFlags().IsAnySet(plDependencyFlags::Thumbnail | plDependencyFlags::Transform))
+      {
+        plUuid documentGuid = m_pObjectAccessor->GetObjectManager()->GetDocument()->GetGuid();
+        plAssetCurator::plLockedSubAsset asset = plAssetCurator::GetSingleton()->GetSubAsset(documentGuid);
+        if (asset.isValid())
+        {
+          plSet<plUuid> inverseHull;
+          plAssetCurator::GetSingleton()->GenerateInverseTransitiveHull(asset->m_pAssetInfo, inverseHull, true, true);
+          if (inverseHull.Contains(newAssetGuid))
+          {
+            plQtUiServices::GetSingleton()->MessageBoxWarning("This asset can't be used here, as that would create a circular dependency.");
+            return;
+          }
+        }
+      }
+
+      m_AssetGuid = newAssetGuid;
       auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid);
 
       if (pAsset)
       {
         pAsset->GetSubAssetIdentifier(sText);
 
-        sThumbnailPath = pAsset->m_pAssetInfo->GetManager()->GenerateResourceThumbnailPath(pAsset->m_pAssetInfo->m_sAbsolutePath, pAsset->m_Data.m_sName);
+        sThumbnailPath = pAsset->m_pAssetInfo->GetManager()->GenerateResourceThumbnailPath(pAsset->m_pAssetInfo->m_Path, pAsset->m_Data.m_sName);
       }
       else
+      {
         m_AssetGuid = plUuid();
+      }
     }
 
     UpdateThumbnail(m_AssetGuid, sThumbnailPath);
@@ -267,7 +288,7 @@ void plQtAssetPropertyWidget::ThumbnailInvalidated(QString sPath, plUInt32 uiIma
 void plQtAssetPropertyWidget::OnOpenAssetDocument()
 {
   plQtEditorApp::GetSingleton()->OpenDocumentQueued(
-    plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath, GetSelection()[0].m_pObject);
+    plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath(), GetSelection()[0].m_pObject);
 }
 
 void plQtAssetPropertyWidget::OnSelectInAssetBrowser()
@@ -282,7 +303,7 @@ void plQtAssetPropertyWidget::OnOpenExplorer()
 
   if (m_AssetGuid.IsValid())
   {
-    sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath;
+    sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath();
   }
   else
   {
@@ -314,7 +335,7 @@ void plQtAssetPropertyWidget::OnCopyAssetGuid()
   mimeData->setText(QString::fromUtf8(sGuid.GetData()));
   clipboard->setMimeData(mimeData);
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::Seconds(5));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::MakeFromSeconds(5));
 }
 
 void plQtAssetPropertyWidget::OnCreateNewAsset()
@@ -325,7 +346,7 @@ void plQtAssetPropertyWidget::OnCreateNewAsset()
   {
     if (m_AssetGuid.IsValid())
     {
-      sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_sAbsolutePath;
+      sPath = plAssetCurator::GetSingleton()->GetSubAsset(m_AssetGuid)->m_pAssetInfo->m_Path.GetAbsolutePath();
     }
     else
     {

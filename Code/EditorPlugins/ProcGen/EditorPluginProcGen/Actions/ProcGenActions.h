@@ -6,7 +6,7 @@
 
 class plPreferences;
 
-class PLASMA_EDITORPLUGINPROCGEN_DLL plProcGenActions
+class PL_EDITORPLUGINPROCGEN_DLL plProcGenActions
 {
 public:
   static void RegisterActions();
@@ -19,9 +19,9 @@ public:
   static plActionDescriptorHandle s_hDumpDisassembly;
 };
 
-class PLASMA_EDITORPLUGINPROCGEN_DLL plProcGenAction : public plButtonAction
+class PL_EDITORPLUGINPROCGEN_DLL plProcGenAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGenAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGenAction, plButtonAction);
 
 public:
   enum class ActionType

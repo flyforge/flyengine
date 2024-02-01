@@ -5,7 +5,7 @@
 #include <RendererFoundation/Resources/ResourceFormats.h>
 #include <Texture/Image/Image.h>
 
-struct PLASMA_RENDERERCORE_DLL plTextureUtils
+struct PL_RENDERERCORE_DLL plTextureUtils
 {
   static plGALResourceFormat::Enum ImageFormatToGalFormat(plImageFormat::Enum format, bool bSRGB);
   static plImageFormat::Enum GalFormatToImageFormat(plGALResourceFormat::Enum format, bool bRemoveSRGB);

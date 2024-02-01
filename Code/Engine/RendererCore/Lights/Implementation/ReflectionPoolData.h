@@ -13,9 +13,9 @@ class plSkyLightComponent;
 class plSphereReflectionProbeComponent;
 class plBoxReflectionProbeComponent;
 
-static const plUInt32 s_uiReflectionCubeMapSize = 128;
-static const plUInt32 s_uiNumReflectionProbeCubeMaps = 32;
-static const float s_fDebugSphereRadius = 0.3f;
+static constexpr plUInt32 s_uiReflectionCubeMapSize = 128;
+static constexpr plUInt32 s_uiNumReflectionProbeCubeMaps = 32;
+static constexpr float s_fDebugSphereRadius = 0.3f;
 
 inline plUInt32 GetMipLevels()
 {
@@ -44,7 +44,7 @@ struct plReflectionPool::Data
       : m_mapping(s_uiNumReflectionProbeCubeMaps)
     {
     }
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(WorldReflectionData);
+    PL_DISALLOW_COPY_AND_ASSIGN(WorldReflectionData);
 
     plIdTable<plReflectionProbeId, ProbeData> m_Probes;
     plReflectionProbeId m_SkyLight; // SkyLight is always fixed at reflectionIndex 0.

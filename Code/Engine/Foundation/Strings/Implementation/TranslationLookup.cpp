@@ -25,7 +25,7 @@ void plTranslator::Reload() {}
 
 void plTranslator::ReloadAllTranslators()
 {
-  PLASMA_LOG_BLOCK("ReloadAllTranslators");
+  PL_LOG_BLOCK("ReloadAllTranslators");
 
   for (plTranslator* pTranslator : s_AllTranslators)
   {
@@ -53,17 +53,20 @@ void plTranslationLookup::AddTranslator(plUniquePtr<plTranslator> pTranslator)
 }
 
 
-const char* plTranslationLookup::Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+plStringView plTranslationLookup::Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
   for (plUInt32 i = s_Translators.GetCount(); i > 0; --i)
   {
-    const char* szResult = s_Translators[i - 1]->Translate(szString, uiStringHash, usage);
+    plStringView sResult = s_Translators[i - 1]->Translate(sString, uiStringHash, usage);
 
-    if (szResult != nullptr)
-      return szResult;
+    if (!sResult.IsEmpty())
+      return sResult;
   }
 
-  return szString;
+  if (usage != plTranslationUsage::Default)
+    return {};
+
+  return sString;
 }
 
 
@@ -76,14 +79,14 @@ void plTranslationLookup::Clear()
 
 void plTranslatorFromFiles::AddTranslationFilesFromFolder(const char* szFolder)
 {
-  PLASMA_LOG_BLOCK("AddTranslationFilesFromFolder", szFolder);
+  PL_LOG_BLOCK("AddTranslationFilesFromFolder", szFolder);
 
   if (!m_Folders.Contains(szFolder))
   {
     m_Folders.PushBack(szFolder);
   }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
   plStringBuilder startPath;
   if (plFileSystem::ResolvePath(szFolder, &startPath, nullptr).Failed())
     return;
@@ -107,9 +110,9 @@ void plTranslatorFromFiles::AddTranslationFilesFromFolder(const char* szFolder)
 #endif
 }
 
-const char* plTranslatorFromFiles::Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+plStringView plTranslatorFromFiles::Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
-  return plTranslatorStorage::Translate(szString, uiStringHash, usage);
+  return plTranslatorStorage::Translate(sString, uiStringHash, usage);
 }
 
 void plTranslatorFromFiles::Reload()
@@ -124,7 +127,7 @@ void plTranslatorFromFiles::Reload()
 
 void plTranslatorFromFiles::LoadTranslationFile(const char* szFullPath)
 {
-  PLASMA_LOG_BLOCK("LoadTranslationFile", szFullPath);
+  PL_LOG_BLOCK("LoadTranslationFile", szFullPath);
 
   plLog::Dev("Loading Localization File '{0}'", szFullPath);
 
@@ -191,18 +194,18 @@ void plTranslatorFromFiles::LoadTranslationFile(const char* szFullPath)
 
 //////////////////////////////////////////////////////////////////////////
 
-void plTranslatorStorage::StoreTranslation(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+void plTranslatorStorage::StoreTranslation(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
-  m_Translations[(plUInt32)usage][uiStringHash] = szString;
+  m_Translations[(plUInt32)usage][uiStringHash] = sString;
 }
 
-const char* plTranslatorStorage::Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+plStringView plTranslatorStorage::Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
   auto it = m_Translations[(plUInt32)usage].Find(uiStringHash);
   if (it.IsValid())
     return it.Value().GetData();
 
-  return nullptr;
+  return {};
 }
 
 void plTranslatorStorage::Reset()
@@ -222,42 +225,52 @@ void plTranslatorStorage::Reload()
 
 bool plTranslatorLogMissing::s_bActive = true;
 
-const char* plTranslatorLogMissing::Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+plStringView plTranslatorLogMissing::Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
   if (!plTranslatorLogMissing::s_bActive && !GetHighlightUntranslated())
-    return nullptr;
+    return {};
 
   if (usage != plTranslationUsage::Default)
-    return nullptr;
+    return {};
 
-  const char* szResult = plTranslatorStorage::Translate(szString, uiStringHash, usage);
+  plStringView sResult = plTranslatorStorage::Translate(sString, uiStringHash, usage);
 
-  if (szResult == nullptr)
+  if (sResult.IsEmpty())
   {
-    plLog::Warning("Missing translation: {0};", szString);
+    plLog::Warning("Missing translation: {0};", sString);
 
-    StoreTranslation(szString, uiStringHash, usage);
+    StoreTranslation(sString, uiStringHash, usage);
   }
 
-  return nullptr;
+  return {};
 }
 
-const char* plTranslatorMakeMoreReadable::Translate(const char* szString, plUInt64 uiStringHash, plTranslationUsage usage)
+plStringView plTranslatorMakeMoreReadable::Translate(plStringView sString, plUInt64 uiStringHash, plTranslationUsage usage)
 {
-  const char* szResult = plTranslatorStorage::Translate(szString, uiStringHash, usage);
+  if (usage != plTranslationUsage::Default)
+    return {};
 
-  if (szResult != nullptr)
-    return szResult;
+  plStringView sResult = plTranslatorStorage::Translate(sString, uiStringHash, usage);
 
+  if (!sResult.IsEmpty())
+    return sResult;
 
   plStringBuilder result;
-  plStringBuilder tmp = szString;
+  plStringBuilder tmp = sString;
   tmp.Trim(" _-");
-  tmp.TrimWordStart("pl");
-  tmp.TrimWordEnd("Component");
 
-  auto IsUpper = [](plUInt32 c) { return c == plStringUtils::ToUpperChar(c); };
-  auto IsNumber = [](plUInt32 c) { return c >= '0' && c <= '9'; };
+  tmp.TrimWordStart("pl");
+
+  plStringView sComponent = "Component";
+  if (tmp.EndsWith(sComponent) && tmp.GetElementCount() > sComponent.GetElementCount())
+  {
+    tmp.Shrink(0, sComponent.GetElementCount());
+  }
+
+  auto IsUpper = [](plUInt32 c)
+  { return c == plStringUtils::ToUpperChar(c); };
+  auto IsNumber = [](plUInt32 c)
+  { return c >= '0' && c <= '9'; };
 
   plUInt32 uiPrev = ' ';
   plUInt32 uiCur = ' ';
@@ -289,7 +302,7 @@ const char* plTranslatorMakeMoreReadable::Translate(const char* szString, plUInt
       continue;
     }
 
-    if (IsNumber(uiPrev) != IsNumber(uiCur))
+    if (uiPrev != '[' && uiCur != ']' && IsNumber(uiPrev) != IsNumber(uiCur))
     {
       result.Append(" ");
       result.Append(uiCur);
@@ -327,12 +340,12 @@ const char* plTranslatorMakeMoreReadable::Translate(const char* szString, plUInt
 
   if (GetHighlightUntranslated())
   {
-    result.Append(" (@", szString, ")");
+    result.Append(" (@", sString, ")");
   }
 
   StoreTranslation(result, uiStringHash, usage);
 
-  return plTranslatorStorage::Translate(szString, uiStringHash, usage);
+  return plTranslatorStorage::Translate(sString, uiStringHash, usage);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_TranslationLookup);
+

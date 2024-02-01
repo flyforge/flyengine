@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/Configuration/CVar.h>
 #include <Foundation/Configuration/Startup.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -12,14 +12,14 @@
 #include <Texture/plTexFormat/plTexFormat.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTexture2DResource, 1, plRTTIDefaultAllocator<plTexture2DResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTexture2DResource, 1, plRTTIDefaultAllocator<plTexture2DResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCVarInt cvar_RenderingOffscreenTargetResolution1("Rendering.Offscreen.TargetResolution1", 256, plCVarFlags::Default, "Configurable render target resolution");
 plCVarInt cvar_RenderingOffscreenTargetResolution2("Rendering.Offscreen.TargetResolution2", 512, plCVarFlags::Default, "Configurable render target resolution");
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plTexture2DResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plTexture2DResource);
 
 plTexture2DResource::plTexture2DResource()
   : plResource(DoUpdate::OnAnyThread, plTextureUtils::s_bForceFullQualityAlways ? 1 : 2)
@@ -94,7 +94,7 @@ void plTexture2DResource::FillOutDescriptor(plTexture2DResourceDescriptor& ref_t
   if (pImage->GetNumFaces() == 6)
     ref_td.m_DescGAL.m_Type = plGALTextureType::TextureCube;
 
-  PLASMA_ASSERT_DEV(pImage->GetNumFaces() == 1 || pImage->GetNumFaces() == 6, "Invalid number of image faces");
+  PL_ASSERT_DEV(pImage->GetNumFaces() == 1 || pImage->GetNumFaces() == 6, "Invalid number of image faces");
 
   out_uiMemoryUsed = 0;
 
@@ -121,7 +121,7 @@ void plTexture2DResource::FillOutDescriptor(plTexture2DResourceDescriptor& ref_t
           id.m_uiRowPitch = static_cast<plUInt32>(pImage->GetRowPitch(mip));
         }
 
-        PLASMA_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
+        PL_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
         id.m_uiSlicePitch = static_cast<plUInt32>(pImage->GetDepthPitch(mip));
 
         out_uiMemoryUsed += id.m_uiSlicePitch;
@@ -164,7 +164,7 @@ plResourceLoadDesc plTexture2DResource::UpdateContent(plStreamReader* Stream)
   }
 
   const bool bIsRenderTarget = texFormat.m_iRenderTargetResolutionX != 0;
-  PLASMA_ASSERT_DEV(!bIsRenderTarget, "Render targets are not supported by regular 2D texture resources");
+  PL_ASSERT_DEV(!bIsRenderTarget, "Render targets are not supported by regular 2D texture resources");
 
   {
 
@@ -212,7 +212,7 @@ plResourceLoadDesc plTexture2DResource::UpdateContent(plStreamReader* Stream)
 
     if (uiUploadNumMipLevels > 0)
     {
-      PLASMA_ASSERT_DEBUG(m_uiLoadedTextures < 2, "Invalid texture upload");
+      PL_ASSERT_DEBUG(m_uiLoadedTextures < 2, "Invalid texture upload");
 
       plHybridArray<plGALSystemMemoryDescription, 32> initData;
       FillOutDescriptor(td, pImage, texFormat.m_bSRGB, uiUploadNumMipLevels, m_uiMemoryGPU[m_uiLoadedTextures], initData);
@@ -240,7 +240,7 @@ void plTexture2DResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = m_uiMemoryGPU[0] + m_uiMemoryGPU[1];
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture2DResource, plTexture2DResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plTexture2DResource, plTexture2DResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = descriptor.m_uiQualityLevelsDiscardable;
@@ -255,7 +255,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture2DResource, plTexture2DResourceDes
   m_uiHeight = descriptor.m_DescGAL.m_uiHeight;
 
   m_hGALTexture[m_uiLoadedTextures] = pDevice->CreateTexture(descriptor.m_DescGAL, descriptor.m_InitialContent);
-  PLASMA_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
+  PL_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
 
   pDevice->GetTexture(m_hGALTexture[m_uiLoadedTextures])->SetDebugName(GetResourceDescription());
 
@@ -265,7 +265,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture2DResource, plTexture2DResourceDes
   }
 
   m_hSamplerState = pDevice->CreateSamplerState(descriptor.m_SamplerDesc);
-  PLASMA_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
+  PL_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
 
   ++m_uiLoadedTextures;
 
@@ -282,10 +282,10 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTexture2DResource, plTexture2DResourceDes
 // TODO (resources): move into separate file
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderToTexture2DResource, 1, plRTTIDefaultAllocator<plRenderToTexture2DResource>);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderToTexture2DResource, 1, plRTTIDefaultAllocator<plRenderToTexture2DResource>);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, Texture2D)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, Texture2D)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ResourceManager" 
@@ -303,12 +303,12 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, Texture2D)
     plResourceManager::UnregisterResourceOverrideType(plGetStaticRTTI<plRenderToTexture2DResource>());
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plRenderToTexture2DResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plRenderToTexture2DResource);
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plRenderToTexture2DResource, plRenderToTexture2DResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plRenderToTexture2DResource, plRenderToTexture2DResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = 0;
@@ -326,7 +326,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plRenderToTexture2DResource, plRenderToText
   descGAL.SetAsRenderTarget(m_uiWidth, m_uiHeight, m_Format, descriptor.m_SampleCount);
 
   m_hGALTexture[m_uiLoadedTextures] = pDevice->CreateTexture(descGAL, descriptor.m_InitialContent);
-  PLASMA_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture data could not be uploaded to the GPU");
+  PL_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture data could not be uploaded to the GPU");
 
   pDevice->GetTexture(m_hGALTexture[m_uiLoadedTextures])->SetDebugName(GetResourceDescription());
 
@@ -336,7 +336,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plRenderToTexture2DResource, plRenderToText
   }
 
   m_hSamplerState = pDevice->CreateSamplerState(descriptor.m_SamplerDesc);
-  PLASMA_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
+  PL_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
 
   ++m_uiLoadedTextures;
 
@@ -430,10 +430,10 @@ plResourceLoadDesc plRenderToTexture2DResource::UpdateContent(plStreamReader* St
 
   const bool bIsRenderTarget = texFormat.m_iRenderTargetResolutionX != 0;
 
-  PLASMA_ASSERT_DEV(bIsRenderTarget, "Trying to create a RenderToTexture resource from data that is not set up as a render-target");
+  PL_ASSERT_DEV(bIsRenderTarget, "Trying to create a RenderToTexture resource from data that is not set up as a render-target");
 
   {
-    PLASMA_ASSERT_DEV(m_uiLoadedTextures == 0, "not implemented");
+    PL_ASSERT_DEV(m_uiLoadedTextures == 0, "not implemented");
 
     if (texFormat.m_iRenderTargetResolutionX == -1)
     {
@@ -449,7 +449,7 @@ plResourceLoadDesc plRenderToTexture2DResource::UpdateContent(plStreamReader* St
       }
       else
       {
-        PLASMA_REPORT_FAILURE(
+        PL_REPORT_FAILURE(
           "Invalid render target configuration: {0} x {1}", texFormat.m_iRenderTargetResolutionX, texFormat.m_iRenderTargetResolutionY);
       }
     }
@@ -478,4 +478,4 @@ void plRenderToTexture2DResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUs
   out_NewMemoryUsage.m_uiMemoryGPU = m_uiMemoryGPU[0] + m_uiMemoryGPU[1];
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Textures_Texture2DResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Textures_Texture2DResource);

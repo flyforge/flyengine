@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/Configuration/Startup.h>
 #include <Foundation/IO/OpenDdlReader.h>
 #include <Foundation/IO/OpenDdlUtils.h>
@@ -38,7 +38,6 @@ bool plMaterialResourceDescriptor::operator==(const plMaterialResourceDescriptor
          m_PermutationVars == other.m_PermutationVars &&
          m_Parameters == other.m_Parameters &&
          m_Texture2DBindings == other.m_Texture2DBindings &&
-         m_Texture3DBindings == other.m_Texture3DBindings &&
          m_TextureCubeBindings == other.m_TextureCubeBindings &&
          m_RenderDataCategory == other.m_RenderDataCategory;
 }
@@ -46,14 +45,14 @@ bool plMaterialResourceDescriptor::operator==(const plMaterialResourceDescriptor
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialResource, 1, plRTTIDefaultAllocator<plMaterialResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialResource, 1, plRTTIDefaultAllocator<plMaterialResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plMaterialResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plMaterialResource);
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, MaterialResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, MaterialResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -65,7 +64,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, MaterialResource)
     plMaterialResource::ClearCache();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plDeque<plMaterialResource::CachedValues> plMaterialResource::s_CachedValues;
@@ -399,98 +398,6 @@ plTextureCubeResourceHandle plMaterialResource::GetTextureCubeBinding(const plTe
   return plTextureCubeResourceHandle();
 }
 
-void plMaterialResource::SetTexture3DBinding(const plHashedString& sName, const plTexture3DResourceHandle& value)
-{
-  plUInt32 uiIndex = plInvalidIndex;
-  for (plUInt32 i = 0; i < m_mDesc.m_Texture3DBindings.GetCount(); ++i)
-  {
-    if (m_mDesc.m_Texture3DBindings[i].m_Name == sName)
-    {
-      uiIndex = i;
-      break;
-    }
-  }
-
-  if (value.IsValid())
-  {
-    if (uiIndex != plInvalidIndex)
-    {
-      m_mDesc.m_Texture3DBindings[uiIndex].m_Value = value;
-    }
-    else
-    {
-      auto& binding = m_mDesc.m_Texture3DBindings.ExpandAndGetRef();
-      binding.m_Name = sName;
-      binding.m_Value = value;
-    }
-  }
-  else
-  {
-    if (uiIndex != plInvalidIndex)
-    {
-      m_mDesc.m_Texture3DBindings.RemoveAtAndSwap(uiIndex);
-    }
-  }
-
-  m_iLastModified.Increment();
-
-  m_ModifiedEvent.Broadcast(this);
-}
-
-void plMaterialResource::SetTexture3DBinding(const char* szName, const plTexture3DResourceHandle& value)
-{
-  plTempHashedString sName(szName);
-
-  plUInt32 uiIndex = plInvalidIndex;
-  for (plUInt32 i = 0; i < m_mDesc.m_Texture3DBindings.GetCount(); ++i)
-  {
-    if (m_mDesc.m_Texture3DBindings[i].m_Name == sName)
-    {
-      uiIndex = i;
-      break;
-    }
-  }
-
-  if (value.IsValid())
-  {
-    if (uiIndex != plInvalidIndex)
-    {
-      m_mDesc.m_Texture3DBindings[uiIndex].m_Value = value;
-    }
-    else
-    {
-      auto& binding = m_mDesc.m_Texture3DBindings.ExpandAndGetRef();
-      binding.m_Name.Assign(szName);
-      binding.m_Value = value;
-    }
-  }
-  else
-  {
-    if (uiIndex != plInvalidIndex)
-    {
-      m_mDesc.m_Texture3DBindings.RemoveAtAndSwap(uiIndex);
-    }
-  }
-
-  m_iLastModified.Increment();
-
-  m_ModifiedEvent.Broadcast(this);
-}
-
-plTexture3DResourceHandle plMaterialResource::GetTexture3DBinding(const plTempHashedString& sName)
-{
-  auto pCachedValues = GetOrUpdateCachedValues();
-
-  // Use pointer to prevent ref counting
-  plTexture3DResourceHandle* pBinding;
-  if (pCachedValues->m_Texture3DBindings.TryGetValue(sName, pBinding))
-  {
-    return *pBinding;
-  }
-
-  return plTexture3DResourceHandle();
-}
-
 plRenderData::Category plMaterialResource::GetRenderDataCategory()
 {
   auto pCachedValues = GetOrUpdateCachedValues();
@@ -532,7 +439,7 @@ const char* plMaterialResource::GetDefaultMaterialFileName(DefaultMaterialType m
     case DefaultMaterialType::MissingMaterial:
       return "Base/Materials/Common/MissingMaterial.plMaterialAsset";
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return "";
   }
 }
@@ -599,7 +506,7 @@ plResourceLoadDesc plMaterialResource::UpdateContent(plStreamReader* pOuterStrea
 
     plUInt8 uiVersion = 0;
     (*pOuterStream) >> uiVersion;
-    PLASMA_ASSERT_DEV(uiVersion >= 4 && uiVersion <= 8, "Unknown plMaterialBin version {0}", uiVersion);
+    PL_ASSERT_DEV(uiVersion >= 4 && uiVersion <= 7, "Unknown plMaterialBin version {0}", uiVersion);
 
     plUInt8 uiCompressionMode = 0;
     if (uiVersion >= 6)
@@ -699,28 +606,6 @@ plResourceLoadDesc plMaterialResource::UpdateContent(plStreamReader* pOuterStrea
       }
     }
 
-    // 3D Textures
-    if (uiVersion >= 7)
-    {
-      plUInt16 uiTextures = 0;
-      s >> uiTextures;
-
-      m_mDesc.m_Texture3DBindings.Reserve(uiTextures);
-
-      for (plUInt16 i = 0; i < uiTextures; ++i)
-      {
-        s >> sTemp;
-        s >> sTemp2;
-
-        if (!sTemp.IsEmpty() && !sTemp2.IsEmpty())
-        {
-          plMaterialResourceDescriptor::Texture3DBinding& tc = m_mDesc.m_Texture3DBindings.ExpandAndGetRef();
-          tc.m_Name.Assign(sTemp.GetData());
-          tc.m_Value = plResourceManager::LoadResource<plTexture3DResource>(sTemp2);
-        }
-      }
-    }
-
     // Cube Textures
     {
       plUInt16 uiTextures = 0;
@@ -766,7 +651,7 @@ plResourceLoadDesc plMaterialResource::UpdateContent(plStreamReader* pOuterStrea
     }
 
     // Render data category
-    if (uiVersion >= 8)
+    if (uiVersion >= 7)
     {
       plStringBuilder sRenderDataCategoryName;
       s >> sRenderDataCategoryName;
@@ -777,7 +662,7 @@ plResourceLoadDesc plMaterialResource::UpdateContent(plStreamReader* pOuterStrea
         m_mDesc.m_RenderDataCategory = plRenderData::FindCategory(sCategoryNameHashed);
         if (m_mDesc.m_RenderDataCategory == plInvalidRenderDataCategory)
         {
-          plLog::Error("Material '{}' uses an invalid render data category '{}'", GetResourceDescription(), sRenderDataCategoryName);
+          plLog::Error("Material '{}' uses an invalid render data category '{}'", GetResourceIdOrDescription(), sRenderDataCategoryName);
         }
       }
     }
@@ -927,12 +812,12 @@ void plMaterialResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
 {
   out_NewMemoryUsage.m_uiMemoryCPU =
     sizeof(plMaterialResource) + (plUInt32)(m_mDesc.m_PermutationVars.GetHeapMemoryUsage() + m_mDesc.m_Parameters.GetHeapMemoryUsage() + m_mDesc.m_Texture2DBindings.GetHeapMemoryUsage() + m_mDesc.m_TextureCubeBindings.GetHeapMemoryUsage() + m_mOriginalDesc.m_PermutationVars.GetHeapMemoryUsage() +
-                                            m_mOriginalDesc.m_Parameters.GetHeapMemoryUsage() + m_mOriginalDesc.m_Texture2DBindings.GetHeapMemoryUsage() + m_mOriginalDesc.m_Texture3DBindings.GetHeapMemoryUsage() + m_mOriginalDesc.m_TextureCubeBindings.GetHeapMemoryUsage());
+                                            m_mOriginalDesc.m_Parameters.GetHeapMemoryUsage() + m_mOriginalDesc.m_Texture2DBindings.GetHeapMemoryUsage() + m_mOriginalDesc.m_TextureCubeBindings.GetHeapMemoryUsage());
 
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMaterialResource, plMaterialResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plMaterialResource, plMaterialResourceDescriptor)
 {
   m_mDesc = descriptor;
   m_mOriginalDesc = descriptor;
@@ -957,7 +842,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMaterialResource, plMaterialResourceDescr
 
 void plMaterialResource::OnBaseMaterialModified(const plMaterialResource* pModifiedMaterial)
 {
-  PLASMA_ASSERT_DEV(m_mDesc.m_hBaseMaterial == pModifiedMaterial, "Implementation error");
+  PL_ASSERT_DEV(m_mDesc.m_hBaseMaterial == pModifiedMaterial, "Implementation error");
 
   m_iLastModified.Increment();
   m_iLastConstantsModified.Increment();
@@ -1007,10 +892,10 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
     return;
 
   plTempHashedString sConstantBufferName("plMaterialConstants");
-  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::PixelShader)->GetShaderResourceBinding(sConstantBufferName);
+  const plShaderResourceBinding* pBinding = pShaderPermutation->GetShaderByteCode(plGALShaderStage::PixelShader)->GetShaderResourceBinding(sConstantBufferName);
   if (pBinding == nullptr)
   {
-    pBinding = pShaderPermutation->GetShaderStageBinary(plGALShaderStage::VertexShader)->GetShaderResourceBinding(sConstantBufferName);
+    pBinding = pShaderPermutation->GetShaderByteCode(plGALShaderStage::VertexShader)->GetShaderResourceBinding(sConstantBufferName);
   }
 
   const plShaderConstantBufferLayout* pLayout = pBinding != nullptr ? pBinding->m_pLayout : nullptr;
@@ -1035,12 +920,12 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
       plRenderContext::DeleteConstantBufferStorage(m_hConstantBufferStorage);
       m_hConstantBufferStorage = plRenderContext::CreateConstantBufferStorage(pLayout->m_uiTotalSize);
 
-      PLASMA_VERIFY(plRenderContext::TryGetConstantBufferStorage(m_hConstantBufferStorage, pStorage), "");
+      PL_VERIFY(plRenderContext::TryGetConstantBufferStorage(m_hConstantBufferStorage, pStorage), "");
     }
 
     for (auto& constant : pLayout->m_Constants)
     {
-      if (constant.m_uiOffset + plShaderConstantBufferLayout::Constant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
+      if (constant.m_uiOffset + plShaderConstant::s_TypeSize[constant.m_Type.GetValue()] <= data.GetCount())
       {
         plUInt8* pDest = &data[constant.m_uiOffset];
 
@@ -1057,7 +942,7 @@ plMaterialResource::CachedValues* plMaterialResource::GetOrUpdateCachedValues()
 {
   if (!IsModified())
   {
-    PLASMA_ASSERT_DEV(m_pCachedValues != nullptr, "");
+    PL_ASSERT_DEV(m_pCachedValues != nullptr, "");
     return m_pCachedValues;
   }
 
@@ -1077,18 +962,18 @@ plMaterialResource::CachedValues* plMaterialResource::GetOrUpdateCachedValues()
     pCurrentMaterial = plResourceManager::BeginAcquireResource(hBaseMaterial, plResourceAcquireMode::BlockTillLoaded);
   }
 
-  PLASMA_SCOPE_EXIT(for (plUInt32 i = materialHierarchy.GetCount(); i-- > 1;) {
+  PL_SCOPE_EXIT(for (plUInt32 i = materialHierarchy.GetCount(); i-- > 1;) {
     plMaterialResource* pMaterial = materialHierarchy[i];
     plResourceManager::EndAcquireResource(pMaterial);
 
     materialHierarchy[i] = nullptr;
   });
 
-  PLASMA_LOCK(m_UpdateCacheMutex);
+  PL_LOCK(m_UpdateCacheMutex);
 
   if (!IsModified())
   {
-    PLASMA_ASSERT_DEV(m_pCachedValues != nullptr, "");
+    PL_ASSERT_DEV(m_pCachedValues != nullptr, "");
     return m_pCachedValues;
   }
 
@@ -1163,13 +1048,13 @@ namespace
 
   struct FreeCacheEntry
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiIndex;
     plUInt64 m_uiFrame;
   };
 
-  static plDynamicArray<FreeCacheEntry, plStaticAllocatorWrapper> s_FreeMaterialCacheEntries;
+  static plDynamicArray<FreeCacheEntry, plStaticsAllocatorWrapper> s_FreeMaterialCacheEntries;
 } // namespace
 
 void plMaterialResource::CachedValues::Reset()
@@ -1178,14 +1063,14 @@ void plMaterialResource::CachedValues::Reset()
   m_PermutationVars.Clear();
   m_Parameters.Clear();
   m_Texture2DBindings.Clear();
-  m_Texture3DBindings.Clear();
   m_TextureCubeBindings.Clear();
   m_RenderDataCategory = plInvalidRenderDataCategory;
 }
 
+// static
 plMaterialResource::CachedValues* plMaterialResource::AllocateCache(plUInt32& inout_uiCacheIndex)
 {
-  PLASMA_LOCK(s_MaterialCacheMutex);
+  PL_LOCK(s_MaterialCacheMutex);
 
   plUInt32 uiOldCacheIndex = inout_uiCacheIndex;
 
@@ -1206,11 +1091,12 @@ plMaterialResource::CachedValues* plMaterialResource::AllocateCache(plUInt32& in
   return &s_CachedValues[inout_uiCacheIndex];
 }
 
+// static
 void plMaterialResource::DeallocateCache(plUInt32 uiCacheIndex)
 {
   if (uiCacheIndex != plInvalidIndex)
   {
-    PLASMA_LOCK(s_MaterialCacheMutex);
+    PL_LOCK(s_MaterialCacheMutex);
 
     if (uiCacheIndex < s_CachedValues.GetCount())
     {
@@ -1226,7 +1112,7 @@ void plMaterialResource::DeallocateCache(plUInt32 uiCacheIndex)
 // static
 void plMaterialResource::ClearCache()
 {
-  PLASMA_LOCK(s_MaterialCacheMutex);
+  PL_LOCK(s_MaterialCacheMutex);
 
   s_CachedValues.Clear();
   s_FreeMaterialCacheEntries.Clear();
@@ -1237,4 +1123,4 @@ const plMaterialResourceDescriptor& plMaterialResource::GetCurrentDesc() const
   return m_mDesc;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Material_Implementation_MaterialResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Material_Implementation_MaterialResource);

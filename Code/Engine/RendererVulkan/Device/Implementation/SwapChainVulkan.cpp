@@ -4,6 +4,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Foundation/Reflection/ReflectionUtils.h>
 #include <Foundation/System/PlatformFeatures.h>
+#include <RendererFoundation/RendererReflection.h>
 #include <RendererFoundation/Resources/RenderTargetView.h>
 #include <RendererVulkan/Device/DeviceVulkan.h>
 #include <RendererVulkan/Device/SwapChainVulkan.h>
@@ -12,30 +13,34 @@
 #include <RendererVulkan/Utils/ConversionUtilsVulkan.h>
 #include <RendererVulkan/Utils/PipelineBarrierVulkan.h>
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
 #  include <GLFW/glfw3.h>
 #endif
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
 #  include <xcb/xcb.h>
 #endif
 
 namespace
 {
-  plResult GetAlternativeFormat(vk::Format& format, vk::ComponentMapping& componentMapping)
+  plResult GetAlternativeFormat(plGALResourceFormat::Enum& format)
   {
     switch (format)
     {
-      case vk::Format::eR8G8B8A8Srgb:
-        format = vk::Format::eB8G8R8A8Srgb;
-        componentMapping = vk::ComponentMapping{vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eA};
-        return PLASMA_SUCCESS;
-      case vk::Format::eR8G8B8A8Unorm:
-        format = vk::Format::eB8G8R8A8Unorm;
-        componentMapping = vk::ComponentMapping{vk::ComponentSwizzle::eB, vk::ComponentSwizzle::eG, vk::ComponentSwizzle::eR, vk::ComponentSwizzle::eA};
-        return PLASMA_SUCCESS;
+      case plGALResourceFormat::RGBAUByteNormalizedsRGB:
+        format = plGALResourceFormat::BGRAUByteNormalizedsRGB;
+        return PL_SUCCESS;
+      case plGALResourceFormat::RGBAUByteNormalized:
+        format = plGALResourceFormat::BGRAUByteNormalized;
+        return PL_SUCCESS;
+      case plGALResourceFormat::BGRAUByteNormalizedsRGB:
+        format = plGALResourceFormat::RGBAUByteNormalizedsRGB;
+        return PL_SUCCESS;
+      case plGALResourceFormat::BGRAUByteNormalized:
+        format = plGALResourceFormat::RGBAUByteNormalized;
+        return PL_SUCCESS;
       default:
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
   }
 
@@ -59,22 +64,56 @@ namespace
 
 void plGALSwapChainVulkan::AcquireNextRenderTarget(plGALDevice* pDevice)
 {
-  PLASMA_PROFILE_SCOPE("AcquireNextRenderTarget");
+  PL_PROFILE_SCOPE("AcquireNextRenderTarget");
 
-  PLASMA_ASSERT_DEV(!m_currentPipelineImageAvailableSemaphore, "Pipeline semaphores leaked");
+  PL_ASSERT_DEV(!m_currentPipelineImageAvailableSemaphore, "Pipeline semaphores leaked");
   m_currentPipelineImageAvailableSemaphore = plSemaphorePoolVulkan::RequestSemaphore();
 
   if (m_swapChainImageInUseFences[m_uiCurrentSwapChainImage])
   {
-    //#TODO_VULKAN waiting for fence does not seem to be necessary, is it already done by acquireNextImageKHR?
-    // m_pVulkanDevice->GetVulkanDevice().waitForFences(1, &m_swapChainImageInUseFences[m_uiCurrentSwapChainImage], true, 1000000000ui64);
+    // #TODO_VULKAN waiting for fence does not seem to be necessary, is it already done by acquireNextImageKHR?
+    //  m_pVulkanDevice->GetVulkanDevice().waitForFences(1, &m_swapChainImageInUseFences[m_uiCurrentSwapChainImage], true, 1000000000ui64);
     m_swapChainImageInUseFences[m_uiCurrentSwapChainImage] = nullptr;
   }
 
-  vk::Result result = m_pVulkanDevice->GetVulkanDevice().acquireNextImageKHR(m_vulkanSwapChain, std::numeric_limits<uint64_t>::max(), m_currentPipelineImageAvailableSemaphore, nullptr, &m_uiCurrentSwapChainImage);
-  if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+  int retryCount = 0;
+  while (true)
   {
-    plLog::Warning("Swap-chain does not match the target window size and should be recreated.");
+    vk::Result result = m_pVulkanDevice->GetVulkanDevice().acquireNextImageKHR(m_vulkanSwapChain, std::numeric_limits<uint64_t>::max(), m_currentPipelineImageAvailableSemaphore, nullptr, &m_uiCurrentSwapChainImage);
+    if (result == vk::Result::eErrorOutOfDateKHR || result == vk::Result::eSuboptimalKHR)
+    {
+      const vk::SurfaceCapabilitiesKHR surfaceCapabilities = m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(m_vulkanSurface);
+      if (result == vk::Result::eSuboptimalKHR && (surfaceCapabilities.currentExtent.width != m_CurrentSize.width || surfaceCapabilities.currentExtent.height != m_CurrentSize.height))
+      {
+        plLog::Warning("Swap-chain does not match the target window size and should be recreated. Expected size {0}x{1}, current size {2}x{3}.", surfaceCapabilities.currentExtent.width, surfaceCapabilities.currentExtent.height, m_CurrentSize.width, m_CurrentSize.height);
+        break;
+      }
+      else
+      {
+        if (retryCount > 0)
+        {
+          plLog::Error("Automatic swap-chain re-creation didn't have an effect");
+          break;
+        }
+        else
+        {
+          // It is not a size issue, re-create automatically
+          if (CreateSwapChainInternal().Failed())
+          {
+            plLog::Error("Failed automatic swapchain re-creation");
+          }
+          else
+          {
+            plLog::Info("Automatic swapchain re-creation succeeded");
+          }
+          retryCount++;
+        }
+      }
+    }
+    else
+    {
+      break;
+    }
   }
 
 #ifdef VK_LOG_LAYOUT_CHANGES
@@ -86,7 +125,7 @@ void plGALSwapChainVulkan::AcquireNextRenderTarget(plGALDevice* pDevice)
 
 void plGALSwapChainVulkan::PresentRenderTarget(plGALDevice* pDevice)
 {
-  PLASMA_PROFILE_SCOPE("PresentRenderTarget");
+  PL_PROFILE_SCOPE("PresentRenderTarget");
 
   auto pVulkanDevice = static_cast<plGALDeviceVulkan*>(pDevice);
   {
@@ -98,7 +137,11 @@ void plGALSwapChainVulkan::PresentRenderTarget(plGALDevice* pDevice)
 
   // Submit command buffer
   vk::Semaphore currentPipelineRenderFinishedSemaphore = plSemaphorePoolVulkan::RequestSemaphore();
-  vk::Fence renderFence = pVulkanDevice->Submit(m_currentPipelineImageAvailableSemaphore, vk::PipelineStageFlagBits::eColorAttachmentOutput, currentPipelineRenderFinishedSemaphore);
+
+  pVulkanDevice->AddWaitSemaphore(plGALDeviceVulkan::SemaphoreInfo::MakeWaitSemaphore(m_currentPipelineImageAvailableSemaphore, vk::PipelineStageFlagBits::eColorAttachmentOutput));
+  pVulkanDevice->AddSignalSemaphore(plGALDeviceVulkan::SemaphoreInfo::MakeSignalSemaphore(currentPipelineRenderFinishedSemaphore));
+  vk::Fence renderFence = pVulkanDevice->Submit();
+  //vk::Fence renderFence = pVulkanDevice->Submit(m_currentPipelineImageAvailableSemaphore, vk::PipelineStageFlagBits::eColorAttachmentOutput, currentPipelineRenderFinishedSemaphore);
   pVulkanDevice->ReclaimLater(m_currentPipelineImageAvailableSemaphore);
 
   {
@@ -124,7 +167,7 @@ void plGALSwapChainVulkan::PresentRenderTarget(plGALDevice* pDevice)
 
 plResult plGALSwapChainVulkan::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALPresentMode> newPresentMode)
 {
-  PLASMA_ASSERT_DEBUG(!m_currentPipelineImageAvailableSemaphore, "UpdateSwapChain must not be called between AcquireNextRenderTarget and PresentRenderTarget.");
+  PL_ASSERT_DEBUG(!m_currentPipelineImageAvailableSemaphore, "UpdateSwapChain must not be called between AcquireNextRenderTarget and PresentRenderTarget.");
   m_currentPresentMode = newPresentMode;
   return CreateSwapChainInternal();
 }
@@ -148,24 +191,24 @@ plResult plGALSwapChainVulkan::InitPlatform(plGALDevice* pDevice)
   surfaceCreateInfo.hwnd = (HWND)m_WindowDesc.m_pWindow->GetNativeWindowHandle();
 
   m_vulkanSurface = m_pVulkanDevice->GetVulkanInstance().createWin32SurfaceKHR(surfaceCreateInfo);
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
   plWindowHandle windowHandle = m_WindowDesc.m_pWindow->GetNativeWindowHandle();
   switch (windowHandle.type)
   {
     case plWindowHandle::Type::Invalid:
       plLog::Error("Invalid native window handle for window \"{}\"", m_WindowDesc.m_pWindow);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     case plWindowHandle::Type::GLFW:
     {
       VkSurfaceKHR glfwSurface = VK_NULL_HANDLE;
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(glfwCreateWindowSurface(m_pVulkanDevice->GetVulkanInstance(), windowHandle.glfwWindow, nullptr, &glfwSurface));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(glfwCreateWindowSurface(m_pVulkanDevice->GetVulkanInstance(), windowHandle.glfwWindow, nullptr, &glfwSurface));
       m_vulkanSurface = glfwSurface;
     }
     break;
     case plWindowHandle::Type::XCB:
     {
       vk::XcbSurfaceCreateInfoKHR surfaceCreateInfo = {};
-      PLASMA_ASSERT_DEV(windowHandle.xcbWindow.m_pConnection != nullptr && windowHandle.xcbWindow.m_Window != 0, "Invalid xcb handle");
+      PL_ASSERT_DEV(windowHandle.xcbWindow.m_pConnection != nullptr && windowHandle.xcbWindow.m_Window != 0, "Invalid xcb handle");
       surfaceCreateInfo.connection = windowHandle.xcbWindow.m_pConnection;
       surfaceCreateInfo.window = windowHandle.xcbWindow.m_Window;
 
@@ -173,9 +216,9 @@ plResult plGALSwapChainVulkan::InitPlatform(plGALDevice* pDevice)
     }
     break;
   }
-#elif PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#elif PL_ENABLED(PL_SUPPORTS_GLFW)
   VkSurfaceKHR glfwSurface = VK_NULL_HANDLE;
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(glfwCreateWindowSurface(m_pVulkanDevice->GetVulkanInstance(), m_WindowDesc.m_pWindow->GetNativeWindowHandle(), nullptr, &glfwSurface));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(glfwCreateWindowSurface(m_pVulkanDevice->GetVulkanInstance(), m_WindowDesc.m_pWindow->GetNativeWindowHandle(), nullptr, &glfwSurface));
   m_vulkanSurface = glfwSurface;
 #else
 #  error Platform not supported
@@ -184,20 +227,20 @@ plResult plGALSwapChainVulkan::InitPlatform(plGALDevice* pDevice)
   if (!m_vulkanSurface)
   {
     plLog::Error("Failed to create Vulkan surface for window \"{}\"", m_WindowDesc.m_pWindow);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // We have created a surface on a window, the window must not be destroyed while the surface is still alive.
   m_WindowDesc.m_pWindow->AddReference();
   vk::Bool32 surfaceSupported = false;
 
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceSupportKHR(m_pVulkanDevice->GetGraphicsQueue().m_uiQueueFamily, m_vulkanSurface, &surfaceSupported));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceSupportKHR(m_pVulkanDevice->GetGraphicsQueue().m_uiQueueFamily, m_vulkanSurface, &surfaceSupported));
 
   if (!surfaceSupported)
   {
     plLog::Error("Vulkan device does not support surfaces");
     m_pVulkanDevice->DeleteLater(m_vulkanSurface);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   return CreateSwapChainInternal();
@@ -206,20 +249,25 @@ plResult plGALSwapChainVulkan::InitPlatform(plGALDevice* pDevice)
 plResult plGALSwapChainVulkan::CreateSwapChainInternal()
 {
   uint32_t uiPresentModes = 0;
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfacePresentModesKHR(m_vulkanSurface, &uiPresentModes, nullptr));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfacePresentModesKHR(m_vulkanSurface, &uiPresentModes, nullptr));
   plHybridArray<vk::PresentModeKHR, 4> presentModes;
   presentModes.SetCount(uiPresentModes);
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfacePresentModesKHR(m_vulkanSurface, &uiPresentModes, presentModes.GetData()));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfacePresentModesKHR(m_vulkanSurface, &uiPresentModes, presentModes.GetData()));
 
-  const vk::SurfaceCapabilitiesKHR surfaceCapabilities = m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(m_vulkanSurface);
+  vk::SurfaceCapabilitiesKHR surfaceCapabilities;
+  vk::Result res = m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceCapabilitiesKHR(m_vulkanSurface, &surfaceCapabilities);
+  if (res != vk::Result::eSuccess)
+  {
+    return PL_FAILURE;
+  }
 
   uint32_t uiNumSurfaceFormats = 0;
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceFormatsKHR(m_vulkanSurface, &uiNumSurfaceFormats, nullptr));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceFormatsKHR(m_vulkanSurface, &uiNumSurfaceFormats, nullptr));
   std::vector<vk::SurfaceFormatKHR> supportedFormats;
   supportedFormats.resize(uiNumSurfaceFormats);
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceFormatsKHR(m_vulkanSurface, &uiNumSurfaceFormats, supportedFormats.data()));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanPhysicalDevice().getSurfaceFormatsKHR(m_vulkanSurface, &uiNumSurfaceFormats, supportedFormats.data()));
 
-  vk::Format desiredFormat = m_pVulkanDevice->GetFormatLookupTable().GetFormatInfo(m_WindowDesc.m_BackBufferFormat).m_eRenderTarget;
+  vk::Format desiredFormat = m_pVulkanDevice->GetFormatLookupTable().GetFormatInfo(m_WindowDesc.m_BackBufferFormat).m_format;
   vk::ColorSpaceKHR desiredColorSpace = vk::ColorSpaceKHR::eSrgbNonlinear;
   vk::ComponentMapping backBufferComponentMapping;
 
@@ -233,8 +281,9 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
     }
   }
 
-  if (!formatFound && GetAlternativeFormat(desiredFormat, backBufferComponentMapping).Succeeded())
+  if (!formatFound && GetAlternativeFormat(m_WindowDesc.m_BackBufferFormat).Succeeded())
   {
+    desiredFormat = m_pVulkanDevice->GetFormatLookupTable().GetFormatInfo(m_WindowDesc.m_BackBufferFormat).m_format;
     for (vk::SurfaceFormatKHR& supportedFormat : supportedFormats)
     {
       if (supportedFormat.format == desiredFormat && supportedFormat.colorSpace == desiredColorSpace)
@@ -255,7 +304,7 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
     {
       plLog::Info("  format: {}  color space: {}", vk::to_string(supportedFormat.format).c_str(), vk::to_string(supportedFormat.colorSpace).c_str());
     }
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Does the device support RGBA textures or only BRGA?
@@ -272,11 +321,13 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
   swapChainCreateInfo.imageExtent.height = plMath::Clamp(swapChainCreateInfo.imageExtent.height, surfaceCapabilities.minImageExtent.height, surfaceCapabilities.maxImageExtent.height);
   swapChainCreateInfo.imageFormat = desiredFormat;
 
-  swapChainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst ; // We need eTransferDst to be able to resolve msaa textures into the backbuffer.
+  swapChainCreateInfo.imageUsage = vk::ImageUsageFlagBits::eColorAttachment | vk::ImageUsageFlagBits::eTransferDst; // We need eTransferDst to be able to resolve msaa textures into the backbuffer.
   if (m_WindowDesc.m_bAllowScreenshots)
     swapChainCreateInfo.imageUsage |= vk::ImageUsageFlagBits::eTransferSrc | vk::ImageUsageFlagBits::eSampled;
 
-  swapChainCreateInfo.minImageCount = plMath::Max(m_WindowDesc.m_bDoubleBuffered ? 2u : 1u, surfaceCapabilities.minImageCount);
+  // #TODO_VULKAN Using only 2 images in the swapchain may trigger the following validation error when resizing the window. To prevent this we use 3 images instead. Technically m_bDoubleBuffered now means triple buffering - a problem for another time and creating a swapchain with only 1 texture is impossible anyways on most platforms.
+  // https://vulkan.lunarg.com/doc/view/1.3.239.0/windows/1.3-extensions/vkspec.html#VUID-vkAcquireNextImageKHR-surface-07783
+  swapChainCreateInfo.minImageCount = plMath::Max(m_WindowDesc.m_bDoubleBuffered ? 3u : 2u, surfaceCapabilities.minImageCount);
   if (surfaceCapabilities.maxImageCount != 0)
     swapChainCreateInfo.minImageCount = plMath::Min(swapChainCreateInfo.minImageCount, surfaceCapabilities.maxImageCount);
 
@@ -297,15 +348,15 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
   if (!m_vulkanSwapChain)
   {
     plLog::Error("Failed to create Vulkan swap chain!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt32 uiSwapChainImages = 0;
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanDevice().getSwapchainImagesKHR(m_vulkanSwapChain, &uiSwapChainImages, nullptr));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanDevice().getSwapchainImagesKHR(m_vulkanSwapChain, &uiSwapChainImages, nullptr));
   m_swapChainImages.SetCount(uiSwapChainImages);
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(m_pVulkanDevice->GetVulkanDevice().getSwapchainImagesKHR(m_vulkanSwapChain, &uiSwapChainImages, m_swapChainImages.GetData()));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(m_pVulkanDevice->GetVulkanDevice().getSwapchainImagesKHR(m_vulkanSwapChain, &uiSwapChainImages, m_swapChainImages.GetData()));
 
-  PLASMA_ASSERT_DEV(uiSwapChainImages < 4, "If we have more than 3 swap chain images we can't hold ontp fences owned by plDeviceVulkan::PerFrameData anymore as that reclaims all fences once it reuses the frame data (which is 4 right now). Thus, we can't safely pass in the fence in plGALSwapChainVulkan::PresentRenderTarget as it will be reclaimed before we use it.");
+  PL_ASSERT_DEV(uiSwapChainImages < 4, "If we have more than 3 swap chain images we can't hold ontp fences owned by plDeviceVulkan::PerFrameData anymore as that reclaims all fences once it reuses the frame data (which is 4 right now). Thus, we can't safely pass in the fence in plGALSwapChainVulkan::PresentRenderTarget as it will be reclaimed before we use it.");
   m_swapChainImageInUseFences.SetCount(uiSwapChainImages);
 
   for (plUInt32 i = 0; i < uiSwapChainImages; i++)
@@ -318,16 +369,15 @@ plResult plGALSwapChainVulkan::CreateSwapChainInternal()
     TexDesc.m_uiHeight = swapChainCreateInfo.imageExtent.height;
     TexDesc.m_SampleCount = m_WindowDesc.m_SampleCount;
     TexDesc.m_pExisitingNativeObject = m_swapChainImages[i];
-    TexDesc.m_bAllowUAV = true;
     TexDesc.m_bAllowShaderResourceView = false;
     TexDesc.m_bCreateRenderTarget = true;
     TexDesc.m_ResourceAccess.m_bImmutable = true;
     TexDesc.m_ResourceAccess.m_bReadBack = m_WindowDesc.m_bAllowScreenshots;
-    m_swapChainTextures.PushBack(m_pVulkanDevice->CreateTextureInternal(TexDesc, plArrayPtr<plGALSystemMemoryDescription>(), desiredFormat));
+    m_swapChainTextures.PushBack(m_pVulkanDevice->CreateTextureInternal(TexDesc, plArrayPtr<plGALSystemMemoryDescription>()));
   }
   m_CurrentSize = plSizeU32(swapChainCreateInfo.imageExtent.width, swapChainCreateInfo.imageExtent.height);
   m_RenderTargets.m_hRTs[0] = m_swapChainTextures[0];
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALSwapChainVulkan::DestroySwapChainInternal(plGALDeviceVulkan* pVulkanDevice)
@@ -353,7 +403,7 @@ plResult plGALSwapChainVulkan::DeInitPlatform(plGALDevice* pDevice)
   {
     pVulkanDevice->DeleteLater(m_vulkanSurface, (void*)m_WindowDesc.m_pWindow);
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Device_Implementation_SwapChainVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Device_Implementation_SwapChainVulkan);

@@ -13,9 +13,9 @@ using plRmlUiResourceHandle = plTypedResourceHandle<class plRmlUiResource>;
 
 using plRmlUiCanvas2DComponentManager = plComponentManagerSimple<class plRmlUiCanvas2DComponent, plComponentUpdateType::Always, plBlockStorageType::Compact>;
 
-class PLASMA_RMLUIPLUGIN_DLL plRmlUiCanvas2DComponent : public plRenderComponent
+class PL_RMLUIPLUGIN_DLL plRmlUiCanvas2DComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plRmlUiCanvas2DComponent, plRenderComponent, plRmlUiCanvas2DComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plRmlUiCanvas2DComponent, plRenderComponent, plRmlUiCanvas2DComponentManager);
 
 public:
   plRmlUiCanvas2DComponent();
@@ -37,13 +37,13 @@ public:
   void SetRmlResource(const plRmlUiResourceHandle& hResource);
   const plRmlUiResourceHandle& GetRmlResource() const { return m_hResource; }
 
-  void SetOffset(const plVec2I32& offset);                // [ property ]
+  void SetOffset(const plVec2I32& vOffset);                // [ property ]
   const plVec2I32& GetOffset() const { return m_vOffset; } // [ property ]
 
-  void SetSize(const plVec2U32& size);                // [ property ]
+  void SetSize(const plVec2U32& vSize);                // [ property ]
   const plVec2U32& GetSize() const { return m_vSize; } // [ property ]
 
-  void SetAnchorPoint(const plVec2& anchorPoint);                // [ property ]
+  void SetAnchorPoint(const plVec2& vAnchorPoint);                // [ property ]
   const plVec2& GetAnchorPoint() const { return m_vAnchorPoint; } // [ property ]
 
   void SetPassInput(bool bPassInput);                // [ property ]
@@ -53,7 +53,7 @@ public:
   void SetAutobindBlackboards(bool bAutobind);                           // [ property ]
   bool GetAutobindBlackboards() const { return m_bAutobindBlackboards; } // [ property ]
 
-  plUInt32 AddDataBinding(plUniquePtr<plRmlUiDataBinding>&& dataBinding);
+  plUInt32 AddDataBinding(plUniquePtr<plRmlUiDataBinding>&& pDataBinding);
   void RemoveDataBinding(plUInt32 uiDataBindingIndex);
 
   /// \brief Adds the given blackboard as data binding. The name of the board is used as model name for the binding.
@@ -63,10 +63,10 @@ public:
   plRmlUiContext* GetOrCreateRmlContext();
   plRmlUiContext* GetRmlContext() { return m_pContext; }
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  virtual plResult GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg) override;
+  virtual plResult GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg) override;
 
 protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
@@ -77,10 +77,10 @@ protected:
   plRmlUiResourceHandle m_hResource;
   plEvent<const plResourceEvent&, plMutex>::Unsubscriber m_ResourceEventUnsubscriber;
 
-  plVec2I32 m_vOffset = plVec2I32::ZeroVector();
-  plVec2U32 m_vSize = plVec2U32::ZeroVector();
-  plVec2 m_vAnchorPoint = plVec2::ZeroVector();
-  plVec2U32 m_vReferenceResolution = plVec2U32::ZeroVector();
+  plVec2I32 m_vOffset = plVec2I32::MakeZero();
+  plVec2U32 m_vSize = plVec2U32::MakeZero();
+  plVec2 m_vAnchorPoint = plVec2::MakeZero();
+  plVec2U32 m_vReferenceResolution = plVec2U32::MakeZero();
   bool m_bPassInput = true;
   bool m_bAutobindBlackboards = true;
 

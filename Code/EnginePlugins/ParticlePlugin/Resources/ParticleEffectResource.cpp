@@ -1,13 +1,13 @@
 #include <ParticlePlugin/ParticlePluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <ParticlePlugin/Resources/ParticleEffectResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectResource, 1, plRTTIDefaultAllocator<plParticleEffectResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectResource, 1, plRTTIDefaultAllocator<plParticleEffectResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plParticleEffectResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plParticleEffectResource);
 // clang-format on
 
 plParticleEffectResource::plParticleEffectResource()
@@ -15,7 +15,7 @@ plParticleEffectResource::plParticleEffectResource()
 {
 }
 
-plParticleEffectResource::~plParticleEffectResource() {}
+plParticleEffectResource::~plParticleEffectResource() = default;
 
 plResourceLoadDesc plParticleEffectResource::UnloadData(Unload WhatToUnload)
 {
@@ -61,7 +61,7 @@ void plParticleEffectResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plParticleEffectResource, plParticleEffectResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plParticleEffectResource, plParticleEffectResourceDescriptor)
 {
   m_Desc = descriptor;
 
@@ -73,16 +73,16 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plParticleEffectResource, plParticleEffectR
   return res;
 }
 
-void plParticleEffectResourceDescriptor::Save(plStreamWriter& stream) const
+void plParticleEffectResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
-  m_Effect.Save(stream);
+  m_Effect.Save(inout_stream);
 }
 
-void plParticleEffectResourceDescriptor::Load(plStreamReader& stream)
+void plParticleEffectResourceDescriptor::Load(plStreamReader& inout_stream)
 {
-  m_Effect.Load(stream);
+  m_Effect.Load(inout_stream);
 }
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Resources_ParticleEffectResource);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Resources_ParticleEffectResource);

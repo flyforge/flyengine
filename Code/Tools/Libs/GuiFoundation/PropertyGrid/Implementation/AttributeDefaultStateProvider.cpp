@@ -3,7 +3,7 @@
 #include <GuiFoundation/PropertyGrid/AttributeDefaultStateProvider.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-static plSharedPtr<plDefaultStateProvider> g_pAttributeDefaultStateProvider = PLASMA_DEFAULT_NEW(plAttributeDefaultStateProvider);
+static plSharedPtr<plDefaultStateProvider> g_pAttributeDefaultStateProvider = PL_DEFAULT_NEW(plAttributeDefaultStateProvider);
 plSharedPtr<plDefaultStateProvider> plAttributeDefaultStateProvider::CreateProvider(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp)
 {
   // One global instance handles all. No need to create a new instance per request as no state need to be tracked.
@@ -96,8 +96,8 @@ plStatus plAttributeDefaultStateProvider::CreateRevertContainerDiff(SuperArray s
     }
     break;
     default:
-      PLASMA_REPORT_FAILURE("Unreachable code");
+      PL_REPORT_FAILURE("Unreachable code");
       break;
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

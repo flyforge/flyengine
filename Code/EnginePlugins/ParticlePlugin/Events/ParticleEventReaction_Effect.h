@@ -5,9 +5,9 @@
 #include <Foundation/Types/SharedPtr.h>
 #include <ParticlePlugin/Events/ParticleEventReaction.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReactionFactory_Effect final : public plParticleEventReactionFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEventReactionFactory_Effect final : public plParticleEventReactionFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory_Effect, plParticleEventReactionFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory_Effect, plParticleEventReactionFactory);
 
 public:
   plParticleEventReactionFactory_Effect();
@@ -15,8 +15,8 @@ public:
   virtual const plRTTI* GetEventReactionType() const override;
   virtual void CopyReactionProperties(plParticleEventReaction* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plString m_sEffect;
   plEnum<plSurfaceInteractionAlignment> m_Alignment;
@@ -33,9 +33,9 @@ private:
   plSharedPtr<plParticleEffectParameters> m_pParameters;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReaction_Effect final : public plParticleEventReaction
+class PL_PARTICLEPLUGIN_DLL plParticleEventReaction_Effect final : public plParticleEventReaction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReaction_Effect, plParticleEventReaction);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReaction_Effect, plParticleEventReaction);
 
 public:
   plParticleEventReaction_Effect();

@@ -12,10 +12,10 @@ class dtNavMesh;
 ///
 /// Through this you can get access to one of the available navmeshes.
 /// Additionally, it also provides access to the different path search filters.
-class PLASMA_AIPLUGIN_DLL plAiNavMeshWorldModule final : public plWorldModule
+class PL_AIPLUGIN_DLL plAiNavMeshWorldModule final : public plWorldModule
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAiNavMeshWorldModule, plWorldModule);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plAiNavMeshWorldModule, plWorldModule);
 
 public:
   plAiNavMeshWorldModule(plWorld* pWorld);

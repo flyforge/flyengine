@@ -5,7 +5,7 @@
 
 class plTypeScriptParameter : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameter, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameter, plReflectedClass);
 
 public:
   plString m_sName;
@@ -13,7 +13,7 @@ public:
 
 class plTypeScriptParameterNumber : public plTypeScriptParameter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterNumber, plTypeScriptParameter);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterNumber, plTypeScriptParameter);
 
 public:
   double m_DefaultValue = 0;
@@ -21,7 +21,7 @@ public:
 
 class plTypeScriptParameterBool : public plTypeScriptParameter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterBool, plTypeScriptParameter);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterBool, plTypeScriptParameter);
 
 public:
   bool m_DefaultValue = false;
@@ -29,7 +29,7 @@ public:
 
 class plTypeScriptParameterString : public plTypeScriptParameter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterString, plTypeScriptParameter);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterString, plTypeScriptParameter);
 
 public:
   plString m_DefaultValue;
@@ -37,7 +37,7 @@ public:
 
 class plTypeScriptParameterVec3 : public plTypeScriptParameter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterVec3, plTypeScriptParameter);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterVec3, plTypeScriptParameter);
 
 public:
   plVec3 m_DefaultValue = plVec3(0.0f);
@@ -45,7 +45,7 @@ public:
 
 class plTypeScriptParameterColor : public plTypeScriptParameter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterColor, plTypeScriptParameter);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptParameterColor, plTypeScriptParameter);
 
 public:
   plColor m_DefaultValue = plColor::White;
@@ -54,7 +54,7 @@ public:
 
 class plTypeScriptAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptAssetProperties, plReflectedClass);
 
 public:
   plTypeScriptAssetProperties();

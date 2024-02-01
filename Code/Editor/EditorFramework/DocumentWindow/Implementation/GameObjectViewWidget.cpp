@@ -7,12 +7,12 @@
 #include <EditorFramework/InputContexts/OrthoGizmoContext.h>
 #include <EditorFramework/InputContexts/SelectionContext.h>
 
-plQtGameObjectViewWidget::plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig)
+plQtGameObjectViewWidget::plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig)
   : plQtEngineViewWidget(pParent, pOwnerWindow, pViewConfig)
 {
-  m_pSelectionContext = PLASMA_DEFAULT_NEW(plSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
-  m_pCameraMoveContext = PLASMA_DEFAULT_NEW(plCameraMoveContext, pOwnerWindow, this);
-  m_pOrthoGizmoContext = PLASMA_DEFAULT_NEW(plOrthoGizmoContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
+  m_pSelectionContext = PL_DEFAULT_NEW(plSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
+  m_pCameraMoveContext = PL_DEFAULT_NEW(plCameraMoveContext, pOwnerWindow, this);
+  m_pOrthoGizmoContext = PL_DEFAULT_NEW(plOrthoGizmoContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
 
   m_pCameraMoveContext->SetCamera(&m_pViewConfig->m_Camera);
   m_pCameraMoveContext->LoadState();
@@ -25,9 +25,9 @@ plQtGameObjectViewWidget::plQtGameObjectViewWidget(QWidget* pParent, plQtGameObj
 
 plQtGameObjectViewWidget::~plQtGameObjectViewWidget()
 {
-  PLASMA_DEFAULT_DELETE(m_pOrthoGizmoContext);
-  PLASMA_DEFAULT_DELETE(m_pSelectionContext);
-  PLASMA_DEFAULT_DELETE(m_pCameraMoveContext);
+  PL_DEFAULT_DELETE(m_pOrthoGizmoContext);
+  PL_DEFAULT_DELETE(m_pSelectionContext);
+  PL_DEFAULT_DELETE(m_pCameraMoveContext);
 }
 
 void plQtGameObjectViewWidget::SyncToEngine()
@@ -65,8 +65,6 @@ void plQtGameObjectViewWidget::HandleMarqueePickingResult(const plViewMarqueePic
     auto pObject = pObjMan->GetObject(guid);
     newSelection.PushBack(pObject);
   }
-
-  const plDocumentObject* pRoot = pObjMan->GetRootObject();
 
   for (plUuid guid : pMsg->m_ObjectGuids)
   {

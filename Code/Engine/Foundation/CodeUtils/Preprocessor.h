@@ -12,7 +12,7 @@
 
 /// \brief This object caches files in a tokenized state. It can be shared among plPreprocessor instances to improve performance when
 /// they access the same files.
-class PLASMA_FOUNDATION_DLL plTokenizedFileCache
+class PL_FOUNDATION_DLL plTokenizedFileCache
 {
 public:
   struct FileData
@@ -59,7 +59,7 @@ private:
 ///   * #include handling
 ///   * #pragma once
 ///   * #warning and #error for custom failure messages
-class PLASMA_FOUNDATION_DLL plPreprocessor
+class PL_FOUNDATION_DLL plPreprocessor
 {
 public:
   /// \brief Describes the type of #include that was encountered during preprocessing
@@ -164,7 +164,7 @@ public:
   /// \a sDefinition must be in the form of the text that follows a #define statement. So to define the macro "WIN32", just
   /// pass that string. You can define any macro that could also be defined in the source files.
   ///
-  /// If the definition is invalid, PLASMA_FAILURE is returned. Also the preprocessor might end up in an invalid state, so using it any
+  /// If the definition is invalid, PL_FAILURE is returned. Also the preprocessor might end up in an invalid state, so using it any
   /// further might fail (including crashing).
   plResult AddCustomDefine(plStringView sDefinition);
 
@@ -213,7 +213,7 @@ private:
   // If changing its position in the class, make sure it always comes before all
   // other members that depend on it to ensure deallocations in those members
   // happen before the allocator get destroyed.
-  plAllocator<plMemoryPolicies::plHeapAllocation, plMemoryTrackingFlags::None> m_ClassAllocator;
+  plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::Nothing> m_ClassAllocator;
 
   bool m_bPassThroughPragma;
   bool m_bPassThroughLine;
@@ -280,7 +280,7 @@ private: // *** Macro Definition ***
 
   plMap<plString256, MacroDefinition> m_Macros;
 
-  static const plInt32 s_iMacroParameter0 = plTokenType::ENUM_COUNT + 2;
+  static constexpr plInt32 s_iMacroParameter0 = plTokenType::ENUM_COUNT + 2;
   static plString s_ParamNames[32];
   plToken m_ParameterTokens[32];
 
@@ -333,7 +333,7 @@ private: // *** Macro Expansion ***
 
   enum TokenFlags : plUInt32
   {
-    NoFurtherExpansion = PLASMA_BIT(0),
+    NoFurtherExpansion = PL_BIT(0),
   };
 
   plToken m_TokenFile;
@@ -389,7 +389,7 @@ private: // *** Other ***
       const_cast<plToken*>(_pe.m_pToken)->m_File = m_CurrentFileStack.PeekBack().m_sVirtualFileName;                                                   \
     }                                                                                                                                                  \
     plStringBuilder sInfo;                                                                                                                             \
-    sInfo.Format(FormatStr, ##__VA_ARGS__);                                                                                                            \
+    sInfo.SetFormat(FormatStr, ##__VA_ARGS__);                                                                                                            \
     _pe.m_sInfo = sInfo;                                                                                                                               \
     m_ProcessingEvents.Broadcast(_pe);                                                                                                                 \
     plLog::Type(m_pLog, "File '{0}', Line {1} ({2}): {3}", _pe.m_pToken->m_File.GetString(), _pe.m_pToken->m_uiLine, _pe.m_pToken->m_uiColumn, sInfo); \

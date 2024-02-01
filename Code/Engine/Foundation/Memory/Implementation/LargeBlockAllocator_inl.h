@@ -1,68 +1,68 @@
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_ALWAYS_INLINE plDataBlock<T, SizeInBytes>::plDataBlock(T* pData, plUInt32 uiCount)
+PL_ALWAYS_INLINE plDataBlock<T, SizeInBytes>::plDataBlock(T* pData, plUInt32 uiCount)
 {
   m_pData = pData;
   m_uiCount = uiCount;
 }
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_FORCE_INLINE T* plDataBlock<T, SizeInBytes>::ReserveBack()
+PL_FORCE_INLINE T* plDataBlock<T, SizeInBytes>::ReserveBack()
 {
-  PLASMA_ASSERT_DEV(m_uiCount < CAPACITY, "Block is full.");
+  PL_ASSERT_DEV(m_uiCount < CAPACITY, "Block is full.");
   return m_pData + m_uiCount++;
 }
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_FORCE_INLINE T* plDataBlock<T, SizeInBytes>::PopBack()
+PL_FORCE_INLINE T* plDataBlock<T, SizeInBytes>::PopBack()
 {
-  PLASMA_ASSERT_DEV(m_uiCount > 0, "Block is empty");
+  PL_ASSERT_DEV(m_uiCount > 0, "Block is empty");
   --m_uiCount;
   return m_pData + m_uiCount;
 }
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_ALWAYS_INLINE bool plDataBlock<T, SizeInBytes>::IsEmpty() const
+PL_ALWAYS_INLINE bool plDataBlock<T, SizeInBytes>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_ALWAYS_INLINE bool plDataBlock<T, SizeInBytes>::IsFull() const
+PL_ALWAYS_INLINE bool plDataBlock<T, SizeInBytes>::IsFull() const
 {
   return m_uiCount == CAPACITY;
 }
 
 template <typename T, plUInt32 SizeInBytes>
-PLASMA_FORCE_INLINE T& plDataBlock<T, SizeInBytes>::operator[](plUInt32 uiIndex) const
+PL_FORCE_INLINE T& plDataBlock<T, SizeInBytes>::operator[](plUInt32 uiIndex) const
 {
-  PLASMA_ASSERT_DEV(uiIndex < m_uiCount, "Out of bounds access. Data block has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex < m_uiCount, "Out of bounds access. Data block has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
   return m_pData[uiIndex];
 }
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <plUInt32 BlockSize>
-plLargeBlockAllocator<BlockSize>::plLargeBlockAllocator(plStringView sName, plAllocatorBase* pParent, plBitflags<plMemoryTrackingFlags> flags)
-  : m_TrackingFlags(flags)
+plLargeBlockAllocator<BlockSize>::plLargeBlockAllocator(plStringView sName, plAllocator* pParent, plAllocatorTrackingMode mode)
+  : m_TrackingMode(mode)
   , m_SuperBlocks(pParent)
   , m_FreeBlocks(pParent)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(BlockSize >= 4096, "Block size must be 4096 or bigger");
+  PL_CHECK_AT_COMPILETIME_MSG(BlockSize >= 4096, "Block size must be 4096 or bigger");
 
-  m_Id = plMemoryTracker::RegisterAllocator(sName, flags, plPageAllocator::GetId());
+  m_Id = plMemoryTracker::RegisterAllocator(sName, mode, plPageAllocator::GetId());
   m_ThreadID = plThreadUtils::GetCurrentThreadID();
 
   const plUInt32 uiPageSize = plSystemInformation::Get().GetMemoryPageSize();
-  PLASMA_IGNORE_UNUSED(uiPageSize);
-  PLASMA_ASSERT_DEV(uiPageSize <= BlockSize, "Memory Page size is bigger than block size.");
-  PLASMA_ASSERT_DEV(BlockSize % uiPageSize == 0, "Blocksize ({0}) must be a multiple of page size ({1})", BlockSize, uiPageSize);
+  PL_IGNORE_UNUSED(uiPageSize);
+  PL_ASSERT_DEV(uiPageSize <= BlockSize, "Memory Page size is bigger than block size.");
+  PL_ASSERT_DEV(BlockSize % uiPageSize == 0, "Blocksize ({0}) must be a multiple of page size ({1})", BlockSize, uiPageSize);
 }
 
 template <plUInt32 BlockSize>
 plLargeBlockAllocator<BlockSize>::~plLargeBlockAllocator()
 {
-  PLASMA_ASSERT_RELEASE(m_ThreadID == plThreadUtils::GetCurrentThreadID(), "Allocator is deleted from another thread");
+  PL_ASSERT_RELEASE(m_ThreadID == plThreadUtils::GetCurrentThreadID(), "Allocator is deleted from another thread");
   plMemoryTracker::DeregisterAllocator(m_Id);
 
   for (plUInt32 i = 0; i < m_SuperBlocks.GetCount(); ++i)
@@ -73,7 +73,7 @@ plLargeBlockAllocator<BlockSize>::~plLargeBlockAllocator()
 
 template <plUInt32 BlockSize>
 template <typename T>
-PLASMA_FORCE_INLINE plDataBlock<T, BlockSize> plLargeBlockAllocator<BlockSize>::AllocateBlock()
+PL_FORCE_INLINE plDataBlock<T, BlockSize> plLargeBlockAllocator<BlockSize>::AllocateBlock()
 {
   struct Helper
   {
@@ -83,16 +83,16 @@ PLASMA_FORCE_INLINE plDataBlock<T, BlockSize> plLargeBlockAllocator<BlockSize>::
     };
   };
 
-  PLASMA_CHECK_AT_COMPILETIME_MSG(
+  PL_CHECK_AT_COMPILETIME_MSG(
     Helper::BLOCK_CAPACITY >= 1, "Type is too big for block allocation. Consider using regular heap allocation instead or increase the block size.");
 
-  plDataBlock<T, BlockSize> block(static_cast<T*>(Allocate(PLASMA_ALIGNMENT_OF(T))), 0);
+  plDataBlock<T, BlockSize> block(static_cast<T*>(Allocate(PL_ALIGNMENT_OF(T))), 0);
   return block;
 }
 
 template <plUInt32 BlockSize>
 template <typename T>
-PLASMA_FORCE_INLINE void plLargeBlockAllocator<BlockSize>::DeallocateBlock(plDataBlock<T, BlockSize>& inout_block)
+PL_FORCE_INLINE void plLargeBlockAllocator<BlockSize>::DeallocateBlock(plDataBlock<T, BlockSize>& inout_block)
 {
   Deallocate(inout_block.m_pData);
   inout_block.m_pData = nullptr;
@@ -100,19 +100,19 @@ PLASMA_FORCE_INLINE void plLargeBlockAllocator<BlockSize>::DeallocateBlock(plDat
 }
 
 template <plUInt32 BlockSize>
-PLASMA_ALWAYS_INLINE plStringView plLargeBlockAllocator<BlockSize>::GetName() const
+PL_ALWAYS_INLINE plStringView plLargeBlockAllocator<BlockSize>::GetName() const
 {
   return plMemoryTracker::GetAllocatorName(m_Id);
 }
 
 template <plUInt32 BlockSize>
-PLASMA_ALWAYS_INLINE plAllocatorId plLargeBlockAllocator<BlockSize>::GetId() const
+PL_ALWAYS_INLINE plAllocatorId plLargeBlockAllocator<BlockSize>::GetId() const
 {
   return m_Id;
 }
 
 template <plUInt32 BlockSize>
-PLASMA_ALWAYS_INLINE const plAllocatorBase::Stats& plLargeBlockAllocator<BlockSize>::GetStats() const
+PL_ALWAYS_INLINE const plAllocator::Stats& plLargeBlockAllocator<BlockSize>::GetStats() const
 {
   return plMemoryTracker::GetAllocatorStats(m_Id);
 }
@@ -120,11 +120,11 @@ PLASMA_ALWAYS_INLINE const plAllocatorBase::Stats& plLargeBlockAllocator<BlockSi
 template <plUInt32 BlockSize>
 void* plLargeBlockAllocator<BlockSize>::Allocate(size_t uiAlign)
 {
-  PLASMA_ASSERT_RELEASE(plMath::IsPowerOf2((plUInt32)uiAlign), "Alignment must be power of two");
+  PL_ASSERT_RELEASE(plMath::IsPowerOf2((plUInt32)uiAlign), "Alignment must be power of two");
 
   plTime fAllocationTime = plTime::Now();
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   void* ptr = nullptr;
 
@@ -145,7 +145,7 @@ void* plLargeBlockAllocator<BlockSize>::Allocate(size_t uiAlign)
   {
     // Allocate a new super block
     void* pMemory = plPageAllocator::AllocatePage(SuperBlock::SIZE_IN_BYTES);
-    PLASMA_CHECK_ALIGNMENT(pMemory, uiAlign);
+    PL_CHECK_ALIGNMENT(pMemory, uiAlign);
 
     SuperBlock superBlock;
     superBlock.m_pBasePtr = pMemory;
@@ -162,9 +162,9 @@ void* plLargeBlockAllocator<BlockSize>::Allocate(size_t uiAlign)
     ptr = pMemory;
   }
 
-  if ((m_TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if (m_TrackingMode >= plAllocatorTrackingMode::AllocationStats)
   {
-    plMemoryTracker::AddAllocation(m_Id, m_TrackingFlags, ptr, BlockSize, uiAlign, plTime::Now() - fAllocationTime);
+    plMemoryTracker::AddAllocation(m_Id, m_TrackingMode, ptr, BlockSize, uiAlign, plTime::Now() - fAllocationTime);
   }
 
   return ptr;
@@ -173,9 +173,9 @@ void* plLargeBlockAllocator<BlockSize>::Allocate(size_t uiAlign)
 template <plUInt32 BlockSize>
 void plLargeBlockAllocator<BlockSize>::Deallocate(void* ptr)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
-  if ((m_TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  if (m_TrackingMode >= plAllocatorTrackingMode::AllocationStats)
   {
     plMemoryTracker::RemoveAllocation(m_Id, ptr);
   }
@@ -183,7 +183,7 @@ void plLargeBlockAllocator<BlockSize>::Deallocate(void* ptr)
   // find super block
   bool bFound = false;
   plUInt32 uiSuperBlockIndex = m_SuperBlocks.GetCount();
-  ptrdiff_t diff = 0;
+  std::ptrdiff_t diff = 0;
 
   for (; uiSuperBlockIndex-- > 0;)
   {
@@ -195,7 +195,8 @@ void plLargeBlockAllocator<BlockSize>::Deallocate(void* ptr)
     }
   }
 
-  PLASMA_ASSERT_DEV(bFound, "'{0}' was not allocated with this allocator", plArgP(ptr));
+  PL_IGNORE_UNUSED(bFound);
+  PL_ASSERT_DEV(bFound, "'{0}' was not allocated with this allocator", plArgP(ptr));
 
   SuperBlock& superBlock = m_SuperBlocks[uiSuperBlockIndex];
   --superBlock.m_uiUsedBlocks;

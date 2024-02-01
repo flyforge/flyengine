@@ -4,15 +4,15 @@
 #include <RendererFoundation/Device/SwapChain.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGALSwapChain, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGALSwapChain, plNoBase, 1, plRTTINoAllocator)
 {
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGALWindowSwapChain, plGALSwapChain, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGALWindowSwapChain, plGALSwapChain, 1, plRTTINoAllocator)
 {
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plGALSwapChainCreationDescription CreateSwapChainCreationDescription(const plRTTI* pType)
@@ -27,7 +27,7 @@ plGALSwapChain::plGALSwapChain(const plRTTI* pSwapChainType)
 {
 }
 
-plGALSwapChain::~plGALSwapChain() {}
+plGALSwapChain::~plGALSwapChain() = default;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -47,8 +47,8 @@ void plGALWindowSwapChain::SetFactoryMethod(Functor factory)
 
 plGALSwapChainHandle plGALWindowSwapChain::Create(const plGALWindowSwapChainCreationDescription& desc)
 {
-  PLASMA_ASSERT_DEV(s_Factory.IsValid(), "No factory method assigned for plGALWindowSwapChain.");
+  PL_ASSERT_DEV(s_Factory.IsValid(), "No factory method assigned for plGALWindowSwapChain.");
   return s_Factory(desc);
 }
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Device_Implementation_SwapChain);
+PL_STATICLINK_FILE(RendererFoundation, RendererFoundation_Device_Implementation_SwapChain);

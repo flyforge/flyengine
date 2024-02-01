@@ -31,7 +31,7 @@ enum class plOpenDdlPrimitiveType
 /// \brief A low level parser for the OpenDDL format. It can incrementally parse the structure, individual blocks can be skipped.
 ///
 /// The document structure is returned through virtual functions that need to be overridden.
-class PLASMA_FOUNDATION_DLL plOpenDdlParser
+class PL_FOUNDATION_DLL plOpenDdlParser
 {
 public:
   plOpenDdlParser();
@@ -184,7 +184,7 @@ private:
   plStreamReader* m_pInput;
   plDynamicArray<plUInt8> m_Cache;
 
-  static const plUInt32 s_uiMaxIdentifierLength = 64;
+  static constexpr plUInt32 s_uiMaxIdentifierLength = 64;
 
   plUInt8 m_uiCurByte;
   plUInt8 m_uiNextByte;

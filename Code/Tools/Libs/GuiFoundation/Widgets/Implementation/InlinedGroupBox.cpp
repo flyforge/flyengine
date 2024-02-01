@@ -27,7 +27,7 @@ plQtInlinedGroupBox::plQtInlinedGroupBox(QWidget* pParent)
 
   QHBoxLayout* pHeaderLayout = new QHBoxLayout(m_pHeader);
   pHeaderLayout->setSpacing(0);
-  pHeaderLayout->setContentsMargins(0, 1, 0, 0);
+  pHeaderLayout->setContentsMargins(0, 0, 0, 0);
   pHeaderLayout->setAlignment(Qt::AlignTop);
 
   pRootLayout->addSpacerItem(new QSpacerItem(0, 0));
@@ -38,9 +38,9 @@ plQtInlinedGroupBox::plQtInlinedGroupBox(QWidget* pParent)
   installEventFilter(this);
 }
 
-void plQtInlinedGroupBox::SetTitle(const char* szTitle)
+void plQtInlinedGroupBox::SetTitle(plStringView sTitle)
 {
-  plQtGroupBoxBase::SetTitle(szTitle);
+  plQtGroupBoxBase::SetTitle(sTitle);
   update();
 }
 

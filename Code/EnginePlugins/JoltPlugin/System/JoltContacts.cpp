@@ -19,7 +19,7 @@ plCVarBool cvar_PhysicsReactionsVisRolls("Jolt.Reactions.VisRolls", false, plCVa
 
 void plJoltContactListener::RemoveTrigger(const plJoltTriggerComponent* pTrigger)
 {
-  PLASMA_LOCK(m_TriggerMutex);
+  PL_LOCK(m_TriggerMutex);
 
   for (auto it = m_Trigs.GetIterator(); it.IsValid();)
   {
@@ -150,7 +150,7 @@ bool plJoltContactListener::ActivateTrigger(const JPH::Body& body1, const JPH::B
   {
     pTrigger->PostTriggerMessage(pComponent->GetOwner()->GetHandle(), plTriggerState::Activated);
 
-    PLASMA_LOCK(m_TriggerMutex);
+    PL_LOCK(m_TriggerMutex);
 
     const plUInt64 uiStoreID = (uiBody1id < uiBody2id) ? (uiBody1id << 32 | uiBody2id) : (uiBody2id << 32 | uiBody1id);
     auto& trig = m_Trigs[uiStoreID];
@@ -164,7 +164,7 @@ bool plJoltContactListener::ActivateTrigger(const JPH::Body& body1, const JPH::B
 
 void plJoltContactListener::DeactivateTrigger(plUInt64 uiBody1id, plUInt64 uiBody2id)
 {
-  PLASMA_LOCK(m_TriggerMutex);
+  PL_LOCK(m_TriggerMutex);
 
   const plUInt64 uiStoreID = (uiBody1id < uiBody2id) ? (uiBody1id << 32 | uiBody2id) : (uiBody2id << 32 | uiBody1id);
   auto itTrig = m_Trigs.Find(uiStoreID);
@@ -180,9 +180,9 @@ void plJoltContactListener::DeactivateTrigger(plUInt64 uiBody1id, plUInt64 uiBod
 
 void plJoltContactEvents::SpawnPhysicsImpactReactions()
 {
-  PLASMA_PROFILE_SCOPE("SpawnPhysicsImpactReactions");
+  PL_PROFILE_SCOPE("SpawnPhysicsImpactReactions");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plUInt32 uiMaxPrefabsToSpawn = cvar_PhysicsReactionsMaxImpacts;
 
@@ -196,14 +196,14 @@ void plJoltContactEvents::SpawnPhysicsImpactReactions()
 
         if (cvar_PhysicsReactionsVisImpacts)
         {
-          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::LightGreen, plTransform(ic.m_vPosition), plTime::Seconds(3));
+          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::LightGreen, plTransform(ic.m_vPosition), plTime::MakeFromSeconds(3));
         }
       }
       else
       {
         if (cvar_PhysicsReactionsVisDiscardedImpacts)
         {
-          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkGray, plTransform(ic.m_vPosition), plTime::Seconds(1));
+          plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkGray, plTransform(ic.m_vPosition), plTime::MakeFromSeconds(1));
         }
       }
     }
@@ -214,9 +214,9 @@ void plJoltContactEvents::SpawnPhysicsImpactReactions()
 
 void plJoltContactEvents::UpdatePhysicsSlideReactions()
 {
-  PLASMA_PROFILE_SCOPE("UpdatePhysicsSlideReactions");
+  PL_PROFILE_SCOPE("UpdatePhysicsSlideReactions");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto& slideInfo : m_SlidingOrRollingActors)
   {
@@ -256,7 +256,7 @@ void plJoltContactEvents::UpdatePhysicsSlideReactions()
 
       if (cvar_PhysicsReactionsVisSlides)
       {
-        plDebugRenderer::DrawLineBox(m_pWorld, plBoundingBox(plVec3(-0.5f), plVec3(0.5f)), plColor::BlueViolet, plTransform(slideInfo.m_vContactPosition));
+        plDebugRenderer::DrawLineBox(m_pWorld, plBoundingBox::MakeFromMinMax(plVec3(-0.5f), plVec3(0.5f)), plColor::BlueViolet, plTransform(slideInfo.m_vContactPosition));
       }
 
       slideInfo.m_bStillSliding = false;
@@ -274,9 +274,9 @@ void plJoltContactEvents::UpdatePhysicsSlideReactions()
 
 void plJoltContactEvents::UpdatePhysicsRollReactions()
 {
-  PLASMA_PROFILE_SCOPE("UpdatePhysicsRollReactions");
+  PL_PROFILE_SCOPE("UpdatePhysicsRollReactions");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto& rollInfo : m_SlidingOrRollingActors)
   {
@@ -337,7 +337,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
 {
   const float fDistanceSqr = (vAvgPos - m_vMainCameraPosition).GetLengthSquared();
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   InteractionContact* ic = nullptr;
 
@@ -373,7 +373,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
     {
       if (cvar_PhysicsReactionsVisDiscardedImpacts)
       {
-        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(vAvgPos), plTime::Seconds(3));
+        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(vAvgPos), plTime::MakeFromSeconds(3));
       }
 
       return;
@@ -382,7 +382,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
     {
       if (cvar_PhysicsReactionsVisDiscardedImpacts)
       {
-        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(m_InteractionContacts[uiBestScore].m_vPosition), plTime::Seconds(3));
+        plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DimGrey, plTransform(m_InteractionContacts[uiBestScore].m_vPosition), plTime::MakeFromSeconds(3));
       }
     }
 
@@ -421,7 +421,7 @@ void plJoltContactEvents::OnContact_ImpactReaction(const plVec3& vAvgPos, const 
 
   if (cvar_PhysicsReactionsVisDiscardedImpacts)
   {
-    plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkOrange, plTransform(vAvgPos), plTime::Seconds(10));
+    plDebugRenderer::AddPersistentCross(m_pWorld, 1.0f, plColor::DarkOrange, plTransform(vAvgPos), plTime::MakeFromSeconds(10));
   }
 }
 
@@ -484,7 +484,7 @@ plJoltContactEvents::SlideAndRollInfo* plJoltContactEvents::FindSlideOrRollInfo(
 void plJoltContactEvents::OnContact_RollReaction(const JPH::Body& body0, const JPH::Body& body1, const JPH::ContactManifold& manifold, plBitflags<plOnJoltContact> onContact0, plBitflags<plOnJoltContact> onContact1, const plVec3& vAvgPos, const plVec3& vAvgNormal0)
 {
   // only consider something 'rolling' when it turns faster than this (per second)
-  constexpr plAngle rollThreshold = plAngle::Degree(45);
+  constexpr plAngle rollThreshold = plAngle::MakeFromDegree(45);
 
   plBitflags<plOnJoltContact> contactFlags[2] = {onContact0, onContact1};
   const JPH::Body* bodies[2] = {&body0, &body1};
@@ -506,7 +506,7 @@ void plJoltContactEvents::OnContact_RollReaction(const JPH::Body& body0, const J
         {
           if (!pMaterial->m_pSurface->GetDescriptor().m_sRollInteractionPrefab.IsEmpty())
           {
-            PLASMA_LOCK(m_Mutex);
+            PL_LOCK(m_Mutex);
 
             if (auto pInfo = FindSlideOrRollInfo(bodies[i], vAvgPos))
             {
@@ -523,7 +523,7 @@ void plJoltContactEvents::OnContact_RollReaction(const JPH::Body& body0, const J
 
 void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const JPH::Body& body1, const JPH::ContactManifold& manifold, plBitflags<plOnJoltContact> onContact0, plBitflags<plOnJoltContact> onContact1, const plVec3& vAvgPos, const plVec3& vAvgNormal0)
 {
-  plVec3 vVelocity[2] = {plVec3::ZeroVector(), plVec3::ZeroVector()};
+  plVec3 vVelocity[2] = {plVec3::MakeZero(), plVec3::MakeZero()};
 
   {
     vVelocity[0] = plJoltConversionUtils::ToVec3(body0.GetLinearVelocity());
@@ -546,7 +546,7 @@ void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const 
     const plVec3 vRelativeVelocityDir = vRelativeVelocity.GetNormalized();
 
     plVec3 vAvgNormal = vAvgNormal0;
-    vAvgNormal.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
+    vAvgNormal.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
 
     // an object is only 'sliding' if it moves at roughly 90 degree along another object
     constexpr float slideAngle = 0.17f; // plMath ::Cos(plAngle::MakeFromDegree(80));
@@ -571,7 +571,7 @@ void plJoltContactEvents::OnContact_SlideReaction(const JPH::Body& body0, const 
             {
               if (!pMaterial->m_pSurface->GetDescriptor().m_sSlideInteractionPrefab.IsEmpty())
               {
-                PLASMA_LOCK(m_Mutex);
+                PL_LOCK(m_Mutex);
 
                 if (auto pInfo = FindSlideOrRollInfo(bodies[i], vAvgPos))
                 {
@@ -605,5 +605,5 @@ void plJoltContactEvents::OnContact_SlideAndRollReaction(const JPH::Body& body0,
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltContacts);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltContacts);
 

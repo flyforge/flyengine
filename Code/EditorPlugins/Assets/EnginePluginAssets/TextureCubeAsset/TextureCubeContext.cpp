@@ -6,23 +6,23 @@
 #include <RendererCore/Meshes/MeshComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeContext, 1, plRTTIDefaultAllocator<plTextureCubeContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeContext, 1, plRTTIDefaultAllocator<plTextureCubeContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Texture Cube"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Texture Cube"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTextureCubeContext::plTextureCubeContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plTextureCubeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plTextureCubeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plDocumentConfigMsgToEngine>())
   {
@@ -36,7 +36,7 @@ void plTextureCubeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pM
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
+  plEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plTextureCubeContext::OnInitialize()
@@ -110,13 +110,13 @@ void plTextureCubeContext::OnInitialize()
 
   // Preview Object
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     plGameObjectDesc obj;
     plGameObject* pObj;
 
     obj.m_sName.Assign("TextureCubePreview");
-    obj.m_LocalRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+    obj.m_LocalRotation = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
     m_hPreviewObject = m_pWorld->CreateObject(obj, pObj);
 
     plMeshComponent* pMesh;
@@ -126,14 +126,14 @@ void plTextureCubeContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plTextureCubeContext::CreateViewContext()
+plEngineProcessViewContext* plTextureCubeContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plTextureCubeViewContext, this);
+  return PL_DEFAULT_NEW(plTextureCubeViewContext, this);
 }
 
-void plTextureCubeContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plTextureCubeContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
 void plTextureCubeContext::OnResourceEvent(const plResourceEvent& e)

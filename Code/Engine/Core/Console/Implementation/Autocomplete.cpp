@@ -3,7 +3,7 @@
 #include <Core/Console/Console.h>
 #include <Core/Console/QuakeConsole.h>
 
-void plCommandInterpreter::FindPossibleCVars(plStringView sVariable, plDeque<plString>& AutoCompleteOptions, plDeque<plConsoleString>& AutoCompleteDescriptions)
+void plCommandInterpreter::FindPossibleCVars(plStringView sVariable, plDeque<plString>& inout_autoCompleteOptions, plDeque<plConsoleString>& inout_autoCompleteDescriptions)
 {
   plStringBuilder sText;
 
@@ -12,21 +12,21 @@ void plCommandInterpreter::FindPossibleCVars(plStringView sVariable, plDeque<plS
   {
     if (pCVar->GetName().StartsWith_NoCase(sVariable))
     {
-      sText.Format("    {0} = {1}", pCVar->GetName(), plQuakeConsole::GetFullInfoAsString(pCVar));
+      sText.SetFormat("    {0} = {1}", pCVar->GetName(), plQuakeConsole::GetFullInfoAsString(pCVar));
 
       plConsoleString cs;
       cs.m_sText = sText;
       cs.m_Type = plConsoleString::Type::VarName;
-      AutoCompleteDescriptions.PushBack(cs);
+      inout_autoCompleteDescriptions.PushBack(cs);
 
-      AutoCompleteOptions.PushBack(pCVar->GetName());
+      inout_autoCompleteOptions.PushBack(pCVar->GetName());
     }
 
     pCVar = pCVar->GetNextInstance();
   }
 }
 
-void plCommandInterpreter::FindPossibleFunctions(plStringView sVariable, plDeque<plString>& AutoCompleteOptions, plDeque<plConsoleString>& AutoCompleteDescriptions)
+void plCommandInterpreter::FindPossibleFunctions(plStringView sVariable, plDeque<plString>& inout_autoCompleteOptions, plDeque<plConsoleString>& inout_autoCompleteDescriptions)
 {
   plStringBuilder sText;
 
@@ -35,14 +35,14 @@ void plCommandInterpreter::FindPossibleFunctions(plStringView sVariable, plDeque
   {
     if (pFunc->GetName().StartsWith_NoCase(sVariable))
     {
-      sText.Format("    {0} {1}", pFunc->GetName(), pFunc->GetDescription());
+      sText.SetFormat("    {0} {1}", pFunc->GetName(), pFunc->GetDescription());
 
       plConsoleString cs;
       cs.m_sText = sText;
       cs.m_Type = plConsoleString::Type::FuncName;
-      AutoCompleteDescriptions.PushBack(cs);
+      inout_autoCompleteDescriptions.PushBack(cs);
 
-      AutoCompleteOptions.PushBack(pFunc->GetName());
+      inout_autoCompleteOptions.PushBack(pFunc->GetName());
     }
 
     pFunc = pFunc->GetNextInstance();
@@ -59,7 +59,7 @@ const plString plQuakeConsole::GetValueAsString(plCVar* pCVar)
     case plCVarType::Int:
     {
       plCVarInt* pInt = static_cast<plCVarInt*>(pCVar);
-      s.Format("{0}", pInt->GetValue());
+      s.SetFormat("{0}", pInt->GetValue());
     }
     break;
 
@@ -76,14 +76,14 @@ const plString plQuakeConsole::GetValueAsString(plCVar* pCVar)
     case plCVarType::String:
     {
       plCVarString* pString = static_cast<plCVarString*>(pCVar);
-      s.Format("\"{0}\"", pString->GetValue());
+      s.SetFormat("\"{0}\"", pString->GetValue());
     }
     break;
 
     case plCVarType::Float:
     {
       plCVarFloat* pFloat = static_cast<plCVarFloat*>(pCVar);
-      s.Format("{0}", plArgF(pFloat->GetValue(), 3));
+      s.SetFormat("{0}", plArgF(pFloat->GetValue(), 3));
     }
     break;
 
@@ -98,7 +98,7 @@ plString plQuakeConsole::GetFullInfoAsString(plCVar* pCVar)
 {
   plStringBuilder s = GetValueAsString(pCVar);
 
-  const bool bAnyFlags = pCVar->GetFlags().IsAnySet(plCVarFlags::RequiresRestart | plCVarFlags::Save);
+  const bool bAnyFlags = pCVar->GetFlags().IsAnySet(plCVarFlags::Save | plCVarFlags::ShowRequiresRestartMsg);
 
   if (bAnyFlags)
     s.Append(" [ ");
@@ -106,7 +106,7 @@ plString plQuakeConsole::GetFullInfoAsString(plCVar* pCVar)
   if (pCVar->GetFlags().IsAnySet(plCVarFlags::Save))
     s.Append("SAVE ");
 
-  if (pCVar->GetFlags().IsAnySet(plCVarFlags::RequiresRestart))
+  if (pCVar->GetFlags().IsAnySet(plCVarFlags::ShowRequiresRestartMsg))
     s.Append("RESTART ");
 
   if (bAnyFlags)
@@ -115,20 +115,20 @@ plString plQuakeConsole::GetFullInfoAsString(plCVar* pCVar)
   return s;
 }
 
-const plString plCommandInterpreter::FindCommonString(const plDeque<plString>& vStrings)
+const plString plCommandInterpreter::FindCommonString(const plDeque<plString>& strings)
 {
   plStringBuilder sCommon;
   plUInt32 c;
 
   plUInt32 uiPos = 0;
-  auto it1 = vStrings[0].GetIteratorFront();
+  auto it1 = strings[0].GetIteratorFront();
   while (it1.IsValid())
   {
     c = it1.GetCharacter();
 
-    for (int v = 1; v < (int)vStrings.GetCount(); v++)
+    for (int v = 1; v < (int)strings.GetCount(); v++)
     {
-      auto it2 = vStrings[v].GetIteratorFront();
+      auto it2 = strings[v].GetIteratorFront();
 
       it2 += uiPos;
 
@@ -145,11 +145,11 @@ const plString plCommandInterpreter::FindCommonString(const plDeque<plString>& v
   return sCommon;
 }
 
-void plCommandInterpreter::AutoComplete(plCommandInterpreterState& inout_State)
+void plCommandInterpreter::AutoComplete(plCommandInterpreterState& inout_state)
 {
-  plString sVarName = inout_State.m_sInput;
+  plString sVarName = inout_state.m_sInput;
 
-  auto it = rbegin(inout_State.m_sInput);
+  auto it = rbegin(inout_state.m_sInput);
 
   // dots are allowed in CVar names
   while (it.IsValid() && (it.GetCharacter() == '.' || !plStringUtils::IsIdentifierDelimiter_C_Code(*it)))
@@ -172,26 +172,23 @@ void plCommandInterpreter::AutoComplete(plCommandInterpreterState& inout_State)
   {
     AutoCompleteDescriptions.Sort();
 
-    inout_State.AddOutputLine("");
+    inout_state.AddOutputLine("");
 
     for (plUInt32 i = 0; i < AutoCompleteDescriptions.GetCount(); i++)
     {
-      inout_State.AddOutputLine(AutoCompleteDescriptions[i].m_sText.GetData(), AutoCompleteDescriptions[i].m_Type);
+      inout_state.AddOutputLine(AutoCompleteDescriptions[i].m_sText.GetData(), AutoCompleteDescriptions[i].m_Type);
     }
 
-    inout_State.AddOutputLine("");
+    inout_state.AddOutputLine("");
   }
 
   if (AutoCompleteOptions.GetCount() > 0)
   {
     if (szLastWordDelimiter != nullptr)
-      inout_State.m_sInput = plStringView(inout_State.m_sInput.GetData(), szLastWordDelimiter + 1);
+      inout_state.m_sInput = plStringView(inout_state.m_sInput.GetData(), szLastWordDelimiter + 1);
     else
-      inout_State.m_sInput.Clear();
+      inout_state.m_sInput.Clear();
 
-    inout_State.m_sInput.Append(FindCommonString(AutoCompleteOptions).GetData());
+    inout_state.m_sInput.Append(FindCommonString(AutoCompleteOptions).GetData());
   }
 }
-
-
-PLASMA_STATICLINK_FILE(Core, Core_Console_Implementation_Autocomplete);

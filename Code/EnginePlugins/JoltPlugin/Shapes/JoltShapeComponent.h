@@ -17,7 +17,7 @@ namespace JPH
 struct plJoltSubShape
 {
   JPH::Shape* m_pShape = nullptr;
-  plTransform m_Transform = plTransform::IdentityTransform();
+  plTransform m_Transform = plTransform::MakeIdentity();
 };
 
 /// \brief Base class for all Jolt physics shapes.
@@ -27,9 +27,9 @@ struct plJoltSubShape
 ///
 /// When an actor is created, it searches for plJoltShapeComponent on its own object and all child objects.
 /// It then adds all these shapes, with their respective transforms, to the Jolt actor.
-class PLASMA_JOLTPLUGIN_DLL plJoltShapeComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltShapeComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltShapeComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltShapeComponent, plComponent);
 
 
   //////////////////////////////////////////////////////////////////////////

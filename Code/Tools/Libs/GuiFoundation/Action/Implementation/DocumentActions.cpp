@@ -13,9 +13,9 @@
 #include <ToolsFoundation/Document/DocumentManager.h>
 #include <ToolsFoundation/Project/ToolsProject.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDocumentAction, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDocumentAction, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 ////////////////////////////////////////////////////////////////////////
 // plDocumentActions
@@ -25,32 +25,25 @@ plActionDescriptorHandle plDocumentActions::s_hSaveCategory;
 plActionDescriptorHandle plDocumentActions::s_hSave;
 plActionDescriptorHandle plDocumentActions::s_hSaveAs;
 plActionDescriptorHandle plDocumentActions::s_hSaveAll;
-plActionDescriptorHandle plDocumentActions::s_hCloseCategory;
 plActionDescriptorHandle plDocumentActions::s_hClose;
+plActionDescriptorHandle plDocumentActions::s_hCloseAll;
+plActionDescriptorHandle plDocumentActions::s_hCloseAllButThis;
 plActionDescriptorHandle plDocumentActions::s_hOpenContainingFolder;
 plActionDescriptorHandle plDocumentActions::s_hCopyAssetGuid;
 plActionDescriptorHandle plDocumentActions::s_hUpdatePrefabs;
-plActionDescriptorHandle plDocumentActions::s_hDocumentCategory;
 
 void plDocumentActions::RegisterActions()
 {
-  s_hSaveCategory = PLASMA_REGISTER_CATEGORY("SaveCategory");
-  s_hSave =
-    PLASMA_REGISTER_ACTION_1("Document.Save", plActionScope::Document, "Document", "Ctrl+S", plDocumentAction, plDocumentAction::ButtonType::Save);
-  s_hSaveAll = PLASMA_REGISTER_ACTION_1(
-    "Document.SaveAll", plActionScope::Document, "Document", "Ctrl+Shift+S", plDocumentAction, plDocumentAction::ButtonType::SaveAll);
-  s_hSaveAs =
-    PLASMA_REGISTER_ACTION_1("Document.SaveAs", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::SaveAs);
-  s_hCloseCategory = PLASMA_REGISTER_CATEGORY("CloseCategory");
-  s_hClose =
-    PLASMA_REGISTER_ACTION_1("Document.Close", plActionScope::Document, "Document", "Ctrl+W", plDocumentAction, plDocumentAction::ButtonType::Close);
-  s_hOpenContainingFolder = PLASMA_REGISTER_ACTION_1(
-    "Document.OpenContainingFolder", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::OpenContainingFolder);
-  s_hCopyAssetGuid = PLASMA_REGISTER_ACTION_1(
-    "Document.CopyAssetGuid", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::CopyAssetGuid);
-  s_hDocumentCategory = PLASMA_REGISTER_CATEGORY("Tools.DocumentCategory");
-  s_hUpdatePrefabs = PLASMA_REGISTER_ACTION_1(
-    "Prefabs.UpdateAll", plActionScope::Document, "Scene", "Ctrl+Shift+P", plDocumentAction, plDocumentAction::ButtonType::UpdatePrefabs);
+  s_hSaveCategory = PL_REGISTER_CATEGORY("SaveCategory");
+  s_hSave = PL_REGISTER_ACTION_1("Document.Save", plActionScope::Document, "Document", "Ctrl+S", plDocumentAction, plDocumentAction::ButtonType::Save);
+  s_hSaveAll = PL_REGISTER_ACTION_1("Document.SaveAll", plActionScope::Document, "Document", "Ctrl+Shift+S", plDocumentAction, plDocumentAction::ButtonType::SaveAll);
+  s_hSaveAs = PL_REGISTER_ACTION_1("Document.SaveAs", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::SaveAs);
+  s_hClose = PL_REGISTER_ACTION_1("Document.Close", plActionScope::Document, "Document", "Ctrl+W", plDocumentAction, plDocumentAction::ButtonType::Close);
+  s_hCloseAll = PL_REGISTER_ACTION_1("Document.CloseAll", plActionScope::Document, "Document", "Ctrl+Shift+W", plDocumentAction, plDocumentAction::ButtonType::CloseAll);
+  s_hCloseAllButThis = PL_REGISTER_ACTION_1("Document.CloseAllButThis", plActionScope::Document, "Document", "Shift+Alt+W", plDocumentAction, plDocumentAction::ButtonType::CloseAllButThis);
+  s_hOpenContainingFolder = PL_REGISTER_ACTION_1("Document.OpenContainingFolder", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::OpenContainingFolder);
+  s_hCopyAssetGuid = PL_REGISTER_ACTION_1("Document.CopyAssetGuid", plActionScope::Document, "Document", "", plDocumentAction, plDocumentAction::ButtonType::CopyAssetGuid);
+  s_hUpdatePrefabs = PL_REGISTER_ACTION_1("Prefabs.UpdateAll", plActionScope::Document, "Scene", "Ctrl+Shift+P", plDocumentAction, plDocumentAction::ButtonType::UpdatePrefabs);
 }
 
 void plDocumentActions::UnregisterActions()
@@ -59,47 +52,49 @@ void plDocumentActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSave);
   plActionManager::UnregisterAction(s_hSaveAs);
   plActionManager::UnregisterAction(s_hSaveAll);
-  plActionManager::UnregisterAction(s_hCloseCategory);
   plActionManager::UnregisterAction(s_hClose);
+  plActionManager::UnregisterAction(s_hCloseAll);
+  plActionManager::UnregisterAction(s_hCloseAllButThis);
   plActionManager::UnregisterAction(s_hOpenContainingFolder);
   plActionManager::UnregisterAction(s_hCopyAssetGuid);
-  plActionManager::UnregisterAction(s_hDocumentCategory);
   plActionManager::UnregisterAction(s_hUpdatePrefabs);
 }
 
-void plDocumentActions::MapActions(const char* szMapping, const char* szPath, bool bForToolbar)
+void plDocumentActions::MapMenuActions(plStringView sMapping, plStringView sTargetMenu)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", sMapping);
 
-  pMap->MapAction(s_hSaveCategory, szPath, 1.0f);
-  plStringBuilder sSubPath(szPath, "/SaveCategory");
+  pMap->MapAction(s_hSave, sTargetMenu, 5.0f);
+  pMap->MapAction(s_hSaveAs, sTargetMenu, 6.0f);
+  pMap->MapAction(s_hSaveAll, sTargetMenu, 7.0f);
+  pMap->MapAction(s_hClose, sTargetMenu, 8.0f);
+  pMap->MapAction(s_hCloseAll, sTargetMenu, 9.0f);
+  pMap->MapAction(s_hCloseAllButThis, sTargetMenu, 10.0f);
+  pMap->MapAction(s_hOpenContainingFolder, sTargetMenu, 11.0f);
+
+  pMap->MapAction(s_hCopyAssetGuid, sTargetMenu, 12.0f);
+}
+
+void plDocumentActions::MapToolbarActions(plStringView sMapping)
+{
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", sMapping);
+
+  pMap->MapAction(s_hSaveCategory, "", 1.0f);
+  plStringView sSubPath = "SaveCategory";
 
   pMap->MapAction(s_hSave, sSubPath, 1.0f);
   pMap->MapAction(s_hSaveAll, sSubPath, 3.0f);
-
-  if (!bForToolbar)
-  {
-    pMap->MapAction(s_hSaveAs, sSubPath, 2.0f);
-
-    sSubPath.Set(szPath, "/CloseCategory");
-    pMap->MapAction(s_hCloseCategory, szPath, 2.0f);
-    pMap->MapAction(s_hClose, sSubPath, 1.0f);
-    pMap->MapAction(s_hCopyAssetGuid, sSubPath, 2.0f);
-    pMap->MapAction(s_hOpenContainingFolder, sSubPath, 3.0f);
-  }
 }
 
 
-void plDocumentActions::MapToolsActions(const char* szMapping, const char* szPath)
+void plDocumentActions::MapToolsActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", sMapping);
 
-  pMap->MapAction(s_hDocumentCategory, szPath, 1.0f);
-  plStringBuilder sSubPath(szPath, "/Tools.DocumentCategory");
-
-  pMap->MapAction(s_hUpdatePrefabs, sSubPath, 1.0f);
+  pMap->MapAction(s_hUpdatePrefabs, "G.Tools.Document", 1.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -123,6 +118,12 @@ plDocumentAction::plDocumentAction(const plActionContext& context, const char* s
       SetIconPath(":/GuiFoundation/Icons/SaveAll.svg");
       break;
     case plDocumentAction::ButtonType::Close:
+      SetIconPath("");
+      break;
+    case plDocumentAction::ButtonType::CloseAll:
+      SetIconPath("");
+      break;
+    case plDocumentAction::ButtonType::CloseAllButThis:
       SetIconPath("");
       break;
     case plDocumentAction::ButtonType::OpenContainingFolder:
@@ -190,7 +191,7 @@ void plDocumentAction::Execute(const plVariant& value)
     case plDocumentAction::ButtonType::Save:
     {
       plQtDocumentWindow* pWnd = plQtDocumentWindow::FindWindowByDocument(m_Context.m_pDocument);
-      pWnd->SaveDocument().IgnoreResult();
+      pWnd->SaveDocument().LogFailure();
     }
     break;
 
@@ -204,20 +205,19 @@ void plDocumentAction::Execute(const plVariant& value)
         sAllFilters.Append(desc->m_sDocumentTypeName, " (*.", desc->m_sFileExtension, ")");
         QString sSelectedExt;
         plString sFile = QFileDialog::getSaveFileName(QApplication::activeWindow(), QLatin1String("Create Document"),
-          m_Context.m_pDocument->GetDocumentPath(), QString::fromUtf8(sAllFilters.GetData()), &sSelectedExt, QFileDialog::Option::DontResolveSymlinks)
+          plMakeQString(m_Context.m_pDocument->GetDocumentPath()), QString::fromUtf8(sAllFilters.GetData()), &sSelectedExt, QFileDialog::Option::DontResolveSymlinks)
                            .toUtf8()
                            .data();
 
         if (!sFile.IsEmpty())
         {
-          plUuid newDoc;
-          newDoc.CreateNewUuid();
+          plUuid newDoc = plUuid::MakeUuid();
           plStatus res = m_Context.m_pDocument->GetDocumentManager()->CloneDocument(m_Context.m_pDocument->GetDocumentPath(), sFile, newDoc);
 
           if (res.Failed())
           {
             plStringBuilder s;
-            s.Format("Failed to save document: \n'{0}'", sFile);
+            s.SetFormat("Failed to save document: \n'{0}'", sFile);
             plQtUiServices::MessageBoxStatus(res, s);
           }
           else
@@ -226,7 +226,7 @@ void plDocumentAction::Execute(const plVariant& value)
             if (plDocumentManager::FindDocumentTypeFromPath(sFile, false, pTypeDesc).Succeeded())
             {
               plDocument* pDocument = nullptr;
-              m_Context.m_pDocument->GetDocumentManager()->OpenDocument(pTypeDesc->m_sDocumentTypeName, sFile, pDocument).IgnoreResult();
+              m_Context.m_pDocument->GetDocumentManager()->OpenDocument(pTypeDesc->m_sDocumentTypeName, sFile, pDocument).LogFailure();
             }
           }
         }
@@ -242,12 +242,48 @@ void plDocumentAction::Execute(const plVariant& value)
 
     case plDocumentAction::ButtonType::Close:
     {
-      plQtDocumentWindow* pWnd = plQtDocumentWindow::FindWindowByDocument(m_Context.m_pDocument);
+      plQtDocumentWindow* pWindow = plQtDocumentWindow::FindWindowByDocument(m_Context.m_pDocument);
 
-      if (!pWnd->CanCloseWindow())
+      if (!pWindow->CanCloseWindow())
         return;
 
-      pWnd->CloseDocumentWindow();
+      pWindow->CloseDocumentWindow();
+    }
+    break;
+
+    case plDocumentAction::ButtonType::CloseAll:
+    {
+      auto& documentWindows = plQtDocumentWindow::GetAllDocumentWindows();
+      for (plQtDocumentWindow* pWindow : documentWindows)
+      {
+        if (!pWindow->CanCloseWindow())
+          continue;
+
+        // Prevent closing the document root window.
+        if (plStringUtils::Compare(pWindow->GetUniqueName(), "Settings") == 0)
+          continue;
+
+        pWindow->CloseDocumentWindow();
+      }
+    }
+    break;
+
+    case plDocumentAction::ButtonType::CloseAllButThis:
+    {
+      plQtDocumentWindow* pThisWindow = plQtDocumentWindow::FindWindowByDocument(m_Context.m_pDocument);
+
+      auto& documentWindows = plQtDocumentWindow::GetAllDocumentWindows();
+      for (plQtDocumentWindow* pWindow : documentWindows)
+      {
+        if (!pWindow->CanCloseWindow() || pWindow == pThisWindow)
+          continue;
+
+        // Prevent closing the document root window.
+        if (plStringUtils::Compare(pWindow->GetUniqueName(), "Settings") == 0)
+          continue;
+
+        pWindow->CloseDocumentWindow();
+      }
     }
     break;
 
@@ -279,7 +315,7 @@ void plDocumentAction::Execute(const plVariant& value)
       mimeData->setText(sGuid.GetData());
       clipboard->setMimeData(mimeData);
 
-      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::Seconds(5));
+      plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", sGuid), plTime::MakeFromSeconds(5));
     }
     break;
 

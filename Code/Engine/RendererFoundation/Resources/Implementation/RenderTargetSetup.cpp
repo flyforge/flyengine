@@ -8,7 +8,7 @@ bool plGALRenderTargets::operator==(const plGALRenderTargets& other) const
   if (m_hDSTarget != other.m_hDSTarget)
     return false;
 
-  for (plUInt8 uiRTIndex = 0; uiRTIndex < PLASMA_GAL_MAX_RENDERTARGET_COUNT; ++uiRTIndex)
+  for (plUInt8 uiRTIndex = 0; uiRTIndex < PL_GAL_MAX_RENDERTARGET_COUNT; ++uiRTIndex)
   {
     if (m_hRTs[uiRTIndex] != other.m_hRTs[uiRTIndex])
       return false;
@@ -21,13 +21,11 @@ bool plGALRenderTargets::operator!=(const plGALRenderTargets& other) const
   return !(*this == other);
 }
 
-plGALRenderTargetSetup::plGALRenderTargetSetup()
-{
-}
+plGALRenderTargetSetup::plGALRenderTargetSetup() = default;
 
 plGALRenderTargetSetup& plGALRenderTargetSetup::SetRenderTarget(plUInt8 uiIndex, plGALRenderTargetViewHandle hRenderTarget)
 {
-  PLASMA_ASSERT_DEV(uiIndex < PLASMA_GAL_MAX_RENDERTARGET_COUNT, "Render target index out of bounds - should be less than PLASMA_GAL_MAX_RENDERTARGET_COUNT");
+  PL_ASSERT_DEV(uiIndex < PL_GAL_MAX_RENDERTARGET_COUNT, "Render target index out of bounds - should be less than PL_GAL_MAX_RENDERTARGET_COUNT");
 
   m_hRTs[uiIndex] = hRenderTarget;
 
@@ -97,4 +95,4 @@ bool plGALRenderingSetup::operator!=(const plGALRenderingSetup& other) const
   return !(*this == other);
 }
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_RenderTargetSetup);
+

@@ -12,40 +12,40 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plFollowPathMode, 1)
-  PLASMA_ENUM_CONSTANTS(plFollowPathMode::OnlyPosition, plFollowPathMode::AlignUpZ, plFollowPathMode::FullRotation)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plFollowPathMode, 1)
+  PL_ENUM_CONSTANTS(plFollowPathMode::OnlyPosition, plFollowPathMode::AlignUpZ, plFollowPathMode::FullRotation)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plFollowPathComponent, 1, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plFollowPathComponent, 1, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Path", DummyGetter, SetPathObject)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("StartDistance", GetDistanceAlongPath, SetDistanceAlongPath)->AddAttributes(new plClampValueAttribute(0.0f, {})),
-    PLASMA_ACCESSOR_PROPERTY("Running", IsRunning, SetRunning)->AddAttributes(new plDefaultValueAttribute(true)), // Whether the animation should start right away.
-    PLASMA_ENUM_MEMBER_PROPERTY("Mode", plPropertyAnimMode, m_Mode),
-    PLASMA_ENUM_MEMBER_PROPERTY("FollowMode", plFollowPathMode, m_FollowMode),  
-    PLASMA_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("LookAhead", m_fLookAhead)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 10.0f)),
-    PLASMA_MEMBER_PROPERTY("Smoothing", m_fSmoothing)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("TiltAmount", m_fTiltAmount)->AddAttributes(new plDefaultValueAttribute(5.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxTilt", m_MaxTilt)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30.0f)), new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(90.0f))),
+    PL_ACCESSOR_PROPERTY("Path", DummyGetter, SetPathObject)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ACCESSOR_PROPERTY("StartDistance", GetDistanceAlongPath, SetDistanceAlongPath)->AddAttributes(new plClampValueAttribute(0.0f, {})),
+    PL_ACCESSOR_PROPERTY("Running", IsRunning, SetRunning)->AddAttributes(new plDefaultValueAttribute(true)), // Whether the animation should start right away.
+    PL_ENUM_MEMBER_PROPERTY("Mode", plPropertyAnimMode, m_Mode),
+    PL_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("LookAhead", m_fLookAhead)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 10.0f)),
+    PL_MEMBER_PROPERTY("Smoothing", m_fSmoothing)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_ENUM_MEMBER_PROPERTY("FollowMode", plFollowPathMode, m_FollowMode),
+    PL_MEMBER_PROPERTY("TiltAmount", m_fTiltAmount)->AddAttributes(new plDefaultValueAttribute(5.0f)),
+    PL_MEMBER_PROPERTY("MaxTilt", m_MaxTilt)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30.0f)), new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(90.0f))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetDirectionForwards, In, "Forwards"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsDirectionForwards),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(ToggleDirection),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetDirectionForwards, In, "Forwards"),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsDirectionForwards),
+    PL_SCRIPT_FUNCTION_PROPERTY(ToggleDirection),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation/Paths"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plFollowPathComponent::plFollowPathComponent() = default;
@@ -137,37 +137,36 @@ void plFollowPathComponent::Update(bool bForce)
   plVec3 vTarget = transformAhead.m_vPosition - transform.m_vPosition;
   if (m_FollowMode == plFollowPathMode::AlignUpZ)
   {
-    const plPlane plane = plPlane(plVec3::UnitZAxis(), transform.m_vPosition);
+    const plPlane plane = plPlane::MakeFromNormalAndPoint(plVec3::MakeAxisZ(), transform.m_vPosition);
     vTarget = plane.GetCoplanarDirection(vTarget);
   }
-  vTarget.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
+  vTarget.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
 
-  plVec3 vUp = (m_FollowMode == plFollowPathMode::FullRotation) ? transform.m_vUpDirection : plVec3::UnitZAxis();
+  plVec3 vUp = (m_FollowMode == plFollowPathMode::FullRotation) ? transform.m_vUpDirection : plVec3::MakeAxisZ();
   plVec3 vRight = vTarget.CrossRH(vUp);
-  vRight.NormalizeIfNotZero(plVec3::UnitYAxis()).IgnoreResult();
+  vRight.NormalizeIfNotZero(plVec3::MakeAxisY()).IgnoreResult();
 
   vUp = vRight.CrossRH(vTarget);
-  vUp.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
+  vUp.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
 
   // check if we want to tilt the platform when turning
-  plAngle deltaAngle = plAngle::Degree(0.0f);
+  plAngle deltaAngle = plAngle::MakeFromDegree(0.0f);
   if (m_FollowMode == plFollowPathMode::AlignUpZ && !plMath::IsZero(m_fTiltAmount, 0.0001f) && !plMath::IsZero(m_MaxTilt.GetDegree(), 0.0001f))
   {
     if (m_bLastStateValid)
     {
       plVec3 vLastTarget = m_vLastTargetPosition - m_vLastPosition;
       {
-        const plPlane plane = plPlane(plVec3::UnitZAxis(), transform.m_vPosition);
+        const plPlane plane = plPlane::MakeFromNormalAndPoint(plVec3::MakeAxisZ(), transform.m_vPosition);
         vLastTarget = plane.GetCoplanarDirection(vLastTarget);
-        vLastTarget.NormalizeIfNotZero(plVec3::UnitXAxis()).IgnoreResult();
+        vLastTarget.NormalizeIfNotZero(plVec3::MakeAxisX()).IgnoreResult();
       }
 
       const float fTiltStrength = plMath::Sign((vTarget - vLastTarget).Dot(vRight)) * plMath::Sign(m_fTiltAmount);
       plAngle tiltAngle = plMath::Min(vLastTarget.GetAngleBetween(vTarget) * plMath::Abs(m_fTiltAmount), m_MaxTilt);
       deltaAngle = plMath::Lerp(tiltAngle * fTiltStrength, m_LastTiltAngle, 0.85f); // this smooths out the tilting from being jittery
 
-      plQuat rot;
-      rot.SetFromAxisAndAngle(vTarget, deltaAngle);
+      plQuat rot = plQuat::MakeFromAxisAndAngle(vTarget, deltaAngle);
       vUp = rot * vUp;
       vRight = rot * vRight;
     }
@@ -181,7 +180,7 @@ void plFollowPathComponent::Update(bool bForce)
     m_LastTiltAngle = deltaAngle;
   }
 
-  plMat3 mRot = plMat3::IdentityMatrix();
+  plMat3 mRot = plMat3::MakeIdentity();
   if (m_FollowMode != plFollowPathMode::OnlyPosition)
   {
     mRot.SetColumn(0, vTarget);
@@ -192,7 +191,7 @@ void plFollowPathComponent::Update(bool bForce)
   plTransform tFinal;
   tFinal.m_vPosition = transform.m_vPosition;
   tFinal.m_vScale.Set(1);
-  tFinal.m_qRotation.SetFromMat3(mRot);
+  tFinal.m_qRotation = plQuat::MakeFromMat3(mRot);
 
   GetOwner()->SetGlobalTransform(pPathObject->GetGlobalTransform() * tFinal);
 }
@@ -337,3 +336,7 @@ bool plFollowPathComponent::IsDirectionForwards() const
 {
   return m_bIsRunningForwards;
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_FollowPathComponent);
+

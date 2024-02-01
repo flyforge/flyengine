@@ -16,9 +16,11 @@
 ///   plGALDeviceVulkan* pDevice = ...;
 ///   pDevice->ReclaimLater(c);
 /// \endcode
-class PLASMA_RENDERERVULKAN_DLL plCommandBufferPoolVulkan
+class PL_RENDERERVULKAN_DLL plCommandBufferPoolVulkan
 {
 public:
+  ~plCommandBufferPoolVulkan();
+
   void Initialize(vk::Device device, plUInt32 graphicsFamilyIndex);
   void DeInitialize();
 

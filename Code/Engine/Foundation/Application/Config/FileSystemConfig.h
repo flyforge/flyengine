@@ -4,7 +4,7 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <Foundation/Strings/String.h>
 
-class PLASMA_FOUNDATION_DLL plApplicationFileSystemConfig
+class PL_FOUNDATION_DLL plApplicationFileSystemConfig
 {
 public:
   static constexpr const plStringView s_sConfigFile = ":project/RuntimeConfigs/DataDirectories.ddl"_plsv;
@@ -47,5 +47,5 @@ public:
 
 using plApplicationFileSystemConfig_DataDirConfig = plApplicationFileSystemConfig::DataDirConfig;
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plApplicationFileSystemConfig);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plApplicationFileSystemConfig_DataDirConfig);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plApplicationFileSystemConfig);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plApplicationFileSystemConfig_DataDirConfig);

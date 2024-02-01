@@ -15,8 +15,8 @@
 
 #include <d3d11_1.h>
 
-plGALCommandEncoderImplDX11::plGALCommandEncoderImplDX11(plGALDeviceDX11& deviceDX11)
-  : m_GALDeviceDX11(deviceDX11)
+plGALCommandEncoderImplDX11::plGALCommandEncoderImplDX11(plGALDeviceDX11& ref_deviceDX11)
+  : m_GALDeviceDX11(ref_deviceDX11)
 {
   m_pDXContext = m_GALDeviceDX11.GetDXImmediateContext();
 
@@ -28,7 +28,7 @@ plGALCommandEncoderImplDX11::plGALCommandEncoderImplDX11(plGALDeviceDX11& device
 
 plGALCommandEncoderImplDX11::~plGALCommandEncoderImplDX11()
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXAnnotation);
+  PL_GAL_DX11_RELEASE(m_pDXAnnotation);
 }
 
 // State setting functions
@@ -91,39 +91,90 @@ void plGALCommandEncoderImplDX11::SetShaderPlatform(const plGALShader* pShader)
   }
 }
 
-void plGALCommandEncoderImplDX11::SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer)
+void plGALCommandEncoderImplDX11::SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer)
 {
-  /// \todo Check if the device supports the slot index?
-  m_pBoundConstantBuffers[uiSlot] = pBuffer != nullptr ? static_cast<const plGALBufferDX11*>(pBuffer)->GetDXBuffer() : nullptr;
+  PL_ASSERT_RELEASE(binding.m_iSlot < PL_GAL_MAX_CONSTANT_BUFFER_COUNT, "Constant buffer slot index too big!");
 
-  // The GAL doesn't care about stages for constant buffer, but we need to handle this internaly.
+  ID3D11Buffer* pBufferDX11 = pBuffer != nullptr ? static_cast<const plGALBufferDX11*>(pBuffer)->GetDXBuffer() : nullptr;
+  if (m_pBoundConstantBuffers[binding.m_iSlot] == pBufferDX11)
+    return;
+
+  m_pBoundConstantBuffers[binding.m_iSlot] = pBufferDX11;
+  // The GAL doesn't care about stages for constant buffer, but we need to handle this internally.
   for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-    m_BoundConstantBuffersRange[stage].SetToIncludeValue(uiSlot);
+    m_BoundConstantBuffersRange[stage].SetToIncludeValue(binding.m_iSlot);
 }
 
-void plGALCommandEncoderImplDX11::SetSamplerStatePlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState)
+void plGALCommandEncoderImplDX11::SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState)
 {
-  /// \todo Check if the device supports the stage / the slot index
-  m_pBoundSamplerStates[Stage][uiSlot] =
-    pSamplerState != nullptr ? static_cast<const plGALSamplerStateDX11*>(pSamplerState)->GetDXSamplerState() : nullptr;
-  m_BoundSamplerStatesRange[Stage].SetToIncludeValue(uiSlot);
+  PL_ASSERT_RELEASE(binding.m_iSlot < PL_GAL_MAX_SAMPLER_COUNT, "Sampler state slot index too big!");
+
+  ID3D11SamplerState* pSamplerStateDX11 = pSamplerState != nullptr ? static_cast<const plGALSamplerStateDX11*>(pSamplerState)->GetDXSamplerState() : nullptr;
+
+  for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    const plGALShaderStageFlags::Enum flag = plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)stage);
+    if (binding.m_Stages.IsSet(flag))
+    {
+      if (m_pBoundSamplerStates[stage][binding.m_iSlot] != pSamplerStateDX11)
+      {
+        m_pBoundSamplerStates[stage][binding.m_iSlot] = pSamplerStateDX11;
+        m_BoundSamplerStatesRange[stage].SetToIncludeValue(binding.m_iSlot);
+      }
+    }
+  }
 }
 
-void plGALCommandEncoderImplDX11::SetResourceViewPlatform(plGALShaderStage::Enum Stage, plUInt32 uiSlot, const plGALResourceView* pResourceView)
+void plGALCommandEncoderImplDX11::SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView)
 {
-  auto& boundShaderResourceViews = m_pBoundShaderResourceViews[Stage];
-  boundShaderResourceViews.EnsureCount(uiSlot + 1);
-  boundShaderResourceViews[uiSlot] =
-    pResourceView != nullptr ? static_cast<const plGALResourceViewDX11*>(pResourceView)->GetDXResourceView() : nullptr;
-  m_BoundShaderResourceViewsRange[Stage].SetToIncludeValue(uiSlot);
+  if (pResourceView != nullptr && UnsetUnorderedAccessViews(pResourceView->GetResource()))
+  {
+    FlushPlatform();
+  }
+
+  ID3D11ShaderResourceView* pResourceViewDX11 = pResourceView != nullptr ? static_cast<const plGALResourceViewDX11*>(pResourceView)->GetDXResourceView() : nullptr;
+
+    for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    const plGALShaderStageFlags::Enum flag = plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)stage);
+    if (binding.m_Stages.IsSet(flag))
+    {
+      auto& boundShaderResourceViews = m_pBoundShaderResourceViews[stage];
+      boundShaderResourceViews.EnsureCount(binding.m_iSlot + 1);
+      auto& resourcesForResourceViews = m_ResourcesForResourceViews[stage];
+      resourcesForResourceViews.EnsureCount(binding.m_iSlot + 1);
+      if (boundShaderResourceViews[binding.m_iSlot] != pResourceViewDX11)
+      {
+        boundShaderResourceViews[binding.m_iSlot] = pResourceViewDX11;
+        resourcesForResourceViews[binding.m_iSlot] = pResourceView != nullptr ? pResourceView->GetResource() : nullptr;
+        m_BoundShaderResourceViewsRange[stage].SetToIncludeValue(binding.m_iSlot);
+      }
+    }
+  }
 }
 
-void plGALCommandEncoderImplDX11::SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView)
+void plGALCommandEncoderImplDX11::SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView)
 {
-  m_BoundUnoderedAccessViews.EnsureCount(uiSlot + 1);
-  m_BoundUnoderedAccessViews[uiSlot] =
-    pUnorderedAccessView != nullptr ? static_cast<const plGALUnorderedAccessViewDX11*>(pUnorderedAccessView)->GetDXResourceView() : nullptr;
-  m_BoundUnoderedAccessViewsRange.SetToIncludeValue(uiSlot);
+  if (pUnorderedAccessView != nullptr && UnsetResourceViews(pUnorderedAccessView->GetResource()))
+  {
+    FlushPlatform();
+  }
+
+  ID3D11UnorderedAccessView* pUnorderedAccessViewDX11 = pUnorderedAccessView != nullptr ? static_cast<const plGALUnorderedAccessViewDX11*>(pUnorderedAccessView)->GetDXResourceView() : nullptr;
+
+  m_BoundUnoderedAccessViews.EnsureCount(binding.m_iSlot + 1);
+  m_ResourcesForUnorderedAccessViews.EnsureCount(binding.m_iSlot + 1);
+  if (m_BoundUnoderedAccessViews[binding.m_iSlot] != pUnorderedAccessViewDX11)
+  {
+    m_BoundUnoderedAccessViews[binding.m_iSlot] = pUnorderedAccessViewDX11;
+    m_ResourcesForUnorderedAccessViews[binding.m_iSlot] = pUnorderedAccessView != nullptr ? pUnorderedAccessView->GetResource() : nullptr;
+    m_BoundUnoderedAccessViewsRange.SetToIncludeValue(binding.m_iSlot);
+  }
+}
+
+void plGALCommandEncoderImplDX11::SetPushConstantsPlatform(plArrayPtr<const plUInt8> data)
+{
+  PL_REPORT_FAILURE("DX11 does not support push constants, this function should not have been called.");
 }
 
 // Query functions
@@ -138,12 +189,12 @@ void plGALCommandEncoderImplDX11::EndQueryPlatform(const plGALQuery* pQuery)
   m_pDXContext->End(static_cast<const plGALQueryDX11*>(pQuery)->GetDXQuery());
 }
 
-plResult plGALCommandEncoderImplDX11::GetQueryResultPlatform(const plGALQuery* pQuery, plUInt64& uiQueryResult)
+plResult plGALCommandEncoderImplDX11::GetQueryResultPlatform(const plGALQuery* pQuery, plUInt64& ref_uiQueryResult)
 {
   return m_pDXContext->GetData(
-           static_cast<const plGALQueryDX11*>(pQuery)->GetDXQuery(), &uiQueryResult, sizeof(plUInt64), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_FALSE
-           ? PLASMA_FAILURE
-           : PLASMA_SUCCESS;
+           static_cast<const plGALQueryDX11*>(pQuery)->GetDXQuery(), &ref_uiQueryResult, sizeof(plUInt64), D3D11_ASYNC_GETDATA_DONOTFLUSH) == S_FALSE
+           ? PL_FAILURE
+           : PL_SUCCESS;
 }
 
 // Timestamp functions
@@ -157,16 +208,16 @@ void plGALCommandEncoderImplDX11::InsertTimestampPlatform(plGALTimestampHandle h
 
 // Resource update functions
 
-void plGALCommandEncoderImplDX11::ClearUnorderedAccessViewPlatform(const plGALUnorderedAccessView* pUnorderedAccessView, plVec4 clearValues)
+void plGALCommandEncoderImplDX11::ClearUnorderedAccessViewPlatform(const plGALUnorderedAccessView* pUnorderedAccessView, plVec4 vClearValues)
 {
   const plGALUnorderedAccessViewDX11* pUnorderedAccessViewDX11 = static_cast<const plGALUnorderedAccessViewDX11*>(pUnorderedAccessView);
-  m_pDXContext->ClearUnorderedAccessViewFloat(pUnorderedAccessViewDX11->GetDXResourceView(), &clearValues.x);
+  m_pDXContext->ClearUnorderedAccessViewFloat(pUnorderedAccessViewDX11->GetDXResourceView(), &vClearValues.x);
 }
 
-void plGALCommandEncoderImplDX11::ClearUnorderedAccessViewPlatform(const plGALUnorderedAccessView* pUnorderedAccessView, plVec4U32 clearValues)
+void plGALCommandEncoderImplDX11::ClearUnorderedAccessViewPlatform(const plGALUnorderedAccessView* pUnorderedAccessView, plVec4U32 vClearValues)
 {
   const plGALUnorderedAccessViewDX11* pUnorderedAccessViewDX11 = static_cast<const plGALUnorderedAccessViewDX11*>(pUnorderedAccessView);
-  m_pDXContext->ClearUnorderedAccessViewUint(pUnorderedAccessViewDX11->GetDXResourceView(), &clearValues.x);
+  m_pDXContext->ClearUnorderedAccessViewUint(pUnorderedAccessViewDX11->GetDXResourceView(), &vClearValues.x);
 }
 
 void plGALCommandEncoderImplDX11::CopyBufferPlatform(const plGALBuffer* pDestination, const plGALBuffer* pSource)
@@ -186,21 +237,21 @@ void plGALCommandEncoderImplDX11::CopyBufferRegionPlatform(const plGALBuffer* pD
   m_pDXContext->CopySubresourceRegion(pDXDestination, 0, uiDestOffset, 0, 0, pDXSource, 0, &srcBox);
 }
 
-void plGALCommandEncoderImplDX11::UpdateBufferPlatform(const plGALBuffer* pDestination, plUInt32 uiDestOffset, plArrayPtr<const plUInt8> pSourceData, plGALUpdateMode::Enum updateMode)
+void plGALCommandEncoderImplDX11::UpdateBufferPlatform(const plGALBuffer* pDestination, plUInt32 uiDestOffset, plArrayPtr<const plUInt8> sourceData, plGALUpdateMode::Enum updateMode)
 {
-  PLASMA_CHECK_ALIGNMENT_16(pSourceData.GetPtr());
+  PL_CHECK_ALIGNMENT_16(sourceData.GetPtr());
 
   ID3D11Buffer* pDXDestination = static_cast<const plGALBufferDX11*>(pDestination)->GetDXBuffer();
 
   if (pDestination->GetDescription().m_BufferType == plGALBufferType::ConstantBuffer)
   {
-    PLASMA_ASSERT_DEV(uiDestOffset == 0 && pSourceData.GetCount() == pDestination->GetSize(),
+    PL_ASSERT_DEV(uiDestOffset == 0 && sourceData.GetCount() == pDestination->GetSize(),
       "Constant buffers can't be updated partially (and we don't check for DX11.1)!");
 
     D3D11_MAPPED_SUBRESOURCE MapResult;
     if (SUCCEEDED(m_pDXContext->Map(pDXDestination, 0, D3D11_MAP_WRITE_DISCARD, 0, &MapResult)))
     {
-      memcpy(MapResult.pData, pSourceData.GetPtr(), pSourceData.GetCount());
+      memcpy(MapResult.pData, sourceData.GetPtr(), sourceData.GetCount());
 
       m_pDXContext->Unmap(pDXDestination, 0);
     }
@@ -209,22 +260,22 @@ void plGALCommandEncoderImplDX11::UpdateBufferPlatform(const plGALBuffer* pDesti
   {
     if (updateMode == plGALUpdateMode::CopyToTempStorage)
     {
-      if (ID3D11Resource* pDXTempBuffer = m_GALDeviceDX11.FindTempBuffer(pSourceData.GetCount()))
+      if (ID3D11Resource* pDXTempBuffer = m_GALDeviceDX11.FindTempBuffer(sourceData.GetCount()))
       {
         D3D11_MAPPED_SUBRESOURCE MapResult;
         HRESULT hRes = m_pDXContext->Map(pDXTempBuffer, 0, D3D11_MAP_WRITE, 0, &MapResult);
-        PLASMA_ASSERT_DEV(SUCCEEDED(hRes), "Implementation error");
+        PL_ASSERT_DEV(SUCCEEDED(hRes), "Implementation error");
 
-        memcpy(MapResult.pData, pSourceData.GetPtr(), pSourceData.GetCount());
+        memcpy(MapResult.pData, sourceData.GetPtr(), sourceData.GetCount());
 
         m_pDXContext->Unmap(pDXTempBuffer, 0);
 
-        D3D11_BOX srcBox = {0, 0, 0, pSourceData.GetCount(), 1, 1};
+        D3D11_BOX srcBox = {0, 0, 0, sourceData.GetCount(), 1, 1};
         m_pDXContext->CopySubresourceRegion(pDXDestination, 0, uiDestOffset, 0, 0, pDXTempBuffer, 0, &srcBox);
       }
       else
       {
-        PLASMA_REPORT_FAILURE("Could not find a temp buffer for update.");
+        PL_REPORT_FAILURE("Could not find a temp buffer for update.");
       }
     }
     else
@@ -234,7 +285,7 @@ void plGALCommandEncoderImplDX11::UpdateBufferPlatform(const plGALBuffer* pDesti
       D3D11_MAPPED_SUBRESOURCE MapResult;
       if (SUCCEEDED(m_pDXContext->Map(pDXDestination, 0, mapType, 0, &MapResult)))
       {
-        memcpy(plMemoryUtils::AddByteOffset(MapResult.pData, uiDestOffset), pSourceData.GetPtr(), pSourceData.GetCount());
+        memcpy(plMemoryUtils::AddByteOffset(MapResult.pData, uiDestOffset), sourceData.GetPtr(), sourceData.GetCount());
 
         m_pDXContext->Unmap(pDXDestination, 0);
       }
@@ -254,54 +305,54 @@ void plGALCommandEncoderImplDX11::CopyTexturePlatform(const plGALTexture* pDesti
   m_pDXContext->CopyResource(pDXDestination, pDXSource);
 }
 
-void plGALCommandEncoderImplDX11::CopyTextureRegionPlatform(const plGALTexture* pDestination, const plGALTextureSubresource& DestinationSubResource,
-  const plVec3U32& DestinationPoint, const plGALTexture* pSource, const plGALTextureSubresource& SourceSubResource, const plBoundingBoxu32& Box)
+void plGALCommandEncoderImplDX11::CopyTextureRegionPlatform(const plGALTexture* pDestination, const plGALTextureSubresource& destinationSubResource,
+  const plVec3U32& vDestinationPoint, const plGALTexture* pSource, const plGALTextureSubresource& sourceSubResource, const plBoundingBoxu32& box)
 {
   ID3D11Resource* pDXDestination = static_cast<const plGALTextureDX11*>(pDestination)->GetDXTexture();
   ID3D11Resource* pDXSource = static_cast<const plGALTextureDX11*>(pSource)->GetDXTexture();
 
   plUInt32 dstSubResource = D3D11CalcSubresource(
-    DestinationSubResource.m_uiMipLevel, DestinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
+    destinationSubResource.m_uiMipLevel, destinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
   plUInt32 srcSubResource =
-    D3D11CalcSubresource(SourceSubResource.m_uiMipLevel, SourceSubResource.m_uiArraySlice, pSource->GetDescription().m_uiMipLevelCount);
+    D3D11CalcSubresource(sourceSubResource.m_uiMipLevel, sourceSubResource.m_uiArraySlice, pSource->GetDescription().m_uiMipLevelCount);
 
-  D3D11_BOX srcBox = {Box.m_vMin.x, Box.m_vMin.y, Box.m_vMin.z, Box.m_vMax.x, Box.m_vMax.y, Box.m_vMax.z};
+  D3D11_BOX srcBox = {box.m_vMin.x, box.m_vMin.y, box.m_vMin.z, box.m_vMax.x, box.m_vMax.y, box.m_vMax.z};
   m_pDXContext->CopySubresourceRegion(
-    pDXDestination, dstSubResource, DestinationPoint.x, DestinationPoint.y, DestinationPoint.z, pDXSource, srcSubResource, &srcBox);
+    pDXDestination, dstSubResource, vDestinationPoint.x, vDestinationPoint.y, vDestinationPoint.z, pDXSource, srcSubResource, &srcBox);
 }
 
-void plGALCommandEncoderImplDX11::UpdateTexturePlatform(const plGALTexture* pDestination, const plGALTextureSubresource& DestinationSubResource,
-  const plBoundingBoxu32& DestinationBox, const plGALSystemMemoryDescription& pSourceData)
+void plGALCommandEncoderImplDX11::UpdateTexturePlatform(const plGALTexture* pDestination, const plGALTextureSubresource& destinationSubResource,
+  const plBoundingBoxu32& destinationBox, const plGALSystemMemoryDescription& sourceData)
 {
   ID3D11Resource* pDXDestination = static_cast<const plGALTextureDX11*>(pDestination)->GetDXTexture();
 
-  plUInt32 uiWidth = plMath::Max(DestinationBox.m_vMax.x - DestinationBox.m_vMin.x, 1u);
-  plUInt32 uiHeight = plMath::Max(DestinationBox.m_vMax.y - DestinationBox.m_vMin.y, 1u);
-  plUInt32 uiDepth = plMath::Max(DestinationBox.m_vMax.z - DestinationBox.m_vMin.z, 1u);
+  plUInt32 uiWidth = plMath::Max(destinationBox.m_vMax.x - destinationBox.m_vMin.x, 1u);
+  plUInt32 uiHeight = plMath::Max(destinationBox.m_vMax.y - destinationBox.m_vMin.y, 1u);
+  plUInt32 uiDepth = plMath::Max(destinationBox.m_vMax.z - destinationBox.m_vMin.z, 1u);
   plGALResourceFormat::Enum format = pDestination->GetDescription().m_Format;
 
   if (ID3D11Resource* pDXTempTexture = m_GALDeviceDX11.FindTempTexture(uiWidth, uiHeight, uiDepth, format))
   {
     D3D11_MAPPED_SUBRESOURCE MapResult;
     HRESULT hRes = m_pDXContext->Map(pDXTempTexture, 0, D3D11_MAP_WRITE, 0, &MapResult);
-    PLASMA_ASSERT_DEV(SUCCEEDED(hRes), "Implementation error");
+    PL_ASSERT_DEV(SUCCEEDED(hRes), "Implementation error");
 
     plUInt32 uiRowPitch = uiWidth * plGALResourceFormat::GetBitsPerElement(format) / 8;
     plUInt32 uiSlicePitch = uiRowPitch * uiHeight;
-    PLASMA_ASSERT_DEV(pSourceData.m_uiRowPitch == uiRowPitch, "Invalid row pitch. Expected {0} got {1}", uiRowPitch, pSourceData.m_uiRowPitch);
-    PLASMA_ASSERT_DEV(pSourceData.m_uiSlicePitch == 0 || pSourceData.m_uiSlicePitch == uiSlicePitch, "Invalid slice pitch. Expected {0} got {1}",
-      uiSlicePitch, pSourceData.m_uiSlicePitch);
+    PL_ASSERT_DEV(sourceData.m_uiRowPitch == uiRowPitch, "Invalid row pitch. Expected {0} got {1}", uiRowPitch, sourceData.m_uiRowPitch);
+    PL_ASSERT_DEV(sourceData.m_uiSlicePitch == 0 || sourceData.m_uiSlicePitch == uiSlicePitch, "Invalid slice pitch. Expected {0} got {1}",
+      uiSlicePitch, sourceData.m_uiSlicePitch);
 
     if (MapResult.RowPitch == uiRowPitch && MapResult.DepthPitch == uiSlicePitch)
     {
-      memcpy(MapResult.pData, pSourceData.m_pData, uiSlicePitch * uiDepth);
+      memcpy(MapResult.pData, sourceData.m_pData, uiSlicePitch * uiDepth);
     }
     else
     {
       // Copy row by row
       for (plUInt32 z = 0; z < uiDepth; ++z)
       {
-        const void* pSource = plMemoryUtils::AddByteOffset(pSourceData.m_pData, z * uiSlicePitch);
+        const void* pSource = plMemoryUtils::AddByteOffset(sourceData.m_pData, z * uiSlicePitch);
         void* pDest = plMemoryUtils::AddByteOffset(MapResult.pData, z * MapResult.DepthPitch);
 
         for (plUInt32 y = 0; y < uiHeight; ++y)
@@ -316,25 +367,25 @@ void plGALCommandEncoderImplDX11::UpdateTexturePlatform(const plGALTexture* pDes
 
     m_pDXContext->Unmap(pDXTempTexture, 0);
 
-    plUInt32 dstSubResource = D3D11CalcSubresource(DestinationSubResource.m_uiMipLevel, DestinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
+    plUInt32 dstSubResource = D3D11CalcSubresource(destinationSubResource.m_uiMipLevel, destinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
 
     D3D11_BOX srcBox = {0, 0, 0, uiWidth, uiHeight, uiDepth};
-    m_pDXContext->CopySubresourceRegion(pDXDestination, dstSubResource, DestinationBox.m_vMin.x, DestinationBox.m_vMin.y, DestinationBox.m_vMin.z, pDXTempTexture, 0, &srcBox);
+    m_pDXContext->CopySubresourceRegion(pDXDestination, dstSubResource, destinationBox.m_vMin.x, destinationBox.m_vMin.y, destinationBox.m_vMin.z, pDXTempTexture, 0, &srcBox);
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Could not find a temp texture for update.");
+    PL_REPORT_FAILURE("Could not find a temp texture for update.");
   }
 }
 
-void plGALCommandEncoderImplDX11::ResolveTexturePlatform(const plGALTexture* pDestination, const plGALTextureSubresource& DestinationSubResource,
-  const plGALTexture* pSource, const plGALTextureSubresource& SourceSubResource)
+void plGALCommandEncoderImplDX11::ResolveTexturePlatform(const plGALTexture* pDestination, const plGALTextureSubresource& destinationSubResource,
+  const plGALTexture* pSource, const plGALTextureSubresource& sourceSubResource)
 {
   ID3D11Resource* pDXDestination = static_cast<const plGALTextureDX11*>(pDestination)->GetDXTexture();
   ID3D11Resource* pDXSource = static_cast<const plGALTextureDX11*>(pSource)->GetDXTexture();
 
-  plUInt32 dstSubResource = D3D11CalcSubresource(DestinationSubResource.m_uiMipLevel, DestinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
-  plUInt32 srcSubResource = D3D11CalcSubresource(SourceSubResource.m_uiMipLevel, SourceSubResource.m_uiArraySlice, pSource->GetDescription().m_uiMipLevelCount);
+  plUInt32 dstSubResource = D3D11CalcSubresource(destinationSubResource.m_uiMipLevel, destinationSubResource.m_uiArraySlice, pDestination->GetDescription().m_uiMipLevelCount);
+  plUInt32 srcSubResource = D3D11CalcSubresource(sourceSubResource.m_uiMipLevel, sourceSubResource.m_uiArraySlice, pSource->GetDescription().m_uiMipLevelCount);
 
   DXGI_FORMAT DXFormat = m_GALDeviceDX11.GetFormatLookupTable().GetFormatInfo(pDestination->GetDescription().m_Format).m_eResourceViewType;
 
@@ -348,8 +399,8 @@ void plGALCommandEncoderImplDX11::ReadbackTexturePlatform(const plGALTexture* pT
   // MSAA textures (e.g. backbuffers) need to be converted to non MSAA versions
   const bool bMSAASourceTexture = pDXTexture->GetDescription().m_SampleCount != plGALMSAASampleCount::None;
 
-  PLASMA_ASSERT_DEV(pDXTexture->GetDXStagingTexture() != nullptr, "No staging resource available for read-back");
-  PLASMA_ASSERT_DEV(pDXTexture->GetDXTexture() != nullptr, "Texture object is invalid");
+  PL_ASSERT_DEV(pDXTexture->GetDXStagingTexture() != nullptr, "No staging resource available for read-back");
+  PL_ASSERT_DEV(pDXTexture->GetDXTexture() != nullptr, "Texture object is invalid");
 
   if (bMSAASourceTexture)
   {
@@ -371,18 +422,18 @@ plUInt32 GetMipSize(plUInt32 uiSize, plUInt32 uiMipLevel)
   return plMath::Max(1u, uiSize);
 }
 
-void plGALCommandEncoderImplDX11::CopyTextureReadbackResultPlatform(const plGALTexture* pTexture, plArrayPtr<plGALTextureSubresource> SourceSubResource, plArrayPtr<plGALSystemMemoryDescription> TargetData)
+void plGALCommandEncoderImplDX11::CopyTextureReadbackResultPlatform(const plGALTexture* pTexture, plArrayPtr<plGALTextureSubresource> sourceSubResource, plArrayPtr<plGALSystemMemoryDescription> targetData)
 {
   const plGALTextureDX11* pDXTexture = static_cast<const plGALTextureDX11*>(pTexture);
 
-  PLASMA_ASSERT_DEV(pDXTexture->GetDXStagingTexture() != nullptr, "No staging resource available for read-back");
-  PLASMA_ASSERT_DEV(SourceSubResource.GetCount() == TargetData.GetCount(), "Source and target arrays must be of the same size.");
+  PL_ASSERT_DEV(pDXTexture->GetDXStagingTexture() != nullptr, "No staging resource available for read-back");
+  PL_ASSERT_DEV(sourceSubResource.GetCount() == targetData.GetCount(), "Source and target arrays must be of the same size.");
 
-  const plUInt32 uiSubResources = SourceSubResource.GetCount();
+  const plUInt32 uiSubResources = sourceSubResource.GetCount();
   for (plUInt32 i = 0; i < uiSubResources; i++)
   {
-    const plGALTextureSubresource& subRes = SourceSubResource[i];
-    const plGALSystemMemoryDescription& memDesc = TargetData[i];
+    const plGALTextureSubresource& subRes = sourceSubResource[i];
+    const plGALSystemMemoryDescription& memDesc = targetData[i];
     const plUInt32 uiSubResourceIndex = D3D11CalcSubresource(subRes.m_uiMipLevel, subRes.m_uiArraySlice, pTexture->GetDescription().m_uiMipLevelCount);
 
     D3D11_MAPPED_SUBRESOURCE Mapped;
@@ -424,7 +475,7 @@ void plGALCommandEncoderImplDX11::GenerateMipMapsPlatform(const plGALResourceVie
 
 void plGALCommandEncoderImplDX11::FlushPlatform()
 {
-  FlushDeferredStateChanges();
+  FlushDeferredStateChanges().IgnoreResult();
 }
 
 // Debug helper functions
@@ -463,7 +514,7 @@ void plGALCommandEncoderImplDX11::BeginRendering(const plGALRenderingSetup& rend
   {
     m_RenderTargetSetup = renderingSetup.m_RenderTargetSetup;
 
-    const plGALRenderTargetView* pRenderTargetViews[PLASMA_GAL_MAX_RENDERTARGET_COUNT] = {nullptr};
+    const plGALRenderTargetView* pRenderTargetViews[PL_GAL_MAX_RENDERTARGET_COUNT] = {nullptr};
     const plGALRenderTargetView* pDepthStencilView = nullptr;
 
     const plUInt32 uiRenderTargetCount = m_RenderTargetSetup.GetRenderTargetCount();
@@ -477,8 +528,8 @@ void plGALCommandEncoderImplDX11::BeginRendering(const plGALRenderingSetup& rend
       {
         const plGALResourceBase* pTexture = pRenderTargetView->GetTexture()->GetParentResource();
 
-        bFlushNeeded |= m_pOwner->UnsetResourceViews(pTexture);
-        bFlushNeeded |= m_pOwner->UnsetUnorderedAccessViews(pTexture);
+        bFlushNeeded |= UnsetResourceViews(pTexture);
+        bFlushNeeded |= UnsetUnorderedAccessViews(pTexture);
       }
 
       pRenderTargetViews[uiIndex] = pRenderTargetView;
@@ -489,8 +540,8 @@ void plGALCommandEncoderImplDX11::BeginRendering(const plGALRenderingSetup& rend
     {
       const plGALResourceBase* pTexture = pDepthStencilView->GetTexture()->GetParentResource();
 
-      bFlushNeeded |= m_pOwner->UnsetResourceViews(pTexture);
-      bFlushNeeded |= m_pOwner->UnsetUnorderedAccessViews(pTexture);
+      bFlushNeeded |= UnsetResourceViews(pTexture);
+      bFlushNeeded |= UnsetUnorderedAccessViews(pTexture);
     }
 
     if (bFlushNeeded)
@@ -498,7 +549,7 @@ void plGALCommandEncoderImplDX11::BeginRendering(const plGALRenderingSetup& rend
       FlushPlatform();
     }
 
-    for (plUInt32 i = 0; i < PLASMA_GAL_MAX_RENDERTARGET_COUNT; i++)
+    for (plUInt32 i = 0; i < PL_GAL_MAX_RENDERTARGET_COUNT; i++)
     {
       m_pBoundRenderTargets[i] = nullptr;
     }
@@ -545,13 +596,13 @@ void plGALCommandEncoderImplDX11::BeginCompute()
 
 // Draw functions
 
-void plGALCommandEncoderImplDX11::ClearPlatform(const plColor& ClearColor, plUInt32 uiRenderTargetClearMask, bool bClearDepth, bool bClearStencil, float fDepthClear, plUInt8 uiStencilClear)
+void plGALCommandEncoderImplDX11::ClearPlatform(const plColor& clearColor, plUInt32 uiRenderTargetClearMask, bool bClearDepth, bool bClearStencil, float fDepthClear, plUInt8 uiStencilClear)
 {
   for (plUInt32 i = 0; i < m_uiBoundRenderTargetCount; i++)
   {
     if (uiRenderTargetClearMask & (1u << i) && m_pBoundRenderTargets[i])
     {
-      m_pDXContext->ClearRenderTargetView(m_pBoundRenderTargets[i], ClearColor.GetData());
+      m_pDXContext->ClearRenderTargetView(m_pBoundRenderTargets[i], clearColor.GetData());
     }
   }
 
@@ -564,18 +615,19 @@ void plGALCommandEncoderImplDX11::ClearPlatform(const plColor& ClearColor, plUIn
   }
 }
 
-void plGALCommandEncoderImplDX11::DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
+plResult plGALCommandEncoderImplDX11::DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->Draw(uiVertexCount, uiStartVertex);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
+plResult plGALCommandEncoderImplDX11::DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   m_pDXContext->DrawIndexed(uiIndexCount, uiStartIndex, 0);
 
   // In debug builds, with a debugger attached, the engine will break on D3D errors
@@ -604,53 +656,39 @@ void plGALCommandEncoderImplDX11::DrawIndexedPlatform(plUInt32 uiIndexCount, plU
 #else
   m_pDXContext->DrawIndexed(uiIndexCount, uiStartIndex, 0);
 #endif
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
+plResult plGALCommandEncoderImplDX11::DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->DrawIndexedInstanced(uiIndexCountPerInstance, uiInstanceCount, uiStartIndex, 0, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplDX11::DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->DrawIndexedInstancedIndirect(static_cast<const plGALBufferDX11*>(pIndirectArgumentBuffer)->GetDXBuffer(), uiArgumentOffsetInBytes);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
+plResult plGALCommandEncoderImplDX11::DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->DrawInstanced(uiVertexCountPerInstance, uiInstanceCount, uiStartVertex, 0);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplDX11::DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->DrawInstancedIndirect(static_cast<const plGALBufferDX11*>(pIndirectArgumentBuffer)->GetDXBuffer(), uiArgumentOffsetInBytes);
-}
-
-void plGALCommandEncoderImplDX11::DrawAutoPlatform()
-{
-  FlushDeferredStateChanges();
-
-  m_pDXContext->DrawAuto();
-}
-
-void plGALCommandEncoderImplDX11::BeginStreamOutPlatform()
-{
-  FlushDeferredStateChanges();
-
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-}
-
-void plGALCommandEncoderImplDX11::EndStreamOutPlatform()
-{
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  return PL_SUCCESS;
 }
 
 void plGALCommandEncoderImplDX11::SetIndexBufferPlatform(const plGALBuffer* pIndexBuffer)
@@ -668,7 +706,7 @@ void plGALCommandEncoderImplDX11::SetIndexBufferPlatform(const plGALBuffer* pInd
 
 void plGALCommandEncoderImplDX11::SetVertexBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pVertexBuffer)
 {
-  PLASMA_ASSERT_DEV(uiSlot < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT, "Invalid slot index");
+  PL_ASSERT_DEV(uiSlot < PL_GAL_MAX_VERTEX_BUFFER_COUNT, "Invalid slot index");
 
   m_pBoundVertexBuffers[uiSlot] = pVertexBuffer != nullptr ? static_cast<const plGALBufferDX11*>(pVertexBuffer)->GetDXBuffer() : nullptr;
   m_VertexBufferStrides[uiSlot] = pVertexBuffer != nullptr ? pVertexBuffer->GetDescription().m_uiStructSize : 0;
@@ -687,14 +725,14 @@ static const D3D11_PRIMITIVE_TOPOLOGY GALTopologyToDX11[plGALPrimitiveTopology::
   D3D11_PRIMITIVE_TOPOLOGY_TRIANGLELIST,
 };
 
-void plGALCommandEncoderImplDX11::SetPrimitiveTopologyPlatform(plGALPrimitiveTopology::Enum Topology)
+void plGALCommandEncoderImplDX11::SetPrimitiveTopologyPlatform(plGALPrimitiveTopology::Enum topology)
 {
-  m_pDXContext->IASetPrimitiveTopology(GALTopologyToDX11[Topology]);
+  m_pDXContext->IASetPrimitiveTopology(GALTopologyToDX11[topology]);
 }
 
-void plGALCommandEncoderImplDX11::SetBlendStatePlatform(const plGALBlendState* pBlendState, const plColor& BlendFactor, plUInt32 uiSampleMask)
+void plGALCommandEncoderImplDX11::SetBlendStatePlatform(const plGALBlendState* pBlendState, const plColor& blendFactor, plUInt32 uiSampleMask)
 {
-  FLOAT BlendFactors[4] = {BlendFactor.r, BlendFactor.g, BlendFactor.b, BlendFactor.a};
+  FLOAT BlendFactors[4] = {blendFactor.r, blendFactor.g, blendFactor.b, blendFactor.a};
 
   m_pDXContext->OMSetBlendState(
     pBlendState != nullptr ? static_cast<const plGALBlendStateDX11*>(pBlendState)->GetDXBlendState() : nullptr, BlendFactors, uiSampleMask);
@@ -736,25 +774,22 @@ void plGALCommandEncoderImplDX11::SetScissorRectPlatform(const plRectU32& rect)
   m_pDXContext->RSSetScissorRects(1, &ScissorRect);
 }
 
-void plGALCommandEncoderImplDX11::SetStreamOutBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer, plUInt32 uiOffset)
-{
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-}
-
 //////////////////////////////////////////////////////////////////////////
 
-void plGALCommandEncoderImplDX11::DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
+plResult plGALCommandEncoderImplDX11::DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->Dispatch(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
+  return PL_SUCCESS;
 }
 
-void plGALCommandEncoderImplDX11::DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALCommandEncoderImplDX11::DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
-  FlushDeferredStateChanges();
+  PL_SUCCEED_OR_RETURN(FlushDeferredStateChanges());
 
   m_pDXContext->DispatchIndirect(static_cast<const plGALBufferDX11*>(pIndirectArgumentBuffer)->GetDXBuffer(), uiArgumentOffsetInBytes);
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -783,7 +818,7 @@ static void SetShaderResources(plGALShaderStage::Enum stage, ID3D11DeviceContext
       pContext->CSSetShaderResources(uiStartSlot, uiNumSlots, pShaderResourceViews);
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
@@ -811,7 +846,7 @@ static void SetConstantBuffers(
       pContext->CSSetConstantBuffers(uiStartSlot, uiNumSlots, pConstantBuffers);
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
@@ -839,12 +874,12 @@ static void SetSamplers(
       pContext->CSSetSamplers(uiStartSlot, uiNumSlots, pSamplerStates);
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
 // Some state changes are deferred so they can be updated faster
-void plGALCommandEncoderImplDX11::FlushDeferredStateChanges()
+plResult plGALCommandEncoderImplDX11::FlushDeferredStateChanges()
 {
   if (m_BoundVertexBuffersRange.IsValid())
   {
@@ -906,4 +941,47 @@ void plGALCommandEncoderImplDX11::FlushDeferredStateChanges()
       m_BoundSamplerStatesRange[stage].Reset();
     }
   }
+  return PL_SUCCESS;
+}
+
+bool plGALCommandEncoderImplDX11::UnsetUnorderedAccessViews(const plGALResourceBase* pResource)
+{
+  PL_ASSERT_DEV(pResource->GetParentResource() == pResource, "No proxies allowed");
+
+  bool bResult = false;
+
+  for (plUInt32 uiSlot = 0; uiSlot < m_ResourcesForUnorderedAccessViews.GetCount(); ++uiSlot)
+  {
+    if (m_ResourcesForUnorderedAccessViews[uiSlot] == pResource)
+    {
+      m_ResourcesForUnorderedAccessViews[uiSlot] = nullptr;
+      m_BoundUnoderedAccessViews[uiSlot] = nullptr;
+      m_BoundUnoderedAccessViewsRange.SetToIncludeValue(uiSlot);
+      bResult = true;
+    }
+  }
+
+  return bResult;
+}
+bool plGALCommandEncoderImplDX11::UnsetResourceViews(const plGALResourceBase* pResource)
+{
+  PL_ASSERT_DEV(pResource->GetParentResource() == pResource, "No proxies allowed");
+
+  bool bResult = false;
+
+  for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+  {
+    for (plUInt32 uiSlot = 0; uiSlot < m_ResourcesForResourceViews[stage].GetCount(); ++uiSlot)
+    {
+      if (m_ResourcesForResourceViews[stage][uiSlot] == pResource)
+      {
+        m_ResourcesForResourceViews[stage][uiSlot] = nullptr;
+        m_pBoundShaderResourceViews[stage][uiSlot] = nullptr;
+        m_BoundShaderResourceViewsRange[stage].SetToIncludeValue(uiSlot);
+        bResult = true;
+      }
+    }
+  }
+
+  return bResult;
 }

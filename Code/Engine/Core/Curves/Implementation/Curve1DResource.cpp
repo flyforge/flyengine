@@ -1,19 +1,19 @@
 #include <Core/CorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Curves/Curve1DResource.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCurve1DResource, 1, plRTTIDefaultAllocator<plCurve1DResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCurve1DResource, 1, plRTTIDefaultAllocator<plCurve1DResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plCurve1DResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plCurve1DResource);
 
 plCurve1DResource::plCurve1DResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plCurve1DResource, plCurve1DResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plCurve1DResource, plCurve1DResourceDescriptor)
 {
   m_Descriptor = descriptor;
 
@@ -39,7 +39,7 @@ plResourceLoadDesc plCurve1DResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plCurve1DResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plCurve1DResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plCurve1DResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -78,37 +78,37 @@ void plCurve1DResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   }
 }
 
-void plCurve1DResourceDescriptor::Save(plStreamWriter& stream) const
+void plCurve1DResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
 
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   const plUInt8 uiCurves = static_cast<plUInt8>(m_Curves.GetCount());
-  stream << uiCurves;
+  inout_stream << uiCurves;
 
   for (plUInt32 i = 0; i < uiCurves; ++i)
   {
-    m_Curves[i].Save(stream);
+    m_Curves[i].Save(inout_stream);
   }
 }
 
-void plCurve1DResourceDescriptor::Load(plStreamReader& stream)
+void plCurve1DResourceDescriptor::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
 
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion == 1, "Invalid file version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion == 1, "Invalid file version {0}", uiVersion);
 
   plUInt8 uiCurves = 0;
-  stream >> uiCurves;
+  inout_stream >> uiCurves;
 
   m_Curves.SetCount(uiCurves);
 
   for (plUInt32 i = 0; i < uiCurves; ++i)
   {
-    m_Curves[i].Load(stream);
+    m_Curves[i].Load(inout_stream);
 
     /// \todo We can do this on load, or somehow ensure this is always already correctly saved
     m_Curves[i].SortControlPoints();
@@ -118,4 +118,4 @@ void plCurve1DResourceDescriptor::Load(plStreamReader& stream)
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Curves_Implementation_Curve1DResource);
+PL_STATICLINK_FILE(Core, Core_Curves_Implementation_Curve1DResource);

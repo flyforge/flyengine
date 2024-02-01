@@ -4,17 +4,11 @@
 #include <EditorFramework/Preferences/EditorPreferences.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-plString plQtEditorApp::GetExternalToolsFolder(bool bForceUseCustomTools)
-{
-  PlasmaEditorPreferencesUser* pPref = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
-  return plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(bForceUseCustomTools ? false : pPref->m_bUsePrecompiledTools);
-}
-
 plString plQtEditorApp::FindToolApplication(const char* szToolName)
 {
   plStringBuilder toolExe = szToolName;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   toolExe.ChangeFileExtension("exe");
 #else
   toolExe.RemoveFileExtension();
@@ -22,30 +16,49 @@ plString plQtEditorApp::FindToolApplication(const char* szToolName)
 
   szToolName = toolExe;
 
-  plStringBuilder sTool = plQtEditorApp::GetSingleton()->GetExternalToolsFolder();
-  sTool.AppendPath(szToolName);
+  plEditorPreferencesUser* pPref = plPreferences::QueryPreferences<plEditorPreferencesUser>();
 
-  if (plFileSystem::ExistsFile(sTool))
-    return sTool;
+  plHybridArray<plString, 3> sFolders;
+  sFolders.PushBack(plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(false));
+  sFolders.PushBack(plApplicationServices::GetSingleton()->GetPrecompiledToolsFolder(true));
 
-  sTool = plQtEditorApp::GetSingleton()->GetExternalToolsFolder(true);
-  sTool.AppendPath(szToolName);
+  if (pPref->m_bUsePrecompiledTools)
+  {
+    if(!pPref->m_sCustomPrecompiledToolsFolder.IsEmpty() && plOSFile::ExistsDirectory(pPref->m_sCustomPrecompiledToolsFolder))
+    {
+      plStringBuilder customToolsFolder = pPref->m_sCustomPrecompiledToolsFolder;
+      customToolsFolder.MakeCleanPath();
+      sFolders.PushBack(customToolsFolder);
+      plMath::Swap(sFolders[0], sFolders[2]);
+    }
+    else
+    {
+      plMath::Swap(sFolders[0], sFolders[1]);
+    }
+  }
 
-  if (plFileSystem::ExistsFile(sTool))
-    return sTool;
+  plStringBuilder sTool;
+  for(auto& folder : sFolders)
+  {
+    sTool = folder;
+    sTool.AppendPath(szToolName);
+
+    if (plOSFile::ExistsFile(sTool))
+      return sTool;
+  }
 
   // just try the one in the same folder as the editor
   return szToolName;
 }
 
-plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& arguments, plUInt32 uiSecondsTillTimeout, plLogInterface* pLogOutput /*= nullptr*/, plLogMsgType::Enum LogLevel /*= plLogMsgType::InfoMsg*/, const char* szCWD /*= nullptr*/)
+plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& arguments, plUInt32 uiSecondsTillTimeout, plLogInterface* pLogOutput /*= nullptr*/, plLogMsgType::Enum logLevel /*= plLogMsgType::InfoMsg*/, const char* szCWD /*= nullptr*/)
 {
   // this block is supposed to be in the global log, not the given log interface
-  PLASMA_LOG_BLOCK("Executing Tool", szTool);
+  PL_LOG_BLOCK("Executing Tool", szTool);
 
   plStringBuilder toolExe = szTool;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   toolExe.ChangeFileExtension("exe");
 #else
   toolExe.RemoveFileExtension();
@@ -135,7 +148,7 @@ plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& argum
           tmp.Trim("() ");
 
         szMsg = tmp.GetData();
-        blocks.PushBack(PLASMA_DEFAULT_NEW(LogBlockData, pLogOutput, szMsg));
+        blocks.PushBack(PL_DEFAULT_NEW(LogBlockData, pLogOutput, szMsg));
         continue;
       }
       else if (tmp.StartsWith("----- "))
@@ -153,7 +166,7 @@ plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& argum
         // TODO: output all logged data in one big message, if the tool failed
       }
 
-      if (msgType > LogLevel || szMsg == nullptr)
+      if (msgType > logLevel || szMsg == nullptr)
         continue;
 
       plLog::BroadcastLoggingEvent(pLogOutput, msgType, szMsg);
@@ -171,7 +184,7 @@ plStatus plQtEditorApp::ExecuteTool(const char* szTool, const QStringList& argum
     return plStatus(plFmt("{0} returned error code {1}", szTool, proc.exitCode()));
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plString plQtEditorApp::BuildFileserveCommandLine() const

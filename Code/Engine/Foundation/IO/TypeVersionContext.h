@@ -13,9 +13,9 @@ class plStreamReader;
 /// To use, create an object of this type on the stack, call Begin() and use the returned
 /// plStreamWriter for subsequent serialization operations. Call AddType to add a type and its parent types to the version table.
 /// Call End() once you want to finish writing the type versions.
-class PLASMA_FOUNDATION_DLL plTypeVersionWriteContext : public plSerializationContext<plTypeVersionWriteContext>
+class PL_FOUNDATION_DLL plTypeVersionWriteContext : public plSerializationContext<plTypeVersionWriteContext>
 {
-  PLASMA_DECLARE_SERIALIZATION_CONTEXT(plTypeVersionWriteContext);
+  PL_DECLARE_SERIALIZATION_CONTEXT(plTypeVersionWriteContext);
 
 public:
   plTypeVersionWriteContext();
@@ -48,9 +48,9 @@ protected:
 };
 
 /// \brief Use this class to restore type versions written to a stream using a plTypeVersionWriteContext.
-class PLASMA_FOUNDATION_DLL plTypeVersionReadContext : public plSerializationContext<plTypeVersionReadContext>
+class PL_FOUNDATION_DLL plTypeVersionReadContext : public plSerializationContext<plTypeVersionReadContext>
 {
-  PLASMA_DECLARE_SERIALIZATION_CONTEXT(plTypeVersionReadContext);
+  PL_DECLARE_SERIALIZATION_CONTEXT(plTypeVersionReadContext);
 
 public:
   /// \brief Reads the type version table from the stream

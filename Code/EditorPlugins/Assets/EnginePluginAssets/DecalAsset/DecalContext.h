@@ -4,9 +4,9 @@
 #include <EnginePluginAssets/EnginePluginAssetsDLL.h>
 #include <RendererCore/Meshes/MeshResource.h>
 
-class PLASMA_ENGINEPLUGINASSETS_DLL plDecalContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINASSETS_DLL plDecalContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalContext, plEngineProcessDocumentContext);
 
 public:
   plDecalContext();
@@ -14,8 +14,8 @@ public:
 protected:
   virtual void OnInitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
 
 private:
   plMeshResourceHandle m_hPreviewMeshResource;

@@ -6,13 +6,13 @@
 #ifdef BUILDSYSTEM_ENABLE_DUKTAPE_SUPPORT
 
 struct duk_hthread;
-typedef duk_hthread duk_context;
-typedef int (*duk_c_function)(duk_context* ctx);
+using duk_context = duk_hthread;
+using duk_c_function = int (*)(duk_context*);
 
 
-class PLASMA_CORE_DLL plDuktapeContext : public plDuktapeHelper
+class PL_CORE_DLL plDuktapeContext : public plDuktapeHelper
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDuktapeContext);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDuktapeContext);
 
 public:
   plDuktapeContext(plStringView sWrapperName);
@@ -39,11 +39,10 @@ protected:
   bool m_bInitializedModuleSupport = false;
 
 private:
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
-  plAllocator<plMemoryPolicies::plHeapAllocation, plMemoryTrackingFlags::RegisterAllocator | plMemoryTrackingFlags::EnableAllocationTracking>
-    m_Allocator;
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
+  plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::AllocationStats> m_Allocator;
 #  else
-  plAllocator<plMemoryPolicies::plHeapAllocation, plMemoryTrackingFlags::None> m_Allocator;
+  plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::Nothing> m_Allocator;
 #  endif
 };
 

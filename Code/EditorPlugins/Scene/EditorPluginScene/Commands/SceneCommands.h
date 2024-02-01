@@ -8,7 +8,7 @@ class plRandomGauss;
 
 class plDuplicateObjectsCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDuplicateObjectsCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plDuplicateObjectsCommand, plCommand);
 
 public:
   plDuplicateObjectsCommand();

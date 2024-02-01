@@ -16,7 +16,7 @@ using plShaderResourceHandle = plTypedResourceHandle<class plShaderResource>;
 
 struct alignas(16) plImguiVertex
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plVec3 m_Position;
   plVec2 m_TexCoord;
@@ -25,16 +25,16 @@ struct alignas(16) plImguiVertex
 
 struct plImguiBatch
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plRectU32 m_ScissorRect;
   plUInt16 m_uiTextureID;
   plUInt16 m_uiVertexCount;
 };
 
-class PLASMA_GAMEENGINE_DLL plImguiRenderData : public plRenderData
+class PL_GAMEENGINE_DLL plImguiRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plImguiRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plImguiRenderData, plRenderData);
 
 public:
   plArrayPtr<plImguiVertex> m_Vertices;
@@ -42,36 +42,38 @@ public:
   plArrayPtr<plImguiBatch> m_Batches;
 };
 
-class PLASMA_GAMEENGINE_DLL plImguiExtractor : public plExtractor
+class PL_GAMEENGINE_DLL plImguiExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plImguiExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plImguiExtractor, plExtractor);
 
 public:
   plImguiExtractor(const char* szName = "ImguiExtractor");
 
   virtual void Extract(
-    const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;
+    const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 };
 
-class PLASMA_GAMEENGINE_DLL plImguiRenderer : public plRenderer
+class PL_GAMEENGINE_DLL plImguiRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plImguiRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plImguiRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plImguiRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plImguiRenderer);
 
 public:
   plImguiRenderer();
   ~plImguiRenderer();
 
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
-  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const override;
+  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const override;
   virtual void RenderBatch(
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 
 protected:
   void SetupRenderer();
 
-  static const plUInt32 s_uiVertexBufferSize = 10000;
-  static const plUInt32 s_uiIndexBufferSize = s_uiVertexBufferSize * 2;
+  static constexpr plUInt32 s_uiVertexBufferSize = 10000;
+  static constexpr plUInt32 s_uiIndexBufferSize = s_uiVertexBufferSize * 2;
 
   plShaderResourceHandle m_hShader;
   plGALBufferHandle m_hVertexBuffer;

@@ -4,58 +4,58 @@
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTexture2DChannelMappingEnum, 1)
-  PLASMA_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::R1)
-  PLASMA_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RG1, plTexture2DChannelMappingEnum::R1_G2)
-  PLASMA_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RGB1, plTexture2DChannelMappingEnum::RGB1_ABLACK, plTexture2DChannelMappingEnum::R1_G2_B3)
-  PLASMA_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RGBA1, plTexture2DChannelMappingEnum::RGB1_A2, plTexture2DChannelMappingEnum::R1_G2_B3_A4)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTexture2DChannelMappingEnum, 1)
+  PL_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::R1)
+  PL_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RG1, plTexture2DChannelMappingEnum::R1_G2)
+  PL_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RGB1, plTexture2DChannelMappingEnum::RGB1_ABLACK, plTexture2DChannelMappingEnum::R1_G2_B3)
+  PL_ENUM_CONSTANTS(plTexture2DChannelMappingEnum::RGBA1, plTexture2DChannelMappingEnum::RGB1_A2, plTexture2DChannelMappingEnum::R1_G2_B3_A4)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTexture2DResolution, 1)
-  PLASMA_ENUM_CONSTANTS(plTexture2DResolution::Fixed64x64, plTexture2DResolution::Fixed128x128, plTexture2DResolution::Fixed256x256, plTexture2DResolution::Fixed512x512, plTexture2DResolution::Fixed1024x1024, plTexture2DResolution::Fixed2048x2048)
-  PLASMA_ENUM_CONSTANTS(plTexture2DResolution::CVarRtResolution1, plTexture2DResolution::CVarRtResolution2)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTexture2DResolution, 1)
+  PL_ENUM_CONSTANTS(plTexture2DResolution::Fixed64x64, plTexture2DResolution::Fixed128x128, plTexture2DResolution::Fixed256x256, plTexture2DResolution::Fixed512x512, plTexture2DResolution::Fixed1024x1024, plTexture2DResolution::Fixed2048x2048)
+  PL_ENUM_CONSTANTS(plTexture2DResolution::CVarRtResolution1, plTexture2DResolution::CVarRtResolution2)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plRenderTargetFormat, 1)
-  PLASMA_ENUM_CONSTANTS(plRenderTargetFormat::RGBA8sRgb, plRenderTargetFormat::RGBA8, plRenderTargetFormat::RGB10, plRenderTargetFormat::RGBA16)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plRenderTargetFormat, 1)
+  PL_ENUM_CONSTANTS(plRenderTargetFormat::RGBA8sRgb, plRenderTargetFormat::RGBA8, plRenderTargetFormat::RGB10, plRenderTargetFormat::RGBA16)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetProperties, 5, plRTTIDefaultAllocator<plTextureAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetProperties, 5, plRTTIDefaultAllocator<plTextureAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("IsRenderTarget", m_bIsRenderTarget)->AddAttributes(new plHiddenAttribute),
-    PLASMA_ENUM_MEMBER_PROPERTY("Usage", plTexConvUsage, m_TextureUsage),
+    PL_MEMBER_PROPERTY("IsRenderTarget", m_bIsRenderTarget)->AddAttributes(new plHiddenAttribute),
+    PL_ENUM_MEMBER_PROPERTY("Usage", plTexConvUsage, m_TextureUsage),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("Format", plRenderTargetFormat, m_RtFormat),
-    PLASMA_ENUM_MEMBER_PROPERTY("Resolution", plTexture2DResolution, m_Resolution),
-    PLASMA_MEMBER_PROPERTY("CVarResScale", m_fCVarResolutionScale)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, 10.0f)),
+    PL_ENUM_MEMBER_PROPERTY("Format", plRenderTargetFormat, m_RtFormat),
+    PL_ENUM_MEMBER_PROPERTY("Resolution", plTexture2DResolution, m_Resolution),
+    PL_MEMBER_PROPERTY("CVarResScale", m_fCVarResolutionScale)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, 10.0f)),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("MipmapMode", plTexConvMipmapMode, m_MipmapMode),
-    PLASMA_MEMBER_PROPERTY("PreserveAlphaCoverage", m_bPreserveAlphaCoverage),
-    PLASMA_MEMBER_PROPERTY("AlphaThreshold", m_fAlphaThreshold)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode),
-    PLASMA_MEMBER_PROPERTY("PremultipliedAlpha", m_bPremultipliedAlpha),
-    PLASMA_MEMBER_PROPERTY("DilateColor", m_bDilateColor)->AddAttributes(new plDefaultValueAttribute(false)),
-    PLASMA_MEMBER_PROPERTY("FlipHorizontal", m_bFlipHorizontal),
-    PLASMA_MEMBER_PROPERTY("HdrExposureBias", m_fHdrExposureBias)->AddAttributes(new plClampValueAttribute(-20.0f, 20.0f)),
+    PL_ENUM_MEMBER_PROPERTY("MipmapMode", plTexConvMipmapMode, m_MipmapMode),
+    PL_MEMBER_PROPERTY("PreserveAlphaCoverage", m_bPreserveAlphaCoverage),
+    PL_MEMBER_PROPERTY("AlphaThreshold", m_fAlphaThreshold)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode),
+    PL_MEMBER_PROPERTY("PremultipliedAlpha", m_bPremultipliedAlpha),
+    PL_MEMBER_PROPERTY("DilateColor", m_bDilateColor)->AddAttributes(new plDefaultValueAttribute(false)),
+    PL_MEMBER_PROPERTY("FlipHorizontal", m_bFlipHorizontal),
+    PL_MEMBER_PROPERTY("HdrExposureBias", m_fHdrExposureBias)->AddAttributes(new plClampValueAttribute(-20.0f, 20.0f)),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("TextureFilter", plTextureFilterSetting, m_TextureFilter),
-    PLASMA_ENUM_MEMBER_PROPERTY("AddressModeU", plImageAddressMode, m_AddressModeU),
-    PLASMA_ENUM_MEMBER_PROPERTY("AddressModeV", plImageAddressMode, m_AddressModeV),
-    PLASMA_ENUM_MEMBER_PROPERTY("AddressModeW", plImageAddressMode, m_AddressModeW),
+    PL_ENUM_MEMBER_PROPERTY("TextureFilter", plTextureFilterSetting, m_TextureFilter),
+    PL_ENUM_MEMBER_PROPERTY("AddressModeU", plImageAddressMode, m_AddressModeU),
+    PL_ENUM_MEMBER_PROPERTY("AddressModeV", plImageAddressMode, m_AddressModeV),
+    PL_ENUM_MEMBER_PROPERTY("AddressModeW", plImageAddressMode, m_AddressModeW),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("ChannelMapping", plTexture2DChannelMappingEnum, m_ChannelMapping),
+    PL_ENUM_MEMBER_PROPERTY("ChannelMapping", plTexture2DChannelMappingEnum, m_ChannelMapping),
 
-    PLASMA_ACCESSOR_PROPERTY("Input1", GetInputFile0, SetInputFile0)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input2", GetInputFile1, SetInputFile1)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input3", GetInputFile2, SetInputFile2)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input4", GetInputFile3, SetInputFile3)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input1", GetInputFile0, SetInputFile0)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input2", GetInputFile1, SetInputFile1)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input3", GetInputFile2, SetInputFile2)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input4", GetInputFile3, SetInputFile3)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
 
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plTextureAssetProperties::PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
@@ -210,7 +210,7 @@ plInt32 plTextureAssetProperties::GetNumInputFiles() const
       return 4;
   }
 
-  PLASMA_REPORT_FAILURE("Invalid Code Path");
+  PL_REPORT_FAILURE("Invalid Code Path");
   return 1;
 }
 
@@ -229,7 +229,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pMipmaps = pNode->FindProperty("Mipmaps");
     if (pMipmaps && pMipmaps->m_Value.IsA<bool>())
@@ -263,7 +263,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     const char* szAddressModes[] = {"AddressModeU", "AddressModeV", "AddressModeW"};
 
@@ -301,7 +301,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pUsage = pNode->FindProperty("Usage");
     if (pUsage && pUsage->m_Value.IsA<plString>())

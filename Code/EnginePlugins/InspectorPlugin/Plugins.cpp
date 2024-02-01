@@ -76,4 +76,4 @@ void RemovePluginEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Plugins);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Plugins);

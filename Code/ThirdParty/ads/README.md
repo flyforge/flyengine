@@ -89,7 +89,7 @@ know it from Visual Studio.
   - [Qt Creator IDE](#qt-creator-ide)
   - [Qt Design Studio](#qt-design-studio)
   - [CETONI Elements](#cetoni-elements)
-  - [plasmaEditor](#plasmaEditor)
+  - [ezEditor](#ezeditor)
   - [D-Tect X](#d-tect-x)
   - [HiveWE](#hivewe)
   - [Ramses Composer](#ramses-composer)
@@ -386,13 +386,13 @@ plugin-based and modular laboratory automation software for controlling CETONI d
 
 ![CETONI_Elements](doc/showcase_qmix_elements.png)
 
-### [plasmaEditor](https://github.com/PlasmaEngine/PlasmaEngine)
+### [ezEditor](https://github.com/ezEngine/ezEngine)
 
-The plasmaEditor is a full blown graphical editor used for editing scenes and
-importing and authoring assets for the [PlasmaEngine](https://github.com/PlasmaEngine/PlasmaEngine) -
+The ezEditor is a full blown graphical editor used for editing scenes and
+importing and authoring assets for the [ezEngine](https://github.com/ezEngine/ezEngine) -
 an open source C++ game engine in active development.
 
-![plasmaEditor](doc/showcase_PlasmaEngine_editor.png)
+![ezEditor](doc/showcase_ezEngine_editor.png)
 
 ### [D-Tect X](https://www.duerr-ndt.com/products/ndt-software/d-tect-xray-inspection-software.html)
 

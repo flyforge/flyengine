@@ -128,7 +128,7 @@ bool plJoltWorldModule::RaycastAll(plPhysicsCastResultArray& out_results, const 
   ray.mDirection = plJoltConversionUtils::ToVec3(vDir * fDistance);
 
   plRayCastCollectorAll collector;
-  collector.m_Results = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), JPH::RayCastResult, 256);
+  collector.m_Results = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), JPH::RayCastResult, 256);
 
   plJoltBroadPhaseLayerFilter broadphaseFilter(params.m_ShapeTypes);
   plJoltBodyFilter bodyFilter(params.m_uiIgnoreObjectFilterID);
@@ -207,8 +207,7 @@ bool plJoltWorldModule::SweepTestCapsule(plPhysicsCastResult& out_result, float 
 
   const JPH::CapsuleShape shape(fCapsuleHeight * 0.5f, fCapsuleRadius);
 
-  plQuat qFixRot;
-  qFixRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90.0f));
+  plQuat qFixRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(90.0f));
 
   plQuat qRot;
   qRot = transform.m_qRotation;
@@ -292,8 +291,7 @@ bool plJoltWorldModule::OverlapTestCapsule(float fCapsuleRadius, float fCapsuleH
 
   const JPH::CapsuleShape shape(fCapsuleHeight * 0.5f, fCapsuleRadius);
 
-  plQuat qFixRot;
-  qFixRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90.0f));
+  plQuat qFixRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(90.0f));
 
   plQuat qRot;
   qRot = transform.m_qRotation;
@@ -417,4 +415,4 @@ void plJoltWorldModule::QueryGeometryInBox(const plPhysicsQueryParameters& param
   }
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltQueries);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltQueries);

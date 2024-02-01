@@ -5,33 +5,33 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Foundation/Strings/StringBuilder.h>
 
-plDoubleBufferedStackAllocator::plDoubleBufferedStackAllocator(plStringView sName0, plAllocatorBase* pParent)
+plDoubleBufferedLinearAllocator::plDoubleBufferedLinearAllocator(plStringView sName0, plAllocator* pParent)
 {
   plStringBuilder sName = sName0;
   sName.Append("0");
 
-  m_pCurrentAllocator = PLASMA_DEFAULT_NEW(StackAllocatorType, sName, pParent);
+  m_pCurrentAllocator = PL_DEFAULT_NEW(StackAllocatorType, sName, pParent);
 
   sName = sName0;
   sName.Append("1");
 
-  m_pOtherAllocator = PLASMA_DEFAULT_NEW(StackAllocatorType, sName, pParent);
+  m_pOtherAllocator = PL_DEFAULT_NEW(StackAllocatorType, sName, pParent);
 }
 
-plDoubleBufferedStackAllocator::~plDoubleBufferedStackAllocator()
+plDoubleBufferedLinearAllocator::~plDoubleBufferedLinearAllocator()
 {
-  PLASMA_DEFAULT_DELETE(m_pCurrentAllocator);
-  PLASMA_DEFAULT_DELETE(m_pOtherAllocator);
+  PL_DEFAULT_DELETE(m_pCurrentAllocator);
+  PL_DEFAULT_DELETE(m_pOtherAllocator);
 }
 
-void plDoubleBufferedStackAllocator::Swap()
+void plDoubleBufferedLinearAllocator::Swap()
 {
   plMath::Swap(m_pCurrentAllocator, m_pOtherAllocator);
 
   m_pCurrentAllocator->Reset();
 }
 
-void plDoubleBufferedStackAllocator::Reset()
+void plDoubleBufferedLinearAllocator::Reset()
 {
   m_pCurrentAllocator->Reset();
   m_pOtherAllocator->Reset();
@@ -39,7 +39,7 @@ void plDoubleBufferedStackAllocator::Reset()
 
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FrameAllocator)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FrameAllocator)
 
   ON_CORESYSTEMS_STARTUP
   {
@@ -51,15 +51,15 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FrameAllocator)
     plFrameAllocator::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-plDoubleBufferedStackAllocator* plFrameAllocator::s_pAllocator;
+plDoubleBufferedLinearAllocator* plFrameAllocator::s_pAllocator;
 
 // static
 void plFrameAllocator::Swap()
 {
-  PLASMA_PROFILE_SCOPE("FrameAllocator.Swap");
+  PL_PROFILE_SCOPE("FrameAllocator.Swap");
 
   s_pAllocator->Swap();
 }
@@ -76,13 +76,13 @@ void plFrameAllocator::Reset()
 // static
 void plFrameAllocator::Startup()
 {
-  s_pAllocator = PLASMA_DEFAULT_NEW(plDoubleBufferedStackAllocator, "FrameAllocator", plFoundation::GetAlignedAllocator());
+  s_pAllocator = PL_DEFAULT_NEW(plDoubleBufferedLinearAllocator, "FrameAllocator", plFoundation::GetAlignedAllocator());
 }
 
 // static
 void plFrameAllocator::Shutdown()
 {
-  PLASMA_DEFAULT_DELETE(s_pAllocator);
+  PL_DEFAULT_DELETE(s_pAllocator);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Memory_Implementation_FrameAllocator);
+PL_STATICLINK_FILE(Foundation, Foundation_Memory_Implementation_FrameAllocator);

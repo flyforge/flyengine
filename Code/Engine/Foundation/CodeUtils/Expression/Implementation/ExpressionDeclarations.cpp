@@ -15,7 +15,7 @@ namespace
     "Float",
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szRegisterTypeNames) == RegisterType::Count);
+  static_assert(PL_ARRAY_SIZE(s_szRegisterTypeNames) == RegisterType::Count);
 
   static const char* s_szRegisterTypeNamesShort[] = {
     "U",
@@ -24,15 +24,15 @@ namespace
     "F",
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szRegisterTypeNamesShort) == RegisterType::Count);
+  static_assert(PL_ARRAY_SIZE(s_szRegisterTypeNamesShort) == RegisterType::Count);
 
-  static_assert(RegisterType::Count <= PLASMA_BIT(RegisterType::MaxNumBits));
+  static_assert(RegisterType::Count <= PL_BIT(RegisterType::MaxNumBits));
 } // namespace
 
 // static
 const char* RegisterType::GetName(Enum registerType)
 {
-  PLASMA_ASSERT_DEBUG(registerType >= 0 && registerType < PLASMA_ARRAY_SIZE(s_szRegisterTypeNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(registerType >= 0 && registerType < PL_ARRAY_SIZE(s_szRegisterTypeNames), "Out of bounds access");
   return s_szRegisterTypeNames[registerType];
 }
 
@@ -43,7 +43,7 @@ plResult StreamDesc::Serialize(plStreamWriter& inout_stream) const
   inout_stream << m_sName;
   inout_stream << static_cast<plUInt8>(m_DataType);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult StreamDesc::Deserialize(plStreamReader& inout_stream)
@@ -54,7 +54,7 @@ plResult StreamDesc::Deserialize(plStreamReader& inout_stream)
   inout_stream >> dataType;
   m_DataType = static_cast<plProcessingStream::DataType>(dataType);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -76,21 +76,21 @@ bool FunctionDesc::operator<(const FunctionDesc& other) const
 plResult FunctionDesc::Serialize(plStreamWriter& inout_stream) const
 {
   inout_stream << m_sName;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_InputTypes));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_InputTypes));
   inout_stream << m_uiNumRequiredInputs;
   inout_stream << m_OutputType;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult FunctionDesc::Deserialize(plStreamReader& inout_stream)
 {
   inout_stream >> m_sName;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_InputTypes));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_InputTypes));
   inout_stream >> m_uiNumRequiredInputs;
   inout_stream >> m_OutputType;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plHashedString FunctionDesc::GetMangledName() const
@@ -186,5 +186,22 @@ plExpressionFunction plDefaultExpressionFunctions::s_PerlinNoiseFunc = {
   &PerlinNoise,
 };
 
+//////////////////////////////////////////////////////////////////////////
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Expression_Implementation_ExpressionDeclarations);
+// clang-format off
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExpressionWidgetAttribute, 1, plRTTIDefaultAllocator<plExpressionWidgetAttribute>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("InputsProperty", m_sInputsProperty),
+    PL_MEMBER_PROPERTY("OutputsProperty", m_sOutputsProperty),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
+  }
+  PL_END_FUNCTIONS;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on

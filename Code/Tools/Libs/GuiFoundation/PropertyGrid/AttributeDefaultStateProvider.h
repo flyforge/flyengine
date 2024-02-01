@@ -5,7 +5,7 @@
 #include <GuiFoundation/PropertyGrid/DefaultState.h>
 
 /// \brief This is the fall back default state provider which handles the default state set via the plDefaultAttribute on the reflected type.
-class PLASMA_GUIFOUNDATION_DLL plAttributeDefaultStateProvider : public plDefaultStateProvider
+class PL_GUIFOUNDATION_DLL plAttributeDefaultStateProvider : public plDefaultStateProvider
 {
 public:
   static plSharedPtr<plDefaultStateProvider> CreateProvider(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);

@@ -14,20 +14,20 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Velocity, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Velocity>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Velocity, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Velocity>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("RiseSpeed", m_fRiseSpeed),
-    PLASMA_MEMBER_PROPERTY("Friction", m_fFriction)->AddAttributes(new plClampValueAttribute(0.0f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("WindInfluence", m_fWindInfluence)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("RiseSpeed", m_fRiseSpeed),
+    PL_MEMBER_PROPERTY("Friction", m_fFriction)->AddAttributes(new plClampValueAttribute(0.0f, 100.0f)),
+    PL_MEMBER_PROPERTY("WindInfluence", m_fWindInfluence)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Velocity, 1, plRTTIDefaultAllocator<plParticleBehavior_Velocity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Velocity, 1, plRTTIDefaultAllocator<plParticleBehavior_Velocity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleBehaviorFactory_Velocity::plParticleBehaviorFactory_Velocity() = default;
@@ -62,37 +62,37 @@ enum class BehaviorVelocityVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleBehaviorFactory_Velocity::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_Velocity::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)BehaviorVelocityVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fRiseSpeed;
-  stream << m_fFriction;
+  inout_stream << m_fRiseSpeed;
+  inout_stream << m_fFriction;
 
   // Version 3
-  stream << m_fWindInfluence;
+  inout_stream << m_fWindInfluence;
 }
 
-void plParticleBehaviorFactory_Velocity::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_Velocity::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)BehaviorVelocityVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)BehaviorVelocityVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_fRiseSpeed;
-  stream >> m_fFriction;
+  inout_stream >> m_fRiseSpeed;
+  inout_stream >> m_fFriction;
 
   if (uiVersion >= 3)
   {
-    stream >> m_fWindInfluence;
+    inout_stream >> m_fWindInfluence;
   }
 }
 
-void plParticleBehaviorFactory_Velocity::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleBehaviorFactory_Velocity::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
 }
 
 void plParticleBehavior_Velocity::CreateRequiredStreams()
@@ -103,7 +103,7 @@ void plParticleBehavior_Velocity::CreateRequiredStreams()
 
 void plParticleBehavior_Velocity::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Velocity");
+  PL_PROFILE_SCOPE("PFX: Velocity");
 
   const float tDiff = (float)m_TimeDiff.GetSeconds();
   const plVec3 vDown = m_pPhysicsModule != nullptr ? m_pPhysicsModule->GetGravity().GetNormalized() : plVec3(0.0f, 0.0f, -1.0f);
@@ -157,4 +157,4 @@ void plParticleBehavior_Velocity::RequestRequiredWorldModulesForCache(plParticle
 }
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Velocity);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Velocity);

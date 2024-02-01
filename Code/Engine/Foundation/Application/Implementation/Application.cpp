@@ -29,7 +29,7 @@ plResult plApplication::BeforeCoreSystemsStartup()
     plLog::Error("Unable to find the SDK root directory. Mounting data directories may fail.");
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   plRTTI::VerifyCorrectnessForAllTypes();
 #endif
 
@@ -37,13 +37,13 @@ plResult plApplication::BeforeCoreSystemsStartup()
   {
     while (!plSystemInformation::IsDebuggerAttached())
     {
-      plThreadUtils::Sleep(plTime::Milliseconds(1));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(1));
     }
 
-    PLASMA_DEBUG_BREAK;
+    PL_DEBUG_BREAK;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -58,7 +58,7 @@ void plApplication::SetCommandLineArguments(plUInt32 uiArgumentCount, const char
 
 const char* plApplication::GetArgument(plUInt32 uiArgument) const
 {
-  PLASMA_ASSERT_DEV(uiArgument < m_uiArgumentCount, "There are only {0} arguments, cannot access argument {1}.", m_uiArgumentCount, uiArgument);
+  PL_ASSERT_DEV(uiArgument < m_uiArgumentCount, "There are only {0} arguments, cannot access argument {1}.", m_uiArgumentCount, uiArgument);
 
   return m_pArguments[uiArgument];
 }
@@ -73,5 +73,3 @@ void plApplication::RequestQuit()
 plApplication* plApplication::s_pApplicationInstance = nullptr;
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Application_Implementation_Application);

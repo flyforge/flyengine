@@ -9,7 +9,7 @@
 class plAbstractObjectGraph;
 class plAbstractObjectNode;
 
-struct PLASMA_FOUNDATION_DLL plRttiConverterObject
+struct PL_FOUNDATION_DLL plRttiConverterObject
 {
   plRttiConverterObject()
     : m_pType(nullptr)
@@ -22,14 +22,14 @@ struct PLASMA_FOUNDATION_DLL plRttiConverterObject
   {
   }
 
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   const plRTTI* m_pType;
   void* m_pObject;
 };
 
 
-class PLASMA_FOUNDATION_DLL plRttiConverterContext
+class PL_FOUNDATION_DLL plRttiConverterContext
 {
 public:
   virtual void Clear();
@@ -77,7 +77,7 @@ protected:
 };
 
 
-class PLASMA_FOUNDATION_DLL plRttiConverterWriter
+class PL_FOUNDATION_DLL plRttiConverterWriter
 {
 public:
   using FilterFunction = plDelegate<bool(const void* pObject, const plAbstractProperty* pProp)>;
@@ -100,11 +100,9 @@ private:
   plRttiConverterContext* m_pContext = nullptr;
   plAbstractObjectGraph* m_pGraph = nullptr;
   FilterFunction m_Filter;
-  bool m_bSerializeReadOnly = false;
-  bool m_bSerializeOwnerPtrs = false;
 };
 
-class PLASMA_FOUNDATION_DLL plRttiConverterReader
+class PL_FOUNDATION_DLL plRttiConverterReader
 {
 public:
   plRttiConverterReader(const plAbstractObjectGraph* pGraph, plRttiConverterContext* pContext);

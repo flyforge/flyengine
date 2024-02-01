@@ -6,7 +6,7 @@
 
 plResult plTexConvProcessor::Assemble3DTexture(plImage& dst) const
 {
-  PLASMA_PROFILE_SCOPE("Assemble3DTexture");
+  PL_PROFILE_SCOPE("Assemble3DTexture");
 
   const auto& images = m_Descriptor.m_InputImages;
 
@@ -14,4 +14,3 @@ plResult plTexConvProcessor::Assemble3DTexture(plImage& dst) const
 }
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_Texture3D);

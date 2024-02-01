@@ -6,10 +6,10 @@
 #include <EditorFramework/GUI/ExposedParameters.h>
 #include <Foundation/Serialization/ReflectionSerializer.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plExposedParametersTypeRegistry);
+PL_IMPLEMENT_SINGLETON(plExposedParametersTypeRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ExposedParametersTypeRegistry)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ExposedParametersTypeRegistry)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager", "AssetCurator"
@@ -17,13 +17,13 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ExposedParametersTypeRegistr
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plExposedParametersTypeRegistry);
+    PL_DEFAULT_NEW(plExposedParametersTypeRegistry);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plExposedParametersTypeRegistry* pDummy = plExposedParametersTypeRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
   ON_HIGHLEVELSYSTEMS_STARTUP
@@ -34,7 +34,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ExposedParametersTypeRegistr
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plExposedParametersTypeRegistry::plExposedParametersTypeRegistry()
@@ -94,8 +94,8 @@ const plRTTI* plExposedParametersTypeRegistry::GetExposedParametersType(const ch
 void plExposedParametersTypeRegistry::UpdateExposedParametersType(ParamData& data, const plExposedParameters& params)
 {
   plStringBuilder name;
-  name.Format("plExposedParameters_{0}", data.m_SubAssetGuid);
-  PLASMA_LOG_BLOCK("Updating Type", name.GetData());
+  name.SetFormat("plExposedParameters_{0}", data.m_SubAssetGuid);
+  PL_LOG_BLOCK("Updating Type", name.GetData());
   plReflectedTypeDescriptor desc;
   desc.m_sTypeName = name;
   desc.m_sPluginName = "ExposedParametersTypes";

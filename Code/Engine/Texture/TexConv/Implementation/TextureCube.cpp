@@ -6,7 +6,7 @@
 
 plResult plTexConvProcessor::AssembleCubemap(plImage& dst) const
 {
-  PLASMA_PROFILE_SCOPE("AssembleCubemap");
+  PL_PROFILE_SCOPE("AssembleCubemap");
 
   const auto& cm = m_Descriptor.m_ChannelMappings;
   const auto& images = m_Descriptor.m_InputImages;
@@ -24,7 +24,7 @@ plResult plTexConvProcessor::AssembleCubemap(plImage& dst) const
     if (plImageUtils::CreateCubemapFrom6Files(dst, faces).Failed())
     {
       plLog::Error("Failed to assemble cubemap from 6 images. Images must be square, with power-of-two resolutions.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else
@@ -32,11 +32,11 @@ plResult plTexConvProcessor::AssembleCubemap(plImage& dst) const
     if (plImageUtils::CreateCubemapFromSingleFile(dst, images[0]).Failed())
     {
       plLog::Error("Failed to assemble cubemap from single image.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_TextureCube);
+

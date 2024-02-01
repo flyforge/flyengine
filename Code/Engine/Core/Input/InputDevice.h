@@ -37,10 +37,10 @@
 /// the incoming window messages. If such a device specific function is necessary, it also needs to be integrated into the proper
 /// code (e.g. into the window handling code, to be able to get the window messages). In such a case it might not be possible
 /// to add such a device purely through a dynamic plugin, but might also need deeper integration into other engine code.
-class PLASMA_CORE_DLL plInputDevice : public plEnumerable<plInputDevice, plReflectedClass>
+class PL_CORE_DLL plInputDevice : public plEnumerable<plInputDevice, plReflectedClass>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS_WITH_BASE(plInputDevice, plReflectedClass);
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInputDevice, plReflectedClass);
+  PL_DECLARE_ENUMERABLE_CLASS_WITH_BASE(plInputDevice, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plInputDevice, plReflectedClass);
 
 public:
   /// \brief Default Constructor.

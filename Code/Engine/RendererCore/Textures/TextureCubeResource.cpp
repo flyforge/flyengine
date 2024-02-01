@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/RenderContext/RenderContext.h>
 #include <RendererCore/Textures/TextureCubeResource.h>
 #include <RendererCore/Textures/TextureUtils.h>
@@ -9,10 +9,10 @@
 #include <Texture/plTexFormat/plTexFormat.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeResource, 1, plRTTIDefaultAllocator<plTextureCubeResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeResource, 1, plRTTIDefaultAllocator<plTextureCubeResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plTextureCubeResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plTextureCubeResource);
 // clang-format on
 
 plTextureCubeResource::plTextureCubeResource()
@@ -118,7 +118,7 @@ plResourceLoadDesc plTextureCubeResource::UpdateContent(plStreamReader* Stream)
   if (pImage->GetNumFaces() == 6)
     texDesc.m_Type = plGALTextureType::TextureCube;
 
-  PLASMA_ASSERT_DEV(pImage->GetNumFaces() == 1 || pImage->GetNumFaces() == 6, "Invalid number of image faces (resource: '{0}')", GetResourceID());
+  PL_ASSERT_DEV(pImage->GetNumFaces() == 1 || pImage->GetNumFaces() == 6, "Invalid number of image faces (resource: '{0}')", GetResourceID());
 
   m_uiMemoryGPU[m_uiLoadedTextures] = 0;
 
@@ -134,7 +134,7 @@ plResourceLoadDesc plTextureCubeResource::UpdateContent(plStreamReader* Stream)
 
         id.m_pData = pImage->GetPixelPointer<plUInt8>(mip, face, array_index);
 
-        PLASMA_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
+        PL_ASSERT_DEV(pImage->GetDepthPitch(mip) < plMath::MaxValue<plUInt32>(), "Depth pitch exceeds plGAL limits.");
 
         if (plImageFormat::GetType(pImage->GetImageFormat()) == plImageFormatType::BLOCK_COMPRESSED)
         {
@@ -189,7 +189,7 @@ void plTextureCubeResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = m_uiMemoryGPU[0] + m_uiMemoryGPU[1];
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTextureCubeResource, plTextureCubeResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plTextureCubeResource, plTextureCubeResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = descriptor.m_uiQualityLevelsDiscardable;
@@ -198,13 +198,13 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTextureCubeResource, plTextureCubeResourc
 
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
 
-  PLASMA_ASSERT_DEV(descriptor.m_DescGAL.m_uiWidth == descriptor.m_DescGAL.m_uiHeight, "Cubemap width and height must be identical");
+  PL_ASSERT_DEV(descriptor.m_DescGAL.m_uiWidth == descriptor.m_DescGAL.m_uiHeight, "Cubemap width and height must be identical");
 
   m_Format = descriptor.m_DescGAL.m_Format;
   m_uiWidthAndHeight = descriptor.m_DescGAL.m_uiWidth;
 
   m_hGALTexture[m_uiLoadedTextures] = pDevice->CreateTexture(descriptor.m_DescGAL, descriptor.m_InitialContent);
-  PLASMA_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
+  PL_ASSERT_DEV(!m_hGALTexture[m_uiLoadedTextures].IsInvalidated(), "Texture Data could not be uploaded to the GPU");
 
   pDevice->GetTexture(m_hGALTexture[m_uiLoadedTextures])->SetDebugName(GetResourceDescription());
 
@@ -214,7 +214,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTextureCubeResource, plTextureCubeResourc
   }
 
   m_hSamplerState = pDevice->CreateSamplerState(descriptor.m_SamplerDesc);
-  PLASMA_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
+  PL_ASSERT_DEV(!m_hSamplerState.IsInvalidated(), "Sampler state error");
 
   ++m_uiLoadedTextures;
 
@@ -223,4 +223,4 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plTextureCubeResource, plTextureCubeResourc
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Textures_TextureCubeResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Textures_TextureCubeResource);

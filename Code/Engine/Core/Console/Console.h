@@ -11,7 +11,7 @@
 #include <Foundation/Types/RefCounted.h>
 #include <Foundation/Types/SharedPtr.h>
 
-struct PLASMA_CORE_DLL plConsoleString
+struct PL_CORE_DLL plConsoleString
 {
   enum class Type : plUInt8
   {
@@ -35,7 +35,7 @@ struct PLASMA_CORE_DLL plConsoleString
   bool operator<(const plConsoleString& rhs) const { return m_sText < rhs.m_sText; }
 };
 
-struct PLASMA_CORE_DLL plCommandInterpreterState
+struct PL_CORE_DLL plCommandInterpreterState
 {
   plStringBuilder m_sInput;
   plHybridArray<plConsoleString, 16> m_sOutput;
@@ -43,21 +43,21 @@ struct PLASMA_CORE_DLL plCommandInterpreterState
   void AddOutputLine(const plFormatString& text, plConsoleString::Type type = plConsoleString::Type::Default);
 };
 
-class PLASMA_CORE_DLL plCommandInterpreter : public plRefCounted
+class PL_CORE_DLL plCommandInterpreter : public plRefCounted
 {
 public:
-  virtual void Interpret(plCommandInterpreterState& inout_State) = 0;
+  virtual void Interpret(plCommandInterpreterState& inout_state) = 0;
 
-  virtual void AutoComplete(plCommandInterpreterState& inout_State);
+  virtual void AutoComplete(plCommandInterpreterState& inout_state);
 
   /// \brief Iterates over all cvars and finds all that start with the string \a szVariable.
-  static void FindPossibleCVars(plStringView sVariable, plDeque<plString>& CommonStrings, plDeque<plConsoleString>& ConsoleStrings);
+  static void FindPossibleCVars(plStringView sVariable, plDeque<plString>& ref_commonStrings, plDeque<plConsoleString>& ref_consoleStrings);
 
   /// \brief Iterates over all console functions and finds all that start with the string \a szVariable.
-  static void FindPossibleFunctions(plStringView sVariable, plDeque<plString>& CommonStrings, plDeque<plConsoleString>& ConsoleStrings);
+  static void FindPossibleFunctions(plStringView sVariable, plDeque<plString>& ref_commonStrings, plDeque<plConsoleString>& ref_consoleStrings);
 
   /// \brief Returns the prefix string that is common to all strings in the \a vStrings array.
-  static const plString FindCommonString(const plDeque<plString>& vStrings);
+  static const plString FindCommonString(const plDeque<plString>& strings);
 };
 
 /// \brief The event data that is broadcast by the console
@@ -74,7 +74,7 @@ struct plConsoleEvent
   const plConsoleString* m_AddedpConsoleString;
 };
 
-class PLASMA_CORE_DLL plConsole
+class PL_CORE_DLL plConsole
 {
 public:
   plConsole();
@@ -118,7 +118,7 @@ public:
   /// \brief Replaces the current command interpreter.
   ///
   /// This base class doesn't set any default interpreter, but derived classes may do so.
-  void SetCommandInterpreter(const plSharedPtr<plCommandInterpreter>& interpreter) { m_pCommandInterpreter = interpreter; }
+  void SetCommandInterpreter(const plSharedPtr<plCommandInterpreter>& pInterpreter) { m_pCommandInterpreter = pInterpreter; }
 
   /// \brief Returns the currently used command interpreter.
   const plSharedPtr<plCommandInterpreter>& GetCommandInterpreter() const { return m_pCommandInterpreter; }
@@ -127,12 +127,12 @@ public:
   ///
   /// Returns true, if the string was modified in any way.
   /// Adds additional strings to the console output, if there are further auto-completion suggestions.
-  virtual bool AutoComplete(plStringBuilder& text);
+  virtual bool AutoComplete(plStringBuilder& ref_sText);
 
   /// \brief Executes the given input string.
   ///
   /// The command is forwarded to the set command interpreter.
-  virtual void ExecuteCommand(plStringView input);
+  virtual void ExecuteCommand(plStringView sInput);
 
 protected:
   plSharedPtr<plCommandInterpreter> m_pCommandInterpreter;
@@ -146,7 +146,7 @@ public:
   /// \brief Adds a string to the console.
   ///
   /// The base class only broadcasts an event, but does not store the string anywhere.
-  virtual void AddConsoleString(plStringView text, plConsoleString::Type type = plConsoleString::Type::Default);
+  virtual void AddConsoleString(plStringView sText, plConsoleString::Type type = plConsoleString::Type::Default);
 
   /// @}
 
@@ -155,7 +155,7 @@ public:
 
 public:
   /// \brief Adds an item to the input history.
-  void AddToInputHistory(plStringView text);
+  void AddToInputHistory(plStringView sText);
 
   /// \brief Returns the current input history.
   ///
@@ -163,13 +163,14 @@ public:
   const plStaticArray<plString, 16>& GetInputHistory() const { return m_InputHistory; }
 
   /// \brief Replaces the input line by the next (or previous) history item.
-  void RetrieveInputHistory(plInt32 iHistoryUp, plStringBuilder& result);
+  void RetrieveInputHistory(plInt32 iHistoryUp, plStringBuilder& ref_sResult);
 
   /// \brief Writes the current input history to a text file.
   plResult SaveInputHistory(plStringView sFile);
 
   /// \brief Reads the text file and appends all lines to the input history.
   void LoadInputHistory(plStringView sFile);
+
 protected:
   plInt32 m_iCurrentInputHistoryElement = -1;
   plStaticArray<plString, 16> m_InputHistory;

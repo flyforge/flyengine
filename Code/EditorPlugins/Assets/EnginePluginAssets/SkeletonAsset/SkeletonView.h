@@ -4,7 +4,7 @@
 
 class plSkeletonContext;
 
-class plSkeletonViewContext : public PlasmaEngineProcessViewContext
+class plSkeletonViewContext : public plEngineProcessViewContext
 {
 public:
   plSkeletonViewContext(plSkeletonContext* pContext);
@@ -18,7 +18,7 @@ protected:
   virtual plViewHandle CreateView() override;
   virtual void SetCamera(const plViewRedrawMsgToEngine* pMsg) override;
 
-  virtual void HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg) override;
+  virtual void HandleViewMessage(const plEditorEngineViewMsg* pMsg) override;
 
   void PickObjectAt(plUInt16 x, plUInt16 y);
 

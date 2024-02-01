@@ -5,52 +5,52 @@
 #include <EditorPluginAssets/PropertyAnimAsset/PropertyAnimObjectManager.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimationTrack, 1, plRTTIDefaultAllocator<plPropertyAnimationTrack>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimationTrack, 1, plRTTIDefaultAllocator<plPropertyAnimationTrack>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectPath", m_sObjectSearchSequence),
-    PLASMA_MEMBER_PROPERTY("ComponentType", m_sComponentType),
-    PLASMA_MEMBER_PROPERTY("Property", m_sPropertyPath),
-    PLASMA_ENUM_MEMBER_PROPERTY("Target", plPropertyAnimTarget, m_Target),
-    PLASMA_MEMBER_PROPERTY("FloatCurve", m_FloatCurve),
-    PLASMA_MEMBER_PROPERTY("Gradient", m_ColorGradient),
+    PL_MEMBER_PROPERTY("ObjectPath", m_sObjectSearchSequence),
+    PL_MEMBER_PROPERTY("ComponentType", m_sComponentType),
+    PL_MEMBER_PROPERTY("Property", m_sPropertyPath),
+    PL_ENUM_MEMBER_PROPERTY("Target", plPropertyAnimTarget, m_Target),
+    PL_MEMBER_PROPERTY("FloatCurve", m_FloatCurve),
+    PL_MEMBER_PROPERTY("Gradient", m_ColorGradient),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimationTrackGroup, 1, plRTTIDefaultAllocator<plPropertyAnimationTrackGroup>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimationTrackGroup, 1, plRTTIDefaultAllocator<plPropertyAnimationTrackGroup>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("FPS", m_uiFramesPerSecond)->AddAttributes(new plDefaultValueAttribute(60)),
-    PLASMA_MEMBER_PROPERTY("Duration", m_uiCurveDuration)->AddAttributes(new plDefaultValueAttribute(480)),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Tracks", m_Tracks)->AddFlags(plPropertyFlags::PointerOwner),
-    PLASMA_MEMBER_PROPERTY("EventTrack", m_EventTrack),
+    PL_MEMBER_PROPERTY("FPS", m_uiFramesPerSecond)->AddAttributes(new plDefaultValueAttribute(60)),
+    PL_MEMBER_PROPERTY("Duration", m_uiCurveDuration)->AddAttributes(new plDefaultValueAttribute(480)),
+    PL_ARRAY_MEMBER_PROPERTY("Tracks", m_Tracks)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_MEMBER_PROPERTY("EventTrack", m_EventTrack),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimAssetDocument, 2, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimAssetDocument, 2, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plPropertyAnimationTrackGroup::~plPropertyAnimationTrackGroup()
 {
   for (plPropertyAnimationTrack* pTrack : m_Tracks)
   {
-    PLASMA_DEFAULT_DELETE(pTrack);
+    PL_DEFAULT_DELETE(pTrack);
   }
 }
 
-plPropertyAnimAssetDocument::plPropertyAnimAssetDocument(const char* szDocumentPath)
+plPropertyAnimAssetDocument::plPropertyAnimAssetDocument(plStringView sDocumentPath)
   : plSimpleAssetDocument<plPropertyAnimationTrackGroup, plGameObjectContextDocument>(
-      PLASMA_DEFAULT_NEW(plPropertyAnimObjectManager), szDocumentPath, plAssetDocEngineConnection::FullObjectMirroring)
+      PL_DEFAULT_NEW(plPropertyAnimObjectManager), sDocumentPath, plAssetDocEngineConnection::FullObjectMirroring)
 {
   m_GameObjectContextEvents.AddEventHandler(plMakeDelegate(&plPropertyAnimAssetDocument::GameObjectContextEventHandler, this));
-  m_pObjectAccessor = PLASMA_DEFAULT_NEW(plPropertyAnimObjectAccessor, this, GetCommandHistory());
+  m_pObjectAccessor = PL_DEFAULT_NEW(plPropertyAnimObjectAccessor, this, GetCommandHistory());
 }
 
 plPropertyAnimAssetDocument::~plPropertyAnimAssetDocument()
@@ -76,7 +76,7 @@ void plPropertyAnimAssetDocument::SetAnimationDurationTicks(plUInt64 uiNumTicks)
     cmdSet.m_Object = GetPropertyObject()->GetGuid();
     cmdSet.m_sProperty = "Duration";
     cmdSet.m_NewValue = uiNumTicks;
-    history->AddCommand(cmdSet).IgnoreResult();
+    history->AddCommand(cmdSet).AssertSuccess();
 
     history->FinishTransaction();
   }
@@ -101,7 +101,7 @@ plTime plPropertyAnimAssetDocument::GetAnimationDurationTime() const
 {
   const plInt64 ticks = GetAnimationDurationTicks();
 
-  return plTime::Seconds(ticks / 4800.0);
+  return plTime::MakeFromSeconds(ticks / 4800.0);
 }
 
 void plPropertyAnimAssetDocument::AdjustDuration()
@@ -161,7 +161,7 @@ bool plPropertyAnimAssetDocument::SetScrubberPosition(plUInt64 uiTick)
   return true;
 }
 
-plTransformStatus plPropertyAnimAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+plTransformStatus plPropertyAnimAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
   const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const plPropertyAnimationTrackGroup* pProp = GetProperties();
@@ -206,8 +206,7 @@ plTransformStatus plPropertyAnimAssetDocument::InternalTransformAsset(plStreamWr
       if (res > 0)
         return false;
 
-      return lhs.m_sComponentType < rhs.m_sComponentType;
-    });
+      return lhs.m_sComponentType < rhs.m_sComponentType; });
 
     desc.m_ColorAnimations.Sort([](const plColorPropertyAnimEntry& lhs, const plColorPropertyAnimEntry& rhs) -> bool {
       const plInt32 res = lhs.m_sObjectSearchSequence.Compare(rhs.m_sObjectSearchSequence);
@@ -216,29 +215,25 @@ plTransformStatus plPropertyAnimAssetDocument::InternalTransformAsset(plStreamWr
       if (res > 0)
         return false;
 
-      return lhs.m_sComponentType < rhs.m_sComponentType;
-    });
+      return lhs.m_sComponentType < rhs.m_sComponentType; });
   }
 
   pProp->m_EventTrack.ConvertToRuntimeData(desc.m_EventTrack);
 
   desc.Save(stream);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
 void plPropertyAnimAssetDocument::InitializeAfterLoading(bool bFirstTimeCreation)
 {
+  m_pMirror = PL_DEFAULT_NEW(plIPCObjectMirrorEditor);
   // Filter needs to be set before base class init as that one sends the doc.
   // (Local mirror ignores temporaries, i.e. only mirrors the asset itself)
-  m_ObjectMirror.SetFilterFunction([this](const plDocumentObject* pObject, const char* szProperty) -> bool {
-    return !static_cast<plPropertyAnimObjectManager*>(GetObjectManager())->IsTemporary(pObject, szProperty);
-  });
+  m_ObjectMirror.SetFilterFunction([this](const plDocumentObject* pObject, plStringView sProperty) -> bool { return !static_cast<plPropertyAnimObjectManager*>(GetObjectManager())->IsTemporary(pObject, sProperty); });
   // (Remote IPC mirror only sends temporaries, i.e. the context)
-  m_Mirror.SetFilterFunction([this](const plDocumentObject* pObject, const char* szProperty) -> bool {
-    return static_cast<plPropertyAnimObjectManager*>(GetObjectManager())->IsTemporary(pObject, szProperty);
-  });
+  m_pMirror->SetFilterFunction([this](const plDocumentObject* pObject, plStringView sProperty) -> bool { return static_cast<plPropertyAnimObjectManager*>(GetObjectManager())->IsTemporary(pObject, sProperty); });
   SUPER::InitializeAfterLoading(bFirstTimeCreation);
   // Important to do these after base class init as we want our subscriptions to happen after the mirror of the base class.
   GetObjectManager()->m_StructureEvents.AddEventHandler(plMakeDelegate(&plPropertyAnimAssetDocument::TreeStructureEventHandler, this));
@@ -319,12 +314,12 @@ void plPropertyAnimAssetDocument::RebuildMapping()
   {
     RemoveTrack(m_TrackTable.GetIterator().Key());
   }
-  PLASMA_ASSERT_DEBUG(m_PropertyTable.IsEmpty() && m_TrackTable.IsEmpty(), "All tracks should be removed.");
+  PL_ASSERT_DEBUG(m_PropertyTable.IsEmpty() && m_TrackTable.IsEmpty(), "All tracks should be removed.");
 
   const plAbstractProperty* pTracksProp = plGetStaticRTTI<plPropertyAnimationTrackGroup>()->FindPropertyByName("Tracks");
-  PLASMA_ASSERT_DEBUG(pTracksProp, "Name of property plPropertyAnimationTrackGroup::m_Tracks has changed.");
+  PL_ASSERT_DEBUG(pTracksProp, "Name of property plPropertyAnimationTrackGroup::m_Tracks has changed.");
   plHybridArray<plVariant, 16> values;
-  m_pObjectAccessor->GetValues(GetPropertyObject(), pTracksProp, values).IgnoreResult();
+  m_pObjectAccessor->GetValues(GetPropertyObject(), pTracksProp, values).AssertSuccess();
   for (const plVariant& value : values)
   {
     AddTrack(value.Get<plUuid>());
@@ -347,21 +342,21 @@ void plPropertyAnimAssetDocument::RemoveTrack(const plUuid& track)
 
 void plPropertyAnimAssetDocument::AddTrack(const plUuid& track)
 {
-  PLASMA_ASSERT_DEV(!m_TrackTable.Contains(track), "Track already exists.");
+  PL_ASSERT_DEV(!m_TrackTable.Contains(track), "Track already exists.");
   auto& keys = m_TrackTable[track];
   const plDocumentObject* pContext = GetContextObject();
   if (!pContext)
     return;
 
   auto pTrack = GetTrack(track);
-  FindTrackKeys(pTrack->m_sObjectSearchSequence.GetData(), pTrack->m_sComponentType.GetData(), pTrack->m_sPropertyPath.GetData(), keys);
+  FindTrackKeys(pTrack->m_sObjectSearchSequence.GetData(), pTrack->m_sComponentType.GetData(), pTrack->m_sPropertyPath.GetData(), keys).IgnoreResult();
 
   for (const plPropertyReference& key : keys)
   {
     if (!m_PropertyTable.Contains(key))
     {
       PropertyValue value;
-      PLASMA_VERIFY(m_pObjectAccessor->GetValue(GetObjectManager()->GetObject(key.m_Object), key.m_pProperty, value.m_InitialValue, key.m_Index).Succeeded(),
+      PL_VERIFY(m_pObjectAccessor->GetValue(GetObjectManager()->GetObject(key.m_Object), key.m_pProperty, value.m_InitialValue, key.m_Index).Succeeded(),
         "Computed key invalid, does not resolve to a value.");
       m_PropertyTable.Insert(key, value);
     }
@@ -373,13 +368,12 @@ void plPropertyAnimAssetDocument::AddTrack(const plUuid& track)
 }
 
 
-void plPropertyAnimAssetDocument::FindTrackKeys(
-  const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath, plHybridArray<plPropertyReference, 1>& keys) const
+plStatus plPropertyAnimAssetDocument::FindTrackKeys(const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath, plHybridArray<plPropertyReference, 1>& keys) const
 {
   plObjectPropertyPathContext context = {GetContextObject(), m_pObjectAccessor.Borrow(), "TempObjects"};
 
   keys.Clear();
-  plObjectPropertyPath::ResolvePath(context, keys, szObjectSearchSequence, szComponentType, szPropertyPath).IgnoreResult();
+  return plObjectPropertyPath::ResolvePath(context, keys, szObjectSearchSequence, szComponentType, szPropertyPath);
 }
 
 
@@ -388,7 +382,7 @@ void plPropertyAnimAssetDocument::GenerateTrackInfo(const plDocumentObject* pObj
 {
   plObjectPropertyPathContext context = {GetContextObject(), m_pObjectAccessor.Borrow(), "TempObjects"};
   plPropertyReference propertyRef = {pObject->GetGuid(), pProp, index};
-  plObjectPropertyPath::CreatePath(context, propertyRef, sObjectSearchSequence, sComponentType, sPropertyPath).IgnoreResult();
+  plObjectPropertyPath::CreatePath(context, propertyRef, sObjectSearchSequence, sComponentType, sPropertyPath).AssertSuccess();
 }
 
 void plPropertyAnimAssetDocument::ApplyAnimation()
@@ -410,7 +404,7 @@ void plPropertyAnimAssetDocument::ApplyAnimation(const plPropertyReference& key,
     auto pTrack = GetTrack(track);
     const plRTTI* pPropRtti = key.m_pProperty->GetSpecificType();
 
-    //#TODO apply pTrack to animValue
+    // #TODO apply pTrack to animValue
     switch (pTrack->m_Target)
     {
       case plPropertyAnimTarget::Number:
@@ -446,7 +440,7 @@ void plPropertyAnimAssetDocument::ApplyAnimation(const plPropertyReference& key,
           bIsRotation = true;
           const double fValue = pTrack->m_FloatCurve.Evaluate(m_uiScrubberTickPos);
 
-          euler[(plUInt32)pTrack->m_Target - plPropertyAnimTarget::RotationX] = plAngle::Degree(fValue);
+          euler[(plUInt32)pTrack->m_Target - plPropertyAnimTarget::RotationX] = plAngle::MakeFromDegree(fValue);
         }
       }
       break;
@@ -466,15 +460,16 @@ void plPropertyAnimAssetDocument::ApplyAnimation(const plPropertyReference& key,
   if (bIsRotation)
   {
     plQuat qRotation;
-    qRotation.SetFromEulerAngles(euler[0], euler[1], euler[2]);
+    qRotation = plQuat::MakeFromEulerAngles(euler[0], euler[1], euler[2]);
     animValue = qRotation;
   }
 
   plDocumentObject* pObj = GetObjectManager()->GetObject(key.m_Object);
   plVariant oldValue;
-  PLASMA_VERIFY(m_pObjectAccessor->GetValue(pObj, key.m_pProperty, oldValue, key.m_Index).Succeeded(), "Retrieving old value failed.");
+  PL_VERIFY(m_pObjectAccessor->GetValue(pObj, key.m_pProperty, oldValue, key.m_Index).Succeeded(), "Retrieving old value failed.");
+
   if (oldValue != animValue)
-    GetObjectManager()->SetValue(pObj, key.m_pProperty->GetPropertyName(), animValue, key.m_Index).IgnoreResult();
+    GetObjectManager()->SetValue(pObj, key.m_pProperty->GetPropertyName(), animValue, key.m_Index).AssertSuccess();
 
   // tell the gizmos and manipulators that they should update their transform
   // usually they listen to the command history and selection events, but in this case no commands are executed
@@ -485,15 +480,15 @@ void plPropertyAnimAssetDocument::ApplyAnimation(const plPropertyReference& key,
   }
 }
 
-void plPropertyAnimAssetDocument::SetPlayAnimation(bool play)
+void plPropertyAnimAssetDocument::SetPlayAnimation(bool bPlay)
 {
-  if (m_bPlayAnimation == play)
+  if (m_bPlayAnimation == bPlay)
     return;
 
   if (m_uiScrubberTickPos >= GetAnimationDurationTicks())
     m_uiScrubberTickPos = 0;
 
-  m_bPlayAnimation = play;
+  m_bPlayAnimation = bPlay;
   if (!m_bPlayAnimation)
   {
     // During playback we do not round to frames, so we need to round it again on stop.
@@ -507,12 +502,12 @@ void plPropertyAnimAssetDocument::SetPlayAnimation(bool play)
   m_PropertyAnimEvents.Broadcast(e);
 }
 
-void plPropertyAnimAssetDocument::SetRepeatAnimation(bool repeat)
+void plPropertyAnimAssetDocument::SetRepeatAnimation(bool bRepeat)
 {
-  if (m_bRepeatAnimation == repeat)
+  if (m_bRepeatAnimation == bRepeat)
     return;
 
-  m_bRepeatAnimation = repeat;
+  m_bRepeatAnimation = bRepeat;
 
   plPropertyAnimAssetDocumentEvent e;
   e.m_pDocument = this;
@@ -550,7 +545,7 @@ const plPropertyAnimationTrack* plPropertyAnimAssetDocument::GetTrack(const plUu
 plPropertyAnimationTrack* plPropertyAnimAssetDocument::GetTrack(const plUuid& track)
 {
   auto obj = m_Context.GetObjectByGUID(track);
-  PLASMA_ASSERT_DEBUG(obj.m_pType == plGetStaticRTTI<plPropertyAnimationTrack>(),
+  PL_ASSERT_DEBUG(obj.m_pType == plGetStaticRTTI<plPropertyAnimationTrack>(),
     "Track guid does not resolve to a track, "
     "either the track is not yet created in the mirror or already destroyed. Make sure callbacks are executed in the right order.");
   auto pTrack = static_cast<plPropertyAnimationTrack*>(obj.m_pObject);
@@ -606,11 +601,7 @@ plStatus plPropertyAnimAssetDocument::CanAnimate(
   }
 
   plHybridArray<plPropertyReference, 1> keys;
-  FindTrackKeys(sObjectSearchSequence.GetData(), sComponentType.GetData(), sPropertyPath.GetData(), keys);
-  if (!keys.Contains(key))
-    return plStatus("No node name set or property is not reachable.");
-
-  return plStatus(PLASMA_SUCCESS);
+  return FindTrackKeys(sObjectSearchSequence.GetData(), sComponentType.GetData(), sPropertyPath.GetData(), keys);
 }
 
 plUuid plPropertyAnimAssetDocument::FindTrack(
@@ -669,19 +660,19 @@ plUuid plPropertyAnimAssetDocument::CreateTrack(
   plObjectCommandAccessor accessor(GetCommandHistory());
   const plRTTI* pTrackType = plGetStaticRTTI<plPropertyAnimationTrack>();
   plUuid newTrack;
-  PLASMA_VERIFY(
+  PL_VERIFY(
     accessor.AddObject(GetPropertyObject(), plGetStaticRTTI<plPropertyAnimationTrackGroup>()->FindPropertyByName("Tracks"), -1, pTrackType, newTrack)
       .Succeeded(),
     "Adding track failed.");
   const plDocumentObject* pTrackObj = accessor.GetObject(newTrack);
   plVariant value = sObjectSearchSequence.GetData();
-  PLASMA_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("ObjectPath"), value).Succeeded(), "Adding track failed.");
+  PL_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("ObjectPath"), value).Succeeded(), "Adding track failed.");
   value = sComponentType.GetData();
-  PLASMA_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("ComponentType"), value).Succeeded(), "Adding track failed.");
+  PL_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("ComponentType"), value).Succeeded(), "Adding track failed.");
   value = sPropertyPath.GetData();
-  PLASMA_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("Property"), value).Succeeded(), "Adding track failed.");
+  PL_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("Property"), value).Succeeded(), "Adding track failed.");
   value = (int)target;
-  PLASMA_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("Target"), value).Succeeded(), "Adding track failed.");
+  PL_VERIFY(accessor.SetValue(pTrackObj, pTrackType->FindPropertyByName("Target"), value).Succeeded(), "Adding track failed.");
 
   {
     const plAbstractProperty* pFloatCurveProp = pTrackType->FindPropertyByName("FloatCurve");
@@ -693,7 +684,7 @@ plUuid plPropertyAnimAssetDocument::CreateTrack(
     plColorGammaUB color = plColor::White;
 
     const plUInt32 uiNameHash = plHashingUtils::xxHash32(sObjectSearchSequence.GetData(), sObjectSearchSequence.GetElementCount());
-    const plUInt32 uiColorIdx = uiNameHash % PLASMA_ARRAY_SIZE(g_CurveColors);
+    const plUInt32 uiColorIdx = uiNameHash % PL_ARRAY_SIZE(g_CurveColors);
 
     switch (target)
     {
@@ -719,19 +710,19 @@ plUuid plPropertyAnimAssetDocument::CreateTrack(
         break;
     }
 
-    accessor.SetValue(pFloatCurveObject, pColorProp, color).IgnoreResult();
+    accessor.SetValue(pFloatCurveObject, pColorProp, color).AssertSuccess();
   }
 
   return newTrack;
 }
 
-plUuid plPropertyAnimAssetDocument::FindCurveCp(const plUuid& trackGuid, plInt64 tickX)
+plUuid plPropertyAnimAssetDocument::FindCurveCp(const plUuid& trackGuid, plInt64 iTickX)
 {
   auto pTrack = GetTrack(trackGuid);
   plInt32 iIndex = -1;
   for (plUInt32 i = 0; i < pTrack->m_FloatCurve.m_ControlPoints.GetCount(); i++)
   {
-    if (pTrack->m_FloatCurve.m_ControlPoints[i].m_iTick == tickX)
+    if (pTrack->m_FloatCurve.m_ControlPoints[i].m_iTick == iTickX)
     {
       iIndex = (plInt32)i;
       break;
@@ -749,7 +740,7 @@ plUuid plPropertyAnimAssetDocument::FindCurveCp(const plUuid& trackGuid, plInt64
   return cpGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::InsertCurveCpAt(const plUuid& track, plInt64 tickX, double newPosY)
+plUuid plPropertyAnimAssetDocument::InsertCurveCpAt(const plUuid& track, plInt64 iTickX, double fNewPosY)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -759,27 +750,27 @@ plUuid plPropertyAnimAssetDocument::InsertCurveCpAt(const plUuid& track, plInt64
   const plVariant curveGuid = trackObject->GetTypeAccessor().GetValue("FloatCurve");
 
   plUuid newObjectGuid;
-  PLASMA_VERIFY(acc.AddObject(accessor.GetObject(curveGuid.Get<plUuid>()), "ControlPoints", -1, plGetStaticRTTI<plCurveControlPointData>(), newObjectGuid)
+  PL_VERIFY(acc.AddObject(accessor.GetObject(curveGuid.Get<plUuid>()), "ControlPoints", -1, plGetStaticRTTI<plCurveControlPointData>(), newObjectGuid)
               .Succeeded(),
     "");
   auto curveCPObj = accessor.GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(curveCPObj, "Tick", tickX).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(curveCPObj, "Value", newPosY).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(curveCPObj, "LeftTangent", plVec2(-0.1f, 0.0f)).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(curveCPObj, "RightTangent", plVec2(+0.1f, 0.0f)).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(curveCPObj, "Tick", iTickX).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(curveCPObj, "Value", fNewPosY).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(curveCPObj, "LeftTangent", plVec2(-0.1f, 0.0f)).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(curveCPObj, "RightTangent", plVec2(+0.1f, 0.0f)).Succeeded(), "");
 
   acc.FinishTransaction();
 
   return newObjectGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::FindGradientColorCp(const plUuid& trackGuid, plInt64 tickX)
+plUuid plPropertyAnimAssetDocument::FindGradientColorCp(const plUuid& trackGuid, plInt64 iTickX)
 {
   auto pTrack = GetTrack(trackGuid);
   plInt32 iIndex = -1;
   for (plUInt32 i = 0; i < pTrack->m_ColorGradient.m_ColorCPs.GetCount(); i++)
   {
-    if (pTrack->m_ColorGradient.m_ColorCPs[i].m_iTick == tickX)
+    if (pTrack->m_ColorGradient.m_ColorCPs[i].m_iTick == iTickX)
     {
       iIndex = (plInt32)i;
       break;
@@ -797,7 +788,7 @@ plUuid plPropertyAnimAssetDocument::FindGradientColorCp(const plUuid& trackGuid,
   return cpGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::InsertGradientColorCpAt(const plUuid& trackGuid, plInt64 tickX, const plColorGammaUB& color)
+plUuid plPropertyAnimAssetDocument::InsertGradientColorCpAt(const plUuid& trackGuid, plInt64 iTickX, const plColorGammaUB& color)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -808,23 +799,23 @@ plUuid plPropertyAnimAssetDocument::InsertGradientColorCpAt(const plUuid& trackG
 
   acc.StartTransaction("Add Color Control Point");
   plUuid newObjectGuid;
-  PLASMA_VERIFY(acc.AddObject(gradientObject, "ColorCPs", -1, plGetStaticRTTI<plColorControlPoint>(), newObjectGuid).Succeeded(), "");
+  PL_VERIFY(acc.AddObject(gradientObject, "ColorCPs", -1, plGetStaticRTTI<plColorControlPoint>(), newObjectGuid).Succeeded(), "");
   const plDocumentObject* cpObject = GetObjectManager()->GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Tick", tickX).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Red", color.r).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Green", color.g).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Blue", color.b).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Tick", iTickX).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Red", color.r).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Green", color.g).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Blue", color.b).Succeeded(), "");
   acc.FinishTransaction();
   return newObjectGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::FindGradientAlphaCp(const plUuid& trackGuid, plInt64 tickX)
+plUuid plPropertyAnimAssetDocument::FindGradientAlphaCp(const plUuid& trackGuid, plInt64 iTickX)
 {
   auto pTrack = GetTrack(trackGuid);
   plInt32 iIndex = -1;
   for (plUInt32 i = 0; i < pTrack->m_ColorGradient.m_AlphaCPs.GetCount(); i++)
   {
-    if (pTrack->m_ColorGradient.m_AlphaCPs[i].m_iTick == tickX)
+    if (pTrack->m_ColorGradient.m_AlphaCPs[i].m_iTick == iTickX)
     {
       iIndex = (plInt32)i;
       break;
@@ -842,7 +833,7 @@ plUuid plPropertyAnimAssetDocument::FindGradientAlphaCp(const plUuid& trackGuid,
   return cpGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::InsertGradientAlphaCpAt(const plUuid& trackGuid, plInt64 tickX, plUInt8 alpha)
+plUuid plPropertyAnimAssetDocument::InsertGradientAlphaCpAt(const plUuid& trackGuid, plInt64 iTickX, plUInt8 uiAlpha)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -853,21 +844,21 @@ plUuid plPropertyAnimAssetDocument::InsertGradientAlphaCpAt(const plUuid& trackG
 
   acc.StartTransaction("Add Alpha Control Point");
   plUuid newObjectGuid;
-  PLASMA_VERIFY(acc.AddObject(gradientObject, "AlphaCPs", -1, plGetStaticRTTI<plAlphaControlPoint>(), newObjectGuid).Succeeded(), "");
+  PL_VERIFY(acc.AddObject(gradientObject, "AlphaCPs", -1, plGetStaticRTTI<plAlphaControlPoint>(), newObjectGuid).Succeeded(), "");
   const plDocumentObject* cpObject = GetObjectManager()->GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Tick", tickX).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Alpha", alpha).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Tick", iTickX).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Alpha", uiAlpha).Succeeded(), "");
   acc.FinishTransaction();
   return newObjectGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::FindGradientIntensityCp(const plUuid& trackGuid, plInt64 tickX)
+plUuid plPropertyAnimAssetDocument::FindGradientIntensityCp(const plUuid& trackGuid, plInt64 iTickX)
 {
   auto pTrack = GetTrack(trackGuid);
   plInt32 iIndex = -1;
   for (plUInt32 i = 0; i < pTrack->m_ColorGradient.m_IntensityCPs.GetCount(); i++)
   {
-    if (pTrack->m_ColorGradient.m_IntensityCPs[i].m_iTick == tickX)
+    if (pTrack->m_ColorGradient.m_IntensityCPs[i].m_iTick == iTickX)
     {
       iIndex = (plInt32)i;
       break;
@@ -885,7 +876,7 @@ plUuid plPropertyAnimAssetDocument::FindGradientIntensityCp(const plUuid& trackG
   return cpGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::InsertGradientIntensityCpAt(const plUuid& trackGuid, plInt64 tickX, float intensity)
+plUuid plPropertyAnimAssetDocument::InsertGradientIntensityCpAt(const plUuid& trackGuid, plInt64 iTickX, float fIntensity)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -896,15 +887,15 @@ plUuid plPropertyAnimAssetDocument::InsertGradientIntensityCpAt(const plUuid& tr
 
   acc.StartTransaction("Add Intensity Control Point");
   plUuid newObjectGuid;
-  PLASMA_VERIFY(acc.AddObject(gradientObject, "IntensityCPs", -1, plGetStaticRTTI<plIntensityControlPoint>(), newObjectGuid).Succeeded(), "");
+  PL_VERIFY(acc.AddObject(gradientObject, "IntensityCPs", -1, plGetStaticRTTI<plIntensityControlPoint>(), newObjectGuid).Succeeded(), "");
   const plDocumentObject* cpObject = GetObjectManager()->GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Tick", tickX).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(cpObject, "Intensity", intensity).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Tick", iTickX).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(cpObject, "Intensity", fIntensity).Succeeded(), "");
   acc.FinishTransaction();
   return newObjectGuid;
 }
 
-plUuid plPropertyAnimAssetDocument::InsertEventTrackCpAt(plInt64 tickX, const char* szValue)
+plUuid plPropertyAnimAssetDocument::InsertEventTrackCpAt(plInt64 iTickX, const char* szValue)
 {
   plObjectCommandAccessor accessor(GetCommandHistory());
   plObjectAccessorBase& acc = accessor;
@@ -914,12 +905,12 @@ plUuid plPropertyAnimAssetDocument::InsertEventTrackCpAt(plInt64 tickX, const ch
   plUuid trackGuid = accessor.Get<plUuid>(GetPropertyObject(), pTrackProp);
 
   plUuid newObjectGuid;
-  PLASMA_VERIFY(
+  PL_VERIFY(
     acc.AddObject(accessor.GetObject(trackGuid), "ControlPoints", -1, plGetStaticRTTI<plEventTrackControlPointData>(), newObjectGuid).Succeeded(),
     "");
   const plDocumentObject* pCPObj = accessor.GetObject(newObjectGuid);
-  PLASMA_VERIFY(acc.SetValue(pCPObj, "Tick", tickX).Succeeded(), "");
-  PLASMA_VERIFY(acc.SetValue(pCPObj, "Event", szValue).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(pCPObj, "Tick", iTickX).Succeeded(), "");
+  PL_VERIFY(acc.SetValue(pCPObj, "Event", szValue).Succeeded(), "");
 
   acc.FinishTransaction();
 

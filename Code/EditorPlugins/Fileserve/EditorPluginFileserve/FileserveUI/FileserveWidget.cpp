@@ -5,7 +5,7 @@
 #include <EditorPluginFileserve/FileserveUI/FileserveWidget.moc.h>
 #include <Foundation/Utilities/CommandLineUtils.h>
 
-plQtFileserveWidget::plQtFileserveWidget(QWidget* parent /*= nullptr*/)
+plQtFileserveWidget::plQtFileserveWidget(QWidget* pParent /*= nullptr*/)
 {
   setupUi(this);
   Progress->reset();
@@ -84,10 +84,10 @@ plQtFileserveWidget::plQtFileserveWidget(QWidget* parent /*= nullptr*/)
   }
 }
 
-void plQtFileserveWidget::FindOwnIP(plStringBuilder& out_Display, plHybridArray<plStringBuilder, 4>* out_AllIPs)
+void plQtFileserveWidget::FindOwnIP(plStringBuilder& out_sDisplay, plHybridArray<plStringBuilder, 4>* out_pAllIPs)
 {
   plStringBuilder hardwarename;
-  out_Display.Clear();
+  out_sDisplay.Clear();
 
   for (const QNetworkInterface& neti : QNetworkInterface::allInterfaces())
   {
@@ -117,14 +117,14 @@ void plQtFileserveWidget::FindOwnIP(plStringBuilder& out_Display, plHybridArray<
         continue;
 
       // if we DO find multiple adapters, display them all
-      if (!out_Display.IsEmpty())
-        out_Display.Append("\n");
+      if (!out_sDisplay.IsEmpty())
+        out_sDisplay.Append("\n");
 
-      out_Display.AppendFormat("Adapter: '{0}' = {1}", hardwarename, entry.ip().toString().toUtf8().data());
+      out_sDisplay.AppendFormat("Adapter: '{0}' = {1}", hardwarename, entry.ip().toString().toUtf8().data());
 
-      if (out_AllIPs != nullptr)
+      if (out_pAllIPs != nullptr)
       {
-        out_AllIPs->PushBack(entry.ip().toString().toUtf8().data());
+        out_pAllIPs->PushBack(entry.ip().toString().toUtf8().data());
       }
     }
   }
@@ -227,7 +227,7 @@ void plQtFileserveWidget::FileserverEventHandler(const plFileserverEvent& e)
   switch (e.m_Type)
   {
     case plFileserverEvent::Type::None:
-      PLASMA_ASSERT_DEV(false, "None event should never be fired");
+      PL_ASSERT_DEV(false, "None event should never be fired");
       break;
 
     case plFileserverEvent::Type::ServerStarted:
@@ -351,7 +351,7 @@ void plQtFileserveWidget::FileserverEventHandler(const plFileserverEvent& e)
 
     case plFileserverEvent::Type::FileDownloading:
     {
-      if (plTime::Now() - m_LastProgressUpdate > plTime::Milliseconds(100))
+      if (plTime::Now() - m_LastProgressUpdate > plTime::MakeFromMilliseconds(100))
       {
         m_LastProgressUpdate = plTime::Now();
         Progress->setValue((int)(100.0 * e.m_uiSentTotal / e.m_uiSizeTotal));
@@ -380,7 +380,7 @@ void plQtFileserveWidget::FileserverEventHandler(const plFileserverEvent& e)
 
     case plFileserverEvent::Type::FileUploading:
     {
-      if (plTime::Now() - m_LastProgressUpdate > plTime::Milliseconds(100))
+      if (plTime::Now() - m_LastProgressUpdate > plTime::MakeFromMilliseconds(100))
       {
         m_LastProgressUpdate = plTime::Now();
         Progress->setValue((int)(100.0 * e.m_uiSentTotal / e.m_uiSizeTotal));
@@ -510,7 +510,7 @@ void plQtFileserveWidget::UpdateClientList()
   {
     QTreeWidgetItem* pClient = new QTreeWidgetItem();
 
-    sName.Format("Client: {0}", it.Key());
+    sName.SetFormat("Client: {0}", it.Key());
     pClient->setText(0, sName.GetData());
     pClient->setText(1, it.Value().m_bConnected ? "connected" : "disconnected");
 

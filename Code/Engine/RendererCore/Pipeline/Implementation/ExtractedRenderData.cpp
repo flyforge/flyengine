@@ -3,7 +3,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererCore/Pipeline/ExtractedRenderData.h>
 
-plExtractedRenderData::plExtractedRenderData() {}
+plExtractedRenderData::plExtractedRenderData() = default;
 
 void plExtractedRenderData::AddRenderData(const plRenderData* pRenderData, plRenderData::Category category)
 {
@@ -21,11 +21,11 @@ void plExtractedRenderData::AddFrameData(const plRenderData* pFrameData)
 
 void plExtractedRenderData::SortAndBatch()
 {
-  PLASMA_PROFILE_SCOPE("SortAndBatch");
+  PL_PROFILE_SCOPE("SortAndBatch");
 
   struct RenderDataComparer
   {
-    PLASMA_FORCE_INLINE bool Less(const plRenderDataBatch::SortableRenderData& a, const plRenderDataBatch::SortableRenderData& b) const
+    PL_FORCE_INLINE bool Less(const plRenderDataBatch::SortableRenderData& a, const plRenderDataBatch::SortableRenderData& b) const
     {
       if (a.m_uiSortingKey == b.m_uiSortingKey)
       {
@@ -109,4 +109,4 @@ const plRenderData* plExtractedRenderData::GetFrameData(const plRTTI* pRtti) con
   return nullptr;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_ExtractedRenderData);
+

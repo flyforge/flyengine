@@ -44,7 +44,7 @@ struct plPhysicsCastResultArray
 /// \brief Used to report overlap query results
 struct plPhysicsOverlapResult
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plGameObjectHandle m_hShapeObject;            ///< The game object to which the hit physics shape is attached.
   plGameObjectHandle m_hActorObject;            ///< The game object to which the parent actor of the hit physics shape is attached.
@@ -72,7 +72,7 @@ struct plPhysicsTriangle
 /// This is mainly for optimization purposes. It is up to the physics integration to support some or all of these flags.
 ///
 /// Note: If this is modified, 'Physics.ts' also has to be updated.
-PLASMA_DECLARE_FLAGS_WITH_DEFAULT(plUInt32, plPhysicsShapeType, 0xFFFFFFFF,
+PL_DECLARE_FLAGS_WITH_DEFAULT(plUInt32, plPhysicsShapeType, 0xFFFFFFFF,
   Static,    ///< Static geometry
   Dynamic,   ///< Dynamic and kinematic objects
   Query,     ///< Query shapes are kinematic bodies that don't participate in the simulation and are only used for raycasts and other queries.
@@ -83,7 +83,7 @@ PLASMA_DECLARE_FLAGS_WITH_DEFAULT(plUInt32, plPhysicsShapeType, 0xFFFFFFFF,
   Cloth      ///< Soft-body shapes. Mainly for decorative purposes.
 );
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plPhysicsShapeType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plPhysicsShapeType);
 
 struct plPhysicsQueryParameters
 {
@@ -108,9 +108,9 @@ enum class plPhysicsHitCollection
   Any
 };
 
-class PLASMA_CORE_DLL plPhysicsWorldModuleInterface : public plWorldModule
+class PL_CORE_DLL plPhysicsWorldModuleInterface : public plWorldModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPhysicsWorldModuleInterface, plWorldModule);
+  PL_ADD_DYNAMIC_REFLECTION(plPhysicsWorldModuleInterface, plWorldModule);
 
 protected:
   plPhysicsWorldModuleInterface(plWorld* pWorld)
@@ -158,8 +158,8 @@ public:
   {
     plGameObjectHandle m_hActorA;
     plGameObjectHandle m_hActorB;
-    plTransform m_LocalFrameA = plTransform::IdentityTransform();
-    plTransform m_LocalFrameB = plTransform::IdentityTransform();
+    plTransform m_LocalFrameA = plTransform::MakeIdentity();
+    plTransform m_LocalFrameB = plTransform::MakeIdentity();
   };
 
   struct FixedJointConfig : JointConfig
@@ -171,9 +171,9 @@ public:
 };
 
 /// \brief Used to apply a physical impulse on the object
-struct PLASMA_CORE_DLL plMsgPhysicsAddImpulse : public plMessage
+struct PL_CORE_DLL plMsgPhysicsAddImpulse : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgPhysicsAddImpulse, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgPhysicsAddImpulse, plMessage);
 
   plVec3 m_vGlobalPosition;
   plVec3 m_vImpulse;
@@ -185,9 +185,9 @@ struct PLASMA_CORE_DLL plMsgPhysicsAddImpulse : public plMessage
 };
 
 /// \brief Used to apply a physical force on the object
-struct PLASMA_CORE_DLL plMsgPhysicsAddForce : public plMessage
+struct PL_CORE_DLL plMsgPhysicsAddForce : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgPhysicsAddForce, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgPhysicsAddForce, plMessage);
 
   plVec3 m_vGlobalPosition;
   plVec3 m_vForce;
@@ -197,26 +197,26 @@ struct PLASMA_CORE_DLL plMsgPhysicsAddForce : public plMessage
   void* m_pInternalPhysicsActor = nullptr;
 };
 
-struct PLASMA_CORE_DLL plMsgPhysicsJointBroke : public plEventMessage
+struct PL_CORE_DLL plMsgPhysicsJointBroke : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgPhysicsJointBroke, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgPhysicsJointBroke, plEventMessage);
 
   plGameObjectHandle m_hJointObject;
 };
 
 /// \brief Sent by components such as plJoltGrabObjectComponent to indicate that the object has been grabbed or released.
-struct PLASMA_CORE_DLL plMsgObjectGrabbed : public plMessage
+struct PL_CORE_DLL plMsgObjectGrabbed : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgObjectGrabbed, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgObjectGrabbed, plMessage);
 
   plGameObjectHandle m_hGrabbedBy;
   bool m_bGotGrabbed = true;
 };
 
 /// \brief Send this to components such as plJoltGrabObjectComponent to demand that m_hGrabbedObjectToRelease should no longer be grabbed.
-struct PLASMA_CORE_DLL plMsgReleaseObjectGrab : public plMessage
+struct PL_CORE_DLL plMsgReleaseObjectGrab : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgReleaseObjectGrab, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgReleaseObjectGrab, plMessage);
 
   plGameObjectHandle m_hGrabbedObjectToRelease;
 };
@@ -225,23 +225,23 @@ struct PLASMA_CORE_DLL plMsgReleaseObjectGrab : public plMessage
 
 #include <Foundation/Communication/Message.h>
 
-struct PLASMA_CORE_DLL plSmcTriangle
+struct PL_CORE_DLL plSmcTriangle
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt32 m_uiVertexIndices[3];
 };
 
-struct PLASMA_CORE_DLL plSmcSubMesh
+struct PL_CORE_DLL plSmcSubMesh
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt32 m_uiFirstTriangle = 0;
   plUInt32 m_uiNumTriangles = 0;
   plUInt16 m_uiSurfaceIndex = 0;
 };
 
-struct PLASMA_CORE_DLL plSmcDescription
+struct PL_CORE_DLL plSmcDescription
 {
   plDeque<plVec3> m_Vertices;
   plDeque<plSmcTriangle> m_Triangles;
@@ -249,9 +249,9 @@ struct PLASMA_CORE_DLL plSmcDescription
   plDeque<plString> m_Surfaces;
 };
 
-struct PLASMA_CORE_DLL plMsgBuildStaticMesh : public plMessage
+struct PL_CORE_DLL plMsgBuildStaticMesh : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgBuildStaticMesh, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgBuildStaticMesh, plMessage);
 
   /// \brief Append data to this description to add meshes to the automatic static mesh generation
   plSmcDescription* m_pStaticMeshDescription = nullptr;

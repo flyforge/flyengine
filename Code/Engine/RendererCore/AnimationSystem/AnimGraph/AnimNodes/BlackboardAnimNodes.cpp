@@ -10,56 +10,56 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plSetBlackboardNumberAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plSetBlackboardNumberAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
-    PLASMA_MEMBER_PROPERTY("Number", m_fNumber),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_MEMBER_PROPERTY("Number", m_fNumber),
 
-    PLASMA_MEMBER_PROPERTY("InActivate", m_InActivate)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("InNumber", m_InNumber)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("InActivate", m_InActivate)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("InNumber", m_InNumber)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plTitleAttribute("Set Number: '{BlackboardEntry}'"),
+    new plTitleAttribute("Set Number: '{BlackboardEntry}' to {Number}"),
     new plCategoryAttribute("Blackboard"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plSetBlackboardNumberAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
   stream << m_fNumber;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InActivate.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InNumber.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InActivate.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InNumber.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSetBlackboardNumberAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
   stream >> m_fNumber;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InActivate.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InNumber.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InActivate.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InNumber.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSetBlackboardNumberAnimNode::SetBlackboardEntry(const char* szFile)
@@ -81,10 +81,7 @@ void plSetBlackboardNumberAnimNode::Step(plAnimController& ref_controller, plAni
   if (pBlackboard == nullptr)
     return;
 
-  if (pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InNumber.GetNumber(ref_graph, m_fNumber)).Failed())
-  {
-    plLog::Warning("AnimController::SetBlackboardNumber: '{}' doesn't exist.", m_sBlackboardEntry);
-  }
+  pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InNumber.GetNumber(ref_graph, m_fNumber));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -92,50 +89,50 @@ void plSetBlackboardNumberAnimNode::Step(plAnimController& ref_controller, plAni
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGetBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plGetBlackboardNumberAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGetBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plGetBlackboardNumberAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
 
-    PLASMA_MEMBER_PROPERTY("OutNumber", m_OutNumber)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutNumber", m_OutNumber)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Blackboard"),
     new plTitleAttribute("Get Number: '{BlackboardEntry}'"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Lime)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plGetBlackboardNumberAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutNumber.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutNumber.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGetBlackboardNumberAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutNumber.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutNumber.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGetBlackboardNumberAnimNode::SetBlackboardEntry(const char* szFile)
@@ -173,62 +170,62 @@ void plGetBlackboardNumberAnimNode::Step(plAnimController& ref_controller, plAni
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCompareBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plCompareBlackboardNumberAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCompareBlackboardNumberAnimNode, 1, plRTTIDefaultAllocator<plCompareBlackboardNumberAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
-    PLASMA_MEMBER_PROPERTY("ReferenceValue", m_fReferenceValue),
-    PLASMA_ENUM_MEMBER_PROPERTY("Comparison", plComparisonOperator, m_Comparison),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_MEMBER_PROPERTY("ReferenceValue", m_fReferenceValue),
+    PL_ENUM_MEMBER_PROPERTY("Comparison", plComparisonOperator, m_Comparison),
 
-    PLASMA_MEMBER_PROPERTY("OutOnTrue", m_OutOnTrue)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("OutOnFalse", m_OutOnFalse)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("OutIsTrue", m_OutIsTrue)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutOnTrue", m_OutOnTrue)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutOnFalse", m_OutOnFalse)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutIsTrue", m_OutIsTrue)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Blackboard"),
     new plTitleAttribute("Check: '{BlackboardEntry}' {Comparison} {ReferenceValue}"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Lime)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plCompareBlackboardNumberAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
   stream << m_fReferenceValue;
   stream << m_Comparison;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnTrue.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFalse.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutIsTrue.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutIsTrue.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCompareBlackboardNumberAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
   stream >> m_fReferenceValue;
   stream >> m_Comparison;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnTrue.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFalse.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutIsTrue.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutIsTrue.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plCompareBlackboardNumberAnimNode::SetBlackboardEntry(const char* szFile)
@@ -294,56 +291,56 @@ bool plCompareBlackboardNumberAnimNode::GetInstanceDataDesc(plInstanceDataDesc& 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCheckBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plCheckBlackboardBoolAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCheckBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plCheckBlackboardBoolAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
 
-    PLASMA_MEMBER_PROPERTY("OutOnTrue", m_OutOnTrue)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("OutOnFalse", m_OutOnFalse)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("OutBool", m_OutBool)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutOnTrue", m_OutOnTrue)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutOnFalse", m_OutOnFalse)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutBool", m_OutBool)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Blackboard"),
     new plTitleAttribute("Check Bool: '{BlackboardEntry}'"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Lime)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plCheckBlackboardBoolAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnTrue.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFalse.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutBool.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutBool.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCheckBlackboardBoolAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnTrue.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFalse.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutBool.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutBool.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plCheckBlackboardBoolAnimNode::SetBlackboardEntry(const char* szFile)
@@ -408,56 +405,56 @@ bool plCheckBlackboardBoolAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plSetBlackboardBoolAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plSetBlackboardBoolAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
-    PLASMA_MEMBER_PROPERTY("Bool", m_bBool),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_MEMBER_PROPERTY("Bool", m_bBool),
 
-    PLASMA_MEMBER_PROPERTY("InActivate", m_InActivate)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("InBool", m_InBool)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("InActivate", m_InActivate)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("InBool", m_InBool)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plTitleAttribute("Set Bool: '{BlackboardEntry}'"),
+    new plTitleAttribute("Set Bool: '{BlackboardEntry}' to {Bool}"),
     new plCategoryAttribute("Blackboard"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plSetBlackboardBoolAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
   stream << m_bBool;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InActivate.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InBool.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InActivate.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InBool.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSetBlackboardBoolAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
   stream >> m_bBool;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InActivate.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InBool.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InActivate.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InBool.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSetBlackboardBoolAnimNode::SetBlackboardEntry(const char* szFile)
@@ -479,10 +476,7 @@ void plSetBlackboardBoolAnimNode::Step(plAnimController& ref_controller, plAnimG
   if (pBlackboard == nullptr)
     return;
 
-  if (pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InBool.GetBool(ref_graph, m_bBool)).Failed())
-  {
-    plLog::Warning("AnimController::SetBlackboardBool: '{}' doesn't exist.", m_sBlackboardEntry);
-  }
+  pBlackboard->SetEntryValue(m_sBlackboardEntry, m_InBool.GetBool(ref_graph, m_bBool));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -490,50 +484,50 @@ void plSetBlackboardBoolAnimNode::Step(plAnimController& ref_controller, plAnimG
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGetBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plGetBlackboardBoolAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGetBlackboardBoolAnimNode, 1, plRTTIDefaultAllocator<plGetBlackboardBoolAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
 
-    PLASMA_MEMBER_PROPERTY("OutBool", m_OutBool)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutBool", m_OutBool)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Blackboard"),
     new plTitleAttribute("Get Bool: '{BlackboardEntry}'"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Lime)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plGetBlackboardBoolAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutBool.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutBool.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGetBlackboardBoolAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutBool.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutBool.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGetBlackboardBoolAnimNode::SetBlackboardEntry(const char* szFile)
@@ -572,50 +566,50 @@ void plGetBlackboardBoolAnimNode::Step(plAnimController& ref_controller, plAnimG
 
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plOnBlackboardValueChangedAnimNode, 1, plRTTIDefaultAllocator<plOnBlackboardValueChangedAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plOnBlackboardValueChangedAnimNode, 1, plRTTIDefaultAllocator<plOnBlackboardValueChangedAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
+    PL_ACCESSOR_PROPERTY("BlackboardEntry", GetBlackboardEntry, SetBlackboardEntry),
 
-    PLASMA_MEMBER_PROPERTY("OutOnValueChanged", m_OutOnValueChanged)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("OutOnValueChanged", m_OutOnValueChanged)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Blackboard"),
     new plTitleAttribute("OnChanged: '{BlackboardEntry}'"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Lime)),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plOnBlackboardValueChangedAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnValueChanged.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnValueChanged.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plOnBlackboardValueChangedAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sBlackboardEntry;
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnValueChanged.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnValueChanged.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plOnBlackboardValueChangedAnimNode::SetBlackboardEntry(const char* szFile)
@@ -667,4 +661,4 @@ bool plOnBlackboardValueChangedAnimNode::GetInstanceDataDesc(plInstanceDataDesc&
 //////////////////////////////////////////////////////////////////////////
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_BlackboardAnimNodes);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_BlackboardAnimNodes);

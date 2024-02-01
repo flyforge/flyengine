@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) || PL_ENABLED(PL_PLATFORM_LINUX)
 
 //-------------------------------------------------------------------------------------
 // BC4BC5.cpp
@@ -13,10 +13,10 @@
 // http://go.microsoft.com/fwlink/?LinkId=248926
 //-------------------------------------------------------------------------------------
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_LINUX)
+#if PL_DISABLED(PL_PLATFORM_LINUX)
 #include "DirectXTexP.h"
 #else
-#include "PLASMACompat.h"
+#include "PLCompat.h"
 #endif
 
 #include "BC.h"
@@ -571,5 +571,4 @@ void DirectX::D3DXEncodeBC5S(uint8_t *pBC, const XMVECTOR *pColor, uint32_t flag
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_BC4BC5);
 

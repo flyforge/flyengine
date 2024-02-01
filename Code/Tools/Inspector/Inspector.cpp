@@ -126,4 +126,4 @@ public:
   }
 };
 
-PLASMA_APPLICATION_ENTRY_POINT(plInspectorApp);
+PL_APPLICATION_ENTRY_POINT(plInspectorApp);

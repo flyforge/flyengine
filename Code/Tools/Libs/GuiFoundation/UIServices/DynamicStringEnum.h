@@ -10,7 +10,7 @@
 /// The UI should show these user specified names without restarting the tool.
 ///
 /// Call the static function GetDynamicEnum() to create or get the plDynamicEnum for a specific type.
-class PLASMA_GUIFOUNDATION_DLL plDynamicStringEnum
+class PL_GUIFOUNDATION_DLL plDynamicStringEnum
 {
 public:
   /// \brief Returns a plDynamicEnum under the given name. Creates a new one, if the name has not been used before.

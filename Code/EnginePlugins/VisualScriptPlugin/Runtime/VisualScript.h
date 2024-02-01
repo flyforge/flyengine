@@ -6,11 +6,11 @@
 class plVisualScriptInstance;
 class plVisualScriptExecutionContext;
 
-struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
+struct PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
 {
   /// \brief Native node types for visual script graphs.
   /// Editor only types are not supported at runtime and will be replaced by the visual script compiler during asset transform.
-  struct PLASMA_VISUALSCRIPTPLUGIN_DLL Type
+  struct PL_VISUALSCRIPTPLUGIN_DLL Type
   {
     using StorageType = plUInt8;
 
@@ -30,8 +30,8 @@ struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
 
       FirstBuiltin,
 
-      Builtin_Constant, // Editor Only
-      Builtin_GetVariable, // Editor Only
+      Builtin_Constant,    // Editor only
+      Builtin_GetVariable, // Editor only
       Builtin_SetVariable,
       Builtin_IncVariable,
       Builtin_DecVariable,
@@ -51,13 +51,13 @@ struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
       Builtin_Compare,
       Builtin_CompareExec, // Editor only
       Builtin_IsValid,
-      Builtin_Select, // TODO
+      Builtin_Select,
 
       Builtin_Add,
       Builtin_Subtract,
       Builtin_Multiply,
       Builtin_Divide,
-      Builtin_Expression, // TODO
+      Builtin_Expression,
 
       Builtin_ToBool,
       Builtin_ToByte,
@@ -72,17 +72,17 @@ struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
       Builtin_Variant_ConvertTo,
 
       Builtin_MakeArray,
-      Builtin_Array_GetElement, // TODO
-      Builtin_Array_SetElement, // TODO
-      Builtin_Array_GetCount,   // TODO
-      Builtin_Array_IsEmpty,    // TODO
-      Builtin_Array_Clear,      // TODO
-      Builtin_Array_Contains,   // TODO
-      Builtin_Array_IndexOf,    // TODO
-      Builtin_Array_Insert,     // TODO
-      Builtin_Array_PushBack,   // TODO
-      Builtin_Array_Remove,     // TODO
-      Builtin_Array_RemoveAt,   // TODO
+      Builtin_Array_GetElement,
+      Builtin_Array_SetElement,
+      Builtin_Array_GetCount,
+      Builtin_Array_IsEmpty,
+      Builtin_Array_Clear,
+      Builtin_Array_Contains,
+      Builtin_Array_IndexOf,
+      Builtin_Array_Insert,
+      Builtin_Array_PushBack,
+      Builtin_Array_Remove,
+      Builtin_Array_RemoveAt,
 
       Builtin_TryGetComponentOfBaseType,
 
@@ -99,12 +99,12 @@ struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
       Default = Invalid
     };
 
-    PLASMA_ALWAYS_INLINE static bool IsEntry(Enum type) { return type >= EntryCall && type <= MessageHandler_Coroutine; }
-    PLASMA_ALWAYS_INLINE static bool IsLoop(Enum type) { return type >= Builtin_WhileLoop && type <= Builtin_ReverseForEachLoop; }
+    PL_ALWAYS_INLINE static bool IsEntry(Enum type) { return type >= EntryCall && type <= MessageHandler_Coroutine; }
+    PL_ALWAYS_INLINE static bool IsLoop(Enum type) { return type >= Builtin_WhileLoop && type <= Builtin_ReverseForEachLoop; }
 
-    PLASMA_ALWAYS_INLINE static bool MakesOuterCoroutine(Enum type) { return type == InplaceCoroutine || (type >= Builtin_WaitForAll && type <= Builtin_Yield); }
+    PL_ALWAYS_INLINE static bool MakesOuterCoroutine(Enum type) { return type == InplaceCoroutine || (type >= Builtin_WaitForAll && type <= Builtin_Yield); }
 
-    PLASMA_ALWAYS_INLINE static bool IsBuiltin(Enum type) { return type > FirstBuiltin && type < LastBuiltin; }
+    PL_ALWAYS_INLINE static bool IsBuiltin(Enum type) { return type > FirstBuiltin && type < LastBuiltin; }
 
     static Enum GetConversionType(plVisualScriptDataType::Enum targetDataType);
 
@@ -126,9 +126,9 @@ struct PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptNodeDescription
   void AppendUserDataName(plStringBuilder& out_sResult) const;
 };
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptGraphDescription : public plRefCounted
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptGraphDescription : public plRefCounted
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plVisualScriptGraphDescription);
+  PL_DISALLOW_COPY_AND_ASSIGN(plVisualScriptGraphDescription);
 
 public:
   plVisualScriptGraphDescription();
@@ -166,13 +166,13 @@ public:
       };
     };
 
-    static PLASMA_ALWAYS_INLINE ExecResult Completed() { return {0}; }
-    static PLASMA_ALWAYS_INLINE ExecResult RunNext(int iExecSlot) { return {iExecSlot}; }
-    static PLASMA_ALWAYS_INLINE ExecResult ContinueLater(plTime maxDelay) { return {State::ContinueLater, maxDelay}; }
-    static PLASMA_ALWAYS_INLINE ExecResult Error() { return {State::Error}; }
+    static PL_ALWAYS_INLINE ExecResult Completed() { return {0}; }
+    static PL_ALWAYS_INLINE ExecResult RunNext(int iExecSlot) { return {iExecSlot}; }
+    static PL_ALWAYS_INLINE ExecResult ContinueLater(plTime maxDelay) { return {State::ContinueLater, maxDelay}; }
+    static PL_ALWAYS_INLINE ExecResult Error() { return {State::Error}; }
 
     int m_NextExecAndState = 0;
-    plTime m_MaxDelay = plTime::Zero();
+    plTime m_MaxDelay = plTime::MakeZero();
   };
 
   struct Node;
@@ -186,7 +186,7 @@ public:
   struct Node
   {
     ExecuteFunction m_Function = nullptr;
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt32 m_uiPadding = 0;
 #endif
 
@@ -230,7 +230,7 @@ private:
 };
 
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptExecutionContext
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptExecutionContext
 {
 public:
   plVisualScriptExecutionContext(const plSharedPtr<const plVisualScriptGraphDescription>& pDesc);
@@ -294,6 +294,6 @@ struct plVisualScriptSendMessageMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_VISUALSCRIPTPLUGIN_DLL, plVisualScriptSendMessageMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_VISUALSCRIPTPLUGIN_DLL, plVisualScriptSendMessageMode);
 
 #include <VisualScriptPlugin/Runtime/VisualScript_inl.h>

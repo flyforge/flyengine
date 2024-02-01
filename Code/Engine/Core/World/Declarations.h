@@ -8,11 +8,11 @@
 
 #include <Core/CoreDLL.h>
 
-#ifndef PLASMA_WORLD_INDEX_BITS
-#define PLASMA_WORLD_INDEX_BITS 8
+#ifndef PL_WORLD_INDEX_BITS
+#  define PL_WORLD_INDEX_BITS 8
 #endif
 
-#define PLASMA_MAX_WORLDS (1 << PLASMA_WORLD_INDEX_BITS)
+#define PL_MAX_WORLDS (1 << PL_WORLD_INDEX_BITS)
 
 class plWorld;
 class plSpatialSystem;
@@ -27,7 +27,7 @@ namespace plInternal
     DEFAULT_BLOCK_SIZE = 1024 * 16
   };
 
-  typedef plLargeBlockAllocator<DEFAULT_BLOCK_SIZE> WorldLargeBlockAllocator;
+  using WorldLargeBlockAllocator = plLargeBlockAllocator<DEFAULT_BLOCK_SIZE>;
 } // namespace plInternal
 
 class plGameObject;
@@ -41,18 +41,18 @@ struct plMsgDeleteGameObject;
 /// \brief Internal game object id used by plGameObjectHandle.
 struct plGameObjectId
 {
-  typedef plUInt64 StorageType;
+  using StorageType = plUInt64;
 
-  PLASMA_DECLARE_ID_TYPE(plGameObjectId, 32, 8);
+  PL_DECLARE_ID_TYPE(plGameObjectId, 32, 8);
 
-  static_assert(PLASMA_WORLD_INDEX_BITS > 0 && PLASMA_WORLD_INDEX_BITS <= 24);
+  static_assert(PL_WORLD_INDEX_BITS > 0 && PL_WORLD_INDEX_BITS <= 24);
 
-  PLASMA_FORCE_INLINE plGameObjectId(StorageType instanceIndex, plUInt8 generation, plUInt8 worldIndex = 0)
+  PL_FORCE_INLINE plGameObjectId(StorageType instanceIndex, plUInt8 uiGeneration, plUInt8 uiWorldIndex = 0)
   {
     m_Data = 0;
     m_InstanceIndex = static_cast<plUInt32>(instanceIndex);
-    m_Generation = generation;
-    m_WorldIndex = worldIndex;
+    m_Generation = uiGeneration;
+    m_WorldIndex = uiWorldIndex;
   }
 
   union
@@ -62,7 +62,7 @@ struct plGameObjectId
     {
       StorageType m_InstanceIndex : 32;
       StorageType m_Generation : 8;
-      StorageType m_WorldIndex : PLASMA_WORLD_INDEX_BITS;
+      StorageType m_WorldIndex : PL_WORLD_INDEX_BITS;
     };
   };
 };
@@ -74,7 +74,7 @@ struct plGameObjectId
 /// Note that the object might have been deleted so always check the return value of TryGetObject.
 struct plGameObjectHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGameObjectHandle, plGameObjectId);
+  PL_DECLARE_HANDLE_TYPE(plGameObjectHandle, plGameObjectId);
 
   friend class plWorld;
   friend class plGameObject;
@@ -84,36 +84,36 @@ struct plGameObjectHandle
 template <>
 struct plHashHelper<plGameObjectHandle>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plGameObjectHandle value) { return plHashHelper<plUInt64>::Hash(value.GetInternalID().m_Data); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(plGameObjectHandle value) { return plHashHelper<plUInt64>::Hash(value.GetInternalID().m_Data); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plGameObjectHandle a, plGameObjectHandle b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plGameObjectHandle a, plGameObjectHandle b) { return a == b; }
 };
 
 /// \brief Currently not implemented as it is not needed for game object handles.
-PLASMA_CORE_DLL void operator<<(plStreamWriter& Stream, const plGameObjectHandle& Value);
-PLASMA_CORE_DLL void operator>>(plStreamReader& Stream, plGameObjectHandle& Value);
+PL_CORE_DLL void operator<<(plStreamWriter& inout_stream, const plGameObjectHandle& hValue);
+PL_CORE_DLL void operator>>(plStreamReader& inout_stream, plGameObjectHandle& ref_hValue);
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plGameObjectHandle);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plGameObjectHandle);
-#define PLASMA_COMPONENT_TYPE_INDEX_BITS (24 - PLASMA_WORLD_INDEX_BITS)
-#define PLASMA_MAX_COMPONENT_TYPES (1 << PLASMA_COMPONENT_TYPE_INDEX_BITS)
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plGameObjectHandle);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plGameObjectHandle);
+#define PL_COMPONENT_TYPE_INDEX_BITS (24 - PL_WORLD_INDEX_BITS)
+#define PL_MAX_COMPONENT_TYPES (1 << PL_COMPONENT_TYPE_INDEX_BITS)
 
 /// \brief Internal component id used by plComponentHandle.
 struct plComponentId
 {
-  typedef plUInt64 StorageType;
+  using StorageType = plUInt64;
 
-  PLASMA_DECLARE_ID_TYPE(plComponentId, 32, 8);
+  PL_DECLARE_ID_TYPE(plComponentId, 32, 8);
 
-  static_assert(PLASMA_COMPONENT_TYPE_INDEX_BITS > 0 && PLASMA_COMPONENT_TYPE_INDEX_BITS <= 16);
+  static_assert(PL_COMPONENT_TYPE_INDEX_BITS > 0 && PL_COMPONENT_TYPE_INDEX_BITS <= 16);
 
-  PLASMA_ALWAYS_INLINE plComponentId(StorageType instanceIndex, plUInt8 generation, plUInt16 typeId = 0, plUInt8 worldIndex = 0)
+  PL_ALWAYS_INLINE plComponentId(StorageType instanceIndex, plUInt8 uiGeneration, plUInt16 uiTypeId = 0, plUInt8 uiWorldIndex = 0)
   {
     m_Data = 0;
     m_InstanceIndex = static_cast<plUInt32>(instanceIndex);
-    m_Generation = generation;
-    m_TypeId = typeId;
-    m_WorldIndex = worldIndex;
+    m_Generation = uiGeneration;
+    m_TypeId = uiTypeId;
+    m_WorldIndex = uiWorldIndex;
   }
 
   union
@@ -123,8 +123,8 @@ struct plComponentId
     {
       StorageType m_InstanceIndex : 32;
       StorageType m_Generation : 8;
-      StorageType m_WorldIndex : PLASMA_WORLD_INDEX_BITS;
-      StorageType m_TypeId : PLASMA_COMPONENT_TYPE_INDEX_BITS;
+      StorageType m_WorldIndex : PL_WORLD_INDEX_BITS;
+      StorageType m_TypeId : PL_COMPONENT_TYPE_INDEX_BITS;
     };
   };
 };
@@ -136,7 +136,7 @@ struct plComponentId
 /// Note that the component might have been deleted so always check the return value of TryGetComponent.
 struct plComponentHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plComponentHandle, plComponentId);
+  PL_DECLARE_HANDLE_TYPE(plComponentHandle, plComponentId);
 
   friend class plWorld;
   friend class plComponentManagerBase;
@@ -147,22 +147,22 @@ struct plComponentHandle
 template <>
 struct plHashHelper<plComponentHandle>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plComponentHandle value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(plComponentHandle value)
   {
     plComponentId id = value.GetInternalID();
     plUInt64 data = *reinterpret_cast<plUInt64*>(&id);
     return plHashHelper<plUInt64>::Hash(data);
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plComponentHandle a, plComponentHandle b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plComponentHandle a, plComponentHandle b) { return a == b; }
 };
 
 /// \brief Currently not implemented as it is not needed for component handles.
-PLASMA_CORE_DLL void operator<<(plStreamWriter& Stream, const plComponentHandle& Value);
-PLASMA_CORE_DLL void operator>>(plStreamReader& Stream, plComponentHandle& Value);
+PL_CORE_DLL void operator<<(plStreamWriter& inout_stream, const plComponentHandle& hValue);
+PL_CORE_DLL void operator>>(plStreamReader& inout_stream, plComponentHandle& ref_hValue);
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plComponentHandle);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plComponentHandle);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plComponentHandle);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plComponentHandle);
 
 /// \brief Internal flags of game objects or components.
 struct plObjectFlags
@@ -172,31 +172,32 @@ struct plObjectFlags
   enum Enum
   {
     None = 0,
-    Dynamic = PLASMA_BIT(0),                 ///< Usually detected automatically. A dynamic object will not cache render data across frames.
-    ForceDynamic = PLASMA_BIT(1),            ///< Set by the user to enforce the 'Dynamic' mode. Necessary when user code (or scripts) should change
+    Dynamic = PL_BIT(0),                 ///< Usually detected automatically. A dynamic object will not cache render data across frames.
+    ForceDynamic = PL_BIT(1),            ///< Set by the user to enforce the 'Dynamic' mode. Necessary when user code (or scripts) should change
                                          ///< objects, and the automatic detection cannot know that.
-    ActiveFlag = PLASMA_BIT(2),              ///< The object/component has the 'active flag' set
-    ActiveState = PLASMA_BIT(3),             ///< The object/component and all its parents have the active flag
-    Initialized = PLASMA_BIT(4),             ///< The object/component has been initialized
-    Initializing = PLASMA_BIT(5),            ///< The object/component is currently initializing. Used to prevent recursions during initialization.
-    SimulationStarted = PLASMA_BIT(6),       ///< OnSimulationStarted() has been called on the component
-    SimulationStarting = PLASMA_BIT(7),      ///< Used to prevent recursion during OnSimulationStarted()
-    UnhandledMessageHandler = PLASMA_BIT(8), ///< For components, when a message is not handled, a virtual function is called
+    ActiveFlag = PL_BIT(2),              ///< The object/component has the 'active flag' set
+    ActiveState = PL_BIT(3),             ///< The object/component and all its parents have the active flag
+    Initialized = PL_BIT(4),             ///< The object/component has been initialized
+    Initializing = PL_BIT(5),            ///< The object/component is currently initializing. Used to prevent recursions during initialization.
+    SimulationStarted = PL_BIT(6),       ///< OnSimulationStarted() has been called on the component
+    SimulationStarting = PL_BIT(7),      ///< Used to prevent recursion during OnSimulationStarted()
+    UnhandledMessageHandler = PL_BIT(8), ///< For components, when a message is not handled, a virtual function is called
 
-    ChildChangesNotifications = PLASMA_BIT(9),            ///< The object should send a notification message when children are added or removed.
-    ComponentChangesNotifications = PLASMA_BIT(10),       ///< The object should send a notification message when components are added or removed.
-    StaticTransformChangesNotifications = PLASMA_BIT(11), ///< The object should send a notification message if it is static and its transform changes.
-    ParentChangesNotifications = PLASMA_BIT(12), ///< The object should send a notification message when the parent is changes.
-    CreatedByPrefab = PLASMA_BIT(13),                         ///< Such flagged objects and components are ignored during scene export (see plWorldWriter) and will be removed when a prefab needs to be re-instantiated.
+    ChildChangesNotifications = PL_BIT(9),            ///< The object should send a notification message when children are added or removed.
+    ComponentChangesNotifications = PL_BIT(10),       ///< The object should send a notification message when components are added or removed.
+    StaticTransformChangesNotifications = PL_BIT(11), ///< The object should send a notification message if it is static and its transform changes.
+    ParentChangesNotifications = PL_BIT(12),          ///< The object should send a notification message when the parent is changes.
 
-    UserFlag0 = PLASMA_BIT(24),
-    UserFlag1 = PLASMA_BIT(25),
-    UserFlag2 = PLASMA_BIT(26),
-    UserFlag3 = PLASMA_BIT(27),
-    UserFlag4 = PLASMA_BIT(28),
-    UserFlag5 = PLASMA_BIT(29),
-    UserFlag6 = PLASMA_BIT(30),
-    UserFlag7 = PLASMA_BIT(31),
+    CreatedByPrefab = PL_BIT(13), ///< Such flagged objects and components are ignored during scene export (see plWorldWriter) and will be removed when a prefab needs to be re-instantiated.
+
+    UserFlag0 = PL_BIT(24),
+    UserFlag1 = PL_BIT(25),
+    UserFlag2 = PL_BIT(26),
+    UserFlag3 = PL_BIT(27),
+    UserFlag4 = PL_BIT(28),
+    UserFlag5 = PL_BIT(29),
+    UserFlag6 = PL_BIT(30),
+    UserFlag7 = PL_BIT(31),
 
     Default = None
   };
@@ -216,7 +217,8 @@ struct plObjectFlags
     StorageType ComponentChangesNotifications : 1;       //< 10
     StorageType StaticTransformChangesNotifications : 1; //< 11
     StorageType ParentChangesNotifications : 1;          //< 12
-    StorageType CreatedByPrefab : 1;                     //< 13
+
+    StorageType CreatedByPrefab : 1; //< 13
 
     StorageType Padding : 10; // 14 - 23
 
@@ -231,14 +233,14 @@ struct plObjectFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plObjectFlags);
+PL_DECLARE_FLAGS_OPERATORS(plObjectFlags);
 
 /// \brief Specifies the mode of an object. This enum is only used in the editor.
 ///
 /// \sa plObjectFlags
 struct plObjectMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum : plUInt8
   {
@@ -249,7 +251,7 @@ struct plObjectMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plObjectMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plObjectMode);
 
 /// \brief Specifies the mode of a component. Dynamic components may change an object's transform, static components must not.
 ///
@@ -279,15 +281,15 @@ struct plObjectMsgQueueType
 };
 
 /// \brief Certain components may delete themselves or their owner when they are finished with their main purpose
-struct PLASMA_CORE_DLL plOnComponentFinishedAction
+struct PL_CORE_DLL plOnComponentFinishedAction
 {
   using StorageType = plUInt8;
 
   enum Enum : StorageType
   {
-    None,
-    DeleteComponent,
-    DeleteGameObject,
+    None,             ///< Nothing happens after the action is finished.
+    DeleteComponent,  ///< The component deletes only itself, but its game object stays.
+    DeleteGameObject, ///< When finished the component deletes its owner game object. If there are multiple objects with this mode, the component instead deletes itself, and only the last such component deletes the game object.
 
     Default = None
   };
@@ -306,22 +308,22 @@ struct PLASMA_CORE_DLL plOnComponentFinishedAction
   /// plOnComponentFinishedAction mechanism.
   /// Depending on the state of this component, the function will either execute the object deletion,
   /// or delay it, until its own work is done.
-  static void HandleDeleteObjectMsg(plMsgDeleteGameObject& msg, plEnum<plOnComponentFinishedAction>& action);
+  static void HandleDeleteObjectMsg(plMsgDeleteGameObject& ref_msg, plEnum<plOnComponentFinishedAction>& ref_action);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plOnComponentFinishedAction);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plOnComponentFinishedAction);
 
 /// \brief Same as plOnComponentFinishedAction, but additionally includes 'Restart'
-struct PLASMA_CORE_DLL plOnComponentFinishedAction2
+struct PL_CORE_DLL plOnComponentFinishedAction2
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
-    None,
-    DeleteComponent,
-    DeleteGameObject,
-    Restart,
+    None,             ///< Nothing happens after the action is finished.
+    DeleteComponent,  ///< The component deletes only itself, but its game object stays.
+    DeleteGameObject, ///< When finished the component deletes its owner game object. If there are multiple objects with this mode, the component instead deletes itself, and only the last such component deletes the game object.
+    Restart,          ///< When finished, restart from the beginning.
 
     Default = None
   };
@@ -330,10 +332,10 @@ struct PLASMA_CORE_DLL plOnComponentFinishedAction2
   static void HandleFinishedAction(plComponent* pComponent, plOnComponentFinishedAction2::Enum action);
 
   /// \brief See plOnComponentFinishedAction::HandleDeleteObjectMsg()
-  static void HandleDeleteObjectMsg(plMsgDeleteGameObject& msg, plEnum<plOnComponentFinishedAction2>& action);
+  static void HandleDeleteObjectMsg(plMsgDeleteGameObject& ref_msg, plEnum<plOnComponentFinishedAction2>& ref_action);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plOnComponentFinishedAction2);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plOnComponentFinishedAction2);
 
 /// \brief Used as return value of visitor functions to define whether calling function should stop or continue visiting.
 struct plVisitorExecution
@@ -346,18 +348,18 @@ struct plVisitorExecution
   };
 };
 
-typedef plGenericId<24, 8> plSpatialDataId;
+using plSpatialDataId = plGenericId<24, 8>;
 class plSpatialDataHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plSpatialDataHandle, plSpatialDataId);
+  PL_DECLARE_HANDLE_TYPE(plSpatialDataHandle, plSpatialDataId);
 };
 
-#define PLASMA_MAX_WORLD_MODULE_TYPES PLASMA_MAX_COMPONENT_TYPES
-typedef plUInt16 plWorldModuleTypeId;
-static_assert(plMath::MaxValue<plWorldModuleTypeId>() >= PLASMA_MAX_WORLD_MODULE_TYPES - 1);
+#define PL_MAX_WORLD_MODULE_TYPES PL_MAX_COMPONENT_TYPES
+using plWorldModuleTypeId = plUInt16;
+static_assert(plMath::MaxValue<plWorldModuleTypeId>() >= PL_MAX_WORLD_MODULE_TYPES - 1);
 
-typedef plGenericId<24, 8> plComponentInitBatchId;
+using plComponentInitBatchId = plGenericId<24, 8>;
 class plComponentInitBatchHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plComponentInitBatchHandle, plComponentInitBatchId);
+  PL_DECLARE_HANDLE_TYPE(plComponentInitBatchHandle, plComponentInitBatchId);
 };

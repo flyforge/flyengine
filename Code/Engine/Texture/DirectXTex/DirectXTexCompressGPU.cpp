@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexCompressGPU.cpp
@@ -426,5 +426,4 @@ HRESULT DirectX::Compress(
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexCompressGPU);
 

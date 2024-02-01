@@ -35,7 +35,7 @@ struct plTexConvCompressionMode
   using StorageType = plUInt8;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TEXTURE_DLL, plTexConvCompressionMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TEXTURE_DLL, plTexConvCompressionMode);
 
 struct plTexConvUsage
 {
@@ -60,7 +60,7 @@ struct plTexConvUsage
   using StorageType = plUInt8;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TEXTURE_DLL, plTexConvUsage);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TEXTURE_DLL, plTexConvUsage);
 
 struct plTexConvMipmapMode
 {
@@ -76,7 +76,7 @@ struct plTexConvMipmapMode
   using StorageType = plUInt8;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TEXTURE_DLL, plTexConvMipmapMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TEXTURE_DLL, plTexConvMipmapMode);
 
 struct plTexConvTargetPlatform
 {

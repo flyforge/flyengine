@@ -1,12 +1,12 @@
 
 template <typename T>
-plDynamicArrayBase<T>::plDynamicArrayBase(plAllocatorBase* pAllocator)
+plDynamicArrayBase<T>::plDynamicArrayBase(plAllocator* pAllocator)
   : m_pAllocator(pAllocator)
 {
 }
 
 template <typename T>
-plDynamicArrayBase<T>::plDynamicArrayBase(T* pInplaceStorage, plUInt32 uiCapacity, plAllocatorBase* pAllocator)
+plDynamicArrayBase<T>::plDynamicArrayBase(T* pInplaceStorage, plUInt32 uiCapacity, plAllocator* pAllocator)
   : m_pAllocator(pAllocator)
 {
   m_pAllocator.SetFlags(Storage::External);
@@ -15,21 +15,21 @@ plDynamicArrayBase<T>::plDynamicArrayBase(T* pInplaceStorage, plUInt32 uiCapacit
 }
 
 template <typename T>
-plDynamicArrayBase<T>::plDynamicArrayBase(const plDynamicArrayBase<T>& other, plAllocatorBase* pAllocator)
+plDynamicArrayBase<T>::plDynamicArrayBase(const plDynamicArrayBase<T>& other, plAllocator* pAllocator)
   : m_pAllocator(pAllocator)
 {
   plArrayBase<T, plDynamicArrayBase<T>>::operator=((plArrayPtr<const T>)other); // redirect this to the plArrayPtr version
 }
 
 template <typename T>
-plDynamicArrayBase<T>::plDynamicArrayBase(plDynamicArrayBase<T>&& other, plAllocatorBase* pAllocator)
+plDynamicArrayBase<T>::plDynamicArrayBase(plDynamicArrayBase<T>&& other, plAllocator* pAllocator)
   : m_pAllocator(pAllocator)
 {
   *this = std::move(other);
 }
 
 template <typename T>
-plDynamicArrayBase<T>::plDynamicArrayBase(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator)
+plDynamicArrayBase<T>::plDynamicArrayBase(const plArrayPtr<const T>& other, plAllocator* pAllocator)
   : m_pAllocator(pAllocator)
 {
   plArrayBase<T, plDynamicArrayBase<T>>::operator=(other);
@@ -43,7 +43,7 @@ plDynamicArrayBase<T>::~plDynamicArrayBase()
   if (m_pAllocator.GetFlags() == Storage::Owned)
   {
     // only delete our storage, if we own it
-    PLASMA_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
+    PL_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
   }
 
   this->m_uiCapacity = 0;
@@ -51,7 +51,7 @@ plDynamicArrayBase<T>::~plDynamicArrayBase()
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plDynamicArrayBase<T>::operator=(const plDynamicArrayBase<T>& rhs)
+PL_ALWAYS_INLINE void plDynamicArrayBase<T>::operator=(const plDynamicArrayBase<T>& rhs)
 {
   plArrayBase<T, plDynamicArrayBase<T>>::operator=((plArrayPtr<const T>)rhs); // redirect this to the plArrayPtr version
 }
@@ -62,12 +62,12 @@ inline void plDynamicArrayBase<T>::operator=(plDynamicArrayBase<T>&& rhs) noexce
   // Clear any existing data (calls destructors if necessary)
   this->Clear();
 
-  if (this->m_pAllocator == rhs.m_pAllocator && rhs.m_pAllocator.GetFlags() == Storage::Owned) // only move the storage of rhs, if it owns it
+  if (this->m_pAllocator.GetPtr() == rhs.m_pAllocator.GetPtr() && rhs.m_pAllocator.GetFlags() == Storage::Owned) // only move the storage of rhs, if it owns it
   {
     if (this->m_pAllocator.GetFlags() == Storage::Owned)
     {
       // only delete our storage, if we own it
-      PLASMA_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
+      PL_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
     }
 
     // we now own this storage
@@ -103,7 +103,7 @@ void plDynamicArrayBase<T>::Swap(plDynamicArrayBase<T>& other)
   {
     constexpr plUInt32 InplaceStorageSize = 64;
 
-    struct alignas(PLASMA_ALIGNMENT_OF(T)) Tmp
+    struct alignas(PL_ALIGNMENT_OF(T)) Tmp
     {
       plUInt8 m_StaticData[InplaceStorageSize * sizeof(T)];
     };
@@ -153,18 +153,18 @@ void plDynamicArrayBase<T>::SetCapacity(plUInt32 uiCapacity)
 
   if (this->m_pAllocator.GetFlags() == Storage::Owned && uiCapacity > this->m_uiCapacity)
   {
-    this->m_pElements = PLASMA_EXTEND_RAW_BUFFER(this->m_pAllocator, this->m_pElements, this->m_uiCount, uiCapacity);
+    this->m_pElements = PL_EXTEND_RAW_BUFFER(this->m_pAllocator, this->m_pElements, this->m_uiCount, uiCapacity);
   }
   else
   {
     T* pOldElements = GetElementsPtr();
 
-    T* pNewElements = PLASMA_NEW_RAW_BUFFER(this->m_pAllocator, T, uiCapacity);
+    T* pNewElements = PL_NEW_RAW_BUFFER(this->m_pAllocator, T, uiCapacity);
     plMemoryUtils::RelocateConstruct(pNewElements, pOldElements, this->m_uiCount);
 
     if (this->m_pAllocator.GetFlags() == Storage::Owned)
     {
-      PLASMA_DELETE_RAW_BUFFER(this->m_pAllocator, pOldElements);
+      PL_DELETE_RAW_BUFFER(this->m_pAllocator, pOldElements);
     }
 
     // after any resize, we definitely own the storage
@@ -193,7 +193,7 @@ void plDynamicArrayBase<T>::Reserve(plUInt32 uiCapacity)
 
   uiNewCapacity64 = (uiNewCapacity64 + (CAPACITY_ALIGNMENT - 1)) & ~(CAPACITY_ALIGNMENT - 1);
 
-  PLASMA_ASSERT_DEV(uiCapacity <= uiNewCapacity64, "The requested capacity of {} elements exceeds the maximum possible capacity of {} elements.", uiCapacity, uiMaxCapacity);
+  PL_ASSERT_DEV(uiCapacity <= uiNewCapacity64, "The requested capacity of {} elements exceeds the maximum possible capacity of {} elements.", uiCapacity, uiMaxCapacity);
 
   SetCapacity(static_cast<plUInt32>(uiNewCapacity64 & 0xFFFFFFFF));
 }
@@ -207,7 +207,7 @@ void plDynamicArrayBase<T>::Compact()
   if (this->IsEmpty())
   {
     // completely deallocate all data, if the array is empty.
-    PLASMA_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
+    PL_DELETE_RAW_BUFFER(this->m_pAllocator, this->m_pElements);
     this->m_uiCapacity = 0;
   }
   else
@@ -219,13 +219,13 @@ void plDynamicArrayBase<T>::Compact()
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plDynamicArrayBase<T>::GetElementsPtr()
+PL_ALWAYS_INLINE T* plDynamicArrayBase<T>::GetElementsPtr()
 {
   return this->m_pElements;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE const T* plDynamicArrayBase<T>::GetElementsPtr() const
+PL_ALWAYS_INLINE const T* plDynamicArrayBase<T>::GetElementsPtr() const
 {
   return this->m_pElements;
 }
@@ -246,7 +246,7 @@ plDynamicArray<T, A>::plDynamicArray()
 }
 
 template <typename T, typename A>
-plDynamicArray<T, A>::plDynamicArray(plAllocatorBase* pAllocator)
+plDynamicArray<T, A>::plDynamicArray(plAllocator* pAllocator)
   : plDynamicArrayBase<T>(pAllocator)
 {
 }

@@ -1,28 +1,28 @@
 
 /// \brief Used to guard plGALDevice functions from multi-threaded access and to verify that executing them on non-main-threads is allowed
-#define PLASMA_GALDEVICE_LOCK_AND_CHECK()                                                                                                                \
-  PLASMA_LOCK(m_Mutex);                                                                                                                                  \
+#define PL_GALDEVICE_LOCK_AND_CHECK()                                                                                                                \
+  PL_LOCK(m_Mutex);                                                                                                                                  \
   VerifyMultithreadedAccess()
 
-PLASMA_ALWAYS_INLINE const plGALDeviceCreationDescription* plGALDevice::GetDescription() const
+PL_ALWAYS_INLINE const plGALDeviceCreationDescription* plGALDevice::GetDescription() const
 {
   return &m_Description;
 }
 
-PLASMA_ALWAYS_INLINE plResult plGALDevice::GetTimestampResult(plGALTimestampHandle hTimestamp, plTime& ref_result)
+PL_ALWAYS_INLINE plResult plGALDevice::GetTimestampResult(plGALTimestampHandle hTimestamp, plTime& ref_result)
 {
   return GetTimestampResultPlatform(hTimestamp, ref_result);
 }
 
-PLASMA_ALWAYS_INLINE plGALTimestampHandle plGALDevice::GetTimestamp()
+PL_ALWAYS_INLINE plGALTimestampHandle plGALDevice::GetTimestamp()
 {
   return GetTimestampPlatform();
 }
 
 template <typename IdTableType, typename ReturnType>
-PLASMA_ALWAYS_INLINE ReturnType* plGALDevice::Get(typename IdTableType::TypeOfId hHandle, const IdTableType& IdTable) const
+PL_ALWAYS_INLINE ReturnType* plGALDevice::Get(typename IdTableType::TypeOfId hHandle, const IdTableType& IdTable) const
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   ReturnType* pObject = nullptr;
   IdTable.TryGetValue(hHandle, pObject);
@@ -95,26 +95,26 @@ inline const plGALQuery* plGALDevice::GetQuery(plGALQueryHandle hQuery) const
 }
 
 // static
-PLASMA_ALWAYS_INLINE void plGALDevice::SetDefaultDevice(plGALDevice* pDefaultDevice)
+PL_ALWAYS_INLINE void plGALDevice::SetDefaultDevice(plGALDevice* pDefaultDevice)
 {
   s_pDefaultDevice = pDefaultDevice;
 }
 
 // static
-PLASMA_ALWAYS_INLINE plGALDevice* plGALDevice::GetDefaultDevice()
+PL_ALWAYS_INLINE plGALDevice* plGALDevice::GetDefaultDevice()
 {
-  PLASMA_ASSERT_DEBUG(s_pDefaultDevice != nullptr, "Default device not set.");
+  PL_ASSERT_DEBUG(s_pDefaultDevice != nullptr, "Default device not set.");
   return s_pDefaultDevice;
 }
 
 // static
-PLASMA_ALWAYS_INLINE bool plGALDevice::HasDefaultDevice()
+PL_ALWAYS_INLINE bool plGALDevice::HasDefaultDevice()
 {
   return s_pDefaultDevice != nullptr;
 }
 
 template <typename HandleType>
-PLASMA_FORCE_INLINE void plGALDevice::AddDeadObject(plUInt32 uiType, HandleType handle)
+PL_FORCE_INLINE void plGALDevice::AddDeadObject(plUInt32 uiType, HandleType handle)
 {
   auto& deadObject = m_DeadObjects.ExpandAndGetRef();
   deadObject.m_uiType = uiType;
@@ -138,10 +138,10 @@ void plGALDevice::ReviveDeadObject(plUInt32 uiType, HandleType handle)
   }
 }
 
-PLASMA_ALWAYS_INLINE void plGALDevice::VerifyMultithreadedAccess() const
+PL_ALWAYS_INLINE void plGALDevice::VerifyMultithreadedAccess() const
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-  PLASMA_ASSERT_DEV(m_Capabilities.m_bMultithreadedResourceCreation || plThreadUtils::IsMainThread(),
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  PL_ASSERT_DEV(m_Capabilities.m_bMultithreadedResourceCreation || plThreadUtils::IsMainThread(),
     "This device does not support multi-threaded resource creation, therefore this function can only be executed on the main thread.");
 #endif
 }

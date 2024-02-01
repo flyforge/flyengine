@@ -13,7 +13,7 @@ using plDynamicMeshBufferResourceHandle = plTypedResourceHandle<class plDynamicM
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltClothSheetComponentManager : public plComponentManager<class plJoltClothSheetComponent, plBlockStorageType::FreeList>
+class PL_JOLTPLUGIN_DLL plJoltClothSheetComponentManager : public plComponentManager<class plJoltClothSheetComponent, plBlockStorageType::FreeList>
 {
 public:
   plJoltClothSheetComponentManager(plWorld* pWorld);
@@ -28,9 +28,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltClothSheetRenderData final : public plRenderData
+class PL_JOLTPLUGIN_DLL plJoltClothSheetRenderData final : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltClothSheetRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltClothSheetRenderData, plRenderData);
 
 public:
   plUInt32 m_uiUniqueID = 0;
@@ -44,10 +44,10 @@ public:
   plMaterialResourceHandle m_hMaterial;
 };
 
-class PLASMA_JOLTPLUGIN_DLL plJoltClothSheetRenderer : public plRenderer
+class PL_JOLTPLUGIN_DLL plJoltClothSheetRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltClothSheetRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plJoltClothSheetRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltClothSheetRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plJoltClothSheetRenderer);
 
 public:
   plJoltClothSheetRenderer();
@@ -65,20 +65,20 @@ protected:
 };
 
 /// \brief Flags for how a piece of cloth should be simulated.
-struct PLASMA_JOLTPLUGIN_DLL plJoltClothSheetFlags
+struct PL_JOLTPLUGIN_DLL plJoltClothSheetFlags
 {
   using StorageType = plUInt16;
 
   enum Enum
   {
-    FixedCornerTopLeft = PLASMA_BIT(0),     ///< This corner can't move.
-    FixedCornerTopRight = PLASMA_BIT(1),    ///< This corner can't move.
-    FixedCornerBottomRight = PLASMA_BIT(2), ///< This corner can't move.
-    FixedCornerBottomLeft = PLASMA_BIT(3),  ///< This corner can't move.
-    FixedEdgeTop = PLASMA_BIT(4),           ///< This entire edge can't move.
-    FixedEdgeRight = PLASMA_BIT(5),         ///< This entire edge can't move.
-    FixedEdgeBottom = PLASMA_BIT(6),        ///< This entire edge can't move.
-    FixedEdgeLeft = PLASMA_BIT(7),          ///< This entire edge can't move.
+    FixedCornerTopLeft = PL_BIT(0),     ///< This corner can't move.
+    FixedCornerTopRight = PL_BIT(1),    ///< This corner can't move.
+    FixedCornerBottomRight = PL_BIT(2), ///< This corner can't move.
+    FixedCornerBottomLeft = PL_BIT(3),  ///< This corner can't move.
+    FixedEdgeTop = PL_BIT(4),           ///< This entire edge can't move.
+    FixedEdgeRight = PL_BIT(5),         ///< This entire edge can't move.
+    FixedEdgeBottom = PL_BIT(6),        ///< This entire edge can't move.
+    FixedEdgeLeft = PL_BIT(7),          ///< This entire edge can't move.
 
     Default = FixedEdgeTop
   };
@@ -96,7 +96,7 @@ struct PLASMA_JOLTPLUGIN_DLL plJoltClothSheetFlags
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltClothSheetFlags);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltClothSheetFlags);
 
 /// \brief Simulates a rectangular piece of cloth.
 ///
@@ -104,9 +104,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltClothSheetFlags);
 /// The component samples the wind simulation and applies wind forces to the cloth.
 ///
 /// Cloth sheets can be used as decorative elements like flags that blow in the wind.
-class PLASMA_JOLTPLUGIN_DLL plJoltClothSheetComponent : public plRenderComponent
+class PL_JOLTPLUGIN_DLL plJoltClothSheetComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltClothSheetComponent, plRenderComponent, plJoltClothSheetComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltClothSheetComponent, plRenderComponent, plJoltClothSheetComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

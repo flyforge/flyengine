@@ -14,8 +14,8 @@
 // plTextureChannelModeAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureChannelModeAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureChannelModeAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plTextureChannelModeAction::plTextureChannelModeAction(const plActionContext& context, const char* szName, const char* szIconPath)
   : plEnumerationMenuAction(context, szName, szIconPath)
@@ -37,9 +37,9 @@ void plTextureChannelModeAction::Execute(const plVariant& value)
 // plTextureLodSliderAction
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureLodSliderAction, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureLodSliderAction, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 plTextureLodSliderAction::plTextureLodSliderAction(const plActionContext& context, const char* szName)
@@ -53,8 +53,6 @@ plTextureLodSliderAction::plTextureLodSliderAction(const plActionContext& contex
 
 void plTextureLodSliderAction::Execute(const plVariant& value)
 {
-  const plInt32 iValue = value.Get<plInt32>();
-
   m_pDocument->m_iTextureLod = value.Get<plInt32>();
 }
 
@@ -68,8 +66,8 @@ plActionDescriptorHandle plTextureAssetActions::s_hLodSlider;
 
 void plTextureAssetActions::RegisterActions()
 {
-  s_hTextureChannelMode = PLASMA_REGISTER_DYNAMIC_MENU("TextureAsset.ChannelMode", plTextureChannelModeAction, ":/EditorFramework/Icons/RenderMode.svg");
-  s_hLodSlider = PLASMA_REGISTER_ACTION_0("TextureAsset.LodSlider", plActionScope::Document, "Texture 2D", "", plTextureLodSliderAction);
+  s_hTextureChannelMode = PL_REGISTER_DYNAMIC_MENU("TextureAsset.ChannelMode", plTextureChannelModeAction, ":/EditorFramework/Icons/RenderMode.svg");
+  s_hLodSlider = PL_REGISTER_ACTION_0("TextureAsset.LodSlider", plActionScope::Document, "Texture 2D", "", plTextureLodSliderAction);
 }
 
 void plTextureAssetActions::UnregisterActions()
@@ -78,13 +76,13 @@ void plTextureAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLodSlider);
 }
 
-void plTextureAssetActions::MapActions(const char* szMapping, const char* szPath)
+void plTextureAssetActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  pMap->MapAction(s_hLodSlider, szPath, 14.0f);
-  pMap->MapAction(s_hTextureChannelMode, szPath, 15.0f);
+  pMap->MapAction(s_hLodSlider, "", 14.0f);
+  pMap->MapAction(s_hTextureChannelMode, "", 15.0f);
 }
 
 
@@ -135,7 +133,7 @@ plQtTextureAssetDocumentWindow::plQtTextureAssetDocumentWindow(plTextureAssetDoc
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("TextureAssetDockWidget");
-    pPropertyPanel->setWindowTitle("TEXTURE PROPERTIES");
+    pPropertyPanel->setWindowTitle("Texture Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -151,7 +149,7 @@ plQtTextureAssetDocumentWindow::plQtTextureAssetDocumentWindow(plTextureAssetDoc
 
 void plQtTextureAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -159,7 +157,7 @@ void plQtTextureAssetDocumentWindow::InternalRedraw()
 void plQtTextureAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {

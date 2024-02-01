@@ -34,7 +34,7 @@ plQtCollectionAssetDocumentWindow::plQtCollectionAssetDocumentWindow(plDocument*
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("CollectionAssetDockWidget");
-    pPropertyPanel->setWindowTitle("COLLECTION PROPERTIES");
+    pPropertyPanel->setWindowTitle("Collection Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -48,4 +48,4 @@ plQtCollectionAssetDocumentWindow::plQtCollectionAssetDocumentWindow(plDocument*
   FinishWindowCreation();
 }
 
-plQtCollectionAssetDocumentWindow::~plQtCollectionAssetDocumentWindow() {}
+plQtCollectionAssetDocumentWindow::~plQtCollectionAssetDocumentWindow() = default;

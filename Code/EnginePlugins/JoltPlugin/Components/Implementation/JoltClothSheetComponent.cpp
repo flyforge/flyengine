@@ -32,51 +32,51 @@
 #include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltClothSheetRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltClothSheetRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltClothSheetRenderer, 1, plRTTIDefaultAllocator<plJoltClothSheetRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltClothSheetRenderer, 1, plRTTIDefaultAllocator<plJoltClothSheetRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltClothSheetFlags, 1)
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerTopLeft),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerTopRight),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerBottomRight),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerBottomLeft),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeTop),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeRight),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeBottom),
-  PLASMA_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeLeft),
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltClothSheetFlags, 1)
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerTopLeft),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerTopRight),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerBottomRight),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedCornerBottomLeft),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeTop),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeRight),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeBottom),
+  PL_ENUM_CONSTANT(plJoltClothSheetFlags::FixedEdgeLeft),
+PL_END_STATIC_REFLECTED_BITFLAGS;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltClothSheetComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltClothSheetComponent, 1, plComponentMode::Static)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plDefaultValueAttribute(plVec2(0.5f, 0.5f))),
-      PLASMA_ACCESSOR_PROPERTY("Segments", GetSegments, SetSegments)->AddAttributes(new plDefaultValueAttribute(plVec2U32(16, 16)), new plClampValueAttribute(plVec2U32(2, 2), plVec2U32(64, 64))),
-      PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-      PLASMA_MEMBER_PROPERTY("WindInfluence", m_fWindInfluence)->AddAttributes(new plDefaultValueAttribute(0.3f), new plClampValueAttribute(0.0f, 10.0f)),
-      PLASMA_MEMBER_PROPERTY("GravityFactor", m_fGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-      PLASMA_MEMBER_PROPERTY("Damping", m_fDamping)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
-      PLASMA_BITFLAGS_ACCESSOR_PROPERTY("Flags", plJoltClothSheetFlags, GetFlags, SetFlags),
-      PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-      PLASMA_MEMBER_PROPERTY("TextureScale", m_vTextureScale)->AddAttributes(new plDefaultValueAttribute(plVec2(1.0f))),
-      PLASMA_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White)),
+      PL_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plDefaultValueAttribute(plVec2(0.5f, 0.5f))),
+      PL_ACCESSOR_PROPERTY("Segments", GetSegments, SetSegments)->AddAttributes(new plDefaultValueAttribute(plVec2U32(16, 16)), new plClampValueAttribute(plVec2U32(2, 2), plVec2U32(64, 64))),
+      PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+      PL_MEMBER_PROPERTY("WindInfluence", m_fWindInfluence)->AddAttributes(new plDefaultValueAttribute(0.3f), new plClampValueAttribute(0.0f, 10.0f)),
+      PL_MEMBER_PROPERTY("GravityFactor", m_fGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+      PL_MEMBER_PROPERTY("Damping", m_fDamping)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+      PL_BITFLAGS_ACCESSOR_PROPERTY("Flags", plJoltClothSheetFlags, GetFlags, SetFlags),
+      PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+      PL_MEMBER_PROPERTY("TextureScale", m_vTextureScale)->AddAttributes(new plDefaultValueAttribute(plVec2(1.0f))),
+      PL_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White)),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Physics/Jolt/Effects"),
     }
-    PLASMA_END_ATTRIBUTES;
-    PLASMA_BEGIN_MESSAGEHANDLERS
+    PL_END_ATTRIBUTES;
+    PL_BEGIN_MESSAGEHANDLERS
     {
-      PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+      PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
     }
-    PLASMA_END_MESSAGEHANDLERS;
+    PL_END_MESSAGEHANDLERS;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltClothSheetComponent::plJoltClothSheetComponent() = default;
@@ -273,7 +273,7 @@ static JPH::Ref<JPH::SoftBodySharedSettings> CreateCloth(plVec2U32 vSegments, pl
 
 void plJoltClothSheetComponent::SetupCloth()
 {
-  m_BSphere.SetInvalid();
+  m_BSphere = plBoundingSphere::MakeInvalid();
 
   if (IsActiveAndSimulating())
   {
@@ -379,20 +379,19 @@ plResult plJoltClothSheetComponent::GetLocalBounds(plBoundingBoxSphere& ref_boun
 {
   if (m_BSphere.IsValid())
   {
-    ref_bounds.ExpandToInclude(plBoundingBoxSphere(m_BSphere));
+    ref_bounds.ExpandToInclude(plBoundingBoxSphere::MakeFromSphere(m_BSphere));
   }
   else
   {
-    plBoundingBox box;
-    box.SetInvalid();
-    box.ExpandToInclude(plVec3::ZeroVector());
+    plBoundingBox box = plBoundingBox::MakeInvalid();
+    box.ExpandToInclude(plVec3::MakeZero());
     box.ExpandToInclude(plVec3(0, 0, -0.1f));
     box.ExpandToInclude(plVec3(m_vSize.x, m_vSize.y, 0.1f));
 
-    ref_bounds.ExpandToInclude(plBoundingBoxSphere(box));
+    ref_bounds.ExpandToInclude(plBoundingBoxSphere::MakeFromBox(box));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plJoltClothSheetComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -412,8 +411,8 @@ void plJoltClothSheetComponent::OnMsgExtractRenderData(plMsgExtractRenderData& m
     pRenderData->m_uiVerticesX = 2;
     pRenderData->m_uiVerticesY = 2;
 
-    pRenderData->m_Positions = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec3, 4);
-    pRenderData->m_Indices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt16, 6);
+    pRenderData->m_Positions = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec3, 4);
+    pRenderData->m_Indices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt16, 6);
 
     pRenderData->m_Positions[0] = plVec3(0, 0, 0);
     pRenderData->m_Positions[1] = plVec3(m_vSize.x, 0, 0);
@@ -447,8 +446,8 @@ void plJoltClothSheetComponent::OnMsgExtractRenderData(plMsgExtractRenderData& m
     if (!lock.SucceededAndIsInBroadPhase())
       return;
 
-    pRenderData->m_Positions = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec3, pRenderData->m_uiVerticesX * pRenderData->m_uiVerticesY);
-    pRenderData->m_Indices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt16, (pRenderData->m_uiVerticesX - 1) * (pRenderData->m_uiVerticesY - 1) * 2 * 3);
+    pRenderData->m_Positions = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec3, pRenderData->m_uiVerticesX * pRenderData->m_uiVerticesY);
+    pRenderData->m_Indices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt16, (pRenderData->m_uiVerticesX - 1) * (pRenderData->m_uiVerticesY - 1) * 2 * 3);
 
     const JPH::Body& body = lock.GetBody();
     const JPH::SoftBodyMotionProperties* pMotion = static_cast<const JPH::SoftBodyMotionProperties*>(body.GetMotionProperties());
@@ -663,7 +662,7 @@ void plJoltClothSheetRenderer::RenderBatch(const plRenderViewContext& renderView
   {
     const plJoltClothSheetRenderData* pRenderData = it;
 
-    PLASMA_ASSERT_DEV(pRenderData->m_uiVerticesX > 1 && pRenderData->m_uiVerticesY > 1, "Invalid cloth render data");
+    PL_ASSERT_DEV(pRenderData->m_uiVerticesX > 1 && pRenderData->m_uiVerticesY > 1, "Invalid cloth render data");
 
     pRenderContext->BindMaterial(pRenderData->m_hMaterial);
 
@@ -740,8 +739,8 @@ void plJoltClothSheetRenderer::RenderBatch(const plRenderViewContext& renderView
           {
             pVertexData[vidx].m_vPosition = pRenderData->m_Positions[vidx];
             pVertexData[vidx].m_vTexCoord = plVec2(x * fDivU, y * fDivY).CompMul(pRenderData->m_vTextureScale);
-            pVertexData[vidx].EncodeNormal(plVec3::UnitZAxis());
-            pVertexData[vidx].EncodeTangent(plVec3::UnitXAxis(), 1.0f);
+            pVertexData[vidx].EncodeNormal(plVec3::MakeAxisZ());
+            pVertexData[vidx].EncodeTangent(plVec3::MakeAxisX(), 1.0f);
           }
         }
       }
@@ -797,7 +796,7 @@ void plJoltClothSheetComponentManager::Initialize()
   SUPER::Initialize();
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltClothSheetComponentManager::Update, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltClothSheetComponentManager::Update, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
     desc.m_bOnlyUpdateWhenSimulating = true;
 
@@ -805,7 +804,7 @@ void plJoltClothSheetComponentManager::Initialize()
   }
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltClothSheetComponentManager::UpdateBounds, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltClothSheetComponentManager::UpdateBounds, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostAsync;
     desc.m_bOnlyUpdateWhenSimulating = true;
 

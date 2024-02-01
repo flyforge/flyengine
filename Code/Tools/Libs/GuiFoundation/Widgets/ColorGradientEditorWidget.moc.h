@@ -9,7 +9,7 @@
 
 class QMouseEvent;
 
-class PLASMA_GUIFOUNDATION_DLL plQtColorGradientEditorWidget : public QWidget, public Ui_ColorGradientEditorWidget
+class PL_GUIFOUNDATION_DLL plQtColorGradientEditorWidget : public QWidget, public Ui_ColorGradientEditorWidget
 {
   Q_OBJECT
 
@@ -26,25 +26,25 @@ public:
   void FrameGradient();
 
 Q_SIGNALS:
-  void ColorCpAdded(double posX, const plColorGammaUB& color);
-  void ColorCpMoved(plInt32 index, float newPosX);
-  void ColorCpDeleted(plInt32 index);
-  void ColorCpChanged(plInt32 index, const plColorGammaUB& color);
+  void ColorCpAdded(double fPosX, const plColorGammaUB& color);
+  void ColorCpMoved(plInt32 iIndex, float fNewPosX);
+  void ColorCpDeleted(plInt32 iIndex);
+  void ColorCpChanged(plInt32 iIndex, const plColorGammaUB& color);
 
-  void AlphaCpAdded(double posX, plUInt8 alpha);
-  void AlphaCpMoved(plInt32 index, double newPosX);
-  void AlphaCpDeleted(plInt32 index);
-  void AlphaCpChanged(plInt32 index, plUInt8 alpha);
+  void AlphaCpAdded(double fPosX, plUInt8 uiAlpha);
+  void AlphaCpMoved(plInt32 iIndex, double fNewPosX);
+  void AlphaCpDeleted(plInt32 iIndex);
+  void AlphaCpChanged(plInt32 iIndex, plUInt8 uiAlpha);
 
-  void IntensityCpAdded(double posX, float intensity);
-  void IntensityCpMoved(plInt32 index, double newPosX);
-  void IntensityCpDeleted(plInt32 index);
-  void IntensityCpChanged(plInt32 index, float intensity);
+  void IntensityCpAdded(double fPosX, float fIntensity);
+  void IntensityCpMoved(plInt32 iIndex, double fNewPosX);
+  void IntensityCpDeleted(plInt32 iIndex);
+  void IntensityCpChanged(plInt32 iIndex, float fIntensity);
 
   void NormalizeRange();
 
   void BeginOperation();
-  void EndOperation(bool commit);
+  void EndOperation(bool bCommit);
 
 private Q_SLOTS:
   void on_ButtonFrame_clicked();

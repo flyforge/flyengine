@@ -6,8 +6,8 @@
 #include <QFont>
 #include <qevent.h>
 
-plQtManipulatorLabel::plQtManipulatorLabel(QWidget* parent, Qt::WindowFlags f)
-  : QLabel(parent, f)
+plQtManipulatorLabel::plQtManipulatorLabel(QWidget* pParent, Qt::WindowFlags f)
+  : QLabel(pParent, f)
   , m_pItems(nullptr)
   , m_pManipulator(nullptr)
   , m_bActive(false)
@@ -15,8 +15,8 @@ plQtManipulatorLabel::plQtManipulatorLabel(QWidget* parent, Qt::WindowFlags f)
   setCursor(Qt::WhatsThisCursor);
 }
 
-plQtManipulatorLabel::plQtManipulatorLabel(const QString& text, QWidget* parent, Qt::WindowFlags f)
-  : QLabel(text, parent, f)
+plQtManipulatorLabel::plQtManipulatorLabel(const QString& sText, QWidget* pParent, Qt::WindowFlags f)
+  : QLabel(sText, pParent, f)
   , m_pItems(nullptr)
   , m_pManipulator(nullptr)
   , m_bActive(false)

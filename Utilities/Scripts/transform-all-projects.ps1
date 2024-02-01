@@ -1,32 +1,13 @@
-# Find EditorProcessor.exe
+. "$PSScriptRoot\common-functions.ps1"
 
-$appPath = ""
-
-$fileToCheck = "$PSScriptRoot\..\..\Output\Bin\WinVs2019Debug64\EditorProcessor.exe"
-if (Test-Path $fileToCheck -PathType leaf)
-{
-    $appPath = $fileToCheck
-}
-
-$fileToCheck = "$PSScriptRoot\..\..\Output\Bin\WinVs2019Dev64\EditorProcessor.exe"
-if (Test-Path $fileToCheck -PathType leaf)
-{
-    $appPath = $fileToCheck
-}    
-
-$fileToCheck = "$PSScriptRoot\..\..\Output\Bin\WinVs2019Shipping64\EditorProcessor.exe"
-if (Test-Path $fileToCheck -PathType leaf)
-{
-    $appPath = $fileToCheck
-}    
-
-"Using $appPath"
+$appPath = Find-EditorProcessor
+Write-Host "Using $appPath"
 
 # Transform all assets
 Get-ChildItem -Path $PSScriptRoot\..\..\. -Filter plProject -Recurse -File | ForEach-Object {
     $projectDir = $_.Directory.FullName
     
-    "Transforming project $projectDir"
+    Write-Host "Transforming: -project $projectDir -transform PC"
 
     & $appPath -project $projectDir -transform PC | Out-Null
 }

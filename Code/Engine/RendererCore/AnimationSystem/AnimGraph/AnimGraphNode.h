@@ -32,9 +32,9 @@ namespace ozz
 /// The nodes implement different functionality. For example logic nodes are used to figure out how to play an animation,
 /// other nodes then sample and combining animation poses, and yet other nodes can inform the user about events
 /// or they write state back to the animation graph's blackboard.
-class PLASMA_RENDERERCORE_DLL plAnimGraphNode : public plReflectedClass
+class PL_RENDERERCORE_DLL plAnimGraphNode : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphNode, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphNode, plReflectedClass);
 
 public:
   plAnimGraphNode();
@@ -65,7 +65,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_RENDERERCORE_DLL plAnimState
+struct PL_RENDERERCORE_DLL plAnimState
 {
   enum class State
   {
@@ -118,4 +118,4 @@ private:
   float m_fCurWeight = 0.0f;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plAnimState);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plAnimState);

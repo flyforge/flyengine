@@ -11,7 +11,7 @@
 #include <Foundation/Logging/HTMLWriter.h>
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Logging/VisualStudioWriter.h>
-#include <Foundation/Memory/StackAllocator.h>
+#include <Foundation/Memory/LinearAllocator.h>
 #include <Foundation/Strings/PathUtils.h>
 #include <Foundation/Strings/String.h>
 #include <Foundation/Strings/StringBuilder.h>
@@ -20,19 +20,19 @@
 
 namespace
 {
-  PLASMA_ALWAYS_INLINE void SkipWhitespace(plToken& token, plUInt32& i, const plDeque<plToken>& tokens)
+  PL_ALWAYS_INLINE void SkipWhitespace(plToken& ref_token, plUInt32& i, const plDeque<plToken>& tokens)
   {
-    while (token.m_iType == plTokenType::Whitespace)
+    while (ref_token.m_iType == plTokenType::Whitespace)
     {
-      token = tokens[++i];
+      ref_token = tokens[++i];
     }
   }
 
-  PLASMA_ALWAYS_INLINE void SkipLine(plToken& token, plUInt32& i, const plDeque<plToken>& tokens)
+  PL_ALWAYS_INLINE void SkipLine(plToken& ref_token, plUInt32& i, const plDeque<plToken>& tokens)
   {
-    while (token.m_iType != plTokenType::Newline && token.m_iType != plTokenType::EndOfFile)
+    while (ref_token.m_iType != plTokenType::Newline && ref_token.m_iType != plTokenType::EndOfFile)
     {
-      token = tokens[++i];
+      ref_token = tokens[++i];
     }
   }
 } // namespace
@@ -45,7 +45,7 @@ private:
   bool m_bHadErrors;
   bool m_bHadSeriousWarnings;
   bool m_bHadWarnings;
-  plUniquePtr<plStackAllocator<plMemoryTrackingFlags::None>> m_pStackAllocator;
+  plUniquePtr<plLinearAllocator<plAllocatorTrackingMode::Nothing>> m_pStackAllocator;
   plDynamicArray<plString> m_IncludeDirectories;
 
   struct IgnoreInfo
@@ -57,7 +57,7 @@ private:
   IgnoreInfo m_IgnoreSource;
 
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   plHeaderCheckApp()
     : plApplication("HeaderCheck")
@@ -89,12 +89,12 @@ public:
     }
   }
 
-  plResult ParseArray(const plVariant& value, plHashSet<plString>& dst)
+  plResult ParseArray(const plVariant& value, plHashSet<plString>& ref_dst)
   {
     if (!value.CanConvertTo<plVariantArray>())
     {
       plLog::Error("Expected array");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     auto a = value.Get<plVariantArray>();
     const auto arraySize = a.GetCount();
@@ -104,34 +104,39 @@ public:
       if (!el.CanConvertTo<plString>())
       {
         plLog::Error("Value {0} at index {1} can not be converted to a string. Expected array of strings.", el, i);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       plStringBuilder file = el.Get<plString>();
       file.ToLower();
-      dst.Insert(file);
+      ref_dst.Insert(file);
     }
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  plResult ParseIgnoreFile(const plStringView ignoreFilePath)
+  plResult ParseIgnoreFile(const plStringView sIgnoreFilePath)
   {
     plJSONReader jsonReader;
     jsonReader.SetLogInterface(plLog::GetThreadLocalLogSystem());
 
     plFileReader reader;
-    plString sIgnoreFilePath = ignoreFilePath;
     if (reader.Open(sIgnoreFilePath).Failed())
     {
-      plLog::Error("Failed to open ignore file {0}", ignoreFilePath);
-      return PLASMA_FAILURE;
+      plLog::Error("Failed to open ignore file {0}", sIgnoreFilePath);
+      return PL_FAILURE;
     }
 
     if (jsonReader.Parse(reader).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const plStringView includeTarget = "includeTarget";
     const plStringView includeSource = "includeSource";
     const plStringView byName = "byName";
+
+    if (jsonReader.GetTopLevelElementType() != plJSONReader::ElementType::Dictionary)
+    {
+      plLog::Error("Ignore file {0} does not start with a json object", sIgnoreFilePath);
+      return PL_FAILURE;
+    }
 
     auto topLevel = jsonReader.GetTopLevelObject();
     for (auto it = topLevel.GetIterator(); it.IsValid(); it.Next())
@@ -147,23 +152,23 @@ public:
             if (ParseArray(it2.Value(), info.m_byName).Failed())
             {
               plLog::Error("Failed to parse value of '{0}.{1}'.", it.Key(), it2.Key());
-              return PLASMA_FAILURE;
+              return PL_FAILURE;
             }
           }
           else
           {
             plLog::Error("Unknown field of '{0}.{1}'", it.Key(), it2.Key());
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
         }
       }
       else
       {
         plLog::Error("Unknown json member in root object '{0}'", it.Key().GetView());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   virtual void AfterCoreSystemsStartup() override
@@ -172,7 +177,7 @@ public:
     plGlobalLog::AddLogWriter(plLogWriter::VisualStudio::LogMessageHandler);
     plGlobalLog::AddLogWriter(LogInspector);
 
-    m_pStackAllocator = PLASMA_DEFAULT_NEW(plStackAllocator<plMemoryTrackingFlags::None>, "Temp Allocator", plFoundation::GetAlignedAllocator());
+    m_pStackAllocator = PL_DEFAULT_NEW(plLinearAllocator<plAllocatorTrackingMode::Nothing>, "Temp Allocator", plFoundation::GetAlignedAllocator());
 
     if (GetArgumentCount() < 2)
       plLog::Error("This tool requires at leas one command-line argument: An absolute path to the top-level folder of a library.");
@@ -285,23 +290,22 @@ public:
     ref_sOut.Clear();
 
     plFileReader File;
-    if (File.Open(sFile) == PLASMA_FAILURE)
+    if (File.Open(sFile) == PL_FAILURE)
     {
       plLog::Error("Could not open for reading: '{0}'", sFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
-
 
     plDynamicArray<plUInt8> FileContent;
 
     plUInt8 Temp[4024];
-    plUInt64 uiRead = File.ReadBytes(Temp, PLASMA_ARRAY_SIZE(Temp));
+    plUInt64 uiRead = File.ReadBytes(Temp, PL_ARRAY_SIZE(Temp));
 
     while (uiRead > 0)
     {
       FileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
 
-      uiRead = File.ReadBytes(Temp, PLASMA_ARRAY_SIZE(Temp));
+      uiRead = File.ReadBytes(Temp, PL_ARRAY_SIZE(Temp));
     }
 
     FileContent.PushBack(0);
@@ -311,12 +315,12 @@ public:
       plLog::Error("The file \"{0}\" contains characters that are not valid Utf8. This often happens when you type special characters in "
                    "an editor that does not save the file in Utf8 encoding.",
         sFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     ref_sOut = (const char*)&FileContent[0];
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   void IterateOverFiles()
@@ -348,7 +352,7 @@ public:
         {
           plLog::Info("Checking: {}", currentFile);
 
-          PLASMA_LOG_BLOCK("Header", &currentFile.GetData()[uiSearchDirLength]);
+          PL_LOG_BLOCK("Header", &currentFile.GetData()[uiSearchDirLength]);
           CheckHeaderFile(currentFile);
           m_pStackAllocator->Reset();
         }
@@ -358,15 +362,15 @@ public:
       plLog::Error("Could not search the directory '{0}'", m_sSearchDir);
   }
 
-  void CheckInclude(const plStringBuilder& currentFile, const plStringBuilder& includePath, plUInt32 line)
+  void CheckInclude(const plStringBuilder& sCurrentFile, const plStringBuilder& sIncludePath, plUInt32 uiLine)
   {
     plStringBuilder absIncludePath(m_pStackAllocator.Borrow());
     bool includeOutside = true;
-    if (includePath.IsAbsolutePath())
+    if (sIncludePath.IsAbsolutePath())
     {
       for (auto& includeDir : m_IncludeDirectories)
       {
-        if (includePath.StartsWith(includeDir))
+        if (sIncludePath.StartsWith(includeDir))
         {
           includeOutside = false;
           break;
@@ -376,7 +380,7 @@ public:
     else
     {
       bool includeFound = false;
-      if (includePath.StartsWith("ThirdParty"))
+      if (sIncludePath.StartsWith("ThirdParty"))
       {
         includeOutside = true;
       }
@@ -385,7 +389,7 @@ public:
         for (auto& includeDir : m_IncludeDirectories)
         {
           absIncludePath = includeDir;
-          absIncludePath.AppendPath(includePath);
+          absIncludePath.AppendPath(sIncludePath);
           if (plOSFile::ExistsFile(absIncludePath))
           {
             includeOutside = false;
@@ -397,9 +401,9 @@ public:
 
     if (includeOutside)
     {
-      plStringBuilder includeFileLower = includePath.GetFileNameAndExtension();
+      plStringBuilder includeFileLower = sIncludePath.GetFileNameAndExtension();
       includeFileLower.ToLower();
-      plStringBuilder currentFileLower = currentFile.GetFileNameAndExtension();
+      plStringBuilder currentFileLower = sCurrentFile.GetFileNameAndExtension();
       currentFileLower.ToLower();
 
       bool ignore = m_IgnoreTarget.m_byName.Contains(includeFileLower) || m_IgnoreSource.m_byName.Contains(currentFileLower);
@@ -409,20 +413,20 @@ public:
         plLog::Error("Including '{0}' in {1}:{2} leaks underlying implementation details. Including system or thirdparty headers in public pl header "
                      "files is not allowed. Please use an interface, factory or pimpl pattern to hide the implementation and avoid the include. See "
                      "the Documentation Chapter 'General->Header Files' for details.",
-          includePath.GetView(), currentFile.GetView(), line);
+          sIncludePath.GetView(), sCurrentFile.GetView(), uiLine);
       }
     }
   }
 
-  void CheckHeaderFile(const plStringBuilder& currentFile)
+  void CheckHeaderFile(const plStringBuilder& sCurrentFile)
   {
     plStringBuilder fileContents(m_pStackAllocator.Borrow());
-    ReadEntireFile(currentFile.GetData(), fileContents).IgnoreResult();
+    ReadEntireFile(sCurrentFile.GetData(), fileContents).IgnoreResult();
 
-    auto fileDir = currentFile.GetFileDirectory();
+    auto fileDir = sCurrentFile.GetFileDirectory();
 
     plStringBuilder internalMacroToken(m_pStackAllocator.Borrow());
-    internalMacroToken.Append("PLASMA_", m_sProjectName, "_INTERNAL_HEADER");
+    internalMacroToken.Append("PL_", m_sProjectName, "_INTERNAL_HEADER");
     auto internalMacroTokenView = internalMacroToken.GetView();
 
     plTokenizer tokenizer(m_pStackAllocator.Borrow());
@@ -478,7 +482,7 @@ public:
             }
             else if (!isInternalHeader)
             {
-              CheckInclude(currentFile, absIncludePath, includeToken.m_uiLine);
+              CheckInclude(sCurrentFile, absIncludePath, includeToken.m_uiLine);
             }
           }
           else if (curToken.m_iType == plTokenType::NonIdentifier && curToken.m_DataView == openAngleBracket)
@@ -491,7 +495,7 @@ public:
               curToken = tokens[++i];
               if (curToken.m_iType == plTokenType::Newline)
               {
-                plLog::Error("Non-terminated '<' in #include {0} line {1}", currentFile.GetView(), includeToken.m_uiLine);
+                plLog::Error("Non-terminated '<' in #include {0} line {1}", sCurrentFile.GetView(), includeToken.m_uiLine);
                 error = true;
                 break;
               }
@@ -510,13 +514,13 @@ public:
               plStringBuilder includePath(m_pStackAllocator.Borrow());
               includePath = plStringView(startToken.m_DataView.GetEndPointer(), curToken.m_DataView.GetStartPointer());
               includePath.MakeCleanPath();
-              CheckInclude(currentFile, includePath, startToken.m_uiLine);
+              CheckInclude(sCurrentFile, includePath, startToken.m_uiLine);
             }
           }
           else
           {
             // error
-            plLog::Error("Can not parse #include statement in {0} line {1}", currentFile.GetView(), includeToken.m_uiLine);
+            plLog::Error("Can not parse #include statement in {0} line {1}", sCurrentFile.GetView(), includeToken.m_uiLine);
           }
         }
         else
@@ -556,4 +560,4 @@ public:
   }
 };
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plHeaderCheckApp);
+PL_CONSOLEAPP_ENTRY_POINT(plHeaderCheckApp);

@@ -14,7 +14,7 @@ namespace plDataDirectory
   /// \brief A data directory type to handle access to ordinary files.
   ///
   /// Register the 'Factory' function at plFileSystem to allow it to mount local directories.
-  class PLASMA_FOUNDATION_DLL FolderType : public plDataDirectoryType
+  class PL_FOUNDATION_DLL FolderType : public plDataDirectoryType
   {
   public:
     ~FolderType();
@@ -72,9 +72,9 @@ namespace plDataDirectory
 
 
   /// \brief Handles reading from ordinary files.
-  class PLASMA_FOUNDATION_DLL FolderReader : public plDataDirectoryReader
+  class PL_FOUNDATION_DLL FolderReader : public plDataDirectoryReader
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(FolderReader);
+    PL_DISALLOW_COPY_AND_ASSIGN(FolderReader);
 
   public:
     FolderReader(plInt32 iDataDirUserData)
@@ -97,9 +97,9 @@ namespace plDataDirectory
   };
 
   /// \brief Handles writing to ordinary files.
-  class PLASMA_FOUNDATION_DLL FolderWriter : public plDataDirectoryWriter
+  class PL_FOUNDATION_DLL FolderWriter : public plDataDirectoryWriter
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(FolderWriter);
+    PL_DISALLOW_COPY_AND_ASSIGN(FolderWriter);
 
   public:
     FolderWriter(plInt32 iDataDirUserData = 0)

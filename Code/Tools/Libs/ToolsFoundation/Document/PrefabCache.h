@@ -9,9 +9,9 @@
 
 class plAbstractObjectGraph;
 
-class PLASMA_TOOLSFOUNDATION_DLL plPrefabCache
+class PL_TOOLSFOUNDATION_DLL plPrefabCache
 {
-  PLASMA_DECLARE_SINGLETON(plPrefabCache);
+  PL_DECLARE_SINGLETON(plPrefabCache);
 
 public:
   plPrefabCache();
@@ -21,11 +21,11 @@ public:
   void LoadGraph(plAbstractObjectGraph& out_graph, plStringView sGraph);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, plPrefabCache);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, plPrefabCache);
 
   struct PrefabData
   {
-    PrefabData() {}
+    PrefabData() = default;
 
     plUuid m_documentGuid;
     plString m_sAbsPath;

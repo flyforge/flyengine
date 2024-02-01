@@ -25,7 +25,7 @@
 /*************************************************************************/
 /*************************************************************************/
 /*****                                                               *****/
-/*****                      BPLASMAIER COMPUTATIONS                      *****/
+/*****                      BEZIER COMPUTATIONS                      *****/
 /*****                                                               *****/
 /*************************************************************************/
 /*************************************************************************/
@@ -1175,9 +1175,9 @@ SW_FT_Error SW_FT_Stroker_ConicTo(SW_FT_Stroker stroker, SW_FT_Vector* control,
                                   SW_FT_Vector* to)
 {
     SW_FT_Error   error = 0;
-    SW_FT_Vector  bpl_stack[34];
+    SW_FT_Vector  bez_stack[34];
     SW_FT_Vector* arc;
-    SW_FT_Vector* limit = bpl_stack + 30;
+    SW_FT_Vector* limit = bez_stack + 30;
     SW_FT_Bool    first_arc = TRUE;
 
     /* if all control points are coincident, this is a no-op; */
@@ -1190,12 +1190,12 @@ SW_FT_Error SW_FT_Stroker_ConicTo(SW_FT_Stroker stroker, SW_FT_Vector* control,
         goto Exit;
     }
 
-    arc = bpl_stack;
+    arc = bez_stack;
     arc[0] = *to;
     arc[1] = *control;
     arc[2] = stroker->center;
 
-    while (arc >= bpl_stack) {
+    while (arc >= bez_stack) {
         SW_FT_Angle angle_in, angle_out;
 
         /* initialize with current direction */
@@ -1347,9 +1347,9 @@ SW_FT_Error SW_FT_Stroker_CubicTo(SW_FT_Stroker stroker, SW_FT_Vector* control1,
                                   SW_FT_Vector* control2, SW_FT_Vector* to)
 {
     SW_FT_Error   error = 0;
-    SW_FT_Vector  bpl_stack[37];
+    SW_FT_Vector  bez_stack[37];
     SW_FT_Vector* arc;
-    SW_FT_Vector* limit = bpl_stack + 32;
+    SW_FT_Vector* limit = bez_stack + 32;
     SW_FT_Bool    first_arc = TRUE;
 
     /* if all control points are coincident, this is a no-op; */
@@ -1364,13 +1364,13 @@ SW_FT_Error SW_FT_Stroker_CubicTo(SW_FT_Stroker stroker, SW_FT_Vector* control1,
         goto Exit;
     }
 
-    arc = bpl_stack;
+    arc = bez_stack;
     arc[0] = *to;
     arc[1] = *control2;
     arc[2] = *control1;
     arc[3] = stroker->center;
 
-    while (arc >= bpl_stack) {
+    while (arc >= bez_stack) {
         SW_FT_Angle angle_in, angle_mid, angle_out;
 
         /* initialize with current direction */

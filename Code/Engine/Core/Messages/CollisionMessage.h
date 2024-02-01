@@ -3,9 +3,9 @@
 #include <Core/World/Declarations.h>
 #include <Foundation/Communication/Message.h>
 
-struct PLASMA_CORE_DLL plMsgCollision : public plMessage
+struct PL_CORE_DLL plMsgCollision : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgCollision, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgCollision, plMessage);
 
   plGameObjectHandle m_hObjectA;
   plGameObjectHandle m_hObjectB;

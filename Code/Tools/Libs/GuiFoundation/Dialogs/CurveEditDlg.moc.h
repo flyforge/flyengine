@@ -9,11 +9,11 @@ class plCurveGroupData;
 class plObjectAccessorBase;
 class plDocumentObject;
 
-class PLASMA_GUIFOUNDATION_DLL plQtCurveEditDlg : public QDialog, Ui_CurveEditDlg
+class PL_GUIFOUNDATION_DLL plQtCurveEditDlg : public QDialog, Ui_CurveEditDlg
 {
   Q_OBJECT
 public:
-  plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* parent);
+  plQtCurveEditDlg(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QWidget* pParent);
   ~plQtCurveEditDlg();
 
   static QByteArray GetLastDialogGeometry() { return s_LastDialogGeometry; }

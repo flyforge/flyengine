@@ -4,9 +4,9 @@
 #include <RendererCore/Pipeline/FrameDataProvider.h>
 #include <RendererCore/Shader/ConstantBufferStorage.h>
 
-struct PLASMA_RENDERERCORE_DLL plClusteredDataGPU
+struct PL_RENDERERCORE_DLL plClusteredDataGPU
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plClusteredDataGPU);
+  PL_DISALLOW_COPY_AND_ASSIGN(plClusteredDataGPU);
 
 public:
   plClusteredDataGPU();
@@ -31,9 +31,9 @@ public:
   void BindResources(plRenderContext* pRenderContext);
 };
 
-class PLASMA_RENDERERCORE_DLL plClusteredDataProvider : public plFrameDataProvider<plClusteredDataGPU>
+class PL_RENDERERCORE_DLL plClusteredDataProvider : public plFrameDataProvider<plClusteredDataGPU>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plClusteredDataProvider, plFrameDataProviderBase);
+  PL_ADD_DYNAMIC_REFLECTION(plClusteredDataProvider, plFrameDataProviderBase);
 
 public:
   plClusteredDataProvider();

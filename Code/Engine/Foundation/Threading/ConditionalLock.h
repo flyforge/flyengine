@@ -6,7 +6,7 @@ template <typename T>
 class plConditionalLock
 {
 public:
-  PLASMA_ALWAYS_INLINE explicit plConditionalLock(T& lock, bool bCondition)
+  PL_ALWAYS_INLINE explicit plConditionalLock(T& lock, bool bCondition)
     : m_lock(lock)
     , m_bCondition(bCondition)
   {
@@ -16,7 +16,7 @@ public:
     }
   }
 
-  PLASMA_ALWAYS_INLINE ~plConditionalLock()
+  PL_ALWAYS_INLINE ~plConditionalLock()
   {
     if (m_bCondition)
     {

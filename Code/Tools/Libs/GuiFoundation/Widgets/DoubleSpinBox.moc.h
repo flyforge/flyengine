@@ -4,13 +4,13 @@
 #include <QDoubleSpinBox>
 class plVariant;
 
-class PLASMA_GUIFOUNDATION_DLL plQtDoubleSpinBox : public QDoubleSpinBox
+class PL_GUIFOUNDATION_DLL plQtDoubleSpinBox : public QDoubleSpinBox
 {
   Q_OBJECT
 public:
   explicit plQtDoubleSpinBox(QWidget* pParent, bool bIntMode = false);
 
-  void SetIntMode(bool enable);
+  void SetIntMode(bool bEnable);
 
   void setDisplaySuffix(const char* szSuffix);
   void setDefaultValue(double value);
@@ -20,16 +20,15 @@ public:
   void setMinimum(const plVariant& val);
   void setMaximum(const plVariant& val);
 
-  virtual QString textFromValue(double val) const override;
-  virtual double valueFromText(const QString& text) const override;
+  virtual QString textFromValue(double fVal) const override;
+  virtual double valueFromText(const QString& sText) const override;
 
   void setValueInvalid();
-  void setValue(double val);
+  void setValue(double fVal);
   void setValue(const plVariant& val);
   double value() const;
 
 protected:
-  virtual void wheelEvent(QWheelEvent* event) override;
   virtual void focusInEvent(QFocusEvent* event) override;
   virtual void focusOutEvent(QFocusEvent* event) override;
   virtual void mousePressEvent(QMouseEvent* event) override;

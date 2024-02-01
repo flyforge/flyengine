@@ -5,7 +5,7 @@
 
 #include <Foundation/Basics/Platform/Win/MinWindows.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
 struct alignas(4) plMutexHandle
 {
   plUInt8 data[24];
@@ -18,7 +18,7 @@ struct alignas(8) plMutexHandle
 #endif
 
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
 struct alignas(4) plConditionVariableHandle
 {
   plUInt8 data[4];
@@ -37,7 +37,7 @@ using plThreadID = plMinWindows::DWORD;
 using plOSThreadEntryPoint = plMinWindows::DWORD(__stdcall*)(void* lpThreadParameter);
 using plSemaphoreHandle = plMinWindows::HANDLE;
 
-#define PLASMA_THREAD_CLASS_ENTRY_POINT plMinWindows::DWORD __stdcall plThreadClassEntryPoint(void* lpThreadParameter);
+#define PL_THREAD_CLASS_ENTRY_POINT plMinWindows::DWORD __stdcall plThreadClassEntryPoint(void* lpThreadParameter);
 
 struct plConditionVariableData
 {

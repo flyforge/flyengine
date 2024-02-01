@@ -15,11 +15,11 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALUnor
 plGALUnorderedAccessViewDX11::plGALUnorderedAccessViewDX11(
   plGALResourceBase* pResource, const plGALUnorderedAccessViewCreationDescription& Description)
   : plGALUnorderedAccessView(pResource, Description)
-  , m_pDXUnorderedAccessView(nullptr)
+
 {
 }
 
-plGALUnorderedAccessViewDX11::~plGALUnorderedAccessViewDX11() {}
+plGALUnorderedAccessViewDX11::~plGALUnorderedAccessViewDX11() = default;
 
 plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -34,7 +34,7 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
   if (pTexture == nullptr && pBuffer == nullptr)
   {
     plLog::Error("No valid texture handle or buffer handle given for unordered access view creation!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 
@@ -64,7 +64,7 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
   if (DXViewFormat == DXGI_FORMAT_UNKNOWN)
   {
     plLog::Error("Couldn't get valid DXGI format for resource view! ({0})", ViewFormat);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   D3D11_UNORDERED_ACCESS_VIEW_DESC DXUAVDesc;
@@ -83,6 +83,7 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
     {
       case plGALTextureType::Texture2D:
       case plGALTextureType::Texture2DProxy:
+      case plGALTextureType::Texture2DShared:
 
         if (!bIsArrayView)
         {
@@ -114,8 +115,8 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
         break;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
-        return PLASMA_FAILURE;
+        PL_ASSERT_NOT_IMPLEMENTED;
+        return PL_FAILURE;
     }
   }
   else if (pBuffer)
@@ -137,20 +138,20 @@ plResult plGALUnorderedAccessViewDX11::InitPlatform(plGALDevice* pDevice)
 
   if (FAILED(pDXDevice->GetDXDevice()->CreateUnorderedAccessView(pDXResource, &DXUAVDesc, &m_pDXUnorderedAccessView)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 plResult plGALUnorderedAccessViewDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXUnorderedAccessView);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXUnorderedAccessView);
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_UnorderedAccessViewDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_UnorderedAccessViewDX11);

@@ -18,10 +18,10 @@ namespace
     ast.PrintGraph(dgmlGraph);
 
     plStringBuilder sFileName;
-    sFileName.Format(":appdata/{0}_{1}_AST.dgml", sAssetName, sOutputName);
+    sFileName.SetFormat(":appdata/{0}_{1}_AST.dgml", sAssetName, sOutputName);
 
     plDGMLGraphWriter dgmlGraphWriter;
-    PLASMA_IGNORE_UNUSED(dgmlGraphWriter);
+    PL_IGNORE_UNUSED(dgmlGraphWriter);
     if (dgmlGraphWriter.WriteGraphToFile(sFileName, dgmlGraph).Succeeded())
     {
       plLog::Info("AST was dumped to: {0}", sFileName);
@@ -41,7 +41,7 @@ namespace
 
 struct DocObjAndOutput
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   const plDocumentObject* m_pObject;
   const char* m_szOutputName;
@@ -50,14 +50,14 @@ struct DocObjAndOutput
 template <>
 struct plHashHelper<DocObjAndOutput>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const DocObjAndOutput& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const DocObjAndOutput& value)
   {
     const plUInt32 hashA = plHashHelper<const void*>::Hash(value.m_pObject);
     const plUInt32 hashB = plHashHelper<const void*>::Hash(value.m_szOutputName);
     return plHashingUtils::CombineHashValues32(hashA, hashB);
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const DocObjAndOutput& a, const DocObjAndOutput& b)
+  PL_ALWAYS_INLINE static bool Equal(const DocObjAndOutput& a, const DocObjAndOutput& b)
   {
     return a.m_pObject == b.m_pObject && a.m_szOutputName == b.m_szOutputName;
   }
@@ -82,11 +82,11 @@ struct plProcGenGraphAssetDocument::GenerateContext
 
 ////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphAssetDocument, 6, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphAssetDocument, 7, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plProcGenGraphAssetDocument::plProcGenGraphAssetDocument(const char* szDocumentPath)
-  : plAssetDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plProcGenNodeManager), plAssetDocEngineConnection::None)
+plProcGenGraphAssetDocument::plProcGenGraphAssetDocument(plStringView sDocumentPath)
+  : plAssetDocument(sDocumentPath, PL_DEFAULT_NEW(plProcGenNodeManager), plAssetDocEngineConnection::None)
 {
 }
 
@@ -106,7 +106,7 @@ void plProcGenGraphAssetDocument::SetDebugPin(const plPin* pDebugPin)
   GetObjectManager()->m_PropertyEvents.Broadcast(e);
 }
 
-plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const
+plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile, bool bAllowDebug) const
 {
   GenerateContext context(GetObjectManager());
 
@@ -116,14 +116,14 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
 
   const bool bDebug = bAllowDebug && (m_pDebugPin != nullptr);
 
-  plStringDeduplicationWriteContext stringDedupContext(stream);
+  plStringDeduplicationWriteContext stringDedupContext(inout_stream);
 
   plChunkStreamWriter chunk(stringDedupContext.Begin());
   chunk.BeginStream(1);
 
   plExpressionCompiler compiler;
 
-  auto WriteByteCode = [&](const plDocumentObject* pOutputNode) {
+  auto WriteByteCode = [&](const plDocumentObject* pOutputNode)->plStatus {
     context.m_GraphContext.m_VolumeTagSetIndices.Clear();
 
     if (pOutputNode->GetType()->IsDerivedFrom<plProcGen_PlacementOutput>())
@@ -136,7 +136,7 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return plStatus("Unknown output type");
     }
 
@@ -159,13 +159,13 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
       return plStatus("Compilation failed");
     }
 
-    byteCode.Save(chunk);
+    PL_SUCCEED_OR_RETURN(byteCode.Save(chunk));
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   };
 
   {
-    chunk.BeginChunk("PlacementOutputs", 6);
+    chunk.BeginChunk("PlacementOutputs", 7);
 
     if (!bDebug)
     {
@@ -173,7 +173,7 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
 
       for (auto pPlacementNode : placementNodes)
       {
-        PLASMA_SUCCEED_OR_RETURN(WriteByteCode(pPlacementNode));
+        PL_SUCCEED_OR_RETURN(WriteByteCode(pPlacementNode));
 
         auto pPGNode = context.m_DocObjToProcGenNodeTable.GetValue(pPlacementNode);
         auto pPlacementOutput = plStaticCast<plProcGen_PlacementOutput*>(pPGNode->Borrow());
@@ -200,7 +200,7 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
         return plStatus("Debug Compilation failed");
       }
 
-      byteCode.Save(chunk);
+      PL_SUCCEED_OR_RETURN(byteCode.Save(chunk));
 
       m_pDebugNode->m_VolumeTagSetIndices = context.m_GraphContext.m_VolumeTagSetIndices;
       m_pDebugNode->Save(chunk);
@@ -216,7 +216,7 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
 
     for (auto pVertexColorNode : vertexColorNodes)
     {
-      PLASMA_SUCCEED_OR_RETURN(WriteByteCode(pVertexColorNode));
+      PL_SUCCEED_OR_RETURN(WriteByteCode(pVertexColorNode));
 
       auto pPGNode = context.m_DocObjToProcGenNodeTable.GetValue(pVertexColorNode);
       auto pVertexColorOutput = plStaticCast<plProcGen_VertexColorOutput*>(pPGNode->Borrow());
@@ -237,9 +237,9 @@ plStatus plProcGenGraphAssetDocument::WriteAsset(plStreamWriter& stream, const p
   }
 
   chunk.EndStream();
-  PLASMA_SUCCEED_OR_RETURN(stringDedupContext.End());
+  PL_SUCCEED_OR_RETURN(stringDedupContext.End());
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plProcGenGraphAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
@@ -262,45 +262,50 @@ void plProcGenGraphAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* p
         plVariant prefab = typeAccessor.GetValue("Objects", i);
         if (prefab.IsA<plString>())
         {
-          pInfo->m_RuntimeDependencies.Insert(prefab.Get<plString>());
+          pInfo->m_PackageDependencies.Insert(prefab.Get<plString>());
+          pInfo->m_ThumbnailDependencies.Insert(prefab.Get<plString>());
         }
       }
 
       plVariant colorGradient = typeAccessor.GetValue("ColorGradient");
       if (colorGradient.IsA<plString>())
       {
-        pInfo->m_RuntimeDependencies.Insert(colorGradient.Get<plString>());
+        pInfo->m_PackageDependencies.Insert(colorGradient.Get<plString>());
+        pInfo->m_ThumbnailDependencies.Insert(colorGradient.Get<plString>());
       }
     }
   }
   else
   {
-    pInfo->m_RuntimeDependencies.Insert(s_szSphereAssetId);
-    pInfo->m_RuntimeDependencies.Insert(s_szBWGradientAssetId);
+    pInfo->m_PackageDependencies.Insert(s_szSphereAssetId);
+    pInfo->m_PackageDependencies.Insert(s_szBWGradientAssetId);
+
+    pInfo->m_ThumbnailDependencies.Insert(s_szSphereAssetId);
+    pInfo->m_ThumbnailDependencies.Insert(s_szBWGradientAssetId);
   }
 }
 
-plTransformStatus plProcGenGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plProcGenGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  PLASMA_ASSERT_DEV(plStringUtils::IsNullOrEmpty(szOutputTag), "Additional output '{0}' not implemented!", szOutputTag);
+  PL_ASSERT_DEV(sOutputTag.IsEmpty(), "Additional output '{0}' not implemented!", sOutputTag);
 
   return WriteAsset(stream, pAssetProfile, false);
 }
 
 void plProcGenGraphAssetDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const
 {
-  out_MimeTypes.PushBack("application/PlasmaEditor.ProcGenGraph");
+  out_MimeTypes.PushBack("application/plEditor.ProcGenGraph");
 }
 
 bool plProcGenGraphAssetDocument::CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const
 {
-  out_MimeType = "application/PlasmaEditor.ProcGenGraph";
+  out_MimeType = "application/plEditor.ProcGenGraph";
 
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plProcGenGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
+bool plProcGenGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);
@@ -364,7 +369,7 @@ plExpressionAST::Node* plProcGenGraphAssetDocument::GenerateExpressionAST(const 
   for (plUInt32 i = 0; i < inputPins.GetCount(); ++i)
   {
     auto connections = pManager->GetConnections(*inputPins[i]);
-    PLASMA_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
+    PL_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
 
     if (connections.IsEmpty())
       continue;
@@ -404,19 +409,19 @@ plExpressionAST::Node* plProcGenGraphAssetDocument::GenerateExpressionAST(const 
 plExpressionAST::Node* plProcGenGraphAssetDocument::GenerateDebugExpressionAST(GenerateContext& context, plExpressionAST& out_Ast) const
 {
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
-  PLASMA_ASSERT_DEV(m_pDebugPin != nullptr, "");
+  PL_ASSERT_DEV(m_pDebugPin != nullptr, "");
 
   const plPin* pPinSource = m_pDebugPin;
   if (pPinSource->GetType() == plPin::Type::Input)
   {
     auto connections = pManager->GetConnections(*pPinSource);
-    PLASMA_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
+    PL_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
 
     if (connections.IsEmpty())
       return nullptr;
 
     pPinSource = &connections[0]->GetSourcePin();
-    PLASMA_ASSERT_DEBUG(pPinSource != nullptr, "Invalid connection");
+    PL_ASSERT_DEBUG(pPinSource != nullptr, "Invalid connection");
   }
 
   plHybridArray<plExpressionAST::Node*, 8> inputAstNodes;
@@ -459,7 +464,7 @@ void plProcGenGraphAssetDocument::DumpSelectedOutput(bool bAst, bool bDisassembl
   }
   else
   {
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
     return;
   }
 
@@ -497,7 +502,7 @@ void plProcGenGraphAssetDocument::DumpSelectedOutput(bool bAst, bool bDisassembl
     byteCode.Disassemble(sDisassembly);
 
     plStringBuilder sFileName;
-    sFileName.Format(":appdata/{0}_{1}_ByteCode.txt", sAssetName, sOutputName);
+    sFileName.SetFormat(":appdata/{0}_{1}_ByteCode.txt", sAssetName, sOutputName);
 
     plFileWriter fileWriter;
     if (fileWriter.Open(sFileName).Succeeded())
@@ -518,8 +523,9 @@ void plProcGenGraphAssetDocument::CreateDebugNode()
   if (m_pDebugNode != nullptr)
     return;
 
-  m_pDebugNode = PLASMA_DEFAULT_NEW(plProcGen_PlacementOutput);
+  m_pDebugNode = PL_DEFAULT_NEW(plProcGen_PlacementOutput);
   m_pDebugNode->m_sName = "Debug";
   m_pDebugNode->m_ObjectsToPlace.PushBack(s_szSphereAssetId);
   m_pDebugNode->m_sColorGradient = s_szBWGradientAssetId;
+  m_pDebugNode->m_PlacementPattern = plProcPlacementPattern::RegularGrid;
 }

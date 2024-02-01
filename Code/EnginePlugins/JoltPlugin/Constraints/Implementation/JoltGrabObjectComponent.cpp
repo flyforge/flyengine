@@ -12,41 +12,41 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltGrabObjectComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltGrabObjectComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MaxGrabPointDistance", m_fMaxGrabPointDistance)->AddAttributes(new plDefaultValueAttribute(2.0f)),
-    PLASMA_MEMBER_PROPERTY("CastRadius", m_fCastRadius)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_MEMBER_PROPERTY("SpringStiffness", m_fSpringStiffness)->AddAttributes(new plDefaultValueAttribute(2.0f), new plClampValueAttribute(1.0f, 60.0f)),
-    PLASMA_MEMBER_PROPERTY("SpringDamping", m_fSpringDamping)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("BreakDistance", m_fBreakDistance)->AddAttributes(new plDefaultValueAttribute(0.5f)),
-    PLASMA_ACCESSOR_PROPERTY("AttachTo", DummyGetter, SetAttachToReference)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_MEMBER_PROPERTY("GrabAnyObjectWithSize", m_fAllowGrabAnyObjectWithSize)->AddAttributes(new plDefaultValueAttribute(0.75f)),
+    PL_MEMBER_PROPERTY("MaxGrabPointDistance", m_fMaxGrabPointDistance)->AddAttributes(new plDefaultValueAttribute(2.0f)),
+    PL_MEMBER_PROPERTY("CastRadius", m_fCastRadius)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("SpringStiffness", m_fSpringStiffness)->AddAttributes(new plDefaultValueAttribute(2.0f), new plClampValueAttribute(1.0f, 60.0f)),
+    PL_MEMBER_PROPERTY("SpringDamping", m_fSpringDamping)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("BreakDistance", m_fBreakDistance)->AddAttributes(new plDefaultValueAttribute(0.5f)),
+    PL_ACCESSOR_PROPERTY("AttachTo", DummyGetter, SetAttachToReference)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_MEMBER_PROPERTY("GrabAnyObjectWithSize", m_fAllowGrabAnyObjectWithSize)->AddAttributes(new plDefaultValueAttribute(0.75f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GrabNearbyObject),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(HasObjectGrabbed),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(DropGrabbedObject),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(ThrowGrabbedObject, In, "Direction"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(BreakObjectGrab),
+    PL_SCRIPT_FUNCTION_PROPERTY(GrabNearbyObject),
+    PL_SCRIPT_FUNCTION_PROPERTY(HasObjectGrabbed),
+    PL_SCRIPT_FUNCTION_PROPERTY(DropGrabbedObject),
+    PL_SCRIPT_FUNCTION_PROPERTY(ThrowGrabbedObject, In, "Direction"),
+    PL_SCRIPT_FUNCTION_PROPERTY(BreakObjectGrab),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_FUNCTIONS;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgReleaseObjectGrab, OnMsgReleaseObjectGrab),
+    PL_MESSAGE_HANDLER(plMsgReleaseObjectGrab, OnMsgReleaseObjectGrab),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Constraints"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plJoltGrabObjectComponent::plJoltGrabObjectComponent() = default;
@@ -133,7 +133,7 @@ bool plJoltGrabObjectComponent::FindNearbyObject(plGameObject*& out_pObject, plT
     if (hit.m_fDistance > m_fMaxGrabPointDistance)
       return false;
 
-    out_localGrabPoint = plTransform::IdentityTransform();
+    out_localGrabPoint = plTransform::MakeIdentity();
   }
 
   out_pObject = const_cast<plGameObject*>(pActorObj);
@@ -230,7 +230,7 @@ void plJoltGrabObjectComponent::BreakObjectGrab()
   plMsgPhysicsJointBroke msg;
   msg.m_hJointObject = GetOwner()->GetHandle();
 
-  GetOwner()->PostEventMessage(msg, this, plTime::Zero());
+  GetOwner()->PostEventMessage(msg, this, plTime::MakeZero());
 }
 
 void plJoltGrabObjectComponent::SetAttachToReference(const char* szReference)
@@ -309,7 +309,7 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
 
   const plGameObject* pAttachToObject = nullptr;
   if (!GetWorld()->TryGetObject(m_hAttachTo, pAttachToObject))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const auto vAttachToPos = pAttachToObject->GetGlobalPosition();
   const auto vOwnerDir = GetOwner()->GetGlobalDirForwards();
@@ -330,7 +330,7 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
 
     if (!bounds.IsValid())
     {
-      bounds = plBoundingSphere(plVec3::ZeroVector(), 0.1f);
+      bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 0.1f);
     }
 
     const auto& box = bounds.GetBox();
@@ -343,13 +343,13 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
 
       grabPoints.SetCount(4);
       grabPoints[0].m_vLocalPosition.Set(-halfExt.x, 0, 0);
-      grabPoints[0].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitXAxis());
+      grabPoints[0].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plVec3::MakeAxisX());
       grabPoints[1].m_vLocalPosition.Set(+halfExt.x, 0, 0);
-      grabPoints[1].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), -plVec3::UnitXAxis());
+      grabPoints[1].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), -plVec3::MakeAxisX());
       grabPoints[2].m_vLocalPosition.Set(0, -halfExt.y, 0);
-      grabPoints[2].m_qLocalRotation .SetShortestRotation(plVec3::UnitXAxis(), plVec3::UnitYAxis());
+      grabPoints[2].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plVec3::MakeAxisY());
       grabPoints[3].m_vLocalPosition.Set(0, +halfExt.y, 0);
-      grabPoints[3].m_qLocalRotation.SetShortestRotation(plVec3::UnitXAxis(), -plVec3::UnitYAxis());
+      grabPoints[3].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), -plVec3::MakeAxisY());
       // grabPoints[4].m_vLocalPosition.Set(0, 0, -halfExt.z);
       // grabPoints[4].m_qLocalRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), plVec3::MakeAxisZ());
       // grabPoints[5].m_vLocalPosition.Set(0, 0, +halfExt.z);
@@ -363,7 +363,7 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
   }
 
   if (grabPoints.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const float fMaxDistSqr = plMath::Square(m_fMaxGrabPointDistance);
 
@@ -394,12 +394,12 @@ plResult plJoltGrabObjectComponent::DetermineGrabPoint(const plComponent* pActor
   }
 
   if (uiBestPointIndex >= grabPoints.GetCount())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   out_LocalGrabPoint.m_vPosition = grabPoints[uiBestPointIndex].m_vLocalPosition;
   out_LocalGrabPoint.m_qRotation = grabPoints[uiBestPointIndex].m_qLocalRotation;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plJoltGrabObjectComponent::CreateJoint(plJoltDynamicActorComponent* pParent, plJoltDynamicActorComponent* pChild)
@@ -490,7 +490,7 @@ void plJoltGrabObjectComponent::DetectDistanceViolation(plJoltDynamicActorCompon
   else
   {
     // TODO: make this configurable?
-    if (GetWorld()->GetClock().GetAccumulatedTime() - m_LastValidTime > plTime::Seconds(1.0))
+    if (GetWorld()->GetClock().GetAccumulatedTime() - m_LastValidTime > plTime::MakeFromSeconds(1.0))
     {
       BreakObjectGrab();
       return;
@@ -571,10 +571,10 @@ void plJoltGrabObjectComponent::Update()
   {
     // disallow grabbing something again until that time
     // to prevent grabbing an object in air that we just jumped off of
-    m_LastValidTime = GetWorld()->GetClock().GetAccumulatedTime() + plTime::Milliseconds(400);
+    m_LastValidTime = GetWorld()->GetClock().GetAccumulatedTime() + plTime::MakeFromMilliseconds(400);
     BreakObjectGrab();
   }
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltGrabObjectComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltGrabObjectComponent);

@@ -4,9 +4,9 @@
 #include <EditorFramework/Gizmos/GizmoBase.h>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plScaleGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plScaleGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScaleGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plScaleGizmo, plGizmo);
 
 public:
   plScaleGizmo();
@@ -18,19 +18,19 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
   virtual void OnTransformationChanged(const plTransform& transform) override;
 
 protected:
-  PlasmaEngineGizmoHandle m_hAxisX;
-  PlasmaEngineGizmoHandle m_hAxisY;
-  PlasmaEngineGizmoHandle m_hAxisZ;
-  PlasmaEngineGizmoHandle m_hAxisXYZ;
+  plEngineGizmoHandle m_hAxisX;
+  plEngineGizmoHandle m_hAxisY;
+  plEngineGizmoHandle m_hAxisZ;
+  plEngineGizmoHandle m_hAxisXYZ;
 
 private:
   plVec3 m_vScalingResult;
@@ -41,16 +41,14 @@ private:
   plTime m_LastInteraction;
   plVec3 m_vMoveAxis;
   plMat4 m_mInvViewProj;
-
-  bool m_bUseExperimentalGizmo = false;
 };
 
 /// \brief Scale gizmo version that only uses boxes that can be composited with
 /// rotate and translate gizmos without major overlap.
 /// Used by the plTransformManipulatorAdapter.
-class PLASMA_EDITORFRAMEWORK_DLL plManipulatorScaleGizmo : public plScaleGizmo
+class PL_EDITORFRAMEWORK_DLL plManipulatorScaleGizmo : public plScaleGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plManipulatorScaleGizmo, plScaleGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plManipulatorScaleGizmo, plScaleGizmo);
 
 public:
   plManipulatorScaleGizmo();

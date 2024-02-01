@@ -3,12 +3,12 @@
 #include <Foundation/Configuration/Singleton.h>
 #include <VisualScriptPlugin/Runtime/VisualScript.h>
 
-struct plScriptBaseClassAttribute_Function;
+struct plNodePropertyValue;
 class plVisualScriptPin;
 
 class plVisualScriptNodeRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plVisualScriptNodeRegistry);
+  PL_DECLARE_SINGLETON(plVisualScriptNodeRegistry);
 
 public:
   struct PinDesc
@@ -23,9 +23,10 @@ public:
     plEnum<plVisualScriptDataType> m_ScriptDataType;
     bool m_bRequired = false;
     bool m_bSplitExecution = false;
+    bool m_bReplaceWithArray = false;
 
-    PLASMA_ALWAYS_INLINE bool IsExecutionPin() const { return m_ScriptDataType == plVisualScriptDataType::Invalid; }
-    PLASMA_ALWAYS_INLINE bool IsDataPin() const { return m_ScriptDataType != plVisualScriptDataType::Invalid; }
+    PL_ALWAYS_INLINE bool IsExecutionPin() const { return m_ScriptDataType == plVisualScriptDataType::Invalid; }
+    PL_ALWAYS_INLINE bool IsDataPin() const { return m_ScriptDataType != plVisualScriptDataType::Invalid; }
 
     static plColor GetColorForScriptDataType(plVisualScriptDataType::Enum dataType);
     plColor GetColor() const;
@@ -49,19 +50,31 @@ public:
     void AddInputExecutionPin(plStringView sName, const plHashedString& sDynamicPinProperty = plHashedString());
     void AddOutputExecutionPin(plStringView sName, const plHashedString& sDynamicPinProperty = plHashedString(), bool bSplitExecution = false);
 
-    void AddInputDataPin(plStringView sName, const plRTTI* pDataType, plVisualScriptDataType::Enum scriptDataType, bool bRequired, const plHashedString& sDynamicPinProperty = plHashedString(), PinDesc::DeductTypeFunc deductTypeFunc = nullptr);
+    void AddInputDataPin(plStringView sName, const plRTTI* pDataType, plVisualScriptDataType::Enum scriptDataType, bool bRequired, const plHashedString& sDynamicPinProperty = plHashedString(), PinDesc::DeductTypeFunc deductTypeFunc = nullptr, bool bReplaceWithArray = false);
     void AddOutputDataPin(plStringView sName, const plRTTI* pDataType, plVisualScriptDataType::Enum scriptDataType, const plHashedString& sDynamicPinProperty = plHashedString(), PinDesc::DeductTypeFunc deductTypeFunc = nullptr);
 
-    PLASMA_ALWAYS_INLINE bool NeedsTypeDeduction() const { return m_DeductTypeFunc != nullptr; }
+    PL_ALWAYS_INLINE bool NeedsTypeDeduction() const { return m_DeductTypeFunc != nullptr; }
   };
 
   plVisualScriptNodeRegistry();
   ~plVisualScriptNodeRegistry();
 
   const plRTTI* GetNodeBaseType() const { return m_pBaseType; }
+  const plRTTI* GetVariableSetterType() const { return m_pSetVariableType; }
+  const plRTTI* GetVariableGetterType() const { return m_pGetVariableType; }
   const NodeDesc* GetNodeDescForType(const plRTTI* pRtti) const { return m_TypeToNodeDescs.GetValue(pRtti); }
 
-  const plMap<const plRTTI*, NodeDesc>& GetAllNodeTypes() const { return m_TypeToNodeDescs; }
+  struct NodeCreationTemplate
+  {
+    const plRTTI* m_pType = nullptr;
+    plStringView m_sTypeName;
+    plHashedString m_sCategory;
+    plUInt32 m_uiPropertyValuesStart;
+    plUInt32 m_uiPropertyValuesCount;
+  };
+
+  const plArrayPtr<const NodeCreationTemplate> GetNodeCreationTemplates() const { return m_NodeCreationTemplates; }
+  const plArrayPtr<const plNodePropertyValue> GetPropertyValues() const { return m_PropertyValues; }
 
   static constexpr const char* s_szTypeNamePrefix = "VisualScriptNode_";
   static constexpr plUInt32 s_uiTypeNamePrefixLength = plStringUtils::GetStringElementCount(s_szTypeNamePrefix);
@@ -83,16 +96,26 @@ private:
 
   void CreateBuiltinTypes();
   void CreateGetOwnerNodeType(const plRTTI* pRtti);
-  void CreateFunctionCallNodeType(const plRTTI* pRtti, const plAbstractFunctionProperty* pFunction, const plScriptableFunctionAttribute* pScriptableFunctionAttribute, bool bIsEntryFunction);
+  void CreateFunctionCallNodeType(const plRTTI* pRtti, const plHashedString& sCategory, const plAbstractFunctionProperty* pFunction, const plScriptableFunctionAttribute* pScriptableFunctionAttribute, bool bIsEntryFunction);
   void CreateCoroutineNodeType(const plRTTI* pRtti);
   void CreateMessageNodeTypes(const plRTTI* pRtti);
   void CreateEnumNodeTypes(const plRTTI* pRtti);
 
-  void FillDesc(plReflectedTypeDescriptor& desc, const plRTTI* pRtti, plStringView sCategoryOverride = plStringView(), const plColorGammaUB* pColorOverride = nullptr);
-  void FillDesc(plReflectedTypeDescriptor& desc, plStringView sTypeName, plStringView sCategory, const plColorGammaUB& color);
+  void FillDesc(plReflectedTypeDescriptor& desc, const plRTTI* pRtti, const plColorGammaUB* pColorOverride = nullptr);
+  void FillDesc(plReflectedTypeDescriptor& desc, plStringView sTypeName, const plColorGammaUB& color);
+
+  const plRTTI* RegisterNodeType(plReflectedTypeDescriptor& typeDesc, NodeDesc&& nodeDesc, const plHashedString& sCategory);
 
   const plRTTI* m_pBaseType = nullptr;
+  const plRTTI* m_pSetPropertyType = nullptr;
+  const plRTTI* m_pGetPropertyType = nullptr;
+  const plRTTI* m_pSetVariableType = nullptr;
+  const plRTTI* m_pGetVariableType = nullptr;
   bool m_bBuiltinTypesCreated = false;
   plMap<const plRTTI*, NodeDesc> m_TypeToNodeDescs;
   plHashSet<const plRTTI*> m_EnumTypes;
+
+  plDynamicArray<NodeCreationTemplate> m_NodeCreationTemplates;
+  plDynamicArray<plNodePropertyValue> m_PropertyValues;
+  plDeque<plString> m_PropertyNodeTypeNames;
 };

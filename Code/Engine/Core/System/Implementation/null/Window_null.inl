@@ -2,30 +2,30 @@
 
 plResult plWindow::Initialize()
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  return PLASMA_FAILURE;
+  PL_ASSERT_NOT_IMPLEMENTED;
+  return PL_FAILURE;
 }
 
 plResult plWindow::Destroy()
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  return PLASMA_FAILURE;
+  PL_ASSERT_NOT_IMPLEMENTED;
+  return PL_FAILURE;
 }
 
 plResult plWindow::Resize(const plSizeU32& newWindowSize)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  return PLASMA_FAILURE;
+  PL_ASSERT_NOT_IMPLEMENTED;
+  return PL_FAILURE;
 }
 
 void plWindow::ProcessWindowMessages()
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 void plWindow::OnResize(const plSizeU32& newWindowSize)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 plWindowHandle plWindow::GetNativeWindowHandle() const

@@ -17,9 +17,9 @@
 /// on creation and deletion of components. Each manager can also register update functions to update its components during
 /// the different update phases of plWorld.
 /// Use plWorld::CreateComponentManager to create an instance of a component manager within a specific world.
-class PLASMA_CORE_DLL plComponentManagerBase : public plWorldModule
+class PL_CORE_DLL plComponentManagerBase : public plWorldModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plComponentManagerBase, plWorldModule);
+  PL_ADD_DYNAMIC_REFLECTION(plComponentManagerBase, plWorldModule);
 
 protected:
   plComponentManagerBase(plWorld* pWorld);
@@ -27,13 +27,13 @@ protected:
 
 public:
   /// \brief Checks whether the given handle references a valid component.
-  bool IsValidComponent(const plComponentHandle& component) const;
+  bool IsValidComponent(const plComponentHandle& hComponent) const;
 
   /// \brief Returns if a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
-  bool TryGetComponent(const plComponentHandle& component, plComponent*& out_pComponent);
+  bool TryGetComponent(const plComponentHandle& hComponent, plComponent*& out_pComponent);
 
   /// \brief Returns if a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
-  bool TryGetComponent(const plComponentHandle& component, const plComponent*& out_pComponent) const;
+  bool TryGetComponent(const plComponentHandle& hComponent, const plComponent*& out_pComponent) const;
 
   /// \brief Returns the number of components managed by this manager.
   plUInt32 GetComponentCount() const;
@@ -46,18 +46,18 @@ public:
   plComponentHandle CreateComponent(plGameObject* pOwnerObject, ComponentType*& out_pComponent);
 
   /// \brief Deletes the given component. Note that the component will be invalidated first and the actual deletion is postponed.
-  void DeleteComponent(const plComponentHandle& component);
+  void DeleteComponent(const plComponentHandle& hComponent);
 
   /// \brief Deletes the given component. Note that the component will be invalidated first and the actual deletion is postponed.
   void DeleteComponent(plComponent* pComponent);
 
   /// \brief Adds all components that this manager handles to the given array (array is not cleared).
   /// Prefer to use more efficient methods on derived classes, only use this if you need to go through a plComponentManagerBase pointer.
-  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_AllComponents, bool bOnlyActive) = 0;
+  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_allComponents, bool bOnlyActive) = 0;
 
   /// \brief Adds all components that this manager handles to the given array (array is not cleared).
   /// Prefer to use more efficient methods on derived classes, only use this if you need to go through a plComponentManagerBase pointer.
-  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_AllComponents, bool bOnlyActive) = 0;
+  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_allComponents, bool bOnlyActive) = 0;
 
 protected:
   /// \cond
@@ -87,18 +87,18 @@ template <typename T, plBlockStorageType::Enum StorageType>
 class plComponentManager : public plComponentManagerBase
 {
 public:
-  typedef T ComponentType;
-  typedef plComponentManagerBase SUPER;
+  using ComponentType = T;
+  using SUPER = plComponentManagerBase;
 
   /// \brief Although the constructor is public always use plWorld::CreateComponentManager to create an instance.
   plComponentManager(plWorld* pWorld);
   virtual ~plComponentManager();
 
   /// \brief Returns if a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
-  bool TryGetComponent(const plComponentHandle& component, ComponentType*& out_pComponent);
+  bool TryGetComponent(const plComponentHandle& hComponent, ComponentType*& out_pComponent);
 
   /// \brief Returns if a component with the given handle exists and if so writes out the corresponding pointer to out_pComponent.
-  bool TryGetComponent(const plComponentHandle& component, const ComponentType*& out_pComponent) const;
+  bool TryGetComponent(const plComponentHandle& hComponent, const ComponentType*& out_pComponent) const;
 
   /// \brief Returns an iterator over all components.
   typename plBlockStorage<ComponentType, plInternal::DEFAULT_BLOCK_SIZE, StorageType>::Iterator GetComponents(plUInt32 uiStartIndex = 0);
@@ -109,8 +109,8 @@ public:
   /// \brief Returns the type id corresponding to the component type managed by this manager.
   static plWorldModuleTypeId TypeId();
 
-  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_AllComponents, bool bOnlyActive) override;
-  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_AllComponents, bool bOnlyActive) override;
+  virtual void CollectAllComponents(plDynamicArray<plComponentHandle>& out_allComponents, bool bOnlyActive) override;
+  virtual void CollectAllComponents(plDynamicArray<plComponent*>& out_allComponents, bool bOnlyActive) override;
 
 protected:
   friend ComponentType;
@@ -154,11 +154,11 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-#define PLASMA_ADD_COMPONENT_FUNCTIONALITY(componentType, baseType, managerType)                        \
+#define PL_ADD_COMPONENT_FUNCTIONALITY(componentType, baseType, managerType)                        \
 public:                                                                                             \
-  typedef managerType ComponentManagerType;                                                         \
+  using ComponentManagerType = managerType;                                                         \
   virtual plWorldModuleTypeId GetTypeId() const override { return s_TypeId; }                       \
-  static PLASMA_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return s_TypeId; }                         \
+  static PL_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return s_TypeId; }                         \
   virtual plComponentMode::Enum GetMode() const override;                                           \
   static plComponentHandle CreateComponent(plGameObject* pOwnerObject, componentType*& pComponent); \
   static void DeleteComponent(componentType* pComponent);                                           \
@@ -168,26 +168,26 @@ private:                                                                        
   friend managerType;                                                                               \
   static plWorldModuleTypeId s_TypeId
 
-#define PLASMA_ADD_ABSTRACT_COMPONENT_FUNCTIONALITY(componentType, baseType)                     \
+#define PL_ADD_ABSTRACT_COMPONENT_FUNCTIONALITY(componentType, baseType)                     \
 public:                                                                                      \
   virtual plWorldModuleTypeId GetTypeId() const override { return plWorldModuleTypeId(-1); } \
-  static PLASMA_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return plWorldModuleTypeId(-1); }
+  static PL_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return plWorldModuleTypeId(-1); }
 
 /// \brief Add this macro to a custom component type inside the type declaration.
-#define PLASMA_DECLARE_COMPONENT_TYPE(componentType, baseType, managerType) \
-  PLASMA_ADD_DYNAMIC_REFLECTION(componentType, baseType);                   \
-  PLASMA_ADD_COMPONENT_FUNCTIONALITY(componentType, baseType, managerType);
+#define PL_DECLARE_COMPONENT_TYPE(componentType, baseType, managerType) \
+  PL_ADD_DYNAMIC_REFLECTION(componentType, baseType);                   \
+  PL_ADD_COMPONENT_FUNCTIONALITY(componentType, baseType, managerType);
 
 /// \brief Add this macro to a custom abstract component type inside the type declaration.
-#define PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(componentType, baseType) \
-  PLASMA_ADD_DYNAMIC_REFLECTION(componentType, baseType);               \
-  PLASMA_ADD_ABSTRACT_COMPONENT_FUNCTIONALITY(componentType, baseType);
+#define PL_DECLARE_ABSTRACT_COMPONENT_TYPE(componentType, baseType) \
+  PL_ADD_DYNAMIC_REFLECTION(componentType, baseType);               \
+  PL_ADD_ABSTRACT_COMPONENT_FUNCTIONALITY(componentType, baseType);
 
 
 /// \brief Implements rtti and component specific functionality. Add this macro to a cpp file.
 ///
-/// \see PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE
-#define PLASMA_BEGIN_COMPONENT_TYPE(componentType, version, mode)                                                                                  \
+/// \see PL_BEGIN_DYNAMIC_REFLECTED_TYPE
+#define PL_BEGIN_COMPONENT_TYPE(componentType, version, mode)                                                                                  \
   plWorldModuleTypeId componentType::s_TypeId =                                                                                                \
     plWorldModuleFactory::GetInstance()->RegisterWorldModule<typename componentType::ComponentManagerType, componentType>();                   \
   plComponentMode::Enum componentType::GetMode() const { return mode; }                                                                        \
@@ -197,17 +197,17 @@ public:                                                                         
   }                                                                                                                                            \
   void componentType::DeleteComponent(componentType* pComponent) { pComponent->GetOwningManager()->DeleteComponent(pComponent->GetHandle()); } \
   void componentType::DeleteComponent() { GetOwningManager()->DeleteComponent(GetHandle()); }                                                  \
-  PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(componentType, version, plRTTINoAllocator)
+  PL_BEGIN_DYNAMIC_REFLECTED_TYPE(componentType, version, plRTTINoAllocator)
 
 /// \brief Implements rtti and abstract component specific functionality. Add this macro to a cpp file.
 ///
-/// \see PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE
-#define PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(componentType, version)             \
-  PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(componentType, version, plRTTINoAllocator) \
+/// \see PL_BEGIN_DYNAMIC_REFLECTED_TYPE
+#define PL_BEGIN_ABSTRACT_COMPONENT_TYPE(componentType, version)             \
+  PL_BEGIN_DYNAMIC_REFLECTED_TYPE(componentType, version, plRTTINoAllocator) \
     flags.Add(plTypeFlags::Abstract);
 
-/// \brief Ends the component implementation code block that was opened with PLASMA_BEGIN_COMPONENT_TYPE.
-#define PLASMA_END_COMPONENT_TYPE PLASMA_END_DYNAMIC_REFLECTED_TYPE
-#define PLASMA_END_ABSTRACT_COMPONENT_TYPE PLASMA_END_DYNAMIC_REFLECTED_TYPE
+/// \brief Ends the component implementation code block that was opened with PL_BEGIN_COMPONENT_TYPE.
+#define PL_END_COMPONENT_TYPE PL_END_DYNAMIC_REFLECTED_TYPE
+#define PL_END_ABSTRACT_COMPONENT_TYPE PL_END_DYNAMIC_REFLECTED_TYPE
 
 #include <Core/World/Implementation/ComponentManager_inl.h>

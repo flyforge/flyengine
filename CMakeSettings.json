@@ -15,18 +15,15 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -48,18 +45,15 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -81,18 +75,15 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -114,23 +105,19 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
           "name": "ANDROID_ABI",
-          "value": "arm64-v8a",
-          "type": "STRING"
+          "value": "arm64-v8a"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -152,23 +139,19 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
           "name": "ANDROID_ABI",
-          "value": "arm64-v8a",
-          "type": "STRING"
+          "value": "arm64-v8a"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -190,23 +173,19 @@
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
           "name": "ANDROID_ABI",
-          "value": "arm64-v8a",
-          "type": "STRING"
+          "value": "arm64-v8a"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -228,23 +207,19 @@
         },
         {
           "name": "ANDROID_ABI",
-          "value": "x86",
-          "type": "STRING"
+          "value": "x86"
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -266,23 +241,19 @@
         },
         {
           "name": "ANDROID_ABI",
-          "value": "x86",
-          "type": "STRING"
+          "value": "x86"
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
@@ -304,52 +275,24 @@
         },
         {
           "name": "ANDROID_ABI",
-          "value": "x86",
-          "type": "STRING"
+          "value": "x86"
         },
         {
           "name": "ANDROID_PLATFORM",
-          "value": "23",
-          "type": "STRING"
+          "value": "23"
         },
         {
-          "name": "PLASMA_ENABLE_QT_SUPPORT",
-          "value": "0",
-          "type": "STRING"
+          "name": "PL_ENABLE_QT_SUPPORT",
+          "value": "0"
         },
         {
-          "name": "PLASMA_BUILD_SAMPLES",
-          "value": "1",
-          "type": "STRING"
+          "name": "PL_BUILD_SAMPLES",
+          "value": "1"
         }
       ],
       "buildCommandArgs": "-v",
       "ctestCommandArgs": "",
       "intelliSenseMode": "android-clang-x86"
-    },
-    {
-      "name": "x64-Debug",
-      "generator": "Ninja",
-      "configurationType": "Debug",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
-    },
-    {
-      "name": "x64-Dev",
-      "generator": "Ninja",
-      "configurationType": "Dev",
-      "buildRoot": "${projectDir}\\out\\build\\${name}",
-      "installRoot": "${projectDir}\\out\\install\\${name}",
-      "cmakeCommandArgs": "",
-      "buildCommandArgs": "",
-      "ctestCommandArgs": "",
-      "inheritEnvironments": [ "msvc_x64_x64" ],
-      "variables": []
     }
   ]
 }

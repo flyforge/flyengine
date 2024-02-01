@@ -25,7 +25,7 @@ void plQtJoltProjectSettingsDlg::EnsureConfigFileExists()
 {
   plStringView sConfigFile = plCollisionFilterConfig::s_sConfigFile;
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   sConfigFile = plFileSystem::MigrateFileLocation(":project/CollisionLayers.cfg", sConfigFile);
 #endif
 
@@ -115,12 +115,13 @@ void plQtJoltProjectSettingsDlg::SetupTable()
   FilterTable->horizontalHeader()->setHighlightSections(false);
 
   QStringList headers;
+  plStringBuilder tmp;
 
   for (plUInt32 r = 0; r < uiLayers; ++r)
   {
     m_IndexRemap[r] = m_Config.GetNamedGroupIndex(r);
 
-    headers.push_back(QString::fromUtf8(m_Config.GetGroupName(m_IndexRemap[r])));
+    headers.push_back(QString::fromUtf8(m_Config.GetGroupName(m_IndexRemap[r]).GetData(tmp)));
   }
 
   FilterTable->setVerticalHeaderLabels(headers);
@@ -154,16 +155,16 @@ plResult plQtJoltProjectSettingsDlg::Save()
   if (m_Config.Save().Failed())
   {
     plStringBuilder sError;
-    sError.Format("Failed to save the Collision Layer file\n'{0}'", plCollisionFilterConfig::s_sConfigFile);
+    sError.SetFormat("Failed to save the Collision Layer file\n'{0}'", plCollisionFilterConfig::s_sConfigFile);
 
     plQtUiServices::GetSingleton()->MessageBoxWarning(sError);
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   UpdateCollisionLayerDynamicEnumValues();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plQtJoltProjectSettingsDlg::Load()
@@ -217,9 +218,9 @@ void plQtJoltProjectSettingsDlg::on_DefaultButtons_clicked(QAbstractButton* pBut
 
 void plQtJoltProjectSettingsDlg::on_ButtonAddLayer_clicked()
 {
-  const plInt32 iNewIdx = m_Config.FindUnnamedGroup();
+  const plUInt32 uiNewIdx = m_Config.FindUnnamedGroup();
 
-  if (iNewIdx < 0)
+  if (uiNewIdx == plInvalidIndex)
   {
     plQtUiServices::GetSingleton()->MessageBoxInformation("The maximum number of collision layers has been reached.");
     return;
@@ -227,20 +228,19 @@ void plQtJoltProjectSettingsDlg::on_ButtonAddLayer_clicked()
 
   while (true)
   {
-
     bool ok;
     QString result = QInputDialog::getText(this, QStringLiteral("Add Layer"), QStringLiteral("Name:"), QLineEdit::Normal, QString(), &ok);
 
     if (!ok)
       return;
 
-    if (m_Config.GetFilterGroupByName(result.toUtf8().data()) >= 0)
+    if (m_Config.GetFilterGroupByName(result.toUtf8().data()) != plInvalidIndex)
     {
       plQtUiServices::GetSingleton()->MessageBoxWarning("A Collision Layer with the given name already exists.");
       continue;
     }
 
-    m_Config.SetGroupName(iNewIdx, result.toUtf8().data());
+    m_Config.SetGroupName(uiNewIdx, result.toUtf8().data());
     break;
   }
 
@@ -289,7 +289,7 @@ void plQtJoltProjectSettingsDlg::on_ButtonRenameLayer_clicked()
       return;
     }
 
-    if (m_Config.GetFilterGroupByName(result.toUtf8().data()) >= 0)
+    if (m_Config.GetFilterGroupByName(result.toUtf8().data()) != plInvalidIndex)
     {
       plQtUiServices::GetSingleton()->MessageBoxWarning("A Collision Layer with the given name already exists.");
       continue;

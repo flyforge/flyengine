@@ -10,7 +10,7 @@
 struct plTypeData
 {
   plMutex m_Mutex;
-  plHashTable<plUInt64, plRTTI*, plHashHelper<plUInt64>, plStaticAllocatorWrapper> m_TypeNameHashToType;
+  plHashTable<plUInt64, plRTTI*, plHashHelper<plUInt64>, plStaticsAllocatorWrapper> m_TypeNameHashToType;
   plDynamicArray<plRTTI*> m_AllTypes;
 
   bool m_bIterating = false;
@@ -31,7 +31,7 @@ plTypeData* GetTypeData()
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Reflection)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Reflection)
 
   //BEGIN_SUBSYSTEM_DEPENDENCIES
   //  "FileSystem"
@@ -48,7 +48,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Reflection)
     plPlugin::Events().RemoveEventHandler(plRTTI::PluginEventHandler);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plRTTI::plRTTI(plStringView sName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
@@ -73,7 +73,7 @@ plRTTI::plRTTI(plStringView sName, const plRTTI* pParentType, plUInt32 uiTypeSiz
   // However, I don't know where we could do these debug checks where they are guaranteed to be executed.
   // For now they are executed here and one might also do that in e.g. the game application
   {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     VerifyCorrectness();
 #endif
   }
@@ -158,7 +158,7 @@ void plRTTI::VerifyCorrectness() const
 {
   if (m_VerifyParent != nullptr)
   {
-    PLASMA_ASSERT_DEV(m_VerifyParent() == m_pParentType, "Type '{0}': The given parent type '{1}' does not match the actual parent type '{2}'",
+    PL_ASSERT_DEV(m_VerifyParent() == m_pParentType, "Type '{0}': The given parent type '{1}' does not match the actual parent type '{2}'",
       m_sTypeName, (m_pParentType != nullptr) ? m_pParentType->GetTypeName() : "null",
       (m_VerifyParent() != nullptr) ? m_VerifyParent()->GetTypeName() : "null");
   }
@@ -175,7 +175,8 @@ void plRTTI::VerifyCorrectness() const
         const bool bNewProperty = !Known.Find(pInstance->m_Properties[i]->GetPropertyName()).IsValid();
         Known.Insert(pInstance->m_Properties[i]->GetPropertyName());
 
-        PLASMA_ASSERT_DEV(bNewProperty, "{0}: The property with name '{1}' is already defined in type '{2}'.", m_sTypeName,
+        PL_IGNORE_UNUSED(bNewProperty);
+        PL_ASSERT_DEV(bNewProperty, "{0}: The property with name '{1}' is already defined in type '{2}'.", m_sTypeName,
           pInstance->m_Properties[i]->GetPropertyName(), pInstance->GetTypeName());
       }
 
@@ -186,7 +187,8 @@ void plRTTI::VerifyCorrectness() const
   {
     for (const plAbstractProperty* pFunc : m_Functions)
     {
-      PLASMA_ASSERT_DEV(pFunc->GetCategory() == plPropertyCategory::Function, "Invalid function property '{}'", pFunc->GetPropertyName());
+      PL_IGNORE_UNUSED(pFunc);
+      PL_ASSERT_DEV(pFunc->GetCategory() == plPropertyCategory::Function, "Invalid function property '{}'", pFunc->GetPropertyName());
     }
   }
 }
@@ -212,7 +214,7 @@ void plRTTI::RegisterType()
   m_uiTypeNameHash = plHashingUtils::StringHash(m_sTypeName);
 
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
   pData->m_TypeNameHashToType.Insert(m_uiTypeNameHash, this);
 
   m_uiTypeIndex = pData->m_AllTypes.GetCount();
@@ -222,10 +224,10 @@ void plRTTI::RegisterType()
 void plRTTI::UnregisterType()
 {
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
   pData->m_TypeNameHashToType.Remove(m_uiTypeNameHash);
 
-  PLASMA_ASSERT_DEV(pData->m_bIterating == false, "Unregistering types while iterating over types might cause unexpected behavior");
+  PL_ASSERT_DEV(pData->m_bIterating == false, "Unregistering types while iterating over types might cause unexpected behavior");
   pData->m_AllTypes.RemoveAtAndSwap(m_uiTypeIndex);
   if (m_uiTypeIndex != pData->m_AllTypes.GetCount())
   {
@@ -248,7 +250,7 @@ const plRTTI* plRTTI::FindTypeByName(plStringView sName)
   plUInt64 uiNameHash = plHashingUtils::StringHash(sName);
 
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   plRTTI* pType = nullptr;
   pData->m_TypeNameHashToType.TryGetValue(uiNameHash, pType);
@@ -258,7 +260,7 @@ const plRTTI* plRTTI::FindTypeByName(plStringView sName)
 const plRTTI* plRTTI::FindTypeByNameHash(plUInt64 uiNameHash)
 {
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   plRTTI* pType = nullptr;
   pData->m_TypeNameHashToType.TryGetValue(uiNameHash, pType);
@@ -273,7 +275,7 @@ const plRTTI* plRTTI::FindTypeByNameHash32(plUInt32 uiNameHash)
 const plRTTI* plRTTI::FindTypeIf(PredicateFunc func)
 {
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   for (const plRTTI* pRtti : pData->m_AllTypes)
   {
@@ -311,7 +313,7 @@ const plAbstractProperty* plRTTI::FindPropertyByName(plStringView sName, bool bS
 
 bool plRTTI::DispatchMessage(void* pInstance, plMessage& ref_msg) const
 {
-  PLASMA_ASSERT_DEBUG(m_uiMsgIdOffset != plSmallInvalidIndex, "Message handler table should have been gathered at this point.\n"
+  PL_ASSERT_DEBUG(m_uiMsgIdOffset != plSmallInvalidIndex, "Message handler table should have been gathered at this point.\n"
                                                           "If this assert is triggered for a type loaded from a dynamic plugin,\n"
                                                           "you may have forgotten to instantiate an plPlugin object inside your plugin DLL.");
 
@@ -333,7 +335,7 @@ bool plRTTI::DispatchMessage(void* pInstance, plMessage& ref_msg) const
 
 bool plRTTI::DispatchMessage(const void* pInstance, plMessage& ref_msg) const
 {
-  PLASMA_ASSERT_DEBUG(m_uiMsgIdOffset != plSmallInvalidIndex, "Message handler table should have been gathered at this point.\n"
+  PL_ASSERT_DEBUG(m_uiMsgIdOffset != plSmallInvalidIndex, "Message handler table should have been gathered at this point.\n"
                                                           "If this assert is triggered for a type loaded from a dynamic plugin,\n"
                                                           "you may have forgotten to instantiate an plPlugin object inside your plugin DLL.");
 
@@ -356,11 +358,11 @@ bool plRTTI::DispatchMessage(const void* pInstance, plMessage& ref_msg) const
 void plRTTI::ForEachType(VisitorFunc func, plBitflags<ForEachOptions> options /*= ForEachOptions::Default*/)
 {
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   pData->m_bIterating = true;
   // Can't use ranged based for loop here since we might add new types while iterating and the m_AllTypes array might re-allocate.
-  for (plUInt32 i = 0; i < pData->m_AllTypes.GetCount(); ++i) 
+  for (plUInt32 i = 0; i < pData->m_AllTypes.GetCount(); ++i)
   {
     auto pRtti = pData->m_AllTypes.GetData()[i];
     if (options.IsSet(ForEachOptions::ExcludeNonAllocatable) && (pRtti->GetAllocator() == nullptr || pRtti->GetAllocator()->CanAllocate() == false))
@@ -377,7 +379,7 @@ void plRTTI::ForEachType(VisitorFunc func, plBitflags<ForEachOptions> options /*
 void plRTTI::ForEachDerivedType(const plRTTI* pBaseType, VisitorFunc func, plBitflags<ForEachOptions> options /*= ForEachOptions::Default*/)
 {
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   pData->m_bIterating = true;
   // Can't use ranged based for loop here since we might add new types while iterating and the m_AllTypes array might re-allocate.
@@ -403,7 +405,7 @@ void plRTTI::AssignPlugin(plStringView sPluginName)
   // assigns the given plugin name to every plRTTI instance that has no plugin assigned yet
 
   auto pData = GetTypeData();
-  PLASMA_LOCK(pData->m_Mutex);
+  PL_LOCK(pData->m_Mutex);
 
   for (plRTTI* pRtti : pData->m_AllTypes)
   {
@@ -418,10 +420,7 @@ void plRTTI::AssignPlugin(plStringView sPluginName)
   }
 }
 
-// warning C4505: 'IsValidIdentifierName': unreferenced function with internal linkage has been removed
-// happens in Release builds, because the function is only used in a debug assert
-#define PLASMA_MSVC_WARNING_NUMBER 4505
-#include <Foundation/Basics/Compiler/MSVC/DisableWarning_MSVC.h>
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 
 static bool IsValidIdentifierName(plStringView sIdentifier)
 {
@@ -455,11 +454,11 @@ static bool IsValidIdentifierName(plStringView sIdentifier)
   return true;
 }
 
-#include <Foundation/Basics/Compiler/MSVC/RestoreWarning_MSVC.h>
+#endif
 
 void plRTTI::SanityCheckType(plRTTI* pType)
 {
-  PLASMA_ASSERT_DEV(pType->GetTypeFlags().IsSet(plTypeFlags::StandardType) + pType->GetTypeFlags().IsSet(plTypeFlags::IsEnum) +
+  PL_ASSERT_DEV(pType->GetTypeFlags().IsSet(plTypeFlags::StandardType) + pType->GetTypeFlags().IsSet(plTypeFlags::IsEnum) +
                     pType->GetTypeFlags().IsSet(plTypeFlags::Bitflags) + pType->GetTypeFlags().IsSet(plTypeFlags::Class) ==
                   1,
     "Types are mutually exclusive!");
@@ -468,11 +467,11 @@ void plRTTI::SanityCheckType(plRTTI* pType)
   {
     const plRTTI* pSpecificType = pProp->GetSpecificType();
 
-    PLASMA_ASSERT_DEBUG(IsValidIdentifierName(pProp->GetPropertyName()), "Property name is invalid: '{0}'", pProp->GetPropertyName());
+    PL_ASSERT_DEBUG(IsValidIdentifierName(pProp->GetPropertyName()), "Property name is invalid: '{0}'", pProp->GetPropertyName());
 
     if (pProp->GetCategory() != plPropertyCategory::Function)
     {
-      PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) + pProp->GetFlags().IsSet(plPropertyFlags::IsEnum) +
+      PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) + pProp->GetFlags().IsSet(plPropertyFlags::IsEnum) +
                         pProp->GetFlags().IsSet(plPropertyFlags::Bitflags) + pProp->GetFlags().IsSet(plPropertyFlags::Class) <=
                       1,
         "Types are mutually exclusive!");
@@ -482,20 +481,21 @@ void plRTTI::SanityCheckType(plRTTI* pType)
     {
       case plPropertyCategory::Constant:
       {
-        PLASMA_ASSERT_DEV(pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType), "Only standard type constants are supported!");
+        PL_IGNORE_UNUSED(pSpecificType);
+        PL_ASSERT_DEV(pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType), "Only standard type constants are supported!");
       }
       break;
       case plPropertyCategory::Member:
       {
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType),
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType),
           "Property-Type missmatch!");
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::IsEnum) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::IsEnum),
-          "Property-Type missmatch! Use PLASMA_BEGIN_STATIC_REFLECTED_ENUM for type and PLASMA_ENUM_MEMBER_PROPERTY / "
-          "PLASMA_ENUM_ACCESSOR_PROPERTY for property.");
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Bitflags) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Bitflags),
-          "Property-Type missmatch! Use PLASMA_BEGIN_STATIC_REFLECTED_ENUM for type and PLASMA_BITFLAGS_MEMBER_PROPERTY / "
-          "PLASMA_BITFLAGS_ACCESSOR_PROPERTY for property.");
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Class) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Class),
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::IsEnum) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::IsEnum),
+          "Property-Type missmatch! Use PL_BEGIN_STATIC_REFLECTED_ENUM for type and PL_ENUM_MEMBER_PROPERTY / "
+          "PL_ENUM_ACCESSOR_PROPERTY for property.");
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Bitflags) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Bitflags),
+          "Property-Type missmatch! Use PL_BEGIN_STATIC_REFLECTED_ENUM for type and PL_BITFLAGS_MEMBER_PROPERTY / "
+          "PL_BITFLAGS_ACCESSOR_PROPERTY for property.");
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Class) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Class),
           "If plPropertyFlags::Class is set, the property type must be plTypeFlags::Class and vise versa.");
       }
       break;
@@ -503,14 +503,14 @@ void plRTTI::SanityCheckType(plRTTI* pType)
       case plPropertyCategory::Set:
       case plPropertyCategory::Map:
       {
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType),
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::StandardType) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::StandardType),
           "Property-Type missmatch!");
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Class) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Class),
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Class) == pSpecificType->GetTypeFlags().IsSet(plTypeFlags::Class),
           "If plPropertyFlags::Class is set, the property type must be plTypeFlags::Class and vise versa.");
       }
       break;
       case plPropertyCategory::Function:
-        PLASMA_REPORT_FAILURE("Functions need to be put into the PLASMA_BEGIN_FUNCTIONS / PLASMA_END_FUNCTIONS; block.");
+        PL_REPORT_FAILURE("Functions need to be put into the PL_BEGIN_FUNCTIONS / PL_END_FUNCTIONS; block.");
         break;
     }
   }
@@ -535,7 +535,7 @@ void plRTTI::PluginEventHandler(const plPluginEvent& EventData)
       // find all new rtti instances and assign them to that new plugin
       AssignPlugin(EventData.m_sPluginBinary);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
       plRTTI::VerifyCorrectnessForAllTypes();
 #endif
     }
@@ -549,4 +549,4 @@ void plRTTI::PluginEventHandler(const plPluginEvent& EventData)
 plRTTIAllocator::~plRTTIAllocator() = default;
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_RTTI);
+PL_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_RTTI);

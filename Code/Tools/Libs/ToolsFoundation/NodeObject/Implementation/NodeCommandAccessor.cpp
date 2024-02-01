@@ -13,21 +13,35 @@ plNodeCommandAccessor::~plNodeCommandAccessor() = default;
 
 plStatus plNodeCommandAccessor::SetValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, const plVariant& newValue, plVariant index /*= plVariant()*/)
 {
-  if (m_pHistory->InTemporaryTransaction() == false && IsDynamicPinProperty(pObject, pProp))
+  if (m_pHistory->InTemporaryTransaction() == false)
   {
-    plHybridArray<ConnectionInfo, 16> oldConnections;
-    PLASMA_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
+    auto pNodeObject = pObject;
+    auto pDynamicPinProperty = pProp;
 
-    // TODO: remap oldConnections
+    if (IsNode(pObject) == false)
+    {
+      auto pParent = pObject->GetParent();
+      if (pParent != nullptr && IsNode(pParent))
+      {
+        pNodeObject = pParent;
+        pDynamicPinProperty = pParent->GetType()->FindPropertyByName(pObject->GetParentProperty());
+      }
+    }
 
-    PLASMA_SUCCEED_OR_RETURN(plObjectCommandAccessor::SetValue(pObject, pProp, newValue, index));
+    if (IsDynamicPinProperty(pNodeObject, pDynamicPinProperty))
+    {
+      plHybridArray<ConnectionInfo, 16> oldConnections;
+      PL_SUCCEED_OR_RETURN(DisconnectAllPins(pNodeObject, oldConnections));
 
-    return TryReconnectAllPins(pObject, oldConnections);
+      // TODO: remap oldConnections
+
+      PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::SetValue(pObject, pProp, newValue, index));
+
+      return TryReconnectAllPins(pNodeObject, oldConnections);
+    }
   }
-  else
-  {
-    return plObjectCommandAccessor::SetValue(pObject, pProp, newValue, index);
-  }  
+
+  return plObjectCommandAccessor::SetValue(pObject, pProp, newValue, index);
 }
 
 plStatus plNodeCommandAccessor::InsertValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, const plVariant& newValue, plVariant index /*= plVariant()*/)
@@ -35,9 +49,9 @@ plStatus plNodeCommandAccessor::InsertValue(const plDocumentObject* pObject, con
   if (IsDynamicPinProperty(pObject, pProp))
   {
     plHybridArray<ConnectionInfo, 16> oldConnections;
-    PLASMA_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
+    PL_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
 
-    PLASMA_SUCCEED_OR_RETURN(plObjectCommandAccessor::InsertValue(pObject, pProp, newValue, index));
+    PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::InsertValue(pObject, pProp, newValue, index));
 
     return TryReconnectAllPins(pObject, oldConnections);
   }
@@ -52,9 +66,9 @@ plStatus plNodeCommandAccessor::RemoveValue(const plDocumentObject* pObject, con
   if (IsDynamicPinProperty(pObject, pProp))
   {
     plHybridArray<ConnectionInfo, 16> oldConnections;
-    PLASMA_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
+    PL_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
 
-    PLASMA_SUCCEED_OR_RETURN(plObjectCommandAccessor::RemoveValue(pObject, pProp, index));
+    PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::RemoveValue(pObject, pProp, index));
 
     return TryReconnectAllPins(pObject, oldConnections);
   }
@@ -69,11 +83,11 @@ plStatus plNodeCommandAccessor::MoveValue(const plDocumentObject* pObject, const
   if (IsDynamicPinProperty(pObject, pProp))
   {
     plHybridArray<ConnectionInfo, 16> oldConnections;
-    PLASMA_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
+    PL_SUCCEED_OR_RETURN(DisconnectAllPins(pObject, oldConnections));
 
     // TODO: remap oldConnections
 
-    PLASMA_SUCCEED_OR_RETURN(plObjectCommandAccessor::MoveValue(pObject, pProp, oldIndex, newIndex));
+    PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::MoveValue(pObject, pProp, oldIndex, newIndex));
 
     return TryReconnectAllPins(pObject, oldConnections);
   }
@@ -81,6 +95,54 @@ plStatus plNodeCommandAccessor::MoveValue(const plDocumentObject* pObject, const
   {
     return plObjectCommandAccessor::MoveValue(pObject, pProp, oldIndex, newIndex);
   }
+}
+
+plStatus plNodeCommandAccessor::AddObject(const plDocumentObject* pParent, const plAbstractProperty* pParentProp, const plVariant& index, const plRTTI* pType, plUuid& inout_objectGuid)
+{
+  if (IsDynamicPinProperty(pParent, pParentProp))
+  {
+    plHybridArray<ConnectionInfo, 16> oldConnections;
+    PL_SUCCEED_OR_RETURN(DisconnectAllPins(pParent, oldConnections));
+
+    // TODO: remap oldConnections
+
+    PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::AddObject(pParent, pParentProp, index, pType, inout_objectGuid));
+
+    return TryReconnectAllPins(pParent, oldConnections);
+  }
+  else
+  {
+    return plObjectCommandAccessor::AddObject(pParent, pParentProp, index, pType, inout_objectGuid);
+  }
+}
+
+plStatus plNodeCommandAccessor::RemoveObject(const plDocumentObject* pObject)
+{
+  if (const plDocumentObject* pParent = pObject->GetParent())
+  {
+    const plAbstractProperty* pProp = pParent->GetType()->FindPropertyByName(pObject->GetParentProperty());
+    if (IsDynamicPinProperty(pParent, pProp))
+    {
+      plHybridArray<ConnectionInfo, 16> oldConnections;
+      PL_SUCCEED_OR_RETURN(DisconnectAllPins(pParent, oldConnections));
+
+      // TODO: remap oldConnections
+
+      PL_SUCCEED_OR_RETURN(plObjectCommandAccessor::RemoveObject(pObject));
+
+      return TryReconnectAllPins(pParent, oldConnections);
+    }
+  }
+
+  return plObjectCommandAccessor::RemoveObject(pObject);
+}
+
+
+bool plNodeCommandAccessor::IsNode(const plDocumentObject* pObject) const
+{
+  auto pManager = static_cast<const plDocumentNodeManager*>(pObject->GetDocumentObjectManager());
+
+  return pManager->IsNode(pObject);
 }
 
 bool plNodeCommandAccessor::IsDynamicPinProperty(const plDocumentObject* pObject, const plAbstractProperty* pProp) const
@@ -94,8 +156,7 @@ plStatus plNodeCommandAccessor::DisconnectAllPins(const plDocumentObject* pObjec
 {
   auto pManager = static_cast<const plDocumentNodeManager*>(pObject->GetDocumentObjectManager());
 
-  auto Disconnect = [&](plArrayPtr<const plConnection* const> connections) -> plStatus
-  {
+  auto Disconnect = [&](plArrayPtr<const plConnection* const> connections) -> plStatus {
     for (const plConnection* pConnection : connections)
     {
       auto& connectionInfo = out_oldConnections.ExpandAndGetRef();
@@ -104,25 +165,25 @@ plStatus plNodeCommandAccessor::DisconnectAllPins(const plDocumentObject* pObjec
       connectionInfo.m_sSourcePin = pConnection->GetSourcePin().GetName();
       connectionInfo.m_sTargetPin = pConnection->GetTargetPin().GetName();
 
-      PLASMA_SUCCEED_OR_RETURN(plNodeCommands::DisconnectAndRemoveCommand(m_pHistory, pConnection->GetParent()->GetGuid()));
+      PL_SUCCEED_OR_RETURN(plNodeCommands::DisconnectAndRemoveCommand(m_pHistory, pConnection->GetParent()->GetGuid()));
     }
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   };
 
   auto inputs = pManager->GetInputPins(pObject);
   for (auto& pInputPin : inputs)
   {
-    PLASMA_SUCCEED_OR_RETURN(Disconnect(pManager->GetConnections(*pInputPin)));
+    PL_SUCCEED_OR_RETURN(Disconnect(pManager->GetConnections(*pInputPin)));
   }
 
   auto outputs = pManager->GetOutputPins(pObject);
   for (auto& pOutputPin : outputs)
   {
-    PLASMA_SUCCEED_OR_RETURN(Disconnect(pManager->GetConnections(*pOutputPin)));
+    PL_SUCCEED_OR_RETURN(Disconnect(pManager->GetConnections(*pOutputPin)));
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plNodeCommandAccessor::TryReconnectAllPins(const plDocumentObject* pObject, const plDynamicArray<ConnectionInfo>& oldConnections)
@@ -144,8 +205,8 @@ plStatus plNodeCommandAccessor::TryReconnectAllPins(const plDocumentObject* pObj
     if (pManager->CanConnect(pConnectionType, *pSourcePin, *pTargetPin, res).Failed())
       continue;
 
-    PLASMA_SUCCEED_OR_RETURN(plNodeCommands::AddAndConnectCommand(m_pHistory, pConnectionType, *pSourcePin, *pTargetPin));
+    PL_SUCCEED_OR_RETURN(plNodeCommands::AddAndConnectCommand(m_pHistory, pConnectionType, *pSourcePin, *pTargetPin));
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

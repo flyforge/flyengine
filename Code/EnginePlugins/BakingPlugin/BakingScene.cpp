@@ -4,8 +4,8 @@
 #include <BakingPlugin/Tasks/PlaceProbesTask.h>
 #include <BakingPlugin/Tasks/SkyVisibilityTask.h>
 #include <BakingPlugin/Tracer/TracerEmbree.h>
-#include <Core/Assets/AssetFileHeader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/Utilities/GraphicsUtils.h>
 #include <Foundation/Utilities/Progress.h>
 #include <RendererCore/BakedProbes/BakedProbesComponent.h>
@@ -17,17 +17,17 @@ plResult plBakingScene::Extract()
 {
   m_Volumes.Clear();
   m_MeshObjects.Clear();
-  m_BoundingBox.SetInvalid();
+  m_BoundingBox = plBoundingBox::MakeInvalid();
   m_bIsBaked = false;
 
   const plWorld* pWorld = plWorld::GetWorld(m_uiWorldIndex);
   if (pWorld == nullptr)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plWorld& world = *pWorld;
-  PLASMA_LOCK(world.GetReadMarker());
+  PL_LOCK(world.GetReadMarker());
 
   // settings
   {
@@ -63,7 +63,7 @@ plResult plBakingScene::Extract()
     if (m_Volumes.IsEmpty())
     {
       plLog::Error("No Baked Probes Volume found");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -78,22 +78,22 @@ plResult plBakingScene::Extract()
   msg.m_Mode = plWorldGeoExtractionUtil::ExtractionMode::RenderMesh;
   msg.m_pMeshObjects = &m_MeshObjects;
 
-  world.GetSpatialSystem()->FindObjectsInBox(queryBox, queryParams, [&](plGameObject* pObject) {
+  world.GetSpatialSystem()->FindObjectsInBox(queryBox, queryParams, [&](plGameObject* pObject)
+    {
     pObject->SendMessage(msg);
 
-    return plVisitorExecution::Continue;
-  });
+    return plVisitorExecution::Continue; });
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plBakingScene::Bake(const plStringView& sOutputPath, plProgress& progress)
 {
-  PLASMA_ASSERT_DEV(!plThreadUtils::IsMainThread(), "BakeScene must be executed on a worker thread");
+  PL_ASSERT_DEV(!plThreadUtils::IsMainThread(), "BakeScene must be executed on a worker thread");
 
   if (m_pTracer == nullptr)
   {
-    m_pTracer = PLASMA_DEFAULT_NEW(plTracerEmbree);
+    m_pTracer = PL_DEFAULT_NEW(plTracerEmbree);
   }
 
   plProgressRange pgRange("Baking Scene", 2, true, &progress);
@@ -101,9 +101,9 @@ plResult plBakingScene::Bake(const plStringView& sOutputPath, plProgress& progre
   pgRange.SetStepWeighting(1, 0.05f);
 
   if (!pgRange.BeginNextStep("Building Scene"))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_SUCCEED_OR_RETURN(m_pTracer->BuildScene(*this));
+  PL_SUCCEED_OR_RETURN(m_pTracer->BuildScene(*this));
 
   plBakingInternal::PlaceProbesTask placeProbesTask(m_Settings, m_BoundingBox, m_Volumes);
   placeProbesTask.Execute();
@@ -112,17 +112,17 @@ plResult plBakingScene::Bake(const plStringView& sOutputPath, plProgress& progre
   skyVisibilityTask.Execute();
 
   if (!pgRange.BeginNextStep("Writing Result"))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plStringBuilder sFullOutputPath = sOutputPath;
   sFullOutputPath.Append("_Global.plProbeTreeSector");
 
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFullOutputPath));
+  PL_SUCCEED_OR_RETURN(file.Open(sFullOutputPath));
 
   plAssetFileHeader header;
   header.SetFileHashAndVersion(1, 1);
-  PLASMA_SUCCEED_OR_RETURN(header.Write(file));
+  PL_SUCCEED_OR_RETURN(header.Write(file));
 
   plProbeTreeSectorResourceDescriptor desc;
   desc.m_vGridOrigin = placeProbesTask.GetGridOrigin();
@@ -131,18 +131,18 @@ plResult plBakingScene::Bake(const plStringView& sOutputPath, plProgress& progre
   desc.m_ProbePositions = placeProbesTask.GetProbePositions();
   desc.m_SkyVisibility = skyVisibilityTask.GetSkyVisibility();
 
-  PLASMA_SUCCEED_OR_RETURN(desc.Serialize(file));
+  PL_SUCCEED_OR_RETURN(desc.Serialize(file));
 
   m_bIsBaked = true;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plBakingScene::RenderDebugView(const plMat4& InverseViewProjection, plUInt32 uiWidth, plUInt32 uiHeight, plDynamicArray<plColorGammaUB>& out_Pixels,
   plProgress& progress) const
 {
   if (!m_bIsBaked)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plUInt32 uiNumPixel = uiWidth * uiHeight;
   out_Pixels.SetCountUninitialized(uiNumPixel);
@@ -195,7 +195,7 @@ plResult plBakingScene::RenderDebugView(const plMat4& InverseViewProjection, plU
       break;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plBakingScene::plBakingScene() = default;
@@ -205,10 +205,10 @@ plBakingScene::~plBakingScene() = default;
 
 namespace
 {
-  static plDynamicArray<plUniquePtr<plBakingScene>, plStaticAllocatorWrapper> s_BakingScenes;
+  static plDynamicArray<plUniquePtr<plBakingScene>, plStaticsAllocatorWrapper> s_BakingScenes;
 }
 
-PLASMA_IMPLEMENT_SINGLETON(plBaking);
+PL_IMPLEMENT_SINGLETON(plBaking);
 
 plBaking::plBaking()
   : m_SingletonRegistrar(this)
@@ -231,7 +231,7 @@ plBakingScene* plBaking::GetOrCreateScene(const plWorld& world)
   s_BakingScenes.EnsureCount(uiWorldIndex + 1);
   if (s_BakingScenes[uiWorldIndex] == nullptr)
   {
-    auto pScene = PLASMA_DEFAULT_NEW(plBakingScene);
+    auto pScene = PL_DEFAULT_NEW(plBakingScene);
     pScene->m_uiWorldIndex = uiWorldIndex;
 
     s_BakingScenes[uiWorldIndex] = pScene;
@@ -271,5 +271,5 @@ plResult plBaking::RenderDebugView(const plWorld& world, const plMat4& InverseVi
     return pScene->RenderDebugView(InverseViewProjection, uiWidth, uiHeight, out_Pixels, progress);
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }

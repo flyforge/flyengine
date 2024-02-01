@@ -5,9 +5,9 @@
 #include <RendererCore/Shader/ConstantBufferStorage.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
-class PLASMA_RENDERERCORE_DLL plAOPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plAOPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAOPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plAOPass, plRenderPipelinePass);
 
 public:
   plAOPass();
@@ -17,6 +17,8 @@ public:
 
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
   virtual void ExecuteInactive(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   void SetFadeOutStart(float fStart);
   float GetFadeOutStart() const;
@@ -30,17 +32,17 @@ protected:
   plRenderPipelineNodeInputPin m_PinDepthInput;
   plRenderPipelineNodeOutputPin m_PinOutput;
 
-  float m_fRadius;
-  float m_fMaxScreenSpaceRadius;
-  float m_fContrast;
-  float m_fIntensity;
+  float m_fRadius = 1.0f;
+  float m_fMaxScreenSpaceRadius = 1.0f;
+  float m_fContrast = 2.0f;
+  float m_fIntensity = 0.7f;
 
-  float m_fFadeOutStart;
-  float m_fFadeOutEnd;
+  float m_fFadeOutStart = 80.0f;
+  float m_fFadeOutEnd = 100.0f;
 
-  float m_fPositionBias;
-  float m_fMipLevelScale;
-  float m_fDepthBlurThreshold;
+  float m_fPositionBias = 5.0f;
+  float m_fMipLevelScale = 10.0f;
+  float m_fDepthBlurThreshold = 2.0f;
 
   plConstantBufferStorageHandle m_hDownscaleConstantBuffer;
   plConstantBufferStorageHandle m_hSSAOConstantBuffer;

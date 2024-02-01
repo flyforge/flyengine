@@ -5,13 +5,13 @@
 #include <ToolsFoundation/CommandHistory/CommandHistory.h>
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plCommandHistoryActions
+class PL_GUIFOUNDATION_DLL plCommandHistoryActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping, plStringView sTargetMenu = "G.Edit");
 
   static plActionDescriptorHandle s_hCommandHistoryCategory;
   static plActionDescriptorHandle s_hUndo;
@@ -20,9 +20,9 @@ public:
 
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plCommandHistoryAction : public plDynamicActionAndMenuAction
+class PL_GUIFOUNDATION_DLL plCommandHistoryAction : public plDynamicActionAndMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCommandHistoryAction, plDynamicActionAndMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plCommandHistoryAction, plDynamicActionAndMenuAction);
 
 public:
   enum class ButtonType
@@ -35,7 +35,7 @@ public:
   ~plCommandHistoryAction();
 
   virtual void Execute(const plVariant& value) override;
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
 
 private:
   void UpdateState();

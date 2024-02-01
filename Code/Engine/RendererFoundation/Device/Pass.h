@@ -3,9 +3,9 @@
 
 #include <RendererFoundation/Resources/RenderTargetSetup.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALPass
+class PL_RENDERERFOUNDATION_DLL plGALPass
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plGALPass);
+  PL_DISALLOW_COPY_AND_ASSIGN(plGALPass);
 
 public:
   plGALRenderCommandEncoder* BeginRendering(const plGALRenderingSetup& renderingSetup, const char* szName = "");

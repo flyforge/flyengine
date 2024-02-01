@@ -18,28 +18,28 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plKrautTreeComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plKrautTreeComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("KrautTree", GetKrautFile, SetKrautFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Kraut_Tree")),
-    PLASMA_ACCESSOR_PROPERTY("VariationIndex", GetVariationIndex, SetVariationIndex)->AddAttributes(new plDefaultValueAttribute(0xFFFF)),
+    PL_ACCESSOR_PROPERTY("KrautTree", GetKrautFile, SetKrautFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Kraut_Tree")),
+    PL_ACCESSOR_PROPERTY("VariationIndex", GetVariationIndex, SetVariationIndex)->AddAttributes(new plDefaultValueAttribute(0xFFFF)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
-    PLASMA_MESSAGE_HANDLER(plMsgBuildStaticMesh, OnBuildStaticMesh),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
+    PL_MESSAGE_HANDLER(plMsgBuildStaticMesh, OnBuildStaticMesh),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering"),
+    new plCategoryAttribute("Terrain"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plKrautTreeComponent::plKrautTreeComponent() = default;
@@ -108,10 +108,10 @@ plResult plKrautTreeComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool&
       bounds.m_vBoxHalfExtends *= (float)s_iLocalBoundsScale;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plKrautTreeComponent::SetKrautFile(const char* szFile)
@@ -210,7 +210,7 @@ void plKrautTreeComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
   ComputeWind();
 
   // ignore scale, the shader expects the wind strength in the global 0-20 m/sec range
-  const plVec3 vLocalWind = -GetOwner()->GetGlobalRotation() * m_vWindSpringPos;
+  const plVec3 vLocalWind = GetOwner()->GetGlobalRotation().GetInverse() * m_vWindSpringPos;
 
   const plUInt8 uiMaxLods = static_cast<plUInt8>(pTree->GetTreeLODs().GetCount());
   for (plUInt8 uiCurLod = 0; uiCurLod < uiMaxLods; ++uiCurLod)
@@ -284,17 +284,17 @@ void plKrautTreeComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
 plResult plKrautTreeComponent::CreateGeometry(plGeometry& geo, plWorldGeoExtractionUtil::ExtractionMode mode) const
 {
   if (GetOwner()->IsDynamic())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // EnsureTreeIsGenerated(); // not const
 
   if (!m_hKrautTree.IsValid())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plResourceLock<plKrautTreeResource> pTree(m_hKrautTree, plResourceAcquireMode::BlockTillLoaded_NeverFail);
 
   if (pTree.GetAcquireResult() != plResourceAcquireResult::Final)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const auto& details = pTree->GetDetails();
 
@@ -308,12 +308,12 @@ plResult plKrautTreeComponent::CreateGeometry(plGeometry& geo, plWorldGeoExtract
     const float fMaxScale = GetOwner()->GetGlobalScalingSimd().HorizontalMax<3>();
 
     if (details.m_fStaticColliderRadius * fMaxScale <= 0.0f)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const float fTreeHeight = (details.m_Bounds.m_vCenter.z + details.m_Bounds.m_vBoxHalfExtends.z) * 0.9f;
 
     if (fHeightScale * fTreeHeight <= 0.0f)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // using a cone or even a cylinder with a thinner top results in the character controller getting stuck while sliding along the geometry
     // TODO: instead of triangle geometry it would maybe be better to use actual physics capsules
@@ -324,7 +324,7 @@ plResult plKrautTreeComponent::CreateGeometry(plGeometry& geo, plWorldGeoExtract
     geo.TriangulatePolygons();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plKrautTreeComponent::EnsureTreeIsGenerated()
@@ -445,7 +445,7 @@ void plKrautTreeComponent::ComputeWind() const
     plDebugRenderer::DrawLines(GetWorld(), lines, plColor::White);
 
     plStringBuilder tmp;
-    tmp.Format("Wind: {}m/s", m_vWindSpringPos.GetLength());
+    tmp.SetFormat("Wind: {}m/s", m_vWindSpringPos.GetLength());
 
     plDebugRenderer::Draw3DText(GetWorld(), tmp, GetOwner()->GetGlobalPosition() + plVec3(0, 0, 1), plColor::DeepSkyBlue);
   }
@@ -454,7 +454,7 @@ void plKrautTreeComponent::ComputeWind() const
 void plKrautTreeComponent::OnMsgExtractGeometry(plMsgExtractGeometry& ref_msg) const
 {
   plStringBuilder sResourceName;
-  sResourceName.Format("KrautTreeCpu:{}", m_hKrautGenerator.GetResourceID());
+  sResourceName.SetFormat("KrautTreeCpu:{}", m_hKrautGenerator.GetResourceID());
 
   plCpuMeshResourceHandle hMesh = plResourceManager::GetExistingResource<plCpuMeshResource>(sResourceName);
   if (!hMesh.IsValid())
@@ -529,7 +529,7 @@ void plKrautTreeComponentManager::Initialize()
 {
   SUPER::Initialize();
 
-  plWorldModule::UpdateFunctionDesc desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plKrautTreeComponentManager::Update, this);
+  plWorldModule::UpdateFunctionDesc desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plKrautTreeComponentManager::Update, this);
   desc.m_Phase = UpdateFunctionDesc::Phase::PreAsync;
 
   RegisterUpdateFunction(desc);
@@ -539,7 +539,7 @@ void plKrautTreeComponentManager::Initialize()
 
 void plKrautTreeComponentManager::Deinitialize()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plResourceManager::GetResourceEvents().RemoveEventHandler(plMakeDelegate(&plKrautTreeComponentManager::ResourceEventHandler, this));
 
@@ -551,7 +551,7 @@ void plKrautTreeComponentManager::Update(const plWorldModule::UpdateContext& con
   plDeque<plComponentHandle> requireUpdate;
 
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
     requireUpdate.Swap(m_RequireUpdate);
   }
 
@@ -568,7 +568,7 @@ void plKrautTreeComponentManager::Update(const plWorldModule::UpdateContext& con
 
 void plKrautTreeComponentManager::EnqueueUpdate(plComponentHandle hComponent)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_RequireUpdate.IndexOf(hComponent) != plInvalidIndex)
     return;
@@ -580,7 +580,7 @@ void plKrautTreeComponentManager::ResourceEventHandler(const plResourceEvent& e)
 {
   if ((e.m_Type == plResourceEvent::Type::ResourceContentUnloading || e.m_Type == plResourceEvent::Type::ResourceContentUpdated) && e.m_pResource->GetDynamicRTTI()->IsDerivedFrom<plKrautGeneratorResource>())
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     plKrautGeneratorResourceHandle hResource((plKrautGeneratorResource*)(e.m_pResource));
 

@@ -3,10 +3,10 @@
 #include <Foundation/SimdMath/SimdSwizzle.h>
 #include <Foundation/SimdMath/SimdTypes.h>
 
-class PLASMA_FOUNDATION_DLL plSimdVec4b
+class PL_FOUNDATION_DLL plSimdVec4b
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plSimdVec4b();                               // [tested]
   plSimdVec4b(bool b);                         // [tested]
@@ -48,11 +48,11 @@ public:
   plInternal::QuadBool m_v;
 };
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
 #  include <Foundation/SimdMath/Implementation/SSE/SSEVec4b_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_FPU
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_FPU
 #  include <Foundation/SimdMath/Implementation/FPU/FPUVec4b_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_NEON
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_NEON
 #  include <Foundation/SimdMath/Implementation/NEON/NEONVec4b_inl.h>
 #else
 #  error "Unknown SIMD implementation."

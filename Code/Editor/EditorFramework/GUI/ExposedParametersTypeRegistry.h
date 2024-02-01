@@ -15,7 +15,7 @@ struct plAssetCuratorEvent;
 /// Call GetExposedParametersType to create a type for a sub-asset ID.
 class plExposedParametersTypeRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plExposedParametersTypeRegistry);
+  PL_DECLARE_SINGLETON(plExposedParametersTypeRegistry);
 
 public:
   plExposedParametersTypeRegistry();
@@ -27,18 +27,17 @@ public:
   const plRTTI* GetExposedParametersBaseType() const { return m_pBaseType; }
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorFramework, ExposedParametersTypeRegistry);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorFramework, ExposedParametersTypeRegistry);
 
   struct ParamData
   {
     ParamData()
-      : m_pType(nullptr)
-    {
-    }
+
+      = default;
 
     plUuid m_SubAssetGuid;
     bool m_bUpToDate = true;
-    const plRTTI* m_pType;
+    const plRTTI* m_pType = nullptr;
   };
   void UpdateExposedParametersType(ParamData& data, const plExposedParameters& params);
   void AssetCuratorEventHandler(const plAssetCuratorEvent& e);

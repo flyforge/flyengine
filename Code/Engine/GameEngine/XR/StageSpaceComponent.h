@@ -6,15 +6,15 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-typedef plSettingsComponentManager<class plStageSpaceComponent> plStageSpaceComponentManager;
+using plStageSpaceComponentManager = plSettingsComponentManager<class plStageSpaceComponent>;
 
 /// \brief Singleton to set the type of stage space and its global transform in the world.
 ///
 /// The global transform of the owner and the set stage space are read out by the XR
 /// implementation every frame.
-class PLASMA_GAMEENGINE_DLL plStageSpaceComponent : public plComponent
+class PL_GAMEENGINE_DLL plStageSpaceComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plStageSpaceComponent, plComponent, plStageSpaceComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plStageSpaceComponent, plComponent, plStageSpaceComponentManager);
 
 public:
   plStageSpaceComponent();

@@ -10,9 +10,9 @@ class plProcessingStream;
 class plParticleEmitter;
 
 /// \brief Base class for all particle emitters
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitterFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleEmitterFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetEmitterType() const = 0;
@@ -21,8 +21,8 @@ public:
   plParticleEmitter* CreateEmitter(plParticleSystemInstance* pOwner) const;
   virtual void QueryMaxParticleCount(plUInt32& out_uiMaxParticlesAbs, plUInt32& out_uiMaxParticlesPerSecond) const = 0;
 
-  virtual void Save(plStreamWriter& stream) const = 0;
-  virtual void Load(plStreamReader& stream) = 0;
+  virtual void Save(plStreamWriter& inout_stream) const = 0;
+  virtual void Load(plStreamReader& inout_stream) = 0;
 };
 
 enum class plParticleEmitterState
@@ -34,9 +34,9 @@ enum class plParticleEmitterState
 };
 
 /// \brief Base class for stream spawners that are used by plParticleEmitter's
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitter : public plParticleModule
+class PL_PARTICLEPLUGIN_DLL plParticleEmitter : public plParticleModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitter, plParticleModule);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitter, plParticleModule);
 
   friend class plParticleSystemInstance;
   friend class plParticleEmitterFactory;

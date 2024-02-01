@@ -6,26 +6,26 @@
 #include <RendererCore/Meshes/MeshComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshContext, 1, plRTTIDefaultAllocator<plMeshContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshContext, 1, plRTTIDefaultAllocator<plMeshContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Mesh"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Mesh"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMeshContext::plMeshContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pMeshObject = nullptr;
 }
 
-void plMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
+void plMeshContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
 {
-  if (auto* pMsg = plDynamicCast<const PlasmaEditorEngineSetMaterialsMsg*>(pDocMsg))
+  if (auto* pMsg = plDynamicCast<const plEditorEngineSetMaterialsMsg*>(pDocMsg))
   {
     plMeshComponent* pMesh;
     if (m_pMeshObject && m_pMeshObject->TryGetComponentOfBaseType(pMesh))
@@ -64,13 +64,13 @@ void plMeshContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plMeshContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   plGameObjectDesc obj;
   plMeshComponent* pMesh;
@@ -96,21 +96,21 @@ void plMeshContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plMeshContext::CreateViewContext()
+plEngineProcessViewContext* plMeshContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plMeshViewContext, this);
+  return PL_DEFAULT_NEW(plMeshViewContext, this);
 }
 
-void plMeshContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plMeshContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plMeshContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   if (m_bBoundsDirty)
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pMeshObject->UpdateLocalBounds();
     m_pMeshObject->UpdateGlobalTransformAndBounds();
@@ -123,16 +123,15 @@ bool plMeshContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* p
 }
 
 
-void plMeshContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plMeshContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_pMeshObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pMeshObject->UpdateLocalBounds();
     m_pMeshObject->UpdateGlobalTransformAndBounds();

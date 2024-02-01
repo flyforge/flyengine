@@ -5,9 +5,9 @@
 using plJoltShapeSphereComponentManager = plComponentManager<class plJoltShapeSphereComponent, plBlockStorageType::FreeList>;
 
 /// \brief Adds a Jolt sphere shape to a Jolt actor.
-class PLASMA_JOLTPLUGIN_DLL plJoltShapeSphereComponent : public plJoltShapeComponent
+class PL_JOLTPLUGIN_DLL plJoltShapeSphereComponent : public plJoltShapeComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltShapeSphereComponent, plJoltShapeComponent, plJoltShapeSphereComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltShapeSphereComponent, plJoltShapeComponent, plJoltShapeSphereComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

@@ -10,27 +10,27 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltShapeCapsuleComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltShapeCapsuleComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Height", GetHeight, SetHeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Height", GetHeight, SetHeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCapsuleManipulatorAttribute("Height", "Radius"),
     new plCapsuleVisualizerAttribute("Height", "Radius"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltShapeCapsuleComponent::plJoltShapeCapsuleComponent() = default;
@@ -58,8 +58,8 @@ void plJoltShapeCapsuleComponent::DeserializeComponent(plWorldReader& inout_stre
 
 void plJoltShapeCapsuleComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere(plVec3(0, 0, -m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
-  msg.AddBounds(plBoundingSphere(plVec3(0, 0, +m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, -m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, +m_fHeight * 0.5f), m_fRadius), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeCapsuleComponent::SetRadius(float f)
@@ -89,7 +89,7 @@ void plJoltShapeCapsuleComponent::CreateShapes(plDynamicArray<plJoltSubShape>& o
   pNewShape->SetUserData(reinterpret_cast<plUInt64>(GetUserData()));
   pNewShape->SetMaterial(pMaterial);
 
-  JPH::Ref<JPH::RotatedTranslatedShapeSettings> pRotShapeSet = new JPH::RotatedTranslatedShapeSettings(JPH::Vec3::sZero(), JPH::Quat::sRotation(JPH::Vec3::sAxisX(), plAngle::Degree(90).GetRadian()), pNewShape);
+  JPH::Ref<JPH::RotatedTranslatedShapeSettings> pRotShapeSet = new JPH::RotatedTranslatedShapeSettings(JPH::Vec3::sZero(), JPH::Quat::sRotation(JPH::Vec3::sAxisX(), plAngle::MakeFromDegree(90).GetRadian()), pNewShape);
 
   JPH::Shape* pRotShape = pRotShapeSet->Create().Get().GetPtr();
   pRotShape->SetUserData(reinterpret_cast<plUInt64>(GetUserData()));
@@ -97,8 +97,8 @@ void plJoltShapeCapsuleComponent::CreateShapes(plDynamicArray<plJoltSubShape>& o
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pRotShape;
   sub.m_pShape->AddRef();
-  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeCapsuleComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeCapsuleComponent);

@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plPoseResultAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plPoseResultAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPoseResultAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plPoseResultAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -24,7 +24,7 @@ public:
   ~plPoseResultAnimNode();
 
 private:
-  plTime m_FadeDuration = plTime::Milliseconds(200); // [ property ]
+  plTime m_FadeDuration = plTime::MakeFromMilliseconds(200); // [ property ]
 
   plAnimGraphLocalPoseInputPin m_InPose;         // [ property ]
   plAnimGraphNumberInputPin m_InTargetWeight;    // [ property ]

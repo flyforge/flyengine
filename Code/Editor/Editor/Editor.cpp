@@ -3,14 +3,21 @@
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/Utilities/CommandLineOptions.h>
 
-class PlasmaEditorApplication : public plApplication
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+#  include <shellscalingapi.h>
+#endif
+
+class plEditorApplication : public plApplication
 {
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
-  PlasmaEditorApplication()
-    : plApplication("PlasmaEditor")
+  plEditorApplication()
+    : plApplication("plEditor")
   {
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+    SetProcessDpiAwareness(PROCESS_PER_MONITOR_DPI_AWARE);
+#endif
     EnableMemoryLeakReporting(true);
 
     m_pEditorApp = new plQtEditorApp;
@@ -24,7 +31,7 @@ public:
 
     plQtEditorApp::GetSingleton()->InitQt(GetArgumentCount(), (char**)GetArgumentsArray());
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   virtual void AfterCoreSystemsShutdown() override
@@ -60,4 +67,4 @@ private:
   plQtEditorApp* m_pEditorApp;
 };
 
-PLASMA_APPLICATION_ENTRY_POINT(PlasmaEditorApplication);
+PL_APPLICATION_ENTRY_POINT(plEditorApplication);

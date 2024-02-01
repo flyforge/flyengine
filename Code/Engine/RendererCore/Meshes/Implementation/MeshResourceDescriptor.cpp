@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/IO/ChunkStream.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
@@ -10,18 +10,14 @@
 #  include <Foundation/IO/CompressedStreamZstd.h>
 #endif
 
-#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
-#  include <Foundation/IO/CompressedStreamBrotliG.h>
-#endif
-
 plMeshResourceDescriptor::plMeshResourceDescriptor()
 {
-  m_Bounds.SetInvalid();
+  m_Bounds = plBoundingBoxSphere::MakeInvalid();
 }
 
 void plMeshResourceDescriptor::Clear()
 {
-  m_Bounds.SetInvalid();
+  m_Bounds = plBoundingBoxSphere::MakeInvalid();
   m_hMeshBuffer.Invalidate();
   m_Materials.Clear();
   m_MeshBufferDescriptor.Clear();
@@ -88,7 +84,7 @@ void plMeshResourceDescriptor::AddSubMesh(plUInt32 uiPrimitiveCount, plUInt32 ui
   p.m_uiFirstPrimitive = uiFirstPrimitive;
   p.m_uiPrimitiveCount = uiPrimitiveCount;
   p.m_uiMaterialIndex = uiMaterialIndex;
-  p.m_Bounds.SetInvalid();
+  p.m_Bounds = plBoundingBoxSphere::MakeInvalid();
 
   m_SubMeshes.PushBack(p);
 }
@@ -102,17 +98,17 @@ void plMeshResourceDescriptor::SetMaterial(plUInt32 uiMaterialIndex, const char*
 
 plResult plMeshResourceDescriptor::Save(const char* szFile)
 {
-  PLASMA_LOG_BLOCK("plMeshResourceDescriptor::Save", szFile);
+  PL_LOG_BLOCK("plMeshResourceDescriptor::Save", szFile);
 
   plFileWriter file;
   if (file.Open(szFile, 1024 * 1024).Failed())
   {
     plLog::Error("Failed to open file '{0}'", szFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   Save(file);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plMeshResourceDescriptor::Save(plStreamWriter& inout_stream)
@@ -122,13 +118,9 @@ void plMeshResourceDescriptor::Save(plStreamWriter& inout_stream)
 
   plUInt8 uiCompressionMode = 0;
 
-#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
-  uiCompressionMode = 2;
-  plCompressedStreamWriterBrotliG compressor(&inout_stream);
-  plChunkStreamWriter chunk(compressor);
-#elif BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
+#ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   uiCompressionMode = 1;
-  plCompressedStreamWriterZstd compressor(&inout_stream, plCompressedStreamWriterZstd::Compression::Average);
+  plCompressedStreamWriterZstd compressor(&inout_stream, 0, plCompressedStreamWriterZstd::Compression::Average);
   plChunkStreamWriter chunk(compressor);
 #else
   plChunkStreamWriter chunk(stream);
@@ -277,18 +269,18 @@ void plMeshResourceDescriptor::Save(plStreamWriter& inout_stream)
 
 plResult plMeshResourceDescriptor::Load(const char* szFile)
 {
-  PLASMA_LOG_BLOCK("plMeshResourceDescriptor::Load", szFile);
+  PL_LOG_BLOCK("plMeshResourceDescriptor::Load", szFile);
 
   plFileReader file;
   if (file.Open(szFile, 1024 * 1024).Failed())
   {
     plLog::Error("Failed to open file '{0}'", szFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // skip asset header
   plAssetFileHeader assetHeader;
-  PLASMA_SUCCEED_OR_RETURN(assetHeader.Read(file));
+  PL_SUCCEED_OR_RETURN(assetHeader.Read(file));
 
   return Load(file);
 }
@@ -300,7 +292,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
 
   // version 4 and below is broken
   if (uiVersion <= 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt8 uiCompressionMode = 0;
   if (uiVersion >= 6)
@@ -312,10 +304,6 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   plCompressedStreamReaderZstd decompressorZstd;
-#endif
-
-#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
-  plCompressedStreamReaderBrotliG decompressorBrotliG;
 #endif
 
   switch (uiCompressionMode)
@@ -330,21 +318,12 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       break;
 #else
       plLog::Error("Mesh is compressed with zstandard, but support for this compressor is not compiled in.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 #endif
 
-    case 2:
-#ifdef BUILDSYSTEM_ENABLE_BROTLIG_SUPPORT
-      decompressorBrotliG.SetInputStream(&inout_stream);
-      pCompressor = &decompressorBrotliG;
-      break;
-#else
-      plLog::Error("Mesh is compressed with BrotliG, but support for this compressor is not compiled in.");
-      return PLASMA_FAILURE;
-#endif
     default:
       plLog::Error("Mesh is compressed with an unknown algorithm.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plChunkStreamReader chunk(*pCompressor);
@@ -364,7 +343,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       if (ci.m_uiChunkVersion != 1)
       {
         plLog::Error("Version of chunk '{0}' is invalid ({1})", ci.m_sChunkName, ci.m_uiChunkVersion);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // number of materials
@@ -386,7 +365,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       if (ci.m_uiChunkVersion != 1)
       {
         plLog::Error("Version of chunk '{0}' is invalid ({1})", ci.m_sChunkName, ci.m_uiChunkVersion);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // number of sub-meshes
@@ -402,7 +381,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
         chunk >> m_SubMeshes[idx].m_uiPrimitiveCount;
 
         /// \todo load from file
-        m_SubMeshes[idx].m_Bounds.SetInvalid();
+        m_SubMeshes[idx].m_Bounds = plBoundingBoxSphere::MakeInvalid();
       }
     }
 
@@ -411,7 +390,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       if (ci.m_uiChunkVersion > 4)
       {
         plLog::Error("Version of chunk '{0}' is invalid ({1})", ci.m_sChunkName, ci.m_uiChunkVersion);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // Number of vertices
@@ -442,7 +421,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       {
         plUInt32 idx;
         chunk >> idx; // Vertex stream index
-        PLASMA_ASSERT_DEV(idx == i, "Invalid stream index ({0}) in file (should be {1})", idx, i);
+        PL_ASSERT_DEV(idx == i, "Invalid stream index ({0}) in file (should be {1})", idx, i);
 
         plInt32 iFormat, iSemantic;
         plUInt16 uiElementSize, uiOffset;
@@ -487,7 +466,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       if (ci.m_uiChunkVersion != 1)
       {
         plLog::Error("Version of chunk '{0}' is invalid ({1})", ci.m_sChunkName, ci.m_uiChunkVersion);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // size in bytes
@@ -503,7 +482,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
       if (ci.m_uiChunkVersion != 1)
       {
         plLog::Error("Version of chunk '{0}' is invalid ({1})", ci.m_sChunkName, ci.m_uiChunkVersion);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       // size in bytes
@@ -516,7 +495,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
 
     if (ci.m_sChunkName == "BindPose")
     {
-      PLASMA_SUCCEED_OR_RETURN(chunk.ReadHashTable(m_Bones));
+      PL_SUCCEED_OR_RETURN(chunk.ReadHashTable(m_Bones));
     }
 
     if (ci.m_sChunkName == "Skeleton")
@@ -537,7 +516,7 @@ plResult plMeshResourceDescriptor::Load(plStreamReader& inout_stream)
     plLog::Info("Calculated Bounds: {0} | {1} | {2} - {3} | {4} | {5}", plArgF(b.m_vCenter.x, 2), plArgF(b.m_vCenter.y, 2), plArgF(b.m_vCenter.z, 2), plArgF(b.m_vBoxHalfExtends.x, 2), plArgF(b.m_vBoxHalfExtends.y, 2), plArgF(b.m_vBoxHalfExtends.z, 2));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plMeshResourceDescriptor::ComputeBounds()
@@ -558,7 +537,7 @@ plResult plMeshResourceDescriptor::BoneData::Serialize(plStreamWriter& inout_str
   inout_stream << m_GlobalInverseRestPoseMatrix;
   inout_stream << m_uiBoneIndex;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plMeshResourceDescriptor::BoneData::Deserialize(plStreamReader& inout_stream)
@@ -566,7 +545,7 @@ plResult plMeshResourceDescriptor::BoneData::Deserialize(plStreamReader& inout_s
   inout_stream >> m_GlobalInverseRestPoseMatrix;
   inout_stream >> m_uiBoneIndex;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshResourceDescriptor);
+

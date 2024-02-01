@@ -22,7 +22,7 @@ private:
   virtual void InternalRedraw() override;
   void SendRedrawMsg();
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 };
 

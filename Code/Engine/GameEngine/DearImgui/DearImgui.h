@@ -16,8 +16,8 @@ using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResourc
 
 struct ImGuiContext;
 
-typedef plDelegate<void(ImFontAtlas&)> plImguiConfigFontCallback;
-typedef plDelegate<void(ImGuiStyle&)> plImguiConfigStyleCallback;
+using plImguiConfigFontCallback = plDelegate<void(ImFontAtlas&)>;
+using plImguiConfigStyleCallback = plDelegate<void(ImGuiStyle&)>;
 
 /// \brief Singleton class through which one can control the third-party library 'Dear Imgui'
 ///
@@ -30,9 +30,9 @@ typedef plDelegate<void(ImGuiStyle&)> plImguiConfigStyleCallback;
 ///
 /// \note Don't forget that to see the GUI on screen, your render pipeline must contain an plImguiExtractor
 /// and you need to have an plImguiRenderer set (typically on an plSimpleRenderPass).
-class PLASMA_GAMEENGINE_DLL plImgui
+class PL_GAMEENGINE_DLL plImgui
 {
-  PLASMA_DECLARE_SINGLETON(plImgui);
+  PL_DECLARE_SINGLETON(plImgui);
 
 public:
   plImgui(plImguiConfigFontCallback configFontCallback = plImguiConfigFontCallback(),

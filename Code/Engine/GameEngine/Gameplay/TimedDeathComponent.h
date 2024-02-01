@@ -7,24 +7,24 @@
 #include <GameEngine/GameEngineDLL.h>
 
 struct plMsgComponentInternalTrigger;
-typedef plComponentManager<class plTimedDeathComponent, plBlockStorageType::Compact> plTimedDeathComponentManager;
+using plTimedDeathComponentManager = plComponentManager<class plTimedDeathComponent, plBlockStorageType::Compact>;
 using plPrefabResourceHandle = plTypedResourceHandle<class plPrefabResource>;
 
 /// \brief This component deletes the object it is attached to after a timeout.
 ///
 /// \note The timeout must be set immediately after component creation. Once the component
-/// has been initialized (start of the next frame), changing the values has no effect.
+/// has been initialized (start of the next frame), changing the value has no effect.
 /// The only way around this, is to delete the entire component and create a new one.
-class PLASMA_GAMEENGINE_DLL plTimedDeathComponent : public plComponent
+class PL_GAMEENGINE_DLL plTimedDeathComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plTimedDeathComponent, plComponent, plTimedDeathComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plTimedDeathComponent, plComponent, plTimedDeathComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   /// \brief Once this function has been executed, the timeout for deletion is fixed and cannot be reset.
@@ -38,8 +38,8 @@ public:
   plTimedDeathComponent();
   ~plTimedDeathComponent();
 
-  plTime m_MinDelay = plTime::Seconds(1.0);   // [ property ]
-  plTime m_DelayRange = plTime::Seconds(0.0); // [ property ]
+  plTime m_MinDelay = plTime::MakeFromSeconds(1.0);   // [ property ]
+  plTime m_DelayRange = plTime::MakeFromSeconds(0.0); // [ property ]
 
   void SetTimeoutPrefab(const char* szPrefab); // [ property ]
   const char* GetTimeoutPrefab() const;        // [ property ]

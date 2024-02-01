@@ -11,7 +11,7 @@
 /// The time line can be sampled to query all events that occurred during a time period.
 /// There is no way to sample an event track at a fixed point in time, because events occur at specific time points and thus
 /// only range queries make sense.
-class PLASMA_FOUNDATION_DLL plEventTrack
+class PL_FOUNDATION_DLL plEventTrack
 {
 public:
   plEventTrack();
@@ -39,7 +39,7 @@ public:
 private:
   struct ControlPoint
   {
-    PLASMA_ALWAYS_INLINE bool operator<(const ControlPoint& rhs) const { return m_Time < rhs.m_Time; }
+    PL_ALWAYS_INLINE bool operator<(const ControlPoint& rhs) const { return m_Time < rhs.m_Time; }
 
     plTime m_Time;
     plUInt32 m_uiEvent;

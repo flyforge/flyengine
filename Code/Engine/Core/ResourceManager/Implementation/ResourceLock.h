@@ -20,7 +20,7 @@ template <class RESOURCE_TYPE>
 class plResourceLock
 {
 public:
-  PLASMA_ALWAYS_INLINE plResourceLock(const plTypedResourceHandle<RESOURCE_TYPE>& hResource, plResourceAcquireMode mode,
+  PL_ALWAYS_INLINE plResourceLock(const plTypedResourceHandle<RESOURCE_TYPE>& hResource, plResourceAcquireMode mode,
     const plTypedResourceHandle<RESOURCE_TYPE>& hFallbackResource = plTypedResourceHandle<RESOURCE_TYPE>())
   {
     m_pResource = plResourceManager::BeginAcquireResource(hResource, mode, hFallbackResource, &m_AcquireResult);
@@ -36,7 +36,7 @@ public:
     other.m_AcquireResult = plResourceAcquireResult::None;
   }
 
-  PLASMA_ALWAYS_INLINE ~plResourceLock()
+  PL_ALWAYS_INLINE ~plResourceLock()
   {
     if (m_pResource)
     {
@@ -44,16 +44,16 @@ public:
     }
   }
 
-  PLASMA_ALWAYS_INLINE RESOURCE_TYPE* operator->() { return m_pResource; }
-  PLASMA_ALWAYS_INLINE const RESOURCE_TYPE* operator->() const { return m_pResource; }
+  PL_ALWAYS_INLINE RESOURCE_TYPE* operator->() { return m_pResource; }
+  PL_ALWAYS_INLINE const RESOURCE_TYPE* operator->() const { return m_pResource; }
 
-  PLASMA_ALWAYS_INLINE bool IsValid() const { return m_pResource != nullptr; }
-  PLASMA_ALWAYS_INLINE explicit operator bool() const { return m_pResource != nullptr; }
+  PL_ALWAYS_INLINE bool IsValid() const { return m_pResource != nullptr; }
+  PL_ALWAYS_INLINE explicit operator bool() const { return m_pResource != nullptr; }
 
-  PLASMA_ALWAYS_INLINE plResourceAcquireResult GetAcquireResult() const { return m_AcquireResult; }
+  PL_ALWAYS_INLINE plResourceAcquireResult GetAcquireResult() const { return m_AcquireResult; }
 
-  PLASMA_ALWAYS_INLINE const RESOURCE_TYPE* GetPointer() const { return m_pResource; }
-  PLASMA_ALWAYS_INLINE RESOURCE_TYPE* GetPointerNonConst() const { return m_pResource; }
+  PL_ALWAYS_INLINE const RESOURCE_TYPE* GetPointer() const { return m_pResource; }
+  PL_ALWAYS_INLINE RESOURCE_TYPE* GetPointerNonConst() const { return m_pResource; }
 
 private:
   plResourceAcquireResult m_AcquireResult;

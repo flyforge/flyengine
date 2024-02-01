@@ -22,14 +22,14 @@ const char* plWorkerThreadType::GetThreadTypeName(plWorkerThreadType::Enum threa
       return "File Access";
 
     default:
-      PLASMA_REPORT_FAILURE("Invalid Thread Type");
+      PL_REPORT_FAILURE("Invalid Thread Type");
       return "unknown";
   }
 }
 
 void plTaskSystem::WriteStateSnapshotToDGML(plDGMLGraph& ref_graph)
 {
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 
   plHashTable<const plTaskGroup*, plDGMLGraph::NodeId> groupNodeIds;
 
@@ -80,7 +80,7 @@ void plTaskSystem::WriteStateSnapshotToDGML(plDGMLGraph& ref_graph)
     if (!tg.m_bInUse)
       continue;
 
-    title.Format("Group {}", g);
+    title.SetFormat("Group {}", g);
 
     const plDGMLGraph::NodeId taskGroupId = ref_graph.AddGroup(title, plDGMLGraph::GroupType::Expanded, &taskGroupND);
     groupNodeIds[&tg] = taskGroupId;
@@ -99,10 +99,10 @@ void plTaskSystem::WriteStateSnapshotToDGML(plDGMLGraph& ref_graph)
       ref_graph.AddNodeProperty(taskNodeId, scheduledId, task.m_bTaskIsScheduled ? "true" : "false");
       ref_graph.AddNodeProperty(taskNodeId, finishedId, task.IsTaskFinished() ? "true" : "false");
 
-      tmp.Format("{}", task.GetMultiplicity());
+      tmp.SetFormat("{}", task.GetMultiplicity());
       ref_graph.AddNodeProperty(taskNodeId, multiplicityId, tmp);
 
-      tmp.Format("{}", task.m_iRemainingRuns);
+      tmp.SetFormat("{}", task.m_iRemainingRuns);
       ref_graph.AddNodeProperty(taskNodeId, remainingRunsId, tmp);
     }
   }
@@ -128,7 +128,7 @@ void plTaskSystem::WriteStateSnapshotToDGML(plDGMLGraph& ref_graph)
       if (!groupNodeIds.TryGetValue(dependsOn.m_pTaskGroup, otherNodeId))
         continue;
 
-      PLASMA_ASSERT_DEBUG(otherNodeId != ownNodeId, "");
+      PL_ASSERT_DEBUG(otherNodeId != ownNodeId, "");
 
       ref_graph.AddConnection(otherNodeId, ownNodeId);
     }
@@ -143,7 +143,7 @@ void plTaskSystem::WriteStateSnapshotToFile(const char* szPath /*= nullptr*/)
   {
     sPath = ":appdata/TaskGraphs/";
 
-    const plDateTime dt = plTimestamp::CurrentTimestamp();
+    const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
 
     sPath.AppendFormat("{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
 
@@ -161,4 +161,3 @@ void plTaskSystem::WriteStateSnapshotToFile(const char* szPath /*= nullptr*/)
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystemUtils);

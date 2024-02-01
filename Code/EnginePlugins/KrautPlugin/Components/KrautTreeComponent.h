@@ -17,10 +17,10 @@ class plAbstractObjectNode;
 using plKrautTreeResourceHandle = plTypedResourceHandle<class plKrautTreeResource>;
 using plKrautGeneratorResourceHandle = plTypedResourceHandle<class plKrautGeneratorResource>;
 
-class PLASMA_KRAUTPLUGIN_DLL plKrautTreeComponentManager : public plComponentManager<class plKrautTreeComponent, plBlockStorageType::Compact>
+class PL_KRAUTPLUGIN_DLL plKrautTreeComponentManager : public plComponentManager<class plKrautTreeComponent, plBlockStorageType::Compact>
 {
 public:
-  typedef plComponentManager<plKrautTreeComponent, plBlockStorageType::Compact> SUPER;
+  using SUPER = plComponentManager<plKrautTreeComponent, plBlockStorageType::Compact>;
 
   plKrautTreeComponentManager(plWorld* pWorld)
     : SUPER(pWorld)
@@ -41,9 +41,10 @@ protected:
   virtual void Deinitialize() override;
 };
 
-class PLASMA_KRAUTPLUGIN_DLL plKrautTreeComponent : public plRenderComponent
+/// \brief Instantiates a Kraut tree model.
+class PL_KRAUTPLUGIN_DLL plKrautTreeComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plKrautTreeComponent, plRenderComponent, plKrautTreeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plKrautTreeComponent, plRenderComponent, plKrautTreeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -72,22 +73,37 @@ public:
   // see plKrautTreeComponent::GetLocalBounds for details
   static const int s_iLocalBoundsScale = 3;
 
+  /// \brief Currently this adds a cylinder mesh as a rough approximation for the tree collision shape.
   void OnMsgExtractGeometry(plMsgExtractGeometry& ref_msg) const;
+  /// \brief Currently this adds a cylinder mesh as a rough approximation for the tree collision shape.
   void OnBuildStaticMesh(plMsgBuildStaticMesh& ref_msg) const;
 
   void SetKrautFile(const char* szFile); // [ property ]
   const char* GetKrautFile() const;      // [ property ]
 
+  /// \brief If non-default, this chooses a random variation of the tree.
+  ///
+  /// In the tree editor, designers can add "good seeds", ie seed values that produce nice results.
+  /// Using the variation index you can select one of those good seeds.
+  ///
+  /// VariationIndex and CustomRandomSeed are mutually exclusive.
+  /// If neither is set, a random variation is used, using the owner object's stable random seed.
+  /// This is the preferred method to place trees and get a good random set, but requires that a tree model has defined "good seeds".
   void SetVariationIndex(plUInt16 uiIndex); // [ property ]
   plUInt16 GetVariationIndex() const;       // [ property ]
 
+  /// \brief Trees with the same random seed look identical, different seeds produce different trees.
+  ///
+  /// \see SetVariationIndex()
   void SetCustomRandomSeed(plUInt16 uiSeed); // [ property ]
   plUInt16 GetCustomRandomSeed() const;      // [ property ]
 
+  /// \brief Sets the Kraut resource that is used to generate the tree mesh.
   void SetKrautGeneratorResource(const plKrautGeneratorResourceHandle& hTree);
   const plKrautGeneratorResourceHandle& GetKrautGeneratorResource() const { return m_hKrautGenerator; }
 
 private:
+  /// \brief Currently this adds a cylinder mesh as a rough approximation of the tree trunk for collision.
   plResult CreateGeometry(plGeometry& geo, plWorldGeoExtractionUtil::ExtractionMode mode) const;
   void EnsureTreeIsGenerated();
 

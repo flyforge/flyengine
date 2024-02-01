@@ -3,7 +3,7 @@
 #include <Foundation/Communication/GlobalEvent.h>
 #include <Foundation/Logging/Log.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plGlobalEvent);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plGlobalEvent);
 
 plGlobalEvent::EventMap plGlobalEvent::s_KnownEvents;
 
@@ -14,7 +14,7 @@ plGlobalEvent::EventData::EventData()
   m_uiNumEventHandlersRegular = 0;
 }
 
-plGlobalEvent::plGlobalEvent(plStringView sEventName, PLASMA_GLOBAL_EVENT_HANDLER handler, bool bOnlyOnce)
+plGlobalEvent::plGlobalEvent(plStringView sEventName, PL_GLOBAL_EVENT_HANDLER handler, bool bOnlyOnce)
 {
   m_sEventName = sEventName;
   m_bOnlyOnce = bOnlyOnce;
@@ -73,7 +73,7 @@ void plGlobalEvent::PrintGlobalEventStatistics()
 {
   UpdateGlobalEventStatistics();
 
-  PLASMA_LOG_BLOCK("Global Event Statistics");
+  PL_LOG_BLOCK("Global Event Statistics");
 
   EventMap::Iterator it = s_KnownEvents.GetIterator();
 
@@ -87,5 +87,3 @@ void plGlobalEvent::PrintGlobalEventStatistics()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_GlobalEvent);

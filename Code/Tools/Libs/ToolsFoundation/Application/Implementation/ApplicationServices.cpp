@@ -7,7 +7,7 @@
 #include <ToolsFoundation/Document/Document.h>
 #include <ToolsFoundation/Project/ToolsProject.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plApplicationServices);
+PL_IMPLEMENT_SINGLETON(plApplicationServices);
 
 static plApplicationServices g_instance;
 
@@ -19,7 +19,7 @@ plApplicationServices::plApplicationServices()
 plString plApplicationServices::GetApplicationUserDataFolder() const
 {
   plStringBuilder path = plOSFile::GetUserDataFolder();
-  path.AppendPath("PlasmaEngine Project", plApplication::GetApplicationInstance()->GetApplicationName());
+  path.AppendPath("plEngine Project", plApplication::GetApplicationInstance()->GetApplicationName());
   path.MakeCleanPath();
 
   return path;

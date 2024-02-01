@@ -5,9 +5,9 @@ PluginInfo
 {
 	string %DisplayName{"VisualScript"}
 	string %Description{"Adds support for scripting via node based visual scripting."}
-	string %EditorPlugins{"plasmaEditorPluginVisualScript"}
+	string %EditorPlugins{"plEditorPluginVisualScript"}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaVisualScriptPlugin"}
+	string %RuntimePlugins{"plVisualScriptPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

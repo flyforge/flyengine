@@ -3,22 +3,22 @@
 
 /// \file
 
-#include <Foundation/Memory/Allocator.h>
+#include <Foundation/Memory/AllocatorWithPolicy.h>
 
-#include <Foundation/Memory/Policies/AlignedHeapAllocation.h>
-#include <Foundation/Memory/Policies/GuardedAllocation.h>
-#include <Foundation/Memory/Policies/HeapAllocation.h>
-#include <Foundation/Memory/Policies/ProxyAllocation.h>
+#include <Foundation/Memory/Policies/AllocPolicyAlignedHeap.h>
+#include <Foundation/Memory/Policies/AllocPolicyGuarding.h>
+#include <Foundation/Memory/Policies/AllocPolicyHeap.h>
+#include <Foundation/Memory/Policies/AllocPolicyProxy.h>
 
-
-/// \brief Default heap allocator
-using plAlignedHeapAllocator = plAllocator<plMemoryPolicies::plAlignedHeapAllocation>;
 
 /// \brief Default heap allocator
-using plHeapAllocator = plAllocator<plMemoryPolicies::plHeapAllocation>;
+using plAlignedHeapAllocator = plAllocatorWithPolicy<plAllocPolicyAlignedHeap>;
+
+/// \brief Default heap allocator
+using plHeapAllocator = plAllocatorWithPolicy<plAllocPolicyHeap>;
 
 /// \brief Guarded allocator
-using plGuardedAllocator = plAllocator<plMemoryPolicies::plGuardedAllocation>;
+using plGuardingAllocator = plAllocatorWithPolicy<plAllocPolicyGuarding>;
 
 /// \brief Proxy allocator
-using plProxyAllocator = plAllocator<plMemoryPolicies::plProxyAllocation>;
+using plProxyAllocator = plAllocatorWithPolicy<plAllocPolicyProxy>;

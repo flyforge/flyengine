@@ -46,7 +46,7 @@ void plQtReflectionWidget::ProcessTelemetry(void* pUnuseed)
 
   bool bUpdate = false;
 
-  while (plTelemetry::RetrieveMessage('RFLC', msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('RFLC', msg) == PL_SUCCESS)
   {
     if (msg.GetMessageID() == ' CLR')
     {
@@ -128,7 +128,7 @@ bool plQtReflectionWidget::UpdateTree()
       it.Value().m_pTreeItem = pItem;
 
       plStringBuilder sText;
-      sText.Format("{0}", it.Value().m_uiSize);
+      sText.SetFormat("{0}", it.Value().m_uiSize);
 
       pItem->setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable);
       pItem->setText(0, it.Key().GetData());

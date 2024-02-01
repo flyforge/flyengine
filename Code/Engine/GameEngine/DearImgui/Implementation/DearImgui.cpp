@@ -15,21 +15,21 @@ namespace
 {
   void* plImguiAllocate(size_t uiSize, void* pUserData)
   {
-    plAllocatorBase* pAllocator = static_cast<plAllocatorBase*>(pUserData);
-    return pAllocator->Allocate(uiSize, PLASMA_ALIGNMENT_MINIMUM);
+    plAllocator* pAllocator = static_cast<plAllocator*>(pUserData);
+    return pAllocator->Allocate(uiSize, PL_ALIGNMENT_MINIMUM);
   }
 
-  void plImguiDeallocate(void* ptr, void* pUserData)
+  void plImguiDeallocate(void* pPtr, void* pUserData)
   {
-    if (ptr != nullptr)
+    if (pPtr != nullptr)
     {
-      plAllocatorBase* pAllocator = static_cast<plAllocatorBase*>(pUserData);
-      pAllocator->Deallocate(ptr);
+      plAllocator* pAllocator = static_cast<plAllocator*>(pUserData);
+      pAllocator->Deallocate(pPtr);
     }
   }
 } // namespace
 
-PLASMA_IMPLEMENT_SINGLETON(plImgui);
+PL_IMPLEMENT_SINGLETON(plImgui);
 
 plImgui::plImgui(plImguiConfigFontCallback configFontCallback, plImguiConfigStyleCallback configStyleCallback)
   : m_SingletonRegistrar(this)
@@ -46,7 +46,7 @@ plImgui::~plImgui()
 
 void plImgui::SetCurrentContextForView(const plViewHandle& hView)
 {
-  PLASMA_LOCK(m_ViewToContextTableMutex);
+  PL_LOCK(m_ViewToContextTableMutex);
 
   Context& context = m_ViewToContextTable[hView];
   if (context.m_pImGuiContext == nullptr)
@@ -74,7 +74,7 @@ void plImgui::Startup(plImguiConfigFontCallback configFontCallback)
 {
   ImGui::SetAllocatorFunctions(&plImguiAllocate, &plImguiDeallocate, &m_Allocator);
 
-  m_pSharedFontAtlas = PLASMA_DEFAULT_NEW(ImFontAtlas);
+  m_pSharedFontAtlas = PL_DEFAULT_NEW(ImFontAtlas);
 
   if (configFontCallback.IsValid())
   {
@@ -142,26 +142,6 @@ ImGuiContext* plImgui::CreateContext()
   cfg.DisplaySize.x = 1650;
   cfg.DisplaySize.y = 1080;
 
-  cfg.KeyMap[ImGuiKey_Tab] = ImGuiKey_Tab;
-  cfg.KeyMap[ImGuiKey_LeftArrow] = ImGuiKey_LeftArrow;
-  cfg.KeyMap[ImGuiKey_RightArrow] = ImGuiKey_RightArrow;
-  cfg.KeyMap[ImGuiKey_UpArrow] = ImGuiKey_UpArrow;
-  cfg.KeyMap[ImGuiKey_DownArrow] = ImGuiKey_DownArrow;
-  cfg.KeyMap[ImGuiKey_PageUp] = ImGuiKey_PageUp;
-  cfg.KeyMap[ImGuiKey_PageDown] = ImGuiKey_PageDown;
-  cfg.KeyMap[ImGuiKey_Home] = ImGuiKey_Home;
-  cfg.KeyMap[ImGuiKey_End] = ImGuiKey_End;
-  cfg.KeyMap[ImGuiKey_Delete] = ImGuiKey_Delete;
-  cfg.KeyMap[ImGuiKey_Backspace] = ImGuiKey_Backspace;
-  cfg.KeyMap[ImGuiKey_Enter] = ImGuiKey_Enter;
-  cfg.KeyMap[ImGuiKey_Escape] = ImGuiKey_Escape;
-  cfg.KeyMap[ImGuiKey_A] = ImGuiKey_A;
-  cfg.KeyMap[ImGuiKey_C] = ImGuiKey_C;
-  cfg.KeyMap[ImGuiKey_V] = ImGuiKey_V;
-  cfg.KeyMap[ImGuiKey_X] = ImGuiKey_X;
-  cfg.KeyMap[ImGuiKey_Y] = ImGuiKey_Y;
-  cfg.KeyMap[ImGuiKey_Z] = ImGuiKey_Z;
-
   if (m_ConfigStyleCallback.IsValid())
   {
     m_ConfigStyleCallback(ImGui::GetStyle());
@@ -218,26 +198,27 @@ void plImgui::BeginFrame(const plViewHandle& hView)
     cfg.KeySuper = plInputManager::GetInputSlotState(plInputSlot_KeyLeftWin) >= plKeyState::Pressed ||
                    plInputManager::GetInputSlotState(plInputSlot_KeyRightWin) >= plKeyState::Pressed;
 
-    cfg.KeysDown[ImGuiKey_Tab] = plInputManager::GetInputSlotState(plInputSlot_KeyTab) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_LeftArrow] = plInputManager::GetInputSlotState(plInputSlot_KeyLeft) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_RightArrow] = plInputManager::GetInputSlotState(plInputSlot_KeyRight) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_UpArrow] = plInputManager::GetInputSlotState(plInputSlot_KeyUp) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_DownArrow] = plInputManager::GetInputSlotState(plInputSlot_KeyDown) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_PageUp] = plInputManager::GetInputSlotState(plInputSlot_KeyPageUp) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_PageDown] = plInputManager::GetInputSlotState(plInputSlot_KeyPageDown) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Home] = plInputManager::GetInputSlotState(plInputSlot_KeyHome) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_End] = plInputManager::GetInputSlotState(plInputSlot_KeyEnd) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Delete] = plInputManager::GetInputSlotState(plInputSlot_KeyDelete) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Backspace] = plInputManager::GetInputSlotState(plInputSlot_KeyBackspace) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Enter] = plInputManager::GetInputSlotState(plInputSlot_KeyReturn) >= plKeyState::Pressed ||
-                                   plInputManager::GetInputSlotState(plInputSlot_KeyNumpadEnter) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Escape] = plInputManager::GetInputSlotState(plInputSlot_KeyEscape) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_A] = plInputManager::GetInputSlotState(plInputSlot_KeyA) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_C] = plInputManager::GetInputSlotState(plInputSlot_KeyC) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_V] = plInputManager::GetInputSlotState(plInputSlot_KeyV) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_X] = plInputManager::GetInputSlotState(plInputSlot_KeyX) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Y] = plInputManager::GetInputSlotState(plInputSlot_KeyY) >= plKeyState::Pressed;
-    cfg.KeysDown[ImGuiKey_Z] = plInputManager::GetInputSlotState(plInputSlot_KeyZ) >= plKeyState::Pressed;
+    cfg.AddKeyEvent(ImGuiKey_Tab, plInputManager::GetInputSlotState(plInputSlot_KeyTab) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_LeftArrow, plInputManager::GetInputSlotState(plInputSlot_KeyLeft) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_RightArrow, plInputManager::GetInputSlotState(plInputSlot_KeyRight) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_UpArrow, plInputManager::GetInputSlotState(plInputSlot_KeyUp) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_DownArrow, plInputManager::GetInputSlotState(plInputSlot_KeyDown) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_PageUp, plInputManager::GetInputSlotState(plInputSlot_KeyPageUp) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_PageDown, plInputManager::GetInputSlotState(plInputSlot_KeyPageDown) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Home, plInputManager::GetInputSlotState(plInputSlot_KeyHome) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_End, plInputManager::GetInputSlotState(plInputSlot_KeyEnd) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Delete, plInputManager::GetInputSlotState(plInputSlot_KeyDelete) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Backspace, plInputManager::GetInputSlotState(plInputSlot_KeyBackspace) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Enter, plInputManager::GetInputSlotState(plInputSlot_KeyReturn) >= plKeyState::Pressed ||
+                                      plInputManager::GetInputSlotState(plInputSlot_KeyNumpadEnter) >= plKeyState::Pressed);
+
+    cfg.AddKeyEvent(ImGuiKey_Escape, plInputManager::GetInputSlotState(plInputSlot_KeyEscape) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_A, plInputManager::GetInputSlotState(plInputSlot_KeyA) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_C, plInputManager::GetInputSlotState(plInputSlot_KeyC) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_V, plInputManager::GetInputSlotState(plInputSlot_KeyV) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_X, plInputManager::GetInputSlotState(plInputSlot_KeyX) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Y, plInputManager::GetInputSlotState(plInputSlot_KeyY) >= plKeyState::Pressed);
+    cfg.AddKeyEvent(ImGuiKey_Z, plInputManager::GetInputSlotState(plInputSlot_KeyZ) >= plKeyState::Pressed);
   }
   else
   {
@@ -256,9 +237,6 @@ void plImgui::BeginFrame(const plViewHandle& hView)
     cfg.KeyCtrl = false;
     cfg.KeyShift = false;
     cfg.KeySuper = false;
-
-    for (int i = 0; i <= ImGuiKey_COUNT; ++i)
-      cfg.KeysDown[i] = false;
   }
 
   ImGui::NewFrame();
@@ -268,4 +246,4 @@ void plImgui::BeginFrame(const plViewHandle& hView)
 
 #endif
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_DearImgui_Implementation_DearImgui);
+

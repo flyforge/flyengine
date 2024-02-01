@@ -11,15 +11,15 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltShapeConvexHullComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltShapeConvexHullComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltShapeConvexHullComponent::plJoltShapeConvexHullComponent() = default;
@@ -72,7 +72,7 @@ void plJoltShapeConvexHullComponent::CreateShapes(plDynamicArray<plJoltSubShape>
 
   if (pMesh->GetNumConvexParts() == 0)
   {
-    plLog::Warning("plJoltShapeConvexHullComponent '{0}' has a collision mesh set that does not contain a convex mesh: '{1}' ('{2}')", GetOwner()->GetName(), pMesh->GetResourceID(), pMesh->GetResourceDescription());
+    plLog::Warning("plJoltShapeConvexHullComponent '{0}' has a collision mesh set that does not contain a convex mesh: '{1}'", GetOwner()->GetName(), pMesh->GetResourceIdOrDescription());
     return;
   }
 
@@ -82,7 +82,7 @@ void plJoltShapeConvexHullComponent::CreateShapes(plDynamicArray<plJoltSubShape>
 
     plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
     sub.m_pShape = pShape;
-    sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+    sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
   }
 }
 
@@ -100,5 +100,4 @@ void plJoltShapeConvexHullComponent::ExtractGeometry(plMsgExtractGeometry& ref_m
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeConvexHullComponent);
-
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeConvexHullComponent);

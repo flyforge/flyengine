@@ -12,23 +12,23 @@
 #include <ParticlePlugin/Type/Point/ParticleTypePoint.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleSystemDescriptor, 2, plRTTIDefaultAllocator<plParticleSystemDescriptor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleSystemDescriptor, 2, plRTTIDefaultAllocator<plParticleSystemDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_MEMBER_PROPERTY("Visible", m_bVisible)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("LifeTime", m_LifeTime)->AddAttributes(new plDefaultValueAttribute(plTime::Seconds(2)), new plClampValueAttribute(plTime::Seconds(0.0), plVariant())),
-    PLASMA_MEMBER_PROPERTY("LifeScaleParam", m_sLifeScaleParameter),
-    PLASMA_MEMBER_PROPERTY("OnDeathEvent", m_sOnDeathEvent),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Emitters", m_EmitterFactories)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plMaxArraySizeAttribute(1)),
-    PLASMA_SET_ACCESSOR_PROPERTY("Initializers", GetInitializerFactories, AddInitializerFactory, RemoveInitializerFactory)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plPreventDuplicatesAttribute()),
-    PLASMA_SET_ACCESSOR_PROPERTY("Behaviors", GetBehaviorFactories, AddBehaviorFactory, RemoveBehaviorFactory)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plPreventDuplicatesAttribute()),
-    PLASMA_SET_ACCESSOR_PROPERTY("Types", GetTypeFactories, AddTypeFactory, RemoveTypeFactory)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("Visible", m_bVisible)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("LifeTime", m_LifeTime)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromSeconds(2)), new plClampValueAttribute(plTime::MakeFromSeconds(0.0), plVariant())),
+    PL_MEMBER_PROPERTY("LifeScaleParam", m_sLifeScaleParameter),
+    PL_MEMBER_PROPERTY("OnDeathEvent", m_sOnDeathEvent),
+    PL_ARRAY_MEMBER_PROPERTY("Emitters", m_EmitterFactories)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plMaxArraySizeAttribute(1)),
+    PL_SET_ACCESSOR_PROPERTY("Initializers", GetInitializerFactories, AddInitializerFactory, RemoveInitializerFactory)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plPreventDuplicatesAttribute()),
+    PL_SET_ACCESSOR_PROPERTY("Behaviors", GetBehaviorFactories, AddBehaviorFactory, RemoveBehaviorFactory)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plPreventDuplicatesAttribute()),
+    PL_SET_ACCESSOR_PROPERTY("Types", GetTypeFactories, AddTypeFactory, RemoveTypeFactory)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleSystemDescriptor::plParticleSystemDescriptor()
@@ -138,9 +138,9 @@ void plParticleSystemDescriptor::SetupDefaultProcessors()
 
   for (const plRTTI* pRtti : finalizers)
   {
-    PLASMA_ASSERT_DEBUG(
+    PL_ASSERT_DEBUG(
       pRtti->IsDerivedFrom<plParticleFinalizerFactory>(), "Invalid finalizer factory added as a dependency: '{0}'", pRtti->GetTypeName());
-    PLASMA_ASSERT_DEBUG(pRtti->GetAllocator()->CanAllocate(), "Finalizer factory cannot be allocated: '{0}'", pRtti->GetTypeName());
+    PL_ASSERT_DEBUG(pRtti->GetAllocator()->CanAllocate(), "Finalizer factory cannot be allocated: '{0}'", pRtti->GetTypeName());
 
     m_FinalizerFactories.PushBack(pRtti->GetAllocator()->Allocate<plParticleFinalizerFactory>());
   }
@@ -178,11 +178,11 @@ plTime plParticleSystemDescriptor::GetAvgLifetime() const
   return time;
 }
 
-void plParticleSystemDescriptor::Save(plStreamWriter& stream) const
+void plParticleSystemDescriptor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)ParticleSystemVersion::Version_Current;
 
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   const plUInt32 uiNumEmitters = m_EmitterFactories.GetCount();
   const plUInt32 uiNumInitializers = m_InitializerFactories.GetCount();
@@ -190,48 +190,48 @@ void plParticleSystemDescriptor::Save(plStreamWriter& stream) const
   const plUInt32 uiNumTypes = m_TypeFactories.GetCount();
 
   plUInt32 uiMaxParticles = 0;
-  stream << m_bVisible;
-  stream << uiMaxParticles;
-  stream << m_LifeTime.m_Value;
-  stream << m_LifeTime.m_fVariance;
-  stream << m_sOnDeathEvent;
-  stream << m_sLifeScaleParameter;
-  stream << uiNumEmitters;
-  stream << uiNumInitializers;
-  stream << uiNumBehaviors;
-  stream << uiNumTypes;
+  inout_stream << m_bVisible;
+  inout_stream << uiMaxParticles;
+  inout_stream << m_LifeTime.m_Value;
+  inout_stream << m_LifeTime.m_fVariance;
+  inout_stream << m_sOnDeathEvent;
+  inout_stream << m_sLifeScaleParameter;
+  inout_stream << uiNumEmitters;
+  inout_stream << uiNumInitializers;
+  inout_stream << uiNumBehaviors;
+  inout_stream << uiNumTypes;
 
   for (auto pEmitter : m_EmitterFactories)
   {
-    stream << pEmitter->GetDynamicRTTI()->GetTypeName();
+    inout_stream << pEmitter->GetDynamicRTTI()->GetTypeName();
 
-    pEmitter->Save(stream);
+    pEmitter->Save(inout_stream);
   }
 
   for (auto pInitializer : m_InitializerFactories)
   {
-    stream << pInitializer->GetDynamicRTTI()->GetTypeName();
+    inout_stream << pInitializer->GetDynamicRTTI()->GetTypeName();
 
-    pInitializer->Save(stream);
+    pInitializer->Save(inout_stream);
   }
 
   for (auto pBehavior : m_BehaviorFactories)
   {
-    stream << pBehavior->GetDynamicRTTI()->GetTypeName();
+    inout_stream << pBehavior->GetDynamicRTTI()->GetTypeName();
 
-    pBehavior->Save(stream);
+    pBehavior->Save(inout_stream);
   }
 
   for (auto pType : m_TypeFactories)
   {
-    stream << pType->GetDynamicRTTI()->GetTypeName();
+    inout_stream << pType->GetDynamicRTTI()->GetTypeName();
 
-    pType->Save(stream);
+    pType->Save(inout_stream);
   }
 }
 
 
-void plParticleSystemDescriptor::Load(plStreamReader& stream)
+void plParticleSystemDescriptor::Load(plStreamReader& inout_stream)
 {
   ClearEmitters();
   ClearInitializers();
@@ -240,8 +240,8 @@ void plParticleSystemDescriptor::Load(plStreamReader& stream)
   ClearTypes();
 
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= (int)ParticleSystemVersion::Version_Current, "Unknown particle template version {0}", uiVersion);
+  inout_stream >> uiVersion;
+  PL_ASSERT_DEV(uiVersion <= (int)ParticleSystemVersion::Version_Current, "Unknown particle template version {0}", uiVersion);
 
   plUInt32 uiNumEmitters = 0;
   plUInt32 uiNumInitializers = 0;
@@ -250,40 +250,40 @@ void plParticleSystemDescriptor::Load(plStreamReader& stream)
 
   if (uiVersion >= 3)
   {
-    stream >> m_bVisible;
+    inout_stream >> m_bVisible;
   }
 
   if (uiVersion >= 2)
   {
     // now unused
     plUInt32 uiMaxParticles = 0;
-    stream >> uiMaxParticles;
+    inout_stream >> uiMaxParticles;
   }
 
   if (uiVersion >= 5)
   {
-    stream >> m_LifeTime.m_Value;
-    stream >> m_LifeTime.m_fVariance;
-    stream >> m_sOnDeathEvent;
+    inout_stream >> m_LifeTime.m_Value;
+    inout_stream >> m_LifeTime.m_fVariance;
+    inout_stream >> m_sOnDeathEvent;
   }
 
   if (uiVersion >= 7)
   {
-    stream >> m_sLifeScaleParameter;
+    inout_stream >> m_sLifeScaleParameter;
   }
 
-  stream >> uiNumEmitters;
+  inout_stream >> uiNumEmitters;
 
   if (uiVersion >= 2)
   {
-    stream >> uiNumInitializers;
+    inout_stream >> uiNumInitializers;
   }
 
-  stream >> uiNumBehaviors;
+  inout_stream >> uiNumBehaviors;
 
   if (uiVersion >= 4)
   {
-    stream >> uiNumTypes;
+    inout_stream >> uiNumTypes;
   }
 
   m_EmitterFactories.SetCountUninitialized(uiNumEmitters);
@@ -295,55 +295,55 @@ void plParticleSystemDescriptor::Load(plStreamReader& stream)
 
   for (auto& pEmitter : m_EmitterFactories)
   {
-    stream >> sType;
+    inout_stream >> sType;
 
     const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-    PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown emitter factory type '{0}'", sType);
+    PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown emitter factory type '{0}'", sType);
 
     pEmitter = pRtti->GetAllocator()->Allocate<plParticleEmitterFactory>();
 
-    pEmitter->Load(stream);
+    pEmitter->Load(inout_stream);
   }
 
   if (uiVersion >= 2)
   {
     for (auto& pInitializer : m_InitializerFactories)
     {
-      stream >> sType;
+      inout_stream >> sType;
 
       const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-      PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown initializer factory type '{0}'", sType);
+      PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown initializer factory type '{0}'", sType);
 
       pInitializer = pRtti->GetAllocator()->Allocate<plParticleInitializerFactory>();
 
-      pInitializer->Load(stream);
+      pInitializer->Load(inout_stream);
     }
   }
 
   for (auto& pBehavior : m_BehaviorFactories)
   {
-    stream >> sType;
+    inout_stream >> sType;
 
     const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-    PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown behavior factory type '{0}'", sType);
+    PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown behavior factory type '{0}'", sType);
 
     pBehavior = pRtti->GetAllocator()->Allocate<plParticleBehaviorFactory>();
 
-    pBehavior->Load(stream);
+    pBehavior->Load(inout_stream);
   }
 
   if (uiVersion >= 4)
   {
     for (auto& pType : m_TypeFactories)
     {
-      stream >> sType;
+      inout_stream >> sType;
 
       const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-      PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown type factory type '{0}'", sType);
+      PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown type factory type '{0}'", sType);
 
       pType = pRtti->GetAllocator()->Allocate<plParticleTypeFactory>();
 
-      pType->Load(stream);
+      pType->Load(inout_stream);
     }
   }
 
@@ -360,7 +360,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->InlineProperty("LifeTime").IgnoreResult();
   }
@@ -368,4 +368,4 @@ public:
 
 plParticleSystemDescriptor_1_2 g_plParticleSystemDescriptor_1_2;
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_System_ParticleSystemDescriptor);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_System_ParticleSystemDescriptor);

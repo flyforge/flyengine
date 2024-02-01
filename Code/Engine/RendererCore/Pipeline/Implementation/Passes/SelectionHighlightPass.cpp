@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/SelectionHighlightPass.h>
 #include <RendererCore/Pipeline/RenderPipeline.h>
@@ -13,19 +14,19 @@
 #include <RendererCore/../../../Data/Base/Shaders/Pipeline/SelectionHighlightConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectionHighlightPass, 1, plRTTIDefaultAllocator<plSelectionHighlightPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectionHighlightPass, 1, plRTTIDefaultAllocator<plSelectionHighlightPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_PinColor),
-    PLASMA_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
+    PL_MEMBER_PROPERTY("Color", m_PinColor),
+    PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
 
-    PLASMA_MEMBER_PROPERTY("HighlightColor", m_HighlightColor)->AddAttributes(new plDefaultValueAttribute(plColorScheme::LightUI(plColorScheme::Yellow))),
-    PLASMA_MEMBER_PROPERTY("OverlayOpacity", m_fOverlayOpacity)->AddAttributes(new plDefaultValueAttribute(0.1f))
+    PL_MEMBER_PROPERTY("HighlightColor", m_HighlightColor)->AddAttributes(new plDefaultValueAttribute(plColorScheme::LightUI(plColorScheme::Yellow))),
+    PL_MEMBER_PROPERTY("OverlayOpacity", m_fOverlayOpacity)->AddAttributes(new plDefaultValueAttribute(0.1f))
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSelectionHighlightPass::plSelectionHighlightPass(const char* szName)
@@ -33,7 +34,7 @@ plSelectionHighlightPass::plSelectionHighlightPass(const char* szName)
 {
   // Load shader.
   m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/SelectionHighlight.plShader");
-  PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load selection highlight shader!");
+  PL_ASSERT_DEV(m_hShader.IsValid(), "Could not load selection highlight shader!");
 
   m_hConstantBuffer = plRenderContext::CreateConstantBufferStorage<plSelectionHighlightConstants>();
 }
@@ -124,6 +125,22 @@ void plSelectionHighlightPass::Execute(const plRenderViewContext& renderViewCont
   }
 }
 
+plResult plSelectionHighlightPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_HighlightColor;
+  inout_stream << m_fOverlayOpacity;
+  return PL_SUCCESS;
+}
 
+plResult plSelectionHighlightPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_HighlightColor;
+  inout_stream >> m_fOverlayOpacity;
+  return PL_SUCCESS;
+}
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_SelectionHighlightPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_SelectionHighlightPass);

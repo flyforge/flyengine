@@ -7,13 +7,12 @@
 bool plIntersectionUtils::RayPolygonIntersection(const plVec3& vRayStartPos, const plVec3& vRayDir, const plVec3* pPolygonVertices,
   plUInt32 uiNumVertices, float* out_pIntersectionTime, plVec3* out_pIntersectionPoint, plUInt32 uiVertexStride)
 {
-  PLASMA_ASSERT_DEBUG(uiNumVertices >= 3, "A polygon must have at least three vertices.");
-  PLASMA_ASSERT_DEBUG(uiVertexStride >= sizeof(plVec3), "The vertex stride is invalid.");
+  PL_ASSERT_DEBUG(uiNumVertices >= 3, "A polygon must have at least three vertices.");
+  PL_ASSERT_DEBUG(uiVertexStride >= sizeof(plVec3), "The vertex stride is invalid.");
 
-  plPlane p(*pPolygonVertices, *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride),
-    *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride * 2));
+  plPlane p = plPlane::MakeFromPoints(*pPolygonVertices, *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride), *plMemoryUtils::AddByteOffset(pPolygonVertices, uiVertexStride * 2));
 
-  PLASMA_ASSERT_DEBUG(p.IsValid(), "The given polygon's plane is invalid (computed from the first three vertices only).");
+  PL_ASSERT_DEBUG(p.IsValid(), "The given polygon's plane is invalid (computed from the first three vertices only).");
 
   plVec3 vIntersection;
 
@@ -31,7 +30,7 @@ bool plIntersectionUtils::RayPolygonIntersection(const plVec3& vRayStartPos, con
   {
     const plVec3 vThisPoint = *plMemoryUtils::AddByteOffset(pPolygonVertices, plMath::SafeMultiply32(uiVertexStride, i));
 
-    const plPlane EdgePlane(vThisPoint, vPrevPoint, vPrevPoint + p.m_vNormal);
+    plPlane EdgePlane = plPlane::MakeFromPoints(vThisPoint, vPrevPoint, vPrevPoint + p.m_vNormal);
 
     // if the intersection point is outside of any of the edge planes, it is not inside the (convex) polygon
     if (EdgePlane.GetPointPosition(vIntersection) == plPositionOnPlane::Back)
@@ -134,4 +133,4 @@ bool plIntersectionUtils::IsPointOnLine(const plVec3& vLineStart, const plVec3& 
   return (fClosestDistSqr <= fMaxDist * fMaxDist);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Intersection);
+

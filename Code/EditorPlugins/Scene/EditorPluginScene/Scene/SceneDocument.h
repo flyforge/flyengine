@@ -18,9 +18,9 @@ struct GameMode
   };
 };
 
-class PLASMA_EDITORPLUGINSCENE_DLL plSceneDocument : public plGameObjectDocument
+class PL_EDITORPLUGINSCENE_DLL plSceneDocument : public plGameObjectDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneDocument, plGameObjectDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneDocument, plGameObjectDocument);
 
 public:
   enum class DocumentType
@@ -31,7 +31,7 @@ public:
   };
 
 public:
-  plSceneDocument(const char* szDocumentPath, DocumentType DocumentType);
+  plSceneDocument(plStringView sDocumentPath, DocumentType documentType);
   ~plSceneDocument();
 
   enum class ShowOrHide
@@ -74,41 +74,41 @@ public:
   bool IsPrefab() const { return m_DocumentType == DocumentType::Prefab; }
 
   /// \brief Determines whether the given object is an editor prefab
-  bool IsObjectEditorPrefab(const plUuid& object, plUuid* out_PrefabAssetGuid = nullptr) const;
+  bool IsObjectEditorPrefab(const plUuid& object, plUuid* out_pPrefabAssetGuid = nullptr) const;
 
   /// \brief Determines whether the given object is an engine prefab
-  bool IsObjectEnginePrefab(const plUuid& object, plUuid* out_PrefabAssetGuid = nullptr) const;
+  bool IsObjectEnginePrefab(const plUuid& object, plUuid* out_pPrefabAssetGuid = nullptr) const;
 
   /// \brief Nested prefabs are not allowed
   virtual bool ArePrefabsAllowed() const override { return !IsPrefab(); }
 
 
-  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const override;
-  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const override;
+  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_mimeTypes) const override;
+  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_sMimeType) const override;
   virtual bool Paste(
-    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType) override;
+    const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType) override;
   bool DuplicateSelectedObjects(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bSetSelected);
-  bool CopySelectedObjects(plAbstractObjectGraph& graph, plMap<plUuid, plUuid>* out_pParents) const;
+  bool CopySelectedObjects(plAbstractObjectGraph& ref_graph, plMap<plUuid, plUuid>* out_pParents) const;
   bool PasteAt(const plArrayPtr<PasteInfo>& info, const plVec3& vPos);
   bool PasteAtOrignalPosition(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph);
 
   virtual void UpdatePrefabs() override;
 
   /// \brief Removes the link to the prefab template, making the editor prefab a simple object
-  virtual void UnlinkPrefabs(const plDeque<const plDocumentObject*>& Selection) override;
+  virtual void UnlinkPrefabs(const plDeque<const plDocumentObject*>& selection) override;
 
   virtual plUuid ReplaceByPrefab(
-    const plDocumentObject* pRootObject, const char* szPrefabFile, const plUuid& PrefabAsset, const plUuid& PrefabSeed, bool bEnginePrefab) override;
+    const plDocumentObject* pRootObject, plStringView sPrefabFile, const plUuid& prefabAsset, const plUuid& prefabSeed, bool bEnginePrefab) override;
 
   /// \brief Reverts all selected editor prefabs to their original template state
   virtual plUuid RevertPrefab(const plDocumentObject* pObject) override;
 
   /// \brief Converts all objects in the selection that are engine prefabs to their respective editor prefab representation
-  virtual void ConvertToEditorPrefab(const plDeque<const plDocumentObject*>& Selection);
+  virtual void ConvertToEditorPrefab(const plDeque<const plDocumentObject*>& selection);
   /// \brief Converts all objects in the selection that are editor prefabs to their respective engine prefab representation
-  virtual void ConvertToEnginePrefab(const plDeque<const plDocumentObject*>& Selection);
+  virtual void ConvertToEnginePrefab(const plDeque<const plDocumentObject*>& selection);
 
-  virtual plStatus CreatePrefabDocumentFromSelection(const char* szFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, plDelegate<void(plDocumentObject*)> adjustNewNodesCB = {}, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {}) override;
+  virtual plStatus CreatePrefabDocumentFromSelection(plStringView sFile, const plRTTI* pRootType, plDelegate<void(plAbstractObjectNode*)> adjustGraphNodeCB = {}, plDelegate<void(plDocumentObject*)> adjustNewNodesCB = {}, plDelegate<void(plAbstractObjectGraph& graph, plDynamicArray<plAbstractObjectNode*>& graphRootNodes)> finalizeGraphCB = {}) override;
 
   GameMode::Enum GetGameMode() const { return m_GameMode; }
 
@@ -124,7 +124,7 @@ public:
   void ExportSceneGeometry(
     const char* szFile, bool bOnlySelection, int iExtractionMode /* plWorldGeoExtractionUtil::ExtractionMode */, const plMat3& mTransform);
 
-  virtual void HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg) override;
   void HandleGameModeMsg(const plGameModeMsgToEditor* pMsg);
   void HandleObjectStateFromEngineMsg(const plPushObjectStateMsgToEditor* pMsg);
 
@@ -146,7 +146,7 @@ public:
     const plDocumentObject* pObject, const plAbstractProperty* pProperty, plVariant index, plExposedSceneProperty& out_key) const;
   plStatus AddExposedParameter(const char* szName, const plDocumentObject* pObject, const plAbstractProperty* pProperty, plVariant index);
   plInt32 FindExposedParameter(const plDocumentObject* pObject, const plAbstractProperty* pProperty, plVariant index);
-  plStatus RemoveExposedParameter(plInt32 index);
+  plStatus RemoveExposedParameter(plInt32 iIndex);
   ///@}
 
   /// \name Editor Camera
@@ -179,7 +179,7 @@ protected:
   void SetGameMode(GameMode::Enum mode);
 
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
-  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab) override;
+  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab) override;
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
 
   template <typename Func>
@@ -196,14 +196,14 @@ protected:
 protected:
   void EnsureSettingsObjectExist();
   void DocumentObjectMetaDataEventHandler(const plObjectMetaData<plUuid, plDocumentObjectMetaData>::EventData& e);
-  void EngineConnectionEventHandler(const PlasmaEditorEngineProcessConnection::Event& e);
+  void EngineConnectionEventHandler(const plEditorEngineProcessConnection::Event& e);
   void ToolsProjectEventHandler(const plToolsProjectEvent& e);
 
   plStatus RequestExportScene(const char* szTargetFile, const plAssetFileHeader& header);
 
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 

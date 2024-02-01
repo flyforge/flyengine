@@ -23,7 +23,7 @@ void plRasterizerView::SetResolution(plUInt32 uiWidth, plUInt32 uiHeight, float 
     m_uiResolutionX = uiWidth;
     m_uiResolutionY = uiHeight;
 
-    m_pRasterizer = PLASMA_DEFAULT_NEW(Rasterizer, uiWidth, uiHeight);
+    m_pRasterizer = PL_DEFAULT_NEW(Rasterizer, uiWidth, uiHeight);
   }
 
   if (fAspectRatio == 0.0f)
@@ -34,9 +34,9 @@ void plRasterizerView::SetResolution(plUInt32 uiWidth, plUInt32 uiHeight, float 
 
 void plRasterizerView::BeginScene()
 {
-  PLASMA_ASSERT_DEV(m_pRasterizer != nullptr, "Call SetResolution() first.");
+  PL_ASSERT_DEV(m_pRasterizer != nullptr, "Call SetResolution() first.");
 
-  PLASMA_PROFILE_SCOPE("Occlusion::Clear");
+  PL_PROFILE_SCOPE("Occlusion::Clear");
 
   m_pRasterizer->clear();
   m_bAnyOccludersRasterized = false;
@@ -44,10 +44,10 @@ void plRasterizerView::BeginScene()
 
 void plRasterizerView::ReadBackFrame(plArrayPtr<plColorLinearUB> targetBuffer) const
 {
-  PLASMA_PROFILE_SCOPE("Occlusion::ReadFrame");
+  PL_PROFILE_SCOPE("Occlusion::ReadFrame");
 
-  PLASMA_ASSERT_DEV(m_pRasterizer != nullptr, "Call SetResolution() first.");
-  PLASMA_ASSERT_DEV(targetBuffer.GetCount() >= m_uiResolutionX * m_uiResolutionY, "Target buffer is too small.");
+  PL_ASSERT_DEV(m_pRasterizer != nullptr, "Call SetResolution() first.");
+  PL_ASSERT_DEV(targetBuffer.GetCount() >= m_uiResolutionX * m_uiResolutionY, "Target buffer is too small.");
 
   m_pRasterizer->readBackDepth(targetBuffer.GetPtr());
 }
@@ -57,7 +57,7 @@ void plRasterizerView::EndScene()
   if (m_Instances.IsEmpty())
     return;
 
-  PLASMA_PROFILE_SCOPE("Occlusion::RasterizeScene");
+  PL_PROFILE_SCOPE("Occlusion::RasterizeScene");
 
   SortObjectsFrontToBack();
 
@@ -73,9 +73,9 @@ void plRasterizerView::EndScene()
 
 void plRasterizerView::RasterizeObjects(plUInt32 uiMaxObjects)
 {
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
 
-  PLASMA_PROFILE_SCOPE("Occlusion::RasterizeObjects");
+  PL_PROFILE_SCOPE("Occlusion::RasterizeObjects");
 
   for (const Instance& inst : m_Instances)
   {
@@ -122,8 +122,8 @@ void plRasterizerView::ApplyModelViewProjectionMatrix(const plTransform& modelTr
 
 void plRasterizerView::SortObjectsFrontToBack()
 {
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
-  PLASMA_PROFILE_SCOPE("Occlusion::SortObjects");
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
+  PL_PROFILE_SCOPE("Occlusion::SortObjects");
 
   const plVec3 camPos = m_pCamera->GetCenterPosition();
 
@@ -137,11 +137,11 @@ void plRasterizerView::SortObjectsFrontToBack()
 
 bool plRasterizerView::IsVisible(const plSimdBBox& aabb) const
 {
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
   if (!m_bAnyOccludersRasterized)
     return true; // assume that people already do frustum culling anyway
 
-  PLASMA_PROFILE_SCOPE("Occlusion::IsVisible");
+  PL_PROFILE_SCOPE("Occlusion::IsVisible");
 
   plSimdVec4f vmin = aabb.m_Min;
   plSimdVec4f vmax = aabb.m_Max;
@@ -160,9 +160,9 @@ bool plRasterizerView::IsVisible(const plSimdBBox& aabb) const
 
 plRasterizerView* plRasterizerViewPool::GetRasterizerView(plUInt32 uiWidth, plUInt32 uiHeight, float fAspectRatio)
 {
-  PLASMA_PROFILE_SCOPE("Occlusion::GetViewFromPool");
+  PL_PROFILE_SCOPE("Occlusion::GetViewFromPool");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   const float divX = (float)uiWidth / (float)cvar_SpatialCullingOcclusionMaxResolution;
   const float divY = (float)uiHeight / (float)cvar_SpatialCullingOcclusionMaxResolution;
@@ -205,11 +205,11 @@ void plRasterizerViewPool::ReturnRasterizerView(plRasterizerView* pView)
   if (pView == nullptr)
     return;
 
-  PLASMA_PROFILE_SCOPE("Occlusion::ReturnViewToPool");
+  PL_PROFILE_SCOPE("Occlusion::ReturnViewToPool");
 
   pView->SetCamera(nullptr);
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (PoolEntry& entry : m_Entries)
   {
@@ -220,8 +220,8 @@ void plRasterizerViewPool::ReturnRasterizerView(plRasterizerView* pView)
     }
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Rasterizer_Implementation_RasterizerView);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Rasterizer_Implementation_RasterizerView);

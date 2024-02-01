@@ -1,35 +1,36 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plSimdQuat::plSimdQuat() = default;
+PL_ALWAYS_INLINE plSimdQuat::plSimdQuat() = default;
 
-PLASMA_ALWAYS_INLINE plSimdQuat::plSimdQuat(const plSimdVec4f& v)
+PL_ALWAYS_INLINE plSimdQuat::plSimdQuat(const plSimdVec4f& v)
   : m_v(v)
 {
 }
 
-// static
-PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::IdentityQuaternion()
+PL_ALWAYS_INLINE const plSimdQuat plSimdQuat::MakeIdentity()
 {
   return plSimdQuat(plSimdVec4f(0.0f, 0.0f, 0.0f, 1.0f));
 }
 
-PLASMA_ALWAYS_INLINE void plSimdQuat::SetIdentity()
+PL_ALWAYS_INLINE plSimdQuat plSimdQuat::MakeFromElements(plSimdFloat x, plSimdFloat y, plSimdFloat z, plSimdFloat w)
 {
-  m_v.Set(0.0f, 0.0f, 0.0f, 1.0f);
+  return plSimdQuat(plSimdVec4f(x, y, z, w));
 }
 
-PLASMA_ALWAYS_INLINE void plSimdQuat::SetFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle)
+inline plSimdQuat plSimdQuat::MakeFromAxisAndAngle(const plSimdVec4f& vRotationAxis, const plSimdFloat& fAngle)
 {
   ///\todo optimize
-  const plAngle halfAngle = plAngle::Radian(fAngle) * 0.5f;
+  const plAngle halfAngle = plAngle::MakeFromRadian(fAngle) * 0.5f;
   float s = plMath::Sin(halfAngle);
   float c = plMath::Cos(halfAngle);
 
-  m_v = vRotationAxis * s;
-  m_v.SetW(c);
+  plSimdQuat res;
+  res.m_v = vRotationAxis * s;
+  res.m_v.SetW(c);
+  return res;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdQuat::Normalize()
+PL_ALWAYS_INLINE void plSimdQuat::Normalize()
 {
   m_v.Normalize<4>();
 }
@@ -51,10 +52,10 @@ inline plResult plSimdQuat::GetRotationAxisAndAngle(plSimdVec4f& ref_vAxis, plSi
 
   ref_fAngle = acos * 2;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
+PL_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
 {
   const plSimdVec4f xyz = m_v;
   const plSimdVec4f x2y2z2 = xyz + xyz;
@@ -67,7 +68,7 @@ PLASMA_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
   const plSimdVec4f yy2_xx2_xx2 = xx2yy2zz2.Get<plSwizzle::YXXX>();
   const plSimdVec4f zz2_zz2_yy2 = xx2yy2zz2.Get<plSwizzle::ZZYX>();
   plSimdVec4f diagonal = plSimdVec4f(1.0f) - (yy2_xx2_xx2 + zz2_zz2_yy2);
-  diagonal.SetW(plSimdFloat::Zero());
+  diagonal.SetW(plSimdFloat::MakeZero());
 
   // non diagonal terms
   // xy2 +- wz2
@@ -98,32 +99,32 @@ PLASMA_ALWAYS_INLINE plSimdMat4f plSimdQuat::GetAsMat4() const
   const plSimdVec4f addZ_u_subY_u = adds.GetCombined<plSwizzle::ZXYX>(subs);
   const plSimdVec4f col2 = addZ_u_subY_u.GetCombined<plSwizzle::XZZW>(diagonal);
 
-  return plSimdMat4f(col0, col1, col2, plSimdVec4f(0, 0, 0, 1));
+  return plSimdMat4f::MakeFromColumns(col0, col1, col2, plSimdVec4f(0, 0, 0, 1));
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdQuat::IsValid(const plSimdFloat& fEpsilon) const
+PL_ALWAYS_INLINE bool plSimdQuat::IsValid(const plSimdFloat& fEpsilon) const
 {
   return m_v.IsNormalized<4>(fEpsilon);
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdQuat::IsNaN() const
+PL_ALWAYS_INLINE bool plSimdQuat::IsNaN() const
 {
   return m_v.IsNaN<4>();
 }
 
-PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::operator-() const
+PL_ALWAYS_INLINE plSimdQuat plSimdQuat::operator-() const
 {
-  return m_v.FlipSign(plSimdVec4b(true, true, true, false));
+  return plSimdQuat(m_v.FlipSign(plSimdVec4b(true, true, true, false)));
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdQuat::operator*(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdQuat::operator*(const plSimdVec4f& v) const
 {
   plSimdVec4f t = m_v.CrossRH(v);
   t += t;
   return v + t * m_v.w() + m_v.CrossRH(t);
 }
 
-PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::operator*(const plSimdQuat& q2) const
+PL_ALWAYS_INLINE plSimdQuat plSimdQuat::operator*(const plSimdQuat& q2) const
 {
   plSimdQuat q;
 
@@ -133,12 +134,12 @@ PLASMA_ALWAYS_INLINE plSimdQuat plSimdQuat::operator*(const plSimdQuat& q2) cons
   return q;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdQuat::operator==(const plSimdQuat& q2) const
+PL_ALWAYS_INLINE bool plSimdQuat::operator==(const plSimdQuat& q2) const
 {
   return (m_v == q2.m_v).AllSet<4>();
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdQuat::operator!=(const plSimdQuat& q2) const
+PL_ALWAYS_INLINE bool plSimdQuat::operator!=(const plSimdQuat& q2) const
 {
   return (m_v != q2.m_v).AnySet<4>();
 }

@@ -8,6 +8,7 @@
 #include <RendererCore/Pipeline/RenderPipelineNode.h>
 
 struct plGALTextureCreationDescription;
+class plStreamWriter;
 
 /// \brief Passed to plRenderPipelinePass::InitRenderPipelinePass to inform about
 /// existing connections on each input / output pin index.
@@ -21,10 +22,10 @@ struct plRenderPipelinePassConnection
   plHybridArray<const plRenderPipelineNodePin*, 4> m_Inputs; ///< The various input pins this connection is connected to.
 };
 
-class PLASMA_RENDERERCORE_DLL plRenderPipelinePass : public plRenderPipelineNode
+class PL_RENDERERCORE_DLL plRenderPipelinePass : public plRenderPipelineNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRenderPipelinePass, plRenderPipelineNode);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plRenderPipelinePass, plRenderPipelineNode);
+  PL_DISALLOW_COPY_AND_ASSIGN(plRenderPipelinePass);
 
 public:
   plRenderPipelinePass(const char* szName, bool bIsStereoAware = false);
@@ -59,18 +60,21 @@ public:
   /// \brief Allows for the pass to write data back using plView::SetRenderPassReadBackProperty. E.g. picking results etc.
   virtual void ReadBackProperties(plView* pView);
 
+  virtual plResult Serialize(plStreamWriter& inout_stream) const;
+  virtual plResult Deserialize(plStreamReader& inout_stream);
+
   void RenderDataWithCategory(const plRenderViewContext& renderViewContext, plRenderData::Category category, plRenderDataBatch::Filter filter = plRenderDataBatch::Filter());
 
-  PLASMA_ALWAYS_INLINE plRenderPipeline* GetPipeline() { return m_pPipeline; }
-  PLASMA_ALWAYS_INLINE const plRenderPipeline* GetPipeline() const { return m_pPipeline; }
+  PL_ALWAYS_INLINE plRenderPipeline* GetPipeline() { return m_pPipeline; }
+  PL_ALWAYS_INLINE const plRenderPipeline* GetPipeline() const { return m_pPipeline; }
 
 private:
   friend class plRenderPipeline;
 
-  bool m_bActive;
+  bool m_bActive = true;
 
   const bool m_bIsStereoAware;
   plHashedString m_sName;
 
-  plRenderPipeline* m_pPipeline;
+  plRenderPipeline* m_pPipeline = nullptr;
 };

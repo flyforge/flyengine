@@ -6,9 +6,9 @@
 
 using plCurve1DResourceHandle = plTypedResourceHandle<class plCurve1DResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Continuous final : public plParticleEmitterFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Continuous final : public plParticleEmitterFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Continuous, plParticleEmitterFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Continuous, plParticleEmitterFactory);
 
 public:
   plParticleEmitterFactory_Continuous();
@@ -17,8 +17,8 @@ public:
   virtual void CopyEmitterProperties(plParticleEmitter* pEmitter, bool bFirstTime) const override;
   virtual void QueryMaxParticleCount(plUInt32& out_uiMaxParticlesAbs, plUInt32& out_uiMaxParticlesPerSecond) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
 public:
   plTime m_StartDelay;
@@ -35,9 +35,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitter_Continuous final : public plParticleEmitter
+class PL_PARTICLEPLUGIN_DLL plParticleEmitter_Continuous final : public plParticleEmitter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Continuous, plParticleEmitter);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Continuous, plParticleEmitter);
 
 public:
   plTime m_StartDelay; // delay before the emitter becomes active, to sync with other systems, only used once, has no effect later on

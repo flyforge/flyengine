@@ -25,16 +25,16 @@ struct plPrefabInstantiationOptions
 
   enum class RandomSeedMode
   {
-    DeterministicFromParent,
-    CompletelyRandom,
-    FixedFromSerialization,
-    CustomRootValue,
+    DeterministicFromParent, ///< plWorld::CreateObject() will either derive a deterministic value from the parent object, or assign a random value, if no parent exists
+    CompletelyRandom,        ///< plWorld::CreateObject() will assign a random value to this object
+    FixedFromSerialization,  ///< Keep deserialized random seed value
+    CustomRootValue,         ///< Use the given seed root value to assign a deterministic (but different) value to each game object.
   };
 
   RandomSeedMode m_RandomSeedMode = RandomSeedMode::DeterministicFromParent;
   plUInt32 m_uiCustomRandomSeedRootValue = 0;
 
-  plTime m_MaxStepTime = plTime::Zero();
+  plTime m_MaxStepTime = plTime::MakeZero();
 
   plProgress* m_pProgress = nullptr;
 };
@@ -43,7 +43,7 @@ struct plPrefabInstantiationOptions
 ///        in different locations and different plWorld's.
 ///
 /// The reader will ignore unknown component types and skip them during instantiation.
-class PLASMA_CORE_DLL plWorldReader
+class PL_CORE_DLL plWorldReader
 {
 public:
   /// \brief A context object is returned from InstantiateWorld or InstantiatePrefab if a maxStepTime greater than zero is specified.
@@ -61,7 +61,7 @@ public:
       Finished,          ///< The instantiation is finished and you can delete the context. Don't call 'Step()' on it again.
     };
 
-    virtual ~InstantiationContextBase() {}
+    virtual ~InstantiationContextBase() = default;
 
     /// \Brief Advance the instantiation by one step
     /// \return Whether the operation is finished or needs to be repeated.
@@ -82,7 +82,7 @@ public:
   /// to actually get an objects into an plWorld.
   /// By default, the method will warn if it skips bytes in the stream that are of unknown
   /// types. The warnings can be suppressed by setting warningOnUnkownSkip to false.
-  plResult ReadWorldDescription(plStreamReader& stream, bool warningOnUnkownSkip = true);
+  plResult ReadWorldDescription(plStreamReader& inout_stream, bool bWarningOnUnkownSkip = true);
 
   /// \brief Creates one instance of the world that was previously read by ReadWorldDescription().
   ///
@@ -98,7 +98,7 @@ public:
   ///
   /// If pProgress is a valid pointer it is used to track the progress of the instantiation. The plProgress object
   /// has to be valid as long as the instantiation is in progress.
-  plUniquePtr<InstantiationContextBase> InstantiateWorld(plWorld& world, const plUInt16* pOverrideTeamID = nullptr, plTime maxStepTime = plTime::Zero(), plProgress* pProgress = nullptr);
+  plUniquePtr<InstantiationContextBase> InstantiateWorld(plWorld& ref_world, const plUInt16* pOverrideTeamID = nullptr, plTime maxStepTime = plTime::MakeZero(), plProgress* pProgress = nullptr);
 
   /// \brief Creates one instance of the world that was previously read by ReadWorldDescription().
   ///
@@ -115,7 +115,7 @@ public:
   ///
   /// If pProgress is a valid pointer it is used to track the progress of the instantiation. The plProgress object
   /// has to be valid as long as the instantiation is in progress.
-  plUniquePtr<InstantiationContextBase> InstantiatePrefab(plWorld& world, const plTransform& rootTransform, const plPrefabInstantiationOptions& options);
+  plUniquePtr<InstantiationContextBase> InstantiatePrefab(plWorld& ref_world, const plTransform& rootTransform, const plPrefabInstantiationOptions& options);
 
   /// \brief Gives access to the stream of data. Use this inside component deserialization functions to read data.
   plStreamReader& GetStream() const { return *m_pStream; }
@@ -127,7 +127,7 @@ public:
   void ReadComponentHandle(plComponentHandle& out_hComponent);
 
   /// \brief Used during component deserialization to query the actual version number with which the
-  /// given component type was written. The version number is given through the PLASMA_BEGIN_COMPONENT_TYPE
+  /// given component type was written. The version number is given through the PL_BEGIN_COMPONENT_TYPE
   /// macro. Whenever the serialization of a component changes, that number should be increased.
   plUInt32 GetComponentTypeVersion(const plRTTI* pRtti) const;
 
@@ -152,8 +152,8 @@ public:
   plUInt32 GetRootObjectCount() const;
   plUInt32 GetChildObjectCount() const;
 
-  static void SetMaxStepTime(InstantiationContextBase* context, plTime maxStepTime);
-  static plTime GetMaxStepTime(InstantiationContextBase* context);
+  static void SetMaxStepTime(InstantiationContextBase* pContext, plTime maxStepTime);
+  static plTime GetMaxStepTime(InstantiationContextBase* pContext);
 
 private:
   struct GameObjectToCreate
@@ -196,14 +196,14 @@ private:
   class InstantiationContext : public InstantiationContextBase
   {
   public:
-    InstantiationContext(plWorldReader& worldReader, bool bUseTransform, const plTransform& rootTransform, const plPrefabInstantiationOptions& options);
+    InstantiationContext(plWorldReader& ref_worldReader, bool bUseTransform, const plTransform& rootTransform, const plPrefabInstantiationOptions& options);
     ~InstantiationContext();
 
     virtual StepResult Step() override;
     virtual void Cancel() override;
 
     template <bool UseTransform>
-    bool CreateGameObjects(const plDynamicArray<GameObjectToCreate>& objects, plGameObjectHandle hParent, plDynamicArray<plGameObject*>* out_CreatedObjects, plTime endTime);
+    bool CreateGameObjects(const plDynamicArray<GameObjectToCreate>& objects, plGameObjectHandle hParent, plDynamicArray<plGameObject*>* out_pCreatedObjects, plTime endTime);
 
     bool CreateComponents(plTime endTime);
     bool DeserializeComponents(plTime endTime);

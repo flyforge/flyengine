@@ -7,9 +7,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-struct PLASMA_GAMEENGINE_DLL plMsgSensorDetectedObjectsChanged : public plEventMessage
+struct PL_GAMEENGINE_DLL plMsgSensorDetectedObjectsChanged : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgSensorDetectedObjectsChanged, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgSensorDetectedObjectsChanged, plEventMessage);
 
   plArrayPtr<plGameObjectHandle> m_DetectedObjects;
 };
@@ -23,16 +23,16 @@ struct PLASMA_GAMEENGINE_DLL plMsgSensorDetectedObjectsChanged : public plEventM
 /// with matching spatial category for the sensors to detect them. This can be achieved with components like e.g. plMarkerComponent.
 /// Visibility tests via raycasts are done afterwards by default but can be disabled.
 /// The components store an array of all their currently detected objects and send an plMsgSensorDetectedObjectsChanged message if this array changes.
-class PLASMA_GAMEENGINE_DLL plSensorComponent : public plComponent
+class PL_GAMEENGINE_DLL plSensorComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plSensorComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plSensorComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   virtual void OnActivated() override;
@@ -45,7 +45,7 @@ public:
   plSensorComponent();
   ~plSensorComponent();
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const = 0;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const = 0;
   virtual void DebugDrawSensorShape() const = 0;
 
   void SetSpatialCategory(const char* szCategory); // [ property ]
@@ -63,8 +63,11 @@ public:
   void SetColor(plColorGammaUB color); // [ property ]
   plColorGammaUB GetColor() const;     // [ property ]
 
+  plTagSet m_IncludeTags; // [ property ]
+  plTagSet m_ExcludeTags; // [ property ]
+
   /// \brief Returns the list of objects that this sensor has detected during its last update
-  plArrayPtr<plGameObjectHandle> GetLastDetectedObjects() const { return m_LastDetectedObjects; }
+  plArrayPtr<const plGameObjectHandle> GetLastDetectedObjects() const { return m_LastDetectedObjects; }
 
   /// \brief Updates the sensor state right now.
   ///
@@ -81,7 +84,6 @@ public:
   /// Returns true, if there was a change in detected objects, false if the same objects were detected as last time.
   bool RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWorldModule, plDynamicArray<plGameObject*>& out_objectsInSensorVolume, plDynamicArray<plGameObjectHandle>& ref_detectedObjects, bool bPostChangeMsg) const;
 
-
 protected:
   void UpdateSpatialCategory();
   void UpdateScheduling();
@@ -97,7 +99,7 @@ protected:
   friend class plSensorWorldModule;
   mutable plDynamicArray<plGameObjectHandle> m_LastDetectedObjects;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   mutable plDynamicArray<plVec3> m_LastOccludedObjectPositions;
 #endif
 };
@@ -106,21 +108,21 @@ protected:
 
 using plSensorSphereComponentManager = plComponentManager<class plSensorSphereComponent, plBlockStorageType::Compact>;
 
-class PLASMA_GAMEENGINE_DLL plSensorSphereComponent : public plSensorComponent
+class PL_GAMEENGINE_DLL plSensorSphereComponent : public plSensorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSensorSphereComponent, plSensorComponent, plSensorSphereComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSensorSphereComponent, plSensorComponent, plSensorSphereComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -137,21 +139,21 @@ public:
 
 using plSensorCylinderComponentManager = plComponentManager<class plSensorCylinderComponent, plBlockStorageType::Compact>;
 
-class PLASMA_GAMEENGINE_DLL plSensorCylinderComponent : public plSensorComponent
+class PL_GAMEENGINE_DLL plSensorCylinderComponent : public plSensorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSensorCylinderComponent, plSensorComponent, plSensorCylinderComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSensorCylinderComponent, plSensorComponent, plSensorCylinderComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -169,21 +171,21 @@ public:
 
 using plSensorConeComponentManager = plComponentManager<class plSensorConeComponent, plBlockStorageType::Compact>;
 
-class PLASMA_GAMEENGINE_DLL plSensorConeComponent : public plSensorComponent
+class PL_GAMEENGINE_DLL plSensorConeComponent : public plSensorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSensorConeComponent, plSensorComponent, plSensorConeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSensorConeComponent, plSensorComponent, plSensorConeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plSensorComponent
 
-  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const override;
+  virtual void GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const override;
   virtual void DebugDrawSensorShape() const override;
 
   //////////////////////////////////////////////////////////////////////////
@@ -195,15 +197,15 @@ public:
 
   float m_fNearDistance = 0.0f;             // [ property ]
   float m_fFarDistance = 10.0f;             // [ property ]
-  plAngle m_Angle = plAngle::Degree(90.0f); // [ property ]
+  plAngle m_Angle = plAngle::MakeFromDegree(90.0f); // [ property ]
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 class plSensorWorldModule : public plWorldModule
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSensorWorldModule, plWorldModule);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plSensorWorldModule, plWorldModule);
 
 public:
   plSensorWorldModule(plWorld* pWorld);

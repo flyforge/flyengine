@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/IO/ChunkStream.h>
 #include <RendererCore/BakedProbes/ProbeTreeSectorResource.h>
 
@@ -31,10 +31,10 @@ plResult plProbeTreeSectorResourceDescriptor::Serialize(plStreamWriter& inout_st
   inout_stream << m_vProbeSpacing;
   inout_stream << m_vProbeCount;
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_ProbePositions));
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_SkyVisibility));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_ProbePositions));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_SkyVisibility));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProbeTreeSectorResourceDescriptor::Deserialize(plStreamReader& inout_stream)
@@ -42,24 +42,25 @@ plResult plProbeTreeSectorResourceDescriptor::Deserialize(plStreamReader& inout_
   Clear();
 
   const plTypeVersion version = inout_stream.ReadVersion(s_ProbeTreeResourceDescriptorVersion);
+  PL_IGNORE_UNUSED(version);
 
   inout_stream >> m_vGridOrigin;
   inout_stream >> m_vProbeSpacing;
   inout_stream >> m_vProbeCount;
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_ProbePositions));
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_SkyVisibility));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_ProbePositions));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_SkyVisibility));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProbeTreeSectorResource, 1, plRTTIDefaultAllocator<plProbeTreeSectorResource>);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProbeTreeSectorResource, 1, plRTTIDefaultAllocator<plProbeTreeSectorResource>);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plProbeTreeSectorResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plProbeTreeSectorResource);
 // clang-format on
 
 plProbeTreeSectorResource::plProbeTreeSectorResource()
@@ -132,4 +133,4 @@ plResourceLoadDesc plProbeTreeSectorResource::CreateResource(plProbeTreeSectorRe
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_ProbeTreeSectorResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_ProbeTreeSectorResource);

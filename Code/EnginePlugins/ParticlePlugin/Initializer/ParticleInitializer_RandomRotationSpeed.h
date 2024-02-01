@@ -6,25 +6,25 @@
 
 using plCurve1DResourceHandle = plTypedResourceHandle<class plCurve1DResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory_RandomRotationSpeed final : public plParticleInitializerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory_RandomRotationSpeed final : public plParticleInitializerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_RandomRotationSpeed, plParticleInitializerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_RandomRotationSpeed, plParticleInitializerFactory);
 
 public:
   virtual const plRTTI* GetInitializerType() const override;
   virtual void CopyInitializerProperties(plParticleInitializer* pInitializer, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   bool m_bRandomStartAngle = false;
   plVarianceTypeAngle m_RotationSpeed;
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer_RandomRotationSpeed final : public plParticleInitializer
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer_RandomRotationSpeed final : public plParticleInitializer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer_RandomRotationSpeed, plParticleInitializer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer_RandomRotationSpeed, plParticleInitializer);
 
 public:
   bool m_bRandomStartAngle = false;

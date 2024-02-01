@@ -1,6 +1,7 @@
 #include <GuiFoundation/GuiFoundationPCH.h>
 
 #include <Foundation/Strings/TranslationLookup.h>
+#include <GuiFoundation/GuiFoundationDLL.h>
 #include <GuiFoundation/NodeEditor/Connection.h>
 #include <GuiFoundation/NodeEditor/Node.h>
 #include <GuiFoundation/NodeEditor/Pin.h>
@@ -16,8 +17,8 @@ plRttiMappedObjectFactory<plQtPin> plQtNodeScene::s_PinFactory;
 plRttiMappedObjectFactory<plQtConnection> plQtNodeScene::s_ConnectionFactory;
 plVec2 plQtNodeScene::s_vLastMouseInteraction(0);
 
-plQtNodeScene::plQtNodeScene(QObject* parent)
-  : QGraphicsScene(parent)
+plQtNodeScene::plQtNodeScene(QObject* pParent)
+  : QGraphicsScene(pParent)
 {
   setItemIndexMethod(QGraphicsScene::NoIndex);
 
@@ -40,7 +41,7 @@ plQtNodeScene::~plQtNodeScene()
 
 void plQtNodeScene::InitScene(const plDocumentNodeManager* pManager)
 {
-  PLASMA_ASSERT_DEV(pManager != nullptr, "Invalid node manager");
+  PL_ASSERT_DEV(pManager != nullptr, "Invalid node manager");
 
   m_pManager = pManager;
 
@@ -244,8 +245,7 @@ void plQtNodeScene::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
       }
     }
 
-cleanup:
-
+  cleanup:
     delete m_pTempConnection;
     m_pTempConnection = nullptr;
     m_pStartPin = nullptr;
@@ -312,9 +312,7 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     QAction* pAction = new QAction("Disconnect Pin", &menu);
     menu.addAction(pAction);
     connect(pAction, &QAction::triggered, this, [this, pPin](bool bChecked)
-    { 
-      DisconnectPinsAction(pPin); 
-    });
+      { DisconnectPinsAction(pPin); });
 
     pPin->ExtendContextMenu(menu);
   }
@@ -333,10 +331,8 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     {
       QAction* pAction = new QAction("Remove", &menu);
       menu.addAction(pAction);
-      connect(pAction, &QAction::triggered, this, [this](bool bChecked) 
-      { 
-        RemoveSelectedNodesAction(); 
-      });
+      connect(pAction, &QAction::triggered, this, [this](bool bChecked)
+        { RemoveSelectedNodesAction(); });
     }
 
     pNode->ExtendContextMenu(menu);
@@ -346,7 +342,8 @@ void plQtNodeScene::contextMenuEvent(QGraphicsSceneContextMenuEvent* contextMenu
     plQtConnection* pConnection = static_cast<plQtConnection*>(pItem);
     QAction* pAction = new QAction("Delete Connection", &menu);
     menu.addAction(pAction);
-    connect(pAction, &QAction::triggered, this, [this, pConnection](bool bChecked) { DisconnectPinsAction(pConnection); });
+    connect(pAction, &QAction::triggered, this, [this, pConnection](bool bChecked)
+      { DisconnectPinsAction(pConnection); });
 
     pConnection->ExtendContextMenu(menu);
   }
@@ -413,7 +410,6 @@ void plQtNodeScene::CreateQtNode(const plDocumentObject* pObject)
 
   pNode->ResetFlags();
 
-
   // Note: We dont create connections here as it can cause recusion issues
   if (m_pTempConnection)
   {
@@ -438,12 +434,9 @@ void plQtNodeScene::CreateQtConnection(const plDocumentObject* pObject)
 
   plQtNode* pSource = m_Nodes[pinSource.GetParent()];
   plQtNode* pTarget = m_Nodes[pinTarget.GetParent()];
-  if (!pTarget || !pSource)
-    return;
-
   plQtPin* pOutput = pSource->GetOutputPin(pinSource);
   plQtPin* pInput = pTarget->GetInputPin(pinTarget);
-  PLASMA_ASSERT_DEV(pOutput != nullptr && pInput != nullptr, "Node does not contain pin!");
+  PL_ASSERT_DEV(pOutput != nullptr && pInput != nullptr, "Node does not contain pin!");
 
   plQtConnection* pQtConnection = s_ConnectionFactory.CreateObject(pObject->GetTypeAccessor().GetType());
   if (pQtConnection == nullptr)
@@ -465,12 +458,10 @@ void plQtNodeScene::CreateQtConnection(const plDocumentObject* pObject)
 void plQtNodeScene::DeleteQtConnection(const plDocumentObject* pObject)
 {
   plQtConnection* pQtConnection = m_Connections[pObject];
-  if (!pQtConnection)
-    return;
   m_Connections.Remove(pObject);
 
   const plConnection* pConnection = pQtConnection->GetConnection();
-  PLASMA_ASSERT_DEV(pConnection != nullptr, "No connection");
+  PL_ASSERT_DEV(pConnection != nullptr, "No connection");
 
   const plPin& pinSource = pConnection->GetSourcePin();
   const plPin& pinTarget = pConnection->GetTargetPin();
@@ -479,7 +470,7 @@ void plQtNodeScene::DeleteQtConnection(const plDocumentObject* pObject)
   plQtNode* pTarget = m_Nodes[pinTarget.GetParent()];
   plQtPin* pOutput = pSource->GetOutputPin(pinSource);
   plQtPin* pInput = pTarget->GetInputPin(pinTarget);
-  PLASMA_ASSERT_DEV(pOutput != nullptr && pInput != nullptr, "Node does not contain pin!");
+  PL_ASSERT_DEV(pOutput != nullptr && pInput != nullptr, "Node does not contain pin!");
 
   pOutput->RemoveConnection(pQtConnection);
   pInput->RemoveConnection(pQtConnection);
@@ -500,7 +491,7 @@ void plQtNodeScene::RecreateQtPins(const plDocumentObject* pObject)
   pNode->UpdateGeometry();
 }
 
-void plQtNodeScene::CreateNodeObject(const plRTTI* pRtti)
+void plQtNodeScene::CreateNodeObject(const plNodeCreationTemplate& nodeTemplate)
 {
   plCommandHistory* history = m_pManager->GetDocument()->GetCommandHistory();
   history->StartTransaction("Add Node");
@@ -508,8 +499,8 @@ void plQtNodeScene::CreateNodeObject(const plRTTI* pRtti)
   plStatus res;
   {
     plAddObjectCommand cmd;
-    cmd.m_pType = pRtti;
-    cmd.m_NewObjectGuid.CreateNewUuid();
+    cmd.m_pType = nodeTemplate.m_pType;
+    cmd.m_NewObjectGuid = plUuid::MakeUuid();
     cmd.m_Index = -1;
 
     res = history->AddCommand(cmd);
@@ -519,6 +510,18 @@ void plQtNodeScene::CreateNodeObject(const plRTTI* pRtti)
       move.m_Object = cmd.m_NewObjectGuid;
       move.m_NewPos = m_vMousePos;
       res = history->AddCommand(move);
+    }
+
+    for (auto& propValue : nodeTemplate.m_PropertyValues)
+    {
+      if (res.m_Result.Failed())
+        break;
+
+      plSetObjectPropertyCommand setCmd;
+      setCmd.m_Object = cmd.m_NewObjectGuid;
+      setCmd.m_sProperty = propValue.m_sPropertyName.GetString();
+      setCmd.m_NewValue = propValue.m_Value;
+      res = history->AddCommand(setCmd);
     }
   }
 
@@ -572,7 +575,6 @@ void plQtNodeScene::NodeEventsHandler(const plDocumentNodeManagerEvent& e)
 void plQtNodeScene::PropertyEventsHandler(const plDocumentObjectPropertyEvent& e)
 {
   auto it = m_Nodes.Find(e.m_pObject);
-
   if (it.IsValid())
   {
     it.Value()->ResetFlags();
@@ -607,8 +609,6 @@ void plQtNodeScene::SelectionEventsHandler(const plSelectionManagerEvent& e)
   for (auto itCon : m_Connections)
   {
     auto pQtCon = itCon.Value();
-    if (!pQtCon)
-      continue;
     auto pCon = pQtCon->GetConnection();
 
     const bool prev = pQtCon->m_bAdjacentNodeSelected;
@@ -740,46 +740,43 @@ void plQtNodeScene::OpenSearchMenu(QPoint screenPos)
   menu.addAction(pSearchMenu);
 
   connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, &plQtNodeScene::OnMenuItemTriggered);
-  connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, [&menu]() { menu.close(); });
-
-  plStringBuilder sFullName, sCleanName2;
-
-  plHybridArray<const plRTTI*, 32> types;
-  m_pManager->GetCreateableTypes(types);
+  connect(pSearchMenu, &plQtSearchableMenu::MenuItemTriggered, this, [&menu]()
+    { menu.close(); });
 
   plStringBuilder tmp;
+  plStringBuilder sFullPath;
 
-  for (const plRTTI* pRtti : types)
+  m_NodeCreationTemplates.Clear();
+  m_pManager->GetNodeCreationTemplates(m_NodeCreationTemplates);
+
+  for (plUInt32 i = 0; i < m_NodeCreationTemplates.GetCount(); ++i)
   {
-    plStringView sCleanName = pRtti->GetTypeName();
+    const plNodeCreationTemplate& nodeTemplate = m_NodeCreationTemplates[i];
+    const plRTTI* pRtti = nodeTemplate.m_pType;
+    plStringView sCleanName = nodeTemplate.m_sTypeName.IsEmpty() ? pRtti->GetTypeName() : nodeTemplate.m_sTypeName;
 
-    const char* szColonColon = sCleanName.FindLastSubString("::");
-    if (szColonColon != nullptr)
-      sCleanName.SetStartPosition(szColonColon + 2);
-
-    const char* szUnderscore = sCleanName.FindLastSubString("_");
-    if (szUnderscore != nullptr)
-      sCleanName.SetStartPosition(szUnderscore + 1);
-
-    sCleanName2 = sCleanName;
-    if (const char* szBracket = sCleanName2.FindLastSubString("<"))
+    if (const char* szUnderscore = sCleanName.FindLastSubString("_"))
     {
-      sCleanName2.SetSubString_FromTo(sCleanName2.GetData(), szBracket);
+      sCleanName.SetStartPosition(szUnderscore + 1);
     }
 
-    sFullName = m_pManager->GetTypeCategory(pRtti);
+    if (const char* szBracket = sCleanName.FindLastSubString("<"))
+    {
+      sCleanName = plStringView(sCleanName.GetStartPointer(), szBracket);
+    }
 
-    if (sFullName.IsEmpty())
+    sFullPath = nodeTemplate.m_sCategory.GetString();
+    if (sFullPath.IsEmpty())
     {
       if (auto pAttr = pRtti->GetAttributeByType<plCategoryAttribute>())
       {
-        sFullName = pAttr->GetCategory();
+        sFullPath = pAttr->GetCategory();
       }
     }
 
-    sFullName.AppendPath(plTranslate(sCleanName.GetData(tmp)));
+    sFullPath.AppendPath(sCleanName);
 
-    pSearchMenu->AddItem(sFullName, QVariant::fromValue((void*)pRtti));
+    pSearchMenu->AddItem(plTranslate(sCleanName.GetData(tmp)), sFullPath, QVariant::fromValue(i));
   }
 
   pSearchMenu->Finalize(m_sContextMenuSearchText);
@@ -791,7 +788,7 @@ void plQtNodeScene::OpenSearchMenu(QPoint screenPos)
 
 plStatus plQtNodeScene::RemoveNode(plQtNode* pNode)
 {
-  PLASMA_SUCCEED_OR_RETURN(m_pManager->CanRemove(pNode->GetObject()));
+  PL_SUCCEED_OR_RETURN(m_pManager->CanRemove(pNode->GetObject()));
 
   plRemoveNodeCommand cmd;
   cmd.m_Object = pNode->GetObject()->GetGuid();
@@ -907,7 +904,7 @@ void plQtNodeScene::DisconnectPinsAction(plQtPin* pPin)
   plCommandHistory* history = m_pManager->GetDocument()->GetCommandHistory();
   history->StartTransaction("Disconnect Pins");
 
-  plStatus res = plStatus(PLASMA_SUCCESS);
+  plStatus res = plStatus(PL_SUCCESS);
   for (plQtConnection* pConnection : pPin->GetConnections())
   {
     DisconnectPinsAction(pConnection);
@@ -923,9 +920,11 @@ void plQtNodeScene::DisconnectPinsAction(plQtPin* pPin)
 
 void plQtNodeScene::OnMenuItemTriggered(const QString& sName, const QVariant& variant)
 {
-  const plRTTI* pRtti = static_cast<const plRTTI*>(variant.value<void*>());
+  plUInt32 uiTypeIndex = variant.value<plUInt32>();
+  if (uiTypeIndex >= m_NodeCreationTemplates.GetCount())
+    return;
 
-  CreateNodeObject(pRtti);
+  CreateNodeObject(m_NodeCreationTemplates[uiTypeIndex]);
 }
 
 void plQtNodeScene::OnSelectionChanged()

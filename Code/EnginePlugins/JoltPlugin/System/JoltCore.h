@@ -14,7 +14,7 @@ namespace JPH
   class JobSystem;
 }
 
-class PLASMA_JOLTPLUGIN_DLL plJoltCore
+class PL_JOLTPLUGIN_DLL plJoltCore
 {
 public:
   static JPH::JobSystem* GetJoltJobSystem() { return s_pJobSystem.get(); }
@@ -27,7 +27,7 @@ public:
 #endif
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Jolt, JoltPlugin);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Jolt, JoltPlugin);
 
   static void Startup();
   static void Shutdown();

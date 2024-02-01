@@ -32,20 +32,22 @@ void plIpcChannelEnet::InternalConnect()
   if (m_Mode == Mode::Server)
   {
     m_pNetwork->StartServer('RMOT', m_sAddress, false).IgnoreResult();
+    SetConnectionState(ConnectionState::Connecting);
   }
   else
   {
-    if ((m_sLastAddress != m_sAddress) || (plTime::Now() - m_LastConnectAttempt > plTime::Seconds(10)))
+    SetConnectionState(ConnectionState::Connecting);
+    if ((m_sLastAddress != m_sAddress) || (plTime::Now() - m_LastConnectAttempt > plTime::MakeFromSeconds(10)))
     {
       m_sLastAddress = m_sAddress;
       m_LastConnectAttempt = plTime::Now();
       m_pNetwork->ConnectToServer('RMOT', m_sAddress, false).IgnoreResult();
     }
 
-    m_pNetwork->WaitForConnectionToServer(plTime::Milliseconds(10.0)).IgnoreResult();
+    m_pNetwork->WaitForConnectionToServer(plTime::MakeFromMilliseconds(10.0)).IgnoreResult();
   }
 
-  m_bConnected = m_pNetwork->IsConnectedToOther() ? 1 : 0;
+  SetConnectionState(m_pNetwork->IsConnectedToOther() ? ConnectionState::Connected : ConnectionState::Disconnected);
 }
 
 void plIpcChannelEnet::InternalDisconnect()
@@ -53,13 +55,13 @@ void plIpcChannelEnet::InternalDisconnect()
   m_pNetwork->ShutdownConnection();
   m_pNetwork->m_RemoteEvents.RemoveEventHandler(plMakeDelegate(&plIpcChannelEnet::EnetEventHandler, this));
 
-  m_bConnected = 0;
+  SetConnectionState(ConnectionState::Disconnected);
 }
 
 void plIpcChannelEnet::InternalSend()
 {
   {
-    PLASMA_LOCK(m_OutputQueueMutex);
+    PL_LOCK(m_OutputQueueMutex);
 
     while (!m_OutputQueue.IsEmpty())
     {
@@ -83,14 +85,14 @@ void plIpcChannelEnet::Tick()
 {
   m_pNetwork->UpdateRemoteInterface();
 
-  m_bConnected = m_pNetwork->IsConnectedToOther() ? 1 : 0;
+  SetConnectionState(m_pNetwork->IsConnectedToOther() ? ConnectionState::Connected : ConnectionState::Disconnected);
 
   m_pNetwork->ExecuteAllMessageHandlers();
 }
 
 void plIpcChannelEnet::NetworkMessageHandler(plRemoteMessage& msg)
 {
-  ReceiveMessageData(msg.GetMessageData());
+  ReceiveData(msg.GetMessageData());
 }
 
 void plIpcChannelEnet::EnetEventHandler(const plRemoteEvent& e)
@@ -110,5 +112,3 @@ void plIpcChannelEnet::EnetEventHandler(const plRemoteEvent& e)
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_IpcChannelEnet);

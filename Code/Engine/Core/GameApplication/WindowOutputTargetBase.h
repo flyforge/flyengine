@@ -12,10 +12,10 @@ class plImage;
 ///
 /// This interface provides the high level functionality that is needed by plGameApplication to work with
 /// the render output.
-class PLASMA_CORE_DLL plWindowOutputTargetBase
+class PL_CORE_DLL plWindowOutputTargetBase
 {
 public:
-  virtual ~plWindowOutputTargetBase() {}
+  virtual ~plWindowOutputTargetBase() = default;
   virtual void Present(bool bEnableVSync) = 0;
-  virtual plResult CaptureImage(plImage& out_Image) = 0;
+  virtual plResult CaptureImage(plImage& out_image) = 0;
 };

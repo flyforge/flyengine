@@ -9,51 +9,32 @@ o
 	p
 	{
 		s %AssetType{"Collection"}
-		VarArray %Dependencies
-		{
-			s{"{ 0416eb3e-69c0-4640-be5b-77354e0e37d7 }"}
-			s{"{ 05af8d07-0b38-44a6-8d50-49731ae2625d }"}
-			s{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
-			s{"{ 3437db17-ddf1-4b67-b80f-9999d6b0c352 }"}
-			s{"{ 3edf10b3-36d2-434f-9683-c653909abe7e }"}
-			s{"{ 4800d341-755b-4367-a175-ffa5dd17bd29 }"}
-			s{"{ 4d15c716-a8e9-43d4-9424-43174403fb94 }"}
-			s{"{ 4dc82890-39e3-4bfc-a97d-86a984d4d3db }"}
-			s{"{ 4f4d9f16-3d47-4c67-b821-a778f11dcaf5 }"}
-			s{"{ 618ee743-ed04-4fac-bf5f-572939db2f1d }"}
-			s{"{ 734898e8-b1a2-0da2-c4ae-701912983c2f }"}
-			s{"{ 7c71fc2d-2a1a-4938-9305-f3a0f26d73cc }"}
-			s{"{ abb5f06e-f4f2-4fb1-94e9-eed4a51e4490 }"}
-			s{"{ b4b75b1c-c2c8-4a0e-8076-780bdd46d18b }"}
-			s{"{ bf05609a-6225-4503-a375-58f92db77023 }"}
-			s{"{ da463c4d-c984-4910-b0b7-a0b3891d0448 }"}
-			s{"{ e19df82d-f16b-48c3-bc52-0b66f5ebe45e }"}
-			s{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
-		}
+		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{2066776411180025002,5593963395639352612}}
-		u4 %Hash{9371397415689341302}
+		u4 %Hash{12591100092234109441}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %References
+		VarArray %PackageDeps
 		{
 			s{"{ 0416eb3e-69c0-4640-be5b-77354e0e37d7 }"}
 			s{"{ 05af8d07-0b38-44a6-8d50-49731ae2625d }"}
+			s{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
 			s{"{ 3437db17-ddf1-4b67-b80f-9999d6b0c352 }"}
 			s{"{ 3edf10b3-36d2-434f-9683-c653909abe7e }"}
 			s{"{ 4800d341-755b-4367-a175-ffa5dd17bd29 }"}
 			s{"{ 4d15c716-a8e9-43d4-9424-43174403fb94 }"}
 			s{"{ 4dc82890-39e3-4bfc-a97d-86a984d4d3db }"}
 			s{"{ 4f4d9f16-3d47-4c67-b821-a778f11dcaf5 }"}
-			s{"{ 618ee743-ed04-4fac-bf5f-572939db2f1d }"}
 			s{"{ 734898e8-b1a2-0da2-c4ae-701912983c2f }"}
 			s{"{ 7c71fc2d-2a1a-4938-9305-f3a0f26d73cc }"}
 			s{"{ abb5f06e-f4f2-4fb1-94e9-eed4a51e4490 }"}
 			s{"{ b4b75b1c-c2c8-4a0e-8076-780bdd46d18b }"}
 			s{"{ c533e113-2a4c-4f42-a546-653c78f5e8a7 }"}
 			s{"{ da463c4d-c984-4910-b0b7-a0b3891d0448 }"}
-			s{"{ e19df82d-f16b-48c3-bc52-0b66f5ebe45e }"}
-			s{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
+			s{"{ e9e6b167-c18c-4260-9b0e-4cf4503c1463 }"}
+			s{"{ f962fc28-661b-485c-a527-c997e239a3f0 }"}
 		}
+		VarArray %References{}
 	}
 }
 }
@@ -154,19 +135,8 @@ o
 	u3 %v{1}
 	p
 	{
-		s %Asset{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
-		s %Name{"PlasmaTexture"}
-	}
-}
-o
-{
-	Uuid %id{u4{18413158107033146038,5264914848442346985}}
-	s %t{"plCollectionAssetEntry"}
-	u3 %v{1}
-	p
-	{
-		s %Asset{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
-		s %Name{"PlasmaMaterial"}
+		s %Asset{"{ f962fc28-661b-485c-a527-c997e239a3f0 }"}
+		s %Name{"GridTexture"}
 	}
 }
 o
@@ -198,8 +168,8 @@ o
 	u3 %v{1}
 	p
 	{
-		s %Asset{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
-		s %Name{"PlasmaMaterial"}
+		s %Asset{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
+		s %Name{"PatternMaterial"}
 	}
 }
 o
@@ -211,17 +181,6 @@ o
 	{
 		s %Asset{"{ 05af8d07-0b38-44a6-8d50-49731ae2625d }"}
 		s %Name{"FullbrightMaterial"}
-	}
-}
-o
-{
-	Uuid %id{u4{4263562520226083984,5547604773862745455}}
-	s %t{"plCollectionAssetEntry"}
-	u3 %v{1}
-	p
-	{
-		s %Asset{"{ e19df82d-f16b-48c3-bc52-0b66f5ebe45e }"}
-		s %Name{"PlasmaTexture"}
 	}
 }
 o
@@ -250,8 +209,6 @@ o
 			Uuid{u4{9763702991569668230,5044119589064127174}}
 			Uuid{u4{9678958425463295414,5623681418031130790}}
 			Uuid{u4{9702148624811856300,5624788208411000712}}
-			Uuid{u4{18413158107033146038,5264914848442346985}}
-			Uuid{u4{4263562520226083984,5547604773862745455}}
 		}
 	}
 }
@@ -273,7 +230,7 @@ o
 	u3 %v{1}
 	p
 	{
-		s %Asset{"{ 618ee743-ed04-4fac-bf5f-572939db2f1d }"}
+		s %Asset{"{ e9e6b167-c18c-4260-9b0e-4cf4503c1463 }"}
 		s %Name{"MissingMesh"}
 	}
 }
@@ -318,7 +275,7 @@ Types
 {
 o
 {
-	Uuid %id{u4{13945755425651394373,8113293788220373438}}
+	Uuid %id{u4{13590641013881919643,2844595810355963325}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -327,7 +284,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plCollectionAssetEntry"}
 		u3 %TypeVersion{1}
@@ -335,7 +292,7 @@ o
 }
 o
 {
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -352,7 +309,7 @@ o
 }
 o
 {
-	Uuid %id{u4{11192746898462049744,11240724253243930222}}
+	Uuid %id{u4{12165807254422627566,15044647769667105818}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -361,7 +318,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plCollectionAssetData"}
 		u3 %TypeVersion{1}
@@ -369,7 +326,7 @@ o
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p

@@ -17,13 +17,13 @@ struct plGizmoEvent
     CancelInteractions,
   };
 
-  const PlasmaEditorInputContext* m_pGizmo = nullptr;
+  const plEditorInputContext* m_pGizmo = nullptr;
   Type m_Type;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plGizmo : public PlasmaEditorInputContext
+class PL_EDITORFRAMEWORK_DLL plGizmo : public plEditorInputContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmo, PlasmaEditorInputContext);
+  PL_ADD_DYNAMIC_REFLECTION(plGizmo, plEditorInputContext);
 
 public:
   plGizmo();
@@ -34,12 +34,12 @@ public:
   void SetTransformation(const plTransform& transform);
   const plTransform& GetTransformation() const { return m_Transformation; }
 
-  void ConfigureInteraction(plGizmoHandle* pHandle, const plCamera* pCamera, const plVec3& vInteractionPivot, const plVec2I32& viewport)
+  void ConfigureInteraction(plGizmoHandle* pHandle, const plCamera* pCamera, const plVec3& vInteractionPivot, const plVec2I32& vViewport)
   {
     m_pInteractionGizmoHandle = pHandle;
     m_pCamera = pCamera;
     m_vInteractionPivot = vInteractionPivot;
-    m_vViewport = viewport;
+    m_vViewport = vViewport;
   }
 
   plEvent<const plGizmoEvent&> m_GizmoEvents;

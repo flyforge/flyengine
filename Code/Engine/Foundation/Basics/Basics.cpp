@@ -2,14 +2,14 @@
 
 #include <Foundation/Memory/CommonAllocators.h>
 
-#if PLASMA_ENABLED(PLASMA_USE_GUARDED_ALLOCATIONS)
-using DefaultHeapType = plGuardedAllocator;
-using DefaultAlignedHeapType = plGuardedAllocator;
-using DefaultStaticHeapType = plGuardedAllocator;
+#if PL_ENABLED(PL_ALLOC_GUARD_ALLOCATIONS)
+using DefaultHeapType = plGuardingAllocator;
+using DefaultAlignedHeapType = plGuardingAllocator;
+using DefaultStaticsHeapType = plAllocatorWithPolicy<plAllocPolicyGuarding, plAllocatorTrackingMode::AllocationStatsIgnoreLeaks>;
 #else
 using DefaultHeapType = plHeapAllocator;
 using DefaultAlignedHeapType = plAlignedHeapAllocator;
-using DefaultStaticHeapType = plHeapAllocator;
+using DefaultStaticsHeapType = plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::AllocationStatsIgnoreLeaks>;
 #endif
 
 enum
@@ -18,21 +18,21 @@ enum
   ALIGNED_ALLOCATOR_BUFFER_SIZE = sizeof(DefaultAlignedHeapType)
 };
 
-alignas(PLASMA_ALIGNMENT_MINIMUM) static plUInt8 s_DefaultAllocatorBuffer[HEAP_ALLOCATOR_BUFFER_SIZE];
-alignas(PLASMA_ALIGNMENT_MINIMUM) static plUInt8 s_StaticAllocatorBuffer[HEAP_ALLOCATOR_BUFFER_SIZE];
+alignas(PL_ALIGNMENT_MINIMUM) static plUInt8 s_DefaultAllocatorBuffer[HEAP_ALLOCATOR_BUFFER_SIZE];
+alignas(PL_ALIGNMENT_MINIMUM) static plUInt8 s_StaticAllocatorBuffer[HEAP_ALLOCATOR_BUFFER_SIZE];
 
-alignas(PLASMA_ALIGNMENT_MINIMUM) static plUInt8 s_AlignedAllocatorBuffer[ALIGNED_ALLOCATOR_BUFFER_SIZE];
+alignas(PL_ALIGNMENT_MINIMUM) static plUInt8 s_AlignedAllocatorBuffer[ALIGNED_ALLOCATOR_BUFFER_SIZE];
 
 bool plFoundation::s_bIsInitialized = false;
-plAllocatorBase* plFoundation::s_pDefaultAllocator = nullptr;
-plAllocatorBase* plFoundation::s_pAlignedAllocator = nullptr;
+plAllocator* plFoundation::s_pDefaultAllocator = nullptr;
+plAllocator* plFoundation::s_pAlignedAllocator = nullptr;
 
 void plFoundation::Initialize()
 {
   if (s_bIsInitialized)
     return;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   plMemoryUtils::ReserveLower4GBAddressSpace();
 #endif
 
@@ -49,25 +49,25 @@ void plFoundation::Initialize()
   s_bIsInitialized = true;
 }
 
-#if defined(PLASMA_CUSTOM_STATIC_ALLOCATOR_FUNC)
-extern plAllocatorBase* PLASMA_CUSTOM_STATIC_ALLOCATOR_FUNC();
+#if defined(PL_CUSTOM_STATIC_ALLOCATOR_FUNC)
+extern plAllocator* PL_CUSTOM_STATIC_ALLOCATOR_FUNC();
 #endif
 
-plAllocatorBase* plFoundation::GetStaticAllocator()
+plAllocator* plFoundation::GetStaticsAllocator()
 {
-  static plAllocatorBase* pStaticAllocator = nullptr;
+  static plAllocator* pStaticAllocator = nullptr;
 
   if (pStaticAllocator == nullptr)
   {
-#if defined(PLASMA_CUSTOM_STATIC_ALLOCATOR_FUNC)
+#if defined(PL_CUSTOM_STATIC_ALLOCATOR_FUNC)
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
+#  if PL_ENABLED(PL_COMPILE_ENGINE_AS_DLL)
 
-#    if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-    using GetStaticAllocatorFunc = plAllocatorBase* (*)();
+#    if PL_ENABLED(PL_PLATFORM_WINDOWS)
+    using GetStaticAllocatorFunc = plAllocator* (*)();
 
     HMODULE hThisModule = GetModuleHandle(nullptr);
-    GetStaticAllocatorFunc func = (GetStaticAllocatorFunc)GetProcAddress(hThisModule, PLASMA_CUSTOM_STATIC_ALLOCATOR_FUNC);
+    GetStaticAllocatorFunc func = (GetStaticAllocatorFunc)GetProcAddress(hThisModule, PL_CUSTOM_STATIC_ALLOCATOR_FUNC);
     if (func != nullptr)
     {
       pStaticAllocator = (*func)();
@@ -78,17 +78,13 @@ plAllocatorBase* plFoundation::GetStaticAllocator()
 #    endif
 
 #  else
-    return PLASMA_CUSTOM_STATIC_ALLOCATOR_FUNC();
+    return PL_CUSTOM_STATIC_ALLOCATOR_FUNC();
 #  endif
 
 #endif
 
-    pStaticAllocator = new (s_StaticAllocatorBuffer) DefaultStaticHeapType(PLASMA_STATIC_ALLOCATOR_NAME);
+    pStaticAllocator = new (s_StaticAllocatorBuffer) DefaultStaticsHeapType("Statics");
   }
 
   return pStaticAllocator;
 }
-
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Basics);

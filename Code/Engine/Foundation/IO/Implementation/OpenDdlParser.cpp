@@ -37,7 +37,7 @@ bool IsDdlIdentifierCharacter(plUInt32 uiByte)
 
 void plOpenDdlParser::SetInputStream(plStreamReader& stream, plUInt32 uiFirstLineOffset /*= 0*/)
 {
-  PLASMA_ASSERT_DEV(m_StateStack.IsEmpty(), "OpenDDL Parser cannot be restarted");
+  PL_ASSERT_DEV(m_StateStack.IsEmpty(), "OpenDDL Parser cannot be restarted");
 
   m_pInput = &stream;
 
@@ -129,7 +129,7 @@ bool plOpenDdlParser::ContinueParsing()
       return true;
 
     default:
-      PLASMA_REPORT_FAILURE("Unknown State in OpenDDL parser state machine.");
+      PL_REPORT_FAILURE("Unknown State in OpenDDL parser state machine.");
       return false;
   }
 }
@@ -140,12 +140,12 @@ plResult plOpenDdlParser::ParseAll()
   {
   }
 
-  return m_bHadFatalParsingError ? PLASMA_FAILURE : PLASMA_SUCCESS;
+  return m_bHadFatalParsingError ? PL_FAILURE : PL_SUCCESS;
 }
 
 void plOpenDdlParser::SkipRestOfObject()
 {
-  PLASMA_ASSERT_DEBUG(!m_bSkippingMode, "Skipping mode is in an invalid state.");
+  PL_ASSERT_DEBUG(!m_bSkippingMode, "Skipping mode is in an invalid state.");
 
   m_bSkippingMode = true;
 
@@ -652,7 +652,7 @@ void plOpenDdlParser::ReadString()
         default:
         {
           plStringBuilder s;
-          s.Format("Unknown escape-sequence '\\{0}'", plArgC(m_uiCurByte));
+          s.SetFormat("Unknown escape-sequence '\\{0}'", plArgC(m_uiCurByte));
           ParsingError(s, false);
         }
         break;
@@ -747,7 +747,7 @@ void plOpenDdlParser::PurgeCachedPrimitives(bool bThisIsAll)
         break;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         break;
     }
   }
@@ -863,10 +863,10 @@ void plOpenDdlParser::ContinueBool()
       // We actually use '1' and '0' in compact mode
 
       bool bRes = false;
-      if (plConversionUtils::StringToBool((const char*)&m_TempString[0], bRes) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToBool((const char*)&m_TempString[0], bRes) == PL_FAILURE)
       {
         plStringBuilder s;
-        s.Format("Parsing value: Expected 'true' or 'false', Got '{0}' instead.", (const char*)&m_TempString[0]);
+        s.SetFormat("Parsing value: Expected 'true' or 'false', Got '{0}' instead.", (const char*)&m_TempString[0]);
         ParsingError(s.GetData(), false);
       }
 
@@ -1038,7 +1038,7 @@ void plOpenDdlParser::ContinueInt()
     }
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 }
@@ -1105,10 +1105,10 @@ void plOpenDdlParser::ContinueFloat()
     // Decimal literal
     ReadDecimalFloat();
 
-    if (plConversionUtils::StringToFloat((const char*)&m_TempString[0], dValue) == PLASMA_FAILURE)
+    if (plConversionUtils::StringToFloat((const char*)&m_TempString[0], dValue) == PL_FAILURE)
     {
       plStringBuilder s;
-      s.Format("Reading number failed: Could not convert '{0}' to a floating point value.", (const char*)&m_TempString[0]);
+      s.SetFormat("Reading number failed: Could not convert '{0}' to a floating point value.", (const char*)&m_TempString[0]);
       ParsingError(s.GetData(), true);
     }
 
@@ -1143,7 +1143,7 @@ void plOpenDdlParser::ContinueFloat()
     }
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 }
@@ -1221,5 +1221,3 @@ plUInt64 plOpenDdlParser::ReadDecimalLiteral()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_OpenDdlParser);

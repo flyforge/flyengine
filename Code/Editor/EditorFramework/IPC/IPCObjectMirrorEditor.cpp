@@ -8,34 +8,34 @@ plIPCObjectMirrorEditor::plIPCObjectMirrorEditor()
   m_pIPC = nullptr;
 }
 
-plIPCObjectMirrorEditor::~plIPCObjectMirrorEditor() {}
+plIPCObjectMirrorEditor::~plIPCObjectMirrorEditor() = default;
 
-void plIPCObjectMirrorEditor::SetIPC(PlasmaEditorEngineConnection* pIPC)
+void plIPCObjectMirrorEditor::SetIPC(plEditorEngineConnection* pIPC)
 {
-  PLASMA_ASSERT_DEBUG(m_pContext == nullptr, "Need to call SetIPC before SetReceiver");
+  PL_ASSERT_DEBUG(m_pContext == nullptr, "Need to call SetIPC before SetReceiver");
   m_pIPC = pIPC;
 }
 
-PlasmaEditorEngineConnection* plIPCObjectMirrorEditor::GetIPC()
+plEditorEngineConnection* plIPCObjectMirrorEditor::GetIPC()
 {
   return m_pIPC;
 }
 
-void plIPCObjectMirrorEditor::ApplyOp(plObjectChange& change)
+void plIPCObjectMirrorEditor::ApplyOp(plObjectChange& ref_change)
 {
   if (m_pManager)
   {
-    SendOp(change);
+    SendOp(ref_change);
   }
   else
   {
-    PLASMA_REPORT_FAILURE("plIPCObjectMirrorEngine not set up for sender nor receiver!");
+    PL_REPORT_FAILURE("plIPCObjectMirrorEngine not set up for sender nor receiver!");
   }
 }
 
 void plIPCObjectMirrorEditor::SendOp(plObjectChange& change)
 {
-  PLASMA_ASSERT_DEBUG(m_pIPC != nullptr, "Need to call SetIPC before SetReceiver");
+  PL_ASSERT_DEBUG(m_pIPC != nullptr, "Need to call SetIPC before SetReceiver");
 
   plEntityMsgToEngine msg;
   msg.m_change = std::move(change);

@@ -70,7 +70,7 @@ public:
   plEnumAccessorProperty(const char* szPropertyName, GetterFunc getter, SetterFunc setter)
     : plTypedEnumProperty<EnumType>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
     plAbstractMemberProperty::m_Flags.Add(plPropertyFlags::IsEnum);
 
     m_Getter = getter;
@@ -94,7 +94,7 @@ public:
 
   virtual void SetValue(void* pInstance, plInt64 value) const override // [tested]
   {
-    PLASMA_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     if (m_Setter)
       (static_cast<Class*>(pInstance)->*m_Setter)((typename EnumType::Enum)value);
   }
@@ -118,7 +118,7 @@ public:
   plEnumMemberProperty(const char* szPropertyName, GetterFunc getter, SetterFunc setter, PointerFunc pointer)
     : plTypedEnumProperty<EnumType>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
     plAbstractMemberProperty::m_Flags.Add(plPropertyFlags::IsEnum);
 
     m_Getter = getter;
@@ -139,7 +139,7 @@ public:
 
   virtual void SetValue(void* pInstance, plInt64 value) const override // [tested]
   {
-    PLASMA_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
 
     if (m_Setter)
       m_Setter(static_cast<Class*>(pInstance), (typename EnumType::Enum)value);

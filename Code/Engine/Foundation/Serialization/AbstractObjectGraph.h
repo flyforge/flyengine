@@ -13,7 +13,7 @@
 
 class plAbstractObjectGraph;
 
-class PLASMA_FOUNDATION_DLL plAbstractObjectNode
+class PL_FOUNDATION_DLL plAbstractObjectNode
 {
 public:
   struct Property
@@ -39,7 +39,7 @@ public:
   void ClearProperties();
 
   // \brief Inlines a custom variant type. Use to patch properties that have been turned into custom variant type.
-  // \sa PLASMA_DEFINE_CUSTOM_VARIANT_TYPE, PLASMA_DECLARE_CUSTOM_VARIANT_TYPE
+  // \sa PL_DEFINE_CUSTOM_VARIANT_TYPE, PL_DECLARE_CUSTOM_VARIANT_TYPE
   plResult InlineProperty(plStringView sName);
 
   const plAbstractObjectGraph* GetOwner() const { return m_pOwner; }
@@ -66,9 +66,9 @@ private:
 
   plHybridArray<Property, 16> m_Properties;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plAbstractObjectNode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plAbstractObjectNode);
 
-struct PLASMA_FOUNDATION_DLL plAbstractGraphDiffOperation
+struct PL_FOUNDATION_DLL plAbstractGraphDiffOperation
 {
   enum class Op
   {
@@ -84,7 +84,7 @@ struct PLASMA_FOUNDATION_DLL plAbstractGraphDiffOperation
   plVariant m_Value;
 };
 
-struct PLASMA_FOUNDATION_DLL plObjectChangeType
+struct PL_FOUNDATION_DLL plObjectChangeType
 {
   using StorageType = plInt8;
 
@@ -99,10 +99,10 @@ struct PLASMA_FOUNDATION_DLL plObjectChangeType
     Default = NodeAdded
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plObjectChangeType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plObjectChangeType);
 
 
-struct PLASMA_FOUNDATION_DLL plDiffOperation
+struct PL_FOUNDATION_DLL plDiffOperation
 {
   plEnum<plObjectChangeType> m_Operation;
   plUuid m_Node;        // owner of m_sProperty
@@ -110,10 +110,10 @@ struct PLASMA_FOUNDATION_DLL plDiffOperation
   plVariant m_Index;
   plVariant m_Value;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plDiffOperation);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plDiffOperation);
 
 
-class PLASMA_FOUNDATION_DLL plAbstractObjectGraph
+class PL_FOUNDATION_DLL plAbstractObjectGraph
 {
 public:
   plAbstractObjectGraph() = default;
@@ -172,7 +172,7 @@ public:
   void MergeDiffs(const plDeque<plAbstractGraphDiffOperation>& lhs, const plDeque<plAbstractGraphDiffOperation>& rhs, plDeque<plAbstractGraphDiffOperation>& ref_out) const;
 
 private:
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAbstractObjectGraph);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAbstractObjectGraph);
 
   void RemapVariant(plVariant& value, const plHashTable<plUuid, plUuid>& guidMap);
   void MergeArrays(const plVariantArray& baseArray, const plVariantArray& leftArray, const plVariantArray& rightArray, plVariantArray& out) const;

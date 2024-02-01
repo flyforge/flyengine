@@ -6,7 +6,7 @@
 /// \brief This struct defines the different states a key can be in.
 ///        All keys always go through the states 'Pressed' and 'Released', even if they are active for only one frame.
 ///        A key is 'Down' when it is pressed for at least two frames. It is 'Up' when it is not pressed for at least two frames.
-struct PLASMA_CORE_DLL plKeyState
+struct PL_CORE_DLL plKeyState
 {
   enum Enum
   {
@@ -17,7 +17,7 @@ struct PLASMA_CORE_DLL plKeyState
   };
 
   /// \brief Computes the new key state from a previous key state and whether it is currently pressed or not.
-  static plKeyState::Enum GetNewKeyState(plKeyState::Enum PrevState, bool bKeyDown);
+  static plKeyState::Enum GetNewKeyState(plKeyState::Enum prevState, bool bKeyDown);
 };
 
 // clang-format off
@@ -31,24 +31,24 @@ struct PLASMA_CORE_DLL plKeyState
 /// You an additionally also use the prefix of the input slot name, to filter out all touch input slots etc. if necessary.
 struct plInputSlotFlags
 {
-  typedef plUInt16 StorageType;
+  using StorageType = plUInt16;
 
   enum Enum
   {
     None                      = 0,
 
-    ReportsRelativeValues     = PLASMA_BIT(0),  ///< The input slot reports delta values (e.g. a mouse move), instead of absolute values.
-    ValueBinaryZeroOrOne      = PLASMA_BIT(1),  ///< The input slot will either be zero or one. Used for all buttons and keys.
-    ValueRangeZeroToOne       = PLASMA_BIT(2),  ///< The input slot has analog values between zero and one. Used for analog axis like the xbox triggers or thumb-sticks.
-    ValueRangeZeroToInf       = PLASMA_BIT(3),  ///< The input slot has unbounded values larger than zero. Used for all absolute positions, such as the mouse position.
-    Pressable                 = PLASMA_BIT(4),  ///< The slot can be pressed (e.g. a key). This is not possible for an axis, such as the mouse or an analog stick.
-    Holdable                  = PLASMA_BIT(5),  ///< The user can hold down the key. Possible for buttons, but not for axes or for wheels such as the mouse wheel.
-    HalfAxis                  = PLASMA_BIT(6),  ///< The input slot represents one half of the actually possible data. Used for all axes (pos / neg mouse movement, thumb-sticks).
-    FullAxis                  = PLASMA_BIT(7),  ///< The input slot represents one full axis. Mostly used for devices that report absolute values, such as the mouse position or touch input positions (values between zero and one) 
-    RequiresDeadZone          = PLASMA_BIT(8),  ///< The input slot represents hardware that should use a dead zone, otherwise it might fire prematurely. Mostly used on thumb-sticks and trigger buttons.
-    ValuesAreNonContinuous    = PLASMA_BIT(9),  ///< The values of the slot can jump around randomly, ie. the user can input arbitrary values, like the position on a touchpad
-    ActivationDependsOnOthers = PLASMA_BIT(10), ///< Whether this slot can be activated depends on whether certain other slots are active. This is the case for touch-points which are numbered depending on how many other touch-points are already active.
-    NeverTimeScale            = PLASMA_BIT(11), ///< When this flag is specified, data from the input slot will never be scaled by the input update time difference. Important for mouse deltas and such.
+    ReportsRelativeValues     = PL_BIT(0),  ///< The input slot reports delta values (e.g. a mouse move), instead of absolute values.
+    ValueBinaryZeroOrOne      = PL_BIT(1),  ///< The input slot will either be zero or one. Used for all buttons and keys.
+    ValueRangeZeroToOne       = PL_BIT(2),  ///< The input slot has analog values between zero and one. Used for analog axis like the xbox triggers or thumb-sticks.
+    ValueRangeZeroToInf       = PL_BIT(3),  ///< The input slot has unbounded values larger than zero. Used for all absolute positions, such as the mouse position.
+    Pressable                 = PL_BIT(4),  ///< The slot can be pressed (e.g. a key). This is not possible for an axis, such as the mouse or an analog stick.
+    Holdable                  = PL_BIT(5),  ///< The user can hold down the key. Possible for buttons, but not for axes or for wheels such as the mouse wheel.
+    HalfAxis                  = PL_BIT(6),  ///< The input slot represents one half of the actually possible data. Used for all axes (pos / neg mouse movement, thumb-sticks).
+    FullAxis                  = PL_BIT(7),  ///< The input slot represents one full axis. Mostly used for devices that report absolute values, such as the mouse position or touch input positions (values between zero and one)
+    RequiresDeadZone          = PL_BIT(8),  ///< The input slot represents hardware that should use a dead zone, otherwise it might fire prematurely. Mostly used on thumb-sticks and trigger buttons.
+    ValuesAreNonContinuous    = PL_BIT(9),  ///< The values of the slot can jump around randomly, ie. the user can input arbitrary values, like the position on a touchpad
+    ActivationDependsOnOthers = PL_BIT(10), ///< Whether this slot can be activated depends on whether certain other slots are active. This is the case for touch-points which are numbered depending on how many other touch-points are already active.
+    NeverTimeScale            = PL_BIT(11), ///< When this flag is specified, data from the input slot will never be scaled by the input update time difference. Important for mouse deltas and such.
 
 
     // Some predefined sets of flags for the most common use cases
@@ -83,7 +83,7 @@ struct plInputSlotFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plInputSlotFlags);
+PL_DECLARE_FLAGS_OPERATORS(plInputSlotFlags);
 
 #define plInputSlot_None                  ""
 

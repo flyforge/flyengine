@@ -7,7 +7,7 @@
 #include <RendererCore/Pipeline/Declarations.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-PLASMA_DECLARE_FLAGS(plUInt8, plReflectionProbeUpdaterFlags, SkyLight, HasCustomCubeMap);
+PL_DECLARE_FLAGS(plUInt8, plReflectionProbeUpdaterFlags, SkyLight, HasCustomCubeMap);
 
 /// \brief Renders reflection probes and stores filtered mipmap chains into an atlas texture as well as computing sky irradiance
 /// Rendering sky irradiance is optional and only done if m_iIrradianceOutputIndex != -1.
@@ -37,7 +37,7 @@ public:
   /// \param desc Probe render settings.
   /// \param globalTransform World position to be rendered.
   /// \param target Where the probe should be rendered into.
-  /// \return Returns PLASMA_FAILURE if no more free slots are available.
+  /// \return Returns PL_FAILURE if no more free slots are available.
   plResult StartDynamicUpdate(const plReflectionProbeRef& probe, const plReflectionProbeDesc& desc, const plTransform& globalTransform, const TargetSlot& target);
 
   /// \brief Starts filtering an existing cube map into a new reflection probe.
@@ -45,7 +45,7 @@ public:
   /// \param desc Probe render settings.
   /// \param sourceTexture Cube map that should be filtered into a reflection probe.
   /// \param target Where the probe should be rendered into.
-  /// \return Returns PLASMA_FAILURE if no more free slots are available.
+  /// \return Returns PL_FAILURE if no more free slots are available.
   plResult StartFilterUpdate(const plReflectionProbeRef& probe, const plReflectionProbeDesc& desc, plTextureCubeResourceHandle hSourceTexture, const TargetSlot& target);
 
   /// \brief Cancel a previously started update.
@@ -66,7 +66,7 @@ private:
 
   struct UpdateStep
   {
-    typedef plUInt8 StorageType;
+    using StorageType = plUInt8;
 
     enum Enum
     {
@@ -101,7 +101,7 @@ private:
 
     struct Step
     {
-      PLASMA_DECLARE_POD_TYPE();
+      PL_DECLARE_POD_TYPE();
 
       plUInt8 m_uiViewIndex;
       plEnum<UpdateStep> m_UpdateStep;

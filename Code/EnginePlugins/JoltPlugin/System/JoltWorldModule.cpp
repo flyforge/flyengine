@@ -23,9 +23,9 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plJoltWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE
+PL_IMPLEMENT_WORLD_MODULE(plJoltWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE
 // clang-format on
 
 plCVarBool cvar_JoltSimulationPause("Jolt.Simulation.Pause", false, plCVarFlags::None, "Pauses the physics simulation.");
@@ -41,12 +41,11 @@ plCVarBool cvar_JoltVisualizeGeometry("Jolt.Visualize.Geometry", false, plCVarFl
 plCVarBool cvar_JoltVisualizeGeometryExclusive("Jolt.Visualize.Exclusive", false, plCVarFlags::Save, "Hides regularly rendered geometry.");
 plCVarFloat cvar_JoltVisualizeDistance("Jolt.Visualize.Distance", 30.0f, plCVarFlags::Save, "How far away objects to visualize.");
 
-
 plJoltWorldModule::plJoltWorldModule(plWorld* pWorld)
   : plPhysicsWorldModuleInterface(pWorld)
 //, m_FreeObjectFilterIDs(plJolt::GetSingleton()->GetAllocator()) // could use a proxy allocator to bin those
 {
-  m_pSimulateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "Jolt::Simulate", plMakeDelegate(&plJoltWorldModule::Simulate, this));
+  m_pSimulateTask = PL_DEFAULT_NEW(plDelegateTask<void>, "Jolt::Simulate", plTaskNesting::Never, plMakeDelegate(&plJoltWorldModule::Simulate, this));
   m_pSimulateTask->ConfigureTask("Jolt Simulate", plTaskNesting::Maybe);
 }
 
@@ -134,11 +133,11 @@ void plJoltWorldModule::Deinitialize()
   m_pTempAllocator = nullptr;
 
   plJoltBodyActivationListener* pActivationListener = reinterpret_cast<plJoltBodyActivationListener*>(m_pActivationListener);
-  PLASMA_DEFAULT_DELETE(pActivationListener);
+  PL_DEFAULT_DELETE(pActivationListener);
   m_pActivationListener = nullptr;
 
   plJoltContactListener* pContactListener = reinterpret_cast<plJoltContactListener*>(m_pContactListener);
-  PLASMA_DEFAULT_DELETE(pContactListener);
+  PL_DEFAULT_DELETE(pContactListener);
   m_pContactListener = nullptr;
 
   m_pGroupFilter->Release();
@@ -224,13 +223,13 @@ public:
     uiSize = plMath::Max(uiSize, 1024u * 1024u);
 
     auto& alloc = m_Chunks.ExpandAndGetRef();
-    alloc.m_pPtr = PLASMA_NEW_RAW_BUFFER(&m_ProxyAlloc, plUInt8, uiSize);
+    alloc.m_pPtr = PL_NEW_RAW_BUFFER(&m_ProxyAlloc, plUInt8, uiSize);
     alloc.m_uiSize = uiSize;
   }
 
   void ClearChunk(plUInt32 uiChunkIdx)
   {
-    PLASMA_DELETE_RAW_BUFFER(&m_ProxyAlloc, m_Chunks[uiChunkIdx].m_pPtr);
+    PL_DELETE_RAW_BUFFER(&m_ProxyAlloc, m_Chunks[uiChunkIdx].m_pPtr);
     m_Chunks[uiChunkIdx].m_pPtr = nullptr;
     m_Chunks[uiChunkIdx].m_uiSize = 0;
     m_Chunks[uiChunkIdx].m_uiLastOffset = 0;
@@ -265,7 +264,7 @@ void plJoltWorldModule::Initialize()
   m_pSystem->Init(cMaxBodies, cNumBodyMutexes, cMaxBodyPairs, cMaxContactConstraints, m_ObjectToBroadphase, m_ObjectVsBroadphaseFilter, m_ObjectLayerPairFilter);
 
   {
-    plJoltBodyActivationListener* pListener = PLASMA_DEFAULT_NEW(plJoltBodyActivationListener);
+    plJoltBodyActivationListener* pListener = PL_DEFAULT_NEW(plJoltBodyActivationListener);
     m_pActivationListener = pListener;
     pListener->m_pActiveActors = &m_ActiveActors;
     pListener->m_pActiveRagdolls = &m_ActiveRagdolls;
@@ -275,7 +274,7 @@ void plJoltWorldModule::Initialize()
   }
 
   {
-    plJoltContactListener* pListener = PLASMA_DEFAULT_NEW(plJoltContactListener);
+    plJoltContactListener* pListener = PL_DEFAULT_NEW(plJoltContactListener);
     pListener->m_pWorld = GetWorld();
     m_pContactListener = pListener;
     m_pSystem->SetContactListener(pListener);
@@ -295,7 +294,7 @@ void plJoltWorldModule::Initialize()
 void plJoltWorldModule::OnSimulationStarted()
 {
   {
-    auto startSimDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltWorldModule::StartSimulation, this);
+    auto startSimDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltWorldModule::StartSimulation, this);
     startSimDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
     startSimDesc.m_bOnlyUpdateWhenSimulating = true;
     // Start physics simulation as late as possible in the first synchronous phase
@@ -306,7 +305,7 @@ void plJoltWorldModule::OnSimulationStarted()
   }
 
   {
-    auto fetchResultsDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltWorldModule::FetchResults, this);
+    auto fetchResultsDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltWorldModule::FetchResults, this);
     fetchResultsDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostAsync;
     fetchResultsDesc.m_bOnlyUpdateWhenSimulating = true;
     // Fetch results as early as possible after async phase.
@@ -320,7 +319,7 @@ void plJoltWorldModule::OnSimulationStarted()
   UpdateSettingsCfg();
   ApplySettingsCfg();
 
-  m_AccumulatedTimeSinceUpdate = plTime::Zero();
+  m_AccumulatedTimeSinceUpdate = plTime::MakeZero();
 }
 
 plUInt32 plJoltWorldModule::CreateObjectFilterID()
@@ -375,7 +374,7 @@ void plJoltWorldModule::DeallocateUserData(plUInt32& ref_uiUserDataId)
 
 const plJoltUserData& plJoltWorldModule::GetUserData(plUInt32 uiUserDataId) const
 {
-  PLASMA_ASSERT_DEBUG(uiUserDataId != plInvalidIndex, "Invalid plJoltUserData ID");
+  PL_ASSERT_DEBUG(uiUserDataId != plInvalidIndex, "Invalid plJoltUserData ID");
 
   return m_AllocatedUserData[uiUserDataId];
 }
@@ -446,7 +445,7 @@ void plJoltWorldModule::ActivateCharacterController(plJoltCharacterControllerCom
 {
   if (bActivate)
   {
-    PLASMA_ASSERT_DEBUG(!m_ActiveCharacters.Contains(pCharacter), "plJoltCharacterControllerComponent was activated more than once.");
+    PL_ASSERT_DEBUG(!m_ActiveCharacters.Contains(pCharacter), "plJoltCharacterControllerComponent was activated more than once.");
 
     m_ActiveCharacters.PushBack(pCharacter);
   }
@@ -454,7 +453,7 @@ void plJoltWorldModule::ActivateCharacterController(plJoltCharacterControllerCom
   {
     if (!m_ActiveCharacters.RemoveAndSwap(pCharacter))
     {
-      PLASMA_ASSERT_DEBUG(false, "plJoltCharacterControllerComponent was deactivated more than once.");
+      PL_ASSERT_DEBUG(false, "plJoltCharacterControllerComponent was deactivated more than once.");
     }
   }
 }
@@ -586,10 +585,10 @@ void plJoltWorldModule::StartSimulation(const plWorldModule::UpdateContext& cont
 
 void plJoltWorldModule::FetchResults(const plWorldModule::UpdateContext& context)
 {
-  PLASMA_PROFILE_SCOPE("FetchResults");
+  PL_PROFILE_SCOPE("FetchResults");
 
   {
-    PLASMA_PROFILE_SCOPE("Wait for Simulate Task");
+    PL_PROFILE_SCOPE("Wait for Simulate Task");
     plTaskSystem::WaitForGroup(m_SimulateTaskGroupId);
   }
 
@@ -646,7 +645,7 @@ void plJoltWorldModule::FetchResults(const plWorldModule::UpdateContext& context
 
 plTime plJoltWorldModule::CalculateUpdateSteps()
 {
-  plTime tSimulatedTimeStep = plTime::Zero();
+  plTime tSimulatedTimeStep = plTime::MakeZero();
   m_AccumulatedTimeSinceUpdate += GetWorld()->GetClock().GetTimeDiff();
   m_UpdateSteps.Clear();
 
@@ -656,11 +655,11 @@ plTime plJoltWorldModule::CalculateUpdateSteps()
     m_UpdateSteps.PushBack(m_AccumulatedTimeSinceUpdate);
 
     tSimulatedTimeStep = m_AccumulatedTimeSinceUpdate;
-    m_AccumulatedTimeSinceUpdate = plTime::Zero();
+    m_AccumulatedTimeSinceUpdate = plTime::MakeZero();
   }
   else if (m_Settings.m_SteppingMode == plJoltSteppingMode::Fixed)
   {
-    const plTime tFixedStep = plTime::Seconds(1.0 / m_Settings.m_fFixedFrameRate);
+    const plTime tFixedStep = plTime::MakeFromSeconds(1.0 / m_Settings.m_fFixedFrameRate);
 
     plUInt32 uiNumSubSteps = 0;
 
@@ -675,7 +674,7 @@ plTime plJoltWorldModule::CalculateUpdateSteps()
   }
   else if (m_Settings.m_SteppingMode == plJoltSteppingMode::SemiFixed)
   {
-    plTime tFixedStep = plTime::Seconds(1.0 / m_Settings.m_fFixedFrameRate);
+    plTime tFixedStep = plTime::MakeFromSeconds(1.0 / m_Settings.m_fFixedFrameRate);
     const plTime tMinStep = tFixedStep * 0.25;
 
     if (tFixedStep * m_Settings.m_uiMaxSubSteps < m_AccumulatedTimeSinceUpdate) // in case too much time has passed
@@ -705,7 +704,7 @@ void plJoltWorldModule::Simulate()
   if (m_UpdateSteps.IsEmpty())
     return;
 
-  PLASMA_PROFILE_SCOPE("Physics Simulation");
+  PL_PROFILE_SCOPE("Physics Simulation");
 
   plTime tDelta = m_UpdateSteps[0];
   plUInt32 uiSteps = 1;
@@ -714,7 +713,7 @@ void plJoltWorldModule::Simulate()
 
   for (plUInt32 i = 1; i < m_UpdateSteps.GetCount(); ++i)
   {
-    PLASMA_PROFILE_SCOPE("Physics Sim Step");
+    PL_PROFILE_SCOPE("Physics Sim Step");
 
     if (m_UpdateSteps[i] == tDelta)
     {
@@ -781,9 +780,9 @@ struct DebugVis
   plColor m_Color;
 };
 
-const char* szMatSolid = "{ ecf3cc38-3d23-4f35-a34d-ab056d5ff6a5 }";       // Data/Base/Materials/Common/PhysicsColliders.plMaterialAsset
-const char* szMatTransparent = "{ 7e842c33-ff80-437b-9a44-21536c9cdc99 }"; // Data/Base/Materials/Common/PhysicsCollidersTransparent.plMaterialAsset
-const char* szMatTwoSided = "{ f2d14696-2040-4a46-a957-fd6ad75cee32 }";    // Data/Base/Materials/Common/PhysicsCollidersSoft.plMaterialAsset
+const char* szMatSolid = "{ e6367876-ddb5-4149-ba80-180af553d463 }";       // Data/Base/Materials/Common/PhysicsColliders.plMaterialAsset
+const char* szMatTransparent = "{ ca43dda3-a28c-41fe-ae20-419182e56f87 }"; // Data/Base/Materials/Common/PhysicsCollidersTransparent.plMaterialAsset
+const char* szMatTwoSided = "{ b03df0e4-98b7-49ba-8413-d981014a77be }";    // Data/Base/Materials/Common/PhysicsCollidersSoft.plMaterialAsset
 
 static const DebugVis s_Vis[plPhysicsShapeType::Count][2] =
   {
@@ -966,7 +965,7 @@ void plJoltWorldModule::DebugDrawGeometry(const plVec3& vCenter, float fRadius, 
 
     if (!shapeGeo.m_hMesh.IsValid() || (geo.m_bMutableGeometry && lock.GetBody().IsActive()))
     {
-      shapeGeo.m_Bounds.SetInvalid();
+      shapeGeo.m_Bounds = plBoundingBox::MakeInvalid();
 
       JPH::Shape::GetTrianglesContext ctx;
       ts.mShape->GetTrianglesStart(ctx, JPH::AABox::sBiggest(), JPH::Vec3::sZero(), JPH::Quat::sIdentity(), JPH::Vec3::sReplicate(1.0f));
@@ -992,7 +991,7 @@ void plJoltWorldModule::DebugDrawGeometry(const plVec3& vCenter, float fRadius, 
         desc.m_bColorStream = false;
 
         plStringBuilder sGuid;
-        sGuid.Format("ColMeshVisGeo_{}", s_iColMeshVisGeoCounter.Increment());
+        sGuid.SetFormat("ColMeshVisGeo_{}", s_iColMeshVisGeoCounter.Increment());
 
         if (!shapeGeo.m_hMesh.IsValid())
         {
@@ -1022,7 +1021,7 @@ void plJoltWorldModule::DebugDrawGeometry(const plVec3& vCenter, float fRadius, 
     gd.m_bDynamic = true;
     gd.m_LocalPosition = objTrans.m_vPosition;
     gd.m_LocalRotation = objTrans.m_qRotation;
-    gd.m_LocalScaling =  objTrans.m_vScale;
+    gd.m_LocalScaling = objTrans.m_vScale;
 
     gd.m_Tags.Set(tag);
     plGameObject* pObj;
@@ -1042,4 +1041,4 @@ void plJoltWorldModule::DebugDrawGeometry(const plVec3& vCenter, float fRadius, 
   }
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltWorldModule);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltWorldModule);

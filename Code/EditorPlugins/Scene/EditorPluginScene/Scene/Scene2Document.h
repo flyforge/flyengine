@@ -10,7 +10,7 @@ class plScene2Document;
 
 class plSceneLayerBase : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneLayerBase, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneLayerBase, plReflectedClass);
 
 public:
   plSceneLayerBase();
@@ -22,7 +22,7 @@ public:
 
 class plSceneLayer : public plSceneLayerBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneLayer, plSceneLayerBase);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneLayer, plSceneLayerBase);
 
 public:
   plSceneLayer();
@@ -34,7 +34,7 @@ public:
 
 class plSceneDocumentSettings : public plSceneDocumentSettingsBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneDocumentSettings, plSceneDocumentSettingsBase);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneDocumentSettings, plSceneDocumentSettingsBase);
 
 public:
   plSceneDocumentSettings();
@@ -62,12 +62,12 @@ struct plScene2LayerEvent
   plUuid m_layerGuid;
 };
 
-class PLASMA_EDITORPLUGINSCENE_DLL plScene2Document : public plSceneDocument
+class PL_EDITORPLUGINSCENE_DLL plScene2Document : public plSceneDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScene2Document, plSceneDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plScene2Document, plSceneDocument);
 
 public:
-  plScene2Document(const char* szDocumentPath);
+  plScene2Document(plStringView sDocumentPath);
   ~plScene2Document();
 
   /// \name Scene Data Accessors
@@ -97,8 +97,8 @@ public:
 
   bool IsLayerLoaded(const plUuid& layerGuid) const;
   plStatus SetLayerLoaded(const plUuid& layerGuid, bool bLoaded);
-  void GetAllLayers(plDynamicArray<plUuid>& out_LayerGuids);
-  void GetLoadedLayers(plDynamicArray<plSceneDocument*>& out_Layers) const;
+  void GetAllLayers(plDynamicArray<plUuid>& out_layerGuids);
+  void GetLoadedLayers(plDynamicArray<plSceneDocument*>& out_layers) const;
 
   bool IsLayerVisible(const plUuid& layerGuid) const;
   plStatus SetLayerVisible(const plUuid& layerGuid, bool bVisible);
@@ -115,7 +115,7 @@ public:
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
   virtual void InitializeAfterLoadingAndSaving() override;
   virtual const plDocumentObject* GetSettingsObject() const override;
-  virtual void HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg) override;
   virtual plTaskGroupID InternalSaveDocument(AfterSaveCallback callback) override;
   virtual void SendGameWorldToEngine() override;
 

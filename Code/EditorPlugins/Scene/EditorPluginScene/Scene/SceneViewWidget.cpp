@@ -16,7 +16,7 @@
 
 bool plQtSceneViewWidget::s_bContextMenuInitialized = false;
 
-plQtSceneViewWidget::plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig)
+plQtSceneViewWidget::plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig)
   : plQtGameObjectViewWidget(pParent, pOwnerWindow, pViewConfig)
 {
   setAcceptDrops(true);
@@ -27,13 +27,13 @@ plQtSceneViewWidget::plQtSceneViewWidget(QWidget* pParent, plQtGameObjectDocumen
   {
     //#TODO Not the cleanest solution but this replaces the default selection context of the base class.
     const plUInt32 uiSelectionIndex = m_InputContexts.IndexOf(m_pSelectionContext);
-    PLASMA_DEFAULT_DELETE(m_pSelectionContext);
-    m_pSelectionContext = PLASMA_DEFAULT_NEW(plSceneSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
+    PL_DEFAULT_DELETE(m_pSelectionContext);
+    m_pSelectionContext = PL_DEFAULT_NEW(plSceneSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
     m_InputContexts[uiSelectionIndex] = m_pSelectionContext;
   }
 }
 
-plQtSceneViewWidget::~plQtSceneViewWidget() {}
+plQtSceneViewWidget::~plQtSceneViewWidget() = default;
 
 bool plQtSceneViewWidget::IsPickingAgainstSelectionAllowed() const
 {
@@ -53,10 +53,10 @@ void plQtSceneViewWidget::OnOpenContextMenu(QPoint globalPos)
 
     plActionMapManager::RegisterActionMap("SceneViewContextMenu").IgnoreResult();
 
-    plGameObjectSelectionActions::MapViewContextMenuActions("SceneViewContextMenu", "");
-    plSelectionActions::MapViewContextMenuActions("SceneViewContextMenu", "");
-    plEditActions::MapViewContextMenuActions("SceneViewContextMenu", "");
-    plSceneActions::MapViewContextMenuActions("SceneViewContextMenu", "");
+    plGameObjectSelectionActions::MapViewContextMenuActions("SceneViewContextMenu");
+    plSelectionActions::MapViewContextMenuActions("SceneViewContextMenu");
+    plEditActions::MapViewContextMenuActions("SceneViewContextMenu");
+    plSceneActions::MapViewContextMenuActions("SceneViewContextMenu");
   }
 
   {
@@ -86,7 +86,8 @@ void plQtSceneViewWidget::dragEnterEvent(QDragEnterEvent* e)
   m_bAllowPickSelectedWhileDragging = false;
 
   {
-    plObjectPickingResult res = PickObject(e->pos().x(), e->pos().y());
+    const QPoint screenPos = e->position().toPoint();
+    plObjectPickingResult res = PickObject(screenPos.x(), screenPos.y());
 
     plDragDropInfo info;
     info.m_pMimeData = e->mimeData();
@@ -98,8 +99,8 @@ void plQtSceneViewWidget::dragEnterEvent(QDragEnterEvent* e)
     info.m_iTargetObjectSubID = res.m_uiPartIndex;
     info.m_TargetObject = res.m_PickedObject;
     info.m_TargetComponent = res.m_PickedComponent;
-    info.m_bShiftKeyDown = e->keyboardModifiers() & Qt::ShiftModifier;
-    info.m_bCtrlKeyDown = e->keyboardModifiers() & Qt::ControlModifier;
+    info.m_bShiftKeyDown = e->modifiers() & Qt::ShiftModifier;
+    info.m_bCtrlKeyDown = e->modifiers() & Qt::ControlModifier;
 
     plDragDropConfig cfg;
     if (plDragDropHandler::BeginDragDropOperation(&info, &cfg))
@@ -125,14 +126,15 @@ void plQtSceneViewWidget::dragMoveEvent(QDragMoveEvent* e)
 {
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastDragMoveEvent < plTime::Seconds(1.0 / 25.0))
+  if (tNow - m_LastDragMoveEvent < plTime::MakeFromSeconds(1.0 / 25.0))
     return;
 
   m_LastDragMoveEvent = tNow;
 
   if (plDragDropHandler::IsHandlerActive())
   {
-    plObjectPickingResult res = PickObject(e->pos().x(), e->pos().y());
+    const QPoint screenPos = e->position().toPoint();
+    plObjectPickingResult res = PickObject(screenPos.x(), screenPos.y());
 
     plDragDropInfo info;
     info.m_pMimeData = e->mimeData();
@@ -144,8 +146,8 @@ void plQtSceneViewWidget::dragMoveEvent(QDragMoveEvent* e)
     info.m_iTargetObjectSubID = res.m_uiPartIndex;
     info.m_TargetObject = res.m_PickedObject;
     info.m_TargetComponent = res.m_PickedComponent;
-    info.m_bShiftKeyDown = e->keyboardModifiers() & Qt::ShiftModifier;
-    info.m_bCtrlKeyDown = e->keyboardModifiers() & Qt::ControlModifier;
+    info.m_bShiftKeyDown = e->modifiers() & Qt::ShiftModifier;
+    info.m_bCtrlKeyDown = e->modifiers() & Qt::ControlModifier;
 
     plDragDropHandler::UpdateDragDropOperation(&info);
   }
@@ -155,7 +157,8 @@ void plQtSceneViewWidget::dropEvent(QDropEvent* e)
 {
   if (plDragDropHandler::IsHandlerActive())
   {
-    plObjectPickingResult res = PickObject(e->pos().x(), e->pos().y());
+    const QPoint screenPos = e->position().toPoint();
+    plObjectPickingResult res = PickObject(screenPos.x(), screenPos.y());
 
     plDragDropInfo info;
     info.m_pMimeData = e->mimeData();
@@ -167,8 +170,8 @@ void plQtSceneViewWidget::dropEvent(QDropEvent* e)
     info.m_iTargetObjectSubID = res.m_uiPartIndex;
     info.m_TargetObject = res.m_PickedObject;
     info.m_TargetComponent = res.m_PickedComponent;
-    info.m_bShiftKeyDown = e->keyboardModifiers() & Qt::ShiftModifier;
-    info.m_bCtrlKeyDown = e->keyboardModifiers() & Qt::ControlModifier;
+    info.m_bShiftKeyDown = e->modifiers() & Qt::ShiftModifier;
+    info.m_bCtrlKeyDown = e->modifiers() & Qt::ControlModifier;
 
     plDragDropHandler::FinishDragDrop(&info);
   }

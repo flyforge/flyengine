@@ -41,7 +41,7 @@ plQtExposedBoneWidget::plQtExposedBoneWidget()
 void plQtExposedBoneWidget::SetSelection(const plHybridArray<plPropertySelection, 8>& items)
 {
   plQtStandardPropertyWidget::SetSelection(items);
-  PLASMA_ASSERT_DEBUG(m_pProp->GetSpecificType()->IsDerivedFrom<plExposedBone>(), "Selection does not match plExposedBone.");
+  PL_ASSERT_DEBUG(m_pProp->GetSpecificType()->IsDerivedFrom<plExposedBone>(), "Selection does not match plExposedBone.");
 }
 
 void plQtExposedBoneWidget::onBeginTemporary()
@@ -68,11 +68,11 @@ void plQtExposedBoneWidget::SlotValueChanged()
   plExposedBone* pCopy = reinterpret_cast<plExposedBone*>(plReflectionSerializer::Clone(obj.m_pObject, obj.m_pType));
 
   {
-    plAngle x = plAngle::Degree(m_pRotWidget[0]->value());
-    plAngle y = plAngle::Degree(m_pRotWidget[1]->value());
-    plAngle z = plAngle::Degree(m_pRotWidget[2]->value());
+    plAngle x = plAngle::MakeFromDegree(m_pRotWidget[0]->value());
+    plAngle y = plAngle::MakeFromDegree(m_pRotWidget[1]->value());
+    plAngle z = plAngle::MakeFromDegree(m_pRotWidget[2]->value());
 
-    pCopy->m_Transform.m_qRotation.SetFromEulerAngles(x, y, z);
+    pCopy->m_Transform.m_qRotation = plQuat::MakeFromEulerAngles(x, y, z);
   }
 
   plVariant newValue;

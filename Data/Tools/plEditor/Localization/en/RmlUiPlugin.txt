@@ -1,0 +1,10 @@
+# Asset Types
+
+RmlUi;Rml UI
+
+# Component Types
+
+plRmlUiCanvas2DComponent;RmlUi Canvas 2D
+
+# Properties
+

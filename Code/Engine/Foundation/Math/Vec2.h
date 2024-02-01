@@ -2,10 +2,10 @@
 
 #include <Foundation/Math/Math.h>
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
-#  define PLASMA_VEC2_CHECK_FOR_NAN(obj) (obj)->AssertNotNaN();
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
+#  define PL_VEC2_CHECK_FOR_NAN(obj) (obj)->AssertNotNaN();
 #else
-#  define PLASMA_VEC2_CHECK_FOR_NAN(obj)
+#  define PL_VEC2_CHECK_FOR_NAN(obj)
 #endif
 
 /// \brief A 2-component vector class.
@@ -14,7 +14,7 @@ class plVec2Template
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using ComponentType = Type;
 
@@ -37,13 +37,20 @@ public:
 
   // no copy-constructor and operator= since the default-generated ones will be faster
 
-  /// \brief Static function that returns a zero-vector.
-  static const plVec2Template<Type> ZeroVector() { return plVec2Template(0); } // [tested]
+  /// \brief Returns a vector with all components set to Not-a-Number (NaN).
+  PL_DECLARE_IF_FLOAT_TYPE
+  [[nodiscard]] static const plVec2Template<Type> MakeNaN()
+  {
+    return plVec2Template<Type>(plMath::NaN<Type>());
+  }
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+  /// \brief Static function that returns a zero-vector.
+  [[nodiscard]] static constexpr plVec2Template<Type> MakeZero() { return plVec2Template(0); } // [tested]
+
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
                                "check that all code-paths properly initialize this object.");
   }
 #endif
@@ -76,10 +83,12 @@ public:
   // *** Functions dealing with length ***
 public:
   /// \brief Returns the length of the vector.
+  PL_DECLARE_IF_FLOAT_TYPE
   Type GetLength() const; // [tested]
 
-  /// \brief Tries to rescale the vector to the given length. If the vector is too close to zero, PLASMA_FAILURE is returned and the vector is
+  /// \brief Tries to rescale the vector to the given length. If the vector is too close to zero, PL_FAILURE is returned and the vector is
   /// set to zero.
+  PL_DECLARE_IF_FLOAT_TYPE
   plResult SetLength(Type fNewLength, Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
 
   /// \brief Returns the squared length. Faster, since no square-root is taken. Useful, if one only wants to compare the lengths of two
@@ -88,18 +97,21 @@ public:
 
   /// \brief Normalizes this vector and returns its previous length in one operation. More efficient than calling GetLength and then
   /// Normalize.
+  PL_DECLARE_IF_FLOAT_TYPE
   Type GetLengthAndNormalize(); // [tested]
 
   /// \brief Returns a normalized version of this vector, leaves the vector itself unchanged.
+  PL_DECLARE_IF_FLOAT_TYPE
   const plVec2Template<Type> GetNormalized() const; // [tested]
 
   /// \brief Normalizes this vector.
+  PL_DECLARE_IF_FLOAT_TYPE
   void Normalize(); // [tested]
 
-  /// \brief Tries to normalize this vector. If the vector is too close to zero, PLASMA_FAILURE is returned and the vector is set to the given
+  /// \brief Tries to normalize this vector. If the vector is too close to zero, PL_FAILURE is returned and the vector is set to the given
   /// fallback value.
-  plResult NormalizeIfNotZero(
-    const plVec2Template<Type>& vFallback = plVec2Template<Type>(1, 0), Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
+  PL_DECLARE_IF_FLOAT_TYPE
+  plResult NormalizeIfNotZero(const plVec2Template<Type>& vFallback = plVec2Template<Type>(1, 0), Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
 
   /// \brief Returns, whether this vector is (0, 0).
   bool IsZero() const; // [tested]
@@ -108,6 +120,7 @@ public:
   bool IsZero(Type fEpsilon) const; // [tested]
 
   /// \brief Returns, whether the squared length of this vector is between 0.999f and 1.001f.
+  PL_DECLARE_IF_FLOAT_TYPE
   bool IsNormalized(Type fEpsilon = plMath::HugeEpsilon<Type>()) const; // [tested]
 
   /// \brief Returns true, if any of x or y is NaN
@@ -174,12 +187,14 @@ public:
   ///
   /// \note This function may fail, e.g. create a vector that is zero, if the given normal is parallel to the vector itself.
   ///       If you need to handle such cases, you should manually check afterwards, whether the result is zero, or cannot be normalized.
+  PL_DECLARE_IF_FLOAT_TYPE
   void MakeOrthogonalTo(const plVec2Template<Type>& vNormal); // [tested]
 
   /// \brief Returns some arbitrary vector orthogonal to this one. The vector is NOT normalized.
   const plVec2Template<Type> GetOrthogonalVector() const; // [tested]
 
   /// \brief Returns this vector reflected at vNormal.
+  PL_DECLARE_IF_FLOAT_TYPE
   const plVec2Template<Type> GetReflectedVector(const plVec2Template<Type>& vNormal) const; // [tested]
 };
 

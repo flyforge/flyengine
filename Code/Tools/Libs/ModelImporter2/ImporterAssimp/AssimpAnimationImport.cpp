@@ -10,34 +10,34 @@
 
 namespace plModelImporter2
 {
-  PLASMA_FORCE_INLINE void ai2ozz(const aiVector3D& in, ozz::math::Float3& out)
+  PL_FORCE_INLINE void ai2ozz(const aiVector3D& in, ozz::math::Float3& ref_out)
   {
-    out.x = (float)in.x;
-    out.y = (float)in.y;
-    out.z = (float)in.z;
+    ref_out.x = (float)in.x;
+    ref_out.y = (float)in.y;
+    ref_out.z = (float)in.z;
   }
 
-  PLASMA_FORCE_INLINE void ai2ozz(const aiQuaternion& in, ozz::math::Quaternion& out)
+  PL_FORCE_INLINE void ai2ozz(const aiQuaternion& in, ozz::math::Quaternion& ref_out)
   {
-    out.x = (float)in.x;
-    out.y = (float)in.y;
-    out.z = (float)in.z;
-    out.w = (float)in.w;
+    ref_out.x = (float)in.x;
+    ref_out.y = (float)in.y;
+    ref_out.z = (float)in.z;
+    ref_out.w = (float)in.w;
   }
 
-  PLASMA_FORCE_INLINE void ozz2pl(const ozz::math::Float3& in, plVec3& out)
+  PL_FORCE_INLINE void ozz2pl(const ozz::math::Float3& in, plVec3& ref_vOut)
   {
-    out.x = (float)in.x;
-    out.y = (float)in.y;
-    out.z = (float)in.z;
+    ref_vOut.x = (float)in.x;
+    ref_vOut.y = (float)in.y;
+    ref_vOut.z = (float)in.z;
   }
 
-  PLASMA_FORCE_INLINE void ozz2pl(const ozz::math::Quaternion& in, plQuat& out)
+  PL_FORCE_INLINE void ozz2pl(const ozz::math::Quaternion& in, plQuat& ref_qOut)
   {
-    out.v.x = (float)in.x;
-    out.v.y = (float)in.y;
-    out.v.z = (float)in.z;
-    out.w = (float)in.w;
+    ref_qOut.x = (float)in.x;
+    ref_qOut.y = (float)in.y;
+    ref_qOut.z = (float)in.z;
+    ref_qOut.w = (float)in.w;
   }
 
   plResult ImporterAssimp::ImportAnimations()
@@ -45,10 +45,10 @@ namespace plModelImporter2
     auto* pAnimOut = m_Options.m_pAnimationOutput;
 
     if (pAnimOut == nullptr)
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     if (m_pScene->mNumAnimations == 0)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pAnimOut->m_bAdditive = m_Options.m_bAdditiveAnimation;
 
@@ -74,7 +74,7 @@ namespace plModelImporter2
         continue;
 
       if (plMath::IsZero(pAnim->mDuration, plMath::DefaultEpsilon<double>()))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       const plUInt32 uiMaxKeyframes = (plUInt32)plMath::Max(1.0, pAnim->mDuration);
 
@@ -254,11 +254,11 @@ namespace plModelImporter2
         }
       }
 
-      pAnimOut->SetDuration(plTime::Seconds(fMaxTimestamp));
+      pAnimOut->SetDuration(plTime::MakeFromSeconds(fMaxTimestamp));
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 } // namespace plModelImporter2

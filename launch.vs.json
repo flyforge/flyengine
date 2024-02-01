@@ -17,7 +17,7 @@
       "miDebuggerPath": "${workspaceRoot}\\Data\\Tools\\Precompiled\\GdbProxy.exe",
       "setupCommands": [
         {
-          "text": "shell powershell -NoLogo -NoProfile -File \"${workspaceRoot}\\Utilities\\DbgAndroid.ps1\" -PrepareOnly -PackageName \"com.plasmaengine.FoundationTest\" -detectArch \"${cmake.name}\" -originalSoDir \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\" -debugTemp \"${workspaceRoot}\\debugtemp\" -apk \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\\FoundationTest.apk\" -MessageBoxOnError",
+          "text": "shell powershell -NoLogo -NoProfile -File \"${workspaceRoot}\\Utilities\\DbgAndroid.ps1\" -PrepareOnly -PackageName \"com.plengine.FoundationTest\" -detectArch \"${cmake.name}\" -originalSoDir \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\" -debugTemp \"${workspaceRoot}\\debugtemp\" -apk \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\\FoundationTest.apk\" -MessageBoxOnError",
           "ignoreFailures": false
         },
         {
@@ -47,7 +47,7 @@
       "miDebuggerPath": "${workspaceRoot}\\Data\\Tools\\Precompiled\\GdbProxy.exe",
       "setupCommands": [
         {
-          "text": "shell powershell -NoLogo -NoProfile -File \"${workspaceRoot}\\Utilities\\DbgAndroid.ps1\" -PrepareOnly -PackageName \"com.plasmaengine.FoundationTest\" -detectArch \"${cmake.name}\" -originalSoDir \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\" -debugTemp \"${workspaceRoot}\\debugtemp\" -MessageBoxOnError",
+          "text": "shell powershell -NoLogo -NoProfile -File \"${workspaceRoot}\\Utilities\\DbgAndroid.ps1\" -PrepareOnly -PackageName \"com.plengine.FoundationTest\" -detectArch \"${cmake.name}\" -originalSoDir \"${cmake.buildRoot}\\Code\\UnitTests\\FoundationTest\" -debugTemp \"${workspaceRoot}\\debugtemp\" -MessageBoxOnError",
           "ignoreFailures": false
         },
         {

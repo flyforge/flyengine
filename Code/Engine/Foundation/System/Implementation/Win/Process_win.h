@@ -1,5 +1,5 @@
 #include <Foundation/FoundationInternal.h>
-PLASMA_FOUNDATION_INTERNAL_HEADER
+PL_FOUNDATION_INTERNAL_HEADER
 
 #include <Foundation/Logging/Log.h>
 #include <Foundation/System/Process.h>
@@ -77,69 +77,70 @@ struct plPipeWin
     if (m_pipeWrite)
     {
       m_running = true;
-      m_readThread = std::thread([&]() {
-        plHybridArray<char, 256> overflowBuffer;
-
-        constexpr int BUFSIZE = 512;
-        char chBuf[BUFSIZE];
-        while (true)
+      m_readThread = std::thread([&]()
         {
-          DWORD bytesRead = 0;
-          bool res = ReadFile(m_pipeRead, chBuf, BUFSIZE, &bytesRead, nullptr);
-          if (!res || bytesRead == 0)
-          {
-            if (!overflowBuffer.IsEmpty())
-            {
-              ReportString(ref_onStdOut, overflowBuffer);
-            }
-            break;
-          }
+          plHybridArray<char, 256> overflowBuffer;
 
-          const char* szCurrentPos = chBuf;
-          const char* szEndPos = chBuf + bytesRead;
-
-          while (szCurrentPos < szEndPos)
+          constexpr int BUFSIZE = 512;
+          char chBuf[BUFSIZE];
+          while (true)
           {
-            const char* szFound = plStringUtils::FindSubString(szCurrentPos, "\n", szEndPos);
-            if (szFound)
+            DWORD bytesRead = 0;
+            bool res = ReadFile(m_pipeRead, chBuf, BUFSIZE, &bytesRead, nullptr);
+            if (!res || bytesRead == 0)
             {
-              if (overflowBuffer.IsEmpty())
+              if (!overflowBuffer.IsEmpty())
               {
-                // If there is nothing in the overflow buffer this is a complete line and can be fired as is.
-                ReportString(ref_onStdOut, szCurrentPos, szFound + 1);
+                ReportString(ref_onStdOut, overflowBuffer);
+              }
+              break;
+            }
+
+            const char* szCurrentPos = chBuf;
+            const char* szEndPos = chBuf + bytesRead;
+
+            while (szCurrentPos < szEndPos)
+            {
+              const char* szFound = plStringUtils::FindSubString(szCurrentPos, "\n", szEndPos);
+              if (szFound)
+              {
+                if (overflowBuffer.IsEmpty())
+                {
+                  // If there is nothing in the overflow buffer this is a complete line and can be fired as is.
+                  ReportString(ref_onStdOut, szCurrentPos, szFound + 1);
+                }
+                else
+                {
+                  // We have data in the overflow buffer so this is the final part of a partial line so we need to complete and fire the overflow buffer.
+
+                  while (szCurrentPos < szFound + 1)
+                  {
+                    overflowBuffer.PushBack(*szCurrentPos);
+                    ++szCurrentPos;
+                  }
+
+                  ReportString(ref_onStdOut, overflowBuffer);
+
+                  overflowBuffer.Clear();
+                }
+
+                szCurrentPos = szFound + 1;
               }
               else
               {
-                // We have data in the overflow buffer so this is the final part of a partial line so we need to complete and fire the overflow buffer.
+                // This is either the start or a middle segment of a line, append to overflow buffer.
 
-                while (szCurrentPos < szFound + 1)
+                while (szCurrentPos < szEndPos)
                 {
                   overflowBuffer.PushBack(*szCurrentPos);
                   ++szCurrentPos;
                 }
-
-                ReportString(ref_onStdOut, overflowBuffer);
-
-                overflowBuffer.Clear();
-              }
-
-              szCurrentPos = szFound + 1;
-            }
-            else
-            {
-              // This is either the start or a middle segment of a line, append to overflow buffer.
-
-              while (szCurrentPos < szEndPos)
-              {
-                overflowBuffer.PushBack(*szCurrentPos);
-                ++szCurrentPos;
               }
             }
           }
-        }
-        m_running = false;
-        //
-      });
+          m_running = false;
+          //
+        });
     }
   }
 };
@@ -175,7 +176,7 @@ struct plProcessImpl
 
 plProcess::plProcess()
 {
-  m_pImpl = PLASMA_DEFAULT_NEW(plProcessImpl);
+  m_pImpl = PL_DEFAULT_NEW(plProcessImpl);
 }
 
 plProcess::~plProcess()
@@ -271,8 +272,8 @@ static BOOL CreateProcessWithExplicitHandles(LPCWSTR pApplicationName, LPWSTR pC
 
 plResult plProcess::Launch(const plProcessOptions& opt, plBitflags<plProcessLaunchFlags> launchFlags /*= plAsyncProcessFlags::None*/)
 {
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessHandle == nullptr, "Cannot reuse an instance of plProcess");
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessID == 0, "Cannot reuse an instance of plProcess");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessHandle == nullptr, "Cannot reuse an instance of plProcess");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessID == 0, "Cannot reuse an instance of plProcess");
 
   plStringBuilder sProcess = opt.m_sProcess;
   sProcess.MakeCleanPath();
@@ -307,6 +308,11 @@ plResult plProcess::Launch(const plProcessOptions& opt, plBitflags<plProcessLaun
     si.dwFlags |= STARTF_USESTDHANDLES;
     HandlesToInherit[uiNumHandlesToInherit++] = m_pImpl->m_pipeStdErr.m_pipeWrite;
   }
+
+  // in theory this can be used to force the process's main window to be in the background,
+  // but except for SW_HIDE and SW_SHOWMINNOACTIVE this doesn't work, and those are not useful
+  //si.wShowWindow = SW_SHOWNOACTIVATE;
+  //si.dwFlags |= STARTF_USESHOWWINDOW;
 
   PROCESS_INFORMATION pi;
   plMemoryUtils::ZeroFill(&pi, 1);
@@ -345,7 +351,7 @@ plResult plProcess::Launch(const plProcessOptions& opt, plBitflags<plProcessLaun
     m_pImpl->m_pipeStdOut.Close();
     m_pImpl->m_pipeStdErr.Close();
     plLog::Error("Failed to launch '{} {}' - {}", sProcess, plArgSensitive(sCmdLine, "CommandLine"), plArgErrorCode(GetLastError()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   m_pImpl->m_pipeStdOut.StartRead(m_OnStdOut);
   m_pImpl->m_pipeStdErr.StartRead(m_OnStdError);
@@ -368,13 +374,13 @@ plResult plProcess::Launch(const plProcessOptions& opt, plBitflags<plProcessLaun
     Detach();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProcess::ResumeSuspended()
 {
   if (m_pImpl->m_ProcessHandle == nullptr || m_pImpl->m_MainThreadHandle == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   ResumeThread(m_pImpl->m_MainThreadHandle);
 
@@ -382,13 +388,13 @@ plResult plProcess::ResumeSuspended()
   CloseHandle(m_pImpl->m_MainThreadHandle);
   m_pImpl->m_MainThreadHandle = nullptr;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plProcess::WaitToFinish(plTime timeout /*= plTime::Zero()*/)
+plResult plProcess::WaitToFinish(plTime timeout /*= plTime::MakeZero()*/)
 {
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessHandle != nullptr, "Launch a process before waiting on it");
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessID != 0, "Launch a process before waiting on it");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessHandle != nullptr, "Launch a process before waiting on it");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessID != 0, "Launch a process before waiting on it");
 
   DWORD dwTimeout = INFINITE;
 
@@ -402,13 +408,13 @@ plResult plProcess::WaitToFinish(plTime timeout /*= plTime::Zero()*/)
   if (res == WAIT_TIMEOUT)
   {
     // the process is not yet finished, the timeout was reached
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (res == WAIT_FAILED)
   {
     plLog::Error("Failed to wait for '{}' - {}", m_sProcess, plArgErrorCode(GetLastError()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // the process has finished
@@ -418,38 +424,42 @@ plResult plProcess::WaitToFinish(plTime timeout /*= plTime::Zero()*/)
 
   GetExitCodeProcess(m_pImpl->m_ProcessHandle, reinterpret_cast<DWORD*>(&m_iExitCode));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProcess::Execute(const plProcessOptions& opt, plInt32* out_pExitCode /*= nullptr*/)
 {
   plProcess proc;
 
-  PLASMA_SUCCEED_OR_RETURN(proc.Launch(opt));
-  PLASMA_SUCCEED_OR_RETURN(proc.WaitToFinish());
+  PL_SUCCEED_OR_RETURN(proc.Launch(opt));
+  PL_SUCCEED_OR_RETURN(proc.WaitToFinish());
 
   if (out_pExitCode != nullptr)
   {
     *out_pExitCode = proc.GetExitCode();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plProcess::Terminate()
 {
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessHandle != nullptr, "Launch a process before terminating it");
-  PLASMA_ASSERT_DEV(m_pImpl->m_ProcessID != 0, "Launch a process before terminating it");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessHandle != nullptr, "Launch a process before terminating it");
+  PL_ASSERT_DEV(m_pImpl->m_ProcessID != 0, "Launch a process before terminating it");
 
   if (TerminateProcess(m_pImpl->m_ProcessHandle, 0xFFFFFFFF) == FALSE)
   {
+    const DWORD err = GetLastError();
+    if (err == ERROR_ACCESS_DENIED) // this means the process already terminated, so from our perspective the goal was achieved
+      return PL_SUCCESS;
+
     plLog::Error("Failed to terminate process '{}' - {}", m_sProcess, plArgErrorCode(GetLastError()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_SUCCEED_OR_RETURN(WaitToFinish());
+  PL_SUCCEED_OR_RETURN(WaitToFinish());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plProcessState plProcess::GetState() const
@@ -470,9 +480,22 @@ plProcessState plProcess::GetState() const
   if (exitCode == STILL_ACTIVE)
     return plProcessState::Running;
 
+  if (m_ProcessExited.IsZero())
+  {
+    m_ProcessExited = plTime::Now();
+  }
+
   // Do not consider a process finished if the pipe threads have not exited yet.
   if (m_pImpl->m_pipeStdOut.IsRunning() || m_pImpl->m_pipeStdErr.IsRunning())
-    return plProcessState::Running;
+  {
+    if (plTime::Now() - m_ProcessExited < plTime::MakeFromSeconds(2))
+    {
+      return plProcessState::Running;
+    }
+
+    m_pImpl->m_pipeStdOut.Close();
+    m_pImpl->m_pipeStdErr.Close();
+  }
 
   m_iExitCode = (plInt32)exitCode;
   return plProcessState::Finished;
@@ -481,7 +504,7 @@ plProcessState plProcess::GetState() const
 void plProcess::Detach()
 {
   // throw away the previous plProcessImpl and create a blank one
-  m_pImpl = PLASMA_DEFAULT_NEW(plProcessImpl);
+  m_pImpl = PL_DEFAULT_NEW(plProcessImpl);
 
   // reset the exit code to the default
   m_iExitCode = -0xFFFF;

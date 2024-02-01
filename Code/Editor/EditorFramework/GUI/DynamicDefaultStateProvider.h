@@ -8,7 +8,7 @@ class plDynamicDefaultValueAttribute;
 class plPropertyPath;
 
 /// \brief Retrieves the dynamic default state of an object or container attributed with plDynamicDefaultValueAttribute from an asset's meta data.
-class PLASMA_EDITORFRAMEWORK_DLL plDynamicDefaultStateProvider : public plDefaultStateProvider
+class PL_EDITORFRAMEWORK_DLL plDynamicDefaultStateProvider : public plDefaultStateProvider
 {
 public:
   static plSharedPtr<plDefaultStateProvider> CreateProvider(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);

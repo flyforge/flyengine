@@ -5,9 +5,9 @@
 #include <Foundation/Types/ArrayPtr.h>
 #include <ParticlePlugin/ParticlePluginDLL.h>
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleEvent
+struct PL_PARTICLEPLUGIN_DLL plParticleEvent
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plTempHashedString m_EventType;
   plVec3 m_vPosition;
@@ -15,4 +15,4 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleEvent
   plVec3 m_vNormal;
 };
 
-typedef plArrayPtr<plParticleEvent> plParticleEventQueue;
+using plParticleEventQueue = plArrayPtr<plParticleEvent>;

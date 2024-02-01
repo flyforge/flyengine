@@ -6,13 +6,13 @@
 #include <Foundation/Application/Config/FileSystemConfig.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtWindowCfgDlg : public QDialog, public Ui_plQtWindowCfgDlg
+class PL_EDITORFRAMEWORK_DLL plQtWindowCfgDlg : public QDialog, public Ui_plQtWindowCfgDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtWindowCfgDlg(QWidget* parent);
+  plQtWindowCfgDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_m_ButtonBox_clicked(QAbstractButton* button);
@@ -30,4 +30,3 @@ private:
   plWindowCreationDesc m_Descs[2];
   bool m_bOverrideProjectDefault[2];
 };
-

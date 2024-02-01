@@ -10,7 +10,7 @@ struct plMsgExtractGeometry;
 class plStreamWriter;
 class plStreamReader;
 
-struct PLASMA_RENDERERCORE_DLL plMeshInstanceData
+struct PL_RENDERERCORE_DLL plMeshInstanceData
 {
   void SetLocalPosition(plVec3 vPosition);
   plVec3 GetLocalPosition() const;
@@ -29,13 +29,13 @@ struct PLASMA_RENDERERCORE_DLL plMeshInstanceData
   plColor m_color;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshInstanceData);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plMeshInstanceData);
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plInstancedMeshRenderData : public plMeshRenderData
+class PL_RENDERERCORE_DLL plInstancedMeshRenderData : public plMeshRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInstancedMeshRenderData, plMeshRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plInstancedMeshRenderData, plMeshRenderData);
 
 public:
   virtual void FillBatchIdAndSortingKey() override;
@@ -46,10 +46,10 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plInstancedMeshComponentManager : public plComponentManager<class plInstancedMeshComponent, plBlockStorageType::Compact>
+class PL_RENDERERCORE_DLL plInstancedMeshComponentManager : public plComponentManager<class plInstancedMeshComponent, plBlockStorageType::Compact>
 {
 public:
-  typedef plComponentManager<plInstancedMeshComponent, plBlockStorageType::Compact> SUPER;
+  using SUPER = plComponentManager<plInstancedMeshComponent, plBlockStorageType::Compact>;
 
   plInstancedMeshComponentManager(plWorld* pWorld);
 
@@ -72,9 +72,19 @@ protected:
   virtual void Deinitialize() override;
 };
 
-class PLASMA_RENDERERCORE_DLL plInstancedMeshComponent : public plMeshComponentBase
+/// \brief Renders multiple instances of the same mesh.
+///
+/// This is used as an optimization to render many instances of the same (usually small mesh).
+/// For example, if you need to render 1000 pieces of grass in a small area,
+/// instead of creating 1000 game objects each with a mesh component,
+/// it is more efficient to create one game object with an instanced mesh component and give it the locations of the 1000 pieces.
+/// Due to the small area, there is no benefit in culling the instances separately.
+///
+/// However, editing instanced mesh components isn't very convenient, so usually this component would be created and configured
+/// in code, rather than by hand in the editor. For example a procedural plant placement system could use this.
+class PL_RENDERERCORE_DLL plInstancedMeshComponent : public plMeshComponentBase
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plInstancedMeshComponent, plMeshComponentBase, plInstancedMeshComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plInstancedMeshComponent, plMeshComponentBase, plInstancedMeshComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -99,7 +109,6 @@ public:
 
 protected:
   virtual plMeshRenderData* CreateRenderData() const override;
-
 
   //////////////////////////////////////////////////////////////////////////
   // plInstancedMeshComponent

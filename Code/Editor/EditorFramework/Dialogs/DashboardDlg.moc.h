@@ -6,7 +6,7 @@
 #include <Foundation/Strings/String.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtDashboardDlg : public QDialog, public Ui_plQtDashboardDlg
+class PL_EDITORFRAMEWORK_DLL plQtDashboardDlg : public QDialog, public Ui_plQtDashboardDlg
 {
   Q_OBJECT
 
@@ -18,7 +18,7 @@ public:
     Documentation
   };
 
-  plQtDashboardDlg(QWidget* parent, DashboardTab activeTab = DashboardTab::Projects);
+  plQtDashboardDlg(QWidget* pParent, DashboardTab activeTab = DashboardTab::Projects);
 
 private:
 

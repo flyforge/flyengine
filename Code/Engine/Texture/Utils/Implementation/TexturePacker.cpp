@@ -2,9 +2,9 @@
 
 #include <Texture/Utils/TexturePacker.h>
 
-plTexturePacker::plTexturePacker() {}
+plTexturePacker::plTexturePacker() = default;
 
-plTexturePacker::~plTexturePacker() {}
+plTexturePacker::~plTexturePacker() = default;
 
 void plTexturePacker::SetTextureSize(plUInt32 uiWidth, plUInt32 uiHeight, plUInt32 uiReserveTextures /*= 0*/)
 {
@@ -29,7 +29,7 @@ void plTexturePacker::AddTexture(plUInt32 uiWidth, plUInt32 uiHeight)
 
 struct sortdata
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plInt32 m_Priority;
   plInt32 m_Index;
@@ -51,10 +51,10 @@ plResult plTexturePacker::PackTextures()
   for (plUInt32 idx = 0; idx < sorted.GetCount(); ++idx)
   {
     if (!TryPlaceTexture(sorted[idx].m_Index))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plTexturePacker::PosToIndex(plUInt32 x, plUInt32 y) const
@@ -117,5 +117,3 @@ bool plTexturePacker::TryPlaceAt(plVec2U32 pos, plVec2U32 size)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Texture, Texture_Utils_Implementation_TexturePacker);

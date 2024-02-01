@@ -15,7 +15,7 @@ plOpenDdlReader::~plOpenDdlReader()
 
 plResult plOpenDdlReader::ParseDocument(plStreamReader& inout_stream, plUInt32 uiFirstLineOffset, plLogInterface* pLog, plUInt32 uiCacheSizeInKB)
 {
-  PLASMA_ASSERT_DEBUG(m_ObjectStack.IsEmpty(), "A reader can only be used once.");
+  PL_ASSERT_DEBUG(m_ObjectStack.IsEmpty(), "A reader can only be used once.");
 
   SetLogInterface(pLog);
   SetCacheSize(uiCacheSizeInKB);
@@ -39,7 +39,7 @@ plResult plOpenDdlReader::ParseDocument(plStreamReader& inout_stream, plUInt32 u
 
 const plOpenDdlReaderElement* plOpenDdlReader::GetRootElement() const
 {
-  PLASMA_ASSERT_DEBUG(!m_ObjectStack.IsEmpty(), "The reader has not parsed any document yet or an error occurred during parsing.");
+  PL_ASSERT_DEBUG(!m_ObjectStack.IsEmpty(), "The reader has not parsed any document yet or an error occurred during parsing.");
 
   return m_ObjectStack[0];
 }
@@ -73,7 +73,7 @@ plOpenDdlReaderElement* plOpenDdlReader::CreateElement(plOpenDdlPrimitiveType ty
 
   if (bGlobalName)
   {
-    pElement->m_uiNumChildElements = PLASMA_BIT(31);
+    pElement->m_uiNumChildElements = PL_BIT(31);
   }
 
   if (bGlobalName && !sName.IsEmpty())
@@ -255,7 +255,7 @@ void plOpenDdlReader::ClearDataChunks()
 {
   for (plUInt32 i = 0; i < m_DataChunks.GetCount(); ++i)
   {
-    PLASMA_DEFAULT_DELETE(m_DataChunks[i]);
+    PL_DEFAULT_DELETE(m_DataChunks[i]);
   }
 
   m_DataChunks.Clear();
@@ -263,12 +263,12 @@ void plOpenDdlReader::ClearDataChunks()
 
 plUInt8* plOpenDdlReader::AllocateBytes(plUInt32 uiNumBytes)
 {
-  uiNumBytes = plMemoryUtils::AlignSize(uiNumBytes, static_cast<plUInt32>(PLASMA_ALIGNMENT_MINIMUM));
+  uiNumBytes = plMemoryUtils::AlignSize(uiNumBytes, static_cast<plUInt32>(PL_ALIGNMENT_MINIMUM));
 
   // if the requested data is very large, just allocate it as an individual chunk
   if (uiNumBytes > s_uiChunkSize / 2)
   {
-    plUInt8* pResult = PLASMA_DEFAULT_NEW_ARRAY(plUInt8, uiNumBytes).GetPtr();
+    plUInt8* pResult = PL_DEFAULT_NEW_ARRAY(plUInt8, uiNumBytes).GetPtr();
     m_DataChunks.PushBack(pResult);
     return pResult;
   }
@@ -276,7 +276,7 @@ plUInt8* plOpenDdlReader::AllocateBytes(plUInt32 uiNumBytes)
   // if our current chunk is too small, discard the remaining free bytes and just allocate a new chunk
   if (m_uiBytesInChunkLeft < uiNumBytes)
   {
-    m_pCurrentChunk = PLASMA_DEFAULT_NEW_ARRAY(plUInt8, s_uiChunkSize).GetPtr();
+    m_pCurrentChunk = PL_DEFAULT_NEW_ARRAY(plUInt8, s_uiChunkSize).GetPtr();
     m_uiBytesInChunkLeft = s_uiChunkSize;
     m_DataChunks.PushBack(m_pCurrentChunk);
   }
@@ -296,7 +296,7 @@ plUInt32 plOpenDdlReaderElement::GetNumChildObjects() const
   if (m_PrimitiveType != plOpenDdlPrimitiveType::Custom)
     return 0;
 
-  return m_uiNumChildElements & (~PLASMA_BIT(31)); // Bit 31 stores whether the name is global
+  return m_uiNumChildElements & (~PL_BIT(31)); // Bit 31 stores whether the name is global
 }
 
 plUInt32 plOpenDdlReaderElement::GetNumPrimitives() const
@@ -304,7 +304,7 @@ plUInt32 plOpenDdlReaderElement::GetNumPrimitives() const
   if (m_PrimitiveType == plOpenDdlPrimitiveType::Custom)
     return 0;
 
-  return m_uiNumChildElements & (~PLASMA_BIT(31)); // Bit 31 stores whether the name is global
+  return m_uiNumChildElements & (~PL_BIT(31)); // Bit 31 stores whether the name is global
 }
 
 
@@ -320,7 +320,7 @@ bool plOpenDdlReaderElement::HasPrimitives(plOpenDdlPrimitiveType type, plUInt32
 
 const plOpenDdlReaderElement* plOpenDdlReaderElement::FindChild(plStringView sName) const
 {
-  PLASMA_ASSERT_DEBUG(m_PrimitiveType == plOpenDdlPrimitiveType::Custom, "Cannot search for a child object in a primitives list");
+  PL_ASSERT_DEBUG(m_PrimitiveType == plOpenDdlPrimitiveType::Custom, "Cannot search for a child object in a primitives list");
 
   const plOpenDdlReaderElement* pChild = static_cast<const plOpenDdlReaderElement*>(m_pFirstChild);
 
@@ -341,7 +341,7 @@ const plOpenDdlReaderElement* plOpenDdlReaderElement::FindChildOfType(plOpenDdlP
 {
   /// \test This is new
 
-  PLASMA_ASSERT_DEBUG(m_PrimitiveType == plOpenDdlPrimitiveType::Custom, "Cannot search for a child object in a primitives list");
+  PL_ASSERT_DEBUG(m_PrimitiveType == plOpenDdlPrimitiveType::Custom, "Cannot search for a child object in a primitives list");
 
   const plOpenDdlReaderElement* pChild = static_cast<const plOpenDdlReaderElement*>(m_pFirstChild);
 
@@ -377,4 +377,3 @@ const plOpenDdlReaderElement* plOpenDdlReaderElement::FindChildOfType(plStringVi
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_OpenDdlReader);

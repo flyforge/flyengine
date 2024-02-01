@@ -99,7 +99,7 @@ CREDITS:
       Guillaume Chereau
       github:jry2
       github:romigrou
-      Sergio Gonzalpl
+      Sergio Gonzalez
       Jonas Karlsson
       Filip Wasil
       Thatcher Ulrich

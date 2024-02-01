@@ -10,7 +10,7 @@ const char* plPathUtils::FindPreviousSeparator(const char* szPathStart, const ch
 
   while (szStartSearchAt > szPathStart)
   {
-    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt);
+    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt, szPathStart).AssertSuccess();
 
     if (IsPathSeparator(*szStartSearchAt))
       return szStartSearchAt;
@@ -111,11 +111,11 @@ plStringView plPathUtils::GetFileDirectory(plStringView sPath)
   return plStringView(sPath.GetStartPointer(), szSeparator + 1);
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 const char plPathUtils::OsSpecificPathSeparator = '\\';
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_LINUX) || PL_ENABLED(PL_PLATFORM_ANDROID)
 const char plPathUtils::OsSpecificPathSeparator = '/';
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#elif PL_ENABLED(PL_PLATFORM_OSX)
 const char plPathUtils::OsSpecificPathSeparator = '/';
 #else
 #  error "Unknown platform."
@@ -130,14 +130,14 @@ bool plPathUtils::IsAbsolutePath(plStringView sPath)
 
   // szPath[0] will not be \0 -> so we can access szPath[1] without problems
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   /// if it is an absolute path, character 0 must be ASCII (A - Z)
   /// checks for local paths, i.e. 'C:\stuff' and UNC paths, i.e. '\\server\stuff'
   /// not sure if we should handle '//' identical to '\\' (currently we do)
   return ((szPath[1] == ':') || (IsPathSeparator(szPath[0]) && IsPathSeparator(szPath[1])));
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_LINUX) || PL_ENABLED(PL_PLATFORM_ANDROID)
   return (szPath[0] == '/');
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#elif PL_ENABLED(PL_PLATFORM_OSX)
   return (szPath[0] == '/');
 #else
 #  error "Unknown platform."
@@ -174,7 +174,7 @@ void plPathUtils::GetRootedPathParts(plStringView sPath, plStringView& ref_sRoot
 
   do
   {
-    plUnicodeUtils::MoveToNextUtf8(szStart, szPathEnd);
+    plUnicodeUtils::MoveToNextUtf8(szStart, szPathEnd).AssertSuccess();
 
     if (*szStart == '\0')
       return;
@@ -182,10 +182,10 @@ void plPathUtils::GetRootedPathParts(plStringView sPath, plStringView& ref_sRoot
   } while (IsPathSeparator(*szStart));
 
   const char* szEnd = szStart;
-  plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd);
+  plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd).AssertSuccess();
 
   while (*szEnd != '\0' && !IsPathSeparator(*szEnd))
-    plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd);
+    plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd).AssertSuccess();
 
   ref_sRoot = plStringView(szStart, szEnd);
   if (*szEnd == '\0')
@@ -195,7 +195,7 @@ void plPathUtils::GetRootedPathParts(plStringView sPath, plStringView& ref_sRoot
   else
   {
     // skip path separator for the relative path
-    plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd);
+    plUnicodeUtils::MoveToNextUtf8(szEnd, szPathEnd).AssertSuccess();
     ref_sRelPath = plStringView(szEnd, szPathEnd);
   }
 }
@@ -217,7 +217,7 @@ bool plPathUtils::IsValidFilenameChar(plUInt32 uiCharacter)
   // this:
   static const plUInt32 forbiddenFilenameChars[] = {'<', '>', ':', '"', '|', '?', '*', '\\', '/', '\t', '\b', '\n', '\r', '\0'};
 
-  for (int i = 0; i < PLASMA_ARRAY_SIZE(forbiddenFilenameChars); ++i)
+  for (int i = 0; i < PL_ARRAY_SIZE(forbiddenFilenameChars); ++i)
   {
     if (forbiddenFilenameChars[i] == uiCharacter)
       return false;
@@ -243,7 +243,7 @@ bool plPathUtils::ContainsInvalidFilenameChars(plStringView sPath)
 
 void plPathUtils::MakeValidFilename(plStringView sFilename, plUInt32 uiReplacementCharacter, plStringBuilder& out_sFilename)
 {
-  PLASMA_ASSERT_DEBUG(IsValidFilenameChar(uiReplacementCharacter), "Given replacement character is not allowed for filenames.");
+  PL_ASSERT_DEBUG(IsValidFilenameChar(uiReplacementCharacter), "Given replacement character is not allowed for filenames.");
 
   out_sFilename.Clear();
 
@@ -266,7 +266,32 @@ bool plPathUtils::IsSubPath(plStringView sPrefixPath, plStringView sFullPath)
   tmp.MakeCleanPath();
   tmp.AppendPath("");
 
-  return sFullPath.StartsWith_NoCase(tmp);
+  if (sFullPath.StartsWith(tmp))
+  {
+    if (tmp.GetElementCount() == sFullPath.GetElementCount())
+      return true;
+
+    return sFullPath.GetStartPointer()[tmp.GetElementCount()] == '/';
+  }
+
+  return false;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_PathUtils);
+bool plPathUtils::IsSubPath_NoCase(plStringView sPrefixPath, plStringView sFullPath)
+{
+  plStringBuilder tmp = sPrefixPath;
+  tmp.MakeCleanPath();
+  tmp.AppendPath("");
+
+  if (sFullPath.StartsWith_NoCase(tmp))
+  {
+    if (tmp.GetElementCount() == sFullPath.GetElementCount())
+      return true;
+
+    return sFullPath.GetStartPointer()[tmp.GetElementCount()] == '/';
+  }
+
+  return false;
+}
+
+

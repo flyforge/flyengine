@@ -8,42 +8,42 @@
 #  include <JoltPlugin/System/JoltCore.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltAxis, 1)
-  PLASMA_BITFLAGS_CONSTANT(plJoltAxis::X),
-  PLASMA_BITFLAGS_CONSTANT(plJoltAxis::Y),
-  PLASMA_BITFLAGS_CONSTANT(plJoltAxis::Z),
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plJoltAxis, 1)
+  PL_BITFLAGS_CONSTANT(plJoltAxis::X),
+  PL_BITFLAGS_CONSTANT(plJoltAxis::Y),
+  PL_BITFLAGS_CONSTANT(plJoltAxis::Z),
+PL_END_STATIC_REFLECTED_BITFLAGS;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plJolt6DOFConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJolt6DOFConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_BITFLAGS_ACCESSOR_PROPERTY("FreeLinearAxis", plJoltAxis, GetFreeLinearAxis, SetFreeLinearAxis),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("LinearLimitMode", plJoltConstraintLimitMode, GetLinearLimitMode, SetLinearLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LinearRangeX", GetLinearRangeX, SetLinearRangeX),
-    PLASMA_ACCESSOR_PROPERTY("LinearRangeY", GetLinearRangeY, SetLinearRangeY),
-    PLASMA_ACCESSOR_PROPERTY("LinearRangeZ", GetLinearRangeZ, SetLinearRangeZ),
-    PLASMA_ACCESSOR_PROPERTY("LinearStiffness", GetLinearStiffness, SetLinearStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("LinearDamping", GetLinearDamping, SetLinearDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_BITFLAGS_ACCESSOR_PROPERTY("FreeAngularAxis", plJoltAxis, GetFreeAngularAxis, SetFreeAngularAxis),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("SwingLimitMode", plJoltConstraintLimitMode, GetSwingLimitMode, SetSwingLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("SwingLimit", GetSwingLimit, SetSwingLimit)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
-    PLASMA_ACCESSOR_PROPERTY("SwingStiffness", GetSwingStiffness, SetSwingStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SwingDamping", GetSwingDamping, SetSwingDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("TwistLimitMode", plJoltConstraintLimitMode, GetTwistLimitMode, SetTwistLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
-    PLASMA_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
-    PLASMA_ACCESSOR_PROPERTY("TwistStiffness", GetTwistStiffness, SetTwistStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("TwistDamping", GetTwistDamping, SetTwistDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_BITFLAGS_ACCESSOR_PROPERTY("FreeLinearAxis", plJoltAxis, GetFreeLinearAxis, SetFreeLinearAxis),
+    PL_ENUM_ACCESSOR_PROPERTY("LinearLimitMode", plJoltConstraintLimitMode, GetLinearLimitMode, SetLinearLimitMode),
+    PL_ACCESSOR_PROPERTY("LinearRangeX", GetLinearRangeX, SetLinearRangeX),
+    PL_ACCESSOR_PROPERTY("LinearRangeY", GetLinearRangeY, SetLinearRangeY),
+    PL_ACCESSOR_PROPERTY("LinearRangeZ", GetLinearRangeZ, SetLinearRangeZ),
+    PL_ACCESSOR_PROPERTY("LinearStiffness", GetLinearStiffness, SetLinearStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("LinearDamping", GetLinearDamping, SetLinearDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_BITFLAGS_ACCESSOR_PROPERTY("FreeAngularAxis", plJoltAxis, GetFreeAngularAxis, SetFreeAngularAxis),
+    PL_ENUM_ACCESSOR_PROPERTY("SwingLimitMode", plJoltConstraintLimitMode, GetSwingLimitMode, SetSwingLimitMode),
+    PL_ACCESSOR_PROPERTY("SwingLimit", GetSwingLimit, SetSwingLimit)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
+    PL_ACCESSOR_PROPERTY("SwingStiffness", GetSwingStiffness, SetSwingStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SwingDamping", GetSwingDamping, SetSwingDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ENUM_ACCESSOR_PROPERTY("TwistLimitMode", plJoltConstraintLimitMode, GetTwistLimitMode, SetTwistLimitMode),
+    PL_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
+    PL_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(175), plAngle::MakeFromDegree(175))),
+    PL_ACCESSOR_PROPERTY("TwistStiffness", GetTwistStiffness, SetTwistStiffness)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("TwistDamping", GetTwistDamping, SetTwistDamping)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.2, plColor::SlateGray)
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJolt6DOFConstraintComponent::plJolt6DOFConstraintComponent() = default;
@@ -107,8 +107,8 @@ void plJolt6DOFConstraintComponent::DeserializeComponent(plWorldReader& stream)
 
 void plJolt6DOFConstraintComponent::CreateContstraintType(JPH::Body* pBody0, JPH::Body* pBody1)
 {
-  //PLASMA_ASSERT_DEV(localFrame0.isFinite() && localFrame0.isValid() && localFrame0.isSane(), "frame 0");
-  //PLASMA_ASSERT_DEV(localFrame1.isFinite() && localFrame1.isValid() && localFrame1.isSane(), "frame 1");
+  //PL_ASSERT_DEV(localFrame0.isFinite() && localFrame0.isValid() && localFrame0.isSane(), "frame 0");
+  //PL_ASSERT_DEV(localFrame1.isFinite() && localFrame1.isValid() && localFrame1.isSane(), "frame 1");
   //
   //  m_pJoint = PxD6JointCreate(*(plJolt::GetSingleton()->GetJoltAPI()), actor0, localFrame0, actor1, localFrame1);
 }
@@ -387,5 +387,5 @@ void plJolt6DOFConstraintComponent::SetTwistDamping(float f)
 #endif
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_Jolt6DOFConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_Jolt6DOFConstraintComponent);
 

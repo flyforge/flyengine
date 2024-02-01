@@ -9,29 +9,57 @@
 #include <Foundation/IO/OpenDdlUtils.h>
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <QNetworkReply>
+#include <QProcess>
 
-PageDownloader::PageDownloader(QUrl url)
+static plString GetVersionFilePath()
 {
-  connect(&m_WebCtrl, &QNetworkAccessManager::finished, this, &PageDownloader::DownloadDone);
-
-  QNetworkRequest request(url);
-  m_WebCtrl.get(request);
+  plStringBuilder sTemp = plOSFile::GetTempDataFolder();
+  sTemp.AppendPath("plEditor/version-page.htm");
+  return sTemp;
 }
 
-void PageDownloader::DownloadDone(QNetworkReply* pReply)
+PageDownloader::PageDownloader(const QString& sUrl)
 {
-  QNetworkReply::NetworkError e = pReply->error();
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+  QStringList args;
 
-  if (e != QNetworkReply::NetworkError::NoError)
+  args << "-Command";
+  args << QString("(Invoke-webrequest -URI \"%1\").Content > \"%2\"").arg(sUrl).arg(GetVersionFilePath().GetData());
+
+  m_pProcess = PL_DEFAULT_NEW(QProcess);
+  connect(m_pProcess.Borrow(), &QProcess::finished, this, &PageDownloader::DownloadDone);
+  m_pProcess->start("C:\\Windows\\System32\\WindowsPowershell\\v1.0\\powershell.exe", args);
+#else
+  PL_ASSERT_NOT_IMPLEMENTED;
+#endif
+}
+
+void PageDownloader::DownloadDone(int exitCode, QProcess::ExitStatus exitStatus)
+{
+  m_pProcess = nullptr;
+
+  plOSFile file;
+  if (file.Open(GetVersionFilePath(), plFileOpenMode::Read).Failed())
+    return;
+
+  plDataBuffer content;
+  file.ReadAll(content);
+
+  content.PushBack('\0');
+  content.PushBack('\0');
+
+  const plUInt16* pStart = (plUInt16*)content.GetData();
+  if (plUnicodeUtils::SkipUtf16BomLE(pStart))
   {
-    m_DownloadedData = pReply->readAll();
+    m_sDownloadedPage = plStringWChar(pStart);
   }
   else
   {
-    m_DownloadedData = pReply->readAll();
+    const char* szUtf8 = (const char*)content.GetData();
+    m_sDownloadedPage = plStringWChar(szUtf8);
   }
 
-  pReply->deleteLater();
+  plOSFile::DeleteFile(GetVersionFilePath()).IgnoreResult();
 
   Q_EMIT FinishedDownload();
 }
@@ -68,7 +96,7 @@ void plQtVersionChecker::Initialize()
 
   m_sKnownLatestVersion = pLatest->GetPrimitivesString()[0];
 
-  const plTimestamp nextCheck = fs.m_LastModificationTime + plTime::Hours(24);
+  const plTimestamp nextCheck = fs.m_LastModificationTime + plTime::MakeFromHours(24);
 
   if (nextCheck.Compare(plTimestamp::CurrentTimestamp(), plTimestamp::CompareMode::Newer))
   {
@@ -83,17 +111,22 @@ plResult plQtVersionChecker::StoreKnownVersion()
 {
   plFileWriter file;
   if (file.Open(m_sConfigFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlWriter ddl;
   ddl.SetOutputStream(&file);
   plOpenDdlUtils::StoreString(ddl, m_sKnownLatestVersion, "KnownLatest");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plQtVersionChecker::Check(bool bForce)
 {
+#if PL_DISABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+  PL_ASSERT_DEV(!bForce, "The version check is not yet implemented on this platform.");
+  return false;
+#endif
+
   if (bForce)
   {
     // to trigger a 'new release available' signal
@@ -112,17 +145,16 @@ bool plQtVersionChecker::Check(bool bForce)
 
   m_bCheckInProgresss = true;
 
-  // DON'T use HTTPS here, our Qt version only supports HTTP
-  m_pVersionPage = new PageDownloader(QUrl("http://plengine.net/pages/getting-started/binaries.html"));
+  m_pVersionPage = PL_DEFAULT_NEW(PageDownloader, "https://plengine.net/pages/getting-started/binaries.html");
 
-  connect(m_pVersionPage.data(), &PageDownloader::FinishedDownload, this, &plQtVersionChecker::PageDownloaded);
+  connect(m_pVersionPage.Borrow(), &PageDownloader::FinishedDownload, this, &plQtVersionChecker::PageDownloaded);
 
   return true;
 }
 
 const char* plQtVersionChecker::GetOwnVersion() const
 {
-  return BUILDSYSTEM_SDKVERSION_MAJOR "." BUILDSYSTEM_SDKVERSION_MINOR "." BUILDSYSTEM_SDKVERSION_PATCH;
+  return PL_PP_STRINGIFY(BUILDSYSTEM_SDKVERSION_MAJOR) "." PL_PP_STRINGIFY(BUILDSYSTEM_SDKVERSION_MINOR) "." PL_PP_STRINGIFY(BUILDSYSTEM_SDKVERSION_PATCH);
 }
 
 const char* plQtVersionChecker::GetKnownLatestVersion() const
@@ -179,7 +211,9 @@ bool plQtVersionChecker::IsLatestNewer() const
 void plQtVersionChecker::PageDownloaded()
 {
   m_bCheckInProgresss = false;
-  plStringBuilder sPage = m_pVersionPage->GetDownloadedData().data();
+  plStringBuilder sPage = m_pVersionPage->GetDownloadedData();
+
+  m_pVersionPage = nullptr;
 
   if (sPage.IsEmpty())
   {

@@ -3,10 +3,10 @@
 #include <EditorPluginAssets/MaterialAsset/ShaderTypeRegistry.h>
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plShaderTypeRegistry);
+PL_IMPLEMENT_SINGLETON(plShaderTypeRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, ShaderTypeRegistry)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, ShaderTypeRegistry)
 
 BEGIN_SUBSYSTEM_DEPENDENCIES
   "ReflectedTypeManager"
@@ -14,13 +14,13 @@ END_SUBSYSTEM_DEPENDENCIES
 
 ON_CORESYSTEMS_STARTUP
 {
-  PLASMA_DEFAULT_NEW(plShaderTypeRegistry);
+  PL_DEFAULT_NEW(plShaderTypeRegistry);
 }
 
 ON_CORESYSTEMS_SHUTDOWN
 {
   plShaderTypeRegistry* pDummy = plShaderTypeRegistry::GetSingleton();
-  PLASMA_DEFAULT_DELETE(pDummy);
+  PL_DEFAULT_DELETE(pDummy);
 }
 
 ON_HIGHLEVELSYSTEMS_STARTUP
@@ -31,7 +31,7 @@ ON_HIGHLEVELSYSTEMS_SHUTDOWN
 {
 }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace
@@ -47,7 +47,7 @@ namespace
 
   const plRTTI* GetPermutationType(const plShaderParser::ParameterDefinition& def)
   {
-    PLASMA_ASSERT_DEV(def.m_sType.IsEqual("Permutation"), "");
+    PL_ASSERT_DEV(def.m_sType.IsEqual("Permutation"), "");
 
     PermutationVarConfig* pConfig = nullptr;
     if (s_PermutationVarConfigs.TryGetValue(def.m_sName, pConfig))
@@ -56,7 +56,7 @@ namespace
     }
 
     plStringBuilder sTemp;
-    sTemp.Format("Shaders/PermutationVars/{0}.plPermVar", def.m_sName);
+    sTemp.SetFormat("Shaders/PermutationVars/{0}.plPermVar", def.m_sName);
 
     plString sPath = sTemp;
     plQtEditorApp::GetSingleton()->MakeDataDirectoryRelativePathAbsolute(sPath);
@@ -94,14 +94,14 @@ namespace
         plArrayPtr<plPropertyAttribute* const> noAttributes;
 
         plStringBuilder sEnumName;
-        sEnumName.Format("{0}::Default", def.m_sName);
+        sEnumName.SetFormat("{0}::Default", def.m_sName);
 
         descEnum.m_Properties.PushBack(plReflectedPropertyDescriptor(sEnumName, defaultValue.Get<plUInt32>(), noAttributes));
 
         for (const auto& ev : enumDefinition.m_Values)
         {
           plStringBuilder sEnumName;
-          sEnumName.Format("{0}::{1}", def.m_sName, ev.m_sValueName);
+          sEnumName.SetFormat("{0}::{1}", def.m_sName, ev.m_sValueName);
 
           descEnum.m_Properties.PushBack(plReflectedPropertyDescriptor(sEnumName, ev.m_iValueValue, noAttributes));
         }
@@ -133,14 +133,14 @@ namespace
     plArrayPtr<plPropertyAttribute* const> noAttributes;
 
     plStringBuilder sEnumName;
-    sEnumName.Format("{0}::Default", def.m_sName);
+    sEnumName.SetFormat("{0}::Default", def.m_sName);
 
     descEnum.m_Properties.PushBack(plReflectedPropertyDescriptor(sEnumName, def.m_uiDefaultValue, noAttributes));
 
     for (const auto& ev : def.m_Values)
     {
       plStringBuilder sEnumName;
-      sEnumName.Format("{0}::{1}", def.m_sName, ev.m_sValueName);
+      sEnumName.SetFormat("{0}::{1}", def.m_sName, ev.m_sValueName);
 
       descEnum.m_Properties.PushBack(plReflectedPropertyDescriptor(sEnumName, ev.m_iValueValue, noAttributes));
     }
@@ -170,43 +170,43 @@ namespace
     return pType;
   }
 
-  void AddAttributes(plShaderParser::ParameterDefinition& def, const plRTTI* pType, plHybridArray<const plPropertyAttribute*, 2>& attributes)
+  void AddAttributes(plShaderParser::ParameterDefinition& ref_def, const plRTTI* pType, plHybridArray<const plPropertyAttribute*, 2>& ref_attributes)
   {
-    if (def.m_sType.StartsWith_NoCase("texture"))
+    if (ref_def.m_sType.StartsWith_NoCase("texture"))
     {
-      if (def.m_sType.IsEqual("Texture2D"))
+      if (ref_def.m_sType.IsEqual("Texture2D"))
       {
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 2D"));
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_2D"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plCategoryAttribute, "Texture 2D"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_2D"));
       }
-      else if (def.m_sType.IsEqual("Texture3D"))
+      else if (ref_def.m_sType.IsEqual("Texture3D"))
       {
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture 3D"));
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_3D"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plCategoryAttribute, "Texture 3D"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_3D"));
       }
-      else if (def.m_sType.IsEqual("TextureCube"))
+      else if (ref_def.m_sType.IsEqual("TextureCube"))
       {
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Texture Cube"));
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_Cube"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plCategoryAttribute, "Texture Cube"));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plAssetBrowserAttribute, "CompatibleAsset_Texture_Cube"));
       }
     }
-    else if (def.m_sType.StartsWith_NoCase("permutation"))
+    else if (ref_def.m_sType.StartsWith_NoCase("permutation"))
     {
-      attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Permutation"));
+      ref_attributes.PushBack(PL_DEFAULT_NEW(plCategoryAttribute, "Permutation"));
     }
     else
     {
-      attributes.PushBack(PLASMA_DEFAULT_NEW(plCategoryAttribute, "Constant"));
+      ref_attributes.PushBack(PL_DEFAULT_NEW(plCategoryAttribute, "Constant"));
     }
 
-    for (auto& attributeDef : def.m_Attributes)
+    for (auto& attributeDef : ref_def.m_Attributes)
     {
       if (attributeDef.m_sType.IsEqual("Default") && attributeDef.m_Values.GetCount() >= 1)
       {
         if (pType == plGetStaticRTTI<plColor>())
         {
           // always expose the alpha channel for color properties
-          attributes.PushBack(PLASMA_DEFAULT_NEW(plExposeColorAlphaAttribute));
+          ref_attributes.PushBack(PL_DEFAULT_NEW(plExposeColorAlphaAttribute));
 
           // patch default type, VSE writes float4 instead of color
           if (attributeDef.m_Values[0].GetType() == plVariantType::Vector4)
@@ -216,21 +216,21 @@ namespace
           }
         }
 
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plDefaultValueAttribute, attributeDef.m_Values[0]));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plDefaultValueAttribute, attributeDef.m_Values[0]));
       }
       else if (attributeDef.m_sType.IsEqual("Clamp") && attributeDef.m_Values.GetCount() >= 2)
       {
-        attributes.PushBack(PLASMA_DEFAULT_NEW(plClampValueAttribute, attributeDef.m_Values[0], attributeDef.m_Values[1]));
+        ref_attributes.PushBack(PL_DEFAULT_NEW(plClampValueAttribute, attributeDef.m_Values[0], attributeDef.m_Values[1]));
       }
       else if (attributeDef.m_sType.IsEqual("Group"))
       {
         if (attributeDef.m_Values.GetCount() >= 1 && attributeDef.m_Values[0].CanConvertTo<plString>())
         {
-          attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute, attributeDef.m_Values[0].ConvertTo<plString>()));
+          ref_attributes.PushBack(PL_DEFAULT_NEW(plGroupAttribute, attributeDef.m_Values[0].ConvertTo<plString>()));
         }
         else
         {
-          attributes.PushBack(PLASMA_DEFAULT_NEW(plGroupAttribute));
+          ref_attributes.PushBack(PL_DEFAULT_NEW(plGroupAttribute));
         }
       }
     }
@@ -308,7 +308,7 @@ const plRTTI* plShaderTypeRegistry::GetShaderType(plStringView sShaderPath0)
 
 void plShaderTypeRegistry::UpdateShaderType(ShaderData& data)
 {
-  PLASMA_LOG_BLOCK("Updating Shader Parameters", data.m_sShaderPath.GetData());
+  PL_LOG_BLOCK("Updating Shader Parameters", data.m_sShaderPath.GetData());
 
   plHybridArray<plShaderParser::ParameterDefinition, 16> parameters;
   plHybridArray<plShaderParser::EnumDefinition, 4> enumDefinitions;
@@ -398,7 +398,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode*) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode*) const override
   {
     plString sDescTypeName = plGetStaticRTTI<plReflectedTypeDescriptor>()->GetTypeName();
 
@@ -436,7 +436,7 @@ public:
       desc.m_Flags = plTypeFlags::Phantom | plTypeFlags::Abstract | plTypeFlags::Class;
       desc.m_uiTypeVersion = 1;
 
-      context.RegisterObject(plUuid::StableUuidForString(desc.m_sTypeName.GetData()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
+      context.RegisterObject(plUuid::MakeStableUuidFromString(desc.m_sTypeName.GetData()), plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
       rttiConverter.AddObjectToGraph(plGetStaticRTTI<plReflectedTypeDescriptor>(), &desc);
     }
   }
@@ -453,21 +453,21 @@ public:
   {
   }
 
-  static void FixEnumString(plStringBuilder& sValue, const char* szName)
+  static void FixEnumString(plStringBuilder& ref_sValue, const char* szName)
   {
-    if (sValue.StartsWith(szName))
-      sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
+    if (ref_sValue.StartsWith(szName))
+      ref_sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
 
-    if (sValue.StartsWith("::"))
-      sValue.Shrink(2, 0);
+    if (ref_sValue.StartsWith("::"))
+      ref_sValue.Shrink(2, 0);
 
-    if (sValue.StartsWith(szName))
-      sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
+    if (ref_sValue.StartsWith(szName))
+      ref_sValue.Shrink(plStringUtils::GetCharacterCount(szName), 0);
 
-    if (sValue.StartsWith("_"))
-      sValue.Shrink(1, 0);
+    if (ref_sValue.StartsWith("_"))
+      ref_sValue.Shrink(1, 0);
 
-    sValue.PrependFormat("{0}::{0}_", szName);
+    ref_sValue.PrependFormat("{0}::{0}_", szName);
   }
 
   void FixEnum(plAbstractObjectNode* pNode, const char* szEnum) const
@@ -480,7 +480,7 @@ public:
     }
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     FixEnum(pNode, "SHADING_MODE");
     FixEnum(pNode, "BLEND_MODE");

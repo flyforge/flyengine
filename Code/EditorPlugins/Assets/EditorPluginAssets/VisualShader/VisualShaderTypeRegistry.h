@@ -23,7 +23,7 @@ struct plVisualShaderPinDescriptor
 
 struct plVisualShaderNodeType
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -40,7 +40,7 @@ struct plVisualShaderNodeDescriptor
   plEnum<plVisualShaderNodeType> m_NodeType;
   plString m_sCfgFile; ///< from which config file this node type was loaded
   plString m_sName;
-  plString m_sCategory;
+  plHashedString m_sCategory;
   plString m_sCheckPermutations;
   plColorGammaUB m_Color = plColorScheme::DarkUI(plColorScheme::Gray);
   plString m_sShaderCodePixelDefines;
@@ -51,7 +51,6 @@ struct plVisualShaderNodeDescriptor
   plString m_sShaderCodePermutations;
   plString m_sShaderCodeMaterialParams;
   plString m_sShaderCodeMaterialCB;
-  plString m_sShaderCodeRenderConfig;
   plString m_sShaderCodeRenderState;
   plString m_sShaderCodeVertexShader;
   plString m_sShaderCodeGeometryShader;
@@ -65,7 +64,7 @@ struct plVisualShaderNodeDescriptor
 
 class plVisualShaderTypeRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plVisualShaderTypeRegistry);
+  PL_DECLARE_SINGLETON(plVisualShaderTypeRegistry);
 
 public:
   plVisualShaderTypeRegistry();
@@ -81,7 +80,7 @@ public:
   void UpdateNodeData(plStringView sCfgFileRelative);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorPluginAssets, VisualShader);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorPluginAssets, VisualShader);
 
   void LoadNodeData();
   const plRTTI* GenerateTypeFromDesc(const plVisualShaderNodeDescriptor& desc);

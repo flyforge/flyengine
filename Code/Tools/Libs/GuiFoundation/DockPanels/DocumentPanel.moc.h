@@ -6,18 +6,18 @@
 
 class plDocument;
 
-class PLASMA_GUIFOUNDATION_DLL plQtDocumentPanel : public QDockWidget
+class PL_GUIFOUNDATION_DLL plQtDocumentPanel : public QDockWidget
 {
 public:
   Q_OBJECT
 
 public:
-  plQtDocumentPanel(QWidget* parent, plDocument* pDocument);
+  plQtDocumentPanel(QWidget* pParent, plDocument* pDocument);
   ~plQtDocumentPanel();
 
   // prevents closing of the dockwidget, even with Alt+F4
   virtual void closeEvent(QCloseEvent* e) override;
-  virtual bool event(QEvent* event) override;
+  virtual bool event(QEvent* pEvent) override;
 
   static const plDynamicArray<plQtDocumentPanel*>& GetAllDocumentPanels() { return s_AllDocumentPanels; }
 

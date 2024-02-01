@@ -16,34 +16,34 @@
 #include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plCustomMeshComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plCustomMeshComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_PROPERTIES
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
-  } PLASMA_END_MESSAGEHANDLERS;
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+  } PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plAtomicInteger32 s_iCustomMeshResources;
 
 plCustomMeshComponent::plCustomMeshComponent()
 {
-  m_Bounds.SetInvalid();
+  m_Bounds = plBoundingBoxSphere::MakeInvalid();
 }
 
 plCustomMeshComponent::~plCustomMeshComponent() = default;
@@ -79,10 +79,10 @@ plResult plCustomMeshComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, 
   if (m_Bounds.IsValid())
   {
     ref_bounds = m_Bounds;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plDynamicMeshBufferResourceHandle plCustomMeshComponent::CreateMeshResource(plGALPrimitiveTopology::Enum topology, plUInt32 uiMaxVertices, plUInt32 uiMaxPrimitives, plGALIndexType::Enum indexType)
@@ -95,7 +95,7 @@ plDynamicMeshBufferResourceHandle plCustomMeshComponent::CreateMeshResource(plGA
   desc.m_bColorStream = true;
 
   plStringBuilder sGuid;
-  sGuid.Format("CustomMesh_{}", s_iCustomMeshResources.Increment());
+  sGuid.SetFormat("CustomMesh_{}", s_iCustomMeshResources.Increment());
 
   m_hDynamicMesh = plResourceManager::CreateResource<plDynamicMeshBufferResource>(sGuid, std::move(desc));
 
@@ -186,7 +186,6 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
   plCustomMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plCustomMeshRenderData>(GetOwner());
   {
-    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
     pRenderData->m_hMesh = m_hDynamicMesh;
@@ -202,7 +201,6 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
   plResourceLock<plMaterialResource> pMaterial(m_hMaterial, plResourceAcquireMode::AllowLoadingFallback);
   plRenderData::Category category = pMaterial->GetRenderDataCategory();
   bool bDontCacheYet = pMaterial.GetAcquireResult() == plResourceAcquireResult::LoadingFallback;
-
 
   msg.AddRenderData(pRenderData, category, bDontCacheYet ? plRenderData::Caching::Never : plRenderData::Caching::IfStatic);
 }
@@ -244,7 +242,7 @@ void plCustomMeshComponent::OnActivated()
       ind[i * 3 + 2] = geo.GetPolygons()[i].m_Vertices[2];
     }
 
-    SetBounds(plBoundingSphere(plVec3::ZeroVector(), 1.5f));
+    SetBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 1.5f));
   }
 }
 
@@ -253,8 +251,8 @@ void plCustomMeshComponent::OnActivated()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomMeshRenderData, 1, plRTTIDefaultAllocator<plCustomMeshRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomMeshRenderData, 1, plRTTIDefaultAllocator<plCustomMeshRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 
@@ -281,8 +279,8 @@ void plCustomMeshRenderData::FillBatchIdAndSortingKey()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomMeshRenderer, 1, plRTTIDefaultAllocator<plCustomMeshRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomMeshRenderer, 1, plRTTIDefaultAllocator<plCustomMeshRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCustomMeshRenderer::plCustomMeshRenderer() = default;
@@ -304,7 +302,6 @@ void plCustomMeshRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTT
 void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
 {
   plRenderContext* pRenderContext = renderViewContext.m_pRenderContext;
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plGALCommandEncoder* pGALCommandEncoder = pRenderContext->GetCommandEncoder();
 
   plInstanceData* pInstanceData = pPass->GetPipeline()->GetFrameDataProvider<plInstanceDataProvider>()->GetData(renderViewContext);
@@ -338,17 +335,9 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
     instanceData[0].Color = pRenderData->m_Color;
     instanceData[0].ObjectToWorld = pRenderData->m_GlobalTransform;
 
-    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-      instanceData[0].LastObjectToWorld = pRenderData->m_LastGlobalTransform;
-    #endif
-
     if (pRenderData->m_uiUniformScale)
     {
       instanceData[0].ObjectToWorldNormal = instanceData[0].ObjectToWorld;
-
-      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-        instanceData[0].LastObjectToWorldNormal = instanceData[0].LastObjectToWorld;
-      #endif
     }
     else
     {
@@ -359,16 +348,6 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
       // we explicitly ignore the return value here (success / failure)
       // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
       instanceData[0].ObjectToWorldNormal = mInverse.GetTranspose();
-
-      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-        objectToWorld = pRenderData->m_LastGlobalTransform.GetAsMat4();
-
-        mInverse = objectToWorld.GetRotationalPart();
-        mInverse.Invert(0.0f).IgnoreResult();
-        // we explicitly ignore the return value here (success / failure)
-        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
-        instanceData[0].LastObjectToWorldNormal = mInverse.GetTranspose();
-      #endif
     }
 
     pInstanceData->UpdateInstanceData(pRenderContext, 1);
@@ -384,4 +363,4 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_CustomMeshComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_CustomMeshComponent);

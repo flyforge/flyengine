@@ -35,31 +35,25 @@ inline void plHashTableBase<K, V, H>::ConstIterator::SetToEnd()
 
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::ConstIterator::IsValid() const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::ConstIterator::IsValid() const
 {
   return m_uiCurrentCount < m_pHashTable->m_uiCount;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::ConstIterator::operator==(const typename plHashTableBase<K, V, H>::ConstIterator& rhs) const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::ConstIterator::operator==(const typename plHashTableBase<K, V, H>::ConstIterator& rhs) const
 {
   return m_uiCurrentIndex == rhs.m_uiCurrentIndex && m_pHashTable->m_pEntries == rhs.m_pHashTable->m_pEntries;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE bool plHashTableBase<K, V, H>::ConstIterator::operator!=(const typename plHashTableBase<K, V, H>::ConstIterator& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE const K& plHashTableBase<K, V, H>::ConstIterator::Key() const
+PL_ALWAYS_INLINE const K& plHashTableBase<K, V, H>::ConstIterator::Key() const
 {
   return m_pHashTable->m_pEntries[m_uiCurrentIndex].key;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE const V& plHashTableBase<K, V, H>::ConstIterator::Value() const
+PL_ALWAYS_INLINE const V& plHashTableBase<K, V, H>::ConstIterator::Value() const
 {
   return m_pHashTable->m_pEntries[m_uiCurrentIndex].value;
 }
@@ -91,7 +85,7 @@ void plHashTableBase<K, V, H>::ConstIterator::Next()
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE void plHashTableBase<K, V, H>::ConstIterator::operator++()
+PL_ALWAYS_INLINE void plHashTableBase<K, V, H>::ConstIterator::operator++()
 {
   Next();
 }
@@ -114,7 +108,7 @@ plHashTableBase<K, V, H>::Iterator::Iterator(const typename plHashTableBase<K, V
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE void plHashTableBase<K, V, H>::Iterator::operator=(const Iterator& rhs) // [tested]
+PL_ALWAYS_INLINE void plHashTableBase<K, V, H>::Iterator::operator=(const Iterator& rhs) // [tested]
 {
   this->m_pHashTable = rhs.m_pHashTable;
   this->m_uiCurrentIndex = rhs.m_uiCurrentIndex;
@@ -122,7 +116,7 @@ PLASMA_ALWAYS_INLINE void plHashTableBase<K, V, H>::Iterator::operator=(const It
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE V& plHashTableBase<K, V, H>::Iterator::Value()
+PL_FORCE_INLINE V& plHashTableBase<K, V, H>::Iterator::Value()
 {
   return this->m_pHashTable->m_pEntries[this->m_uiCurrentIndex].value;
 }
@@ -131,7 +125,7 @@ PLASMA_FORCE_INLINE V& plHashTableBase<K, V, H>::Iterator::Value()
 // ***** plHashTableBase *****
 
 template <typename K, typename V, typename H>
-plHashTableBase<K, V, H>::plHashTableBase(plAllocatorBase* pAllocator)
+plHashTableBase<K, V, H>::plHashTableBase(plAllocator* pAllocator)
 {
   m_pEntries = nullptr;
   m_pEntryFlags = nullptr;
@@ -141,7 +135,7 @@ plHashTableBase<K, V, H>::plHashTableBase(plAllocatorBase* pAllocator)
 }
 
 template <typename K, typename V, typename H>
-plHashTableBase<K, V, H>::plHashTableBase(const plHashTableBase<K, V, H>& other, plAllocatorBase* pAllocator)
+plHashTableBase<K, V, H>::plHashTableBase(const plHashTableBase<K, V, H>& other, plAllocator* pAllocator)
 {
   m_pEntries = nullptr;
   m_pEntryFlags = nullptr;
@@ -153,7 +147,7 @@ plHashTableBase<K, V, H>::plHashTableBase(const plHashTableBase<K, V, H>& other,
 }
 
 template <typename K, typename V, typename H>
-plHashTableBase<K, V, H>::plHashTableBase(plHashTableBase<K, V, H>&& other, plAllocatorBase* pAllocator)
+plHashTableBase<K, V, H>::plHashTableBase(plHashTableBase<K, V, H>&& other, plAllocator* pAllocator)
 {
   m_pEntries = nullptr;
   m_pEntryFlags = nullptr;
@@ -168,8 +162,8 @@ template <typename K, typename V, typename H>
 plHashTableBase<K, V, H>::~plHashTableBase()
 {
   Clear();
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
   m_uiCapacity = 0;
 }
 
@@ -214,8 +208,8 @@ void plHashTableBase<K, V, H>::operator=(plHashTableBase<K, V, H>&& rhs)
   }
   else
   {
-    PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
-    PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
+    PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
+    PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
 
     // Move all data over.
     m_pEntries = rhs.m_pEntries;
@@ -257,12 +251,6 @@ bool plHashTableBase<K, V, H>::operator==(const plHashTableBase<K, V, H>& rhs) c
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE bool plHashTableBase<K, V, H>::operator!=(const plHashTableBase<K, V, H>& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename K, typename V, typename H>
 void plHashTableBase<K, V, H>::Reserve(plUInt32 uiCapacity)
 {
   const plUInt64 uiCap64 = static_cast<plUInt64>(uiCapacity);
@@ -271,7 +259,7 @@ void plHashTableBase<K, V, H>::Reserve(plUInt32 uiCapacity)
   uiNewCapacity64 = plMath::Min<plUInt64>(uiNewCapacity64, 0x80000000llu); // the largest power-of-two in 32 bit
 
   plUInt32 uiNewCapacity32 = static_cast<plUInt32>(uiNewCapacity64 & 0xFFFFFFFF);
-  PLASMA_ASSERT_DEBUG(uiCapacity <= uiNewCapacity32, "plHashSet/Map do not support more than 2 billion entries.");
+  PL_ASSERT_DEBUG(uiCapacity <= uiNewCapacity32, "plHashSet/Map do not support more than 2 billion entries.");
 
   if (m_uiCapacity >= uiNewCapacity32)
     return;
@@ -286,8 +274,8 @@ void plHashTableBase<K, V, H>::Compact()
   if (IsEmpty())
   {
     // completely deallocate all data, if the table is empty.
-    PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
-    PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
+    PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
+    PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntryFlags);
     m_uiCapacity = 0;
   }
   else
@@ -299,13 +287,13 @@ void plHashTableBase<K, V, H>::Compact()
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE bool plHashTableBase<K, V, H>::IsEmpty() const
+PL_ALWAYS_INLINE bool plHashTableBase<K, V, H>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
@@ -391,7 +379,7 @@ bool plHashTableBase<K, V, H>::Remove(const CompatibleKeyType& key, V* out_pOldV
 template <typename K, typename V, typename H>
 typename plHashTableBase<K, V, H>::Iterator plHashTableBase<K, V, H>::Remove(const typename plHashTableBase<K, V, H>::Iterator& pos)
 {
-  PLASMA_ASSERT_DEBUG(pos.m_pHashTable == this, "Iterator from wrong hashtable");
+  PL_ASSERT_DEBUG(pos.m_pHashTable == this, "Iterator from wrong hashtable");
   Iterator it = pos;
   plUInt32 uiIndex = pos.m_uiCurrentIndex;
   ++it;
@@ -444,7 +432,7 @@ inline bool plHashTableBase<K, V, H>::TryGetValue(const CompatibleKeyType& key, 
   plUInt32 uiIndex = FindEntry(key);
   if (uiIndex != plInvalidIndex)
   {
-    PLASMA_ASSERT_DEBUG(m_pEntries != nullptr, "No entries present"); // To fix static analysis
+    PL_ASSERT_DEBUG(m_pEntries != nullptr, "No entries present"); // To fix static analysis
     out_value = m_pEntries[uiIndex].value;
     return true;
   }
@@ -460,7 +448,7 @@ inline bool plHashTableBase<K, V, H>::TryGetValue(const CompatibleKeyType& key, 
   if (uiIndex != plInvalidIndex)
   {
     out_pValue = &m_pEntries[uiIndex].value;
-    PLASMA_ANALYSIS_ASSUME(out_pValue != nullptr);
+    PL_ANALYSIS_ASSUME(out_pValue != nullptr);
     return true;
   }
 
@@ -475,7 +463,7 @@ inline bool plHashTableBase<K, V, H>::TryGetValue(const CompatibleKeyType& key, 
   if (uiIndex != plInvalidIndex)
   {
     out_pValue = &m_pEntries[uiIndex].value;
-    PLASMA_ANALYSIS_ASSUME(out_pValue != nullptr);
+    PL_ANALYSIS_ASSUME(out_pValue != nullptr);
     return true;
   }
 
@@ -564,24 +552,24 @@ V& plHashTableBase<K, V, H>::FindOrAdd(const K& key, bool* out_pExisted)
 
     // new entry
     plMemoryUtils::CopyConstruct(&m_pEntries[uiIndex].key, key, 1);
-    plMemoryUtils::DefaultConstruct(&m_pEntries[uiIndex].value, 1);
+    plMemoryUtils::Construct<ConstructAll>(&m_pEntries[uiIndex].value, 1);
     MarkEntryAsValid(uiIndex);
     ++m_uiCount;
   }
 
-  PLASMA_ASSERT_DEBUG(m_pEntries != nullptr, "Entries should be present");
+  PL_ASSERT_DEBUG(m_pEntries != nullptr, "Entries should be present");
   return m_pEntries[uiIndex].value;
 }
 
 template <typename K, typename V, typename H>
 template <typename CompatibleKeyType>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::Contains(const CompatibleKeyType& key) const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::Contains(const CompatibleKeyType& key) const
 {
   return FindEntry(key) != plInvalidIndex;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase<K, V, H>::GetIterator()
+PL_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase<K, V, H>::GetIterator()
 {
   Iterator iterator(*this);
   iterator.SetToBegin();
@@ -589,7 +577,7 @@ PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase<K, V, H>::GetEndIterator()
+PL_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase<K, V, H>::GetEndIterator()
 {
   Iterator iterator(*this);
   iterator.SetToEnd();
@@ -597,7 +585,7 @@ PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::Iterator plHashTableBase
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTableBase<K, V, H>::GetIterator() const
+PL_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTableBase<K, V, H>::GetIterator() const
 {
   ConstIterator iterator(*this);
   iterator.SetToBegin();
@@ -605,7 +593,7 @@ PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTabl
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTableBase<K, V, H>::GetEndIterator() const
+PL_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTableBase<K, V, H>::GetEndIterator() const
 {
   ConstIterator iterator(*this);
   iterator.SetToEnd();
@@ -613,7 +601,7 @@ PLASMA_ALWAYS_INLINE typename plHashTableBase<K, V, H>::ConstIterator plHashTabl
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE plAllocatorBase* plHashTableBase<K, V, H>::GetAllocator() const
+PL_ALWAYS_INLINE plAllocator* plHashTableBase<K, V, H>::GetAllocator() const
 {
   return m_pAllocator;
 }
@@ -628,15 +616,15 @@ plUInt64 plHashTableBase<K, V, H>::GetHeapMemoryUsage() const
 template <typename K, typename V, typename H>
 void plHashTableBase<K, V, H>::SetCapacity(plUInt32 uiCapacity)
 {
-  PLASMA_ASSERT_DEBUG(plMath::IsPowerOf2(uiCapacity), "uiCapacity must be a power of two to avoid modulo during lookup.");
+  PL_ASSERT_DEBUG(plMath::IsPowerOf2(uiCapacity), "uiCapacity must be a power of two to avoid modulo during lookup.");
   const plUInt32 uiOldCapacity = m_uiCapacity;
   m_uiCapacity = uiCapacity;
 
   Entry* pOldEntries = m_pEntries;
   plUInt32* pOldEntryFlags = m_pEntryFlags;
 
-  m_pEntries = PLASMA_NEW_RAW_BUFFER(m_pAllocator, Entry, m_uiCapacity);
-  m_pEntryFlags = PLASMA_NEW_RAW_BUFFER(m_pAllocator, plUInt32, GetFlagsCapacity());
+  m_pEntries = PL_NEW_RAW_BUFFER(m_pAllocator, Entry, m_uiCapacity);
+  m_pEntryFlags = PL_NEW_RAW_BUFFER(m_pAllocator, plUInt32, GetFlagsCapacity());
   plMemoryUtils::ZeroFill(m_pEntryFlags, GetFlagsCapacity());
 
   m_uiCount = 0;
@@ -644,20 +632,20 @@ void plHashTableBase<K, V, H>::SetCapacity(plUInt32 uiCapacity)
   {
     if (GetFlags(pOldEntryFlags, i) == VALID_ENTRY)
     {
-      PLASMA_VERIFY(!Insert(std::move(pOldEntries[i].key), std::move(pOldEntries[i].value)), "Implementation error");
+      PL_VERIFY(!Insert(std::move(pOldEntries[i].key), std::move(pOldEntries[i].value)), "Implementation error");
 
       plMemoryUtils::Destruct(&pOldEntries[i].key, 1);
       plMemoryUtils::Destruct(&pOldEntries[i].value, 1);
     }
   }
 
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, pOldEntries);
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, pOldEntryFlags);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, pOldEntries);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, pOldEntryFlags);
 }
 
 template <typename K, typename V, typename H>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::FindEntry(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::FindEntry(const CompatibleKeyType& key) const
 {
   return FindEntry(H::Hash(key), key);
 }
@@ -686,12 +674,12 @@ inline plUInt32 plHashTableBase<K, V, H>::FindEntry(plUInt32 uiHash, const Compa
   return plInvalidIndex;
 }
 
-#define PLASMA_HASHTABLE_USE_BITFLAGS PLASMA_ON
+#define PL_HASHTABLE_USE_BITFLAGS PL_ON
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlagsCapacity() const
+PL_FORCE_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlagsCapacity() const
 {
-#if PLASMA_ENABLED(PLASMA_HASHTABLE_USE_BITFLAGS)
+#if PL_ENABLED(PL_HASHTABLE_USE_BITFLAGS)
   return (m_uiCapacity + 15) / 16;
 #else
   return m_uiCapacity;
@@ -699,9 +687,9 @@ PLASMA_FORCE_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlagsCapacity() const
 }
 
 template <typename K, typename V, typename H>
-PLASMA_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlags(plUInt32* pFlags, plUInt32 uiEntryIndex) const
+PL_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlags(plUInt32* pFlags, plUInt32 uiEntryIndex) const
 {
-#if PLASMA_ENABLED(PLASMA_HASHTABLE_USE_BITFLAGS)
+#if PL_ENABLED(PL_HASHTABLE_USE_BITFLAGS)
   const plUInt32 uiIndex = uiEntryIndex / 16;
   const plUInt32 uiSubIndex = (uiEntryIndex & 15) * 2;
   return (pFlags[uiIndex] >> uiSubIndex) & FLAGS_MASK;
@@ -713,50 +701,50 @@ PLASMA_ALWAYS_INLINE plUInt32 plHashTableBase<K, V, H>::GetFlags(plUInt32* pFlag
 template <typename K, typename V, typename H>
 void plHashTableBase<K, V, H>::SetFlags(plUInt32 uiEntryIndex, plUInt32 uiFlags)
 {
-#if PLASMA_ENABLED(PLASMA_HASHTABLE_USE_BITFLAGS)
+#if PL_ENABLED(PL_HASHTABLE_USE_BITFLAGS)
   const plUInt32 uiIndex = uiEntryIndex / 16;
   const plUInt32 uiSubIndex = (uiEntryIndex & 15) * 2;
-  PLASMA_ASSERT_DEBUG(uiIndex < GetFlagsCapacity(), "Out of bounds access");
+  PL_ASSERT_DEBUG(uiIndex < GetFlagsCapacity(), "Out of bounds access");
   m_pEntryFlags[uiIndex] &= ~(FLAGS_MASK << uiSubIndex);
   m_pEntryFlags[uiIndex] |= (uiFlags << uiSubIndex);
 #else
-  PLASMA_ASSERT_DEBUG(uiEntryIndex < GetFlagsCapacity(), "Out of bounds access");
+  PL_ASSERT_DEBUG(uiEntryIndex < GetFlagsCapacity(), "Out of bounds access");
   m_pEntryFlags[uiEntryIndex] = uiFlags;
 #endif
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::IsFreeEntry(plUInt32 uiEntryIndex) const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::IsFreeEntry(plUInt32 uiEntryIndex) const
 {
   return GetFlags(m_pEntryFlags, uiEntryIndex) == FREE_ENTRY;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::IsValidEntry(plUInt32 uiEntryIndex) const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::IsValidEntry(plUInt32 uiEntryIndex) const
 {
   return GetFlags(m_pEntryFlags, uiEntryIndex) == VALID_ENTRY;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE bool plHashTableBase<K, V, H>::IsDeletedEntry(plUInt32 uiEntryIndex) const
+PL_FORCE_INLINE bool plHashTableBase<K, V, H>::IsDeletedEntry(plUInt32 uiEntryIndex) const
 {
   return GetFlags(m_pEntryFlags, uiEntryIndex) == DELETED_ENTRY;
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsFree(plUInt32 uiEntryIndex)
+PL_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsFree(plUInt32 uiEntryIndex)
 {
   SetFlags(uiEntryIndex, FREE_ENTRY);
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsValid(plUInt32 uiEntryIndex)
+PL_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsValid(plUInt32 uiEntryIndex)
 {
   SetFlags(uiEntryIndex, VALID_ENTRY);
 }
 
 template <typename K, typename V, typename H>
-PLASMA_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsDeleted(plUInt32 uiEntryIndex)
+PL_FORCE_INLINE void plHashTableBase<K, V, H>::MarkEntryAsDeleted(plUInt32 uiEntryIndex)
 {
   SetFlags(uiEntryIndex, DELETED_ENTRY);
 }
@@ -769,7 +757,7 @@ plHashTable<K, V, H, A>::plHashTable()
 }
 
 template <typename K, typename V, typename H, typename A>
-plHashTable<K, V, H, A>::plHashTable(plAllocatorBase* pAllocator)
+plHashTable<K, V, H, A>::plHashTable(plAllocator* pAllocator)
   : plHashTableBase<K, V, H>(pAllocator)
 {
 }

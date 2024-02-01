@@ -9,9 +9,9 @@
 /// plDataDirectoryType's provide.
 /// Derive from this class if you want to implement different policies on how to read files.
 /// E.g. the default reader (plFileReader) implements a buffered read policy (using an internal cache).
-class PLASMA_FOUNDATION_DLL plFileReaderBase : public plStreamReader
+class PL_FOUNDATION_DLL plFileReaderBase : public plStreamReader
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFileReaderBase);
+  PL_DISALLOW_COPY_AND_ASSIGN(plFileReaderBase);
 
 public:
   plFileReaderBase() { m_pDataDirReader = nullptr; }
@@ -51,9 +51,9 @@ protected:
 /// plDataDirectoryType's provide.
 /// Derive from this class if you want to implement different policies on how to write files.
 /// E.g. the default writer (plFileWriter) implements a buffered write policy (using an internal cache).
-class PLASMA_FOUNDATION_DLL plFileWriterBase : public plStreamWriter
+class PL_FOUNDATION_DLL plFileWriterBase : public plStreamWriter
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFileWriterBase);
+  PL_DISALLOW_COPY_AND_ASSIGN(plFileWriterBase);
 
 public:
   plFileWriterBase() { m_pDataDirWriter = nullptr; }

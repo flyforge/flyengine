@@ -6,11 +6,11 @@
 
 class plQtNodeScene;
 
-class PLASMA_GUIFOUNDATION_DLL plQtNodeView : public QGraphicsView
+class PL_GUIFOUNDATION_DLL plQtNodeView : public QGraphicsView
 {
   Q_OBJECT
 public:
-  explicit plQtNodeView(QWidget* parent = nullptr);
+  explicit plQtNodeView(QWidget* pParent = nullptr);
   ~plQtNodeView();
 
   void SetScene(plQtNodeScene* pScene);
@@ -23,18 +23,18 @@ protected:
   virtual void wheelEvent(QWheelEvent* event) override;
   virtual void contextMenuEvent(QContextMenuEvent* event) override;
   virtual void resizeEvent(QResizeEvent*) override;
+  virtual void drawBackground(QPainter* painter, const QRectF& r) override;
 
-  virtual void drawBackground(QPainter *painter, const QRectF &r) override;
 
 private:
   void UpdateView();
 
-  void DrawGrid(QPainter *painter, const double gridStep);
+  void DrawGrid(QPainter* painter, const double gridStep);
 
 private:
-  plQtNodeScene* m_pScene;
-  bool m_bPanning;
-  plInt32 m_iPanCounter;
+  plQtNodeScene* m_pScene = nullptr;
+  bool m_bPanning = false;
+  plInt32 m_iPanCounter = 0;
 
   QPointF m_ViewPos;
   QPointF m_ViewScale;

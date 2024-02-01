@@ -4,7 +4,7 @@
 #include <Core/World/Declarations.h>
 #include <Foundation/Math/CurveFunctions.h>
 
-class PLASMA_CORE_DLL plScriptCoroutine_TweenProperty : public plTypedScriptCoroutine<plScriptCoroutine_TweenProperty, plComponentHandle, plStringView, plVariant, plTime, plEnum<plCurveFunction>>
+class PL_CORE_DLL plScriptCoroutine_TweenProperty : public plTypedScriptCoroutine<plScriptCoroutine_TweenProperty, plComponentHandle, plStringView, plVariant, plTime, plEnum<plCurveFunction>>
 {
 public:
   void Start(plComponentHandle hComponent, plStringView sPropertyName, plVariant targetValue, plTime duration, plEnum<plCurveFunction> easing);
@@ -21,4 +21,4 @@ private:
   plTime m_TimePassed;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutine_TweenProperty);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutine_TweenProperty);

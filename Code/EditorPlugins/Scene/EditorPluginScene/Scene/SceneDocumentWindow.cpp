@@ -2,6 +2,7 @@
 
 #include <EditorFramework/DocumentWindow/QuadViewWidget.moc.h>
 #include <EditorFramework/Gizmos/SnapProvider.h>
+#include <EditorFramework/Preferences/EditorPreferences.h>
 #include <EditorPluginScene/Panels/ScenegraphPanel/ScenegraphPanel.moc.h>
 #include <EditorPluginScene/Scene/SceneDocument.h>
 #include <EditorPluginScene/Scene/SceneDocumentWindow.moc.h>
@@ -15,7 +16,7 @@
 plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
   : plQtSceneDocumentWindowBase(pDocument)
 {
-  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, PlasmaEngineViewConfig* pConfig) -> plQtEngineViewWidget*
+  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, plEngineViewConfig* pConfig) -> plQtEngineViewWidget*
   {
     plQtSceneViewWidget* pWidget = new plQtSceneViewWidget(nullptr, static_cast<plQtSceneDocumentWindowBase*>(pWindow), pConfig);
     pWindow->AddViewWidget(pWidget);
@@ -29,7 +30,8 @@ plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
 
   setCentralWidget(m_pQuadViewWidget);
 
-  SetTargetFramerate(60);
+  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  SetTargetFramerate(pPreferences->GetMaxFramerate());
 
   {
     // Menu Bar
@@ -53,12 +55,10 @@ plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
     addToolBar(pToolBar);
   }
 
-  const plSceneDocument* pSceneDoc = static_cast<const plSceneDocument*>(GetDocument());
-
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("PropertyPanel");
-    pPropertyPanel->setWindowTitle("PROPERTIES");
+    pPropertyPanel->setWindowTitle("Properties");
     pPropertyPanel->show();
 
     plQtDocumentPanel* pPanelTree = new plQtScenegraphPanel(this, static_cast<plSceneDocument*>(pDocument));
@@ -66,7 +66,7 @@ plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
     pPropertyPanel->setWidget(pPropertyGrid);
-    PLASMA_VERIFY(connect(pPropertyGrid, &plQtPropertyGridWidget::ExtendContextMenu, this, &plQtSceneDocumentWindow::ExtendPropertyGridContextMenu), "");
+    PL_VERIFY(connect(pPropertyGrid, &plQtPropertyGridWidget::ExtendContextMenu, this, &plQtSceneDocumentWindow::ExtendPropertyGridContextMenu), "");
 
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, pPropertyPanel);
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, pPanelTree);
@@ -77,7 +77,7 @@ plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
   {
     plQtDocumentPanel* pPanel = new plQtDocumentPanel(this, pDocument);
     pPanel->setObjectName("SceneSettingsDockWidget");
-    pPanel->setWindowTitle(GetSceneDocument()->IsPrefab() ? "PREFAB SETTINGS" : "SCENE SETTINGS");
+    pPanel->setWindowTitle(GetSceneDocument()->IsPrefab() ? "Prefab Settings" : "Scene Settings");
     pPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPanel, pDocument, false);
@@ -92,9 +92,7 @@ plQtSceneDocumentWindow::plQtSceneDocumentWindow(plSceneDocument* pDocument)
   FinishWindowCreation();
 }
 
-plQtSceneDocumentWindow::~plQtSceneDocumentWindow()
-{
-}
+plQtSceneDocumentWindow::~plQtSceneDocumentWindow() = default;
 
 plQtSceneDocumentWindowBase::plQtSceneDocumentWindowBase(plSceneDocument* pDocument)
   : plQtGameObjectDocumentWindow(pDocument)
@@ -251,7 +249,7 @@ void plQtSceneDocumentWindowBase::InternalRedraw()
   if (doc->GetGameMode() == GameMode::Play && !window()->isActiveWindow())
     return;
 
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
@@ -259,7 +257,7 @@ void plQtSceneDocumentWindowBase::InternalRedraw()
 void plQtSceneDocumentWindowBase::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   {
@@ -358,7 +356,7 @@ void plQtSceneDocumentWindowBase::ExtendPropertyGridContextMenu(
   }
 }
 
-void plQtSceneDocumentWindowBase::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plQtSceneDocumentWindowBase::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
 {
   plQtGameObjectDocumentWindow::ProcessMessageEventHandler(pMsg);
 }

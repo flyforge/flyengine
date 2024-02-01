@@ -4,7 +4,7 @@
 
 class plMaterialDragDropHandler : public plAssetDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialDragDropHandler, plAssetDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plMaterialDragDropHandler, plAssetDragDropHandler);
 
 public:
 protected:

@@ -10,8 +10,7 @@ plActionDescriptorHandle plSceneGizmoActions::s_hGreyBoxingGizmo;
 
 void plSceneGizmoActions::RegisterActions()
 {
-  s_hGreyBoxingGizmo =
-    PLASMA_REGISTER_ACTION_1("Gizmo.Mode.GreyBoxing", plActionScope::Document, "Gizmo", "B", plGizmoAction, plGetStaticRTTI<plGreyBoxEditTool>());
+  s_hGreyBoxingGizmo = PL_REGISTER_ACTION_1("Gizmo.Mode.GreyBoxing", plActionScope::Document, "Gizmo", "B", plGizmoAction, plGetStaticRTTI<plGreyBoxEditTool>());
 }
 
 void plSceneGizmoActions::UnregisterActions()
@@ -19,20 +18,19 @@ void plSceneGizmoActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hGreyBoxingGizmo);
 }
 
-void plSceneGizmoActions::MapMenuActions(const char* szMapping, const char* szPath)
+void plSceneGizmoActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/Gizmo.Menu");
-  pMap->MapAction(s_hGreyBoxingGizmo, sSubPath, 5.0f);
+  pMap->MapAction(s_hGreyBoxingGizmo, "G.Gizmos", 5.0f);
 }
 
-void plSceneGizmoActions::MapToolbarActions(const char* szMapping, const char* szPath)
+void plSceneGizmoActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/GizmoCategory");
+  const plStringView sSubPath("GizmoCategory");
   pMap->MapAction(s_hGreyBoxingGizmo, sSubPath, 5.0f);
 }

@@ -15,24 +15,24 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("KrautTreeAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("KrautTreeAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plStandardMenus::MapActions("KrautTreeAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("KrautTreeAssetMenuBar");
-      plDocumentActions::MapActions("KrautTreeAssetMenuBar", "Menu.File", false);
-      plAssetActions::MapMenuActions("KrautTreeAssetMenuBar", "Menu.File");
-      plCommandHistoryActions::MapActions("KrautTreeAssetMenuBar", "Menu.Edit");
+      plDocumentActions::MapMenuActions("KrautTreeAssetMenuBar");
+      plAssetActions::MapMenuActions("KrautTreeAssetMenuBar");
+      plCommandHistoryActions::MapActions("KrautTreeAssetMenuBar");
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("KrautTreeAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("KrautTreeAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("KrautTreeAssetToolBar");
       plCommandHistoryActions::MapActions("KrautTreeAssetToolBar", "");
       plAssetActions::MapToolBarActions("KrautTreeAssetToolBar", true);
     }
   }
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }

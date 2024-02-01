@@ -23,9 +23,9 @@ plQtLayerAdapter::~plQtLayerAdapter()
   m_DocumentEventUnsubscriber.Unsubscribe();
 }
 
-QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int row, int column, int role) const
+QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const
 {
-  switch (role)
+  switch (iRole)
   {
     case UserRoles::LayerGuid:
     {
@@ -43,9 +43,9 @@ QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int row, int co
       const plAssetCurator::plLockedSubAsset subAsset = plAssetCurator::GetSingleton()->GetSubAsset(layerGuid);
       if (subAsset.isValid())
       {
-        if (role == Qt::ToolTipRole)
+        if (iRole == Qt::ToolTipRole)
         {
-          return subAsset->m_pAssetInfo->m_sAbsolutePath.GetData();
+          return plMakeQString(subAsset->m_pAssetInfo->m_Path.GetAbsolutePath());
         }
         plStringBuilder sName = subAsset->GetName();
         QString sQtName = QString::fromUtf8(sName.GetData());
@@ -76,7 +76,7 @@ QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int row, int co
       plUuid layerGuid = pAccessor->Get<plUuid>(pObject, "Layer");
       if (!m_pSceneDocument->IsLayerLoaded(layerGuid))
       {
-        return QColor(128, 128, 128);
+        return QVariant();
       }
     }
     break;
@@ -95,7 +95,7 @@ QVariant plQtLayerAdapter::data(const plDocumentObject* pObject, int row, int co
   return QVariant();
 }
 
-bool plQtLayerAdapter::setData(const plDocumentObject* pObject, int row, int column, const QVariant& value, int role) const
+bool plQtLayerAdapter::setData(const plDocumentObject* pObject, int iRow, int iColumn, const QVariant& value, int iRole) const
 {
   return false;
 }
@@ -152,32 +152,32 @@ plQtLayerDelegate::plQtLayerDelegate(QObject* pParent, plScene2Document* pDocume
 {
 }
 
-bool plQtLayerDelegate::mousePressEvent(QMouseEvent* event, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool plQtLayerDelegate::mousePressEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   const QRect visibleRect = GetVisibleIconRect(option);
   const QRect loadedRect = GetLoadedIconRect(option);
-  if (event->button() == Qt::MouseButton::LeftButton && (visibleRect.contains(event->localPos().toPoint()) || loadedRect.contains(event->localPos().toPoint())))
+  if (pEvent->button() == Qt::MouseButton::LeftButton && (visibleRect.contains(pEvent->position().toPoint()) || loadedRect.contains(pEvent->position().toPoint())))
   {
     m_bPressed = true;
-    event->accept();
+    pEvent->accept();
     return true;
   }
-  return plQtItemDelegate::mousePressEvent(event, option, index);
+  return plQtItemDelegate::mousePressEvent(pEvent, option, index);
 }
 
-bool plQtLayerDelegate::mouseReleaseEvent(QMouseEvent* event, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool plQtLayerDelegate::mouseReleaseEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   if (m_bPressed)
   {
     const QRect visibleRect = GetVisibleIconRect(option);
     const QRect loadedRect = GetLoadedIconRect(option);
-    if (visibleRect.contains(event->localPos().toPoint()))
+    if (visibleRect.contains(pEvent->position().toPoint()))
     {
       const plUuid layerGuid = index.data(plQtLayerAdapter::UserRoles::LayerGuid).value<plUuid>();
       const bool bVisible = !m_pDocument->IsLayerVisible(layerGuid);
       m_pDocument->SetLayerVisible(layerGuid, bVisible).LogFailure();
     }
-    else if (loadedRect.contains(event->localPos().toPoint()))
+    else if (loadedRect.contains(pEvent->position().toPoint()))
     {
       const plUuid layerGuid = index.data(plQtLayerAdapter::UserRoles::LayerGuid).value<plUuid>();
       if (layerGuid != m_pDocument->GetGuid())
@@ -186,24 +186,24 @@ bool plQtLayerDelegate::mouseReleaseEvent(QMouseEvent* event, const QStyleOption
       }
     }
     m_bPressed = false;
-    event->accept();
+    pEvent->accept();
     return true;
   }
-  return plQtItemDelegate::mouseReleaseEvent(event, option, index);
+  return plQtItemDelegate::mouseReleaseEvent(pEvent, option, index);
 }
 
-bool plQtLayerDelegate::mouseMoveEvent(QMouseEvent* event, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool plQtLayerDelegate::mouseMoveEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   if (m_bPressed)
   {
     return true;
   }
-  return plQtItemDelegate::mouseMoveEvent(event, option, index);
+  return plQtItemDelegate::mouseMoveEvent(pEvent, option, index);
 }
 
-void plQtLayerDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt, const QModelIndex& index) const
+void plQtLayerDelegate::paint(QPainter* pPainter, const QStyleOptionViewItem& opt, const QModelIndex& index) const
 {
-  plQtItemDelegate::paint(painter, opt, index);
+  plQtItemDelegate::paint(pPainter, opt, index);
 
   {
     const plUuid layerGuid = index.data(plQtLayerAdapter::UserRoles::LayerGuid).value<plUuid>();
@@ -213,7 +213,7 @@ void plQtLayerDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
         const QRect thumbnailRect = GetVisibleIconRect(opt);
         const bool bVisible = m_pDocument->IsLayerVisible(layerGuid);
         const QIcon::Mode mode = bVisible ? QIcon::Mode::Normal : QIcon::Mode::Disabled;
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginScene/Icons/LayerVisible.svg").paint(painter, thumbnailRect, Qt::AlignmentFlag::AlignCenter, mode);
+        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginScene/Icons/LayerVisible.svg").paint(pPainter, thumbnailRect, Qt::AlignmentFlag::AlignCenter, mode);
       }
 
       if (layerGuid != m_pDocument->GetGuid())
@@ -221,7 +221,7 @@ void plQtLayerDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt
         const QRect thumbnailRect = GetLoadedIconRect(opt);
         const bool bLoaded = m_pDocument->IsLayerLoaded(layerGuid);
         const QIcon::Mode mode = bLoaded ? QIcon::Mode::Normal : QIcon::Mode::Disabled;
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginScene/Icons/LayerLoaded.svg").paint(painter, thumbnailRect, Qt::AlignmentFlag::AlignCenter, mode);
+        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginScene/Icons/LayerLoaded.svg").paint(pPainter, thumbnailRect, Qt::AlignmentFlag::AlignCenter, mode);
       }
     }
   }
@@ -232,27 +232,27 @@ QSize plQtLayerDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelI
   return plQtItemDelegate::sizeHint(opt, index);
 }
 
-bool plQtLayerDelegate::helpEvent(QHelpEvent* event, QAbstractItemView* view, const QStyleOptionViewItem& option, const QModelIndex& index)
+bool plQtLayerDelegate::helpEvent(QHelpEvent* pEvent, QAbstractItemView* pView, const QStyleOptionViewItem& option, const QModelIndex& index)
 {
   const plUuid layerGuid = index.data(plQtLayerAdapter::UserRoles::LayerGuid).value<plUuid>();
   if (layerGuid.IsValid())
   {
     const QRect visibleRect = GetVisibleIconRect(option);
     const QRect loadedRect = GetLoadedIconRect(option);
-    if (visibleRect.contains(event->pos()))
+    if (visibleRect.contains(pEvent->pos()))
     {
       const bool bVisible = m_pDocument->IsLayerVisible(layerGuid);
-      QToolTip::showText(event->globalPos(), bVisible ? "Hide Layer" : "Show Layer", view);
+      QToolTip::showText(pEvent->globalPos(), bVisible ? "Hide Layer" : "Show Layer", pView);
       return true;
     }
-    else if (loadedRect.contains(event->pos()))
+    else if (loadedRect.contains(pEvent->pos()))
     {
       const bool bLoaded = m_pDocument->IsLayerLoaded(layerGuid);
-      QToolTip::showText(event->globalPos(), bLoaded ? "Unload Layer" : "Load Layer", view);
+      QToolTip::showText(pEvent->globalPos(), bLoaded ? "Unload Layer" : "Load Layer", pView);
       return true;
     }
   }
-  return plQtItemDelegate::helpEvent(event, view, option, index);
+  return plQtItemDelegate::helpEvent(pEvent, pView, option, index);
 }
 
 QRect plQtLayerDelegate::GetVisibleIconRect(const QStyleOptionViewItem& opt)

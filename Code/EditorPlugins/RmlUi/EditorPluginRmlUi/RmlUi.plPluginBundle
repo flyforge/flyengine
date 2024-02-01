@@ -5,10 +5,10 @@ PluginInfo
 {
 	string %DisplayName{"RML UI"}
 	string %Description{"Adds support for graphical user interfaces using RmlUI."}
-	string %EditorPlugins{"plasmaEditorPluginRmlUi"}
-	string %EditorEnginePlugins{"PlasmaEnginePluginRmlUi"}
-	string %RuntimePlugins{"plasmaRmlUiPlugin"}
-	string %PackageDependencies{}
+	string %EditorPlugins{"plEditorPluginRmlUi"}
+	string %EditorEnginePlugins{"plEnginePluginRmlUi"}
+	string %RuntimePlugins{"plRmlUiPlugin"}
+	string %PackageDependencies{"freetype.dll", "RmlCore.dll"}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}
 	string %EnabledInTemplates{"General2D", "General3D"}

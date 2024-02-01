@@ -10,4 +10,4 @@ struct plMaterialResourceSlot
   bool m_bHighlight = false;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plMaterialResourceSlot);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plMaterialResourceSlot);

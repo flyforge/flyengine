@@ -4,20 +4,21 @@
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererFoundation/Resources/RenderTargetView.h>
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAntialiasingPass, 1, plRTTIDefaultAllocator<plAntialiasingPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAntialiasingPass, 1, plRTTIDefaultAllocator<plAntialiasingPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput)
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAntialiasingPass::plAntialiasingPass()
@@ -26,11 +27,11 @@ plAntialiasingPass::plAntialiasingPass()
   {
     // Load shader.
     m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Antialiasing.plShader");
-    PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load antialiasing shader!");
+    PL_ASSERT_DEV(m_hShader.IsValid(), "Could not load antialiasing shader!");
   }
 }
 
-plAntialiasingPass::~plAntialiasingPass() {}
+plAntialiasingPass::~plAntialiasingPass() = default;
 
 bool plAntialiasingPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
@@ -97,6 +98,18 @@ void plAntialiasingPass::Execute(const plRenderViewContext& renderViewContext, c
   renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
 }
 
+plResult plAntialiasingPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
 
+plResult plAntialiasingPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
+}
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_AntialiasingPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_AntialiasingPass);

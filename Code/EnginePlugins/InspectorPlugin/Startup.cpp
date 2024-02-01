@@ -10,22 +10,22 @@ namespace StartupDetail
   static plInt32 s_iSendSubSystemTelemetry = 0;
 } // namespace StartupDetail
 
-PLASMA_ON_GLOBAL_EVENT(plStartup_StartupCoreSystems_End)
+PL_ON_GLOBAL_EVENT(plStartup_StartupCoreSystems_End)
 {
   StartupDetail::SendSubsystemTelemetry();
 }
 
-PLASMA_ON_GLOBAL_EVENT(plStartup_StartupHighLevelSystems_End)
+PL_ON_GLOBAL_EVENT(plStartup_StartupHighLevelSystems_End)
 {
   StartupDetail::SendSubsystemTelemetry();
 }
 
-PLASMA_ON_GLOBAL_EVENT(plStartup_ShutdownCoreSystems_End)
+PL_ON_GLOBAL_EVENT(plStartup_ShutdownCoreSystems_End)
 {
   StartupDetail::SendSubsystemTelemetry();
 }
 
-PLASMA_ON_GLOBAL_EVENT(plStartup_ShutdownHighLevelSystems_End)
+PL_ON_GLOBAL_EVENT(plStartup_ShutdownHighLevelSystems_End)
 {
   StartupDetail::SendSubsystemTelemetry();
 }
@@ -98,4 +98,4 @@ void RemoveStartupEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Startup);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Startup);

@@ -9,23 +9,23 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plSceneViewContext::plSceneViewContext(plSceneContext* pSceneContext)
-  : PlasmaEngineProcessViewContext(pSceneContext)
+  : plEngineProcessViewContext(pSceneContext)
 {
   m_pSceneContext = pSceneContext;
   m_bUpdatePickingData = true;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.1f, 1000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
 
   m_CullingCamera = m_Camera;
 }
 
-plSceneViewContext::~plSceneViewContext() {}
+plSceneViewContext::~plSceneViewContext() = default;
 
-void plSceneViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
+void plSceneViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
 {
-  PlasmaEngineProcessViewContext::HandleViewMessage(pMsg);
+  plEngineProcessViewContext::HandleViewMessage(pMsg);
 
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewRedrawMsgToEngine>())
   {
@@ -45,7 +45,7 @@ void plSceneViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg
       {
         if (plSoundInterface* pSoundInterface = plSingletonRegistry::GetSingletonInstance<plSoundInterface>())
         {
-          pSoundInterface->SetListener(-1, pMsg2->m_vPosition, pMsg2->m_vDirForwards, pMsg2->m_vDirUp, plVec3::ZeroVector());
+          pSoundInterface->SetListener(-1, pMsg2->m_vPosition, pMsg2->m_vDirForwards, pMsg2->m_vDirUp, plVec3::MakeZero());
         }
       }
     }
@@ -64,9 +64,9 @@ void plSceneViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg
   }
 }
 
-void plSceneViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
+void plSceneViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* pRenderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  PlasmaEngineProcessViewContext::SetupRenderTarget(hSwapChain, renderTargets, uiWidth, uiHeight);
+  plEngineProcessViewContext::SetupRenderTarget(hSwapChain, pRenderTargets, uiWidth, uiHeight);
   plView* pView = nullptr;
   if (plRenderWorld::TryGetView(m_hView, pView))
   {
@@ -91,7 +91,7 @@ bool plSceneViewContext::UpdateThumbnailCamera(const plBoundingBoxSphere& bounds
     pView->SetRenderPassProperty("EditorPickingPass", "PickSelected", true);
   }
 
-  PLASMA_LOCK(m_pSceneContext->GetWorld()->GetWriteMarker());
+  PL_LOCK(m_pSceneContext->GetWorld()->GetWriteMarker());
   const plCameraComponentManager* pCamMan = m_pSceneContext->GetWorld()->GetComponentManager<plCameraComponentManager>();
   if (pCamMan)
   {
@@ -149,25 +149,25 @@ void plSceneViewContext::Redraw(bool bRenderEditorGizmos)
       pView->m_ExcludeTags.Remove(tagNoOrtho);
     }
 
-    PLASMA_LOCK(pView->GetWorld()->GetWriteMarker());
+    PL_LOCK(pView->GetWorld()->GetWriteMarker());
     if (auto pGizmoManager = pView->GetWorld()->GetComponentManager<plGizmoComponentManager>())
     {
       pGizmoManager->m_uiHighlightID = GetDocumentContext()->m_Context.m_uiHighlightID;
     }
   }
 
-  PlasmaEngineProcessViewContext::Redraw(bRenderEditorGizmos);
+  plEngineProcessViewContext::Redraw(bRenderEditorGizmos);
 }
 
 void plSceneViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
-  PlasmaEngineProcessViewContext::SetCamera(pMsg);
+  plEngineProcessViewContext::SetCamera(pMsg);
 
   plView* pView = nullptr;
   plRenderWorld::TryGetView(m_hView, pView);
 
   bool bDebugCulling = false;
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   bDebugCulling = plRenderPipeline::cvar_SpatialCullingVis;
 #endif
 
@@ -210,7 +210,7 @@ plViewHandle plSceneViewContext::CreateView()
   pView->SetExtractorProperty("EditorShapeIconsExtractor", "SceneContext", sceneContextVariant);
   pView->SetExtractorProperty("EditorGridExtractor", "SceneContext", sceneContextVariant);
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   pView->SetCullingCamera(&m_CullingCamera);
@@ -225,67 +225,69 @@ plViewHandle plSceneViewContext::CreateView()
 void plSceneViewContext::PickObjectAt(plUInt16 x, plUInt16 y)
 {
   // remote processes do not support picking, just ignore this
-  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plViewPickingResultMsgToEditor res;
+  PL_SCOPE_EXIT(SendViewMessage(&res));
 
   plView* pView = nullptr;
-  if (plRenderWorld::TryGetView(m_hView, pView) && pView->IsRenderPassReadBackPropertyExisting("EditorPickingPass", "PickingMatrix"))
+  if (plRenderWorld::TryGetView(m_hView, pView) == false)
+    return;
+
+  pView->SetRenderPassProperty("EditorPickingPass", "PickingPosition", plVec2(x, y));
+
+  if (pView->IsRenderPassReadBackPropertyExisting("EditorPickingPass", "PickedPosition") == false)
+    return;
+
+  plVariant varPickedPos = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedPosition");
+  if (varPickedPos.IsA<plVec3>() == false)
+    return;
+
+  const plUInt32 uiPickingID = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedID").ConvertTo<plUInt32>();
+  res.m_vPickedNormal = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedNormal").ConvertTo<plVec3>();
+  res.m_vPickingRayStartPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickedRayStartPosition").ConvertTo<plVec3>();
+  res.m_vPickedPosition = varPickedPos.ConvertTo<plVec3>();
+
+  PL_ASSERT_DEBUG(!res.m_vPickedPosition.IsNaN(), "");
+
+  const plUInt32 uiComponentID = (uiPickingID & 0x00FFFFFF);
+  const plUInt32 uiPartIndex = (uiPickingID >> 24) & 0x7F; // highest bit indicates whether the object is dynamic, ignore this
+
+  plArrayPtr<plWorldRttiConverterContext*> contexts = m_pSceneContext->GetAllContexts();
+  for (plWorldRttiConverterContext* pContext : contexts)
   {
-    pView->SetRenderPassProperty("EditorPickingPass", "PickingPosition", plVec2(x, y));
-    plVariant varMat = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingMatrix");
+    res.m_ComponentGuid = pContext->m_ComponentPickingMap.GetGuid(uiComponentID);
+    if (res.m_ComponentGuid.IsValid() == false)
+      continue;
 
-    if (varMat.IsA<plMat4>())
+    plComponentHandle hComponent = pContext->m_ComponentMap.GetHandle(res.m_ComponentGuid);
+
+    plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+
+    // check whether the component is still valid
+    plComponent* pComponent = nullptr;
+    if (pDocumentContext->GetWorld()->TryGetComponent<plComponent>(hComponent, pComponent))
     {
-      const plUInt32 uiPickingID = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingID").ConvertTo<plUInt32>();
-      // const float fPickingDepth = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingDepth").ConvertTo<float>();
-      res.m_vPickedNormal = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingNormal").ConvertTo<plVec3>();
-      res.m_vPickingRayStartPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingRayStartPosition").ConvertTo<plVec3>();
-      res.m_vPickedPosition = pView->GetRenderPassReadBackProperty("EditorPickingPass", "PickingPosition").ConvertTo<plVec3>();
-
-      PLASMA_ASSERT_DEBUG(!res.m_vPickedPosition.IsNaN(), "");
-
-      const plUInt32 uiComponentID = (uiPickingID & 0x00FFFFFF);
-      const plUInt32 uiPartIndex = (uiPickingID >> 24) & 0x7F; // highest bit indicates whether the object is dynamic, ignore this
-
-      plArrayPtr<plWorldRttiConverterContext*> contexts = m_pSceneContext->GetAllContexts();
-      for (plWorldRttiConverterContext* pContext : contexts)
-      {
-        res.m_ComponentGuid = pContext->m_ComponentPickingMap.GetGuid(uiComponentID);
-        if (res.m_ComponentGuid.IsValid())
-        {
-          plComponentHandle hComponent = pContext->m_ComponentMap.GetHandle(res.m_ComponentGuid);
-
-          PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
-
-          // check whether the component is still valid
-          plComponent* pComponent = nullptr;
-          if (pDocumentContext->GetWorld()->TryGetComponent<plComponent>(hComponent, pComponent))
-          {
-            // if yes, fill out the parent game object guid
-            res.m_ObjectGuid = pContext->m_GameObjectMap.GetGuid(pComponent->GetOwner()->GetHandle());
-            res.m_uiPartIndex = uiPartIndex;
-          }
-          else
-          {
-            res.m_ComponentGuid = plUuid();
-          }
-          break;
-        }
-      }
-      // Always take the other picking ID from the scene itself as gizmos are handled by the window and only the scene itself has one.
-      res.m_OtherGuid = m_pSceneContext->m_Context.m_OtherPickingMap.GetGuid(uiComponentID);
+      // if yes, fill out the parent game object guid
+      res.m_ObjectGuid = pContext->m_GameObjectMap.GetGuid(pComponent->GetOwner()->GetHandle());
+      res.m_uiPartIndex = uiPartIndex;
     }
+    else
+    {
+      res.m_ComponentGuid = plUuid();
+    }
+    break;
   }
 
-  SendViewMessage(&res);
+  // Always take the other picking ID from the scene itself as gizmos are handled by the window and only the scene itself has one.
+  res.m_OtherGuid = m_pSceneContext->m_Context.m_OtherPickingMap.GetGuid(uiComponentID);
 }
 
 void plSceneViewContext::MarqueePickObjects(const plViewMarqueePickingMsgToEngine* pMsg)
 {
   // remote processes do not support picking, just ignore this
-  if (PlasmaEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
+  if (plEditorEngineProcessApp::GetSingleton()->IsRemoteMode())
     return;
 
   plViewMarqueePickingResultMsgToEditor res;
@@ -311,7 +313,7 @@ void plSceneViewContext::MarqueePickObjects(const plViewMarqueePickingMsgToEngin
 
     if (varMarquee.IsA<plVariantArray>())
     {
-      PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+      plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
 
       const plVariantArray resArray = varMarquee.Get<plVariantArray>();
 

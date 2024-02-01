@@ -1,4 +1,5 @@
 
+
 #include <EditorFramework/EditorFrameworkDLL.h>
 
 #include <EditorFramework/CodeGen/CppSettings.h>
@@ -6,13 +7,13 @@
 #include <Foundation/Strings/String.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtCppProjectDlg : public QDialog, public Ui_plQtCppProjectDlg
+class PL_EDITORFRAMEWORK_DLL plQtCppProjectDlg : public QDialog, public Ui_plQtCppProjectDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtCppProjectDlg(QWidget* parent);
+  plQtCppProjectDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_Result_rejected();

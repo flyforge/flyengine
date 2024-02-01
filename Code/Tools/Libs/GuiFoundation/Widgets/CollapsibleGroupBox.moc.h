@@ -5,13 +5,13 @@
 #include <GuiFoundation/Widgets/GroupBoxBase.moc.h>
 #include <GuiFoundation/ui_CollapsibleGroupBox.h>
 
-class PLASMA_GUIFOUNDATION_DLL plQtCollapsibleGroupBox : public plQtGroupBoxBase, protected Ui_CollapsibleGroupBox
+class PL_GUIFOUNDATION_DLL plQtCollapsibleGroupBox : public plQtGroupBoxBase, protected Ui_CollapsibleGroupBox
 {
   Q_OBJECT
 public:
   explicit plQtCollapsibleGroupBox(QWidget* pParent);
 
-  virtual void SetTitle(const char* szTitle) override;
+  virtual void SetTitle(plStringView sTitle) override;
   virtual void SetIcon(const QIcon& icon) override;
   virtual void SetFillColor(const QColor& color) override;
 
@@ -26,6 +26,6 @@ protected:
   virtual void paintEvent(QPaintEvent* event) override;
 
 protected:
-  bool m_bCollapsed;
+  bool m_bCollapsed = false;
 };
 

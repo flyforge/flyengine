@@ -2,9 +2,9 @@
 
 #include <Foundation/Basics.h>
 
-#define PLASMA_INCLUDED_WINDOWS_H 1
+#define PL_INCLUDED_WINDOWS_H 1
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 // this is important for code that wants to include winsock2.h later on
 #  define _WINSOCKAPI_ /* Prevent inclusion of winsock.h in windows.h */
 
@@ -37,28 +37,28 @@ namespace plMinWindows
   struct ToNativeImpl<HINSTANCE>
   {
     using type = ::HINSTANCE;
-    static PLASMA_ALWAYS_INLINE ::HINSTANCE ToNative(HINSTANCE hInstance) { return reinterpret_cast<::HINSTANCE>(hInstance); }
+    static PL_ALWAYS_INLINE ::HINSTANCE ToNative(HINSTANCE hInstance) { return reinterpret_cast<::HINSTANCE>(hInstance); }
   };
 
   template <>
   struct ToNativeImpl<HWND>
   {
     using type = ::HWND;
-    static PLASMA_ALWAYS_INLINE ::HWND ToNative(HWND hWnd) { return reinterpret_cast<::HWND>(hWnd); }
+    static PL_ALWAYS_INLINE ::HWND ToNative(HWND hWnd) { return reinterpret_cast<::HWND>(hWnd); }
   };
 
   template <>
   struct FromNativeImpl<::HWND>
   {
     using type = HWND;
-    static PLASMA_ALWAYS_INLINE HWND FromNative(::HWND pWnd) { return reinterpret_cast<HWND>(pWnd); }
+    static PL_ALWAYS_INLINE HWND FromNative(::HWND hWnd) { return reinterpret_cast<HWND>(hWnd); }
   };
 
   template <>
   struct FromNativeImpl<::HINSTANCE>
   {
     using type = HINSTANCE;
-    static PLASMA_ALWAYS_INLINE HINSTANCE FromNative(::HINSTANCE pInstance) { return reinterpret_cast<HINSTANCE>(pInstance); }
+    static PL_ALWAYS_INLINE HINSTANCE FromNative(::HINSTANCE hInstance) { return reinterpret_cast<HINSTANCE>(hInstance); }
   };
 } // namespace plMinWindows
 #endif

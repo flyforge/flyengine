@@ -4,12 +4,12 @@
 
 class plScene2Document;
 
-class PLASMA_EDITORPLUGINSCENE_DLL plLayerDocument : public plSceneDocument
+class PL_EDITORPLUGINSCENE_DLL plLayerDocument : public plSceneDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLayerDocument, plSceneDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plLayerDocument, plSceneDocument);
 
 public:
-  plLayerDocument(const char* szDocumentPath, plScene2Document* pParentScene);
+  plLayerDocument(plStringView sDocumentPath, plScene2Document* pParentScene);
   ~plLayerDocument();
 
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;

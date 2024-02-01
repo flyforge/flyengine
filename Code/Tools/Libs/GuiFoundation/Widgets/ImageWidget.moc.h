@@ -6,7 +6,7 @@
 
 class QGraphicsPixmapItem;
 
-class PLASMA_GUIFOUNDATION_DLL plQtImageScene : public QGraphicsScene
+class PL_GUIFOUNDATION_DLL plQtImageScene : public QGraphicsScene
 {
 public:
   plQtImageScene(QObject* pParent = nullptr);
@@ -18,12 +18,12 @@ private:
   QGraphicsPixmapItem* m_pImageItem;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtImageWidget : public QWidget, public Ui_ImageWidget
+class PL_GUIFOUNDATION_DLL plQtImageWidget : public QWidget, public Ui_ImageWidget
 {
   Q_OBJECT
 
 public:
-  plQtImageWidget(QWidget* parent, bool bShowButtons = true);
+  plQtImageWidget(QWidget* pParent, bool bShowButtons = true);
   ~plQtImageWidget();
 
   void SetImage(QPixmap pixmap);

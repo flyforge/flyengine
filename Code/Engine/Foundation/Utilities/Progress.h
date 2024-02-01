@@ -12,7 +12,7 @@ class plProgressRange;
 /// Other code can use this to visualize the progress in different ways.
 /// For instance a GUI application can show a progress bar dialog and a game
 /// could show a loading screen.
-struct PLASMA_FOUNDATION_DLL plProgressEvent
+struct PL_FOUNDATION_DLL plProgressEvent
 {
   enum class Type
   {
@@ -32,7 +32,7 @@ struct PLASMA_FOUNDATION_DLL plProgressEvent
 /// From the ranges and the current advancement, a final progress percentage is computed. Every time a significant change
 /// takes place, an event is broadcast. This allows other code to display the progress, either in a GUI application
 /// or in a fullscreen loading screen or in any other way appropriate.
-class PLASMA_FOUNDATION_DLL plProgress
+class PL_FOUNDATION_DLL plProgress
 {
 public:
   plProgress();
@@ -93,9 +93,9 @@ private:
 /// then opening a nested range will sub-divide that first step. When the nested range is closed,
 /// the first top-level step is finished and BeginNextStep() should be called on the top-level range.
 /// Subsequently the second step is active and can again be further subdivided with another nested plProgressRange.
-class PLASMA_FOUNDATION_DLL plProgressRange
+class PL_FOUNDATION_DLL plProgressRange
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plProgressRange);
+  PL_DISALLOW_COPY_AND_ASSIGN(plProgressRange);
 
 public:
   /// \brief Creates a progress range scope.

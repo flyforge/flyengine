@@ -4,7 +4,7 @@
 
 class plSimplifiedDataCPU : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimplifiedDataCPU, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plSimplifiedDataCPU, plRenderData);
 
 public:
   plSimplifiedDataCPU();
@@ -14,9 +14,9 @@ public:
   plEnum<plCameraUsageHint> m_cameraUsageHint = plCameraUsageHint::Default;
 };
 
-class PLASMA_RENDERERCORE_DLL plSimplifiedDataExtractor : public plExtractor
+class PL_RENDERERCORE_DLL plSimplifiedDataExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimplifiedDataExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plSimplifiedDataExtractor, plExtractor);
 
 public:
   plSimplifiedDataExtractor(const char* szName = "SimplifiedDataExtractor");
@@ -24,4 +24,6 @@ public:
 
   virtual void PostSortAndBatch(
     const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 };

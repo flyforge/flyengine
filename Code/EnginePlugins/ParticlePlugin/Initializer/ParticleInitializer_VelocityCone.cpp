@@ -10,29 +10,29 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_VelocityCone, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_VelocityCone>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_VelocityCone, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_VelocityCone>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(30)), new plClampValueAttribute(plAngle::Degree(1), plAngle::Degree(89))),
-    PLASMA_MEMBER_PROPERTY("Speed", m_Speed),
+    PL_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30)), new plClampValueAttribute(plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(89))),
+    PL_MEMBER_PROPERTY("Speed", m_Speed),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plConeVisualizerAttribute(plBasisAxis::PositiveZ, "Angle", 1.0f, nullptr, plColor::CornflowerBlue)
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_VelocityCone, 1, plRTTIDefaultAllocator<plParticleInitializer_VelocityCone>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_VelocityCone, 1, plRTTIDefaultAllocator<plParticleInitializer_VelocityCone>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleInitializerFactory_VelocityCone::plParticleInitializerFactory_VelocityCone()
 {
-  m_Angle = plAngle::Degree(45);
+  m_Angle = plAngle::MakeFromDegree(45);
 }
 
 const plRTTI* plParticleInitializerFactory_VelocityCone::GetInitializerType() const
@@ -44,33 +44,33 @@ void plParticleInitializerFactory_VelocityCone::CopyInitializerProperties(plPart
 {
   plParticleInitializer_VelocityCone* pInitializer = static_cast<plParticleInitializer_VelocityCone*>(pInitializer0);
 
-  pInitializer->m_Angle = plMath::Clamp(m_Angle, plAngle::Degree(1), plAngle::Degree(89));
+  pInitializer->m_Angle = plMath::Clamp(m_Angle, plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(89));
   pInitializer->m_Speed = m_Speed;
 }
 
-void plParticleInitializerFactory_VelocityCone::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_VelocityCone::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_Angle;
-  stream << m_Speed.m_Value;
-  stream << m_Speed.m_fVariance;
+  inout_stream << m_Angle;
+  inout_stream << m_Speed.m_Value;
+  inout_stream << m_Speed.m_fVariance;
 }
 
-void plParticleInitializerFactory_VelocityCone::Load(plStreamReader& stream)
+void plParticleInitializerFactory_VelocityCone::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_Angle;
-  stream >> m_Speed.m_Value;
-  stream >> m_Speed.m_fVariance;
+  inout_stream >> m_Angle;
+  inout_stream >> m_Speed.m_Value;
+  inout_stream >> m_Speed.m_fVariance;
 }
 
-void plParticleInitializerFactory_VelocityCone::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleInitializerFactory_VelocityCone::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -82,7 +82,7 @@ void plParticleInitializer_VelocityCone::CreateRequiredStreams()
 
 void plParticleInitializer_VelocityCone::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Velocity Cone");
+  PL_PROFILE_SCOPE("PFX: Velocity Cone");
 
   const plVec3 startVel = GetOwnerSystem()->GetParticleStartVelocity();
 
@@ -94,7 +94,7 @@ void plParticleInitializer_VelocityCone::InitializeElements(plUInt64 uiStartInde
 
   for (plUInt64 i = uiStartIndex; i < uiStartIndex + uiNumElements; ++i)
   {
-    const plVec3 dir = plVec3::CreateRandomDeviationZ(rng, m_Angle);
+    const plVec3 dir = plVec3::MakeRandomDeviationZ(rng, m_Angle);
     // dir.z = 0;
     // float len = 0.0f;
 
@@ -127,7 +127,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->InlineProperty("Speed").IgnoreResult();
   }
@@ -135,4 +135,4 @@ public:
 
 plParticleInitializerFactory_VelocityCone_1_2 g_plParticleInitializerFactory_VelocityCone_1_2;
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_VelocityCone);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_VelocityCone);

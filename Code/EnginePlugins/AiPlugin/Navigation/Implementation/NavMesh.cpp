@@ -25,7 +25,7 @@ plAiNavMesh::plAiNavMesh(plUInt32 uiNumSectorsX, plUInt32 uiNumSectorsY, float f
   m_fInvSectorMetersXY = 1.0f / fSectorMetersXY;
   m_NavmeshConfig = navmeshConfig;
 
-  m_pNavMesh = PLASMA_DEFAULT_NEW(dtNavMesh);
+  m_pNavMesh = PL_DEFAULT_NEW(dtNavMesh);
 
   dtNavMeshParams np;
   np.tileWidth = fSectorMetersXY;
@@ -41,7 +41,7 @@ plAiNavMesh::plAiNavMesh(plUInt32 uiNumSectorsX, plUInt32 uiNumSectorsY, float f
 
 plAiNavMesh::~plAiNavMesh()
 {
-  PLASMA_DEFAULT_DELETE(m_pNavMesh);
+  PL_DEFAULT_DELETE(m_pNavMesh);
 }
 
 plVec2I32 plAiNavMesh::CalculateSectorCoord(float fPositionX, float fPositionY) const
@@ -57,7 +57,7 @@ plVec2I32 plAiNavMesh::CalculateSectorCoord(float fPositionX, float fPositionY) 
 
 plVec2I32 plAiNavMesh::CalculateSectorCoord(SectorID sectorID) const
 {
-  PLASMA_ASSERT_DEBUG(sectorID < m_uiNumSectorsX * m_uiNumSectorsY, "Invalid navmesh sector ID");
+  PL_ASSERT_DEBUG(sectorID < m_uiNumSectorsX * m_uiNumSectorsY, "Invalid navmesh sector ID");
 
   return plVec2I32(sectorID % m_uiNumSectorsX, sectorID / m_uiNumSectorsX);
 }
@@ -132,7 +132,7 @@ bool plAiNavMesh::RequestSector(const plVec2& vCenter, const plVec2& vHalfExtent
 
 void plAiNavMesh::FinalizeSectorUpdates()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto sectorID : m_UpdatingSectors)
   {
@@ -140,7 +140,7 @@ void plAiNavMesh::FinalizeSectorUpdates()
 
     auto& sector = m_Sectors[sectorID];
 
-    PLASMA_ASSERT_DEV(sector.m_FlagUpdateAvailable == 1, "Invalid sector update state");
+    PL_ASSERT_DEV(sector.m_FlagUpdateAvailable == 1, "Invalid sector update state");
 
     if (!sector.m_NavmeshDataCur.IsEmpty())
     {
@@ -207,7 +207,7 @@ plBoundingBox plAiNavMesh::GetSectorBounds(plVec2I32 vCoord, float fMinZ /*= 0.0
   const plVec3 min = GetSectorPositionOffset(vCoord).GetAsVec3(fMinZ);
   const plVec3 max = min + plVec3(m_fSectorMetersXY, m_fSectorMetersXY, fMaxZ - fMinZ);
 
-  return plBoundingBox(min, max);
+  return plBoundingBox::MakeFromMinMax(min, max);
 }
 
 void plAiNavMesh::DebugDraw(plDebugRendererContext context, const plAiNavigationConfig& config)

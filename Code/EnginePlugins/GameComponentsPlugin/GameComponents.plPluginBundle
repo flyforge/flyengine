@@ -1,0 +1,15 @@
+// for a description of the options see:
+// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
+
+PluginInfo
+{
+	string %DisplayName{"Game Components"}
+	string %Description{"Contains components useful for many types of games."}
+	string %EditorPlugins{}
+	string %EditorEnginePlugins{}
+	string %RuntimePlugins{"plGameComponentsPlugin"}
+	string %PackageDependencies{}
+	string %RequiredPlugins{}
+	string %ExclusiveFeatures{}
+	string %EnabledInTemplates{"General3D"}
+}

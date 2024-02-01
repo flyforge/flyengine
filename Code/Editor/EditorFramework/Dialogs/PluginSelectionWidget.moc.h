@@ -9,13 +9,13 @@
 struct plPluginBundleSet;
 struct plPluginBundle;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtPluginSelectionWidget : public QWidget, public Ui_PluginSelectionWidget
+class PL_EDITORFRAMEWORK_DLL plQtPluginSelectionWidget : public QWidget, public Ui_PluginSelectionWidget
 {
 public:
   Q_OBJECT
 
 public:
-  plQtPluginSelectionWidget(QWidget* parent);
+  plQtPluginSelectionWidget(QWidget* pParent);
   ~plQtPluginSelectionWidget();
 
   void SetPluginSet(plPluginBundleSet* pPluginSet);

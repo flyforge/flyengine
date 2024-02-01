@@ -5,7 +5,7 @@
 
 namespace plShaderHelper
 {
-  class PLASMA_RENDERERCORE_DLL plTextSectionizer
+  class PL_RENDERERCORE_DLL plTextSectionizer
   {
   public:
     void Clear();
@@ -20,10 +20,9 @@ namespace plShaderHelper
     struct plTextSection
     {
       plTextSection(const char* szName)
+        : m_sName(szName)
+
       {
-        m_sName = szName;
-        m_szSectionStart = nullptr;
-        m_uiFirstLine = 0;
       }
 
       void Reset()
@@ -34,9 +33,9 @@ namespace plShaderHelper
       }
 
       plString m_sName;
-      const char* m_szSectionStart;
+      const char* m_szSectionStart = nullptr;
       plStringView m_Content;
-      plUInt32 m_uiFirstLine;
+      plUInt32 m_uiFirstLine = 0;
     };
 
     plStringBuilder m_sText;
@@ -63,7 +62,7 @@ namespace plShaderHelper
     };
   };
 
-  PLASMA_RENDERERCORE_DLL void GetShaderSections(const char* szContent, plTextSectionizer& out_sections);
+  PL_RENDERERCORE_DLL void GetShaderSections(const char* szContent, plTextSectionizer& out_sections);
 
   plUInt32 CalculateHash(const plArrayPtr<plPermutationVar>& vars);
 } // namespace plShaderHelper

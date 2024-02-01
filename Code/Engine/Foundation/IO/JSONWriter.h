@@ -8,7 +8,7 @@
 /// \brief The base class for JSON writers.
 ///
 /// Declares a common interface for writing JSON files. Also implements some utility functions built on top of the interface (AddVariable()).
-class PLASMA_FOUNDATION_DLL plJSONWriter
+class PL_FOUNDATION_DLL plJSONWriter
 {
 public:
   /// \brief Modes to configure how much whitespace the JSON writer will output
@@ -280,7 +280,7 @@ private:
 /// I.e. it will turn the data into a JSON object which contains one variable called "$type" that identifies the data type, and one variable called
 /// "$binary" which contains the raw binary data Hex encoded in little endian format.
 /// If you want to write a fully standard compliant JSON file, just don't output any of these types.
-class PLASMA_FOUNDATION_DLL plStandardJSONWriter : public plJSONWriter
+class PL_FOUNDATION_DLL plStandardJSONWriter : public plJSONWriter
 {
 public:
   /// \brief Constructor.

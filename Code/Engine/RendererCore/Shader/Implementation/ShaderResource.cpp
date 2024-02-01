@@ -4,10 +4,10 @@
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderResource, 1, plRTTIDefaultAllocator<plShaderResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderResource, 1, plRTTIDefaultAllocator<plShaderResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plShaderResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plShaderResource);
 // clang-format on
 
 plShaderResource::plShaderResource()
@@ -64,7 +64,7 @@ void plShaderResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plShaderResource, plShaderResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plShaderResource, plShaderResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_State = plResourceState::Loaded;
@@ -76,4 +76,4 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plShaderResource, plShaderResourceDescripto
   return ret;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ShaderResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ShaderResource);

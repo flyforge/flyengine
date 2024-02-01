@@ -3,7 +3,8 @@
 # #####################################
 
 macro(pl_requires_renderer)
-	if(PLASMA_CMAKE_PLATFORM_WINDOWS)
+	# PLATFORM-TODO
+	if(PL_CMAKE_PLATFORM_WINDOWS)
 		pl_requires_d3d()
 	else()
 		pl_requires_vulkan()
@@ -12,10 +13,11 @@ endmacro()
 
 # #####################################
 # ## pl_add_renderers(<target>)
-# ## Add all required libraries and dependencies to the given target so it has accedss to all available renderers.
+# ## Add all required libraries and dependencies to the given target so it has access to all available renderers.
 # #####################################
 function(pl_add_renderers TARGET_NAME)
-	if(PLASMA_BUILD_VULKAN)
+	# PLATFORM-TODO
+	if(PL_BUILD_EXPERIMENTAL_VULKAN)
 		target_link_libraries(${TARGET_NAME}
 			PRIVATE
 			RendererVulkan
@@ -26,7 +28,7 @@ function(pl_add_renderers TARGET_NAME)
 		)
 	endif()
 
-	if(PLASMA_CMAKE_PLATFORM_WINDOWS)
+	if(PL_CMAKE_PLATFORM_WINDOWS)
 		target_link_libraries(${TARGET_NAME}
 			PRIVATE
 			RendererDX11

@@ -1,0 +1,11 @@
+# Asset Types
+
+LUT;Lookup Table
+
+# Properties
+
+plLUTAssetProperties::CUBEfile;CUBE File
+
+# UI
+
+LUTImport.Cube;Lookup Table

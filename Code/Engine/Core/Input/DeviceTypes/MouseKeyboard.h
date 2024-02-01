@@ -22,9 +22,9 @@ struct plMouseCursorClipMode
 /// \brief This is the base class for all input devices that handle mouse and keyboard input.
 ///
 /// This class is derived from plInputDevice but adds interface functions to handle mouse and keyboard input.
-class PLASMA_CORE_DLL plInputDeviceMouseKeyboard : public plInputDevice
+class PL_CORE_DLL plInputDeviceMouseKeyboard : public plInputDevice
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInputDeviceMouseKeyboard, plInputDevice);
+  PL_ADD_DYNAMIC_REFLECTION(plInputDeviceMouseKeyboard, plInputDevice);
 
 public:
   plInputDeviceMouseKeyboard() { m_vMouseScale.Set(1.0f); }
@@ -61,7 +61,7 @@ public:
 protected:
   virtual void UpdateInputSlotValues() override;
 
-  plTime m_DoubleClickTime = plTime::Milliseconds(500);
+  plTime m_DoubleClickTime = plTime::MakeFromMilliseconds(500);
   static plInt32 s_iMouseIsOverWindowNumber;
 
 private:

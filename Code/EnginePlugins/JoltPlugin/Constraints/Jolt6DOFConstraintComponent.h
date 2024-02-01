@@ -4,16 +4,16 @@
 
 #  include <JoltPlugin/Constraints/JoltConstraintComponent.h>
 
-struct PLASMA_JOLTPLUGIN_DLL plJoltAxis
+struct PL_JOLTPLUGIN_DLL plJoltAxis
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
     None = 0,
-    X = PLASMA_BIT(0),
-    Y = PLASMA_BIT(1),
-    Z = PLASMA_BIT(2),
+    X = PL_BIT(0),
+    Y = PL_BIT(1),
+    Z = PL_BIT(2),
     All = X | Y | Z,
     Default = All
   };
@@ -26,14 +26,14 @@ struct PLASMA_JOLTPLUGIN_DLL plJoltAxis
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plJoltAxis);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltAxis);
+PL_DECLARE_FLAGS_OPERATORS(plJoltAxis);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltAxis);
 
 using plJolt6DOFConstraintComponentManager = plComponentManager<class plJolt6DOFConstraintComponent, plBlockStorageType::Compact>;
 
-class PLASMA_JOLTPLUGIN_DLL plJolt6DOFConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJolt6DOFConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJolt6DOFConstraintComponent, plJoltConstraintComponent, plJolt6DOFConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJolt6DOFConstraintComponent, plJoltConstraintComponent, plJolt6DOFConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

@@ -7,21 +7,21 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_Distance, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_Distance>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_Distance, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_Distance>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("DistanceThreshold", m_fDistanceThreshold)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.01f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(1)),
-    PLASMA_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
-    PLASMA_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
+    PL_MEMBER_PROPERTY("DistanceThreshold", m_fDistanceThreshold)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.01f, 100.0f)),
+    PL_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(1)),
+    PL_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
+    PL_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_Distance, 1, plRTTIDefaultAllocator<plParticleEmitter_Distance>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_Distance, 1, plRTTIDefaultAllocator<plParticleEmitter_Distance>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleEmitterFactory_Distance::plParticleEmitterFactory_Distance() = default;
@@ -61,29 +61,29 @@ enum class EmitterDistanceVersion
 };
 
 
-void plParticleEmitterFactory_Distance::Save(plStreamWriter& stream) const
+void plParticleEmitterFactory_Distance::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)EmitterDistanceVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   // Version 1
-  stream << m_fDistanceThreshold;
-  stream << m_uiSpawnCountMin;
-  stream << m_uiSpawnCountRange;
-  stream << m_sSpawnCountScaleParameter;
+  inout_stream << m_fDistanceThreshold;
+  inout_stream << m_uiSpawnCountMin;
+  inout_stream << m_uiSpawnCountRange;
+  inout_stream << m_sSpawnCountScaleParameter;
 }
 
-void plParticleEmitterFactory_Distance::Load(plStreamReader& stream)
+void plParticleEmitterFactory_Distance::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)EmitterDistanceVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)EmitterDistanceVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_fDistanceThreshold;
-  stream >> m_uiSpawnCountMin;
-  stream >> m_uiSpawnCountRange;
-  stream >> m_sSpawnCountScaleParameter;
+  inout_stream >> m_fDistanceThreshold;
+  inout_stream >> m_uiSpawnCountMin;
+  inout_stream >> m_uiSpawnCountRange;
+  inout_stream >> m_sSpawnCountScaleParameter;
 }
 
 void plParticleEmitter_Distance::CreateRequiredStreams() {}
@@ -140,3 +140,7 @@ plUInt32 plParticleEmitter_Distance::ComputeSpawnCount(const plTime& tDiff)
 
   return uiSpawn;
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter_Distance);
+

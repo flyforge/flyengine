@@ -9,25 +9,25 @@
 #include <RendererCore/Pipeline/RenderData.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltVisColMeshComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltVisColMeshComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle;CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle;CompatibleAsset_Jolt_Colmesh_Convex", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Misc"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltVisColMeshComponent::plJoltVisColMeshComponent() = default;
@@ -64,10 +64,10 @@ plResult plJoltVisColMeshComponent::GetLocalBounds(plBoundingBoxSphere& ref_boun
   {
     plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::BlockTillLoaded);
     ref_bounds = pMesh->GetBounds();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plJoltVisColMeshComponent::SetMeshFile(const char* szFile)
@@ -207,7 +207,7 @@ void plJoltVisColMeshComponentManager::Initialize()
 {
   SUPER::Initialize();
 
-  plWorldModule::UpdateFunctionDesc desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltVisColMeshComponentManager::Update, this);
+  plWorldModule::UpdateFunctionDesc desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltVisColMeshComponentManager::Update, this);
   desc.m_Phase = UpdateFunctionDesc::Phase::PreAsync;
 
   RegisterUpdateFunction(desc);
@@ -217,7 +217,7 @@ void plJoltVisColMeshComponentManager::Initialize()
 
 void plJoltVisColMeshComponentManager::Deinitialize()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plResourceManager::GetResourceEvents().RemoveEventHandler(plMakeDelegate(&plJoltVisColMeshComponentManager::ResourceEventHandler, this));
 
@@ -248,7 +248,7 @@ void plJoltVisColMeshComponentManager::ResourceEventHandler(const plResourceEven
 {
   if ((e.m_Type == plResourceEvent::Type::ResourceContentUnloading || e.m_Type == plResourceEvent::Type::ResourceContentUpdated) && e.m_pResource->GetDynamicRTTI()->IsDerivedFrom<plJoltMeshResource>())
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     plJoltMeshResourceHandle hResource((plJoltMeshResource*)(e.m_pResource));
 
@@ -265,4 +265,4 @@ void plJoltVisColMeshComponentManager::ResourceEventHandler(const plResourceEven
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltVisColMeshComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltVisColMeshComponent);

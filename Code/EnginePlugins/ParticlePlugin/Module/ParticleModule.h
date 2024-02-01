@@ -8,9 +8,9 @@
 
 class plProcessingStream;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleModule : public plProcessingStreamProcessor
+class PL_PARTICLEPLUGIN_DLL plParticleModule : public plProcessingStreamProcessor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleModule, plProcessingStreamProcessor);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleModule, plProcessingStreamProcessor);
 
   friend class plParticleSystemInstance;
 
@@ -50,7 +50,7 @@ protected:
   virtual plResult UpdateStreamBindings() final override
   {
     m_StreamBinding.UpdateBindings(m_pStreamGroup);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plRandom& GetRNG() const { return GetOwnerEffect()->GetRNG(); }

@@ -17,72 +17,72 @@ class plJoltActorComponent;
 class plJoltUserData
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plJoltUserData() = default;
   ~plJoltUserData() = default;
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltDynamicActorComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltDynamicActorComponent* pObject)
   {
     m_Type = Type::DynamicActorComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltStaticActorComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltStaticActorComponent* pObject)
   {
     m_Type = Type::StaticActorComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltTriggerComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltTriggerComponent* pObject)
   {
     m_Type = Type::TriggerComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltCharacterControllerComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltCharacterControllerComponent* pObject)
   {
     m_Type = Type::CharacterComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltShapeComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltShapeComponent* pObject)
   {
     m_Type = Type::ShapeComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltQueryShapeActorComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltQueryShapeActorComponent* pObject)
   {
     m_Type = Type::QueryShapeActorComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plSurfaceResource* pObject)
+  PL_ALWAYS_INLINE void Init(plSurfaceResource* pObject)
   {
     m_Type = Type::SurfaceResource;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltRagdollComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltRagdollComponent* pObject)
   {
     m_Type = Type::RagdollComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_ALWAYS_INLINE void Init(plJoltRopeComponent* pObject)
+  PL_ALWAYS_INLINE void Init(plJoltRopeComponent* pObject)
   {
     m_Type = Type::RopeComponent;
     m_pObject = pObject;
   }
 
-  PLASMA_FORCE_INLINE void Invalidate()
+  PL_FORCE_INLINE void Invalidate()
   {
     m_Type = Type::Invalid;
     m_pObject = nullptr;
   }
 
-  PLASMA_FORCE_INLINE static plComponent* GetComponent(const void* pUserData)
+  PL_FORCE_INLINE static plComponent* GetComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData == nullptr ||
@@ -95,7 +95,7 @@ public:
     return static_cast<plComponent*>(pJoltUserData->m_pObject);
   }
 
-  PLASMA_FORCE_INLINE static plJoltActorComponent* GetActorComponent(const void* pUserData)
+  PL_FORCE_INLINE static plJoltActorComponent* GetActorComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr &&
@@ -109,7 +109,7 @@ public:
     return nullptr;
   }
 
-  PLASMA_FORCE_INLINE static plJoltDynamicActorComponent* GetDynamicActorComponent(const void* pUserData)
+  PL_FORCE_INLINE static plJoltDynamicActorComponent* GetDynamicActorComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::DynamicActorComponent)
@@ -120,7 +120,7 @@ public:
     return nullptr;
   }
 
-  PLASMA_FORCE_INLINE static plJoltRagdollComponent* GetRagdollComponent(const void* pUserData)
+  PL_FORCE_INLINE static plJoltRagdollComponent* GetRagdollComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::RagdollComponent)
@@ -131,7 +131,7 @@ public:
     return nullptr;
   }
 
-  PLASMA_FORCE_INLINE static plJoltRopeComponent* GetRopeComponent(const void* pUserData)
+  PL_FORCE_INLINE static plJoltRopeComponent* GetRopeComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::RopeComponent)
@@ -142,7 +142,7 @@ public:
     return nullptr;
   }
 
-  // PLASMA_FORCE_INLINE static plJoltShapeComponent* GetShapeComponent(const void* pUserData)
+  // PL_FORCE_INLINE static plJoltShapeComponent* GetShapeComponent(const void* pUserData)
   //{
   //   const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
   //   if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::ShapeComponent)
@@ -153,7 +153,7 @@ public:
   //  return nullptr;
   //}
 
-  PLASMA_FORCE_INLINE static plJoltTriggerComponent* GetTriggerComponent(const void* pUserData)
+  PL_FORCE_INLINE static plJoltTriggerComponent* GetTriggerComponent(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::TriggerComponent)
@@ -164,7 +164,7 @@ public:
     return nullptr;
   }
 
-  PLASMA_FORCE_INLINE static const plSurfaceResource* GetSurfaceResource(const void* pUserData)
+  PL_FORCE_INLINE static const plSurfaceResource* GetSurfaceResource(const void* pUserData)
   {
     const plJoltUserData* pJoltUserData = static_cast<const plJoltUserData*>(pUserData);
     if (pJoltUserData != nullptr && pJoltUserData->m_Type == Type::SurfaceResource)

@@ -13,5 +13,5 @@ namespace plGraphicsUtils
   /// are not very useful, the first two rows are left black, except for the very first character, which is an upside down
   /// question mark. This character can be used for unknown characters (e.g. when Utf8 is printed as ASCII and thus characters
   /// above 127 are possible).
-  PLASMA_RENDERERCORE_DLL void CreateSimpleASCIIFontTexture(plImage& ref_img, bool bSetEmptyToUnknown = false);
+  PL_RENDERERCORE_DLL void CreateSimpleASCIIFontTexture(plImage& ref_img, bool bSetEmptyToUnknown = false);
 } // namespace plGraphicsUtils

@@ -14,7 +14,7 @@ plResult plTypeScriptBinding::Init_Log()
   m_Duk.RegisterGlobalFunction("__CPP_Log_Dev", __CPP_Log, 1, plLogMsgType::DevMsg);
   m_Duk.RegisterGlobalFunction("__CPP_Log_Debug", __CPP_Log, 1, plLogMsgType::DebugMsg);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static int __CPP_Log(duk_context* pDuk)

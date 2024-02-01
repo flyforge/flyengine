@@ -7,9 +7,9 @@
 /// \brief The click gizmo displays a simple shape that can be clicked.
 ///
 /// This can be used to provide the user with a way to select which part to edit further.
-class PLASMA_EDITORFRAMEWORK_DLL plClickGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plClickGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plClickGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plClickGizmo, plGizmo);
 
 public:
   plClickGizmo();
@@ -17,8 +17,8 @@ public:
   void SetColor(const plColor& color);
 
 protected:
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
 
   virtual void DoFocusLost(bool bCancel) override;
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
@@ -26,5 +26,5 @@ protected:
   virtual void OnTransformationChanged(const plTransform& transform) override;
 
 private:
-  PlasmaEngineGizmoHandle m_hShape;
+  plEngineGizmoHandle m_hShape;
 };

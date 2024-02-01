@@ -30,6 +30,7 @@
     <file>plSliderComponent.svg</file>
     <file>plCameraComponent.svg</file>
     <file>plSpawnComponent.svg</file>
+    <file>plSpawnBoxComponent.svg</file>
     <file>plTimedDeathComponent.svg</file>
     <file>plInputComponent.svg</file>
     <file>plProjectileComponent.svg</file>
@@ -88,8 +89,8 @@
     <file>plCameraShakeVolumeSphereComponent.svg</file>
     <file>plPathNodeComponent.svg</file>
     <file>plFollowPathComponent.svg</file>
-    <file>plBlackboardComponent.svg</file>
-    <file>plScriptComponent.svg</file>
+    <file>plLocalBlackboardComponent.svg</file>
+	<file>plGlobalBlackboardComponent.svg</file>
     <file>plPostProcessingComponent.svg</file>
     <file>plVolumeBoxComponent.svg</file>
     <file>plVolumeSphereComponent.svg</file>

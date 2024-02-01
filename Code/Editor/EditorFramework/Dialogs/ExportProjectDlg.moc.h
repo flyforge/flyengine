@@ -9,7 +9,7 @@ class plQtExportProjectDlg : public QDialog, public Ui_ExportProjectDlg
   Q_OBJECT
 
 public:
-  plQtExportProjectDlg(QWidget* parent);
+  plQtExportProjectDlg(QWidget* pParent);
 
   static bool s_bTransformAll;
 

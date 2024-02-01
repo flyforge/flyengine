@@ -34,7 +34,7 @@ void plSceneSelectionContext::SelectPickedObject(const plObjectPickingResult& re
           m_PickObjectOverride(pObject);
           return;
         }
-        pSceneDocument->SetActiveLayer(layerGuid).IgnoreResult();
+        pSceneDocument->SetActiveLayer(layerGuid).LogFailure();
       }
     }
   }

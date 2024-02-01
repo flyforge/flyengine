@@ -10,7 +10,6 @@ class plQtCustomDataAssetDocumentWindow : public plQtDocumentWindow
 
 public:
   plQtCustomDataAssetDocumentWindow(plDocument* pDocument);
-  ~plQtCustomDataAssetDocumentWindow();
 
   virtual const char* GetWindowLayoutGroupName() const override { return "CustomDataAsset"; }
 };

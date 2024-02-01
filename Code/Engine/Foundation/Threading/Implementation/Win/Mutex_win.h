@@ -1,10 +1,10 @@
-#ifdef PLASMA_MUTEX_WIN_INL_H_INCLUDED
+#ifdef PL_MUTEX_WIN_INL_H_INCLUDED
 #  error "This file must not be included twice."
 #endif
 
-#define PLASMA_MUTEX_WIN_INL_H_INCLUDED
+#define PL_MUTEX_WIN_INL_H_INCLUDED
 
-#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC) && PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_X86)
+#if PL_ENABLED(PL_COMPILER_MSVC) && PL_ENABLED(PL_PLATFORM_ARCH_X86)
 
 extern "C"
 {
@@ -17,7 +17,7 @@ extern "C"
   __declspec(dllimport) plMinWindows::BOOL __stdcall plWinTryEnterCriticalSection(plMutexHandle* handle);
 
   // Now redirect them through linker flags to the correct implementation
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#  if PL_ENABLED(PL_PLATFORM_32BIT)
 #    pragma comment(linker, "/alternatename:__imp__plWinEnterCriticalSection@4=__imp__EnterCriticalSection@4")
 #    pragma comment(linker, "/alternatename:__imp__plWinLeaveCriticalSection@4=__imp__LeaveCriticalSection@4")
 #    pragma comment(linker, "/alternatename:__imp__plWinTryEnterCriticalSection@4=__imp__TryEnterCriticalSection@4")
@@ -45,10 +45,10 @@ inline plResult plMutex::TryLock()
   if (plWinTryEnterCriticalSection(&m_hHandle) != 0)
   {
     ++m_iLockCount;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 #else
@@ -72,10 +72,10 @@ inline plResult plMutex::TryLock()
   if (TryEnterCriticalSection((CRITICAL_SECTION*)&m_hHandle) != 0)
   {
     ++m_iLockCount;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 #endif

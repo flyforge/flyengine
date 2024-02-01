@@ -10,17 +10,30 @@
 /// Note that this class is much less efficient at reading large JSON documents, as it will dynamically allocate and copy objects around
 /// quite a bit. For small to medium sized documents that might be good enough, for large files one should prefer to write a dedicated
 /// class derived from plJSONParser.
-class PLASMA_FOUNDATION_DLL plJSONReader : public plJSONParser
+class PL_FOUNDATION_DLL plJSONReader : public plJSONParser
 {
 public:
+  enum class ElementType : plInt8
+  {
+    None,       ///< The JSON document is entirely empty (not even containing an empty object or array)
+    Dictionary, ///< The top level element in the JSON document is an object
+    Array,      ///< The top level element in the JSON document is an array
+  };
+
   plJSONReader();
 
-  /// \brief Reads the entire stream and creates the internal data structure that represents the JSON document. Returns PLASMA_FAILURE if any parsing
+  /// \brief Reads the entire stream and creates the internal data structure that represents the JSON document. Returns PL_FAILURE if any parsing
   /// error occurred.
   plResult Parse(plStreamReader& ref_input, plUInt32 uiFirstLineOffset = 0);
 
   /// \brief Returns the top-level object of the JSON document.
   const plVariantDictionary& GetTopLevelObject() const { return m_Stack.PeekBack().m_Dictionary; }
+
+  /// \brief Returns the top-level array of the JSON document.
+  const plVariantArray& GetTopLevelArray() const { return m_Stack.PeekBack().m_Array; }
+
+  /// \brief Returns whether the top level element is an array or an object.
+  ElementType GetTopLevelElementType() const { return m_Stack.PeekBack().m_Mode; }
 
 private:
   /// \brief This function can be overridden to skip certain variables, however the overriding function must still call this.
@@ -53,22 +66,16 @@ private:
   virtual void OnParsingError(plStringView sMessage, bool bFatal, plUInt32 uiLine, plUInt32 uiColumn) override;
 
 protected:
-  enum class ElementMode : plInt8
-  {
-    Array,
-    Dictionary
-  };
-
   struct Element
   {
     plString m_sName;
-    ElementMode m_Mode;
+    ElementType m_Mode = ElementType::None;
     plVariantArray m_Array;
     plVariantDictionary m_Dictionary;
   };
 
   plHybridArray<Element, 32> m_Stack;
 
-  bool m_bParsingError;
+  bool m_bParsingError = false;
   plString m_sLastName;
 };

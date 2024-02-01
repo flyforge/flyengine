@@ -15,7 +15,7 @@ public:
   plHybridArray(); // [tested]
 
   /// \brief Creates an empty array. Does not allocate any data yet.
-  explicit plHybridArray(plAllocatorBase* pAllocator); // [tested]
+  explicit plHybridArray(plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given array.
   plHybridArray(const plHybridArray<T, Size, AllocatorWrapper>& other); // [tested]
@@ -37,14 +37,14 @@ public:
 
 protected:
   /// \brief The fixed size array.
-  struct alignas(PLASMA_ALIGNMENT_OF(T))
+  struct alignas(PL_ALIGNMENT_OF(T))
   {
     plUInt8 m_StaticData[Size * sizeof(T)];
   };
 
-  PLASMA_ALWAYS_INLINE T* GetStaticArray() { return reinterpret_cast<T*>(m_StaticData); }
+  PL_ALWAYS_INLINE T* GetStaticArray() { return reinterpret_cast<T*>(m_StaticData); }
 
-  PLASMA_ALWAYS_INLINE const T* GetStaticArray() const { return reinterpret_cast<const T*>(m_StaticData); }
+  PL_ALWAYS_INLINE const T* GetStaticArray() const { return reinterpret_cast<const T*>(m_StaticData); }
 };
 
 #include <Foundation/Containers/Implementation/HybridArray_inl.h>

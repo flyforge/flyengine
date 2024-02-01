@@ -4,10 +4,10 @@ pl_requires_rmlui()
 
 set (PROJECT_NAME "lunasvg")
 
-pl_create_target(STATIC_LIBRARY ${PROJECT_NAME} NO_UNITY NO_PLASMA_PREFIX)
+pl_create_target(STATIC_LIBRARY ${PROJECT_NAME} NO_UNITY NO_PL_PREFIX)
 
 # override the default IDE folder
-pl_set_project_ide_folder(${PROJECT_NAME} "${PLASMA_ROOT}/Code/ThirdParty/lunasvg")
+pl_set_project_ide_folder(${PROJECT_NAME} "${PL_ROOT}/Code/ThirdParty/lunasvg")
 
 target_include_directories(${PROJECT_NAME}
   PRIVATE
@@ -15,9 +15,9 @@ target_include_directories(${PROJECT_NAME}
   "3rdparty/software"
 
   PUBLIC
-  "Include"
+  "include"
 )
 
-if(PLASMA_CMAKE_PLATFORM_WINDOWS)
+if(PL_CMAKE_COMPILER_MSVC)
   target_compile_options(${PROJECT_NAME} PRIVATE /wd4456 /wd4458 /wd4701)
 endif()

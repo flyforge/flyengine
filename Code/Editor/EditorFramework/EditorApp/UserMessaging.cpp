@@ -11,7 +11,7 @@ void plQtEditorApp::AddRestartRequiredReason(const char* szReason)
   }
 
   plStringBuilder s;
-  s.Format("The editor process must be restarted.\nReason: '{0}'\n\nDo you want to restart now?", szReason);
+  s.SetFormat("The editor process must be restarted.\nReason: '{0}'\n\nDo you want to restart now?", szReason);
 
   if (plQtUiServices::MessageBoxQuestion(s, QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::Yes) == QMessageBox::StandardButton::Yes)
   {
@@ -32,7 +32,7 @@ void plQtEditorApp::AddReloadProjectRequiredReason(const char* szReason)
     m_ReloadProjectRequiredReasons.Insert(szReason);
 
     plStringBuilder s;
-    s.Format("The project must be reloaded.\nReason: '{0}'", szReason);
+    s.SetFormat("The project must be reloaded.\nReason: '{0}'", szReason);
 
     plQtUiServices::MessageBoxInformation(s);
 

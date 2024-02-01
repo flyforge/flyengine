@@ -2,14 +2,14 @@
 
 #include <Foundation/Basics.h>
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_DISABLED(PL_PLATFORM_WINDOWS)
 #  error "WinRT util header should only be included in Windows builds!"
 #endif
 
 // For 10.0.10240, there are circular includes in some headers, fix by including first:
 #include <corecrt.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 // All WRL
 #  include <wrl.h>
 #else
@@ -29,4 +29,4 @@ using namespace Microsoft::WRL;
 using namespace Microsoft::WRL::Wrappers;
 
 // warning C4530: C++ exception handler used, but unwind semantics are not enabled. Specify /EHsc
-PLASMA_MSVC_ANALYSIS_WARNING_DISABLE(4530);
+PL_MSVC_ANALYSIS_WARNING_DISABLE(4530);

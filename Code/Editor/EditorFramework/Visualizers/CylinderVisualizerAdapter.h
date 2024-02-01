@@ -24,5 +24,5 @@ protected:
   plBitflags<plVisualizerAnchor> m_Anchor;
   plBasisAxis::Enum m_Axis;
 
-  PlasmaEngineGizmoHandle m_hCylinder;
+  plEngineGizmoHandle m_hCylinder;
 };

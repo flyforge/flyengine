@@ -4,9 +4,9 @@
 #include <RendererCore/Pipeline/FrameDataProvider.h>
 #include <RendererCore/Shader/ConstantBufferStorage.h>
 
-struct PLASMA_RENDERERCORE_DLL plSimplifiedDataGPU
+struct PL_RENDERERCORE_DLL plSimplifiedDataGPU
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSimplifiedDataGPU);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSimplifiedDataGPU);
 
 public:
   plSimplifiedDataGPU();
@@ -19,9 +19,9 @@ public:
   void BindResources(plRenderContext* pRenderContext);
 };
 
-class PLASMA_RENDERERCORE_DLL plSimplifiedDataProvider : public plFrameDataProvider<plSimplifiedDataGPU>
+class PL_RENDERERCORE_DLL plSimplifiedDataProvider : public plFrameDataProvider<plSimplifiedDataGPU>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSimplifiedDataProvider, plFrameDataProviderBase);
+  PL_ADD_DYNAMIC_REFLECTION(plSimplifiedDataProvider, plFrameDataProviderBase);
 
 public:
   plSimplifiedDataProvider();

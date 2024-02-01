@@ -14,8 +14,8 @@ namespace plRmlUiInternal
     BlackboardDataBinding(const plSharedPtr<plBlackboard>& pBlackboard);
     ~BlackboardDataBinding();
 
-    virtual plResult Initialize(Rml::Context& context) override;
-    virtual void Deinitialize(Rml::Context& context) override;
+    virtual plResult Initialize(Rml::Context& ref_context) override;
+    virtual void Deinitialize(Rml::Context& ref_context) override;
     virtual void Update() override;
 
   private:
@@ -25,15 +25,15 @@ namespace plRmlUiInternal
 
     struct EntryWrapper
     {
-      EntryWrapper(plBlackboard& blackboard, const plHashedString& sName, plUInt32 uiChangeCounter)
-        : m_Blackboard(blackboard)
+      EntryWrapper(plBlackboard& ref_blackboard, const plHashedString& sName, plUInt32 uiChangeCounter)
+        : m_Blackboard(ref_blackboard)
         , m_sName(sName)
         , m_uiChangeCounter(uiChangeCounter)
       {
       }
 
       void SetValue(const Rml::Variant& value);
-      void GetValue(Rml::Variant& out_Value) const;
+      void GetValue(Rml::Variant& out_value) const;
 
       plBlackboard& m_Blackboard;
       plHashedString m_sName;

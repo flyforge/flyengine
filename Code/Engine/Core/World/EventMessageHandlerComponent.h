@@ -10,16 +10,16 @@ struct plEventMessage;
 /// Event messages are messages that are 'broadcast' to indicate something happened on a component,
 /// e.g. a trigger that got activated or an animation that finished playing. These messages are 'bubbled up'
 /// the object hierarchy to the closest parent object that holds an plEventMessageHandlerComponent.
-class PLASMA_CORE_DLL plEventMessageHandlerComponent : public plComponent
+class PL_CORE_DLL plEventMessageHandlerComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plEventMessageHandlerComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plEventMessageHandlerComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   virtual void Deinitialize() override;
@@ -34,13 +34,13 @@ public:
   ~plEventMessageHandlerComponent();
 
   /// \brief Sets the debug output object flag. The effect is type specific, most components will not do anything different.
-  void SetDebugOutput(bool enable);
+  void SetDebugOutput(bool bEnable);
 
   /// \brief Gets the debug output object flag.
   bool GetDebugOutput() const;
 
   /// \brief Registers or de-registers this component as a global event handler.
-  void SetGlobalEventHandlerMode(bool enable); // [ property ]
+  void SetGlobalEventHandlerMode(bool bEnable); // [ property ]
 
   /// \brief Returns whether this component is registered as a global event handler.
   bool GetGlobalEventHandlerMode() const { return m_bIsGlobalEventHandler; } // [ property ]

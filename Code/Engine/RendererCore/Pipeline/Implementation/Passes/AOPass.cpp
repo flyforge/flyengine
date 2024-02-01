@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/GPUResourcePool/GPUResourcePool.h>
 #include <RendererCore/Pipeline/Passes/AOPass.h>
 #include <RendererCore/Pipeline/View.h>
@@ -11,49 +12,41 @@
 #include <RendererCore/../../../Data/Base/Shaders/Pipeline/SSAOConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAOPass, 1, plRTTIDefaultAllocator<plAOPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAOPass, 1, plRTTIDefaultAllocator<plAOPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("DepthInput", m_PinDepthInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput),
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, 10.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxScreenSpaceRadius", m_fMaxScreenSpaceRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, 2.0f)),
-    PLASMA_MEMBER_PROPERTY("Contrast", m_fContrast)->AddAttributes(new plDefaultValueAttribute(2.0f)),
-    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(0.7f)),
-    PLASMA_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plDefaultValueAttribute(80.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("FadeOutEnd", GetFadeOutEnd, SetFadeOutEnd)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("PositionBias", m_fPositionBias)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
-    PLASMA_MEMBER_PROPERTY("MipLevelScale", m_fMipLevelScale)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("DepthBlurThreshold", m_fDepthBlurThreshold)->AddAttributes(new plDefaultValueAttribute(2.0f), new plClampValueAttribute(0.01f, plVariant())),
+    PL_MEMBER_PROPERTY("DepthInput", m_PinDepthInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput),
+    PL_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, 10.0f)),
+    PL_MEMBER_PROPERTY("MaxScreenSpaceRadius", m_fMaxScreenSpaceRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, 2.0f)),
+    PL_MEMBER_PROPERTY("Contrast", m_fContrast)->AddAttributes(new plDefaultValueAttribute(2.0f)),
+    PL_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(0.7f)),
+    PL_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plDefaultValueAttribute(80.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("FadeOutEnd", GetFadeOutEnd, SetFadeOutEnd)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("PositionBias", m_fPositionBias)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
+    PL_MEMBER_PROPERTY("MipLevelScale", m_fMipLevelScale)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("DepthBlurThreshold", m_fDepthBlurThreshold)->AddAttributes(new plDefaultValueAttribute(2.0f), new plClampValueAttribute(0.01f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAOPass::plAOPass()
   : plRenderPipelinePass("AOPass", true)
-  , m_fRadius(1.0f)
-  , m_fMaxScreenSpaceRadius(1.0f)
-  , m_fContrast(2.0f)
-  , m_fIntensity(0.7f)
-  , m_fFadeOutStart(80.0f)
-  , m_fFadeOutEnd(100.0f)
-  , m_fPositionBias(5.0f)
-  , m_fMipLevelScale(10.0f)
-  , m_fDepthBlurThreshold(2.0f)
+
 {
   m_hNoiseTexture = plResourceManager::LoadResource<plTexture2DResource>("Textures/SSAONoise.dds");
 
   m_hDownscaleShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/DownscaleDepth.plShader");
-  PLASMA_ASSERT_DEV(m_hDownscaleShader.IsValid(), "Could not load downsample shader!");
+  PL_ASSERT_DEV(m_hDownscaleShader.IsValid(), "Could not load downsample shader!");
 
   m_hSSAOShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/SSAO.plShader");
-  PLASMA_ASSERT_DEV(m_hSSAOShader.IsValid(), "Could not load SSAO shader!");
+  PL_ASSERT_DEV(m_hSSAOShader.IsValid(), "Could not load SSAO shader!");
 
   m_hBlurShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/SSAOBlur.plShader");
-  PLASMA_ASSERT_DEV(m_hBlurShader.IsValid(), "Could not load SSAO shader!");
+  PL_ASSERT_DEV(m_hBlurShader.IsValid(), "Could not load SSAO shader!");
 
   m_hDownscaleConstantBuffer = plRenderContext::CreateConstantBufferStorage<plDownscaleDepthConstants>();
   m_hSSAOConstantBuffer = plRenderContext::CreateConstantBufferStorage<plSSAOConstants>();
@@ -115,7 +108,7 @@ void plAOPass::Execute(const plRenderViewContext& renderViewContext, const plArr
 
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plGALPass* pGALPass = pDevice->BeginPass(GetName());
-  PLASMA_SCOPE_EXIT(pDevice->EndPass(pGALPass));
+  PL_SCOPE_EXIT(pDevice->EndPass(pGALPass));
 
   plUInt32 uiWidth = pDepthInput->m_Desc.m_uiWidth;
   plUInt32 uiHeight = pDepthInput->m_Desc.m_uiHeight;
@@ -308,6 +301,38 @@ void plAOPass::ExecuteInactive(const plRenderViewContext& renderViewContext, con
   auto pCommandEncoder = plRenderContext::BeginPassAndRenderingScope(renderViewContext, renderingSetup, GetName());
 }
 
+plResult plAOPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_fRadius;
+  inout_stream << m_fMaxScreenSpaceRadius;
+  inout_stream << m_fContrast;
+  inout_stream << m_fIntensity;
+  inout_stream << m_fFadeOutStart;
+  inout_stream << m_fFadeOutEnd;
+  inout_stream << m_fPositionBias;
+  inout_stream << m_fMipLevelScale;
+  inout_stream << m_fDepthBlurThreshold;
+  return PL_SUCCESS;
+}
+
+plResult plAOPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_fRadius;
+  inout_stream >> m_fMaxScreenSpaceRadius;
+  inout_stream >> m_fContrast;
+  inout_stream >> m_fIntensity;
+  inout_stream >> m_fFadeOutStart;
+  inout_stream >> m_fFadeOutEnd;
+  inout_stream >> m_fPositionBias;
+  inout_stream >> m_fMipLevelScale;
+  inout_stream >> m_fDepthBlurThreshold;
+  return PL_SUCCESS;
+}
+
 void plAOPass::SetFadeOutStart(float fStart)
 {
   m_fFadeOutStart = plMath::Clamp(fStart, 0.0f, m_fFadeOutEnd);
@@ -354,4 +379,4 @@ void plAOPass::CreateSamplerState()
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_AOPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_AOPass);

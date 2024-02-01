@@ -5,28 +5,18 @@
 #include <Foundation/Math/Rect.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderState
+struct PL_RENDERERFOUNDATION_DLL plGALCommandEncoderState
 {
   virtual void InvalidateState();
 
   plGALShaderHandle m_hShader;
-
-  plGALBufferHandle m_hConstantBuffers[PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT];
-
-  plHybridArray<plGALResourceViewHandle, 16> m_hResourceViews[plGALShaderStage::ENUM_COUNT];
-  plHybridArray<const plGALResourceBase*, 16> m_pResourcesForResourceViews[plGALShaderStage::ENUM_COUNT];
-
-  plHybridArray<plGALUnorderedAccessViewHandle, 16> m_hUnorderedAccessViews;
-  plHybridArray<const plGALResourceBase*, 16> m_pResourcesForUnorderedAccessViews;
-
-  plGALSamplerStateHandle m_hSamplerStates[plGALShaderStage::ENUM_COUNT][PLASMA_GAL_MAX_SAMPLER_COUNT];
 };
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderRenderState : public plGALCommandEncoderState
+struct PL_RENDERERFOUNDATION_DLL plGALCommandEncoderRenderState final : public plGALCommandEncoderState
 {
   virtual void InvalidateState() override;
 
-  plGALBufferHandle m_hVertexBuffers[PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT];
+  plGALBufferHandle m_hVertexBuffers[PL_GAL_MAX_VERTEX_BUFFER_COUNT];
   plGALBufferHandle m_hIndexBuffer;
 
   plGALVertexDeclarationHandle m_hVertexDeclaration;

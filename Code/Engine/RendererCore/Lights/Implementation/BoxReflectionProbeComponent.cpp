@@ -12,50 +12,50 @@
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plBoxReflectionProbeComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plBoxReflectionProbeComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), {}), new plDefaultValueAttribute(plVec3(5.0f))),
-    PLASMA_ACCESSOR_PROPERTY("InfluenceScale", GetInfluenceScale, SetInfluenceScale)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(1.0f))),
-    PLASMA_ACCESSOR_PROPERTY("InfluenceShift", GetInfluenceShift, SetInfluenceShift)->AddAttributes(new plClampValueAttribute(plVec3(-1.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.0f))),
-    PLASMA_ACCESSOR_PROPERTY("PositiveFalloff", GetPositiveFalloff, SetPositiveFalloff)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.1f, 0.1f, 0.0f))),
-    PLASMA_ACCESSOR_PROPERTY("NegativeFalloff", GetNegativeFalloff, SetNegativeFalloff)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.1f, 0.1f, 0.0f))),
-    PLASMA_ACCESSOR_PROPERTY("BoxProjection", GetBoxProjection, SetBoxProjection)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), {}), new plDefaultValueAttribute(plVec3(5.0f))),
+    PL_ACCESSOR_PROPERTY("InfluenceScale", GetInfluenceScale, SetInfluenceScale)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(1.0f))),
+    PL_ACCESSOR_PROPERTY("InfluenceShift", GetInfluenceShift, SetInfluenceShift)->AddAttributes(new plClampValueAttribute(plVec3(-1.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.0f))),
+    PL_ACCESSOR_PROPERTY("PositiveFalloff", GetPositiveFalloff, SetPositiveFalloff)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.1f, 0.1f, 0.0f))),
+    PL_ACCESSOR_PROPERTY("NegativeFalloff", GetNegativeFalloff, SetNegativeFalloff)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), plVec3(1.0f)), new plDefaultValueAttribute(plVec3(0.1f, 0.1f, 0.0f))),
+    PL_ACCESSOR_PROPERTY("BoxProjection", GetBoxProjection, SetBoxProjection)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(OnObjectCreated),
+    PL_FUNCTION_PROPERTY(OnObjectCreated),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_FUNCTIONS;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering/Lighting"),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxReflectionProbeVisualizerAttribute("Extents", "InfluenceScale", "InfluenceShift"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxReflectionProbeVisualizerAttribute, 1, plRTTIDefaultAllocator<plBoxReflectionProbeVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxReflectionProbeVisualizerAttribute, 1, plRTTIDefaultAllocator<plBoxReflectionProbeVisualizerAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBoxReflectionProbeComponentManager::plBoxReflectionProbeComponentManager(plWorld* pWorld)
@@ -220,4 +220,4 @@ plBoxReflectionProbeVisualizerAttribute::plBoxReflectionProbeVisualizerAttribute
 {
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_BoxReflectionProbeComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_BoxReflectionProbeComponent);

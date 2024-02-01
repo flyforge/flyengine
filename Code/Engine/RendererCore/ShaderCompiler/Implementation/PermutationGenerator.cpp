@@ -15,8 +15,8 @@ void plPermutationGenerator::RemovePermutations(const plHashedString& sPermVarNa
 
 void plPermutationGenerator::AddPermutation(const plHashedString& sName, const plHashedString& sValue)
 {
-  PLASMA_ASSERT_DEV(!sName.IsEmpty(), "");
-  PLASMA_ASSERT_DEV(!sValue.IsEmpty(), "");
+  PL_ASSERT_DEV(!sName.IsEmpty(), "");
+  PL_ASSERT_DEV(!sValue.IsEmpty(), "");
 
   m_Permutations[sName].Insert(sValue);
 }
@@ -57,4 +57,4 @@ void plPermutationGenerator::GetPermutation(plUInt32 uiPerm, plHybridArray<plPer
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_ShaderCompiler_Implementation_PermutationGenerator);
+

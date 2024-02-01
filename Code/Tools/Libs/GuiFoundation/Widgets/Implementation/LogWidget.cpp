@@ -5,8 +5,8 @@
 #include <QClipboard>
 #include <QKeyEvent>
 
-plQtLogWidget::plQtLogWidget(QWidget* parent)
-  : QWidget(parent)
+plQtLogWidget::plQtLogWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   setupUi(this);
 
@@ -14,7 +14,7 @@ plQtLogWidget::plQtLogWidget(QWidget* parent)
   ListViewLog->setModel(m_pLog);
   ListViewLog->setUniformItemSizes(true);
   ListViewLog->installEventFilter(this);
-  connect(m_pLog, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int first, int last) { ScrollToBottomIfAtEnd(first); });
+  connect(m_pLog, &QAbstractItemModel::rowsInserted, this, [this](const QModelIndex& parent, int iFirst, int iLast) { ScrollToBottomIfAtEnd(iFirst); });
 
   const int logIndex = ((int)plLogMsgType::All - (int)plLogMsgType::InfoMsg);
   ComboFilter->setCurrentIndex(logIndex);
@@ -22,11 +22,11 @@ plQtLogWidget::plQtLogWidget(QWidget* parent)
 
 plQtLogWidget::~plQtLogWidget() = default;
 
-void plQtLogWidget::ShowControls(bool show)
+void plQtLogWidget::ShowControls(bool bShow)
 {
-  ButtonClearLog->setVisible(show);
-  ComboFilter->setVisible(show);
-  Search->setVisible(show);
+  ButtonClearLog->setVisible(bShow);
+  ComboFilter->setVisible(bShow);
+  Search->setVisible(bShow);
 }
 
 plQtLogModel* plQtLogWidget::GetLog()
@@ -41,7 +41,7 @@ plQtSearchWidget* plQtLogWidget::GetSearchWidget()
 
 void plQtLogWidget::SetLogLevel(plLogMsgType::Enum logLevel)
 {
-  PLASMA_ASSERT_DEBUG(logLevel >= (int)plLogMsgType::ErrorMsg && logLevel <= plLogMsgType::All, "Invalid log level set.");
+  PL_ASSERT_DEBUG(logLevel >= (int)plLogMsgType::ErrorMsg && logLevel <= plLogMsgType::All, "Invalid log level set.");
   ComboFilter->setCurrentIndex((int)plLogMsgType::All - (int)logLevel);
 }
 

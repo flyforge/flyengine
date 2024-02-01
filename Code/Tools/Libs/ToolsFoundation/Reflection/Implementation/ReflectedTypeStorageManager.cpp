@@ -14,7 +14,7 @@ plMap<const plRTTI*, plReflectedTypeStorageManager::ReflectedTypeStorageMapping*
 
 // clang-format off
 // 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeStorageManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeStorageManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation",
@@ -31,7 +31,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeStorageManager)
     plReflectedTypeStorageManager::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
@@ -57,12 +57,12 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddProperties(c
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRecursive(
-  const plRTTI* pType, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
+  const plRTTI* pType, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
 {
   // Parse parent class
   const plRTTI* pParent = pType->GetParentType();
   if (pParent != nullptr)
-    AddPropertiesRecursive(pParent, requiresPatchingEmbeddedClass);
+    AddPropertiesRecursive(pParent, ref_requiresPatchingEmbeddedClass);
 
   // Parse properties
   const plUInt32 uiPropertyCount = pType->GetProperties().GetCount();
@@ -78,7 +78,7 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRe
       // Value already present, update type and instances
       storageInfo->m_Type = GetStorageType(pProperty);
       storageInfo->m_DefaultValue = plToolsReflectionUtils::GetStorageDefault(pProperty);
-      UpdateInstances(storageInfo->m_uiIndex, pProperty, requiresPatchingEmbeddedClass);
+      UpdateInstances(storageInfo->m_uiIndex, pProperty, ref_requiresPatchingEmbeddedClass);
     }
     else
     {
@@ -86,18 +86,18 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertiesRe
 
       // Add value, new entries are appended
       m_PathToStorageInfoTable.Insert(path, StorageInfo(uiIndex, GetStorageType(pProperty), plToolsReflectionUtils::GetStorageDefault(pProperty)));
-      AddPropertyToInstances(uiIndex, pProperty, requiresPatchingEmbeddedClass);
+      AddPropertyToInstances(uiIndex, pProperty, ref_requiresPatchingEmbeddedClass);
     }
   }
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances(
-  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
+  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
 {
   for (auto it = m_Instances.GetIterator(); it.IsValid(); ++it)
   {
     plDynamicArray<plVariant>& data = it.Key()->m_Data;
-    PLASMA_ASSERT_DEV(uiIndex < data.GetCount(), "plReflectedTypeStorageAccessor found with fewer properties that is should have!");
+    PL_ASSERT_DEV(uiIndex < data.GetCount(), "plReflectedTypeStorageAccessor found with fewer properties that is should have!");
     plVariant& value = data[uiIndex];
 
     const auto SpecVarType = GetStorageType(pProperty);
@@ -113,13 +113,13 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
           {
             if (!value.Get<plUuid>().IsValid())
             {
-              requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+              ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
             }
           }
           else
           {
             value = plToolsReflectionUtils::GetStorageDefault(pProperty);
-            requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+            ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
           }
           continue;
         }
@@ -171,9 +171,9 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
           }
           else
           {
-            plResult res(PLASMA_FAILURE);
+            plResult res(PL_FAILURE);
             var = var.ConvertTo(SpecVarType, &res);
-            if (res == PLASMA_FAILURE)
+            if (res == PL_FAILURE)
             {
               var = plReflectionUtils::GetDefaultValue(pProperty, i);
             }
@@ -202,9 +202,9 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
           }
           else
           {
-            plResult res(PLASMA_FAILURE);
+            plResult res(PL_FAILURE);
             it2.Value() = it2.Value().ConvertTo(SpecVarType, &res);
-            if (res == PLASMA_FAILURE)
+            if (res == PL_FAILURE)
             {
               it2.Value() = plReflectionUtils::GetDefaultValue(pProperty, it2.Key());
             }
@@ -220,7 +220,7 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::UpdateInstances
 }
 
 void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertyToInstances(
-  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& requiresPatchingEmbeddedClass)
+  plUInt32 uiIndex, const plAbstractProperty* pProperty, plSet<const plDocumentObject*>& ref_requiresPatchingEmbeddedClass)
 {
   if (pProperty->GetCategory() != plPropertyCategory::Member)
     return;
@@ -228,11 +228,11 @@ void plReflectedTypeStorageManager::ReflectedTypeStorageMapping::AddPropertyToIn
   for (auto it = m_Instances.GetIterator(); it.IsValid(); ++it)
   {
     plDynamicArray<plVariant>& data = it.Key()->m_Data;
-    PLASMA_ASSERT_DEV(data.GetCount() == uiIndex, "plReflectedTypeStorageAccessor found with a property count that does not match its storage mapping!");
+    PL_ASSERT_DEV(data.GetCount() == uiIndex, "plReflectedTypeStorageAccessor found with a property count that does not match its storage mapping!");
     data.PushBack(plToolsReflectionUtils::GetStorageDefault(pProperty));
     if (pProperty->GetFlags().IsSet(plPropertyFlags::Class) && !pProperty->GetFlags().IsSet(plPropertyFlags::Pointer))
     {
-      requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
+      ref_requiresPatchingEmbeddedClass.Insert(it.Key()->GetOwner());
     }
   }
 }
@@ -292,11 +292,10 @@ void plReflectedTypeStorageManager::Shutdown()
     for (auto inst : pMapping->m_Instances)
     {
       plLog::Error("Type '{0}' survived shutdown!", inst->GetType()->GetTypeName());
-
     }
 
-    PLASMA_ASSERT_DEV(pMapping->m_Instances.IsEmpty(), "A type was removed which still has instances using the type!");
-    PLASMA_DEFAULT_DELETE(pMapping);
+    PL_ASSERT_DEV(pMapping->m_Instances.IsEmpty(), "A type was removed which still has instances using the type!");
+    PL_DEFAULT_DELETE(pMapping);
   }
   s_ReflectedTypeToStorageMapping.Clear();
 }
@@ -317,12 +316,12 @@ void plReflectedTypeStorageManager::RemoveStorageAccessor(plReflectedTypeStorage
 
 plReflectedTypeStorageManager::ReflectedTypeStorageMapping* plReflectedTypeStorageManager::GetTypeStorageMapping(const plRTTI* pType)
 {
-  PLASMA_ASSERT_DEV(pType != nullptr, "Nullptr is not a valid type!");
+  PL_ASSERT_DEV(pType != nullptr, "Nullptr is not a valid type!");
   auto it = s_ReflectedTypeToStorageMapping.Find(pType);
   if (it.IsValid())
     return it.Value();
 
-  ReflectedTypeStorageMapping* pMapping = PLASMA_DEFAULT_NEW(ReflectedTypeStorageMapping);
+  ReflectedTypeStorageMapping* pMapping = PL_DEFAULT_NEW(ReflectedTypeStorageMapping);
   pMapping->AddProperties(pType);
   s_ReflectedTypeToStorageMapping[pType] = pMapping;
   return pMapping;
@@ -335,28 +334,28 @@ void plReflectedTypeStorageManager::TypeEventHandler(const plPhantomRttiManagerE
     case plPhantomRttiManagerEvent::Type::TypeAdded:
     {
       const plRTTI* pType = e.m_pChangedType;
-      PLASMA_ASSERT_DEV(pType != nullptr, "A type was added but it has an invalid handle!");
+      PL_ASSERT_DEV(pType != nullptr, "A type was added but it has an invalid handle!");
 
-      PLASMA_ASSERT_DEV(!s_ReflectedTypeToStorageMapping.Find(e.m_pChangedType).IsValid(), "The type '{0}' was added twice!", pType->GetTypeName());
+      PL_ASSERT_DEV(!s_ReflectedTypeToStorageMapping.Find(e.m_pChangedType).IsValid(), "The type '{0}' was added twice!", pType->GetTypeName());
       GetTypeStorageMapping(e.m_pChangedType);
     }
     break;
     case plPhantomRttiManagerEvent::Type::TypeChanged:
     {
       const plRTTI* pNewType = e.m_pChangedType;
-      PLASMA_ASSERT_DEV(pNewType != nullptr, "A type was updated but its handle is invalid!");
+      PL_ASSERT_DEV(pNewType != nullptr, "A type was updated but its handle is invalid!");
 
       ReflectedTypeStorageMapping* pMapping = s_ReflectedTypeToStorageMapping[e.m_pChangedType];
-      PLASMA_ASSERT_DEV(pMapping != nullptr, "A type was updated but no mapping exists for it!");
+      PL_ASSERT_DEV(pMapping != nullptr, "A type was updated but no mapping exists for it!");
 
       if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plEnumBase")
       {
-        // PLASMA_ASSERT_DEV(false, "Updating enums not implemented yet!");
+        // PL_ASSERT_DEV(false, "Updating enums not implemented yet!");
         break;
       }
       else if (pNewType->GetParentType() != nullptr && pNewType->GetParentType()->GetTypeName() == "plBitflagsBase")
       {
-        PLASMA_ASSERT_DEV(false, "Updating bitflags not implemented yet!");
+        PL_ASSERT_DEV(false, "Updating bitflags not implemented yet!");
       }
 
       pMapping->AddProperties(pNewType);
@@ -379,10 +378,10 @@ void plReflectedTypeStorageManager::TypeEventHandler(const plPhantomRttiManagerE
     case plPhantomRttiManagerEvent::Type::TypeRemoved:
     {
       ReflectedTypeStorageMapping* pMapping = s_ReflectedTypeToStorageMapping[e.m_pChangedType];
-      PLASMA_ASSERT_DEV(pMapping != nullptr, "A type was removed but no mapping ever exited for it!");
-      PLASMA_ASSERT_DEV(pMapping->m_Instances.IsEmpty(), "A type was removed which still has instances using the type!");
+      PL_ASSERT_DEV(pMapping != nullptr, "A type was removed but no mapping ever exited for it!");
+      PL_ASSERT_DEV(pMapping->m_Instances.IsEmpty(), "A type was removed which still has instances using the type!");
       s_ReflectedTypeToStorageMapping.Remove(e.m_pChangedType);
-      PLASMA_DEFAULT_DELETE(pMapping);
+      PL_DEFAULT_DELETE(pMapping);
     }
     break;
   }

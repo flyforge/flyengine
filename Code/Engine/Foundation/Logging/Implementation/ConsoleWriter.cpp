@@ -3,21 +3,21 @@
 #include <Foundation/Logging/ConsoleWriter.h>
 #include <Foundation/Time/Timestamp.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <android/log.h>
 #  define printf(...) __android_log_print(ANDROID_LOG_DEBUG, "plEngine", __VA_ARGS__)
 #endif
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 
 static void SetConsoleColor(WORD ui)
 {
-#  if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#  if PL_DISABLED(PL_PLATFORM_WINDOWS_UWP)
   SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), ui);
 #  endif
 }
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_OSX) || PL_ENABLED(PL_PLATFORM_LINUX) || PL_ENABLED(PL_PLATFORM_ANDROID)
 static void SetConsoleColor(plUInt8 ui) {}
 #else
 #  error "Unknown Platform."
@@ -32,7 +32,7 @@ void plLogWriter::Console::LogMessageHandler(const plLoggingEventData& eventData
   plLog::GenerateFormattedTimestamp(s_TimestampMode, sTimestamp);
 
   static plMutex WriterLock; // will only be created if this writer is used at all
-  PLASMA_LOCK(WriterLock);
+  PL_LOCK(WriterLock);
 
   if (eventData.m_EventType == plLogMsgType::BeginGroup)
     printf("\n");
@@ -55,7 +55,7 @@ void plLogWriter::Console::LogMessageHandler(const plLoggingEventData& eventData
 
     case plLogMsgType::EndGroup:
       SetConsoleColor(0x02);
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
       printf("----- %s (%.6f sec)-----\n\n", eventData.m_sText.GetData(sTemp1), eventData.m_fSeconds);
 #else
       printf("----- %s (%s)-----\n\n", eventData.m_sText.GetData(sTemp1), "timing info not available");
@@ -114,9 +114,8 @@ void plLogWriter::Console::SetTimestampMode(plLog::TimestampMode mode)
 {
   s_TimestampMode = mode;
 }
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 #  undef printf
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Logging_Implementation_ConsoleWriter);

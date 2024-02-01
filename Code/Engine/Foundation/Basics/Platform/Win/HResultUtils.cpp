@@ -1,12 +1,12 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
 #  include <Foundation/Basics/Platform/Win/HResultUtils.h>
 #  include <Foundation/Strings/StringBuilder.h>
 #  include <Foundation/Strings/StringConversion.h>
 
-PLASMA_FOUNDATION_DLL plString plHRESULTtoString(plMinWindows::HRESULT result)
+PL_FOUNDATION_DLL plString plHRESULTtoString(plMinWindows::HRESULT result)
 {
   wchar_t buffer[4096];
   if (::FormatMessageW(FORMAT_MESSAGE_FROM_SYSTEM,
@@ -14,7 +14,7 @@ PLASMA_FOUNDATION_DLL plString plHRESULTtoString(plMinWindows::HRESULT result)
         result,
         MAKELANGID(LANG_NEUTRAL, SUBLANG_NEUTRAL),
         buffer,
-        PLASMA_ARRAY_SIZE(buffer),
+        PL_ARRAY_SIZE(buffer),
         nullptr) == 0)
   {
     return {};
@@ -31,5 +31,3 @@ PLASMA_FOUNDATION_DLL plString plHRESULTtoString(plMinWindows::HRESULT result)
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Platform_Win_HResultUtils);

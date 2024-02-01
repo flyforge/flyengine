@@ -1,10 +1,10 @@
 
-PLASMA_ALWAYS_INLINE plWorld* plWorldModule::GetWorld()
+PL_ALWAYS_INLINE plWorld* plWorldModule::GetWorld()
 {
   return m_pWorld;
 }
 
-PLASMA_ALWAYS_INLINE const plWorld* plWorldModule::GetWorld() const
+PL_ALWAYS_INLINE const plWorld* plWorldModule::GetWorld() const
 {
   return m_pWorld;
 }
@@ -16,7 +16,7 @@ plWorldModuleTypeId plWorldModuleFactory::RegisterWorldModule()
 {
   struct Helper
   {
-    static plWorldModule* Create(plAllocatorBase* pAllocator, plWorld* pWorld) { return PLASMA_NEW(pAllocator, ModuleType, pWorld); }
+    static plWorldModule* Create(plAllocator* pAllocator, plWorld* pWorld) { return PL_NEW(pAllocator, ModuleType, pWorld); }
   };
 
   const plRTTI* pRtti = plGetStaticRTTI<RTTIType>();

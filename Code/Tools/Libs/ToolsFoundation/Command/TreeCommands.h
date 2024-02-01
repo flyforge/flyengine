@@ -8,9 +8,9 @@
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plAddObjectCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plAddObjectCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAddObjectCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plAddObjectCommand, plCommand);
 
 public:
   plAddObjectCommand();
@@ -19,7 +19,7 @@ public: // Properties
   void SetType(plStringView sType);
   plStringView GetType() const;
 
-  const plRTTI* m_pType;
+  const plRTTI* m_pType = nullptr;
   plUuid m_Parent;
   plString m_sParentProperty;
   plVariant m_Index;
@@ -32,7 +32,7 @@ private:
   virtual void CleanupInternal(CommandState state) override;
 
 private:
-  plDocumentObject* m_pObject;
+  plDocumentObject* m_pObject = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -40,9 +40,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plPasteObjectsCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plPasteObjectsCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPasteObjectsCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plPasteObjectsCommand, plCommand);
 
 public:
   plPasteObjectsCommand();
@@ -74,9 +74,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plInstantiatePrefabCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plInstantiatePrefabCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInstantiatePrefabCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plInstantiatePrefabCommand, plCommand);
 
 public:
   plInstantiatePrefabCommand();
@@ -114,12 +114,12 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plUnlinkPrefabCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plUnlinkPrefabCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plUnlinkPrefabCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plUnlinkPrefabCommand, plCommand);
 
 public:
-  plUnlinkPrefabCommand() {}
+  plUnlinkPrefabCommand() = default;
 
   plUuid m_Object;
 
@@ -139,9 +139,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plRemoveObjectCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plRemoveObjectCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRemoveObjectCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plRemoveObjectCommand, plCommand);
 
 public:
   plRemoveObjectCommand();
@@ -155,19 +155,19 @@ private:
   virtual void CleanupInternal(CommandState state) override;
 
 private:
-  plDocumentObject* m_pParent;
+  plDocumentObject* m_pParent = nullptr;
   plString m_sParentProperty;
   plVariant m_Index;
-  plDocumentObject* m_pObject;
+  plDocumentObject* m_pObject = nullptr;
 };
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plMoveObjectCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plMoveObjectCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMoveObjectCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plMoveObjectCommand, plCommand);
 
 public:
   plMoveObjectCommand();
@@ -195,9 +195,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plSetObjectPropertyCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plSetObjectPropertyCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSetObjectPropertyCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plSetObjectPropertyCommand, plCommand);
 
 public:
   plSetObjectPropertyCommand();
@@ -222,9 +222,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plResizeAndSetObjectPropertyCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plResizeAndSetObjectPropertyCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plResizeAndSetObjectPropertyCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plResizeAndSetObjectPropertyCommand, plCommand);
 
 public:
   plResizeAndSetObjectPropertyCommand();
@@ -237,7 +237,7 @@ public: // Properties
 
 private:
   virtual plStatus DoInternal(bool bRedo) override;
-  virtual plStatus UndoInternal(bool bFireEvents) override { return plStatus(PLASMA_SUCCESS); }
+  virtual plStatus UndoInternal(bool bFireEvents) override { return plStatus(PL_SUCCESS); }
   virtual void CleanupInternal(CommandState state) override {}
 
   plDocumentObject* m_pObject;
@@ -247,9 +247,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plInsertObjectPropertyCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plInsertObjectPropertyCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInsertObjectPropertyCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plInsertObjectPropertyCommand, plCommand);
 
 public:
   plInsertObjectPropertyCommand();
@@ -273,9 +273,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plRemoveObjectPropertyCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plRemoveObjectPropertyCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRemoveObjectPropertyCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plRemoveObjectPropertyCommand, plCommand);
 
 public:
   plRemoveObjectPropertyCommand();
@@ -299,9 +299,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_TOOLSFOUNDATION_DLL plMoveObjectPropertyCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plMoveObjectPropertyCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMoveObjectPropertyCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plMoveObjectPropertyCommand, plCommand);
 
 public:
   plMoveObjectPropertyCommand();

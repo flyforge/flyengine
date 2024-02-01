@@ -9,9 +9,9 @@ using plJoltHingeConstraintComponentManager = plComponentManager<class plJoltHin
 /// Hinge constraints are typically used for doors and wheels. They may either rotate freely
 /// or be limited between an upper and lower angle.
 /// It is possible to enable a drive to make the hinge rotate at a certain speed, or return to a desired angle.
-class PLASMA_JOLTPLUGIN_DLL plJoltHingeConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltHingeConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltHingeConstraintComponent, plJoltConstraintComponent, plJoltHingeConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltHingeConstraintComponent, plJoltConstraintComponent, plJoltHingeConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

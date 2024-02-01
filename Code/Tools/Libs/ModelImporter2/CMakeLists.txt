@@ -18,15 +18,15 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 # deactivated for now, would need to be updated to modern CMake
-#set (PLASMA_BUILD_OFFICIAL_FBX_SDK OFF CACHE BOOL "Whether to use the official Autodesk FBX SDK or not")
-#mark_as_advanced(FORCE PLASMA_BUILD_OFFICIAL_FBX_SDK)
+#set (PL_BUILD_OFFICIAL_FBX_SDK OFF CACHE BOOL "Whether to use the official Autodesk FBX SDK or not")
+#mark_as_advanced(FORCE PL_BUILD_OFFICIAL_FBX_SDK)
 #
-#if (PLASMA_BUILD_OFFICIAL_FBX_SDK)
+#if (PL_BUILD_OFFICIAL_FBX_SDK)
 #
-#    set (PLASMA_FBXSDK_DIR "" CACHE PATH "Directory of Autodesk FBX SDK installation")
-#    target_include_directories (${PROJECT_NAME} PRIVATE "${PLASMA_FBXSDK_DIR}/include")
+#    set (PL_FBXSDK_DIR "" CACHE PATH "Directory of Autodesk FBX SDK installation")
+#    target_include_directories (${PROJECT_NAME} PRIVATE "${PL_FBXSDK_DIR}/include")
 #
-#    set (FBXSDK_LIB_DIR "${PLASMA_FBXSDK_DIR}/lib")
+#    set (FBXSDK_LIB_DIR "${PL_FBXSDK_DIR}/lib")
 #
 #    if (DEFINED BUILDSYSTEM_COMPILER_MSVC_140 OR DEFINED BUILDSYSTEM_COMPILER_MSVC_141)
 #      if (${BUILDSYSTEM_PLATFORM_64BIT})

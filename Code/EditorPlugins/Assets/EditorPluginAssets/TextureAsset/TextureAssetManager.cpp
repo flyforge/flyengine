@@ -8,18 +8,18 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetProfileConfig, 1, plRTTIDefaultAllocator<plTextureAssetProfileConfig>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetProfileConfig, 1, plRTTIDefaultAllocator<plTextureAssetProfileConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MaxResolution", m_uiMaxResolution)->AddAttributes(new plDefaultValueAttribute(16 * 1024)),
+    PL_MEMBER_PROPERTY("MaxResolution", m_uiMaxResolution)->AddAttributes(new plDefaultValueAttribute(16 * 1024)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetDocumentManager, 1, plRTTIDefaultAllocator<plTextureAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureAssetDocumentManager, 1, plRTTIDefaultAllocator<plTextureAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTextureAssetDocumentManager::plTextureAssetDocumentManager()
@@ -86,12 +86,12 @@ void plTextureAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
   }
 }
 
-void plTextureAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plTextureAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  plTextureAssetDocument* pDoc = new plTextureAssetDocument(szPath);
+  plTextureAssetDocument* pDoc = new plTextureAssetDocument(sPath);
   out_pDocument = pDoc;
 
-  if (plStringUtils::IsEqual(szDocumentTypeName, "Render Target"))
+  if (sDocumentTypeName.IsEqual("Render Target"))
   {
     pDoc->m_bIsRenderTarget = true;
   }
@@ -103,17 +103,17 @@ void plTextureAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicA
   inout_DocumentTypes.PushBack(&m_DocTypeDesc2);
 }
 
-plString plTextureAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, const char* szDataDirectory, const char* szDocumentPath, const char* szOutputTag, const plPlatformProfile* pAssetProfile) const
+plString plTextureAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDescriptor, plStringView sDataDirectory, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile) const
 {
-  if (plStringUtils::IsEqual(szOutputTag, "LOWRES"))
+  if (sOutputTag.IsEqual("LOWRES"))
   {
-    plStringBuilder sRelativePath(szDocumentPath);
-    sRelativePath.MakeRelativeTo(szDataDirectory).IgnoreResult();
+    plStringBuilder sRelativePath(sDocumentPath);
+    sRelativePath.MakeRelativeTo(sDataDirectory).IgnoreResult();
     sRelativePath.RemoveFileExtension();
     sRelativePath.Append("-lowres");
     plAssetDocumentManager::GenerateOutputFilename(sRelativePath, pAssetProfile, "plTexture2D", true);
     return sRelativePath;
   }
 
-  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, szDataDirectory, szDocumentPath, szOutputTag, pAssetProfile);
+  return SUPER::GetRelativeOutputFileName(pTypeDescriptor, sDataDirectory, sDocumentPath, sOutputTag, pAssetProfile);
 }

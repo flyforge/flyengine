@@ -9,7 +9,7 @@ thread_local plTaskWorkerInfo tl_TaskWorkerInfo;
 static const char* GenerateThreadName(plWorkerThreadType::Enum threadType, plUInt32 uiThreadNumber)
 {
   static plStringBuilder sTemp;
-  sTemp.Format("{} {}", plWorkerThreadType::GetThreadTypeName(threadType), uiThreadNumber);
+  sTemp.SetFormat("{} {}", plWorkerThreadType::GetThreadTypeName(threadType), uiThreadNumber);
   return sTemp.GetData();
 }
 
@@ -32,17 +32,17 @@ plResult plTaskWorkerThread::DeactivateWorker()
     // if necessary, wake this thread up
     WakeUpIfIdle();
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plTaskWorkerThread::Run()
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     m_WorkerType != plWorkerThreadType::Unknown && m_WorkerType != plWorkerThreadType::MainThread, "Worker threads cannot use this type");
-  PLASMA_ASSERT_DEBUG(m_WorkerType < plWorkerThreadType::ENUM_COUNT, "Worker Thread Type is invalid: {0}", m_WorkerType);
+  PL_ASSERT_DEBUG(m_WorkerType < plWorkerThreadType::ENUM_COUNT, "Worker Thread Type is invalid: {0}", m_WorkerType);
 
   // once this thread is running, store the worker type in the thread_local variable
   // such that the plTaskSystem is able to look this up (e.g. in WaitForGroup) to know which types of tasks to help with
@@ -76,7 +76,7 @@ plUInt32 plTaskWorkerThread::Run()
 
       if (bIsReserve)
       {
-        PLASMA_VERIFY(m_iWorkerState.Set((int)plTaskWorkerState::Idle) == (int)plTaskWorkerState::Active, "Corrupt worker state");
+        PL_VERIFY(m_iWorkerState.Set((int)plTaskWorkerState::Idle) == (int)plTaskWorkerState::Active, "Corrupt worker state");
 
         // if this thread is part of the reserve, then don't continue to process tasks indefinitely
         // instead, put this thread to sleep and wake up someone else
@@ -101,7 +101,7 @@ void plTaskWorkerThread::WaitForWork()
   m_ThreadActiveTime += plTime::Now() - m_StartedWorkingTime;
   m_bExecutingTask = false;
   m_WakeUpSignal.WaitForSignal();
-  PLASMA_ASSERT_DEBUG(m_iWorkerState == (int)plTaskWorkerState::Active, "Worker state should have been reset to 'active'");
+  PL_ASSERT_DEBUG(m_iWorkerState == (int)plTaskWorkerState::Active, "Worker state should have been reset to 'active'");
 }
 
 plTaskWorkerState plTaskWorkerThread::WakeUpIfIdle()
@@ -122,7 +122,7 @@ void plTaskWorkerThread::UpdateThreadUtilization(plTime timePassed)
   // The thread keeps track of how much time it spends executing tasks.
   // Here we retrieve that time and resets it to zero.
   {
-    m_ThreadActiveTime = plTime::Zero();
+    m_ThreadActiveTime = plTime::MakeZero();
 
     if (m_bExecutingTask)
     {
@@ -148,4 +148,3 @@ double plTaskWorkerThread::GetThreadUtilization(plUInt32* pNumTasksExecuted /*= 
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskWorkerThread);

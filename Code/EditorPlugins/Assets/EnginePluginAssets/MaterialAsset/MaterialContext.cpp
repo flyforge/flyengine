@@ -7,23 +7,23 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialContext, 1, plRTTIDefaultAllocator<plMaterialContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialContext, 1, plRTTIDefaultAllocator<plMaterialContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Material"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Material"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMaterialContext::plMaterialContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plMaterialContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plMaterialContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plCreateThumbnailMsgToEngine>())
   {
@@ -44,7 +44,7 @@ void plMaterialContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
       m_PreviewModel = (PreviewModel)pMsg2->m_iValue;
 
       auto pWorld = m_pWorld;
-      PLASMA_LOCK(pWorld->GetWriteMarker());
+      PL_LOCK(pWorld->GetWriteMarker());
 
       plMeshComponent* pMesh;
       if (pWorld->TryGetComponent(m_hMeshComponent, pMesh))
@@ -68,7 +68,7 @@ void plMaterialContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
+  plEngineProcessDocumentContext::HandleMessage(pMsg);
 }
 
 void plMaterialContext::OnInitialize()
@@ -90,7 +90,7 @@ void plMaterialContext::OnInitialize()
 
         plGeometry::GeoOptions opt;
         opt.m_Color = plColor::Red;
-        opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(90));
+        opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
         geom.AddSphere(0.1f, 64, 64, opt);
         geom.ComputeTangents();
 
@@ -180,7 +180,7 @@ void plMaterialContext::OnInitialize()
 
         plGeometry::GeoOptions opt;
         opt.m_Color = plColor::Red;
-        opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90));
+        opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90));
         geom.AddRectXY(plVec2(0.2f), 64, 64, opt);
         geom.ComputeTangents();
 
@@ -213,7 +213,7 @@ void plMaterialContext::OnInitialize()
   }
 
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   plGameObjectDesc obj;
   plGameObject* pObj;
@@ -238,17 +238,17 @@ void plMaterialContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plMaterialContext::CreateViewContext()
+plEngineProcessViewContext* plMaterialContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plMaterialViewContext, this);
+  return PL_DEFAULT_NEW(plMaterialViewContext, this);
 }
 
-void plMaterialContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plMaterialContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plMaterialContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plMaterialContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   plMaterialViewContext* pMaterialViewContext = static_cast<plMaterialViewContext*>(pThumbnailViewContext);
   pMaterialViewContext->PositionThumbnailCamera();

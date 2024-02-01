@@ -3,30 +3,58 @@
 
 #ifdef __clang__
 
-#  undef PLASMA_COMPILER_CLANG
-#  define PLASMA_COMPILER_CLANG PLASMA_ON
+#  undef PL_COMPILER_CLANG
+#  define PL_COMPILER_CLANG PL_ON
 
-#  define PLASMA_ALWAYS_INLINE __attribute__((always_inline)) inline
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
-#    define PLASMA_FORCE_INLINE inline
+#  define PL_ALWAYS_INLINE __attribute__((always_inline)) inline
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
+#    define PL_FORCE_INLINE inline
 #  else
-#    define PLASMA_FORCE_INLINE __attribute__((always_inline)) inline
+#    define PL_FORCE_INLINE __attribute__((always_inline)) inline
 #  endif
 
-#  define PLASMA_ALIGNMENT_OF(type) PLASMA_COMPILE_TIME_MAX(__alignof(type), PLASMA_ALIGNMENT_MINIMUM)
+#  define PL_ALIGNMENT_OF(type) PL_COMPILE_TIME_MAX(__alignof(type), PL_ALIGNMENT_MINIMUM)
 
-#  define PLASMA_DEBUG_BREAK \
-    {                    \
-      __builtin_trap();  \
-    }
+#  if __has_builtin(__builtin_debugtrap)
+#    define PL_DEBUG_BREAK     \
+      {                        \
+        __builtin_debugtrap(); \
+      }
+#  elif __has_builtin(__debugbreak)
+#    define PL_DEBUG_BREAK \
+      {                    \
+        __debugbreak();    \
+      }
+#  else
+#    include <signal.h>
+#    if defined(SIGTRAP)
+#      define PL_DEBUG_BREAK \
+        {                    \
+          raise(SIGTRAP);    \
+        }
+#    else
+#      define PL_DEBUG_BREAK \
+        {                    \
+          raise(SIGABRT);    \
+        }
+#    endif
+#  endif
 
-#  define PLASMA_SOURCE_FUNCTION __PRETTY_FUNCTION__
-#  define PLASMA_SOURCE_LINE __LINE__
-#  define PLASMA_SOURCE_FILE __FILE__
+#  define PL_SOURCE_FUNCTION __PRETTY_FUNCTION__
+#  define PL_SOURCE_LINE __LINE__
+#  define PL_SOURCE_FILE __FILE__
 
 #  ifdef BUILDSYSTEM_BUILDTYPE_Debug
-#    undef PLASMA_COMPILE_FOR_DEBUG
-#    define PLASMA_COMPILE_FOR_DEBUG PLASMA_ON
+#    undef PL_COMPILE_FOR_DEBUG
+#    define PL_COMPILE_FOR_DEBUG PL_ON
 #  endif
+
+#  define PL_WARNING_PUSH() _Pragma("clang diagnostic push")
+#  define PL_WARNING_POP() _Pragma("clang diagnostic pop")
+#  define PL_WARNING_DISABLE_CLANG(_x) _Pragma(PL_STRINGIZE(clang diagnostic ignored _x))
+
+#else
+
+#  define PL_WARNING_DISABLE_CLANG(_x)
 
 #endif

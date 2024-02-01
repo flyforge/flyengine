@@ -3,7 +3,7 @@
 #include <Core/CoreDLL.h>
 #include <Foundation/Reflection/Reflection.h>
 
-struct PLASMA_CORE_DLL plUpdateRate
+struct PL_CORE_DLL plUpdateRate
 {
   using StorageType = plUInt8;
 
@@ -16,6 +16,7 @@ struct PLASMA_CORE_DLL plUpdateRate
     Max5fps,
     Max2fps,
     Max1fps,
+    Never,
 
     Default = Max30fps
   };
@@ -23,7 +24,7 @@ struct PLASMA_CORE_DLL plUpdateRate
   static plTime GetInterval(Enum updateRate);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plUpdateRate);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plUpdateRate);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -31,7 +32,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plUpdateRate);
 ///
 /// Tries to maintain an even workload per frame and also keep the given interval for a work as best as possible.
 /// A typical use case would be e.g. component update functions that don't need to be called every frame.
-class PLASMA_CORE_DLL plIntervalSchedulerBase
+class PL_CORE_DLL plIntervalSchedulerBase
 {
 protected:
   plIntervalSchedulerBase(plTime minInterval, plTime maxInterval);
@@ -65,7 +66,7 @@ class plIntervalScheduler : public plIntervalSchedulerBase
   using SUPER = plIntervalSchedulerBase;
 
 public:
-  PLASMA_ALWAYS_INLINE plIntervalScheduler(plTime minInterval = plTime::Milliseconds(1), plTime maxInterval = plTime::Seconds(1))
+  PL_ALWAYS_INLINE plIntervalScheduler(plTime minInterval = plTime::MakeFromMilliseconds(1), plTime maxInterval = plTime::MakeFromSeconds(1))
     : SUPER(minInterval, maxInterval)
   {
   }

@@ -5,17 +5,20 @@
 #include <Foundation/Math/Rect.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderCommonPlatformInterface
+struct plShaderResourceBinding;
+
+class PL_RENDERERFOUNDATION_DLL plGALCommandEncoderCommonPlatformInterface
 {
 public:
   // State setting functions
 
   virtual void SetShaderPlatform(const plGALShader* pShader) = 0;
 
-  virtual void SetConstantBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer) = 0;
-  virtual void SetSamplerStatePlatform(plGALShaderStage::Enum stage, plUInt32 uiSlot, const plGALSamplerState* pSamplerState) = 0;
-  virtual void SetResourceViewPlatform(plGALShaderStage::Enum stage, plUInt32 uiSlot, const plGALResourceView* pResourceView) = 0;
-  virtual void SetUnorderedAccessViewPlatform(plUInt32 uiSlot, const plGALUnorderedAccessView* pUnorderedAccessView) = 0;
+  virtual void SetConstantBufferPlatform(const plShaderResourceBinding& binding, const plGALBuffer* pBuffer) = 0;
+  virtual void SetSamplerStatePlatform(const plShaderResourceBinding& binding, const plGALSamplerState* pSamplerState) = 0;
+  virtual void SetResourceViewPlatform(const plShaderResourceBinding& binding, const plGALResourceView* pResourceView) = 0;
+  virtual void SetUnorderedAccessViewPlatform(const plShaderResourceBinding& binding, const plGALUnorderedAccessView* pUnorderedAccessView) = 0;
+  virtual void SetPushConstantsPlatform(plArrayPtr<const plUInt8> data) = 0;
 
   // Query functions
 
@@ -61,23 +64,19 @@ public:
   virtual void InsertEventMarkerPlatform(const char* szMarker) = 0;
 };
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderRenderPlatformInterface
+class PL_RENDERERFOUNDATION_DLL plGALCommandEncoderRenderPlatformInterface
 {
 public:
   // Draw functions
 
   virtual void ClearPlatform(const plColor& clearColor, plUInt32 uiRenderTargetClearMask, bool bClearDepth, bool bClearStencil, float fDepthClear, plUInt8 uiStencilClear) = 0;
 
-  virtual void DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex) = 0;
-  virtual void DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex) = 0;
-  virtual void DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex) = 0;
-  virtual void DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
-  virtual void DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex) = 0;
-  virtual void DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
-  virtual void DrawAutoPlatform() = 0;
-
-  virtual void BeginStreamOutPlatform() = 0;
-  virtual void EndStreamOutPlatform() = 0;
+  virtual plResult DrawPlatform(plUInt32 uiVertexCount, plUInt32 uiStartVertex) = 0;
+  virtual plResult DrawIndexedPlatform(plUInt32 uiIndexCount, plUInt32 uiStartIndex) = 0;
+  virtual plResult DrawIndexedInstancedPlatform(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex) = 0;
+  virtual plResult DrawIndexedInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
+  virtual plResult DrawInstancedPlatform(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex) = 0;
+  virtual plResult DrawInstancedIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
 
   // State functions
 
@@ -92,15 +91,13 @@ public:
 
   virtual void SetViewportPlatform(const plRectFloat& rect, float fMinDepth, float fMaxDepth) = 0;
   virtual void SetScissorRectPlatform(const plRectU32& rect) = 0;
-
-  virtual void SetStreamOutBufferPlatform(plUInt32 uiSlot, const plGALBuffer* pBuffer, plUInt32 uiOffset) = 0;
 };
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoderComputePlatformInterface
+class PL_RENDERERFOUNDATION_DLL plGALCommandEncoderComputePlatformInterface
 {
 public:
   // Dispatch
 
-  virtual void DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ) = 0;
-  virtual void DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
+  virtual plResult DispatchPlatform(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ) = 0;
+  virtual plResult DispatchIndirectPlatform(const plGALBuffer* pIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes) = 0;
 };

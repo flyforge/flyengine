@@ -17,7 +17,7 @@ namespace
     auto globalEventHandler = s_GlobalEventHandlerPerWorld[uiWorldIndex];
     if (globalEventHandler == nullptr)
     {
-      globalEventHandler = PLASMA_NEW(plStaticAllocatorWrapper::GetAllocator(), plDynamicArray<plComponentHandle>);
+      globalEventHandler = PL_NEW(plStaticsAllocatorWrapper::GetAllocator(), plDynamicArray<plComponentHandle>);
 
       s_GlobalEventHandlerPerWorld[uiWorldIndex] = globalEventHandler;
     }
@@ -29,7 +29,7 @@ namespace
   {
     plUInt32 uiWorldIndex = pComponent->GetWorld()->GetIndex();
     auto globalEventHandler = s_GlobalEventHandlerPerWorld[uiWorldIndex];
-    PLASMA_ASSERT_DEV(globalEventHandler != nullptr, "Implementation error.");
+    PL_ASSERT_DEV(globalEventHandler != nullptr, "Implementation error.");
 
     globalEventHandler->RemoveAndSwap(pComponent->GetHandle());
   }
@@ -38,25 +38,25 @@ namespace
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plEventMessageHandlerComponent, 3)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plEventMessageHandlerComponent, 3)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("HandleGlobalEvents", GetGlobalEventHandlerMode, SetGlobalEventHandlerMode),
-    PLASMA_ACCESSOR_PROPERTY("PassThroughUnhandledEvents", GetPassThroughUnhandledEvents, SetPassThroughUnhandledEvents),
+    PL_ACCESSOR_PROPERTY("HandleGlobalEvents", GetGlobalEventHandlerMode, SetGlobalEventHandlerMode),
+    PL_ACCESSOR_PROPERTY("PassThroughUnhandledEvents", GetPassThroughUnhandledEvents, SetPassThroughUnhandledEvents),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
 plEventMessageHandlerComponent::plEventMessageHandlerComponent() = default;
 plEventMessageHandlerComponent::~plEventMessageHandlerComponent() = default;
 
-void plEventMessageHandlerComponent::SerializeComponent(plWorldWriter& stream) const
+void plEventMessageHandlerComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   // version 2
   s << m_bIsGlobalEventHandler;
@@ -65,11 +65,11 @@ void plEventMessageHandlerComponent::SerializeComponent(plWorldWriter& stream) c
   s << m_bPassThroughUnhandledEvents;
 }
 
-void plEventMessageHandlerComponent::DeserializeComponent(plWorldReader& stream)
+void plEventMessageHandlerComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   if (uiVersion >= 2)
   {
@@ -92,9 +92,9 @@ void plEventMessageHandlerComponent::Deinitialize()
   SUPER::Deinitialize();
 }
 
-void plEventMessageHandlerComponent::SetDebugOutput(bool enable)
+void plEventMessageHandlerComponent::SetDebugOutput(bool bEnable)
 {
-  m_bDebugOutput = enable;
+  m_bDebugOutput = bEnable;
 }
 
 bool plEventMessageHandlerComponent::GetDebugOutput() const
@@ -102,14 +102,14 @@ bool plEventMessageHandlerComponent::GetDebugOutput() const
   return m_bDebugOutput;
 }
 
-void plEventMessageHandlerComponent::SetGlobalEventHandlerMode(bool enable)
+void plEventMessageHandlerComponent::SetGlobalEventHandlerMode(bool bEnable)
 {
-  if (m_bIsGlobalEventHandler == enable)
+  if (m_bIsGlobalEventHandler == bEnable)
     return;
 
-  m_bIsGlobalEventHandler = enable;
+  m_bIsGlobalEventHandler = bEnable;
 
-  if (enable)
+  if (bEnable)
   {
     RegisterGlobalEventHandler(this);
   }
@@ -151,4 +151,4 @@ void plEventMessageHandlerComponent::ClearGlobalEventHandlersForWorld(const plWo
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_EventMessageHandlerComponent);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_EventMessageHandlerComponent);

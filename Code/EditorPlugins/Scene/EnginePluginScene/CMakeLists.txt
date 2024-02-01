@@ -14,7 +14,7 @@ target_link_libraries(${PROJECT_NAME}
   SharedPluginScene
 )
 
-if (PLASMA_BUILD_EMBREE)
+if (PL_BUILD_EMBREE)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
     BakingPlugin

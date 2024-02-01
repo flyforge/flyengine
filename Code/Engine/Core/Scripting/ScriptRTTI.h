@@ -8,9 +8,9 @@
 
 class plWorld;
 
-class PLASMA_CORE_DLL plScriptRTTI : public plRTTI, public plRefCountingImpl
+class PL_CORE_DLL plScriptRTTI : public plRTTI, public plRefCountingImpl
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plScriptRTTI);
+  PL_DISALLOW_COPY_AND_ASSIGN(plScriptRTTI);
 
 public:
   enum
@@ -34,7 +34,7 @@ private:
   plSmallArray<plAbstractMessageHandler*, NumInplaceFunctions> m_MessageHandlerRawPtrs;
 };
 
-class PLASMA_CORE_DLL plScriptFunctionProperty : public plAbstractFunctionProperty
+class PL_CORE_DLL plScriptFunctionProperty : public plAbstractFunctionProperty
 {
 public:
   plScriptFunctionProperty(plStringView sName);
@@ -50,7 +50,7 @@ struct plScriptMessageDesc
   plArrayPtr<const plAbstractProperty* const> m_Properties;
 };
 
-class PLASMA_CORE_DLL plScriptMessageHandler : public plAbstractMessageHandler
+class PL_CORE_DLL plScriptMessageHandler : public plAbstractMessageHandler
 {
 public:
   plScriptMessageHandler(const plScriptMessageDesc& desc);
@@ -62,7 +62,7 @@ private:
   plArrayPtr<const plAbstractProperty* const> m_Properties;
 };
 
-class PLASMA_CORE_DLL plScriptInstance
+class PL_CORE_DLL plScriptInstance
 {
 public:
   plScriptInstance(plReflectedClass& inout_owner, plWorld* pWorld);
@@ -71,9 +71,19 @@ public:
   plReflectedClass& GetOwner() { return m_Owner; }
   plWorld* GetWorld() { return m_pWorld; }
 
-  virtual void ApplyParameters(const plArrayMap<plHashedString, plVariant>& parameters) = 0;
+  virtual void SetInstanceVariables(const plArrayMap<plHashedString, plVariant>& parameters);
+  virtual void SetInstanceVariable(const plHashedString& sName, const plVariant& value) = 0;
+  virtual plVariant GetInstanceVariable(const plHashedString& sName) = 0;
 
 private:
   plReflectedClass& m_Owner;
   plWorld* m_pWorld = nullptr;
 };
+
+struct PL_CORE_DLL plScriptAllocator
+{
+  static plAllocator* GetAllocator();
+};
+
+/// \brief creates a new instance of type using the script allocator
+#define PL_SCRIPT_NEW(type, ...) PL_NEW(plScriptAllocator::GetAllocator(), type, __VA_ARGS__)

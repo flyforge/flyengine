@@ -25,57 +25,57 @@ void plOBJLoader::Clear()
   m_Materials.Clear();
 }
 
-static plStringView ReadLine(plStringView& szPos)
+static plStringView ReadLine(plStringView& ref_sPos)
 {
-  while (szPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(szPos.GetCharacter()))
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(ref_sPos.GetCharacter()))
+    ++ref_sPos;
 
-  const char* szStart = szPos.GetStartPointer();
+  const char* szStart = ref_sPos.GetStartPointer();
 
-  while (szPos.GetCharacter() != '\0' && szPos.GetCharacter() != '\r' && szPos.GetCharacter() != '\n')
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && ref_sPos.GetCharacter() != '\r' && ref_sPos.GetCharacter() != '\n')
+    ++ref_sPos;
 
-  const char* szEnd = szPos.GetStartPointer();
+  const char* szEnd = ref_sPos.GetStartPointer();
 
-  while (szPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(szPos.GetCharacter()))
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(ref_sPos.GetCharacter()))
+    ++ref_sPos;
 
   return plStringView(szStart, szEnd);
 }
 
-static plStringView ReadString(plStringView& szPos)
+static plStringView ReadString(plStringView& ref_sPos)
 {
-  while (szPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(szPos.GetCharacter()))
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(ref_sPos.GetCharacter()))
+    ++ref_sPos;
 
-  const char* szStart = szPos.GetStartPointer();
+  const char* szStart = ref_sPos.GetStartPointer();
 
-  while (szPos.GetCharacter() != '\0' && !plStringUtils::IsWhiteSpace(szPos.GetCharacter()))
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && !plStringUtils::IsWhiteSpace(ref_sPos.GetCharacter()))
+    ++ref_sPos;
 
-  const char* szEnd = szPos.GetStartPointer();
+  const char* szEnd = ref_sPos.GetStartPointer();
 
-  while (szPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(szPos.GetCharacter()))
-    ++szPos;
+  while (ref_sPos.GetCharacter() != '\0' && plStringUtils::IsWhiteSpace(ref_sPos.GetCharacter()))
+    ++ref_sPos;
 
   return plStringView(szStart, szEnd);
 }
 
-static bool SkipSlash(plStringView& szPos)
+static bool SkipSlash(plStringView& ref_sPos)
 {
-  if (szPos.GetCharacter() != '/')
+  if (ref_sPos.GetCharacter() != '/')
     return false;
 
-  ++szPos;
+  ++ref_sPos;
 
-  return (szPos.GetCharacter() != ' ' && szPos.GetCharacter() != '\t');
+  return (ref_sPos.GetCharacter() != ' ' && ref_sPos.GetCharacter() != '\t');
 }
 
 plResult plOBJLoader::LoadOBJ(const char* szFile, bool bIgnoreMaterials)
 {
   plFileReader File;
   if (File.Open(szFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plString sContent;
   sContent.ReadAll(File);
@@ -209,7 +209,7 @@ plResult plOBJLoader::LoadOBJ(const char* szFile, bool bIgnoreMaterials)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plOBJLoader::SortFacesByMaterial()
@@ -268,7 +268,7 @@ plResult plOBJLoader::LoadMTL(const char* szFile, const char* szMaterialBasePath
 {
   plFileReader File;
   if (File.Open(szFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plString sContent;
   sContent.ReadAll(File);
@@ -304,9 +304,7 @@ plResult plOBJLoader::LoadMTL(const char* szFile, const char* szMaterialBasePath
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_FileFormats_Implementation_OBJLoader);

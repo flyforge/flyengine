@@ -6,7 +6,7 @@
 #include <Foundation/Types/UniquePtr.h>
 
 /// \brief [internal] Worker task for loading resources (typically from disk).
-class PLASMA_CORE_DLL plResourceManagerWorkerDataLoad final : public plTask
+class PL_CORE_DLL plResourceManagerWorkerDataLoad final : public plTask
 {
 public:
   ~plResourceManagerWorkerDataLoad();
@@ -22,7 +22,7 @@ private:
 
 /// \brief [internal] Worker task for uploading resource data.
 /// Depending on the resource type, this may get scheduled to run on the main thread or on any thread.
-class PLASMA_CORE_DLL plResourceManagerWorkerUpdateContent final : public plTask
+class PL_CORE_DLL plResourceManagerWorkerUpdateContent final : public plTask
 {
 public:
   ~plResourceManagerWorkerUpdateContent();

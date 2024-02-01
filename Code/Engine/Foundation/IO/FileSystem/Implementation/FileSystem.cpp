@@ -8,7 +8,7 @@
 #include <Foundation/Strings/StringView.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FileSystem)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FileSystem)
 
   ON_CORESYSTEMS_STARTUP
   {
@@ -20,7 +20,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FileSystem)
     plFileSystem::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plFileSystem::FileSystemData* plFileSystem::s_pData = nullptr;
@@ -30,7 +30,7 @@ plMap<plString, plString> plFileSystem::s_SpecialDirectories;
 
 void plFileSystem::RegisterDataDirectoryFactory(plDataDirFactory factory, float fPriority /*= 0*/)
 {
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   auto& data = s_pData->m_DataDirFactories.ExpandAndGetRef();
   data.m_Factory = factory;
@@ -39,21 +39,21 @@ void plFileSystem::RegisterDataDirectoryFactory(plDataDirFactory factory, float 
 
 plEventSubscriptionID plFileSystem::RegisterEventHandler(plEvent<const FileEvent&>::Handler handler)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   return s_pData->m_Event.AddEventHandler(handler);
 }
 
 void plFileSystem::UnregisterEventHandler(plEvent<const FileEvent&>::Handler handler)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   s_pData->m_Event.RemoveEventHandler(handler);
 }
 
 void plFileSystem::UnregisterEventHandler(plEventSubscriptionID subscriptionId)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   s_pData->m_Event.RemoveEventHandler(subscriptionId);
 }
@@ -76,8 +76,8 @@ void plFileSystem::CleanUpRootName(plStringBuilder& sRoot)
 
 plResult plFileSystem::AddDataDirectory(plStringView sDataDirectory, plStringView sGroup, plStringView sRootName, DataDirUsage usage)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
-  PLASMA_ASSERT_DEV(usage != AllowWrites || !sRootName.IsEmpty(), "A data directory must have a non-empty, unique name to be mounted for write access");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(usage != AllowWrites || !sRootName.IsEmpty(), "A data directory must have a non-empty, unique name to be mounted for write access");
 
   plStringBuilder sPath = sDataDirectory;
   sPath.MakeCleanPath();
@@ -88,7 +88,7 @@ plResult plFileSystem::AddDataDirectory(plStringView sDataDirectory, plStringVie
   plStringBuilder sCleanRootName = sRootName;
   CleanUpRootName(sCleanRootName);
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   bool failed = false;
   if (FindDataDirectoryWithRoot(sCleanRootName) != nullptr)
@@ -126,7 +126,7 @@ plResult plFileSystem::AddDataDirectory(plStringView sDataDirectory, plStringVie
           s_pData->m_Event.Broadcast(fe);
         }
 
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
   }
@@ -141,7 +141,7 @@ plResult plFileSystem::AddDataDirectory(plStringView sDataDirectory, plStringVie
   }
 
   plLog::Error("Adding Data Directory '{0}' failed.", plArgSensitive(sDataDirectory, "Path"));
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -150,7 +150,7 @@ bool plFileSystem::RemoveDataDirectory(plStringView sRootName)
   plStringBuilder sCleanRootName = sRootName;
   CleanUpRootName(sCleanRootName);
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (plUInt32 i = 0; i < s_pData->m_DataDirectories.GetCount();)
   {
@@ -185,7 +185,7 @@ plUInt32 plFileSystem::RemoveDataDirectoryGroup(plStringView sGroup)
   if (s_pData == nullptr)
     return 0;
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plUInt32 uiRemoved = 0;
 
@@ -217,9 +217,9 @@ plUInt32 plFileSystem::RemoveDataDirectoryGroup(plStringView sGroup)
 
 void plFileSystem::ClearAllDataDirectories()
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (plInt32 i = s_pData->m_DataDirectories.GetCount() - 1; i >= 0; --i)
   {
@@ -244,7 +244,7 @@ plDataDirectoryType* plFileSystem::FindDataDirectoryWithRoot(plStringView sRootN
   if (sRootName.IsEmpty())
     return nullptr;
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (const auto& dd : s_pData->m_DataDirectories)
   {
@@ -259,21 +259,21 @@ plDataDirectoryType* plFileSystem::FindDataDirectoryWithRoot(plStringView sRootN
 
 plUInt32 plFileSystem::GetNumDataDirectories()
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   return s_pData->m_DataDirectories.GetCount();
 }
 
 plDataDirectoryType* plFileSystem::GetDataDirectory(plUInt32 uiDataDirIndex)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   return s_pData->m_DataDirectories[uiDataDirIndex].m_pDataDirectory;
 }
 
 plStringView plFileSystem::GetDataDirRelativePath(plStringView sPath, plUInt32 uiDataDir)
 {
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   // if an absolute path is given, this will check whether the absolute path would fall into this data directory
   // if yes, the prefix path is removed and then only the relative path is given to the data directory type
@@ -316,41 +316,10 @@ plStringView plFileSystem::GetDataDirRelativePath(plStringView sPath, plUInt32 u
   return sPath;
 }
 
-plResult plFileSystem::MakePathRelative(plStringView sPath, plStringBuilder& out_Path)
-{
-  plDataDirectoryType* datadir;
-  plUInt32 bestSize = 0;
-  plString res = plString();
-  plStringBuilder temp;
-
-  for (plUInt32 i = 0; i < GetNumDataDirectories(); i++)
-  {
-    sPath.GetData(temp);
-    datadir = GetDataDirectory(i);
-    plStringBuilder test = datadir->GetRedirectedDataDirectoryPath();
-
-    test.PathParentDirectory();
-    if (temp.TrimWordStart(test))
-    {
-      if (test.GetCharacterCount() > bestSize)  //Try to get the shortest trim possible
-      {
-        res = temp;
-        bestSize = test.GetCharacterCount();
-      }
-    }
-  }
-
-  if (res.GetCharacterCount() > 0)
-  {
-    out_Path = res;
-    return PLASMA_SUCCESS;
-  }
-  return PLASMA_FAILURE;
-}
 
 plFileSystem::DataDirectory* plFileSystem::GetDataDirForRoot(const plString& sRoot)
 {
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (plInt32 i = (plInt32)s_pData->m_DataDirectories.GetCount() - 1; i >= 0; --i)
   {
@@ -364,7 +333,7 @@ plFileSystem::DataDirectory* plFileSystem::GetDataDirForRoot(const plString& sRo
 
 void plFileSystem::DeleteFile(plStringView sFile)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   if (plPathUtils::IsAbsolutePath(sFile))
   {
@@ -375,12 +344,12 @@ void plFileSystem::DeleteFile(plStringView sFile)
   plString sRootName;
   sFile = ExtractRootName(sFile, sRootName);
 
-  PLASMA_ASSERT_DEV(!sRootName.IsEmpty(), "Files can only be deleted with a rooted path name.");
+  PL_ASSERT_DEV(!sRootName.IsEmpty(), "Files can only be deleted with a rooted path name.");
 
   if (sRootName.IsEmpty())
     return;
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (plInt32 i = (plInt32)s_pData->m_DataDirectories.GetCount() - 1; i >= 0; --i)
   {
@@ -410,14 +379,14 @@ void plFileSystem::DeleteFile(plStringView sFile)
 
 bool plFileSystem::ExistsFile(plStringView sFile)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   plString sRootName;
   sFile = ExtractRootName(sFile, sRootName);
 
   const bool bOneSpecificDataDir = !sRootName.IsEmpty();
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (plInt32 i = (plInt32)s_pData->m_DataDirectories.GetCount() - 1; i >= 0; --i)
   {
@@ -436,9 +405,9 @@ bool plFileSystem::ExistsFile(plStringView sFile)
 
 plResult plFileSystem::GetFileStats(plStringView sFileOrFolder, plFileStats& out_stats)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plString sRootName;
   sFileOrFolder = ExtractRootName(sFileOrFolder, sRootName);
@@ -453,10 +422,10 @@ plResult plFileSystem::GetFileStats(plStringView sFileOrFolder, plFileStats& out
     plStringView sRelPath = GetDataDirRelativePath(sFileOrFolder, i);
 
     if (s_pData->m_DataDirectories[i].m_pDataDirectory->GetFileStats(sRelPath, bOneSpecificDataDir, out_stats).Succeeded())
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plStringView plFileSystem::ExtractRootName(plStringView sPath, plString& rootName)
@@ -477,7 +446,7 @@ plStringView plFileSystem::ExtractRootName(plStringView sPath, plString& rootNam
     ++it;
   }
 
-  PLASMA_ASSERT_DEV(it.IsValid(), "Cannot parse the path \"{0}\". The data-dir root name starts with a ':' but does not end with '/'.", sPath);
+  PL_ASSERT_DEV(it.IsValid(), "Cannot parse the path \"{0}\". The data-dir root name starts with a ':' but does not end with '/'.", sPath);
 
   sCur.ToUpper();
   rootName = sCur;
@@ -488,12 +457,12 @@ plStringView plFileSystem::ExtractRootName(plStringView sPath, plString& rootNam
 
 plDataDirectoryReader* plFileSystem::GetFileReader(plStringView sFile, plFileShareMode::Enum FileShareMode, bool bAllowFileEvents)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   if (sFile.IsEmpty())
     return nullptr;
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plString sRootName;
   sFile = ExtractRootName(sFile, sRootName);
@@ -556,18 +525,18 @@ plDataDirectoryReader* plFileSystem::GetFileReader(plStringView sFile, plFileSha
 
 plDataDirectoryWriter* plFileSystem::GetFileWriter(plStringView sFile, plFileShareMode::Enum FileShareMode, bool bAllowFileEvents)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
   if (sFile.IsEmpty())
     return nullptr;
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plString sRootName;
 
   if (!plPathUtils::IsAbsolutePath(sFile))
   {
-    PLASMA_ASSERT_DEV(sFile.StartsWith(":"),
+    PL_ASSERT_DEV(sFile.StartsWith(":"),
       "Only native absolute paths or rooted paths (starting with a colon and then the data dir root name) are allowed for "
       "writing to files. This path is neither: '{0}'",
       sFile);
@@ -632,9 +601,9 @@ plDataDirectoryWriter* plFileSystem::GetFileWriter(plStringView sFile, plFileSha
 
 plResult plFileSystem::ResolvePath(plStringView sPath, plStringBuilder* out_pAbsolutePath, plStringBuilder* out_pDataDirRelativePath, plDataDirectoryType** out_pDataDir /*= nullptr*/)
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plStringBuilder absPath, relPath;
 
@@ -647,7 +616,7 @@ plResult plFileSystem::ResolvePath(plStringView sPath, plStringBuilder* out_pAbs
     DataDirectory* pDataDir = GetDataDirForRoot(sRootName);
 
     if (pDataDir == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (out_pDataDir != nullptr)
       *out_pDataDir = pDataDir->m_pDataDirectory;
@@ -680,11 +649,11 @@ plResult plFileSystem::ResolvePath(plStringView sPath, plStringBuilder* out_pAbs
         if (out_pDataDir)
           *out_pDataDir = dir.m_pDataDirectory;
 
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
@@ -692,7 +661,7 @@ plResult plFileSystem::ResolvePath(plStringView sPath, plStringBuilder* out_pAbs
     plDataDirectoryReader* pReader = plFileSystem::GetFileReader(sPath, plFileShareMode::SharedReads, true);
 
     if (!pReader)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (out_pDataDir != nullptr)
       *out_pDataDir = pReader->GetDataDirectory();
@@ -711,7 +680,7 @@ plResult plFileSystem::ResolvePath(plStringView sPath, plStringBuilder* out_pAbs
   if (out_pDataDirRelativePath)
     *out_pDataDirRelativePath = relPath;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plFileSystem::FindFolderWithSubPath(plStringBuilder& out_sResult, plStringView sStartDirectory, plStringView sSubPath, plStringView sRedirectionFileName /*= nullptr*/)
@@ -729,7 +698,7 @@ plResult plFileSystem::FindFolderWithSubPath(plStringBuilder& out_sResult, plStr
     if (ResolvePath(sStartDirAbs, &abs, nullptr).Failed())
     {
       out_sResult.Clear();
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     sStartDirAbs = abs;
@@ -770,7 +739,7 @@ plResult plFileSystem::FindFolderWithSubPath(plStringBuilder& out_sResult, plStr
       {
         out_sResult.AppendPath(sRedirection);
         out_sResult.MakeCleanPath();
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
 
@@ -781,19 +750,19 @@ plResult plFileSystem::FindFolderWithSubPath(plStringBuilder& out_sResult, plStr
 
     if (plOSFile::ExistsDirectory(FullPath) || plOSFile::ExistsFile(FullPath))
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     out_sResult.PathParentDirectory();
     sStartDirAbs.PathParentDirectory();
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 bool plFileSystem::ResolveAssetRedirection(plStringView sPathOrAssetGuid, plStringBuilder& out_sRedirection)
 {
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (auto& dd : s_pData->m_DataDirectories)
   {
@@ -849,9 +818,9 @@ plStringView plFileSystem::MigrateFileLocation(plStringView sOldLocation, plStri
 
 void plFileSystem::ReloadAllExternalDataDirectoryConfigs()
 {
-  PLASMA_LOG_BLOCK("ReloadAllExternalDataDirectoryConfigs");
+  PL_LOG_BLOCK("ReloadAllExternalDataDirectoryConfigs");
 
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   for (auto& dd : s_pData->m_DataDirectories)
   {
@@ -861,44 +830,44 @@ void plFileSystem::ReloadAllExternalDataDirectoryConfigs()
 
 void plFileSystem::Startup()
 {
-  s_pData = PLASMA_DEFAULT_NEW(FileSystemData);
+  s_pData = PL_DEFAULT_NEW(FileSystemData);
 }
 
 void plFileSystem::Shutdown()
 {
   {
-    PLASMA_LOCK(s_pData->m_FsMutex);
+    PL_LOCK(s_pData->m_FsMutex);
 
     s_pData->m_DataDirFactories.Clear();
 
     ClearAllDataDirectories();
   }
 
-  PLASMA_DEFAULT_DELETE(s_pData);
+  PL_DEFAULT_DELETE(s_pData);
 }
 
 plResult plFileSystem::DetectSdkRootDirectory(plStringView sExpectedSubFolder /*= "Data/Base"*/)
 {
   if (!s_sSdkRootDir.IsEmpty())
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plStringBuilder sdkRoot;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   // Probably this is what needs to be done on all mobile platforms as well
   sdkRoot = plOSFile::GetApplicationDirectory();
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_ANDROID)
   sdkRoot = plOSFile::GetApplicationDirectory();
 #else
   if (plFileSystem::FindFolderWithSubPath(sdkRoot, plOSFile::GetApplicationDirectory(), sExpectedSubFolder, "plSdkRoot.txt").Failed())
   {
     plLog::Error("Could not find SDK root. Application dir is '{0}'. Searched for parent with '{1}' sub-folder.", plOSFile::GetApplicationDirectory(), sExpectedSubFolder);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 #endif
 
   plFileSystem::SetSdkRootDirectory(sdkRoot);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plFileSystem::SetSdkRootDirectory(plStringView sSdkDir)
@@ -911,7 +880,7 @@ void plFileSystem::SetSdkRootDirectory(plStringView sSdkDir)
 
 plStringView plFileSystem::GetSdkRootDirectory()
 {
-  PLASMA_ASSERT_DEV(!s_sSdkRootDir.IsEmpty(), "The project directory has not been set through 'plFileSystem::SetSdkRootDirectory'.");
+  PL_ASSERT_DEV(!s_sSdkRootDir.IsEmpty(), "The project directory has not been set through 'plFileSystem::SetSdkRootDirectory'.");
   return s_sSdkRootDir;
 }
 
@@ -935,7 +904,7 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
   if (sDirectory.IsEmpty() || !sDirectory.StartsWith(">"))
   {
     out_sPath = sDirectory;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // skip the '>'
@@ -957,7 +926,7 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
     out_sPath = it.Value();
     out_sPath.AppendPath(szEnd); // szEnd might be on \0 or a slash
     out_sPath.MakeCleanPath();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (sName == "sdk")
@@ -966,7 +935,7 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
     out_sPath = GetSdkRootDirectory();
     out_sPath.AppendPath(sDirectory);
     out_sPath.MakeCleanPath();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (sName == "user")
@@ -975,7 +944,7 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
     out_sPath = plOSFile::GetUserDataFolder();
     out_sPath.AppendPath(sDirectory);
     out_sPath.MakeCleanPath();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (sName == "temp")
@@ -984,7 +953,7 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
     out_sPath = plOSFile::GetTempDataFolder();
     out_sPath.AppendPath(sDirectory);
     out_sPath.MakeCleanPath();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (sName == "appdir")
@@ -993,24 +962,24 @@ plResult plFileSystem::ResolveSpecialDirectory(plStringView sDirectory, plString
     out_sPath = plOSFile::GetApplicationDirectory();
     out_sPath.AppendPath(sDirectory);
     out_sPath.MakeCleanPath();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
 plMutex& plFileSystem::GetMutex()
 {
-  PLASMA_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
+  PL_ASSERT_DEV(s_pData != nullptr, "FileSystem is not initialized.");
   return s_pData->m_FsMutex;
 }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
 
 void plFileSystem::StartSearch(plFileSystemIterator& ref_iterator, plStringView sSearchTerm, plBitflags<plFileSystemIteratorFlags> flags /*= plFileSystemIteratorFlags::Default*/)
 {
-  PLASMA_LOCK(s_pData->m_FsMutex);
+  PL_LOCK(s_pData->m_FsMutex);
 
   plHybridArray<plString, 16> folders;
   plStringBuilder sDdPath;
@@ -1037,9 +1006,9 @@ void plFileSystem::StartSearch(plFileSystemIterator& ref_iterator, plStringView 
 plResult plFileSystem::CreateDirectoryStructure(plStringView sPath)
 {
   plStringBuilder sRedir;
-  PLASMA_SUCCEED_OR_RETURN(ResolveSpecialDirectory(sPath, sRedir));
+  PL_SUCCEED_OR_RETURN(ResolveSpecialDirectory(sPath, sRedir));
 
   return plOSFile::CreateDirectoryStructure(sRedir);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_FileSystem);
+PL_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_FileSystem);

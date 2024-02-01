@@ -6,14 +6,9 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <RendererCore/Lights/LightComponent.h>
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plLightUnit, 1)
-  PLASMA_ENUM_CONSTANT(plLightUnit::Lumen),
-  PLASMA_ENUM_CONSTANT(plLightUnit::Candela),
-PLASMA_END_STATIC_REFLECTED_ENUM;
-
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLightRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLightRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plLightRenderData::FillBatchIdAndSortingKey(float fScreenSpaceSize)
@@ -24,38 +19,49 @@ void plLightRenderData::FillBatchIdAndSortingKey(float fScreenSpaceSize)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 7)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 5)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("LightColor", GetLightColor, SetLightColor),
-    PLASMA_ENUM_MEMBER_PROPERTY("LightUnit", plLightUnit, m_LightUnit)->AddAttributes(new plDefaultValueAttribute(plLightUnit::Lumen)),
-    PLASMA_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(800.0f)),
-    PLASMA_ACCESSOR_PROPERTY("SpecularMultiplier", GetSpecularMultiplier, SetSpecularMultiplier)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Temperature", GetTemperature, SetTemperature)->AddAttributes(new plClampValueAttribute(1000.0f, 15000.0f), new plDefaultValueAttribute(6550.0f), new plSuffixAttribute(" kelvin")),
-    PLASMA_ACCESSOR_PROPERTY("CastShadows", GetCastShadows, SetCastShadows),
-    PLASMA_ACCESSOR_PROPERTY("VolumetricIntensity", GetVolumetricIntensity, SetVolumetricIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("PenumbraSize", GetPenumbraSize, SetPenumbraSize)->AddAttributes(new plClampValueAttribute(0.0f, 0.5f), new plDefaultValueAttribute(0.1f), new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("SlopeBias", GetSlopeBias, SetSlopeBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.25f)),
-    PLASMA_ACCESSOR_PROPERTY("ConstantBias", GetConstantBias, SetConstantBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.1f))
+    PL_ACCESSOR_PROPERTY("UseColorTemperature", GetUsingColorTemperature, SetUsingColorTemperature),
+    PL_ACCESSOR_PROPERTY("LightColor", GetLightColor, SetLightColor),
+    PL_ACCESSOR_PROPERTY("Temperature", GetTemperature, SetTemperature)->AddAttributes(new plImageSliderUiAttribute("LightTemperature"), new plDefaultValueAttribute(6550), new plClampValueAttribute(1000, 15000)),
+    PL_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(10.0f)),
+    PL_ACCESSOR_PROPERTY("SpecularMultiplier", GetSpecularMultiplier, SetSpecularMultiplier)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("CastShadows", GetCastShadows, SetCastShadows),
+    PL_ACCESSOR_PROPERTY("PenumbraSize", GetPenumbraSize, SetPenumbraSize)->AddAttributes(new plClampValueAttribute(0.0f, 0.5f), new plDefaultValueAttribute(0.1f), new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("SlopeBias", GetSlopeBias, SetSlopeBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.25f)),
+    PL_ACCESSOR_PROPERTY("ConstantBias", GetConstantBias, SetConstantBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.1f))
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Lighting"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 // clang-format on
 
 plLightComponent::plLightComponent() = default;
 plLightComponent::~plLightComponent() = default;
+
+void plLightComponent::SetUsingColorTemperature(bool bUseColorTemperature)
+{
+  m_bUseColorTemperature = bUseColorTemperature;
+
+  InvalidateCachedRenderData();
+}
+
+bool plLightComponent::GetUsingColorTemperature() const
+{
+  return m_bUseColorTemperature;
+}
 
 void plLightComponent::SetLightColor(plColorGammaUB lightColor)
 {
@@ -64,26 +70,40 @@ void plLightComponent::SetLightColor(plColorGammaUB lightColor)
   InvalidateCachedRenderData();
 }
 
-plColorGammaUB plLightComponent::GetLightColor() const
+plColorGammaUB plLightComponent::GetBaseLightColor() const
 {
   return m_LightColor;
 }
 
-void plLightComponent::SetLightUnit(plEnum<plLightUnit> lightUnit)
+plColorGammaUB plLightComponent::GetLightColor() const
 {
-  m_LightUnit = lightUnit;
-}
-
-plEnum<plLightUnit> plLightComponent::GetLightUnit() const
-{
-  return m_LightUnit;
+  if (m_bUseColorTemperature)
+  {
+    return plColor::MakeFromKelvin(m_uiTemperature);
+  }
+  else
+  {
+    return m_LightColor;
+  }
 }
 
 void plLightComponent::SetIntensity(float fIntensity)
 {
   m_fIntensity = plMath::Max(fIntensity, 0.0f);
 
+  TriggerLocalBoundsUpdate();
+}
+
+void plLightComponent::SetTemperature(plUInt32 uiTemperature)
+{
+  m_uiTemperature = plMath::Clamp(uiTemperature, 1500u, 40000u);
+
   InvalidateCachedRenderData();
+}
+
+plUInt32 plLightComponent::GetTemperature() const
+{
+  return m_uiTemperature;
 }
 
 float plLightComponent::GetIntensity() const
@@ -101,30 +121,6 @@ void plLightComponent::SetSpecularMultiplier(float fSpecularMultiplier)
 float plLightComponent::GetSpecularMultiplier() const
 {
   return m_fSpecularMultiplier;
-}
-
-void plLightComponent::SetVolumetricIntensity(float fVolumetricIntensity)
-{
-  m_fVolumetricIntensity = plMath::Max(fVolumetricIntensity, 0.0f);
-
-  InvalidateCachedRenderData();
-}
-
-float plLightComponent::GetVolumetricIntensity() const
-{
-  return m_fVolumetricIntensity;
-}
-
-void plLightComponent::SetTemperature(float fTemperature)
-{
-  m_fTemperature = plMath::Clamp(fTemperature, 1500.0f, 40000.0f);
-
-  InvalidateCachedRenderData();
-}
-
-float plLightComponent::GetTemperature() const
-{
-  return m_fTemperature;
 }
 
 void plLightComponent::SetCastShadows(bool bCastShadows)
@@ -182,12 +178,13 @@ void plLightComponent::SerializeComponent(plWorldWriter& inout_stream) const
 
   s << m_LightColor;
   s << m_fIntensity;
-  s << m_fTemperature;
   s << m_fPenumbraSize;
   s << m_fSlopeBias;
   s << m_fConstantBias;
   s << m_bCastShadows;
-  s << m_LightUnit;
+  s << m_bUseColorTemperature;
+  s << m_uiTemperature;
+  s << m_fSpecularMultiplier;
 }
 
 void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -199,11 +196,6 @@ void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
 
   s >> m_LightColor;
   s >> m_fIntensity;
-
-  if (uiVersion >= 5)
-  {
-    s >> m_fTemperature;
-  }
 
   if (uiVersion >= 3)
   {
@@ -218,9 +210,12 @@ void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
 
   s >> m_bCastShadows;
 
-  if (uiVersion >= 7)
+  if (uiVersion >= 5)
   {
-    s >> m_LightUnit;
+
+    s >> m_bUseColorTemperature;
+    s >> m_uiTemperature;
+    s >> m_fSpecularMultiplier;
   }
 }
 
@@ -237,7 +232,7 @@ float plLightComponent::CalculateEffectiveRange(float fRange, float fIntensity)
   const float fThreshold = 0.10f; // aggressive threshold to prevent large lights
   const float fEffectiveRange = plMath::Sqrt(plMath::Max(0.0f, fIntensity)) / plMath::Sqrt(fThreshold);
 
-  PLASMA_ASSERT_DEBUG(!plMath::IsNaN(fEffectiveRange), "Light range is NaN");
+  PL_ASSERT_DEBUG(!plMath::IsNaN(fEffectiveRange), "Light range is NaN");
 
   if (fRange <= 0.0f)
   {
@@ -267,8 +262,8 @@ float plLightComponent::CalculateScreenSpaceSize(const plBoundingSphere& sphere,
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-#include <Foundation/Serialization/GraphPatch.h>
 #include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
 
 class plLightComponentPatch_1_2 : public plGraphPatch
 {
@@ -285,4 +280,4 @@ plLightComponentPatch_1_2 g_plLightComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_LightComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_LightComponent);

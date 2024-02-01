@@ -7,67 +7,67 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgMoveCharacterController);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgMoveCharacterController, 1, plRTTIDefaultAllocator<plMsgMoveCharacterController>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgMoveCharacterController);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgMoveCharacterController, 1, plRTTIDefaultAllocator<plMsgMoveCharacterController>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MoveForwards", m_fMoveForwards),
-    PLASMA_MEMBER_PROPERTY("MoveBackwards", m_fMoveBackwards),
-    PLASMA_MEMBER_PROPERTY("StrafeLeft", m_fStrafeLeft),
-    PLASMA_MEMBER_PROPERTY("StrafeRight", m_fStrafeRight),
-    PLASMA_MEMBER_PROPERTY("RotateLeft", m_fRotateLeft),
-    PLASMA_MEMBER_PROPERTY("RotateRight", m_fRotateRight),
-    PLASMA_MEMBER_PROPERTY("Run", m_bRun),
-    PLASMA_MEMBER_PROPERTY("Jump", m_bJump),
-    PLASMA_MEMBER_PROPERTY("Crouch", m_bCrouch),
+    PL_MEMBER_PROPERTY("MoveForwards", m_fMoveForwards),
+    PL_MEMBER_PROPERTY("MoveBackwards", m_fMoveBackwards),
+    PL_MEMBER_PROPERTY("StrafeLeft", m_fStrafeLeft),
+    PL_MEMBER_PROPERTY("StrafeRight", m_fStrafeRight),
+    PL_MEMBER_PROPERTY("RotateLeft", m_fRotateLeft),
+    PL_MEMBER_PROPERTY("RotateRight", m_fRotateRight),
+    PL_MEMBER_PROPERTY("Run", m_bRun),
+    PL_MEMBER_PROPERTY("Jump", m_bJump),
+    PL_MEMBER_PROPERTY("Crouch", m_bCrouch),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plCharacterControllerComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plCharacterControllerComponent, 1)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(RawMove, In, "moveDeltaGlobal"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(TeleportCharacter, In, "globalFootPosition"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsDestinationUnobstructed, In, "globalFootPosition", In, "characterHeight"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsTouchingGround),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsCrouching),
+    PL_SCRIPT_FUNCTION_PROPERTY(RawMove, In, "moveDeltaGlobal"),
+    PL_SCRIPT_FUNCTION_PROPERTY(TeleportCharacter, In, "globalFootPosition"),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsDestinationUnobstructed, In, "globalFootPosition", In, "characterHeight"),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsTouchingGround),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsCrouching),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_FUNCTIONS;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgMoveCharacterController, MoveCharacter),
+    PL_MESSAGE_HANDLER(plMsgMoveCharacterController, MoveCharacter),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
-plCharacterControllerComponent::plCharacterControllerComponent() {}
+plCharacterControllerComponent::plCharacterControllerComponent() = default;
 
-void plCharacterControllerComponent::SerializeComponent(plWorldWriter& stream) const
+void plCharacterControllerComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
   // auto& s = stream.GetStream();
 }
 
-void plCharacterControllerComponent::DeserializeComponent(plWorldReader& stream)
+void plCharacterControllerComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
   // auto& s = stream.GetStream();
 }
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Physics_Implementation_CharacterControllerComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Physics_Implementation_CharacterControllerComponent);

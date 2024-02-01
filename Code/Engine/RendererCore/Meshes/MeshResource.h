@@ -5,11 +5,11 @@
 
 using plMaterialResourceHandle = plTypedResourceHandle<class plMaterialResource>;
 
-class PLASMA_RENDERERCORE_DLL plMeshResource : public plResource
+class PL_RENDERERCORE_DLL plMeshResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMeshResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plMeshResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plMeshResource, plMeshResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plMeshResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plMeshResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plMeshResource, plMeshResourceDescriptor);
 
 public:
   plMeshResource();

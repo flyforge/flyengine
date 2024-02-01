@@ -5,7 +5,7 @@
 
 class plDocumentObject;
 
-struct PLASMA_GUIFOUNDATION_DLL plPropertySelection
+struct PL_GUIFOUNDATION_DLL plPropertySelection
 {
   const plDocumentObject* m_pObject;
   plVariant m_Index;
@@ -15,14 +15,14 @@ struct PLASMA_GUIFOUNDATION_DLL plPropertySelection
   bool operator<(const plPropertySelection& rhs) const
   {
     // Qt6 requires the less than operator but never calls it, so we use this dummy for now.
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
     return false;
   }
 };
 
-struct PLASMA_GUIFOUNDATION_DLL plPropertyClipboard
+struct PL_GUIFOUNDATION_DLL plPropertyClipboard
 {
   plString m_Type;
   plVariant m_Value;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GUIFOUNDATION_DLL, plPropertyClipboard)
+PL_DECLARE_REFLECTABLE_TYPE(PL_GUIFOUNDATION_DLL, plPropertyClipboard)

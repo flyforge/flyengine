@@ -51,11 +51,11 @@ public:
 
   /// Searches for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word, the position is
   /// returned. Otherwise nullptr.
-  const char* FindWholeWord(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
+  const char* FindWholeWord(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
 
   /// Searches for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word, the position is
   /// returned. Otherwise nullptr. Ignores case.
-  const char* FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
+  const char* FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
 
   /// Compares this string with the other one. Returns 0 for equality, -1 if this string is 'smaller', 1 otherwise.
   plInt32 Compare(plStringView sOther) const; // [tested]
@@ -105,7 +105,7 @@ public:
   plStringView GetView() const; // [tested]
 
   /// \brief Returns a pointer to the internal Utf8 string.
-  PLASMA_ALWAYS_INLINE operator const char*() const { return InternalGetData(); }
+  PL_ALWAYS_INLINE operator const char*() const { return InternalGetData(); }
 
   /// \brief Fills the given container with plStringView's which represent each found substring.
   /// If bReturnEmptyStrings is true, even empty strings between separators are returned.
@@ -161,6 +161,20 @@ public:
   /// ":/MyRoot\folder" -> "MyRoot"
   /// Returns an empty string, if the path is not rooted.
   plStringView GetRootedPathRootName() const; // [tested]
+
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+  /// \brief Returns a std::string_view to this string.
+  PL_ALWAYS_INLINE std::string_view GetAsStdView() const
+  {
+    return std::string_view(InternalGetData(), static_cast<size_t>(InternalGetElementCount()));
+  }
+
+  /// \brief Returns a std::string_view to this string.
+  PL_ALWAYS_INLINE operator std::string_view() const
+  {
+    return GetAsStdView();
+  }
+#endif
 
 private:
   const char* InternalGetData() const;

@@ -1,6 +1,6 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #  include <Foundation/Basics/Platform/Win/MinWindows.h>
 #  include <type_traits>
@@ -16,9 +16,9 @@ void plVerifyWindowsType()
 };
 
 void CALLBACK WindowsCallbackTest1();
-void PLASMA_WINDOWS_CALLBACK WindowsCallbackTest2();
+void PL_WINDOWS_CALLBACK WindowsCallbackTest2();
 void WINAPI WindowsWinapiTest1();
-void PLASMA_WINDOWS_WINAPI WindowsWinapiTest2();
+void PL_WINDOWS_WINAPI WindowsWinapiTest2();
 
 // Will never be called and thus removed by the linker
 void plCheckWindowsTypeSizes()
@@ -34,15 +34,14 @@ void plCheckWindowsTypeSizes()
   plVerifyWindowsType<plMinWindows::HWND, HWND, false>();
   plVerifyWindowsType<plMinWindows::HRESULT, HRESULT, true>();
 
-  static_assert(std::is_same<decltype(&WindowsCallbackTest1), decltype(&WindowsCallbackTest2)>::value, "PLASMA_WINDOWS_CALLBACK does not match CALLBACK");
-  static_assert(std::is_same<decltype(&WindowsWinapiTest1), decltype(&WindowsWinapiTest2)>::value, "PLASMA_WINDOWS_WINAPI does not match WINAPI");
+  static_assert(std::is_same<decltype(&WindowsCallbackTest1), decltype(&WindowsCallbackTest2)>::value, "PL_WINDOWS_CALLBACK does not match CALLBACK");
+  static_assert(std::is_same<decltype(&WindowsWinapiTest1), decltype(&WindowsWinapiTest2)>::value, "PL_WINDOWS_WINAPI does not match WINAPI");
 
   // Clang doesn't allow us to do this check at compile time
-#  if PLASMA_DISABLED(PLASMA_COMPILER_CLANG)
-  static_assert(PLASMA_WINDOWS_INVALID_HANDLE_VALUE == INVALID_HANDLE_VALUE, "PLASMA_WINDOWS_INVALID_HANDLE_VALUE does not match INVALID_HANDLE_VALUE");
+#  if PL_DISABLED(PL_COMPILER_CLANG)
+  static_assert(PL_WINDOWS_INVALID_HANDLE_VALUE == INVALID_HANDLE_VALUE, "PL_WINDOWS_INVALID_HANDLE_VALUE does not match INVALID_HANDLE_VALUE");
 #  endif
 }
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Platform_Win_MinWindows);

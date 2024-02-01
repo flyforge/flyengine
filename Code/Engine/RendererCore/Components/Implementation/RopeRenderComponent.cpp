@@ -11,39 +11,39 @@
 #include <RendererCore/Meshes/SkinnedMeshComponent.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
-#include <RendererCore/Shader/Types.h>
+#include <RendererFoundation/Shader/Types.h>
 #include <RendererFoundation/Device/Device.h>
 
 plCVarBool cvar_FeatureRopesVisBones("Feature.Ropes.VisBones", false, plCVarFlags::Default, "Enables debug visualization of rope bones");
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plRopeRenderComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plRopeRenderComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("Thickness", GetThickness, SetThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("Detail", GetDetail, SetDetail)->AddAttributes(new plDefaultValueAttribute(6), new plClampValueAttribute(3, 16)),
-    PLASMA_ACCESSOR_PROPERTY("Subdivide", GetSubdivide, SetSubdivide),
-    PLASMA_ACCESSOR_PROPERTY("UScale", GetUScale, SetUScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("Thickness", GetThickness, SetThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Detail", GetDetail, SetDetail)->AddAttributes(new plDefaultValueAttribute(6), new plClampValueAttribute(3, 16)),
+    PL_ACCESSOR_PROPERTY("Subdivide", GetSubdivide, SetSubdivide),
+    PL_ACCESSOR_PROPERTY("UScale", GetUScale, SetUScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgRopePoseUpdated, OnRopePoseUpdated),
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
-    PLASMA_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgRopePoseUpdated, OnRopePoseUpdated),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+    PL_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Ropes"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRopeRenderComponent::plRopeRenderComponent() = default;
@@ -65,7 +65,7 @@ void plRopeRenderComponent::SerializeComponent(plWorldWriter& inout_stream) cons
 void plRopeRenderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   auto& s = inout_stream.GetStream();
 
   s >> m_Color;
@@ -80,7 +80,7 @@ void plRopeRenderComponent::OnActivated()
 {
   SUPER::OnActivated();
 
-  m_LocalBounds.SetInvalid();
+  m_LocalBounds = plBoundingBoxSphere::MakeInvalid();
 }
 
 void plRopeRenderComponent::OnDeactivated()
@@ -93,7 +93,7 @@ void plRopeRenderComponent::OnDeactivated()
 plResult plRopeRenderComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg)
 {
   bounds = m_LocalBounds;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRopeRenderComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -109,7 +109,6 @@ void plRopeRenderComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
   plSkinnedMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plSkinnedMeshRenderData>(GetOwner());
   {
-    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
     pRenderData->m_hMesh = m_hMesh;
@@ -155,19 +154,19 @@ void plRopeRenderComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
       auto& x = lines.ExpandAndGetRef();
       x.m_start = pos;
-      x.m_end = x.m_start + skinningMat.TransformDirection(plVec3::UnitXAxis());
+      x.m_end = x.m_start + skinningMat.TransformDirection(plVec3::MakeAxisX());
       x.m_startColor = plColor::Red;
       x.m_endColor = plColor::Red;
 
       auto& y = lines.ExpandAndGetRef();
       y.m_start = pos;
-      y.m_end = y.m_start + skinningMat.TransformDirection(plVec3::UnitYAxis() * 2.0f);
+      y.m_end = y.m_start + skinningMat.TransformDirection(plVec3::MakeAxisY() * 2.0f);
       y.m_startColor = plColor::Green;
       y.m_endColor = plColor::Green;
 
       auto& z = lines.ExpandAndGetRef();
       z.m_start = pos;
-      z.m_end = z.m_start + skinningMat.TransformDirection(plVec3::UnitZAxis() * 2.0f);
+      z.m_end = z.m_start + skinningMat.TransformDirection(plVec3::MakeAxisZ() * 2.0f);
       z.m_startColor = plColor::Blue;
       z.m_endColor = plColor::Blue;
     }
@@ -215,7 +214,7 @@ void plRopeRenderComponent::SetThickness(float fThickness)
         offsetMat.SetTranslationVector(plVec3(static_cast<float>(i), 0, 0));
         plMat4 skinningMat = m_SkinningState.m_Transforms[i].GetAsMat4() * offsetMat;
 
-        transforms[i].SetFromMat4(skinningMat);
+        transforms[i] = plTransform::MakeFromMat4(skinningMat);
       }
 
       UpdateSkinningTransformBuffer(transforms);
@@ -286,13 +285,12 @@ void plRopeRenderComponent::OnRopePoseUpdated(plMsgRopePoseUpdated& msg)
 
   UpdateSkinningTransformBuffer(msg.m_LinkTransforms);
 
-  plBoundingBox newBounds;
-  newBounds.SetFromPoints(&msg.m_LinkTransforms[0].m_vPosition, msg.m_LinkTransforms.GetCount(), sizeof(plTransform));
+  plBoundingBox newBounds = plBoundingBox::MakeFromPoints(&msg.m_LinkTransforms[0].m_vPosition, msg.m_LinkTransforms.GetCount(), sizeof(plTransform));
 
   // if the existing bounds are big enough, don't update them
   if (!m_LocalBounds.IsValid() || !m_LocalBounds.GetBox().Contains(newBounds))
   {
-    m_LocalBounds.ExpandToInclude(newBounds);
+    m_LocalBounds.ExpandToInclude(plBoundingBoxSphere::MakeFromBox(newBounds));
 
     TriggerLocalBoundsUpdate();
   }
@@ -301,7 +299,7 @@ void plRopeRenderComponent::OnRopePoseUpdated(plMsgRopePoseUpdated& msg)
 void plRopeRenderComponent::GenerateRenderMesh(plUInt32 uiNumRopePieces)
 {
   plStringBuilder sResourceName;
-  sResourceName.Format("Rope-Mesh:{}{}-d{}-u{}", uiNumRopePieces, m_bSubdivide ? "Sub" : "", m_uiDetail, m_fUScale);
+  sResourceName.SetFormat("Rope-Mesh:{}{}-d{}-u{}", uiNumRopePieces, m_bSubdivide ? "Sub" : "", m_uiDetail, m_fUScale);
 
   m_hMesh = plResourceManager::GetExistingResource<plMeshResource>(sResourceName);
   if (m_hMesh.IsValid())
@@ -309,7 +307,7 @@ void plRopeRenderComponent::GenerateRenderMesh(plUInt32 uiNumRopePieces)
 
   plGeometry geom;
 
-  const plAngle fDegStep = plAngle::Degree(360.0f / m_uiDetail);
+  const plAngle fDegStep = plAngle::MakeFromDegree(360.0f / m_uiDetail);
   const float fVStep = 1.0f / m_uiDetail;
 
   auto addCap = [&](float x, const plVec3& vNormal, plUInt16 uiBoneIndex, bool bFlipWinding) {
@@ -317,7 +315,7 @@ void plRopeRenderComponent::GenerateRenderMesh(plUInt32 uiNumRopePieces)
 
     plUInt32 centerIndex = geom.AddVertex(plVec3(x, 0, 0), vNormal, plVec2(0.5f, 0.5f), plColor::White, boneIndices);
 
-    plAngle deg = plAngle::Radian(0);
+    plAngle deg = plAngle::MakeFromRadian(0);
     for (plUInt32 s = 0; s < m_uiDetail; ++s)
     {
       const float fY = plMath::Cos(deg);
@@ -340,7 +338,7 @@ void plRopeRenderComponent::GenerateRenderMesh(plUInt32 uiNumRopePieces)
   };
 
   auto addPiece = [&](float x, const plVec4U16& vBoneIndices, const plColorLinearUB& boneWeights, bool bCreatePolygons) {
-    plAngle deg = plAngle::Radian(0);
+    plAngle deg = plAngle::MakeFromRadian(0);
     float fU = x * m_fUScale;
     float fV = 0;
 
@@ -472,4 +470,4 @@ void plRopeRenderComponent::UpdateSkinningTransformBuffer(plArrayPtr<const plTra
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RopeRenderComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RopeRenderComponent);

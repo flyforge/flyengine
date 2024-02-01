@@ -1,6 +1,6 @@
 #include <Player/Player.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Input/InputManager.h>
 #include <Core/World/World.h>
 #include <Core/WorldSerializer/WorldReader.h>
@@ -20,10 +20,10 @@
 #include <RendererCore/Meshes/MeshComponent.h>
 
 // this injects the main function
-PLASMA_APPLICATION_ENTRY_POINT(plPlayerApplication);
+PL_APPLICATION_ENTRY_POINT(plPlayerApplication);
 
 // these command line options may not all be directly used in plPlayer, but the plFallbackGameState reads those options to determine which scene to load
-plCommandLineOptionString opt_Project("_Player", "-project", "Path to the project folder.\nUsually an absolute path, though relative paths will work for projects that are located inside the PLASMA SDK directory.", "");
+plCommandLineOptionString opt_Project("_Player", "-project", "Path to the project folder.\nUsually an absolute path, though relative paths will work for projects that are located inside the PL SDK directory.", "");
 plCommandLineOptionString opt_Scene("_Player", "-scene", "Path to a scene file.\nUsually given relative to the corresponding project data directory where it resides, but can also be given as an absolute path.", "");
 
 plPlayerApplication::plPlayerApplication()
@@ -43,17 +43,17 @@ plResult plPlayerApplication::BeforeCoreSystemsStartup()
     {
       plLog::OsMessageBox(cmdHelp);
       SetReturnCode(-1);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
   plStartup::AddApplicationTag("player");
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::BeforeCoreSystemsStartup());
+  PL_SUCCEED_OR_RETURN(SUPER::BeforeCoreSystemsStartup());
 
   DetermineProjectPath();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -84,10 +84,10 @@ void plPlayerApplication::DetermineProjectPath()
 {
   plStringBuilder sProjectPath = opt_Project.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
 
-#if PLASMA_DISABLED(PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
+#if PL_DISABLED(PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
   // We can't specify command line arguments on many platforms so the project must be defined by plFileserve.
   // plFileserve must be started with the project special dir set. For example:
-  // -specialdirs project ".../PlasmaEngine/Data/Samples/Testing Chambers
+  // -specialdirs project ".../plEngine/Data/Samples/Testing Chambers
 
   if (sProjectPath.IsEmpty())
   {

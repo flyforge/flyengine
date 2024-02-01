@@ -19,15 +19,15 @@ plQtPropertyAnimModel::~plQtPropertyAnimModel()
   m_pAssetDoc->GetObjectManager()->m_StructureEvents.RemoveEventHandler(plMakeDelegate(&plQtPropertyAnimModel::DocumentStructureEventHandler, this));
 }
 
-QVariant plQtPropertyAnimModel::data(const QModelIndex& index, int role) const
+QVariant plQtPropertyAnimModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid() || index.column() != 0)
     return QVariant();
 
   plQtPropertyAnimModelTreeEntry* pItem = static_cast<plQtPropertyAnimModelTreeEntry*>(index.internalPointer());
-  PLASMA_ASSERT_DEBUG(pItem != nullptr, "Invalid model index");
+  PL_ASSERT_DEBUG(pItem != nullptr, "Invalid model index");
 
-  switch (role)
+  switch (iRole)
   {
     case Qt::DisplayRole:
       return QString(pItem->m_sDisplay.GetData());
@@ -59,22 +59,22 @@ Qt::ItemFlags plQtPropertyAnimModel::flags(const QModelIndex& index) const
   return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
 }
 
-QModelIndex plQtPropertyAnimModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
+QModelIndex plQtPropertyAnimModel::index(int iRow, int iColumn, const QModelIndex& parent /*= QModelIndex()*/) const
 {
-  if (column != 0)
+  if (iColumn != 0)
     return QModelIndex();
 
   plQtPropertyAnimModelTreeEntry* pParentItem = static_cast<plQtPropertyAnimModelTreeEntry*>(parent.internalPointer());
   if (pParentItem != nullptr)
   {
-    return createIndex(row, column, (void*)&m_AllEntries[m_iInUse][pParentItem->m_Children[row]]);
+    return createIndex(iRow, iColumn, (void*)&m_AllEntries[m_iInUse][pParentItem->m_Children[iRow]]);
   }
   else
   {
-    if (row >= (int)m_TopLevelEntries[m_iInUse].GetCount())
+    if (iRow >= (int)m_TopLevelEntries[m_iInUse].GetCount())
       return QModelIndex();
 
-    return createIndex(row, column, (void*)&m_AllEntries[m_iInUse][m_TopLevelEntries[m_iInUse][row]]);
+    return createIndex(iRow, iColumn, (void*)&m_AllEntries[m_iInUse][m_TopLevelEntries[m_iInUse][iRow]]);
   }
 }
 

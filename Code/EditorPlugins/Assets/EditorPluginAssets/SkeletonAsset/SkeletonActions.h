@@ -13,7 +13,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hRenderBones;
@@ -26,7 +26,7 @@ public:
 
 class plSkeletonAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSkeletonAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plSkeletonAction, plButtonAction);
 
 public:
   enum class ActionType

@@ -2,7 +2,7 @@
 
 #include <RendererCore/RendererCoreDLL.h>
 
-#if PLASMA_ENABLED(PLASMA_EMBED_FONT_FILE)
+#if PL_ENABLED(PL_EMBED_FONT_FILE)
 
 // Font: https://fonts.google.com/specimen/Inconsolata
 // License: Open Font License (http://scripts.sil.org/OFL_web)
@@ -144,7 +144,4 @@ const plUInt8 g_FontFileTGA[] =
 
 #endif
 
-
-
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Debug_Implementation_Inconsolata);
 

@@ -54,9 +54,9 @@ struct plFileserverEvent
 /// That means it cannot serve two clients that require different settings for the same special directory.
 ///
 /// The port on which the server connects to clients can be configured through the command line option "-fs_port X"
-class PLASMA_FILESERVEPLUGIN_DLL plFileserver
+class PL_FILESERVEPLUGIN_DLL plFileserver
 {
-  PLASMA_DECLARE_SINGLETON(plFileserver);
+  PL_DECLARE_SINGLETON(plFileserver);
 
 public:
   plFileserver();
@@ -87,7 +87,7 @@ public:
   void BroadcastReloadResourcesCommand();
 
   static plResult SendConnectionInfo(
-    const char* szClientAddress, plUInt16 uiMyPort, const plArrayPtr<plStringBuilder>& MyIPs, plTime timeout = plTime::Seconds(10));
+    const char* szClientAddress, plUInt16 uiMyPort, const plArrayPtr<plStringBuilder>& myIPs, plTime timeout = plTime::MakeFromSeconds(10));
 
 private:
   void NetworkEventHandler(const plRemoteEvent& e);

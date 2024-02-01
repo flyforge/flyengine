@@ -11,7 +11,7 @@ class plQtShaderTemplateDlg : public QDialog, public Ui_ShaderTemplateDlg
   Q_OBJECT
 
 public:
-  plQtShaderTemplateDlg(QWidget* parent, const plDocument* pDoc);
+  plQtShaderTemplateDlg(QWidget* pParent, const plDocument* pDoc);
 
   plString m_sResult;
 

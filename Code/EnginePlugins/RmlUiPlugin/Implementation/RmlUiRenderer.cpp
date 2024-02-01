@@ -10,11 +10,11 @@
 #include <RendererCore/../../../Data/Plugins/Shaders/RmlUiConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiRenderer, 1, plRTTIDefaultAllocator<plRmlUiRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiRenderer, 1, plRTTIDefaultAllocator<plRmlUiRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRmlUiRenderer::plRmlUiRenderer()
@@ -35,7 +35,7 @@ plRmlUiRenderer::plRmlUiRenderer()
 
     plGALBufferCreationDescription desc;
     desc.m_uiStructSize = sizeof(plUInt32);
-    desc.m_uiTotalSize = PLASMA_ARRAY_SIZE(indices) * desc.m_uiStructSize;
+    desc.m_uiTotalSize = PL_ARRAY_SIZE(indices) * desc.m_uiStructSize;
     desc.m_BufferType = plGALBufferType::IndexBuffer;
 
     m_hQuadIndexBuffer = plGALDevice::GetDefaultDevice()->CreateBuffer(desc, plMakeArrayPtr(indices).ToByteArray());
@@ -76,14 +76,14 @@ plRmlUiRenderer::~plRmlUiRenderer()
   m_hQuadIndexBuffer.Invalidate();
 }
 
-void plRmlUiRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plRmlUiRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plRmlUiRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plRmlUiRenderData>());
 }
 
-void plRmlUiRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
+void plRmlUiRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
-  categories.PushBack(plDefaultRenderDataCategories::GUI);
+  ref_categories.PushBack(plDefaultRenderDataCategories::GUI);
 }
 
 void plRmlUiRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -94,7 +94,7 @@ void plRmlUiRenderer::RenderBatch(const plRenderViewContext& renderViewContext, 
   pRenderContext->BindConstantBuffer("plRmlUiConstants", m_hConstantBuffer);
 
   // reset cached state
-  m_mLastTransform = plMat4::IdentityMatrix();
+  m_mLastTransform = plMat4::MakeIdentity();
   m_LastRect = plRectFloat(0, 0);
 
   for (auto it = batch.GetIterator<plRmlUiRenderData>(); it.IsValid(); ++it)

@@ -3,10 +3,10 @@
 #include <GuiFoundation/PropertyGrid/ManipulatorManager.h>
 #include <ToolsFoundation/Document/Document.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plManipulatorManager);
+PL_IMPLEMENT_SINGLETON(plManipulatorManager);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ManipulatorManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ManipulatorManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager"
@@ -14,7 +14,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ManipulatorManager)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plManipulatorManager);
+    PL_DEFAULT_NEW(plManipulatorManager);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -22,11 +22,11 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ManipulatorManager)
     if (plManipulatorManager::GetSingleton())
     {
       auto ptr = plManipulatorManager::GetSingleton();
-      PLASMA_DEFAULT_DELETE(ptr);
+      PL_DEFAULT_DELETE(ptr);
     }
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plManipulatorManager::plManipulatorManager()
@@ -43,14 +43,14 @@ plManipulatorManager::~plManipulatorManager()
 }
 
 const plManipulatorAttribute* plManipulatorManager::GetActiveManipulator(
-  const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_Selection) const
+  const plDocument* pDoc, const plHybridArray<plPropertySelection, 8>*& out_pSelection) const
 {
-  out_Selection = nullptr;
+  out_pSelection = nullptr;
   auto it = m_ActiveManipulator.Find(pDoc);
 
   if (it.IsValid())
   {
-    out_Selection = &(it.Value().m_Selection);
+    out_pSelection = &(it.Value().m_Selection);
 
     return it.Value().m_pAttribute;
   }
@@ -200,7 +200,7 @@ void plManipulatorManager::TransferToCurrentSelection(const plDocument* pDoc)
 
   const auto& selection = pDoc->GetSelectionManager()->GetSelection();
 
-  PLASMA_ASSERT_DEV(pDoc->GetManipulatorSearchStrategy() != plManipulatorSearchStrategy::None, "The document type '{}' has to override the function 'GetManipulatorSearchStrategy()'", pDoc->GetDynamicRTTI()->GetTypeName());
+  PL_ASSERT_DEV(pDoc->GetManipulatorSearchStrategy() != plManipulatorSearchStrategy::None, "The document type '{}' has to override the function 'GetManipulatorSearchStrategy()'", pDoc->GetDynamicRTTI()->GetTypeName());
 
   if (pDoc->GetManipulatorSearchStrategy() == plManipulatorSearchStrategy::SelectedObject)
   {

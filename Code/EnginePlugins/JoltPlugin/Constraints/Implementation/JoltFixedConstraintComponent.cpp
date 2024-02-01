@@ -5,8 +5,8 @@
 #include <JoltPlugin/Constraints/JoltFixedConstraintComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltFixedConstraintComponent, 1, plComponentMode::Static);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_COMPONENT_TYPE(plJoltFixedConstraintComponent, 1, plComponentMode::Static);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltFixedConstraintComponent::plJoltFixedConstraintComponent() = default;
@@ -61,4 +61,4 @@ void plJoltFixedConstraintComponent::CreateContstraintType(JPH::Body* pBody0, JP
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltFixedConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltFixedConstraintComponent);

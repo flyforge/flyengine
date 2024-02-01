@@ -1,13 +1,13 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <GameEngine/StateMachine/StateMachineResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineResource, 1, plRTTIDefaultAllocator<plStateMachineResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineResource, 1, plRTTIDefaultAllocator<plStateMachineResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plStateMachineResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plStateMachineResource);
 // clang-format on
 
 plStateMachineResource::plStateMachineResource()
@@ -17,11 +17,11 @@ plStateMachineResource::plStateMachineResource()
 
 plStateMachineResource::~plStateMachineResource() = default;
 
-plUniquePtr<plStateMachineInstance> plStateMachineResource::CreateInstance(plReflectedClass& owner)
+plUniquePtr<plStateMachineInstance> plStateMachineResource::CreateInstance(plReflectedClass& ref_owner)
 {
   if (m_pDescription != nullptr)
   {
-    return PLASMA_DEFAULT_NEW(plStateMachineInstance, owner, m_pDescription);
+    return PL_DEFAULT_NEW(plStateMachineInstance, ref_owner, m_pDescription);
   }
 
   return nullptr;
@@ -41,7 +41,7 @@ plResourceLoadDesc plStateMachineResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plStateMachineResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plStateMachineResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plStateMachineResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -62,7 +62,7 @@ plResourceLoadDesc plStateMachineResource::UpdateContent(plStreamReader* Stream)
   plAssetFileHeader AssetHash;
   AssetHash.Read(*Stream).IgnoreResult();
 
-  plUniquePtr<plStateMachineDescription> pDescription = PLASMA_DEFAULT_NEW(plStateMachineDescription);
+  plUniquePtr<plStateMachineDescription> pDescription = PL_DEFAULT_NEW(plStateMachineDescription);
   if (pDescription->Deserialize(*Stream).Failed())
   {
     res.m_State = plResourceState::LoadedResourceMissing;
@@ -80,3 +80,6 @@ void plStateMachineResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryCPU = 0;
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachineResource);

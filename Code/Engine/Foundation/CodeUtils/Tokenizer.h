@@ -7,22 +7,25 @@
 #include <Foundation/Strings/HashedString.h>
 
 /// \brief Describes which kind of token an plToken is.
-struct PLASMA_FOUNDATION_DLL plTokenType
+struct PL_FOUNDATION_DLL plTokenType
 {
   enum Enum
   {
-    Unknown,       ///< for internal use
-    Whitespace,    ///< The token is a space or tab
-    Identifier,    ///< a series of alphanumerics or underscores
-    NonIdentifier, ///< Everything else
-    Newline,       ///< Either '\n' or '\r\n'
-    LineComment,   ///< A comment that starts with two slashes and ends at the next newline (or end of file)
-    BlockComment,  ///< A comment that starts with a slash and a star, and ends at the next star/slash combination (or end of file)
-    String1,       ///< A string enclosed in "
-    String2,       ///< A string enclosed in '
-    Integer,       ///< An integer number
-    Float,         ///< A floating point number
-    EndOfFile,     ///< End-of-file marker
+    Unknown,           ///< for internal use
+    Whitespace,        ///< The token is a space or tab
+    Identifier,        ///< a series of alphanumerics or underscores
+    NonIdentifier,     ///< Everything else
+    Newline,           ///< Either '\n' or '\r\n'
+    LineComment,       ///< A comment that starts with two slashes and ends at the next newline (or end of file)
+    BlockComment,      ///< A comment that starts with a slash and a star, and ends at the next star/slash combination (or end of file)
+    String1,           ///< A string enclosed in "
+    String2,           ///< A string enclosed in '
+    Integer,           ///< An integer number
+    Float,             ///< A floating point number
+    RawString1,        ///< A raw c++11 string enclosed in ". Contents do not contain the enclosing " or the start / end marker.
+    RawString1Prefix,  ///< The prefix part of a C++11 string. E.g: R"foo(
+    RawString1Postfix, ///< The postfix part of a C++11 string. E.g: )foo"
+    EndOfFile,         ///< End-of-file marker
     ENUM_COUNT,
   };
 
@@ -30,7 +33,7 @@ struct PLASMA_FOUNDATION_DLL plTokenType
 };
 
 /// \brief Represents one piece of tokenized text in a document.
-struct PLASMA_FOUNDATION_DLL plToken
+struct PL_FOUNDATION_DLL plToken
 {
   plToken()
   {
@@ -72,18 +75,21 @@ struct PLASMA_FOUNDATION_DLL plToken
 /// Parenthesis etc. will not be tokenized in any special way, they are all considered as non-Identifiers.
 ///
 /// The token stream will always end with an end-of-file token.
-class PLASMA_FOUNDATION_DLL plTokenizer
+class PL_FOUNDATION_DLL plTokenizer
 {
 public:
   /// \brief Constructor.
   ///
   /// Takes an additional optional allocator. If no allocator is given the default allocator will be used.
-  plTokenizer(plAllocatorBase* pAllocator = nullptr);
+  plTokenizer(plAllocator* pAllocator = nullptr);
 
   ~plTokenizer();
 
   /// \brief Clears any previous result and creates a new token stream for the given array.
-  void Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog);
+  /// \param data The string data to be tokenized.
+  /// \param pLog A log interface that will receive any tokenization errors.
+  /// \param bCopyData If set, 'data' will be copied into a member variable and tokenization is run on the copy, allowing for the original data storage to be deallocated after this call. If false, tokenization will reference 'data' directly and thus, 'data' must outlive this instance.
+  void Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog, bool bCopyData = true);
 
   /// \brief Gives read access to the token stream.
   const plDeque<plToken>& GetTokens() const { return m_Tokens; }
@@ -91,12 +97,15 @@ public:
   /// \brief Gives read and write access to the token stream.
   plDeque<plToken>& GetTokens() { return m_Tokens; }
 
+  /// \brief Returns an array with a copy of all tokens. Use this when using plTokenParseUtils.
+  void GetAllTokens(plDynamicArray<const plToken*>& ref_tokens) const;
+
   /// \brief Returns an array of all tokens. New line tokens are ignored.
-  void GetAllLines(plHybridArray<const plToken*, 32>& ref_tokens) const;
+  void GetAllLines(plDynamicArray<const plToken*>& ref_tokens) const;
 
   /// \brief Returns an array of tokens that represent the next line in the file.
   ///
-  /// Returns PLASMA_SUCCESS when there was more data to return, PLASMA_FAILURE if the end of the file was reached already.
+  /// Returns PL_SUCCESS when there was more data to return, PL_FAILURE if the end of the file was reached already.
   /// uiFirstToken is the index from where to start. It will be updated automatically. Consecutive calls to GetNextLine()
   /// with the same uiFirstToken variable will give one line after the other.
   ///
@@ -108,8 +117,8 @@ public:
 
   plResult GetNextLine(plUInt32& ref_uiFirstToken, plHybridArray<plToken*, 32>& ref_tokens);
 
-  /// \brief Returns the internal copy of the tokenized data
-  const plDynamicArray<plUInt8>& GetTokenizedData() const { return m_Data; }
+  /// \brief Returns the internal copy of the tokenized data. Will be empty if Tokenize was called with 'bCopyData' equals 'false'.
+  const plArrayPtr<const plUInt8> GetTokenizedData() const { return m_Data; }
 
   /// \brief Enables treating lines that start with # character as line comments
   ///
@@ -122,6 +131,7 @@ private:
 
   void HandleUnknown();
   void HandleString(char terminator);
+  void HandleRawString();
   void HandleNumber();
   void HandleLineComment();
   void HandleBlockComment();
@@ -132,6 +142,7 @@ private:
   plLogInterface* m_pLog = nullptr;
   plTokenType::Enum m_CurMode = plTokenType::Unknown;
   plStringView m_sIterator;
+  plStringView m_sRawStringMarker;
   plUInt32 m_uiCurLine = 1;
   plUInt32 m_uiCurColumn = -1;
   plUInt32 m_uiCurChar = '\0';

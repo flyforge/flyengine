@@ -11,11 +11,11 @@
 #include <limits.h>
 #include <stddef.h>
 
-// BEGIN PLASMA SPECIFIC
-#if defined(BUILDSYSTEM_COMPILE_ENGINE_AS_DLL) && defined(WIN32)
+// BEGIN PL SPECIFIC
+#if defined(BUILDSYSTEM_COMPILE_ENGINE_AS_DLL) && defined(_WIN32)
   #define LUA_BUILD_AS_DLL
 #endif
-// END PLASMA SPECIFIC
+// END PL SPECIFIC
 
 
 /*
@@ -57,7 +57,7 @@
 
 #pragma warning(disable:4244)
 
-// BEGIN PLASMA SPECIFIC UWP FIX
+// BEGIN PL SPECIFIC UWP FIX
 #if WINAPI_FAMILY != WINAPI_FAMILY_APP
 #define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
 #else
@@ -65,7 +65,7 @@
   inline char* getenv(const char* name) { return "NOT SUPPORTED ON UWP"; }
   inline int system(const char* command) { return 0; }
 #endif
-// END PLASMA SPECIFIC UWP FIX
+// END PL SPECIFIC UWP FIX
 
 #endif
 

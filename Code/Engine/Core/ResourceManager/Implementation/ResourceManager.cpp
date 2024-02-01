@@ -26,7 +26,7 @@ plUniquePtr<plResourceManagerState> plResourceManager::s_pState;
 plMutex plResourceManager::s_ResourceMutex;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, ResourceManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, ResourceManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation"
@@ -51,7 +51,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, ResourceManager)
     plResourceManager::OnEngineShutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
@@ -67,7 +67,7 @@ plMap<const plRTTI*, plResourceTypeLoader*>& plResourceManager::GetResourceTypeL
 
 void plResourceManager::AddResourceCleanupCallback(ResourceCleanupCB cb)
 {
-  PLASMA_ASSERT_DEV(cb.IsComparable(), "Delegates with captures are not allowed");
+  PL_ASSERT_DEV(cb.IsComparable(), "Delegates with captures are not allowed");
 
   for (plUInt32 i = 0; i < s_pState->m_ResourceCleanupCallbacks.GetCount(); ++i)
   {
@@ -106,7 +106,7 @@ void plResourceManager::ExecuteAllResourceCleanupCallbacks()
     cb();
   }
 
-  PLASMA_ASSERT_DEV(s_pState->m_ResourceCleanupCallbacks.IsEmpty(), "During resource cleanup, new resource cleanup callbacks were registered.");
+  PL_ASSERT_DEV(s_pState->m_ResourceCleanupCallbacks.IsEmpty(), "During resource cleanup, new resource cleanup callbacks were registered.");
 }
 
 plMap<const plRTTI*, plResourcePriority>& plResourceManager::GetResourceTypePriorities()
@@ -116,7 +116,7 @@ plMap<const plRTTI*, plResourcePriority>& plResourceManager::GetResourceTypePrio
 
 void plResourceManager::BroadcastResourceEvent(const plResourceEvent& e)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   // broadcast it through the resource to everyone directly interested in that specific resource
   e.m_pResource->m_ResourceEvents.Broadcast(e);
@@ -148,9 +148,9 @@ void plResourceManager::ForceNoFallbackAcquisition(plUInt32 uiNumFrames /*= 0xFF
 
 plUInt32 plResourceManager::FreeAllUnusedResources()
 {
-  PLASMA_LOG_BLOCK("plResourceManager::FreeAllUnusedResources");
+  PL_LOG_BLOCK("plResourceManager::FreeAllUnusedResources");
 
-  PLASMA_PROFILE_SCOPE("FreeAllUnusedResources");
+  PL_PROFILE_SCOPE("FreeAllUnusedResources");
 
   if (s_pState == nullptr)
   {
@@ -167,7 +167,7 @@ plUInt32 plResourceManager::FreeAllUnusedResources()
   do
   {
     {
-      PLASMA_LOCK(s_ResourceMutex);
+      PL_LOCK(s_ResourceMutex);
 
       bUnloadedAny = false;
 
@@ -223,9 +223,9 @@ plUInt32 plResourceManager::FreeUnusedResources(plTime timeout, plTime lastAcqui
   if (timeout.IsZeroOrNegative())
     return 0;
 
-  PLASMA_LOCK(s_ResourceMutex);
-  PLASMA_LOG_BLOCK("plResourceManager::FreeUnusedResources");
-  PLASMA_PROFILE_SCOPE("FreeUnusedResources");
+  PL_LOCK(s_ResourceMutex);
+  PL_LOG_BLOCK("plResourceManager::FreeUnusedResources");
+  PL_PROFILE_SCOPE("FreeUnusedResources");
 
   auto itResourceType = s_pState->m_LoadedResources.Find(s_pState->m_pFreeUnusedLastType);
   if (!itResourceType.IsValid())
@@ -320,7 +320,7 @@ void plResourceManager::AllowResourceTypeAcquireDuringUpdateContent(const plRTTI
 {
   auto& info = s_pState->m_TypeInfo[pTypeBeingUpdated];
 
-  PLASMA_ASSERT_DEV(info.m_bAllowNestedAcquireCached == false, "AllowResourceTypeAcquireDuringUpdateContent for type '{}' must be called before the resource info has been requested.", pTypeBeingUpdated->GetTypeName());
+  PL_ASSERT_DEV(info.m_bAllowNestedAcquireCached == false, "AllowResourceTypeAcquireDuringUpdateContent for type '{}' must be called before the resource info has been requested.", pTypeBeingUpdated->GetTypeName());
 
   if (info.m_NestedTypes.IndexOf(pTypeItWantsToAcquire) == plInvalidIndex)
   {
@@ -330,7 +330,7 @@ void plResourceManager::AllowResourceTypeAcquireDuringUpdateContent(const plRTTI
 
 bool plResourceManager::IsResourceTypeAcquireDuringUpdateContentAllowed(const plRTTI* pTypeBeingUpdated, const plRTTI* pTypeItWantsToAcquire)
 {
-  PLASMA_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "");
+  PL_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "");
 
   auto& info = s_pState->m_TypeInfo[pTypeBeingUpdated];
 
@@ -381,18 +381,18 @@ bool plResourceManager::IsResourceTypeAcquireDuringUpdateContentAllowed(const pl
 
 plResult plResourceManager::DeallocateResource(plResource* pResource)
 {
-  //PLASMA_ASSERT_DEBUG(pResource->m_iLockCount == 0, "Resource '{0}' has a refcount of zero, but is still in an acquired state.", pResource->GetResourceID());
+  //PL_ASSERT_DEBUG(pResource->m_iLockCount == 0, "Resource '{0}' has a refcount of zero, but is still in an acquired state.", pResource->GetResourceID());
 
   if (RemoveFromLoadingQueue(pResource).Failed())
   {
     // cannot deallocate resources that are currently queued for loading,
     // especially when they are already picked up by a task
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   pResource->CallUnloadData(plResource::Unload::AllQualityLevels);
 
-  PLASMA_ASSERT_DEBUG(pResource->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.", pResource->GetResourceID());
+  PL_ASSERT_DEBUG(pResource->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.", pResource->GetResourceID());
 
   // broadcast that we are going to delete the resource
   {
@@ -402,22 +402,24 @@ plResult plResourceManager::DeallocateResource(plResource* pResource)
     plResourceManager::BroadcastResourceEvent(e);
   }
 
+  PL_ASSERT_DEV(pResource->GetReferenceCount() == 0, "The resource '{}' ({}) is being deallocated, you just stored a handle to it, which won't work! If you are listening to plResourceEvent::Type::ResourceContentUnloading then additionally listen to plResourceEvent::Type::ResourceDeleted to clean up handles to dead resources.", pResource->GetResourceID(), pResource->GetResourceDescription());
+
   // delete the resource via the RTTI provided allocator
   pResource->GetDynamicRTTI()->GetAllocator()->Deallocate(pResource);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // To allow triggering this event without a link dependency
 // Used by Fileserve, to trigger this event, even though Fileserve should not have a link dependency on Core
-PLASMA_ON_GLOBAL_EVENT(plResourceManager_ReloadAllResources)
+PL_ON_GLOBAL_EVENT(plResourceManager_ReloadAllResources)
 {
   plResourceManager::ReloadAllResources(false);
 }
 void plResourceManager::ResetAllResources()
 {
-  PLASMA_LOCK(s_ResourceMutex);
-  PLASMA_LOG_BLOCK("plResourceManager::ReloadAllResources");
+  PL_LOCK(s_ResourceMutex);
+  PL_LOG_BLOCK("plResourceManager::ReloadAllResources");
 
   for (auto itType = s_pState->m_LoadedResources.GetIterator(); itType.IsValid(); ++itType)
   {
@@ -431,13 +433,13 @@ void plResourceManager::ResetAllResources()
 
 void plResourceManager::PerFrameUpdate()
 {
-  PLASMA_PROFILE_SCOPE("plResourceManagerUpdate");
+  PL_PROFILE_SCOPE("plResourceManagerUpdate");
 
   s_pState->m_LastFrameUpdate = plTime::Now();
 
   if (s_pState->m_bBroadcastExistsEvent)
   {
-    PLASMA_LOCK(s_ResourceMutex);
+    PL_LOCK(s_ResourceMutex);
 
     s_pState->m_bBroadcastExistsEvent = false;
 
@@ -455,7 +457,7 @@ void plResourceManager::PerFrameUpdate()
   }
 
   {
-    PLASMA_LOCK(s_ResourceMutex);
+    PL_LOCK(s_ResourceMutex);
 
     for (auto it = s_pState->m_ResourcesToUnloadOnMainThread.GetIterator(); it.IsValid(); it.Next())
     {
@@ -474,12 +476,12 @@ void plResourceManager::PerFrameUpdate()
         continue;
       }
 
-      PLASMA_ASSERT_DEV(resourceToUnload != nullptr, "Found a resource above, should not be nullptr.");
+      PL_ASSERT_DEV(resourceToUnload != nullptr, "Found a resource above, should not be nullptr.");
 
       // If the resource was still loaded, we are going to unload it now.
       resourceToUnload->CallUnloadData(plResource::Unload::AllQualityLevels);
 
-      PLASMA_ASSERT_DEV(resourceToUnload->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.", resourceToUnload->GetResourceID());
+      PL_ASSERT_DEV(resourceToUnload->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.", resourceToUnload->GetResourceID());
     }
 
     s_pState->m_ResourcesToUnloadOnMainThread.Clear();
@@ -525,9 +527,9 @@ void plResourceManager::PluginEventHandler(const plPluginEvent& e)
 
 void plResourceManager::OnCoreStartup()
 {
-  s_pState = PLASMA_DEFAULT_NEW(plResourceManagerState);
+  s_pState = PL_DEFAULT_NEW(plResourceManagerState);
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
   s_pState->m_bAllowLaunchDataLoadTask = true;
   s_pState->m_bShutdown = false;
 
@@ -537,7 +539,7 @@ void plResourceManager::OnCoreStartup()
 void plResourceManager::EngineAboutToShutdown()
 {
   {
-    PLASMA_LOCK(s_ResourceMutex);
+    PL_LOCK(s_ResourceMutex);
 
     if (s_pState == nullptr)
     {
@@ -560,7 +562,7 @@ void plResourceManager::EngineAboutToShutdown()
   }
 
   {
-    PLASMA_LOCK(s_ResourceMutex);
+    PL_LOCK(s_ResourceMutex);
 
     for (auto entry : s_pState->m_LoadingQueue)
     {
@@ -590,7 +592,7 @@ void plResourceManager::EngineAboutToShutdown()
 
 bool plResourceManager::IsAnyLoadingInProgress()
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   if (s_pState->m_LoadingQueue.GetCount() > 0)
   {
@@ -638,7 +640,7 @@ void plResourceManager::OnCoreShutdown()
 {
   OnEngineShutdown();
 
-  PLASMA_LOG_BLOCK("Referenced Resources");
+  PL_LOG_BLOCK("Referenced Resources");
 
   for (auto itType = s_pState->m_LoadedResources.GetIterator(); itType.IsValid(); ++itType)
   {
@@ -647,7 +649,7 @@ void plResourceManager::OnCoreShutdown()
 
     if (!lr.m_Resources.IsEmpty())
     {
-      PLASMA_LOG_BLOCK("Type", pRtti->GetTypeName());
+      PL_LOG_BLOCK("Type", pRtti->GetTypeName());
 
       plLog::Error("{0} resource of type '{1}' are still referenced.", lr.m_Resources.GetCount(), pRtti->GetTypeName());
 
@@ -657,7 +659,7 @@ void plResourceManager::OnCoreShutdown()
 
         plLog::Info("RC = {0}, ID = '{1}'", pReference->GetReferenceCount(), plArgSensitive(pReference->GetResourceID(), "ResourceID"));
 
-#if PLASMA_ENABLED(PLASMA_RESOURCEHANDLE_STACK_TRACES)
+#if PL_ENABLED(PL_RESOURCEHANDLE_STACK_TRACES)
         pReference->PrintHandleStackTraces();
 #endif
       }
@@ -674,13 +676,13 @@ plResource* plResourceManager::GetResource(const plRTTI* pRtti, plStringView sRe
   if (sResourceID.IsEmpty())
     return nullptr;
 
-  PLASMA_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Calling code must lock the mutex until the resource pointer is stored in a handle");
+  PL_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Calling code must lock the mutex until the resource pointer is stored in a handle");
 
   // redirect requested type to override type, if available
   pRtti = FindResourceTypeOverride(pRtti, sResourceID);
 
-  PLASMA_ASSERT_DEBUG(pRtti != nullptr, "There is no RTTI information available for the given resource type '{0}'", PLASMA_STRINGIZE(ResourceType));
-  PLASMA_ASSERT_DEBUG(pRtti->GetAllocator() != nullptr && pRtti->GetAllocator()->CanAllocate(), "There is no RTTI allocator available for the given resource type '{0}'", PLASMA_STRINGIZE(ResourceType));
+  PL_ASSERT_DEBUG(pRtti != nullptr, "There is no RTTI information available for the given resource type '{0}'", PL_STRINGIZE(ResourceType));
+  PL_ASSERT_DEBUG(pRtti->GetAllocator() != nullptr && pRtti->GetAllocator()->CanAllocate(), "There is no RTTI allocator available for the given resource type '{0}'", PL_STRINGIZE(ResourceType));
 
   plResource* pResource = nullptr;
   plTempHashedString sHashedResourceID(sResourceID);
@@ -772,7 +774,7 @@ const plRTTI* plResourceManager::FindResourceTypeOverride(const plRTTI* pRtti, p
 plString plResourceManager::GenerateUniqueResourceID(plStringView sResourceIDPrefix)
 {
   plStringBuilder resourceID;
-  resourceID.Format("{}-{}", sResourceIDPrefix, s_pState->m_uiNextResourceID++);
+  resourceID.SetFormat("{}-{}", sResourceIDPrefix, s_pState->m_uiNextResourceID++);
   return resourceID;
 }
 
@@ -782,7 +784,7 @@ plTypelessResourceHandle plResourceManager::GetExistingResourceByType(const plRT
 
   const plTempHashedString sResourceHash(sResourceID);
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   const plRTTI* pRtti = FindResourceTypeOverride(pResourceType, sResourceID);
 
@@ -794,7 +796,7 @@ plTypelessResourceHandle plResourceManager::GetExistingResourceByType(const plRT
 
 plTypelessResourceHandle plResourceManager::GetExistingResourceOrCreateAsync(const plRTTI* pResourceType, plStringView sResourceID, plUniquePtr<plResourceTypeLoader>&& pLoader)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   plTypelessResourceHandle hResource = GetExistingResourceByType(pResourceType, sResourceID);
 
@@ -812,7 +814,7 @@ plTypelessResourceHandle plResourceManager::GetExistingResourceOrCreateAsync(con
 
 void plResourceManager::ForceLoadResourceNow(const plTypelessResourceHandle& hResource)
 {
-  PLASMA_ASSERT_DEV(hResource.IsValid(), "Cannot access an invalid resource");
+  PL_ASSERT_DEV(hResource.IsValid(), "Cannot access an invalid resource");
 
   plResource* pResource = hResource.m_pResource;
 
@@ -826,7 +828,7 @@ void plResourceManager::ForceLoadResourceNow(const plTypelessResourceHandle& hRe
 
 void plResourceManager::RegisterNamedResource(plStringView sLookupName, plStringView sRedirectionResource)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   plTempHashedString lookup(sLookupName);
 
@@ -838,7 +840,7 @@ void plResourceManager::RegisterNamedResource(plStringView sLookupName, plString
 
 void plResourceManager::UnregisterNamedResource(plStringView sLookupName)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   plTempHashedString hash(sLookupName);
   s_pState->m_NamedResources.Remove(hash);
@@ -854,7 +856,7 @@ void plResourceManager::SetResourceLowResData(const plTypelessResourceHandle& hR
   if (!pResource->GetBaseResourceFlags().IsSet(plResourceFlags::IsReloadable))
     return;
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   // set this, even if we don't end up using the data (because some thread is already loading the full thing)
   pResource->m_Flags.Add(plResourceFlags::HasLowResData);
@@ -869,7 +871,7 @@ void plResourceManager::SetResourceLowResData(const plTypelessResourceHandle& hR
 
   pResource->CallUpdateContent(pStream);
 
-  PLASMA_ASSERT_DEV(pResource->GetLoadingState() != plResourceState::Unloaded, "The resource should have changed its loading state.");
+  PL_ASSERT_DEV(pResource->GetLoadingState() != plResourceState::Unloaded, "The resource should have changed its loading state.");
 
   // Update Memory Usage
   {
@@ -878,8 +880,8 @@ void plResourceManager::SetResourceLowResData(const plTypelessResourceHandle& hR
     MemUsage.m_uiMemoryGPU = 0xFFFFFFFF;
     pResource->UpdateMemoryUsage(MemUsage);
 
-    PLASMA_ASSERT_DEV(MemUsage.m_uiMemoryCPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its CPU memory usage", pResource->GetResourceID());
-    PLASMA_ASSERT_DEV(MemUsage.m_uiMemoryGPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its GPU memory usage", pResource->GetResourceID());
+    PL_ASSERT_DEV(MemUsage.m_uiMemoryCPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its CPU memory usage", pResource->GetResourceID());
+    PL_ASSERT_DEV(MemUsage.m_uiMemoryGPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its GPU memory usage", pResource->GetResourceID());
 
     pResource->m_MemoryUsage = MemUsage;
   }
@@ -892,21 +894,21 @@ plResourceTypeLoader* plResourceManager::GetDefaultResourceLoader()
 
 void plResourceManager::EnableExportMode(bool bEnable)
 {
-  PLASMA_ASSERT_DEV(s_pState != nullptr, "plStartup::StartupCoreSystems() must be called before using the plResourceManager.");
+  PL_ASSERT_DEV(s_pState != nullptr, "plStartup::StartupCoreSystems() must be called before using the plResourceManager.");
 
   s_pState->m_bExportMode = bEnable;
 }
 
 bool plResourceManager::IsExportModeEnabled()
 {
-  PLASMA_ASSERT_DEV(s_pState != nullptr, "plStartup::StartupCoreSystems() must be called before using the plResourceManager.");
+  PL_ASSERT_DEV(s_pState != nullptr, "plStartup::StartupCoreSystems() must be called before using the plResourceManager.");
 
   return s_pState->m_bExportMode;
 }
 
 void plResourceManager::RestoreResource(const plTypelessResourceHandle& hResource)
 {
-  PLASMA_ASSERT_DEV(hResource.IsValid(), "Cannot access an invalid resource");
+  PL_ASSERT_DEV(hResource.IsValid(), "Cannot access an invalid resource");
 
   plResource* pResource = hResource.m_pResource;
   pResource->m_Flags.Remove(plResourceFlags::PreventFileReload);
@@ -936,7 +938,7 @@ plDynamicArray<plResource*>& plResourceManager::GetLoadedResourceOfTypeTempConta
 
 void plResourceManager::SetDefaultResourceLoader(plResourceTypeLoader* pDefaultLoader)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   s_pState->m_pDefaultResourceLoader = pDefaultLoader;
 }
@@ -946,4 +948,4 @@ plResourceManager::ResourceTypeInfo& plResourceManager::GetResourceTypeInfo(cons
   return s_pState->m_TypeInfo[pRtti];
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_ResourceManager);
+PL_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_ResourceManager);

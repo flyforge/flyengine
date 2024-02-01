@@ -11,7 +11,7 @@
 /// plDependencyFile stores a list of files that are the 'dependency set'. It can be serialized.
 /// Through HasAnyFileChanged() one can detect whether any of the files has changed, since the last call to StoreCurrentTimeStamp().
 /// The time stamp that is retrieved through StoreCurrentTimeStamp() will also be serialized.
-class PLASMA_FOUNDATION_DLL plDependencyFile
+class PL_FOUNDATION_DLL plDependencyFile
 {
 public:
   plDependencyFile();

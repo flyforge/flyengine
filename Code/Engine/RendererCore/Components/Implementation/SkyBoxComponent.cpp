@@ -8,29 +8,29 @@
 #include <RendererCore/Textures/TextureCubeResource.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSkyBoxComponent, 4, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
-    PLASMA_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("InverseTonemap", GetInverseTonemap, SetInverseTonemap),
-    PLASMA_ACCESSOR_PROPERTY("UseFog", GetUseFog, SetUseFog)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("VirtualDistance", GetVirtualDistance, SetVirtualDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
+    PL_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
+    PL_ACCESSOR_PROPERTY("ExposureBias", GetExposureBias, SetExposureBias)->AddAttributes(new plClampValueAttribute(-32.0f, 32.0f)),
+    PL_ACCESSOR_PROPERTY("InverseTonemap", GetInverseTonemap, SetInverseTonemap),
+    PL_ACCESSOR_PROPERTY("UseFog", GetUseFog, SetUseFog)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("VirtualDistance", GetVirtualDistance, SetVirtualDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Effects/Sky"),
+    new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plSkyBoxComponent::plSkyBoxComponent() = default;
@@ -84,7 +84,7 @@ void plSkyBoxComponent::Initialize()
 plResult plSkyBoxComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
   ref_bAlwaysVisible = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSkyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -95,8 +95,6 @@ void plSkyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) cons
 
   plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
   {
-    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
-    pRenderData->m_LastGlobalTransform.m_vPosition.SetZero(); // skybox should always be at the origin
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalTransform.m_vPosition.SetZero(); // skybox should always be at the origin
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
@@ -263,4 +261,4 @@ plSkyBoxComponentPatch_1_2 g_plSkyBoxComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_SkyBoxComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_SkyBoxComponent);

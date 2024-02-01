@@ -55,5 +55,3 @@ plTime plDefaultTimeStepSmoothing::GetSmoothedTimeStep(plTime rawTimeStep, const
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_DefaultTimeStepSmoothing);

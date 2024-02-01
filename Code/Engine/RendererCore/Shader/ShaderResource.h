@@ -10,11 +10,11 @@ struct plShaderResourceDescriptor
 {
 };
 
-class PLASMA_RENDERERCORE_DLL plShaderResource : public plResource
+class PL_RENDERERCORE_DLL plShaderResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plShaderResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plShaderResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plShaderResource, plShaderResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plShaderResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plShaderResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plShaderResource, plShaderResourceDescriptor);
 
 public:
   plShaderResource();

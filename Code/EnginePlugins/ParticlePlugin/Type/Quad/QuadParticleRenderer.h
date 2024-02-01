@@ -8,9 +8,9 @@
 #include <RendererCore/../../../Data/Base/Shaders/Particles/BillboardQuadParticleShaderData.h>
 #include <RendererCore/../../../Data/Base/Shaders/Particles/TangentQuadParticleShaderData.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleQuadRenderData final : public plRenderData
+class PL_PARTICLEPLUGIN_DLL plParticleQuadRenderData final : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleQuadRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleQuadRenderData, plRenderData);
 
 public:
   plEnum<plParticleTypeRenderMode> m_RenderMode;
@@ -31,16 +31,16 @@ public:
 };
 
 /// \brief Implements rendering of particle systems
-class PLASMA_PARTICLEPLUGIN_DLL plParticleQuadRenderer final : public plParticleRenderer
+class PL_PARTICLEPLUGIN_DLL plParticleQuadRenderer final : public plParticleRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleQuadRenderer, plParticleRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plParticleQuadRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleQuadRenderer, plParticleRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plParticleQuadRenderer);
 
 public:
   plParticleQuadRenderer();
   ~plParticleQuadRenderer();
 
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const override;
   virtual void RenderBatch(
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 

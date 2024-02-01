@@ -9,25 +9,25 @@
 class plAssetProfilesObjectManager : public plDocumentObjectManager
 {
 public:
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override { Types.PushBack(plGetStaticRTTI<plPlatformProfile>()); }
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override { ref_types.PushBack(plGetStaticRTTI<plPlatformProfile>()); }
 };
 
 class plAssetProfilesDocument : public plDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetProfilesDocument, plDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetProfilesDocument, plDocument);
 
 public:
-  plAssetProfilesDocument(const char* szDocumentPath)
-    : plDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plAssetProfilesObjectManager))
+  plAssetProfilesDocument(plStringView sDocumentPath)
+    : plDocument(sDocumentPath, PL_DEFAULT_NEW(plAssetProfilesObjectManager))
   {
   }
 
 public:
-  virtual plDocumentInfo* CreateDocumentInfo() override { return PLASMA_DEFAULT_NEW(plDocumentInfo); }
+  virtual plDocumentInfo* CreateDocumentInfo() override { return PL_DEFAULT_NEW(plDocumentInfo); }
 };
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetProfilesDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetProfilesDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 class plQtAssetConfigAdapter : public plQtNameableAdapter
 {
@@ -38,11 +38,11 @@ public:
     m_pDialog = pDialog;
   }
 
-  virtual QVariant data(const plDocumentObject* pObject, int row, int column, int role) const override
+  virtual QVariant data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const override
   {
-    if (column == 0)
+    if (iColumn == 0)
     {
-      if (role == Qt::DecorationRole)
+      if (iRole == Qt::DecorationRole)
       {
         const plInt32 iPlatform = pObject->GetTypeAccessor().GetValue("Platform").ConvertTo<plInt32>();
 
@@ -59,15 +59,15 @@ public:
         }
       }
 
-      if (role == Qt::DisplayRole)
+      if (iRole == Qt::DisplayRole)
       {
-        QString name = plQtNameableAdapter::data(pObject, row, column, role).toString();
+        QString name = plQtNameableAdapter::data(pObject, iRow, iColumn, iRole).toString();
 
-        if (row == plAssetCurator::GetSingleton()->GetActiveAssetProfileIndex())
+        if (iRow == plAssetCurator::GetSingleton()->GetActiveAssetProfileIndex())
         {
           name += " (active)";
         }
-        else if (row == m_pDialog->m_uiActiveConfig)
+        else if (iRow == m_pDialog->m_uiActiveConfig)
         {
           name += " (switch to)";
         }
@@ -76,15 +76,15 @@ public:
       }
     }
 
-    return plQtNameableAdapter::data(pObject, row, column, role);
+    return plQtNameableAdapter::data(pObject, iRow, iColumn, iRole);
   }
 
 private:
   const plQtAssetProfilesDlg* m_pDialog = nullptr;
 };
 
-plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* parent)
-  : QDialog(parent)
+plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -95,7 +95,7 @@ plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* parent)
   DeleteButton->setEnabled(false);
   RenameButton->setEnabled(false);
 
-  m_pDocument = PLASMA_DEFAULT_NEW(plAssetProfilesDocument, "<none>");
+  m_pDocument = PL_DEFAULT_NEW(plAssetProfilesDocument, "<none>");
   m_pDocument->GetSelectionManager()->m_Events.AddEventHandler(plMakeDelegate(&plQtAssetProfilesDlg::SelectionEventHandler, this));
 
   std::unique_ptr<plQtDocumentTreeModel> pModel(new plQtDocumentTreeModel(m_pDocument->GetObjectManager()));
@@ -130,7 +130,7 @@ plQtAssetProfilesDlg::~plQtAssetProfilesDlg()
   delete Properties;
   Properties = nullptr;
 
-  PLASMA_DEFAULT_DELETE(m_pDocument);
+  PL_DEFAULT_DELETE(m_pDocument);
 }
 
 plUuid plQtAssetProfilesDlg::NativeToObject(plPlatformProfile* pProfile)
@@ -141,8 +141,7 @@ plUuid plQtAssetProfilesDlg::NativeToObject(plPlatformProfile* pProfile)
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, true, true);
 
-  plUuid guid;
-  guid.CreateNewUuid();
+  const plUuid guid = plUuid::MakeUuid();
   context.RegisterObject(guid, pType, pProfile);
   plAbstractObjectNode* pNode = conv.AddObjectToGraph(pType, pProfile, "root");
 
@@ -164,7 +163,8 @@ void plQtAssetProfilesDlg::ObjectToNative(plUuid objectGuid, plPlatformProfile* 
 
   // Write object to graph.
   plAbstractObjectGraph graph;
-  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool {
+  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool
+  {
     if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
       return false;
     return true;
@@ -281,7 +281,7 @@ void plQtAssetProfilesDlg::on_AddButton_clicked()
     return;
 
   plPlatformProfile profile;
-  profile.m_sName = sProfileName;
+  profile.SetConfigName(sProfileName);
   profile.AddMissingConfigs();
 
   auto& binding = m_ProfileBindings[NativeToObject(&profile)];
@@ -312,7 +312,7 @@ void plQtAssetProfilesDlg::on_DeleteButton_clicked()
   plRemoveObjectCommand cmd;
   cmd.m_Object = sel[0]->GetGuid();
 
-  m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
+  m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
 
   m_pDocument->GetCommandHistory()->FinishTransaction();
 }
@@ -338,7 +338,7 @@ void plQtAssetProfilesDlg::on_RenameButton_clicked()
   cmd.m_sProperty = "Name";
   cmd.m_NewValue = sProfileName;
 
-  m_pDocument->GetCommandHistory()->AddCommand(cmd).IgnoreResult();
+  m_pDocument->GetCommandHistory()->AddCommand(cmd).AssertSuccess();
 
   m_pDocument->GetCommandHistory()->FinishTransaction();
 }
@@ -369,7 +369,7 @@ void plQtAssetProfilesDlg::AllAssetProfilesToObject()
 void plQtAssetProfilesDlg::PropertyChangedEventHandler(const plDocumentObjectPropertyEvent& e)
 {
   const plUuid guid = e.m_pObject->GetGuid();
-  PLASMA_ASSERT_DEV(m_ProfileBindings.Contains(guid), "Object GUID is not in the known list!");
+  PL_ASSERT_DEV(m_ProfileBindings.Contains(guid), "Object GUID is not in the known list!");
 
   ObjectToNative(guid, m_ProfileBindings[guid].m_pProfile);
 }

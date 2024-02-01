@@ -14,7 +14,7 @@ void plSetBase<KeyType, Comparer>::Iterator::Next()
 
   if (m_pElement == nullptr)
   {
-    PLASMA_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
+    PL_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
     return;
   }
 
@@ -65,7 +65,7 @@ void plSetBase<KeyType, Comparer>::Iterator::Prev()
 
   if (m_pElement == nullptr)
   {
-    PLASMA_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
+    PL_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
     return;
   }
 
@@ -125,7 +125,7 @@ void plSetBase<KeyType, Comparer>::Constructor()
 }
 
 template <typename KeyType, typename Comparer>
-plSetBase<KeyType, Comparer>::plSetBase(const Comparer& comparer, plAllocatorBase* pAllocator)
+plSetBase<KeyType, Comparer>::plSetBase(const Comparer& comparer, plAllocator* pAllocator)
   : m_Elements(pAllocator)
   , m_Comparer(comparer)
 {
@@ -133,7 +133,7 @@ plSetBase<KeyType, Comparer>::plSetBase(const Comparer& comparer, plAllocatorBas
 }
 
 template <typename KeyType, typename Comparer>
-plSetBase<KeyType, Comparer>::plSetBase(const plSetBase<KeyType, Comparer>& cc, plAllocatorBase* pAllocator)
+plSetBase<KeyType, Comparer>::plSetBase(const plSetBase<KeyType, Comparer>& cc, plAllocator* pAllocator)
   : m_Elements(pAllocator)
 {
   Constructor();
@@ -176,26 +176,26 @@ void plSetBase<KeyType, Comparer>::Clear()
 }
 
 template <typename KeyType, typename Comparer>
-PLASMA_ALWAYS_INLINE bool plSetBase<KeyType, Comparer>::IsEmpty() const
+PL_ALWAYS_INLINE bool plSetBase<KeyType, Comparer>::IsEmpty() const
 {
   return (m_uiCount == 0);
 }
 
 template <typename KeyType, typename Comparer>
-PLASMA_ALWAYS_INLINE plUInt32 plSetBase<KeyType, Comparer>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plSetBase<KeyType, Comparer>::GetCount() const
 {
   return m_uiCount;
 }
 
 
 template <typename KeyType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::GetIterator() const
+PL_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::GetIterator() const
 {
   return Iterator(GetLeftMost());
 }
 
 template <typename KeyType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::GetLastIterator() const
+PL_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::GetLastIterator() const
 {
   return Iterator(GetRightMost());
 }
@@ -253,20 +253,20 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Inter
 
 template <typename KeyType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::Find(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::Find(const CompatibleKeyType& key) const
 {
   return Iterator(Internal_Find(key));
 }
 
 template <typename KeyType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plSetBase<KeyType, Comparer>::Contains(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE bool plSetBase<KeyType, Comparer>::Contains(const CompatibleKeyType& key) const
 {
   return Internal_Find(key) != nullptr;
 }
 
 template <typename KeyType, typename Comparer>
-PLASMA_FORCE_INLINE bool plSetBase<KeyType, Comparer>::ContainsSet(const plSetBase<KeyType, Comparer>& operand) const
+PL_FORCE_INLINE bool plSetBase<KeyType, Comparer>::ContainsSet(const plSetBase<KeyType, Comparer>& operand) const
 {
   for (const KeyType& key : operand)
   {
@@ -303,7 +303,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Inter
 
 template <typename KeyType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::LowerBound(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::LowerBound(const CompatibleKeyType& key) const
 {
   return Iterator(Internal_LowerBound(key));
 }
@@ -338,7 +338,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Inter
 
 template <typename KeyType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::UpperBound(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::UpperBound(const CompatibleKeyType& key) const
 {
   return Iterator(Internal_UpperBound(key));
 }
@@ -415,7 +415,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Acqui
     m_pFreeElementStack = m_pFreeElementStack->m_pParent;
   }
 
-  plMemoryUtils::Construct<Node>(pNode, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes, Node>(pNode, 1);
 
   pNode->m_pParent = pParent;
   pNode->m_Key = std::forward<CompatibleKeyType>(key);
@@ -431,7 +431,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Acqui
 template <typename KeyType, typename Comparer>
 void plSetBase<KeyType, Comparer>::ReleaseNode(Node* pNode)
 {
-  PLASMA_ASSERT_DEBUG(pNode != nullptr, "pNode is invalid.");
+  PL_ASSERT_DEBUG(pNode != nullptr, "pNode is invalid.");
 
   plMemoryUtils::Destruct<Node>(pNode, 1);
 
@@ -505,7 +505,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Inser
 
     while (true)
     {
-      PLASMA_ASSERT_DEBUG(top < STACK_SIZE, "plSetBase's internal stack is not large enough to be able to sort {0} elements.", GetCount());
+      PL_ASSERT_DEBUG(top < STACK_SIZE, "plSetBase's internal stack is not large enough to be able to sort {0} elements.", GetCount());
       up[top++] = it;
       dir = m_Comparer.Less(it->m_Key, key) ? 1 : 0;
 
@@ -564,7 +564,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
 
     while (true)
     {
-      PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+      PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
       up[top++] = it;
 
       if (it == &m_NilNode)
@@ -588,7 +588,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
 
       if (--top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
         up[top - 1]->m_pLink[dir] = it->m_pLink[dir2];
         up[top - 1]->m_pLink[dir]->m_pParent = up[top - 1];
       }
@@ -602,7 +602,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
 
       while (heir->m_pLink[0] != &m_NilNode)
       {
-        PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
         up[top++] = prev = heir;
 
         heir = heir->m_pLink[0];
@@ -619,11 +619,11 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
     {
       if (top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
         dir = up[top - 1]->m_pLink[1] == up[top];
       }
 
-      PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+      PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
 
       if ((up[top]->m_pLink[0]->m_uiLevel < up[top]->m_uiLevel - 1) || (up[top]->m_pLink[1]->m_uiLevel < up[top]->m_uiLevel - 1))
       {
@@ -642,14 +642,14 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
 
       if (top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
 
         up[top - 1]->m_pLink[dir] = up[top];
         up[top - 1]->m_pLink[dir]->m_pParent = up[top - 1];
       }
       else
       {
-        PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
         root = up[top];
       }
     }
@@ -699,7 +699,7 @@ typename plSetBase<KeyType, Comparer>::Node* plSetBase<KeyType, Comparer>::Remov
 template <typename KeyType, typename Comparer>
 typename plSetBase<KeyType, Comparer>::Iterator plSetBase<KeyType, Comparer>::Remove(const Iterator& pos)
 {
-  PLASMA_ASSERT_DEBUG(pos.m_pElement != nullptr, "The Iterator(pos) is invalid.");
+  PL_ASSERT_DEBUG(pos.m_pElement != nullptr, "The Iterator(pos) is invalid.");
 
   Iterator temp(pos);
   ++temp;
@@ -728,15 +728,7 @@ bool plSetBase<KeyType, Comparer>::operator==(const plSetBase<KeyType, Comparer>
   return true;
 }
 
-template <typename KeyType, typename Comparer>
-bool plSetBase<KeyType, Comparer>::operator!=(const plSetBase<KeyType, Comparer>& rhs) const
-{
-  return !operator==(rhs);
-}
-
 #undef STACK_SIZE
-
-
 
 template <typename KeyType, typename Comparer, typename AllocatorWrapper>
 plSet<KeyType, Comparer, AllocatorWrapper>::plSet()
@@ -745,13 +737,13 @@ plSet<KeyType, Comparer, AllocatorWrapper>::plSet()
 }
 
 template <typename KeyType, typename Comparer, typename AllocatorWrapper>
-plSet<KeyType, Comparer, AllocatorWrapper>::plSet(plAllocatorBase* pAllocator)
+plSet<KeyType, Comparer, AllocatorWrapper>::plSet(plAllocator* pAllocator)
   : plSetBase<KeyType, Comparer>(Comparer(), pAllocator)
 {
 }
 
 template <typename KeyType, typename Comparer, typename AllocatorWrapper>
-plSet<KeyType, Comparer, AllocatorWrapper>::plSet(const Comparer& comparer, plAllocatorBase* pAllocator)
+plSet<KeyType, Comparer, AllocatorWrapper>::plSet(const Comparer& comparer, plAllocator* pAllocator)
   : plSetBase<KeyType, Comparer>(comparer, pAllocator)
 {
 }

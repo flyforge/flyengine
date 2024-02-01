@@ -11,9 +11,9 @@ plObjectCommandAccessor::plObjectCommandAccessor(plCommandHistory* pHistory)
 {
 }
 
-void plObjectCommandAccessor::StartTransaction(const char* szDisplayString)
+void plObjectCommandAccessor::StartTransaction(plStringView sDisplayString)
 {
-  m_pHistory->StartTransaction(szDisplayString);
+  m_pHistory->StartTransaction(sDisplayString);
 }
 
 void plObjectCommandAccessor::CancelTransaction()
@@ -26,9 +26,9 @@ void plObjectCommandAccessor::FinishTransaction()
   m_pHistory->FinishTransaction();
 }
 
-void plObjectCommandAccessor::BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands /*= false*/)
+void plObjectCommandAccessor::BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands /*= false*/)
 {
-  m_pHistory->BeginTemporaryCommands(szDisplayString, bFireEventsWhenUndoingTempCommands);
+  m_pHistory->BeginTemporaryCommands(sDisplayString, bFireEventsWhenUndoingTempCommands);
 }
 
 void plObjectCommandAccessor::CancelTemporaryCommands()

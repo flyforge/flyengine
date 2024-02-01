@@ -4,9 +4,9 @@
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 #include <RendererFoundation/Resources/RenderTargetSetup.h>
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plPickingRenderPass : public plRenderPipelinePass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plPickingRenderPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPickingRenderPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plPickingRenderPass, plRenderPipelinePass);
 
 public:
   plPickingRenderPass();
@@ -27,14 +27,14 @@ public:
   bool m_bPickSelected = true;
   bool m_bPickTransparent = true;
 
-  plVec2 m_PickingPosition;
-  plUInt32 m_PickingIdOut;
-  float m_PickingDepthOut;
-  plVec2 m_MarqueePickPosition0;
-  plVec2 m_MarqueePickPosition1;
+  plVec2 m_PickingPosition = plVec2(-1);
+  plUInt32 m_PickingIdOut = 0;
+  float m_PickingDepthOut = 0.0f;
+  plVec2 m_MarqueePickPosition0 = plVec2(-1);
+  plVec2 m_MarqueePickPosition1 = plVec2(-1);
   plUInt32 m_uiMarqueeActionID = 0xFFFFFFFF; // used to prevent reusing an old result for a new marquee action
-  plUInt32 m_uiWindowWidth;
-  plUInt32 m_uiWindowHeight;
+  plUInt32 m_uiWindowWidth = 0;
+  plUInt32 m_uiWindowHeight = 0;
 
 private:
   void CreateTarget();
@@ -54,7 +54,7 @@ private:
 
 
   /// we need this matrix to compute the world space position of picked pixels
-  plMat4 m_mPickingInverseViewProjectionMatrix;
+  plMat4 m_mPickingInverseViewProjectionMatrix = plMat4::MakeZero();
 
   /// stores the 2D depth buffer image (32 Bit depth precision), to compute pixel positions from
   plDynamicArray<float> m_PickingResultsDepth;

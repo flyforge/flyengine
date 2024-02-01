@@ -20,13 +20,13 @@ plImageView::plImageView(const plImageHeader& header, plConstByteBlobPtr imageDa
 void plImageView::Clear()
 {
   plImageHeader::Clear();
-  m_subImageOffsets.Clear();
-  m_dataPtr.Clear();
+  m_SubImageOffsets.Clear();
+  m_DataPtr.Clear();
 }
 
 bool plImageView::IsValid() const
 {
-  return !m_dataPtr.IsEmpty();
+  return !m_DataPtr.IsEmpty();
 }
 
 void plImageView::ResetAndViewExternalStorage(const plImageHeader& header, plConstByteBlobPtr imageData)
@@ -35,45 +35,46 @@ void plImageView::ResetAndViewExternalStorage(const plImageHeader& header, plCon
 
   plUInt64 dataSize = ComputeLayout();
 
-  PLASMA_ASSERT_DEV(imageData.GetCount() == dataSize, "Provided image storage ({} bytes) doesn't match required data size ({} bytes)",
+  PL_IGNORE_UNUSED(dataSize);
+  PL_ASSERT_DEV(imageData.GetCount() == dataSize, "Provided image storage ({} bytes) doesn't match required data size ({} bytes)",
     imageData.GetCount(), dataSize);
 
   // Const cast is safe here as we will only perform non-const access if this is an plImage which owns mutable access to the storage
-  m_dataPtr = plBlobPtr<plUInt8>(const_cast<plUInt8*>(static_cast<const plUInt8*>(imageData.GetPtr())), imageData.GetCount());
+  m_DataPtr = plBlobPtr<plUInt8>(const_cast<plUInt8*>(static_cast<const plUInt8*>(imageData.GetPtr())), imageData.GetCount());
 }
 
 plResult plImageView::SaveTo(plStringView sFileName) const
 {
-  PLASMA_LOG_BLOCK("Writing Image", sFileName);
-  
+  PL_LOG_BLOCK("Writing Image", sFileName);
+
   if (m_Format == plImageFormat::UNKNOWN)
   {
     plLog::Error("Cannot write image '{0}' - image data is invalid or empty", sFileName);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plFileWriter writer;
-  if (writer.Open(sFileName) == PLASMA_FAILURE)
+  if (writer.Open(sFileName) == PL_FAILURE)
   {
     plLog::Error("Failed to open image file '{0}'", sFileName);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringView it = plPathUtils::GetFileExtension(sFileName);
 
   if (plImageFileFormat* pFormat = plImageFileFormat::GetWriterFormat(it.GetStartPointer()))
   {
-    if (pFormat->WriteImage(writer, *this, it.GetStartPointer()) != PLASMA_SUCCESS)
+    if (pFormat->WriteImage(writer, *this, it.GetStartPointer()) != PL_SUCCESS)
     {
       plLog::Error("Failed to write image file '{0}'", sFileName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plLog::Error("No known image file format for extension '{0}'", it);
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 const plImageHeader& plImageView::GetHeader() const
@@ -102,16 +103,16 @@ plImageView plImageView::GetRowView(
   offset += z * GetDepthPitch(uiMipLevel, uiPlaneIndex);
   offset += y * GetRowPitch(uiMipLevel, uiPlaneIndex);
 
-  plBlobPtr<const plUInt8> dataSlice = m_dataPtr.GetSubArray(offset, GetRowPitch(uiMipLevel, uiPlaneIndex));
+  plBlobPtr<const plUInt8> dataSlice = m_DataPtr.GetSubArray(offset, GetRowPitch(uiMipLevel, uiPlaneIndex));
   return plImageView(header, plConstByteBlobPtr(dataSlice.GetPtr(), dataSlice.GetCount()));
 }
 
 void plImageView::ReinterpretAs(plImageFormat::Enum format)
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     plImageFormat::IsCompressed(format) == plImageFormat::IsCompressed(GetImageFormat()), "Cannot reinterpret compressed and non-compressed formats");
 
-  PLASMA_ASSERT_DEBUG(plImageFormat::GetBitsPerPixel(GetImageFormat()) == plImageFormat::GetBitsPerPixel(format),
+  PL_ASSERT_DEBUG(plImageFormat::GetBitsPerPixel(GetImageFormat()) == plImageFormat::GetBitsPerPixel(format),
     "Cannot reinterpret between formats of different sizes");
 
   SetImageFormat(format);
@@ -119,8 +120,8 @@ void plImageView::ReinterpretAs(plImageFormat::Enum format)
 
 plUInt64 plImageView::ComputeLayout()
 {
-  m_subImageOffsets.Clear();
-  m_subImageOffsets.Reserve(m_uiNumMipLevels * m_uiNumFaces * m_uiNumArrayIndices * GetPlaneCount());
+  m_SubImageOffsets.Clear();
+  m_SubImageOffsets.Reserve(m_uiNumMipLevels * m_uiNumFaces * m_uiNumArrayIndices * GetPlaneCount());
 
   plUInt64 uiDataSize = 0;
 
@@ -132,7 +133,7 @@ plUInt64 plImageView::ComputeLayout()
       {
         for (plUInt32 uiPlaneIndex = 0; uiPlaneIndex < GetPlaneCount(); uiPlaneIndex++)
         {
-          m_subImageOffsets.PushBack(uiDataSize);
+          m_SubImageOffsets.PushBack(uiDataSize);
 
           uiDataSize += GetDepthPitch(uiMipLevel, uiPlaneIndex) * GetDepth(uiMipLevel);
         }
@@ -141,23 +142,23 @@ plUInt64 plImageView::ComputeLayout()
   }
 
   // Push back total size as a marker
-  m_subImageOffsets.PushBack(uiDataSize);
+  m_SubImageOffsets.PushBack(uiDataSize);
 
   return uiDataSize;
 }
 
 void plImageView::ValidateSubImageIndices(plUInt32 uiMipLevel, plUInt32 uiFace, plUInt32 uiArrayIndex, plUInt32 uiPlaneIndex) const
 {
-  PLASMA_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
-  PLASMA_ASSERT_DEV(uiFace < m_uiNumFaces, "Invalid uiFace");
-  PLASMA_ASSERT_DEV(uiArrayIndex < m_uiNumArrayIndices, "Invalid array slice");
-  PLASMA_ASSERT_DEV(uiPlaneIndex < GetPlaneCount(), "Invalid plane index");
+  PL_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
+  PL_ASSERT_DEV(uiFace < m_uiNumFaces, "Invalid uiFace");
+  PL_ASSERT_DEV(uiArrayIndex < m_uiNumArrayIndices, "Invalid array slice");
+  PL_ASSERT_DEV(uiPlaneIndex < GetPlaneCount(), "Invalid plane index");
 }
 
 const plUInt64& plImageView::GetSubImageOffset(plUInt32 uiMipLevel, plUInt32 uiFace, plUInt32 uiArrayIndex, plUInt32 uiPlaneIndex) const
 {
   ValidateSubImageIndices(uiMipLevel, uiFace, uiArrayIndex, uiPlaneIndex);
-  return m_subImageOffsets[uiPlaneIndex + GetPlaneCount() * (uiMipLevel + m_uiNumMipLevels * (uiFace + m_uiNumFaces * uiArrayIndex))];
+  return m_SubImageOffsets[uiPlaneIndex + GetPlaneCount() * (uiMipLevel + m_uiNumMipLevels * (uiFace + m_uiNumFaces * uiArrayIndex))];
 }
 
 plImage::plImage()
@@ -192,7 +193,7 @@ void plImage::operator=(plImage&& rhs)
 
 void plImage::Clear()
 {
-  m_internalStorage.Clear();
+  m_InternalStorage.Clear();
 
   plImageView::Clear();
 }
@@ -208,18 +209,18 @@ void plImage::ResetAndAlloc(const plImageHeader& header)
 
   // therefore, if external storage is insufficient, fall back to internal storage
 
-  if (!UsesExternalStorage() || m_dataPtr.GetCount() < requiredSize)
+  if (!UsesExternalStorage() || m_DataPtr.GetCount() < requiredSize)
   {
-    m_internalStorage.SetCountUninitialized(requiredSize);
-    m_dataPtr = m_internalStorage.GetBlobPtr<plUInt8>();
+    m_InternalStorage.SetCountUninitialized(requiredSize);
+    m_DataPtr = m_InternalStorage.GetBlobPtr<plUInt8>();
   }
 
-  plImageView::ResetAndViewExternalStorage(header, plConstByteBlobPtr(m_dataPtr.GetPtr(), m_dataPtr.GetCount()));
+  plImageView::ResetAndViewExternalStorage(header, plConstByteBlobPtr(m_DataPtr.GetPtr(), m_DataPtr.GetCount()));
 }
 
 void plImage::ResetAndUseExternalStorage(const plImageHeader& header, plByteBlobPtr externalData)
 {
-  m_internalStorage.Clear();
+  m_InternalStorage.Clear();
 
   plImageView::ResetAndViewExternalStorage(header, externalData);
 }
@@ -230,16 +231,16 @@ void plImage::ResetAndMove(plImage&& other)
 
   if (other.UsesExternalStorage())
   {
-    m_internalStorage.Clear();
-    m_subImageOffsets = std::move(other.m_subImageOffsets);
-    m_dataPtr = other.m_dataPtr;
+    m_InternalStorage.Clear();
+    m_SubImageOffsets = std::move(other.m_SubImageOffsets);
+    m_DataPtr = other.m_DataPtr;
     other.Clear();
   }
   else
   {
-    m_internalStorage = std::move(other.m_internalStorage);
-    m_subImageOffsets = std::move(other.m_subImageOffsets);
-    m_dataPtr = m_internalStorage.GetBlobPtr<plUInt8>();
+    m_InternalStorage = std::move(other.m_InternalStorage);
+    m_SubImageOffsets = std::move(other.m_SubImageOffsets);
+    m_DataPtr = m_InternalStorage.GetBlobPtr<plUInt8>();
     other.Clear();
   }
 }
@@ -253,33 +254,33 @@ void plImage::ResetAndCopy(const plImageView& other)
 
 plResult plImage::LoadFrom(plStringView sFileName)
 {
-  PLASMA_LOG_BLOCK("Loading Image", sFileName);
+  PL_LOG_BLOCK("Loading Image", sFileName);
 
-  PLASMA_PROFILE_SCOPE(plPathUtils::GetFileNameAndExtension(sFileName).GetStartPointer());
+  PL_PROFILE_SCOPE(plPathUtils::GetFileNameAndExtension(sFileName).GetStartPointer());
 
   plFileReader reader;
-  if (reader.Open(sFileName) == PLASMA_FAILURE)
+  if (reader.Open(sFileName) == PL_FAILURE)
   {
     plLog::Warning("Failed to open image file '{0}'", plArgSensitive(sFileName, "File"));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringView it = plPathUtils::GetFileExtension(sFileName);
 
   if (plImageFileFormat* pFormat = plImageFileFormat::GetReaderFormat(it.GetStartPointer()))
   {
-    if (pFormat->ReadImage(reader, *this, it.GetStartPointer()) != PLASMA_SUCCESS)
+    if (pFormat->ReadImage(reader, *this, it.GetStartPointer()) != PL_SUCCESS)
     {
       plLog::Warning("Failed to read image file '{0}'", plArgSensitive(sFileName, "File"));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plLog::Warning("No known image file format for extension '{0}'", it);
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plImage::Convert(plImageFormat::Enum targetFormat)
@@ -301,7 +302,7 @@ plImageView plImageView::GetSubImageView(plUInt32 uiMipLevel /*= 0*/, plUInt32 u
   const plUInt64& offset = GetSubImageOffset(uiMipLevel, uiFace, uiArrayIndex, 0);
   plUInt64 size = *(&offset + GetPlaneCount()) - offset;
 
-  plBlobPtr<const plUInt8> subView = m_dataPtr.GetSubArray(offset, size);
+  plBlobPtr<const plUInt8> subView = m_DataPtr.GetSubArray(offset, size);
 
   return plImageView(header, plConstByteBlobPtr(subView.GetPtr(), subView.GetCount()));
 }
@@ -332,7 +333,7 @@ plImageView plImageView::GetPlaneView(plUInt32 uiMipLevel /*= 0*/, plUInt32 uiFa
   const plUInt64& offset = GetSubImageOffset(uiMipLevel, uiFace, uiArrayIndex, uiPlaneIndex);
   plUInt64 size = *(&offset + 1) - offset;
 
-  plBlobPtr<const plUInt8> subView = m_dataPtr.GetSubArray(offset, size);
+  plBlobPtr<const plUInt8> subView = m_DataPtr.GetSubArray(offset, size);
 
   return plImageView(header, plConstByteBlobPtr(subView.GetPtr(), subView.GetCount()));
 }
@@ -372,14 +373,14 @@ plImageView plImageView::GetSliceView(plUInt32 uiMipLevel /*= 0*/, plUInt32 uiFa
   plUInt64 offset = GetSubImageOffset(uiMipLevel, uiFace, uiArrayIndex, uiPlaneIndex) + z * GetDepthPitch(uiMipLevel, uiPlaneIndex);
   plUInt64 size = GetDepthPitch(uiMipLevel, uiPlaneIndex);
 
-  plBlobPtr<const plUInt8> subView = m_dataPtr.GetSubArray(offset, size);
+  plBlobPtr<const plUInt8> subView = m_DataPtr.GetSubArray(offset, size);
 
   return plImageView(header, plConstByteBlobPtr(subView.GetPtr(), subView.GetCount()));
 }
 
 bool plImage::UsesExternalStorage() const
 {
-  return m_internalStorage.GetBlobPtr<plUInt8>() != m_dataPtr;
+  return m_InternalStorage.GetBlobPtr<plUInt8>() != m_DataPtr;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_Image);
+

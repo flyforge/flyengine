@@ -11,19 +11,19 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomRotationSpeed, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomRotationSpeed>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomRotationSpeed, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomRotationSpeed>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("RandomStartAngle", m_bRandomStartAngle),
-    PLASMA_MEMBER_PROPERTY("DegreesPerSecond", m_RotationSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90)), new plClampValueAttribute(plAngle::Degree(0), plVariant())),
+    PL_MEMBER_PROPERTY("RandomStartAngle", m_bRandomStartAngle),
+    PL_MEMBER_PROPERTY("DegreesPerSecond", m_RotationSpeed)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90)), new plClampValueAttribute(plAngle::MakeFromDegree(0), plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomRotationSpeed, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomRotationSpeed>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomRotationSpeed, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomRotationSpeed>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleInitializerFactory_RandomRotationSpeed::GetInitializerType() const
@@ -50,29 +50,29 @@ enum class InitializerRandomRotationVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleInitializerFactory_RandomRotationSpeed::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_RandomRotationSpeed::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)InitializerRandomRotationVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_RotationSpeed.m_Value;
-  stream << m_RotationSpeed.m_fVariance;
+  inout_stream << m_RotationSpeed.m_Value;
+  inout_stream << m_RotationSpeed.m_fVariance;
 
   // Version 2
-  stream << m_bRandomStartAngle;
+  inout_stream << m_bRandomStartAngle;
 }
 
-void plParticleInitializerFactory_RandomRotationSpeed::Load(plStreamReader& stream)
+void plParticleInitializerFactory_RandomRotationSpeed::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_RotationSpeed.m_Value;
-  stream >> m_RotationSpeed.m_fVariance;
+  inout_stream >> m_RotationSpeed.m_Value;
+  inout_stream >> m_RotationSpeed.m_fVariance;
 
   if (uiVersion >= 2)
   {
-    stream >> m_bRandomStartAngle;
+    inout_stream >> m_bRandomStartAngle;
   }
 }
 
@@ -85,12 +85,12 @@ void plParticleInitializer_RandomRotationSpeed::CreateRequiredStreams()
 
 void plParticleInitializer_RandomRotationSpeed::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Random Rotation");
+  PL_PROFILE_SCOPE("PFX: Random Rotation");
 
   plFloat16* pSpeed = m_pStreamRotationSpeed->GetWritableData<plFloat16>();
 
   // speed
-  if (m_RotationSpeed.m_Value != plAngle::Radian(0))
+  if (m_RotationSpeed.m_Value != plAngle::MakeFromRadian(0))
   {
     plRandom& rng = GetRNG();
 
@@ -143,7 +143,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->InlineProperty("DegreesPerSecond").IgnoreResult();
   }
@@ -151,4 +151,4 @@ public:
 
 plParticleInitializerFactory_RandomRotationSpeed_1_2 g_plParticleInitializerFactory_RandomRotationSpeed_1_2;
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomRotationSpeed);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomRotationSpeed);

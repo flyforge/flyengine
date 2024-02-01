@@ -8,9 +8,9 @@
 #include <Foundation/Types/UniquePtr.h>
 
 /// \brief Specifies in which mode this camera is configured.
-struct PLASMA_CORE_DLL plCameraMode
+struct PL_CORE_DLL plCameraMode
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -24,7 +24,7 @@ struct PLASMA_CORE_DLL plCameraMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plCameraMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plCameraMode);
 
 /// \brief Determines left or right eye of a stereo camera.
 ///
@@ -37,7 +37,7 @@ enum class plCameraEye
 };
 
 /// \brief A camera class that stores the orientation and some basic camera settings.
-class PLASMA_CORE_DLL plCamera
+class PL_CORE_DLL plCamera
 {
 public:
   plCamera();
@@ -45,10 +45,10 @@ public:
   /// \brief Allows to specify a different coordinate system in which the camera input and output coordinates are given.
   ///
   /// The default in z is forward = PositiveX, right = PositiveY, Up = PositiveZ.
-  void SetCoordinateSystem(plBasisAxis::Enum forwardAxis, plBasisAxis::Enum rightAxis, plBasisAxis::Enum upAxis);
+  void SetCoordinateSystem(plBasisAxis::Enum forwardAxis, plBasisAxis::Enum rightAxis, plBasisAxis::Enum axis);
 
   /// \brief Allows to specify a full plCoordinateSystemProvider to determine forward/right/up vectors for camera movement
-  void SetCoordinateSystem(const plSharedPtr<plCoordinateSystemProvider>& provider);
+  void SetCoordinateSystem(const plSharedPtr<plCoordinateSystemProvider>& pProvider);
 
   /// \brief Returns the position of the camera that should be used for rendering etc.
   plVec3 GetPosition(plCameraEye eye = plCameraEye::Left) const;
@@ -112,7 +112,7 @@ public:
   ///
   /// \param fFovOrDim
   ///   Fov X/Y in degree or width/height (depending on Mode).
-  void SetCameraMode(plCameraMode::Enum Mode, float fFovOrDim, float fNearPlane, float fFarPlane);
+  void SetCameraMode(plCameraMode::Enum mode, float fFovOrDim, float fNearPlane, float fFarPlane);
 
   /// Sets the camera mode to stereo and specifies projection matrices directly.
   ///
@@ -157,13 +157,13 @@ public:
   ///
   /// Rotate around \a rightAxis for looking up/down. \forwardAxis is roll. For turning left/right use RotateGlobally().
   /// Not supported for stereo cameras.
-  void RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle upAxis);
+  void RotateLocally(plAngle forwardAxis, plAngle rightAxis, plAngle axis);
 
   /// \brief Rotates the camera around the forward, right and up axis of the coordinate system in global space.
   ///
   /// Rotate around Z for turning the camera left/right.
   /// Not supported for stereo cameras.
-  void RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle upAxis);
+  void RotateGlobally(plAngle forwardAxis, plAngle rightAxis, plAngle axis);
 
   /// \brief Returns the view matrix for the given eye.
   ///
@@ -174,28 +174,12 @@ public:
   ///
   /// If the camera is stereo and the given aspect ratio is close to the aspect ratio passed in SetStereoProjection,
   /// the matrix set in SetStereoProjection will be used.
-  void GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out_projectionMatrix, plCameraEye eye = plCameraEye::Left,
+  void GetProjectionMatrix(float fAspectRatioWidthDivHeight, plMat4& out_mProjectionMatrix, plCameraEye eye = plCameraEye::Left,
     plClipSpaceDepthRange::Enum depthRange = plClipSpaceDepthRange::Default) const;
-
-  float GetShutterSpeed() const;
-
-  void SetShutterSpeed(float fShutterSpeed);
 
   float GetExposure() const;
 
   void SetExposure(float fExposure);
-
-  float GetAperture() const;
-
-  void SetAperture(float fAperture);
-
-  float GetISO() const;
-
-  void SetISO(float fISO);
-
-  float GetFocusDistance() const;
-
-  void SetFocusDistance(float fFocusDistance);
 
   /// \brief Returns a counter that is increased every time the camera settings are modified.
   ///
@@ -232,11 +216,7 @@ private:
 
   float m_fFovOrDim = 90.0f;
 
-  float m_fShutterSpeed = 1.0f;
   float m_fExposure = 1.0f;
-  float m_fAperture = 1.0f;
-  float m_fISO = 100.0f;
-  float m_fFocusDistance = 1.0f;
 
   plVec3 m_vCameraPosition[2];
   plMat4 m_mViewMatrix[2];

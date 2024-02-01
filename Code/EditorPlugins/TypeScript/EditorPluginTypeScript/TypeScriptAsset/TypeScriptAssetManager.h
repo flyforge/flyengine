@@ -10,7 +10,7 @@ struct plGameObjectDocumentEvent;
 
 class plTypeScriptAssetDocumentManager : public plAssetDocumentManager
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptAssetDocumentManager, plAssetDocumentManager);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptAssetDocumentManager, plAssetDocumentManager);
 
 public:
   plTypeScriptAssetDocumentManager();
@@ -21,13 +21,13 @@ public:
   void SetupProjectForTypeScript(bool bForce);
   plResult GenerateScriptCompendium(plBitflags<plTransformFlags> transformFlags);
 
-  virtual plStatus GetAdditionalOutputs(plDynamicArray<plString>& files) override;
+  virtual plStatus GetAdditionalOutputs(plDynamicArray<plString>& ref_files) override;
 
 private:
   void OnDocumentManagerEvent(const plDocumentManager::Event& e);
 
   virtual void InternalCreateDocument(
-    const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
+    plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
   virtual void InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const override;
 
   virtual bool GeneratesProfileSpecificAssets() const override { return false; }
@@ -54,7 +54,7 @@ private:
 
 class plTypeScriptPreferences : public plPreferences
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptPreferences, plPreferences);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptPreferences, plPreferences);
 
 public:
   plTypeScriptPreferences();

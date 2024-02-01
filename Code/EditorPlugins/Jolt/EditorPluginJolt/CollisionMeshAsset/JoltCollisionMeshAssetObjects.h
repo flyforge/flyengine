@@ -14,7 +14,7 @@ struct plJoltSurfaceResourceSlot
 
 struct plJoltCollisionMeshType
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -26,11 +26,11 @@ struct plJoltCollisionMeshType
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plJoltCollisionMeshType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plJoltCollisionMeshType);
 
 struct plJoltConvexCollisionMeshType
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -42,13 +42,13 @@ struct plJoltConvexCollisionMeshType
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plJoltConvexCollisionMeshType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plJoltConvexCollisionMeshType);
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plJoltSurfaceResourceSlot);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plJoltSurfaceResourceSlot);
 
 class plJoltCollisionMeshAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetProperties, plReflectedClass);
 
 public:
   plJoltCollisionMeshAssetProperties();

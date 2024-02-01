@@ -30,7 +30,7 @@ struct plJoltConstraintLimitMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltConstraintLimitMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltConstraintLimitMode);
 
 /// \brief Configures how a drive on a constraint works.
 struct plJoltConstraintDriveMode
@@ -47,7 +47,7 @@ struct plJoltConstraintDriveMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltConstraintDriveMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltConstraintDriveMode);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -69,9 +69,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltConstraintDriveMode
 /// collisions between only those two actors. For example a door that is joined to a door frame may not work
 /// right, if the edge of the door still collides with the door frame. It is easier to make the door work smoothly
 /// if it doesn't collide with the frame and its movement is mainly limited by the constraint.
-class PLASMA_JOLTPLUGIN_DLL plJoltConstraintComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltConstraintComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

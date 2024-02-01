@@ -13,7 +13,7 @@ plQtSkeletonPanel::plQtSkeletonPanel(QWidget* pParent, plSkeletonAssetDocument* 
   m_pSkeletonDocument = pDocument;
 
   setObjectName("SkeletonPanel");
-  setWindowTitle("SKELETON");
+  setWindowTitle("Skeleton");
 
   m_pMainWidget = new QWidget(this);
   m_pMainWidget->setLayout(new QVBoxLayout());
@@ -21,7 +21,7 @@ plQtSkeletonPanel::plQtSkeletonPanel(QWidget* pParent, plSkeletonAssetDocument* 
   m_pMainWidget->layout()->setContentsMargins(0, 0, 0, 0);
   m_pFilterWidget = new plQtSearchWidget(this);
   connect(m_pFilterWidget, &plQtSearchWidget::textChanged, this,
-    [this](const QString& text) { m_pTreeWidget->GetProxyFilterModel()->SetFilterText(text); });
+    [this](const QString& sText) { m_pTreeWidget->GetProxyFilterModel()->SetFilterText(sText); });
 
   m_pMainWidget->layout()->addWidget(m_pFilterWidget);
 

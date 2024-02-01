@@ -13,9 +13,9 @@ using plJoltDefaultCharacterComponentManager = plComponentManager<class plJoltDe
 ///
 /// It is also possible to derive from this component and override some virtual functions to just tweak the behavior of this
 /// sample implementation, in case you only need minor tweaks.
-class PLASMA_JOLTPLUGIN_DLL plJoltDefaultCharacterComponent : public plJoltCharacterControllerComponent
+class PL_JOLTPLUGIN_DLL plJoltDefaultCharacterComponent : public plJoltCharacterControllerComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltDefaultCharacterComponent, plJoltCharacterControllerComponent, plJoltDefaultCharacterComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltDefaultCharacterComponent, plJoltCharacterControllerComponent, plJoltDefaultCharacterComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -44,7 +44,7 @@ public:
   };
 
   /// How many degrees per second the character turns
-  plAngle m_RotateSpeed = plAngle::Degree(90.0f); // [ property ]
+  plAngle m_RotateSpeed = plAngle::MakeFromDegree(90.0f); // [ property ]
 
   /// The radius of the capsule shape
   float m_fShapeRadius = 0.25f;
@@ -115,22 +115,21 @@ public:
   /// \brief Returns the radius of the shape. This never changes at runtime.
   virtual float GetShapeRadius() const override;
 
-  virtual bool IsTouchingGround() override { return m_LastGroundState == GroundState::OnGround; }
   GroundState GetGroundState() const { return m_LastGroundState; }
   bool IsStandingOnGround() const { return m_LastGroundState == GroundState::OnGround; } // [ scriptable ]
   bool IsSlidingOnGround() const { return m_LastGroundState == GroundState::Sliding; }   // [ scriptable ]
   bool IsInAir() const { return m_LastGroundState == GroundState::InAir; }               // [ scriptable ]
-  virtual bool IsCrouching() override { return m_uiIsCrouchingBit; }                                // [ scriptable ]
+  bool IsCrouching() const { return m_uiIsCrouchingBit; }                                // [ scriptable ]
 
   /// Instantly teleports the character to the target position. Doesn't change its rotation.
-  virtual void TeleportCharacter(const plVec3& vGlobalFootPosition) override ;
+  void TeleportCharacter(const plVec3& vGlobalFootPosition);
 
   struct Config
   {
     bool m_bAllowJump = true;
     bool m_bAllowCrouch = true;
     bool m_bApplyGroundVelocity = true;
-    plVec3 m_vVelocity = plVec3::ZeroVector();
+    plVec3 m_vVelocity = plVec3::MakeZero();
     float m_fPushDownForce = 0;
     plHashedString m_sGroundInteraction;
     float m_fGroundInteractionDistanceThreshold = 1.0f;
@@ -172,11 +171,11 @@ protected:
   plUInt8 m_uiInputRunBit : 1;
   plUInt8 m_uiIsCrouchingBit : 1;
   plAngle m_InputRotateZ;
-  plVec2 m_vInputDirection = plVec2::ZeroVector();
+  plVec2 m_vInputDirection = plVec2::MakeZero();
   float m_fVelocityUp = 0.0f;
   float m_fNextCylinderHeight = 0;
   float m_fAccumulatedWalkDistance = 0.0f;
-  plVec2 m_vVelocityLateral = plVec2::ZeroVector();
+  plVec2 m_vVelocityLateral = plVec2::MakeZero();
   plTransform m_PreviousTransform;
   bool m_bFeetOnSolidGround = false;
 
@@ -186,7 +185,7 @@ protected:
   float m_fHeadTargetHeight = 0.0f;
   plGameObjectHandle m_hHeadObject;
 
-  plVec3 m_vAbsoluteRootMotion = plVec3::ZeroVector();
+  plVec3 m_vAbsoluteRootMotion = plVec3::MakeZero();
 
   plUInt32 m_uiUserDataIndex = plInvalidIndex;
   plUInt32 m_uiJoltBodyID = plInvalidIndex;

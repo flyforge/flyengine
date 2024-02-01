@@ -14,11 +14,11 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALReso
 
 plGALResourceViewDX11::plGALResourceViewDX11(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description)
   : plGALResourceView(pResource, Description)
-  , m_pDXResourceView(nullptr)
+
 {
 }
 
-plGALResourceViewDX11::~plGALResourceViewDX11() {}
+plGALResourceViewDX11::~plGALResourceViewDX11() = default;
 
 plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -32,8 +32,8 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
 
   if (pTexture == nullptr && pBuffer == nullptr)
   {
-    //plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
-    return PLASMA_FAILURE;
+    plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
+    return PL_FAILURE;
   }
 
 
@@ -52,7 +52,7 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
     if (!pBuffer->GetDescription().m_bAllowRawViews && m_Description.m_bRawView)
     {
       plLog::Error("Trying to create a raw view for a buffer with no raw view flag is invalid!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -72,7 +72,7 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
   if (DXViewFormat == DXGI_FORMAT_UNKNOWN)
   {
     plLog::Error("Couldn't get valid DXGI format for resource view! ({0})", ViewFormat);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   D3D11_SHADER_RESOURCE_VIEW_DESC DXSRVDesc;
@@ -91,6 +91,7 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
     {
       case plGALTextureType::Texture2D:
       case plGALTextureType::Texture2DProxy:
+      case plGALTextureType::Texture2DShared:
 
         if (!bIsArrayView)
         {
@@ -153,8 +154,8 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
         break;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
-        return PLASMA_FAILURE;
+        PL_ASSERT_NOT_IMPLEMENTED;
+        return PL_FAILURE;
     }
   }
   else if (pBuffer)
@@ -172,20 +173,20 @@ plResult plGALResourceViewDX11::InitPlatform(plGALDevice* pDevice)
 
   if (FAILED(pDXDevice->GetDXDevice()->CreateShaderResourceView(pDXResource, &DXSRVDesc, &m_pDXResourceView)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 plResult plGALResourceViewDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXResourceView);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXResourceView);
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_ResourceViewDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_ResourceViewDX11);

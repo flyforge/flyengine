@@ -12,24 +12,24 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plAnimationControllerComponent, 2, plComponentMode::Static);
+PL_BEGIN_COMPONENT_TYPE(plAnimationControllerComponent, 2, plComponentMode::Static);
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("AnimGraph", GetAnimGraphFile, SetAnimGraphFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Graph")),
+    PL_ACCESSOR_PROPERTY("AnimGraph", GetAnimGraphFile, SetAnimGraphFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Graph")),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("RootMotionMode", plRootMotionMode, m_RootMotionMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("InvisibleUpdateRate", plAnimationInvisibleUpdateRate, m_InvisibleUpdateRate),
+    PL_ENUM_MEMBER_PROPERTY("RootMotionMode", plRootMotionMode, m_RootMotionMode),
+    PL_ENUM_MEMBER_PROPERTY("InvisibleUpdateRate", plAnimationInvisibleUpdateRate, m_InvisibleUpdateRate),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
+      new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plAnimationControllerComponent::plAnimationControllerComponent() = default;
@@ -100,7 +100,7 @@ void plAnimationControllerComponent::OnSimulationStarted()
 
 void plAnimationControllerComponent::Update()
 {
-  plTime tMinStep = plTime::Seconds(0);
+  plTime tMinStep = plTime::MakeFromSeconds(0);
   plVisibilityState visType = GetOwner()->GetVisibilityState();
 
   if (visType != plVisibilityState::Direct)
@@ -117,7 +117,7 @@ void plAnimationControllerComponent::Update()
     return;
 
   m_AnimController.Update(m_ElapsedTimeSinceUpdate, GetOwner());
-  m_ElapsedTimeSinceUpdate.SetZero();
+  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
   plVec3 translation;
   plAngle rotationX;
@@ -128,4 +128,4 @@ void plAnimationControllerComponent::Update()
   plRootMotionMode::Apply(m_RootMotionMode, GetOwner(), translation, rotationX, rotationY, rotationZ);
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_AnimationControllerComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_AnimationControllerComponent);

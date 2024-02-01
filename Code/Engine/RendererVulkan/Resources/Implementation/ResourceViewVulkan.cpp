@@ -42,7 +42,7 @@ plResult plGALResourceViewVulkan::InitPlatform(plGALDevice* pDevice)
   if (pTexture == nullptr && pBuffer == nullptr)
   {
     plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (pTexture)
@@ -56,7 +56,7 @@ plResult plGALResourceViewVulkan::InitPlatform(plGALDevice* pDevice)
 
     plGALResourceFormat::Enum viewFormat = m_Description.m_OverrideViewFormat == plGALResourceFormat::Invalid ? texDesc.m_Format : m_Description.m_OverrideViewFormat;
     vk::ImageViewCreateInfo viewCreateInfo;
-    viewCreateInfo.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(viewFormat).m_eResourceViewType;
+    viewCreateInfo.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(viewFormat).m_format;
     viewCreateInfo.image = image;
     viewCreateInfo.subresourceRange = plConversionUtilsVulkan::GetSubresourceRange(texDesc, m_Description);
     viewCreateInfo.subresourceRange.aspectMask &= ~vk::ImageAspectFlagBits::eStencil;
@@ -65,29 +65,23 @@ plResult plGALResourceViewVulkan::InitPlatform(plGALDevice* pDevice)
     m_resourceImageInfo.imageLayout = bIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal;
     m_resourceImageInfoArray.imageLayout = m_resourceImageInfo.imageLayout;
 
-    if (pParentTexture->GetFormatOverrideEnabled())
-    {
-      PLASMA_ASSERT_DEV(m_Description.m_OverrideViewFormat == plGALResourceFormat::Invalid, "Resource views on this texture can not use a override view format (not implemented)");
-      viewCreateInfo.format = pParentTexture->GetImageFormat();
-    }
-
     m_range = viewCreateInfo.subresourceRange;
     if (texDesc.m_Type == plGALTextureType::Texture3D) // no array support
     {
       viewCreateInfo.viewType = plConversionUtilsVulkan::GetImageViewType(texDesc.m_Type, false);
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfo.imageView));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfo.imageView));
     }
     else if (m_Description.m_uiArraySize == 1) // can be array or not
     {
       viewCreateInfo.viewType = plConversionUtilsVulkan::GetImageViewType(texDesc.m_Type, false);
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfo.imageView));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfo.imageView));
       viewCreateInfo.viewType = plConversionUtilsVulkan::GetImageViewType(texDesc.m_Type, true);
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfoArray.imageView));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfoArray.imageView));
     }
     else // Can only be array
     {
       viewCreateInfo.viewType = plConversionUtilsVulkan::GetImageViewType(texDesc.m_Type, true);
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfoArray.imageView));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&viewCreateInfo, nullptr, &m_resourceImageInfoArray.imageView));
     }
   }
   else if (pBuffer)
@@ -95,7 +89,7 @@ plResult plGALResourceViewVulkan::InitPlatform(plGALDevice* pDevice)
     if (!pBuffer->GetDescription().m_bAllowRawViews && m_Description.m_bRawView)
     {
       plLog::Error("Trying to create a raw view for a buffer with no raw view flag is invalid!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     auto pParentBuffer = static_cast<const plGALBufferVulkan*>(pBuffer);
@@ -117,15 +111,15 @@ plResult plGALResourceViewVulkan::InitPlatform(plGALDevice* pDevice)
 
       vk::BufferViewCreateInfo viewCreateInfo;
       viewCreateInfo.buffer = pParentBuffer->GetVkBuffer();
-      viewCreateInfo.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(viewFormat).m_eResourceViewType;
+      viewCreateInfo.format = pVulkanDevice->GetFormatLookupTable().GetFormatInfo(viewFormat).m_format;
       viewCreateInfo.offset = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiFirstElement;
       viewCreateInfo.range = pBuffer->GetDescription().m_uiStructSize * m_Description.m_uiNumElements;
 
-      VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createBufferView(&viewCreateInfo, nullptr, &m_bufferView));
+      VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createBufferView(&viewCreateInfo, nullptr, &m_bufferView));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALResourceViewVulkan::DeInitPlatform(plGALDevice* pDevice)
@@ -137,9 +131,9 @@ plResult plGALResourceViewVulkan::DeInitPlatform(plGALDevice* pDevice)
   m_resourceImageInfoArray = vk::DescriptorImageInfo();
   m_resourceBufferInfo = vk::DescriptorBufferInfo();
   pVulkanDevice->DeleteLater(m_bufferView);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_ResourceViewVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_ResourceViewVulkan);

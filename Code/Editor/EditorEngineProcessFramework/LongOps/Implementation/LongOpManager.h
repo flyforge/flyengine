@@ -8,7 +8,7 @@
 #include <Foundation/Types/Uuid.h>
 
 /// \brief Base class with shared functionality for plLongOpControllerManager and plLongOpWorkerManager
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpManager
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpManager
 {
 public:
   /// \brief Needs to be called early to initialize the IPC channel to use.

@@ -15,7 +15,7 @@ using plSurfaceResourceHandle = plTypedResourceHandle<class plSurfaceResource>;
 
 struct plProcGenBinaryOperator
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -30,11 +30,11 @@ struct plProcGenBinaryOperator
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcGenBinaryOperator);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcGenBinaryOperator);
 
 struct plProcGenBlendMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -50,11 +50,11 @@ struct plProcGenBlendMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcGenBlendMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcGenBlendMode);
 
 struct plProcVertexColorChannelMapping
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -69,7 +69,7 @@ struct plProcVertexColorChannelMapping
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcVertexColorChannelMapping);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcVertexColorChannelMapping);
 
 struct plProcVertexColorMapping
 {
@@ -78,11 +78,11 @@ struct plProcVertexColorMapping
   plEnum<plProcVertexColorChannelMapping> m_B = plProcVertexColorChannelMapping::B;
   plEnum<plProcVertexColorChannelMapping> m_A = plProcVertexColorChannelMapping::A;
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcVertexColorMapping);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcVertexColorMapping);
 
 struct plProcPlacementMode
 {
@@ -97,7 +97,25 @@ struct plProcPlacementMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcPlacementMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcPlacementMode);
+
+struct plProcPlacementPattern
+{
+  using StorageType = plUInt8;
+
+  enum Enum
+  {
+    RegularGrid,
+    HexGrid,
+    Natural,
+
+    COUNT,
+
+    Default = Natural
+  };
+};
+
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcPlacementPattern);
 
 struct plProcVolumeImageMode
 {
@@ -115,7 +133,7 @@ struct plProcVolumeImageMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcVolumeImageMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcVolumeImageMode);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -138,15 +156,16 @@ namespace plProcGenInternal
   {
     struct Point
     {
-      plVec2 m_Coordinates;
-      float m_fThreshold;
+      float x;
+      float y;
+      float threshold;
     };
 
     plArrayPtr<Point> m_Points;
     float m_fSize;
   };
 
-  struct PLASMA_PROCGENPLUGIN_DLL GraphSharedDataBase : public plRefCounted
+  struct PL_PROCGENPLUGIN_DLL GraphSharedDataBase : public plRefCounted
   {
     virtual ~GraphSharedDataBase();
   };
@@ -177,10 +196,10 @@ namespace plProcGenInternal
     const Pattern* m_pPattern = nullptr;
     float m_fFootprint = 1.0f;
 
-    plVec3 m_vMinOffset = plVec3::ZeroVector();
-    plVec3 m_vMaxOffset = plVec3::ZeroVector();
+    plVec3 m_vMinOffset = plVec3::MakeZero();
+    plVec3 m_vMaxOffset = plVec3::MakeZero();
 
-    plAngle m_YawRotationSnap = plAngle::Radian(0.0f);
+    plAngle m_YawRotationSnap = plAngle::MakeFromRadian(0.0f);
     float m_fAlignToNormal = 1.0f;
 
     plVec3 m_vMinScale = plVec3(1.0f);
@@ -201,7 +220,7 @@ namespace plProcGenInternal
   {
   };
 
-  struct PLASMA_PROCGENPLUGIN_DLL ExpressionInputs
+  struct PL_PROCGENPLUGIN_DLL ExpressionInputs
   {
     static plHashedString s_sPosition;
     static plHashedString s_sPositionX;
@@ -219,7 +238,7 @@ namespace plProcGenInternal
     static plHashedString s_sPointIndex;
   };
 
-  struct PLASMA_PROCGENPLUGIN_DLL ExpressionOutputs
+  struct PL_PROCGENPLUGIN_DLL ExpressionOutputs
   {
     static plHashedString s_sOutDensity;
     static plHashedString s_sOutScale;
@@ -235,7 +254,7 @@ namespace plProcGenInternal
 
   struct PlacementPoint
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_vPosition;
     float m_fScale;
@@ -247,7 +266,7 @@ namespace plProcGenInternal
 
   struct PlacementTransform
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plSimdTransform m_Transform;
     plColorLinear16f m_ObjectColor;
@@ -279,7 +298,7 @@ namespace plProcGenInternal
       plVec3 vMin = (vCenter - plVec2(m_fTileSize * 0.5f)).GetAsVec3(m_fMinZ);
       plVec3 vMax = (vCenter + plVec2(m_fTileSize * 0.5f)).GetAsVec3(m_fMaxZ);
 
-      return plBoundingBox(vMin, vMax);
+      return plBoundingBox::MakeFromMinMax(vMin, vMax);
     }
 
     plHybridArray<plSimdMat4f, 8, plAlignedAllocatorWrapper> m_GlobalToLocalBoxTransforms;

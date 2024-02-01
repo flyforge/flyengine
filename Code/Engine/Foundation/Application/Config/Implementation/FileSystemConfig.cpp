@@ -10,34 +10,34 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plApplicationFileSystemConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationFileSystemConfig>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plApplicationFileSystemConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationFileSystemConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("DataDirs", m_DataDirs),
+    PL_ARRAY_MEMBER_PROPERTY("DataDirs", m_DataDirs),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plApplicationFileSystemConfig_DataDirConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationFileSystemConfig_DataDirConfig>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plApplicationFileSystemConfig_DataDirConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationFileSystemConfig_DataDirConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("RelativePath", m_sDataDirSpecialPath),
-    PLASMA_MEMBER_PROPERTY("Writable", m_bWritable),
-    PLASMA_MEMBER_PROPERTY("RootName", m_sRootName),
+    PL_MEMBER_PROPERTY("RelativePath", m_sDataDirSpecialPath),
+    PL_MEMBER_PROPERTY("Writable", m_bWritable),
+    PL_MEMBER_PROPERTY("RootName", m_sRootName),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plApplicationFileSystemConfig::Save(plStringView sPath)
 {
   plFileWriter file;
   if (file.Open(sPath).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlWriter writer;
   writer.SetOutputStream(&file);
@@ -55,16 +55,16 @@ plResult plApplicationFileSystemConfig::Save(plStringView sPath)
     writer.EndObject();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plApplicationFileSystemConfig::Load(plStringView sPath)
 {
-  PLASMA_LOG_BLOCK("plApplicationFileSystemConfig::Load()");
+  PL_LOG_BLOCK("plApplicationFileSystemConfig::Load()");
 
   m_DataDirs.Clear();
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sOldLoc;
   if (sPath.FindSubString("RuntimeConfigs/"))
   {
@@ -141,7 +141,7 @@ void plApplicationFileSystemConfig::Load(plStringView sPath)
 
 void plApplicationFileSystemConfig::Apply()
 {
-  PLASMA_LOG_BLOCK("plApplicationFileSystemConfig::Apply");
+  PL_LOG_BLOCK("plApplicationFileSystemConfig::Apply");
 
   // plStringBuilder s;
 
@@ -165,17 +165,17 @@ void plApplicationFileSystemConfig::Clear()
 
 plResult plApplicationFileSystemConfig::CreateDataDirStubFiles()
 {
-  PLASMA_LOG_BLOCK("plApplicationFileSystemConfig::CreateDataDirStubFiles");
+  PL_LOG_BLOCK("plApplicationFileSystemConfig::CreateDataDirStubFiles");
 
   plStringBuilder s;
-  plResult res = PLASMA_SUCCESS;
+  plResult res = PL_SUCCESS;
 
   for (const auto& var : m_DataDirs)
   {
     if (plFileSystem::ResolveSpecialDirectory(var.m_sDataDirSpecialPath, s).Failed())
     {
       plLog::Error("Failed to get special directory '{0}'", var.m_sDataDirSpecialPath);
-      res = PLASMA_FAILURE;
+      res = PL_FAILURE;
       continue;
     }
 
@@ -185,13 +185,13 @@ plResult plApplicationFileSystemConfig::CreateDataDirStubFiles()
     if (file.Open(s, plFileOpenMode::Write).Failed())
     {
       plLog::Error("Failed to create stub file '{0}'", s);
-      res = PLASMA_FAILURE;
+      res = PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Application_Config_Implementation_FileSystemConfig);
+PL_STATICLINK_FILE(Foundation, Foundation_Application_Config_Implementation_FileSystemConfig);

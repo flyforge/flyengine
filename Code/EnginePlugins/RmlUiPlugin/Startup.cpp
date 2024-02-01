@@ -8,7 +8,7 @@
 static plRmlUiResourceLoader s_RmlUiResourceLoader;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RmlUi, RmlUiPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RmlUi, RmlUiPlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -37,7 +37,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RmlUi, RmlUiPlugin)
 
     if (plRmlUi::GetSingleton() == nullptr)
     {
-      PLASMA_DEFAULT_NEW(plRmlUi);
+      PL_DEFAULT_NEW(plRmlUi);
     }
   }
 
@@ -45,7 +45,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RmlUi, RmlUiPlugin)
   {
     if (plRmlUi* pRmlUi = plRmlUi::GetSingleton())
     {
-      PLASMA_DEFAULT_DELETE(pRmlUi);
+      PL_DEFAULT_DELETE(pRmlUi);
     }
 
     plResourceManager::SetResourceTypeLoader<plRmlUiResource>(nullptr);
@@ -53,5 +53,5 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RmlUi, RmlUiPlugin)
     plRmlUiResource::CleanupDynamicPluginReferences();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on

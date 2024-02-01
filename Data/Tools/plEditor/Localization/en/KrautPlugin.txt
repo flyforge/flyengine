@@ -1,0 +1,15 @@
+# Asset Types
+
+Kraut Tree;Kraut Tree
+
+# Component Types
+
+plKrautTreeComponent;Kraut Tree
+
+# Enums
+
+plKrautAssetMaterial;Material
+
+# Properties
+
+plKrautTreeAssetProperties::LodDistanceScale;LOD Distance Scale

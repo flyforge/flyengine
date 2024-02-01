@@ -7,31 +7,31 @@
 #include <RendererCore/Lights/SkyLightComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSceneViewPerspective, 1)
-  PLASMA_ENUM_CONSTANTS(plSceneViewPerspective::Orthogonal_Front, plSceneViewPerspective::Orthogonal_Right, plSceneViewPerspective::Orthogonal_Top,
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSceneViewPerspective, 1)
+  PL_ENUM_CONSTANTS(plSceneViewPerspective::Orthogonal_Front, plSceneViewPerspective::Orthogonal_Right, plSceneViewPerspective::Orthogonal_Top,
     plSceneViewPerspective::Perspective)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEngineViewLightSettings, 1, plRTTIDefaultAllocator<PlasmaEngineViewLightSettings>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEngineViewLightSettings, 1, plRTTIDefaultAllocator<plEngineViewLightSettings>)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_MEMBER_PROPERTY("SkyBox", m_bSkyBox),
-      PLASMA_MEMBER_PROPERTY("SkyLight", m_bSkyLight),
-      PLASMA_MEMBER_PROPERTY("SkyLightCubeMap", m_sSkyLightCubeMap),
-      PLASMA_MEMBER_PROPERTY("SkyLightIntensity", m_fSkyLightIntensity),
-      PLASMA_MEMBER_PROPERTY("DirectionalLight", m_bDirectionalLight),
-      PLASMA_MEMBER_PROPERTY("DirectionalLightAngle", m_DirectionalLightAngle),
-      PLASMA_MEMBER_PROPERTY("DirectionalLightShadows", m_bDirectionalLightShadows),
-      PLASMA_MEMBER_PROPERTY("DirectionalLightIntensity", m_fDirectionalLightIntensity),
-      PLASMA_MEMBER_PROPERTY("Fog", m_bFog)
+      PL_MEMBER_PROPERTY("SkyBox", m_bSkyBox),
+      PL_MEMBER_PROPERTY("SkyLight", m_bSkyLight),
+      PL_MEMBER_PROPERTY("SkyLightCubeMap", m_sSkyLightCubeMap),
+      PL_MEMBER_PROPERTY("SkyLightIntensity", m_fSkyLightIntensity),
+      PL_MEMBER_PROPERTY("DirectionalLight", m_bDirectionalLight),
+      PL_MEMBER_PROPERTY("DirectionalLightAngle", m_DirectionalLightAngle),
+      PL_MEMBER_PROPERTY("DirectionalLightShadows", m_bDirectionalLightShadows),
+      PL_MEMBER_PROPERTY("DirectionalLightIntensity", m_fDirectionalLightIntensity),
+      PL_MEMBER_PROPERTY("Fog", m_bFog)
     }
-    PLASMA_END_PROPERTIES;
+    PL_END_PROPERTIES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void PlasmaEngineViewConfig::ApplyPerspectiveSetting(float fov, float nearPlane, float farPlane)
+void plEngineViewConfig::ApplyPerspectiveSetting(float fFov, float fNearPlane, float fFarPlane)
 {
   const float fOrthoRange = 1000.0f;
 
@@ -39,34 +39,34 @@ void PlasmaEngineViewConfig::ApplyPerspectiveSetting(float fov, float nearPlane,
   {
     case plSceneViewPerspective::Perspective:
     {
-      m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovY, fov == 0.0f ? 70.0f : fov, nearPlane, farPlane);
+      m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovY, fFov == 0.0f ? 70.0f : fFov, fNearPlane, fFarPlane);
     }
     break;
 
     case plSceneViewPerspective::Orthogonal_Front:
     {
-      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fov == 0.0f ? 20.0f : fov, -fOrthoRange, fOrthoRange);
+      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fFov == 0.0f ? 20.0f : fFov, -fOrthoRange, fOrthoRange);
       m_Camera.LookAt(m_Camera.GetCenterPosition(), m_Camera.GetCenterPosition() + plVec3(-1, 0, 0), plVec3(0, 0, 1));
     }
     break;
 
     case plSceneViewPerspective::Orthogonal_Right:
     {
-      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fov == 0.0f ? 20.0f : fov, -fOrthoRange, fOrthoRange);
+      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fFov == 0.0f ? 20.0f : fFov, -fOrthoRange, fOrthoRange);
       m_Camera.LookAt(m_Camera.GetCenterPosition(), m_Camera.GetCenterPosition() + plVec3(0, -1, 0), plVec3(0, 0, 1));
     }
     break;
 
     case plSceneViewPerspective::Orthogonal_Top:
     {
-      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fov == 0.0f ? 20.0f : fov, -fOrthoRange, fOrthoRange);
+      m_Camera.SetCameraMode(plCameraMode::OrthoFixedHeight, fFov == 0.0f ? 20.0f : fFov, -fOrthoRange, fOrthoRange);
       m_Camera.LookAt(m_Camera.GetCenterPosition(), m_Camera.GetCenterPosition() + plVec3(0, 0, -1), plVec3(1, 0, 0));
     }
     break;
   }
 }
 
-PlasmaEngineViewLightSettings::PlasmaEngineViewLightSettings(bool bEnable)
+plEngineViewLightSettings::plEngineViewLightSettings(bool bEnable)
 {
   if (!bEnable)
   {
@@ -77,7 +77,7 @@ PlasmaEngineViewLightSettings::PlasmaEngineViewLightSettings(bool bEnable)
   }
 }
 
-PlasmaEngineViewLightSettings::~PlasmaEngineViewLightSettings()
+plEngineViewLightSettings::~plEngineViewLightSettings()
 {
   if (m_hGameObject.IsInvalidated())
     return;
@@ -85,106 +85,106 @@ PlasmaEngineViewLightSettings::~PlasmaEngineViewLightSettings()
   m_pWorld->DeleteObjectDelayed(m_hGameObject);
 }
 
-bool PlasmaEngineViewLightSettings::GetSkyBox() const
+bool plEngineViewLightSettings::GetSkyBox() const
 {
   return m_bSkyBox;
 }
 
-void PlasmaEngineViewLightSettings::SetSkyBox(bool val)
+void plEngineViewLightSettings::SetSkyBox(bool bVal)
 {
-  m_bSkyBox = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::SkyBoxChanged);
+  m_bSkyBox = bVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::SkyBoxChanged);
 }
 
-bool PlasmaEngineViewLightSettings::GetSkyLight() const
+bool plEngineViewLightSettings::GetSkyLight() const
 {
   return m_bSkyLight;
 }
 
-void PlasmaEngineViewLightSettings::SetSkyLight(bool val)
+void plEngineViewLightSettings::SetSkyLight(bool bVal)
 {
-  m_bSkyLight = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::SkyLightChanged);
+  m_bSkyLight = bVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::SkyLightChanged);
 }
 
-const char* PlasmaEngineViewLightSettings::GetSkyLightCubeMap() const
+const char* plEngineViewLightSettings::GetSkyLightCubeMap() const
 {
   return m_sSkyLightCubeMap;
 }
 
-void PlasmaEngineViewLightSettings::SetSkyLightCubeMap(const char* val)
+void plEngineViewLightSettings::SetSkyLightCubeMap(const char* szVal)
 {
-  m_sSkyLightCubeMap = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged);
+  m_sSkyLightCubeMap = szVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::SkyLightCubeMapChanged);
 }
 
-float PlasmaEngineViewLightSettings::GetSkyLightIntensity() const
+float plEngineViewLightSettings::GetSkyLightIntensity() const
 {
   return m_fSkyLightIntensity;
 }
 
-void PlasmaEngineViewLightSettings::SetSkyLightIntensity(float val)
+void plEngineViewLightSettings::SetSkyLightIntensity(float fVal)
 {
-  m_fSkyLightIntensity = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged);
+  m_fSkyLightIntensity = fVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::SkyLightIntensityChanged);
 }
 
-bool PlasmaEngineViewLightSettings::GetDirectionalLight() const
+bool plEngineViewLightSettings::GetDirectionalLight() const
 {
   return m_bDirectionalLight;
 }
 
-void PlasmaEngineViewLightSettings::SetDirectionalLight(bool val)
+void plEngineViewLightSettings::SetDirectionalLight(bool bVal)
 {
-  m_bDirectionalLight = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightChanged);
+  m_bDirectionalLight = bVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::DirectionalLightChanged);
 }
 
-plAngle PlasmaEngineViewLightSettings::GetDirectionalLightAngle() const
+plAngle plEngineViewLightSettings::GetDirectionalLightAngle() const
 {
   return m_DirectionalLightAngle;
 }
 
-void PlasmaEngineViewLightSettings::SetDirectionalLightAngle(plAngle val)
+void plEngineViewLightSettings::SetDirectionalLightAngle(plAngle val)
 {
   m_DirectionalLightAngle = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged);
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::DirectionalLightAngleChanged);
 }
 
-bool PlasmaEngineViewLightSettings::GetDirectionalLightShadows() const
+bool plEngineViewLightSettings::GetDirectionalLightShadows() const
 {
   return m_bDirectionalLightShadows;
 }
 
-void PlasmaEngineViewLightSettings::SetDirectionalLightShadows(bool val)
+void plEngineViewLightSettings::SetDirectionalLightShadows(bool bVal)
 {
-  m_bDirectionalLightShadows = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged);
+  m_bDirectionalLightShadows = bVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::DirectionalLightShadowsChanged);
 }
 
-float PlasmaEngineViewLightSettings::GetDirectionalLightIntensity() const
+float plEngineViewLightSettings::GetDirectionalLightIntensity() const
 {
   return m_fDirectionalLightIntensity;
 }
 
-void PlasmaEngineViewLightSettings::SetDirectionalLightIntensity(float val)
+void plEngineViewLightSettings::SetDirectionalLightIntensity(float fVal)
 {
-  m_fDirectionalLightIntensity = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged);
+  m_fDirectionalLightIntensity = fVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::DirectionalLightIntensityChanged);
 }
 
-bool PlasmaEngineViewLightSettings::GetFog() const
+bool plEngineViewLightSettings::GetFog() const
 {
   return m_bFog;
 }
 
-void PlasmaEngineViewLightSettings::SetFog(bool val)
+void plEngineViewLightSettings::SetFog(bool bVal)
 {
-  m_bFog = val;
-  SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type::FogChanged);
+  m_bFog = bVal;
+  SetModifiedInternal(plEngineViewLightSettingsEvent::Type::FogChanged);
 }
 
-bool PlasmaEngineViewLightSettings::SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID)
+bool plEngineViewLightSettings::SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID)
 {
   m_pWorld = pWorld;
   UpdateForEngine(pWorld);
@@ -194,58 +194,58 @@ bool PlasmaEngineViewLightSettings::SetupForEngine(plWorld* pWorld, plUInt32 uiN
 namespace
 {
   template <typename T>
-  T* SyncComponent(plWorld* pWorld, plGameObject* pParent, plComponentHandle& handle, bool bShouldExist)
+  T* SyncComponent(plWorld* pWorld, plGameObject* pParent, plComponentHandle& inout_hHandle, bool bShouldExist)
   {
     if (bShouldExist)
     {
       T* pComp = nullptr;
-      if (handle.IsInvalidated() || !pWorld->TryGetComponent(handle, pComp))
+      if (inout_hHandle.IsInvalidated() || !pWorld->TryGetComponent(inout_hHandle, pComp))
       {
-        handle = T::CreateComponent(pParent, pComp);
+        inout_hHandle = T::CreateComponent(pParent, pComp);
       }
       return pComp;
     }
     else
     {
-      if (!handle.IsInvalidated())
+      if (!inout_hHandle.IsInvalidated())
       {
         T* pComp = nullptr;
-        if (pWorld->TryGetComponent(handle, pComp))
+        if (pWorld->TryGetComponent(inout_hHandle, pComp))
         {
           pComp->DeleteComponent();
-          handle.Invalidate();
+          inout_hHandle.Invalidate();
         }
       }
       return nullptr;
     }
   }
 
-  plGameObject* SyncGameObject(plWorld* pWorld, plGameObjectHandle& handle, bool bShouldExist)
+  plGameObject* SyncGameObject(plWorld* pWorld, plGameObjectHandle& inout_hHandle, bool bShouldExist)
   {
     if (bShouldExist)
     {
       plGameObject* pObj = nullptr;
-      if (handle.IsInvalidated() || !pWorld->TryGetObject(handle, pObj))
+      if (inout_hHandle.IsInvalidated() || !pWorld->TryGetObject(inout_hHandle, pObj))
       {
         plGameObjectDesc obj;
         obj.m_sName.Assign("ViewLightSettings");
-        handle = pWorld->CreateObject(obj, pObj);
+        inout_hHandle = pWorld->CreateObject(obj, pObj);
         pObj->MakeDynamic();
       }
       return pObj;
     }
     else
     {
-      if (!handle.IsInvalidated())
+      if (!inout_hHandle.IsInvalidated())
       {
-        pWorld->DeleteObjectDelayed(handle);
+        pWorld->DeleteObjectDelayed(inout_hHandle);
       }
       return nullptr;
     }
   }
 } // namespace
 
-void PlasmaEngineViewLightSettings::UpdateForEngine(plWorld* pWorld)
+void plEngineViewLightSettings::UpdateForEngine(plWorld* pWorld)
 {
   if (plGameObject* pParent = SyncGameObject(m_pWorld, m_hSkyBoxObject, m_bSkyBox))
   {
@@ -260,15 +260,13 @@ void PlasmaEngineViewLightSettings::UpdateForEngine(plWorld* pWorld)
   const bool bNeedGameObject = m_bDirectionalLight | m_bSkyLight;
   if (plGameObject* pParent = SyncGameObject(m_pWorld, m_hGameObject, bNeedGameObject))
   {
-    plQuat rot;
-    rot.SetFromAxisAndAngle(plVec3(0.0f, 1.0f, 0.0f), m_DirectionalLightAngle + plAngle::Degree(90.0));
+    plQuat rot = plQuat::MakeFromAxisAndAngle(plVec3(0.0f, 1.0f, 0.0f), m_DirectionalLightAngle + plAngle::MakeFromDegree(90.0));
     pParent->SetLocalRotation(rot);
 
     if (plDirectionalLightComponent* pDirLight = SyncComponent<plDirectionalLightComponent>(m_pWorld, pParent, m_hDirLight, m_bDirectionalLight))
     {
       pDirLight->SetCastShadows(m_bDirectionalLightShadows);
       pDirLight->SetIntensity(m_fDirectionalLightIntensity);
-      pDirLight->SetVolumetricIntensity(0.0f);
     }
 
     if (plSkyLightComponent* pSkyLight = SyncComponent<plSkyLightComponent>(m_pWorld, pParent, m_hSkyLight, m_bSkyLight))
@@ -287,10 +285,10 @@ void PlasmaEngineViewLightSettings::UpdateForEngine(plWorld* pWorld)
   }
 }
 
-void PlasmaEngineViewLightSettings::SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type type)
+void plEngineViewLightSettings::SetModifiedInternal(plEngineViewLightSettingsEvent::Type type)
 {
   SetModified();
-  PlasmaEngineViewLightSettingsEvent e;
+  plEngineViewLightSettingsEvent e;
   e.m_Type = type;
   m_EngineViewLightSettingsEvents.Broadcast(e);
 }

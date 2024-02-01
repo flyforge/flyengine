@@ -13,11 +13,11 @@ plResult plPreprocessor::Expand(const TokenStream& Tokens, TokenStream& Output)
 
   // first expansion
   if (ExpandOnce(Tokens, Temp[iCur0]).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // second expansion
   if (ExpandOnce(Temp[iCur0], Temp[iCur1]).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plInt32 iIterations = 1;
 
@@ -27,7 +27,7 @@ plResult plPreprocessor::Expand(const TokenStream& Tokens, TokenStream& Output)
     if (iIterations > 10)
     {
       PP_LOG(Error, "Macro expansion reached {0} iterations", Tokens[0], iIterations);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     iIterations++;
@@ -37,7 +37,7 @@ plResult plPreprocessor::Expand(const TokenStream& Tokens, TokenStream& Output)
     // third and up
     Temp[iCur1].Clear();
     if (ExpandOnce(Temp[iCur0], Temp[iCur1]).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   // Generally 2 iterations should be sufficient to handle most (all?) cases
@@ -50,7 +50,7 @@ plResult plPreprocessor::Expand(const TokenStream& Tokens, TokenStream& Output)
 
   Output.PushBackRange(Temp[iCur1]);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ExpandOnce(const TokenStream& Tokens, TokenStream& Output)
@@ -61,7 +61,7 @@ plResult plPreprocessor::ExpandOnce(const TokenStream& Tokens, TokenStream& Outp
 
   for (plUInt32 uiCurToken = 0; uiCurToken < Tokens.GetCount();)
   {
-    PLASMA_ASSERT_DEV(Tokens[uiCurToken]->m_iType < s_iMacroParameter0, "Implementation error");
+    PL_ASSERT_DEV(Tokens[uiCurToken]->m_iType < s_iMacroParameter0, "Implementation error");
 
     // if we are not inside some macro expansion, but on the top level, adjust the line counter
     if (bIsOutermost)
@@ -95,7 +95,7 @@ plResult plPreprocessor::ExpandOnce(const TokenStream& Tokens, TokenStream& Outp
     if (!itMacro.Value().m_bIsFunction)
     {
       if (ExpandObjectMacro(itMacro.Value(), Output, Tokens[uiIdentifierToken]).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       ++uiCurToken; // move uiCurToken after the object macro token
       continue;
@@ -113,12 +113,12 @@ plResult plPreprocessor::ExpandOnce(const TokenStream& Tokens, TokenStream& Outp
 
       MacroParameters AllParameters(&m_ClassAllocator);
       if (ExtractAllMacroParameters(Tokens, uiCurToken, AllParameters).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       // uiCurToken is now after the )
 
       if (ExpandFunctionMacro(itMacro.Value(), AllParameters, Output, Tokens[uiIdentifierToken]).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       continue;
     }
@@ -134,14 +134,14 @@ plResult plPreprocessor::ExpandOnce(const TokenStream& Tokens, TokenStream& Outp
   }
 
   --m_CurrentFileStack.PeekBack().m_iExpandDepth;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plPreprocessor::OutputNotExpandableMacro(MacroDefinition& Macro, TokenStream& Output)
 {
   const plStringView& sMacroName = Macro.m_MacroIdentifier->m_DataView;
 
-  PLASMA_ASSERT_DEV(Macro.m_bCurrentlyExpanding, "Implementation Error.");
+  PL_ASSERT_DEV(Macro.m_bCurrentlyExpanding, "Implementation Error.");
 
   plToken* pNewToken = AddCustomToken(Macro.m_MacroIdentifier, sMacroName);
   pNewToken->m_uiCustomFlags = TokenFlags::NoFurtherExpansion;
@@ -155,7 +155,7 @@ plResult plPreprocessor::ExpandObjectMacro(MacroDefinition& Macro, TokenStream& 
   if (Macro.m_bCurrentlyExpanding)
   {
     OutputNotExpandableMacro(Macro, Output);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   ProcessingEvent pe;
@@ -167,7 +167,7 @@ plResult plPreprocessor::ExpandObjectMacro(MacroDefinition& Macro, TokenStream& 
 
   if (pMacroToken->m_DataView.IsEqual("__FILE__"))
   {
-    PLASMA_ASSERT_DEV(!m_CurrentFileStack.IsEmpty(), "Implementation error");
+    PL_ASSERT_DEV(!m_CurrentFileStack.IsEmpty(), "Implementation error");
 
     plStringBuilder sName = "\"";
     sName.Append(m_CurrentFileStack.PeekBack().m_sVirtualFileName.GetView());
@@ -179,13 +179,13 @@ plResult plPreprocessor::ExpandObjectMacro(MacroDefinition& Macro, TokenStream& 
     Output.PushBack(pNewToken);
 
     m_ProcessingEvents.Broadcast(pe);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (pMacroToken->m_DataView.IsEqual("__LINE__"))
   {
     plStringBuilder sLine;
-    sLine.Format("{0}", m_CurrentFileStack.PeekBack().m_iCurrentLine);
+    sLine.SetFormat("{0}", m_CurrentFileStack.PeekBack().m_iCurrentLine);
 
     plToken* pNewToken = AddCustomToken(pMacroToken, sLine);
     pNewToken->m_iType = plTokenType::Integer;
@@ -193,18 +193,18 @@ plResult plPreprocessor::ExpandObjectMacro(MacroDefinition& Macro, TokenStream& 
     Output.PushBack(pNewToken);
 
     m_ProcessingEvents.Broadcast(pe);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   Macro.m_bCurrentlyExpanding = true;
 
   if (Expand(Macro.m_Replacement, Output).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Macro.m_bCurrentlyExpanding = false;
 
   m_ProcessingEvents.Broadcast(pe);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plPreprocessor::PassThroughFunctionMacro(MacroDefinition& Macro, const MacroParameters& Parameters, TokenStream& Output)
@@ -298,7 +298,7 @@ plResult plPreprocessor::InsertStringifiedParameters(const TokenStream& Tokens, 
     if (bStringifyParameter && Tokens[i]->m_iType < s_iMacroParameter0 && Tokens[i]->m_iType != plTokenType::Whitespace)
     {
       PP_LOG0(Error, "Expected a macro parameter name", Tokens[i]);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (Tokens[i]->m_iType >= s_iMacroParameter0 && bStringifyParameter)
@@ -336,7 +336,7 @@ plResult plPreprocessor::InsertStringifiedParameters(const TokenStream& Tokens, 
   // hash at  the end of a macro is already forbidden as 'invalid character at end of macro'
   // so this case does not need to be handled here
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plPreprocessor::MergeTokens(const plToken* pFirst, const plToken* pSecond, TokenStream& Output, const MacroDefinition& Macro)
@@ -446,7 +446,7 @@ plResult plPreprocessor::ConcatenateParameters(const TokenStream& Tokens, TokenS
       if (Output.IsEmpty())
       {
         PP_LOG0(Error, "## cannot occur at the beginning of a macro definition", Tokens[uiConcatToken]);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       const plToken* pFirstToken = Output.PeekBack();
@@ -455,7 +455,7 @@ plResult plPreprocessor::ConcatenateParameters(const TokenStream& Tokens, TokenS
       if (uiCurToken >= Tokens.GetCount())
       {
         PP_LOG0(Error, "## cannot occur at the end of a macro definition", Tokens[uiConcatToken]);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       const plToken* pSecondToken = Tokens[uiCurToken];
@@ -471,18 +471,18 @@ plResult plPreprocessor::ConcatenateParameters(const TokenStream& Tokens, TokenS
     ++uiCurToken;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::InsertParameters(const TokenStream& Tokens, TokenStream& Output, const MacroDefinition& Macro)
 {
   TokenStream Stringified(&m_ClassAllocator);
   if (InsertStringifiedParameters(Tokens, Stringified, Macro).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   TokenStream Concatenated(&m_ClassAllocator);
   if (ConcatenateParameters(Stringified, Concatenated, Macro).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
 
   for (plUInt32 i = 0; i < Concatenated.GetCount(); ++i)
@@ -492,7 +492,7 @@ plResult plPreprocessor::InsertParameters(const TokenStream& Tokens, TokenStream
       const plUInt32 uiParam = Concatenated[i]->m_iType - s_iMacroParameter0;
 
       if (ExpandMacroParam(*Concatenated[i], uiParam, Output, Macro).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
     else
     {
@@ -500,7 +500,7 @@ plResult plPreprocessor::InsertParameters(const TokenStream& Tokens, TokenStream
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ExpandFunctionMacro(MacroDefinition& Macro, const MacroParameters& Parameters, TokenStream& Output, const plToken* pMacroToken)
@@ -510,7 +510,7 @@ plResult plPreprocessor::ExpandFunctionMacro(MacroDefinition& Macro, const Macro
   {
     // for the function macro, also output the parameter list
     PassThroughFunctionMacro(Macro, Parameters, Output);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   ProcessingEvent pe;
@@ -526,7 +526,7 @@ plResult plPreprocessor::ExpandFunctionMacro(MacroDefinition& Macro, const Macro
   for (plUInt32 i = 0; i < Parameters.GetCount(); ++i)
   {
     if (Expand(Parameters[i], ExpandedParameters[i]).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   m_MacroParamStackExpanded.PushBack(&ExpandedParameters);
@@ -536,10 +536,10 @@ plResult plPreprocessor::ExpandFunctionMacro(MacroDefinition& Macro, const Macro
 
   TokenStream MacroOutput(&m_ClassAllocator);
   if (InsertParameters(Macro.m_Replacement, MacroOutput, Macro).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (Expand(MacroOutput, Output).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Macro.m_bCurrentlyExpanding = false;
 
@@ -548,12 +548,12 @@ plResult plPreprocessor::ExpandFunctionMacro(MacroDefinition& Macro, const Macro
 
   m_ProcessingEvents.Broadcast(pe);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ExpandMacroParam(const plToken& MacroToken, plUInt32 uiParam, TokenStream& Output, const MacroDefinition& Macro)
 {
-  PLASMA_ASSERT_DEV(!m_MacroParamStack.IsEmpty(), "Implementation error.");
+  PL_ASSERT_DEV(!m_MacroParamStack.IsEmpty(), "Implementation error.");
 
   const MacroParameters& ParamsExpanded = *m_MacroParamStackExpanded.PeekBack();
 
@@ -565,7 +565,7 @@ plResult plPreprocessor::ExpandMacroParam(const plToken& MacroToken, plUInt32 ui
     Output.PushBack(pWhitespace);
 
     PP_LOG(Warning, "Trying to access parameter {0}, but only {1} parameters were passed along", (&MacroToken), uiParam, ParamsExpanded.GetCount());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else if (uiParam + 1 == Macro.m_iNumParameters && Macro.m_bHasVarArgs)
   {
@@ -579,14 +579,12 @@ plResult plPreprocessor::ExpandMacroParam(const plToken& MacroToken, plUInt32 ui
         Output.PushBack(m_pTokenComma);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   Output.PushBackRange(ParamsExpanded[uiParam]);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Expand);

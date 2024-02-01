@@ -33,9 +33,9 @@ struct plPluginLoadFlags
 
   enum Enum
   {
-    LoadCopy = PLASMA_BIT(0),         ///< Don't load a DLL directly, but create a copy of the file and load that instead. This allows to continue working on (and compiling) the DLL in parallel.
-    PluginIsOptional = PLASMA_BIT(1), ///< When an optional plugin can't be loaded (missing file usually), no error is logged. LoadPlugin() will still return PLASMA_FAILURE though.
-    CustomDependency = PLASMA_BIT(2), ///< The plugin is an injected dependency (usually for the editor), and thus might get treated differently (this is just a tag)
+    LoadCopy = PL_BIT(0),         ///< Don't load a DLL directly, but create a copy of the file and load that instead. This allows to continue working on (and compiling) the DLL in parallel.
+    PluginIsOptional = PL_BIT(1), ///< When an optional plugin can't be loaded (missing file usually), no error is logged. LoadPlugin() will still return PL_FAILURE though.
+    CustomDependency = PL_BIT(2), ///< The plugin is an injected dependency (usually for the editor), and thus might get treated differently (this is just a tag)
 
     Default = 0,
   };
@@ -57,22 +57,22 @@ using plPluginInitCallback = void (*)();
 /// It is not possible to unload individual plugins, but you can unload all plugins. Make sure to only do this when no code and data
 /// from any of the plugins is still referenced somewhere.
 ///
-/// When a plugin has a dependency on another plugin, it should contain a call to PLASMA_PLUGIN_DEPENDENCY() in one of its cpp files.
+/// When a plugin has a dependency on another plugin, it should contain a call to PL_PLUGIN_DEPENDENCY() in one of its cpp files.
 /// This instructs the system to load that plugin as well, and makes sure to delay initialization until all (transitive) dependencies are loaded.
 ///
-/// A plugin may contain one or multiple PLASMA_PLUGIN_ON_LOADED() and PLASMA_PLUGIN_ON_UNLOADED() functions.
+/// A plugin may contain one or multiple PL_PLUGIN_ON_LOADED() and PL_PLUGIN_ON_UNLOADED() functions.
 /// These are called automatically once a plugin and all its dependencies are loaded. This can be used to make sure basic things get set up.
 /// For anything more complicated, use plStartup instead. Once a plugin is loaded, the startup system will initialize new startup code properly.
-class PLASMA_FOUNDATION_DLL plPlugin
+class PL_FOUNDATION_DLL plPlugin
 {
 public:
   /// \brief Code that needs to be execute whenever a plugin is loaded or unloaded can register itself here to be notified of such events.
   static const plCopyOnBroadcastEvent<const plPluginEvent&>& Events(); // [tested]
 
-  /// \brief Calls the PLASMA_PLUGIN_ON_LOADED() functions for all code that is already linked into the executable at startup.
+  /// \brief Calls the PL_PLUGIN_ON_LOADED() functions for all code that is already linked into the executable at startup.
   ///
   /// If code that was meant to be loaded dynamically ends up being statically linked (e.g. on platforms where only static linking is used),
-  /// the PLASMA_PLUGIN_ON_LOADED() functions should still be called. The application can decide when the best time is.
+  /// the PL_PLUGIN_ON_LOADED() functions should still be called. The application can decide when the best time is.
   /// Usually a good point in time is right before the app would load the first dynamic plugin.
   /// If this function is never called manually, but plPlugin::LoadPlugin() is called, this function will be called automatically before loading the first actual plugin.
   static void InitializeStaticallyLinkedPlugins(); // [tested]
@@ -88,15 +88,15 @@ public:
 
   /// \brief Tries to load a DLL dynamically into the program.
   ///
-  /// PLASMA_SUCCESS is returned when the DLL is either successfully loaded or has already been loaded before.
-  /// PLASMA_FAILURE is returned if the DLL cannot be located or it could not be loaded properly.
+  /// PL_SUCCESS is returned when the DLL is either successfully loaded or has already been loaded before.
+  /// PL_FAILURE is returned if the DLL cannot be located or it could not be loaded properly.
   ///
   /// See plPluginLoadFlags for additional options.
   static plResult LoadPlugin(plStringView sPluginFile, plBitflags<plPluginLoadFlags> flags = plPluginLoadFlags::Default); // [tested]
 
   /// \brief Unloads all previously loaded plugins in the reverse order in which they were loaded.
   ///
-  /// Also calls PLASMA_PLUGIN_ON_UNLOADED() of all statically linked code.
+  /// Also calls PL_PLUGIN_ON_UNLOADED() of all statically linked code.
   static void UnloadAllPlugins(); // [tested]
 
   /// \brief Sets how many tries the system will do to find a free plugin file name.
@@ -107,14 +107,14 @@ public:
   static void SetMaxParallelInstances(plUInt32 uiMaxParallelInstances);
 
   /// \internal struct used by plPlugin macros
-  struct PLASMA_FOUNDATION_DLL Init
+  struct PL_FOUNDATION_DLL Init
   {
     Init(plPluginInitCallback onLoadOrUnloadCB, bool bOnLoad);
     Init(const char* szAddPluginDependency);
   };
 
   /// \brief Contains basic information about a loaded plugin.
-  struct PLASMA_FOUNDATION_DLL PluginInfo
+  struct PL_FOUNDATION_DLL PluginInfo
   {
     plString m_sName;
     plHybridArray<plString, 2> m_sDependencies;
@@ -127,6 +127,9 @@ public:
   /// \internal Determines the plugin paths.
   static void GetPluginPaths(plStringView sPluginName, plStringBuilder& ref_sOriginalFile, plStringBuilder& ref_sCopiedFile, plUInt8 uiFileCopyNumber);
 
+  /// \internal determines if a plugin copy is required for hot reloading for plugin code
+  static bool PlatformNeedsPluginCopy();
+
 private:
   plPlugin() = delete;
 };
@@ -134,20 +137,20 @@ private:
 /// \brief Adds a dependency on another plugin to the plugin in which this call is located.
 ///
 /// If Plugin2 requires Plugin1 to be loaded when Plugin2 is used, insert this into a CPP file of Plugin2:\n
-/// PLASMA_PLUGIN_DEPENDENCY(Plugin1);
+/// PL_PLUGIN_DEPENDENCY(Plugin1);
 ///
 /// That instructs the plPlugin system to make sure that Plugin1 gets loaded and initialized before Plugin2 is initialized.
-#define PLASMA_PLUGIN_DEPENDENCY(PluginName) \
-  plPlugin::Init PLASMA_CONCAT(PLASMA_CONCAT(plugin_dep_, PluginName), PLASMA_SOURCE_LINE)(PLASMA_PP_STRINGIFY(PluginName))
+#define PL_PLUGIN_DEPENDENCY(PluginName) \
+  plPlugin::Init PL_CONCAT(PL_CONCAT(plugin_dep_, PluginName), PL_SOURCE_LINE)(PL_PP_STRINGIFY(PluginName))
 
 /// \brief Creates a function that is executed when the plugin gets loaded.
 ///
-/// Just insert PLASMA_PLUGIN_ON_LOADED() { /* function body */ } into a CPP file of a plugin to add a function that is called
+/// Just insert PL_PLUGIN_ON_LOADED() { /* function body */ } into a CPP file of a plugin to add a function that is called
 /// right after the plugin got loaded.
-/// If the plugin has depenencies (set via PLASMA_PLUGIN_DEPENDENCY()), it is guaranteed that all ON_LOADED functions of the
+/// If the plugin has depenencies (set via PL_PLUGIN_DEPENDENCY()), it is guaranteed that all ON_LOADED functions of the
 /// dependencies are called first.
 /// If there are multiple such functions defined within the same DLL, there is no guarantee in which order they are called.
-#define PLASMA_PLUGIN_ON_LOADED()                                \
+#define PL_PLUGIN_ON_LOADED()                                \
   static void plugin_OnLoaded();                             \
   plPlugin::Init plugin_OnLoadedInit(plugin_OnLoaded, true); \
   static void plugin_OnLoaded()
@@ -156,11 +159,11 @@ private:
 ///
 /// This is typically the case when the application shuts down.
 ///
-/// Just insert PLASMA_PLUGIN_ON_UNLOADED() { /* function body */ } into a CPP file of a plugin to add a function that is called
+/// Just insert PL_PLUGIN_ON_UNLOADED() { /* function body */ } into a CPP file of a plugin to add a function that is called
 /// right before the plugin gets unloaded.
 /// ON_UNLOADED function calls across DLLs are done in reverse order to the ON_LOADED function calls.
 /// If there are multiple such functions defined within the same DLL, there is no guarantee in which order they are called.
-#define PLASMA_PLUGIN_ON_UNLOADED()                                   \
+#define PL_PLUGIN_ON_UNLOADED()                                   \
   static void plugin_OnUnloaded();                                \
   plPlugin::Init plugin_OnUnloadedInit(plugin_OnUnloaded, false); \
   static void plugin_OnUnloaded()

@@ -133,12 +133,12 @@ void plQtStateMachineNode::UpdateState()
   }
 }
 
-void plQtStateMachineNode::ExtendContextMenu(QMenu& menu)
+void plQtStateMachineNode::ExtendContextMenu(QMenu& ref_menu)
 {
   if (IsAnyState())
     return;
 
-  QAction* pAction = new QAction("Set as Initial State", &menu);
+  QAction* pAction = new QAction("Set as Initial State", &ref_menu);
   pAction->setEnabled(IsInitialState() == false);
   pAction->connect(pAction, &QAction::triggered,
     [this]() {
@@ -146,7 +146,7 @@ void plQtStateMachineNode::ExtendContextMenu(QMenu& menu)
       pScene->SetInitialState(this);
     });
 
-  menu.addAction(pAction);
+  ref_menu.addAction(pAction);
 }
 
 bool plQtStateMachineNode::IsInitialState() const
@@ -181,8 +181,8 @@ void plQtStateMachineNode::UpdateHeaderColor()
 
 //////////////////////////////////////////////////////////////////////////
 
-plQtStateMachineAssetScene::plQtStateMachineAssetScene(QObject* parent /*= nullptr*/)
-  : plQtNodeScene(parent)
+plQtStateMachineAssetScene::plQtStateMachineAssetScene(QObject* pParent /*= nullptr*/)
+  : plQtNodeScene(pParent)
 {
   SetConnectionStyle(plQtNodeScene::ConnectionStyle::StraightLine);
   SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::DirectionArrows);

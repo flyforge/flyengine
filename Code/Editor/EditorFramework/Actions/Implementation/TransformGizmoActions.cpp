@@ -4,8 +4,8 @@
 #include <EditorFramework/Dialogs/SnapSettingsDlg.moc.h>
 #include <EditorFramework/EditTools/StandardGizmoEditTools.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmoAction, 0, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmoAction, 0, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plGizmoAction::plGizmoAction(const plActionContext& context, const char* szName, const plRTTI* pGizmoType)
   : plButtonAction(context, szName, false, "")
@@ -85,22 +85,22 @@ plActionDescriptorHandle plTransformGizmoActions::s_SnapSettings;
 
 void plTransformGizmoActions::RegisterActions()
 {
-  s_hGizmoCategory = PLASMA_REGISTER_CATEGORY("GizmoCategory");
-  s_hGizmoMenu = PLASMA_REGISTER_MENU("Gizmo.Menu");
-  s_hNoGizmo = PLASMA_REGISTER_ACTION_1("Gizmo.Mode.Select", plActionScope::Document, "Gizmo", "Q", plGizmoAction, nullptr);
-  s_hTranslateGizmo = PLASMA_REGISTER_ACTION_1(
+  s_hGizmoCategory = PL_REGISTER_CATEGORY("GizmoCategory");
+  s_hGizmoMenu = PL_REGISTER_MENU("G.Gizmos");
+  s_hNoGizmo = PL_REGISTER_ACTION_1("Gizmo.Mode.Select", plActionScope::Document, "Gizmo", "Q", plGizmoAction, nullptr);
+  s_hTranslateGizmo = PL_REGISTER_ACTION_1(
     "Gizmo.Mode.Translate", plActionScope::Document, "Gizmo", "W", plToggleWorldSpaceGizmo, plGetStaticRTTI<plTranslateGizmoEditTool>());
-  s_hRotateGizmo = PLASMA_REGISTER_ACTION_1(
+  s_hRotateGizmo = PL_REGISTER_ACTION_1(
     "Gizmo.Mode.Rotate", plActionScope::Document, "Gizmo", "E", plToggleWorldSpaceGizmo, plGetStaticRTTI<plRotateGizmoEditTool>());
   s_hScaleGizmo =
-    PLASMA_REGISTER_ACTION_1("Gizmo.Mode.Scale", plActionScope::Document, "Gizmo", "R", plGizmoAction, plGetStaticRTTI<plScaleGizmoEditTool>());
-  s_hDragToPositionGizmo = PLASMA_REGISTER_ACTION_1(
+    PL_REGISTER_ACTION_1("Gizmo.Mode.Scale", plActionScope::Document, "Gizmo", "R", plGizmoAction, plGetStaticRTTI<plScaleGizmoEditTool>());
+  s_hDragToPositionGizmo = PL_REGISTER_ACTION_1(
     "Gizmo.Mode.DragToPosition", plActionScope::Document, "Gizmo", "T", plGizmoAction, plGetStaticRTTI<plDragToPositionGizmoEditTool>());
-  s_hWorldSpace = PLASMA_REGISTER_ACTION_1(
+  s_hWorldSpace = PL_REGISTER_ACTION_1(
     "Gizmo.TransformSpace", plActionScope::Document, "Gizmo", "", plTransformGizmoAction, plTransformGizmoAction::ActionType::GizmoToggleWorldSpace);
-  s_hMoveParentOnly = PLASMA_REGISTER_ACTION_1("Gizmo.MoveParentOnly", plActionScope::Document, "Gizmo", "", plTransformGizmoAction,
+  s_hMoveParentOnly = PL_REGISTER_ACTION_1("Gizmo.MoveParentOnly", plActionScope::Document, "Gizmo", "", plTransformGizmoAction,
     plTransformGizmoAction::ActionType::GizmoToggleMoveParentOnly);
-  s_SnapSettings = PLASMA_REGISTER_ACTION_1(
+  s_SnapSettings = PL_REGISTER_ACTION_1(
     "Gizmo.SnapSettings", plActionScope::Document, "Gizmo", "End", plTransformGizmoAction, plTransformGizmoAction::ActionType::GizmoSnapSettings);
 }
 
@@ -118,32 +118,32 @@ void plTransformGizmoActions::UnregisterActions()
   plActionManager::UnregisterAction(s_SnapSettings);
 }
 
-void plTransformGizmoActions::MapMenuActions(const char* szMapping, const char* szPath)
+void plTransformGizmoActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/Gizmo.Menu");
+  const plStringView sTarget = "G.Gizmos";
 
-  pMap->MapAction(s_hGizmoMenu, szPath, 4.0f);
-  pMap->MapAction(s_hNoGizmo, sSubPath, 0.0f);
-  pMap->MapAction(s_hTranslateGizmo, sSubPath, 1.0f);
-  pMap->MapAction(s_hRotateGizmo, sSubPath, 2.0f);
-  pMap->MapAction(s_hScaleGizmo, sSubPath, 3.0f);
-  pMap->MapAction(s_hDragToPositionGizmo, sSubPath, 4.0f);
-  pMap->MapAction(s_hWorldSpace, sSubPath, 6.0f);
-  pMap->MapAction(s_hMoveParentOnly, sSubPath, 7.0f);
-  pMap->MapAction(s_SnapSettings, sSubPath, 8.0f);
+  pMap->MapAction(s_hGizmoMenu, "G.Edit", 4.0f);
+  pMap->MapAction(s_hNoGizmo, sTarget, 0.0f);
+  pMap->MapAction(s_hTranslateGizmo, sTarget, 1.0f);
+  pMap->MapAction(s_hRotateGizmo, sTarget, 2.0f);
+  pMap->MapAction(s_hScaleGizmo, sTarget, 3.0f);
+  pMap->MapAction(s_hDragToPositionGizmo, sTarget, 4.0f);
+  pMap->MapAction(s_hWorldSpace, sTarget, 6.0f);
+  pMap->MapAction(s_hMoveParentOnly, sTarget, 7.0f);
+  pMap->MapAction(s_SnapSettings, sTarget, 8.0f);
 }
 
-void plTransformGizmoActions::MapToolbarActions(const char* szMapping, const char* szPath)
+void plTransformGizmoActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/GizmoCategory");
+  const plStringView sSubPath = "GizmoCategory";
 
-  pMap->MapAction(s_hGizmoCategory, szPath, 4.0f);
+  pMap->MapAction(s_hGizmoCategory, "", 4.0f);
   pMap->MapAction(s_hNoGizmo, sSubPath, 0.0f);
   pMap->MapAction(s_hTranslateGizmo, sSubPath, 1.0f);
   pMap->MapAction(s_hRotateGizmo, sSubPath, 2.0f);
@@ -155,9 +155,9 @@ void plTransformGizmoActions::MapToolbarActions(const char* szMapping, const cha
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformGizmoAction, 0, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformGizmoAction, 0, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plTransformGizmoAction::plTransformGizmoAction(const plActionContext& context, const char* szName, ActionType type)
   : plButtonAction(context, szName, false, "")
@@ -249,8 +249,8 @@ void plTransformGizmoAction::UpdateState()
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTranslateGizmoAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTranslateGizmoAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plTranslateGizmoAction::s_hSnappingValueMenu;
 plActionDescriptorHandle plTranslateGizmoAction::s_hSnapPivotToGrid;
@@ -258,11 +258,9 @@ plActionDescriptorHandle plTranslateGizmoAction::s_hSnapObjectsToGrid;
 
 void plTranslateGizmoAction::RegisterActions()
 {
-  s_hSnappingValueMenu = PLASMA_REGISTER_CATEGORY("Gizmo.Translate.Snap.Menu");
-  s_hSnapPivotToGrid = PLASMA_REGISTER_ACTION_1("Gizmo.Translate.Snap.PivotToGrid", plActionScope::Document, "Gizmo - Position Snap", "Ctrl+End",
-    plTranslateGizmoAction, plTranslateGizmoAction::ActionType::SnapSelectionPivotToGrid);
-  s_hSnapObjectsToGrid = PLASMA_REGISTER_ACTION_1("Gizmo.Translate.Snap.ObjectsToGrid", plActionScope::Document, "Gizmo - Position Snap", "",
-    plTranslateGizmoAction, plTranslateGizmoAction::ActionType::SnapEachSelectedObjectToGrid);
+  s_hSnappingValueMenu = PL_REGISTER_CATEGORY("Gizmo.Translate.Snap.Menu");
+  s_hSnapPivotToGrid = PL_REGISTER_ACTION_1("Gizmo.Translate.Snap.PivotToGrid", plActionScope::Document, "Gizmo - Position Snap", "Ctrl+End", plTranslateGizmoAction, plTranslateGizmoAction::ActionType::SnapSelectionPivotToGrid);
+  s_hSnapObjectsToGrid = PL_REGISTER_ACTION_1("Gizmo.Translate.Snap.ObjectsToGrid", plActionScope::Document, "Gizmo - Position Snap", "", plTranslateGizmoAction, plTranslateGizmoAction::ActionType::SnapEachSelectedObjectToGrid);
 }
 
 void plTranslateGizmoAction::UnregisterActions()
@@ -272,17 +270,15 @@ void plTranslateGizmoAction::UnregisterActions()
   plActionManager::UnregisterAction(s_hSnapObjectsToGrid);
 }
 
-void plTranslateGizmoAction::MapActions(const char* szMapping, const char* szPath)
+void plTranslateGizmoAction::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/Gizmo.Translate.Snap.Menu");
+  pMap->MapAction(s_hSnappingValueMenu, "G.Gizmos", 8.0f);
 
-  pMap->MapAction(s_hSnappingValueMenu, szPath, 8.0f);
-
-  pMap->MapAction(s_hSnapPivotToGrid, sSubPath, 0.0f);
-  pMap->MapAction(s_hSnapObjectsToGrid, sSubPath, 1.0f);
+  pMap->MapAction(s_hSnapPivotToGrid, "G.Gizmos", "Gizmo.Translate.Snap.Menu", 0.0f);
+  pMap->MapAction(s_hSnapObjectsToGrid, "G.Gizmos", "Gizmo.Translate.Snap.Menu", 1.0f);
 }
 
 plTranslateGizmoAction::plTranslateGizmoAction(const plActionContext& context, const char* szName, ActionType type)

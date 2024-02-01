@@ -10,13 +10,13 @@
 
 class plOpenDdlReaderElement;
 
-struct PLASMA_FOUNDATION_DLL plSerializedBlock
+struct PL_FOUNDATION_DLL plSerializedBlock
 {
   plString m_Name;
   plUniquePtr<plAbstractObjectGraph> m_Graph;
 };
 
-class PLASMA_FOUNDATION_DLL plAbstractGraphDdlSerializer
+class PL_FOUNDATION_DLL plAbstractGraphDdlSerializer
 {
 public:
   static void Write(plStreamWriter& inout_stream, const plAbstractObjectGraph* pGraph, const plAbstractObjectGraph* pTypesGraph = nullptr, bool bCompactMmode = true, plOpenDdlWriter::TypeStringMode typeMode = plOpenDdlWriter::TypeStringMode::Shortest);

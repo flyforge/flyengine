@@ -8,7 +8,7 @@ class plExposedParametersAttribute;
 class plExposedParameterCommandAccessor;
 
 /// \brief Default state provider handling variant maps with the plExposedParametersAttribute set. Reflects the default value defined in the plExposedParameter.
-class PLASMA_EDITORFRAMEWORK_DLL plExposedParametersDefaultStateProvider : public plDefaultStateProvider
+class PL_EDITORFRAMEWORK_DLL plExposedParametersDefaultStateProvider : public plDefaultStateProvider
 {
 public:
   static plSharedPtr<plDefaultStateProvider> CreateProvider(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);

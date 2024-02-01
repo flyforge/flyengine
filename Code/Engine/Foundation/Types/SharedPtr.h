@@ -9,19 +9,19 @@ template <typename T>
 class plSharedPtr
 {
 public:
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   /// \brief Creates an empty shared ptr.
   plSharedPtr();
 
-  /// \brief Creates a shared ptr from a freshly created instance through PLASMA_NEW or PLASMA_DEFAULT_NEW.
+  /// \brief Creates a shared ptr from a freshly created instance through PL_NEW or PL_DEFAULT_NEW.
   template <typename U>
   plSharedPtr(const plInternal::NewInstance<U>& instance);
 
   /// \brief Creates a shared ptr from a pointer and an allocator. The passed allocator will be used to destroy the instance when the shared
   /// ptr goes out of scope.
   template <typename U>
-  plSharedPtr(U* pInstance, plAllocatorBase* pAllocator);
+  plSharedPtr(U* pInstance, plAllocator* pAllocator);
 
   /// \brief Copy constructs a shared ptr from another. Both will hold a reference to the managed object afterwards.
   plSharedPtr(const plSharedPtr<T>& other);
@@ -44,7 +44,7 @@ public:
   /// \brief Destroys the managed object using the stored allocator if no one else references it anymore.
   ~plSharedPtr();
 
-  /// \brief Sets the shared ptr from a freshly created instance through PLASMA_NEW or PLASMA_DEFAULT_NEW.
+  /// \brief Sets the shared ptr from a freshly created instance through PL_NEW or PL_DEFAULT_NEW.
   template <typename U>
   plSharedPtr<T>& operator=(const plInternal::NewInstance<U>& instance);
 
@@ -120,7 +120,7 @@ private:
   void ReleaseReferenceIfValid();
 
   T* m_pInstance;
-  plAllocatorBase* m_pAllocator;
+  plAllocator* m_pAllocator;
 };
 
 #include <Foundation/Types/Implementation/SharedPtr_inl.h>

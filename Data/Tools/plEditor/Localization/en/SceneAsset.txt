@@ -1,0 +1,207 @@
+# Asset Types
+
+Layer;Scene Layer
+Prefab;Prefab
+Scene;Scene
+
+# Component Types
+
+plAlwaysVisibleComponent;Always Visible
+plAmbientLightComponent;Ambient Light
+plAreaDamageComponent;Area Damage
+plBeamComponent;Beam
+plLocalBlackboardComponent;Local Blackboard
+plGlobalBlackboardComponent;Global Blackboard
+plBoxReflectionProbeComponent;Box Reflection Probe
+plCameraComponent;Camera
+plClothSheetComponent;Cloth Sheet
+plColorAnimationComponent;Color Animation
+plCommentComponent;Comment
+plDebugTextComponent;Debug Text
+plDirectionalLightComponent;Directional Light
+plFakeRopeComponent;Fake Rope Simulation
+plFogComponent;Fog
+plGrabbableItemComponent;Grabbable Item
+plGreyBoxComponent;Grey Boxing
+plHeadBoneComponent;Head Bone
+plHeightfieldComponent;Heightfield
+plInputComponent;Input
+plInstancedMeshComponent;Instanced Mesh
+plJointAttachmentComponent;Joint Attachment
+plJointOverrideComponent;Joint Override
+plLensFlareComponent;Lens Flare
+plLineToComponent;Draw Line To Object
+plMarkerComponent;Marker
+plMeshComponent;Mesh
+plMoveToComponent;Move To
+plOccluderComponent;Occluder Component
+plPlayerStartPointComponent;Player Start Point
+plPointLightComponent;Point Light
+plPrefabReferenceComponent;Prefab Reference
+plProjectileComponent;Projectile
+plPropertyAnimComponent;Property Animation
+plRaycastComponent;Raycast Placement
+plRenderTargetActivatorComponent;Render Target Activator
+plRopeRenderComponent;Rope Renderer
+plRotorComponent;Rotor
+plSensorConeComponent;Cone Sensor
+plSensorCylinderComponent;Cylinder Sensor
+plSensorSphereComponent;Sphere Sensor
+plSimpleAnimationComponent;Simple Animation
+plSimpleWindComponent;Simple Wind
+plSkeletonPoseComponent;Skeleton Pose
+plSkyBoxComponent;Sky Box
+plSkyLightComponent;Sky Light
+plSliderComponent;Slider
+plSpawnComponent;Spawn
+plSpawnBoxComponent;Spawnbox
+plSphereReflectionProbeComponent;Sphere Reflection Probe
+plSpotLightComponent;Spot Light
+plSpriteComponent;Sprite
+plTimedDeathComponent;Timed Death
+plWindVolumeConeComponent;Cone Wind Volume
+plWindVolumeCylinderComponent;Cylinder Wind Volume
+plWindVolumeSphereComponent;Sphere Wind Volume
+plBakedProbesComponent;Baked Probes
+plBakedProbesVolumeComponent;Baked Probes Volume
+plScriptComponent;Script Component
+plPathComponent;Path Shape
+plPathNodeComponent;Path Node
+plFollowPathComponent;Follow Path
+plPowerConnectorComponent;Power Connector
+plTriggerDelayModifierComponent;Trigger Delay Modifier
+plCommentComponent;Comment
+plForwardEventsToGameStateComponent;Forward Events To Game State
+plResetTransformComponent;Reset Transform
+plVolumeBoxComponent;Box Volume
+plVolumeSphereComponent;Sphere Volume
+plPostProcessingComponent;Post Processing
+
+# Properties
+
+EditorShortcut;Editor Shortcut;Press ALT+Number to jump to this camera.
+Scene.CreateThumbnail;Create Scene Thumbnail
+Scene.GameMode.PlayFromHere;Play From Here
+Scene.GameObject.CreateEmptyHere;Create Empty Object Here
+Scene.Camera.Create.0;Create Level Camera 0;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.1;Create Level Camera 1;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.2;Create Level Camera 2;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.3;Create Level Camera 3;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.4;Create Level Camera 4;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.5;Create Level Camera 5;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.6;Create Level Camera 6;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.7;Create Level Camera 7;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.8;Create Level Camera 8;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.Create.9;Create Level Camera 9;Creates a camera node at the current editor camera position and configures its shortcut
+Scene.Camera.JumpTo.0;Jump to Level Camera 0;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.1;Jump to Level Camera 1;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.2;Jump to Level Camera 2;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.3;Jump to Level Camera 3;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.4;Jump to Level Camera 4;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.5;Jump to Level Camera 5;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.6;Jump to Level Camera 6;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.7;Jump to Level Camera 7;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.8;Jump to Level Camera 8;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.JumpTo.9;Jump to Level Camera 9;Moves the editor camera to a camera position that is stored in the level file
+Scene.Camera.MoveCameraHere;Move Camera Here;Moves the camera close to the point that the mouse points at.
+Scene.Camera.Restore.0;Go to Favorite Position 0;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.1;Go to Favorite Position 1;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.2;Go to Favorite Position 2;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.3;Go to Favorite Position 3;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.4;Go to Favorite Position 4;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.5;Go to Favorite Position 5;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.6;Go to Favorite Position 6;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.7;Go to Favorite Position 7;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.8;Go to Favorite Position 8;Moves the editor camera to a previously saved favorite position
+Scene.Camera.Restore.9;Go to Favorite Position 9;Moves the editor camera to a previously saved favorite position
+Scene.Camera.SnapCameraToObject;Align Camera with Object;Moves the camera to be at the exact location of the selected object.
+Scene.Camera.SnapObjectToCamera;Align Object with Camera;Moves the object to be at the current location of the camera.
+Scene.Camera.Speed;Camera Speed;Camera Speed: CTRL+Mousewheel to change
+Scene.Camera.Store.0;Save Favorite Position 0;Saves the current position as a favorite user position
+Scene.Camera.Store.1;Save Favorite Position 1;Saves the current position as a favorite user position
+Scene.Camera.Store.2;Save Favorite Position 2;Saves the current position as a favorite user position
+Scene.Camera.Store.3;Save Favorite Position 3;Saves the current position as a favorite user position
+Scene.Camera.Store.4;Save Favorite Position 4;Saves the current position as a favorite user position
+Scene.Camera.Store.5;Save Favorite Position 5;Saves the current position as a favorite user position
+Scene.Camera.Store.6;Save Favorite Position 6;Saves the current position as a favorite user position
+Scene.Camera.Store.7;Save Favorite Position 7;Saves the current position as a favorite user position
+Scene.Camera.Store.8;Save Favorite Position 8;Saves the current position as a favorite user position
+Scene.Camera.Store.9;Save Favorite Position 9;Saves the current position as a favorite user position
+Scene.ExportAndRun;Export and Run...
+Scene.ExportSceneToOBJ;Export Scene Geometry to OBJ...
+Scene.FavoriteCams.Menu;Favorite Cameras
+Scene.GameMode.Play;Play the Game
+Scene.GameMode.Simulate;Simulate World
+Scene.GameMode.Stop;Reset World
+Scene.KeepSimulationChanges;Keep Simulation Changes;Only possible during simulation. Synchronizes the position of selected objects back to the editor.
+Scene.Render.AddAmbient;Add Ambient Light
+Scene.Render.Grid;Show Grid
+Scene.Render.SelectionOverlay;Visualize Selection
+Scene.Render.ShapeIcons;Render Shape Icons
+Scene.Render.Visualizers;Render Visualizers
+Scene.Simulation.Speed.01;10%
+Scene.Simulation.Speed.025;25%
+Scene.Simulation.Speed.05;50%
+Scene.Simulation.Speed.1;100%
+Scene.Simulation.Speed.10;1000%
+Scene.Simulation.Speed.15;150%
+Scene.Simulation.Speed.2;200%
+Scene.Simulation.Speed.3;300%
+Scene.Simulation.Speed.4;400%
+Scene.Simulation.Speed.5;500%
+Scene.Simulation.Speed.Menu;Simulation Speed
+Scene.Utils.Menu;Utilities
+Scene.View.Span;Spawn View
+Scene.View.Toggle;Toggle Views
+Scene.Render.PickTransparent;Select Transparent
+
+Layer.CreateLayer;Create Layer...
+Layer.DeleteLayer;Delete Layer
+Layer.SaveLayer;Save Layer
+Layer.SaveActiveLayer;Save Active Layer
+Layer.LayerLoaded;Layer Loaded
+Layer.LayerVisible;Layer Visible
+
+plLogicOperator::Equal;=
+plLogicOperator::Unequal;<>
+plLogicOperator::Less;<
+plLogicOperator::LessEqual;<=
+plLogicOperator::Greater;>
+plLogicOperator::GreaterEqual;>=
+
+plExposedSceneProperty;Exposed Property
+
+plCameraMode::PerspectiveFixedFovX;Perspective Fixed X
+plCameraMode::PerspectiveFixedFovY;Perspective Fixed Y
+plCameraMode::OrthoFixedWidth;Ortho Fixed Width
+plCameraMode::OrthoFixedHeight;Ortho Fixed Height
+
+plCameraUsageHint::RenderTarget;Render to Texture
+
+plInputMessageGranularity::PressOnly;Only Key Pressed
+plInputMessageGranularity::PressAndRelease;Key Pressed and Released
+plInputMessageGranularity::PressReleaseAndDown;Key Pressed, Released and Down
+plInputMessageGranularity::PressReleaseDownAndUp;All, even Key Up
+
+plClothSheetFlags::FixedCornerTopLeft;Corner: Top Left
+plClothSheetFlags::FixedCornerTopRight;Corner: Top Right
+plClothSheetFlags::FixedCornerBottomRight;Corner: Bottom Right
+plClothSheetFlags::FixedCornerBottomLeft;Corner: Bottom Left
+plClothSheetFlags::FixedEdgeTop;Edge: Top
+plClothSheetFlags::FixedEdgeRight;Edge: Right
+plClothSheetFlags::FixedEdgeBottom;Edge: Bottom
+plClothSheetFlags::FixedEdgeLeft;Edge: Left
+plClothSheetFlags::FixedEdgeLeft;Edge: Left
+
+plUpdateRate::EveryFrame;Every Frame
+plUpdateRate::Max30fps;Max 30 FPS
+plUpdateRate::Max20fps;Max 20 FPS
+plUpdateRate::Max10fps;Max 10 FPS
+plUpdateRate::Max5fps;Max 5 FPS
+plUpdateRate::Max2fps;Max 2 FPS
+plUpdateRate::Max1fps;Max 1 FPS
+plUpdateRate::Never;Never
+
+plRootMotionMode::SendMoveCharacterMsg;Send MoveCharacterMsg
+
+Prefab.NameLabel;Proxy For;When this is set to '<Prefab-Root>' the node represents the game object in a scene on which the prefab gets instantiated. In this case you cannot edit its name, transform, etc, but you can attach additional components.

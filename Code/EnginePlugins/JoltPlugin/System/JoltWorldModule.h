@@ -24,10 +24,10 @@ namespace JPH
   class GroupFilter;
 } // namespace JPH
 
-class PLASMA_JOLTPLUGIN_DLL plJoltWorldModule : public plPhysicsWorldModuleInterface
+class PL_JOLTPLUGIN_DLL plJoltWorldModule : public plPhysicsWorldModuleInterface
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltWorldModule, plPhysicsWorldModuleInterface);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plJoltWorldModule, plPhysicsWorldModuleInterface);
 
 public:
   plJoltWorldModule(plWorld* pWorld);

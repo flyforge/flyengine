@@ -26,7 +26,7 @@ namespace ReflectionDetail
     {
       return pRTTI->GetParentType()->GetTypeName();
     }
-    
+
     if ((pRTTI->GetTypeName() == "bool") || (pRTTI->GetTypeName() == "float") ||
         (pRTTI->GetTypeName() == "double") || (pRTTI->GetTypeName() == "plInt8") ||
         (pRTTI->GetTypeName() == "plUInt8") || (pRTTI->GetTypeName() == "plInt16") ||
@@ -143,4 +143,4 @@ void RemoveReflectionEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Reflection);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Reflection);

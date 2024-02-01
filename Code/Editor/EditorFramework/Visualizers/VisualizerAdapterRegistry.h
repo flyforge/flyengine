@@ -8,9 +8,9 @@
 struct plVisualizerManagerEvent;
 class plDocument;
 
-class PLASMA_EDITORFRAMEWORK_DLL plVisualizerAdapterRegistry
+class PL_EDITORFRAMEWORK_DLL plVisualizerAdapterRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plVisualizerAdapterRegistry);
+  PL_DECLARE_SINGLETON(plVisualizerAdapterRegistry);
 
 public:
   plVisualizerAdapterRegistry();

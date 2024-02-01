@@ -7,7 +7,7 @@
 ///
 /// Used by deriving from this class and overriding the Run() method. Call DispatchQueue() regurarely so that the collected messages can be
 /// dispatched.
-class PLASMA_FOUNDATION_DLL plThreadWithDispatcher : public plThread
+class PL_FOUNDATION_DLL plThreadWithDispatcher : public plThread
 {
 public:
   using DispatchFunction = plDelegate<void(), 128>;

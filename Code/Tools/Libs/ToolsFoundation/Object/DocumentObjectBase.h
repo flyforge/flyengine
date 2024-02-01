@@ -7,15 +7,13 @@
 
 class plDocumentObjectManager;
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentObject
+class PL_TOOLSFOUNDATION_DLL plDocumentObject
 {
 public:
   plDocumentObject()
-    : m_pDocumentObjectManager(nullptr)
-    , m_pParent(nullptr)
-  {
-  }
-  virtual ~plDocumentObject() {}
+
+    = default;
+  virtual ~plDocumentObject() = default;
 
   // Accessors
   const plUuid& GetGuid() const { return m_Guid; }
@@ -30,15 +28,15 @@ public:
   // Ownership
   const plDocumentObject* GetParent() const { return m_pParent; }
 
-  virtual void InsertSubObject(plDocumentObject* pObject, const char* szProperty, const plVariant& index);
+  virtual void InsertSubObject(plDocumentObject* pObject, plStringView sProperty, const plVariant& index);
   virtual void RemoveSubObject(plDocumentObject* pObject);
 
   // Helper
-  void ComputeObjectHash(plUInt64& uiHash) const;
+  void ComputeObjectHash(plUInt64& ref_uiHash) const;
   const plHybridArray<plDocumentObject*, 8>& GetChildren() const { return m_Children; }
   plDocumentObject* GetChild(const plUuid& guid);
   const plDocumentObject* GetChild(const plUuid& guid) const;
-  const char* GetParentProperty() const { return m_sParentProperty; }
+  plStringView GetParentProperty() const { return m_sParentProperty; }
   const plAbstractProperty* GetParentPropertyType() const;
   plVariant GetPropertyIndex() const;
   bool IsOnHeap() const;
@@ -50,16 +48,16 @@ private:
 
 protected:
   plUuid m_Guid;
-  plDocumentObjectManager* m_pDocumentObjectManager;
+  plDocumentObjectManager* m_pDocumentObjectManager = nullptr;
 
-  plDocumentObject* m_pParent;
+  plDocumentObject* m_pParent = nullptr;
   plHybridArray<plDocumentObject*, 8> m_Children;
 
   // Sub object data
   plString m_sParentProperty;
 };
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentStorageObject : public plDocumentObject
+class PL_TOOLSFOUNDATION_DLL plDocumentStorageObject : public plDocumentObject
 {
 public:
   plDocumentStorageObject(const plRTTI* pType)
@@ -68,7 +66,7 @@ public:
   {
   }
 
-  virtual ~plDocumentStorageObject() {}
+  virtual ~plDocumentStorageObject() = default;
 
   virtual const plIReflectedTypeAccessor& GetTypeAccessor() const override { return m_ObjectPropertiesAccessor; }
 

@@ -5,7 +5,7 @@
 
 class plOpenDdlReaderElement;
 
-class PLASMA_FOUNDATION_DLL plReflectionSerializer
+class PL_FOUNDATION_DLL plReflectionSerializer
 {
 public:
   /// \brief Writes all property values of the reflected \a pObject of type \a pRtti to \a stream in DDL format.

@@ -2,6 +2,7 @@
 
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptGraph.h>
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptTypeDeduction.h>
+#include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptVariable.moc.h>
 
 // static
 plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromNodeDataType(const plVisualScriptPin& pin)
@@ -21,6 +22,18 @@ plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromTypeProperty
   }
 
   return plVisualScriptDataType::Invalid;
+}
+
+// static
+plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromExpressionInput(const plVisualScriptPin& pin)
+{
+  return DeductFromExpressionVariable(pin, "Inputs");
+}
+
+// static
+plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromExpressionOutput(const plVisualScriptPin& pin)
+{
+  return DeductFromExpressionVariable(pin, "Outputs");
 }
 
 // static
@@ -96,6 +109,13 @@ plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromPropertyProp
 }
 
 // static
+plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductDummy(const plDocumentObject* pObject, const plVisualScriptPin* pDisconnectedPin)
+{
+  // nothing to do here
+  return plVisualScriptDataType::Float;
+}
+
+// static
 const plRTTI* plVisualScriptTypeDeduction::GetReflectedType(const plDocumentObject* pObject)
 {
   auto typeVar = pObject->GetTypeAccessor().GetValue("Type");
@@ -147,4 +167,29 @@ const plAbstractProperty* plVisualScriptTypeDeduction::GetReflectedProperty(cons
   }
 
   return pProperty;
+}
+
+// static
+plVisualScriptDataType::Enum plVisualScriptTypeDeduction::DeductFromExpressionVariable(const plVisualScriptPin& pin, plStringView sPropertyName)
+{
+  auto pObject = pin.GetParent();
+
+  plVariant varList = pObject->GetTypeAccessor().GetValue(sPropertyName);
+  if (varList.IsA<plVariantArray>() == false)
+    return plVisualScriptDataType::Invalid;
+
+  plVariant var = varList[pin.GetDataPinIndex()];
+  if (var.IsA<plUuid>() == false)
+    return plVisualScriptDataType::Invalid;
+
+  const plDocumentObject* pVarObject = pObject->GetDocumentObjectManager()->GetObject(var.Get<plUuid>());
+  if (pVarObject == nullptr)
+    return plVisualScriptDataType::Invalid;
+
+  plVariant typeVar = pVarObject->GetTypeAccessor().GetValue("Type");
+  if (typeVar.IsA<plInt64>() == false)
+    return plVisualScriptDataType::Invalid;
+
+  auto expressionDataType = static_cast<plVisualScriptExpressionDataType::Enum>(typeVar.Get<plInt64>());
+  return plVisualScriptExpressionDataType::GetVisualScriptDataType(expressionDataType);
 }

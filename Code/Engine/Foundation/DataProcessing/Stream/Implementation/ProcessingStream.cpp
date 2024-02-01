@@ -10,7 +10,7 @@ static_assert(((int)plProcessingStream::DataType::Byte2 & ~3) == (int)plProcessi
 static_assert(((int)plProcessingStream::DataType::Short3 & ~3) == (int)plProcessingStream::DataType::Short);
 static_assert(((int)plProcessingStream::DataType::Int4 & ~3) == (int)plProcessingStream::DataType::Int);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
+#if PL_ENABLED(PL_PLATFORM_64BIT)
 static_assert(sizeof(plProcessingStream) == 32);
 #endif
 
@@ -75,7 +75,7 @@ void plProcessingStream::SetSize(plUInt64 uiNumElements)
     m_pData = plFoundation::GetDefaultAllocator()->Allocate(static_cast<size_t>(uiNewDataSize), 0);
   }
 
-  PLASMA_ASSERT_DEV(m_pData != nullptr, "Allocating {0} elements of {1} bytes each, with {2} bytes alignment, failed", uiNumElements, ((plUInt32)GetDataTypeSize(m_Type)), m_uiAlignment);
+  PL_ASSERT_DEV(m_pData != nullptr, "Allocating {0} elements of {1} bytes each, with {2} bytes alignment, failed", uiNumElements, ((plUInt32)GetDataTypeSize(m_Type)), m_uiAlignment);
   m_uiDataSize = uiNewDataSize;
 }
 
@@ -123,7 +123,7 @@ static plUInt16 s_TypeSize[] = {
   12, // Int3,
   16, // Int4,
 };
-static_assert(PLASMA_ARRAY_SIZE(s_TypeSize) == (size_t)plProcessingStream::DataType::Count);
+static_assert(PL_ARRAY_SIZE(s_TypeSize) == (size_t)plProcessingStream::DataType::Count);
 
 // static
 plUInt16 plProcessingStream::GetDataTypeSize(DataType type)
@@ -157,7 +157,7 @@ static plStringView s_TypeName[] = {
   "Int3"_plsv, // Int3,
   "Int4"_plsv, // Int4,
 };
-static_assert(PLASMA_ARRAY_SIZE(s_TypeName) == (size_t)plProcessingStream::DataType::Count);
+static_assert(PL_ARRAY_SIZE(s_TypeName) == (size_t)plProcessingStream::DataType::Count);
 
 // static
 plStringView plProcessingStream::GetDataTypeName(DataType type)
@@ -165,4 +165,4 @@ plStringView plProcessingStream::GetDataTypeName(DataType type)
   return s_TypeName[(plUInt32)type];
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_DataProcessing_Stream_Implementation_ProcessingStream);
+

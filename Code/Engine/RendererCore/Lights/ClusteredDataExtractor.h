@@ -10,7 +10,7 @@ struct plPerClusterData;
 
 class plClusteredDataCPU : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plClusteredDataCPU, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plClusteredDataCPU, plRenderData);
 
 public:
   plClusteredDataCPU();
@@ -41,9 +41,9 @@ public:
   plColor m_FogColor = plColor::Black;
 };
 
-class PLASMA_RENDERERCORE_DLL plClusteredDataExtractor : public plExtractor
+class PL_RENDERERCORE_DLL plClusteredDataExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plClusteredDataExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plClusteredDataExtractor, plExtractor);
 
 public:
   plClusteredDataExtractor(const char* szName = "ClusteredDataExtractor");
@@ -51,6 +51,8 @@ public:
 
   virtual void PostSortAndBatch(
     const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
 private:
   void FillItemListAndClusterData(plClusteredDataCPU* pData);
@@ -58,7 +60,7 @@ private:
   template <plUInt32 MaxData>
   struct TempCluster
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_BitMask[MaxData / 32];
   };

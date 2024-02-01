@@ -5,9 +5,9 @@
 #include <ParticlePlugin/Emitter/ParticleEmitter.h>
 #include <ParticlePlugin/Events/ParticleEvent.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitterFactory_OnEvent final : public plParticleEmitterFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEmitterFactory_OnEvent final : public plParticleEmitterFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_OnEvent, plParticleEmitterFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_OnEvent, plParticleEmitterFactory);
 
 public:
   plParticleEmitterFactory_OnEvent();
@@ -17,8 +17,8 @@ public:
   virtual void CopyEmitterProperties(plParticleEmitter* pEmitter, bool bFirstTime) const override;
   virtual void QueryMaxParticleCount(plUInt32& out_uiMaxParticlesAbs, plUInt32& out_uiMaxParticlesPerSecond) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plString m_sEventName;
   plUInt32 m_uiSpawnCountMin = 1;
@@ -26,9 +26,9 @@ public:
   plString m_sSpawnCountScaleParameter;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitter_OnEvent final : public plParticleEmitter
+class PL_PARTICLEPLUGIN_DLL plParticleEmitter_OnEvent final : public plParticleEmitter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitter_OnEvent, plParticleEmitter);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitter_OnEvent, plParticleEmitter);
 
 public:
   plTempHashedString m_sEventName;

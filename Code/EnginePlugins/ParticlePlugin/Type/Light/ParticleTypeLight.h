@@ -6,9 +6,9 @@
 class plView;
 class plExtractedRenderData;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeLightFactory final : public plParticleTypeFactory
+class PL_PARTICLEPLUGIN_DLL plParticleTypeLightFactory final : public plParticleTypeFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeLightFactory, plParticleTypeFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeLightFactory, plParticleTypeFactory);
 
 public:
   plParticleTypeLightFactory();
@@ -16,8 +16,8 @@ public:
   virtual const plRTTI* GetTypeType() const override;
   virtual void CopyTypeProperties(plParticleType* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   float m_fSizeFactor;
   float m_fIntensity;
@@ -27,9 +27,9 @@ public:
   plString m_sSizeScaleParameter;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeLight final : public plParticleType
+class PL_PARTICLEPLUGIN_DLL plParticleTypeLight final : public plParticleType
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeLight, plParticleType);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeLight, plParticleType);
 
 public:
   virtual void CreateRequiredStreams() override;
@@ -43,7 +43,7 @@ public:
 
   virtual float GetMaxParticleRadius(float fParticleSize) const override { return 0.5f * fParticleSize * m_fSizeFactor; }
 
-  virtual void ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const override;
+  virtual void ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const override;
 
 protected:
   virtual void Process(plUInt64 uiNumElements) override {}

@@ -10,21 +10,21 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_OnEvent, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_OnEvent>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_OnEvent, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_OnEvent>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("EventName", m_sEventName),
-    PLASMA_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(1)),
-    PLASMA_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
-    PLASMA_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
+    PL_MEMBER_PROPERTY("EventName", m_sEventName),
+    PL_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(1)),
+    PL_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
+    PL_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_OnEvent, 1, plRTTIDefaultAllocator<plParticleEmitter_OnEvent>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_OnEvent, 1, plRTTIDefaultAllocator<plParticleEmitter_OnEvent>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleEmitterFactory_OnEvent::plParticleEmitterFactory_OnEvent() = default;
@@ -67,34 +67,34 @@ enum class EmitterOnEventVersion
 };
 
 
-void plParticleEmitterFactory_OnEvent::Save(plStreamWriter& stream) const
+void plParticleEmitterFactory_OnEvent::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)EmitterOnEventVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   // Version 1
-  stream << m_sEventName;
+  inout_stream << m_sEventName;
 
   // Version 2
-  stream << m_uiSpawnCountMin;
-  stream << m_uiSpawnCountRange;
-  stream << m_sSpawnCountScaleParameter;
+  inout_stream << m_uiSpawnCountMin;
+  inout_stream << m_uiSpawnCountRange;
+  inout_stream << m_sSpawnCountScaleParameter;
 }
 
-void plParticleEmitterFactory_OnEvent::Load(plStreamReader& stream)
+void plParticleEmitterFactory_OnEvent::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)EmitterOnEventVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)EmitterOnEventVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_sEventName;
+  inout_stream >> m_sEventName;
 
   if (uiVersion >= 2)
   {
-    stream >> m_uiSpawnCountMin;
-    stream >> m_uiSpawnCountRange;
-    stream >> m_sSpawnCountScaleParameter;
+    inout_stream >> m_uiSpawnCountMin;
+    inout_stream >> m_uiSpawnCountRange;
+    inout_stream >> m_sSpawnCountScaleParameter;
   }
 }
 
@@ -137,4 +137,4 @@ void plParticleEmitter_OnEvent::ProcessEventQueue(plParticleEventQueue queue)
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter_OnEvent);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter_OnEvent);

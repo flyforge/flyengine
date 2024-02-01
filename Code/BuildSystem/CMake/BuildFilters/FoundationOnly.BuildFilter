@@ -1,4 +1,4 @@
-set_property(GLOBAL PROPERTY PLASMA_BUILD_FILTER_FoundationOnly
+set_property(GLOBAL PROPERTY PL_BUILD_FILTER_FoundationOnly
     Foundation
     enet
     zstd

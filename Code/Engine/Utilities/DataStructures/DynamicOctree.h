@@ -28,10 +28,10 @@
 /// Once objects are inserted, you can do range queries to find all objects in some location.
 /// Since removal is usually O(1) and insertion is O(d) the tree can be used for very dynamic
 /// data that changes frequently at run-time.
-class PLASMA_UTILITIES_DLL plDynamicOctree
+class PL_UTILITIES_DLL plDynamicOctree
 {
   /// \brief The amount that cells overlap (this is a loose octree). Typically set to 10%.
-  static const float s_LooseOctreeFactor;
+  static const float s_fLooseOctreeFactor;
 
 public:
   plDynamicOctree();
@@ -64,29 +64,29 @@ public:
   /// \brief Adds an object at position vCenter with bounding-box dimensions vHalfExtents to the tree. If the object is outside the tree and
   /// bOnlyIfInside is true, nothing will be inserted.
   ///
-  /// Returns PLASMA_SUCCESS when an object is inserted, PLASMA_FAILURE when the object was rejected. The latter can only happen when bOnlyIfInside
+  /// Returns PL_SUCCESS when an object is inserted, PL_FAILURE when the object was rejected. The latter can only happen when bOnlyIfInside
   /// is set to true. Through out_Object the exact identifier for the object in the tree is returned, which allows for removing the object
   /// with O(1) complexity later. iObjectType and iObjectInstance are the two user values that will be stored for the object. With
   /// RemoveObjectsOfType() one can also remove all objects with the same iObjectType value, if needed.
   plResult InsertObject(const plVec3& vCenter, const plVec3& vHalfExtents, plInt32 iObjectType, plInt32 iObjectInstance,
-    plDynamicTreeObject* out_Object = nullptr, bool bOnlyIfInside = false); // [tested]
+    plDynamicTreeObject* out_pObject = nullptr, bool bOnlyIfInside = false); // [tested]
 
   /// \brief Calls the Callback for every object that is inside the View-frustum. pPassThrough is passed to the Callback for custom
   /// purposes.
-  void FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const;
+  void FindVisibleObjects(const plFrustum& viewfrustum, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const;
 
   /// \brief Returns all objects that are located in a node that overlaps with the given point.
   ///
   /// \note This function will most likely also return objects that do not overlap with the point itself, because they are located
   /// in a node that overlaps with the point. You might need to do more thorough overlap checks to filter those out.
-  void FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough = nullptr) const; // [tested]
+  void FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough = nullptr) const; // [tested]
 
   /// \brief Returns all objects that are located in a node that overlaps with the rectangle with center vPoint and half edge length
   /// fRadius.
   ///
   /// \note This function will most likely also return objects that do not overlap with the rectangle itself, because they are located
   /// in a node that overlaps with the rectangle. You might need to do more thorough overlap checks to filter those out.
-  void FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback,
+  void FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK callback,
     void* pPassThrough = nullptr) const; // [tested]
 
   /// \brief Removes the given Object. Attention: This is an O(n) operation.
@@ -114,31 +114,31 @@ private:
     float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plDynamicTreeObject* out_Object);
 
   /// \brief Recursively checks which nodes are visible and calls the callback for each object at those nodes.
-  void FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx, float miny,
+  void FindVisibleObjects(const plFrustum& Viewfrustum, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx, float miny,
     float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const;
 
   /// \brief Recursively checks in which node a point is located and calls the callback for all objects at those nodes.
-  bool FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx, float miny, float maxy,
+  bool FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx, float miny, float maxy,
     float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const;
 
   /// \brief Recursively checks which node(s) a circle touches and calls the callback for all objects at those nodes.
-  bool FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
+  bool FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
     float miny, float maxy, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const;
 
   /// \brief The tree depth, used for finding a nodes unique ID
-  plUInt32 m_uiMaxTreeDepth;
+  plUInt32 m_uiMaxTreeDepth = 0;
 
   // \brief Also used for finding a nodes unique ID
-  plUInt32 m_uiAddIDTopLevel;
+  plUInt32 m_uiAddIDTopLevel = 0;
 
   /// \brief The square bounding Box (to prevent long thin nodes)
   plBoundingBox m_BBox;
 
   /// \brief The actual bounding box (to discard objects that are outside the world)
-  float m_fRealMinX, m_fRealMaxX, m_fRealMinY, m_fRealMaxY, m_fRealMinZ, m_fRealMaxZ;
+  float m_fRealMinX = 0, m_fRealMaxX = 0, m_fRealMinY = 0, m_fRealMaxY = 0, m_fRealMinZ = 0, m_fRealMaxZ = 0;
 
   /// \brief Used to turn the map into a multi-map.
-  plUInt32 m_uiMultiMapCounter;
+  plUInt32 m_uiMultiMapCounter = 0;
 
   /// \brief Every node has a unique index, the map allows to store many objects at each node, using that index
   plMap<plDynamicTree::plMultiMapKey, plDynamicTree::plObjectData> m_NodeMap;

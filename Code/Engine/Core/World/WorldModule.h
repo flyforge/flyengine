@@ -6,9 +6,9 @@
 
 class plWorld;
 
-class PLASMA_CORE_DLL plWorldModule : public plReflectedClass
+class PL_CORE_DLL plWorldModule : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plWorldModule, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plWorldModule, plReflectedClass);
 
 protected:
   plWorldModule(plWorld* pWorld);
@@ -36,14 +36,14 @@ protected:
   };
 
   /// \brief Update function delegate.
-  typedef plDelegate<void(const UpdateContext&)> UpdateFunction;
+  using UpdateFunction = plDelegate<void(const UpdateContext&)>;
 
   /// \brief Description of an update function that can be registered at the world.
   struct UpdateFunctionDesc
   {
     struct Phase
     {
-      typedef plUInt8 StorageType;
+      using StorageType = plUInt8;
 
       enum Enum
       {
@@ -57,14 +57,14 @@ protected:
       };
     };
 
-    UpdateFunctionDesc(const UpdateFunction& function, plStringView szFunctionName)
+    UpdateFunctionDesc(const UpdateFunction& function, plStringView sFunctionName)
       : m_Function(function)
     {
-      m_sFunctionName.Assign(szFunctionName);
+      m_sFunctionName.Assign(sFunctionName);
     }
 
     UpdateFunction m_Function;                    ///< Delegate to the actual update function.
-    plHashedString m_sFunctionName;               ///< Name of the function. Use the PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC macro to create a description
+    plHashedString m_sFunctionName;               ///< Name of the function. Use the PL_CREATE_MODULE_UPDATE_FUNCTION_DESC macro to create a description
                                                   ///< with the correct name.
     plHybridArray<plHashedString, 4> m_DependsOn; ///< Array of other functions on which this function depends on. This function will be
                                                   ///< called after all its dependencies have been called.
@@ -84,7 +84,7 @@ protected:
   void DeregisterUpdateFunction(const UpdateFunctionDesc& desc);
 
   /// \brief Returns the allocator used by the world.
-  plAllocatorBase* GetAllocator();
+  plAllocator* GetAllocator();
 
   /// \brief Returns the block allocator used by the world.
   plInternal::WorldLargeBlockAllocator* GetBlockAllocator();
@@ -113,7 +113,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief Helper class to get component type ids and create new instances of world modules from rtti.
-class PLASMA_CORE_DLL plWorldModuleFactory
+class PL_CORE_DLL plWorldModuleFactory
 {
 public:
   static plWorldModuleFactory* GetInstance();
@@ -125,7 +125,7 @@ public:
   plWorldModuleTypeId GetTypeId(const plRTTI* pRtti);
 
   /// \brief Creates a new instance of the world module with the given type id and world.
-  plWorldModule* CreateWorldModule(plUInt16 typeId, plWorld* pWorld);
+  plWorldModule* CreateWorldModule(plUInt16 uiTypeId, plWorld* pWorld);
 
   /// \brief Register explicit a mapping of a world module interface to a specific implementation.
   ///
@@ -134,9 +134,9 @@ public:
   void RegisterInterfaceImplementation(plStringView sInterfaceName, plStringView sImplementationName);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, WorldModuleFactory);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, WorldModuleFactory);
 
-  typedef plWorldModule* (*CreatorFunc)(plAllocatorBase*, plWorld*);
+  using CreatorFunc = plWorldModule* (*)(plAllocator*, plWorld*);
 
   plWorldModuleFactory();
   plWorldModuleTypeId RegisterWorldModule(const plRTTI* pRtti, CreatorFunc creatorFunc);
@@ -150,7 +150,7 @@ private:
 
   struct CreatorFuncContext
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     CreatorFunc m_Func;
     const plRTTI* m_pRtti;
@@ -162,18 +162,18 @@ private:
 };
 
 /// \brief Add this macro to the declaration of your module type.
-#define PLASMA_DECLARE_WORLD_MODULE()                                           \
+#define PL_DECLARE_WORLD_MODULE()                                           \
 public:                                                                     \
-  static PLASMA_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return s_TypeId; } \
+  static PL_ALWAYS_INLINE plWorldModuleTypeId TypeId() { return s_TypeId; } \
                                                                             \
 private:                                                                    \
   static plWorldModuleTypeId s_TypeId;
 
 /// \brief Implements the given module type. Add this macro to a cpp outside of the type declaration.
-#define PLASMA_IMPLEMENT_WORLD_MODULE(moduleType) \
+#define PL_IMPLEMENT_WORLD_MODULE(moduleType) \
   plWorldModuleTypeId moduleType::s_TypeId = plWorldModuleFactory::GetInstance()->RegisterWorldModule<moduleType, moduleType>();
 
 /// \brief Helper macro to create an update function description with proper name
-#define PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(func, instance) plWorldModule::UpdateFunctionDesc(plWorldModule::UpdateFunction(&func, instance), #func)
+#define PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(func, instance) plWorldModule::UpdateFunctionDesc(plWorldModule::UpdateFunction(&func, instance), #func)
 
 #include <Core/World/Implementation/WorldModule_inl.h>

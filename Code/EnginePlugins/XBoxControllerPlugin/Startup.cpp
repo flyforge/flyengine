@@ -7,18 +7,18 @@ static plInputDeviceXBox360* g_InputDeviceXBox360 = nullptr;
 plInputDeviceXBox360* plInputDeviceXBox360::GetDevice()
 {
   if (g_InputDeviceXBox360 == nullptr)
-    g_InputDeviceXBox360 = PLASMA_DEFAULT_NEW(plInputDeviceXBox360);
+    g_InputDeviceXBox360 = PL_DEFAULT_NEW(plInputDeviceXBox360);
 
   return g_InputDeviceXBox360;
 }
 
 void plInputDeviceXBox360::DestroyAllDevices()
 {
-  PLASMA_DEFAULT_DELETE(g_InputDeviceXBox360);
+  PL_DEFAULT_DELETE(g_InputDeviceXBox360);
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(InputDevices, InputDeviceXBox360)
+PL_BEGIN_SUBSYSTEM_DECLARATION(InputDevices, InputDeviceXBox360)
  
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation", 
@@ -53,7 +53,6 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(InputDevices, InputDeviceXBox360)
     plInputDeviceXBox360::DestroyAllDevices();
   }
  
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-PLASMA_STATICLINK_FILE(System, System_XBoxController_Startup);

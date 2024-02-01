@@ -7,7 +7,7 @@
 
 class QMouseEvent;
 
-class PLASMA_GUIFOUNDATION_DLL plQtColorGradientWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtColorGradientWidget : public QWidget
 {
   Q_OBJECT
 
@@ -17,32 +17,32 @@ public:
 
   void SetScrubberPosition(double fPosition);
 
-  void setColorGradientData(const plColorGradient* gradient);
+  void setColorGradientData(const plColorGradient* pGradient);
 
-  void setEditMode(bool edit);
-  void setShowColorCPs(bool show);
-  void setShowAlphaCPs(bool show);
-  void setShowIntensityCPs(bool show);
-  void setShowCoords(bool top, bool bottom);
+  void setEditMode(bool bEdit);
+  void setShowColorCPs(bool bShow);
+  void setShowAlphaCPs(bool bShow);
+  void setShowIntensityCPs(bool bShow);
+  void setShowCoords(bool bTop, bool bBottom);
 
   void FrameExtents();
   void ClearSelectedCP();
-  void SelectCP(plInt32 colorCP, plInt32 alphaCP, plInt32 intensityCP);
+  void SelectCP(plInt32 iColorCP, plInt32 iAlphaCP, plInt32 iIntensityCP);
 
 Q_SIGNALS:
   void GradientClicked();
-  void addColorCp(double posX, const plColorGammaUB& color);
-  void addAlphaCp(double posX, plUInt8 value);
-  void addIntensityCp(double posX, float intensity);
-  void moveColorCpToPos(plInt32 index, double newPosX);
-  void moveAlphaCpToPos(plInt32 index, double newPosX);
-  void moveIntensityCpToPos(plInt32 index, double newPosX);
-  void deleteColorCp(plInt32 index);
-  void deleteAlphaCp(plInt32 index);
-  void deleteIntensityCp(plInt32 index);
-  void selectionChanged(plInt32 colorCP, plInt32 alphaCP, plInt32 intensityCP);
+  void addColorCp(double fPosX, const plColorGammaUB& color);
+  void addAlphaCp(double fPosX, plUInt8 value);
+  void addIntensityCp(double fPosX, float fIntensity);
+  void moveColorCpToPos(plInt32 iIndex, double fNewPosX);
+  void moveAlphaCpToPos(plInt32 iIndex, double fNewPosX);
+  void moveIntensityCpToPos(plInt32 iIndex, double fNewPosX);
+  void deleteColorCp(plInt32 iIndex);
+  void deleteAlphaCp(plInt32 iIndex);
+  void deleteIntensityCp(plInt32 iIndex);
+  void selectionChanged(plInt32 iColorCP, plInt32 iAlphaCP, plInt32 iIntensityCP);
   void beginOperation();
-  void endOperation(bool commit);
+  void endOperation(bool bCommit);
   void triggerPickColor();
 
 private:
@@ -126,7 +126,7 @@ private:
   plInt32 m_iSelectedAlphaCP;
   plInt32 m_iSelectedIntensityCP;
 
-  QPoint m_LastMousePosition;
+  QPointF m_LastMousePosition;
   QPixmap m_AlphaPattern;
 
   bool m_bShowScrubber = false;

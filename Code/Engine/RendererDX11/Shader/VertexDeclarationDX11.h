@@ -10,7 +10,7 @@ struct ID3D11InputLayout;
 class plGALVertexDeclarationDX11 : public plGALVertexDeclaration
 {
 public:
-  PLASMA_ALWAYS_INLINE ID3D11InputLayout* GetDXInputLayout() const;
+  PL_ALWAYS_INLINE ID3D11InputLayout* GetDXInputLayout() const;
 
 protected:
   friend class plGALDeviceDX11;
@@ -24,7 +24,7 @@ protected:
 
   virtual ~plGALVertexDeclarationDX11();
 
-  ID3D11InputLayout* m_pDXInputLayout;
+  ID3D11InputLayout* m_pDXInputLayout = nullptr;
 };
 
 #include <RendererDX11/Shader/Implementation/VertexDeclarationDX11_inl.h>

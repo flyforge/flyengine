@@ -10,23 +10,23 @@
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeLightFactory, 1, plRTTIDefaultAllocator<plParticleTypeLightFactory>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeLightFactory, 1, plRTTIDefaultAllocator<plParticleTypeLightFactory>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("SizeFactor", m_fSizeFactor)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
-    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, 100000.0f)),
-    PLASMA_MEMBER_PROPERTY("Percentage", m_uiPercentage)->AddAttributes(new plDefaultValueAttribute(50), new plClampValueAttribute(1, 100)),
-    PLASMA_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
-    PLASMA_MEMBER_PROPERTY("IntensityScaleParam", m_sIntensityParameter),
-    PLASMA_MEMBER_PROPERTY("SizeScaleParam", m_sSizeScaleParameter),
+    PL_MEMBER_PROPERTY("SizeFactor", m_fSizeFactor)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.0f, 1000.0f)),
+    PL_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, 100000.0f)),
+    PL_MEMBER_PROPERTY("Percentage", m_uiPercentage)->AddAttributes(new plDefaultValueAttribute(50), new plClampValueAttribute(1, 100)),
+    PL_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
+    PL_MEMBER_PROPERTY("IntensityScaleParam", m_sIntensityParameter),
+    PL_MEMBER_PROPERTY("SizeScaleParam", m_sSizeScaleParameter),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeLight, 1, plRTTIDefaultAllocator<plParticleTypeLight>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeLight, 1, plRTTIDefaultAllocator<plParticleTypeLight>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleTypeLightFactory::plParticleTypeLightFactory()
@@ -65,37 +65,37 @@ enum class TypeLightVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleTypeLightFactory::Save(plStreamWriter& stream) const
+void plParticleTypeLightFactory::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)TypeLightVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fSizeFactor;
-  stream << m_fIntensity;
-  stream << m_uiPercentage;
+  inout_stream << m_fSizeFactor;
+  inout_stream << m_fIntensity;
+  inout_stream << m_uiPercentage;
 
   // Version 2
-  stream << m_sTintColorParameter;
-  stream << m_sIntensityParameter;
-  stream << m_sSizeScaleParameter;
+  inout_stream << m_sTintColorParameter;
+  inout_stream << m_sIntensityParameter;
+  inout_stream << m_sSizeScaleParameter;
 }
 
-void plParticleTypeLightFactory::Load(plStreamReader& stream)
+void plParticleTypeLightFactory::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)TypeLightVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)TypeLightVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_fSizeFactor;
-  stream >> m_fIntensity;
-  stream >> m_uiPercentage;
+  inout_stream >> m_fSizeFactor;
+  inout_stream >> m_fIntensity;
+  inout_stream >> m_uiPercentage;
 
   if (uiVersion >= 2)
   {
-    stream >> m_sTintColorParameter;
-    stream >> m_sIntensityParameter;
-    stream >> m_sSizeScaleParameter;
+    inout_stream >> m_sTintColorParameter;
+    inout_stream >> m_sIntensityParameter;
+    inout_stream >> m_sSizeScaleParameter;
   }
 }
 
@@ -114,9 +114,9 @@ void plParticleTypeLight::CreateRequiredStreams()
 }
 
 
-void plParticleTypeLight::ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleTypeLight::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
-  PLASMA_PROFILE_SCOPE("PFX: Light");
+  PL_PROFILE_SCOPE("PFX: Light");
 
   const plVec4* pPosition = m_pStreamPosition->GetData<plVec4>();
   const plFloat16* pSize = m_pStreamSize->GetData<plFloat16>();
@@ -177,19 +177,17 @@ void plParticleTypeLight::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
     pRenderData->m_GlobalTransform.m_vPosition = transform * pPosition[i].GetAsVec3();
     pRenderData->m_LightColor = tintColor * pColor[i].ToLinearFloat();
     pRenderData->m_fIntensity = intensity;
-    pRenderData->m_fFalloff = 0.8f;
-    pRenderData->m_fSpecularMultiplier = 1.0;
-    pRenderData->m_fVolumetricIntensity = 0.0f; //TODO: add volumetric intensity to the particle type
+    pRenderData->m_fSpecularMultiplier = 1.0f;
     pRenderData->m_fRange = pSize[i] * sizeFactor;
     pRenderData->m_uiShadowDataOffset = plInvalidIndex;
 
-    float fScreenSpaceSize = plLightComponent::CalculateScreenSpaceSize(plBoundingSphere(pRenderData->m_GlobalTransform.m_vPosition, pRenderData->m_fRange * 0.5f), *msg.m_pView->GetCullingCamera());
+    float fScreenSpaceSize = plLightComponent::CalculateScreenSpaceSize(plBoundingSphere::MakeFromCenterAndRadius(pRenderData->m_GlobalTransform.m_vPosition, pRenderData->m_fRange * 0.5f), *ref_msg.m_pView->GetCullingCamera());
     pRenderData->FillBatchIdAndSortingKey(fScreenSpaceSize);
 
-    msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::Light, plRenderData::Caching::Never);
+    ref_msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::Light, plRenderData::Caching::Never);
   }
 }
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Light_ParticleTypeLight);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Light_ParticleTypeLight);

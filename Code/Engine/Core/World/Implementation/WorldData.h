@@ -6,14 +6,15 @@
 #include <Foundation/Memory/FrameAllocator.h>
 #include <Foundation/Threading/DelegateTask.h>
 #include <Foundation/Time/Clock.h>
+#include <Foundation/Types/SharedPtr.h>
 
+#include <Core/ResourceManager/ResourceHandle.h>
 #include <Core/World/GameObject.h>
 #include <Core/World/WorldDesc.h>
-#include <Foundation/Types/SharedPtr.h>
 
 namespace plInternal
 {
-  class PLASMA_CORE_DLL WorldData
+  class PL_CORE_DLL WorldData
   {
   private:
     friend class ::plWorld;
@@ -28,7 +29,7 @@ namespace plInternal
     mutable plProxyAllocator m_Allocator;
     plLocalAllocatorWrapper m_AllocatorWrapper;
     plInternal::WorldLargeBlockAllocator m_BlockAllocator;
-    plDoubleBufferedStackAllocator m_StackAllocator;
+    plDoubleBufferedLinearAllocator m_StackAllocator;
 
     enum
     {
@@ -37,7 +38,7 @@ namespace plInternal
     };
 
     // object storage
-    typedef plBlockStorage<plGameObject, plInternal::DEFAULT_BLOCK_SIZE, plBlockStorageType::Compact> ObjectStorage;
+    using ObjectStorage = plBlockStorage<plGameObject, plInternal::DEFAULT_BLOCK_SIZE, plBlockStorageType::Compact>;
     plIdTable<plGameObjectId, plGameObject*, plLocalAllocatorWrapper> m_Objects;
     ObjectStorage m_ObjectStorage;
 
@@ -45,7 +46,7 @@ namespace plInternal
     plEvent<const plGameObject*> m_ObjectDeletionEvent;
 
   public:
-    class PLASMA_CORE_DLL ConstObjectIterator
+    class PL_CORE_DLL ConstObjectIterator
     {
     public:
       const plGameObject& operator*() const;
@@ -70,7 +71,7 @@ namespace plInternal
       ObjectStorage::ConstIterator m_Iterator;
     };
 
-    class PLASMA_CORE_DLL ObjectIterator
+    class PL_CORE_DLL ObjectIterator
     {
     public:
       plGameObject& operator*();
@@ -99,8 +100,8 @@ namespace plInternal
     // hierarchy structures
     struct Hierarchy
     {
-      typedef plDataBlock<plGameObject::TransformationData, plInternal::DEFAULT_BLOCK_SIZE> DataBlock;
-      typedef plDynamicArray<DataBlock> DataBlockArray;
+      using DataBlock = plDataBlock<plGameObject::TransformationData, plInternal::DEFAULT_BLOCK_SIZE>;
+      using DataBlockArray = plDynamicArray<DataBlock>;
 
       plHybridArray<DataBlockArray*, 8, plLocalAllocatorWrapper> m_Data;
     };
@@ -128,7 +129,7 @@ namespace plInternal
     template <typename VISITOR>
     plVisitorExecution::Enum TraverseHierarchyLevelMultiThreaded(Hierarchy::DataBlockArray& blocks, void* pUserData = nullptr);
 
-    typedef plDelegate<plVisitorExecution::Enum(plGameObject*)> VisitorFunc;
+    using VisitorFunc = plDelegate<plVisitorExecution::Enum(plGameObject*)>;
     void TraverseBreadthFirst(VisitorFunc& func);
     void TraverseDepthFirst(VisitorFunc& func);
     static plVisitorExecution::Enum TraverseObjectDepthFirst(plGameObject* pObject, VisitorFunc& func);
@@ -140,6 +141,8 @@ namespace plInternal
     static void UpdateGlobalTransformWithParentAndSpatialData(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter, plSpatialSystem& spatialSystem);
 
     void UpdateGlobalTransforms();
+
+    void ResourceEventHandler(const plResourceEvent& e);
 
     // game object lookups
     plHashTable<plUInt64, plGameObjectId, plHashHelper<plUInt64>, plLocalAllocatorWrapper> m_GlobalKeyToIdTable;
@@ -154,7 +157,7 @@ namespace plInternal
 
     struct InitBatch
     {
-      InitBatch(plAllocatorBase* pAllocator, plStringView szName, bool bMustFinishWithinOneFrame);
+      InitBatch(plAllocator* pAllocator, plStringView sName, bool bMustFinishWithinOneFrame);
 
       plHashedString m_sName;
       bool m_bMustFinishWithinOneFrame = true;
@@ -206,9 +209,9 @@ namespace plInternal
 
     struct QueuedMsgMetaData
     {
-      PLASMA_DECLARE_POD_TYPE();
+      PL_DECLARE_POD_TYPE();
 
-      PLASMA_ALWAYS_INLINE QueuedMsgMetaData()
+      PL_ALWAYS_INLINE QueuedMsgMetaData()
         : m_uiReceiverData(0)
       {
       }
@@ -228,22 +231,42 @@ namespace plInternal
       plTime m_Due;
     };
 
-    typedef plMessageQueue<QueuedMsgMetaData, plLocalAllocatorWrapper> MessageQueue;
+    using MessageQueue = plMessageQueue<QueuedMsgMetaData, plLocalAllocatorWrapper>;
     mutable MessageQueue m_MessageQueues[plObjectMsgQueueType::COUNT];
     mutable MessageQueue m_TimedMessageQueues[plObjectMsgQueueType::COUNT];
     plObjectMsgQueueType::Enum m_ProcessingMessageQueue = plObjectMsgQueueType::COUNT;
 
-
     plThreadID m_WriteThreadID;
-    plInt32 m_iWriteCounter;
+    plInt32 m_iWriteCounter = 0;
     mutable plAtomicInteger32 m_iReadCounter;
 
     plUInt32 m_uiUpdateCounter = 0;
-    bool m_bSimulateWorld;
-    bool m_bReportErrorWhenStaticObjectMoves;
+    bool m_bSimulateWorld = true;
+    bool m_bReportErrorWhenStaticObjectMoves = true;
 
     /// \brief Maps some data (given as void*) to an plGameObjectHandle. Only available in special situations (e.g. editor use cases).
     plDelegate<plGameObjectHandle(const void*, plComponentHandle, plStringView)> m_GameObjectReferenceResolver;
+
+    struct ResourceReloadContext
+    {
+      plWorld* m_pWorld = nullptr;
+      plComponent* m_pComponent = nullptr;
+      void* m_pUserData = nullptr;
+    };
+
+    using ResourceReloadFunc = plDelegate<void(ResourceReloadContext&)>;
+
+    struct ResourceReloadFunctionData
+    {
+      plComponentHandle m_hComponent;
+      void* m_pUserData = nullptr;
+      ResourceReloadFunc m_Func;
+    };
+
+    using ReloadFunctionList = plHybridArray<ResourceReloadFunctionData, 8>;
+    plHashTable<plTypelessResourceHandle, ReloadFunctionList> m_ReloadFunctions;
+    plHashSet<plTypelessResourceHandle> m_NeedReload;
+    ReloadFunctionList m_TempReloadFunctions;
 
   public:
     class ReadMarker
@@ -276,7 +299,7 @@ namespace plInternal
     mutable ReadMarker m_ReadMarker;
     WriteMarker m_WriteMarker;
 
-    void* m_pUserData;
+    void* m_pUserData = nullptr;
   };
 } // namespace plInternal
 

@@ -6,7 +6,7 @@
 
 class plXRInterface;
 
-class PLASMA_GAMEENGINE_DLL plGALXRSwapChain : public plGALSwapChain
+class PL_GAMEENGINE_DLL plGALXRSwapChain : public plGALSwapChain
 {
 public:
   using Functor = plDelegate<plGALSwapChainHandle(plXRInterface*)>;
@@ -24,4 +24,4 @@ protected:
 protected:
   plXRInterface* m_pXrInterface = nullptr;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plGALXRSwapChain);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plGALXRSwapChain);

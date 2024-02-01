@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexResize.cpp
@@ -686,7 +686,7 @@ namespace
                     {
                         // Steal and reuse scanline from 'free row' list
                         assert(rowFree->scanline != nullptr);
-                        rowAcc->scanline.reset(rowFree->scanline.release());
+                        rowAcc->scanline = std::move(rowFree->scanline);
                         rowFree = rowFree->next;
                     }
                     else
@@ -1109,5 +1109,4 @@ HRESULT DirectX::Resize(
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexResize);
 

@@ -19,10 +19,10 @@ class plRTTI;
 ///
 /// Used to store custom types inside an plVariant. As lifetime is governed by the plVariant, it is generally not safe to store an plTypedObject.
 /// This class is needed to be able to differentiate between plVariantType::TypedPointer and plVariantType::TypedObject e.g. in plVariant::DispatchTo.
-/// \sa plVariant, PLASMA_DECLARE_CUSTOM_VARIANT_TYPE
+/// \sa plVariant, PL_DECLARE_CUSTOM_VARIANT_TYPE
 struct plTypedObject
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   const void* m_pObject = nullptr;
   const plRTTI* m_pType = nullptr;
 
@@ -30,10 +30,7 @@ struct plTypedObject
   {
     return m_pObject == rhs.m_pObject;
   }
-  bool operator!=(const plTypedObject& rhs) const
-  {
-    return m_pObject != rhs.m_pObject;
-  }
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plTypedObject&);
 };
 
 /// \brief plVariant is a class that can store different types of variables, which is useful in situations where it is not clear up front,
@@ -43,7 +40,7 @@ struct plTypedObject
 /// without requiring a heap allocation. For larger types memory is allocated on the heap. In general variants should be used for code that
 /// needs to be flexible. Although plVariant is implemented very efficiently, it should be avoided to use plVariant in code that needs to be
 /// fast.
-class PLASMA_FOUNDATION_DLL plVariant
+class PL_FOUNDATION_DLL plVariant
 {
 public:
   using Type = plVariantType;
@@ -53,7 +50,7 @@ public:
   /// \brief helper struct to wrap a string pointer
   struct StringWrapper
   {
-    PLASMA_ALWAYS_INLINE StringWrapper(const char* szStr)
+    PL_ALWAYS_INLINE StringWrapper(const char* szStr)
       : m_str(szStr)
     {
     }
@@ -154,16 +151,20 @@ public:
   /// that can either both be converted to double (\see CanConvertTo()) or whose types are equal.
   bool operator==(const plVariant& other) const; // [tested]
 
-  /// \brief Same as operator== (with a twist!)
-  bool operator!=(const plVariant& other) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plVariant&);
 
   /// \brief See non-templated operator==
   template <typename T>
   bool operator==(const T& other) const; // [tested]
 
+#if PL_DISABLED(PL_USE_CPP20_OPERATORS)
   /// \brief See non-templated operator!=
   template <typename T>
-  bool operator!=(const T& other) const; // [tested]
+  bool operator!=(const T& other) const // [tested]
+  {
+    return !(*this == other);
+  }
+#endif
 
   /// \brief Returns whether this variant stores any other type than 'Invalid'.
   bool IsValid() const; // [tested]
@@ -305,7 +306,7 @@ private:
     void* m_Ptr;
     const plRTTI* m_pType;
     plAtomicInteger32 m_uiRef = 1;
-    PLASMA_ALWAYS_INLINE SharedData(void* pPtr, const plRTTI* pType)
+    PL_ALWAYS_INLINE SharedData(void* pPtr, const plRTTI* pType)
       : m_Ptr(pPtr)
       , m_pType(pType)
     {
@@ -321,7 +322,7 @@ private:
     T m_t;
 
   public:
-    PLASMA_ALWAYS_INLINE TypedSharedData(const T& value, const plRTTI* pType = nullptr)
+    PL_ALWAYS_INLINE TypedSharedData(const T& value, const plRTTI* pType = nullptr)
       : SharedData(&m_t, pType)
       , m_t(value)
     {
@@ -329,7 +330,7 @@ private:
 
     virtual SharedData* Clone() const override
     {
-      return PLASMA_DEFAULT_NEW(TypedSharedData<T>, m_t, m_pType);
+      return PL_DEFAULT_NEW(TypedSharedData<T>, m_t, m_pType);
     }
   };
 
@@ -407,7 +408,7 @@ private:
 /// If the plVariant stores an plTypedPointer pointer, this pointer will be dynamically cast to T*.
 /// If the plVariant stores any other type (or nothing), nullptr is returned.
 template <typename T>
-PLASMA_ALWAYS_INLINE T plDynamicCast(const plVariant& variant)
+PL_ALWAYS_INLINE T plDynamicCast(const plVariant& variant)
 {
   if (variant.IsA<T>())
   {
@@ -418,19 +419,18 @@ PLASMA_ALWAYS_INLINE T plDynamicCast(const plVariant& variant)
 }
 
 // Simple math operator overloads. An invalid variant is returned if the given variants have incompatible types.
-PLASMA_FOUNDATION_DLL plVariant operator+(const plVariant& a, const plVariant& b);
-PLASMA_FOUNDATION_DLL plVariant operator-(const plVariant& a, const plVariant& b);
-PLASMA_FOUNDATION_DLL plVariant operator*(const plVariant& a, const plVariant& b);
-PLASMA_FOUNDATION_DLL plVariant operator/(const plVariant& a, const plVariant& b);
-
+PL_FOUNDATION_DLL plVariant operator+(const plVariant& a, const plVariant& b);
+PL_FOUNDATION_DLL plVariant operator-(const plVariant& a, const plVariant& b);
+PL_FOUNDATION_DLL plVariant operator*(const plVariant& a, const plVariant& b);
+PL_FOUNDATION_DLL plVariant operator/(const plVariant& a, const plVariant& b);
 
 namespace plMath
 {
   /// \brief An overload of plMath::Lerp to interpolate variants. A and b must have the same type.
   ///
   /// If the type can't be interpolated like e.g. strings, a is returned for a fFactor less than 0.5, b is returned for a fFactor greater or equal to 0.5.
-  PLASMA_FOUNDATION_DLL plVariant Lerp(const plVariant& a, const plVariant& b, double fFactor);
-}
+  PL_FOUNDATION_DLL plVariant Lerp(const plVariant& a, const plVariant& b, double fFactor);
+} // namespace plMath
 
 #include <Foundation/Types/Implementation/VariantHelper_inl.h>
 

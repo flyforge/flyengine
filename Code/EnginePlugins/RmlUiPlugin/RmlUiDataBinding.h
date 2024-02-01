@@ -4,13 +4,13 @@
 
 #include <RmlUi/Include/RmlUi/Core.h>
 
-class PLASMA_RMLUIPLUGIN_DLL plRmlUiDataBinding
+class PL_RMLUIPLUGIN_DLL plRmlUiDataBinding
 {
 public:
-  virtual ~plRmlUiDataBinding() {}
+  virtual ~plRmlUiDataBinding() = default;
 
-  virtual plResult Initialize(Rml::Context& context) = 0;
-  virtual void Deinitialize(Rml::Context& context) = 0;
+  virtual plResult Initialize(Rml::Context& ref_context) = 0;
+  virtual void Deinitialize(Rml::Context& ref_context) = 0;
 
   virtual void Update() = 0;
 };

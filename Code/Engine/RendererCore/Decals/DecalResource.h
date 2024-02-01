@@ -10,11 +10,11 @@ struct plDecalResourceDescriptor
 {
 };
 
-class PLASMA_RENDERERCORE_DLL plDecalResource : public plResource
+class PL_RENDERERCORE_DLL plDecalResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDecalResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plDecalResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plDecalResource, plDecalResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plDecalResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plDecalResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plDecalResource, plDecalResourceDescriptor);
 
 public:
   plDecalResource();
@@ -25,7 +25,7 @@ private:
   virtual void UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage) override;
 };
 
-class PLASMA_RENDERERCORE_DLL plDecalResourceLoader : public plResourceTypeLoader
+class PL_RENDERERCORE_DLL plDecalResourceLoader : public plResourceTypeLoader
 {
 public:
   struct LoadedData

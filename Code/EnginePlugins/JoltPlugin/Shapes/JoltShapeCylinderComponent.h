@@ -9,9 +9,9 @@ using plJoltShapeCylinderComponentManager = plComponentManager<class plJoltShape
 /// Be aware that the cylinder shape is not as stable in simulation as other shapes.
 /// If possible use capsule shapes instead. In some cases even using a convex hull shape may provide better results,
 /// but this has to be tried out case by case.
-class PLASMA_JOLTPLUGIN_DLL plJoltShapeCylinderComponent : public plJoltShapeComponent
+class PL_JOLTPLUGIN_DLL plJoltShapeCylinderComponent : public plJoltShapeComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltShapeCylinderComponent, plJoltShapeComponent, plJoltShapeCylinderComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltShapeCylinderComponent, plJoltShapeComponent, plJoltShapeCylinderComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

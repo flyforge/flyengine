@@ -5,17 +5,17 @@
 #include <RendererCore/Lights/PointLightComponent.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plPointLightVisualizerAdapter::plPointLightVisualizerAdapter() {}
+plPointLightVisualizerAdapter::plPointLightVisualizerAdapter() = default;
 
-plPointLightVisualizerAdapter::~plPointLightVisualizerAdapter() {}
+plPointLightVisualizerAdapter::~plPointLightVisualizerAdapter() = default;
 
 void plPointLightVisualizerAdapter::Finalize()
 {
   auto* pDoc = m_pObject->GetDocumentObjectManager()->GetDocument()->GetMainDocument();
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
-  PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
+  PL_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
-  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Sphere, plColor::White, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);
@@ -32,22 +32,22 @@ void plPointLightVisualizerAdapter::Update()
   if (!pAttr->GetRangeProperty().IsEmpty() && !pAttr->GetIntensityProperty().IsEmpty())
   {
     plVariant range;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRangeProperty()), range).IgnoreResult();
-    PLASMA_ASSERT_DEBUG(range.CanConvertTo<float>(), "Invalid property bound to plPointLightVisualizerAttribute 'radius'");
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetRangeProperty()), range).AssertSuccess();
+    PL_ASSERT_DEBUG(range.CanConvertTo<float>(), "Invalid property bound to plPointLightVisualizerAttribute 'radius'");
 
     plVariant intensity;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetIntensityProperty()), intensity).IgnoreResult();
-    PLASMA_ASSERT_DEBUG(intensity.CanConvertTo<float>(), "Invalid property bound to plPointLightVisualizerAttribute 'intensity'");
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetIntensityProperty()), intensity).AssertSuccess();
+    PL_ASSERT_DEBUG(intensity.CanConvertTo<float>(), "Invalid property bound to plPointLightVisualizerAttribute 'intensity'");
 
-    m_fScale = range.ConvertTo<float>();
+    m_fScale = plLightComponent::CalculateEffectiveRange(range.ConvertTo<float>(), intensity.ConvertTo<float>());
   }
 
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
 
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plPointLightVisualizerAdapter 'color'");
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plPointLightVisualizerAdapter 'color'");
     m_hGizmo.SetColor(value.ConvertTo<plColor>());
   }
 }

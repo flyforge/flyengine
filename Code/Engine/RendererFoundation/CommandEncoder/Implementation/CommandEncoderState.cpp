@@ -5,35 +5,13 @@
 void plGALCommandEncoderState::InvalidateState()
 {
   m_hShader = plGALShaderHandle();
-
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hConstantBuffers); ++i)
-  {
-    m_hConstantBuffers[i].Invalidate();
-  }
-
-  for (plUInt32 i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
-  {
-    m_hResourceViews[i].Clear();
-    m_pResourcesForResourceViews[i].Clear();
-  }
-
-  m_hUnorderedAccessViews.Clear();
-  m_pResourcesForUnorderedAccessViews.Clear();
-
-  for (plUInt32 i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
-  {
-    for (plUInt32 j = 0; j < PLASMA_GAL_MAX_SAMPLER_COUNT; j++)
-    {
-      m_hSamplerStates[i][j].Invalidate();
-    }
-  }
 }
 
 void plGALCommandEncoderRenderState::InvalidateState()
 {
   plGALCommandEncoderState::InvalidateState();
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hVertexBuffers); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_hVertexBuffers); ++i)
   {
     m_hVertexBuffers[i].Invalidate();
   }
@@ -58,4 +36,3 @@ void plGALCommandEncoderRenderState::InvalidateState()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_CommandEncoder_Implementation_CommandEncoderState);

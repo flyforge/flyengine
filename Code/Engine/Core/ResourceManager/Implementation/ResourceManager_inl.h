@@ -12,7 +12,7 @@ template <typename ResourceType>
 plTypedResourceHandle<ResourceType> plResourceManager::LoadResource(plStringView sResourceID)
 {
   // the mutex here is necessary to prevent a race between resource unloading and storing the pointer in the handle
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
   return plTypedResourceHandle<ResourceType>(GetResource<ResourceType>(sResourceID, true));
 }
 
@@ -22,7 +22,7 @@ plTypedResourceHandle<ResourceType> plResourceManager::LoadResource(plStringView
   plTypedResourceHandle<ResourceType> hResource;
   {
     // the mutex here is necessary to prevent a race between resource unloading and storing the pointer in the handle
-    PLASMA_LOCK(s_ResourceMutex);
+    PL_LOCK(s_ResourceMutex);
     hResource = plTypedResourceHandle<ResourceType>(GetResource<ResourceType>(sResourceID, true));
   }
 
@@ -41,7 +41,7 @@ plTypedResourceHandle<ResourceType> plResourceManager::GetExistingResource(plStr
 
   const plTempHashedString sResourceHash(sResourceID);
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   const plRTTI* pRtti = FindResourceTypeOverride(plGetStaticRTTI<ResourceType>(), sResourceID);
 
@@ -56,9 +56,9 @@ plTypedResourceHandle<ResourceType> plResourceManager::CreateResource(plStringVi
 {
   static_assert(std::is_rvalue_reference<DescriptorType&&>::value, "Please std::move the descriptor into this function");
 
-  PLASMA_LOG_BLOCK("plResourceManager::CreateResource", sResourceID);
+  PL_LOG_BLOCK("plResourceManager::CreateResource", sResourceID);
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   plTypedResourceHandle<ResourceType> hResource(GetResource<ResourceType>(sResourceID, false));
 
@@ -66,7 +66,7 @@ plTypedResourceHandle<ResourceType> plResourceManager::CreateResource(plStringVi
   pResource->SetResourceDescription(sResourceDescription);
   pResource->m_Flags.Add(plResourceFlags::IsCreatedResource);
 
-  PLASMA_ASSERT_DEV(pResource->GetLoadingState() == plResourceState::Unloaded, "CreateResource was called on a resource that is already created");
+  PL_ASSERT_DEV(pResource->GetLoadingState() == plResourceState::Unloaded, "CreateResource was called on a resource that is already created");
 
   // If this does not compile, you either passed in the wrong descriptor type for the given resource type
   // or you forgot to std::move the descriptor when calling CreateResource
@@ -76,7 +76,7 @@ plTypedResourceHandle<ResourceType> plResourceManager::CreateResource(plStringVi
     pResource->VerifyAfterCreateResource(ld);
   }
 
-  PLASMA_ASSERT_DEV(pResource->GetLoadingState() != plResourceState::Unloaded, "CreateResource did not set the loading state properly.");
+  PL_ASSERT_DEV(pResource->GetLoadingState() != plResourceState::Unloaded, "CreateResource did not set the loading state properly.");
 
   EndAcquireResource(pResource);
 
@@ -87,7 +87,7 @@ template <typename ResourceType, typename DescriptorType>
 plTypedResourceHandle<ResourceType>
 plResourceManager::GetOrCreateResource(plStringView sResourceID, DescriptorType&& descriptor, plStringView sResourceDescription)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
   plTypedResourceHandle<ResourceType> hResource = GetExistingResource<ResourceType>(sResourceID);
   if (!hResource.IsValid())
   {
@@ -97,13 +97,13 @@ plResourceManager::GetOrCreateResource(plStringView sResourceID, DescriptorType&
   return hResource;
 }
 
-PLASMA_FORCE_INLINE plResource* plResourceManager::BeginAcquireResourcePointer(const plRTTI* pType, const plTypelessResourceHandle& hResource)
+PL_FORCE_INLINE plResource* plResourceManager::BeginAcquireResourcePointer(const plRTTI* pType, const plTypelessResourceHandle& hResource)
 {
-  PLASMA_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
+  PL_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
 
   plResource* pResource = (plResource*)hResource.m_pResource;
 
-  PLASMA_ASSERT_DEBUG(pResource->GetDynamicRTTI()->IsDerivedFrom(pType),
+  PL_ASSERT_DEBUG(pResource->GetDynamicRTTI()->IsDerivedFrom(pType),
     "The requested resource does not have the same type ('{0}') as the resource handle ('{1}').", pResource->GetDynamicRTTI()->GetTypeName(),
     pType->GetTypeName());
 
@@ -115,14 +115,14 @@ template <typename ResourceType>
 ResourceType* plResourceManager::BeginAcquireResource(const plTypedResourceHandle<ResourceType>& hResource, plResourceAcquireMode mode,
   const plTypedResourceHandle<ResourceType>& hFallbackResource, plResourceAcquireResult* out_pAcquireResult /*= nullptr*/)
 {
-  PLASMA_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
+  PL_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   const plResource* pCurrentlyUpdatingContent = plResource::GetCurrentlyUpdatingContent();
   if (pCurrentlyUpdatingContent != nullptr)
   {
-    PLASMA_LOCK(s_ResourceMutex);
-    PLASMA_ASSERT_DEV(mode == plResourceAcquireMode::PointerOnly || IsResourceTypeAcquireDuringUpdateContentAllowed(pCurrentlyUpdatingContent->GetDynamicRTTI(), plGetStaticRTTI<ResourceType>()),
+    PL_LOCK(s_ResourceMutex);
+    PL_ASSERT_DEV(mode == plResourceAcquireMode::PointerOnly || IsResourceTypeAcquireDuringUpdateContentAllowed(pCurrentlyUpdatingContent->GetDynamicRTTI(), plGetStaticRTTI<ResourceType>()),
       "Trying to acquire a resource of type '{0}' during '{1}::UpdateContent()'. This has to be enabled by calling "
       "plResourceManager::AllowResourceTypeAcquireDuringUpdateContent<{1}, {0}>(); at engine startup, for example in "
       "plGameApplication::Init_SetupDefaultResources().",
@@ -132,8 +132,8 @@ ResourceType* plResourceManager::BeginAcquireResource(const plTypedResourceHandl
 
   ResourceType* pResource = (ResourceType*)hResource.m_hTypeless.m_pResource;
 
-  // PLASMA_ASSERT_DEV(pResource->m_iLockCount < 20, "You probably forgot somewhere to call 'EndAcquireResource' in sync with 'BeginAcquireResource'.");
-  PLASMA_ASSERT_DEBUG(pResource->GetDynamicRTTI()->template IsDerivedFrom<ResourceType>(),
+  // PL_ASSERT_DEV(pResource->m_iLockCount < 20, "You probably forgot somewhere to call 'EndAcquireResource' in sync with 'BeginAcquireResource'.");
+  PL_ASSERT_DEBUG(pResource->GetDynamicRTTI()->template IsDerivedFrom<ResourceType>(),
     "The requested resource does not have the same type ('{0}') as the resource handle ('{1}').", pResource->GetDynamicRTTI()->GetTypeName(),
     plGetStaticRTTI<ResourceType>()->GetTypeName());
 
@@ -210,7 +210,7 @@ ResourceType* plResourceManager::BeginAcquireResource(const plTypedResourceHandl
 
     if (mode != plResourceAcquireMode::AllowLoadingFallback_NeverFail && mode != plResourceAcquireMode::BlockTillLoaded_NeverFail)
     {
-      PLASMA_REPORT_FAILURE("The resource '{0}' of type '{1}' is missing and no fallback is available", pResource->GetResourceID(),
+      PL_REPORT_FAILURE("The resource '{0}' of type '{1}' is missing and no fallback is available", pResource->GetResourceID(),
         plGetStaticRTTI<ResourceType>()->GetTypeName());
     }
 
@@ -230,13 +230,13 @@ ResourceType* plResourceManager::BeginAcquireResource(const plTypedResourceHandl
 template <typename ResourceType>
 void plResourceManager::EndAcquireResource(ResourceType* pResource)
 {
-  // PLASMA_ASSERT_DEV(pResource->m_iLockCount > 0, "The resource lock counter is incorrect: {0}", (plInt32)pResource->m_iLockCount);
+  // PL_ASSERT_DEV(pResource->m_iLockCount > 0, "The resource lock counter is incorrect: {0}", (plInt32)pResource->m_iLockCount);
   // pResource->m_iLockCount.Decrement();
 }
 
-PLASMA_FORCE_INLINE void plResourceManager::EndAcquireResourcePointer(plResource* pResource)
+PL_FORCE_INLINE void plResourceManager::EndAcquireResourcePointer(plResource* pResource)
 {
-  // PLASMA_ASSERT_DEV(pResource->m_iLockCount > 0, "The resource lock counter is incorrect: {0}", (plInt32)pResource->m_iLockCount);
+  // PL_ASSERT_DEV(pResource->m_iLockCount > 0, "The resource lock counter is incorrect: {0}", (plInt32)pResource->m_iLockCount);
   // pResource->m_iLockCount.Decrement();
 }
 
@@ -288,7 +288,7 @@ bool plResourceManager::ReloadResource(const plTypedResourceHandle<ResourceType>
   return res;
 }
 
-PLASMA_FORCE_INLINE bool plResourceManager::ReloadResource(const plRTTI* pType, const plTypelessResourceHandle& hResource, bool bForce)
+PL_FORCE_INLINE bool plResourceManager::ReloadResource(const plRTTI* pType, const plTypelessResourceHandle& hResource, bool bForce)
 {
   plResource* pResource = BeginAcquireResourcePointer(pType, hResource);
 
@@ -308,7 +308,7 @@ plUInt32 plResourceManager::ReloadResourcesOfType(bool bForce)
 template <typename ResourceType>
 void plResourceManager::SetResourceTypeLoader(plResourceTypeLoader* pCreator)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   GetResourceTypeLoaders()[plGetStaticRTTI<ResourceType>()] = pCreator;
 }
@@ -316,7 +316,7 @@ void plResourceManager::SetResourceTypeLoader(plResourceTypeLoader* pCreator)
 template <typename ResourceType>
 plTypedResourceHandle<ResourceType> plResourceManager::GetResourceHandleForExport(plStringView sResourceID)
 {
-  PLASMA_ASSERT_DEV(IsExportModeEnabled(), "Export mode needs to be enabled");
+  PL_ASSERT_DEV(IsExportModeEnabled(), "Export mode needs to be enabled");
 
   return LoadResource<ResourceType>(sResourceID);
 }

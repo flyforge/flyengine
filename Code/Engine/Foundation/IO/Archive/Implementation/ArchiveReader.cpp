@@ -13,10 +13,10 @@
 
 plResult plArchiveReader::OpenArchive(plStringView sPath)
 {
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_MEMORY_MAPPED_FILE)
-  PLASMA_LOG_BLOCK("OpenArchive", sPath);
+#if PL_ENABLED(PL_SUPPORTS_MEMORY_MAPPED_FILE)
+  PL_LOG_BLOCK("OpenArchive", sPath);
 
-  PLASMA_SUCCEED_OR_RETURN(m_MemFile.Open(sPath, plMemoryMappedFile::Mode::ReadOnly));
+  PL_SUCCEED_OR_RETURN(m_MemFile.Open(sPath, plMemoryMappedFile::Mode::ReadOnly));
   m_uiMemFileSize = m_MemFile.GetFileSize();
 
   // validate the archive
@@ -27,17 +27,17 @@ plResult plArchiveReader::OpenArchive(plStringView sPath)
 
     if (plArchiveUtils::IsAcceptedArchiveFileExtensions(extension))
     {
-      PLASMA_SUCCEED_OR_RETURN(plArchiveUtils::ReadHeader(reader, m_uiArchiveVersion));
+      PL_SUCCEED_OR_RETURN(plArchiveUtils::ReadHeader(reader, m_uiArchiveVersion));
 
       m_pDataStart = m_MemFile.GetReadPointer(16, plMemoryMappedFile::OffsetBase::Start);
 
-      PLASMA_SUCCEED_OR_RETURN(plArchiveUtils::ExtractTOC(m_MemFile, m_ArchiveTOC, m_uiArchiveVersion));
+      PL_SUCCEED_OR_RETURN(plArchiveUtils::ExtractTOC(m_MemFile, m_ArchiveTOC, m_uiArchiveVersion));
     }
 
     else
     {
       plLog::Error("Unknown archive file extension '{}'", extension);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -51,27 +51,27 @@ plResult plArchiveReader::OpenArchive(plStringView sPath)
       if (e.m_uiDataStartOffset + e.m_uiStoredDataSize > uiValidSize)
       {
         plLog::Error("Archive is corrupt. Invalid entry data range.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       if (e.m_uiUncompressedDataSize < e.m_uiStoredDataSize)
       {
         plLog::Error("Archive is corrupt. Invalid compression info.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       if (e.m_uiPathStringOffset >= uiMaxPathString)
       {
         plLog::Error("Archive is corrupt. Invalid entry path-string offset.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 #else
-  PLASMA_REPORT_FAILURE("Memory mapped files are unsupported on this platform.");
-  return PLASMA_FAILURE;
+  PL_REPORT_FAILURE("Memory mapped files are unsupported on this platform.");
+  return PL_FAILURE;
 #endif
 }
 
@@ -82,7 +82,7 @@ const plArchiveTOC& plArchiveReader::GetArchiveTOC()
 
 plResult plArchiveReader::ExtractAllFiles(plStringView sTargetFolder) const
 {
-  PLASMA_LOG_BLOCK("ExtractAllFiles", sTargetFolder);
+  PL_LOG_BLOCK("ExtractAllFiles", sTargetFolder);
 
   const plUInt32 numEntries = m_ArchiveTOC.m_Entries.GetCount();
 
@@ -91,12 +91,12 @@ plResult plArchiveReader::ExtractAllFiles(plStringView sTargetFolder) const
     const char* szPath = reinterpret_cast<const char*>(&m_ArchiveTOC.m_AllPathStrings[m_ArchiveTOC.m_Entries[e].m_uiPathStringOffset]);
 
     if (!ExtractNextFileCallback(e + 1, numEntries, szPath))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
-    PLASMA_SUCCEED_OR_RETURN(ExtractFile(e, sTargetFolder));
+    PL_SUCCEED_OR_RETURN(ExtractFile(e, sTargetFolder));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plArchiveReader::ConfigureRawMemoryStreamReader(plUInt32 uiEntryIdx, plRawMemoryStreamReader& ref_memReader) const
@@ -120,7 +120,7 @@ plResult plArchiveReader::ExtractFile(plUInt32 uiEntryIdx, plStringView sTargetF
   sOutputFile.AppendPath(sFilePath);
 
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sOutputFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sOutputFile));
 
   plUInt8 uiTemp[1024 * 8];
 
@@ -128,22 +128,22 @@ plResult plArchiveReader::ExtractFile(plUInt32 uiEntryIdx, plStringView sTargetF
   plUInt64 uiReadTotal = 0;
   while (true)
   {
-    uiRead = pReader->ReadBytes(uiTemp, PLASMA_ARRAY_SIZE(uiTemp));
+    uiRead = pReader->ReadBytes(uiTemp, PL_ARRAY_SIZE(uiTemp));
 
     if (uiRead == 0)
       break;
 
-    PLASMA_SUCCEED_OR_RETURN(file.WriteBytes(uiTemp, uiRead));
+    PL_SUCCEED_OR_RETURN(file.WriteBytes(uiTemp, uiRead));
 
     uiReadTotal += uiRead;
 
     if (!ExtractFileProgressCallback(uiReadTotal, uiMaxSize))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(uiReadTotal == uiMaxSize, "Failed to read entire file");
+  PL_ASSERT_DEV(uiReadTotal == uiMaxSize, "Failed to read entire file");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plArchiveReader::ExtractNextFileCallback(plUInt32 uiCurEntry, plUInt32 uiMaxEntries, plStringView sSourceFile) const
@@ -157,4 +157,3 @@ bool plArchiveReader::ExtractFileProgressCallback(plUInt64 bytesWritten, plUInt6
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Archive_Implementation_ArchiveReader);

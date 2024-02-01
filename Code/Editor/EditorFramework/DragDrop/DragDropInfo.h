@@ -12,9 +12,9 @@ class plQtDocumentTreeModelAdapter;
 ///
 /// It is a reflected class such that one can derive and extend it, if necessary.
 /// DragDrop handlers can then inspect whether it is a known extended type and cast to the type to get access to additional information.
-class PLASMA_EDITORFRAMEWORK_DLL plDragDropInfo : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plDragDropInfo : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDragDropInfo, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDragDropInfo, plReflectedClass);
 
 public:
   plDragDropInfo();
@@ -56,9 +56,9 @@ public:
 
 /// \brief After an plDragDropHandler has been chosen to handle an operation, it is queried once to fill out an instance of this type (or an extended
 /// derived type) to enable configuring how plDragDropInfo is computed by the target.
-class PLASMA_EDITORFRAMEWORK_DLL plDragDropConfig : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plDragDropConfig : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDragDropConfig, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDragDropConfig, plReflectedClass);
 
 public:
   plDragDropConfig();
@@ -66,12 +66,3 @@ public:
   /// Whether the currently selected objects (ie the dragged objects) should be considered for picking or not. Default is disabled.
   bool m_bPickSelectedObjects;
 };
-
-/// \brief Helper operator to retrieve the "application/PlasmaEditor.ObjectSelection" mime data from a plDragDropInfo::m_pMimeData.
-/// \code{.cpp}
-///   plHybridArray<const plDocumentObject*, 32> Dragged;
-///   QByteArray encodedData = m_pMimeData->data("application/PlasmaEditor.ObjectSelection");
-///   QDataStream stream(&encodedData, QIODevice::ReadOnly);
-///   stream >> Dragged;
-/// \endcode
-PLASMA_EDITORFRAMEWORK_DLL void operator>>(QDataStream& stream, plDynamicArray<plDocumentObject*>& rhs);

@@ -13,9 +13,9 @@ class plDocument;
 /// Pass the 'Domain' and 'Visibility' to the constructor to configure whether the preference class
 /// is per application, per project or per document, and whether the data is shared among all users
 /// or custom for every user.
-class PLASMA_EDITORFRAMEWORK_DLL plPreferences : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plPreferences : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPreferences, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plPreferences, plReflectedClass);
 
 public:
   enum class Domain
@@ -30,7 +30,7 @@ public:
   template <typename TYPE>
   static TYPE* QueryPreferences(const plDocument* pDocument = nullptr)
   {
-    PLASMA_CHECK_AT_COMPILETIME_MSG((std::is_base_of<plPreferences, TYPE>::value == true), "All preferences objects must be derived from plPreferences");
+    PL_CHECK_AT_COMPILETIME_MSG((std::is_base_of<plPreferences, TYPE>::value == true), "All preferences objects must be derived from plPreferences");
     return static_cast<TYPE*>(QueryPreferences(plGetStaticRTTI<TYPE>(), pDocument));
   }
 
@@ -60,7 +60,7 @@ public:
   static void ClearApplicationPreferences();
 
   //// \brief Fills the list with all currently known preferences
-  static void GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_AllPreferences);
+  static void GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_allPreferences);
 
   /// \brief Whether the preferences are app, project or document specific
   Domain GetDomain() const { return m_Domain; }

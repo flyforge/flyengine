@@ -16,20 +16,18 @@ struct plPhantomRttiManagerEvent
   };
 
   plPhantomRttiManagerEvent()
-    : m_Type(Type::TypeAdded)
-    , m_pChangedType(nullptr)
-  {
-  }
 
-  Type m_Type;
-  const plRTTI* m_pChangedType;
+    = default;
+
+  Type m_Type = Type::TypeAdded;
+  const plRTTI* m_pChangedType = nullptr;
 };
 
 /// \brief Manages all plPhantomRTTI types that have been added to him.
 ///
 /// A plPhantomRTTI cannot be created directly but must be created via this managers
 /// RegisterType function with a given plReflectedTypeDescriptor.
-class PLASMA_TOOLSFOUNDATION_DLL plPhantomRttiManager
+class PL_TOOLSFOUNDATION_DLL plPhantomRttiManager
 {
 public:
   /// \brief Adds a reflected type to the list of accessible types.
@@ -42,7 +40,7 @@ public:
   /// m_TypeChangedEvent event will be called with the old and new plRTTI.
   ///
   /// \sa plReflectionUtils::GetReflectedTypeDescriptorFromRtti
-  static const plRTTI* RegisterType(plReflectedTypeDescriptor& desc);
+  static const plRTTI* RegisterType(plReflectedTypeDescriptor& ref_desc);
 
   /// \brief Removes a type from the list of accessible types.
   ///
@@ -50,7 +48,7 @@ public:
   static bool UnregisterType(const plRTTI* pRtti);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, ReflectedTypeManager);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, ReflectedTypeManager);
 
   static void Startup();
   static void Shutdown();

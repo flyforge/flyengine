@@ -8,25 +8,25 @@
 #include <ParticlePlugin/Resources/ParticleEffectResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEventReactionFactory_Effect, 1, plRTTIDefaultAllocator<plParticleEventReactionFactory_Effect>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEventReactionFactory_Effect, 1, plRTTIDefaultAllocator<plParticleEventReactionFactory_Effect>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Effect", m_sEffect)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Particle_Effect")),
-    PLASMA_ENUM_MEMBER_PROPERTY("Alignment", plSurfaceInteractionAlignment, m_Alignment),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Effect"), new plExposeColorAlphaAttribute),
+    PL_MEMBER_PROPERTY("Effect", m_sEffect)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Particle_Effect")),
+    PL_ENUM_MEMBER_PROPERTY("Alignment", plSurfaceInteractionAlignment, m_Alignment),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Effect"), new plExposeColorAlphaAttribute),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEventReaction_Effect, 1, plRTTIDefaultAllocator<plParticleEventReaction_Effect>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEventReaction_Effect, 1, plRTTIDefaultAllocator<plParticleEventReaction_Effect>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleEventReactionFactory_Effect::plParticleEventReactionFactory_Effect()
 {
-  m_pParameters = PLASMA_DEFAULT_NEW(plParticleEffectParameters);
+  m_pParameters = PL_DEFAULT_NEW(plParticleEffectParameters);
 }
 
 enum class ReactionEffectVersion
@@ -41,72 +41,72 @@ enum class ReactionEffectVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleEventReactionFactory_Effect::Save(plStreamWriter& stream) const
+void plParticleEventReactionFactory_Effect::Save(plStreamWriter& inout_stream) const
 {
-  SUPER::Save(stream);
+  SUPER::Save(inout_stream);
 
   const plUInt8 uiVersion = (int)ReactionEffectVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   // Version 1
-  stream << m_sEffect;
+  inout_stream << m_sEffect;
 
   // Version 2
-  stream << m_pParameters->m_FloatParams.GetCount();
+  inout_stream << m_pParameters->m_FloatParams.GetCount();
   for (plUInt32 i = 0; i < m_pParameters->m_FloatParams.GetCount(); ++i)
   {
-    stream << m_pParameters->m_FloatParams[i].m_sName;
-    stream << m_pParameters->m_FloatParams[i].m_Value;
+    inout_stream << m_pParameters->m_FloatParams[i].m_sName;
+    inout_stream << m_pParameters->m_FloatParams[i].m_Value;
   }
-  stream << m_pParameters->m_ColorParams.GetCount();
+  inout_stream << m_pParameters->m_ColorParams.GetCount();
   for (plUInt32 i = 0; i < m_pParameters->m_ColorParams.GetCount(); ++i)
   {
-    stream << m_pParameters->m_ColorParams[i].m_sName;
-    stream << m_pParameters->m_ColorParams[i].m_Value;
+    inout_stream << m_pParameters->m_ColorParams[i].m_sName;
+    inout_stream << m_pParameters->m_ColorParams[i].m_Value;
   }
 
   // Version 3
-  stream << m_Alignment;
+  inout_stream << m_Alignment;
 }
 
-void plParticleEventReactionFactory_Effect::Load(plStreamReader& stream)
+void plParticleEventReactionFactory_Effect::Load(plStreamReader& inout_stream)
 {
-  SUPER::Load(stream);
+  SUPER::Load(inout_stream);
 
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)ReactionEffectVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)ReactionEffectVersion::Version_Current, "Invalid version {0}", uiVersion);
 
   // Version 1
-  stream >> m_sEffect;
+  inout_stream >> m_sEffect;
 
   if (uiVersion >= 2)
   {
     plUInt32 numFloats, numColors;
 
-    stream >> numFloats;
+    inout_stream >> numFloats;
     m_pParameters->m_FloatParams.SetCountUninitialized(numFloats);
 
     for (plUInt32 i = 0; i < m_pParameters->m_FloatParams.GetCount(); ++i)
     {
-      stream >> m_pParameters->m_FloatParams[i].m_sName;
-      stream >> m_pParameters->m_FloatParams[i].m_Value;
+      inout_stream >> m_pParameters->m_FloatParams[i].m_sName;
+      inout_stream >> m_pParameters->m_FloatParams[i].m_Value;
     }
 
-    stream >> numColors;
+    inout_stream >> numColors;
     m_pParameters->m_ColorParams.SetCountUninitialized(numColors);
 
     for (plUInt32 i = 0; i < m_pParameters->m_ColorParams.GetCount(); ++i)
     {
-      stream >> m_pParameters->m_ColorParams[i].m_sName;
-      stream >> m_pParameters->m_ColorParams[i].m_Value;
+      inout_stream >> m_pParameters->m_ColorParams[i].m_sName;
+      inout_stream >> m_pParameters->m_ColorParams[i].m_Value;
     }
   }
 
   if (uiVersion >= 3)
   {
-    stream >> m_Alignment;
+    inout_stream >> m_Alignment;
   }
 }
 
@@ -133,12 +133,12 @@ void plParticleEventReactionFactory_Effect::CopyReactionProperties(plParticleEve
 const plRangeView<const char*, plUInt32> plParticleEventReactionFactory_Effect::GetParameters() const
 {
   return plRangeView<const char*, plUInt32>([this]() -> plUInt32 { return 0; },
-    [this]() -> plUInt32 { return m_pParameters->m_FloatParams.GetCount() + m_pParameters->m_ColorParams.GetCount(); }, [this](plUInt32& it) { ++it; },
-    [this](const plUInt32& it) -> const char* {
-      if (it < m_pParameters->m_FloatParams.GetCount())
-        return m_pParameters->m_FloatParams[it].m_sName.GetData();
+    [this]() -> plUInt32 { return m_pParameters->m_FloatParams.GetCount() + m_pParameters->m_ColorParams.GetCount(); }, [this](plUInt32& ref_uiIt) { ++ref_uiIt; },
+    [this](const plUInt32& uiIt) -> const char* {
+      if (uiIt < m_pParameters->m_FloatParams.GetCount())
+        return m_pParameters->m_FloatParams[uiIt].m_sName.GetData();
       else
-        return m_pParameters->m_ColorParams[it - m_pParameters->m_FloatParams.GetCount()].m_sName.GetData();
+        return m_pParameters->m_ColorParams[uiIt - m_pParameters->m_FloatParams.GetCount()].m_sName.GetData();
     });
 }
 
@@ -283,7 +283,7 @@ void plParticleEventReaction_Effect::ProcessEvent(const plParticleEvent& e)
 
   if (!vAlignDir.IsZero())
   {
-    god.m_LocalRotation.SetShortestRotation(plVec3(0, 0, 1), vAlignDir);
+    god.m_LocalRotation = plQuat::MakeShortestRotation(plVec3(0, 0, 1), vAlignDir);
   }
 
   plGameObject* pObject = nullptr;
@@ -310,3 +310,7 @@ void plParticleEventReaction_Effect::ProcessEvent(const plParticleEvent& e)
     pComponent->m_ColorParams = m_Parameters->m_ColorParams;
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Events_ParticleEventReaction_Effect);
+

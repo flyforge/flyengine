@@ -1,59 +1,59 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f() {}
+PL_ALWAYS_INLINE plSimdVec4f::plSimdVec4f() = default;
 
-PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(float xyzw)
+PL_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(float xyzw)
 {
   m_v.Set(xyzw);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(const plSimdFloat& xyzw)
+PL_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(const plSimdFloat& xyzw)
 {
   m_v = xyzw.m_v;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(float x, float y, float z, float w)
+PL_ALWAYS_INLINE plSimdVec4f::plSimdVec4f(float x, float y, float z, float w)
 {
   m_v.Set(x, y, z, w);
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::Set(float xyzw)
+PL_ALWAYS_INLINE void plSimdVec4f::Set(float xyzw)
 {
   m_v.Set(xyzw);
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::Set(float x, float y, float z, float w)
+PL_ALWAYS_INLINE void plSimdVec4f::Set(float x, float y, float z, float w)
 {
   m_v.Set(x, y, z, w);
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::SetX(const plSimdFloat& f)
+PL_ALWAYS_INLINE void plSimdVec4f::SetX(const plSimdFloat& f)
 {
   m_v.x = f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::SetY(const plSimdFloat& f)
+PL_ALWAYS_INLINE void plSimdVec4f::SetY(const plSimdFloat& f)
 {
   m_v.y = f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::SetZ(const plSimdFloat& f)
+PL_ALWAYS_INLINE void plSimdVec4f::SetZ(const plSimdFloat& f)
 {
   m_v.z = f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::SetW(const plSimdFloat& f)
+PL_ALWAYS_INLINE void plSimdVec4f::SetW(const plSimdFloat& f)
 {
   m_v.w = f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdVec4f::SetZero()
+PL_ALWAYS_INLINE void plSimdVec4f::SetZero()
 {
   m_v.SetZero();
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE void plSimdVec4f::Load(const float* pFloats)
+PL_ALWAYS_INLINE void plSimdVec4f::Load(const float* pFloats)
 {
   m_v.SetZero();
   for (int i = 0; i < N; ++i)
@@ -63,7 +63,7 @@ PLASMA_ALWAYS_INLINE void plSimdVec4f::Load(const float* pFloats)
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE void plSimdVec4f::Store(float* pFloats) const
+PL_ALWAYS_INLINE void plSimdVec4f::Store(float* pFloats) const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -72,13 +72,13 @@ PLASMA_ALWAYS_INLINE void plSimdVec4f::Store(float* pFloats) const
 }
 
 template <plMathAcc::Enum acc>
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetReciprocal() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetReciprocal() const
 {
   return plVec4(1.0f).CompDiv(m_v);
 }
 
 template <plMathAcc::Enum acc>
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetSqrt() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetSqrt() const
 {
   plSimdVec4f result;
   result.m_v.x = plMath::Sqrt(m_v.x);
@@ -106,11 +106,11 @@ void plSimdVec4f::NormalizeIfNotZero(const plSimdFloat& fEpsilon)
 {
   plSimdFloat sqLength = GetLengthSquared<N>();
   m_v *= sqLength.GetInvSqrt<acc>();
-  m_v = sqLength > fEpsilon.m_v ? m_v : plVec4::ZeroVector();
+  m_v = sqLength > fEpsilon.m_v ? m_v : plVec4::MakeZero();
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsZero() const
+PL_ALWAYS_INLINE bool plSimdVec4f::IsZero() const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -122,7 +122,7 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsZero() const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsZero(const plSimdFloat& fEpsilon) const
+PL_ALWAYS_INLINE bool plSimdVec4f::IsZero(const plSimdFloat& fEpsilon) const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -134,7 +134,7 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsZero(const plSimdFloat& fEpsilon) const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsNaN() const
+PL_ALWAYS_INLINE bool plSimdVec4f::IsNaN() const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -146,7 +146,7 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsNaN() const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsValid() const
+PL_ALWAYS_INLINE bool plSimdVec4f::IsValid() const
 {
   for (int i = 0; i < N; ++i)
   {
@@ -158,33 +158,33 @@ PLASMA_ALWAYS_INLINE bool plSimdVec4f::IsValid() const
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::GetComponent() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::GetComponent() const
 {
   return (&m_v.x)[N];
 }
 
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::x() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::x() const
 {
   return m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::y() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::y() const
 {
   return m_v.y;
 }
 
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::z() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::z() const
 {
   return m_v.z;
 }
 
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::w() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::w() const
 {
   return m_v.w;
 }
 
 template <plSwizzle::Enum s>
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Get() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Get() const
 {
   plSimdVec4f result;
 
@@ -198,7 +198,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Get() const
 }
 
 template <plSwizzle::Enum s>
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetCombined(const plSimdVec4f& other) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetCombined(const plSimdVec4f& other) const
 {
   plSimdVec4f result;
 
@@ -212,59 +212,59 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetCombined(const plSimdVec4f& oth
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator-() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator-() const
 {
   return -m_v;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator+(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator+(const plSimdVec4f& v) const
 {
   return m_v + v.m_v;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator-(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator-(const plSimdVec4f& v) const
 {
   return m_v - v.m_v;
 }
 
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator*(const plSimdFloat& f) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator*(const plSimdFloat& f) const
 {
   return m_v * f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator/(const plSimdFloat& f) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::operator/(const plSimdFloat& f) const
 {
   return m_v / f.m_v.x;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMul(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMul(const plSimdVec4f& v) const
 {
   return m_v.CompMul(v.m_v);
 }
 
 template <plMathAcc::Enum acc>
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompDiv(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompDiv(const plSimdVec4f& v) const
 {
   return m_v.CompDiv(v.m_v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMin(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMin(const plSimdVec4f& v) const
 {
   return m_v.CompMin(v.m_v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMax(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CompMax(const plSimdVec4f& v) const
 {
   return m_v.CompMax(v.m_v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Abs() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Abs() const
 {
   return m_v.Abs();
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Round() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Round() const
 {
   plSimdVec4f result;
   result.m_v.x = plMath::Round(m_v.x);
@@ -275,7 +275,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Round() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Floor() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Floor() const
 {
   plSimdVec4f result;
   result.m_v.x = plMath::Floor(m_v.x);
@@ -286,7 +286,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Floor() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Ceil() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Ceil() const
 {
   plSimdVec4f result;
   result.m_v.x = plMath::Ceil(m_v.x);
@@ -297,7 +297,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Ceil() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Trunc() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Trunc() const
 {
   plSimdVec4f result;
   result.m_v.x = plMath::Trunc(m_v.x);
@@ -308,7 +308,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Trunc() const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::FlipSign(const plSimdVec4b& cmp) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::FlipSign(const plSimdVec4b& cmp) const
 {
   plSimdVec4f result;
   result.m_v.x = cmp.m_v.x ? -m_v.x : m_v.x;
@@ -320,7 +320,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::FlipSign(const plSimdVec4b& cmp) c
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Select(const plSimdVec4b& cmp, const plSimdVec4f& ifTrue, const plSimdVec4f& ifFalse)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Select(const plSimdVec4b& cmp, const plSimdVec4f& ifTrue, const plSimdVec4f& ifFalse)
 {
   plSimdVec4f result;
   result.m_v.x = cmp.m_v.x ? ifTrue.m_v.x : ifFalse.m_v.x;
@@ -331,31 +331,31 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::Select(const plSimdVec4b& cmp, con
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator+=(const plSimdVec4f& v)
+PL_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator+=(const plSimdVec4f& v)
 {
   m_v += v.m_v;
   return *this;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator-=(const plSimdVec4f& v)
+PL_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator-=(const plSimdVec4f& v)
 {
   m_v -= v.m_v;
   return *this;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator*=(const plSimdFloat& f)
+PL_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator*=(const plSimdFloat& f)
 {
   m_v *= f.m_v.x;
   return *this;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator/=(const plSimdFloat& f)
+PL_ALWAYS_INLINE plSimdVec4f& plSimdVec4f::operator/=(const plSimdFloat& f)
 {
   m_v /= f.m_v.x;
   return *this;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator==(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator==(const plSimdVec4f& v) const
 {
   bool result[4];
   result[0] = m_v.x == v.m_v.x;
@@ -366,17 +366,17 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator==(const plSimdVec4f& v) c
   return plSimdVec4b(result[0], result[1], result[2], result[3]);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator!=(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator!=(const plSimdVec4f& v) const
 {
   return !(*this == v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator<=(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator<=(const plSimdVec4f& v) const
 {
   return !(*this > v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator<(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator<(const plSimdVec4f& v) const
 {
   bool result[4];
   result[0] = m_v.x < v.m_v.x;
@@ -387,12 +387,12 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator<(const plSimdVec4f& v) co
   return plSimdVec4b(result[0], result[1], result[2], result[3]);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator>=(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator>=(const plSimdVec4f& v) const
 {
   return !(*this < v);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator>(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator>(const plSimdVec4f& v) const
 {
   bool result[4];
   result[0] = m_v.x > v.m_v.x;
@@ -404,61 +404,61 @@ PLASMA_ALWAYS_INLINE plSimdVec4b plSimdVec4f::operator>(const plSimdVec4f& v) co
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<2>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<2>() const
 {
   return m_v.x + m_v.y;
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<3>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<3>() const
 {
   return (float)HorizontalSum<2>() + m_v.z;
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<4>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalSum<4>() const
 {
   return (float)HorizontalSum<3>() + m_v.w;
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<2>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<2>() const
 {
   return plMath::Min(m_v.x, m_v.y);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<3>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<3>() const
 {
   return plMath::Min((float)HorizontalMin<2>(), m_v.z);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<4>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMin<4>() const
 {
   return plMath::Min((float)HorizontalMin<3>(), m_v.w);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<2>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<2>() const
 {
   return plMath::Max(m_v.x, m_v.y);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<3>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<3>() const
 {
   return plMath::Max((float)HorizontalMax<2>(), m_v.z);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<4>() const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::HorizontalMax<4>() const
 {
   return plMath::Max((float)HorizontalMax<3>(), m_v.w);
 }
 
 template <int N>
-PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::Dot(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdFloat plSimdVec4f::Dot(const plSimdVec4f& v) const
 {
   float result = 0.0f;
 
@@ -470,12 +470,12 @@ PLASMA_ALWAYS_INLINE plSimdFloat plSimdVec4f::Dot(const plSimdVec4f& v) const
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CrossRH(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CrossRH(const plSimdVec4f& v) const
 {
   return m_v.GetAsVec3().CrossRH(v.m_v.GetAsVec3()).GetAsVec4(0.0f);
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
 {
   if (plMath::Abs(m_v.y) < 0.99f)
   {
@@ -488,37 +488,31 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::GetOrthogonalVector() const
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::ZeroVector()
-{
-  return plVec4::ZeroVector();
-}
-
-// static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
 {
   return a.CompMul(b) + c;
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdFloat& b, const plSimdVec4f& c)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulAdd(const plSimdVec4f& a, const plSimdFloat& b, const plSimdVec4f& c)
 {
   return a * b + c;
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulSub(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulSub(const plSimdVec4f& a, const plSimdVec4f& b, const plSimdVec4f& c)
 {
   return a.CompMul(b) - c;
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulSub(const plSimdVec4f& a, const plSimdFloat& b, const plSimdVec4f& c)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::MulSub(const plSimdVec4f& a, const plSimdFloat& b, const plSimdVec4f& c)
 {
   return a * b - c;
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CopySign(const plSimdVec4f& magnitude, const plSimdVec4f& sign)
+PL_ALWAYS_INLINE plSimdVec4f plSimdVec4f::CopySign(const plSimdVec4f& magnitude, const plSimdVec4f& sign)
 {
   plSimdVec4f result;
   result.m_v.x = sign.m_v.x < 0.0f ? -magnitude.m_v.x : magnitude.m_v.x;

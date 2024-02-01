@@ -1,5 +1,3 @@
-#include "Foundation/Utilities/Stats.h"
-
 #include <GameEngine/GameEnginePCH.h>
 
 #include <Core/ActorSystem/Actor.h>
@@ -34,20 +32,19 @@ plGameApplication* plGameApplication::s_pGameApplicationInstance = nullptr;
 plDelegate<plGALDevice*(const plGALDeviceCreationDescription&)> plGameApplication::s_DefaultDeviceCreator;
 
 plCVarBool plGameApplication::cvar_AppVSync("App.VSync", false, plCVarFlags::Save, "Enables V-Sync");
-plCVarBool plGameApplication::cvar_AppShowFPS("App.ShowFPS", true, plCVarFlags::Save, "Show frames per second counter");
-plCVarBool plGameApplication::cvar_AppShowInfo("App.ShowInfo", true, plCVarFlags::Save, "Show info about the application");
+plCVarBool plGameApplication::cvar_AppShowFPS("App.ShowFPS", false, plCVarFlags::Save, "Show frames per second counter");
 
 plGameApplication::plGameApplication(const char* szAppName, const char* szProjectPath /*= nullptr*/)
   : plGameApplicationBase(szAppName)
   , m_sAppProjectPath(szProjectPath)
 {
-  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plGameApplication::UpdateWorldsAndExtractViews, this));
+  m_pUpdateTask = PL_DEFAULT_NEW(plDelegateTask<void>, "UpdateWorldsAndExtractViews", plTaskNesting::Never, plMakeDelegate(&plGameApplication::UpdateWorldsAndExtractViews, this));
   m_pUpdateTask->ConfigureTask("GameApplication.Update", plTaskNesting::Maybe);
 
   s_pGameApplicationInstance = this;
   m_bWasQuitRequested = false;
 
-  m_pConsole = PLASMA_DEFAULT_NEW(plQuakeConsole);
+  m_pConsole = PL_DEFAULT_NEW(plQuakeConsole);
   plConsole::SetMainConsole(m_pConsole.Borrow());
 }
 
@@ -69,7 +66,7 @@ void plGameApplication::ReinitializeInputConfig()
 
 plString plGameApplication::FindProjectDirectory() const
 {
-  PLASMA_ASSERT_RELEASE(!m_sAppProjectPath.IsEmpty(), "Either the project must have a built-in project directory passed to the plGameApplication constructor, or m_sAppProjectPath must be set manually before doing project setup, or plGameApplication::FindProjectDirectory() must be overridden.");
+  PL_ASSERT_RELEASE(!m_sAppProjectPath.IsEmpty(), "Either the project must have a built-in project directory passed to the plGameApplication constructor, or m_sAppProjectPath must be set manually before doing project setup, or plGameApplication::FindProjectDirectory() must be overridden.");
 
   if (plPathUtils::IsAbsolutePath(m_sAppProjectPath))
     return m_sAppProjectPath;
@@ -101,7 +98,7 @@ bool plGameApplication::IsGameUpdateEnabled() const
 
 void plGameApplication::Run_WorldUpdateAndRender()
 {
-  PLASMA_PROFILE_SCOPE("Run_WorldUpdateAndRender");
+  PL_PROFILE_SCOPE("Run_WorldUpdateAndRender");
   // If multi-threaded rendering is disabled, the same content is updated/extracted and rendered in the same frame.
   // As plRenderWorld::BeginFrame applies the render pipeline properties that were set during the update phase, it needs to be done after update/extraction but before rendering.
   if (!plRenderWorld::GetUseMultithreadedRendering())
@@ -132,7 +129,7 @@ void plGameApplication::Run_WorldUpdateAndRender()
 
   if (plRenderWorld::GetUseMultithreadedRendering())
   {
-    PLASMA_PROFILE_SCOPE("Wait for UpdateWorldsAndExtractViews");
+    PL_PROFILE_SCOPE("Wait for UpdateWorldsAndExtractViews");
     plTaskSystem::WaitForGroup(updateTaskID);
   }
 }
@@ -144,7 +141,7 @@ void plGameApplication::Run_Present()
 
   for (plActor* pActor : allActors)
   {
-    PLASMA_PROFILE_SCOPE(pActor->GetName());
+    PL_PROFILE_SCOPE(pActor->GetName());
 
     plActorPluginWindow* pWindowPlugin = pActor->GetPlugin<plActorPluginWindow>();
 
@@ -168,7 +165,7 @@ void plGameApplication::Run_Present()
         ExecuteFrameCapture(pWindowPlugin->GetWindow()->GetNativeWindowHandle(), ctxt);
       }
 
-      PLASMA_PROFILE_SCOPE("Present");
+      PL_PROFILE_SCOPE("Present");
       pOutput->Present(cvar_AppVSync);
     }
   }
@@ -185,8 +182,8 @@ void plGameApplication::Run_FinishFrame()
 void plGameApplication::UpdateWorldsAndExtractViews()
 {
   plStringBuilder sb;
-  sb.Format("FRAME {}", plRenderWorld::GetFrameCounter());
-  PLASMA_PROFILE_SCOPE(sb.GetData());
+  sb.SetFormat("FRAME {}", plRenderWorld::GetFrameCounter());
+  PL_PROFILE_SCOPE(sb.GetData());
 
   Run_BeforeWorldUpdate();
 
@@ -223,7 +220,7 @@ void plGameApplication::UpdateWorldsAndExtractViews()
     for (plUInt32 i = 0; i < worldsToUpdate.GetCount(); ++i)
     {
       plWorld* pWorld = worldsToUpdate[i];
-      PLASMA_LOCK(pWorld->GetWriteMarker());
+      PL_LOCK(pWorld->GetWriteMarker());
 
       pWorld->Update();
     }
@@ -239,7 +236,7 @@ void plGameApplication::UpdateWorldsAndExtractViews()
 
 void plGameApplication::RenderFps()
 {
-  PLASMA_PROFILE_SCOPE("RenderFps");
+  PL_PROFILE_SCOPE("RenderFps");
   // Do not use plClock for this, it smooths and clamps the timestep
 
   static plTime tAccumTime;
@@ -250,9 +247,9 @@ void plGameApplication::RenderFps()
   ++uiFrames;
   tAccumTime += m_FrameTime;
 
-  if (tAccumTime >= plTime::Seconds(0.5))
+  if (tAccumTime >= plTime::MakeFromSeconds(0.5))
   {
-    tAccumTime -= plTime::Seconds(0.5);
+    tAccumTime -= plTime::MakeFromSeconds(0.5);
     tDisplayedFrameTime = m_FrameTime;
 
     uiFPS = uiFrames * 2;
@@ -263,59 +260,14 @@ void plGameApplication::RenderFps()
   {
     if (const plView* pView = plRenderWorld::GetViewByUsageHint(plCameraUsageHint::MainView, plCameraUsageHint::EditorView))
     {
-      plColor color = plColor::LightGreen;
-      if(uiFPS < 30)
-        color = plColor::Red;
-      else if(uiFPS < 60)
-        color = plColor::Orange;
-
-
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "AAAFPS", plFmt("{0} fps, {1} ms", uiFPS, plArgF(tDisplayedFrameTime.GetMilliseconds(), 1, false, 4)), color);
-    }
-  }
-
-  if (cvar_AppShowInfo)
-  {
-    if (const plView* pView = plRenderWorld::GetViewByUsageHint(plCameraUsageHint::MainView, plCameraUsageHint::EditorView))
-    {
-      const plSystemInformation sysInfo = plSystemInformation::Get();
-
-#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
-      constexpr const char* szDefaultRenderer = "Vulkan";
-#else
-      constexpr const char* szDefaultRenderer = "DX11";
-#endif
-
-      plStringView rednererName = plCommandLineUtils::GetGlobalInstance()->GetStringOption("-renderer", 0, szDefaultRenderer);
-      plStringBuilder tmp;
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Platform", plFmt("Renderer: {0}", rednererName.GetData(tmp)));
-
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Platform", plFmt("Platform: {0}", sysInfo.GetPlatformName()));
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Platform", plFmt("Architecture: {0}", sysInfo.Is64BitOS() ? "x64" : "x86"));
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Platform", plFmt("Build Type: {0}", sysInfo.GetBuildConfiguration()));
-
-      // Move this to another section (not needed in default view)
-//      float memory = plMath::RoundUp(plMemoryUtils::ConvertToGigaBytes(sysInfo.GetInstalledMainMemory()), 1);
-//      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugRenderer::ScreenPlacement::TopLeft, "Hardware", plFmt("Threads: {0}, Memory: {1} (Gb)", sysInfo.GetCPUCoreCount(), memory));
-//
-//      plString gpuMemory = plStats::GetStat("GPU Resource Pool/Memory Consumption").Get<plString>();
-//      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugRenderer::ScreenPlacement::TopLeft, "Usage", plFmt("GPU Memory Used: {0}", gpuMemory));
-//
-//      float availableMemory = plMath::RoundUp(plMemoryUtils::ConvertToGigaBytes(sysInfo.GetAvailableMainMemory()), 1);
-//      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugRenderer::ScreenPlacement::TopLeft, "Usage", plFmt("System Memory Remaining: {0} (Gb)", availableMemory));
-
-      plString profiling = plStats::GetStat("Features/Profiling").Get<plString>();
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Features", plFmt("Profiling: {0}", profiling), (profiling == "Enabled" ? plColor::LightGreen : plColor::Red));
-
-      plString allocTracking = plStats::GetStat("Features/Allocation Tracking").Get<plString>();
-      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopRight, "Features", plFmt("Allocation Tracking: {0}", allocTracking), (allocTracking == "Enabled" ? plColor::LightGreen : plColor::Red));
+      plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::BottomLeft, "FPS", plFmt("{0} fps, {1} ms", uiFPS, plArgF(tDisplayedFrameTime.GetMilliseconds(), 1, false, 4)));
     }
   }
 }
 
 void plGameApplication::RenderConsole()
 {
-  PLASMA_PROFILE_SCOPE("RenderConsole");
+  PL_PROFILE_SCOPE("RenderConsole");
 
   if (!m_bShowConsole || !m_pConsole)
     return;
@@ -346,7 +298,7 @@ void plGameApplication::RenderConsole()
   }
 
   {
-    PLASMA_LOCK(m_pConsole->GetMutex());
+    PL_LOCK(m_pConsole->GetMutex());
 
     auto& consoleStrings = m_pConsole->GetConsoleStrings();
 
@@ -361,8 +313,7 @@ void plGameApplication::RenderConsole()
       plDebugRenderer::Draw2DText(hView, consoleString.m_sText.GetData(), plVec2I32(iTextLeft, iFirstLinePos + i * iTextHeight), consoleString.GetColor());
     }
 
-    plStringBuilder tmp;
-    plDebugRenderer::Draw2DText(hView, m_pConsole->GetInputLine().GetData(tmp), plVec2I32(iTextLeft, (plInt32)(fConsoleTextAreaHeight + fBorderWidth)), plColor::White);
+    plDebugRenderer::Draw2DText(hView, m_pConsole->GetInputLine(), plVec2I32(iTextLeft, (plInt32)(fConsoleTextAreaHeight + fBorderWidth)), plColor::White);
 
     if (plMath::Fraction(plClock::GetGlobalClock()->GetAccumulatedTime().GetSeconds()) > 0.5)
     {
@@ -416,7 +367,7 @@ void plGameApplication::Init_ConfigureInput()
   {
     plStringView sConfigFile = plGameAppInputConfig::s_sConfigFile;
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
     sConfigFile = plFileSystem::MigrateFileLocation(":project/InputConfig.ddl", sConfigFile);
 #endif
 
@@ -493,4 +444,4 @@ bool plGameApplication::Run_ProcessApplicationInput()
   return true;
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_GameApplication_Implementation_GameApplication);
+PL_STATICLINK_FILE(GameEngine, GameEngine_GameApplication_Implementation_GameApplication);

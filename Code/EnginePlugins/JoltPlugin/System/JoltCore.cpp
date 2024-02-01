@@ -20,18 +20,18 @@ std::unique_ptr<plJoltDebugRenderer> plJoltCore::s_pDebugRenderer;
 #endif
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plJoltSteppingMode, 1)
-  PLASMA_ENUM_CONSTANTS(plJoltSteppingMode::Variable, plJoltSteppingMode::Fixed, plJoltSteppingMode::SemiFixed)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plJoltSteppingMode, 1)
+  PL_ENUM_CONSTANTS(plJoltSteppingMode::Variable, plJoltSteppingMode::Fixed, plJoltSteppingMode::SemiFixed)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plOnJoltContact, 1)
-  //PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::SendReportMsg),
-  PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::ImpactReactions),
-  PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::SlideReactions),
-  PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::RollXReactions),
-  PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::RollYReactions),
-  PLASMA_BITFLAGS_CONSTANT(plOnJoltContact::RollZReactions),
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plOnJoltContact, 1)
+  //PL_BITFLAGS_CONSTANT(plOnJoltContact::SendReportMsg),
+  PL_BITFLAGS_CONSTANT(plOnJoltContact::ImpactReactions),
+  PL_BITFLAGS_CONSTANT(plOnJoltContact::SlideReactions),
+  PL_BITFLAGS_CONSTANT(plOnJoltContact::RollXReactions),
+  PL_BITFLAGS_CONSTANT(plOnJoltContact::RollYReactions),
+  PL_BITFLAGS_CONSTANT(plOnJoltContact::RollZReactions),
+PL_END_STATIC_REFLECTED_BITFLAGS;
 // clang-format on
 
 plJoltMaterial* plJoltCore::s_pDefaultMaterial = nullptr;
@@ -48,7 +48,7 @@ static void JoltTraceFunc(const char* szText, ...)
 
   va_list args;
   va_start(args, szText);
-  tmp.PrintfArgs(szText, args);
+  tmp.SetPrintfArgs(szText, args);
   va_end(args);
 
   plLog::Dev("Jolt: {}", tmp);
@@ -99,7 +99,7 @@ void plJoltCore::JoltAlignedFree(void* inBlock)
 
 void plJoltCore::Startup()
 {
-  s_pAllocator = PLASMA_DEFAULT_NEW(plProxyAllocator, "Jolt-Core", plFoundation::GetAlignedAllocator());
+  s_pAllocator = PL_DEFAULT_NEW(plProxyAllocator, "Jolt-Core", plFoundation::GetAlignedAllocator());
 
   JPH::Trace = JoltTraceFunc;
   JPH_IF_ENABLE_ASSERTS(JPH::AssertFailed = JoltAssertFailed);
@@ -178,5 +178,5 @@ void plJoltCore::SurfaceResourceEventHandler(const plSurfaceResourceEvent& e)
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltCore);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltCore);
 

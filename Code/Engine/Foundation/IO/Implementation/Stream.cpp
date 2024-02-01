@@ -16,7 +16,7 @@ plResult plStreamReader::ReadString(plStringBuilder& ref_sBuilder)
   else
   {
     plUInt32 uiCount = 0;
-    PLASMA_SUCCEED_OR_RETURN(ReadDWordValue(&uiCount));
+    PL_SUCCEED_OR_RETURN(ReadDWordValue(&uiCount));
 
     if (uiCount > 0)
     {
@@ -25,7 +25,6 @@ plResult plStreamReader::ReadString(plStringBuilder& ref_sBuilder)
       ref_sBuilder.m_Data.Reserve(uiCount + 1);
       ref_sBuilder.m_Data.SetCountUninitialized(uiCount);
       ReadBytes(ref_sBuilder.m_Data.GetData(), uiCount);
-      ref_sBuilder.m_uiCharacterCount = uiCount;
       ref_sBuilder.AppendTerminator();
     }
     else
@@ -34,7 +33,7 @@ plResult plStreamReader::ReadString(plStringBuilder& ref_sBuilder)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStreamReader::ReadString(plString& ref_sString)
@@ -59,15 +58,14 @@ plResult plStreamWriter::WriteString(const plStringView sStringView)
   }
   else
   {
-    PLASMA_SUCCEED_OR_RETURN(WriteDWordValue(&uiCount));
+    PL_SUCCEED_OR_RETURN(WriteDWordValue(&uiCount));
     if (uiCount > 0)
     {
-      PLASMA_SUCCEED_OR_RETURN(WriteBytes(sStringView.GetStartPointer(), uiCount));
+      PL_SUCCEED_OR_RETURN(WriteBytes(sStringView.GetStartPointer(), uiCount));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_Stream);

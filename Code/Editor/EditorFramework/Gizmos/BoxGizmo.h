@@ -5,23 +5,23 @@
 #include <QPoint>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plBoxGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plBoxGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoxGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plBoxGizmo, plGizmo);
 
 public:
   plBoxGizmo();
 
-  void SetSize(const plVec3& size);
+  void SetSize(const plVec3& vSize);
 
   const plVec3& GetSize() const { return m_vSize; }
 
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -33,9 +33,9 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  PlasmaEngineGizmoHandle m_hCorners;
-  PlasmaEngineGizmoHandle m_Edges[3];
-  PlasmaEngineGizmoHandle m_Faces[3];
+  plEngineGizmoHandle m_hCorners;
+  plEngineGizmoHandle m_Edges[3];
+  plEngineGizmoHandle m_Faces[3];
 
   enum class ManipulateMode
   {

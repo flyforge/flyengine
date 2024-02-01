@@ -35,7 +35,6 @@ void plAnimGraphInstance::Configure(const plAnimGraph& animGraph)
 
 void plAnimGraphInstance::Update(plAnimController& ref_controller, plTime diff, plGameObject* pTarget, const plSkeletonResource* pSekeltonResource)
 {
-  PLASMA_PROFILE_SCOPE("AnimGraphInstance_Update");
   // reset all pin states
   {
     // EXTEND THIS if a new type is introduced
@@ -57,3 +56,5 @@ void plAnimGraphInstance::Update(plAnimController& ref_controller, plTime diff, 
     pNode->Step(ref_controller, *this, diff, pSekeltonResource, pTarget);
   }
 }
+
+

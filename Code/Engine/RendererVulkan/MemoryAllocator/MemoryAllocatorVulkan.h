@@ -47,7 +47,7 @@ struct plVulkanAllocationCreateFlags
     StorageType StrategyMinTime : 1;
   };
 };
-PLASMA_DECLARE_FLAGS_OPERATORS(plVulkanAllocationCreateFlags);
+PL_DECLARE_FLAGS_OPERATORS(plVulkanAllocationCreateFlags);
 
 /// \brief Subset of VmaMemoryUsage. Duplicated for abstraction purposes.
 struct plVulkanMemoryUsage
@@ -70,6 +70,7 @@ struct plVulkanAllocationCreateInfo
   plBitflags<plVulkanAllocationCreateFlags> m_flags;
   plEnum<plVulkanMemoryUsage> m_usage;
   const char* m_pUserData = nullptr;
+  bool m_bExportSharedAllocation = false; // If this allocation should be exported so other processes can access it.
 };
 
 /// \brief Subset of VmaAllocationInfo. Duplicated for abstraction purposes.
@@ -89,7 +90,7 @@ VK_DEFINE_HANDLE(plVulkanAllocation)
 
 /// \brief Thin abstraction layer over VulkanMemoryAllocator to allow for abstraction and prevent pulling in its massive header into other files.
 /// Functions are a subset of VMA's. To be extended once a use-case comes up.
-class PLASMA_RENDERERVULKAN_DLL plMemoryAllocatorVulkan
+class PL_RENDERERVULKAN_DLL plMemoryAllocatorVulkan
 {
 public:
   static vk::Result Initialize(vk::PhysicalDevice physicalDevice, vk::Device device, vk::Instance instance);

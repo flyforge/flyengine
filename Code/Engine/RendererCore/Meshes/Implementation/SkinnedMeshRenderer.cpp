@@ -5,8 +5,8 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkinnedMeshRenderer, 1, plRTTIDefaultAllocator<plSkinnedMeshRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkinnedMeshRenderer, 1, plRTTIDefaultAllocator<plSkinnedMeshRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plUInt32 plSkinnedMeshRenderer::s_uiSkinningBufferUpdates = 0;
@@ -51,4 +51,4 @@ void plSkinnedMeshRenderer::SetAdditionalData(const plRenderViewContext& renderV
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_SkinnedMeshRenderer);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_SkinnedMeshRenderer);

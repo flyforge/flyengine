@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/Curve1DAsset/Curve1DAssetManager.h>
 #include <EditorPluginAssets/Curve1DAsset/Curve1DAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCurve1DAssetDocumentManager, 1, plRTTIDefaultAllocator<plCurve1DAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCurve1DAssetDocumentManager, 1, plRTTIDefaultAllocator<plCurve1DAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plCurve1DAssetDocumentManager::plCurve1DAssetDocumentManager()
 {
@@ -36,7 +36,7 @@ void plCurve1DAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plCurve1DAssetDocument>())
       {
-        plQtCurve1DAssetDocumentWindow* pDocWnd = new plQtCurve1DAssetDocumentWindow(e.m_pDocument);
+        new plQtCurve1DAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -47,9 +47,9 @@ void plCurve1DAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
 }
 
 void plCurve1DAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plCurve1DAssetDocument(szPath);
+  out_pDocument = new plCurve1DAssetDocument(sPath);
 }
 
 void plCurve1DAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

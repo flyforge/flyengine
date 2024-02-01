@@ -5,9 +5,9 @@
 #include <QPoint>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plCapsuleGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plCapsuleGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCapsuleGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plCapsuleGizmo, plGizmo);
 
 public:
   plCapsuleGizmo();
@@ -21,9 +21,9 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -35,9 +35,9 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  PlasmaEngineGizmoHandle m_hLengthTop;
-  PlasmaEngineGizmoHandle m_hLengthBottom;
-  PlasmaEngineGizmoHandle m_hRadius;
+  plEngineGizmoHandle m_hLengthTop;
+  plEngineGizmoHandle m_hLengthBottom;
+  plEngineGizmoHandle m_hRadius;
 
   enum class ManipulateMode
   {

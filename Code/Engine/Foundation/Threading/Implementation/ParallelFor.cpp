@@ -26,7 +26,7 @@ public:
     const IndexType uiSliceStartIndex = uiInvocation * m_uiItemsPerInvocation;
     const IndexType uiSliceEndIndex = plMath::Min(uiSliceStartIndex + m_uiItemsPerInvocation, m_uiStartIndex + m_uiNumItems);
 
-    PLASMA_ASSERT_DEV(uiSliceStartIndex < uiSliceEndIndex, "ParallelFor start/end indices given to index task are invalid: {} -> {}", uiSliceStartIndex, uiSliceEndIndex);
+    PL_ASSERT_DEV(uiSliceStartIndex < uiSliceEndIndex, "ParallelFor start/end indices given to index task are invalid: {} -> {}", uiSliceStartIndex, uiSliceEndIndex);
 
     // Run through the calculated slice, the end index is exclusive, i.e., should not be handled by this instance.
     m_TaskCallback(uiSliceStartIndex, uiSliceEndIndex);
@@ -56,7 +56,7 @@ void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, Ca
     Task indexedTask(uiStartIndex, uiNumItems, std::move(taskCallback), uiNumItems);
     indexedTask.ConfigureTask(szTaskName, plTaskNesting::Never);
 
-    PLASMA_PROFILE_SCOPE(szTaskName);
+    PL_PROFILE_SCOPE(szTaskName);
     indexedTask.Execute();
   }
   else
@@ -65,9 +65,9 @@ void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, Ca
     plUInt64 uiItemsPerInvocation;
     params.DetermineThreading(uiNumItems, uiMultiplicity, uiItemsPerInvocation);
 
-    plAllocatorBase* pAllocator = (params.m_pTaskAllocator != nullptr) ? params.m_pTaskAllocator : plFoundation::GetDefaultAllocator();
+    plAllocator* pAllocator = (params.m_pTaskAllocator != nullptr) ? params.m_pTaskAllocator : plFoundation::GetDefaultAllocator();
 
-    plSharedPtr<Task> pIndexedTask = PLASMA_NEW(pAllocator, Task, uiStartIndex, uiNumItems, std::move(taskCallback), static_cast<IndexType>(uiItemsPerInvocation));
+    plSharedPtr<Task> pIndexedTask = PL_NEW(pAllocator, Task, uiStartIndex, uiNumItems, std::move(taskCallback), static_cast<IndexType>(uiItemsPerInvocation));
     pIndexedTask->ConfigureTask(szTaskName, plTaskNesting::Never);
 
     pIndexedTask->SetMultiplicity(uiMultiplicity);
@@ -125,7 +125,7 @@ void plParallelForParams::DetermineThreading(plUInt64 uiNumItemsToExecute, plUIn
       }
     }
 
-    PLASMA_ASSERT_DEV(out_uiNumItemsPerTask * out_uiNumTasksToRun >= uiNumItemsToExecute, "plParallelFor is missing invocations");
+    PL_ASSERT_DEV(out_uiNumItemsPerTask * out_uiNumTasksToRun >= uiNumItemsToExecute, "plParallelFor is missing invocations");
   }
 }
 
@@ -139,4 +139,4 @@ void plTaskSystem::ParallelForIndexed(plUInt64 uiStartIndex, plUInt64 uiNumItems
   ParallelForIndexedInternal<plUInt64, plParallelForIndexedFunction64>(uiStartIndex, uiNumItems, std::move(taskCallback), szTaskName, params);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_ParallelFor);
+

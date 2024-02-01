@@ -5,7 +5,7 @@
 #include <RendererCore/Shader/ShaderStageBinary.h>
 #include <RendererFoundation/Descriptors/Descriptors.h>
 
-struct PLASMA_RENDERERCORE_DLL plShaderStateResourceDescriptor
+struct PL_RENDERERCORE_DLL plShaderStateResourceDescriptor
 {
   plGALBlendStateCreationDescription m_BlendDesc;
   plGALDepthStencilStateCreationDescription m_DepthStencilDesc;
@@ -18,7 +18,8 @@ struct PLASMA_RENDERERCORE_DLL plShaderStateResourceDescriptor
   plUInt32 CalculateHash() const;
 };
 
-class PLASMA_RENDERERCORE_DLL plShaderPermutationBinary
+/// \brief Serialized state of a shader permutation used by plShaderPermutationResourceLoader to convert into a plShaderPermutationResource.
+class PL_RENDERERCORE_DLL plShaderPermutationBinary
 {
 public:
   plShaderPermutationBinary();
@@ -26,6 +27,7 @@ public:
   plResult Write(plStreamWriter& inout_stream);
   plResult Read(plStreamReader& inout_stream, bool& out_bOldVersion);
 
+  // Actual binary will be loaded from the hash via plShaderStageBinary::LoadStageBinary to produce plShaderStageBinary
   plUInt32 m_uiShaderStageHashes[plGALShaderStage::ENUM_COUNT];
 
   plDependencyFile m_DependencyFile;

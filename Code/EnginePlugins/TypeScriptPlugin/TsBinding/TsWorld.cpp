@@ -24,7 +24,7 @@ plResult plTypeScriptBinding::Init_World()
   m_Duk.RegisterGlobalFunction("__CPP_World_FindObjectsInSphere", __CPP_World_FindObjectsInSphere, 4);
   m_Duk.RegisterGlobalFunction("__CPP_World_FindObjectsInBox", __CPP_World_FindObjectsInBox, 4);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plTypeScriptBinding::StoreWorld(plWorld* pWorld)
@@ -86,7 +86,7 @@ static int __CPP_World_CreateObject(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(hObject);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_World_CreateComponent(duk_context* pDuk)
@@ -113,7 +113,7 @@ static int __CPP_World_CreateComponent(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
   pBinding->DukPutComponentObject(pComponent);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_World_DeleteComponent(duk_context* pDuk)
@@ -139,11 +139,12 @@ static int __CPP_World_TryGetObjectWithGlobalKey(duk_context* pDuk)
   plWorld* pWorld = plTypeScriptBinding::RetrieveWorld(duk);
 
   plGameObject* pObject = nullptr;
-  bool _ = pWorld->TryGetObjectWithGlobalKey(plTempHashedString(duk.GetStringValue(0)), pObject);
+  bool objectExists = pWorld->TryGetObjectWithGlobalKey(plTempHashedString(duk.GetStringValue(0)), pObject);
+  PL_IGNORE_UNUSED(objectExists);
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pObject);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 struct FindObjectsCallback
@@ -158,15 +159,15 @@ struct FindObjectsCallback
     if (!duk_get_global_string(m_pDuk, "callback")) // [ func ]
       return plVisitorExecution::Stop;
 
-    PLASMA_DUK_VERIFY_STACK(duk, +1);
+    PL_DUK_VERIFY_STACK(duk, +1);
 
     m_pBinding->DukPutGameObject(pObject); // [ func go ]
 
-    PLASMA_DUK_VERIFY_STACK(duk, +2);
+    PL_DUK_VERIFY_STACK(duk, +2);
 
     duk_call(m_pDuk, 1); // [ res ]
 
-    PLASMA_DUK_VERIFY_STACK(duk, +1);
+    PL_DUK_VERIFY_STACK(duk, +1);
 
     if (duk_get_boolean_default(m_pDuk, -1, false) == false)
     {
@@ -176,7 +177,7 @@ struct FindObjectsCallback
 
     duk_pop(m_pDuk); // [ ]
 
-    PLASMA_DUK_VERIFY_STACK(duk, 0);
+    PL_DUK_VERIFY_STACK(duk, 0);
     return plVisitorExecution::Continue;
   }
 };
@@ -207,10 +208,10 @@ static int __CPP_World_FindObjectsInSphere(duk_context* pDuk)
     queryParams.m_uiCategoryBitmask = category.GetBitmask();
 
     pWorld->GetSpatialSystem()->FindObjectsInSphere(
-      plBoundingSphere(vSphereCenter, fRadius), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
+      plBoundingSphere::MakeFromCenterAndRadius(vSphereCenter, fRadius), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_World_FindObjectsInBox(duk_context* pDuk)
@@ -238,9 +239,8 @@ static int __CPP_World_FindObjectsInBox(duk_context* pDuk)
     plSpatialSystem::QueryParams queryParams;
     queryParams.m_uiCategoryBitmask = category.GetBitmask();
 
-    pWorld->GetSpatialSystem()->FindObjectsInBox(
-      plBoundingBox(vBoxMin, vBoxMax), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
+    pWorld->GetSpatialSystem()->FindObjectsInBox(plBoundingBox::MakeFromMinMax(vBoxMin, vBoxMax), queryParams, plMakeDelegate(&FindObjectsCallback::Callback, &cb));
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }

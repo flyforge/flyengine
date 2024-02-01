@@ -12,11 +12,11 @@ class plQtLogModel;
 struct plLoggingEventData;
 
 /// \brief The application wide panel that shows the engine log output and the editor log output
-class PLASMA_EDITORFRAMEWORK_DLL plQtLogPanel : public plQtApplicationPanel, public Ui_LogPanel
+class PL_EDITORFRAMEWORK_DLL plQtLogPanel : public plQtApplicationPanel, public Ui_LogPanel
 {
   Q_OBJECT
 
-  PLASMA_DECLARE_SINGLETON(plQtLogPanel);
+  PL_DECLARE_SINGLETON(plQtLogPanel);
 
 public:
   plQtLogPanel();
@@ -30,7 +30,7 @@ private Q_SLOTS:
 
 private:
   void LogWriter(const plLoggingEventData& e);
-  void EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e);
+  void EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e);
   void UiServiceEventHandler(const plQtUiServices::Event& e);
 
   plUInt32 m_uiIgnoredNumErrors = 0;

@@ -7,32 +7,32 @@
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDirectionalLightRenderData, 1, plRTTIDefaultAllocator<plDirectionalLightRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDirectionalLightRenderData, 1, plRTTIDefaultAllocator<plDirectionalLightRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plDirectionalLightComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plDirectionalLightComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("NumCascades", GetNumCascades, SetNumCascades)->AddAttributes(new plClampValueAttribute(1, 4), new plDefaultValueAttribute(2)),
-    PLASMA_ACCESSOR_PROPERTY("MinShadowRange", GetMinShadowRange, SetMinShadowRange)->AddAttributes(new plClampValueAttribute(0.1f, plVariant()), new plDefaultValueAttribute(30.0f), new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plClampValueAttribute(0.6f, 1.0f), new plDefaultValueAttribute(0.8f)),
-    PLASMA_ACCESSOR_PROPERTY("SplitModeWeight", GetSplitModeWeight, SetSplitModeWeight)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.7f)),
-    PLASMA_ACCESSOR_PROPERTY("NearPlaneOffset", GetNearPlaneOffset, SetNearPlaneOffset)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(100.0f), new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("NumCascades", GetNumCascades, SetNumCascades)->AddAttributes(new plClampValueAttribute(1, 4), new plDefaultValueAttribute(2)),
+    PL_ACCESSOR_PROPERTY("MinShadowRange", GetMinShadowRange, SetMinShadowRange)->AddAttributes(new plClampValueAttribute(0.1f, plVariant()), new plDefaultValueAttribute(30.0f), new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("FadeOutStart", GetFadeOutStart, SetFadeOutStart)->AddAttributes(new plClampValueAttribute(0.6f, 1.0f), new plDefaultValueAttribute(0.8f)),
+    PL_ACCESSOR_PROPERTY("SplitModeWeight", GetSplitModeWeight, SetSplitModeWeight)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.7f)),
+    PL_ACCESSOR_PROPERTY("NearPlaneOffset", GetNearPlaneOffset, SetNearPlaneOffset)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(100.0f), new plSuffixAttribute(" m")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::White, "LightColor"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plDirectionalLightComponent::plDirectionalLightComponent() = default;
@@ -41,7 +41,7 @@ plDirectionalLightComponent::~plDirectionalLightComponent() = default;
 plResult plDirectionalLightComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
   ref_bAlwaysVisible = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plDirectionalLightComponent::SetNumCascades(plUInt32 uiNumCascades)
@@ -116,11 +116,9 @@ void plDirectionalLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData&
   auto pRenderData = plCreateRenderDataForThisFrame<plDirectionalLightRenderData>(GetOwner());
 
   pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
-  pRenderData->m_LightColor = m_LightColor;
-  pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
-  pRenderData->m_fVolumetricIntensity = m_fVolumetricIntensity;
+  pRenderData->m_LightColor = GetLightColor();
   pRenderData->m_fIntensity = m_fIntensity;
-  pRenderData->m_fTemperature = m_fTemperature;
+  pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
   pRenderData->m_uiShadowDataOffset = m_bCastShadows ? plShadowPool::AddDirectionalLight(this, msg.m_pView) : plInvalidIndex;
 
   pRenderData->FillBatchIdAndSortingKey(1.0f);
@@ -182,4 +180,4 @@ plDirectionalLightComponentPatch_1_2 g_plDirectionalLightComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_DirectionalLightComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_DirectionalLightComponent);

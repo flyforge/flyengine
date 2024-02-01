@@ -16,19 +16,19 @@ struct plActionDescriptor;
 class plAction;
 struct plActionContext;
 
-typedef plGenericId<24, 8> plActionId;
-typedef plAction* (*CreateActionFunc)(const plActionContext& context);
-typedef void (*DeleteActionFunc)(plAction* pAction);
+using plActionId = plGenericId<24, 8>;
+using CreateActionFunc = plAction* (*)(const plActionContext&);
+using DeleteActionFunc = void (*)(plAction*);
 
 /// \brief Handle for a plAction.
 ///
 /// plAction can be invalidated at runtime so don't store them.
-class PLASMA_GUIFOUNDATION_DLL plActionDescriptorHandle
+class PL_GUIFOUNDATION_DLL plActionDescriptorHandle
 {
 public:
   using StorageType = plUInt32;
-  
-  PLASMA_DECLARE_HANDLE_TYPE(plActionDescriptorHandle, plActionId);
+
+  PL_DECLARE_HANDLE_TYPE(plActionDescriptorHandle, plActionId);
   friend class plActionManager;
 
 public:
@@ -45,7 +45,7 @@ struct plActionScope
     Window,
     Default = Global
   };
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 };
 
 ///
@@ -59,14 +59,14 @@ struct plActionType
     ActionAndMenu,
     Default = Action
   };
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 };
 
 ///
-struct PLASMA_GUIFOUNDATION_DLL plActionContext
+struct PL_GUIFOUNDATION_DLL plActionContext
 {
   plActionContext() = default;
-  plActionContext(plDocument* doc) { m_pDocument = doc; }
+  plActionContext(plDocument* pDoc) { m_pDocument = pDoc; }
 
   plDocument* m_pDocument = nullptr;
   plString m_sMapping;
@@ -75,9 +75,10 @@ struct PLASMA_GUIFOUNDATION_DLL plActionContext
 
 
 ///
-struct PLASMA_GUIFOUNDATION_DLL plActionDescriptor
+struct PL_GUIFOUNDATION_DLL plActionDescriptor
 {
-  plActionDescriptor(){};
+  plActionDescriptor() = default;
+  ;
   plActionDescriptor(plActionType::Enum type, plActionScope::Enum scope, const char* szName, const char* szCategoryPath, const char* szShortcut,
     CreateActionFunc createAction, DeleteActionFunc deleteAction = nullptr);
 
@@ -106,10 +107,10 @@ private:
 
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plAction : public plReflectedClass
+class PL_GUIFOUNDATION_DLL plAction : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAction, plReflectedClass);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAction);
+  PL_ADD_DYNAMIC_REFLECTION(plAction, plReflectedClass);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAction);
 
 public:
   plAction(const plActionContext& context) { m_Context = context; }

@@ -7,9 +7,9 @@ using plJoltPointConstraintComponentManager = plComponentManager<class plJoltPoi
 /// \brief Implements a physics constraint that allows rotation around one point.
 ///
 /// The joined actors can freely rotate around the constraint position.
-class PLASMA_JOLTPLUGIN_DLL plJoltPointConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltPointConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltPointConstraintComponent, plJoltConstraintComponent, plJoltPointConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltPointConstraintComponent, plJoltConstraintComponent, plJoltPointConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

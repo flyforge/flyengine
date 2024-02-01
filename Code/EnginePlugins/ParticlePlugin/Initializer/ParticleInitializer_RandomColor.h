@@ -5,19 +5,19 @@
 
 using plColorGradientResourceHandle = plTypedResourceHandle<class plColorGradientResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory_RandomColor final : public plParticleInitializerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory_RandomColor final : public plParticleInitializerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_RandomColor, plParticleInitializerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_RandomColor, plParticleInitializerFactory);
 
 public:
   virtual const plRTTI* GetInitializerType() const override;
   virtual void CopyInitializerProperties(plParticleInitializer* pInitializer, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   void SetColorGradient(const plColorGradientResourceHandle& hResource) { m_hGradient = hResource; }
-  PLASMA_ALWAYS_INLINE const plColorGradientResourceHandle& GetColorGradient() const { return m_hGradient; }
+  PL_ALWAYS_INLINE const plColorGradientResourceHandle& GetColorGradient() const { return m_hGradient; }
 
   void SetColorGradientFile(const char* szFile);
   const char* GetColorGradientFile() const;
@@ -30,9 +30,9 @@ private:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer_RandomColor final : public plParticleInitializer
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer_RandomColor final : public plParticleInitializer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer_RandomColor, plParticleInitializer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer_RandomColor, plParticleInitializer);
 
 public:
   plColor m_Color1;

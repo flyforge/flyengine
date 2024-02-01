@@ -90,7 +90,7 @@ namespace
 
     "", // LastBuiltin,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_NodeDescTypeNames) == (size_t)plVisualScriptNodeDescription::Type::Count);
+  static_assert(PL_ARRAY_SIZE(s_NodeDescTypeNames) == (size_t)plVisualScriptNodeDescription::Type::Count);
 
   template <typename T>
   plResult WriteNodeArray(plArrayPtr<T> a, plStreamWriter& inout_stream)
@@ -125,14 +125,14 @@ plVisualScriptNodeDescription::Type::Enum plVisualScriptNodeDescription::Type::G
   if (targetDataType == plVisualScriptDataType::Variant)
     return Builtin_ToVariant;
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return Invalid;
 }
 
 // static
 const char* plVisualScriptNodeDescription::Type::GetName(Enum type)
 {
-  PLASMA_ASSERT_DEBUG(type >= 0 && type < PLASMA_ARRAY_SIZE(s_NodeDescTypeNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(type >= 0 && type < PL_ARRAY_SIZE(s_NodeDescTypeNames), "Out of bounds access");
   return s_NodeDescTypeNames[type];
 }
 
@@ -170,9 +170,9 @@ plResult plVisualScriptGraphDescription::Serialize(plArrayPtr<const plVisualScri
     {
       stream << nodeDesc.m_Type;
       stream << nodeDesc.m_DeductedDataType;
-      PLASMA_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_ExecutionIndices.GetArrayPtr(), stream));
-      PLASMA_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_InputDataOffsets.GetArrayPtr(), stream));
-      PLASMA_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_OutputDataOffsets.GetArrayPtr(), stream));
+      PL_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_ExecutionIndices.GetArrayPtr(), stream));
+      PL_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_InputDataOffsets.GetArrayPtr(), stream));
+      PL_SUCCEED_OR_RETURN(WriteNodeArray(nodeDesc.m_OutputDataOffsets.GetArrayPtr(), stream));
 
       ExecutionIndicesArray::AddAdditionalDataSize(nodeDesc.m_ExecutionIndices, additionalDataSize);
       InputDataOffsetsArray::AddAdditionalDataSize(nodeDesc.m_InputDataOffsets, additionalDataSize);
@@ -182,7 +182,7 @@ plResult plVisualScriptGraphDescription::Serialize(plArrayPtr<const plVisualScri
       {
         plUInt32 uiSize = 0;
         plUInt32 uiAlignment = 0;
-        PLASMA_SUCCEED_OR_RETURN(func(nodeDesc, stream, uiSize, uiAlignment));
+        PL_SUCCEED_OR_RETURN(func(nodeDesc, stream, uiSize, uiAlignment));
 
         UserDataArray::AddAdditionalDataSize(uiSize, uiAlignment, additionalDataSize);
       }
@@ -193,20 +193,20 @@ plResult plVisualScriptGraphDescription::Serialize(plArrayPtr<const plVisualScri
   inout_stream << uiRequiredStorageSize;
   inout_stream << nodes.GetCount();
 
-  PLASMA_SUCCEED_OR_RETURN(streamStorage.CopyToStream(inout_stream));
+  PL_SUCCEED_OR_RETURN(streamStorage.CopyToStream(inout_stream));
 
-  PLASMA_SUCCEED_OR_RETURN(localDataDesc.Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(localDataDesc.Serialize(inout_stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptGraphDescription::Deserialize(plStreamReader& inout_stream)
 {
   plTypeVersion uiVersion = inout_stream.ReadVersion(s_uiVisualScriptGraphDescriptionVersion);
-  if (uiVersion < 2)
+  if (uiVersion < 3)
   {
-    plLog::Error("Invalid visual script desc version. Expected >= 2 but got {}. Visual Script needs re-export", uiVersion);
-    return PLASMA_FAILURE;
+    plLog::Error("Invalid visual script desc version. Expected >= 3 but got {}. Visual Script needs re-export", uiVersion);
+    return PL_FAILURE;
   }
 
   {
@@ -232,29 +232,29 @@ plResult plVisualScriptGraphDescription::Deserialize(plStreamReader& inout_strea
 
     node.m_Function = GetExecuteFunction(node.m_Type, node.m_DeductedDataType);
 
-    PLASMA_SUCCEED_OR_RETURN(node.m_ExecutionIndices.ReadFromStream(node.m_NumExecutionIndices, inout_stream, pAdditionalData));
-    PLASMA_SUCCEED_OR_RETURN(node.m_InputDataOffsets.ReadFromStream(node.m_NumInputDataOffsets, inout_stream, pAdditionalData));
-    PLASMA_SUCCEED_OR_RETURN(node.m_OutputDataOffsets.ReadFromStream(node.m_NumOutputDataOffsets, inout_stream, pAdditionalData));
+    PL_SUCCEED_OR_RETURN(node.m_ExecutionIndices.ReadFromStream(node.m_NumExecutionIndices, inout_stream, pAdditionalData));
+    PL_SUCCEED_OR_RETURN(node.m_InputDataOffsets.ReadFromStream(node.m_NumInputDataOffsets, inout_stream, pAdditionalData));
+    PL_SUCCEED_OR_RETURN(node.m_OutputDataOffsets.ReadFromStream(node.m_NumOutputDataOffsets, inout_stream, pAdditionalData));
 
     if (auto func = GetUserDataContext(node.m_Type).m_DeserializeFunc)
     {
-      PLASMA_SUCCEED_OR_RETURN(func(node, inout_stream, pAdditionalData));
+      PL_SUCCEED_OR_RETURN(func(node, inout_stream, pAdditionalData));
     }
   }
 
   m_Nodes = nodes;
 
-  plSharedPtr<plVisualScriptDataDescription> pLocalDataDesc = PLASMA_DEFAULT_NEW(plVisualScriptDataDescription);
-  PLASMA_SUCCEED_OR_RETURN(pLocalDataDesc->Deserialize(inout_stream));
+  plSharedPtr<plVisualScriptDataDescription> pLocalDataDesc = PL_SCRIPT_NEW(plVisualScriptDataDescription);
+  PL_SUCCEED_OR_RETURN(pLocalDataDesc->Deserialize(inout_stream));
   m_pLocalDataDesc = pLocalDataDesc;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plScriptMessageDesc plVisualScriptGraphDescription::GetMessageDesc() const
 {
   auto pEntryNode = GetNode(0);
-  PLASMA_ASSERT_DEBUG(pEntryNode != nullptr &&
+  PL_ASSERT_DEBUG(pEntryNode != nullptr &&
                       pEntryNode->m_Type == plVisualScriptNodeDescription::Type::MessageHandler ||
                     pEntryNode->m_Type == plVisualScriptNodeDescription::Type::MessageHandler_Coroutine ||
                     pEntryNode->m_Type == plVisualScriptNodeDescription::Type::SendMessage,
@@ -269,6 +269,8 @@ plScriptMessageDesc plVisualScriptGraphDescription::GetMessageDesc() const
 }
 
 //////////////////////////////////////////////////////////////////////////
+
+plCVarInt cvar_MaxNodeExecutions("VisualScript.MaxNodeExecutions", 100000, plCVarFlags::Default, "The maximum number of nodes executed within a script invocation");
 
 plVisualScriptExecutionContext::plVisualScriptExecutionContext(const plSharedPtr<const plVisualScriptGraphDescription>& pDesc)
   : m_pDesc(pDesc)
@@ -289,7 +291,7 @@ void plVisualScriptExecutionContext::Initialize(plVisualScriptInstance& inout_in
   m_DataStorage[DataOffset::Source::Constant] = inout_instance.GetConstantDataStorage();
 
   auto pNode = m_pDesc->GetNode(0);
-  PLASMA_ASSERT_DEV(plVisualScriptNodeDescription::Type::IsEntry(pNode->m_Type), "Invalid entry node");
+  PL_ASSERT_DEV(plVisualScriptNodeDescription::Type::IsEntry(pNode->m_Type), "Invalid entry node");
 
   for (plUInt32 i = 0; i < arguments.GetCount(); ++i)
   {
@@ -312,9 +314,13 @@ void plVisualScriptExecutionContext::Deinitialize()
 
 plVisualScriptExecutionContext::ExecResult plVisualScriptExecutionContext::Execute(plTime deltaTimeSinceLastExecution)
 {
-  PLASMA_ASSERT_DEV(m_pInstance != nullptr, "Invalid instance");
+  PL_ASSERT_DEV(m_pInstance != nullptr, "Invalid instance");
   ++m_uiExecutionCounter;
   m_DeltaTimeSinceLastExecution = deltaTimeSinceLastExecution;
+
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  plUInt32 uiCounter = 0;
+#endif
 
   auto pNode = m_pDesc->GetNode(m_uiCurrentNode);
   while (pNode != nullptr)
@@ -324,6 +330,15 @@ plVisualScriptExecutionContext::ExecResult plVisualScriptExecutionContext::Execu
     {
       return result;
     }
+
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+    ++uiCounter;
+    if (uiCounter >= cvar_MaxNodeExecutions)
+    {
+      plLog::Error("Maximum node executions ({}) reached, execution will be aborted. Does the script contain an infinite loop?", cvar_MaxNodeExecutions);
+      return ExecResult::Error();
+    }
+#endif
 
     m_uiCurrentNode = pNode->GetExecutionIndex(result.m_NextExecAndState);
     m_pCurrentCoroutine = nullptr;
@@ -337,7 +352,7 @@ plVisualScriptExecutionContext::ExecResult plVisualScriptExecutionContext::Execu
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plVisualScriptSendMessageMode, 1)
-  PLASMA_ENUM_CONSTANTS(plVisualScriptSendMessageMode::Direct, plVisualScriptSendMessageMode::Recursive, plVisualScriptSendMessageMode::Event)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plVisualScriptSendMessageMode, 1)
+  PL_ENUM_CONSTANTS(plVisualScriptSendMessageMode::Direct, plVisualScriptSendMessageMode::Recursive, plVisualScriptSendMessageMode::Event)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on

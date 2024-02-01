@@ -2,8 +2,8 @@
 
 #include <Core/GameState/StateMap.h>
 
-plStateMap::plStateMap() {}
-plStateMap::~plStateMap() {}
+plStateMap::plStateMap() = default;
+plStateMap::~plStateMap() = default;
 
 
 void plStateMap::Clear()
@@ -16,84 +16,82 @@ void plStateMap::Clear()
   m_Strings.Clear();
 }
 
-void plStateMap::StoreBool(const plTempHashedString& name, bool value)
+void plStateMap::StoreBool(const plTempHashedString& sName, bool value)
 {
-  m_Bools[name] = value;
+  m_Bools[sName] = value;
 }
 
-void plStateMap::StoreInteger(const plTempHashedString& name, plInt64 value)
+void plStateMap::StoreInteger(const plTempHashedString& sName, plInt64 value)
 {
-  m_Integers[name] = value;
+  m_Integers[sName] = value;
 }
 
-void plStateMap::StoreDouble(const plTempHashedString& name, double value)
+void plStateMap::StoreDouble(const plTempHashedString& sName, double value)
 {
-  m_Doubles[name] = value;
+  m_Doubles[sName] = value;
 }
 
-void plStateMap::StoreVec3(const plTempHashedString& name, const plVec3& value)
+void plStateMap::StoreVec3(const plTempHashedString& sName, const plVec3& value)
 {
-  m_Vec3s[name] = value;
+  m_Vec3s[sName] = value;
 }
 
-void plStateMap::StoreColor(const plTempHashedString& name, const plColor& value)
+void plStateMap::StoreColor(const plTempHashedString& sName, const plColor& value)
 {
-  m_Colors[name] = value;
+  m_Colors[sName] = value;
 }
 
-void plStateMap::StoreString(const plTempHashedString& name, const plString& value)
+void plStateMap::StoreString(const plTempHashedString& sName, const plString& value)
 {
-  m_Strings[name] = value;
+  m_Strings[sName] = value;
 }
 
-void plStateMap::RetrieveBool(const plTempHashedString& name, bool& out_Value, bool defaultValue /*= false*/)
+void plStateMap::RetrieveBool(const plTempHashedString& sName, bool& out_bValue, bool bDefaultValue /*= false*/)
 {
-  if (!m_Bools.TryGetValue(name, out_Value))
+  if (!m_Bools.TryGetValue(sName, out_bValue))
   {
-    out_Value = defaultValue;
+    out_bValue = bDefaultValue;
   }
 }
 
-void plStateMap::RetrieveInteger(const plTempHashedString& name, plInt64& out_Value, plInt64 defaultValue /*= 0*/)
+void plStateMap::RetrieveInteger(const plTempHashedString& sName, plInt64& out_iValue, plInt64 iDefaultValue /*= 0*/)
 {
-  if (!m_Integers.TryGetValue(name, out_Value))
+  if (!m_Integers.TryGetValue(sName, out_iValue))
   {
-    out_Value = defaultValue;
+    out_iValue = iDefaultValue;
   }
 }
 
-void plStateMap::RetrieveDouble(const plTempHashedString& name, double& out_Value, double defaultValue /*= 0*/)
+void plStateMap::RetrieveDouble(const plTempHashedString& sName, double& out_fValue, double fDefaultValue /*= 0*/)
 {
-  if (!m_Doubles.TryGetValue(name, out_Value))
+  if (!m_Doubles.TryGetValue(sName, out_fValue))
   {
-    out_Value = defaultValue;
+    out_fValue = fDefaultValue;
   }
 }
 
-void plStateMap::RetrieveVec3(const plTempHashedString& name, plVec3& out_Value, plVec3 defaultValue /*= plVec3(0)*/)
+void plStateMap::RetrieveVec3(const plTempHashedString& sName, plVec3& out_vValue, plVec3 vDefaultValue /*= plVec3(0)*/)
 {
-  if (!m_Vec3s.TryGetValue(name, out_Value))
+  if (!m_Vec3s.TryGetValue(sName, out_vValue))
   {
-    out_Value = defaultValue;
+    out_vValue = vDefaultValue;
   }
 }
 
-void plStateMap::RetrieveColor(const plTempHashedString& name, plColor& out_Value, plColor defaultValue /*= plColor::White*/)
+void plStateMap::RetrieveColor(const plTempHashedString& sName, plColor& out_value, plColor defaultValue /*= plColor::White*/)
 {
-  if (!m_Colors.TryGetValue(name, out_Value))
+  if (!m_Colors.TryGetValue(sName, out_value))
   {
-    out_Value = defaultValue;
+    out_value = defaultValue;
   }
 }
 
-void plStateMap::RetrieveString(const plTempHashedString& name, plString& out_Value, plStringView sDefaultValue /*= {} */)
+void plStateMap::RetrieveString(const plTempHashedString& sName, plString& out_sValue, plStringView sDefaultValue /*= {} */)
 {
-  if (!m_Strings.TryGetValue(name, out_Value))
+  if (!m_Strings.TryGetValue(sName, out_sValue))
   {
-    out_Value = sDefaultValue;
+    out_sValue = sDefaultValue;
   }
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_GameState_Implementation_StateMap);

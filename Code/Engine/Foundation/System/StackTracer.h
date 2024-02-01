@@ -5,7 +5,7 @@
 #include <Foundation/Types/Delegate.h>
 
 /// \brief Helper class to capture the current stack and print a captured stack
-class PLASMA_FOUNDATION_DLL plStackTracer
+class PL_FOUNDATION_DLL plStackTracer
 {
 public:
   /// \brief Captures the current stack trace.
@@ -29,5 +29,5 @@ private:
 
   static void OnPluginEvent(const plPluginEvent& e);
 
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, StackTracer);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, StackTracer);
 };

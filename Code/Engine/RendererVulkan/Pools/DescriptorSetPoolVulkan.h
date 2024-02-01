@@ -4,16 +4,16 @@
 
 #include <vulkan/vulkan.hpp>
 
-PLASMA_DEFINE_AS_POD_TYPE(vk::DescriptorType);
+PL_DEFINE_AS_POD_TYPE(vk::DescriptorType);
 
 template <>
 struct plHashHelper<vk::DescriptorType>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(vk::DescriptorType value) { return plHashHelper<plUInt32>::Hash(plUInt32(value)); }
-  PLASMA_ALWAYS_INLINE static bool Equal(vk::DescriptorType a, vk::DescriptorType b) { return a == b; }
+  PL_ALWAYS_INLINE static plUInt32 Hash(vk::DescriptorType value) { return plHashHelper<plUInt32>::Hash(plUInt32(value)); }
+  PL_ALWAYS_INLINE static bool Equal(vk::DescriptorType a, vk::DescriptorType b) { return a == b; }
 };
 
-class PLASMA_RENDERERVULKAN_DLL plDescriptorSetPoolVulkan
+class PL_RENDERERVULKAN_DLL plDescriptorSetPoolVulkan
 {
 public:
   static void Initialize(vk::Device device);

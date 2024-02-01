@@ -52,7 +52,7 @@ void plQtMainWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage('STAT', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('STAT', Msg) == PL_SUCCESS)
   {
     switch (Msg.GetMessageID())
     {
@@ -129,7 +129,7 @@ void plQtMainWidget::on_ButtonConnect_clicked()
 
   Settings.setValue("LastConnection", sRes);
 
-  if (plTelemetry::ConnectToServer(sRes.toUtf8().data()) == PLASMA_SUCCESS)
+  if (plTelemetry::ConnectToServer(sRes.toUtf8().data()) == PL_SUCCESS)
   {
   }
 }

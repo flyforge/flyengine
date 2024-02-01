@@ -15,7 +15,7 @@ using plCpuMeshResourceHandle = plTypedResourceHandle<class plCpuMeshResource>;
 /// The utility sends plMsgExtractGeometry to world components and they may fill out the geometry information.
 /// \a ExtractionMode defines what the geometry is needed for. This ranges from finding geometry that is used to generate the navmesh from
 /// to exporting the geometry to a file for use in another program, e.g. a modeling software.
-class PLASMA_RENDERERCORE_DLL plWorldGeoExtractionUtil
+class PL_RENDERERCORE_DLL plWorldGeoExtractionUtil
 {
 public:
   struct MeshObject
@@ -52,15 +52,15 @@ public:
 ///
 /// The mode defines what the geometry is needed for, thus components should decide to participate or not
 /// and how detailed the geometry is they return.
-struct PLASMA_RENDERERCORE_DLL plMsgExtractGeometry : public plMessage
+struct PL_RENDERERCORE_DLL plMsgExtractGeometry : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgExtractGeometry, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgExtractGeometry, plMessage);
 
   /// \brief Specifies what the geometry is extracted for, and thus what the message handler should write back
   plWorldGeoExtractionUtil::ExtractionMode m_Mode = plWorldGeoExtractionUtil::ExtractionMode::RenderMesh;
 
   /// \brief Append mesh objects to this to describe the requested world geometry
-  plWorldGeoExtractionUtil::MeshObjectList* m_pMeshObjects;
+  plWorldGeoExtractionUtil::MeshObjectList* m_pMeshObjects = nullptr;
 
   void AddMeshObject(const plTransform& transform, plCpuMeshResourceHandle hMeshResource);
   void AddBox(const plTransform& transform, plVec3 vExtents);

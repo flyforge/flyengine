@@ -19,9 +19,9 @@ using plJoltHitboxComponentManager = plComponentManager<class plJoltHitboxCompon
 /// Typically these shapes are "query shapes" only, meaning they don't participate in the physical simulation,
 /// so they won't push other objects aside.
 /// They can only be detected through raycasts and scene queries (assuming those queries have the plPhysicsShapeType::Query flag set).
-class PLASMA_JOLTPLUGIN_DLL plJoltHitboxComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltHitboxComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltHitboxComponent, plComponent, plJoltHitboxComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltHitboxComponent, plComponent, plJoltHitboxComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

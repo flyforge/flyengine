@@ -9,9 +9,9 @@ using plJoltSwingTwistConstraintComponentManager = plComponentManager<class plJo
 /// This is similar to a cone constraint but with more control.
 /// The swing angle can be limited along Y and Z, so it can have a squashed shape, rather than perfectly round.
 /// Additionally it can be limited how far the child actor may twist around the main axis.
-class PLASMA_JOLTPLUGIN_DLL plJoltSwingTwistConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltSwingTwistConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltSwingTwistConstraintComponent, plJoltConstraintComponent, plJoltSwingTwistConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltSwingTwistConstraintComponent, plJoltConstraintComponent, plJoltSwingTwistConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -70,8 +70,8 @@ protected:
 
   float m_fFriction = 0.0f;
 
-  plAngle m_LowerTwistLimit = plAngle::Degree(90);
-  plAngle m_UpperTwistLimit = plAngle::Degree(90);
+  plAngle m_LowerTwistLimit = plAngle::MakeFromDegree(90);
+  plAngle m_UpperTwistLimit = plAngle::MakeFromDegree(90);
 
   // not sure whether these are useful
   // maybe just expose an 'untwist' feature, with strength/frequency and drive to position 0 ?

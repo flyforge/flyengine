@@ -15,12 +15,12 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAssetDocument, 2, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAssetDocument, 2, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plTypeScriptAssetDocument::plTypeScriptAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plTypeScriptAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
+plTypeScriptAssetDocument::plTypeScriptAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plTypeScriptAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
@@ -97,7 +97,7 @@ void plTypeScriptAssetDocument::CreateComponentFile(const char* szFile)
     {
       sContent.ReadAll(fileIn);
       sContent.ReplaceAll("NewComponent", sComponentName.GetView());
-      sContent.ReplaceAll("<PATH-TO-PLASMA-TS>", "TypeScript/pl");
+      sContent.ReplaceAll("<PATH-TO-PL-TS>", "TypeScript/pl");
     }
   }
 
@@ -142,14 +142,14 @@ plResult plTypeScriptAssetDocument::CreateTsConfigFile(const char* szDirectory)
     const auto& dd = plQtEditorApp::GetSingleton()->GetFileSystemConfig().m_DataDirs[iPlus1 - 1];
 
     plStringBuilder path;
-    PLASMA_SUCCEED_OR_RETURN(plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, path));
+    PL_SUCCEED_OR_RETURN(plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, path));
     path.MakeCleanPath();
     path.AppendPath("*");
 
     sTmp.AppendWithSeparator(", ", "\"", path, "\"");
   }
 
-  sTsConfig.Format(
+  sTsConfig.SetFormat(
     R"({
   "compilerOptions": {
     "target": "es5",
@@ -168,8 +168,8 @@ plResult plTypeScriptAssetDocument::CreateTsConfigFile(const char* szDirectory)
     sTmp.AppendPath("tsconfig.json");
 
     plFileWriter file;
-    PLASMA_SUCCEED_OR_RETURN(file.Open(sTmp));
-    PLASMA_SUCCEED_OR_RETURN(file.WriteBytes(sTsConfig.GetData(), sTsConfig.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(file.Open(sTmp));
+    PL_SUCCEED_OR_RETURN(file.WriteBytes(sTsConfig.GetData(), sTsConfig.GetElementCount()));
   }
 
   {
@@ -179,19 +179,19 @@ plResult plTypeScriptAssetDocument::CreateTsConfigFile(const char* szDirectory)
     plQtUiServices::AddToGitIgnore(sTmp, "tsconfig.json").IgnoreResult();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
 {
   SUPER::UpdateAssetDocumentInfo(pInfo);
 
-  plExposedParameters* pExposedParams = PLASMA_DEFAULT_NEW(plExposedParameters);
+  plExposedParameters* pExposedParams = PL_DEFAULT_NEW(plExposedParameters);
 
   {
     for (const auto& p : GetProperties()->m_NumberParameters)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = p.m_sName;
       param->m_DefaultValue = p.m_DefaultValue;
@@ -199,7 +199,7 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
 
     for (const auto& p : GetProperties()->m_BoolParameters)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = p.m_sName;
       param->m_DefaultValue = p.m_DefaultValue;
@@ -207,7 +207,7 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
 
     for (const auto& p : GetProperties()->m_StringParameters)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = p.m_sName;
       param->m_DefaultValue = p.m_DefaultValue;
@@ -215,7 +215,7 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
 
     for (const auto& p : GetProperties()->m_Vec3Parameters)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = p.m_sName;
       param->m_DefaultValue = p.m_DefaultValue;
@@ -223,7 +223,7 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
 
     for (const auto& p : GetProperties()->m_ColorParameters)
     {
-      plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+      plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
       pExposedParams->m_Parameters.PushBack(param);
       param->m_sName = p.m_sName;
       param->m_DefaultValue = p.m_DefaultValue;
@@ -234,10 +234,10 @@ void plTypeScriptAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pIn
   pInfo->m_MetaInfo.PushBack(pExposedParams);
 }
 
-plTransformStatus plTypeScriptAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plTypeScriptAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  PLASMA_SUCCEED_OR_RETURN(ValidateScriptCode());
-  PLASMA_SUCCEED_OR_RETURN(AutoGenerateVariablesCode());
+  PL_SUCCEED_OR_RETURN(ValidateScriptCode());
+  PL_SUCCEED_OR_RETURN(AutoGenerateVariablesCode());
 
   plStringBuilder sTypeName = plPathUtils::GetFileName(GetDocumentPath());
   stream << sTypeName;
@@ -253,7 +253,7 @@ plTransformStatus plTypeScriptAssetDocument::InternalTransformAsset(plStreamWrit
   }
 
   plTypeScriptAssetDocumentManager* pAssMan = static_cast<plTypeScriptAssetDocumentManager*>(GetAssetDocumentManager());
-  PLASMA_SUCCEED_OR_RETURN(pAssMan->GenerateScriptCompendium(transformFlags));
+  PL_SUCCEED_OR_RETURN(pAssMan->GenerateScriptCompendium(transformFlags));
 
   return plTransformStatus();
 }
@@ -289,7 +289,7 @@ plStatus plTypeScriptAssetDocument::ValidateScriptCode()
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plTypeScriptAssetDocument::AutoGenerateVariablesCode()
@@ -367,10 +367,10 @@ plStatus plTypeScriptAssetDocument::AutoGenerateVariablesCode()
       return plStatus(plFmt("Could not update .ts file '{}'", GetProperties()->m_sScriptFile));
     }
 
-    PLASMA_SUCCEED_OR_RETURN(tsWriteBack.WriteBytes(content.GetData(), content.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(tsWriteBack.WriteBytes(content.GetData(), content.GetElementCount()));
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plTypeScriptAssetDocument::InitializeAfterLoading(bool bFirstTimeCreation)
@@ -392,7 +392,7 @@ void plTypeScriptAssetDocument::InitializeAfterLoading(bool bFirstTimeCreation)
       propCmd.m_Object = GetPropertyObject()->GetGuid();
       propCmd.m_sProperty = "ScriptFile";
       propCmd.m_NewValue = plString(sDefaultFile);
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     history->FinishTransaction();

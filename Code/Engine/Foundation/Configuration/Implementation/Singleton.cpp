@@ -9,4 +9,4 @@ const plMap<size_t, plSingletonRegistry::SingletonEntry>& plSingletonRegistry::G
   return s_Singletons;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Configuration_Implementation_Singleton);
+

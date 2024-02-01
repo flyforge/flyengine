@@ -24,19 +24,19 @@
 ///
 /// To create a global event handler, simply add this code inside a cpp file:
 ///
-/// PLASMA_ON_GLOBAL_EVENT(EventName)
+/// PL_ON_GLOBAL_EVENT(EventName)
 /// {
 ///   ... do something ...
 /// }
 ///
-/// You can also use PLASMA_ON_GLOBAL_EVENT_ONCE, if the handler should only be executed the first time the event is sent.
+/// You can also use PL_ON_GLOBAL_EVENT_ONCE, if the handler should only be executed the first time the event is sent.
 /// This is more efficient than filtering out duplicate events inside the event handler.
-class PLASMA_FOUNDATION_DLL plGlobalEvent : public plEnumerable<plGlobalEvent>
+class PL_FOUNDATION_DLL plGlobalEvent : public plEnumerable<plGlobalEvent>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plGlobalEvent);
+  PL_DECLARE_ENUMERABLE_CLASS(plGlobalEvent);
 
 public:
-  struct PLASMA_FOUNDATION_DLL EventData
+  struct PL_FOUNDATION_DLL EventData
   {
     EventData();
 
@@ -48,11 +48,11 @@ public:
   using EventMap = plMap<plString, EventData>;
 
 public:
-  /// \brief [internal] Use the macro PLASMA_ON_GLOBAL_EVENT or PLASMA_ON_GLOBAL_EVENT_ONCE to create an event handler.
-  using PLASMA_GLOBAL_EVENT_HANDLER = void (*)(const plVariant&, const plVariant&, const plVariant&, const plVariant&);
+  /// \brief [internal] Use the macro PL_ON_GLOBAL_EVENT or PL_ON_GLOBAL_EVENT_ONCE to create an event handler.
+  using PL_GLOBAL_EVENT_HANDLER = void (*)(const plVariant&, const plVariant&, const plVariant&, const plVariant&);
 
-  /// \brief [internal] Use the macro PLASMA_ON_GLOBAL_EVENT or PLASMA_ON_GLOBAL_EVENT_ONCE to create an event handler.
-  plGlobalEvent(plStringView sEventName, PLASMA_GLOBAL_EVENT_HANDLER eventHandler, bool bOnlyOnce); // [tested]
+  /// \brief [internal] Use the macro PL_ON_GLOBAL_EVENT or PL_ON_GLOBAL_EVENT_ONCE to create an event handler.
+  plGlobalEvent(plStringView sEventName, PL_GLOBAL_EVENT_HANDLER eventHandler, bool bOnlyOnce); // [tested]
 
   /// \brief This function will broadcast a system wide event to all event handlers that are registered to handle this specific type of event.
   ///
@@ -75,22 +75,22 @@ private:
   bool m_bOnlyOnce;
   bool m_bHasBeenFired;
   plStringView m_sEventName;
-  PLASMA_GLOBAL_EVENT_HANDLER m_EventHandler;
+  PL_GLOBAL_EVENT_HANDLER m_EventHandler;
 
   static EventMap s_KnownEvents;
 };
 
 /// \brief Use this macro to broadcast an event. Pass 0 to 4 parameters of type aeGlobalEventParam to it.
-#define PLASMA_BROADCAST_EVENT(name, ...) plGlobalEvent::Broadcast(#name, ##__VA_ARGS__);
+#define PL_BROADCAST_EVENT(name, ...) plGlobalEvent::Broadcast(#name, ##__VA_ARGS__);
 
 /// \brief Use this macro to handle an event every time it is broadcast (place function code in curly brackets after it)
-#define PLASMA_ON_GLOBAL_EVENT(name)                                                                                                       \
+#define PL_ON_GLOBAL_EVENT(name)                                                                                                       \
   static void EventHandler_##name(const plVariant& param0, const plVariant& param1, const plVariant& param2, const plVariant& param3); \
   static plGlobalEvent s_EventHandler_##name(#name, EventHandler_##name, false);                                                       \
   static void EventHandler_##name(const plVariant& param0, const plVariant& param1, const plVariant& param2, const plVariant& param3)
 
 /// \brief Use this macro to handle an event only once (place function code in curly brackets after it)
-#define PLASMA_ON_GLOBAL_EVENT_ONCE(name)                                                                                                  \
+#define PL_ON_GLOBAL_EVENT_ONCE(name)                                                                                                  \
   static void EventHandler_##name(const plVariant& param0, const plVariant& param1, const plVariant& param2, const plVariant& param3); \
   static plGlobalEvent s_EventHandler_##name(#name, EventHandler_##name, true);                                                        \
   static void EventHandler_##name(const plVariant& param0, const plVariant& param1, const plVariant& param2, const plVariant& param3)

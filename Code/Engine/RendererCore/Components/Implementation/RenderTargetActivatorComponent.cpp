@@ -8,25 +8,25 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plRenderTargetActivatorComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plRenderTargetActivatorComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target")),
+    PL_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plRenderTargetActivatorComponent::plRenderTargetActivatorComponent() = default;
@@ -54,11 +54,11 @@ plResult plRenderTargetActivatorComponent::GetLocalBounds(plBoundingBoxSphere& r
 {
   if (m_hRenderTarget.IsValid())
   {
-    ref_bounds = plBoundingSphere(plVec3::ZeroVector(), 0.1f);
-    return PLASMA_SUCCESS;
+    ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 0.1f);
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plRenderTargetActivatorComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -108,4 +108,4 @@ const char* plRenderTargetActivatorComponent::GetRenderTargetFile() const
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RenderTargetActivatorComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RenderTargetActivatorComponent);

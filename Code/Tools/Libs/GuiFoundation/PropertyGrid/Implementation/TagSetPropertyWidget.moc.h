@@ -9,7 +9,7 @@ class QPushButton;
 class QMenu;
 class QCheckBox;
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorTagSetWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorTagSetWidget : public plQtPropertyWidget
 {
   Q_OBJECT
 

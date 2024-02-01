@@ -49,15 +49,9 @@ bool plStaticRingBuffer<T, C>::operator==(const plStaticRingBuffer<T, C>& rhs) c
 }
 
 template <typename T, plUInt32 C>
-PLASMA_ALWAYS_INLINE bool plStaticRingBuffer<T, C>::operator!=(const plStaticRingBuffer<T, C>& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename T, plUInt32 C>
 void plStaticRingBuffer<T, C>::PushBack(const T& element)
 {
-  PLASMA_ASSERT_DEV(CanAppend(), "The ring-buffer is full, no elements can be appended before removing one.");
+  PL_ASSERT_DEV(CanAppend(), "The ring-buffer is full, no elements can be appended before removing one.");
 
   const plUInt32 uiLastElement = (m_uiFirstElement + m_uiCount) % C;
 
@@ -68,7 +62,7 @@ void plStaticRingBuffer<T, C>::PushBack(const T& element)
 template <typename T, plUInt32 C>
 void plStaticRingBuffer<T, C>::PushBack(T&& element)
 {
-  PLASMA_ASSERT_DEV(CanAppend(), "The ring-buffer is full, no elements can be appended before removing one.");
+  PL_ASSERT_DEV(CanAppend(), "The ring-buffer is full, no elements can be appended before removing one.");
 
   const plUInt32 uiLastElement = (m_uiFirstElement + m_uiCount) % C;
 
@@ -79,7 +73,7 @@ void plStaticRingBuffer<T, C>::PushBack(T&& element)
 template <typename T, plUInt32 C>
 T& plStaticRingBuffer<T, C>::PeekBack()
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the last element.");
+  PL_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the last element.");
 
   const plUInt32 uiLastElement = (m_uiFirstElement + m_uiCount - 1) % C;
   return m_pElements[uiLastElement];
@@ -88,7 +82,7 @@ T& plStaticRingBuffer<T, C>::PeekBack()
 template <typename T, plUInt32 C>
 const T& plStaticRingBuffer<T, C>::PeekBack() const
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the last element.");
+  PL_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the last element.");
 
   const plUInt32 uiLastElement = (m_uiFirstElement + m_uiCount - 1) % C;
   return m_pElements[uiLastElement];
@@ -97,7 +91,7 @@ const T& plStaticRingBuffer<T, C>::PeekBack() const
 template <typename T, plUInt32 C>
 void plStaticRingBuffer<T, C>::PopFront(plUInt32 uiElements)
 {
-  PLASMA_ASSERT_DEV(m_uiCount >= uiElements, "The ring-buffer contains {0} elements, cannot remove {1} elements from it.", m_uiCount, uiElements);
+  PL_ASSERT_DEV(m_uiCount >= uiElements, "The ring-buffer contains {0} elements, cannot remove {1} elements from it.", m_uiCount, uiElements);
 
   while (uiElements > 0)
   {
@@ -111,51 +105,51 @@ void plStaticRingBuffer<T, C>::PopFront(plUInt32 uiElements)
 }
 
 template <typename T, plUInt32 C>
-PLASMA_FORCE_INLINE const T& plStaticRingBuffer<T, C>::PeekFront() const
+PL_FORCE_INLINE const T& plStaticRingBuffer<T, C>::PeekFront() const
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the first element.");
+  PL_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the first element.");
 
   return m_pElements[m_uiFirstElement];
 }
 
 template <typename T, plUInt32 C>
-PLASMA_FORCE_INLINE T& plStaticRingBuffer<T, C>::PeekFront()
+PL_FORCE_INLINE T& plStaticRingBuffer<T, C>::PeekFront()
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the first element.");
+  PL_ASSERT_DEV(!IsEmpty(), "The ring-buffer is empty, cannot peek at the first element.");
 
   return m_pElements[m_uiFirstElement];
 }
 
 template <typename T, plUInt32 C>
-PLASMA_FORCE_INLINE const T& plStaticRingBuffer<T, C>::operator[](plUInt32 uiIndex) const
+PL_FORCE_INLINE const T& plStaticRingBuffer<T, C>::operator[](plUInt32 uiIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "The ring-buffer only has {0} elements, cannot access element {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "The ring-buffer only has {0} elements, cannot access element {1}.", m_uiCount, uiIndex);
 
   return m_pElements[(m_uiFirstElement + uiIndex) % C];
 }
 
 template <typename T, plUInt32 C>
-PLASMA_FORCE_INLINE T& plStaticRingBuffer<T, C>::operator[](plUInt32 uiIndex)
+PL_FORCE_INLINE T& plStaticRingBuffer<T, C>::operator[](plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "The ring-buffer only has {0} elements, cannot access element {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "The ring-buffer only has {0} elements, cannot access element {1}.", m_uiCount, uiIndex);
 
   return m_pElements[(m_uiFirstElement + uiIndex) % C];
 }
 
 template <typename T, plUInt32 C>
-PLASMA_ALWAYS_INLINE plUInt32 plStaticRingBuffer<T, C>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plStaticRingBuffer<T, C>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T, plUInt32 C>
-PLASMA_ALWAYS_INLINE bool plStaticRingBuffer<T, C>::IsEmpty() const
+PL_ALWAYS_INLINE bool plStaticRingBuffer<T, C>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
 
 template <typename T, plUInt32 C>
-PLASMA_ALWAYS_INLINE bool plStaticRingBuffer<T, C>::CanAppend(plUInt32 uiElements)
+PL_ALWAYS_INLINE bool plStaticRingBuffer<T, C>::CanAppend(plUInt32 uiElements)
 {
   return (m_uiCount + uiElements) <= C;
 }
@@ -168,7 +162,7 @@ void plStaticRingBuffer<T, C>::Clear()
 }
 
 template <typename T, plUInt32 C>
-PLASMA_ALWAYS_INLINE T* plStaticRingBuffer<T, C>::GetStaticArray()
+PL_ALWAYS_INLINE T* plStaticRingBuffer<T, C>::GetStaticArray()
 {
   return reinterpret_cast<T*>(m_Data);
 }

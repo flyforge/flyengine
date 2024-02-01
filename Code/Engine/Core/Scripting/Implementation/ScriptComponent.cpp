@@ -6,22 +6,28 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plScriptComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plScriptComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("UpdateInterval", GetUpdateInterval, SetUpdateInterval)->AddAttributes(new plClampValueAttribute(plTime::Zero(), plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("ScriptClass", GetScriptClassFile, SetScriptClassFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ScriptClass")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("ScriptClass")),
+    PL_ACCESSOR_PROPERTY("UpdateInterval", GetUpdateInterval, SetUpdateInterval)->AddAttributes(new plClampValueAttribute(plTime::MakeZero(), plVariant())),
+    PL_ACCESSOR_PROPERTY("ScriptClass", GetScriptClassFile, SetScriptClassFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ScriptClass")),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("ScriptClass")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_SCRIPT_FUNCTION_PROPERTY(SetScriptVariable, In, "Name", In, "Value"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetScriptVariable, In, "Name"),
+  }
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Scripting"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptComponent::plScriptComponent() = default;
@@ -91,6 +97,8 @@ void plScriptComponent::OnActivated()
   SUPER::OnActivated();
 
   CallScriptFunction(plComponent_ScriptBaseClassFunctions::OnActivated);
+
+  AddUpdateFunctionToSchedule();
 }
 
 void plScriptComponent::OnDeactivated()
@@ -98,6 +106,8 @@ void plScriptComponent::OnDeactivated()
   SUPER::OnDeactivated();
 
   CallScriptFunction(plComponent_ScriptBaseClassFunctions::OnDeactivated);
+
+  RemoveUpdateFunctionToSchedule();
 }
 
 void plScriptComponent::OnSimulationStarted()
@@ -107,16 +117,22 @@ void plScriptComponent::OnSimulationStarted()
   CallScriptFunction(plComponent_ScriptBaseClassFunctions::OnSimulationStarted);
 }
 
-bool plScriptComponent::SendEventMessage(plMessage& inout_msg)
+void plScriptComponent::SetScriptVariable(const plHashedString& sName, const plVariant& value)
 {
-  auto& sender = FindSender(inout_msg);
-  return sender.SendEventMessage(inout_msg, this, GetOwner());
+  if (m_pInstance != nullptr)
+  {
+    m_pInstance->SetInstanceVariable(sName, value);
+  }
 }
 
-void plScriptComponent::PostEventMessage(plMessage& inout_msg, plTime delay)
+plVariant plScriptComponent::GetScriptVariable(const plHashedString& sName) const
 {
-  auto& sender = FindSender(inout_msg);
-  sender.PostEventMessage(inout_msg, this, GetOwner(), delay);
+  if (m_pInstance != nullptr)
+  {
+    return m_pInstance->GetInstanceVariable(sName);
+  }
+
+  return plVariant();
 }
 
 void plScriptComponent::SetScriptClass(const plScriptClassResourceHandle& hScript)
@@ -158,10 +174,7 @@ void plScriptComponent::SetUpdateInterval(plTime interval)
 {
   m_UpdateInterval = interval;
 
-  if (IsActiveAndInitialized())
-  {
-    UpdateScheduling();
-  }
+  AddUpdateFunctionToSchedule();
 }
 
 plTime plScriptComponent::GetUpdateInterval() const
@@ -171,10 +184,14 @@ plTime plScriptComponent::GetUpdateInterval() const
 
 const plRangeView<const char*, plUInt32> plScriptComponent::GetParameters() const
 {
-  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; },
-    [this]() -> plUInt32 { return m_Parameters.GetCount(); },
-    [](plUInt32& ref_uiIt) { ++ref_uiIt; },
-    [this](const plUInt32& uiIt) -> const char* { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
+  return plRangeView<const char*, plUInt32>([]() -> plUInt32
+    { return 0; },
+    [this]() -> plUInt32
+    { return m_Parameters.GetCount(); },
+    [](plUInt32& ref_uiIt)
+    { ++ref_uiIt; },
+    [this](const plUInt32& uiIt) -> const char*
+    { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
 }
 
 void plScriptComponent::SetParameter(const char* szKey, const plVariant& value)
@@ -240,16 +257,27 @@ void plScriptComponent::InstantiateScript(bool bActivate)
   m_pInstance = pScript->Instantiate(*this, GetWorld());
   if (m_pInstance != nullptr)
   {
-    m_pInstance->ApplyParameters(m_Parameters);
+    m_pInstance->SetInstanceVariables(m_Parameters);
   }
 
-  UpdateScheduling();
+  GetWorld()->AddResourceReloadFunction(m_hScriptClass, GetHandle(), nullptr,
+    [](const plWorld::ResourceReloadContext& context)
+    {
+      plStaticCast<plScriptComponent*>(context.m_pComponent)->ReloadScript();
+    });
 
   CallScriptFunction(plComponent_ScriptBaseClassFunctions::Initialize);
   if (bActivate)
   {
     CallScriptFunction(plComponent_ScriptBaseClassFunctions::OnActivated);
+
+    if (GetWorld()->GetWorldSimulationEnabled())
+    {
+      CallScriptFunction(plComponent_ScriptBaseClassFunctions::OnSimulationStarted);
+    }
   }
+
+  AddUpdateFunctionToSchedule();
 }
 
 void plScriptComponent::ClearInstance(bool bDeactivate)
@@ -260,14 +288,12 @@ void plScriptComponent::ClearInstance(bool bDeactivate)
   }
   CallScriptFunction(plComponent_ScriptBaseClassFunctions::Deinitialize);
 
-  auto pModule = GetWorld()->GetOrCreateModule<plScriptWorldModule>();
-  if (auto pUpdateFunction = GetScriptFunction(plComponent_ScriptBaseClassFunctions::Update))
-  {
-    pModule->RemoveUpdateFunctionToSchedule(pUpdateFunction, m_pInstance.Borrow());
-  }
+  RemoveUpdateFunctionToSchedule();
 
+  auto pModule = GetWorld()->GetOrCreateModule<plScriptWorldModule>();
   pModule->StopAndDeleteAllCoroutines(m_pInstance.Borrow());
-  pModule->RemoveScriptReloadFunction(m_hScriptClass, plMakeDelegate(&plScriptComponent::ReloadScript, this));
+
+  GetWorld()->RemoveResourceReloadFunction(m_hScriptClass, GetHandle(), nullptr);
 
   m_pInstance = nullptr;
   m_pScriptType = nullptr;
@@ -275,16 +301,26 @@ void plScriptComponent::ClearInstance(bool bDeactivate)
   m_pMessageDispatchType = GetDynamicRTTI();
 }
 
-void plScriptComponent::UpdateScheduling()
+void plScriptComponent::AddUpdateFunctionToSchedule()
 {
+  if (IsActiveAndInitialized() == false)
+    return;
+
   auto pModule = GetWorld()->GetOrCreateModule<plScriptWorldModule>();
   if (auto pUpdateFunction = GetScriptFunction(plComponent_ScriptBaseClassFunctions::Update))
   {
     const bool bOnlyWhenSimulating = true;
     pModule->AddUpdateFunctionToSchedule(pUpdateFunction, m_pInstance.Borrow(), m_UpdateInterval, bOnlyWhenSimulating);
   }
+}
 
-  pModule->AddScriptReloadFunction(m_hScriptClass, plMakeDelegate(&plScriptComponent::ReloadScript, this));
+void plScriptComponent::RemoveUpdateFunctionToSchedule()
+{
+  auto pModule = GetWorld()->GetOrCreateModule<plScriptWorldModule>();
+  if (auto pUpdateFunction = GetScriptFunction(plComponent_ScriptBaseClassFunctions::Update))
+  {
+    pModule->RemoveUpdateFunctionToSchedule(pUpdateFunction, m_pInstance.Borrow());
+  }
 }
 
 const plAbstractFunctionProperty* plScriptComponent::GetScriptFunction(plUInt32 uiFunctionIndex)
@@ -311,23 +347,4 @@ void plScriptComponent::ReloadScript()
   InstantiateScript(IsActiveAndInitialized());
 }
 
-plEventMessageSender<plMessage>& plScriptComponent::FindSender(plMessage& inout_msg)
-{
-  const plRTTI* pType = inout_msg.GetDynamicRTTI();
-  if (pType->IsDerivedFrom<plEventMessage>())
-  {
-    static_cast<plEventMessage&>(inout_msg).FillFromSenderComponent(this);
-  }
-
-  for (auto& sender : m_EventSenders)
-  {
-    if (sender.m_pMsgType == pType)
-    {
-      return sender.m_Sender;
-    }
-  }
-
-  auto& sender = m_EventSenders.ExpandAndGetRef();
-  sender.m_pMsgType = pType;
-  return sender.m_Sender;
-}
+PL_STATICLINK_FILE(Core, Core_Scripting_Implementation_ScriptComponent);

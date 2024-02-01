@@ -7,7 +7,7 @@
 
 #include <QWidget>
 
-class PLASMA_GUIFOUNDATION_DLL plQtCurve1DEditorWidget : public QWidget, public Ui_Curve1DEditorWidget
+class PL_GUIFOUNDATION_DLL plQtCurve1DEditorWidget : public QWidget, public Ui_Curve1DEditorWidget
 {
   Q_OBJECT
 

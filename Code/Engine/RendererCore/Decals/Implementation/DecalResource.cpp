@@ -6,7 +6,7 @@
 static plDecalResourceLoader s_DecalResourceLoader;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation",
@@ -41,16 +41,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalResource)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalResource, 1, plRTTIDefaultAllocator<plDecalResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalResource, 1, plRTTIDefaultAllocator<plDecalResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plDecalResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plDecalResource);
 // clang-format on
 
 plDecalResource::plDecalResource()
@@ -84,7 +84,7 @@ void plDecalResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDecalResource, plDecalResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plDecalResource, plDecalResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = 0;
@@ -118,4 +118,4 @@ bool plDecalResourceLoader::IsResourceOutdated(const plResource* pResource) cons
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalResource);

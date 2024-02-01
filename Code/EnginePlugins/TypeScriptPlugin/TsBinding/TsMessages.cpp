@@ -71,7 +71,7 @@ static void CreateMessageTypeList(plSet<const plRTTI*>& ref_found, plDynamicArra
 {
   if (ref_found.Contains(pRtti))
     return;
-  
+
   if (!pRtti->IsDerivedFrom<plMessage>())
     return;
 
@@ -88,7 +88,7 @@ static void CreateMessageTypeList(plDynamicArray<const plRTTI*>& out_sorted)
 {
   plSet<const plRTTI*> found;
   out_sorted.Reserve(100);
-  
+
   plHybridArray<const plRTTI*, 64> alphabetical;
   plRTTI::ForEachDerivedType<plMessage>([&](const plRTTI* pRtti) { alphabetical.PushBack(pRtti); });
   alphabetical.Sort([](const plRTTI* p1, const plRTTI* p2) -> bool { return p1->GetTypeName().Compare(p2->GetTypeName()) < 0; });
@@ -135,9 +135,7 @@ void plTypeScriptBinding::GenerateMessagePropertiesCode(plStringBuilder& out_Cod
     if (pProp->GetCategory() != plPropertyCategory::Member)
       continue;
 
-    const plRTTI* pPropType = pProp->GetSpecificType();
-
-    const plAbstractMemberProperty* pMember = static_cast<const plAbstractMemberProperty*>(pProp);
+    auto pMember = static_cast<const plAbstractMemberProperty*>(pProp);
 
     const char* szTypeName = TsType(pMember->GetSpecificType());
     if (szTypeName == nullptr)
@@ -148,11 +146,11 @@ void plTypeScriptBinding::GenerateMessagePropertiesCode(plStringBuilder& out_Cod
 
     if (!sDefault.IsEmpty())
     {
-      sProp.Format("  {0}: {1} = {2};\n", pMember->GetPropertyName(), szTypeName, sDefault);
+      sProp.SetFormat("  {0}: {1} = {2};\n", pMember->GetPropertyName(), szTypeName, sDefault);
     }
     else
     {
-      sProp.Format("  {0}: {1};\n", pMember->GetPropertyName(), szTypeName);
+      sProp.SetFormat("  {0}: {1};\n", pMember->GetPropertyName(), szTypeName);
     }
 
     out_Code.Append(sProp.GetView());
@@ -166,7 +164,7 @@ void plTypeScriptBinding::InjectMessageImportExport(plStringBuilder& content, co
 
   plStringBuilder sImportExport, sTypeName;
 
-  sImportExport.Format(R"(import __AllMessages = require("{}")
+  sImportExport.SetFormat(R"(import __AllMessages = require("{}")
 )",
     szMessageFile);
 
@@ -179,20 +177,20 @@ void plTypeScriptBinding::InjectMessageImportExport(plStringBuilder& content, co
   AppendToTextFile(content, sImportExport);
 }
 
-static plUniquePtr<plMessage> CreateMessage(plUInt32 uiTypeHash, const plRTTI*& pRtti)
+static plUniquePtr<plMessage> CreateMessage(plUInt32 uiTypeHash, const plRTTI*& ref_pRtti)
 {
-  static plHashTable<plUInt32, const plRTTI*, plHashHelper<plUInt32>, plStaticAllocatorWrapper> MessageTypes;
+  static plHashTable<plUInt32, const plRTTI*, plHashHelper<plUInt32>, plStaticsAllocatorWrapper> MessageTypes;
 
-  if (!MessageTypes.TryGetValue(uiTypeHash, pRtti))
+  if (!MessageTypes.TryGetValue(uiTypeHash, ref_pRtti))
   {
-    pRtti = plRTTI::FindTypeIf([=](const plRTTI* pRtti) { return plHashingUtils::StringHashTo32(pRtti->GetTypeNameHash()) == uiTypeHash; });
-    MessageTypes[uiTypeHash] = pRtti;
+    ref_pRtti = plRTTI::FindTypeIf([=](const plRTTI* pRtti) { return plHashingUtils::StringHashTo32(pRtti->GetTypeNameHash()) == uiTypeHash; });
+    MessageTypes[uiTypeHash] = ref_pRtti;
   }
 
-  if (pRtti == nullptr || !pRtti->GetAllocator()->CanAllocate())
+  if (ref_pRtti == nullptr || !ref_pRtti->GetAllocator()->CanAllocate())
     return nullptr;
 
-  return pRtti->GetAllocator()->Allocate<plMessage>();
+  return ref_pRtti->GetAllocator()->Allocate<plMessage>();
 }
 
 plUniquePtr<plMessage> plTypeScriptBinding::MessageFromParameter(duk_context* pDuk, plInt32 iObjIdx, plTime delay)
@@ -206,7 +204,7 @@ plUniquePtr<plMessage> plTypeScriptBinding::MessageFromParameter(duk_context* pD
 
   if (pMsg != nullptr)
   {
-    SyncTsObjectEzTsObject(pDuk, pRtti, pMsg.Borrow(), iObjIdx + 1);
+    SyncTsObjectPlTsObject(pDuk, pRtti, pMsg.Borrow(), iObjIdx + 1);
   }
   else
   {
@@ -227,11 +225,11 @@ plUniquePtr<plMessage> plTypeScriptBinding::MessageFromParameter(duk_context* pD
     }
 
     plLog::Error("Too many posted messages with large delay (> {}). DukTape stash is full.", c_uiMaxMsgStash);
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, nullptr, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, nullptr, 0);
 
   found:
 
-    m_StashedMsgDelivery[m_uiNextStashMsgIdx - c_uiFirstStashMsgIdx] = tNow + delay + plTime::Milliseconds(50);
+    m_StashedMsgDelivery[m_uiNextStashMsgIdx - c_uiFirstStashMsgIdx] = tNow + delay + plTime::MakeFromMilliseconds(50);
 
     {
       duk_dup(duk, iObjIdx + 1);                       // [ object ]
@@ -245,7 +243,7 @@ plUniquePtr<plMessage> plTypeScriptBinding::MessageFromParameter(duk_context* pD
     pTypedMsg->m_uiStashIndex = m_uiNextStashMsgIdx;
   }
 
-  PLASMA_DUK_VERIFY_STACK(duk, 0);
+  PL_DUK_VERIFY_STACK(duk, 0);
   return pMsg;
 }
 
@@ -264,9 +262,9 @@ void plTypeScriptBinding::DukPutMessage(duk_context* pDuk, const plMessage& msg)
   duk_remove(duk, -2);                                 // [ global msg ]
   duk_remove(duk, -2);                                 // [ msg ]
 
-  SyncEzObjectToTsObject(pDuk, pRtti, &msg, -1);
+  SyncPlObjectToTsObject(pDuk, pRtti, &msg, -1);
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, +1);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, +1);
 }
 
 void plTypeScriptBinding::RegisterMessageHandlersForComponentType(const char* szComponent, const plUuid& componentType)
@@ -296,16 +294,16 @@ void plTypeScriptBinding::RegisterMessageHandlersForComponentType(const char* sz
 
   duk.PopStack(); // [ ]
 
-  m_CurrentTsMsgHandlerRegistrator.SetInvalid();
+  m_CurrentTsMsgHandlerRegistrator = plUuid::MakeInvalid();
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 int plTypeScriptBinding::__CPP_Binding_RegisterMessageHandler(duk_context* pDuk)
 {
   plTypeScriptBinding* tsb = plTypeScriptBinding::RetrieveBinding(pDuk);
 
-  PLASMA_ASSERT_DEV(tsb->m_CurrentTsMsgHandlerRegistrator.IsValid(), "'pl.TypescriptComponent.RegisterMessageHandler' may only be called from 'static RegisterMessageHandlers()'");
+  PL_ASSERT_DEV(tsb->m_CurrentTsMsgHandlerRegistrator.IsValid(), "'pl.TypescriptComponent.RegisterMessageHandler' may only be called from 'static RegisterMessageHandlers()'");
 
   plDuktapeFunction duk(pDuk);
 
@@ -328,7 +326,7 @@ int plTypeScriptBinding::__CPP_Binding_RegisterMessageHandler(duk_context* pDuk)
   mh.m_pMessageType = pMsgType;
   mh.m_uiMessageTypeNameHash = uiMsgTypeHash;
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 bool plTypeScriptBinding::HasMessageHandler(const TsComponentTypeInfo& typeInfo, const plRTTI* pMsgRtti) const
@@ -347,7 +345,7 @@ bool plTypeScriptBinding::HasMessageHandler(const TsComponentTypeInfo& typeInfo,
   return false;
 }
 
-bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, plTypeScriptComponent* pComponent, plMessage& msg, bool bSynchronizeAfterwards)
+bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, plTypeScriptComponent* pComponent, plMessage& ref_msg, bool bSynchronizeAfterwards)
 {
   if (!typeInfo.IsValid())
     return false;
@@ -357,10 +355,10 @@ bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, pl
   if (tsc.m_MessageHandlers.IsEmpty())
     return false;
 
-  const plRTTI* pMsgRtti = msg.GetDynamicRTTI();
+  const plRTTI* pMsgRtti = ref_msg.GetDynamicRTTI();
 
   ++m_iMsgDeliveryRecursion;
-  PLASMA_SCOPE_EXIT(--m_iMsgDeliveryRecursion);
+  PL_SCOPE_EXIT(--m_iMsgDeliveryRecursion);
 
   plStringBuilder sStashMsgName;
 
@@ -374,11 +372,11 @@ bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, pl
 
       if (duk.PrepareMethodCall(mh.m_sHandlerFunc).Succeeded()) // [ comp func comp ]
       {
-        plTypeScriptBinding::DukPutMessage(duk, msg); // [ comp func comp msg ]
+        plTypeScriptBinding::DukPutMessage(duk, ref_msg); // [ comp func comp msg ]
 
         if (bSynchronizeAfterwards)
         {
-          sStashMsgName.Format("plMsg-{}", m_iMsgDeliveryRecursion);
+          sStashMsgName.SetFormat("plMsg-{}", m_iMsgDeliveryRecursion);
 
           duk.PushGlobalStash();                       // [ ... stash ]
           duk_dup(duk, -2);                            // [ ... stash msg ]
@@ -394,11 +392,11 @@ bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, pl
         {
           duk.PushGlobalStash();                                                    // [ ... stash ]
           duk_get_prop_string(duk, -1, sStashMsgName);                              // [ ... stash msg ]
-          plTypeScriptBinding::SyncTsObjectEzTsObject(duk, pMsgRtti, &msg, -1); // [ ... stash msg ]
-          duk_pop_2(duk);                                                    // [ ... ]
+          plTypeScriptBinding::SyncTsObjectPlTsObject(duk, pMsgRtti, &ref_msg, -1); // [ ... stash msg ]
+          duk_pop_2(duk);                                                           // [ ... ]
         }
 
-        PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+        PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
       }
       else
       {
@@ -411,10 +409,10 @@ bool plTypeScriptBinding::DeliverMessage(const TsComponentTypeInfo& typeInfo, pl
         // remove 'this'   [ comp ]
         duk.PopStack(); // [ ]
 
-        PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
+        PL_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
       }
 
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
     }
   }
 
@@ -443,7 +441,7 @@ bool plTypeScriptBinding::DeliverTsMessage(const TsComponentTypeInfo& typeInfo, 
         duk.CallPreparedMethod().IgnoreResult();     // [ comp result ]
         duk.PopStack(2);                             // [ ]
 
-        PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+        PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
       }
       else
       {
@@ -456,10 +454,10 @@ bool plTypeScriptBinding::DeliverTsMessage(const TsComponentTypeInfo& typeInfo, 
         // remove 'this'   [ comp ]
         duk.PopStack(); // [ ]
 
-        PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
+        PL_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
       }
 
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
     }
   }
 

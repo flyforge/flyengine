@@ -12,7 +12,7 @@ class plQtPin;
 class plQtConnection;
 struct plSelectionManagerEvent;
 
-class PLASMA_GUIFOUNDATION_DLL plQtNodeScene : public QGraphicsScene
+class PL_GUIFOUNDATION_DLL plQtNodeScene : public QGraphicsScene
 {
   Q_OBJECT
 public:
@@ -23,7 +23,7 @@ public:
     Connection
   };
 
-  explicit plQtNodeScene(QObject* parent = nullptr);
+  explicit plQtNodeScene(QObject* pParent = nullptr);
   ~plQtNodeScene();
 
   virtual void InitScene(const plDocumentNodeManager* pManager);
@@ -43,9 +43,9 @@ public:
     {
       BezierCurve,
       StraightLine,
-      Subway,
+      SubwayLines,
 
-      Default = Subway
+      Default = SubwayLines
     };
   };
 
@@ -58,15 +58,16 @@ public:
 
     enum Enum
     {
-      DirectionArrows = PLASMA_BIT(0), ///< Draw an arrow to indicate the connection's direction. Only works with straight lines atm.
-      Debugging = PLASMA_BIT(1),
+      DirectionArrows = PL_BIT(0), ///< Draw an arrow to indicate the connection's direction. Only works with straight lines atm.
+      DrawDebugging = PL_BIT(1), ///< Draw animated effect to denote debugging.
+
       Default = 0
     };
 
     struct Bits
     {
       StorageType DirectionArrows : 1;
-      StorageType Debugging : 1;
+      StorageType DrawDebugging : 1;
     };
   };
 
@@ -87,7 +88,7 @@ private:
   void CreateQtConnection(const plDocumentObject* pObject);
   void DeleteQtConnection(const plDocumentObject* pObject);
   void RecreateQtPins(const plDocumentObject* pObject);
-  void CreateNodeObject(const plRTTI* pRtti);
+  void CreateNodeObject(const plNodeCreationTemplate& nodeTemplate);
   void NodeEventsHandler(const plDocumentNodeManagerEvent& e);
   void PropertyEventsHandler(const plDocumentObjectPropertyEvent& e);
   void SelectionEventsHandler(const plSelectionManagerEvent& e);
@@ -124,13 +125,15 @@ private:
   plQtConnection* m_pTempConnection = nullptr;
   plQtNode* m_pTempNode = nullptr;
   plDeque<const plDocumentObject*> m_Selection;
-  plVec2 m_vMousePos = plVec2::ZeroVector();
+  plVec2 m_vMousePos = plVec2::MakeZero();
   QString m_sContextMenuSearchText;
   plDynamicArray<const plQtPin*> m_ConnectablePins;
   plEnum<ConnectionStyle> m_ConnectionStyle;
   plBitflags<ConnectionDecorationFlags> m_ConnectionDecorationFlags;
 
+  plDynamicArray<plNodeCreationTemplate> m_NodeCreationTemplates;
+
   static plVec2 s_vLastMouseInteraction;
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plQtNodeScene::ConnectionDecorationFlags);
+PL_DECLARE_FLAGS_OPERATORS(plQtNodeScene::ConnectionDecorationFlags);

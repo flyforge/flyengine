@@ -75,7 +75,7 @@ void plQtAnimationGraphNode::UpdateState()
         if (val.IsValid())
         {
 
-          tmp.Format("{}", val);
+          tmp.SetFormat("{}", val);
 
           if (plConversionUtils::IsStringUuid(tmp))
           {

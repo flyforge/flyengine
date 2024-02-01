@@ -15,8 +15,8 @@ namespace plProcGenInternal
     PlacementTile(PlacementTile&& other);
     ~PlacementTile();
 
-    void Initialize(const PlacementTileDesc& desc, plSharedPtr<const PlacementOutput>& pOutput);
-    void Deinitialize(plWorld& world);
+    void Initialize(const PlacementTileDesc& desc, plSharedPtr<const PlacementOutput>& ref_pOutput);
+    void Deinitialize(plWorld& ref_world);
 
     bool IsValid() const;
 
@@ -26,9 +26,9 @@ namespace plProcGenInternal
     plBoundingBox GetBoundingBox() const;
     plColor GetDebugColor() const;
 
-    void PreparePlacementData(const plWorld* pWorld, const plPhysicsWorldModuleInterface* pPhysicsModule, PlacementData& placementData);
+    void PreparePlacementData(const plWorld* pWorld, const plPhysicsWorldModuleInterface* pPhysicsModule, PlacementData& ref_placementData);
 
-    plUInt32 PlaceObjects(plWorld& world, plArrayPtr<const PlacementTransform> objectTransforms);
+    plUInt32 PlaceObjects(plWorld& ref_world, plArrayPtr<const PlacementTransform> objectTransforms);
 
   private:
     PlacementTileDesc m_Desc;
@@ -45,7 +45,7 @@ namespace plProcGenInternal
       };
     };
 
-    State::Enum m_State;
+    State::Enum m_State = State::Invalid;
     plDynamicArray<plGameObjectHandle> m_PlacedObjects;
   };
 } // namespace plProcGenInternal

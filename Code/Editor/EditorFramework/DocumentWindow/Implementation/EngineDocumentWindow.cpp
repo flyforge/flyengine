@@ -14,6 +14,9 @@ plQtEngineDocumentWindow::plQtEngineDocumentWindow(plAssetDocument* pDocument)
 
 plQtEngineDocumentWindow::~plQtEngineDocumentWindow()
 {
+  // make sure the selection gets cleared before the views are destroyed, so that dependent code can clean up first
+  GetDocument()->GetSelectionManager()->Clear();
+
   GetDocument()->m_ProcessMessageEvent.RemoveEventHandler(plMakeDelegate(&plQtEngineDocumentWindow::ProcessMessageEventHandler, this));
   GetDocument()->m_CommonAssetUiChangeEvent.RemoveEventHandler(plMakeDelegate(&plQtEngineDocumentWindow::CommonAssetUiEventHandler, this));
 
@@ -22,7 +25,7 @@ plQtEngineDocumentWindow::~plQtEngineDocumentWindow()
 }
 
 
-PlasmaEditorEngineConnection* plQtEngineDocumentWindow::GetEditorEngineConnection() const
+plEditorEngineConnection* plQtEngineDocumentWindow::GetEditorEngineConnection() const
 {
   return GetDocument()->GetEditorEngineConnection();
 }
@@ -36,6 +39,7 @@ const plObjectPickingResult& plQtEngineDocumentWindow::PickObject(plUInt16 uiScr
 
   if (pView != nullptr)
     return pView->PickObject(uiScreenPosX, uiScreenPosY);
+
   return s_DummyResult;
 }
 
@@ -112,8 +116,8 @@ plArrayPtr<plQtEngineViewWidget* const> plQtEngineDocumentWindow::GetViewWidgets
 void plQtEngineDocumentWindow::AddViewWidget(plQtEngineViewWidget* pView)
 {
   m_ViewWidgets.PushBack(pView);
-  PlasmaEngineWindowEvent e;
-  e.m_Type = PlasmaEngineWindowEvent::Type::ViewCreated;
+  plEngineWindowEvent e;
+  e.m_Type = plEngineWindowEvent::Type::ViewCreated;
   e.m_pView = pView;
   m_EngineWindowEvent.Broadcast(e);
 }
@@ -121,8 +125,8 @@ void plQtEngineDocumentWindow::AddViewWidget(plQtEngineViewWidget* pView)
 void plQtEngineDocumentWindow::RemoveViewWidget(plQtEngineViewWidget* pView)
 {
   m_ViewWidgets.RemoveAndSwap(pView);
-  PlasmaEngineWindowEvent e;
-  e.m_Type = PlasmaEngineWindowEvent::Type::ViewDestroyed;
+  plEngineWindowEvent e;
+  e.m_Type = plEngineWindowEvent::Type::ViewDestroyed;
   e.m_pView = pView;
   m_EngineWindowEvent.Broadcast(e);
 }
@@ -159,7 +163,7 @@ void plQtEngineDocumentWindow::CommonAssetUiEventHandler(const plCommonAssetUiSt
       msg.m_sPayload = "Visualizers";
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   if (!msg.m_sPayload.IsEmpty())
@@ -168,11 +172,11 @@ void plQtEngineDocumentWindow::CommonAssetUiEventHandler(const plCommonAssetUiSt
   }
 }
 
-void plQtEngineDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plQtEngineDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
 {
-  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<PlasmaEditorEngineViewMsg>())
+  if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plEditorEngineViewMsg>())
   {
-    const PlasmaEditorEngineViewMsg* pViewMsg = static_cast<const PlasmaEditorEngineViewMsg*>(pMsg);
+    const plEditorEngineViewMsg* pViewMsg = static_cast<const plEditorEngineViewMsg*>(pMsg);
 
     plQtEngineViewWidget* pView = GetViewWidgetByID(pViewMsg->m_uiViewID);
 

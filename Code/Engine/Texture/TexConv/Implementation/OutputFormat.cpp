@@ -60,7 +60,7 @@ static plImageFormat::Enum DetermineOutputFormatPC(
         return plImageFormat::R8G8B8A8_UNORM;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 
@@ -96,9 +96,9 @@ static plImageFormat::Enum DetermineOutputFormatPC(
 
 plResult plTexConvProcessor::ChooseOutputFormat(plEnum<plImageFormat>& out_Format, plEnum<plTexConvUsage> usage, plUInt32 uiNumChannels) const
 {
-  PLASMA_PROFILE_SCOPE("ChooseOutputFormat");
+  PL_PROFILE_SCOPE("ChooseOutputFormat");
 
-  PLASMA_ASSERT_DEV(out_Format == plImageFormat::UNKNOWN, "Output format already set");
+  PL_ASSERT_DEV(out_Format == plImageFormat::UNKNOWN, "Output format already set");
 
   switch (m_Descriptor.m_TargetPlatform)
   {
@@ -111,18 +111,16 @@ plResult plTexConvProcessor::ChooseOutputFormat(plEnum<plImageFormat>& out_Forma
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   if (out_Format == plImageFormat::UNKNOWN)
   {
     plLog::Error("Failed to decide for an output image format.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_OutputFormat);

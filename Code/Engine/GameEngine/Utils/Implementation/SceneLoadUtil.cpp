@@ -1,6 +1,6 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Collection/CollectionResource.h>
 #include <GameEngine/GameApplication/GameApplication.h>
 #include <GameEngine/Utils/SceneLoadUtil.h>
@@ -13,9 +13,9 @@ plSceneLoadUtility::~plSceneLoadUtility() = default;
 
 void plSceneLoadUtility::StartSceneLoading(plStringView sSceneFile, plStringView sPreloadCollectionFile)
 {
-  PLASMA_ASSERT_DEV(m_LoadingState == LoadingState::NotStarted, "Can't reuse an plSceneLoadUtility.");
+  PL_ASSERT_DEV(m_LoadingState == LoadingState::NotStarted, "Can't reuse an plSceneLoadUtility.");
 
-  PLASMA_LOG_BLOCK("StartSceneLoading");
+  PL_LOG_BLOCK("StartSceneLoading");
 
   m_LoadingState = LoadingState::Ongoing;
 
@@ -67,14 +67,14 @@ void plSceneLoadUtility::StartSceneLoading(plStringView sSceneFile, plStringView
 
 plUniquePtr<plWorld> plSceneLoadUtility::RetrieveLoadedScene()
 {
-  PLASMA_ASSERT_DEV(m_LoadingState == LoadingState::FinishedSuccessfully, "Can't retrieve a scene when loading hasn't finished successfully.");
+  PL_ASSERT_DEV(m_LoadingState == LoadingState::FinishedSuccessfully, "Can't retrieve a scene when loading hasn't finished successfully.");
 
   return std::move(m_pWorld);
 }
 
 void plSceneLoadUtility::LoadingFailed(const plFormatString& reason)
 {
-  PLASMA_ASSERT_DEV(m_LoadingState == LoadingState::Ongoing, "Invalid loading state");
+  PL_ASSERT_DEV(m_LoadingState == LoadingState::Ongoing, "Invalid loading state");
   m_LoadingState = LoadingState::Failed;
 
   plStringBuilder tmp;
@@ -134,12 +134,12 @@ void plSceneLoadUtility::TickSceneLoading()
   // if we haven't created a world yet, do so now, and set up an instantiation context
   if (m_pWorld == nullptr)
   {
-    PLASMA_LOG_BLOCK("LoadObjectGraph", m_sFile);
+    PL_LOG_BLOCK("LoadObjectGraph", m_sFile);
 
     plWorldDesc desc(m_sFile);
-    m_pWorld = PLASMA_DEFAULT_NEW(plWorld, desc);
+    m_pWorld = PL_DEFAULT_NEW(plWorld, desc);
 
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     if (m_FileReader.Open(m_sFile).Failed())
     {
@@ -167,7 +167,7 @@ void plSceneLoadUtility::TickSceneLoading()
         return;
       }
 
-      m_pInstantiationContext = m_WorldReader.InstantiateWorld(*m_pWorld, nullptr, plTime::Milliseconds(1), &m_InstantiationProgress);
+      m_pInstantiationContext = m_WorldReader.InstantiateWorld(*m_pWorld, nullptr, plTime::MakeFromMilliseconds(1), &m_InstantiationProgress);
     }
   }
   else if (m_pInstantiationContext)
@@ -180,13 +180,13 @@ void plSceneLoadUtility::TickSceneLoading()
       // E.g. only finish component instantiation?
       // also we may want to step the world only with a very small (and fixed!) time-step
 
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
       m_pWorld->Update();
     }
     else if (res == plWorldReader::InstantiationContextBase::StepResult::Finished)
     {
       // TODO: ticking twice seems to fix some Jolt physics issues
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
       m_pWorld->Update();
 
       m_pInstantiationContext = nullptr;
@@ -197,6 +197,8 @@ void plSceneLoadUtility::TickSceneLoading()
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Invalid code path.");
+    PL_REPORT_FAILURE("Invalid code path.");
   }
 }
+
+

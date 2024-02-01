@@ -13,7 +13,7 @@ void UpdateInputDynamicEnumValues()
   plStringBuilder sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sPath.AppendPath("RuntimeConfigs/InputConfig.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sOldPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sOldPath.AppendPath("InputConfig.ddl");
   sPath = plFileSystem::MigrateFileLocation(sOldPath, sPath);
@@ -33,8 +33,8 @@ void UpdateInputDynamicEnumValues()
   }
 }
 
-plQtInputConfigDlg::plQtInputConfigDlg(QWidget* parent)
-  : QDialog(parent)
+plQtInputConfigDlg::plQtInputConfigDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -173,7 +173,7 @@ void plQtInputConfigDlg::LoadActions()
   plStringBuilder sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sPath.AppendPath("RuntimeConfigs/InputConfig.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sOldPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sOldPath.AppendPath("InputConfig.ddl");
   sPath = plFileSystem::MigrateFileLocation(sOldPath, sPath);

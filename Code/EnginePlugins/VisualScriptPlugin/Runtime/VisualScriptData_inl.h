@@ -1,22 +1,22 @@
 
-PLASMA_FORCE_INLINE void plVisualScriptDataDescription::CheckOffset(DataOffset dataOffset, const plRTTI* pType) const
+PL_FORCE_INLINE void plVisualScriptDataDescription::CheckOffset(DataOffset dataOffset, const plRTTI* pType) const
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   auto givenDataType = dataOffset.GetType();
   auto& offsetAndCount = m_PerTypeInfo[givenDataType];
-  PLASMA_ASSERT_DEBUG(offsetAndCount.m_uiCount > 0, "Invalid data offset");
+  PL_ASSERT_DEBUG(offsetAndCount.m_uiCount > 0, "Invalid data offset");
   const plUInt32 uiLastOffset = offsetAndCount.m_uiStartOffset + (offsetAndCount.m_uiCount - 1) * plVisualScriptDataType::GetStorageSize(givenDataType);
-  PLASMA_ASSERT_DEBUG(dataOffset.m_uiByteOffset >= offsetAndCount.m_uiStartOffset && dataOffset.m_uiByteOffset <= uiLastOffset, "Invalid data offset");
+  PL_ASSERT_DEBUG(dataOffset.m_uiByteOffset >= offsetAndCount.m_uiStartOffset && dataOffset.m_uiByteOffset <= uiLastOffset, "Invalid data offset");
 
   if (pType != nullptr)
   {
     auto expectedDataType = plVisualScriptDataType::FromRtti(pType);
-    PLASMA_ASSERT_DEBUG(expectedDataType == givenDataType, "Data type mismatch, expected '{}'({}) but got '{}'", plVisualScriptDataType::GetName(expectedDataType), pType->GetTypeName(), plVisualScriptDataType::GetName(givenDataType));
+    PL_ASSERT_DEBUG(expectedDataType == givenDataType, "Data type mismatch, expected '{}'({}) but got '{}'", plVisualScriptDataType::GetName(expectedDataType), pType->GetTypeName(), plVisualScriptDataType::GetName(givenDataType));
   }
 #endif
 }
 
-PLASMA_FORCE_INLINE plVisualScriptDataDescription::DataOffset plVisualScriptDataDescription::GetOffset(plVisualScriptDataType::Enum dataType, plUInt32 uiIndex, DataOffset::Source::Enum source) const
+PL_FORCE_INLINE plVisualScriptDataDescription::DataOffset plVisualScriptDataDescription::GetOffset(plVisualScriptDataType::Enum dataType, plUInt32 uiIndex, DataOffset::Source::Enum source) const
 {
   auto& offsetAndCount = m_PerTypeInfo[dataType];
   plUInt32 uiByteOffset = plInvalidIndex;
@@ -30,7 +30,7 @@ PLASMA_FORCE_INLINE plVisualScriptDataDescription::DataOffset plVisualScriptData
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_ALWAYS_INLINE bool plVisualScriptDataStorage::IsAllocated() const
+PL_ALWAYS_INLINE bool plVisualScriptDataStorage::IsAllocated() const
 {
   return m_Storage.GetByteBlobPtr().IsEmpty() == false;
 }
@@ -112,7 +112,7 @@ void plVisualScriptDataStorage::SetPointerData(DataOffset dataOffset, T ptr, con
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(!pType || pType->IsDerivedFrom<plComponent>() == false, "Component type '{}' is stored as typed pointer, cast to plComponent first to ensure correct storage", pType->GetTypeName());
+      PL_ASSERT_DEBUG(!pType || pType->IsDerivedFrom<plComponent>() == false, "Component type '{}' is stored as typed pointer, cast to plComponent first to ensure correct storage", pType->GetTypeName());
 
       m_pDesc->CheckOffset(dataOffset, pType);
 
@@ -127,14 +127,14 @@ void plVisualScriptDataStorage::SetPointerData(DataOffset dataOffset, T ptr, con
 
 inline plResult plVisualScriptInstanceData::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(m_DataOffset.Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(m_DataOffset.Serialize(inout_stream));
   inout_stream << m_DefaultValue;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 inline plResult plVisualScriptInstanceData::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(m_DataOffset.Deserialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(m_DataOffset.Deserialize(inout_stream));
   inout_stream >> m_DefaultValue;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

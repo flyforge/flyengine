@@ -8,7 +8,7 @@
 #include <Texture/Image/Image.h>
 #include <Texture/Image/ImageConversion.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 #  include <Foundation/IO/StreamUtils.h>
 #  include <Foundation/Profiling/Profiling.h>
@@ -16,8 +16,9 @@
 
 using namespace DirectX;
 
-PLASMA_DEFINE_AS_POD_TYPE(DirectX::Image); // Allow for storing this struct in pl containers
+PL_DEFINE_AS_POD_TYPE(DirectX::Image); // Allow for storing this struct in pl containers
 
+// PL_STATICLINK_FORCE
 plWicFileFormat g_wicFormat;
 
 namespace
@@ -70,10 +71,10 @@ plResult plWicFileFormat::ReadFileData(plStreamReader& stream, plDynamicArray<pl
   if (storage.IsEmpty())
   {
     plLog::Error("Failure to retrieve image data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static void SetHeader(plImageHeader& ref_header, plImageFormat::Enum imageFormat, const TexMetadata& metadata)
@@ -91,10 +92,10 @@ static void SetHeader(plImageHeader& ref_header, plImageFormat::Enum imageFormat
 
 plResult plWicFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plWicFileFormat::ReadImageHeader");
+  PL_PROFILE_SCOPE("plWicFileFormat::ReadImageHeader");
 
   plDynamicArray<plUInt8> storage;
-  PLASMA_SUCCEED_OR_RETURN(ReadFileData(inout_stream, storage));
+  PL_SUCCEED_OR_RETURN(ReadFileData(inout_stream, storage));
 
   TexMetadata metadata;
   ScratchImage scratchImage;
@@ -104,7 +105,7 @@ plResult plWicFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageH
   if (FAILED(loadResult))
   {
     plLog::Error("Failure to load image metadata. HRESULT:{}", plArgErrorCode(loadResult));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plImageFormat::Enum imageFormat = plImageFormatMappings::FromDxgiFormat(metadata.format);
@@ -120,20 +121,20 @@ plResult plWicFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageH
   if (imageFormat == plImageFormat::UNKNOWN)
   {
     plLog::Error("Unable to use image format from '{}' file.", sFileExtension);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   SetHeader(ref_header, imageFormat, metadata);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plWicFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_image, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plWicFileFormat::ReadImage");
+  PL_PROFILE_SCOPE("plWicFileFormat::ReadImage");
 
   plDynamicArray<plUInt8> storage;
-  PLASMA_SUCCEED_OR_RETURN(ReadFileData(inout_stream, storage));
+  PL_SUCCEED_OR_RETURN(ReadFileData(inout_stream, storage));
 
   TexMetadata metadata;
   ScratchImage scratchImage;
@@ -144,7 +145,7 @@ plResult plWicFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
   if (FAILED(loadResult))
   {
     plLog::Error("Failure to load image data. HRESULT:{}", plArgErrorCode(loadResult));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Determine image format, re-reading image data if necessary
@@ -163,7 +164,7 @@ plResult plWicFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
   if (imageFormat == plImageFormat::UNKNOWN)
   {
     plLog::Error("Unable to use image format from '{}' file.", sFileExtension);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Prepare destination image header and allocate storage
@@ -209,7 +210,7 @@ plResult plWicFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plWicFileFormat::WriteImage(plStreamWriter& inout_stream, const plImageView& image, plStringView sFileExtension) const
@@ -239,18 +240,18 @@ plResult plWicFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   if (format == plImageFormat::UNKNOWN)
   {
     plLog::Error("No conversion from format '{0}' to a format suitable for '{}' files known.", plImageFormat::GetName(image.GetImageFormat()), sFileExtension);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Convert if not already in a compatible format
   if (format != image.GetImageFormat())
   {
     plImage convertedImage;
-    if (plImageConversion::Convert(image, convertedImage, format) != PLASMA_SUCCESS)
+    if (plImageConversion::Convert(image, convertedImage, format) != PL_SUCCESS)
     {
       // This should never happen
-      PLASMA_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
-      return PLASMA_FAILURE;
+      PL_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
+      return PL_FAILURE;
     }
 
     return WriteImage(inout_stream, convertedImage, sFileExtension);
@@ -285,18 +286,18 @@ plResult plWicFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     if (FAILED(res))
     {
       plLog::Error("Failed to save image data to local memory blob - result: {}!", plHRESULTtoString(res));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Push blob into output stream
-    if (inout_stream.WriteBytes(targetBlob.GetBufferPointer(), targetBlob.GetBufferSize()) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(targetBlob.GetBufferPointer(), targetBlob.GetBufferSize()) != PL_SUCCESS)
     {
       plLog::Error("Failed to write image data!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plWicFileFormat::CanReadFileType(plStringView sExtension) const
@@ -313,4 +314,8 @@ bool plWicFileFormat::CanWriteFileType(plStringView sExtension) const
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Formats_WicFileFormat);
+
+
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Formats_WicFileFormat);
+

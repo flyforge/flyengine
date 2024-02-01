@@ -3,22 +3,22 @@
 #include <Core/ResourceManager/Resource.h>
 #include <Foundation/Tracks/ColorGradient.h>
 
-struct PLASMA_CORE_DLL plColorGradientResourceDescriptor
+struct PL_CORE_DLL plColorGradientResourceDescriptor
 {
   plColorGradient m_Gradient;
 
-  void Save(plStreamWriter& stream) const;
-  void Load(plStreamReader& stream);
+  void Save(plStreamWriter& inout_stream) const;
+  void Load(plStreamReader& inout_stream);
 };
 
 using plColorGradientResourceHandle = plTypedResourceHandle<class plColorGradientResource>;
 
 /// \brief A resource that stores a single color gradient. The data is stored in the descriptor.
-class PLASMA_CORE_DLL plColorGradientResource : public plResource
+class PL_CORE_DLL plColorGradientResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plColorGradientResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plColorGradientResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plColorGradientResource, plColorGradientResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plColorGradientResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plColorGradientResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plColorGradientResource, plColorGradientResourceDescriptor);
 
 public:
   plColorGradientResource();

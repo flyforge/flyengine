@@ -6,28 +6,28 @@
 #include <RendererCore/Pipeline/RenderDataBatch.h>
 #include <RendererCore/Pipeline/ViewData.h>
 
-class PLASMA_RENDERERCORE_DLL plExtractedRenderData
+class PL_RENDERERCORE_DLL plExtractedRenderData
 {
 public:
   plExtractedRenderData();
 
-  PLASMA_ALWAYS_INLINE void SetCamera(const plCamera& camera) { m_Camera = camera; }
-  PLASMA_ALWAYS_INLINE const plCamera& GetCamera() const { return m_Camera; }
+  PL_ALWAYS_INLINE void SetCamera(const plCamera& camera) { m_Camera = camera; }
+  PL_ALWAYS_INLINE const plCamera& GetCamera() const { return m_Camera; }
 
-  PLASMA_ALWAYS_INLINE void SetLodCamera(const plCamera& camera) { m_LodCamera = camera; }
-  PLASMA_ALWAYS_INLINE const plCamera& GetLodCamera() const { return m_LodCamera; }
+  PL_ALWAYS_INLINE void SetLodCamera(const plCamera& camera) { m_LodCamera = camera; }
+  PL_ALWAYS_INLINE const plCamera& GetLodCamera() const { return m_LodCamera; }
 
-  PLASMA_ALWAYS_INLINE void SetViewData(const plViewData& viewData) { m_ViewData = viewData; }
-  PLASMA_ALWAYS_INLINE const plViewData& GetViewData() const { return m_ViewData; }
+  PL_ALWAYS_INLINE void SetViewData(const plViewData& viewData) { m_ViewData = viewData; }
+  PL_ALWAYS_INLINE const plViewData& GetViewData() const { return m_ViewData; }
 
-  PLASMA_ALWAYS_INLINE void SetWorldTime(plTime time) { m_WorldTime = time; }
-  PLASMA_ALWAYS_INLINE plTime GetWorldTime() const { return m_WorldTime; }
+  PL_ALWAYS_INLINE void SetWorldTime(plTime time) { m_WorldTime = time; }
+  PL_ALWAYS_INLINE plTime GetWorldTime() const { return m_WorldTime; }
 
-  PLASMA_ALWAYS_INLINE void SetWorldDebugContext(const plDebugRendererContext& debugContext) { m_WorldDebugContext = debugContext; }
-  PLASMA_ALWAYS_INLINE const plDebugRendererContext& GetWorldDebugContext() const { return m_WorldDebugContext; }
+  PL_ALWAYS_INLINE void SetWorldDebugContext(const plDebugRendererContext& debugContext) { m_WorldDebugContext = debugContext; }
+  PL_ALWAYS_INLINE const plDebugRendererContext& GetWorldDebugContext() const { return m_WorldDebugContext; }
 
-  PLASMA_ALWAYS_INLINE void SetViewDebugContext(const plDebugRendererContext& debugContext) { m_ViewDebugContext = debugContext; }
-  PLASMA_ALWAYS_INLINE const plDebugRendererContext& GetViewDebugContext() const { return m_ViewDebugContext; }
+  PL_ALWAYS_INLINE void SetViewDebugContext(const plDebugRendererContext& debugContext) { m_ViewDebugContext = debugContext; }
+  PL_ALWAYS_INLINE const plDebugRendererContext& GetViewDebugContext() const { return m_ViewDebugContext; }
 
   void AddRenderData(const plRenderData* pRenderData, plRenderData::Category category);
   void AddFrameData(const plRenderData* pFrameData);
@@ -40,7 +40,7 @@ public:
     plRenderData::Category category, plRenderDataBatch::Filter filter = plRenderDataBatch::Filter()) const;
 
   template <typename T>
-  PLASMA_ALWAYS_INLINE const T* GetFrameData() const
+  PL_ALWAYS_INLINE const T* GetFrameData() const
   {
     return static_cast<const T*>(GetFrameData(plGetStaticRTTI<T>()));
   }

@@ -8,18 +8,18 @@ class plTextureAssetProfileConfig;
 
 class plLUTAssetDocument : public plSimpleAssetDocument<plLUTAssetProperties>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLUTAssetDocument, plSimpleAssetDocument<plLUTAssetProperties>);
+  PL_ADD_DYNAMIC_REFLECTION(plLUTAssetDocument, plSimpleAssetDocument<plLUTAssetProperties>);
 
 public:
-  plLUTAssetDocument(const char* szDocumentPath);
+  plLUTAssetDocument(plStringView sDocumentPath);
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override
   {
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 };
 
@@ -27,16 +27,14 @@ protected:
 
 class plLUTAssetDocumentGenerator : public plAssetDocumentGenerator
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLUTAssetDocumentGenerator, plAssetDocumentGenerator);
+  PL_ADD_DYNAMIC_REFLECTION(plLUTAssetDocumentGenerator, plAssetDocumentGenerator);
 
 public:
   plLUTAssetDocumentGenerator();
   ~plLUTAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
-  virtual plStatus Generate(
-    plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
+  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plLUTAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "LUTs"; }
-  virtual plStringView GetNameSuffix() const override { return "LUT"; }
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
 };

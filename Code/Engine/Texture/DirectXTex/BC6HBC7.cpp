@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) || PL_ENABLED(PL_PLATFORM_LINUX)
 
 //-------------------------------------------------------------------------------------
 // BC6HBC7.cpp
@@ -13,8 +13,8 @@
 // http://go.microsoft.com/fwlink/?LinkId=248926
 //-------------------------------------------------------------------------------------
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-#include "PLASMACompat.h"
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+#include "PLCompat.h"
 #else
 #include "DirectXTexP.h"
 #endif
@@ -1822,7 +1822,7 @@ void D3DX_BC6H::Encode(bool bSigned, const HDRColorA* const pIn) noexcept
   {
     const uint8_t uShapes = ms_aInfo[EP.uMode].uPartitions ? 32u : 1u;
     // Number of rough cases to look at. reasonable values of this are 1, uShapes/4, and uShapes
-    // uShapes/4 gets nearly all the cases; you can increase that a bit (say by 3 or 4) if you really want to squeeze the last bit out
+    // uShapes/4 gets nearly all the cases; you can increase that a bit (say by 3 or 4) if you really want to squeple the last bit out
     const size_t uItems = std::max<size_t>(1u, size_t(uShapes >> 2));
     float afRoughMSE[BC6H_MAX_SHAPES];
     uint8_t auShape[BC6H_MAX_SHAPES];
@@ -2780,7 +2780,7 @@ void D3DX_BC7::Encode(uint32_t flags, const HDRColorA* const pIn) noexcept
     const size_t uNumRots = size_t(1) << ms_aInfo[EP.uMode].uRotationBits;
     const size_t uNumIdxMode = size_t(1) << ms_aInfo[EP.uMode].uIndexModeBits;
     // Number of rough cases to look at. reasonable values of this are 1, uShapes/4, and uShapes
-    // uShapes/4 gets nearly all the cases; you can increase that a bit (say by 3 or 4) if you really want to squeeze the last bit out
+    // uShapes/4 gets nearly all the cases; you can increase that a bit (say by 3 or 4) if you really want to squeple the last bit out
     const size_t uItems = std::max<size_t>(1, uShapes >> 2);
     float afRoughMSE[BC7_MAX_SHAPES];
     size_t auShape[BC7_MAX_SHAPES];
@@ -3574,4 +3574,4 @@ void DirectX::D3DXEncodeBC7(uint8_t* pBC, const XMVECTOR* pColor, uint32_t flags
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_BC6HBC7);
+

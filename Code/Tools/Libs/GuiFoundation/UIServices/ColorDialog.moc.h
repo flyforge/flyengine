@@ -12,15 +12,15 @@ class QPushButton;
 class QSlider;
 
 
-class PLASMA_GUIFOUNDATION_DLL plQtColorDialog : public QDialog, Ui_ColorDialog
+class PL_GUIFOUNDATION_DLL plQtColorDialog : public QDialog, Ui_ColorDialog
 {
   Q_OBJECT
 public:
-  plQtColorDialog(const plColor& initial, QWidget* parent);
+  plQtColorDialog(const plColor& initial, QWidget* pParent);
   ~plQtColorDialog();
 
-  void ShowAlpha(bool enable);
-  void ShowHDR(bool enable);
+  void ShowAlpha(bool bEnable);
+  void ShowHDR(bool bEnable);
 
   static QByteArray GetLastDialogGeometry() { return s_LastDialogGeometry; }
 

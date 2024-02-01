@@ -13,31 +13,31 @@
 #include <RmlUiPlugin/RmlUiSingleton.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plRmlUiCanvas2DComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plRmlUiCanvas2DComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("RmlFile", GetRmlFile, SetRmlFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Rml_UI")),
-    PLASMA_ACCESSOR_PROPERTY("AnchorPoint", GetAnchorPoint, SetAnchorPoint)->AddAttributes(new plClampValueAttribute(plVec2(0), plVec2(1))),
-    PLASMA_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plSuffixAttribute("px"), new plMinValueTextAttribute("Auto")),
-    PLASMA_ACCESSOR_PROPERTY("Offset", GetOffset, SetOffset)->AddAttributes(new plDefaultValueAttribute(plVec2::ZeroVector()), new plSuffixAttribute("px")),
-    PLASMA_ACCESSOR_PROPERTY("PassInput", GetPassInput, SetPassInput)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("AutobindBlackboards", GetAutobindBlackboards, SetAutobindBlackboards)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("RmlFile", GetRmlFile, SetRmlFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Rml_UI")),
+    PL_ACCESSOR_PROPERTY("AnchorPoint", GetAnchorPoint, SetAnchorPoint)->AddAttributes(new plClampValueAttribute(plVec2(0), plVec2(1))),
+    PL_ACCESSOR_PROPERTY("Size", GetSize, SetSize)->AddAttributes(new plSuffixAttribute("px"), new plMinValueTextAttribute("Auto")),
+    PL_ACCESSOR_PROPERTY("Offset", GetOffset, SetOffset)->AddAttributes(new plDefaultValueAttribute(plVec2::MakeZero()), new plSuffixAttribute("px")),
+    PL_ACCESSOR_PROPERTY("PassInput", GetPassInput, SetPassInput)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("AutobindBlackboards", GetAutobindBlackboards, SetAutobindBlackboards)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgRmlUiReload, OnMsgReload)
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgRmlUiReload, OnMsgReload)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("UI/RmlUi"),
+    new plCategoryAttribute("Input/RmlUi"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plRmlUiCanvas2DComponent::plRmlUiCanvas2DComponent() = default;
@@ -173,16 +173,16 @@ void plRmlUiCanvas2DComponent::SetRmlResource(const plRmlUiResourceHandle& hReso
   }
 }
 
-void plRmlUiCanvas2DComponent::SetOffset(const plVec2I32& offset)
+void plRmlUiCanvas2DComponent::SetOffset(const plVec2I32& vOffset)
 {
-  m_vOffset = offset;
+  m_vOffset = vOffset;
 }
 
-void plRmlUiCanvas2DComponent::SetSize(const plVec2U32& size)
+void plRmlUiCanvas2DComponent::SetSize(const plVec2U32& vSize)
 {
-  if (m_vSize != size)
+  if (m_vSize != vSize)
   {
-    m_vSize = size;
+    m_vSize = vSize;
 
     if (m_pContext != nullptr)
     {
@@ -191,9 +191,9 @@ void plRmlUiCanvas2DComponent::SetSize(const plVec2U32& size)
   }
 }
 
-void plRmlUiCanvas2DComponent::SetAnchorPoint(const plVec2& anchorPoint)
+void plRmlUiCanvas2DComponent::SetAnchorPoint(const plVec2& vAnchorPoint)
 {
-  m_vAnchorPoint = anchorPoint;
+  m_vAnchorPoint = vAnchorPoint;
 }
 
 void plRmlUiCanvas2DComponent::SetPassInput(bool bPassInput)
@@ -211,12 +211,12 @@ void plRmlUiCanvas2DComponent::SetAutobindBlackboards(bool bAutobind)
   }
 }
 
-plUInt32 plRmlUiCanvas2DComponent::AddDataBinding(plUniquePtr<plRmlUiDataBinding>&& dataBinding)
+plUInt32 plRmlUiCanvas2DComponent::AddDataBinding(plUniquePtr<plRmlUiDataBinding>&& pDataBinding)
 {
   // Document needs to be loaded again since data bindings have to be set before document load
   if (m_pContext != nullptr)
   {
-    if (dataBinding->Initialize(*m_pContext).Succeeded())
+    if (pDataBinding->Initialize(*m_pContext).Succeeded())
     {
       if (m_pContext->LoadDocumentFromResource(m_hResource).Succeeded() && IsActive())
       {
@@ -227,15 +227,15 @@ plUInt32 plRmlUiCanvas2DComponent::AddDataBinding(plUniquePtr<plRmlUiDataBinding
 
   for (plUInt32 i = 0; i < m_DataBindings.GetCount(); ++i)
   {
-    if (dataBinding == nullptr)
+    if (pDataBinding == nullptr)
     {
-      m_DataBindings[i] = std::move(dataBinding);
+      m_DataBindings[i] = std::move(pDataBinding);
       return i;
     }
   }
 
   plUInt32 uiDataBindingIndex = m_DataBindings.GetCount();
-  m_DataBindings.PushBack(std::move(dataBinding));
+  m_DataBindings.PushBack(std::move(pDataBinding));
   return uiDataBindingIndex;
 }
 
@@ -253,7 +253,7 @@ void plRmlUiCanvas2DComponent::RemoveDataBinding(plUInt32 uiDataBindingIndex)
 
 plUInt32 plRmlUiCanvas2DComponent::AddBlackboardBinding(const plSharedPtr<plBlackboard>& pBlackboard)
 {
-  auto pDataBinding = PLASMA_DEFAULT_NEW(plRmlUiInternal::BlackboardDataBinding, pBlackboard);
+  auto pDataBinding = PL_DEFAULT_NEW(plRmlUiInternal::BlackboardDataBinding, pBlackboard);
   return AddDataBinding(pDataBinding);
 }
 
@@ -290,11 +290,11 @@ plRmlUiContext* plRmlUiCanvas2DComponent::GetOrCreateRmlContext()
   return m_pContext;
 }
 
-void plRmlUiCanvas2DComponent::SerializeComponent(plWorldWriter& stream) const
+void plRmlUiCanvas2DComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_hResource;
   s << m_vOffset;
@@ -304,11 +304,11 @@ void plRmlUiCanvas2DComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_bAutobindBlackboards;
 }
 
-void plRmlUiCanvas2DComponent::DeserializeComponent(plWorldReader& stream)
+void plRmlUiCanvas2DComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_hResource;
   s >> m_vOffset;
@@ -322,10 +322,10 @@ void plRmlUiCanvas2DComponent::DeserializeComponent(plWorldReader& stream)
   }
 }
 
-plResult plRmlUiCanvas2DComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg)
+plResult plRmlUiCanvas2DComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  bAlwaysVisible = true;
-  return PLASMA_SUCCESS;
+  ref_bAlwaysVisible = true;
+  return PL_SUCCESS;
 }
 
 void plRmlUiCanvas2DComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -377,7 +377,7 @@ void plRmlUiCanvas2DComponent::UpdateCachedValues()
         [hComponent = GetHandle(), pWorld = GetWorld()](const plResourceEvent& e) {
           if (e.m_Type == plResourceEvent::Type::ResourceContentUnloading)
           {
-            pWorld->PostMessage(hComponent, plMsgRmlUiReload(), plTime::Zero());
+            pWorld->PostMessage(hComponent, plMsgRmlUiReload(), plTime::MakeZero());
           }
         },
         m_ResourceEventUnsubscriber);
@@ -402,8 +402,11 @@ void plRmlUiCanvas2DComponent::UpdateAutobinding()
     while (pObject != nullptr)
     {
       pObject->TryGetComponentsOfBaseType(blackboardComponents);
+
       for (auto pBlackboardComponent : blackboardComponents)
       {
+        pBlackboardComponent->EnsureInitialized();
+
         m_AutoBindings.PushBack(AddBlackboardBinding(pBlackboardComponent->GetBoard()));
       }
 

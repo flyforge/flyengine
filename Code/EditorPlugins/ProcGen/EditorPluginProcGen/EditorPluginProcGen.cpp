@@ -19,19 +19,20 @@ void OnLoadPlugin()
       const char* szMenuBar = "ProcGenAssetMenuBar";
 
   plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
-  plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+  plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
   plProjectActions::MapActions(szMenuBar);
-  plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
-  plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
+  plDocumentActions::MapMenuActions(szMenuBar);
+  plAssetActions::MapMenuActions(szMenuBar);
+  plCommandHistoryActions::MapActions(szMenuBar);
 
-  plEditActions::MapActions("ProcGenAssetMenuBar", "Menu.Edit", false, false);
+  plEditActions::MapActions("ProcGenAssetMenuBar", false, false);
 }
 
 // Tool Bar
 {
   const char* szToolBar = "ProcGenAssetToolBar";
   plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
-  plDocumentActions::MapActions(szToolBar, "", true);
+  plDocumentActions::MapToolbarActions(szToolBar);
   plCommandHistoryActions::MapActions(szToolBar, "");
   plAssetActions::MapToolBarActions(szToolBar, true);
 }
@@ -56,12 +57,12 @@ void OnUnloadPlugin()
   plProcGenActions::UnregisterActions();
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

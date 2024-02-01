@@ -10,17 +10,17 @@ struct plJoltCookingMesh;
 
 class plJoltCollisionMeshAssetDocument : public plSimpleAssetDocument<plJoltCollisionMeshAssetProperties>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetDocument, plSimpleAssetDocument<plJoltCollisionMeshAssetProperties>);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetDocument, plSimpleAssetDocument<plJoltCollisionMeshAssetProperties>);
 
 public:
-  plJoltCollisionMeshAssetDocument(const char* szDocumentPath, bool bConvexMesh);
+  plJoltCollisionMeshAssetDocument(plStringView sDocumentPath, bool bConvexMesh);
 
   static plStatus WriteToStream(plChunkStreamWriter& inout_stream, const plJoltCookingMesh& mesh, const plJoltCollisionMeshAssetProperties* pProp);
 
 protected:
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
 
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   plStatus CreateMeshFromFile(plJoltCookingMesh& outMesh);
   plStatus CreateMeshFromGeom(plGeometry& geom, plJoltCookingMesh& outMesh);
@@ -36,30 +36,28 @@ protected:
 
 class plJoltCollisionMeshAssetDocumentGenerator : public plAssetDocumentGenerator
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetDocumentGenerator, plAssetDocumentGenerator);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshAssetDocumentGenerator, plAssetDocumentGenerator);
 
 public:
   plJoltCollisionMeshAssetDocumentGenerator();
   ~plJoltCollisionMeshAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const override;
-  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
+  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plJoltCollisionMeshAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "JoltCollisionMeshes"; }
-  virtual plStringView GetNameSuffix() const override { return "collision"; }
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
 };
 
 class plJoltConvexCollisionMeshAssetDocumentGenerator : public plAssetDocumentGenerator
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltConvexCollisionMeshAssetDocumentGenerator, plAssetDocumentGenerator);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltConvexCollisionMeshAssetDocumentGenerator, plAssetDocumentGenerator);
 
 public:
   plJoltConvexCollisionMeshAssetDocumentGenerator();
   ~plJoltConvexCollisionMeshAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const override;
-  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
+  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plJoltConvexCollisionMeshAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "JoltCollisionMeshes"; }
-  virtual plStringView GetNameSuffix() const override { return "conv_collision"; }
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
 };

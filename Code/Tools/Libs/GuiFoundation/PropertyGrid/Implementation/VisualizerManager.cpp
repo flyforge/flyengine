@@ -3,14 +3,14 @@
 #include <GuiFoundation/PropertyGrid/VisualizerManager.h>
 #include <ToolsFoundation/Object/DocumentObjectManager.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plVisualizerManager);
+PL_IMPLEMENT_SINGLETON(plVisualizerManager);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, VisualizerManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, VisualizerManager)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plVisualizerManager);
+    PL_DEFAULT_NEW(plVisualizerManager);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -18,12 +18,12 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, VisualizerManager)
     if (plVisualizerManager::GetSingleton())
     {
       auto ptr = plVisualizerManager::GetSingleton();
-      PLASMA_DEFAULT_DELETE(ptr);
+      PL_DEFAULT_DELETE(ptr);
     }
   }
 
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plVisualizerManager::plVisualizerManager()

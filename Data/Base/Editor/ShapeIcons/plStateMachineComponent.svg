@@ -1,3 +1,39 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:9ef2885e47e96603badad56848be6d6b3dbea2a3f01eee47b962ac9b3f3f0093
-size 2710
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Generator: Adobe Illustrator 27.7.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
+<svg version="1.1" id="Layer_1" xmlns:serif="http://www.serif.com/"
+	 xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 512 512"
+	 style="enable-background:new 0 0 512 512;" xml:space="preserve">
+<style type="text/css">
+	.st0{fill-rule:evenodd;clip-rule:evenodd;fill:#C0C0C0;}
+	.st1{fill-rule:evenodd;clip-rule:evenodd;fill:#FFFFFF;}
+	
+		.st2{fill-rule:evenodd;clip-rule:evenodd;fill:#C0C0C0;stroke:#FFFFFF;stroke-width:8;stroke-linecap:round;stroke-miterlimit:1.5;}
+</style>
+<g transform="matrix(1,0,0,1,-9.19361,-16.3745)">
+	<path class="st0" d="M297.8,379l-45.4-40.1V379H145.6v15.9h106.8v36l45.2-36h87.2V379H297.8z"/>
+	<path class="st1" d="M303.9,363L263,326.9c-4.7-4.2-11.4-5.2-17.2-2.6c-5.7,2.6-9.4,8.3-9.4,14.6V363h-90.8c-8.8,0-16,7.2-16,16
+		v15.9c0,8.8,7.2,16,16,16h90.8v20c0,6.1,3.5,11.7,9.1,14.4s12.1,1.9,16.9-1.9l40.8-32.5h81.6c8.8,0,16-7.2,16-16V379
+		c0-8.8-7.2-16-16-16H303.9z M297.8,379l-45.4-40.1V379H145.6v15.9h106.8v36l45.2-36h87.2V379H297.8z"/>
+</g>
+<g transform="matrix(0.507955,0.861384,-0.861384,0.507955,138.448,-58.6665)">
+	<path class="st0" d="M384.8-19l-45.4-40.1V-19l-106.8,0v15.9l106.8,0v36l45.2-36l87.2,0V-19L384.8-19z"/>
+	<path class="st1" d="M390.8-35L350-71.2c-4.7-4.2-11.4-5.2-17.2-2.6c-5.7,2.6-9.4,8.3-9.4,14.6V-35l-90.8,0c-8.8,0-16,7.2-16,16
+		v15.9c0,8.8,7.2,16,16,16l90.8,0v20c0,6.1,3.5,11.7,9.1,14.4s12.1,1.9,16.9-1.9l40.8-32.5l81.6,0c8.8,0,16-7.2,16-16V-19
+		c0-8.8-7.2-16-16-16L390.8-35z M384.8-19l-45.4-40.1V-19l-106.8,0v15.9l106.8,0v36l45.2-36l87.2,0V-19L384.8-19z"/>
+</g>
+<g transform="matrix(-0.545378,0.83819,-0.83819,-0.545378,177.327,57.2441)">
+	<path class="st0" d="M179.2-111.4l-45.4-40.1v40.1l-106.8,0v15.9l106.8,0v36l45.2-36h87.2v-15.9H179.2z"/>
+	<path class="st1" d="M185.3-127.4l-40.8-36.1c-4.7-4.2-11.4-5.2-17.2-2.6c-5.7,2.6-9.4,8.3-9.4,14.6v24.1H27c-8.8,0-16,7.2-16,16
+		v15.9c0,8.8,7.2,16,16,16l90.8,0v20c0,6.1,3.5,11.7,9.1,14.4c5.5,2.7,12.1,1.9,16.9-1.9l40.8-32.5h81.6c8.8,0,16-7.2,16-16v-15.9
+		c0-8.8-7.2-16-16-16H185.3z M179.2-111.4l-45.4-40.1v40.1l-106.8,0v15.9l106.8,0v36l45.2-36h87.2v-15.9H179.2z"/>
+</g>
+<g transform="matrix(0.84006,0,0,0.890965,9.22844,7.92982)">
+	<rect x="193" y="66.8" class="st2" width="201.5" height="118.5"/>
+</g>
+<g transform="matrix(0.81349,0,0,0.92457,49.1733,69.1611)">
+	<rect x="341.4" y="264.5" class="st2" width="201.5" height="118.5"/>
+</g>
+<g transform="matrix(0.825746,0,0,0.859915,-27.8832,70.6225)">
+	<rect x="58.7" y="286.5" class="st2" width="201.5" height="118.5"/>
+</g>
+</svg>

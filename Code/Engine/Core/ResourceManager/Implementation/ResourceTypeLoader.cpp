@@ -16,7 +16,7 @@ struct FileResourceLoadData
 
 plResourceLoadData plResourceLoaderFromFile::OpenDataStream(const plResource* pResource)
 {
-  PLASMA_PROFILE_SCOPE("ReadResourceFile");
+  PL_PROFILE_SCOPE("ReadResourceFile");
 
   plResourceLoadData res;
 
@@ -26,7 +26,7 @@ plResourceLoadData plResourceLoaderFromFile::OpenDataStream(const plResource* pR
 
   res.m_sResourceDescription = File.GetFilePathRelative().GetData();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   plFileStats stat;
   if (plFileSystem::GetFileStats(pResource->GetResourceID(), stat).Succeeded())
   {
@@ -35,7 +35,7 @@ plResourceLoadData plResourceLoaderFromFile::OpenDataStream(const plResource* pR
 
 #endif
 
-  FileResourceLoadData* pData = PLASMA_DEFAULT_NEW(FileResourceLoadData);
+  FileResourceLoadData* pData = PL_DEFAULT_NEW(FileResourceLoadData);
 
   const plUInt64 uiFileSize = File.GetFileSize();
 
@@ -60,11 +60,11 @@ plResourceLoadData plResourceLoaderFromFile::OpenDataStream(const plResource* pR
   return res;
 }
 
-void plResourceLoaderFromFile::CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData)
+void plResourceLoaderFromFile::CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData)
 {
-  FileResourceLoadData* pData = static_cast<FileResourceLoadData*>(LoaderData.m_pCustomLoaderData);
+  FileResourceLoadData* pData = static_cast<FileResourceLoadData*>(loaderData.m_pCustomLoaderData);
 
-  PLASMA_DEFAULT_DELETE(pData);
+  PL_DEFAULT_DELETE(pData);
 }
 
 bool plResourceLoaderFromFile::IsResourceOutdated(const plResource* pResource) const
@@ -73,7 +73,7 @@ bool plResourceLoaderFromFile::IsResourceOutdated(const plResource* pResource) c
   if (plFileSystem::ResolvePath(pResource->GetResourceID(), nullptr, nullptr).Failed())
     return false;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
   if (pResource->GetLoadedFileModificationTime().IsValid())
   {
@@ -106,7 +106,7 @@ plResourceLoadData plResourceLoaderFromMemory::OpenDataStream(const plResource* 
   return res;
 }
 
-void plResourceLoaderFromMemory::CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData)
+void plResourceLoaderFromMemory::CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData)
 {
   m_Reader.SetStorage(nullptr);
 }
@@ -125,5 +125,3 @@ bool plResourceLoaderFromMemory::IsResourceOutdated(const plResource* pResource)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_ResourceTypeLoader);

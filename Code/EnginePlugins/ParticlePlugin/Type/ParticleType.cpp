@@ -3,11 +3,11 @@
 #include <ParticlePlugin/Type/ParticleType.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleType, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleType, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleType* plParticleTypeFactory::CreateType(plParticleSystemInstance* pOwner) const
@@ -65,7 +65,7 @@ plUInt32 plParticleType::ComputeSortingKey(plParticleTypeRenderMode::Enum mode, 
       key = plParticleTypeSortingKey::Distortion;
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   key <<= 32 - 3; // require 3 bits for the values above
@@ -74,4 +74,4 @@ plUInt32 plParticleType::ComputeSortingKey(plParticleTypeRenderMode::Enum mode, 
   return key;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_ParticleType);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_ParticleType);

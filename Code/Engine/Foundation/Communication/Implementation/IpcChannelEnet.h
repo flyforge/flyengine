@@ -8,7 +8,7 @@
 class plRemoteInterface;
 class plRemoteMessage;
 
-class PLASMA_FOUNDATION_DLL plIpcChannelEnet : public plIpcChannel
+class PL_FOUNDATION_DLL plIpcChannelEnet : public plIpcChannel
 {
 public:
   plIpcChannelEnet(plStringView sAddress, Mode::Enum mode);

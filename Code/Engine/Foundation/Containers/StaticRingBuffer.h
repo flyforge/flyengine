@@ -9,7 +9,7 @@ template <typename T, plUInt32 Capacity>
 class plStaticRingBuffer
 {
 public:
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Capacity > 1, "ORLY?");
+  PL_CHECK_AT_COMPILETIME_MSG(Capacity > 1, "ORLY?");
 
   /// \brief Constructs an empty ring-buffer.
   plStaticRingBuffer(); // [tested]
@@ -25,9 +25,7 @@ public:
 
   /// \brief Compares two ring-buffers for equality.
   bool operator==(const plStaticRingBuffer<T, Capacity>& rhs) const; // [tested]
-
-  /// \brief Compares two ring-buffers for inequality.
-  bool operator!=(const plStaticRingBuffer<T, Capacity>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plStaticRingBuffer<T, Capacity>&);
 
   /// \brief Appends an element at the end of the ring-buffer. Asserts that CanAppend() is true.
   void PushBack(const T& element); // [tested]
@@ -72,7 +70,7 @@ private:
   T* GetStaticArray();
 
   /// \brief The fixed size array.
-  struct alignas(PLASMA_ALIGNMENT_OF(T))
+  struct alignas(PL_ALIGNMENT_OF(T))
   {
     plUInt8 m_Data[Capacity * sizeof(T)];
   };

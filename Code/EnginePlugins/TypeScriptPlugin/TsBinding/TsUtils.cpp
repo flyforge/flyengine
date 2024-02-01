@@ -13,7 +13,7 @@ plResult plTypeScriptBinding::Init_Utils()
   m_Duk.RegisterGlobalFunction("__CPP_Utils_FindPrefabRootNode", __CPP_Utils_FindPrefabRootNode, 1);
   m_Duk.RegisterGlobalFunction("__CPP_Utils_FindPrefabRootScript", __CPP_Utils_FindPrefabRootScript, 2);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static int __CPP_Utils_StringToHash(duk_context* pDuk)
@@ -54,7 +54,7 @@ static int __CPP_Utils_FindPrefabRootNode(duk_context* pDuk)
   duk.PushNull();
 found:
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Utils_FindPrefabRootScript(duk_context* pDuk)
@@ -92,5 +92,5 @@ static int __CPP_Utils_FindPrefabRootScript(duk_context* pDuk)
   duk.PushNull();
 found:
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }

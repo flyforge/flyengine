@@ -4,14 +4,14 @@
 #include <ToolsFoundation/Reflection/PhantomProperty.h>
 #include <ToolsFoundation/Reflection/PhantomRtti.h>
 
-plPhantomRTTI::plPhantomRTTI(const char* szName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
-  plBitflags<plTypeFlags> flags, const char* szPluginName)
+plPhantomRTTI::plPhantomRTTI(plStringView sName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
+  plBitflags<plTypeFlags> flags, plStringView sPluginName)
   : plRTTI(nullptr, pParentType, uiTypeSize, uiTypeVersion, uiVariantType, flags | plTypeFlags::Phantom, nullptr, plArrayPtr<const plAbstractProperty*>(),
       plArrayPtr<const plAbstractFunctionProperty*>(), plArrayPtr<const plPropertyAttribute*>(), plArrayPtr<plAbstractMessageHandler*>(),
       plArrayPtr<plMessageSenderInfo>(), nullptr)
 {
-  m_sTypeNameStorage = szName;
-  m_sPluginNameStorage = szPluginName;
+  m_sTypeNameStorage = sName;
+  m_sPluginNameStorage = sPluginName;
 
   m_sTypeName = m_sTypeNameStorage.GetData();
   m_sPluginName = m_sPluginNameStorage.GetData();
@@ -26,16 +26,16 @@ plPhantomRTTI::~plPhantomRTTI()
 
   for (auto pProp : m_PropertiesStorage)
   {
-    PLASMA_DEFAULT_DELETE(pProp);
+    PL_DEFAULT_DELETE(pProp);
   }
   for (auto pFunc : m_FunctionsStorage)
   {
-    PLASMA_DEFAULT_DELETE(pFunc);
+    PL_DEFAULT_DELETE(pFunc);
   }
   for (auto pAttrib : m_AttributesStorage)
   {
     auto pAttribNonConst = const_cast<plPropertyAttribute*>(pAttrib);
-    PLASMA_DEFAULT_DELETE(pAttribNonConst);
+    PL_DEFAULT_DELETE(pAttribNonConst);
   }
 }
 
@@ -43,7 +43,7 @@ void plPhantomRTTI::SetProperties(plDynamicArray<plReflectedPropertyDescriptor>&
 {
   for (auto pProp : m_PropertiesStorage)
   {
-    PLASMA_DEFAULT_DELETE(pProp);
+    PL_DEFAULT_DELETE(pProp);
   }
   m_PropertiesStorage.Clear();
 
@@ -56,27 +56,27 @@ void plPhantomRTTI::SetProperties(plDynamicArray<plReflectedPropertyDescriptor>&
     {
       case plPropertyCategory::Constant:
       {
-        m_PropertiesStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomConstantProperty, &properties[i]));
+        m_PropertiesStorage.PushBack(PL_DEFAULT_NEW(plPhantomConstantProperty, &properties[i]));
       }
       break;
       case plPropertyCategory::Member:
       {
-        m_PropertiesStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomMemberProperty, &properties[i]));
+        m_PropertiesStorage.PushBack(PL_DEFAULT_NEW(plPhantomMemberProperty, &properties[i]));
       }
       break;
       case plPropertyCategory::Array:
       {
-        m_PropertiesStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomArrayProperty, &properties[i]));
+        m_PropertiesStorage.PushBack(PL_DEFAULT_NEW(plPhantomArrayProperty, &properties[i]));
       }
       break;
       case plPropertyCategory::Set:
       {
-        m_PropertiesStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomSetProperty, &properties[i]));
+        m_PropertiesStorage.PushBack(PL_DEFAULT_NEW(plPhantomSetProperty, &properties[i]));
       }
       break;
       case plPropertyCategory::Map:
       {
-        m_PropertiesStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomMapProperty, &properties[i]));
+        m_PropertiesStorage.PushBack(PL_DEFAULT_NEW(plPhantomMapProperty, &properties[i]));
       }
       break;
       case plPropertyCategory::Function:
@@ -92,7 +92,7 @@ void plPhantomRTTI::SetFunctions(plDynamicArray<plReflectedFunctionDescriptor>& 
 {
   for (auto pProp : m_FunctionsStorage)
   {
-    PLASMA_DEFAULT_DELETE(pProp);
+    PL_DEFAULT_DELETE(pProp);
   }
   m_FunctionsStorage.Clear();
 
@@ -101,7 +101,7 @@ void plPhantomRTTI::SetFunctions(plDynamicArray<plReflectedFunctionDescriptor>& 
 
   for (plUInt32 i = 0; i < iCount; i++)
   {
-    m_FunctionsStorage.PushBack(PLASMA_DEFAULT_NEW(plPhantomFunctionProperty, &functions[i]));
+    m_FunctionsStorage.PushBack(PL_DEFAULT_NEW(plPhantomFunctionProperty, &functions[i]));
   }
 
   m_Functions = m_FunctionsStorage.GetArrayPtr();
@@ -112,7 +112,7 @@ void plPhantomRTTI::SetAttributes(plDynamicArray<const plPropertyAttribute*>& at
   for (auto pAttrib : m_AttributesStorage)
   {
     auto pAttribNonConst = const_cast<plPropertyAttribute*>(pAttrib);
-    PLASMA_DEFAULT_DELETE(pAttribNonConst);
+    PL_DEFAULT_DELETE(pAttribNonConst);
   }
   m_AttributesStorage.Clear();
   m_AttributesStorage = attributes;

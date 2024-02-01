@@ -7,11 +7,11 @@
 class plOrbitCameraContext;
 class plSelectionContext;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtOrbitCamViewWidget : public plQtEngineViewWidget
+class PL_EDITORFRAMEWORK_DLL plQtOrbitCamViewWidget : public plQtEngineViewWidget
 {
   Q_OBJECT
 public:
-  plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig, bool bPicking = false);
+  plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig, bool bPicking = false);
   ~plQtOrbitCamViewWidget();
 
   void ConfigureFixed(const plVec3& vCenterPos, const plVec3& vHalfBoxSize, const plVec3& vCamPosition);
@@ -19,9 +19,7 @@ public:
 
   void SetOrbitVolume(const plVec3& vCenterPos, const plVec3& vHalfBoxSize);
 
-
   plOrbitCameraContext* GetOrbitCamera();
-
 
   virtual void SyncToEngine() override;
 

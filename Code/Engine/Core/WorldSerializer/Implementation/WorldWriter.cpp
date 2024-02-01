@@ -20,25 +20,25 @@ void plWorldWriter::Clear()
   }
 }
 
-void plWorldWriter::WriteWorld(plStreamWriter& stream, plWorld& world, const plTagSet* pExclude)
+void plWorldWriter::WriteWorld(plStreamWriter& inout_stream, plWorld& ref_world, const plTagSet* pExclude)
 {
   Clear();
 
-  m_pStream = &stream;
+  m_pStream = &inout_stream;
   m_pExclude = pExclude;
 
-  PLASMA_LOCK(world.GetReadMarker());
+  PL_LOCK(ref_world.GetReadMarker());
 
-  world.Traverse(plMakeDelegate(&plWorldWriter::ObjectTraverser, this), plWorld::TraversalMethod::DepthFirst);
+  ref_world.Traverse(plMakeDelegate(&plWorldWriter::ObjectTraverser, this), plWorld::TraversalMethod::DepthFirst);
 
   WriteToStream().IgnoreResult();
 }
 
-void plWorldWriter::WriteObjects(plStreamWriter& stream, const plDeque<const plGameObject*>& rootObjects)
+void plWorldWriter::WriteObjects(plStreamWriter& inout_stream, const plDeque<const plGameObject*>& rootObjects)
 {
   Clear();
 
-  m_pStream = &stream;
+  m_pStream = &inout_stream;
 
   for (const plGameObject* pObject : rootObjects)
   {
@@ -49,11 +49,11 @@ void plWorldWriter::WriteObjects(plStreamWriter& stream, const plDeque<const plG
   WriteToStream().IgnoreResult();
 }
 
-void plWorldWriter::WriteObjects(plStreamWriter& stream, plArrayPtr<const plGameObject*> rootObjects)
+void plWorldWriter::WriteObjects(plStreamWriter& inout_stream, plArrayPtr<const plGameObject*> rootObjects)
 {
   Clear();
 
-  m_pStream = &stream;
+  m_pStream = &inout_stream;
 
   for (const plGameObject* pObject : rootObjects)
   {
@@ -119,10 +119,10 @@ plResult plWorldWriter::WriteToStream()
     WriteComponentSerializationData(m_AllComponents[it.Value()].m_Components);
   }
 
-  PLASMA_SUCCEED_OR_RETURN(stringDedupWriteContext.End());
+  PL_SUCCEED_OR_RETURN(stringDedupWriteContext.End());
   m_pStream = &stringDedupWriteContext.GetOriginalStream();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -146,7 +146,7 @@ void plWorldWriter::AssignComponentHandleIndices(const plMap<plString, const plR
 {
   plUInt16 uiTypeIndex = 0;
 
-  PLASMA_ASSERT_DEV(m_AllComponents.GetCount() <= plMath::MaxValue<plUInt16>(), "Too many types for world writer");
+  PL_ASSERT_DEV(m_AllComponents.GetCount() <= plMath::MaxValue<plUInt16>(), "Too many types for world writer");
 
   // assign the component handle indices in the order in which the components are written
   for (auto it = sortedTypes.GetIterator(); it.IsValid(); ++it)
@@ -213,7 +213,7 @@ void plWorldWriter::WriteGameObjectHandle(const plGameObjectHandle& hObject)
 
   plUInt32 uiIndex = 0;
 
-  PLASMA_ASSERT_DEV(it.IsValid(), "Referenced object does not exist in the scene. This can happen, if it was optimized away, because it had no name, no children and no essential components.");
+  PL_ASSERT_DEV(it.IsValid(), "Referenced object does not exist in the scene. This can happen, if it was optimized away, because it had no name, no children and no essential components.");
 
   if (it.IsValid())
     uiIndex = it.Value();
@@ -232,7 +232,7 @@ void plWorldWriter::WriteComponentHandle(const plComponentHandle& hComponent)
     if (auto* components = m_AllComponents.GetValue(pComponent->GetDynamicRTTI()))
     {
       auto it = components->m_HandleToIndex.Find(hComponent);
-      PLASMA_ASSERT_DEBUG(it.IsValid(), "Handle should always be in the written map at this point");
+      PL_ASSERT_DEBUG(it.IsValid(), "Handle should always be in the written map at this point");
 
       if (it.IsValid())
       {
@@ -250,8 +250,7 @@ plVisitorExecution::Enum plWorldWriter::ObjectTraverser(plGameObject* pObject)
 {
   if (m_pExclude && pObject->GetTags().IsAnySet(*m_pExclude))
     return plVisitorExecution::Skip;
-
-  if(pObject->WasCreatedByPrefab())
+  if (pObject->WasCreatedByPrefab())
     return plVisitorExecution::Skip;
 
   if (pObject->GetParent())
@@ -329,7 +328,7 @@ void plWorldWriter::WriteComponentCreationData(const plDeque<const plComponent*>
         plUInt8 userFlags = 0;
         for (plUInt8 i = 0; i < 8; ++i)
         {
-          userFlags |= pComponent->GetUserFlag(i) ? PLASMA_BIT(i) : 0;
+          userFlags |= pComponent->GetUserFlag(i) ? PL_BIT(i) : 0;
         }
 
         s << userFlags;
@@ -344,7 +343,7 @@ void plWorldWriter::WriteComponentCreationData(const plDeque<const plComponent*>
     plStreamWriter& s = *m_pStream;
     s << storage.GetStorageSize32();
 
-    PLASMA_ASSERT_ALWAYS(storage.GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "Slight file format change and version increase needed to support > 4GB worlds.");
+    PL_ASSERT_ALWAYS(storage.GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "Slight file format change and version increase needed to support > 4GB worlds.");
 
     storage.CopyToStream(s).IgnoreResult();
   }
@@ -371,10 +370,10 @@ void plWorldWriter::WriteComponentSerializationData(const plDeque<const plCompon
     plStreamWriter& s = *m_pStream;
     s << storage.GetStorageSize32();
 
-    PLASMA_ASSERT_ALWAYS(storage.GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "Slight file format change and version increase needed to support > 4GB worlds.");
+    PL_ASSERT_ALWAYS(storage.GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "Slight file format change and version increase needed to support > 4GB worlds.");
 
     storage.CopyToStream(s).IgnoreResult();
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_WorldSerializer_Implementation_WorldWriter);
+

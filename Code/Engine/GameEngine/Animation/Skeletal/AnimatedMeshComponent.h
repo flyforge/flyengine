@@ -7,7 +7,7 @@
 
 using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 
-class PLASMA_GAMEENGINE_DLL plAnimatedMeshComponentManager : public plComponentManager<class plAnimatedMeshComponent, plBlockStorageType::Compact>
+class PL_GAMEENGINE_DLL plAnimatedMeshComponentManager : public plComponentManager<class plAnimatedMeshComponent, plBlockStorageType::FreeList>
 {
 public:
   plAnimatedMeshComponentManager(plWorld* pWorld);
@@ -24,9 +24,19 @@ private:
   plDeque<plComponentHandle> m_ComponentsToUpdate;
 };
 
-class PLASMA_GAMEENGINE_DLL plAnimatedMeshComponent : public plMeshComponentBase
+/// \brief Instantiates a mesh that can be animated through skeletal animation.
+///
+/// The referenced mesh has to contain skinning information.
+///
+/// This component only creates an animated mesh for rendering. It does not animate the mesh in any way.
+/// The component handles messages of type plMsgAnimationPoseUpdated. Using this message other systems can set a new pose
+/// for the animated mesh.
+/// 
+/// For example the plSkeletonPoseComponent, plSimpleAnimationComponent and plAnimationControllerComponent do this
+/// to change the pose of the animated mesh.
+class PL_GAMEENGINE_DLL plAnimatedMeshComponent : public plMeshComponentBase
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plAnimatedMeshComponent, plMeshComponentBase, plAnimatedMeshComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plAnimatedMeshComponent, plMeshComponentBase, plAnimatedMeshComponentManager);
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -64,7 +74,7 @@ protected:
 
   void MapModelSpacePoseToSkinningSpace(const plHashTable<plHashedString, plMeshResourceDescriptor::BoneData>& bones, const plSkeleton& skeleton, plArrayPtr<const plMat4> modelSpaceTransforms, plBoundingBox* bounds);
 
-  plTransform m_RootTransform = plTransform::IdentityTransform();
+  plTransform m_RootTransform = plTransform::MakeIdentity();
   plBoundingBox m_MaxBounds;
   plSkinningState m_SkinningState;
   plSkeletonResourceHandle m_hDefaultSkeleton;
@@ -84,7 +94,7 @@ struct plRootMotionMode
     Default = Ignore
   };
 
-  PLASMA_GAMEENGINE_DLL static void Apply(plRootMotionMode::Enum mode, plGameObject* pObject, const plVec3& vTranslation, plAngle rotationX, plAngle rotationY, plAngle rotationZ);
+  PL_GAMEENGINE_DLL static void Apply(plRootMotionMode::Enum mode, plGameObject* pObject, const plVec3& vTranslation, plAngle rotationX, plAngle rotationY, plAngle rotationZ);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plRootMotionMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plRootMotionMode);

@@ -9,47 +9,47 @@
 
 namespace plModelImporter2
 {
-  static const void MakeValidMaterialName(plString& target, const char* source, plUInt32 matIdx, plSet<plString>& knownMaterialNames)
+  static const void MakeValidMaterialName(plString& ref_sTarget, const char* szSource, plUInt32 uiMatIdx, plSet<plString>& ref_knownMaterialNames)
   {
     plStringBuilder tmp;
-    plPathUtils::MakeValidFilename(source, '_', tmp);
+    plPathUtils::MakeValidFilename(szSource, '_', tmp);
 
-    if (knownMaterialNames.Contains(tmp))
+    if (ref_knownMaterialNames.Contains(tmp))
     {
       if (!tmp.IsEmpty())
         tmp.Prepend("-");
 
-      tmp.PrependFormat("Mat-{}", matIdx);
+      tmp.PrependFormat("Mat-{}", uiMatIdx);
     }
 
-    target = tmp;
-    knownMaterialNames.Insert(target);
+    ref_sTarget = tmp;
+    ref_knownMaterialNames.Insert(ref_sTarget);
   }
 
   template <typename assimpType>
-  static void TryReadAssimpProperty(plMap<PropertySemantic, plVariant>& inout_Properties, PropertySemantic targetSemantic, const aiMaterial& assimpMaterial, const char* aiKey, plUInt32 aiType, plUInt32 aiIdx, bool invert = false)
+  static void TryReadAssimpProperty(plMap<PropertySemantic, plVariant>& inout_properties, PropertySemantic targetSemantic, const aiMaterial& assimpMaterial, const char* szKey, plUInt32 uiType, plUInt32 uiIdx, bool bInvert = false)
   {
     assimpType value;
-    if (assimpMaterial.Get(aiKey, aiType, aiIdx, value) == AI_SUCCESS)
+    if (assimpMaterial.Get(szKey, uiType, uiIdx, value) == AI_SUCCESS)
     {
-      inout_Properties[targetSemantic] = ConvertAssimpType(value, invert);
+      inout_properties[targetSemantic] = ConvertAssimpType(value, bInvert);
     }
   }
 
-  void TryReadAssimpTextures(plMap<TextureSemantic, plString>& out_Textures, aiTextureType aiType, TextureSemantic targetSemantic, const aiMaterial& assimpMaterial)
+  void TryReadAssimpTextures(plMap<TextureSemantic, plString>& out_textures, aiTextureType type, TextureSemantic targetSemantic, const aiMaterial& assimpMaterial)
   {
     // there could be multiple textures of this type, but we can only handle one
     aiString path;
-    if (assimpMaterial.GetTexture(aiType, 0, &path) == AI_SUCCESS)
+    if (assimpMaterial.GetTexture(type, 0, &path) == AI_SUCCESS)
     {
-      out_Textures[targetSemantic] = path.C_Str();
+      out_textures[targetSemantic] = path.C_Str();
     }
   }
 
   plResult ImporterAssimp::ImportMaterials()
   {
     if (!m_pScene->HasMaterials())
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     plSet<plString> knownMaterialNames;
     knownMaterialNames.Insert("");
@@ -90,6 +90,6 @@ namespace plModelImporter2
       // TryReadAssimpTextures(tr, aiTextureType_REFLECTION, TextureSemantic::ReflectionMap, *pMat); // From Assimp documentation "Contains the color of a perfect mirror reflection."
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 } // namespace plModelImporter2

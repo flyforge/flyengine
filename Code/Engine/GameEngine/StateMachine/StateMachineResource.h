@@ -5,10 +5,10 @@
 
 using plStateMachineResourceHandle = plTypedResourceHandle<class plStateMachineResource>;
 
-class PLASMA_GAMEENGINE_DLL plStateMachineResource : public plResource
+class PL_GAMEENGINE_DLL plStateMachineResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plStateMachineResource);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plStateMachineResource);
 
 public:
   plStateMachineResource();
@@ -16,7 +16,7 @@ public:
 
   const plSharedPtr<const plStateMachineDescription>& GetDescription() const { return m_pDescription; }
 
-  plUniquePtr<plStateMachineInstance> CreateInstance(plReflectedClass& owner);
+  plUniquePtr<plStateMachineInstance> CreateInstance(plReflectedClass& ref_owner);
 
 private:
   virtual plResourceLoadDesc UnloadData(Unload WhatToUnload) override;

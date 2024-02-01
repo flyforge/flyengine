@@ -18,7 +18,7 @@ void* plLuaWrapper::GetFunctionLightUserData() const
 
 bool plLuaWrapper::PrepareFunctionCall(const char* szFunctionName)
 {
-  PLASMA_ASSERT_DEV(m_States.m_iLuaReturnValues == 0,
+  PL_ASSERT_DEV(m_States.m_iLuaReturnValues == 0,
     "plLuaWrapper::PrepareFunctionCall: You didn't discard the return-values of the previous script call. {0} Return-values "
     "were expected.",
     m_States.m_iLuaReturnValues);
@@ -63,15 +63,15 @@ plResult plLuaWrapper::CallPreparedFunction(plUInt32 uiExpectedReturnValues, plL
     plLog::Error(pLogInterface, "Script-function Call: {0}", lua_tostring(m_pState, -1));
 
     lua_pop(m_pState, 1); /* pop error message from the stack */
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // before resetting the state, make sure the returned state has no stuff left
-  PLASMA_ASSERT_DEV((m_States.m_iLuaReturnValues == 0) && (m_States.m_iOpenTables == 0),
+  PL_ASSERT_DEV((m_States.m_iLuaReturnValues == 0) && (m_States.m_iOpenTables == 0),
     "After plLuaWrapper::CallPreparedFunction: Return values: {0}, Open Tables: {1}", m_States.m_iLuaReturnValues, m_States.m_iOpenTables);
 
   m_States = StackedStates;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plLuaWrapper::DiscardReturnValues()
@@ -132,5 +132,3 @@ const char* plLuaWrapper::GetStringReturnValue(plUInt32 uiReturnValue) const
 #endif // BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Scripting_LuaWrapper_CFunctions);

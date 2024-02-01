@@ -3,8 +3,8 @@
 #include <Foundation/Communication/Message.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMessage, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMessage, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 // clang-format on
 
@@ -40,4 +40,4 @@ plUniquePtr<plMessage> plMessage::ReplicatePackedMessage(plStreamReader& inout_s
   return pMsg;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_Message);
+PL_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_Message);

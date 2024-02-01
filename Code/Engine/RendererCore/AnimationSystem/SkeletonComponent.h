@@ -9,9 +9,15 @@ struct plMsgQueryAnimationSkeleton;
 
 using plVisualizeSkeletonComponentManager = plComponentManagerSimple<class plSkeletonComponent, plComponentUpdateType::Always, plBlockStorageType::Compact>;
 
-class PLASMA_RENDERERCORE_DLL plSkeletonComponent : public plRenderComponent
+/// \brief Uses debug rendering to visualize various aspects of an animation skeleton.
+///
+/// This is meant for visually inspecting skeletons. It is used by the main skeleton editor,
+/// but can also be added to a scene or added to an animated mesh on-demand.
+///
+/// There are different options what to visualize and also to highlight certain bones.
+class PL_RENDERERCORE_DLL plSkeletonComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSkeletonComponent, plRenderComponent, plVisualizeSkeletonComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSkeletonComponent, plRenderComponent, plVisualizeSkeletonComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -43,19 +49,23 @@ public:
   void SetSkeleton(const plSkeletonResourceHandle& hResource);
   const plSkeletonResourceHandle& GetSkeleton() const { return m_hSkeleton; }
 
+  /// \brief Sets a semicolon-separated list of bone names that should be highlighted.
+  ///
+  /// Set it to "*" to highlight all bones.
+  /// Set it to empty to not highlight any bone.
+  /// Set it to "BoneA;BoneB" to highlight the bones with name "BoneA" and "BoneB".
   void SetBonesToHighlight(const char* szFilter); // [ property ]
   const char* GetBonesToHighlight() const;        // [ property ]
 
-  void VisualizeSkeletonDefaultState();
-
-  bool m_bVisualizeBones = true;
-  bool m_bVisualizeColliders = false;
-  bool m_bVisualizeJoints = false;
-  bool m_bVisualizeSwingLimits = false;
-  bool m_bVisualizeTwistLimits = false;
+  bool m_bVisualizeBones = true;        // [ property ]
+  bool m_bVisualizeColliders = false;   // [ property ]
+  bool m_bVisualizeJoints = false;      // [ property ]
+  bool m_bVisualizeSwingLimits = false; // [ property ]
+  bool m_bVisualizeTwistLimits = false; // [ property ]
 
 protected:
   void Update();
+  void VisualizeSkeletonDefaultState();
   void OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& msg); // [ msg handler ]
 
   void BuildSkeletonVisualization(plMsgAnimationPoseUpdated& msg);
@@ -66,7 +76,7 @@ protected:
   plDebugRenderer::Line& AddLine(const plVec3& vStart, const plVec3& vEnd, const plColor& color);
 
   plSkeletonResourceHandle m_hSkeleton;
-  plTransform m_RootTransform = plTransform::IdentityTransform();
+  plTransform m_RootTransform = plTransform::MakeIdentity();
   plUInt32 m_uiSkeletonChangeCounter = 0;
   plString m_sBonesToHighlight;
 

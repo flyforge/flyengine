@@ -49,7 +49,7 @@ namespace plRmlUiConversionUtils
 
     if (targetType != plVariant::Type::Invalid && result.IsValid())
     {
-      plResult conversionResult = PLASMA_SUCCESS;
+      plResult conversionResult = PL_SUCCESS;
       result = result.ConvertTo(targetType, &conversionResult);
 
       if (conversionResult.Failed())
@@ -66,7 +66,7 @@ namespace plRmlUiConversionUtils
     switch (value.GetType())
     {
       case plVariant::Type::Invalid:
-        return Rml::Variant("<Invalid>");
+        return Rml::Variant("&lt;Invalid&gt;");
 
       case plVariant::Type::Bool:
         return Rml::Variant(value.Get<bool>());
@@ -96,7 +96,7 @@ namespace plRmlUiConversionUtils
         return Rml::Variant(value.Get<plString>());
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         return Rml::Variant();
     }
   }

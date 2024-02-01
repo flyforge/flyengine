@@ -8,35 +8,35 @@ You can classify bytes in a UTF-8 stream as follows:
 this sequence (110... means two bytes, 1110... means three bytes, etc).
 */
 
-PLASMA_ALWAYS_INLINE bool plUnicodeUtils::IsUtf8StartByte(char iByte)
+PL_ALWAYS_INLINE bool plUnicodeUtils::IsUtf8StartByte(char iByte)
 {
   // valid utf8 start bytes are 0x0-------, 0x110-----, 0x1110----, 0x11110---, etc
   return ((iByte & 0x80) == 0) || ((iByte & 0xE0) == 0xC0) || ((iByte & 0xF0) == 0xE0) || ((iByte & 0xF8) == 0xF0) || ((iByte & 0xFC) == 0xF8);
 }
 
-PLASMA_ALWAYS_INLINE bool plUnicodeUtils::IsUtf8ContinuationByte(char iByte)
+PL_ALWAYS_INLINE bool plUnicodeUtils::IsUtf8ContinuationByte(char iByte)
 {
   // check whether the two upper bits are set to '10'
   return (iByte & 0xC0) == 0x80;
 }
 
-PLASMA_ALWAYS_INLINE bool plUnicodeUtils::IsASCII(plUInt32 uiChar)
+PL_ALWAYS_INLINE bool plUnicodeUtils::IsASCII(plUInt32 uiChar)
 {
   return (uiChar <= 127);
 }
 
 inline plUInt32 plUnicodeUtils::GetUtf8SequenceLength(char iFirstByte)
 {
-  const plUInt32 uiBit7 = iFirstByte & PLASMA_BIT(7);
-  const plUInt32 uiBit6 = iFirstByte & PLASMA_BIT(6);
-  const plUInt32 uiBit5 = iFirstByte & PLASMA_BIT(5);
-  const plUInt32 uiBit4 = iFirstByte & PLASMA_BIT(4);
+  const plUInt32 uiBit7 = iFirstByte & PL_BIT(7);
+  const plUInt32 uiBit6 = iFirstByte & PL_BIT(6);
+  const plUInt32 uiBit5 = iFirstByte & PL_BIT(5);
+  const plUInt32 uiBit4 = iFirstByte & PL_BIT(4);
 
   if (uiBit7 == 0) // ASCII character '0xxxxxxx'
     return 1;
 
-  PLASMA_IGNORE_UNUSED(uiBit6);
-  PLASMA_ASSERT_DEV(uiBit6 != 0, "Invalid Leading UTF-8 Byte.");
+  PL_IGNORE_UNUSED(uiBit6);
+  PL_ASSERT_DEV(uiBit6 != 0, "Invalid Leading UTF-8 Byte.");
 
   if (uiBit5 == 0) // '110xxxxx'
     return 2;
@@ -76,7 +76,7 @@ plUInt32 plUnicodeUtils::DecodeUtf16ToUtf32(UInt16Iterator& ref_szUtf16Iterator)
 template <typename WCharIterator>
 plUInt32 plUnicodeUtils::DecodeWCharToUtf32(WCharIterator& ref_szWCharIterator)
 {
-  if (sizeof(wchar_t) == 2)
+  if constexpr (sizeof(wchar_t) == 2)
   {
     return DecodeUtf16ToUtf32(ref_szWCharIterator);
   }
@@ -110,7 +110,7 @@ void plUnicodeUtils::EncodeUtf32ToUtf16(plUInt32 uiUtf32, UInt16Iterator& ref_sz
 template <typename WCharIterator>
 void plUnicodeUtils::EncodeUtf32ToWChar(plUInt32 uiUtf32, WCharIterator& ref_szWCharOutput)
 {
-  if (sizeof(wchar_t) == 2)
+  if constexpr (sizeof(wchar_t) == 2)
   {
     EncodeUtf32ToUtf16(uiUtf32, ref_szWCharOutput);
   }
@@ -143,7 +143,7 @@ inline plUInt32 plUnicodeUtils::GetSizeForCharacterInUtf8(plUInt32 uiCharacter)
   // however some committee agreed that never more than 4 bytes are used (no need for more than 21 Bits)
   // this implementation assumes in several places, that the UTF-8 encoding never uses more than 4 bytes
 
-  PLASMA_ASSERT_DEV(uiCharacter <= 0x0010ffff, "Invalid Unicode Codepoint");
+  PL_ASSERT_DEV(uiCharacter <= 0x0010ffff, "Invalid Unicode Codepoint");
   return 4;
 }
 
@@ -157,7 +157,7 @@ inline bool plUnicodeUtils::IsValidUtf8(const char* szString, const char* szStri
 
 inline bool plUnicodeUtils::SkipUtf8Bom(const char*& ref_szUtf8)
 {
-  PLASMA_ASSERT_DEBUG(ref_szUtf8 != nullptr, "This function expects non nullptr pointers");
+  PL_ASSERT_DEBUG(ref_szUtf8 != nullptr, "This function expects non nullptr pointers");
 
   if (utf8::starts_with_bom(ref_szUtf8, ref_szUtf8 + 4))
   {
@@ -170,7 +170,7 @@ inline bool plUnicodeUtils::SkipUtf8Bom(const char*& ref_szUtf8)
 
 inline bool plUnicodeUtils::SkipUtf16BomLE(const plUInt16*& ref_pUtf16)
 {
-  PLASMA_ASSERT_DEBUG(ref_pUtf16 != nullptr, "This function expects non nullptr pointers");
+  PL_ASSERT_DEBUG(ref_pUtf16 != nullptr, "This function expects non nullptr pointers");
 
   if (*ref_pUtf16 == plUnicodeUtils::Utf16BomLE)
   {
@@ -183,7 +183,7 @@ inline bool plUnicodeUtils::SkipUtf16BomLE(const plUInt16*& ref_pUtf16)
 
 inline bool plUnicodeUtils::SkipUtf16BomBE(const plUInt16*& ref_pUtf16)
 {
-  PLASMA_ASSERT_DEBUG(ref_pUtf16 != nullptr, "This function expects non nullptr pointers");
+  PL_ASSERT_DEBUG(ref_pUtf16 != nullptr, "This function expects non nullptr pointers");
 
   if (*ref_pUtf16 == plUnicodeUtils::Utf16BomBE)
   {
@@ -194,13 +194,14 @@ inline bool plUnicodeUtils::SkipUtf16BomBE(const plUInt16*& ref_pUtf16)
   return false;
 }
 
-inline void plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, plUInt32 uiNumCharacters)
+inline plResult plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, plUInt32 uiNumCharacters)
 {
-  PLASMA_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Bad programmer!");
+  PL_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Invalid string pointer to advance!");
 
   while (uiNumCharacters > 0)
   {
-    PLASMA_ASSERT_DEV(*ref_szUtf8 != '\0', "The given string must not point to the zero terminator.");
+    if (*ref_szUtf8 == '\0')
+      return PL_FAILURE;
 
     do
     {
@@ -209,15 +210,18 @@ inline void plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, plUInt32 uiN
 
     --uiNumCharacters;
   }
+
+  return PL_SUCCESS;
 }
 
-inline void plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, const char* szUtf8End, plUInt32 uiNumCharacters)
+inline plResult plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, const char* szUtf8End, plUInt32 uiNumCharacters)
 {
-  PLASMA_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Bad programmer!");
+  PL_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Invalid string pointer to advance!");
 
-  while (uiNumCharacters > 0 && ref_szUtf8 < szUtf8End)
+  while (uiNumCharacters > 0)
   {
-    PLASMA_ASSERT_DEV(*ref_szUtf8 != '\0', "The given string must not point to the zero terminator.");
+    if (ref_szUtf8 >= szUtf8End || *ref_szUtf8 == '\0')
+      return PL_FAILURE;
 
     do
     {
@@ -226,14 +230,19 @@ inline void plUnicodeUtils::MoveToNextUtf8(const char*& ref_szUtf8, const char* 
 
     --uiNumCharacters;
   }
+
+  return PL_SUCCESS;
 }
 
-inline void plUnicodeUtils::MoveToPriorUtf8(const char*& ref_szUtf8, plUInt32 uiNumCharacters)
+inline plResult plUnicodeUtils::MoveToPriorUtf8(const char*& ref_szUtf8, const char* szUtf8Start, plUInt32 uiNumCharacters)
 {
-  PLASMA_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Bad programmer!");
+  PL_ASSERT_DEBUG(ref_szUtf8 != nullptr, "Invalid string pointer to advance!");
 
   while (uiNumCharacters > 0)
   {
+    if (ref_szUtf8 <= szUtf8Start)
+      return PL_FAILURE;
+
     do
     {
       --ref_szUtf8;
@@ -241,6 +250,8 @@ inline void plUnicodeUtils::MoveToPriorUtf8(const char*& ref_szUtf8, plUInt32 ui
 
     --uiNumCharacters;
   }
+
+  return PL_SUCCESS;
 }
 template <typename T>
 constexpr T* plUnicodeUtils::GetMaxStringEnd()

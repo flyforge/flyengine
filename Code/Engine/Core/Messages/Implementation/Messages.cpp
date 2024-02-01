@@ -9,165 +9,165 @@
 #include <Core/Messages/UpdateLocalBoundsMessage.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgCollision);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgCollision, 1, plRTTIDefaultAllocator<plMsgCollision>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgCollision);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgCollision, 1, plRTTIDefaultAllocator<plMsgCollision>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTriggerState, 1)
-  PLASMA_ENUM_CONSTANTS(plTriggerState::Activated, plTriggerState::Continuing, plTriggerState::Deactivated)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTriggerState, 1)
+  PL_ENUM_CONSTANTS(plTriggerState::Activated, plTriggerState::Continuing, plTriggerState::Deactivated)
+PL_END_STATIC_REFLECTED_ENUM;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgDeleteGameObject);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgDeleteGameObject, 1, plRTTIDefaultAllocator<plMsgDeleteGameObject>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgDeleteGameObject);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgDeleteGameObject, 1, plRTTIDefaultAllocator<plMsgDeleteGameObject>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgComponentInternalTrigger);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgComponentInternalTrigger, 1, plRTTIDefaultAllocator<plMsgComponentInternalTrigger>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgComponentInternalTrigger);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgComponentInternalTrigger, 1, plRTTIDefaultAllocator<plMsgComponentInternalTrigger>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Message", m_sMessage),
-    PLASMA_MEMBER_PROPERTY("Payload", m_iPayload),
+    PL_MEMBER_PROPERTY("Message", m_sMessage),
+    PL_MEMBER_PROPERTY("Payload", m_iPayload),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgUpdateLocalBounds);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgUpdateLocalBounds, 1, plRTTIDefaultAllocator<plMsgUpdateLocalBounds>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgUpdateLocalBounds);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgUpdateLocalBounds, 1, plRTTIDefaultAllocator<plMsgUpdateLocalBounds>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
-  {
-    new plExcludeFromScript()
-  }
-  PLASMA_END_ATTRIBUTES;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-//////////////////////////////////////////////////////////////////////////
-
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgSetPlaying);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetPlaying, 1, plRTTIDefaultAllocator<plMsgSetPlaying>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Play", m_bPlay)->AddAttributes(new plDefaultValueAttribute(true)),
-  }
-  PLASMA_END_PROPERTIES;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-//////////////////////////////////////////////////////////////////////////
-
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgParentChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgParentChanged, 1, plRTTIDefaultAllocator<plMsgParentChanged>)
-{
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgChildrenChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgChildrenChanged, 1, plRTTIDefaultAllocator<plMsgChildrenChanged>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgSetPlaying);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetPlaying, 1, plRTTIDefaultAllocator<plMsgSetPlaying>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("Play", m_bPlay)->AddAttributes(new plDefaultValueAttribute(true)),
+  }
+  PL_END_PROPERTIES;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+//////////////////////////////////////////////////////////////////////////
+
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgParentChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgParentChanged, 1, plRTTIDefaultAllocator<plMsgParentChanged>)
+{
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgComponentsChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgComponentsChanged, 1, plRTTIDefaultAllocator<plMsgComponentsChanged>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgChildrenChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgChildrenChanged, 1, plRTTIDefaultAllocator<plMsgChildrenChanged>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgTransformChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTransformChanged, 1, plRTTIDefaultAllocator<plMsgTransformChanged>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgComponentsChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgComponentsChanged, 1, plRTTIDefaultAllocator<plMsgComponentsChanged>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgSetFloatParameter);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetFloatParameter, 1, plRTTIDefaultAllocator<plMsgSetFloatParameter>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgTransformChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTransformChanged, 1, plRTTIDefaultAllocator<plMsgTransformChanged>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_ATTRIBUTES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sParameterName),
-    PLASMA_MEMBER_PROPERTY("Value", m_fValue),
+    new plExcludeFromScript()
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgGenericEvent);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgGenericEvent, 1, plRTTIDefaultAllocator<plMsgGenericEvent>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgSetFloatParameter);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetFloatParameter, 1, plRTTIDefaultAllocator<plMsgSetFloatParameter>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Message", m_sMessage),
-    PLASMA_MEMBER_PROPERTY("Value", m_Value)->AddAttributes(new plDefaultValueAttribute(0))
+    PL_MEMBER_PROPERTY("Name", m_sParameterName),
+    PL_MEMBER_PROPERTY("Value", m_fValue),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgAnimationReachedEnd);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgAnimationReachedEnd, 1, plRTTIDefaultAllocator<plMsgAnimationReachedEnd>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-//////////////////////////////////////////////////////////////////////////
-
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgTriggerTriggered)
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTriggerTriggered, 1, plRTTIDefaultAllocator<plMsgTriggerTriggered>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgGenericEvent);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgGenericEvent, 1, plRTTIDefaultAllocator<plMsgGenericEvent>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Message", m_sMessage),
-    PLASMA_ENUM_MEMBER_PROPERTY("TriggerState", plTriggerState, m_TriggerState),
-    PLASMA_MEMBER_PROPERTY("GameObject", m_hTriggeringObject),
+    PL_MEMBER_PROPERTY("Message", m_sMessage),
+    PL_MEMBER_PROPERTY("Value", m_Value)->AddAttributes(new plDefaultValueAttribute(0))
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+//////////////////////////////////////////////////////////////////////////
+
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgAnimationReachedEnd);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgAnimationReachedEnd, 1, plRTTIDefaultAllocator<plMsgAnimationReachedEnd>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+//////////////////////////////////////////////////////////////////////////
+
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgTriggerTriggered)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTriggerTriggered, 1, plRTTIDefaultAllocator<plMsgTriggerTriggered>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("Message", m_sMessage),
+    PL_ENUM_MEMBER_PROPERTY("TriggerState", plTriggerState, m_TriggerState),
+    PL_MEMBER_PROPERTY("GameObject", m_hTriggeringObject),
+  }
+  PL_END_PROPERTIES;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format on
 
-PLASMA_STATICLINK_FILE(Core, Core_Messages_Implementation_Messages);
+PL_STATICLINK_FILE(Core, Core_Messages_Implementation_Messages);

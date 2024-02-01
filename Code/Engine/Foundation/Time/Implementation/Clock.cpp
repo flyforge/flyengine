@@ -7,7 +7,7 @@ plClock::Event plClock::s_TimeEvents;
 plClock* plClock::s_pGlobalClock = nullptr;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Clock)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Clock)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Time"
@@ -18,26 +18,26 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, Clock)
     plClock::s_pGlobalClock = new plClock("Global");
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plClock, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plClock, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Paused", GetPaused, SetPaused),
-    PLASMA_ACCESSOR_PROPERTY("Speed", GetSpeed, SetSpeed),
+    PL_ACCESSOR_PROPERTY("Paused", GetPaused, SetPaused),
+    PL_ACCESSOR_PROPERTY("Speed", GetSpeed, SetSpeed),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalClock),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetAccumulatedTime),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetTimeDiff)
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalClock),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetAccumulatedTime),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetTimeDiff)
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plClock::plClock(plStringView sName)
@@ -52,12 +52,12 @@ void plClock::Reset(bool bEverything)
   if (bEverything)
   {
     m_pTimeStepSmoother = nullptr;
-    m_MinTimeStep = plTime::Seconds(0.001); // 1000 FPS
-    m_MaxTimeStep = plTime::Seconds(0.1);   //   10 FPS, many simulations will be instable at that rate already
-    m_FixedTimeStep = plTime::Seconds(0.0);
+    m_MinTimeStep = plTime::MakeFromSeconds(0.001); // 1000 FPS
+    m_MaxTimeStep = plTime::MakeFromSeconds(0.1);   //   10 FPS, many simulations will be instable at that rate already
+    m_FixedTimeStep = plTime::MakeFromSeconds(0.0);
   }
 
-  m_AccumulatedTime = plTime::Seconds(0.0);
+  m_AccumulatedTime = plTime::MakeFromSeconds(0.0);
   m_fSpeed = 1.0;
   m_bPaused = false;
 
@@ -79,9 +79,9 @@ void plClock::Update()
   if (m_bPaused)
   {
     // no change during pause
-    m_LastTimeDiff = plTime::Seconds(0.0);
+    m_LastTimeDiff = plTime::MakeFromSeconds(0.0);
   }
-  else if (m_FixedTimeStep > plTime::Seconds(0.0))
+  else if (m_FixedTimeStep > plTime::MakeFromSeconds(0.0))
   {
     // scale the time step by the speed factor
     m_LastTimeDiff = m_FixedTimeStep * m_fSpeed;
@@ -115,8 +115,8 @@ void plClock::SetAccumulatedTime(plTime t)
 
   // this is to prevent having a time difference of zero (which might not work with some code)
   // in case the next Update() call is done right after this
-  m_LastTimeUpdate = plTime::Now() - plTime::Seconds(0.01);
-  m_LastTimeDiff = plTime::Seconds(0.01);
+  m_LastTimeUpdate = plTime::Now() - plTime::MakeFromSeconds(0.01);
+  m_LastTimeDiff = plTime::MakeFromSeconds(0.01);
 }
 
 void plClock::Save(plStreamWriter& inout_stream) const
@@ -138,7 +138,7 @@ void plClock::Load(plStreamReader& inout_stream)
   plUInt8 uiVersion = 0;
   inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion == 1, "Wrong version for plClock: {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion == 1, "Wrong version for plClock: {0}", uiVersion);
 
   inout_stream >> m_AccumulatedTime;
   inout_stream >> m_LastTimeDiff;
@@ -157,4 +157,4 @@ void plClock::Load(plStreamReader& inout_stream)
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_Clock);
+PL_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_Clock);

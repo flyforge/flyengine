@@ -29,7 +29,7 @@ enum class plRemoteTransmitMode
 };
 
 /// \brief Event type for connections
-struct PLASMA_FOUNDATION_DLL plRemoteEvent
+struct PL_FOUNDATION_DLL plRemoteEvent
 {
   enum Type
   {
@@ -45,7 +45,7 @@ struct PLASMA_FOUNDATION_DLL plRemoteEvent
 
 using plRemoteMessageHandler = plDelegate<void(plRemoteMessage&)>;
 
-struct PLASMA_FOUNDATION_DLL plRemoteMessageQueue
+struct PL_FOUNDATION_DLL plRemoteMessageQueue
 {
   plRemoteMessageHandler m_MessageHandler;
   /// \brief Messages are pushed into this container on arrival.
@@ -56,7 +56,7 @@ struct PLASMA_FOUNDATION_DLL plRemoteMessageQueue
   plDeque<plRemoteMessage> m_MessageQueueOut;
 };
 
-class PLASMA_FOUNDATION_DLL plRemoteInterface
+class PL_FOUNDATION_DLL plRemoteInterface
 {
 public:
   virtual ~plRemoteInterface();
@@ -70,7 +70,7 @@ public:
 
   /// \brief Starts the remote interface as a server.
   ///
-  /// \param uiConnectionToken Should be a unique sequence (e.g. 'PLASMAPZ') to identify the purpose of this connection.
+  /// \param uiConnectionToken Should be a unique sequence (e.g. 'PLPZ') to identify the purpose of this connection.
   /// Only server and clients with the same token will accept connections.
   /// \param uiPort The port over which the connection should run.
   /// \param bStartUpdateThread If true, a thread is started that will regularly call UpdateNetwork() and UpdatePingToServer().
@@ -91,7 +91,7 @@ public:
   /// \brief Can only be called after ConnectToServer(). Updates the network in a loop until a connection is established, or the time has run out.
   ///
   /// A timeout of exactly zero means to wait indefinitely.
-  plResult WaitForConnectionToServer(plTime timeout = plTime::Seconds(10));
+  plResult WaitForConnectionToServer(plTime timeout = plTime::MakeFromSeconds(10));
 
   /// \brief Closes the connection in an orderly fashion
   void ShutdownConnection();
@@ -261,7 +261,7 @@ private:
 ///
 /// The thread does NOT call plRemoteInterface::ExecuteAllMessageHandlers(), so by default no message handlers are executed.
 /// This has to be done manually by the application elsewhere.
-class PLASMA_FOUNDATION_DLL plRemoteThread : public plThread
+class PL_FOUNDATION_DLL plRemoteThread : public plThread
 {
 public:
   plRemoteThread();

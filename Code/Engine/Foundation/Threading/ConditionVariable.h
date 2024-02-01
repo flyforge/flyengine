@@ -18,9 +18,9 @@
 /// plThreadSignal may be more suitable for most use cases.
 ///
 /// \sa plThreadSignal
-class PLASMA_FOUNDATION_DLL plConditionVariable
+class PL_FOUNDATION_DLL plConditionVariable
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plConditionVariable);
+  PL_DISALLOW_COPY_AND_ASSIGN(plConditionVariable);
 
 public:
   enum class WaitResult

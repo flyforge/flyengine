@@ -4,9 +4,9 @@
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Reflection/Reflection.h>
 
-static const plTypeVersion s_uiTypeVersionContextVersion = 1;
+static constexpr plTypeVersion s_uiTypeVersionContextVersion = 1;
 
-PLASMA_IMPLEMENT_SERIALIZATION_CONTEXT(plTypeVersionWriteContext)
+PL_IMPLEMENT_SERIALIZATION_CONTEXT(plTypeVersionWriteContext)
 
 plTypeVersionWriteContext::plTypeVersionWriteContext() = default;
 plTypeVersionWriteContext::~plTypeVersionWriteContext() = default;
@@ -15,7 +15,7 @@ plStreamWriter& plTypeVersionWriteContext::Begin(plStreamWriter& ref_originalStr
 {
   m_pOriginalStream = &ref_originalStream;
 
-  PLASMA_ASSERT_DEV(m_TempStreamStorage.GetStorageSize64() == 0, "Begin() can only be called once on a type version context.");
+  PL_ASSERT_DEV(m_TempStreamStorage.GetStorageSize64() == 0, "Begin() can only be called once on a type version context.");
   m_TempStreamWriter.SetStorage(&m_TempStreamStorage);
 
   return m_TempStreamWriter;
@@ -23,14 +23,14 @@ plStreamWriter& plTypeVersionWriteContext::Begin(plStreamWriter& ref_originalStr
 
 plResult plTypeVersionWriteContext::End()
 {
-  PLASMA_ASSERT_DEV(m_pOriginalStream != nullptr, "End() called before Begin()");
+  PL_ASSERT_DEV(m_pOriginalStream != nullptr, "End() called before Begin()");
 
   WriteTypeVersions(*m_pOriginalStream);
 
   // Now append the original stream
-  PLASMA_SUCCEED_OR_RETURN(m_TempStreamStorage.CopyToStream(*m_pOriginalStream));
+  PL_SUCCEED_OR_RETURN(m_TempStreamStorage.CopyToStream(*m_pOriginalStream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plTypeVersionWriteContext::AddType(const plRTTI* pRtti)
@@ -66,12 +66,12 @@ void plTypeVersionWriteContext::WriteTypeVersions(plStreamWriter& inout_stream) 
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_SERIALIZATION_CONTEXT(plTypeVersionReadContext)
+PL_IMPLEMENT_SERIALIZATION_CONTEXT(plTypeVersionReadContext)
 
 plTypeVersionReadContext::plTypeVersionReadContext(plStreamReader& inout_stream)
 {
   auto version = inout_stream.ReadVersion(s_uiTypeVersionContextVersion);
-  PLASMA_IGNORE_UNUSED(version);
+  PL_IGNORE_UNUSED(version);
 
   plUInt32 uiNumTypes = 0;
   inout_stream >> uiNumTypes;
@@ -106,4 +106,3 @@ plUInt32 plTypeVersionReadContext::GetTypeVersion(const plRTTI* pRtti) const
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_TypeVersionContext);

@@ -9,14 +9,14 @@
 /// \file
 
 
-/// \brief plSingletonRegistry knows about all singleton instances of classes that use PLASMA_DECLARE_SINGLETON.
+/// \brief plSingletonRegistry knows about all singleton instances of classes that use PL_DECLARE_SINGLETON.
 ///
 /// It allows to query for a specific interface implementation by type name only, which makes it possible to
 /// get rid of unwanted library dependencies and use pure virtual interface classes, without singleton code
 /// (and thus link dependencies).
 ///
-/// See PLASMA_DECLARE_SINGLETON and PLASMA_DECLARE_SINGLETON_OF_INTERFACE for details.
-class PLASMA_FOUNDATION_DLL plSingletonRegistry
+/// See PL_DECLARE_SINGLETON and PL_DECLARE_SINGLETON_OF_INTERFACE for details.
+class PL_FOUNDATION_DLL plSingletonRegistry
 {
 public:
   struct SingletonEntry
@@ -39,7 +39,7 @@ public:
   inline static Interface* GetRequiredSingletonInstance() // [tested]
   {
     auto value = GetSingletonInstance<Interface>();
-    PLASMA_ASSERT_ALWAYS(value, "No instance of singleton type \"{0}\" has been registered!", typeid(Interface).name());
+    PL_ASSERT_ALWAYS(value, "No instance of singleton type \"{0}\" has been registered!", typeid(Interface).name());
     return value;
   }
 
@@ -50,8 +50,8 @@ public:
   template <typename Interface>
   inline static void Register(Interface* pSingletonInstance) // [tested]
   {
-    PLASMA_ASSERT_DEV(pSingletonInstance != nullptr, "Invalid singleton instance pointer");
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(pSingletonInstance != nullptr, "Invalid singleton instance pointer");
+    PL_ASSERT_DEV(
       s_Singletons[GetHash<Interface>()].m_pInstance == nullptr, "Singleton for type '{0}' has already been registered", typeid(Interface).name());
 
     s_Singletons[GetHash<Interface>()] = {typeid(Interface).name(), pSingletonInstance};
@@ -61,7 +61,7 @@ public:
   template <typename Interface>
   inline static void Unregister() // [tested]
   {
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       s_Singletons[GetHash<Interface>()].m_pInstance != nullptr, "Singleton for type '{0}' is currently not registered", typeid(Interface).name());
 
     s_Singletons.Remove(GetHash<Interface>());
@@ -90,18 +90,18 @@ private:
 ///        The latter allows to get the implementation of an interface that is only declared through a simple header
 ///        but was not linked against.
 ///
-///        Use PLASMA_DECLARE_SINGLETON for a typical singleton class.
-///        Use PLASMA_DECLARE_SINGLETON_OF_INTERFACE for a singleton class that implements a specific interface,
+///        Use PL_DECLARE_SINGLETON for a typical singleton class.
+///        Use PL_DECLARE_SINGLETON_OF_INTERFACE for a singleton class that implements a specific interface,
 ///        which is itself not declared as a singleton and thus does not support to get to the interface implementation
 ///        through GetSingleton(). This is necessary, if you want to decouple library link dependencies and thus not put
 ///        any singleton code into the interface declaration, to keep it a pure virtual interface.
 ///        You can then query that class pointer also through the name of the interface using plSingletonRegistry.
-#define PLASMA_DECLARE_SINGLETON(self)                                      \
+#define PL_DECLARE_SINGLETON(self)                                      \
 public:                                                                 \
-  PLASMA_ALWAYS_INLINE static self* GetSingleton() { return s_pSingleton; } \
+  PL_ALWAYS_INLINE static self* GetSingleton() { return s_pSingleton; } \
                                                                         \
 private:                                                                \
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(self);                                    \
+  PL_DISALLOW_COPY_AND_ASSIGN(self);                                    \
   void RegisterSingleton()                                              \
   {                                                                     \
     s_pSingleton = this;                                                \
@@ -127,18 +127,18 @@ private:                                                                \
 ///        The latter allows to get the implementation of an interface that is only declared through a simple header
 ///        but was not linked against.
 ///
-///        Use PLASMA_DECLARE_SINGLETON for a typical singleton class.
-///        Use PLASMA_DECLARE_SINGLETON_OF_INTERFACE for a singleton class that implements a specific interface,
+///        Use PL_DECLARE_SINGLETON for a typical singleton class.
+///        Use PL_DECLARE_SINGLETON_OF_INTERFACE for a singleton class that implements a specific interface,
 ///        which is itself not declared as a singleton and thus does not support to get to the interface implementation
 ///        through GetSingleton(). This is necessary, if you want to decouple library link dependencies and thus not put
 ///        any singleton code into the interface declaration, to keep it a pure virtual interface.
 ///        You can then query that class pointer also through the name of the interface using plSingletonRegistry.
-#define PLASMA_DECLARE_SINGLETON_OF_INTERFACE(self, interface)              \
+#define PL_DECLARE_SINGLETON_OF_INTERFACE(self, interface)              \
 public:                                                                 \
-  PLASMA_ALWAYS_INLINE static self* GetSingleton() { return s_pSingleton; } \
+  PL_ALWAYS_INLINE static self* GetSingleton() { return s_pSingleton; } \
                                                                         \
 private:                                                                \
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(self);                                    \
+  PL_DISALLOW_COPY_AND_ASSIGN(self);                                    \
   void RegisterSingleton()                                              \
   {                                                                     \
     s_pSingleton = this;                                                \
@@ -160,24 +160,24 @@ private:                                                                \
 
 
 /// \brief Put this into the cpp of a singleton class
-#define PLASMA_IMPLEMENT_SINGLETON(self) self* self::s_pSingleton = nullptr
+#define PL_IMPLEMENT_SINGLETON(self) self* self::s_pSingleton = nullptr
 
 
 
-/// \brief [internal] Helper class to implement plSingletonRegistry and PLASMA_DECLARE_SINGLETON
+/// \brief [internal] Helper class to implement plSingletonRegistry and PL_DECLARE_SINGLETON
 ///
-/// Classes that use PLASMA_DECLARE_SINGLETON must pass their this pointer to their m_SingletonRegistrar member
+/// Classes that use PL_DECLARE_SINGLETON must pass their this pointer to their m_SingletonRegistrar member
 /// during construction.
 template <class TYPE>
 class plSingletonRegistrar
 {
 public:
-  PLASMA_ALWAYS_INLINE plSingletonRegistrar(TYPE* pType) // [tested]
+  PL_ALWAYS_INLINE plSingletonRegistrar(TYPE* pType) // [tested]
   {
     pType->RegisterSingleton();
   }
 
-  PLASMA_ALWAYS_INLINE ~plSingletonRegistrar() // [tested]
+  PL_ALWAYS_INLINE ~plSingletonRegistrar() // [tested]
   {
     TYPE::UnregisterSingleton();
   }

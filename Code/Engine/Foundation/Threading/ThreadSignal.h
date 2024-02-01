@@ -15,9 +15,9 @@
 /// Thus, in AutoReset mode, it is guaranteed that exactly one thread will be woken up (or not even put to sleep) for every signal.
 ///
 /// If an already raised plThreadSignal is raised again, this has no effect.
-class PLASMA_FOUNDATION_DLL plThreadSignal
+class PL_FOUNDATION_DLL plThreadSignal
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plThreadSignal);
+  PL_DISALLOW_COPY_AND_ASSIGN(plThreadSignal);
 
 public:
   enum class Mode

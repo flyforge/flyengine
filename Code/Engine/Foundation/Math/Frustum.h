@@ -28,7 +28,7 @@ struct plVolumePosition
 ///
 /// Planes can be automatically extracted from a projection matrix or passed in manually.
 /// In the latter case, make sure to pass them in in the order defined in the PlaneType enum.
-class PLASMA_FOUNDATION_DLL plFrustum
+class PL_FOUNDATION_DLL plFrustum
 {
 public:
   enum PlaneType : plUInt8
@@ -64,22 +64,25 @@ public:
   /// \brief Sets the frustum manually by specifying the planes directly.
   ///
   /// \note Make sure to pass in the planes in the order of the PlaneType enum, otherwise plFrustum may not always work as expected.
-  void SetFrustum(const plPlane* pPlanes); // [tested]
+  [[nodiscard]] static plFrustum MakeFromPlanes(const plPlane* pPlanes); // [tested]
 
   /// \brief Creates the frustum by extracting the planes from the given (model-view / projection) matrix.
   ///
   /// If the matrix is just the projection matrix, the frustum will be in local space. Pass the full ModelViewProjection
   /// matrix to create the frustum in world-space. If the projection matrix contained in ModelViewProjection is an infinite
   /// plane projection matrix, the resulting frustum will yield a far plane with infinite distance.
-  void SetFrustum(const plMat4& mModelViewProjection, plClipSpaceDepthRange::Enum depthRange = plClipSpaceDepthRange::Default,
-    plHandedness::Enum handedness = plHandedness::Default); // [tested]
+  [[nodiscard]] static plFrustum MakeFromMVP(const plMat4& mModelViewProjection, plClipSpaceDepthRange::Enum depthRange = plClipSpaceDepthRange::Default, plHandedness::Enum handedness = plHandedness::Default); // [tested]
 
   /// \brief Creates a frustum from the given camera position, direction vectors and the field-of-view along X and Y.
   ///
   /// The up vector does not need to be exactly orthogonal to the forwards vector, it will get recomputed properly.
   /// FOV X and Y define the entire field-of-view, so a FOV of 180 degree would mean the entire half-space in front of the camera.
-  void SetFrustum(
-    const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane); // [tested]
+  [[nodiscard]] static plFrustum MakeFromFOV(const plVec3& vPosition, const plVec3& vForwards, const plVec3& vUp, plAngle fovX, plAngle fovY, float fNearPlane, float fFarPlane); // [tested]
+
+  /// \brief Creates a frustum from 8 corner points.
+  ///
+  /// Asserts that the frustum is valid after construction. Thus the given points must form a proper frustum.
+  [[nodiscard]] static plFrustum MakeFromCorners(const plVec3 pCorners[FrustumCorner::CORNER_COUNT]);
 
   /// \brief Returns the n-th plane of the frustum.
   const plPlane& GetPlane(plUInt8 uiPlane) const; // [tested]
@@ -101,7 +104,7 @@ public:
   ///
   /// Note: If the frustum contains an infinite far plane, the far plane corners (out_points[4..7])
   /// will be at infinity.
-  void ComputeCornerPoints(plVec3 out_pPoints[FrustumCorner::CORNER_COUNT]) const; // [tested]
+  plResult ComputeCornerPoints(plVec3 out_pPoints[FrustumCorner::CORNER_COUNT]) const; // [tested]
 
   /// \brief Checks whether the given object is inside or outside the frustum.
   ///

@@ -11,7 +11,7 @@
 struct plMsgExtractRenderData;
 
 /// \brief A particle system stores all data for one 'layer' of a running particle effect
-class PLASMA_PARTICLEPLUGIN_DLL plParticleSystemInstance
+class PL_PARTICLEPLUGIN_DLL plParticleSystemInstance
 {
 public:
   plParticleSystemInstance();
@@ -21,7 +21,7 @@ public:
 
   bool IsVisible() const { return m_bVisible; }
 
-  void SetEmitterEnabled(bool enable) { m_bEmitterEnabled = enable; }
+  void SetEmitterEnabled(bool bEnable) { m_bEmitterEnabled = bEnable; }
   bool GetEmitterEnabled() const { return m_bEmitterEnabled; }
 
   bool HasActiveParticles() const;
@@ -39,7 +39,7 @@ public:
   const plTransform& GetTransform() const { return m_Transform; }
   const plVec3& GetParticleStartVelocity() const { return m_vParticleStartVelocity; }
 
-  plParticleSystemState::Enum Update(const plTime& tDiff);
+  plParticleSystemState::Enum Update(const plTime& diff);
 
   plWorld* GetWorld() const { return m_pWorld; }
 
@@ -49,19 +49,19 @@ public:
 
 
   /// \brief Returns the desired stream, if it already exists, nullptr otherwise.
-  plProcessingStream* QueryStream(const char* szName, plProcessingStream::DataType Type) const;
+  plProcessingStream* QueryStream(const char* szName, plProcessingStream::DataType type) const;
 
   /// \brief Returns the desired stream, if it already exists, creates it otherwise.
-  void CreateStream(const char* szName, plProcessingStream::DataType Type, plProcessingStream** ppStream, plParticleStreamBinding& binding, bool bExpectInitializedValue);
+  void CreateStream(const char* szName, plProcessingStream::DataType type, plProcessingStream** pStream, plParticleStreamBinding& ref_binding, bool bExpectInitializedValue);
 
   void ProcessEventQueue(plParticleEventQueue queue);
 
   plParticleEffectInstance* GetOwnerEffect() const { return m_pOwnerEffect; }
   plParticleWorldModule* GetOwnerWorldModule() const;
 
-  void ExtractSystemRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const;
+  void ExtractSystemRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const;
 
-  typedef plEvent<const plStreamGroupElementRemovedEvent&>::Handler ParticleDeathHandler;
+  using ParticleDeathHandler = plEvent<const plStreamGroupElementRemovedEvent&>::Handler;
 
   void AddParticleDeathEventHandler(ParticleDeathHandler handler);
   void RemoveParticleDeathEventHandler(ParticleDeathHandler handler);

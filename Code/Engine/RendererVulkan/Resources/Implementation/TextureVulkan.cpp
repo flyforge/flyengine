@@ -1,6 +1,7 @@
 #include <RendererVulkan/RendererVulkanPCH.h>
 
 #include <Foundation/Memory/MemoryUtils.h>
+
 #include <RendererVulkan/Device/DeviceVulkan.h>
 #include <RendererVulkan/Device/InitContext.h>
 #include <RendererVulkan/Resources/BufferVulkan.h>
@@ -36,48 +37,76 @@ vk::ImageAspectFlags plGALTextureVulkan::GetAspectMask() const
   return mask;
 }
 
-plGALTextureVulkan::plGALTextureVulkan(const plGALTextureCreationDescription& Description)
+plGALTextureVulkan::plGALTextureVulkan(const plGALTextureCreationDescription& Description, bool bLinearCPU, bool bStaging)
   : plGALTexture(Description)
   , m_image(nullptr)
-  , m_pExisitingNativeObject(Description.m_pExisitingNativeObject)
-{
-}
-
-plGALTextureVulkan::plGALTextureVulkan(const plGALTextureCreationDescription& Description, vk::Format OverrideFormat, bool bLinearCPU)
-  : plGALTexture(Description)
-  , m_image(nullptr)
-  , m_pExisitingNativeObject(Description.m_pExisitingNativeObject)
-  , m_imageFormat(OverrideFormat)
-  , m_formatOverride(true)
   , m_bLinearCPU(bLinearCPU)
+  , m_bStaging(bStaging)
 {
 }
 
-plGALTextureVulkan::~plGALTextureVulkan() {}
+plGALTextureVulkan::~plGALTextureVulkan() = default;
 
 plResult plGALTextureVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSystemMemoryDescription> pInitialData)
 {
   m_pDevice = static_cast<plGALDeviceVulkan*>(pDevice);
 
+  vk::ImageFormatListCreateInfo imageFormats;
   vk::ImageCreateInfo createInfo = {};
-  //#TODO_VULKAN VK_IMAGE_CREATE_MUTABLE_FORMAT_BIT / VkImageFormatListCreateInfoKHR to allow changing the format in a view is slow.
-  createInfo.flags |= vk::ImageCreateFlagBits::eMutableFormat;
-  if (m_imageFormat == vk::Format::eUndefined)
+
+  m_imageFormat = ComputeImageFormat(m_pDevice, m_Description.m_Format, createInfo, imageFormats, m_bStaging);
+  ComputeCreateInfo(m_pDevice, m_Description, createInfo, m_stages, m_access, m_preferredLayout);
+  if (m_bLinearCPU)
   {
-    m_imageFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eResourceViewType;
+    ComputeCreateInfoLinear(createInfo, m_stages, m_access);
   }
 
-  if ((m_imageFormat == vk::Format::eR8G8B8A8Srgb || m_imageFormat == vk::Format::eB8G8R8A8Unorm) && m_Description.m_bCreateRenderTarget)
+  if (m_Description.m_pExisitingNativeObject == nullptr)
   {
-    // printf("");
+    plVulkanAllocationCreateInfo allocInfo;
+    ComputeAllocInfo(m_bLinearCPU, allocInfo);
+
+    vk::ImageFormatProperties props2;
+    VK_ASSERT_DEBUG(m_pDevice->GetVulkanPhysicalDevice().getImageFormatProperties(createInfo.format, createInfo.imageType, createInfo.tiling, createInfo.usage, createInfo.flags, &props2));
+    VK_SUCCEED_OR_RETURN_PL_FAILURE(plMemoryAllocatorVulkan::CreateImage(createInfo, allocInfo, m_image, m_alloc, &m_allocInfo));
   }
-  createInfo.format = m_imageFormat;
-  if (createInfo.format == vk::Format::eUndefined)
+  else
   {
-    plLog::Error("No storage format available for given format: {0}", m_Description.m_Format);
-    return PLASMA_FAILURE;
+    m_image = static_cast<VkImage>(m_Description.m_pExisitingNativeObject);
   }
-  const bool bIsDepth = plConversionUtilsVulkan::IsDepthFormat(m_imageFormat);
+  m_pDevice->GetInitContext().InitTexture(this, createInfo, pInitialData);
+
+  if (m_Description.m_ResourceAccess.m_bReadBack)
+  {
+    return CreateStagingBuffer(createInfo);
+  }
+
+  return PL_SUCCESS;
+}
+
+
+vk::Format plGALTextureVulkan::ComputeImageFormat(plGALDeviceVulkan* pDevice, plEnum<plGALResourceFormat> galFormat, vk::ImageCreateInfo& ref_createInfo, vk::ImageFormatListCreateInfo& ref_imageFormats, bool bStaging)
+{
+  const plGALFormatLookupEntryVulkan& format = pDevice->GetFormatLookupTable().GetFormatInfo(galFormat);
+
+  ref_createInfo.flags |= vk::ImageCreateFlagBits::eMutableFormat;
+  if (pDevice->GetExtensions().m_bImageFormatList && !format.m_mutableFormats.IsEmpty())
+  {
+    ref_createInfo.pNext = &ref_imageFormats;
+
+    ref_imageFormats.viewFormatCount = format.m_mutableFormats.GetCount();
+    ref_imageFormats.pViewFormats = format.m_mutableFormats.GetData();
+  }
+
+  ref_createInfo.format = bStaging ? format.m_readback : format.m_format;
+  return ref_createInfo.format;
+}
+
+void plGALTextureVulkan::ComputeCreateInfo(plGALDeviceVulkan* m_pDevice, const plGALTextureCreationDescription& m_Description, vk::ImageCreateInfo& createInfo, vk::PipelineStageFlags& m_stages, vk::AccessFlags& m_access, vk::ImageLayout& m_preferredLayout)
+{
+  PL_ASSERT_DEBUG(createInfo.format != vk::Format::eUndefined, "No storage format available for given format: {0}", m_Description.m_Format);
+
+  const bool bIsDepth = plConversionUtilsVulkan::IsDepthFormat(createInfo.format);
 
   m_stages = vk::PipelineStageFlagBits::eTransfer;
   m_access = vk::AccessFlagBits::eTransferRead | vk::AccessFlagBits::eTransferWrite;
@@ -110,7 +139,7 @@ plResult plGALTextureVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGAL
     m_access |= vk::AccessFlagBits::eShaderRead;
     m_preferredLayout = bIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal;
   }
-  //VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT
+  // VK_IMAGE_CREATE_2D_ARRAY_COMPATIBLE_BIT
   if (m_Description.m_bCreateRenderTarget || m_Description.m_bAllowDynamicMipGeneration)
   {
     if (bIsDepth)
@@ -140,10 +169,12 @@ plResult plGALTextureVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGAL
   switch (m_Description.m_Type)
   {
     case plGALTextureType::Texture2D:
+    case plGALTextureType::Texture2DShared:
     case plGALTextureType::TextureCube:
     {
       createInfo.imageType = vk::ImageType::e2D;
-      createInfo.arrayLayers = (m_Description.m_Type == plGALTextureType::Texture2D ? m_Description.m_uiArraySize : (m_Description.m_uiArraySize * 6));
+      const bool bTexture2D = m_Description.m_Type == plGALTextureType::Texture2D || m_Description.m_Type == plGALTextureType::Texture2DShared;
+      createInfo.arrayLayers = bTexture2D ? m_Description.m_uiArraySize : (m_Description.m_uiArraySize * 6);
 
       if (m_Description.m_Type == plGALTextureType::TextureCube)
         createInfo.flags |= vk::ImageCreateFlagBits::eCubeCompatible;
@@ -162,62 +193,47 @@ plResult plGALTextureVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGAL
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      return PLASMA_FAILURE;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
-
-  if (m_pExisitingNativeObject == nullptr)
-  {
-    plVulkanAllocationCreateInfo allocInfo;
-    allocInfo.m_usage = plVulkanMemoryUsage::Auto;
-    if (m_bLinearCPU)
-    {
-      createInfo.tiling = vk::ImageTiling::eLinear;
-      createInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
-      m_stages |= vk::PipelineStageFlagBits::eHost;
-      m_access |= vk::AccessFlagBits::eHostRead;
-      createInfo.flags = {}; // Clear all flags as we don't need them and they usually are not supported on NVidia in linear mode.
-
-      allocInfo.m_flags = plVulkanAllocationCreateFlags::HostAccessRandom;
-    }
-    vk::ImageFormatProperties props2;
-    VK_ASSERT_DEBUG(m_pDevice->GetVulkanPhysicalDevice().getImageFormatProperties(createInfo.format, createInfo.imageType, createInfo.tiling, createInfo.usage, createInfo.flags, &props2));
-
-    VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(plMemoryAllocatorVulkan::CreateImage(createInfo, allocInfo, m_image, m_alloc, &m_allocInfo));
-  }
-  else
-  {
-    m_image = static_cast<VkImage>(m_pExisitingNativeObject);
-  }
-  m_pDevice->GetInitContext().InitTexture(this, createInfo, pInitialData);
-
-  if (m_Description.m_ResourceAccess.m_bReadBack)
-  {
-    return CreateStagingBuffer(createInfo);
-  }
-
-  return PLASMA_SUCCESS;
 }
 
-plGALTextureVulkan::StagingMode plGALTextureVulkan::ComputeStagingMode(const vk::ImageCreateInfo& createInfo) const
+void plGALTextureVulkan::ComputeCreateInfoLinear(vk::ImageCreateInfo& createInfo, vk::PipelineStageFlags& m_stages, vk::AccessFlags& m_access)
+{
+  createInfo.tiling = vk::ImageTiling::eLinear;
+  createInfo.usage |= vk::ImageUsageFlagBits::eTransferSrc;
+  m_stages |= vk::PipelineStageFlagBits::eHost;
+  m_access |= vk::AccessFlagBits::eHostRead;
+  createInfo.flags = {}; // Clear all flags as we don't need them and they usually are not supported on NVidia in linear mode.
+}
+
+void plGALTextureVulkan::ComputeAllocInfo(bool m_bLinearCPU, plVulkanAllocationCreateInfo& allocInfo)
+{
+  allocInfo.m_usage = plVulkanMemoryUsage::Auto;
+  if (m_bLinearCPU)
+  {
+    allocInfo.m_flags = plVulkanAllocationCreateFlags::HostAccessRandom;
+  }
+}
+
+plGALTextureVulkan::StagingMode plGALTextureVulkan::ComputeStagingMode(plGALDeviceVulkan* m_pDevice, const plGALTextureCreationDescription& m_Description, const vk::ImageCreateInfo& createInfo)
 {
   if (!m_Description.m_ResourceAccess.m_bReadBack)
     return StagingMode::None;
 
   // We want the staging texture to always have the intended format and not the override format given by the parent texture.
-  vk::Format stagingFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eStorage;
+  vk::Format stagingFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_readback;
 
-  PLASMA_ASSERT_DEV(!plConversionUtilsVulkan::IsStencilFormat(m_imageFormat), "Stencil read-back not implemented.");
-  PLASMA_ASSERT_DEV(!plConversionUtilsVulkan::IsDepthFormat(stagingFormat), "Depth read-back should use a color format for CPU staging.");
+  PL_ASSERT_DEV(!plConversionUtilsVulkan::IsStencilFormat(createInfo.format), "Stencil read-back not implemented.");
+  PL_ASSERT_DEV(!plConversionUtilsVulkan::IsDepthFormat(stagingFormat), "Depth read-back should use a color format for CPU staging.");
 
-  const vk::FormatProperties srcFormatProps = m_pDevice->GetVulkanPhysicalDevice().getFormatProperties(m_imageFormat);
+  const vk::FormatProperties srcFormatProps = m_pDevice->GetVulkanPhysicalDevice().getFormatProperties(createInfo.format);
   const vk::FormatProperties dstFormatProps = m_pDevice->GetVulkanPhysicalDevice().getFormatProperties(stagingFormat);
 
-  const bool bFormatsEqual = m_imageFormat == stagingFormat && createInfo.samples == vk::SampleCountFlagBits::e1;
+  const bool bFormatsEqual = createInfo.format == stagingFormat && createInfo.samples == vk::SampleCountFlagBits::e1;
   const bool bSupportsCopy = bFormatsEqual && (srcFormatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eTransferSrc) && (dstFormatProps.linearTilingFeatures & vk::FormatFeatureFlagBits::eTransferDst);
   if (bFormatsEqual)
   {
-    PLASMA_ASSERT_DEV(srcFormatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eTransferSrc, "Source format can't be read, readback impossible.");
+    PL_ASSERT_DEV(srcFormatProps.optimalTilingFeatures & vk::FormatFeatureFlagBits::eTransferSrc, "Source format can't be read, readback impossible.");
     return StagingMode::Buffer;
   }
   else
@@ -225,7 +241,8 @@ plGALTextureVulkan::StagingMode plGALTextureVulkan::ComputeStagingMode(const vk:
     vk::ImageFormatProperties props;
     vk::Result res = m_pDevice->GetVulkanPhysicalDevice().getImageFormatProperties(stagingFormat, createInfo.imageType, vk::ImageTiling::eLinear, vk::ImageUsageFlagBits::eColorAttachment, {}, &props);
 
-    const bool bCanUseDirectTexture = (res == vk::Result::eSuccess) && createInfo.arrayLayers <= props.maxArrayLayers && createInfo.mipLevels <= props.maxMipLevels && createInfo.extent.depth <= props.maxExtent.depth && createInfo.extent.width <= props.maxExtent.width && createInfo.extent.height <= props.maxExtent.height && (createInfo.samples & props.sampleCounts);
+    // #TODO_VULKAN Note that on Nvidia driver 531.68 the above call succeeds even though linear rendering is not supported by the driver. Thus, we need to check explicitly here that vk::FormatFeatureFlagBits::eColorAttachment is supported again via the vk::FormatProperties.
+    const bool bCanUseDirectTexture = (dstFormatProps.linearTilingFeatures & vk::FormatFeatureFlagBits::eColorAttachment) && (res == vk::Result::eSuccess) && createInfo.arrayLayers <= props.maxArrayLayers && createInfo.mipLevels <= props.maxMipLevels && createInfo.extent.depth <= props.maxExtent.depth && createInfo.extent.width <= props.maxExtent.width && createInfo.extent.height <= props.maxExtent.height && (createInfo.samples & props.sampleCounts);
     return bCanUseDirectTexture ? StagingMode::Texture : StagingMode::TextureAndBuffer;
   }
 }
@@ -233,7 +250,7 @@ plGALTextureVulkan::StagingMode plGALTextureVulkan::ComputeStagingMode(const vk:
 plUInt32 plGALTextureVulkan::ComputeSubResourceOffsets(plDynamicArray<SubResourceOffset>& subResourceSizes) const
 {
   const plUInt32 alignment = (plUInt32)plGALBufferVulkan::GetAlignment(m_pDevice, vk::BufferUsageFlagBits::eTransferDst);
-  const vk::Format stagingFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eStorage;
+  const vk::Format stagingFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_readback;
   const plUInt8 uiBlockSize = vk::blockSize(stagingFormat);
   const auto blockExtent = vk::blockExtent(stagingFormat);
   const plUInt32 arrayLayers = (m_Description.m_Type == plGALTextureType::TextureCube ? (m_Description.m_uiArraySize * 6) : m_Description.m_uiArraySize);
@@ -246,7 +263,7 @@ plUInt32 plGALTextureVulkan::ComputeSubResourceOffsets(plDynamicArray<SubResourc
     for (plUInt32 uiMipLevel = 0; uiMipLevel < mipLevels; uiMipLevel++)
     {
       const plUInt32 uiSubresourceIndex = uiMipLevel + uiLayer * mipLevels;
-      PLASMA_ASSERT_DEBUG(subResourceSizes.GetCount() == uiSubresourceIndex, "");
+      PL_ASSERT_DEBUG(subResourceSizes.GetCount() == uiSubresourceIndex, "");
 
       const vk::Extent3D imageExtent = GetMipLevelSize(uiMipLevel);
       const VkExtent3D blockCount = {
@@ -264,7 +281,7 @@ plUInt32 plGALTextureVulkan::ComputeSubResourceOffsets(plDynamicArray<SubResourc
 
 plResult plGALTextureVulkan::CreateStagingBuffer(const vk::ImageCreateInfo& createInfo)
 {
-  m_stagingMode = plGALTextureVulkan::ComputeStagingMode(createInfo);
+  m_stagingMode = plGALTextureVulkan::ComputeStagingMode(m_pDevice, m_Description, createInfo);
   if (m_stagingMode == StagingMode::Texture || m_stagingMode == StagingMode::TextureAndBuffer)
   {
     plGALTextureCreationDescription stagingDesc = m_Description;
@@ -278,13 +295,12 @@ plResult plGALTextureVulkan::CreateStagingBuffer(const vk::ImageCreateInfo& crea
     stagingDesc.m_pExisitingNativeObject = nullptr;
 
     const bool bLinearCPU = m_stagingMode == StagingMode::Texture;
-    const vk::Format stagingFormat = m_pDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eStorage;
 
-    m_hStagingTexture = m_pDevice->CreateTextureInternal(stagingDesc, {}, stagingFormat, bLinearCPU);
+    m_hStagingTexture = m_pDevice->CreateTextureInternal(stagingDesc, {}, bLinearCPU, true);
     if (m_hStagingTexture.IsInvalidated())
     {
       plLog::Error("Failed to create staging texture for read-back");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   if (m_stagingMode == StagingMode::Buffer || m_stagingMode == StagingMode::TextureAndBuffer)
@@ -302,16 +318,16 @@ plResult plGALTextureVulkan::CreateStagingBuffer(const vk::ImageCreateInfo& crea
     if (m_hStagingBuffer.IsInvalidated())
     {
       plLog::Error("Failed to create staging buffer for read-back");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 plResult plGALTextureVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
   plGALDeviceVulkan* pVulkanDevice = static_cast<plGALDeviceVulkan*>(pDevice);
-  if (m_image && !m_pExisitingNativeObject)
+  if (m_image && !m_Description.m_pExisitingNativeObject)
   {
     pVulkanDevice->DeleteLater(m_image, m_alloc);
   }
@@ -327,7 +343,8 @@ plResult plGALTextureVulkan::DeInitPlatform(plGALDevice* pDevice)
     pDevice->DestroyBuffer(m_hStagingBuffer);
     m_hStagingBuffer.Invalidate();
   }
-  return PLASMA_SUCCESS;
+
+  return PL_SUCCESS;
 }
 
 void plGALTextureVulkan::SetDebugNamePlatform(const char* szName) const
@@ -347,4 +364,4 @@ void plGALTextureVulkan::SetDebugNamePlatform(const char* szName) const
 
 
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_TextureVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_TextureVulkan);

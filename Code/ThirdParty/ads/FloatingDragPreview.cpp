@@ -269,7 +269,7 @@ CFloatingDragPreview::CFloatingDragPreview(CDockWidget* Content)
 	{
 		d->ContentSourceArea = Content->dockAreaWidget();
 	}
-	setWindowTitle(Content->windowTitle().toUpper());
+	setWindowTitle(Content->windowTitle());
 }
 
 
@@ -279,7 +279,7 @@ CFloatingDragPreview::CFloatingDragPreview(CDockAreaWidget* Content)
 {
 	d->DockManager = Content->dockManager();
 	d->ContentSourceArea = Content;
-	setWindowTitle(Content->currentDockWidget()->windowTitle().toUpper());
+	setWindowTitle(Content->currentDockWidget()->windowTitle());
 }
 
 

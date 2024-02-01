@@ -10,7 +10,7 @@
 plResult plCppSettings::Save(plStringView sFile)
 {
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile.GetStartPointer()));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plOpenDdlWriter ddl;
   ddl.SetOutputStream(&file);
@@ -21,16 +21,16 @@ plResult plCppSettings::Save(plStringView sFile)
 
   ddl.EndObject();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCppSettings::Load(plStringView sFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile.GetStartPointer()));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plOpenDdlReader ddl;
-  PLASMA_SUCCEED_OR_RETURN(ddl.ParseDocument(file));
+  PL_SUCCEED_OR_RETURN(ddl.ParseDocument(file));
 
   if (auto pTarget = ddl.GetRootElement()->FindChildOfType("Target", "Default"))
   {
@@ -40,5 +40,5 @@ plResult plCppSettings::Load(plStringView sFile)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

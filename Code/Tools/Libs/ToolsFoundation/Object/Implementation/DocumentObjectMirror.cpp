@@ -7,23 +7,23 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plObjectChange, plNoBase, 1, plRTTIDefaultAllocator<plObjectChange>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plObjectChange, plNoBase, 1, plRTTIDefaultAllocator<plObjectChange>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Change", m_Change),
-    PLASMA_MEMBER_PROPERTY("Root", m_Root),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Steps", m_Steps),
-    PLASMA_MEMBER_PROPERTY("Graph", m_GraphData),
+    PL_MEMBER_PROPERTY("Change", m_Change),
+    PL_MEMBER_PROPERTY("Root", m_Root),
+    PL_ARRAY_MEMBER_PROPERTY("Steps", m_Steps),
+    PL_MEMBER_PROPERTY("Graph", m_GraphData),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plObjectChange::plObjectChange(const plObjectChange&)
 {
-  PLASMA_REPORT_FAILURE("Not supported!");
+  PL_REPORT_FAILURE("Not supported!");
 }
 
 void plObjectChange::GetGraph(plAbstractObjectGraph& ref_graph) const
@@ -61,7 +61,7 @@ void plObjectChange::operator=(plObjectChange&& rhs)
 
 void plObjectChange::operator=(plObjectChange& rhs)
 {
-  PLASMA_REPORT_FAILURE("Not supported!");
+  PL_REPORT_FAILURE("Not supported!");
 }
 
 
@@ -73,7 +73,7 @@ plDocumentObjectMirror::plDocumentObjectMirror()
 
 plDocumentObjectMirror::~plDocumentObjectMirror()
 {
-  PLASMA_ASSERT_DEV(m_pManager == nullptr && m_pContext == nullptr, "Need to call DeInit before d-tor!");
+  PL_ASSERT_DEV(m_pManager == nullptr && m_pContext == nullptr, "Need to call DeInit before d-tor!");
 }
 
 void plDocumentObjectMirror::InitSender(const plDocumentObjectManager* pManager)
@@ -213,7 +213,7 @@ void plDocumentObjectMirror::TreeStructureEventHandler(const plDocumentObjectStr
     {
       if (IsHeapAllocated(e.m_pPreviousParent, e.m_sParentProperty))
       {
-        PLASMA_ASSERT_DEBUG(IsHeapAllocated(e.m_pNewParent, e.m_sParentProperty), "Old and new parent must have the same heap allocation state!");
+        PL_ASSERT_DEBUG(IsHeapAllocated(e.m_pNewParent, e.m_sParentProperty), "Old and new parent must have the same heap allocation state!");
         if (e.m_pPreviousParent == nullptr || e.m_pPreviousParent == m_pManager->GetRootObject())
         {
           // Object is currently a root object, nothing to do to detach it from its parent.
@@ -314,7 +314,7 @@ void plDocumentObjectMirror::TreePropertyEventHandler(const plDocumentObjectProp
       plUInt32 uiOldIndex = e.m_OldIndex.ConvertTo<plUInt32>();
       plUInt32 uiNewIndex = e.m_NewIndex.ConvertTo<plUInt32>();
       // NewValue can be invalid if an invalid variant in a variant array is moved
-      // PLASMA_ASSERT_DEBUG(e.m_NewValue.IsValid(), "Value must be valid");
+      // PL_ASSERT_DEBUG(e.m_NewValue.IsValid(), "Value must be valid");
 
       {
         plObjectChange change;
@@ -364,28 +364,28 @@ bool plDocumentObjectMirror::IsRootObject(const plDocumentObject* pParent)
   return (pParent == nullptr || pParent == m_pManager->GetRootObject());
 }
 
-bool plDocumentObjectMirror::IsHeapAllocated(const plDocumentObject* pParent, const char* szParentProperty)
+bool plDocumentObjectMirror::IsHeapAllocated(const plDocumentObject* pParent, plStringView sParentProperty)
 {
   if (pParent == nullptr || pParent == m_pManager->GetRootObject())
     return true;
 
   const plRTTI* pRtti = pParent->GetTypeAccessor().GetType();
 
-  auto* pProp = pRtti->FindPropertyByName(szParentProperty);
+  auto* pProp = pRtti->FindPropertyByName(sParentProperty);
   return pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner);
 }
 
 
-bool plDocumentObjectMirror::IsDiscardedByFilter(const plDocumentObject* pObject, const char* szProperty) const
+bool plDocumentObjectMirror::IsDiscardedByFilter(const plDocumentObject* pObject, plStringView sProperty) const
 {
   if (m_Filter.IsValid())
   {
-    return !m_Filter(pObject, szProperty);
+    return !m_Filter(pObject, sProperty);
   }
   return false;
 }
 
-void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, const char* szProperty)
+void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocumentObject* pRoot, plStringView sProperty)
 {
   if (pRoot && pRoot->GetDocumentObjectManager()->GetRootObject() != pRoot)
   {
@@ -394,7 +394,7 @@ void plDocumentObjectMirror::CreatePath(plObjectChange& out_change, const plDocu
     FlattenSteps(path, out_change.m_Steps);
   }
 
-  out_change.m_Change.m_sProperty = szProperty;
+  out_change.m_Change.m_sProperty = sProperty;
 }
 
 plUuid plDocumentObjectMirror::FindRootOpObject(const plDocumentObject* pParent, plHybridArray<const plDocumentObject*, 8>& path)
@@ -414,8 +414,8 @@ plUuid plDocumentObjectMirror::FindRootOpObject(const plDocumentObject* pParent,
 void plDocumentObjectMirror::FlattenSteps(const plArrayPtr<const plDocumentObject* const> path, plHybridArray<plPropertyPathStep, 2>& out_steps)
 {
   plUInt32 uiCount = path.GetCount();
-  PLASMA_ASSERT_DEV(uiCount > 0, "Path must not be empty!");
-  PLASMA_ASSERT_DEV(path[uiCount - 1]->IsOnHeap(), "Root of steps must be on heap!");
+  PL_ASSERT_DEV(uiCount > 0, "Path must not be empty!");
+  PL_ASSERT_DEV(path[uiCount - 1]->IsOnHeap(), "Root of steps must be on heap!");
 
   // Only root object? Then there is no path from it.
   if (uiCount == 1)
@@ -436,7 +436,7 @@ void plDocumentObjectMirror::ApplyOp(plObjectChange& change)
     object = m_pContext->GetObjectByGUID(change.m_Root);
     if (!object.m_pObject)
       return;
-    // PLASMA_ASSERT_DEV(object.m_pObject != nullptr, "Root object does not exist in mirrored native object!");
+    // PL_ASSERT_DEV(object.m_pObject != nullptr, "Root object does not exist in mirrored native object!");
   }
 
   plPropertyPath propPath;
@@ -512,7 +512,7 @@ void plDocumentObjectMirror::ApplyOp(plRttiConverterObject object, const plObjec
       }
       else if (pProp->GetCategory() == plPropertyCategory::Set)
       {
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Pointer), "Set object must always be pointers!");
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Pointer), "Set object must always be pointers!");
         auto pSpecificProp = static_cast<const plAbstractSetProperty*>(pProp);
         plReflectionUtils::InsertSetPropertyValue(pSpecificProp, object.m_pObject, plVariant(pValue, pType));
       }
@@ -563,7 +563,7 @@ void plDocumentObjectMirror::ApplyOp(plRttiConverterObject object, const plObjec
       }
       else if (pProp->GetCategory() == plPropertyCategory::Set)
       {
-        PLASMA_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Pointer), "Set object must always be pointers!");
+        PL_ASSERT_DEV(pProp->GetFlags().IsSet(plPropertyFlags::Pointer), "Set object must always be pointers!");
         auto pSpecificProp = static_cast<const plAbstractSetProperty*>(pProp);
         auto valueObject = m_pContext->GetObjectByGUID(change.m_Change.m_Value.Get<plUuid>());
         plReflectionUtils::RemoveSetPropertyValue(pSpecificProp, object.m_pObject, plVariant(valueObject.m_pObject, valueObject.m_pType));

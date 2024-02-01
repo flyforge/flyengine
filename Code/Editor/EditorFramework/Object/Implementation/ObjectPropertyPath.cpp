@@ -6,16 +6,15 @@
 #include <ToolsFoundation/Object/DocumentObjectVisitor.h>
 
 plStatus plObjectPropertyPath::CreatePath(const plObjectPropertyPathContext& context, const plPropertyReference& prop,
-  plStringBuilder& sObjectSearchSequence, plStringBuilder& sComponentType, plStringBuilder& sPropertyPath)
+  plStringBuilder& ref_sObjectSearchSequence, plStringBuilder& ref_sComponentType, plStringBuilder& ref_sPropertyPath)
 {
-  PLASMA_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
+  PL_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
   const plRTTI* pObjType = plGetStaticRTTI<plGameObject>();
-  const plRTTI* pCompType = plGetStaticRTTI<plComponent>();
 
   const plAbstractProperty* pName = pObjType->FindPropertyByName("Name");
   const plDocumentObject* pObject = context.m_pAccessor->GetObjectManager()->GetObject(prop.m_Object);
   if (!pObject || !prop.m_pProperty)
-    return plStatus(PLASMA_FAILURE);
+    return plStatus(PL_FAILURE);
 
   {
     // Build property part of the path from the next parent node / component.
@@ -24,17 +23,17 @@ plStatus plObjectPropertyPath::CreatePath(const plObjectPropertyPathContext& con
       return plStatus("No parent node or component found.");
     plObjectPropertyPathContext context2 = context;
     context2.m_pContextObject = pObject;
-    plStatus res = CreatePropertyPath(context2, prop, sPropertyPath);
+    plStatus res = CreatePropertyPath(context2, prop, ref_sPropertyPath);
     if (res.Failed())
       return res;
   }
 
   {
     // Component part
-    sComponentType.Clear();
+    ref_sComponentType.Clear();
     if (pObject->GetType()->IsDerivedFrom(plGetStaticRTTI<plComponent>()))
     {
-      sComponentType = pObject->GetType()->GetTypeName();
+      ref_sComponentType = pObject->GetType()->GetTypeName();
       pObject = pObject->GetParent();
     }
   }
@@ -44,9 +43,9 @@ plStatus plObjectPropertyPath::CreatePath(const plObjectPropertyPathContext& con
   {
     if (pObject == nullptr)
     {
-      sObjectSearchSequence.Clear();
-      sComponentType.Clear();
-      sPropertyPath.Clear();
+      ref_sObjectSearchSequence.Clear();
+      ref_sComponentType.Clear();
+      ref_sPropertyPath.Clear();
       return plStatus("Property is not under the given context object, no path exists.");
     }
 
@@ -55,31 +54,31 @@ plStatus plObjectPropertyPath::CreatePath(const plObjectPropertyPathContext& con
       plString sName = context.m_pAccessor->Get<plString>(pObject, pName);
       if (!sName.IsEmpty())
       {
-        if (!sObjectSearchSequence.IsEmpty())
-          sObjectSearchSequence.Prepend("/");
-        sObjectSearchSequence.Prepend(sName);
+        if (!ref_sObjectSearchSequence.IsEmpty())
+          ref_sObjectSearchSequence.Prepend("/");
+        ref_sObjectSearchSequence.Prepend(sName);
       }
     }
     else
     {
-      sObjectSearchSequence.Clear();
-      sComponentType.Clear();
-      sPropertyPath.Clear();
+      ref_sObjectSearchSequence.Clear();
+      ref_sComponentType.Clear();
+      ref_sPropertyPath.Clear();
       return plStatus(plFmt("Only plGameObject objects should be found in the hierarchy, found '{0}' instead.", pObject->GetType()->GetTypeName()));
     }
 
     pObject = pObject->GetParent();
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plObjectPropertyPath::CreatePropertyPath(
   const plObjectPropertyPathContext& context, const plPropertyReference& prop, plStringBuilder& out_sPropertyPath)
 {
-  PLASMA_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
+  PL_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
   const plDocumentObject* pObject = context.m_pAccessor->GetObjectManager()->GetObject(prop.m_Object);
   if (!pObject || !prop.m_pProperty)
-    return plStatus(PLASMA_FAILURE);
+    return plStatus(PL_FAILURE);
 
   out_sPropertyPath.Clear();
   plStatus res = PrependProperty(pObject, prop.m_pProperty, prop.m_Index, out_sPropertyPath);
@@ -94,14 +93,14 @@ plStatus plObjectPropertyPath::CreatePropertyPath(
 
     pObject = pObject->GetParent();
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
-plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& context, plHybridArray<plPropertyReference, 1>& keys,
+plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& context, plDynamicArray<plPropertyReference>& ref_keys,
   const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath)
 {
-  PLASMA_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
-  keys.Clear();
+  PL_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && !context.m_sRootProperty.IsEmpty(), "All context fields must be valid.");
+  ref_keys.Clear();
   const plDocumentObject* pContext = context.m_pContextObject;
   plDocumentObjectVisitor visitor(context.m_pAccessor->GetObjectManager(), "Children", context.m_sRootProperty);
   plHybridArray<const plDocumentObject*, 8> input;
@@ -116,19 +115,22 @@ plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& co
   {
     for (const plDocumentObject* pObj : input)
     {
-      visitor.Visit(pContext, false, [&output, &sName](const plDocumentObject* pObject) -> bool {
+      visitor.Visit(pObj, false, [&output, &sName](const plDocumentObject* pObject) -> bool {
         const auto& sObjectName = pObject->GetTypeAccessor().GetValue("Name").Get<plString>();
         if (sObjectName == sName)
         {
           output.PushBack(pObject);
           return false;
         }
-        return true;
+        return true; //
       });
     }
     input.Clear();
     input.Swap(output);
   }
+
+  if (input.IsEmpty())
+    return plStatus(plFmt("ObjectSearchSequence: '{}' could not be resolved", szObjectSearchSequence));
 
   // Test found objects for component
   for (const plDocumentObject* pObject : input)
@@ -151,7 +153,7 @@ plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& co
           if (pChild->GetType()->GetTypeName() == szComponentType)
           {
             output.PushBack(pChild);
-            continue; //#TODO: break on found component?
+            continue; // #TODO: break on found component?
           }
         }
       }
@@ -160,6 +162,10 @@ plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& co
   input.Clear();
   input.Swap(output);
 
+  if (input.IsEmpty())
+    return plStatus(plFmt("Component '{}' not found on the search path '{}'", szComponentType, szObjectSearchSequence));
+
+  plStatus lastError = plResult(PL_FAILURE);
   // Test found objects / components for property
   for (const plDocumentObject* pObject : input)
   {
@@ -169,16 +175,21 @@ plStatus plObjectPropertyPath::ResolvePath(const plObjectPropertyPathContext& co
     plStatus res = ResolvePropertyPath(context2, szPropertyPath, key);
     if (res.Succeeded())
     {
-      keys.PushBack(key);
+      ref_keys.PushBack(key);
+    }
+
+    if (lastError.Failed())
+    {
+      lastError = res;
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return lastError;
 }
 
 plStatus plObjectPropertyPath::ResolvePropertyPath(
   const plObjectPropertyPathContext& context, const char* szPropertyPath, plPropertyReference& out_key)
 {
-  PLASMA_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && szPropertyPath != nullptr, "All context fields must be valid.");
+  PL_ASSERT_DEV(context.m_pAccessor && context.m_pContextObject && szPropertyPath != nullptr, "All context fields must be valid.");
   const plDocumentObject* pObject = context.m_pContextObject;
   plStringBuilder sPath = szPropertyPath;
   plHybridArray<plStringView, 3> parts;
@@ -214,7 +225,7 @@ plStatus plObjectPropertyPath::ResolvePropertyPath(
     if (const plExposedParametersAttribute* pAttrib = pProperty->GetAttributeByType<plExposedParametersAttribute>())
     {
       const plAbstractProperty* pParameterSourceProp = pObject->GetType()->FindPropertyByName(pAttrib->GetParametersSource());
-      PLASMA_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(),
+      PL_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(),
         pObject->GetType()->GetTypeName());
       plExposedParameterCommandAccessor proxy(context.m_pAccessor, pProperty, pParameterSourceProp);
       res = proxy.GetValue(pObject, pProperty, value, index);
@@ -232,7 +243,7 @@ plStatus plObjectPropertyPath::ResolvePropertyPath(
       out_key.m_Object = pObject->GetGuid();
       out_key.m_pProperty = pProperty;
       out_key.m_Index = index;
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
     else
     {
@@ -248,7 +259,7 @@ plStatus plObjectPropertyPath::ResolvePropertyPath(
       }
     }
   }
-  return plStatus(PLASMA_FAILURE);
+  return plStatus(PL_FAILURE);
 }
 
 plStatus plObjectPropertyPath::PrependProperty(
@@ -261,7 +272,7 @@ plStatus plObjectPropertyPath::PrependProperty(
       if (!out_sPropertyPath.IsEmpty())
         out_sPropertyPath.Prepend("/");
       out_sPropertyPath.Prepend(pProperty->GetPropertyName());
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
     case plPropertyCategory::Enum::Array:
     case plPropertyCategory::Enum::Map:
@@ -272,7 +283,7 @@ plStatus plObjectPropertyPath::PrependProperty(
         out_sPropertyPath.PrependFormat("{0}[{1}]", pProperty->GetPropertyName(), index);
       else
         out_sPropertyPath.PrependFormat("{0}", pProperty->GetPropertyName());
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
     default:
       return plStatus(plFmt(

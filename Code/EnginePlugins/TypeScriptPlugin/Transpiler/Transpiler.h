@@ -6,7 +6,7 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Threading/TaskSystem.h>
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plTypeScriptTranspiler
+class PL_TYPESCRIPTPLUGIN_DLL plTypeScriptTranspiler
 {
 public:
   plTypeScriptTranspiler();
@@ -15,9 +15,9 @@ public:
   void SetOutputFolder(const char* szFolder);
   void StartLoadTranspiler();
   void FinishLoadTranspiler();
-  plResult TranspileString(const char* szString, plStringBuilder& out_Result);
-  plResult TranspileFile(const char* szFile, plUInt64 uiSkipIfFileHash, plStringBuilder& out_Result, plUInt64& out_uiFileHash);
-  plResult TranspileFileAndStoreJS(const char* szFile, plStringBuilder& out_Result);
+  plResult TranspileString(const char* szString, plStringBuilder& out_sResult);
+  plResult TranspileFile(const char* szFile, plUInt64 uiSkipIfFileHash, plStringBuilder& out_sResult, plUInt64& out_uiFileHash);
+  plResult TranspileFileAndStoreJS(const char* szFile, plStringBuilder& out_sResult);
   void SetModifyTsBeforeTranspilationCallback(plDelegate<void(plStringBuilder&)> callback);
 
 private:

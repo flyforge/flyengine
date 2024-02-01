@@ -8,17 +8,19 @@
 class plSceneContext;
 class plCameraComponent;
 
-class PlasmaEditorSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
+class plEditorSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
+  PL_ADD_DYNAMIC_REFLECTION(plEditorSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
 
 public:
-  PlasmaEditorSelectedObjectsExtractor();
-  ~PlasmaEditorSelectedObjectsExtractor();
+  plEditorSelectedObjectsExtractor();
+  ~plEditorSelectedObjectsExtractor();
 
   virtual const plDeque<plGameObjectHandle>* GetSelection() override;
 
-  virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;
+  virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   void SetSceneContext(plSceneContext* pSceneContext) { m_pSceneContext = pSceneContext; }
   plSceneContext* GetSceneContext() const { return m_pSceneContext; }

@@ -37,11 +37,11 @@ struct plDynamicTree
   };
 };
 
-typedef plMap<plDynamicTree::plMultiMapKey, plDynamicTree::plObjectData>::Iterator plDynamicTreeObject;
-typedef plMap<plDynamicTree::plMultiMapKey, plDynamicTree::plObjectData>::ConstIterator plDynamicTreeObjectConst;
+using plDynamicTreeObject = plMap<plDynamicTree::plMultiMapKey, plDynamicTree::plObjectData>::Iterator;
+using plDynamicTreeObjectConst = plMap<plDynamicTree::plMultiMapKey, plDynamicTree::plObjectData>::ConstIterator;
 
 /// \brief Callback type for object queries. Return "false" to abort a search (e.g. when the desired element has been found).
-typedef bool (*PLASMA_VISIBLE_OBJ_CALLBACK)(void* pPassThrough, plDynamicTreeObjectConst Object);
+using PL_VISIBLE_OBJ_CALLBACK = bool (*)(void*, plDynamicTreeObjectConst);
 
 class plDynamicOctree;
 class plDynamicQuadtree;

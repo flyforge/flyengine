@@ -3,15 +3,15 @@
 #include <Core/Scripting/ScriptAttributes.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptExtensionAttribute, 1, plRTTIDefaultAllocator<plScriptExtensionAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptExtensionAttribute, 1, plRTTIDefaultAllocator<plScriptExtensionAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("TypeName", m_sTypeName),
+    PL_MEMBER_PROPERTY("TypeName", m_sTypeName),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptExtensionAttribute::plScriptExtensionAttribute() = default;
@@ -23,15 +23,15 @@ plScriptExtensionAttribute::plScriptExtensionAttribute(plStringView sTypeName)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptBaseClassFunctionAttribute, 1, plRTTIDefaultAllocator<plScriptBaseClassFunctionAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptBaseClassFunctionAttribute, 1, plRTTIDefaultAllocator<plScriptBaseClassFunctionAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Index", m_uiIndex),
+    PL_MEMBER_PROPERTY("Index", m_uiIndex),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptBaseClassFunctionAttribute::plScriptBaseClassFunctionAttribute() = default;
@@ -39,3 +39,7 @@ plScriptBaseClassFunctionAttribute::plScriptBaseClassFunctionAttribute(plUInt16 
   : m_uiIndex(uiIndex)
 {
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_Implementation_ScriptAttributes);
+

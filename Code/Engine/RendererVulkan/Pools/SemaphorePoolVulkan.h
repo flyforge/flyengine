@@ -14,7 +14,7 @@
 ///   plGALDeviceVulkan* pDevice = ...;
 ///   pDevice->ReclaimLater(s);
 /// \endcode
-class PLASMA_RENDERERVULKAN_DLL plSemaphorePoolVulkan
+class PL_RENDERERVULKAN_DLL plSemaphorePoolVulkan
 {
 public:
   static void Initialize(vk::Device device);

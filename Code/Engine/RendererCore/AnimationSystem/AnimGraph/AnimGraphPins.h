@@ -25,9 +25,9 @@ using plAnimPoseGeneratorLocalPoseID = plUInt32;
 using plAnimPoseGeneratorModelPoseID = plUInt32;
 using plAnimPoseGeneratorCommandID = plUInt32;
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphPin : public plReflectedClass
+class PL_RENDERERCORE_DLL plAnimGraphPin : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphPin, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphPin, plReflectedClass);
 
 public:
   enum Type : plUInt8
@@ -61,25 +61,25 @@ protected:
   plUInt8 m_uiNumConnections = 0;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphInputPin : public plAnimGraphPin
+class PL_RENDERERCORE_DLL plAnimGraphInputPin : public plAnimGraphPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphInputPin, plAnimGraphPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphInputPin, plAnimGraphPin);
 
 public:
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphOutputPin : public plAnimGraphPin
+class PL_RENDERERCORE_DLL plAnimGraphOutputPin : public plAnimGraphPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphOutputPin, plAnimGraphPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphOutputPin, plAnimGraphPin);
 
 public:
 };
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphTriggerInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphTriggerInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphTriggerInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphTriggerInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Trigger; }
@@ -88,9 +88,9 @@ public:
   bool AreAllTriggered(plAnimGraphInstance& ref_graph) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphTriggerOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphTriggerOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphTriggerOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphTriggerOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Trigger; }
@@ -104,9 +104,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphNumberInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphNumberInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphNumberInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphNumberInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Number; }
@@ -114,9 +114,9 @@ public:
   double GetNumber(plAnimGraphInstance& ref_graph, double fFallback = 0.0) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphNumberOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphNumberOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphNumberOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphNumberOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Number; }
@@ -126,9 +126,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphBoolInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphBoolInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphBoolInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphBoolInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Bool; }
@@ -136,9 +136,9 @@ public:
   bool GetBool(plAnimGraphInstance& ref_graph, bool bFallback = false) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphBoolOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphBoolOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphBoolOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphBoolOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::Bool; }
@@ -148,9 +148,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphBoneWeightsInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphBoneWeightsInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphBoneWeightsInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphBoneWeightsInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::BoneWeights; }
@@ -158,9 +158,9 @@ public:
   plAnimGraphPinDataBoneWeights* GetWeights(plAnimController& ref_controller, plAnimGraphInstance& ref_graph) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphBoneWeightsOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphBoneWeightsOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphBoneWeightsOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphBoneWeightsOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::BoneWeights; }
@@ -170,9 +170,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphLocalPoseInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphLocalPoseInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::LocalPose; }
@@ -180,9 +180,9 @@ public:
   plAnimGraphPinDataLocalTransforms* GetPose(plAnimController& ref_controller, plAnimGraphInstance& ref_graph) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphLocalPoseMultiInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphLocalPoseMultiInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseMultiInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseMultiInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::LocalPose; }
@@ -190,9 +190,9 @@ public:
   void GetPoses(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plDynamicArray<plAnimGraphPinDataLocalTransforms*>& out_poses) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphLocalPoseOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphLocalPoseOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphLocalPoseOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::LocalPose; }
@@ -202,9 +202,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphModelPoseInputPin : public plAnimGraphInputPin
+class PL_RENDERERCORE_DLL plAnimGraphModelPoseInputPin : public plAnimGraphInputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphModelPoseInputPin, plAnimGraphInputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphModelPoseInputPin, plAnimGraphInputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::ModelPose; }
@@ -212,9 +212,9 @@ public:
   plAnimGraphPinDataModelTransforms* GetPose(plAnimController& ref_controller, plAnimGraphInstance& ref_graph) const;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphModelPoseOutputPin : public plAnimGraphOutputPin
+class PL_RENDERERCORE_DLL plAnimGraphModelPoseOutputPin : public plAnimGraphOutputPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphModelPoseOutputPin, plAnimGraphOutputPin);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphModelPoseOutputPin, plAnimGraphOutputPin);
 
 public:
   virtual plAnimGraphPin::Type GetPinType() const override { return plAnimGraphPin::ModelPose; }

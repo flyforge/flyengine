@@ -83,7 +83,7 @@ void plQtInputWidget::ProcessTelemetry(void* pUnuseed)
   bool bUpdateActionTable = false;
   bool bFillActionTable = false;
 
-  while (plTelemetry::RetrieveMessage('INPT', msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('INPT', msg) == PL_SUCCESS)
   {
     if (msg.GetMessageID() == 'SLOT')
     {
@@ -181,7 +181,7 @@ void plQtInputWidget::UpdateSlotTable(bool bRecreate)
     {
       it.Value().m_iTableRow = iRow;
 
-      sTemp.Format("  {0}  ", it.Key());
+      sTemp.SetFormat("  {0}  ", it.Key());
 
       QLabel* pIcon = new QLabel();
       QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/InputSlots.svg");
@@ -200,7 +200,7 @@ void plQtInputWidget::UpdateSlotTable(bool bRecreate)
       // Flags
       {
         plStringBuilder sFlags;
-        sFlags.Printf("  %16b  ", uiFlags);
+        sFlags.SetPrintf("  %16b  ", uiFlags);
 
         QLabel* pFlags = (QLabel*)TableInputSlots->cellWidget(iRow, 5);
         pFlags->setAlignment(Qt::AlignRight);
@@ -271,7 +271,7 @@ void plQtInputWidget::UpdateSlotTable(bool bRecreate)
           pValue->setText("");
         else
         {
-          sTemp.Format(" {0} ", plArgF(it.Value().m_fValue, 4));
+          sTemp.  SetFormat(" {0} ", plArgF(it.Value().m_fValue, 4));
           pValue->setText(sTemp.GetData());
         }
       }
@@ -322,7 +322,7 @@ void plQtInputWidget::UpdateActionTable(bool bRecreate)
     {
       it.Value().m_iTableRow = iRow;
 
-      sTemp.Format("  {0}  ", it.Key());
+      sTemp.SetFormat("  {0}  ", it.Key());
 
       QLabel* pIcon = new QLabel();
       QIcon icon = plQtUiServices::GetCachedIconResource(":/Icons/Icons/InputActions.svg");
@@ -344,7 +344,7 @@ void plQtInputWidget::UpdateActionTable(bool bRecreate)
         if (it.Value().m_sTrigger[slot].IsEmpty())
           sTemp = "  ";
         else
-          sTemp.Format("  [Scale: {0}] {1}  ", plArgF(it.Value().m_fTriggerScaling[slot], 2), it.Value().m_sTrigger[slot]);
+          sTemp.SetFormat("  [Scale: {0}] {1}  ", plArgF(it.Value().m_fTriggerScaling[slot], 2), it.Value().m_sTrigger[slot]);
 
         QLabel* pValue = (QLabel*)TableInputActions->cellWidget(iRow, 4 + slot);
         pValue->setText(sTemp.GetData());
@@ -391,9 +391,9 @@ void plQtInputWidget::UpdateActionTable(bool bRecreate)
         else
         {
           if (it.Value().m_bUseTimeScaling)
-            sTemp.Format(" {0} (Time-Scaled) ", plArgF(it.Value().m_fValue, 4));
+            sTemp.SetFormat(" {0} (Time-Scaled) ", plArgF(it.Value().m_fValue, 4));
           else
-            sTemp.Format(" {0} (Absolute) ", plArgF(it.Value().m_fValue, 4));
+            sTemp.SetFormat(" {0} (Absolute) ", plArgF(it.Value().m_fValue, 4));
 
           pValue->setText(sTemp.GetData());
         }

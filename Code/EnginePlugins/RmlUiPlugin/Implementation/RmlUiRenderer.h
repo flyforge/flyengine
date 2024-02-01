@@ -7,18 +7,18 @@
 
 using plShaderResourceHandle = plTypedResourceHandle<class plShaderResource>;
 
-class PLASMA_RMLUIPLUGIN_DLL plRmlUiRenderer : public plRenderer
+class PL_RMLUIPLUGIN_DLL plRmlUiRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plRmlUiRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plRmlUiRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plRmlUiRenderer);
 
 public:
   plRmlUiRenderer();
   ~plRmlUiRenderer();
 
   // plRenderer implementation
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
-  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const override;
+  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const override;
 
   virtual void RenderBatch(
     const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
@@ -34,6 +34,6 @@ private:
 
   plVertexDeclarationInfo m_VertexDeclarationInfo;
 
-  mutable plMat4 m_mLastTransform = plMat4::IdentityMatrix();
+  mutable plMat4 m_mLastTransform = plMat4::MakeIdentity();
   mutable plRectFloat m_LastRect = plRectFloat(0, 0);
 };

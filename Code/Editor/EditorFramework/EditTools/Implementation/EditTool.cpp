@@ -3,10 +3,10 @@
 #include <EditorFramework/DocumentWindow/GameObjectDocumentWindow.moc.h>
 #include <EditorFramework/EditTools/EditTool.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectEditTool, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectEditTool, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plGameObjectEditTool::plGameObjectEditTool() {}
+plGameObjectEditTool::plGameObjectEditTool() = default;
 
 void plGameObjectEditTool::ConfigureTool(
   plGameObjectDocument* pDocument, plQtGameObjectDocumentWindow* pWindow, plGameObjectGizmoInterface* pInterface)
@@ -18,12 +18,12 @@ void plGameObjectEditTool::ConfigureTool(
   OnConfigured();
 }
 
-void plGameObjectEditTool::SetActive(bool active)
+void plGameObjectEditTool::SetActive(bool bActive)
 {
-  if (m_bIsActive == active)
+  if (m_bIsActive == bActive)
     return;
 
-  m_bIsActive = active;
+  m_bIsActive = bActive;
   OnActiveChanged(m_bIsActive);
 
   if (!m_bIsActive)

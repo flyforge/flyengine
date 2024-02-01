@@ -38,53 +38,53 @@
  */
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plJoltRagdollStartMode, 1)
-  PLASMA_ENUM_CONSTANTS(plJoltRagdollStartMode::WithBindPose, plJoltRagdollStartMode::WithNextAnimPose, plJoltRagdollStartMode::WithCurrentMeshPose)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plJoltRagdollStartMode, 1)
+  PL_ENUM_CONSTANTS(plJoltRagdollStartMode::WithBindPose, plJoltRagdollStartMode::WithNextAnimPose, plJoltRagdollStartMode::WithCurrentMeshPose)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltRagdollComponent, 2, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plJoltRagdollComponent, 2, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("SelfCollision", m_bSelfCollision),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("StartMode", plJoltRagdollStartMode, GetStartMode, SetStartMode),
-    PLASMA_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("Mass", m_fMass)->AddAttributes(new plDefaultValueAttribute(50.0f)),
-    PLASMA_MEMBER_PROPERTY("StiffnessFactor", m_fStiffnessFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("OwnerVelocityScale", m_fOwnerVelocityScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("CenterPosition", m_vCenterPosition),
-    PLASMA_MEMBER_PROPERTY("CenterVelocity", m_fCenterVelocity)->AddAttributes(new plDefaultValueAttribute(0.0f)),
-    PLASMA_MEMBER_PROPERTY("CenterAngularVelocity", m_fCenterAngularVelocity)->AddAttributes(new plDefaultValueAttribute(0.0f)),
+    PL_MEMBER_PROPERTY("SelfCollision", m_bSelfCollision),
+    PL_ENUM_ACCESSOR_PROPERTY("StartMode", plJoltRagdollStartMode, GetStartMode, SetStartMode),
+    PL_ACCESSOR_PROPERTY("GravityFactor", GetGravityFactor, SetGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Mass", m_fMass)->AddAttributes(new plDefaultValueAttribute(50.0f)),
+    PL_MEMBER_PROPERTY("StiffnessFactor", m_fStiffnessFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("OwnerVelocityScale", m_fOwnerVelocityScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("CenterPosition", m_vCenterPosition),
+    PL_MEMBER_PROPERTY("CenterVelocity", m_fCenterVelocity)->AddAttributes(new plDefaultValueAttribute(0.0f)),
+    PL_MEMBER_PROPERTY("CenterAngularVelocity", m_fCenterAngularVelocity)->AddAttributes(new plDefaultValueAttribute(0.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
-    PLASMA_MESSAGE_HANDLER(plMsgRetrieveBoneState, OnRetrieveBoneState),
-    PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, OnMsgPhysicsAddImpulse),
-    PLASMA_MESSAGE_HANDLER(plMsgPhysicsAddForce, OnMsgPhysicsAddForce),
+    PL_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
+    PL_MESSAGE_HANDLER(plMsgRetrieveBoneState, OnRetrieveBoneState),
+    PL_MESSAGE_HANDLER(plMsgPhysicsAddImpulse, OnMsgPhysicsAddImpulse),
+    PL_MESSAGE_HANDLER(plMsgPhysicsAddForce, OnMsgPhysicsAddForce),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetInitialImpulse, In, "vWorldPosition", In, "vWorldDirectionAndStrength"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(AddInitialImpulse, In, "vWorldPosition", In, "vWorldDirectionAndStrength"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetJointTypeOverride, In, "JointName", In, "OverrideType"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetInitialImpulse, In, "vWorldPosition", In, "vWorldDirectionAndStrength"),
+    PL_SCRIPT_FUNCTION_PROPERTY(AddInitialImpulse, In, "vWorldPosition", In, "vWorldDirectionAndStrength"),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetJointTypeOverride, In, "JointName", In, "OverrideType"),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
-PLASMA_DEFINE_AS_POD_TYPE(JPH::Vec3);
+PL_DEFINE_AS_POD_TYPE(JPH::Vec3);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -100,7 +100,7 @@ void plJoltRagdollComponentManager::Initialize()
   SUPER::Initialize();
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltRagdollComponentManager::Update, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plJoltRagdollComponentManager::Update, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostAsync;
     desc.m_bOnlyUpdateWhenSimulating = false;
 
@@ -110,7 +110,7 @@ void plJoltRagdollComponentManager::Initialize()
 
 void plJoltRagdollComponentManager::Update(const plWorldModule::UpdateContext& context)
 {
-  PLASMA_PROFILE_SCOPE("UpdateRagdolls");
+  PL_PROFILE_SCOPE("UpdateRagdolls");
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
 
@@ -203,13 +203,13 @@ void plJoltRagdollComponent::Update(bool bForce)
   {
     m_ElapsedTimeSinceUpdate += plClock::GetGlobalClock()->GetTimeDiff();
 
-    if (visState == plVisibilityState::Indirect && m_ElapsedTimeSinceUpdate < plTime::Milliseconds(200))
+    if (visState == plVisibilityState::Indirect && m_ElapsedTimeSinceUpdate < plTime::MakeFromMilliseconds(200))
     {
       // when the ragdoll is only visible by shadows or reflections, update it infrequently
       return;
     }
 
-    if (visState == plVisibilityState::Invisible && m_ElapsedTimeSinceUpdate < plTime::Milliseconds(500))
+    if (visState == plVisibilityState::Invisible && m_ElapsedTimeSinceUpdate < plTime::MakeFromMilliseconds(500))
     {
       // when the ragdoll is entirely invisible, update it very rarely
       return;
@@ -219,7 +219,7 @@ void plJoltRagdollComponent::Update(bool bForce)
   RetrieveRagdollPose();
   SendAnimationPoseMsg();
 
-  m_ElapsedTimeSinceUpdate = plTime::Zero();
+  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 }
 
 plResult plJoltRagdollComponent::EnsureSkeletonIsKnown()
@@ -234,10 +234,10 @@ plResult plJoltRagdollComponent::EnsureSkeletonIsKnown()
   if (!m_hSkeleton.IsValid())
   {
     plLog::Error("No skeleton available for ragdoll on object '{}'.", GetOwner()->GetName());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plJoltRagdollComponent::HasCreatedLimbs() const
@@ -524,8 +524,7 @@ void plJoltRagdollComponent::RetrieveRagdollPose()
   const plVec3 vObjectScale = GetOwner()->GetGlobalScaling();
   const float fObjectScale = plMath::Max(vObjectScale.x, vObjectScale.y, vObjectScale.z);
 
-  plMat4 scale;
-  scale.SetScalingMatrix(rootTransform.m_vScale * fObjectScale);
+  plMat4 scale = plMat4::MakeScaling(rootTransform.m_vScale * fObjectScale);
 
   plHybridArray<plMat4, 64> relativeTransforms;
 
@@ -575,7 +574,7 @@ void plJoltRagdollComponent::RetrieveRagdollPose()
     else
     {
       const JPH::BodyID bodyId = m_pRagdoll->GetBodyID(m_Limbs[uiLimbIdx].m_uiPartIndex);
-      PLASMA_ASSERT_DEBUG(!bodyId.IsInvalid(), "Invalid limb -> body mapping");
+      PL_ASSERT_DEBUG(!bodyId.IsInvalid(), "Invalid limb -> body mapping");
       JPH::BodyLockRead bodyRead(pModule->GetJoltSystem()->GetBodyLockInterface(), bodyId);
 
       const plTransform limbGlobalPose = plJoltConversionUtils::ToTransform(bodyRead.GetBody().GetPosition(), bodyRead.GetBody().GetRotation());
@@ -587,7 +586,7 @@ void plJoltRagdollComponent::RetrieveRagdollPose()
 
 void plJoltRagdollComponent::CreateLimbsFromPose(const plMsgAnimationPoseUpdated& pose)
 {
-  PLASMA_ASSERT_DEBUG(!HasCreatedLimbs(), "Limbs are already created.");
+  PL_ASSERT_DEBUG(!HasCreatedLimbs(), "Limbs are already created.");
 
   if (EnsureSkeletonIsKnown().Failed())
     return;
@@ -606,7 +605,7 @@ void plJoltRagdollComponent::CreateLimbsFromPose(const plMsgAnimationPoseUpdated
   m_Limbs.SetCount(pose.m_ModelTransforms.GetCount());
 
   JPH::Ref<JPH::RagdollSettings> ragdollSettings = new JPH::RagdollSettings();
-  PLASMA_SCOPE_EXIT(m_pRagdollSettings = nullptr);
+  PL_SCOPE_EXIT(m_pRagdollSettings = nullptr);
 
   m_pRagdollSettings = ragdollSettings.GetPtr();
   m_pRagdollSettings->mParts.reserve(pSkeletonResource->GetDescriptor().m_Skeleton.GetJointCount());
@@ -673,8 +672,7 @@ void plJoltRagdollComponent::ApplyPartInitialVelocity()
       plVec3 vRotationDir = vVelocityDir.CrossRH(coord.m_vUpDir);
       vRotationDir.NormalizeIfNotZero(coord.m_vUpDir).IgnoreResult();
 
-      plVec3 vRotationAxis;
-      vRotationAxis.CreateRandomDeviation(rng, plAngle::Degree(30.0f), vRotationDir);
+      plVec3 vRotationAxis = plVec3::MakeRandomDeviation(rng, plAngle::MakeFromDegree(30.0f), vRotationDir);
       vRotationAxis *= rng.Bool() ? 1.0f : -1.0f;
 
       float fSpeed = rng.FloatVariance(m_fCenterAngularVelocity, 0.5f);
@@ -758,7 +756,7 @@ void plJoltRagdollComponent::ComputeLimbGlobalTransform(plTransform& transform, 
 {
   plTransform local;
   ComputeLimbModelSpaceTransform(local, pose, uiPoseJointIndex);
-  transform.SetGlobalTransform(GetOwner()->GetGlobalTransform(), local);
+  transform = plTransform::MakeGlobalTransform(GetOwner()->GetGlobalTransform(), local);
 }
 
 void plJoltRagdollComponent::CreateAllLimbs(const plSkeletonResource& skeletonResource, const plMsgAnimationPoseUpdated& pose, plJoltWorldModule& worldModule, float fObjectScale)
@@ -788,7 +786,7 @@ void plJoltRagdollComponent::CreateAllLimbs(const plSkeletonResource& skeletonRe
 
   // get the limb with the lowest index (ie. the first one added) as the root joint
   // and use it's transform to compute m_RootBodyLocalTransform
-  m_RootBodyLocalTransform.SetLocalTransform(GetOwner()->GetGlobalTransform(), limbConstructionInfos.GetIterator().Value().m_GlobalTransform);
+  m_RootBodyLocalTransform = plTransform::MakeLocalTransform(GetOwner()->GetGlobalTransform(), limbConstructionInfos.GetIterator().Value().m_GlobalTransform);
 }
 
 void plJoltRagdollComponent::CreateLimb(const plSkeletonResource& skeletonResource, plMap<plUInt16, LimbConstructionInfo>& limbConstructionInfos, plArrayPtr<const plSkeletonResourceGeometry*> geometries, const plMsgAnimationPoseUpdated& pose, plJoltWorldModule& worldModule, float fObjectScale)
@@ -866,8 +864,7 @@ JPH::Shape* plJoltRagdollComponent::CreateLimbGeoShape(const LimbConstructionInf
       shape.mHalfHeightOfCylinder = geo.m_Transform.m_vScale.x * 0.5f * fObjectScale;
       shape.mRadius = geo.m_Transform.m_vScale.z * fObjectScale;
 
-      plQuat qRot;
-      qRot.SetFromAxisAndAngle(plVec3::UnitZAxis(), plAngle::Degree(-90));
+      plQuat qRot = plQuat::MakeFromAxisAndAngle(plVec3::MakeAxisZ(), plAngle::MakeFromDegree(-90));
       out_shapeTransform.m_qRotation = out_shapeTransform.m_qRotation * qRot;
       out_shapeTransform.m_vPosition += qBoneDirAdjustment * plVec3(geo.m_Transform.m_vScale.x * 0.5f * fObjectScale, 0, 0);
 
@@ -878,7 +875,7 @@ JPH::Shape* plJoltRagdollComponent::CreateLimbGeoShape(const LimbConstructionInf
     case plSkeletonJointGeometryType::ConvexMesh:
     {
       // convex mesh vertices are in "global space" of the mesh file format
-      // so first move them into global space of the PLASMA convention (skeletonRootTransform)
+      // so first move them into global space of the PL convention (skeletonRootTransform)
       // then move them to the global position of the ragdoll object
       // then apply the inverse global transform of the limb, to move everything into local space of the limb
 
@@ -909,7 +906,7 @@ JPH::Shape* plJoltRagdollComponent::CreateLimbGeoShape(const LimbConstructionInf
     }
     break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   pShape->AddRef();
@@ -965,7 +962,7 @@ void plJoltRagdollComponent::CreateAllLimbGeoShapes(const LimbConstructionInfo& 
     plTransform shapeTransform;
     JPH::Shape* pSubShape = CreateLimbGeoShape(limbConstructionInfo, *geometries[0], pJoltMaterial, qBoneDirAdjustment, skeletonRootTransform, shapeTransform, fObjectScale);
 
-    if (!shapeTransform.IsEqual(plTransform::IdentityTransform(), 0.001f))
+    if (!shapeTransform.IsEqual(plTransform::MakeIdentity(), 0.001f))
     {
       JPH::RotatedTranslatedShapeSettings outerShape;
       outerShape.mInnerShapePtr = pSubShape;
@@ -1069,8 +1066,7 @@ void plJoltRagdollComponent::CreateLimbJoint(const plSkeletonJoint& thisJoint, v
 
     const plQuat offsetRot = thisJoint.GetLocalOrientation();
 
-    plQuat qTwist;
-    qTwist.SetFromAxisAndAngle(plVec3::UnitYAxis(), thisJoint.GetTwistLimitCenterAngle());
+    plQuat qTwist = plQuat::MakeFromAxisAndAngle(plVec3::MakeAxisY(), thisJoint.GetTwistLimitCenterAngle());
 
     pJoint->mDrawConstraintSize = 0.1f;
     pJoint->mPosition1 = pLink->mPosition;
@@ -1080,11 +1076,11 @@ void plJoltRagdollComponent::CreateLimbJoint(const plSkeletonJoint& thisJoint, v
     pJoint->mTwistMinAngle = -thisJoint.GetTwistLimitHalfAngle().GetRadian();
     pJoint->mTwistMaxAngle = thisJoint.GetTwistLimitHalfAngle().GetRadian();
     pJoint->mMaxFrictionTorque = m_fStiffnessFactor * thisJoint.GetStiffness();
-    pJoint->mPlaneAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * qTwist * plVec3::UnitZAxis()).Normalized();
-    pJoint->mPlaneAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * qTwist * plVec3::UnitZAxis()).Normalized();
-    pJoint->mTwistAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * plVec3::UnitYAxis()).Normalized();
-    pJoint->mTwistAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * plVec3::UnitYAxis()).Normalized();
+    pJoint->mPlaneAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * qTwist * plVec3::MakeAxisZ()).Normalized();
+    pJoint->mPlaneAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * qTwist * plVec3::MakeAxisZ()).Normalized();
+    pJoint->mTwistAxis1 = plJoltConversionUtils::ToVec3(tParent.m_qRotation * offsetRot * plVec3::MakeAxisY()).Normalized();
+    pJoint->mTwistAxis2 = plJoltConversionUtils::ToVec3(tThis.m_qRotation * plVec3::MakeAxisY()).Normalized();
   }
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltRagdollComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltRagdollComponent);

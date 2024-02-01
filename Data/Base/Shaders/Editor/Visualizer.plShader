@@ -4,11 +4,6 @@ ALL
 [PERMUTATIONS]
 
 RENDER_PASS
-GAMEOBJECT_VELOCITY = FALSE
-
-[MATERIALCONFIG]
-
-RenderDataCategory = SimpleOpaque
 
 [RENDERSTATE]
 
@@ -17,6 +12,10 @@ DepthWrite = true
 WireFrame = true
 CullMode = CullMode_None
 DepthTestFunc = CompareFunc_Less
+
+[MATERIALCONFIG]
+
+RenderDataCategory = SimpleOpaque
 
 [VERTEXSHADER]
 

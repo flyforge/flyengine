@@ -106,12 +106,12 @@ struct plArgHumanReadable
   }
 
   inline explicit plArgHumanReadable(const double value)
-    : plArgHumanReadable(value, 1000u, m_DefaultSuffixes, PLASMA_ARRAY_SIZE(m_DefaultSuffixes))
+    : plArgHumanReadable(value, 1000u, m_DefaultSuffixes, PL_ARRAY_SIZE(m_DefaultSuffixes))
   {
   }
 
   inline explicit plArgHumanReadable(const plInt64 value)
-    : plArgHumanReadable(static_cast<double>(value), 1000u, m_DefaultSuffixes, PLASMA_ARRAY_SIZE(m_DefaultSuffixes))
+    : plArgHumanReadable(static_cast<double>(value), 1000u, m_DefaultSuffixes, PL_ARRAY_SIZE(m_DefaultSuffixes))
   {
   }
 
@@ -125,14 +125,17 @@ struct plArgHumanReadable
 struct plArgFileSize : public plArgHumanReadable
 {
   inline explicit plArgFileSize(const plUInt64 value)
-    : plArgHumanReadable(static_cast<double>(value), 1024u, m_ByteSuffixes, PLASMA_ARRAY_SIZE(m_ByteSuffixes))
+    : plArgHumanReadable(static_cast<double>(value), 1024u, m_ByteSuffixes, PL_ARRAY_SIZE(m_ByteSuffixes))
   {
   }
 
   const char* const m_ByteSuffixes[6] = {"B", "KB", "MB", "GB", "TB", "PB"};
 };
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+/// \brief Converts a windows HRESULT into an error code and a human-readable error message.
+/// Pass in `GetLastError()` function or an HRESULT from another error source. Be careful when printing multiple values, a function could clear `GetLastError` as a side-effect so it is best to store it in a temp variable before printing a complex error message.
+/// \sa https://learn.microsoft.com/en-gb/windows/win32/api/errhandlingapi/nf-errhandlingapi-getlasterror
 struct plArgErrorCode
 {
   inline explicit plArgErrorCode(plUInt32 uiErrorCode)
@@ -142,8 +145,25 @@ struct plArgErrorCode
 
   plUInt32 m_ErrorCode;
 };
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrorCode& arg);
 
+#endif
+
+#if PL_ENABLED(PL_PLATFORM_LINUX)
+/// \brief Many Linux APIs will fill out error on failure. This converts the error into an error code and a human-readable error message.
+/// Pass in the linux `errno` symbol. Be careful when printing multiple values, a function could clear `errno` as a side-effect so it is best to store it in a temp variable before printing a complex error message.
+/// You may have to include #include <errno.h> use this.
+/// \sa https://man7.org/linux/man-pages/man3/errno.3.html
+struct plArgErrno
+{
+  inline explicit plArgErrno(plInt32 iErrno)
+    : m_iErrno(iErrno)
+  {
+  }
+
+  plInt32 m_iErrno;
+};
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgErrno& arg);
 #endif
 
 /// \brief Wraps a string that may contain sensitive information, such as user file paths.
@@ -166,46 +186,46 @@ struct plArgSensitive
   const char* m_szContext;
 
   using BuildStringCallback = plStringView (*)(char*, plUInt32, const plArgSensitive&);
-  PLASMA_FOUNDATION_DLL static BuildStringCallback s_BuildStringCB;
+  PL_FOUNDATION_DLL static BuildStringCallback s_BuildStringCB;
 
   /// \brief Set s_BuildStringCB to this function to enable scrambling of sensitive data.
-  PLASMA_FOUNDATION_DLL static plStringView BuildString_SensitiveUserData_Hash(char* szTmp, plUInt32 uiLength, const plArgSensitive& arg);
+  PL_FOUNDATION_DLL static plStringView BuildString_SensitiveUserData_Hash(char* szTmp, plUInt32 uiLength, const plArgSensitive& arg);
 };
 
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgI& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plInt64 iArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plInt32 iArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgU& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plUInt64 uiArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plUInt32 uiArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgF& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, double fArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, bool bArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const char* szArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const wchar_t* pArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plStringBuilder& sArg);
-PLASMA_FOUNDATION_DLL const plStringView& BuildString(char* szTmp, plUInt32 uiLength, const plStringView& sArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgC& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgP& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plResult arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plVariant& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plAngle& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plRational& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgHumanReadable& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plTime& arg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgSensitive& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgI& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plInt64 iArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plInt32 iArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgU& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plUInt64 uiArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plUInt32 uiArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgF& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, double fArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, bool bArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const char* szArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const wchar_t* pArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plStringBuilder& sArg);
+PL_FOUNDATION_DLL const plStringView& BuildString(char* szTmp, plUInt32 uiLength, const plStringView& sArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgC& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgP& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, plResult arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plVariant& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plAngle& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plRational& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgHumanReadable& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plTime& arg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgSensitive& arg);
 
 
-#if PLASMA_ENABLED(PLASMA_COMPILER_GCC) || PLASMA_ENABLED(PLASMA_COMPILER_CLANG)
+#if PL_ENABLED(PL_COMPILER_GCC) || PL_ENABLED(PL_COMPILER_CLANG)
 
 // on these platforms "long int" is a different type from "long long int"
 
-PLASMA_ALWAYS_INLINE plStringView BuildString(char* szTmp, plUInt32 uiLength, long int iArg)
+PL_ALWAYS_INLINE plStringView BuildString(char* szTmp, plUInt32 uiLength, long int iArg)
 {
   return BuildString(szTmp, uiLength, static_cast<plInt64>(iArg));
 }
 
-PLASMA_ALWAYS_INLINE plStringView BuildString(char* szTmp, plUInt32 uiLength, unsigned long int uiArg)
+PL_ALWAYS_INLINE plStringView BuildString(char* szTmp, plUInt32 uiLength, unsigned long int uiArg)
 {
   return BuildString(szTmp, uiLength, static_cast<plUInt64>(uiArg));
 }

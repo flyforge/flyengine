@@ -8,16 +8,17 @@
 class plQtAssetPropertyWidget;
 
 /// \brief A QLineEdit that is used by plQtAssetPropertyWidget
-class PLASMA_EDITORFRAMEWORK_DLL plQtAssetLineEdit : public QLineEdit
+class PL_EDITORFRAMEWORK_DLL plQtAssetLineEdit : public QLineEdit
 {
   Q_OBJECT
 
 public:
-  explicit plQtAssetLineEdit(QWidget* parent = nullptr);
+  explicit plQtAssetLineEdit(QWidget* pParent = nullptr);
   virtual void dragMoveEvent(QDragMoveEvent* e) override;
   virtual void dragEnterEvent(QDragEnterEvent* e) override;
   virtual void dropEvent(QDropEvent* e) override;
+  virtual void paintEvent(QPaintEvent* e) override;
 
-  plQtAssetPropertyWidget* m_pOwner;
+  plQtAssetPropertyWidget* m_pOwner = nullptr;
 };
 

@@ -18,7 +18,7 @@ plJoltTriggerComponentManager::~plJoltTriggerComponentManager() = default;
 
 void plJoltTriggerComponentManager::UpdateMovingTriggers()
 {
-  PLASMA_PROFILE_SCOPE("MovingTriggers");
+  PL_PROFILE_SCOPE("MovingTriggers");
 
   plJoltWorldModule* pModule = GetWorld()->GetModule<plJoltWorldModule>();
   auto& bodyInterface = pModule->GetJoltSystem()->GetBodyInterface();
@@ -36,20 +36,20 @@ void plJoltTriggerComponentManager::UpdateMovingTriggers()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltTriggerComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltTriggerComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("TriggerMessage", GetTriggerMessage, SetTriggerMessage)
+    PL_ACCESSOR_PROPERTY("TriggerMessage", GetTriggerMessage, SetTriggerMessage)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGESENDERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGESENDERS
   {
-    PLASMA_MESSAGE_SENDER(m_TriggerEventSender)
+    PL_MESSAGE_SENDER(m_TriggerEventSender)
   }
-  PLASMA_END_MESSAGESENDERS
+  PL_END_MESSAGESENDERS
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltTriggerComponent::plJoltTriggerComponent() = default;
@@ -141,9 +141,9 @@ void plJoltTriggerComponent::PostTriggerMessage(const plGameObjectHandle& hOther
   msg.m_sMessage = m_sTriggerMessage;
   msg.m_hTriggeringObject = hOtherObject;
 
-  m_TriggerEventSender.PostEventMessage(msg, this, GetOwner(), plTime::Zero(), plObjectMsgQueueType::PostTransform);
+  m_TriggerEventSender.PostEventMessage(msg, this, GetOwner(), plTime::MakeZero(), plObjectMsgQueueType::PostTransform);
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltTriggerComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltTriggerComponent);
 

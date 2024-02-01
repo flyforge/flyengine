@@ -14,7 +14,7 @@ public:
     : plAbstractMapProperty(szPropertyName)
   {
     m_Flags = plPropertyFlags::GetParameterFlags<Type>();
-    PLASMA_CHECK_AT_COMPILETIME_MSG(
+    PL_CHECK_AT_COMPILETIME_MSG(
       !std::is_pointer<Type>::value ||
         plVariant::TypeDeduction<typename plTypeTraits<Type>::NonConstReferencePointerType>::value == plVariantType::Invalid,
       "Pointer to standard types are not supported.");
@@ -39,8 +39,8 @@ public:
   plAccessorMapProperty(const char* szPropertyName, GetKeyRangeFunc getKeys, GetValueFunc getValue, InsertFunc insert, RemoveFunc remove)
     : plTypedMapProperty<Type>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getKeys != nullptr, "The getKeys function of a map property cannot be nullptr.");
-    PLASMA_ASSERT_DEBUG(getValue != nullptr, "The GetValueFunc function of a map property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getKeys != nullptr, "The getKeys function of a map property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getValue != nullptr, "The GetValueFunc function of a map property cannot be nullptr.");
 
     m_GetKeyRange = getKeys;
     m_GetValue = getValue;
@@ -76,13 +76,13 @@ public:
 
   virtual void Insert(void* pInstance, const char* szKey, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Insert)(szKey, *static_cast<const RealType*>(pObject));
   }
 
   virtual void Remove(void* pInstance, const char* szKey) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no remove function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no remove function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Remove)(szKey);
   }
 
@@ -130,7 +130,7 @@ public:
   plWriteAccessorMapProperty(const char* szPropertyName, GetContainerFunc getContainer, InsertFunc insert, RemoveFunc remove)
     : plTypedMapProperty<Type>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getContainer != nullptr, "The get count function of a map property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getContainer != nullptr, "The get count function of a map property cannot be nullptr.");
 
     m_GetContainer = getContainer;
     m_Insert = insert;
@@ -154,13 +154,13 @@ public:
 
   virtual void Insert(void* pInstance, const char* szKey, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Insert)(szKey, *static_cast<const RealType*>(pObject));
   }
 
   virtual void Remove(void* pInstance, const char* szKey) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no remove function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no remove function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Remove)(szKey);
   }
 
@@ -221,7 +221,7 @@ public:
   plMemberMapProperty(const char* szPropertyName, GetConstContainerFunc constGetter, GetContainerFunc getter)
     : plTypedMapProperty<RealType>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(constGetter != nullptr, "The const get count function of an array property cannot be nullptr.");
+    PL_ASSERT_DEBUG(constGetter != nullptr, "The const get count function of an array property cannot be nullptr.");
 
     m_ConstGetter = constGetter;
     m_Getter = getter;
@@ -234,21 +234,21 @@ public:
 
   virtual void Clear(void* pInstance) const override
   {
-    PLASMA_ASSERT_DEBUG(
+    PL_ASSERT_DEBUG(
       m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).Clear();
   }
 
   virtual void Insert(void* pInstance, const char* szKey, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(
+    PL_ASSERT_DEBUG(
       m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).Insert(szKey, *static_cast<const RealType*>(pObject));
   }
 
   virtual void Remove(void* pInstance, const char* szKey) const override
   {
-    PLASMA_ASSERT_DEBUG(
+    PL_ASSERT_DEBUG(
       m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).Remove(szKey);
   }

@@ -40,12 +40,12 @@ void plDependencyFile::AddFileDependency(plStringView sFile)
 
 void plDependencyFile::StoreCurrentTimeStamp()
 {
-  PLASMA_LOG_BLOCK("plDependencyFile::StoreCurrentTimeStamp");
+  PL_LOG_BLOCK("plDependencyFile::StoreCurrentTimeStamp");
 
   m_iMaxTimeStampStored = 0;
   m_uiSumTimeStampStored = 0;
 
-#if PLASMA_DISABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_DISABLED(PL_SUPPORTS_FILE_STATS)
   plLog::Warning("Trying to retrieve file time stamps on a platform that does not support it");
   return;
 #endif
@@ -64,7 +64,7 @@ void plDependencyFile::StoreCurrentTimeStamp()
 
 bool plDependencyFile::HasAnyFileChanged() const
 {
-#if PLASMA_DISABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_DISABLED(PL_SUPPORTS_FILE_STATS)
   plLog::Warning("Trying to retrieve file time stamps on a platform that does not support it");
   return true;
 #endif
@@ -109,7 +109,7 @@ plResult plDependencyFile::WriteDependencyFile(plStreamWriter& inout_stream) con
   for (const auto& sFile : m_AssetTransformDependencies)
     inout_stream << sFile;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDependencyFile::ReadDependencyFile(plStreamReader& inout_stream)
@@ -120,10 +120,10 @@ plResult plDependencyFile::ReadDependencyFile(plStreamReader& inout_stream)
   if (uiVersion > (plUInt8)plDependencyFileVersion::Current)
   {
     plLog::Error("Dependency file has incorrect file version ({0})", uiVersion);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(uiVersion <= (plUInt8)plDependencyFileVersion::Current, "Invalid file version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (plUInt8)plDependencyFileVersion::Current, "Invalid file version {0}", uiVersion);
 
   inout_stream >> m_iMaxTimeStampStored;
 
@@ -139,17 +139,17 @@ plResult plDependencyFile::ReadDependencyFile(plStreamReader& inout_stream)
   for (plUInt32 i = 0; i < m_AssetTransformDependencies.GetCount(); ++i)
     inout_stream >> m_AssetTransformDependencies[i];
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDependencyFile::RetrieveFileTimeStamp(plStringView sFile, plTimestamp& out_Result)
 {
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
   bool bExisted = false;
   auto it = s_FileTimestamps.FindOrAdd(sFile, &bExisted);
 
-  if (!bExisted || it.Value().m_LastCheck + plTime::Seconds(2.0) < plTime::Now())
+  if (!bExisted || it.Value().m_LastCheck + plTime::MakeFromSeconds(2.0) < plTime::Now())
   {
     it.Value().m_LastCheck = plTime::Now();
 
@@ -157,7 +157,7 @@ plResult plDependencyFile::RetrieveFileTimeStamp(plStringView sFile, plTimestamp
     if (plFileSystem::GetFileStats(sFile, stats).Failed())
     {
       plLog::Error("Could not query the file stats for '{0}'", plArgSensitive(sFile, "File"));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     it.Value().m_FileTimestamp = stats.m_LastModificationTime;
@@ -167,36 +167,34 @@ plResult plDependencyFile::RetrieveFileTimeStamp(plStringView sFile, plTimestamp
 
 #else
 
-  out_Result.SetInt64(0, plSIUnitOfTime::Second);
-  plLog::Warning("Trying to retrieve a file time stamp on a platform that does not support it (file: '{0}')", plArgSensitive(szFile, "File"));
+  out_Result = plTimestamp::MakeFromInt(0, plSIUnitOfTime::Second);
+  plLog::Warning("Trying to retrieve a file time stamp on a platform that does not support it (file: '{0}')", plArgSensitive(sFile, "File"));
 
 #endif
 
-  return out_Result.IsValid() ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return out_Result.IsValid() ? PL_SUCCESS : PL_FAILURE;
 }
 
 plResult plDependencyFile::WriteDependencyFile(plStringView sFile) const
 {
-  PLASMA_LOG_BLOCK("plDependencyFile::WriteDependencyFile", sFile);
+  PL_LOG_BLOCK("plDependencyFile::WriteDependencyFile", sFile);
 
   plFileWriter file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   return WriteDependencyFile(file);
 }
 
 plResult plDependencyFile::ReadDependencyFile(plStringView sFile)
 {
-  PLASMA_LOG_BLOCK("plDependencyFile::ReadDependencyFile", sFile);
+  PL_LOG_BLOCK("plDependencyFile::ReadDependencyFile", sFile);
 
   plFileReader file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   return ReadDependencyFile(file);
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_DependencyFile);

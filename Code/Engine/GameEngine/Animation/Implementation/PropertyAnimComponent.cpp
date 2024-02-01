@@ -10,40 +10,40 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_COMPONENT_TYPE(plPropertyAnimComponent, 3, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plPropertyAnimComponent, 3, plComponentMode::Dynamic)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_ACCESSOR_PROPERTY("Animation", GetPropertyAnimFile, SetPropertyAnimFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Property_Animation")),
-      PLASMA_MEMBER_PROPERTY("Playing", m_bPlaying)->AddAttributes(new plDefaultValueAttribute(true)),
-      PLASMA_ENUM_MEMBER_PROPERTY("Mode", plPropertyAnimMode, m_AnimationMode),
-      PLASMA_MEMBER_PROPERTY("RandomOffset", m_RandomOffset)->AddAttributes(new plClampValueAttribute(plTime::Seconds(0), plVariant())),
-      PLASMA_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(-10.0f, +10.0f)),
-      PLASMA_MEMBER_PROPERTY("RangeLow", m_AnimationRangeLow)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
-      PLASMA_MEMBER_PROPERTY("RangeHigh", m_AnimationRangeHigh)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::Seconds(60 * 60))),
-    } PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+      PL_ACCESSOR_PROPERTY("Animation", GetPropertyAnimFile, SetPropertyAnimFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Property_Animation")),
+      PL_MEMBER_PROPERTY("Playing", m_bPlaying)->AddAttributes(new plDefaultValueAttribute(true)),
+      PL_ENUM_MEMBER_PROPERTY("Mode", plPropertyAnimMode, m_AnimationMode),
+      PL_MEMBER_PROPERTY("RandomOffset", m_RandomOffset)->AddAttributes(new plClampValueAttribute(plTime::MakeFromSeconds(0), plVariant())),
+      PL_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(-10.0f, +10.0f)),
+      PL_MEMBER_PROPERTY("RangeLow", m_AnimationRangeLow)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
+      PL_MEMBER_PROPERTY("RangeHigh", m_AnimationRangeHigh)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::MakeFromSeconds(60 * 60))),
+    } PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Animation"),
-    } PLASMA_END_ATTRIBUTES;
-    PLASMA_BEGIN_MESSAGEHANDLERS
+    } PL_END_ATTRIBUTES;
+    PL_BEGIN_MESSAGEHANDLERS
     {
-      PLASMA_MESSAGE_HANDLER(plMsgSetPlaying, OnMsgSetPlaying),
-    } PLASMA_END_MESSAGEHANDLERS;
-    PLASMA_BEGIN_MESSAGESENDERS
+      PL_MESSAGE_HANDLER(plMsgSetPlaying, OnMsgSetPlaying),
+    } PL_END_MESSAGEHANDLERS;
+    PL_BEGIN_MESSAGESENDERS
     {
-      PLASMA_MESSAGE_SENDER(m_EventTrackMsgSender),
-      PLASMA_MESSAGE_SENDER(m_ReachedEndMsgSender),
-    } PLASMA_END_MESSAGESENDERS;
-    PLASMA_BEGIN_FUNCTIONS
-    {PLASMA_SCRIPT_FUNCTION_PROPERTY(PlayAnimationRange, In, "RangeLow", In, "RangeHigh")} PLASMA_END_FUNCTIONS;
+      PL_MESSAGE_SENDER(m_EventTrackMsgSender),
+      PL_MESSAGE_SENDER(m_ReachedEndMsgSender),
+    } PL_END_MESSAGESENDERS;
+    PL_BEGIN_FUNCTIONS
+    {PL_SCRIPT_FUNCTION_PROPERTY(PlayAnimationRange, In, "RangeLow", In, "RangeHigh")} PL_END_FUNCTIONS;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plPropertyAnimComponent::plPropertyAnimComponent()
 {
-  m_AnimationRangeHigh = plTime::Seconds(60.0 * 60.0);
+  m_AnimationRangeHigh = plTime::MakeFromSeconds(60.0 * 60.0);
 }
 
 plPropertyAnimComponent::~plPropertyAnimComponent() = default;
@@ -261,7 +261,7 @@ void plPropertyAnimComponent::CreateGameObjectBinding(const plFloatPropertyAnimE
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Invalid animation target type '{0}'", pAnim->m_Target.GetValue());
+    PL_REPORT_FAILURE("Invalid animation target type '{0}'", pAnim->m_Target.GetValue());
   }
 }
 
@@ -334,7 +334,7 @@ void plPropertyAnimComponent::CreateFloatPropertyBinding(const plFloatPropertyAn
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Invalid animation target type '{0}'", pAnim->m_Target.GetValue());
+    PL_REPORT_FAILURE("Invalid animation target type '{0}'", pAnim->m_Target.GetValue());
   }
 }
 
@@ -443,7 +443,7 @@ void plPropertyAnimComponent::ApplyAnimations(const plTime& tDiff)
 
 plTime plPropertyAnimComponent::ComputeAnimationLookup(plTime tDiff)
 {
-  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::Zero(), m_pAnimDesc->m_AnimationDuration);
+  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::MakeZero(), m_pAnimDesc->m_AnimationDuration);
   m_AnimationRangeHigh = plMath::Clamp(m_AnimationRangeHigh, m_AnimationRangeLow, m_pAnimDesc->m_AnimationDuration);
 
   const plTime duration = m_AnimationRangeHigh - m_AnimationRangeLow;
@@ -579,7 +579,7 @@ void plPropertyAnimComponent::StartPlayback()
   if (m_pAnimDesc == nullptr)
     return;
 
-  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::Zero(), m_pAnimDesc->m_AnimationDuration);
+  m_AnimationRangeLow = plMath::Clamp(m_AnimationRangeLow, plTime::MakeZero(), m_pAnimDesc->m_AnimationDuration);
   m_AnimationRangeHigh = plMath::Clamp(m_AnimationRangeHigh, m_AnimationRangeLow, m_pAnimDesc->m_AnimationDuration);
 
   // when starting with a negative speed, start at the end of the animation and play backwards
@@ -596,7 +596,7 @@ void plPropertyAnimComponent::StartPlayback()
   if (!m_RandomOffset.IsZero() && m_pAnimDesc->m_AnimationDuration.IsPositive())
   {
     // should the random offset also be scaled by the speed factor? I guess not
-    m_AnimationTime += plMath::Abs(m_fSpeed) * plTime::Seconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_RandomOffset.GetSeconds()));
+    m_AnimationTime += plMath::Abs(m_fSpeed) * plTime::MakeFromSeconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_RandomOffset.GetSeconds()));
 
     const plTime duration = m_AnimationRangeHigh - m_AnimationRangeLow;
 
@@ -646,14 +646,14 @@ void plPropertyAnimComponent::ApplySingleFloatAnimation(const FloatBinding& bind
   {
     auto pTyped = static_cast<const plTypedMemberProperty<plAngle>*>(binding.m_pMemberProperty);
 
-    pTyped->SetValue(binding.m_pObject, plAngle::Degree((float)fFinalValue));
+    pTyped->SetValue(binding.m_pObject, plAngle::MakeFromDegree((float)fFinalValue));
     return;
   }
   else if (pRtti == plGetStaticRTTI<plTime>())
   {
     auto pTyped = static_cast<const plTypedMemberProperty<plTime>*>(binding.m_pMemberProperty);
 
-    pTyped->SetValue(binding.m_pObject, plTime::Seconds(fFinalValue));
+    pTyped->SetValue(binding.m_pObject, plTime::MakeFromSeconds(fFinalValue));
     return;
   }
 
@@ -752,8 +752,7 @@ void plPropertyAnimComponent::ApplyFloatAnimation(const FloatBinding& binding, p
   {
     auto pTyped = static_cast<const plTypedMemberProperty<plQuat>*>(binding.m_pMemberProperty);
 
-    plQuat rot;
-    rot.SetFromEulerAngles(plAngle::Degree(fCurValue[0]), plAngle::Degree(fCurValue[1]), plAngle::Degree(fCurValue[2]));
+    plQuat rot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(fCurValue[0]), plAngle::MakeFromDegree(fCurValue[1]), plAngle::MakeFromDegree(fCurValue[2]));
 
     pTyped->SetValue(binding.m_pObject, rot);
   }
@@ -800,4 +799,4 @@ void plPropertyAnimComponent::Update()
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_PropertyAnimComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_PropertyAnimComponent);

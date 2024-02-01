@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plTexture2DChannelMappingEnum
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -30,11 +30,11 @@ struct plTexture2DChannelMappingEnum
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTexture2DChannelMappingEnum);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plTexture2DChannelMappingEnum);
 
 struct plTexture2DResolution
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -51,11 +51,11 @@ struct plTexture2DResolution
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTexture2DResolution);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plTexture2DResolution);
 
 struct plRenderTargetFormat
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -68,11 +68,11 @@ struct plRenderTargetFormat
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plRenderTargetFormat);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plRenderTargetFormat);
 
 class plTextureAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureAssetProperties, plReflectedClass);
 
 public:
   static void PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);

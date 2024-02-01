@@ -1,6 +1,6 @@
 #include <JoltPlugin/JoltPluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Physics/SurfaceResource.h>
 #include <Foundation/IO/ChunkStream.h>
 #include <Foundation/IO/MemoryStream.h>
@@ -43,16 +43,16 @@ public:
 };
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltMeshResource, 1, plRTTIDefaultAllocator<plJoltMeshResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltMeshResource, 1, plRTTIDefaultAllocator<plJoltMeshResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plJoltMeshResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plJoltMeshResource);
 // clang-format on
 
 plJoltMeshResource::plJoltMeshResource()
   : plResource(DoUpdate::OnMainThread, 1)
 {
-  m_Bounds = plBoundingBoxSphere(plVec3::ZeroVector(), plVec3::ZeroVector(), 0);
+  m_Bounds = plBoundingBoxSphere::MakeFromCenterExtents(plVec3::MakeZero(), plVec3::MakeZero(), 0);
 
   ModifyMemoryUsage().m_uiMemoryCPU = sizeof(plJoltMeshResource);
 }
@@ -65,7 +65,7 @@ plResourceLoadDesc plJoltMeshResource::UnloadData(Unload WhatToUnload)
   {
     if (pMesh != nullptr)
     {
-      PLASMA_DEFAULT_DELETE(pMesh);
+      PL_DEFAULT_DELETE(pMesh);
     }
   }
 
@@ -104,7 +104,7 @@ plResourceLoadDesc plJoltMeshResource::UnloadData(Unload WhatToUnload)
   return res;
 }
 
-PLASMA_DEFINE_AS_POD_TYPE(JPH::Vec3);
+PL_DEFINE_AS_POD_TYPE(JPH::Vec3);
 
 static void ReadConvexMesh(plStreamReader& inout_stream, plDataBuffer* pBuffer)
 {
@@ -112,7 +112,7 @@ static void ReadConvexMesh(plStreamReader& inout_stream, plDataBuffer* pBuffer)
 
   inout_stream >> uiSize;
   pBuffer->SetCountUninitialized(uiSize);
-  PLASMA_VERIFY(inout_stream.ReadBytes(pBuffer->GetData(), uiSize) == uiSize, "Reading cooked convex mesh data failed.");
+  PL_VERIFY(inout_stream.ReadBytes(pBuffer->GetData(), uiSize) == uiSize, "Reading cooked convex mesh data failed.");
 }
 
 static void AddStats(plStreamReader& inout_stream, plUInt32& ref_uiVertices, plUInt32& ref_uiTriangles)
@@ -128,7 +128,7 @@ static void AddStats(plStreamReader& inout_stream, plUInt32& ref_uiVertices, plU
 
 plResourceLoadDesc plJoltMeshResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plJoltMeshResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plJoltMeshResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -232,7 +232,7 @@ plResourceLoadDesc plJoltMeshResource::UpdateContent(plStreamReader* Stream)
 
       if (chunk.GetCurrentChunk().m_sChunkName == "ConvexMesh")
       {
-        m_ConvexMeshesData.PushBack(PLASMA_DEFAULT_NEW(plDataBuffer));
+        m_ConvexMeshesData.PushBack(PL_DEFAULT_NEW(plDataBuffer));
         m_ConvexMeshInstances.SetCount(1);
         ReadConvexMesh(chunk, m_ConvexMeshesData.PeekBack());
         AddStats(chunk, m_uiNumVertices, m_uiNumTriangles);
@@ -248,7 +248,7 @@ plResourceLoadDesc plJoltMeshResource::UpdateContent(plStreamReader* Stream)
 
         for (plUInt32 i = 0; i < uiNumParts; ++i)
         {
-          m_ConvexMeshesData.PushBack(PLASMA_DEFAULT_NEW(plDataBuffer));
+          m_ConvexMeshesData.PushBack(PL_DEFAULT_NEW(plDataBuffer));
           ReadConvexMesh(chunk, m_ConvexMeshesData.PeekBack());
           AddStats(chunk, m_uiNumVertices, m_uiNumTriangles);
         }
@@ -288,7 +288,7 @@ void plJoltMeshResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   }
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plJoltMeshResource, plJoltMeshResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plJoltMeshResource, plJoltMeshResourceDescriptor)
 {
   // creates just an empty mesh
 
@@ -380,7 +380,7 @@ JPH::Shape* plJoltMeshResource::InstantiateTriangleMesh(plUInt64 uiUserData, con
 {
   if (m_pTriangleMeshInstance == nullptr)
   {
-    PLASMA_ASSERT_DEV(!m_TriangleMeshData.IsEmpty(), "Jolt mesh resource doesn't contain a triangle mesh.");
+    PL_ASSERT_DEV(!m_TriangleMeshData.IsEmpty(), "Jolt mesh resource doesn't contain a triangle mesh.");
 
     plRawMemoryStreamReader memReader(m_TriangleMeshData);
 
@@ -391,7 +391,7 @@ JPH::Shape* plJoltMeshResource::InstantiateTriangleMesh(plUInt64 uiUserData, con
 
     if (shapeRes.HasError())
     {
-      PLASMA_REPORT_FAILURE("Failed to instantiate Jolt triangle mesh: {}", shapeRes.GetError().c_str());
+      PL_REPORT_FAILURE("Failed to instantiate Jolt triangle mesh: {}", shapeRes.GetError().c_str());
       return nullptr;
     }
 
@@ -450,7 +450,7 @@ JPH::Shape* plJoltMeshResource::InstantiateConvexPart(plUInt32 uiPartIdx, plUInt
 {
   if (m_ConvexMeshInstances[uiPartIdx] == nullptr)
   {
-    PLASMA_ASSERT_DEV(!m_ConvexMeshesData.IsEmpty(), "Jolt mesh resource doesn't contain any convex mesh.");
+    PL_ASSERT_DEV(!m_ConvexMeshesData.IsEmpty(), "Jolt mesh resource doesn't contain any convex mesh.");
 
     plRawMemoryStreamReader memReader(*m_ConvexMeshesData[uiPartIdx]);
 
@@ -461,7 +461,7 @@ JPH::Shape* plJoltMeshResource::InstantiateConvexPart(plUInt32 uiPartIdx, plUInt
 
     if (shapeRes.HasError())
     {
-      PLASMA_REPORT_FAILURE("Failed to instantiate Jolt triangle mesh: {}", shapeRes.GetError().c_str());
+      PL_REPORT_FAILURE("Failed to instantiate Jolt triangle mesh: {}", shapeRes.GetError().c_str());
       return nullptr;
     }
 
@@ -483,14 +483,14 @@ JPH::Shape* plJoltMeshResource::InstantiateConvexPart(plUInt32 uiPartIdx, plUInt
     }
 
 
-    PLASMA_ASSERT_DEBUG(materials.GetCount() <= 1, "Convex meshes should only have a single material. '{}' has {}", GetResourceDescription(), materials.GetCount());
+    PL_ASSERT_DEBUG(materials.GetCount() <= 1, "Convex meshes should only have a single material. '{}' has {}", GetResourceIdOrDescription(), materials.GetCount());
     shapeRes.Get()->RestoreMaterialState(materials.GetData(), materials.GetCount());
 
 
     m_ConvexMeshInstances[uiPartIdx] = shapeRes.Get();
     m_ConvexMeshInstances[uiPartIdx]->AddRef();
 
-    PLASMA_DEFAULT_DELETE(m_ConvexMeshesData[uiPartIdx]);
+    PL_DEFAULT_DELETE(m_ConvexMeshesData[uiPartIdx]);
   }
 
   {
@@ -510,5 +510,4 @@ JPH::Shape* plJoltMeshResource::InstantiateConvexPart(plUInt32 uiPartIdx, plUInt
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Resources_JoltMeshResource);
-
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Resources_JoltMeshResource);

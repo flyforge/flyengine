@@ -3,8 +3,8 @@
 #include <Core/Input/VirtualThumbStick.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVirtualThumbStick, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVirtualThumbStick, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plInt32 plVirtualThumbStick::s_iThumbsticks = 0;
@@ -18,7 +18,7 @@ plVirtualThumbStick::plVirtualThumbStick()
   SetInputArea(plVec2(0.0f), plVec2(0.0f), 0.0f, 0.0f);
 
   plStringBuilder s;
-  s.Format("Thumbstick_{0}", s_iThumbsticks);
+  s.SetFormat("Thumbstick_{0}", s_iThumbsticks);
   m_sName = s;
 
   ++s_iThumbsticks;
@@ -33,7 +33,7 @@ plVirtualThumbStick::~plVirtualThumbStick()
   plInputManager::RemoveInputAction(GetDynamicRTTI()->GetTypeName(), m_sName.GetData());
 }
 
-void plVirtualThumbStick::SetTriggerInputSlot(plVirtualThumbStick::Input::Enum Input, const plInputActionConfig* pCustomConfig)
+void plVirtualThumbStick::SetTriggerInputSlot(plVirtualThumbStick::Input::Enum input, const plInputActionConfig* pCustomConfig)
 {
   for (plInt32 i = 0; i < plInputActionConfig::MaxInputSlotAlternatives; ++i)
   {
@@ -42,7 +42,7 @@ void plVirtualThumbStick::SetTriggerInputSlot(plVirtualThumbStick::Input::Enum I
     m_ActionConfig.m_sInputSlotTrigger[i] = plInputSlot_None;
   }
 
-  switch (Input)
+  switch (input)
   {
     case plVirtualThumbStick::Input::Touchpoint:
     {
@@ -68,7 +68,7 @@ void plVirtualThumbStick::SetTriggerInputSlot(plVirtualThumbStick::Input::Enum I
     break;
     case plVirtualThumbStick::Input::Custom:
     {
-      PLASMA_ASSERT_DEV(pCustomConfig != nullptr, "Must pass a custom config, if you want to have a custom config.");
+      PL_ASSERT_DEV(pCustomConfig != nullptr, "Must pass a custom config, if you want to have a custom config.");
 
       for (plInt32 i = 0; i < plInputActionConfig::MaxInputSlotAlternatives; ++i)
       {
@@ -83,10 +83,9 @@ void plVirtualThumbStick::SetTriggerInputSlot(plVirtualThumbStick::Input::Enum I
   m_bConfigChanged = true;
 }
 
-void plVirtualThumbStick::SetThumbstickOutput(
-  plVirtualThumbStick::Output::Enum Output, plStringView sOutputLeft, plStringView sOutputRight, plStringView sOutputUp, plStringView sOutputDown)
+void plVirtualThumbStick::SetThumbstickOutput(plVirtualThumbStick::Output::Enum output, plStringView sOutputLeft, plStringView sOutputRight, plStringView sOutputUp, plStringView sOutputDown)
 {
-  switch (Output)
+  switch (output)
   {
     case plVirtualThumbStick::Output::Controller0_LeftStick:
     {
@@ -165,12 +164,12 @@ void plVirtualThumbStick::SetThumbstickOutput(
   m_bConfigChanged = true;
 }
 
-void plVirtualThumbStick::SetAreaFocusMode(plInputActionConfig::OnEnterArea OnEnter, plInputActionConfig::OnLeaveArea OnLeave)
+void plVirtualThumbStick::SetAreaFocusMode(plInputActionConfig::OnEnterArea onEnter, plInputActionConfig::OnLeaveArea onLeave)
 {
   m_bConfigChanged = true;
 
-  m_ActionConfig.m_OnEnterArea = OnEnter;
-  m_ActionConfig.m_OnLeaveArea = OnLeave;
+  m_ActionConfig.m_OnEnterArea = onEnter;
+  m_ActionConfig.m_OnLeaveArea = onLeave;
 }
 
 void plVirtualThumbStick::SetInputArea(
@@ -277,4 +276,4 @@ void plVirtualThumbStick::RegisterInputSlots()
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_VirtualThumbStick);
+PL_STATICLINK_FILE(Core, Core_Input_Implementation_VirtualThumbStick);

@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/SphereManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plSphereManipulatorAdapter::plSphereManipulatorAdapter() {}
+plSphereManipulatorAdapter::plSphereManipulatorAdapter() = default;
 
-plSphereManipulatorAdapter::~plSphereManipulatorAdapter() {}
+plSphereManipulatorAdapter::~plSphereManipulatorAdapter() = default;
 
 void plSphereManipulatorAdapter::Finalize()
 {
@@ -15,7 +15,7 @@ void plSphereManipulatorAdapter::Finalize()
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
 
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmo.SetTransformation(GetObjectTransform());
   m_Gizmo.SetVisible(m_bManipulatorIsVisible);

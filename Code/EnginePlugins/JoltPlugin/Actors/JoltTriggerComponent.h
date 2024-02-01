@@ -6,7 +6,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltTriggerComponentManager : public plComponentManager<class plJoltTriggerComponent, plBlockStorageType::FreeList>
+class PL_JOLTPLUGIN_DLL plJoltTriggerComponentManager : public plComponentManager<class plJoltTriggerComponent, plBlockStorageType::FreeList>
 {
 public:
   plJoltTriggerComponentManager(plWorld* pWorld);
@@ -35,9 +35,9 @@ private:
 ///
 /// The message plMsgTriggerTriggered is sent for every change. It references the object that entered or left the volume
 /// and it also contains a trigger-specific message string to identify what this should be used for.
-class PLASMA_JOLTPLUGIN_DLL plJoltTriggerComponent : public plJoltActorComponent
+class PL_JOLTPLUGIN_DLL plJoltTriggerComponent : public plJoltActorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltTriggerComponent, plJoltActorComponent, plJoltTriggerComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltTriggerComponent, plJoltActorComponent, plJoltTriggerComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

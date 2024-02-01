@@ -39,7 +39,7 @@ plQtImageDataAssetDocumentWindow::plQtImageDataAssetDocumentWindow(plImageDataAs
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("ImageDataAssetDockWidget");
-    pPropertyPanel->setWindowTitle("PROPERTIES");
+    pPropertyPanel->setWindowTitle("Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);

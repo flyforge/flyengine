@@ -1,4 +1,7 @@
 <RCC>
+  <qresource prefix="JoltPlugin">
+    <file>JoltPlugin.svg</file>
+  </qresource>
   <qresource prefix="AssetIcons">
     <file>Jolt_Collision_Mesh.svg</file>
     <file>Jolt_Collision_Mesh_Convex.svg</file>
@@ -22,13 +25,13 @@
 	<file>plJoltPointConstraintComponent.svg</file>
 	<file>plJoltDefaultCharacterComponent.svg</file>
 	<file>plJoltSliderConstraintComponent.svg</file>
-	<file>plJoltBoneColliderComponent.svg</file>
+	<file>plJoltHitboxComponent.svg</file>
 	<file>plJoltRopeComponent.svg</file>
 	<file>plJoltShapeCylinderComponent.svg</file>
 	<file>plJoltRagdollComponent.svg</file>
 	<file>plJoltSwingTwistConstraintComponent.svg</file>
 	<file>plJoltConeConstraintComponent.svg</file>
-    <file>plJoltClothSheetComponent.svg</file>
-  </qresource>
+	<file>plJoltClothSheetComponent.svg</file>
+  </qresource>  
 </RCC>
 

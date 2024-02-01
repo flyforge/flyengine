@@ -16,19 +16,19 @@ CreatorFuncInfo* GetCreatorFuncInfo(plStringView sRendererName)
   auto pFuncInfo = s_CreatorFuncs.GetValue(sRendererName);
   if (pFuncInfo == nullptr)
   {
-    plStringBuilder sPluginName = "plasmaRenderer";
+    plStringBuilder sPluginName = "plRenderer";
     sPluginName.Append(sRendererName);
 
-    PLASMA_VERIFY(plPlugin::LoadPlugin(sPluginName).Succeeded(), "Renderer plugin '{}' not found", sPluginName);
+    PL_VERIFY(plPlugin::LoadPlugin(sPluginName).Succeeded(), "Renderer plugin '{}' not found", sPluginName);
 
     pFuncInfo = s_CreatorFuncs.GetValue(sRendererName);
-    PLASMA_ASSERT_DEV(pFuncInfo != nullptr, "Renderer '{}' is not registered", sRendererName);
+    PL_ASSERT_DEV(pFuncInfo != nullptr, "Renderer '{}' is not registered", sRendererName);
   }
 
   return pFuncInfo;
 }
 
-plInternal::NewInstance<plGALDevice> plGALDeviceFactory::CreateDevice(plStringView sRendererName, plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& desc)
+plInternal::NewInstance<plGALDevice> plGALDeviceFactory::CreateDevice(plStringView sRendererName, plAllocator* pAllocator, const plGALDeviceCreationDescription& desc)
 {
   if (auto pFuncInfo = GetCreatorFuncInfo(sRendererName))
   {
@@ -54,13 +54,12 @@ void plGALDeviceFactory::RegisterCreatorFunc(const char* szRendererName, const C
   funcInfo.m_sShaderModel = szShaderModel;
   funcInfo.m_sShaderCompiler = szShaderCompiler;
 
-  PLASMA_VERIFY(s_CreatorFuncs.Insert(szRendererName, funcInfo) == false, "Creator func already registered");
+  PL_VERIFY(s_CreatorFuncs.Insert(szRendererName, funcInfo) == false, "Creator func already registered");
 }
 
 void plGALDeviceFactory::UnregisterCreatorFunc(const char* szRendererName)
 {
-  PLASMA_VERIFY(s_CreatorFuncs.Remove(szRendererName), "Creator func not registered");
+  PL_VERIFY(s_CreatorFuncs.Remove(szRendererName), "Creator func not registered");
 }
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Device_Implementation_DeviceFactory);

@@ -28,7 +28,7 @@ struct plBakedProbesComponent::RenderDebugViewTask : public plTask
 
   virtual void Execute() override
   {
-    PLASMA_ASSERT_DEV(m_PixelData.GetCount() == m_uiWidth * m_uiHeight, "Pixel data must be pre-allocated");
+    PL_ASSERT_DEV(m_PixelData.GetCount() == m_uiWidth * m_uiHeight, "Pixel data must be pre-allocated");
 
     plProgress progress;
     progress.m_Events.AddEventHandler([this](const plProgressEvent& e) {
@@ -51,7 +51,7 @@ struct plBakedProbesComponent::RenderDebugViewTask : public plTask
   plBakingInterface* m_pBakingInterface = nullptr;
 
   const plWorld* m_pWorld = nullptr;
-  plMat4 m_InverseViewProjection = plMat4::IdentityMatrix();
+  plMat4 m_InverseViewProjection = plMat4::MakeIdentity();
   plUInt32 m_uiWidth = 0;
   plUInt32 m_uiHeight = 0;
   plDynamicArray<plColorGammaUB> m_PixelData;
@@ -72,7 +72,7 @@ plBakedProbesComponentManager::~plBakedProbesComponentManager() = default;
 void plBakedProbesComponentManager::Initialize()
 {
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plBakedProbesComponentManager::RenderDebug, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plBakedProbesComponentManager::RenderDebug, this);
 
     this->RegisterUpdateFunction(desc);
   }
@@ -172,38 +172,38 @@ void plBakedProbesComponentManager::CreateDebugResources()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plBakedProbesComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Settings", m_Settings),
-    PLASMA_ACCESSOR_PROPERTY("ShowDebugOverlay", GetShowDebugOverlay, SetShowDebugOverlay)->AddAttributes(new plGroupAttribute("Debug")),
-    PLASMA_ACCESSOR_PROPERTY("ShowDebugProbes", GetShowDebugProbes, SetShowDebugProbes),
-    PLASMA_ACCESSOR_PROPERTY("UseTestPosition", GetUseTestPosition, SetUseTestPosition),
-    PLASMA_ACCESSOR_PROPERTY("TestPosition", GetTestPosition, SetTestPosition)
+    PL_MEMBER_PROPERTY("Settings", m_Settings),
+    PL_ACCESSOR_PROPERTY("ShowDebugOverlay", GetShowDebugOverlay, SetShowDebugOverlay)->AddAttributes(new plGroupAttribute("Debug")),
+    PL_ACCESSOR_PROPERTY("ShowDebugProbes", GetShowDebugProbes, SetShowDebugProbes),
+    PL_ACCESSOR_PROPERTY("UseTestPosition", GetUseTestPosition, SetUseTestPosition),
+    PL_ACCESSOR_PROPERTY("TestPosition", GetTestPosition, SetTestPosition)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(OnObjectCreated),
+    PL_FUNCTION_PROPERTY(OnObjectCreated),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Lighting/Baking"),
     new plLongOpAttribute("plLongOpProxy_BakeScene"),
     new plTransformManipulatorAttribute("TestPosition"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plBakedProbesComponent::plBakedProbesComponent() = default;
@@ -237,7 +237,7 @@ void plBakedProbesComponent::SetShowDebugOverlay(bool bShow)
 
   if (bShow && m_pRenderDebugViewTask == nullptr)
   {
-    m_pRenderDebugViewTask = PLASMA_DEFAULT_NEW(RenderDebugViewTask);
+    m_pRenderDebugViewTask = PL_DEFAULT_NEW(RenderDebugViewTask);
   }
 }
 
@@ -300,7 +300,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
   auto pManager = static_cast<const plBakedProbesComponentManager*>(GetOwningManager());
 
   auto addProbeRenderData = [&](const plVec3& vPosition, plCompressedSkyVisibility skyVisibility, plRenderData::Caching::Enum caching) {
-    plTransform transform = plTransform::IdentityTransform();
+    plTransform transform = plTransform::MakeIdentity();
     transform.m_vPosition = vPosition;
 
     plColor encodedSkyVisibility = plColor::Black;
@@ -309,12 +309,12 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(pOwner);
     {
       pRenderData->m_GlobalTransform = transform;
-      pRenderData->m_GlobalBounds.SetInvalid();
+      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
       pRenderData->m_hMesh = pManager->m_hDebugSphere;
       pRenderData->m_hMaterial = pManager->m_hDebugMaterial;
       pRenderData->m_Color = encodedSkyVisibility;
       pRenderData->m_uiSubMeshIndex = 0;
-      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(this, 0);
+      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(*this, 0);
 
       pRenderData->FillBatchIdAndSortingKey();
     }
@@ -325,7 +325,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
   if (m_bUseTestPosition)
   {
     plBakedProbesWorldModule::ProbeIndexData indexData;
-    if (pModule->GetProbeIndexData(m_vTestPosition, plVec3::UnitZAxis(), indexData).Failed())
+    if (pModule->GetProbeIndexData(m_vTestPosition, plVec3::MakeAxisZ(), indexData).Failed())
       return;
 
     if (true)
@@ -334,7 +334,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
       if (pProbeTree.GetAcquireResult() != plResourceAcquireResult::Final)
         return;
 
-      for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(indexData.m_probeIndices); ++i)
+      for (plUInt32 i = 0; i < PL_ARRAY_SIZE(indexData.m_probeIndices); ++i)
       {
         plVec3 pos = pProbeTree->GetProbePositions()[indexData.m_probeIndices[i]];
         plDebugRenderer::DrawCross(ref_msg.m_pView->GetHandle(), pos, 0.5f, plColor::Yellow);
@@ -465,10 +465,10 @@ void plBakedProbesComponent::RenderDebugOverlay()
 void plBakedProbesComponent::OnObjectCreated(const plAbstractObjectNode& node)
 {
   plStringBuilder sPrefix;
-  sPrefix.Format(":project/AssetCache/Generated/{0}", node.GetGuid());
+  sPrefix.SetFormat(":project/AssetCache/Generated/{0}", node.GetGuid());
 
   m_sProbeTreeResourcePrefix.Assign(sPrefix);
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesComponent);

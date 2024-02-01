@@ -1,7 +1,7 @@
 #include <RendererCore/Rasterizer/Thirdparty/Occluder.h>
 #include <RendererCore/Rasterizer/Thirdparty/Rasterizer.h>
 
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
 
 #  include <algorithm>
 #  include <cassert>
@@ -351,7 +351,7 @@ void Rasterizer::clear()
 
 bool Rasterizer::queryVisibility(__m128 boundsMin, __m128 boundsMax, bool& needsClipping)
 {
-  // Frustum culling is not necessary, because PLASMA only calls this functions for objects that are definitely inside the frustum
+  // Frustum culling is not necessary, because PL only calls this functions for objects that are definitely inside the frustum
   //
   // Frustum cull
   __m128 extents = _mm_sub_ps(boundsMax, boundsMin);
@@ -1550,4 +1550,3 @@ template void Rasterizer::rasterize<false>(const Occluder& occluder);
 #endif
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Rasterizer_Thirdparty_Rasterizer);

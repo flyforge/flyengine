@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_DISABLED(PL_PLATFORM_WINDOWS_UWP)
 #  error "uwp util header should only be included in UWP builds!"
 #endif
 
@@ -66,7 +66,7 @@ namespace plUwpUtils
     ComPtr<MapInterface> pIterable;
     pMapView->QueryInterface<MapInterface>(&pIterable);
 
-    PLASMA_ASSERT_DEBUG(pIterable != nullptr, "Invalid map iteration interface");
+    PL_ASSERT_DEBUG(pIterable != nullptr, "Invalid map iteration interface");
 
     ComPtr<IIterator<IKeyValuePair<KeyType, ValueType>*>> iterator;
     pIterable->First(&iterator);
@@ -126,7 +126,7 @@ namespace plUwpUtils
   {
     if (FAILED(ABI::Windows::Foundation::GetActivationFactory(HStringReference(szRuntimeClassName).Get(), &out_Ptr)))
     {
-      PLASMA_REPORT_FAILURE("Failed to retrieve activation factory (statics) for '{0}'", plStringUtf8(szRuntimeClassName).GetData());
+      PL_REPORT_FAILURE("Failed to retrieve activation factory (statics) for '{0}'", plStringUtf8(szRuntimeClassName).GetData());
       out_Ptr = nullptr;
     }
   }
@@ -141,14 +141,14 @@ namespace plUwpUtils
     ::RoActivateInstance(HStringReference(szRuntimeClassName).Get(), &out_Ptr);
   }
 
-  plMat4 PLASMA_FOUNDATION_DLL ConvertMat4(const ABI::Windows::Foundation::Numerics::Matrix4x4& in);
+  plMat4 PL_FOUNDATION_DLL ConvertMat4(const ABI::Windows::Foundation::Numerics::Matrix4x4& in);
 
-  plVec3 PLASMA_FOUNDATION_DLL ConvertVec3(const ABI::Windows::Foundation::Numerics::Vector3& in);
-  void PLASMA_FOUNDATION_DLL ConvertVec3(const plVec3& in, ABI::Windows::Foundation::Numerics::Vector3& out);
+  plVec3 PL_FOUNDATION_DLL ConvertVec3(const ABI::Windows::Foundation::Numerics::Vector3& in);
+  void PL_FOUNDATION_DLL ConvertVec3(const plVec3& in, ABI::Windows::Foundation::Numerics::Vector3& out);
 
-  plQuat PLASMA_FOUNDATION_DLL ConvertQuat(const ABI::Windows::Foundation::Numerics::Quaternion& in);
-  void PLASMA_FOUNDATION_DLL ConvertQuat(const plQuat& in, ABI::Windows::Foundation::Numerics::Quaternion& out);
+  plQuat PL_FOUNDATION_DLL ConvertQuat(const ABI::Windows::Foundation::Numerics::Quaternion& in);
+  void PL_FOUNDATION_DLL ConvertQuat(const plQuat& in, ABI::Windows::Foundation::Numerics::Quaternion& out);
 
-  plUuid PLASMA_FOUNDATION_DLL ConvertGuid(const GUID& in);
-  void PLASMA_FOUNDATION_DLL ConvertGuid(const plUuid& in, GUID& out);
+  plUuid PL_FOUNDATION_DLL ConvertGuid(const GUID& in);
+  void PL_FOUNDATION_DLL ConvertGuid(const plUuid& in, GUID& out);
 } // namespace plUwpUtils

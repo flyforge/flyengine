@@ -1365,9 +1365,9 @@ enum __SAL_YesNo
 #define _Pre_opt_ptrdiff_count_(ptr) _SAL1_1_Source_(_Pre_opt_ptrdiff_count_, (ptr), _Pre1_impl_(__maybenull_impl_notref) _Pre1_impl_(__count_x_impl(__ptrdiff(ptr))) _Pre_valid_impl_)
 
 
-// char * strncpy(_Out_cap_(_Count) _Post_maybpl_ char * _Dest, _In_z_ const char * _Source, _In_ size_t _Count)
+// char * strncpy(_Out_cap_(_Count) _Post_maybez_ char * _Dest, _In_z_ const char * _Source, _In_ size_t _Count)
 // buffer maybe zero-terminated after the call
-#define _Post_maybpl_ _SAL1_1_Source_(_Post_maybpl_, (), _Post1_impl_(__maybplterm_impl))
+#define _Post_maybez_ _SAL1_1_Source_(_Post_maybez_, (), _Post1_impl_(__maybezterm_impl))
 
 // e.g. SIZE_T HeapSize( _In_ HANDLE hHeap, DWORD dwFlags, _Pre_notnull_ _Post_bytecap_(return) LPCVOID lpMem );
 #define _Post_cap_(size) _SAL1_1_Source_(_Post_cap_, (size), _Post1_impl_(__cap_impl(size)))
@@ -1694,7 +1694,7 @@ __PRIMOP(char*, _Strstr_(__In_impl_ char*, __In_impl_ char*));
 #  define __notnull_impl_notref Null = SA_No, Notref = 1
 
 #  define __zterm_impl NullTerminated = SA_Yes
-#  define __maybplterm_impl NullTerminated = SA_Maybe
+#  define __maybezterm_impl NullTerminated = SA_Maybe
 #  define __maybzterm_impl NullTerminated = SA_Maybe
 #  define __notzterm_impl NullTerminated = SA_No
 
@@ -1816,7 +1816,7 @@ __PRIMOP(char*, _Strstr_(__In_impl_ char*, __In_impl_ char*));
 #  define __notnull_impl_notref _Notref_ _Notnull_impl_
 
 #  define __zterm_impl _SA_annotes1(SAL_nullTerminated, __yes)
-#  define __maybplterm_impl _SA_annotes1(SAL_nullTerminated, __maybe)
+#  define __maybezterm_impl _SA_annotes1(SAL_nullTerminated, __maybe)
 #  define __maybzterm_impl _SA_annotes1(SAL_nullTerminated, __maybe)
 #  define __notzterm_impl _SA_annotes1(SAL_nullTerminated, __no)
 

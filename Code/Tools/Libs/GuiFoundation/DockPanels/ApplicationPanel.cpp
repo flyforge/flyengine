@@ -9,8 +9,8 @@
 #include <ads/DockContainerWidget.h>
 #include <ads/DockWidgetTab.h>
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plQtApplicationPanel, plNoBase, 1, plRTTINoAllocator)
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plQtApplicationPanel, plNoBase, 1, plRTTINoAllocator)
+PL_END_STATIC_REFLECTED_TYPE;
 
 plDynamicArray<plQtApplicationPanel*> plQtApplicationPanel::s_AllApplicationPanels;
 
@@ -19,8 +19,8 @@ plQtApplicationPanel::plQtApplicationPanel(const char* szPanelName)
 {
   plStringBuilder sPanel("AppPanel_", szPanelName);
 
-  setObjectName(QString::fromUtf8(sPanel.GetData()));
-  setWindowTitle(QString::fromUtf8(plTranslate(szPanelName)).toUpper());
+  setObjectName(plMakeQString(sPanel));
+  setWindowTitle(plMakeQString(plTranslate(szPanelName)));
 
   s_AllApplicationPanels.PushBack(this);
 
@@ -73,13 +73,13 @@ void plQtApplicationPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e
   }
 }
 
-bool plQtApplicationPanel::event(QEvent* event)
+bool plQtApplicationPanel::event(QEvent* pEvent)
 {
-  if (event->type() == QEvent::ShortcutOverride)
+  if (pEvent->type() == QEvent::ShortcutOverride || pEvent->type() == QEvent::KeyPress)
   {
-    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
-    if (plQtProxy::TriggerDocumentAction(nullptr, keyEvent))
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(pEvent);
+    if (plQtProxy::TriggerDocumentAction(nullptr, keyEvent, pEvent->type() == QEvent::ShortcutOverride))
       return true;
   }
-  return ads::CDockWidget::event(event);
+  return ads::CDockWidget::event(pEvent);
 }

@@ -32,22 +32,22 @@ namespace plRmlUiInternal
     Extractor();
     virtual ~Extractor();
 
-    virtual void RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation) override;
+    virtual void RenderGeometry(Rml::Vertex* pVertices, int iNum_vertices, int* pIndices, int iNum_indices, Rml::TextureHandle hTexture, const Rml::Vector2f& translation) override;
 
-    virtual Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture) override;
-    virtual void RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry_handle, const Rml::Vector2f& translation) override;
-    virtual void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry_handle) override;
+    virtual Rml::CompiledGeometryHandle CompileGeometry(Rml::Vertex* pVertices, int iNum_vertices, int* pIndices, int iNum_indices, Rml::TextureHandle hTexture) override;
+    virtual void RenderCompiledGeometry(Rml::CompiledGeometryHandle hGeometry_handle, const Rml::Vector2f& translation) override;
+    virtual void ReleaseCompiledGeometry(Rml::CompiledGeometryHandle hGeometry_handle) override;
 
-    virtual void EnableScissorRegion(bool enable) override;
-    virtual void SetScissorRegion(int x, int y, int width, int height) override;
+    virtual void EnableScissorRegion(bool bEnable) override;
+    virtual void SetScissorRegion(int x, int y, int iWidth, int iHeight) override;
 
-    virtual bool LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source) override;
-    virtual bool GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions) override;
-    virtual void ReleaseTexture(Rml::TextureHandle texture_handle) override;
+    virtual bool LoadTexture(Rml::TextureHandle& ref_hTexture_handle, Rml::Vector2i& ref_texture_dimensions, const Rml::String& sSource) override;
+    virtual bool GenerateTexture(Rml::TextureHandle& ref_hTexture_handle, const Rml::byte* pSource, const Rml::Vector2i& source_dimensions) override;
+    virtual void ReleaseTexture(Rml::TextureHandle hTexture_handle) override;
 
-    virtual void SetTransform(const Rml::Matrix4f* transform) override;
+    virtual void SetTransform(const Rml::Matrix4f* pTransform) override;
 
-    void BeginExtraction(const plVec2I32& offset);
+    void BeginExtraction(const plVec2I32& vOffset);
     void EndExtraction();
 
     plRenderData* GetRenderData();
@@ -69,9 +69,9 @@ namespace plRmlUiInternal
     plIdTable<TextureId, plTexture2DResourceHandle> m_Textures;
     plTexture2DResourceHandle m_hFallbackTexture;
 
-    plVec2 m_vOffset = plVec2::ZeroVector();
+    plVec2 m_vOffset = plVec2::MakeZero();
 
-    plMat4 m_mTransform = plMat4::IdentityMatrix();
+    plMat4 m_mTransform = plMat4::MakeIdentity();
     plRectFloat m_ScissorRect = plRectFloat(0, 0);
     bool m_bEnableScissorRect = false;
 

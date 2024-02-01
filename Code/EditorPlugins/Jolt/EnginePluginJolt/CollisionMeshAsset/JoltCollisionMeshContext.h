@@ -7,14 +7,14 @@
 class plObjectSelectionMsgToEngine;
 class plRenderContext;
 
-class PLASMA_ENGINEPLUGINJOLT_DLL plJoltCollisionMeshContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINJOLT_DLL plJoltCollisionMeshContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltCollisionMeshContext, plEngineProcessDocumentContext);
 
 public:
   plJoltCollisionMeshContext();
 
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
 
   const plJoltMeshResourceHandle& GetMesh() const { return m_hMesh; }
 
@@ -23,12 +23,12 @@ public:
 protected:
   virtual void OnInitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
 
 private:
-  void QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg);
+  void QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg);
 
   plGameObject* m_pMeshObject;
   plJoltMeshResourceHandle m_hMesh;

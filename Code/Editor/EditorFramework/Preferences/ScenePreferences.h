@@ -2,9 +2,9 @@
 
 #include <EditorFramework/Preferences/Preferences.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plScenePreferencesUser : public plPreferences
+class PL_EDITORFRAMEWORK_DLL plScenePreferencesUser : public plPreferences
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScenePreferencesUser, plPreferences);
+  PL_ADD_DYNAMIC_REFLECTION(plScenePreferencesUser, plPreferences);
 
 public:
   plScenePreferencesUser();
@@ -12,7 +12,7 @@ public:
   void SetCameraSpeed(plInt32 value);
   plInt32 GetCameraSpeed() const { return m_iCameraSpeed; }
 
-  void SetShowGrid(bool show);
+  void SetShowGrid(bool bShow);
   bool GetShowGrid() const { return m_bShowGrid; }
 
 protected:

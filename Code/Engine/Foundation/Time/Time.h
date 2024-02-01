@@ -8,55 +8,58 @@
 /// It offers convenient functions to get the time in other units.
 /// plTime is a high-precision time using the OS specific high-precision timing functions
 /// and may thus be used for profiling as well as simulation code.
-struct PLASMA_FOUNDATION_DLL plTime
+struct PL_FOUNDATION_DLL plTime
 {
 public:
   /// \brief Gets the current time
   static plTime Now(); // [tested]
 
   /// \brief Creates an instance of plTime that was initialized from nanoseconds.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Nanoseconds(double fNanoseconds) { return plTime(fNanoseconds * 0.000000001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromNanoseconds(double fNanoseconds) { return plTime(fNanoseconds * 0.000000001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Nanoseconds(double fNanoseconds) { return plTime(fNanoseconds * 0.000000001); }
 
   /// \brief Creates an instance of plTime that was initialized from microseconds.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Microseconds(double fMicroseconds) { return plTime(fMicroseconds * 0.000001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromMicroseconds(double fMicroseconds) { return plTime(fMicroseconds * 0.000001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Microseconds(double fMicroseconds) { return plTime(fMicroseconds * 0.000001); }
 
   /// \brief Creates an instance of plTime that was initialized from milliseconds.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Milliseconds(double fMilliseconds) { return plTime(fMilliseconds * 0.001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromMilliseconds(double fMilliseconds) { return plTime(fMilliseconds * 0.001); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Milliseconds(double fMilliseconds) { return plTime(fMilliseconds * 0.001); }
 
   /// \brief Creates an instance of plTime that was initialized from seconds.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Seconds(double fSeconds) { return plTime(fSeconds); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromSeconds(double fSeconds) { return plTime(fSeconds); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Seconds(double fSeconds) { return plTime(fSeconds); }
 
   /// \brief Creates an instance of plTime that was initialized from minutes.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Minutes(double fMinutes) { return plTime(fMinutes * 60); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromMinutes(double fMinutes) { return plTime(fMinutes * 60); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Minutes(double fMinutes) { return plTime(fMinutes * 60); }
 
   /// \brief Creates an instance of plTime that was initialized from hours.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Hours(double fHours) { return plTime(fHours * 60 * 60); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeFromHours(double fHours) { return plTime(fHours * 60 * 60); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime Hours(double fHours) { return plTime(fHours * 60 * 60); }
 
   /// \brief Creates an instance of plTime that was initialized with zero.
-  PLASMA_ALWAYS_INLINE constexpr static plTime Zero() { return plTime(0.0); }
+  [[nodiscard]] PL_ALWAYS_INLINE constexpr static plTime MakeZero() { return plTime(0.0); }
 
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief The default constructor sets the time to zero.
-  PLASMA_ALWAYS_INLINE constexpr plTime() = default;
-
-  /// \brief Sets the time value to zero.
-  void SetZero();
+  PL_ALWAYS_INLINE constexpr plTime() = default;
 
   /// \brief Returns true if the stored time is exactly zero. That typically means the value was not changed from the default.
-  PLASMA_ALWAYS_INLINE constexpr bool IsZero() const { return m_fTime == 0.0; }
+  PL_ALWAYS_INLINE constexpr bool IsZero() const { return m_fTime == 0.0; }
 
   /// \brief Checks for a negative time value.
-  PLASMA_ALWAYS_INLINE constexpr bool IsNegative() const { return m_fTime < 0.0; }
+  PL_ALWAYS_INLINE constexpr bool IsNegative() const { return m_fTime < 0.0; }
 
   /// \brief Checks for a positive time value. This does not include zero.
-  PLASMA_ALWAYS_INLINE constexpr bool IsPositive() const { return m_fTime > 0.0; }
+  PL_ALWAYS_INLINE constexpr bool IsPositive() const { return m_fTime > 0.0; }
 
   /// \brief Returns true if the stored time is zero or negative.
-  PLASMA_ALWAYS_INLINE constexpr bool IsZeroOrNegative() const { return m_fTime <= 0.0; }
+  PL_ALWAYS_INLINE constexpr bool IsZeroOrNegative() const { return m_fTime <= 0.0; }
 
   /// \brief Returns true if the stored time is zero or positive.
-  PLASMA_ALWAYS_INLINE constexpr bool IsZeroOrPositive() const { return m_fTime >= 0.0; }
+  PL_ALWAYS_INLINE constexpr bool IsZeroOrPositive() const { return m_fTime >= 0.0; }
 
   /// \brief Returns the time as a float value (in seconds).
   ///
@@ -118,7 +121,7 @@ private:
   double m_fTime = 0.0;
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, Time);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, Time);
 
   static void Initialize();
 };

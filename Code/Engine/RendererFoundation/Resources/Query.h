@@ -3,7 +3,7 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/Resources/Resource.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALQuery : public plGALResource<plGALQueryCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALQuery : public plGALResource<plGALQueryCreationDescription>
 {
 public:
 protected:
@@ -18,5 +18,5 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 
-  bool m_bStarted;
+  bool m_bStarted = false;
 };

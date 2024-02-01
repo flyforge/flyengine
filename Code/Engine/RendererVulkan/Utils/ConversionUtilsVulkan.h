@@ -7,10 +7,10 @@
 
 #include <vulkan/vulkan.hpp>
 
-PLASMA_DEFINE_AS_POD_TYPE(vk::PresentModeKHR);
+PL_DEFINE_AS_POD_TYPE(vk::PresentModeKHR);
 
-/// \brief Helper functions to convert and extract Vulkan objects from PLASMA objects.
-class PLASMA_RENDERERVULKAN_DLL plConversionUtilsVulkan
+/// \brief Helper functions to convert and extract Vulkan objects from PL objects.
+class PL_RENDERERVULKAN_DLL plConversionUtilsVulkan
 {
 public:
   /// \brief Helper function to hash vk enums.
@@ -39,8 +39,11 @@ public:
   static bool IsStencilFormat(vk::Format format);
   static vk::PrimitiveTopology GetPrimitiveTopology(plEnum<plGALPrimitiveTopology> topology);
   static vk::ShaderStageFlagBits GetShaderStage(plGALShaderStage::Enum stage);
+  static vk::ShaderStageFlagBits GetShaderStages(plBitflags<plGALShaderStageFlags> stages);
   static vk::PipelineStageFlags GetPipelineStage(plGALShaderStage::Enum stage);
   static vk::PipelineStageFlags GetPipelineStage(vk::ShaderStageFlags flags);
+  static vk::PipelineStageFlags GetPipelineStages(plBitflags<plGALShaderStageFlags> stages);
+  static vk::DescriptorType GetDescriptorType(plGALShaderResourceType::Enum type);
 };
 
 #include <RendererVulkan/Utils/Implementation/ConversionUtilsVulkan.inl.h>

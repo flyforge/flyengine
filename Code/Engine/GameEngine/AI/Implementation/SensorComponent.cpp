@@ -7,48 +7,50 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgSensorDetectedObjectsChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSensorDetectedObjectsChanged, 1, plRTTIDefaultAllocator<plMsgSensorDetectedObjectsChanged>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgSensorDetectedObjectsChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSensorDetectedObjectsChanged, 1, plRTTIDefaultAllocator<plMsgSensorDetectedObjectsChanged>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY_READ_ONLY("DetectedObjects", m_DetectedObjects),
+    PL_ARRAY_MEMBER_PROPERTY_READ_ONLY("DetectedObjects", m_DetectedObjects),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plSensorComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plSensorComponent, 2)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("UpdateRate", plUpdateRate, m_UpdateRate),
-    PLASMA_ACCESSOR_PROPERTY("SpatialCategory", GetSpatialCategory, SetSpatialCategory)->AddAttributes(new plDynamicStringEnumAttribute("SpatialDataCategoryEnum")),
-    PLASMA_MEMBER_PROPERTY("TestVisibility", m_bTestVisibility)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plDefaultValueAttribute(plColorScheme::LightUI(plColorScheme::Orange))),
+    PL_ENUM_MEMBER_PROPERTY("UpdateRate", plUpdateRate, m_UpdateRate),
+    PL_ACCESSOR_PROPERTY("SpatialCategory", GetSpatialCategory, SetSpatialCategory)->AddAttributes(new plDynamicStringEnumAttribute("SpatialDataCategoryEnum")),
+    PL_SET_MEMBER_PROPERTY("IncludeTags", m_IncludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_SET_MEMBER_PROPERTY("ExcludeTags", m_ExcludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_MEMBER_PROPERTY("TestVisibility", m_bTestVisibility)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plDefaultValueAttribute(plColorScheme::LightUI(plColorScheme::Orange))),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("AI/Sensors"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 // clang-format on
 
 plSensorComponent::plSensorComponent() = default;
 plSensorComponent::~plSensorComponent() = default;
 
-void plSensorComponent::SerializeComponent(plWorldWriter& stream) const
+void plSensorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_sSpatialCategory;
   s << m_bTestVisibility;
@@ -56,13 +58,15 @@ void plSensorComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_UpdateRate;
   s << m_bShowDebugInfo;
   s << m_Color;
+  m_IncludeTags.Save(s);
+  m_ExcludeTags.Save(s);
 }
 
-void plSensorComponent::DeserializeComponent(plWorldReader& stream)
+void plSensorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_sSpatialCategory;
   s >> m_bTestVisibility;
@@ -70,6 +74,11 @@ void plSensorComponent::DeserializeComponent(plWorldReader& stream)
   s >> m_UpdateRate;
   s >> m_bShowDebugInfo;
   s >> m_Color;
+  if (uiVersion >= 2)
+  {
+    m_IncludeTags.Load(s, plTagRegistry::GetGlobalRegistry());
+    m_ExcludeTags.Load(s, plTagRegistry::GetGlobalRegistry());
+  }
 }
 
 void plSensorComponent::OnActivated()
@@ -85,8 +94,9 @@ void plSensorComponent::OnDeactivated()
 {
   auto pModule = GetWorld()->GetOrCreateModule<plSensorWorldModule>();
   pModule->RemoveComponentToSchedule(this);
+  pModule->RemoveComponentForDebugRendering(this);
 
-  UpdateDebugInfo();
+  SUPER::OnDeactivated();
 }
 
 void plSensorComponent::SetSpatialCategory(const char* szCategory)
@@ -152,7 +162,7 @@ plColorGammaUB plSensorComponent::GetColor() const
 
 bool plSensorComponent::RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWorldModule, plDynamicArray<plGameObject*>& out_objectsInSensorVolume, plDynamicArray<plGameObjectHandle>& ref_detectedObjects, bool bPostChangeMsg) const
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_LastOccludedObjectPositions.Clear();
 #endif
 
@@ -187,7 +197,7 @@ bool plSensorComponent::RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWo
       if (pPhysicsWorldModule->Raycast(hitResult, rayStart, rayDir, fDistance, params))
       {
         // hit something in between -> not visible
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
         m_LastOccludedObjectPositions.PushBack(rayEnd);
 #endif
 
@@ -215,7 +225,7 @@ bool plSensorComponent::RunSensorCheck(plPhysicsWorldModuleInterface* pPhysicsWo
   {
     plMsgSensorDetectedObjectsChanged msg;
     msg.m_DetectedObjects = m_LastDetectedObjects;
-    pSensorOwner->PostEventMessage(msg, this, plTime::Zero(), plObjectMsgQueueType::PostAsync);
+    pSensorOwner->PostEventMessage(msg, this, plTime::MakeZero(), plObjectMsgQueueType::PostAsync);
   }
 
   return true;
@@ -236,7 +246,11 @@ void plSensorComponent::UpdateSpatialCategory()
 void plSensorComponent::UpdateScheduling()
 {
   auto pModule = GetWorld()->GetOrCreateModule<plSensorWorldModule>();
-  pModule->AddComponentToSchedule(this, m_UpdateRate);
+
+  if (m_UpdateRate == plUpdateRate::Never)
+    pModule->RemoveComponentToSchedule(this);
+  else
+    pModule->AddComponentToSchedule(this, m_UpdateRate);
 }
 
 void plSensorComponent::UpdateDebugInfo()
@@ -255,53 +269,55 @@ void plSensorComponent::UpdateDebugInfo()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSensorSphereComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSensorSphereComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plSphereManipulatorAttribute("Radius"),
     new plSphereVisualizerAttribute("Radius", plColor::White, "Color"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSensorSphereComponent::plSensorSphereComponent() = default;
 plSensorSphereComponent::~plSensorSphereComponent() = default;
 
-void plSensorSphereComponent::SerializeComponent(plWorldWriter& stream) const
+void plSensorSphereComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fRadius;
 }
 
-void plSensorSphereComponent::DeserializeComponent(plWorldReader& stream)
+void plSensorSphereComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_fRadius;
 }
 
-void plSensorSphereComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const
+void plSensorSphereComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const
 {
   const plGameObject* pOwner = GetOwner();
 
   const float scale = pOwner->GetGlobalTransformSimd().GetMaxScale();
-  plBoundingSphere sphere = plBoundingSphere(pOwner->GetGlobalPosition(), m_fRadius * scale);
+  const plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(pOwner->GetGlobalPosition(), m_fRadius * scale);
 
   plSpatialSystem::QueryParams params;
   params.m_uiCategoryBitmask = m_SpatialCategory.GetBitmask();
+  params.m_pIncludeTags = &m_IncludeTags;
+  params.m_pExcludeTags = &m_ExcludeTags;
 
   plSimdMat4f toLocalSpace = pOwner->GetGlobalTransformSimd().GetAsMat4().GetInverse();
   plSimdFloat radiusSquared = m_fRadius * m_fRadius;
@@ -312,7 +328,7 @@ void plSensorSphereComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObje
 
     if (bInRadius)
     {
-      out_Objects.PushBack(pObject);
+      out_objects.PushBack(pObject);
     }
 
     return plVisitorExecution::Continue; });
@@ -320,54 +336,54 @@ void plSensorSphereComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObje
 
 void plSensorSphereComponent::DebugDrawSensorShape() const
 {
-  plBoundingSphere sphere = plBoundingSphere(plVec3::ZeroVector(), m_fRadius);
+  const plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius);
   plDebugRenderer::DrawLineSphere(GetWorld(), sphere, m_Color, GetOwner()->GetGlobalTransform());
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSensorCylinderComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSensorCylinderComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Height", m_fHeight)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Height", m_fHeight)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCylinderVisualizerAttribute(plBasisAxis::PositiveZ, "Height", "Radius", plColor::White, "Color"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSensorCylinderComponent::plSensorCylinderComponent() = default;
 plSensorCylinderComponent::~plSensorCylinderComponent() = default;
 
-void plSensorCylinderComponent::SerializeComponent(plWorldWriter& stream) const
+void plSensorCylinderComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fRadius;
   s << m_fHeight;
 }
 
-void plSensorCylinderComponent::DeserializeComponent(plWorldReader& stream)
+void plSensorCylinderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_fRadius;
   s >> m_fHeight;
 }
 
-void plSensorCylinderComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const
+void plSensorCylinderComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const
 {
   const plGameObject* pOwner = GetOwner();
 
@@ -375,10 +391,12 @@ void plSensorCylinderComponent::GetObjectsInSensorVolume(plDynamicArray<plGameOb
   const float xyScale = plMath::Max(scale.x, scale.y);
 
   const float sphereRadius = plVec2(m_fRadius * xyScale, m_fHeight * 0.5f * scale.z).GetLength();
-  plBoundingSphere sphere = plBoundingSphere(pOwner->GetGlobalPosition(), sphereRadius);
+  const plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(pOwner->GetGlobalPosition(), sphereRadius);
 
   plSpatialSystem::QueryParams params;
   params.m_uiCategoryBitmask = m_SpatialCategory.GetBitmask();
+  params.m_pIncludeTags = &m_IncludeTags;
+  params.m_pExcludeTags = &m_ExcludeTags;
 
   plSimdMat4f toLocalSpace = pOwner->GetGlobalTransformSimd().GetAsMat4().GetInverse();
   plSimdFloat radiusSquared = m_fRadius * m_fRadius;
@@ -391,7 +409,7 @@ void plSensorCylinderComponent::GetObjectsInSensorVolume(plDynamicArray<plGameOb
 
     if (bInRadius && bInHeight)
     {
-      out_Objects.PushBack(pObject);
+      out_objects.PushBack(pObject);
     }
 
     return plVisitorExecution::Continue; });
@@ -401,8 +419,7 @@ void plSensorCylinderComponent::DebugDrawSensorShape() const
 {
   plTransform pt = GetOwner()->GetGlobalTransform();
 
-  plQuat r;
-  r.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90.0f));
+  plQuat r = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90.0f));
   plTransform t = plTransform(plVec3(0, 0, -0.5f * m_fHeight * pt.m_vScale.z), r, plVec3(pt.m_vScale.z, pt.m_vScale.y, pt.m_vScale.x));
 
   pt.m_vScale.Set(1);
@@ -415,52 +432,54 @@ void plSensorCylinderComponent::DebugDrawSensorShape() const
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSensorConeComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSensorConeComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("NearDistance", m_fNearDistance)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("FarDistance", m_fFarDistance)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(90.0f)), new plClampValueAttribute(0.0f, plAngle::Degree(180.0f))),
+    PL_MEMBER_PROPERTY("NearDistance", m_fNearDistance)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("FarDistance", m_fFarDistance)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(90.0f)), new plClampValueAttribute(0.0f, plAngle::MakeFromDegree(180.0f))),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSensorConeComponent::plSensorConeComponent() = default;
 plSensorConeComponent::~plSensorConeComponent() = default;
 
-void plSensorConeComponent::SerializeComponent(plWorldWriter& stream) const
+void plSensorConeComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fNearDistance;
   s << m_fFarDistance;
   s << m_Angle;
 }
 
-void plSensorConeComponent::DeserializeComponent(plWorldReader& stream)
+void plSensorConeComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_fNearDistance;
   s >> m_fFarDistance;
   s >> m_Angle;
 }
 
-void plSensorConeComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_Objects) const
+void plSensorConeComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject*>& out_objects) const
 {
   const plGameObject* pOwner = GetOwner();
 
   const float scale = pOwner->GetGlobalTransformSimd().GetMaxScale();
-  plBoundingSphere sphere = plBoundingSphere(pOwner->GetGlobalPosition(), m_fFarDistance * scale);
+  const plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(pOwner->GetGlobalPosition(), m_fFarDistance * scale);
 
   plSpatialSystem::QueryParams params;
   params.m_uiCategoryBitmask = m_SpatialCategory.GetBitmask();
+  params.m_pIncludeTags = &m_IncludeTags;
+  params.m_pExcludeTags = &m_ExcludeTags;
 
   plSimdMat4f toLocalSpace = pOwner->GetGlobalTransformSimd().GetAsMat4().GetInverse();
   const plSimdFloat nearSquared = m_fNearDistance * m_fNearDistance;
@@ -477,7 +496,7 @@ void plSensorConeComponent::GetObjectsInSensorVolume(plDynamicArray<plGameObject
 
     if (bInDistance && bInAngle)
     {
-      out_Objects.PushBack(pObject);
+      out_objects.PushBack(pObject);
     }
 
     return plVisitorExecution::Continue; });
@@ -493,9 +512,9 @@ void plSensorConeComponent::DebugDrawSensorShape() const
   plDebugRenderer::Line lines[NUM_LINES];
   plUInt32 curLine = 0;
 
-  const plUInt32 numSegments = plMath::Clamp(static_cast<plUInt32>(m_Angle / plAngle::Degree(180)) * MAX_SEGMENTS, MIN_SEGMENTS, MAX_SEGMENTS);
+  const plUInt32 numSegments = plMath::Clamp(static_cast<plUInt32>(m_Angle / plAngle::MakeFromDegree(180) * MAX_SEGMENTS), MIN_SEGMENTS, MAX_SEGMENTS);
   const plAngle stepAngle = m_Angle / static_cast<float>(numSegments);
-  const plAngle circleStepAngle = plAngle::Degree(360.0f / CIRCLE_SEGMENTS);
+  const plAngle circleStepAngle = plAngle::MakeFromDegree(360.0f / CIRCLE_SEGMENTS);
 
   for (plUInt32 i = 0; i < 2; ++i)
   {
@@ -513,7 +532,7 @@ void plSensorConeComponent::DebugDrawSensorShape() const
     }
     else
     {
-      q.SetFromAxisAndAngle(plVec3::UnitXAxis(), plAngle::Degree(90));
+      q = plQuat::MakeFromAxisAndAngle(plVec3::MakeAxisX(), plAngle::MakeFromDegree(90));
       fX *= m_fFarDistance;
       fCircleRadius *= m_fFarDistance;
     }
@@ -555,7 +574,7 @@ void plSensorConeComponent::DebugDrawSensorShape() const
       }
     }
 
-    curAngle = plAngle::Degree(0.0f);
+    curAngle = plAngle::MakeFromDegree(0.0f);
     for (plUInt32 s = 0; s < CIRCLE_SEGMENTS; ++s)
     {
       const plAngle nextAngle = curAngle + circleStepAngle;
@@ -577,16 +596,16 @@ void plSensorConeComponent::DebugDrawSensorShape() const
     }
   }
 
-  PLASMA_ASSERT_DEV(curLine <= NUM_LINES, "");
+  PL_ASSERT_DEV(curLine <= NUM_LINES, "");
   plDebugRenderer::DrawLines(GetWorld(), plMakeArrayPtr(lines, curLine), m_Color, GetOwner()->GetGlobalTransform());
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plSensorWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSensorWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_WORLD_MODULE(plSensorWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSensorWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSensorWorldModule::plSensorWorldModule(plWorld* pWorld)
@@ -599,7 +618,7 @@ void plSensorWorldModule::Initialize()
   SUPER::Initialize();
 
   {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSensorWorldModule::UpdateSensors, this);
+    auto updateDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSensorWorldModule::UpdateSensors, this);
     updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::Async;
     updateDesc.m_bOnlyUpdateWhenSimulating = true;
 
@@ -607,7 +626,7 @@ void plSensorWorldModule::Initialize()
   }
 
   {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSensorWorldModule::DebugDrawSensors, this);
+    auto updateDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSensorWorldModule::DebugDrawSensors, this);
     updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostTransform;
 
     RegisterUpdateFunction(updateDesc);
@@ -618,6 +637,7 @@ void plSensorWorldModule::Initialize()
 
 void plSensorWorldModule::AddComponentToSchedule(plSensorComponent* pComponent, plUpdateRate::Enum updateRate)
 {
+  PL_ASSERT_DEBUG(updateRate != plUpdateRate::Never, "Invalid update rate for scheduling");
   m_Scheduler.AddOrUpdateWork(pComponent->GetHandle(), plUpdateRate::GetInterval(updateRate));
 }
 
@@ -649,71 +669,11 @@ void plSensorWorldModule::UpdateSensors(const plWorldModule::UpdateContext& cont
   m_Scheduler.Update(deltaTime, [this](const plComponentHandle& hComponent, plTime deltaTime) {
     const plWorld* pWorld = GetWorld();
     const plSensorComponent* pSensorComponent = nullptr;
-    PLASMA_VERIFY(pWorld->TryGetComponent(hComponent, pSensorComponent), "Invalid component handle");
+    PL_VERIFY(pWorld->TryGetComponent(hComponent, pSensorComponent), "Invalid component handle");
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-    pSensorComponent->m_LastOccludedObjectPositions.Clear();
-#endif
-
-    m_ObjectsInSensorVolume.Clear();
-
-    pSensorComponent->GetObjectsInSensorVolume(m_ObjectsInSensorVolume);
-    const plGameObject* pSensorOwner = pSensorComponent->GetOwner();
-
-    m_DetectedObjects.Clear();
-
-    if (pSensorComponent->m_bTestVisibility)
-    {
-      const plVec3 rayStart = pSensorOwner->GetGlobalPosition();
-      for (auto pObject : m_ObjectsInSensorVolume)
-      {
-        const plVec3 rayEnd = pObject->GetGlobalPosition();
-        plVec3 rayDir = rayEnd - rayStart;
-        const float fDistance = rayDir.GetLengthAndNormalize();
-
-        plPhysicsCastResult hitResult;
-        plPhysicsQueryParameters params(pSensorComponent->m_uiCollisionLayer);
-        params.m_bIgnoreInitialOverlap = true;
-        params.m_ShapeTypes = plPhysicsShapeType::Default;
-
-        // TODO: probably best to expose the plPhysicsShapeType bitflags on the component
-        params.m_ShapeTypes.Remove(plPhysicsShapeType::Rope);
-        params.m_ShapeTypes.Remove(plPhysicsShapeType::Ragdoll);
-        params.m_ShapeTypes.Remove(plPhysicsShapeType::Trigger);
-        params.m_ShapeTypes.Remove(plPhysicsShapeType::Query);
-        params.m_ShapeTypes.Remove(plPhysicsShapeType::Character);
-
-        if (m_pPhysicsWorldModule->Raycast(hitResult, rayStart, rayDir, fDistance, params))
-        {
-          // hit something in between -> not visible
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-          pSensorComponent->m_LastOccludedObjectPositions.PushBack(rayEnd);
-#endif
-
-          continue;
-        }
-
-        m_DetectedObjects.PushBack(pObject->GetHandle());
-      }
-    }
-    else
-    {
-      for (auto pObject : m_ObjectsInSensorVolume)
-      {
-        m_DetectedObjects.PushBack(pObject->GetHandle());
-      }
-    }
-
-    m_DetectedObjects.Sort();
-    if (m_DetectedObjects != pSensorComponent->m_LastDetectedObjects)
-    {
-      m_DetectedObjects.Swap(pSensorComponent->m_LastDetectedObjects);
-
-      plMsgSensorDetectedObjectsChanged msg;
-      msg.m_DetectedObjects = pSensorComponent->m_LastDetectedObjects;
-
-      pSensorOwner->PostEventMessage(msg, pSensorComponent, plTime::Zero(), plObjectMsgQueueType::PostAsync);
-    } });
+    pSensorComponent->RunSensorCheck(m_pPhysicsWorldModule, m_ObjectsInSensorVolume, m_DetectedObjects, true);
+    //
+  });
 }
 
 void plSensorWorldModule::DebugDrawSensors(const plWorldModule::UpdateContext& context)
@@ -726,7 +686,7 @@ void plSensorWorldModule::DebugDrawSensors(const plWorldModule::UpdateContext& c
     lines.Clear();
 
     const plSensorComponent* pSensorComponent = nullptr;
-    PLASMA_VERIFY(pWorld->TryGetComponent(hComponent, pSensorComponent), "Invalid component handle");
+    PL_VERIFY(pWorld->TryGetComponent(hComponent, pSensorComponent), "Invalid component handle");
 
     pSensorComponent->DebugDrawSensorShape();
 
@@ -740,7 +700,7 @@ void plSensorWorldModule::DebugDrawSensors(const plWorldModule::UpdateContext& c
       lines.PushBack({sensorPos, pObject->GetGlobalPosition(), plColor::Lime});
     }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     for (const plVec3& occludedPos : pSensorComponent->m_LastOccludedObjectPositions)
     {
       lines.PushBack({sensorPos, occludedPos, plColor::Red});
@@ -750,3 +710,6 @@ void plSensorWorldModule::DebugDrawSensors(const plWorldModule::UpdateContext& c
     plDebugRenderer::DrawLines(pWorld, lines, plColor::White);
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_AI_Implementation_SensorComponent);

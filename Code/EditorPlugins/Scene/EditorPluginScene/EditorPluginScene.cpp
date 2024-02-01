@@ -1,5 +1,6 @@
 #include <EditorPluginScene/EditorPluginScenePCH.h>
 
+#include <EditorFramework/Actions/AssetActions.h>
 #include <EditorFramework/Actions/GameObjectDocumentActions.h>
 #include <EditorFramework/Actions/GameObjectSelectionActions.h>
 #include <EditorFramework/Actions/ProjectActions.h>
@@ -19,16 +20,19 @@
 #include <EditorPluginScene/Visualizers/PointLightVisualizerAdapter.h>
 #include <EditorPluginScene/Visualizers/SpotLightVisualizerAdapter.h>
 #include <GameEngine/Configuration/RendererProfileConfigs.h>
+#include <GameEngine/Gameplay/GreyBoxComponent.h>
 #include <GuiFoundation/Action/ActionMapManager.h>
 #include <GuiFoundation/Action/CommandHistoryActions.h>
 #include <GuiFoundation/Action/DocumentActions.h>
 #include <GuiFoundation/Action/EditActions.h>
 #include <GuiFoundation/Action/StandardMenus.h>
+#include <GuiFoundation/PropertyGrid/Implementation/PropertyWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 #include <GuiFoundation/UIServices/DynamicStringEnum.h>
 #include <RendererCore/Lights/BoxReflectionProbeComponent.h>
 #include <RendererCore/Lights/PointLightComponent.h>
 #include <RendererCore/Lights/SpotLightComponent.h>
+#include <RendererCore/Utils/CoreRenderProfile.h>
 #include <ToolsFoundation/Settings/ToolsTagRegistry.h>
 
 void OnDocumentManagerEvent(const plDocumentManager::Event& e)
@@ -39,11 +43,11 @@ void OnDocumentManagerEvent(const plDocumentManager::Event& e)
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plScene2Document>())
       {
-        plQtDocumentWindow* pDocWnd = new plQtScene2DocumentWindow(static_cast<plScene2Document*>(e.m_pDocument));
+        new plQtScene2DocumentWindow(static_cast<plScene2Document*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
       else if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plSceneDocument>())
       {
-        plQtDocumentWindow* pDocWnd = new plQtSceneDocumentWindow(static_cast<plSceneDocument*>(e.m_pDocument));
+        new plQtSceneDocumentWindow(static_cast<plSceneDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -53,9 +57,9 @@ void OnDocumentManagerEvent(const plDocumentManager::Event& e)
   }
 }
 
-void ToolsProjectEventHandler(const PlasmaEditorAppEvent& e)
+void ToolsProjectEventHandler(const plEditorAppEvent& e)
 {
-  if (e.m_Type == PlasmaEditorAppEvent::Type::BeforeApplyDataDirectories)
+  if (e.m_Type == plEditorAppEvent::Type::BeforeApplyDataDirectories)
   {
     // plQtEditorApp::GetSingleton()->AddPluginDataDirDependency(">sdk/Data/Base", "base");
   }
@@ -85,7 +89,26 @@ void AssetCuratorEventHandler(const plAssetCuratorEvent& e)
 
 void plCameraComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
 void plSkyLightComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
+void plGreyBoxComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
+void plLightComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
 void plSceneDocument_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
+
+QImage SliderImageGenerator_LightTemperature(plUInt32 uiWidth, plUInt32 uiHeight, double fMinValue, double fMaxValue)
+{
+  // can use a 1D image, height doesn't need to be all used
+  QImage image = QImage(uiWidth, 1, QImage::Format::Format_RGB32);
+
+  for (int x = 0; x < uiWidth; ++x)
+  {
+    const double pos = (double)x / (uiWidth - 1.0);
+    plColor c = plColor::MakeFromKelvin(static_cast<plUInt32>((pos * (fMaxValue - fMinValue)) + fMinValue));
+
+    plColorGammaUB cg = c;
+    image.setPixel(x, 0, qRgb(cg.r, cg.g, cg.b));
+  }
+
+  return image;
+}
 
 void OnLoadPlugin()
 {
@@ -109,31 +132,35 @@ void OnLoadPlugin()
   plSceneActions::RegisterActions();
   plLayerActions::RegisterActions();
 
+  // misc
+  plQtImageSliderWidget::s_ImageGenerators["LightTemperature"] = SliderImageGenerator_LightTemperature;
+
   // Menu Bar
   const char* MenuBars[] = {"EditorPluginScene_DocumentMenuBar", "EditorPluginScene_Scene2MenuBar"};
   for (const char* szMenuBar : MenuBars)
   {
-    plActionMapManager::RegisterActionMap(szMenuBar).IgnoreResult();
-    plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Scene | plStandardMenuTypes::Panels | plStandardMenuTypes::View | plStandardMenuTypes::Help);
+    plActionMapManager::RegisterActionMap(szMenuBar).AssertSuccess();
+    plStandardMenus::MapActions(szMenuBar, plStandardMenuTypes::Default | plStandardMenuTypes::Edit | plStandardMenuTypes::Scene | plStandardMenuTypes::View);
     plProjectActions::MapActions(szMenuBar);
-    plDocumentActions::MapActions(szMenuBar, "Menu.File", false);
-    plDocumentActions::MapToolsActions(szMenuBar, "Menu.Tools");
-    plCommandHistoryActions::MapActions(szMenuBar, "Menu.Edit");
-    plTransformGizmoActions::MapMenuActions(szMenuBar, "Menu.Edit");
-    plSceneGizmoActions::MapMenuActions(szMenuBar, "Menu.Edit");
-    plGameObjectSelectionActions::MapActions(szMenuBar, "Menu.Edit");
-    plSelectionActions::MapActions(szMenuBar, "Menu.Edit");
-    plEditActions::MapActions(szMenuBar, "Menu.Edit", true, true);
-    plTranslateGizmoAction::MapActions(szMenuBar, "Menu.Edit/Gizmo.Menu");
-    plGameObjectDocumentActions::MapMenuActions(szMenuBar, "Menu.View");
-    plGameObjectDocumentActions::MapMenuSimulationSpeed(szMenuBar, "Menu.Scene");
+    plDocumentActions::MapMenuActions(szMenuBar);
+    plAssetActions::MapMenuActions(szMenuBar);
+    plDocumentActions::MapToolsActions(szMenuBar);
+    plCommandHistoryActions::MapActions(szMenuBar);
+    plTransformGizmoActions::MapMenuActions(szMenuBar);
+    plSceneGizmoActions::MapMenuActions(szMenuBar);
+    plGameObjectSelectionActions::MapActions(szMenuBar);
+    plSelectionActions::MapActions(szMenuBar);
+    plEditActions::MapActions(szMenuBar, true, true);
+    plTranslateGizmoAction::MapActions(szMenuBar);
+    plGameObjectDocumentActions::MapMenuActions(szMenuBar);
+    plGameObjectDocumentActions::MapMenuSimulationSpeed(szMenuBar);
     plSceneActions::MapMenuActions(szMenuBar);
   }
   // Scene2 Menu bar adjustments
   {
     plActionMap* pMap = plActionMapManager::GetActionMap(MenuBars[1]);
-    pMap->UnmapAction(plDocumentActions::s_hSave, "Menu.File/SaveCategory").IgnoreResult();
-    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "Menu.File/SaveCategory", 1.0f);
+    pMap->UnmapAction(plDocumentActions::s_hSave, "G.File.Common").AssertSuccess();
+    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "G.File.Common", 6.5f);
   }
 
 
@@ -141,51 +168,62 @@ void OnLoadPlugin()
   const char* ToolBars[] = {"EditorPluginScene_DocumentToolBar", "EditorPluginScene_Scene2ToolBar"};
   for (const char* szToolBar : ToolBars)
   {
-    plActionMapManager::RegisterActionMap(szToolBar).IgnoreResult();
-    plDocumentActions::MapActions(szToolBar, "", true);
+    plActionMapManager::RegisterActionMap(szToolBar).AssertSuccess();
+    plDocumentActions::MapToolbarActions(szToolBar);
     plCommandHistoryActions::MapActions(szToolBar, "");
+    plTransformGizmoActions::MapToolbarActions(szToolBar);
+    plSceneGizmoActions::MapToolbarActions(szToolBar);
+    plGameObjectDocumentActions::MapToolbarActions(szToolBar);
     plSceneActions::MapToolbarActions(szToolBar);
+  }
+  // Scene2 Tool bar adjustments
+  {
+    plActionMap* pMap = plActionMapManager::GetActionMap(ToolBars[1]);
+    pMap->UnmapAction(plDocumentActions::s_hSave, "SaveCategory").AssertSuccess();
+    pMap->MapAction(plLayerActions::s_hSaveActiveLayer, "SaveCategory", 1.0f);
   }
 
   // View Tool Bar
-  plActionMapManager::RegisterActionMap("EditorPluginScene_ViewToolBar").IgnoreResult();
-  plViewActions::MapActions("EditorPluginScene_ViewToolBar", "", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-  plQuadViewActions::MapActions("EditorPluginScene_ViewToolBar", "");
-  plTransformGizmoActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
-  plSceneGizmoActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
-  plGameObjectDocumentActions::MapToolbarActions("EditorPluginScene_ViewToolBar", "");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_ViewToolBar").AssertSuccess();
+  plViewActions::MapToolbarActions("EditorPluginScene_ViewToolBar", plViewActions::PerspectiveMode | plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+  plQuadViewActions::MapToolbarActions("EditorPluginScene_ViewToolBar");
 
   // Visualizers
   plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plPointLightVisualizerAttribute>(), [](const plRTTI* pRtti) -> plVisualizerAdapter*
-    { return PLASMA_DEFAULT_NEW(plPointLightVisualizerAdapter); });
+    { return PL_DEFAULT_NEW(plPointLightVisualizerAdapter); });
   plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plSpotLightVisualizerAttribute>(), [](const plRTTI* pRtti) -> plVisualizerAdapter*
-    { return PLASMA_DEFAULT_NEW(plSpotLightVisualizerAdapter); });
+    { return PL_DEFAULT_NEW(plSpotLightVisualizerAdapter); });
   plVisualizerAdapterRegistry::GetSingleton()->m_Factory.RegisterCreator(plGetStaticRTTI<plBoxReflectionProbeVisualizerAttribute>(), [](const plRTTI* pRtti) -> plVisualizerAdapter*
-    { return PLASMA_DEFAULT_NEW(plBoxReflectionProbeVisualizerAdapter); });
+    { return PL_DEFAULT_NEW(plBoxReflectionProbeVisualizerAdapter); });
 
   // SceneGraph Context Menu
-  plActionMapManager::RegisterActionMap("EditorPluginScene_ScenegraphContextMenu").IgnoreResult();
-  plGameObjectSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
-  plSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
-  plEditActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu", "");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_ScenegraphContextMenu").AssertSuccess();
+  plGameObjectSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
+  plSelectionActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
+  plEditActions::MapContextMenuActions("EditorPluginScene_ScenegraphContextMenu");
 
   // Layer Context Menu
-  plActionMapManager::RegisterActionMap("EditorPluginScene_LayerContextMenu").IgnoreResult();
-  plLayerActions::MapContextMenuActions("EditorPluginScene_LayerContextMenu", "");
+  plActionMapManager::RegisterActionMap("EditorPluginScene_LayerContextMenu").AssertSuccess();
+  plLayerActions::MapContextMenuActions("EditorPluginScene_LayerContextMenu");
 
   // component property meta states
   plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plCameraComponent_PropertyMetaStateEventHandler);
   plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plSkyLightComponent_PropertyMetaStateEventHandler);
+  plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plGreyBoxComponent_PropertyMetaStateEventHandler);
+  plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plLightComponent_PropertyMetaStateEventHandler);
 }
 
 void OnUnloadPlugin()
 {
   plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plSceneDocument_PropertyMetaStateEventHandler);
+
   plDocumentManager::s_Events.RemoveEventHandler(plMakeDelegate(OnDocumentManagerEvent));
   plQtEditorApp::GetSingleton()->m_Events.RemoveEventHandler(ToolsProjectEventHandler);
   plAssetCurator::GetSingleton()->m_Events.RemoveEventHandler(AssetCuratorEventHandler);
+  plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plGreyBoxComponent_PropertyMetaStateEventHandler);
   plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plSkyLightComponent_PropertyMetaStateEventHandler);
   plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plCameraComponent_PropertyMetaStateEventHandler);
+  plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plLightComponent_PropertyMetaStateEventHandler);
 
 
   plSelectionActions::UnregisterActions();
@@ -194,12 +232,12 @@ void OnUnloadPlugin()
   plSceneActions::UnregisterActions();
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }
@@ -207,6 +245,7 @@ PLASMA_PLUGIN_ON_UNLOADED()
 void plCameraComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
 {
   static const plRTTI* pRtti = plRTTI::FindTypeByName("plCameraComponent");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Did the typename change?");
 
   if (e.m_pObject->GetTypeAccessor().GetType() != pRtti)
     return;
@@ -224,6 +263,7 @@ void plCameraComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e
 void plSkyLightComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
 {
   static const plRTTI* pRtti = plRTTI::FindTypeByName("plSkyLightComponent");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Did the typename change?");
 
   if (e.m_pObject->GetTypeAccessor().GetType() != pRtti)
     return;
@@ -236,4 +276,77 @@ void plSkyLightComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent&
   props["CubeMap"].m_Visibility = bIsStatic ? plPropertyUiState::Default : plPropertyUiState::Invisible;
   // props["RenderTargetOffset"].m_Visibility = isRenderTarget ? plPropertyUiState::Default : plPropertyUiState::Invisible;
   // props["RenderTargetSize"].m_Visibility = isRenderTarget ? plPropertyUiState::Default : plPropertyUiState::Invisible;
+}
+
+void plGreyBoxComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
+{
+  static const plRTTI* pRtti = plRTTI::FindTypeByName("plGreyBoxComponent");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Did the typename change?");
+
+  if (e.m_pObject->GetTypeAccessor().GetType() != pRtti)
+    return;
+
+  auto& props = *e.m_pPropertyStates;
+
+  const plInt64 iShapeType = e.m_pObject->GetTypeAccessor().GetValue("Shape").ConvertTo<plInt64>();
+
+  props["Detail"].m_Visibility = plPropertyUiState::Invisible;
+  props["Detail"].m_sNewLabelText = "Detail";
+  props["Curvature"].m_Visibility = plPropertyUiState::Invisible;
+  props["Thickness"].m_Visibility = plPropertyUiState::Invisible;
+  props["SlopedTop"].m_Visibility = plPropertyUiState::Invisible;
+  props["SlopedBottom"].m_Visibility = plPropertyUiState::Invisible;
+
+  switch (iShapeType)
+  {
+    case plGreyBoxShape::Box:
+      break;
+    case plGreyBoxShape::RampX:
+    case plGreyBoxShape::RampY:
+      break;
+    case plGreyBoxShape::Column:
+      props["Detail"].m_Visibility = plPropertyUiState::Default;
+      break;
+    case plGreyBoxShape::StairsX:
+    case plGreyBoxShape::StairsY:
+      props["Detail"].m_Visibility = plPropertyUiState::Default;
+      props["Curvature"].m_Visibility = plPropertyUiState::Default;
+      props["SlopedTop"].m_Visibility = plPropertyUiState::Default;
+      props["Detail"].m_sNewLabelText = "Steps";
+      break;
+    case plGreyBoxShape::ArchX:
+    case plGreyBoxShape::ArchY:
+      props["Detail"].m_Visibility = plPropertyUiState::Default;
+      props["Curvature"].m_Visibility = plPropertyUiState::Default;
+      props["Thickness"].m_Visibility = plPropertyUiState::Default;
+      break;
+    case plGreyBoxShape::SpiralStairs:
+      props["Detail"].m_Visibility = plPropertyUiState::Default;
+      props["Curvature"].m_Visibility = plPropertyUiState::Default;
+      props["Thickness"].m_Visibility = plPropertyUiState::Default;
+      props["SlopedTop"].m_Visibility = plPropertyUiState::Default;
+      props["SlopedBottom"].m_Visibility = plPropertyUiState::Default;
+      props["Detail"].m_sNewLabelText = "Steps";
+      break;
+  }
+}
+
+void plLightComponent_PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
+{
+  static const plRTTI* pRtti = plRTTI::FindTypeByName("plLightComponent");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Did the typename change?");
+
+  if (!e.m_pObject->GetTypeAccessor().GetType()->IsDerivedFrom(pRtti))
+    return;
+
+  auto& props = *e.m_pPropertyStates;
+
+  const bool bUseColorTemperature = e.m_pObject->GetTypeAccessor().GetValue("UseColorTemperature").ConvertTo<bool>();
+  props["Temperature"].m_Visibility = bUseColorTemperature ? plPropertyUiState::Default : plPropertyUiState::Invisible;
+  props["LightColor"].m_Visibility = bUseColorTemperature ? plPropertyUiState::Invisible : plPropertyUiState::Default;
+
+  const bool bCastShadows = e.m_pObject->GetTypeAccessor().GetValue("CastShadows").ConvertTo<bool>();
+  props["PenumbraSize"].m_Visibility = bCastShadows ? plPropertyUiState::Default : plPropertyUiState::Invisible;
+  props["SlopeBias"].m_Visibility = bCastShadows ? plPropertyUiState::Default : plPropertyUiState::Invisible;
+  props["ConstantBias"].m_Visibility = bCastShadows ? plPropertyUiState::Default : plPropertyUiState::Invisible;
 }

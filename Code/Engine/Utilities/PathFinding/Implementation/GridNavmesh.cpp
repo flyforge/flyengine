@@ -529,5 +529,3 @@ void plGridNavmesh::CreateGraphEdges(ConvexArea& Area)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_PathFinding_Implementation_GridNavmesh);

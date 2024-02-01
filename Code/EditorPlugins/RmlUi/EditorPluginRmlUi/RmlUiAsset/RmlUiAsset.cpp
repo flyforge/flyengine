@@ -3,9 +3,9 @@
 #include <EditorPluginRmlUi/RmlUiAsset/RmlUiAsset.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 
-plStringView FindRCSSReference(plStringView& sRml)
+plStringView FindRCSSReference(plStringView& ref_sRml)
 {
-  const char* szCurrent = sRml.FindSubString("href");
+  const char* szCurrent = ref_sRml.FindSubString("href");
   if (szCurrent == nullptr)
     return plStringView();
 
@@ -31,7 +31,7 @@ plStringView FindRCSSReference(plStringView& sRml)
 
   if (szStart != nullptr && szEnd != nullptr)
   {
-    sRml.SetStartPosition(szEnd);
+    ref_sRml.SetStartPosition(szEnd);
 
     plStringView rcss = plStringView(szStart, szEnd);
     if (rcss.EndsWith_NoCase(".rcss"))
@@ -43,15 +43,15 @@ plStringView FindRCSSReference(plStringView& sRml)
   return plStringView();
 }
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plRmlUiAssetDocument::plRmlUiAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plRmlUiAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple)
+plRmlUiAssetDocument::plRmlUiAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plRmlUiAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple)
 {
 }
 
-plTransformStatus plRmlUiAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plRmlUiAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plRmlUiAssetProperties* pProp = GetProperties();
 
@@ -103,9 +103,9 @@ plTransformStatus plRmlUiAssetDocument::InternalTransformAsset(plStreamWriter& s
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(desc.Save(stream));
+  PL_SUCCEED_OR_RETURN(desc.Save(stream));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plTransformStatus plRmlUiAssetDocument::InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo)

@@ -16,7 +16,6 @@ void plWorldRttiConverterContext::Clear()
   m_UnknownTypes.Clear();
 }
 
-
 void plWorldRttiConverterContext::DeleteExistingObjects()
 {
   if (m_pWorld == nullptr)
@@ -24,7 +23,7 @@ void plWorldRttiConverterContext::DeleteExistingObjects()
 
   m_UnknownTypes.Clear();
 
-  PLASMA_LOCK(m_pWorld->GetWriteMarker());
+  PL_LOCK(m_pWorld->GetWriteMarker());
 
   const auto& map = m_GameObjectMap.GetHandleToGuidMap();
   while (!map.IsEmpty())
@@ -59,7 +58,7 @@ void plWorldRttiConverterContext::DeleteExistingObjects()
 
 plInternal::NewInstance<void> plWorldRttiConverterContext::CreateObject(const plUuid& guid, const plRTTI* pRtti)
 {
-  PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Object type is unknown");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Object type is unknown");
 
   if (pRtti == plGetStaticRTTI<plGameObject>())
   {
@@ -127,7 +126,7 @@ void plWorldRttiConverterContext::DeleteObject(const plUuid& guid)
     return;
 
   const plRTTI* pRtti = object.m_pType;
-  PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Object does not exist!");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Object does not exist!");
 
   if (pRtti == plGetStaticRTTI<plGameObject>())
   {
@@ -170,7 +169,7 @@ void plWorldRttiConverterContext::RegisterObject(const plUuid& guid, const plRTT
   {
     plComponent* pComponent = static_cast<plComponent*>(pObject);
 
-    PLASMA_ASSERT_DEV(m_pWorld != nullptr && pComponent->GetWorld() == m_pWorld, "Invalid object to register");
+    PL_ASSERT_DEV(m_pWorld != nullptr && pComponent->GetWorld() == m_pWorld, "Invalid object to register");
 
     m_ComponentMap.RegisterObject(guid, pComponent->GetHandle());
     pComponent->SetUniqueID(m_uiNextComponentPickingID++);
@@ -185,7 +184,7 @@ void plWorldRttiConverterContext::UnregisterObject(const plUuid& guid)
   plRttiConverterObject object = GetObjectByGUID(guid);
 
   // this can happen when running a game simulation and the object is destroyed by the game code
-  // PLASMA_ASSERT_DEBUG(object.m_pObject, "Failed to retrieve object by guid!");
+  // PL_ASSERT_DEBUG(object.m_pObject, "Failed to retrieve object by guid!");
 
   if (object.m_pType != nullptr)
   {
@@ -221,7 +220,7 @@ plRttiConverterObject plWorldRttiConverterContext::GetObjectByGUID(const plUuid&
       object.m_pObject = nullptr;
       object.m_pType = nullptr;
       // this can happen when one manipulates a running scene, and an object just deleted itself
-      // PLASMA_REPORT_FAILURE("Can't resolve game object GUID!");
+      // PL_REPORT_FAILURE("Can't resolve game object GUID!");
       return object;
     }
 
@@ -242,7 +241,7 @@ plRttiConverterObject plWorldRttiConverterContext::GetObjectByGUID(const plUuid&
       object.m_pObject = nullptr;
       object.m_pType = nullptr;
       // this can happen when one manipulates a running scene, and an object just deleted itself
-      // PLASMA_REPORT_FAILURE("Can't resolve component GUID!");
+      // PL_REPORT_FAILURE("Can't resolve component GUID!");
       return object;
     }
 

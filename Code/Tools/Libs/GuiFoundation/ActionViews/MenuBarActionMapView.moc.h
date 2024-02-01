@@ -11,13 +11,13 @@ class plActionMap;
 class QAction;
 class plQtProxy;
 
-class PLASMA_GUIFOUNDATION_DLL plQtMenuBarActionMapView : public QMenuBar
+class PL_GUIFOUNDATION_DLL plQtMenuBarActionMapView : public QMenuBar
 {
   Q_OBJECT
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtMenuBarActionMapView);
+  PL_DISALLOW_COPY_AND_ASSIGN(plQtMenuBarActionMapView);
 
 public:
-  explicit plQtMenuBarActionMapView(QWidget* parent);
+  explicit plQtMenuBarActionMapView(QWidget* pParent);
   ~plQtMenuBarActionMapView();
 
   void SetActionContext(const plActionContext& context);

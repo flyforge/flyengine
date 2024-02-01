@@ -3,11 +3,7 @@
 #include <GuiFoundation/PropertyGrid/Implementation/TagSetPropertyWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyGridWidget.moc.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
-#include <QCheckBox>
-#include <QHBoxLayout>
-#include <QMenu>
-#include <QPushButton>
-#include <QWidgetAction>
+
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 #include <ToolsFoundation/Settings/ToolsTagRegistry.h>
@@ -49,12 +45,12 @@ void plQtPropertyEditorTagSetWidget::SetSelection(const plHybridArray<plProperty
 
 void plQtPropertyEditorTagSetWidget::OnInit()
 {
-  PLASMA_ASSERT_DEV(m_pProp->GetCategory() == plPropertyCategory::Set && m_pProp->GetSpecificType() == plGetStaticRTTI<plConstCharPtr>(),
+  PL_ASSERT_DEV(m_pProp->GetCategory() == plPropertyCategory::Set && m_pProp->GetSpecificType() == plGetStaticRTTI<plConstCharPtr>(),
     "plQtPropertyEditorTagSetWidget only works with plTagSet.");
 
   // Retrieve tag categories.
   const plTagSetWidgetAttribute* pAssetAttribute = m_pProp->GetAttributeByType<plTagSetWidgetAttribute>();
-  PLASMA_ASSERT_DEV(pAssetAttribute != nullptr, "plQtPropertyEditorTagSetWidget needs plTagSetWidgetAttribute to be set.");
+  PL_ASSERT_DEV(pAssetAttribute != nullptr, "plQtPropertyEditorTagSetWidget needs plTagSetWidgetAttribute to be set.");
   plStringBuilder sTagFilter = pAssetAttribute->GetTagFilter();
   plHybridArray<plStringView, 4> categories;
   sTagFilter.Split(false, categories, ";");
@@ -121,10 +117,10 @@ void plQtPropertyEditorTagSetWidget::InternalUpdateValue()
   {
     plHybridArray<plVariant, 16> currentSetValues;
     plStatus status = m_pObjectAccessor->GetValues(item.m_pObject, m_pProp, currentSetValues);
-    PLASMA_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
+    PL_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
     for (const plVariant& key : currentSetValues)
     {
-      PLASMA_ASSERT_DEV(key.GetType() == plVariantType::String, "Tags are supposed to be of type string!");
+      PL_ASSERT_DEV(key.GetType() == plVariantType::String, "Tags are supposed to be of type string!");
       tags[key.Get<plString>()]++;
     }
   }
@@ -185,13 +181,13 @@ void plQtPropertyEditorTagSetWidget::onCheckBoxClicked(bool bChecked)
       plHybridArray<plVariant, 16> currentSetValues;
 
       plStatus status = m_pObjectAccessor->GetValues(item.m_pObject, m_pProp, currentSetValues);
-      PLASMA_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
+      PL_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
       if (!currentSetValues.Contains(value))
       {
         auto res = m_pObjectAccessor->InsertValue(item.m_pObject, m_pProp, value, -1);
         if (res.m_Result.Failed())
         {
-          PLASMA_REPORT_FAILURE("Failed to add '{0}' tag to tag set", value.Get<plString>());
+          PL_REPORT_FAILURE("Failed to add '{0}' tag to tag set", value.Get<plString>());
         }
       }
     }
@@ -208,14 +204,14 @@ void plQtPropertyEditorTagSetWidget::onCheckBoxClicked(bool bChecked)
     {
       plHybridArray<plVariant, 16> currentSetValues;
       plStatus status = m_pObjectAccessor->GetValues(item.m_pObject, m_pProp, currentSetValues);
-      PLASMA_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
+      PL_ASSERT_DEV(status.m_Result.Succeeded(), "Failed to get tag keys!");
       plUInt32 uiIndex = currentSetValues.IndexOf(value);
       if (uiIndex != -1)
       {
         auto res = m_pObjectAccessor->RemoveValue(item.m_pObject, m_pProp, uiIndex);
         if (res.m_Result.Failed())
         {
-          PLASMA_REPORT_FAILURE("Failed to remove '{0}' tag from tag set", value.Get<plString>());
+          PL_REPORT_FAILURE("Failed to remove '{0}' tag from tag set", value.Get<plString>());
         }
       }
     }

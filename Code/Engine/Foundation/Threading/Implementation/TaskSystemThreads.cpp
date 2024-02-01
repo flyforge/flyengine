@@ -93,7 +93,7 @@ void plTaskSystem::StopWorkerThreads()
     for (plUInt32 i = 0; i < uiNumWorkers; ++i)
     {
       s_pThreadState->m_Workers[type][i]->Join();
-      PLASMA_DEFAULT_DELETE(s_pThreadState->m_Workers[type][i]);
+      PL_DEFAULT_DELETE(s_pThreadState->m_Workers[type][i]);
     }
 
     s_pThreadState->m_iAllocatedWorkers[type] = 0;
@@ -104,20 +104,20 @@ void plTaskSystem::StopWorkerThreads()
 
 void plTaskSystem::AllocateThreads(plWorkerThreadType::Enum type, plUInt32 uiAddThreads)
 {
-  PLASMA_ASSERT_DEBUG(uiAddThreads > 0, "Invalid number of threads to allocate");
+  PL_ASSERT_DEBUG(uiAddThreads > 0, "Invalid number of threads to allocate");
 
   {
     // prevent concurrent thread allocation
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
 
     plUInt32 uiNextThreadIdx = s_pThreadState->m_iAllocatedWorkers[type];
 
-    PLASMA_ASSERT_ALWAYS(uiNextThreadIdx + uiAddThreads <= s_pThreadState->m_Workers[type].GetCount(), "Max number of worker threads ({}) exceeded.",
+    PL_ASSERT_ALWAYS(uiNextThreadIdx + uiAddThreads <= s_pThreadState->m_Workers[type].GetCount(), "Max number of worker threads ({}) exceeded.",
       s_pThreadState->m_Workers[type].GetCount());
 
     for (plUInt32 i = 0; i < uiAddThreads; ++i)
     {
-      s_pThreadState->m_Workers[type][uiNextThreadIdx] = PLASMA_DEFAULT_NEW(plTaskWorkerThread, (plWorkerThreadType::Enum)type, uiNextThreadIdx);
+      s_pThreadState->m_Workers[type][uiNextThreadIdx] = PL_DEFAULT_NEW(plTaskWorkerThread, (plWorkerThreadType::Enum)type, uiNextThreadIdx);
       s_pThreadState->m_Workers[type][uiNextThreadIdx]->Start();
 
       ++uiNextThreadIdx;
@@ -232,11 +232,10 @@ void plTaskSystem::DetermineTasksToExecuteOnThread(plTaskPriority::Enum& out_Fir
 
     default:
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
     }
   }
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystemThreads);

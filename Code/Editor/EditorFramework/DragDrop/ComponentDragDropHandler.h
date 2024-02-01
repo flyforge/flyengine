@@ -5,9 +5,9 @@
 class plDocument;
 class plDragDropInfo;
 
-class PLASMA_EDITORFRAMEWORK_DLL plComponentDragDropHandler : public plAssetDragDropHandler
+class PL_EDITORFRAMEWORK_DLL plComponentDragDropHandler : public plAssetDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plComponentDragDropHandler, plAssetDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plComponentDragDropHandler, plAssetDragDropHandler);
 
 protected:
   void CreateDropObject(const plVec3& vPosition, const char* szType, const char* szProperty, const plVariant& value, plUuid parent, plInt32 iInsertChildIndex);
@@ -39,5 +39,5 @@ protected:
 
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;
 
-  plVec3 m_vAlignAxisWithNormal = plVec3::ZeroVector();
+  plVec3 m_vAlignAxisWithNormal = plVec3::MakeZero();
 };

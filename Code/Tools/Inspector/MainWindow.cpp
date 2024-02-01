@@ -59,20 +59,20 @@ plQtMainWindow::plQtMainWindow()
   plQtDataWidget* pDataWidget = new plQtDataWidget();
   plQtResourceWidget* pResourceWidget = new plQtResourceWidget();
 
-  PLASMA_VERIFY(nullptr != QWidget::connect(pMainWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pLogWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pTimeWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pMemoryWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pInputWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pCVarsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pReflectionWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pSubsystemsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pFileWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pPluginsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(
+  PL_VERIFY(nullptr != QWidget::connect(pMainWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pLogWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pTimeWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pMemoryWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pInputWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pCVarsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pReflectionWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pSubsystemsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pFileWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pPluginsWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(
     nullptr != QWidget::connect(pGlobalEventesWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pDataWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
-  PLASMA_VERIFY(nullptr != QWidget::connect(pResourceWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pDataWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
+  PL_VERIFY(nullptr != QWidget::connect(pResourceWidget, &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
 
   QMenu* pHistoryMenu = new QMenu;
   pHistoryMenu->setTearOffEnabled(true);
@@ -84,14 +84,14 @@ plQtMainWindow::plQtMainWindow()
     m_pStatHistoryWidgets[i] = new plQtStatVisWidget(this, i);
     m_DockManager->addDockWidgetTab(ads::BottomDockWidgetArea, m_pStatHistoryWidgets[i]);
 
-    PLASMA_VERIFY(
+    PL_VERIFY(
       nullptr != QWidget::connect(m_pStatHistoryWidgets[i], &ads::CDockWidget::viewToggled, this, &plQtMainWindow::DockWidgetVisibilityChanged), "");
 
     pHistoryMenu->addAction(&m_pStatHistoryWidgets[i]->m_ShowWindowAction);
 
     m_pActionShowStatIn[i] = new QAction(this);
 
-    PLASMA_VERIFY(nullptr != QWidget::connect(m_pActionShowStatIn[i], &QAction::triggered, plQtMainWidget::s_pWidget, &plQtMainWidget::ShowStatIn), "");
+    PL_VERIFY(nullptr != QWidget::connect(m_pActionShowStatIn[i], &QAction::triggered, plQtMainWidget::s_pWidget, &plQtMainWidget::ShowStatIn), "");
   }
 
   // delay this until after all widgets are created
@@ -223,7 +223,7 @@ void plQtMainWindow::UpdateNetwork()
         bResetStats = true;
 
         plStringBuilder s;
-        s.Format("Connected to new Server with ID {0}", uiServerID);
+        s.SetFormat("Connected to new Server with ID {0}", uiServerID);
 
         plQtLogDockWidget::s_pWidget->Log(s.GetData());
       }
@@ -330,7 +330,7 @@ void plQtMainWindow::UpdateAlwaysOnTop()
   static bool bOnTop = false;
 
   bool bNewState = bOnTop;
-  PLASMA_IGNORE_UNUSED(bNewState);
+  PL_IGNORE_UNUSED(bNewState);
 
   if (m_OnTopMode == Always || (m_OnTopMode == WhenConnected && plTelemetry::IsConnectedToServer()))
     bNewState = true;
@@ -359,7 +359,7 @@ void plQtMainWindow::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage(' APP', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage(' APP', Msg) == PL_SUCCESS)
   {
     switch (Msg.GetMessageID())
     {

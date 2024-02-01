@@ -1,21 +1,21 @@
 #pragma once
 
+#include <Core/World/SpatialData.h>
 #include <Foundation/Types/Variant.h>
 #include <GameEngine/GameEngineDLL.h>
 
-class plWorld;
-
-class PLASMA_GAMEENGINE_DLL plVolumeSampler
+/// \brief A volume sampler is used to sample the registered values from volumes at a given position. It also takes care of interpolation over time of those values.
+class PL_GAMEENGINE_DLL plVolumeSampler
 {
 public:
   plVolumeSampler();
   ~plVolumeSampler();
 
-  void RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration = plTime::Zero());
+  void RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration = plTime::MakeZero());
   void DeregisterValue(plHashedString sName);
   void DeregisterAllValues();
 
-  void SampleAtPosition(plWorld& world, const plVec3& vGlobalPosition, plTime deltaTime);
+  void SampleAtPosition(const plWorld& world, plSpatialData::Category spatialCategory, const plVec3& vGlobalPosition, plTime deltaTime);
 
   plVariant GetValue(plTempHashedString sName) const
   {
@@ -33,10 +33,10 @@ private:
   struct Value
   {
     plVariant m_DefaultValue;
+    plVariant m_TargetValue;
     plVariant m_CurrentValue;
     double m_fInterpolationFactor = -1.0;
   };
 
   plHashTable<plHashedString, Value> m_Values;
-  plHashTable<plHashedString, plVariant> m_TargetValues;
 };

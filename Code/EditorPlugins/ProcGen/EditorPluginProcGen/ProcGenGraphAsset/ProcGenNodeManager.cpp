@@ -6,10 +6,10 @@
 #include <Foundation/Configuration/Startup.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenPin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenPin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginProcGen, ProcGen)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginProcGen, ProcGen)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager"
@@ -31,7 +31,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginProcGen, ProcGen)
     plQtNodeScene::GetNodeFactory().UnregisterCreator(pBaseType);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -41,7 +41,7 @@ bool plProcGenNodeManager::InternalIsNode(const plDocumentObject* pObject) const
   return pObject->GetType()->IsDerivedFrom(plGetStaticRTTI<plProcGenNodeBase>());
 }
 
-void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node)
+void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& ref_node)
 {
   const plRTTI* pNodeBaseType = plGetStaticRTTI<plProcGenNodeBase>();
 
@@ -69,36 +69,26 @@ void plProcGenNodeManager::InternalCreatePins(const plDocumentObject* pObject, N
 
     if (pPropType->IsDerivedFrom<plRenderPipelineNodeInputPin>())
     {
-      auto pPin = PLASMA_DEFAULT_NEW(plProcGenPin, plPin::Type::Input, pProp->GetPropertyName(), pinColor, pObject);
-      node.m_Inputs.PushBack(pPin);
+      auto pPin = PL_DEFAULT_NEW(plProcGenPin, plPin::Type::Input, pProp->GetPropertyName(), pinColor, pObject);
+      ref_node.m_Inputs.PushBack(pPin);
     }
     else if (pPropType->IsDerivedFrom<plRenderPipelineNodeOutputPin>())
     {
-      auto pPin = PLASMA_DEFAULT_NEW(plProcGenPin, plPin::Type::Output, pProp->GetPropertyName(), pinColor, pObject);
-      node.m_Outputs.PushBack(pPin);
+      auto pPin = PL_DEFAULT_NEW(plProcGenPin, plPin::Type::Output, pProp->GetPropertyName(), pinColor, pObject);
+      ref_node.m_Outputs.PushBack(pPin);
     }
   }
 }
 
-void plProcGenNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
+void plProcGenNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const
 {
   plRTTI::ForEachDerivedType<plProcGenNodeBase>(
-    [&](const plRTTI* pRtti) { Types.PushBack(pRtti); },
+    [&](const plRTTI* pRtti) { ref_types.PushBack(pRtti); },
     plRTTI::ForEachOptions::ExcludeAbstract);
 }
 
-const char* plProcGenNodeManager::GetTypeCategory(const plRTTI* pRtti) const
+plStatus plProcGenNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_result) const
 {
-  if (const plCategoryAttribute* pAttr = pRtti->GetAttributeByType<plCategoryAttribute>())
-  {
-    return pAttr->GetCategory();
-  }
-
-  return nullptr;
-}
-
-plStatus plProcGenNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const
-{
-  out_Result = CanConnectResult::ConnectNto1;
-  return plStatus(PLASMA_SUCCESS);
+  out_result = CanConnectResult::ConnectNto1;
+  return plStatus(PL_SUCCESS);
 }

@@ -7,12 +7,12 @@
 #include <QTableWidget>
 #include <QTreeWidget>
 
-plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* parent)
-  : QDialog(parent)
+plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
-  PLASMA_VERIFY(connect(Shortcuts, SIGNAL(itemSelectionChanged()), this, SLOT(SlotSelectionChanged())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(Shortcuts, SIGNAL(itemSelectionChanged()), this, SLOT(SlotSelectionChanged())) != nullptr, "signal/slot connection failed");
 
   m_iSelectedAction = -1;
   KeyEditor->setEnabled(false);
@@ -57,7 +57,7 @@ plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* parent)
       QFont font = pParent->font(0);
       font.setBold(true);
 
-      //pParent->setFont(0, font);
+      pParent->setFont(0, font);
 
       for (auto it2 : it.Value())
       {
@@ -72,7 +72,7 @@ plQtShortcutEditorDlg::plQtShortcutEditorDlg(QWidget* parent)
         pItem->setData(0, Qt::DisplayRole, item->m_sActionName.GetData());
         pItem->setData(1, Qt::DisplayRole, sTemp.GetData());
         pItem->setData(2, Qt::DisplayRole, item->m_sShortcut.GetData());
-        pItem->setData(3, Qt::DisplayRole, plTranslateTooltip(item->m_sActionName));
+        pItem->setData(3, Qt::DisplayRole, plMakeQString(plTranslateTooltip(item->m_sActionName)));
 
         if (item->m_sShortcut == item->m_sDefaultShortcut)
           pItem->setBackground(2, QBrush());

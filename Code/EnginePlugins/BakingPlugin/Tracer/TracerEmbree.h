@@ -3,7 +3,7 @@
 #include <BakingPlugin/Tracer/TracerInterface.h>
 #include <Foundation/Types/UniquePtr.h>
 
-class PLASMA_BAKINGPLUGIN_DLL plTracerEmbree : public plTracerInterface
+class PL_BAKINGPLUGIN_DLL plTracerEmbree : public plTracerInterface
 {
 public:
   plTracerEmbree();

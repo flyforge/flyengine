@@ -7,19 +7,19 @@
 #include <ParticlePlugin/WorldModule/ParticleWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeEffectFactory, 1, plRTTIDefaultAllocator<plParticleTypeEffectFactory>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeEffectFactory, 1, plRTTIDefaultAllocator<plParticleTypeEffectFactory>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Effect", m_sEffect)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Particle_Effect")),
-    // PLASMA_MEMBER_PROPERTY("Shared Instance Name", m_sSharedInstanceName), // there is currently no way (I can think of) to uniquely identify each sub-system for the 'shared owner'
+    PL_MEMBER_PROPERTY("Effect", m_sEffect)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Particle_Effect")),
+    // PL_MEMBER_PROPERTY("Shared Instance Name", m_sSharedInstanceName), // there is currently no way (I can think of) to uniquely identify each sub-system for the 'shared owner'
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeEffect, 1, plRTTIDefaultAllocator<plParticleTypeEffect>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeEffect, 1, plRTTIDefaultAllocator<plParticleTypeEffect>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleTypeEffectFactory::plParticleTypeEffectFactory() = default;
@@ -59,33 +59,33 @@ enum class TypeEffectVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleTypeEffectFactory::Save(plStreamWriter& stream) const
+void plParticleTypeEffectFactory::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)TypeEffectVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   plUInt64 m_uiRandomSeed = 0;
 
-  stream << m_sEffect;
-  stream << m_uiRandomSeed;
-  stream << m_sSharedInstanceName;
+  inout_stream << m_sEffect;
+  inout_stream << m_uiRandomSeed;
+  inout_stream << m_sSharedInstanceName;
 }
 
-void plParticleTypeEffectFactory::Load(plStreamReader& stream)
+void plParticleTypeEffectFactory::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)TypeEffectVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)TypeEffectVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_sEffect;
+  inout_stream >> m_sEffect;
 
   if (uiVersion >= 2)
   {
     plUInt64 m_uiRandomSeed = 0;
 
-    stream >> m_uiRandomSeed;
-    stream >> m_sSharedInstanceName;
+    inout_stream >> m_uiRandomSeed;
+    inout_stream >> m_sSharedInstanceName;
   }
 }
 
@@ -108,9 +108,9 @@ void plParticleTypeEffect::CreateRequiredStreams()
   CreateStream("EffectID", plProcessingStream::DataType::Int, &m_pStreamEffectID, false);
 }
 
-void plParticleTypeEffect::ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleTypeEffect::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
-  PLASMA_PROFILE_SCOPE("PFX: Effect");
+  PL_PROFILE_SCOPE("PFX: Effect");
 
   const plUInt32 numParticles = (plUInt32)GetOwnerSystem()->GetNumActiveParticles();
 
@@ -128,7 +128,7 @@ void plParticleTypeEffect::ExtractTypeRenderData(plMsgExtractRenderData& msg, co
     const plParticleEffectInstance* pEffect = nullptr;
     if (pWorldModule->TryGetEffectInstance(hInstance, pEffect))
     {
-      pWorldModule->ExtractEffectRenderData(pEffect, msg, pEffect->GetTransform());
+      pWorldModule->ExtractEffectRenderData(pEffect, ref_msg, pEffect->GetTransform());
     }
   }
 }
@@ -140,7 +140,7 @@ void plParticleTypeEffect::OnReset()
 
 void plParticleTypeEffect::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Effect");
+  PL_PROFILE_SCOPE("PFX: Effect");
 
   if (!m_hEffect.IsValid())
     return;
@@ -176,7 +176,7 @@ void plParticleTypeEffect::Process(plUInt64 uiNumElements)
 
       // TODO: pass through velocity
       pEffect->SetVisibleIf(GetOwnerEffect());
-      pEffect->SetTransformForNextFrame(t, plVec3::ZeroVector());
+      pEffect->SetTransformForNextFrame(t, plVec3::MakeZero());
 
       plBoundingBoxSphere bounds;
       pEffect->GetBoundingVolume(bounds);
@@ -218,4 +218,4 @@ void plParticleTypeEffect::ClearEffects(bool bInterruptImmediately)
   }
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Effect_ParticleTypeEffect);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Effect_ParticleTypeEffect);

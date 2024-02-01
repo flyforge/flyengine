@@ -3,10 +3,10 @@
 #include <EditorFramework/Manipulators/ManipulatorAdapterRegistry.h>
 #include <GuiFoundation/PropertyGrid/ManipulatorManager.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plManipulatorAdapterRegistry);
+PL_IMPLEMENT_SINGLETON(plManipulatorAdapterRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ManipulatorAdapterRegistry)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ManipulatorAdapterRegistry)
  
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ManipulatorManager"
@@ -14,16 +14,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, ManipulatorAdapterRegistry)
  
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plManipulatorAdapterRegistry);
+    PL_DEFAULT_NEW(plManipulatorAdapterRegistry);
   }
  
   ON_CORESYSTEMS_SHUTDOWN
   {
     auto ptr = plManipulatorAdapterRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(ptr);
+    PL_DEFAULT_DELETE(ptr);
   }
  
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plManipulatorAdapterRegistry::plManipulatorAdapterRegistry()
@@ -43,11 +43,11 @@ plManipulatorAdapterRegistry::~plManipulatorAdapterRegistry()
   }
 }
 
-void plManipulatorAdapterRegistry::QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& outGridSettings)
+void plManipulatorAdapterRegistry::QueryGridSettings(const plDocument* pDocument, plGridSettingsMsgToEngine& out_gridSettings)
 {
   for (auto& adapt : m_DocumentAdapters[pDocument].m_Adapters)
   {
-    adapt->QueryGridSettings(outGridSettings);
+    adapt->QueryGridSettings(out_gridSettings);
   }
 }
 
@@ -74,7 +74,7 @@ void plManipulatorAdapterRegistry::ClearAdapters(const plDocument* pDocument)
 {
   for (auto& adapt : m_DocumentAdapters[pDocument].m_Adapters)
   {
-    PLASMA_DEFAULT_DELETE(adapt);
+    PL_DEFAULT_DELETE(adapt);
   }
 
   m_DocumentAdapters[pDocument].m_Adapters.Clear();

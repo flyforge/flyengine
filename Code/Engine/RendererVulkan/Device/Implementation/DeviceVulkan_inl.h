@@ -1,30 +1,30 @@
-PLASMA_ALWAYS_INLINE vk::Device plGALDeviceVulkan::GetVulkanDevice() const
+PL_ALWAYS_INLINE vk::Device plGALDeviceVulkan::GetVulkanDevice() const
 {
   return m_device;
 }
 
-PLASMA_ALWAYS_INLINE const plGALDeviceVulkan::Queue& plGALDeviceVulkan::GetGraphicsQueue() const
+PL_ALWAYS_INLINE const plGALDeviceVulkan::Queue& plGALDeviceVulkan::GetGraphicsQueue() const
 {
   return m_graphicsQueue;
 }
 
-PLASMA_ALWAYS_INLINE const plGALDeviceVulkan::Queue& plGALDeviceVulkan::GetTransferQueue() const
+PL_ALWAYS_INLINE const plGALDeviceVulkan::Queue& plGALDeviceVulkan::GetTransferQueue() const
 {
   return m_transferQueue;
 }
 
-PLASMA_ALWAYS_INLINE vk::PhysicalDevice plGALDeviceVulkan::GetVulkanPhysicalDevice() const
+PL_ALWAYS_INLINE vk::PhysicalDevice plGALDeviceVulkan::GetVulkanPhysicalDevice() const
 {
   return m_physicalDevice;
 }
 
-PLASMA_ALWAYS_INLINE vk::Instance plGALDeviceVulkan::GetVulkanInstance() const
+PL_ALWAYS_INLINE vk::Instance plGALDeviceVulkan::GetVulkanInstance() const
 {
   return m_instance;
 }
 
 
-PLASMA_ALWAYS_INLINE const plGALFormatLookupTableVulkan& plGALDeviceVulkan::GetFormatLookupTable() const
+PL_ALWAYS_INLINE const plGALFormatLookupTableVulkan& plGALDeviceVulkan::GetFormatLookupTable() const
 {
   return m_FormatLookupTable;
 }

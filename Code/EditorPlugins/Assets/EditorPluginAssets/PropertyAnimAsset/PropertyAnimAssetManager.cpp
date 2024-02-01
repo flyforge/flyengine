@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/PropertyAnimAsset/PropertyAnimAssetManager.h>
 #include <EditorPluginAssets/PropertyAnimAsset/PropertyAnimAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimAssetDocumentManager, 1, plRTTIDefaultAllocator<plPropertyAnimAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAnimAssetDocumentManager, 1, plRTTIDefaultAllocator<plPropertyAnimAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plPropertyAnimAssetDocumentManager::plPropertyAnimAssetDocumentManager()
 {
@@ -38,8 +38,7 @@ void plPropertyAnimAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plPropertyAnimAssetDocument>())
       {
-        plQtPropertyAnimAssetDocumentWindow* pDocWnd =
-          new plQtPropertyAnimAssetDocumentWindow(static_cast<plPropertyAnimAssetDocument*>(e.m_pDocument));
+        new plQtPropertyAnimAssetDocumentWindow(static_cast<plPropertyAnimAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -50,9 +49,9 @@ void plPropertyAnimAssetDocumentManager::OnDocumentManagerEvent(const plDocument
 }
 
 void plPropertyAnimAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plPropertyAnimAssetDocument(szPath);
+  out_pDocument = new plPropertyAnimAssetDocument(sPath);
 }
 
 void plPropertyAnimAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

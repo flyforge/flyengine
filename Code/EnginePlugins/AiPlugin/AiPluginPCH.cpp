@@ -2,7 +2,7 @@
 
 #include <AiPlugin/AiPluginDLL.h>
 
-PLASMA_STATICLINK_LIBRARY(AiPlugin)
+PL_STATICLINK_LIBRARY(AiPlugin)
 {
   if (bReturn)
     return;

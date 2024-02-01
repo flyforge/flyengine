@@ -34,7 +34,7 @@ plQtCustomDataAssetDocumentWindow::plQtCustomDataAssetDocumentWindow(plDocument*
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("CustomDataAssetDockWidget");
-    pPropertyPanel->setWindowTitle("Data Properties");
+    pPropertyPanel->setWindowTitle("CustomData Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -47,5 +47,3 @@ plQtCustomDataAssetDocumentWindow::plQtCustomDataAssetDocumentWindow(plDocument*
 
   FinishWindowCreation();
 }
-
-plQtCustomDataAssetDocumentWindow::~plQtCustomDataAssetDocumentWindow() {}

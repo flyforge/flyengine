@@ -14,26 +14,26 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetProperties, 1, plRTTIDefaultAllocator<plCustomDataAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetProperties, 1, plRTTIDefaultAllocator<plCustomDataAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_MEMBER_PROPERTY("Type", m_pType)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plCustomDataAssetDocument::plCustomDataAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plCustomDataAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
+plCustomDataAssetDocument::plCustomDataAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plCustomDataAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plCustomDataAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+plTransformStatus plCustomDataAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
   const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plAbstractObjectGraph abstractObjectGraph;
@@ -42,7 +42,7 @@ plTransformStatus plCustomDataAssetDocument::InternalTransformAsset(plStreamWrit
   plDocumentObject* pObject = GetPropertyObject();
 
   plVariant type = pObject->GetTypeAccessor().GetValue("Type");
-  PLASMA_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
+  PL_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
 
   if (plDocumentObject* pDataObject = pObject->GetChild(type.Get<plUuid>()))
   {
@@ -50,5 +50,5 @@ plTransformStatus plCustomDataAssetDocument::InternalTransformAsset(plStreamWrit
   }
 
   plAbstractGraphBinarySerializer::Write(stream, &abstractObjectGraph);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

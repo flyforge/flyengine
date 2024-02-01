@@ -7,16 +7,16 @@
 #include <RendererFoundation/Resources/Buffer.h>
 
 plMeshViewContext::plMeshViewContext(plMeshContext* pMeshContext)
-  : PlasmaEngineProcessViewContext(pMeshContext)
+  : plEngineProcessViewContext(pMeshContext)
 {
   m_pContext = pMeshContext;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.05f, 10000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
-plMeshViewContext::~plMeshViewContext() {}
+plMeshViewContext::~plMeshViewContext() = default;
 
 bool plMeshViewContext::UpdateThumbnailCamera(const plBoundingBoxSphere& bounds)
 {
@@ -32,7 +32,7 @@ plViewHandle plMeshViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();
@@ -42,12 +42,10 @@ void plMeshViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
   if (m_pContext->m_bDisplayGrid)
   {
-    PlasmaEngineProcessViewContext::DrawSimpleGrid();
+    plEngineProcessViewContext::DrawSimpleGrid();
   }
 
-  PlasmaEngineProcessViewContext::SetCamera(pMsg);
-
-  const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
+  plEngineProcessViewContext::SetCamera(pMsg);
 
   auto hMesh = m_pContext->GetMesh();
   if (hMesh.IsValid())

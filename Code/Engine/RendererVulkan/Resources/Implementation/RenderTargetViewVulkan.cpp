@@ -26,7 +26,7 @@ plResult plGALRenderTargetViewVulkan::InitPlatform(plGALDevice* pDevice)
   if (pTexture == nullptr)
   {
     plLog::Error("No valid texture handle given for render target view creation!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plGALTextureCreationDescription& texDesc = pTexture->GetDescription();
@@ -44,17 +44,12 @@ plResult plGALRenderTargetViewVulkan::InitPlatform(plGALDevice* pDevice)
   if (vkViewFormat == vk::Format::eUndefined)
   {
     plLog::Error("Couldn't get Vulkan format for view!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 
   vk::Image vkImage = pTextureVulkan->GetImage();
   const bool bIsArrayView = IsArrayView(texDesc, m_Description);
-
-  if (pTextureVulkan->GetFormatOverrideEnabled())
-  {
-    vkViewFormat = pTextureVulkan->GetImageFormat();
-  }
 
   vk::ImageViewCreateInfo imageViewCreationInfo;
   if (bIsDepthFormat)
@@ -91,18 +86,18 @@ plResult plGALRenderTargetViewVulkan::InitPlatform(plGALDevice* pDevice)
   m_range = imageViewCreationInfo.subresourceRange;
   m_bfullRange = m_range == pTextureVulkan->GetFullRange();
 
-  VK_SUCCEED_OR_RETURN_PLASMA_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&imageViewCreationInfo, nullptr, &m_imageView));
+  VK_SUCCEED_OR_RETURN_PL_FAILURE(pVulkanDevice->GetVulkanDevice().createImageView(&imageViewCreationInfo, nullptr, &m_imageView));
   pVulkanDevice->SetDebugName("RTV", m_imageView);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALRenderTargetViewVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
   plGALDeviceVulkan* pVulkanDevice = static_cast<plGALDeviceVulkan*>(pDevice);
   pVulkanDevice->DeleteLater(m_imageView);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_RenderTargetViewVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_RenderTargetViewVulkan);

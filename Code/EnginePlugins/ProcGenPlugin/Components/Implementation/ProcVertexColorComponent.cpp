@@ -14,8 +14,8 @@
 #include <RendererFoundation/Device/Pass.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcVertexColorRenderData, 1, plRTTIDefaultAllocator<plProcVertexColorRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcVertexColorRenderData, 1, plRTTIDefaultAllocator<plProcVertexColorRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plProcVertexColorRenderData::FillBatchIdAndSortingKey()
@@ -59,7 +59,7 @@ void plProcVertexColorComponentManager::Initialize()
   }
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcVertexColorComponentManager::UpdateVertexColors, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcVertexColorComponentManager::UpdateVertexColors, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
     desc.m_fPriority = 10000.0f;
 
@@ -183,7 +183,7 @@ void plProcVertexColorComponentManager::UpdateComponentVertexColors(plProcVertex
 
   if (m_uiNextTaskIndex >= m_UpdateTasks.GetCount())
   {
-    m_UpdateTasks.PushBack(PLASMA_DEFAULT_NEW(plProcGenInternal::VertexColorTask));
+    m_UpdateTasks.PushBack(PL_DEFAULT_NEW(plProcGenInternal::VertexColorTask));
   }
 
   auto& pUpdateTask = m_UpdateTasks[m_uiNextTaskIndex];
@@ -211,7 +211,7 @@ void plProcVertexColorComponentManager::OnExtractionEvent(const plRenderWorldExt
   if (m_ModifiedDataRange.IsValid())
   {
     auto& dataCopy = m_DataCopy[plRenderWorld::GetDataIndexForExtraction()];
-    dataCopy.m_Data = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt32, m_ModifiedDataRange.GetCount());
+    dataCopy.m_Data = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plUInt32, m_ModifiedDataRange.GetCount());
     dataCopy.m_Data.CopyFrom(m_VertexColorData.GetArrayPtr().GetSubArray(m_ModifiedDataRange.m_uiMin, m_ModifiedDataRange.GetCount()));
     dataCopy.m_uiStart = m_ModifiedDataRange.m_uiMin;
   }
@@ -308,16 +308,16 @@ void plProcVertexColorComponentManager::OnAreaInvalidated(const plProcGenInterna
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plProcVertexColorOutputDesc, plNoBase, 1, plRTTIDefaultAllocator<plProcVertexColorOutputDesc>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plProcVertexColorOutputDesc, plNoBase, 1, plRTTIDefaultAllocator<plProcVertexColorOutputDesc>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Name", GetName, SetName),
-    PLASMA_MEMBER_PROPERTY("Mapping", m_Mapping),
+    PL_ACCESSOR_PROPERTY("Name", GetName, SetName),
+    PL_MEMBER_PROPERTY("Mapping", m_Mapping),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plProcVertexColorOutputDesc::SetName(const char* szName)
@@ -326,47 +326,47 @@ void plProcVertexColorOutputDesc::SetName(const char* szName)
 }
 
 static plTypeVersion s_ProcVertexColorOutputDescVersion = 1;
-plResult plProcVertexColorOutputDesc::Serialize(plStreamWriter& stream) const
+plResult plProcVertexColorOutputDesc::Serialize(plStreamWriter& inout_stream) const
 {
-  stream.WriteVersion(s_ProcVertexColorOutputDescVersion);
-  stream << m_sName;
-  PLASMA_SUCCEED_OR_RETURN(m_Mapping.Serialize(stream));
+  inout_stream.WriteVersion(s_ProcVertexColorOutputDescVersion);
+  inout_stream << m_sName;
+  PL_SUCCEED_OR_RETURN(m_Mapping.Serialize(inout_stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plProcVertexColorOutputDesc::Deserialize(plStreamReader& stream)
+plResult plProcVertexColorOutputDesc::Deserialize(plStreamReader& inout_stream)
 {
-  /*plTypeVersion version =*/stream.ReadVersion(s_ProcVertexColorOutputDescVersion);
-  stream >> m_sName;
-  PLASMA_SUCCEED_OR_RETURN(m_Mapping.Deserialize(stream));
+  /*plTypeVersion version =*/inout_stream.ReadVersion(s_ProcVertexColorOutputDescVersion);
+  inout_stream >> m_sName;
+  PL_SUCCEED_OR_RETURN(m_Mapping.Deserialize(inout_stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plProcVertexColorComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plProcVertexColorComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ProcGen_Graph")),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("OutputDescs", OutputDescs_GetCount, GetOutputDesc, SetOutputDesc, OutputDescs_Insert, OutputDescs_Remove),
+    PL_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ProcGen_Graph")),
+    PL_ARRAY_ACCESSOR_PROPERTY("OutputDescs", OutputDescs_GetCount, GetOutputDesc, SetOutputDesc, OutputDescs_Insert, OutputDescs_Remove),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged)
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Construction/Procedural Generation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plProcVertexColorComponent::plProcVertexColorComponent() = default;
@@ -442,21 +442,21 @@ void plProcVertexColorComponent::SetOutputDesc(plUInt32 uiIndex, const plProcVer
   }
 }
 
-void plProcVertexColorComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcVertexColorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_hResource;
   s.WriteArray(m_OutputDescs).IgnoreResult();
 }
 
-void plProcVertexColorComponent::DeserializeComponent(plWorldReader& stream)
+void plProcVertexColorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_hResource;
   if (uiVersion >= 2)
@@ -476,7 +476,7 @@ void plProcVertexColorComponent::DeserializeComponent(plWorldReader& stream)
   }
 }
 
-void plProcVertexColorComponent::OnTransformChanged(plMsgTransformChanged& msg)
+void plProcVertexColorComponent::OnTransformChanged(plMsgTransformChanged& ref_msg)
 {
   auto pManager = static_cast<plProcVertexColorComponentManager*>(GetOwningManager());
   pManager->EnqueueUpdate(this);

@@ -8,9 +8,9 @@
 
 #include <RendererCore/../../../Data/Base/Shaders/Particles/TrailShaderData.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTrailRenderData final : public plRenderData
+class PL_PARTICLEPLUGIN_DLL plParticleTrailRenderData final : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTrailRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTrailRenderData, plRenderData);
 
 public:
   plTexture2DResourceHandle m_hTexture;
@@ -31,16 +31,16 @@ public:
 };
 
 /// \brief Implements rendering of a trail particle systems
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTrailRenderer final : public plParticleRenderer
+class PL_PARTICLEPLUGIN_DLL plParticleTrailRenderer final : public plParticleRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTrailRenderer, plParticleRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plParticleTrailRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTrailRenderer, plParticleRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plParticleTrailRenderer);
 
 public:
   plParticleTrailRenderer();
   ~plParticleTrailRenderer();
 
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const override;
   virtual void RenderBatch(
     const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 

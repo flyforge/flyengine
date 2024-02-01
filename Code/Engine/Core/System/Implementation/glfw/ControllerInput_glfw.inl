@@ -34,7 +34,7 @@ namespace
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, ControllerInput)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, ControllerInput)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -44,7 +44,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, ControllerInput)
 
   ON_CORESYSTEMS_STARTUP
   {
-    g_pControllerInputGlfw = PLASMA_DEFAULT_NEW(plControllerInputGlfw);
+    g_pControllerInputGlfw = PL_DEFAULT_NEW(plControllerInputGlfw);
     plControllerInput::SetDevice(g_pControllerInputGlfw.Borrow());
   }
 
@@ -65,7 +65,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, ControllerInput)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace
@@ -99,8 +99,8 @@ void plControllerInputGlfw::RegisterControllerButton(const char* szButton, const
 
   for (plInt32 i = 0; i < MaxControllers; ++i)
   {
-    s.Format("controller{0}_{1}", i, szButton);
-    s2.Format("Cont {0}: {1}", i + 1, szName);
+    s.SetFormat("controller{0}_{1}", i, szButton);
+    s2.SetFormat("Cont {0}: {1}", i + 1, szName);
     RegisterInputSlot(s.GetData(), s2.GetData(), SlotFlags);
   }
 }
@@ -111,14 +111,14 @@ void plControllerInputGlfw::SetDeadZone(const char* szButton)
 
   for (plInt32 i = 0; i < MaxControllers; ++i)
   {
-    s.Format("controller{0}_{1}", i, szButton);
+    s.SetFormat("controller{0}_{1}", i, szButton);
     plInputManager::SetInputSlotDeadZone(s.GetData(), 0.23f);
   }
 }
 
 void plControllerInputGlfw::SetControllerValue(plStringBuilder& tmp, plUInt8 controllerIndex, const char* inputSlotName, float value)
 {
-  tmp.Format("controller{0}_{1}", controllerIndex, inputSlotName);
+  tmp.SetFormat("controller{0}_{1}", controllerIndex, inputSlotName);
   m_InputSlotValues[tmp] = value;
 }
 
@@ -165,7 +165,7 @@ void plControllerInputGlfw::UpdateInputSlotValues()
         GLFWgamepadstate state = {};
         if (glfwGetGamepadState(glfwId, &state))
         {
-          for (size_t buttonIndex = 0; buttonIndex < PLASMA_ARRAY_SIZE(g_ControllerButtonMappings); buttonIndex++)
+          for (size_t buttonIndex = 0; buttonIndex < PL_ARRAY_SIZE(g_ControllerButtonMappings); buttonIndex++)
           {
             const ControllerButtonMapping mapping = g_ControllerButtonMappings[buttonIndex];
             SetControllerValue(inputSlotName, uiVirtual, mapping.plName, (state.buttons[mapping.glfwIndex] == GLFW_PRESS) ? 1.0f : 0.0f);

@@ -6,8 +6,8 @@
 #include <Foundation/Strings/StringConversion.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStandardInputDevice, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStandardInputDevice, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 bool plStandardInputDevice::s_bMainWindowUsed = false;
@@ -18,11 +18,11 @@ plStandardInputDevice::plStandardInputDevice(plUInt32 uiWindowNumber)
 
   if (uiWindowNumber == 0)
   {
-    PLASMA_ASSERT_RELEASE(!s_bMainWindowUsed, "You cannot have two devices of Type plStandardInputDevice with the window number zero.");
+    PL_ASSERT_RELEASE(!s_bMainWindowUsed, "You cannot have two devices of Type plStandardInputDevice with the window number zero.");
     plStandardInputDevice::s_bMainWindowUsed = true;
   }
 
-  m_DoubleClickTime = plTime::Milliseconds(GetDoubleClickTime());
+  m_DoubleClickTime = plTime::MakeFromMilliseconds(GetDoubleClickTime());
 }
 
 plStandardInputDevice::~plStandardInputDevice()
@@ -344,9 +344,9 @@ void plStandardInputDevice::ApplyClipRect(plMouseCursorClipMode::Enum mode, plMi
     POINT mp;
     if (GetCursorPos(&mp))
     {
-      // make sure the position is inside the window rect
-      mp.x = plMath::Clamp(mp.x, r.left, r.right);
-      mp.y = plMath::Clamp(mp.y, r.top, r.bottom);
+      // center the position inside the window rect
+      mp.x = r.left + (r.right - r.left) / 2;
+      mp.y = r.top + (r.bottom - r.top) / 2;
 
       r.top = mp.y;
       r.bottom = mp.y;
@@ -372,23 +372,23 @@ void plStandardInputDevice::SetClipMouseCursor(plMouseCursorClipMode::Enum mode)
 
 // WM_INPUT mouse clicks do not work in some VMs.
 // When this is enabled, mouse clicks are retrieved via standard WM_LBUTTONDOWN.
-#define PLASMA_MOUSEBUTTON_COMPATIBILTY_MODE PLASMA_ON
+#define PL_MOUSEBUTTON_COMPATIBILTY_MODE PL_ON
 
 void plStandardInputDevice::WindowMessage(
-  plMinWindows::HWND hWnd, plMinWindows::UINT Msg, plMinWindows::WPARAM wParam, plMinWindows::LPARAM lParam)
+  plMinWindows::HWND hWnd, plMinWindows::UINT msg, plMinWindows::WPARAM wparam, plMinWindows::LPARAM lparam)
 {
-#if PLASMA_ENABLED(PLASMA_MOUSEBUTTON_COMPATIBILTY_MODE)
+#if PL_ENABLED(PL_MOUSEBUTTON_COMPATIBILTY_MODE)
   static plInt32 s_iMouseCaptureCount = 0;
 #endif
 
-  switch (Msg)
+  switch (msg)
   {
     case WM_MOUSEWHEEL:
     {
       // The mousewheel does not work with rawinput over touchpads (at least not all)
       // So we handle that one individually
 
-      const plInt32 iRotated = (plInt16)HIWORD(wParam);
+      const plInt32 iRotated = (plInt16)HIWORD(wparam);
 
       if (iRotated > 0)
         m_InputSlotValues[plInputSlot_MouseWheelUp] = iRotated / 120.0f;
@@ -406,8 +406,8 @@ void plStandardInputDevice::WindowMessage(
       const plUInt32 uiResX = area.right - area.left;
       const plUInt32 uiResY = area.bottom - area.top;
 
-      const float fPosX = (float)((short)LOWORD(lParam));
-      const float fPosY = (float)((short)HIWORD(lParam));
+      const float fPosX = (float)((short)LOWORD(lparam));
+      const float fPosY = (float)((short)HIWORD(lparam));
 
       s_iMouseIsOverWindowNumber = m_uiWindowNumber;
       m_InputSlotValues[plInputSlot_MousePositionX] = (fPosX / uiResX);
@@ -435,7 +435,7 @@ void plStandardInputDevice::WindowMessage(
     }
 
     case WM_CHAR:
-      m_uiLastCharacter = (wchar_t)wParam;
+      m_uiLastCharacter = (wchar_t)wparam;
       return;
 
       // these messages would only arrive, if the window had the flag CS_DBLCLKS
@@ -452,7 +452,7 @@ void plStandardInputDevice::WindowMessage(
       //  m_InputSlotValues[plInputSlot_MouseDblClick2] = 1.0f;
       //  return;
 
-#if PLASMA_ENABLED(PLASMA_MOUSEBUTTON_COMPATIBILTY_MODE)
+#if PL_ENABLED(PL_MOUSEBUTTON_COMPATIBILTY_MODE)
 
     case WM_LBUTTONDOWN:
       m_uiMouseButtonReceivedDown[0]++;
@@ -512,9 +512,9 @@ void plStandardInputDevice::WindowMessage(
       return;
 
     case WM_XBUTTONDOWN:
-      if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1)
+      if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
         m_uiMouseButtonReceivedDown[3]++;
-      if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)
+      if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
         m_uiMouseButtonReceivedDown[4]++;
 
       if (s_iMouseCaptureCount == 0)
@@ -524,9 +524,9 @@ void plStandardInputDevice::WindowMessage(
       return;
 
     case WM_XBUTTONUP:
-      if (GET_XBUTTON_WPARAM(wParam) == XBUTTON1)
+      if (GET_XBUTTON_WPARAM(wparam) == XBUTTON1)
         m_uiMouseButtonReceivedUp[3]++;
-      if (GET_XBUTTON_WPARAM(wParam) == XBUTTON2)
+      if (GET_XBUTTON_WPARAM(wparam) == XBUTTON2)
         m_uiMouseButtonReceivedUp[4]++;
 
       --s_iMouseCaptureCount;
@@ -551,7 +551,7 @@ void plStandardInputDevice::WindowMessage(
     {
       plUInt32 uiSize = 0;
 
-      GetRawInputData((HRAWINPUT)lParam, RID_INPUT, nullptr, &uiSize, sizeof(RAWINPUTHEADER));
+      GetRawInputData((HRAWINPUT)lparam, RID_INPUT, nullptr, &uiSize, sizeof(RAWINPUTHEADER));
 
       if (uiSize == 0)
         return;
@@ -559,7 +559,7 @@ void plStandardInputDevice::WindowMessage(
       plHybridArray<plUInt8, sizeof(RAWINPUT)> InputData;
       InputData.SetCountUninitialized(uiSize);
 
-      if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &InputData[0], &uiSize, sizeof(RAWINPUTHEADER)) != uiSize)
+      if (GetRawInputData((HRAWINPUT)lparam, RID_INPUT, &InputData[0], &uiSize, sizeof(RAWINPUTHEADER)) != uiSize)
         return;
 
       RAWINPUT* raw = (RAWINPUT*)&InputData[0];
@@ -600,16 +600,9 @@ void plStandardInputDevice::WindowMessage(
         // Note that the 'stupid shift' is sent along with several other keys as well (e.g. left/right/up/down arrows)
         // in these cases we can ignore them entirely, as the following key will have an unambiguous key code
         if (sInputSlotName == plInputSlot_KeyNumpadStar && bWasStupidLeftShift)
-        {
           sInputSlotName = plInputSlot_KeyPrint;
-        }
 
         bWasStupidLeftShift = false;
-
-        int iRequest = raw->data.keyboard.MakeCode << 16;
-
-        if (raw->data.keyboard.Flags & RI_KEY_E0)
-          iRequest |= 1 << 24;
 
         const bool bPressed = !(raw->data.keyboard.Flags & 0x01);
 
@@ -652,7 +645,7 @@ void plStandardInputDevice::WindowMessage(
 // therefore in 'compatibility mode' it is just queried via standard WM_LBUTTONDOWN etc.
 // to get 'high performance' mouse clicks, this code would work fine though
 // but I doubt it makes much difference in latency
-#if PLASMA_DISABLED(PLASMA_MOUSEBUTTON_COMPATIBILTY_MODE)
+#if PL_DISABLED(PL_MOUSEBUTTON_COMPATIBILTY_MODE)
           for (plInt32 mb = 0; mb < 5; ++mb)
           {
             char szTemp[32];
@@ -695,7 +688,6 @@ void plStandardInputDevice::WindowMessage(
           else
           {
             static int iTouchPoint = 0;
-            static bool bTouchPointDown = false;
 
             plStringView sSlot = plInputManager::GetInputSlotTouchPoint(iTouchPoint);
             plStringView sSlotX = plInputManager::GetInputSlotTouchPointPositionX(iTouchPoint);
@@ -706,13 +698,11 @@ void plStandardInputDevice::WindowMessage(
 
             if ((uiButtons & (RI_MOUSE_BUTTON_1_DOWN | RI_MOUSE_BUTTON_2_DOWN)) != 0)
             {
-              bTouchPointDown = true;
               m_InputSlotValues[sSlot] = 1.0f;
             }
 
             if ((uiButtons & (RI_MOUSE_BUTTON_1_UP | RI_MOUSE_BUTTON_2_UP)) != 0)
             {
-              bTouchPointDown = false;
               m_InputSlotValues[sSlot] = 0.0f;
             }
           }
@@ -744,7 +734,7 @@ static void SetKeyNameForScanCode(int iScanCode, bool bExtended, const char* szI
 
 void plStandardInputDevice::LocalizeButtonDisplayNames()
 {
-  PLASMA_LOG_BLOCK("plStandardInputDevice::LocalizeButtonDisplayNames");
+  PL_LOG_BLOCK("plStandardInputDevice::LocalizeButtonDisplayNames");
 
   SetKeyNameForScanCode(1, false, plInputSlot_KeyEscape);
   SetKeyNameForScanCode(2, false, plInputSlot_Key1);
@@ -902,9 +892,9 @@ void plStandardInputDevice::OnFocusLost(plMinWindows::HWND hWnd)
 
   const char* slotDown[5] = {plInputSlot_MouseButton0, plInputSlot_MouseButton1, plInputSlot_MouseButton2, plInputSlot_MouseButton3, plInputSlot_MouseButton4};
 
-  static_assert(PLASMA_ARRAY_SIZE(m_uiMouseButtonReceivedDown) == PLASMA_ARRAY_SIZE(slotDown));
+  static_assert(PL_ARRAY_SIZE(m_uiMouseButtonReceivedDown) == PL_ARRAY_SIZE(slotDown));
 
-  for (int i = 0; i < PLASMA_ARRAY_SIZE(m_uiMouseButtonReceivedDown); ++i)
+  for (int i = 0; i < PL_ARRAY_SIZE(m_uiMouseButtonReceivedDown); ++i)
   {
     m_uiMouseButtonReceivedDown[i] = 0;
     m_uiMouseButtonReceivedUp[i] = 0;

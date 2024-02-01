@@ -40,68 +40,68 @@ public:
   using StorageType = typename Derived::StorageType;
 
   /// \brief Default constructor
-  PLASMA_ALWAYS_INLINE plEnum()
+  PL_ALWAYS_INLINE plEnum()
     : m_Value((StorageType)Derived::Default)
   {
   } // [tested]
 
   /// \brief Copy constructor
-  PLASMA_ALWAYS_INLINE plEnum(const SelfType& rh)
+  PL_ALWAYS_INLINE plEnum(const SelfType& rh)
     : m_Value(rh.m_Value)
   {
   }
 
   /// \brief Construct from a C++ enum, and implicit conversion from enum type
-  PLASMA_ALWAYS_INLINE plEnum(typename Derived::Enum init)
+  PL_ALWAYS_INLINE plEnum(typename Derived::Enum init)
     : m_Value((StorageType)init)
   {
   } // [tested]
 
   /// \brief Assignment operator
-  PLASMA_ALWAYS_INLINE void operator=(const SelfType& rh) // [tested]
+  PL_ALWAYS_INLINE void operator=(const SelfType& rh) // [tested]
   {
     m_Value = rh.m_Value;
   }
 
   /// \brief Assignment operator.
-  PLASMA_ALWAYS_INLINE void operator=(const typename Derived::Enum value) // [tested]
+  PL_ALWAYS_INLINE void operator=(const typename Derived::Enum value) // [tested]
   {
     m_Value = (StorageType)value;
   }
 
   /// \brief Comparison operators
-  PLASMA_ALWAYS_INLINE bool operator==(const SelfType& rhs) const { return m_Value == rhs.m_Value; }
-  PLASMA_ALWAYS_INLINE bool operator!=(const SelfType& rhs) const { return m_Value != rhs.m_Value; }
-  PLASMA_ALWAYS_INLINE bool operator>(const SelfType& rhs) const { return m_Value > rhs.m_Value; }
-  PLASMA_ALWAYS_INLINE bool operator<(const SelfType& rhs) const { return m_Value < rhs.m_Value; }
-  PLASMA_ALWAYS_INLINE bool operator>=(const SelfType& rhs) const { return m_Value >= rhs.m_Value; }
-  PLASMA_ALWAYS_INLINE bool operator<=(const SelfType& rhs) const { return m_Value <= rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator==(const SelfType& rhs) const { return m_Value == rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator!=(const SelfType& rhs) const { return m_Value != rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator>(const SelfType& rhs) const { return m_Value > rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator<(const SelfType& rhs) const { return m_Value < rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator>=(const SelfType& rhs) const { return m_Value >= rhs.m_Value; }
+  PL_ALWAYS_INLINE bool operator<=(const SelfType& rhs) const { return m_Value <= rhs.m_Value; }
 
-  PLASMA_ALWAYS_INLINE bool operator==(typename Derived::Enum value) const { return m_Value == value; }
-  PLASMA_ALWAYS_INLINE bool operator!=(typename Derived::Enum value) const { return m_Value != value; }
-  PLASMA_ALWAYS_INLINE bool operator>(typename Derived::Enum value) const { return m_Value > value; }
-  PLASMA_ALWAYS_INLINE bool operator<(typename Derived::Enum value) const { return m_Value < value; }
-  PLASMA_ALWAYS_INLINE bool operator>=(typename Derived::Enum value) const { return m_Value >= value; }
-  PLASMA_ALWAYS_INLINE bool operator<=(typename Derived::Enum value) const { return m_Value <= value; }
+  PL_ALWAYS_INLINE bool operator==(typename Derived::Enum value) const { return m_Value == value; }
+  PL_ALWAYS_INLINE bool operator!=(typename Derived::Enum value) const { return m_Value != value; }
+  PL_ALWAYS_INLINE bool operator>(typename Derived::Enum value) const { return m_Value > value; }
+  PL_ALWAYS_INLINE bool operator<(typename Derived::Enum value) const { return m_Value < value; }
+  PL_ALWAYS_INLINE bool operator>=(typename Derived::Enum value) const { return m_Value >= value; }
+  PL_ALWAYS_INLINE bool operator<=(typename Derived::Enum value) const { return m_Value <= value; }
 
   /// brief Bitwise operators
-  PLASMA_ALWAYS_INLINE SelfType operator|(const SelfType& rhs) const { return static_cast<typename Derived::Enum>(m_Value | rhs.m_Value); } // [tested]
-  PLASMA_ALWAYS_INLINE SelfType operator&(const SelfType& rhs) const { return static_cast<typename Derived::Enum>(m_Value & rhs.m_Value); } // [tested]
+  PL_ALWAYS_INLINE SelfType operator|(const SelfType& rhs) const { return static_cast<typename Derived::Enum>(m_Value | rhs.m_Value); } // [tested]
+  PL_ALWAYS_INLINE SelfType operator&(const SelfType& rhs) const { return static_cast<typename Derived::Enum>(m_Value & rhs.m_Value); } // [tested]
 
   /// \brief Implicit conversion to enum type.
-  PLASMA_ALWAYS_INLINE operator typename Derived::Enum() const // [tested]
+  PL_ALWAYS_INLINE operator typename Derived::Enum() const // [tested]
   {
     return static_cast<typename Derived::Enum>(m_Value);
   }
 
   /// \brief Returns the enum value as an integer
-  PLASMA_ALWAYS_INLINE StorageType GetValue() const // [tested]
+  PL_ALWAYS_INLINE StorageType GetValue() const // [tested]
   {
     return m_Value;
   }
 
   /// \brief Sets the enum value through an integer
-  PLASMA_ALWAYS_INLINE void SetValue(StorageType value) // [tested]
+  PL_ALWAYS_INLINE void SetValue(StorageType value) // [tested]
   {
     m_Value = value;
   }
@@ -111,13 +111,13 @@ private:
 };
 
 
-#define PLASMA_ENUM_VALUE_TO_STRING(name) \
+#define PL_ENUM_VALUE_TO_STRING(name) \
   case name:                          \
-    return PLASMA_STRINGIZE(name);
+    return PL_STRINGIZE(name);
 
 /// \brief Helper macro to generate a 'ToString' function for enum values.
 ///
-/// Usage: PLASMA_ENUM_TO_STRING(Value1, Value2, Value3, Value4)
+/// Usage: PL_ENUM_TO_STRING(Value1, Value2, Value3, Value4)
 /// Embed it into a struct (which defines the enums).
 /// Example:
 /// struct plExampleEnum
@@ -129,14 +129,14 @@ private:
 ///     C,
 ///   };
 ///
-///   PLASMA_ENUM_TO_STRING(A, B, C);
+///   PL_ENUM_TO_STRING(A, B, C);
 /// };
-#define PLASMA_ENUM_TO_STRING(...)                               \
+#define PL_ENUM_TO_STRING(...)                               \
   const char* ToString(plUInt32 value)                       \
   {                                                          \
     switch (value)                                           \
     {                                                        \
-      PLASMA_EXPAND_ARGS(PLASMA_ENUM_VALUE_TO_STRING, ##__VA_ARGS__) \
+      PL_EXPAND_ARGS(PL_ENUM_VALUE_TO_STRING, ##__VA_ARGS__) \
       default:                                               \
         return nullptr;                                      \
     }                                                        \

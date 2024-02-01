@@ -12,7 +12,7 @@ void plStringWChar::operator=(const plUInt16* pUtf16)
   {
     // skip any Utf16 little endian Byte Order Mark
     plUnicodeUtils::SkipUtf16BomLE(pUtf16);
-    PLASMA_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
+    PL_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
 
     plUnicodeUtils::UtfInserter<wchar_t, plHybridArray<wchar_t, BufferSize>> tempInserter(&m_Data);
 
@@ -79,7 +79,7 @@ void plStringWChar::operator=(plStringView sUtf8)
   {
     const char* szUtf8 = sUtf8.GetStartPointer();
 
-    PLASMA_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
+    PL_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
 
     // skip any Utf8 Byte Order Mark
     plUnicodeUtils::SkipUtf8Bom(szUtf8);
@@ -104,7 +104,7 @@ void plStringWChar::operator=(plStringView sUtf8)
 
 void plStringUtf8::operator=(const char* szUtf8)
 {
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
 
   m_Data.Clear();
@@ -134,7 +134,7 @@ void plStringUtf8::operator=(const plUInt16* pUtf16)
   {
     // skip any Utf16 little endian Byte Order Mark
     plUnicodeUtils::SkipUtf16BomLE(pUtf16);
-    PLASMA_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
+    PL_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
 
     plUnicodeUtils::UtfInserter<char, plHybridArray<char, BufferSize>> tempInserter(&m_Data);
 
@@ -198,7 +198,7 @@ void plStringUtf8::operator=(const wchar_t* pWChar)
   m_Data.PushBack('\0');
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 void plStringUtf8::operator=(const Microsoft::WRL::Wrappers::HString& hstring)
 {
@@ -228,7 +228,7 @@ void plStringUtf8::operator=(const HSTRING& hstring)
 
 void plStringUtf16::operator=(const char* szUtf8)
 {
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
 
   m_Data.Clear();
@@ -263,7 +263,7 @@ void plStringUtf16::operator=(const plUInt16* pUtf16)
   {
     // skip any Utf16 little endian Byte Order Mark
     plUnicodeUtils::SkipUtf16BomLE(pUtf16);
-    PLASMA_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
+    PL_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
 
     while (*pUtf16 != '\0')
     {
@@ -328,7 +328,7 @@ void plStringUtf16::operator=(const wchar_t* pWChar)
 
 void plStringUtf32::operator=(const char* szUtf8)
 {
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     plUnicodeUtils::IsValidUtf8(szUtf8), "Input Data is not a valid Utf8 string. Did you intend to use a Wide-String and forget the 'L' prefix?");
 
   m_Data.Clear();
@@ -358,7 +358,7 @@ void plStringUtf32::operator=(const plUInt16* pUtf16)
   {
     // skip any Utf16 little endian Byte Order Mark
     plUnicodeUtils::SkipUtf16BomLE(pUtf16);
-    PLASMA_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
+    PL_ASSERT_DEV(!plUnicodeUtils::SkipUtf16BomBE(pUtf16), "Utf-16 Big Endian is currently not supported.");
 
     while (*pUtf16 != '\0')
     {
@@ -406,7 +406,7 @@ void plStringUtf32::operator=(const wchar_t* pWChar)
   m_Data.PushBack('\0');
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 plStringHString::plStringHString()
 {
@@ -455,4 +455,3 @@ void plStringHString::operator=(const wchar_t* szWChar)
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_StringConversion);

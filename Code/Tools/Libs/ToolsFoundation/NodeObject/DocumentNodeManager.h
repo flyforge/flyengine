@@ -8,7 +8,7 @@
 class plPin;
 class plConnection;
 
-struct PLASMA_TOOLSFOUNDATION_DLL plDocumentNodeManagerEvent
+struct PL_TOOLSFOUNDATION_DLL plDocumentNodeManagerEvent
 {
   enum class Type
   {
@@ -55,9 +55,9 @@ private:
   const plDocumentObject* m_pParent = nullptr;
 };
 
-class PLASMA_TOOLSFOUNDATION_DLL plPin : public plReflectedClass
+class PL_TOOLSFOUNDATION_DLL plPin : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPin, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plPin, plReflectedClass);
 
 public:
   enum class Type
@@ -72,7 +72,7 @@ public:
     Rect,
     RoundRect,
     Arrow,
-    Default = Rect
+    Default = Circle
   };
 
   plPin(Type type, plStringView sName, const plColorGammaUB& color, const plDocumentObject* pObject)
@@ -99,7 +99,30 @@ private:
   const plDocumentObject* m_pParent = nullptr;
 };
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentNodeManager : public plDocumentObjectManager
+//////////////////////////////////////////////////////////////////////////
+
+struct plNodePropertyValue
+{
+  plHashedString m_sPropertyName;
+  plVariant m_Value;
+};
+
+/// \brief Describes a template that will be used to create new nodes. In most cases this only contains the type
+/// but it can also contain properties that are pre-filled when the node is created.
+///
+/// For example in visual script this allows us to have one generic node type for setting reflected properties
+/// but we can expose all relevant reflected properties in the node creation menu so the user does not need to fill out the property name manually.
+struct plNodeCreationTemplate
+{
+  const plRTTI* m_pType = nullptr;
+  plStringView m_sTypeName;
+  plHashedString m_sCategory;
+  plArrayPtr<const plNodePropertyValue> m_PropertyValues;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
+class PL_TOOLSFOUNDATION_DLL plDocumentNodeManager : public plDocumentObjectManager
 {
 public:
   plEvent<const plDocumentNodeManagerEvent&> m_NodeEvents;
@@ -107,13 +130,19 @@ public:
   plDocumentNodeManager();
   virtual ~plDocumentNodeManager();
 
+  /// \brief For node documents this function is called instead of GetCreateableTypes to get a list for the node creation menu.
+  ///
+  /// \see plNodeCreationTemplate
+  virtual void GetNodeCreationTemplates(plDynamicArray<plNodeCreationTemplate>& out_templates) const;
+
   virtual const plRTTI* GetConnectionType() const;
 
   plVec2 GetNodePos(const plDocumentObject* pObject) const;
   const plConnection& GetConnection(const plDocumentObject* pObject) const;
+  const plConnection* GetConnectionIfExists(const plDocumentObject* pObject) const;
 
-  const plPin* GetInputPinByName(const plDocumentObject* pObject, const char* szName) const;
-  const plPin* GetOutputPinByName(const plDocumentObject* pObject, const char* szName) const;
+  const plPin* GetInputPinByName(const plDocumentObject* pObject, plStringView sName) const;
+  const plPin* GetOutputPinByName(const plDocumentObject* pObject, plStringView sName) const;
   plArrayPtr<const plUniquePtr<const plPin>> GetInputPins(const plDocumentObject* pObject) const;
   plArrayPtr<const plUniquePtr<const plPin>> GetOutputPins(const plDocumentObject* pObject) const;
 
@@ -133,7 +162,8 @@ public:
   plArrayPtr<const plConnection* const> GetConnections(const plPin& pin) const;
   bool HasConnections(const plPin& pin) const;
   bool IsConnected(const plPin& source, const plPin& target) const;
-  plStatus CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& result) const;
+
+  plStatus CanConnect(const plRTTI* pObjectType, const plPin& source, const plPin& target, CanConnectResult& ref_result) const;
   plStatus CanDisconnect(const plConnection* pConnection) const;
   plStatus CanDisconnect(const plDocumentObject* pObject) const;
   plStatus CanMoveNode(const plDocumentObject* pObject, const plVec2& vPos) const;
@@ -142,12 +172,12 @@ public:
   void Disconnect(const plDocumentObject* pObject);
   void MoveNode(const plDocumentObject* pObject, const plVec2& vPos);
 
-  void AttachMetaDataBeforeSaving(plAbstractObjectGraph& graph) const;
+  void AttachMetaDataBeforeSaving(plAbstractObjectGraph& ref_graph) const;
   void RestoreMetaDataAfterLoading(const plAbstractObjectGraph& graph, bool bUndoable);
 
   void GetMetaDataHash(const plDocumentObject* pObject, plUInt64& inout_uiHash) const;
   bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph) const;
-  bool PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& pickedPosition, bool bAllowPickedPosition);
+  bool PasteObjects(const plArrayPtr<plDocument::PasteInfo>& info, const plAbstractObjectGraph& objectGraph, const plVec2& vPickedPosition, bool bAllowPickedPosition);
 
 protected:
   /// \brief Tests whether pTarget can be reached from pSource by following the pin connections
@@ -156,12 +186,12 @@ protected:
   /// \brief Returns true if adding a connection between the two pins would create a circular graph
   bool WouldConnectionCreateCircle(const plPin& source, const plPin& target) const;
 
-  void GetDynamicPinNames(const plDocumentObject* pObject, const char* szPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const;
+  virtual void GetDynamicPinNames(const plDocumentObject* pObject, plStringView sPropertyName, plStringView sPinName, plDynamicArray<plString>& out_Names) const;
   virtual bool TryRecreatePins(const plDocumentObject* pObject);
 
   struct NodeInternal
   {
-    plVec2 m_vPos = plVec2::ZeroVector();
+    plVec2 m_vPos = plVec2::MakeZero();
     plHybridArray<plUniquePtr<plPin>, 6> m_Inputs;
     plHybridArray<plUniquePtr<plPin>, 6> m_Outputs;
   };
@@ -171,13 +201,15 @@ private:
   virtual bool InternalIsConnection(const plDocumentObject* pObject) const;
   virtual bool InternalIsDynamicPinProperty(const plDocumentObject* pObject, const plAbstractProperty* pProp) const { return false; }
   virtual plStatus InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const;
-  virtual plStatus InternalCanDisconnect(const plPin& source, const plPin& target) const { return plStatus(PLASMA_SUCCESS); }
-  virtual plStatus InternalCanMoveNode(const plDocumentObject* pObject, const plVec2& vPos) const { return plStatus(PLASMA_SUCCESS); }
+  virtual plStatus InternalCanDisconnect(const plPin& source, const plPin& target) const { return plStatus(PL_SUCCESS); }
+  virtual plStatus InternalCanMoveNode(const plDocumentObject* pObject, const plVec2& vPos) const { return plStatus(PL_SUCCESS); }
   virtual void InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node) = 0;
 
   void ObjectHandler(const plDocumentObjectEvent& e);
   void StructureEventHandler(const plDocumentObjectStructureEvent& e);
   void PropertyEventsHandler(const plDocumentObjectPropertyEvent& e);
+
+  void HandlePotentialDynamicPinPropertyChanged(const plDocumentObject* pObject, plStringView sPropertyName);
 
   void RestoreOldMetaDataAfterLoading(const plAbstractObjectGraph& graph, const plAbstractObjectNode::Property& connectionsProperty, const plDocumentObject* pSourceObject);
 

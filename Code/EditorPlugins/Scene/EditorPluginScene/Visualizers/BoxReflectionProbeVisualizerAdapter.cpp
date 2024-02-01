@@ -6,16 +6,16 @@
 
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plBoxReflectionProbeVisualizerAdapter::plBoxReflectionProbeVisualizerAdapter() {}
-plBoxReflectionProbeVisualizerAdapter::~plBoxReflectionProbeVisualizerAdapter() {}
+plBoxReflectionProbeVisualizerAdapter::plBoxReflectionProbeVisualizerAdapter() = default;
+plBoxReflectionProbeVisualizerAdapter::~plBoxReflectionProbeVisualizerAdapter() = default;
 
 void plBoxReflectionProbeVisualizerAdapter::Finalize()
 {
   auto* pDoc = m_pObject->GetDocumentObjectManager()->GetDocument()->GetMainDocument();
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
-  PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
+  PL_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
-  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineBox, plColorScheme::LightUI(plColorScheme::Yellow), plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineBox, plColorScheme::LightUI(plColorScheme::Yellow), plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);

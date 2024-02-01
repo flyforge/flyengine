@@ -9,7 +9,7 @@
 #include <Foundation/Basics/Platform/Win/HResultUtils.h>
 #include <d3d11.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 #  include <Foundation/Basics/Platform/uwp/UWPUtils.h>
 #  include <dxgi1_3.h>
 #endif
@@ -35,7 +35,7 @@ void plGALSwapChainDX11::PresentRenderTarget(plGALDevice* pDevice)
     return;
   }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   // Since the swap chain can't be in discard mode, we do the discarding ourselves.
   ID3D11DeviceContext1* deviceContext1 = nullptr;
   if (FAILED(pDXDevice->GetDXImmediateContext()->QueryInterface(&deviceContext1)))
@@ -65,7 +65,7 @@ plResult plGALSwapChainDX11::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALP
   // Need to flush dead objects or ResizeBuffers will fail as the backbuffer is still referenced.
   pDXDevice->FlushDeadObjects();
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   HRESULT result = m_pDXSwapChain->ResizeBuffers(2, // Only double buffering supported.
     m_WindowDesc.m_pWindow->GetClientAreaSize().width,
     m_WindowDesc.m_pWindow->GetClientAreaSize().height,
@@ -81,7 +81,7 @@ plResult plGALSwapChainDX11::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALP
   if (FAILED(result))
   {
     plLog::Error("UpdateSwapChain: ResizeBuffers call failed: {}", plArgErrorCode(result));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   return CreateBackBufferInternal(pDXDevice);
@@ -89,18 +89,18 @@ plResult plGALSwapChainDX11::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALP
 
 plGALSwapChainDX11::plGALSwapChainDX11(const plGALWindowSwapChainCreationDescription& Description)
   : plGALWindowSwapChain(Description)
-  , m_pDXSwapChain(nullptr)
+
 {
 }
 
-plGALSwapChainDX11::~plGALSwapChainDX11() {}
+plGALSwapChainDX11::~plGALSwapChainDX11() = default;
 
 
 plResult plGALSwapChainDX11::InitPlatform(plGALDevice* pDevice)
 {
   plGALDeviceDX11* pDXDevice = static_cast<plGALDeviceDX11*>(pDevice);
   m_CurrentPresentMode = m_WindowDesc.m_InitialPresentMode;
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   DXGI_SWAP_CHAIN_DESC1 SwapChainDesc = {0};
 
   // Only double buffering supported.
@@ -159,11 +159,11 @@ plResult plGALSwapChainDX11::InitPlatform(plGALDevice* pDevice)
 
   SwapChainDesc.BufferUsage = DXGI_USAGE_BACK_BUFFER | DXGI_USAGE_RENDER_TARGET_OUTPUT;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   {
     ComPtr<IDXGIFactory1> dxgiFactory = pDXDevice->GetDXGIFactory();
     ComPtr<IDXGIFactory3> dxgiFactory3;
-    PLASMA_HRESULT_TO_FAILURE_LOG(dxgiFactory.As(&dxgiFactory3));
+    PL_HRESULT_TO_FAILURE_LOG(dxgiFactory.As(&dxgiFactory3));
 
     ComPtr<IDXGISwapChain1> swapChain1;
     ComPtr<IDXGISwapChain> swapChain;
@@ -183,15 +183,15 @@ plResult plGALSwapChainDX11::InitPlatform(plGALDevice* pDevice)
         plLog::Error("Failed to create swapchain: {0}", plHRESULTtoString(result));
       }
 
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
-    PLASMA_HRESULT_TO_FAILURE_LOG(swapChain1.As(&swapChain));
+    PL_HRESULT_TO_FAILURE_LOG(swapChain1.As(&swapChain));
     m_pDXSwapChain = swapChain.Detach();
   }
 #else
   if (FAILED(pDXDevice->GetDXGIFactory()->CreateSwapChain(pDXDevice->GetDXDevice(), &SwapChainDesc, &m_pDXSwapChain)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
 #endif
@@ -199,7 +199,7 @@ plResult plGALSwapChainDX11::InitPlatform(plGALDevice* pDevice)
   m_WindowDesc.m_pWindow->AddReference();
 
   m_bCanMakeDirectScreenshots = (SwapChainDesc.SwapEffect != DXGI_SWAP_EFFECT_FLIP_SEQUENTIAL);
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   m_bCanMakeDirectScreenshots = m_bCanMakeDirectScreenshots && (SwapChainDesc.SwapEffect != DXGI_SWAP_EFFECT_FLIP_DISCARD);
 #endif
   return CreateBackBufferInternal(pDXDevice);
@@ -213,9 +213,9 @@ plResult plGALSwapChainDX11::CreateBackBufferInternal(plGALDeviceDX11* pDXDevice
   if (FAILED(result))
   {
     plLog::Error("Couldn't access backbuffer texture of swapchain: {0}", plHRESULTtoString(result));
-    PLASMA_GAL_DX11_RELEASE(m_pDXSwapChain);
+    PL_GAL_DX11_RELEASE(m_pDXSwapChain);
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plGALTextureCreationDescription TexDesc;
@@ -225,7 +225,7 @@ plResult plGALSwapChainDX11::CreateBackBufferInternal(plGALDeviceDX11* pDXDevice
   TexDesc.m_pExisitingNativeObject = pNativeBackBufferTexture;
   TexDesc.m_bAllowShaderResourceView = false;
   TexDesc.m_bCreateRenderTarget = true;
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   // See format handling in swap chain desc creation above.
   if (plGALResourceFormat::IsSrgb(m_WindowDesc.m_BackBufferFormat))
     TexDesc.m_Format = plGALResourceFormat::RGBAUByteNormalizedsRGB;
@@ -243,7 +243,7 @@ plResult plGALSwapChainDX11::CreateBackBufferInternal(plGALDeviceDX11* pDXDevice
 
   // And create the pl texture object wrapping the backbuffer texture
   m_hBackBufferTexture = pDXDevice->CreateTexture(TexDesc);
-  PLASMA_ASSERT_RELEASE(!m_hBackBufferTexture.IsInvalidated(), "Couldn't create native backbuffer texture object!");
+  PL_ASSERT_RELEASE(!m_hBackBufferTexture.IsInvalidated(), "Couldn't create native backbuffer texture object!");
 
   // Create extra texture to be used as "practical backbuffer" if we can't do the screenshots the user wants.
   if (!m_bCanMakeDirectScreenshots && m_WindowDesc.m_bAllowScreenshots)
@@ -253,12 +253,12 @@ plResult plGALSwapChainDX11::CreateBackBufferInternal(plGALDeviceDX11* pDXDevice
 
     m_hActualBackBufferTexture = m_hBackBufferTexture;
     m_hBackBufferTexture = pDXDevice->CreateTexture(TexDesc);
-    PLASMA_ASSERT_RELEASE(!m_hBackBufferTexture.IsInvalidated(), "Couldn't create non-native backbuffer texture object!");
+    PL_ASSERT_RELEASE(!m_hBackBufferTexture.IsInvalidated(), "Couldn't create non-native backbuffer texture object!");
   }
 
   m_RenderTargets.m_hRTs[0] = m_hBackBufferTexture;
   m_CurrentSize = plSizeU32(TexDesc.m_uiWidth, TexDesc.m_uiHeight);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALSwapChainDX11::DestroyBackBufferInternal(plGALDeviceDX11* pDXDevice)
@@ -281,19 +281,19 @@ plResult plGALSwapChainDX11::DeInitPlatform(plGALDevice* pDevice)
 
   if (m_pDXSwapChain)
   {
-#if PLASMA_DISABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_DISABLED(PL_PLATFORM_WINDOWS_UWP)
     // Full screen swap chains must be switched to windowed mode before destruction.
     // See: https://msdn.microsoft.com/en-us/library/windows/desktop/bb205075(v=vs.85).aspx#Destroying
     m_pDXSwapChain->SetFullscreenState(FALSE, NULL);
 #endif
 
-    PLASMA_GAL_DX11_RELEASE(m_pDXSwapChain);
+    PL_GAL_DX11_RELEASE(m_pDXSwapChain);
 
     m_WindowDesc.m_pWindow->RemoveReference();
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Device_Implementation_SwapChainDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Device_Implementation_SwapChainDX11);

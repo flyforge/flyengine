@@ -16,13 +16,13 @@
 #include <RendererFoundation/Device/SwapChain.h>
 #include <Texture/Image/Image.h>
 
-PlasmaEngineProcessViewContext::PlasmaEngineProcessViewContext(PlasmaEngineProcessDocumentContext* pContext)
+plEngineProcessViewContext::plEngineProcessViewContext(plEngineProcessDocumentContext* pContext)
   : m_pDocumentContext(pContext)
 {
   m_uiViewID = 0xFFFFFFFF;
 }
 
-PlasmaEngineProcessViewContext::~PlasmaEngineProcessViewContext()
+plEngineProcessViewContext::~plEngineProcessViewContext()
 {
   plRenderWorld::DeleteView(m_hView);
   m_hView.Invalidate();
@@ -30,15 +30,15 @@ PlasmaEngineProcessViewContext::~PlasmaEngineProcessViewContext()
   plActorManager::GetSingleton()->DestroyAllActors(this);
 }
 
-void PlasmaEngineProcessViewContext::SetViewID(plUInt32 id)
+void plEngineProcessViewContext::SetViewID(plUInt32 uiId)
 {
-  PLASMA_ASSERT_DEBUG(m_uiViewID == 0xFFFFFFFF, "View ID may only be set once");
-  m_uiViewID = id;
+  PL_ASSERT_DEBUG(m_uiViewID == 0xFFFFFFFF, "View ID may only be set once");
+  m_uiViewID = uiId;
 }
 
-void PlasmaEngineProcessViewContext::HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg)
+void plEngineProcessViewContext::HandleViewMessage(const plEditorEngineViewMsg* pMsg)
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP) || PL_ENABLED(PL_PLATFORM_LINUX)
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plViewRedrawMsgToEngine>())
   {
     const plViewRedrawMsgToEngine* pMsg2 = static_cast<const plViewRedrawMsgToEngine*>(pMsg);
@@ -47,7 +47,7 @@ void PlasmaEngineProcessViewContext::HandleViewMessage(const PlasmaEditorEngineV
 
     if (pMsg2->m_uiWindowWidth > 0 && pMsg2->m_uiWindowHeight > 0)
     {
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
       HandleWindowUpdate(reinterpret_cast<plWindowHandle>(pMsg2->m_uiHWND), pMsg2->m_uiWindowWidth, pMsg2->m_uiWindowHeight);
 #  else
       plWindowHandle windowHandle;
@@ -67,14 +67,14 @@ void PlasmaEngineProcessViewContext::HandleViewMessage(const PlasmaEditorEngineV
 
     img.SaveTo(msg->m_sOutputFile).IgnoreResult();
   }
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
-  PLASMA_REPORT_FAILURE("This code path should never be executed on UWP.");
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
+  PL_REPORT_FAILURE("This code path should never be executed on UWP.");
 #else
 #  error "Unsupported platform."
 #endif
 }
 
-void PlasmaEngineProcessViewContext::SendViewMessage(PlasmaEditorEngineViewMsg* pViewMsg)
+void plEngineProcessViewContext::SendViewMessage(plEditorEngineViewMsg* pViewMsg)
 {
   pViewMsg->m_DocumentGuid = GetDocumentContext()->GetDocumentGuid();
   pViewMsg->m_uiViewID = m_uiViewID;
@@ -82,9 +82,9 @@ void PlasmaEngineProcessViewContext::SendViewMessage(PlasmaEditorEngineViewMsg* 
   GetDocumentContext()->SendProcessMessage(pViewMsg);
 }
 
-void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt16 uiWidth, plUInt16 uiHeight)
+void plEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  PLASMA_LOG_BLOCK("PlasmaEngineProcessViewContext::HandleWindowUpdate");
+  PL_LOG_BLOCK("plEngineProcessViewContext::HandleWindowUpdate");
 
   if (m_pEditorWndActor != nullptr)
   {
@@ -93,12 +93,12 @@ void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plU
 
     const plSizeU32 wndSize = pWindowPlugin->GetWindow()->GetClientAreaSize();
 
-    PLASMA_ASSERT_DEV(pWindowPlugin->GetWindow()->GetNativeWindowHandle() == hWnd, "Editor view handle must never change. View needs to be destroyed and recreated.");
+    PL_ASSERT_DEV(pWindowPlugin->GetWindow()->GetNativeWindowHandle() == hWnd, "Editor view handle must never change. View needs to be destroyed and recreated.");
 
     if (wndSize.width == uiWidth && wndSize.height == uiHeight)
       return;
 
-    if (static_cast<PlasmaEditorProcessViewWindow*>(pWindowPlugin->GetWindow())->UpdateWindow(hWnd, uiWidth, uiHeight).Failed())
+    if (static_cast<plEditorProcessViewWindow*>(pWindowPlugin->GetWindow())->UpdateWindow(hWnd, uiWidth, uiHeight).Failed())
     {
       plLog::Error("Failed to update Editor Process View Window");
     }
@@ -107,14 +107,14 @@ void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plU
 
   {
     // Create new actor
-    plUniquePtr<plActor> pActor = PLASMA_DEFAULT_NEW(plActor, "EditorView", this);
+    plUniquePtr<plActor> pActor = PL_DEFAULT_NEW(plActor, "EditorView", this);
     m_pEditorWndActor = pActor.Borrow();
 
-    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PLASMA_DEFAULT_NEW(plActorPluginWindowOwner);
+    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PL_DEFAULT_NEW(plActorPluginWindowOwner);
 
     // create window
     {
-      plUniquePtr<PlasmaEditorProcessViewWindow> pWindow = PLASMA_DEFAULT_NEW(PlasmaEditorProcessViewWindow);
+      plUniquePtr<plEditorProcessViewWindow> pWindow = PL_DEFAULT_NEW(plEditorProcessViewWindow);
       if (pWindow->UpdateWindow(hWnd, uiWidth, uiHeight).Succeeded())
       {
         pWindowPlugin->m_pWindow = std::move(pWindow);
@@ -127,7 +127,7 @@ void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plU
 
     // create output target
     {
-      plUniquePtr<plWindowOutputTargetGAL> pOutput = PLASMA_DEFAULT_NEW(plWindowOutputTargetGAL, [this](plGALSwapChainHandle hSwapChain, plSizeU32 size) {
+      plUniquePtr<plWindowOutputTargetGAL> pOutput = PL_DEFAULT_NEW(plWindowOutputTargetGAL, [this](plGALSwapChainHandle hSwapChain, plSizeU32 size) {
         OnSwapChainChanged(hSwapChain, size);
       });
 
@@ -143,7 +143,6 @@ void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plU
 
     // setup render target
     {
-      plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
       plWindowOutputTargetGAL* pOutput = static_cast<plWindowOutputTargetGAL*>(pWindowPlugin->m_pWindowOutputTarget.Borrow());
 
       const plSizeU32 wndSize = pWindowPlugin->m_pWindow->GetClientAreaSize();
@@ -155,7 +154,7 @@ void PlasmaEngineProcessViewContext::HandleWindowUpdate(plWindowHandle hWnd, plU
   }
 }
 
-void PlasmaEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSwapChain, plSizeU32 size)
+void plEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSwapChain, plSizeU32 size)
 {
   plView* pView = nullptr;
   if (plRenderWorld::TryGetView(m_hView, pView))
@@ -165,10 +164,10 @@ void PlasmaEngineProcessViewContext::OnSwapChainChanged(plGALSwapChainHandle hSw
   }
 }
 
-void PlasmaEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* renderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
+void plEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwapChain, const plGALRenderTargets* pRenderTargets, plUInt16 uiWidth, plUInt16 uiHeight)
 {
-  PLASMA_LOG_BLOCK("PlasmaEngineProcessViewContext::SetupRenderTarget");
-  PLASMA_ASSERT_DEV(hSwapChain.IsInvalidated() || renderTargets == nullptr, "hSwapChain and renderTargetSetup are mutually exclusive.");
+  PL_LOG_BLOCK("plEngineProcessViewContext::SetupRenderTarget");
+  PL_ASSERT_DEV((!hSwapChain.IsInvalidated() && pRenderTargets == nullptr) || (hSwapChain.IsInvalidated() && pRenderTargets != nullptr), "hSwapChain and pRenderTargets are mutually exclusive.");
 
   // setup view
   {
@@ -183,13 +182,13 @@ void PlasmaEngineProcessViewContext::SetupRenderTarget(plGALSwapChainHandle hSwa
       if (!hSwapChain.IsInvalidated())
         pView->SetSwapChain(hSwapChain);
       else
-        pView->SetRenderTargets(*renderTargets);
+        pView->SetRenderTargets(*pRenderTargets);
       pView->SetViewport(plRectFloat(0.0f, 0.0f, (float)uiWidth, (float)uiHeight));
     }
   }
 }
 
-void PlasmaEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
+void plEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
 {
   auto pState = plGameApplicationBase::GetGameApplicationBaseInstance()->GetActiveGameStateLinkedToWorld(GetDocumentContext()->GetWorld());
 
@@ -219,17 +218,17 @@ void PlasmaEngineProcessViewContext::Redraw(bool bRenderEditorGizmos)
   }
 }
 
-bool PlasmaEngineProcessViewContext::FocusCameraOnObject(plCamera& camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir)
+bool plEngineProcessViewContext::FocusCameraOnObject(plCamera& inout_camera, const plBoundingBoxSphere& objectBounds, float fFov, const plVec3& vViewDir)
 {
   if (!objectBounds.IsValid())
     return false;
 
   plVec3 vDir = vViewDir;
   bool bChanged = false;
-  plVec3 vCameraPos = camera.GetCenterPosition();
+  plVec3 vCameraPos = inout_camera.GetCenterPosition();
   plVec3 vCenterPos = objectBounds.GetSphere().m_vCenter;
 
-  const float fDist = plMath::Max(0.1f, objectBounds.GetSphere().m_fRadius) / plMath::Sin(plAngle::Degree(fFov / 2));
+  const float fDist = plMath::Max(0.1f, objectBounds.GetSphere().m_fRadius) / plMath::Sin(plAngle::MakeFromDegree(fFov / 2));
   vDir.Normalize();
   plVec3 vNewCameraPos = vCenterPos - vDir * fDist;
   if (!vNewCameraPos.IsEqual(vCameraPos, 0.01f))
@@ -243,14 +242,14 @@ bool PlasmaEngineProcessViewContext::FocusCameraOnObject(plCamera& camera, const
     if (!vNewCameraPos.IsValid())
       return false;
 
-    camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, fFov, 0.1f, 1000.0f);
-    camera.LookAt(vNewCameraPos, vCenterPos, plVec3(0.0f, 0.0f, 1.0f));
+    inout_camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, fFov, 0.1f, 1000.0f);
+    inout_camera.LookAt(vNewCameraPos, vCenterPos, plVec3(0.0f, 0.0f, 1.0f));
   }
 
   return bChanged;
 }
 
-void PlasmaEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
+void plEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
   plViewRenderMode::Enum renderMode = (plViewRenderMode::Enum)pMsg->m_uiRenderMode;
 
@@ -309,17 +308,17 @@ void PlasmaEngineProcessViewContext::SetCamera(const plViewRedrawMsgToEngine* pM
   }
 }
 
-plRenderPipelineResourceHandle PlasmaEngineProcessViewContext::CreateDefaultRenderPipeline()
+plRenderPipelineResourceHandle plEngineProcessViewContext::CreateDefaultRenderPipeline()
 {
-  return PlasmaEditorEngineProcessApp::GetSingleton()->CreateDefaultMainRenderPipeline();
+  return plEditorEngineProcessApp::GetSingleton()->CreateDefaultMainRenderPipeline();
 }
 
-plRenderPipelineResourceHandle PlasmaEngineProcessViewContext::CreateDebugRenderPipeline()
+plRenderPipelineResourceHandle plEngineProcessViewContext::CreateDebugRenderPipeline()
 {
-  return PlasmaEditorEngineProcessApp::GetSingleton()->CreateDefaultDebugRenderPipeline();
+  return plEditorEngineProcessApp::GetSingleton()->CreateDefaultDebugRenderPipeline();
 }
 
-void PlasmaEngineProcessViewContext::DrawSimpleGrid() const
+void plEngineProcessViewContext::DrawSimpleGrid() const
 {
   plDynamicArray<plDebugRenderer::Line> lines;
   lines.Reserve(2 * (10 + 1 + 10) + 4);
@@ -413,9 +412,9 @@ void PlasmaEngineProcessViewContext::DrawSimpleGrid() const
   plDebugRenderer::DrawLines(m_hView, lines, plColor::White);
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <EditorEngineProcessFramework/EngineProcess/Implementation/Win/EngineProcessViewContext_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
 #  include <EditorEngineProcessFramework/EngineProcess/Implementation/Linux/EngineProcessViewContext_linux.h>
 #else
 #  error Platform not supported

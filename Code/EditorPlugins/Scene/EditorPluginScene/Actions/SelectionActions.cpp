@@ -10,8 +10,8 @@
 #include <QFileDialog>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectionAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectionAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plActionDescriptorHandle plSelectionActions::s_hGroupSelectedItems;
@@ -38,44 +38,44 @@ plActionDescriptorHandle plSelectionActions::s_hCopyReference;
 
 void plSelectionActions::RegisterActions()
 {
-  s_hGroupSelectedItems = PLASMA_REGISTER_ACTION_1("Selection.GroupItems", plActionScope::Document, "Scene - Selection", "Ctrl+G", plSelectionAction,
+  s_hGroupSelectedItems = PL_REGISTER_ACTION_1("Selection.GroupItems", plActionScope::Document, "Scene - Selection", "Ctrl+G", plSelectionAction,
     plSelectionAction::ActionType::GroupSelectedItems);
-  s_hCreateEmptyChildObject = PLASMA_REGISTER_ACTION_1("Selection.CreateEmptyChildObject", plActionScope::Document, "Scene - Selection", "",
+  s_hCreateEmptyChildObject = PL_REGISTER_ACTION_1("Selection.CreateEmptyChildObject", plActionScope::Document, "Scene - Selection", "",
     plSelectionAction, plSelectionAction::ActionType::CreateEmptyChildObject);
-  s_hCreateEmptyObjectAtPosition = PLASMA_REGISTER_ACTION_1("Selection.CreateEmptyObjectAtPosition", plActionScope::Document, "Scene - Selection",
+  s_hCreateEmptyObjectAtPosition = PL_REGISTER_ACTION_1("Selection.CreateEmptyObjectAtPosition", plActionScope::Document, "Scene - Selection",
     "Ctrl+Shift+X", plSelectionAction, plSelectionAction::ActionType::CreateEmptyObjectAtPosition);
-  s_hHideSelectedObjects = PLASMA_REGISTER_ACTION_1(
+  s_hHideSelectedObjects = PL_REGISTER_ACTION_1(
     "Selection.HideItems", plActionScope::Document, "Scene - Selection", "H", plSelectionAction, plSelectionAction::ActionType::HideSelectedObjects);
-  s_hHideUnselectedObjects = PLASMA_REGISTER_ACTION_1("Selection.HideUnselectedItems", plActionScope::Document, "Scene - Selection", "Shift+H",
+  s_hHideUnselectedObjects = PL_REGISTER_ACTION_1("Selection.HideUnselectedItems", plActionScope::Document, "Scene - Selection", "Shift+H",
     plSelectionAction, plSelectionAction::ActionType::HideUnselectedObjects);
-  s_hShowHiddenObjects = PLASMA_REGISTER_ACTION_1("Selection.ShowHidden", plActionScope::Document, "Scene - Selection", "Ctrl+H", plSelectionAction,
+  s_hShowHiddenObjects = PL_REGISTER_ACTION_1("Selection.ShowHidden", plActionScope::Document, "Scene - Selection", "Ctrl+H", plSelectionAction,
     plSelectionAction::ActionType::ShowHiddenObjects);
-  s_hAttachToObject = PLASMA_REGISTER_ACTION_1(
+  s_hAttachToObject = PL_REGISTER_ACTION_1(
     "Selection.Attach", plActionScope::Document, "Scene - Selection", "", plSelectionAction, plSelectionAction::ActionType::AttachToObject);
-  s_hDetachFromParent = PLASMA_REGISTER_ACTION_1(
+  s_hDetachFromParent = PL_REGISTER_ACTION_1(
     "Selection.Detach", plActionScope::Document, "Scene - Selection", "", plSelectionAction, plSelectionAction::ActionType::DetachFromParent);
 
-  s_hPrefabMenu = PLASMA_REGISTER_MENU_WITH_ICON("Prefabs.Menu", ":/AssetIcons/Prefab.svg");
+  s_hPrefabMenu = PL_REGISTER_MENU_WITH_ICON("Prefabs.Menu", ":/AssetIcons/Prefab.svg");
   s_hCreatePrefab =
-    PLASMA_REGISTER_ACTION_1("Prefabs.Create", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::CreatePrefab);
+    PL_REGISTER_ACTION_1("Prefabs.Create", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::CreatePrefab);
   s_hRevertPrefab =
-    PLASMA_REGISTER_ACTION_1("Prefabs.Revert", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::RevertPrefab);
-  s_hUnlinkFromPrefab = PLASMA_REGISTER_ACTION_1(
+    PL_REGISTER_ACTION_1("Prefabs.Revert", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::RevertPrefab);
+  s_hUnlinkFromPrefab = PL_REGISTER_ACTION_1(
     "Prefabs.Unlink", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::UnlinkFromPrefab);
-  s_hOpenPrefabDocument = PLASMA_REGISTER_ACTION_1(
+  s_hOpenPrefabDocument = PL_REGISTER_ACTION_1(
     "Prefabs.OpenDocument", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::OpenPrefabDocument);
-  s_hConvertToEnginePrefab = PLASMA_REGISTER_ACTION_1(
+  s_hConvertToEnginePrefab = PL_REGISTER_ACTION_1(
     "Prefabs.ConvertToEngine", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::ConvertToEnginePrefab);
-  s_hConvertToEditorPrefab = PLASMA_REGISTER_ACTION_1(
+  s_hConvertToEditorPrefab = PL_REGISTER_ACTION_1(
     "Prefabs.ConvertToEditor", plActionScope::Document, "Prefabs", "", plSelectionAction, plSelectionAction::ActionType::ConvertToEditorPrefab);
 
-  s_hDuplicateSpecial = PLASMA_REGISTER_ACTION_1("Selection.DuplicateSpecial", plActionScope::Document, "Scene - Selection", "Ctrl+D", plSelectionAction,
+  s_hDuplicateSpecial = PL_REGISTER_ACTION_1("Selection.DuplicateSpecial", plActionScope::Document, "Scene - Selection", "Ctrl+D", plSelectionAction,
     plSelectionAction::ActionType::DuplicateSpecial);
-  s_hDeltaTransform = PLASMA_REGISTER_ACTION_1("Selection.DeltaTransform", plActionScope::Document, "Scene - Selection", "Ctrl+M", plSelectionAction,
+  s_hDeltaTransform = PL_REGISTER_ACTION_1("Selection.DeltaTransform", plActionScope::Document, "Scene - Selection", "Ctrl+M", plSelectionAction,
     plSelectionAction::ActionType::DeltaTransform);
-  s_hSnapObjectToCamera = PLASMA_REGISTER_ACTION_1(
+  s_hSnapObjectToCamera = PL_REGISTER_ACTION_1(
     "Scene.Camera.SnapObjectToCamera", plActionScope::Document, "Camera", "", plSelectionAction, plSelectionAction::ActionType::SnapObjectToCamera);
-  s_hCopyReference = PLASMA_REGISTER_ACTION_1(
+  s_hCopyReference = PL_REGISTER_ACTION_1(
     "Selection.CopyReference", plActionScope::Document, "Scene - Selection", "", plSelectionAction, plSelectionAction::ActionType::CopyReference);
 }
 
@@ -102,77 +102,70 @@ void plSelectionActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hCopyReference);
 }
 
-void plSelectionActions::MapActions(const char* szMapping, const char* szPath)
+void plSelectionActions::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/SelectionCategory");
+  pMap->MapAction(s_hCreateEmptyChildObject, "G.Selection", 1.0f);
+  pMap->MapAction(s_hCreateEmptyObjectAtPosition, "G.Selection", 1.1f);
+  pMap->MapAction(s_hGroupSelectedItems, "G.Selection", 3.7f);
+  pMap->MapAction(s_hHideSelectedObjects, "G.Selection", 4.0f);
+  pMap->MapAction(s_hHideUnselectedObjects, "G.Selection", 5.0f);
+  pMap->MapAction(s_hShowHiddenObjects, "G.Selection", 6.0f);
+  pMap->MapAction(s_hDuplicateSpecial, "G.Selection", 7.0f);
+  pMap->MapAction(s_hDeltaTransform, "G.Selection", 7.1f);
+  pMap->MapAction(s_hAttachToObject, "G.Selection", 7.2f);
+  pMap->MapAction(s_hDetachFromParent, "G.Selection", 7.3f);
+  pMap->MapAction(s_hSnapObjectToCamera, "G.Selection", 9.0f);
+  pMap->MapAction(s_hCopyReference, "G.Selection", 10.0f);
 
-  pMap->MapAction(s_hCreateEmptyChildObject, sSubPath, 1.0f);
-  pMap->MapAction(s_hCreateEmptyObjectAtPosition, sSubPath, 1.1f);
-  pMap->MapAction(s_hGroupSelectedItems, sSubPath, 3.7f);
-  pMap->MapAction(s_hHideSelectedObjects, sSubPath, 4.0f);
-  pMap->MapAction(s_hHideUnselectedObjects, sSubPath, 5.0f);
-  pMap->MapAction(s_hShowHiddenObjects, sSubPath, 6.0f);
-  pMap->MapAction(s_hDuplicateSpecial, sSubPath, 7.0f);
-  pMap->MapAction(s_hDeltaTransform, sSubPath, 7.1f);
-  pMap->MapAction(s_hAttachToObject, sSubPath, 7.2f);
-  pMap->MapAction(s_hDetachFromParent, sSubPath, 7.3f);
-  pMap->MapAction(s_hSnapObjectToCamera, sSubPath, 9.0f);
-  pMap->MapAction(s_hCopyReference, sSubPath, 10.0f);
-
-  MapPrefabActions(szMapping, sSubPath, 0.0f);
+  MapPrefabActions(sMapping, 0.0f);
 }
 
-void plSelectionActions::MapPrefabActions(const char* szMapping, const char* szPath, float fPriority)
+void plSelectionActions::MapPrefabActions(plStringView sMapping, float fPriority)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sPrefabSubPath(szPath, "/Prefabs.Menu");
-  pMap->MapAction(s_hPrefabMenu, szPath, fPriority);
+  pMap->MapAction(s_hPrefabMenu, "G.Selection", fPriority);
 
-  pMap->MapAction(s_hOpenPrefabDocument, sPrefabSubPath, 1.0f);
-  pMap->MapAction(s_hRevertPrefab, sPrefabSubPath, 2.0f);
-  pMap->MapAction(s_hCreatePrefab, sPrefabSubPath, 3.0f);
-  pMap->MapAction(s_hUnlinkFromPrefab, sPrefabSubPath, 4.0f);
-  pMap->MapAction(s_hConvertToEditorPrefab, sPrefabSubPath, 5.0f);
-  pMap->MapAction(s_hConvertToEnginePrefab, sPrefabSubPath, 6.0f);
+  pMap->MapAction(s_hOpenPrefabDocument, "G.Selection", "Prefabs.Menu", 1.0f);
+  pMap->MapAction(s_hRevertPrefab, "G.Selection", "Prefabs.Menu", 2.0f);
+  pMap->MapAction(s_hCreatePrefab, "G.Selection", "Prefabs.Menu", 3.0f);
+  pMap->MapAction(s_hUnlinkFromPrefab, "G.Selection", "Prefabs.Menu", 4.0f);
+  pMap->MapAction(s_hConvertToEditorPrefab, "G.Selection", "Prefabs.Menu", 5.0f);
+  pMap->MapAction(s_hConvertToEnginePrefab, "G.Selection", "Prefabs.Menu", 6.0f);
 }
 
-void plSelectionActions::MapContextMenuActions(const char* szMapping, const char* szPath)
+void plSelectionActions::MapContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/SelectionCategory");
+  pMap->MapAction(s_hCreateEmptyChildObject, "G.Selection", 0.5f);
+  pMap->MapAction(s_hGroupSelectedItems, "G.Selection", 2.0f);
+  pMap->MapAction(s_hHideSelectedObjects, "G.Selection", 3.0f);
+  pMap->MapAction(s_hDetachFromParent, "G.Selection", 3.2f);
+  pMap->MapAction(s_hCopyReference, "G.Selection", 4.0f);
 
-  pMap->MapAction(s_hCreateEmptyChildObject, sSubPath, 0.5f);
-  pMap->MapAction(s_hGroupSelectedItems, sSubPath, 2.0f);
-  pMap->MapAction(s_hHideSelectedObjects, sSubPath, 3.0f);
-  pMap->MapAction(s_hDetachFromParent, sSubPath, 3.2f);
-  pMap->MapAction(s_hCopyReference, sSubPath, 4.0f);
-
-  MapPrefabActions(szMapping, sSubPath, 4.0f);
+  MapPrefabActions(sMapping, 4.0f);
 }
 
 
-void plSelectionActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
+void plSelectionActions::MapViewContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/SelectionCategory");
+  pMap->MapAction(s_hGroupSelectedItems, "G.Selection", 2.0f);
+  pMap->MapAction(s_hHideSelectedObjects, "G.Selection", 3.0f);
+  pMap->MapAction(s_hAttachToObject, "G.Selection", 3.1f);
+  pMap->MapAction(s_hDetachFromParent, "G.Selection", 3.2f);
+  pMap->MapAction(s_hSnapObjectToCamera, "G.Selection", 5.0f);
+  pMap->MapAction(s_hCopyReference, "G.Selection", 6.0f);
 
-  pMap->MapAction(s_hGroupSelectedItems, sSubPath, 2.0f);
-  pMap->MapAction(s_hHideSelectedObjects, sSubPath, 3.0f);
-  pMap->MapAction(s_hAttachToObject, sSubPath, 3.1f);
-  pMap->MapAction(s_hDetachFromParent, sSubPath, 3.2f);
-  pMap->MapAction(s_hSnapObjectToCamera, sSubPath, 5.0f);
-  pMap->MapAction(s_hCopyReference, sSubPath, 6.0f);
-
-  MapPrefabActions(szMapping, sSubPath, 7.0f);
+  MapPrefabActions(sMapping, 7.0f);
 }
 
 plSelectionAction::plSelectionAction(const plActionContext& context, const char* szName, plSelectionAction::ActionType type)
@@ -230,13 +223,13 @@ plSelectionAction::plSelectionAction(const plActionContext& context, const char*
       // SetIconPath(":/EditorPluginScene/Icons/Duplicate.svg"); // TODO Icon
       break;
     case ActionType::ConvertToEditorPrefab:
-      // SetIconPath(":/EditorPluginScene/PrefabRevert.svg"); // TODO Icon
+      // SetIconPath(":/EditorPluginScene/PrefabRevert.png"); // TODO Icon
       break;
     case ActionType::ConvertToEnginePrefab:
-      // SetIconPath(":/EditorPluginScene/PrefabRevert.svg"); // TODO Icon
+      // SetIconPath(":/EditorPluginScene/PrefabRevert.png"); // TODO Icon
       break;
     case ActionType::CopyReference:
-      // SetIconPath(":/EditorPluginScene/PrefabRevert.svg"); // TODO Icon
+      // SetIconPath(":/EditorPluginScene/PrefabRevert.png"); // TODO Icon
       break;
   }
 
@@ -381,7 +374,7 @@ void plSelectionAction::OpenPrefabDocument()
   auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(PrefabAsset);
   if (pAsset)
   {
-    plQtEditorApp::GetSingleton()->OpenDocumentQueued(pAsset->m_pAssetInfo->m_sAbsolutePath);
+    plQtEditorApp::GetSingleton()->OpenDocumentQueued(pAsset->m_pAssetInfo->m_Path.GetAbsolutePath());
   }
   else
   {

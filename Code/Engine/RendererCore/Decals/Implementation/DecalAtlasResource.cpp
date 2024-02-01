@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/ResourceManager/ResourceManager.h>
 #include <Foundation/Configuration/Startup.h>
 #include <Foundation/IO/FileSystem/FileSystem.h>
@@ -12,7 +12,7 @@
 #include <Texture/Image/Image.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalAtlasResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalAtlasResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation",
@@ -43,25 +43,25 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, DecalAtlasResource)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAtlasResource, 1, plRTTIDefaultAllocator<plDecalAtlasResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAtlasResource, 1, plRTTIDefaultAllocator<plDecalAtlasResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plDecalAtlasResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plDecalAtlasResource);
 // clang-format on
 
 plUInt32 plDecalAtlasResource::s_uiDecalAtlasResources = 0;
 
 plDecalAtlasResource::plDecalAtlasResource()
   : plResource(DoUpdate::OnAnyThread, 1)
-  , m_vBaseColorSize(plVec2U32::ZeroVector())
-  , m_vNormalSize(plVec2U32::ZeroVector())
+  , m_vBaseColorSize(plVec2U32::MakeZero())
+  , m_vNormalSize(plVec2U32::MakeZero())
 {
 }
 
@@ -82,7 +82,7 @@ plResourceLoadDesc plDecalAtlasResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plDecalAtlasResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plDecalAtlasResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plDecalAtlasResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -107,7 +107,7 @@ plResourceLoadDesc plDecalAtlasResource::UpdateContent(plStreamReader* Stream)
   {
     plUInt8 uiVersion = 0;
     *Stream >> uiVersion;
-    PLASMA_ASSERT_DEV(uiVersion <= 3, "Invalid decal atlas version {0}", uiVersion);
+    PL_ASSERT_DEV(uiVersion <= 3, "Invalid decal atlas version {0}", uiVersion);
 
     // this version is now incompatible
     if (uiVersion < 3)
@@ -158,7 +158,7 @@ void plDecalAtlasResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDecalAtlasResource, plDecalAtlasResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plDecalAtlasResource, plDecalAtlasResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_uiQualityLevelsDiscardable = 0;
@@ -183,7 +183,7 @@ void plDecalAtlasResource::CreateLayerTexture(const plImage& img, bool bSRGB, pl
   plTextureUtils::ConfigureSampler(plTextureFilterSetting::HighQuality, td.m_SamplerDesc);
 
   plStringBuilder sTexId;
-  sTexId.Format("{0}_Tex{1}", GetResourceID(), s_uiDecalAtlasResources);
+  sTexId.SetFormat("{0}_Tex{1}", GetResourceID(), s_uiDecalAtlasResources);
   ++s_uiDecalAtlasResources;
 
   out_hTexture = plResourceManager::CreateResource<plTexture2DResource>(sTexId, std::move(td));
@@ -196,7 +196,7 @@ void plDecalAtlasResource::ReadDecalInfo(plStreamReader* Stream)
 
 void plDecalAtlasResource::ReportResourceIsMissing()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   // normal during development, don't care much
   plLog::Debug("Decal Atlas Resource is missing: '{0}' ('{1}')", GetResourceID(), GetResourceDescription());
 #else
@@ -207,4 +207,4 @@ void plDecalAtlasResource::ReportResourceIsMissing()
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalAtlasResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalAtlasResource);

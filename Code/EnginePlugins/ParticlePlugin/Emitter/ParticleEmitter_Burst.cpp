@@ -9,23 +9,23 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_Burst, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_Burst>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory_Burst, 1, plRTTIDefaultAllocator<plParticleEmitterFactory_Burst>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Duration", m_Duration),
-    PLASMA_MEMBER_PROPERTY("StartDelay", m_StartDelay),
+    PL_MEMBER_PROPERTY("Duration", m_Duration),
+    PL_MEMBER_PROPERTY("StartDelay", m_StartDelay),
 
-    PLASMA_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(10)),
-    PLASMA_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
-    PLASMA_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
+    PL_MEMBER_PROPERTY("MinSpawnCount", m_uiSpawnCountMin)->AddAttributes(new plDefaultValueAttribute(10)),
+    PL_MEMBER_PROPERTY("SpawnCountRange", m_uiSpawnCountRange),
+    PL_MEMBER_PROPERTY("SpawnCountScaleParam", m_sSpawnCountScaleParameter),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_Burst, 1, plRTTIDefaultAllocator<plParticleEmitter_Burst>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter_Burst, 1, plRTTIDefaultAllocator<plParticleEmitter_Burst>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleEmitterFactory_Burst::plParticleEmitterFactory_Burst()
@@ -70,31 +70,31 @@ enum class EmitterBurstVersion
 };
 
 
-void plParticleEmitterFactory_Burst::Save(plStreamWriter& stream) const
+void plParticleEmitterFactory_Burst::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)EmitterBurstVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   // Version 1
-  stream << m_Duration;
-  stream << m_StartDelay;
-  stream << m_uiSpawnCountMin;
-  stream << m_uiSpawnCountRange;
-  stream << m_sSpawnCountScaleParameter;
+  inout_stream << m_Duration;
+  inout_stream << m_StartDelay;
+  inout_stream << m_uiSpawnCountMin;
+  inout_stream << m_uiSpawnCountRange;
+  inout_stream << m_sSpawnCountScaleParameter;
 }
 
-void plParticleEmitterFactory_Burst::Load(plStreamReader& stream)
+void plParticleEmitterFactory_Burst::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)EmitterBurstVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)EmitterBurstVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_Duration;
-  stream >> m_StartDelay;
-  stream >> m_uiSpawnCountMin;
-  stream >> m_uiSpawnCountRange;
-  stream >> m_sSpawnCountScaleParameter;
+  inout_stream >> m_Duration;
+  inout_stream >> m_StartDelay;
+  inout_stream >> m_uiSpawnCountMin;
+  inout_stream >> m_uiSpawnCountRange;
+  inout_stream >> m_sSpawnCountScaleParameter;
 }
 
 void plParticleEmitter_Burst::OnFinalize()
@@ -124,7 +124,7 @@ plParticleEmitterState plParticleEmitter_Burst::IsFinished()
 
 plUInt32 plParticleEmitter_Burst::ComputeSpawnCount(const plTime& tDiff)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Burst - Spawn Count ");
+  PL_PROFILE_SCOPE("PFX: Burst - Spawn Count ");
 
   // delay before the emitter becomes active
   if (m_StartDelay.IsPositive())
@@ -152,3 +152,7 @@ plUInt32 plParticleEmitter_Burst::ComputeSpawnCount(const plTime& tDiff)
 
   return uiSpawn;
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter_Burst);
+

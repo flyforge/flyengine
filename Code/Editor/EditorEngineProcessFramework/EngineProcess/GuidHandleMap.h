@@ -3,7 +3,7 @@
 #include <EditorEngineProcessFramework/EditorEngineProcessFrameworkDLL.h>
 
 template <typename HandleType>
-class PlasmaEditorGuidEngineHandleMap
+class plEditorGuidEngineHandleMap
 {
 public:
   void Clear()
@@ -23,7 +23,7 @@ public:
     m_GuidToHandle[guid] = handle;
     m_HandleToGuid[handle] = guid;
 
-    PLASMA_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
+    PL_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
   }
 
   void UnregisterObject(plUuid guid)
@@ -32,7 +32,7 @@ public:
     m_GuidToHandle.Remove(guid);
     m_HandleToGuid.Remove(handle);
 
-    PLASMA_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
+    PL_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
   }
 
   void UnregisterObject(HandleType handle)
@@ -41,7 +41,7 @@ public:
     m_GuidToHandle.Remove(guid);
     m_HandleToGuid.Remove(handle);
 
-    PLASMA_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
+    PL_ASSERT_DEV(m_GuidToHandle.GetCount() == m_HandleToGuid.GetCount(), "1:1 relationship is broken. Check operator< for handle type.");
   }
 
   HandleType GetHandle(plUuid guid) const

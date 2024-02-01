@@ -1,6 +1,6 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plColorBaseUB::plColorBaseUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a /* = 255*/)
+PL_ALWAYS_INLINE plColorBaseUB::plColorBaseUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a /* = 255*/)
 {
   this->r = r;
   this->g = g;
@@ -8,7 +8,7 @@ PLASMA_ALWAYS_INLINE plColorBaseUB::plColorBaseUB(plUInt8 r, plUInt8 g, plUInt8 
   this->a = a;
 }
 
-PLASMA_ALWAYS_INLINE plColorLinearUB::plColorLinearUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a /* = 255*/)
+PL_ALWAYS_INLINE plColorLinearUB::plColorLinearUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a /* = 255*/)
   : plColorBaseUB(r, g, b, a)
 {
 }
@@ -33,7 +33,7 @@ inline plColor plColorLinearUB::ToLinearFloat() const
 
 // *****************
 
-PLASMA_ALWAYS_INLINE plColorGammaUB::plColorGammaUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a)
+PL_ALWAYS_INLINE plColorGammaUB::plColorGammaUB(plUInt8 r, plUInt8 g, plUInt8 b, plUInt8 a)
   : plColorBaseUB(r, g, b, a)
 {
 }

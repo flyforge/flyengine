@@ -5,7 +5,7 @@
 class plPlayerApplication : public plGameApplication
 {
 public:
-  typedef plGameApplication SUPER;
+  using SUPER = plGameApplication;
 
   plPlayerApplication();
 

@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexImage.cpp
@@ -841,5 +841,4 @@ bool ScratchImage::IsAlphaAllOpaque() const noexcept
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexImage);
 

@@ -1,8 +1,0 @@
-Processing succeeded
-
-This is fine.
-===
-This is fine.
-===
-This is fine.
-===

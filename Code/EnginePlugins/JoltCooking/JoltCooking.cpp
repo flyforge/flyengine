@@ -145,7 +145,7 @@ plResult plJoltCooking::CookTriangleMesh(const plJoltCookingMesh& mesh, plStream
     if (shapeRes.HasError())
     {
       plLog::Error("Cooking Jolt triangle mesh failed: {}", shapeRes.GetError().c_str());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plDefaultMemoryStreamStorage storage;
@@ -164,7 +164,7 @@ plResult plJoltCooking::CookTriangleMesh(const plJoltCookingMesh& mesh, plStream
     ref_outputStream << uiNumTriangles;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plJoltCooking::CookConvexMesh(const plJoltCookingMesh& mesh0, plStreamWriter& ref_outputStream)
@@ -174,16 +174,16 @@ plResult plJoltCooking::CookConvexMesh(const plJoltCookingMesh& mesh0, plStreamW
   range.BeginNextStep("Computing Convex Hull");
 
   plJoltCookingMesh mesh;
-  PLASMA_SUCCEED_OR_RETURN(ComputeConvexHull(mesh0, mesh));
+  PL_SUCCEED_OR_RETURN(ComputeConvexHull(mesh0, mesh));
 
   range.BeginNextStep("Cooking Convex Hull");
 
-  PLASMA_SUCCEED_OR_RETURN(CookSingleConvexJoltMesh(mesh, ref_outputStream));
+  PL_SUCCEED_OR_RETURN(CookSingleConvexJoltMesh(mesh, ref_outputStream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_DEFINE_AS_POD_TYPE(JPH::Vec3);
+PL_DEFINE_AS_POD_TYPE(JPH::Vec3);
 
 plResult plJoltCooking::CookSingleConvexJoltMesh(const plJoltCookingMesh& mesh, plStreamWriter& OutputStream)
 {
@@ -209,7 +209,7 @@ plResult plJoltCooking::CookSingleConvexJoltMesh(const plJoltCookingMesh& mesh, 
   if (shapeRes.HasError())
   {
     plLog::Error("Cooking convex Jolt mesh failed: {}", shapeRes.GetError().c_str());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plDefaultMemoryStreamStorage storage;
@@ -227,7 +227,7 @@ plResult plJoltCooking::CookSingleConvexJoltMesh(const plJoltCookingMesh& mesh, 
   const plUInt32 uiNumTriangles = shapeRes.Get()->GetStats().mNumTriangles;
   OutputStream << uiNumTriangles;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plJoltCooking::ComputeConvexHull(const plJoltCookingMesh& mesh, plJoltCookingMesh& out_mesh)
@@ -241,7 +241,7 @@ plResult plJoltCooking::ComputeConvexHull(const plJoltCookingMesh& mesh, plJoltC
   if (gen.Build(mesh.m_Vertices).Failed())
   {
     plLog::Error("Computing the convex hull failed.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plDynamicArray<plConvexHullGenerator::Face> faces;
@@ -250,14 +250,14 @@ plResult plJoltCooking::ComputeConvexHull(const plJoltCookingMesh& mesh, plJoltC
   if (faces.GetCount() >= 255)
   {
     plConvexHullGenerator gen2;
-    gen2.SetSimplificationMinTriangleAngle(plAngle::Degree(30));
-    gen2.SetSimplificationFlatVertexNormalThreshold(plAngle::Degree(10));
+    gen2.SetSimplificationMinTriangleAngle(plAngle::MakeFromDegree(30));
+    gen2.SetSimplificationFlatVertexNormalThreshold(plAngle::MakeFromDegree(10));
     gen2.SetSimplificationMinTriangleEdgeLength(0.08f);
 
     if (gen2.Build(out_mesh.m_Vertices).Failed())
     {
       plLog::Error("Computing the convex hull failed (second try).");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     gen2.Retrieve(out_mesh.m_Vertices, faces);
@@ -274,12 +274,12 @@ plResult plJoltCooking::ComputeConvexHull(const plJoltCookingMesh& mesh, plJoltC
   }
 
   plLog::Dev("Computed the convex hull in {0} milliseconds", plArgF(timer.GetRunningTotal().GetMilliseconds(), 1));
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plStatus plJoltCooking::WriteResourceToStream(plChunkStreamWriter& inout_stream, const plJoltCookingMesh& mesh, const plArrayPtr<plString>& surfaces, MeshType meshType, plUInt32 uiMaxConvexPieces)
 {
-  plResult resCooking = PLASMA_FAILURE;
+  plResult resCooking = PL_FAILURE;
 
   {
     inout_stream.BeginChunk("Surfaces", 1);
@@ -297,8 +297,7 @@ plStatus plJoltCooking::WriteResourceToStream(plChunkStreamWriter& inout_stream,
   {
     inout_stream.BeginChunk("Details", 1);
 
-    plBoundingBoxSphere aabb;
-    aabb.SetFromPoints(mesh.m_Vertices.GetData(), mesh.m_Vertices.GetCount());
+    plBoundingBoxSphere aabb = plBoundingBoxSphere::MakeFromPoints(mesh.m_Vertices.GetData(), mesh.m_Vertices.GetCount());
 
     inout_stream << aabb;
 
@@ -344,12 +343,12 @@ plStatus plJoltCooking::WriteResourceToStream(plChunkStreamWriter& inout_stream,
     return plStatus("Cooking the collision mesh failed.");
 
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plResult plJoltCooking::CookDecomposedConvexMesh(const plJoltCookingMesh& mesh, plStreamWriter& ref_outputStream, plUInt32 uiMaxConvexPieces)
 {
-  PLASMA_LOG_BLOCK("Decomposing Mesh");
+  PL_LOG_BLOCK("Decomposing Mesh");
 
   IVHACD* pConDec = CreateVHACD();
   IVHACD::Parameters params;
@@ -383,7 +382,7 @@ plResult plJoltCooking::CookDecomposedConvexMesh(const plJoltCookingMesh& mesh, 
   if (!pConDec->Compute(mesh.m_Vertices.GetData()->GetData(), mesh.m_Vertices.GetCount(), mesh.m_PolygonIndices.GetData(), mesh.m_VerticesInPolygon.GetCount(), params))
   {
     plLog::Error("Failed to compute convex decomposition");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt16 uiNumParts = 0;
@@ -434,10 +433,10 @@ plResult plJoltCooking::CookDecomposedConvexMesh(const plJoltCookingMesh& mesh, 
       chm.m_PolygonIndices[t * 3 + 2] = ch.m_triangles[t].mI2;
     }
 
-    PLASMA_SUCCEED_OR_RETURN(CookSingleConvexJoltMesh(chm, ref_outputStream));
+    PL_SUCCEED_OR_RETURN(CookSingleConvexJoltMesh(chm, ref_outputStream));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(JoltCooking, JoltCooking_JoltCooking);
+PL_STATICLINK_FILE(JoltCooking, JoltCooking_JoltCooking);

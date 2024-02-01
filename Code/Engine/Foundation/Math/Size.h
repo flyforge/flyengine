@@ -9,7 +9,7 @@ class plSizeTemplate
 {
 public:
   // Means this object can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   // *** Data ***
 public:

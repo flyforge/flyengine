@@ -3,8 +3,8 @@
 #include <EditorFramework/Dialogs/DataDirsDlg.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 
-plQtDataDirsDlg::plQtDataDirsDlg(QWidget* parent)
-  : QDialog(parent)
+plQtDataDirsDlg::plQtDataDirsDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 

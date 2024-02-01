@@ -8,16 +8,16 @@
 plNonUniformBoxManipulatorAdapter::plNonUniformBoxManipulatorAdapter() = default;
 plNonUniformBoxManipulatorAdapter::~plNonUniformBoxManipulatorAdapter() = default;
 
-void plNonUniformBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings)
+void plNonUniformBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings)
 {
-  outGridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
+  out_gridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
 
   // if density != 0, it is enabled at least in ortho mode
-  outGridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
+  out_gridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
 
   // to be active in perspective mode, tangents have to be non-zero
-  outGridSettings.m_vGridTangent1.SetZero();
-  outGridSettings.m_vGridTangent2.SetZero();
+  out_gridSettings.m_vGridTangent1.SetZero();
+  out_gridSettings.m_vGridTangent2.SetZero();
 }
 
 void plNonUniformBoxManipulatorAdapter::Finalize()
@@ -27,7 +27,7 @@ void plNonUniformBoxManipulatorAdapter::Finalize()
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
 
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmo.SetTransformation(GetObjectTransform());
 

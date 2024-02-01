@@ -5,7 +5,7 @@
 #include <Foundation/Logging/Log.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FolderDataDirectory)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FolderDataDirectory)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "FileSystem"
@@ -16,7 +16,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, FolderDataDirectory)
     plFileSystem::RegisterDataDirectoryFactory(plDataDirectory::FolderType::Factory);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace plDataDirectory
@@ -72,31 +72,31 @@ namespace plDataDirectory
 
   plDataDirectoryType* FolderType::Factory(plStringView sDataDirectory, plStringView sGroup, plStringView sRootName, plFileSystem::DataDirUsage usage)
   {
-    FolderType* pDataDir = PLASMA_DEFAULT_NEW(FolderType);
+    FolderType* pDataDir = PL_DEFAULT_NEW(FolderType);
 
-    if (pDataDir->InitializeDataDirectory(sDataDirectory) == PLASMA_SUCCESS)
+    if (pDataDir->InitializeDataDirectory(sDataDirectory) == PL_SUCCESS)
       return pDataDir;
 
-    PLASMA_DEFAULT_DELETE(pDataDir);
+    PL_DEFAULT_DELETE(pDataDir);
     return nullptr;
   }
 
   void FolderType::RemoveDataDirectory()
   {
     {
-      PLASMA_LOCK(m_ReaderWriterMutex);
+      PL_LOCK(m_ReaderWriterMutex);
       for (plUInt32 i = 0; i < m_Readers.GetCount(); ++i)
       {
-        PLASMA_ASSERT_DEV(!m_Readers[i]->m_bIsInUse, "Cannot remove a data directory while there are still files open in it.");
+        PL_ASSERT_DEV(!m_Readers[i]->m_bIsInUse, "Cannot remove a data directory while there are still files open in it.");
       }
 
       for (plUInt32 i = 0; i < m_Writers.GetCount(); ++i)
       {
-        PLASMA_ASSERT_DEV(!m_Writers[i]->m_bIsInUse, "Cannot remove a data directory while there are still files open in it.");
+        PL_ASSERT_DEV(!m_Writers[i]->m_bIsInUse, "Cannot remove a data directory while there are still files open in it.");
       }
     }
     FolderType* pThis = this;
-    PLASMA_DEFAULT_DELETE(pThis);
+    PL_DEFAULT_DELETE(pThis);
   }
 
   void FolderType::DeleteFile(plStringView sFile)
@@ -109,12 +109,12 @@ namespace plDataDirectory
 
   FolderType::~FolderType()
   {
-    PLASMA_LOCK(m_ReaderWriterMutex);
+    PL_LOCK(m_ReaderWriterMutex);
     for (plUInt32 i = 0; i < m_Readers.GetCount(); ++i)
-      PLASMA_DEFAULT_DELETE(m_Readers[i]);
+      PL_DEFAULT_DELETE(m_Readers[i]);
 
     for (plUInt32 i = 0; i < m_Writers.GetCount(); ++i)
-      PLASMA_DEFAULT_DELETE(m_Writers[i]);
+      PL_DEFAULT_DELETE(m_Writers[i]);
   }
 
   void FolderType::ReloadExternalConfigs()
@@ -124,7 +124,7 @@ namespace plDataDirectory
 
   void FolderType::LoadRedirectionFile()
   {
-    PLASMA_LOCK(m_RedirectionMutex);
+    PL_LOCK(m_RedirectionMutex);
     m_FileRedirection.Clear();
 
     if (!s_sRedirectionFile.IsEmpty())
@@ -132,7 +132,7 @@ namespace plDataDirectory
       plStringBuilder sRedirectionFile(GetRedirectedDataDirectoryPath(), "/", s_sRedirectionFile);
       sRedirectionFile.MakeCleanPath();
 
-      PLASMA_LOG_BLOCK("LoadRedirectionFile", sRedirectionFile.GetData());
+      PL_LOG_BLOCK("LoadRedirectionFile", sRedirectionFile.GetData());
 
       plOSFile file;
       if (file.Open(sRedirectionFile, plFileOpenMode::Read).Succeeded())
@@ -144,9 +144,9 @@ namespace plDataDirectory
 
         do
         {
-          uiRead = file.Read(uiTemp, PLASMA_ARRAY_SIZE(uiTemp));
+          uiRead = file.Read(uiTemp, PL_ARRAY_SIZE(uiTemp));
           content.PushBackRange(plArrayPtr<char>(uiTemp, (plUInt32)uiRead));
-        } while (uiRead == PLASMA_ARRAY_SIZE(uiTemp));
+        } while (uiRead == PL_ARRAY_SIZE(uiTemp));
 
         content.PushBack(0); // make sure the string is terminated
 
@@ -200,7 +200,7 @@ namespace plDataDirectory
     if (plPathUtils::IsAbsolutePath(sRedirectedAsset))
     {
       if (!sRedirectedAsset.StartsWith_NoCase(sPath))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       sPath.Clear();
     }
@@ -208,16 +208,20 @@ namespace plDataDirectory
     sPath.AppendPath(sRedirectedAsset);
 
     if (!plPathUtils::IsAbsolutePath(sPath))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
     return plOSFile::GetFileStats(sPath, out_Stats);
+#else
+    return PL_FAILURE;
+#endif
   }
 
   plResult FolderType::InternalInitializeDataDirectory(plStringView sDirectory)
   {
     // allow to set the 'empty' directory to handle all absolute paths
     if (sDirectory.IsEmpty())
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     plStringBuilder sRedirected;
     if (plFileSystem::ResolveSpecialDirectory(sDirectory, sRedirected).Succeeded())
@@ -230,16 +234,16 @@ namespace plDataDirectory
     }
 
     if (!plOSFile::ExistsDirectory(m_sRedirectedDataDirPath))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     ReloadExternalConfigs();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   void FolderType::OnReaderWriterClose(plDataDirectoryReaderWriterBase* pClosed)
   {
-    PLASMA_LOCK(m_ReaderWriterMutex);
+    PL_LOCK(m_ReaderWriterMutex);
     if (pClosed->IsReader())
     {
       FolderReader* pReader = (FolderReader*)pClosed;
@@ -254,12 +258,12 @@ namespace plDataDirectory
 
   plDataDirectory::FolderReader* FolderType::CreateFolderReader() const
   {
-    return PLASMA_DEFAULT_NEW(FolderReader, 0);
+    return PL_DEFAULT_NEW(FolderReader, 0);
   }
 
   plDataDirectory::FolderWriter* FolderType::CreateFolderWriter() const
   {
-    return PLASMA_DEFAULT_NEW(FolderWriter, 0);
+    return PL_DEFAULT_NEW(FolderWriter, 0);
   }
 
   plDataDirectoryReader* FolderType::OpenFileToRead(plStringView sFile, plFileShareMode::Enum FileShareMode, bool bSpecificallyThisDataDir)
@@ -273,7 +277,7 @@ namespace plDataDirectory
 
     FolderReader* pReader = nullptr;
     {
-      PLASMA_LOCK(m_ReaderWriterMutex);
+      PL_LOCK(m_ReaderWriterMutex);
       for (plUInt32 i = 0; i < m_Readers.GetCount(); ++i)
       {
         if (!m_Readers[i]->m_bIsInUse)
@@ -289,9 +293,9 @@ namespace plDataDirectory
     }
 
     // if opening the file fails, the reader's m_bIsInUse needs to be reset.
-    if (pReader->Open(sFileToOpen, this, FileShareMode) == PLASMA_FAILURE)
+    if (pReader->Open(sFileToOpen, this, FileShareMode) == PL_FAILURE)
     {
-      PLASMA_LOCK(m_ReaderWriterMutex);
+      PL_LOCK(m_ReaderWriterMutex);
       pReader->m_bIsInUse = false;
       return nullptr;
     }
@@ -303,7 +307,7 @@ namespace plDataDirectory
 
   bool FolderType::ResolveAssetRedirection(plStringView sFile, plStringBuilder& out_sRedirection)
   {
-    PLASMA_LOCK(m_RedirectionMutex);
+    PL_LOCK(m_RedirectionMutex);
     // Check if we know about a file redirection for this
     auto it = m_FileRedirection.Find(sFile);
 
@@ -334,7 +338,7 @@ namespace plDataDirectory
     FolderWriter* pWriter = nullptr;
 
     {
-      PLASMA_LOCK(m_ReaderWriterMutex);
+      PL_LOCK(m_ReaderWriterMutex);
       for (plUInt32 i = 0; i < m_Writers.GetCount(); ++i)
       {
         if (!m_Writers[i]->m_bIsInUse)
@@ -349,9 +353,9 @@ namespace plDataDirectory
       pWriter->m_bIsInUse = true;
     }
     // if opening the file fails, the writer's m_bIsInUse needs to be reset.
-    if (pWriter->Open(sFile, this, FileShareMode) == PLASMA_FAILURE)
+    if (pWriter->Open(sFile, this, FileShareMode) == PL_FAILURE)
     {
-      PLASMA_LOCK(m_ReaderWriterMutex);
+      PL_LOCK(m_ReaderWriterMutex);
       pWriter->m_bIsInUse = false;
       return nullptr;
     }
@@ -363,4 +367,4 @@ namespace plDataDirectory
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_DataDirTypeFolder);
+PL_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_DataDirTypeFolder);

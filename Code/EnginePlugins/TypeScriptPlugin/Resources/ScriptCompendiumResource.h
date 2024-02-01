@@ -8,7 +8,7 @@
 class plStreamWriter;
 class plStreamReader;
 
-struct PLASMA_TYPESCRIPTPLUGIN_DLL plScriptCompendiumResourceDesc
+struct PL_TYPESCRIPTPLUGIN_DLL plScriptCompendiumResourceDesc
 {
   plMap<plString, plString> m_PathToSource;
 
@@ -17,20 +17,20 @@ struct PLASMA_TYPESCRIPTPLUGIN_DLL plScriptCompendiumResourceDesc
     plString m_sComponentTypeName;
     plString m_sComponentFilePath;
 
-    plResult Serialize(plStreamWriter& stream) const;
-    plResult Deserialize(plStreamReader& stream);
+    plResult Serialize(plStreamWriter& inout_stream) const;
+    plResult Deserialize(plStreamReader& inout_stream);
   };
 
   plMap<plUuid, ComponentTypeInfo> m_AssetGuidToInfo;
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 };
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plScriptCompendiumResource : public plResource
+class PL_TYPESCRIPTPLUGIN_DLL plScriptCompendiumResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScriptCompendiumResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plScriptCompendiumResource);
+  PL_ADD_DYNAMIC_REFLECTION(plScriptCompendiumResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plScriptCompendiumResource);
 
 public:
   plScriptCompendiumResource();

@@ -15,11 +15,11 @@
 #include <RendererCore/../../../Data/Base/Shaders/Common/ObjectConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautRenderData, 1, plRTTIDefaultAllocator<plKrautRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautRenderData, 1, plRTTIDefaultAllocator<plKrautRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautRenderer, 1, plRTTIDefaultAllocator<plKrautRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautRenderer, 1, plRTTIDefaultAllocator<plKrautRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plKrautRenderer::plKrautRenderer() = default;

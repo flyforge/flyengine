@@ -19,7 +19,7 @@ class plMessageQueueBase
 public:
   struct Entry
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plMessage* m_pMessage;
     MetaDataType m_MetaData;
@@ -28,10 +28,10 @@ public:
 
 protected:
   /// \brief No memory is allocated during construction.
-  plMessageQueueBase(plAllocatorBase* pAllocator); // [tested]
+  plMessageQueueBase(plAllocator* pAllocator); // [tested]
 
   /// \brief No memory is allocated during construction.
-  plMessageQueueBase(const plMessageQueueBase& rhs, plAllocatorBase* pAllocator);
+  plMessageQueueBase(const plMessageQueueBase& rhs, plAllocator* pAllocator);
 
   /// \brief Destructor.
   ~plMessageQueueBase(); // [tested]
@@ -97,7 +97,7 @@ class plMessageQueue : public plMessageQueueBase<MetaDataType>
 {
 public:
   plMessageQueue();
-  plMessageQueue(plAllocatorBase* pAllocator);
+  plMessageQueue(plAllocator* pAllocator);
 
   plMessageQueue(const plMessageQueue<MetaDataType, AllocatorWrapper>& rhs);
   plMessageQueue(const plMessageQueueBase<MetaDataType>& rhs);

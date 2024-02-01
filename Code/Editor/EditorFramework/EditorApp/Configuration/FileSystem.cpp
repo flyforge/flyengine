@@ -44,7 +44,7 @@ void plQtEditorApp::SetFileSystemConfig(const plApplicationFileSystemConfig& cfg
 
 void plQtEditorApp::SetupDataDirectories()
 {
-  PLASMA_PROFILE_SCOPE("SetupDataDirectories");
+  PL_PROFILE_SCOPE("SetupDataDirectories");
   plFileSystem::DetectSdkRootDirectory().IgnoreResult();
 
   plStringBuilder sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
@@ -56,8 +56,8 @@ void plQtEditorApp::SetupDataDirectories()
   // so instead we use the absolute path directly
   m_FileSystemConfig.Load(sPath);
 
-  PlasmaEditorAppEvent e;
-  e.m_Type = PlasmaEditorAppEvent::Type::BeforeApplyDataDirectories;
+  plEditorAppEvent e;
+  e.m_Type = plEditorAppEvent::Type::BeforeApplyDataDirectories;
   m_Events.Broadcast(e);
 
   plQtEditorApp::GetSingleton()->AddPluginDataDirDependency(">sdk/Data/Base", "base", false);
@@ -78,47 +78,47 @@ void plQtEditorApp::SetupDataDirectories()
   m_FileSystemConfig.Apply();
 }
 
-bool plQtEditorApp::MakeParentDataDirectoryRelativePathAbsolute(plStringBuilder& sPath, bool bCheckExists) const
+bool plQtEditorApp::MakeParentDataDirectoryRelativePathAbsolute(plStringBuilder& ref_sPath, bool bCheckExists) const
 {
-  sPath.MakeCleanPath();
+  ref_sPath.MakeCleanPath();
 
-  if (plPathUtils::IsAbsolutePath(sPath))
+  if (plPathUtils::IsAbsolutePath(ref_sPath))
     return true;
 
-  if (plPathUtils::IsRootedPath(sPath))
+  if (plPathUtils::IsRootedPath(ref_sPath))
   {
     plStringBuilder sAbsPath;
-    if (plFileSystem::ResolvePath(sPath, &sAbsPath, nullptr).Succeeded())
+    if (plFileSystem::ResolvePath(ref_sPath, &sAbsPath, nullptr).Succeeded())
     {
-      sPath = sAbsPath;
+      ref_sPath = sAbsPath;
       return true;
     }
 
     return false;
   }
 
-  if (plConversionUtils::IsStringUuid(sPath))
+  if (plConversionUtils::IsStringUuid(ref_sPath))
   {
-    plUuid guid = plConversionUtils::ConvertStringToUuid(sPath);
+    plUuid guid = plConversionUtils::ConvertStringToUuid(ref_sPath);
     auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(guid);
 
     if (pAsset == nullptr)
       return false;
 
-    sPath = pAsset->m_pAssetInfo->m_sAbsolutePath;
+    ref_sPath = pAsset->m_pAssetInfo->m_Path;
     return true;
   }
 
   plStringBuilder sTemp, sFolder, sDataDirName;
 
-  const char* szEnd = sPath.FindSubString("/");
+  const char* szEnd = ref_sPath.FindSubString("/");
   if (szEnd)
   {
-    sDataDirName.SetSubString_FromTo(sPath.GetData(), szEnd);
+    sDataDirName.SetSubString_FromTo(ref_sPath.GetData(), szEnd);
   }
   else
   {
-    sDataDirName = sPath;
+    sDataDirName = ref_sPath;
   }
 
   for (plUInt32 i = m_FileSystemConfig.m_DataDirs.GetCount(); i > 0; --i)
@@ -137,12 +137,12 @@ bool plQtEditorApp::MakeParentDataDirectoryRelativePathAbsolute(plStringBuilder&
       continue;
 
     sTemp.PathParentDirectory(); // the secret sauce is here
-    sTemp.AppendPath(sPath);
+    sTemp.AppendPath(ref_sPath);
     sTemp.MakeCleanPath();
 
     if (!bCheckExists || plOSFile::ExistsFile(sTemp) || plOSFile::ExistsDirectory(sTemp))
     {
-      sPath = sTemp;
+      ref_sPath = sTemp;
       return true;
     }
   }
@@ -150,32 +150,32 @@ bool plQtEditorApp::MakeParentDataDirectoryRelativePathAbsolute(plStringBuilder&
   return false;
 }
 
-bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plStringBuilder& sPath) const
+bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plStringBuilder& ref_sPath) const
 {
-  if (plPathUtils::IsAbsolutePath(sPath))
+  if (plPathUtils::IsAbsolutePath(ref_sPath))
     return true;
 
-  if (plPathUtils::IsRootedPath(sPath))
+  if (plPathUtils::IsRootedPath(ref_sPath))
   {
     plStringBuilder sAbsPath;
-    if (plFileSystem::ResolvePath(sPath, &sAbsPath, nullptr).Succeeded())
+    if (plFileSystem::ResolvePath(ref_sPath, &sAbsPath, nullptr).Succeeded())
     {
-      sPath = sAbsPath;
+      ref_sPath = sAbsPath;
       return true;
     }
 
     return false;
   }
 
-  if (plConversionUtils::IsStringUuid(sPath))
+  if (plConversionUtils::IsStringUuid(ref_sPath))
   {
-    plUuid guid = plConversionUtils::ConvertStringToUuid(sPath);
+    plUuid guid = plConversionUtils::ConvertStringToUuid(ref_sPath);
     auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(guid);
 
     if (pAsset == nullptr)
       return false;
 
-    sPath = pAsset->m_pAssetInfo->m_sAbsolutePath;
+    ref_sPath = pAsset->m_pAssetInfo->m_Path;
     return true;
   }
 
@@ -188,12 +188,12 @@ bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plStringBuilder& sPath
     if (plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sTemp).Failed())
       continue;
 
-    sTemp.AppendPath(sPath);
+    sTemp.AppendPath(ref_sPath);
     sTemp.MakeCleanPath();
 
     if (plOSFile::ExistsFile(sTemp) || plOSFile::ExistsDirectory(sTemp))
     {
-      sPath = sTemp;
+      ref_sPath = sTemp;
       return true;
     }
   }
@@ -201,15 +201,15 @@ bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plStringBuilder& sPath
   return false;
 }
 
-bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plString& sPath) const
+bool plQtEditorApp::MakeDataDirectoryRelativePathAbsolute(plString& ref_sPath) const
 {
-  plStringBuilder sTemp = sPath;
+  plStringBuilder sTemp = ref_sPath;
   bool bRes = MakeDataDirectoryRelativePathAbsolute(sTemp);
-  sPath = sTemp;
+  ref_sPath = sTemp;
   return bRes;
 }
 
-bool plQtEditorApp::MakePathDataDirectoryRelative(plStringBuilder& sPath) const
+bool plQtEditorApp::MakePathDataDirectoryRelative(plStringBuilder& ref_sPath) const
 {
   plStringBuilder sTemp;
 
@@ -220,18 +220,18 @@ bool plQtEditorApp::MakePathDataDirectoryRelative(plStringBuilder& sPath) const
     if (plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sTemp).Failed())
       continue;
 
-    if (sPath.IsPathBelowFolder(sTemp))
+    if (ref_sPath.IsPathBelowFolder(sTemp))
     {
-      sPath.MakeRelativeTo(sTemp).IgnoreResult();
+      ref_sPath.MakeRelativeTo(sTemp).IgnoreResult();
       return true;
     }
   }
 
-  sPath.MakeRelativeTo(plFileSystem::GetSdkRootDirectory()).IgnoreResult();
+  ref_sPath.MakeRelativeTo(plFileSystem::GetSdkRootDirectory()).IgnoreResult();
   return false;
 }
 
-bool plQtEditorApp::MakePathDataDirectoryParentRelative(plStringBuilder& sPath) const
+bool plQtEditorApp::MakePathDataDirectoryParentRelative(plStringBuilder& ref_sPath) const
 {
   plStringBuilder sTemp;
 
@@ -242,23 +242,23 @@ bool plQtEditorApp::MakePathDataDirectoryParentRelative(plStringBuilder& sPath) 
     if (plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sTemp).Failed())
       continue;
 
-    if (sPath.IsPathBelowFolder(sTemp))
+    if (ref_sPath.IsPathBelowFolder(sTemp))
     {
       sTemp.PathParentDirectory();
 
-      sPath.MakeRelativeTo(sTemp).IgnoreResult();
+      ref_sPath.MakeRelativeTo(sTemp).IgnoreResult();
       return true;
     }
   }
 
-  sPath.MakeRelativeTo(plFileSystem::GetSdkRootDirectory()).IgnoreResult();
+  ref_sPath.MakeRelativeTo(plFileSystem::GetSdkRootDirectory()).IgnoreResult();
   return false;
 }
 
-bool plQtEditorApp::MakePathDataDirectoryRelative(plString& sPath) const
+bool plQtEditorApp::MakePathDataDirectoryRelative(plString& ref_sPath) const
 {
-  plStringBuilder sTemp = sPath;
+  plStringBuilder sTemp = ref_sPath;
   bool bRes = MakePathDataDirectoryRelative(sTemp);
-  sPath = sTemp;
+  ref_sPath = sTemp;
   return bRes;
 }

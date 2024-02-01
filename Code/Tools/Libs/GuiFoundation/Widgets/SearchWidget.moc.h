@@ -10,24 +10,27 @@ class QPushButton;
 ///
 /// The clear button is only active when the line edit has text.
 /// The text can be cleared by pressing ESC while the line edit has focus.
-class PLASMA_GUIFOUNDATION_DLL plQtSearchWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtSearchWidget : public QWidget
 {
   Q_OBJECT
 public:
   explicit plQtSearchWidget(QWidget* pParent);
 
   /// \brief Passed through to the QLineEdit
-  void setText(const QString& text);
+  void setText(const QString& sText);
 
   /// \brief Passed through from the QLineEdit
   QString text() const;
 
   /// \brief Passed through to the QLineEdit
-  void setPlaceholderText(const QString& text);
+  void setPlaceholderText(const QString& sText);
+
+  /// \brief Passed through to the QLineEdit
+  void selectAll();
 
 Q_SIGNALS:
   /// \brief Passed through from the QLineEdit
-  void textChanged(const QString& text);
+  void textChanged(const QString& sText);
 
   /// \brief The user pressed the enter key
   void enterPressed();

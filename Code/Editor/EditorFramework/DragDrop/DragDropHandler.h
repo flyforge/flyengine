@@ -6,9 +6,9 @@
 class plDragDropInfo;
 class plDragDropConfig;
 
-class PLASMA_EDITORFRAMEWORK_DLL plDragDropHandler : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plDragDropHandler : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDragDropHandler, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDragDropHandler, plReflectedClass);
 
 public:
   /// \brief Returns whether the last call to BeginDragDropOperation() was successful and a handler is now in effect.

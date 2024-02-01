@@ -6,8 +6,8 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Document/PrefabCache.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabComponentDragDropHandler, 1, plRTTIDefaultAllocator<plPrefabComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabComponentDragDropHandler, 1, plRTTIDefaultAllocator<plPrefabComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plPrefabComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
@@ -49,7 +49,6 @@ void plPrefabComponentDragDropHandler::CreatePrefab(const plVec3& vPosition, con
   if (vPos.IsNaN())
     vPos.SetZero();
 
-  plSceneDocument* pScene = static_cast<plSceneDocument*>(m_pDocument);
   auto pCmdHistory = m_pDocument->GetCommandHistory();
 
   plInstantiatePrefabCommand PasteCmd;
@@ -57,16 +56,16 @@ void plPrefabComponentDragDropHandler::CreatePrefab(const plVec3& vPosition, con
   PasteCmd.m_CreateFromPrefab = AssetGuid;
   PasteCmd.m_Index = iInsertChildIndex;
   PasteCmd.m_sBasePrefabGraph = plPrefabCache::GetSingleton()->GetCachedPrefabDocument(AssetGuid);
-  PasteCmd.m_RemapGuid.CreateNewUuid();
+  PasteCmd.m_RemapGuid = plUuid::MakeUuid();
 
   if (PasteCmd.m_sBasePrefabGraph.IsEmpty())
     return; // error
 
-  pCmdHistory->AddCommand(PasteCmd).IgnoreResult();
+  pCmdHistory->AddCommand(PasteCmd).AssertSuccess();
 
   if (PasteCmd.m_CreatedRootObject.IsValid())
   {
-    MoveObjectToPosition(PasteCmd.m_CreatedRootObject, vPos, plQuat::IdentityQuaternion());
+    MoveObjectToPosition(PasteCmd.m_CreatedRootObject, vPos, plQuat::MakeIdentity());
 
     m_DraggedObjects.PushBack(PasteCmd.m_CreatedRootObject);
   }

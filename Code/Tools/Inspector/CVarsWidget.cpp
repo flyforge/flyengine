@@ -46,7 +46,7 @@ plQtCVarsWidget::plQtCVarsWidget(QWidget* pParent)
   connect(CVarWidget, &plQtCVarWidget::onIntChanged, this, &plQtCVarsWidget::IntChanged);
   connect(CVarWidget, &plQtCVarWidget::onStringChanged, this, &plQtCVarsWidget::StringChanged);
 
-  CVarWidget->GetConsole().SetCommandInterpreter(PLASMA_DEFAULT_NEW(plCommandInterpreterInspector));
+  CVarWidget->GetConsole().SetCommandInterpreter(PL_DEFAULT_NEW(plCommandInterpreterInspector));
 
   ResetStats();
 }
@@ -68,7 +68,7 @@ void plQtCVarsWidget::ProcessTelemetry(void* pUnuseed)
   bool bUpdateCVarsTable = false;
   bool bFillCVarsTable = false;
 
-  while (plTelemetry::RetrieveMessage('CVAR', msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('CVAR', msg) == PL_SUCCESS)
   {
     if (msg.GetMessageID() == ' CLR')
     {
@@ -143,7 +143,7 @@ void plQtCVarsWidget::ProcessTelemetryConsole(void* pUnuseed)
   plTelemetryMessage msg;
   plStringBuilder tmp;
 
-  while (plTelemetry::RetrieveMessage('CMD', msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('CMD', msg) == PL_SUCCESS)
   {
     if (msg.GetMessageID() == 'RES')
     {

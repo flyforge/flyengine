@@ -19,14 +19,14 @@ public:
 
 protected:
   virtual void InternalRedraw() override;
-  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
   void PropertyEventHandler(const plDocumentObjectPropertyEvent& e);
 
 private:
   void SendRedrawMsg();
   void QueryObjectBBox(plInt32 iPurpose = 0);
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
   plKrautTreeAssetDocument* m_pAssetDoc;
 };

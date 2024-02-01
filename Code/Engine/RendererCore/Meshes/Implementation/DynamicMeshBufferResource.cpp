@@ -7,10 +7,10 @@
 #include <RendererFoundation/Resources/Buffer.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicMeshBufferResource, 1, plRTTIDefaultAllocator<plDynamicMeshBufferResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicMeshBufferResource, 1, plRTTIDefaultAllocator<plDynamicMeshBufferResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plDynamicMeshBufferResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plDynamicMeshBufferResource);
 // clang-format on
 
 plDynamicMeshBufferResource::plDynamicMeshBufferResource()
@@ -20,9 +20,9 @@ plDynamicMeshBufferResource::plDynamicMeshBufferResource()
 
 plDynamicMeshBufferResource::~plDynamicMeshBufferResource()
 {
-  PLASMA_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hColorBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hColorBuffer.IsInvalidated(), "Implementation error");
 }
 
 plResourceLoadDesc plDynamicMeshBufferResource::UnloadData(Unload WhatToUnload)
@@ -58,7 +58,7 @@ plResourceLoadDesc plDynamicMeshBufferResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plDynamicMeshBufferResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_REPORT_FAILURE("This resource type does not support loading data from file.");
+  PL_REPORT_FAILURE("This resource type does not support loading data from file.");
 
   return plResourceLoadDesc();
 }
@@ -71,11 +71,11 @@ void plDynamicMeshBufferResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUs
   out_NewMemoryUsage.m_uiMemoryGPU = ModifyMemoryUsage().m_uiMemoryGPU;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshBufferResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshBufferResourceDescriptor)
 {
-  PLASMA_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hColorBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hColorBuffer.IsInvalidated(), "Implementation error");
 
   m_Descriptor = descriptor;
 
@@ -125,7 +125,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshB
   m_hVertexBuffer = pDevice->CreateVertexBuffer(sizeof(plDynamicMeshVertex), m_Descriptor.m_uiMaxVertices /* no initial data -> mutable */);
 
   plStringBuilder sName;
-  sName.Format("{0} - Dynamic Vertex Buffer", GetResourceDescription());
+  sName.SetFormat("{0} - Dynamic Vertex Buffer", GetResourceDescription());
   pDevice->GetBuffer(m_hVertexBuffer)->SetDebugName(sName);
 
   const plUInt32 uiMaxIndices = plGALPrimitiveTopology::VerticesPerPrimitive(m_Descriptor.m_Topology) * m_Descriptor.m_uiMaxPrimitives;
@@ -135,7 +135,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshB
     m_ColorData.SetCountUninitialized(uiMaxIndices);
     m_hColorBuffer = pDevice->CreateVertexBuffer(sizeof(plColorLinearUB), m_Descriptor.m_uiMaxVertices /* no initial data -> mutable */);
 
-    sName.Format("{0} - Dynamic Color Buffer", GetResourceDescription());
+    sName.SetFormat("{0} - Dynamic Color Buffer", GetResourceDescription());
     pDevice->GetBuffer(m_hColorBuffer)->SetDebugName(sName);
   }
 
@@ -145,7 +145,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshB
 
     m_hIndexBuffer = pDevice->CreateIndexBuffer(plGALIndexType::UInt, uiMaxIndices /* no initial data -> mutable */);
 
-    sName.Format("{0} - Dynamic Index32 Buffer", GetResourceDescription());
+    sName.SetFormat("{0} - Dynamic Index32 Buffer", GetResourceDescription());
     pDevice->GetBuffer(m_hIndexBuffer)->SetDebugName(sName);
   }
   else if (m_Descriptor.m_IndexType == plGALIndexType::UShort)
@@ -154,7 +154,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plDynamicMeshBufferResource, plDynamicMeshB
 
     m_hIndexBuffer = pDevice->CreateIndexBuffer(plGALIndexType::UShort, uiMaxIndices /* no initial data -> mutable */);
 
-    sName.Format("{0} - Dynamic Index16 Buffer", GetResourceDescription());
+    sName.SetFormat("{0} - Dynamic Index16 Buffer", GetResourceDescription());
     pDevice->GetBuffer(m_hIndexBuffer)->SetDebugName(sName);
   }
 
@@ -176,7 +176,7 @@ void plDynamicMeshBufferResource::UpdateGpuBuffer(plGALCommandEncoder* pGALComma
     if (uiNumVertices == plMath::MaxValue<plUInt32>())
       uiNumVertices = m_VertexData.GetCount() - uiFirstVertex;
 
-    PLASMA_ASSERT_DEV(uiNumVertices <= m_VertexData.GetCount(), "Can't upload {} vertices, the buffer was allocated to hold a maximum of {} vertices.", uiNumVertices, m_VertexData.GetCount());
+    PL_ASSERT_DEV(uiNumVertices <= m_VertexData.GetCount(), "Can't upload {} vertices, the buffer was allocated to hold a maximum of {} vertices.", uiNumVertices, m_VertexData.GetCount());
 
     m_bAccessedVB = false;
 
@@ -188,7 +188,7 @@ void plDynamicMeshBufferResource::UpdateGpuBuffer(plGALCommandEncoder* pGALComma
     if (uiNumVertices == plMath::MaxValue<plUInt32>())
       uiNumVertices = m_ColorData.GetCount() - uiFirstVertex;
 
-    PLASMA_ASSERT_DEV(uiNumVertices <= m_ColorData.GetCount(), "Can't upload {} vertices, the buffer was allocated to hold a maximum of {} vertices.", uiNumVertices, m_ColorData.GetCount());
+    PL_ASSERT_DEV(uiNumVertices <= m_ColorData.GetCount(), "Can't upload {} vertices, the buffer was allocated to hold a maximum of {} vertices.", uiNumVertices, m_ColorData.GetCount());
 
     m_bAccessedCB = false;
 
@@ -201,23 +201,23 @@ void plDynamicMeshBufferResource::UpdateGpuBuffer(plGALCommandEncoder* pGALComma
 
     if (!m_Index16Data.IsEmpty())
     {
-      PLASMA_ASSERT_DEV(uiFirstIndex < m_Index16Data.GetCount(), "Invalid first index value {}", uiFirstIndex);
+      PL_ASSERT_DEV(uiFirstIndex < m_Index16Data.GetCount(), "Invalid first index value {}", uiFirstIndex);
 
       if (uiNumIndices == plMath::MaxValue<plUInt32>())
         uiNumIndices = m_Index16Data.GetCount() - uiFirstIndex;
 
-      PLASMA_ASSERT_DEV(uiNumIndices <= m_Index16Data.GetCount(), "Can't upload {} indices, the buffer was allocated to hold a maximum of {} indices.", uiNumIndices, m_Index16Data.GetCount());
+      PL_ASSERT_DEV(uiNumIndices <= m_Index16Data.GetCount(), "Can't upload {} indices, the buffer was allocated to hold a maximum of {} indices.", uiNumIndices, m_Index16Data.GetCount());
 
       pGALCommandEncoder->UpdateBuffer(m_hIndexBuffer, sizeof(plUInt16) * uiFirstIndex, m_Index16Data.GetArrayPtr().GetSubArray(uiFirstIndex, uiNumIndices).ToByteArray(), mode);
     }
     else if (!m_Index32Data.IsEmpty())
     {
-      PLASMA_ASSERT_DEV(uiFirstIndex < m_Index32Data.GetCount(), "Invalid first index value {}", uiFirstIndex);
+      PL_ASSERT_DEV(uiFirstIndex < m_Index32Data.GetCount(), "Invalid first index value {}", uiFirstIndex);
 
       if (uiNumIndices == plMath::MaxValue<plUInt32>())
         uiNumIndices = m_Index32Data.GetCount() - uiFirstIndex;
 
-      PLASMA_ASSERT_DEV(uiNumIndices <= m_Index32Data.GetCount(), "Can't upload {} indices, the buffer was allocated to hold a maximum of {} indices.", uiNumIndices, m_Index32Data.GetCount());
+      PL_ASSERT_DEV(uiNumIndices <= m_Index32Data.GetCount(), "Can't upload {} indices, the buffer was allocated to hold a maximum of {} indices.", uiNumIndices, m_Index32Data.GetCount());
 
       pGALCommandEncoder->UpdateBuffer(m_hIndexBuffer, sizeof(plUInt32) * uiFirstIndex, m_Index32Data.GetArrayPtr().GetSubArray(uiFirstIndex, uiNumIndices).ToByteArray(), mode);
     }
@@ -225,4 +225,4 @@ void plDynamicMeshBufferResource::UpdateGpuBuffer(plGALCommandEncoder* pGALComma
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_DynamicMeshBufferResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_DynamicMeshBufferResource);

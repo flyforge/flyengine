@@ -4,8 +4,8 @@
 #include <ToolsFoundation/Document/Document.h>
 #include <ToolsFoundation/Object/DocumentObjectManager.h>
 
-plQtPickDocumentObjectDlg::plQtPickDocumentObjectDlg(QWidget* parent, const plArrayPtr<Element>& objects, const plUuid& currentObject)
-  : QDialog(parent)
+plQtPickDocumentObjectDlg::plQtPickDocumentObjectDlg(QWidget* pParent, const plArrayPtr<Element>& objects, const plUuid& currentObject)
+  : QDialog(pParent)
   , m_Objects(objects)
   , m_CurrentObject(currentObject)
 {

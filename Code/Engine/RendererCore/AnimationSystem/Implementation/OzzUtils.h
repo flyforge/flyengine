@@ -15,9 +15,9 @@ namespace ozz::animation
 ///
 /// Since ozz::io::Stream requires seek/tell functionality, it cannot be implemented with basic plStreamReader / plStreamWriter.
 /// Instead, we must have the entire ozz archive data in memory, to be able to jump around arbitrarily.
-class PLASMA_RENDERERCORE_DLL plOzzArchiveData
+class PL_RENDERERCORE_DLL plOzzArchiveData
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plOzzArchiveData);
+  PL_DISALLOW_COPY_AND_ASSIGN(plOzzArchiveData);
 
 public:
   plOzzArchiveData();
@@ -33,7 +33,7 @@ public:
 /// \brief Implements the ozz::io::Stream interface for reading. The data has to be present in an plOzzArchiveData object.
 ///
 /// The class is implemented inline and not DLL exported because ozz is only available as a static library.
-class PLASMA_RENDERERCORE_DLL plOzzStreamReader : public ozz::io::Stream
+class PL_RENDERERCORE_DLL plOzzStreamReader : public ozz::io::Stream
 {
 public:
   plOzzStreamReader(const plOzzArchiveData& data);
@@ -57,7 +57,7 @@ private:
 /// \brief Implements the ozz::io::Stream interface for writing. The data is gathered in an plOzzArchiveData object.
 ///
 /// The class is implemented inline and not DLL exported because ozz is only available as a static library.
-class PLASMA_RENDERERCORE_DLL plOzzStreamWriter : public ozz::io::Stream
+class PL_RENDERERCORE_DLL plOzzStreamWriter : public ozz::io::Stream
 {
 public:
   plOzzStreamWriter(plOzzArchiveData& ref_data);
@@ -80,6 +80,6 @@ private:
 
 namespace plOzzUtils
 {
-  PLASMA_RENDERERCORE_DLL void CopyAnimation(ozz::animation::Animation* pDst, const ozz::animation::Animation* pSrc);
-  PLASMA_RENDERERCORE_DLL void CopySkeleton(ozz::animation::Skeleton* pDst, const ozz::animation::Skeleton* pSrc);
+  PL_RENDERERCORE_DLL void CopyAnimation(ozz::animation::Animation* pDst, const ozz::animation::Animation* pSrc);
+  PL_RENDERERCORE_DLL void CopySkeleton(ozz::animation::Skeleton* pDst, const ozz::animation::Skeleton* pSrc);
 } // namespace plOzzUtils

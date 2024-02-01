@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexD3D11.cpp
@@ -763,7 +763,7 @@ HRESULT DirectX::CaptureTexture(
         if ((desc.Usage == D3D11_USAGE_STAGING) && (desc.CPUAccessFlags & D3D11_CPU_ACCESS_READ))
         {
             // Handle case where the source is already a staging texture we can use directly
-            pStaging = pTexture;
+            pStaging = std::move(pTexture);
         }
         else
         {
@@ -868,7 +868,7 @@ HRESULT DirectX::CaptureTexture(
         else if ((desc.Usage == D3D11_USAGE_STAGING) && (desc.CPUAccessFlags & D3D11_CPU_ACCESS_READ))
         {
             // Handle case where the source is already a staging texture we can use directly
-            pStaging = pTexture;
+            pStaging = std::move(pTexture);
         }
         else
         {
@@ -921,7 +921,7 @@ HRESULT DirectX::CaptureTexture(
         if ((desc.Usage == D3D11_USAGE_STAGING) && (desc.CPUAccessFlags & D3D11_CPU_ACCESS_READ))
         {
             // Handle case where the source is already a staging texture we can use directly
-            pStaging = pTexture;
+            pStaging = std::move(pTexture);
         }
         else
         {
@@ -974,5 +974,4 @@ HRESULT DirectX::CaptureTexture(
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexD3D11);
 

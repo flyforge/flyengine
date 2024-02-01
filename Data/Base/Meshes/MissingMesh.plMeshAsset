@@ -11,12 +11,16 @@ o
 		s %AssetType{"Mesh"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{1301208658247538602,5358332398482862355}}
-		u4 %Hash{12582048633023008515}
+		u4 %Hash{14329054220184670969}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
+		VarArray %PackageDeps
+		{
+			s{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
+		}
 		VarArray %References
 		{
-			s{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
+			s{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
 		}
 	}
 }
@@ -44,7 +48,6 @@ o
 		}
 		s %MeshFile{""}
 		s %NormalPrecision{"plMeshNormalPrecision::_10Bit"}
-		b %Optimize{1}
 		s %PrimitiveType{"plMeshPrimitive::Sphere"}
 		f %Radius{0x0000003F}
 		f %Radius2{0x0000003F}
@@ -64,7 +67,7 @@ o
 	p
 	{
 		s %Label{"Default"}
-		s %Resource{"{ f4b1a490-e549-4968-a16d-a74629154a22 }"}
+		s %Resource{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
 	}
 }
 o
@@ -95,7 +98,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMaterialResourceSlot"}
 		u3 %TypeVersion{1}
@@ -112,7 +115,7 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshAssetProperties"}
 		u3 %TypeVersion{3}
@@ -163,7 +166,7 @@ o
 		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshPrimitive"}
 		u3 %TypeVersion{1}

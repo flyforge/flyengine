@@ -25,7 +25,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plVec2Temp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plVec2Template<Type>& ref_vValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec2Template<Type>)) == sizeof(plVec2Template<Type>), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec2Template<Type>)) == sizeof(plVec2Template<Type>), "End of stream reached.");
   return inout_stream;
 }
 
@@ -40,9 +40,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plVec2Template<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plVec2Template<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -58,7 +58,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plVec3Temp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plVec3Template<Type>& ref_vValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec3Template<Type>)) == sizeof(plVec3Template<Type>), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec3Template<Type>)) == sizeof(plVec3Template<Type>), "End of stream reached.");
   return inout_stream;
 }
 
@@ -73,9 +73,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plVec3Template<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plVec3Template<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -91,7 +91,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plVec4Temp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plVec4Template<Type>& ref_vValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec4Template<Type>)) == sizeof(plVec4Template<Type>), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_vValue, sizeof(plVec4Template<Type>)) == sizeof(plVec4Template<Type>), "End of stream reached.");
   return inout_stream;
 }
 
@@ -106,9 +106,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plVec4Template<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plVec4Template<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -124,7 +124,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plMat3Temp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plMat3Template<Type>& ref_mValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(ref_mValue.m_fElementsCM, sizeof(Type) * 9) == sizeof(Type) * 9, "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(ref_mValue.m_fElementsCM, sizeof(Type) * 9) == sizeof(Type) * 9, "End of stream reached.");
   return inout_stream;
 }
 
@@ -139,9 +139,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plMat3Template<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plMat3Template<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -157,7 +157,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plMat4Temp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plMat4Template<Type>& ref_mValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(ref_mValue.m_fElementsCM, sizeof(Type) * 16) == sizeof(Type) * 16, "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(ref_mValue.m_fElementsCM, sizeof(Type) * 16) == sizeof(Type) * 16, "End of stream reached.");
   return inout_stream;
 }
 
@@ -172,9 +172,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plMat4Template<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plMat4Template<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -212,7 +212,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plPlaneTem
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plPlaneTemplate<Type>& out_value)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&out_value, sizeof(plPlaneTemplate<Type>)) == sizeof(plPlaneTemplate<Type>), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&out_value, sizeof(plPlaneTemplate<Type>)) == sizeof(plPlaneTemplate<Type>), "End of stream reached.");
   return inout_stream;
 }
 
@@ -227,9 +227,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plPlaneTemplate<Type>* p
 {
   const plUInt64 uiNumBytes = sizeof(plPlaneTemplate<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -245,7 +245,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plQuatTemp
 template <typename Type>
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plQuatTemplate<Type>& ref_qValue)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_qValue, sizeof(plQuatTemplate<Type>)) == sizeof(plQuatTemplate<Type>), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_qValue, sizeof(plQuatTemplate<Type>)) == sizeof(plQuatTemplate<Type>), "End of stream reached.");
   return inout_stream;
 }
 
@@ -260,9 +260,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plQuatTemplate<Type>* pA
 {
   const plUInt64 uiNumBytes = sizeof(plQuatTemplate<Type>) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -331,7 +331,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plColor& v
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plColor& ref_value)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColor)) == sizeof(plColor), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColor)) == sizeof(plColor), "End of stream reached.");
   return inout_stream;
 }
 
@@ -345,9 +345,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plColor* pArray, plUInt6
 {
   const plUInt64 uiNumBytes = sizeof(plColor) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -360,7 +360,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plColorGam
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plColorGammaUB& ref_value)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColorGammaUB)) == sizeof(plColorGammaUB), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColorGammaUB)) == sizeof(plColorGammaUB), "End of stream reached.");
   return inout_stream;
 }
 
@@ -375,9 +375,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plColorGammaUB* pArray, 
 {
   const plUInt64 uiNumBytes = sizeof(plColorGammaUB) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -407,9 +407,9 @@ plResult DeserializeArray(plStreamReader& inout_stream, plAngle* pArray, plUInt6
 {
   const plUInt64 uiNumBytes = sizeof(plAngle) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -422,7 +422,7 @@ inline plStreamWriter& operator<<(plStreamWriter& inout_stream, const plColorLin
 
 inline plStreamReader& operator>>(plStreamReader& inout_stream, plColorLinearUB& ref_value)
 {
-  PLASMA_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColorLinearUB)) == sizeof(plColorLinearUB), "End of stream reached.");
+  PL_VERIFY(inout_stream.ReadBytes(&ref_value, sizeof(plColorLinearUB)) == sizeof(plColorLinearUB), "End of stream reached.");
   return inout_stream;
 }
 
@@ -437,7 +437,7 @@ plResult DeserializeArray(plStreamReader& inout_stream, plColorLinearUB* pArray,
 {
   const plUInt64 uiNumBytes = sizeof(plColorLinearUB) * uiCount;
   if (inout_stream.ReadBytes(pArray, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }

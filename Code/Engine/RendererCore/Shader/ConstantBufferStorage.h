@@ -4,7 +4,7 @@
 #include <RendererCore/RendererCoreDLL.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-class PLASMA_RENDERERCORE_DLL plConstantBufferStorageBase
+class PL_RENDERERCORE_DLL plConstantBufferStorageBase
 {
 protected:
   friend class plRenderContext;
@@ -19,11 +19,11 @@ public:
 
   void UploadData(plGALCommandEncoder* pCommandEncoder);
 
-  PLASMA_ALWAYS_INLINE plGALBufferHandle GetGALBufferHandle() const { return m_hGALConstantBuffer; }
+  PL_ALWAYS_INLINE plGALBufferHandle GetGALBufferHandle() const { return m_hGALConstantBuffer; }
 
 protected:
-  bool m_bHasBeenModified;
-  plUInt32 m_uiLastHash;
+  bool m_bHasBeenModified = false;
+  plUInt32 m_uiLastHash = 0;
   plGALBufferHandle m_hGALConstantBuffer;
 
   plArrayPtr<plUInt8> m_Data;
@@ -33,26 +33,26 @@ template <typename T>
 class plConstantBufferStorage : public plConstantBufferStorageBase
 {
 public:
-  PLASMA_FORCE_INLINE T& GetDataForWriting()
+  PL_FORCE_INLINE T& GetDataForWriting()
   {
     plArrayPtr<plUInt8> rawData = GetRawDataForWriting();
-    PLASMA_ASSERT_DEV(rawData.GetCount() == sizeof(T), "Invalid data size");
+    PL_ASSERT_DEV(rawData.GetCount() == sizeof(T), "Invalid data size");
     return *reinterpret_cast<T*>(rawData.GetPtr());
   }
 
-  PLASMA_FORCE_INLINE const T& GetDataForReading() const
+  PL_FORCE_INLINE const T& GetDataForReading() const
   {
     plArrayPtr<const plUInt8> rawData = GetRawDataForReading();
-    PLASMA_ASSERT_DEV(rawData.GetCount() == sizeof(T), "Invalid data size");
+    PL_ASSERT_DEV(rawData.GetCount() == sizeof(T), "Invalid data size");
     return *reinterpret_cast<const T*>(rawData.GetPtr());
   }
 };
 
-typedef plGenericId<24, 8> plConstantBufferStorageId;
+using plConstantBufferStorageId = plGenericId<24, 8>;
 
 class plConstantBufferStorageHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plConstantBufferStorageHandle, plConstantBufferStorageId);
+  PL_DECLARE_HANDLE_TYPE(plConstantBufferStorageHandle, plConstantBufferStorageId);
 
   friend class plRenderContext;
 };

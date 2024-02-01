@@ -15,7 +15,7 @@ plSettingsComponentManager<ComponentType>::~plSettingsComponentManager()
 }
 
 template <typename ComponentType>
-PLASMA_ALWAYS_INLINE ComponentType* plSettingsComponentManager<ComponentType>::GetSingletonComponent()
+PL_ALWAYS_INLINE ComponentType* plSettingsComponentManager<ComponentType>::GetSingletonComponent()
 {
   for (const auto& pComponent : m_Components)
   {
@@ -28,7 +28,7 @@ PLASMA_ALWAYS_INLINE ComponentType* plSettingsComponentManager<ComponentType>::G
 }
 
 template <typename ComponentType>
-PLASMA_ALWAYS_INLINE const ComponentType* plSettingsComponentManager<ComponentType>::GetSingletonComponent() const
+PL_ALWAYS_INLINE const ComponentType* plSettingsComponentManager<ComponentType>::GetSingletonComponent() const
 {
   for (const auto& pComponent : m_Components)
   {
@@ -42,31 +42,31 @@ PLASMA_ALWAYS_INLINE const ComponentType* plSettingsComponentManager<ComponentTy
 
 // static
 template <typename ComponentType>
-PLASMA_ALWAYS_INLINE plWorldModuleTypeId plSettingsComponentManager<ComponentType>::TypeId()
+PL_ALWAYS_INLINE plWorldModuleTypeId plSettingsComponentManager<ComponentType>::TypeId()
 {
   return ComponentType::TypeId();
 }
 
 template <typename ComponentType>
-void plSettingsComponentManager<ComponentType>::CollectAllComponents(plDynamicArray<plComponentHandle>& out_AllComponents, bool bOnlyActive)
+void plSettingsComponentManager<ComponentType>::CollectAllComponents(plDynamicArray<plComponentHandle>& out_allComponents, bool bOnlyActive)
 {
   for (auto& component : m_Components)
   {
     if (!bOnlyActive || component->IsActive())
     {
-      out_AllComponents.PushBack(component->GetHandle());
+      out_allComponents.PushBack(component->GetHandle());
     }
   }
 }
 
 template <typename ComponentType>
-void plSettingsComponentManager<ComponentType>::CollectAllComponents(plDynamicArray<plComponent*>& out_AllComponents, bool bOnlyActive)
+void plSettingsComponentManager<ComponentType>::CollectAllComponents(plDynamicArray<plComponent*>& out_allComponents, bool bOnlyActive)
 {
   for (auto& component : m_Components)
   {
     if (!bOnlyActive || component->IsActive())
     {
-      out_AllComponents.PushBack(component.Borrow());
+      out_allComponents.PushBack(component.Borrow());
     }
   }
 }
@@ -76,11 +76,10 @@ plComponent* plSettingsComponentManager<ComponentType>::CreateComponentStorage()
 {
   if (!m_Components.IsEmpty())
   {
-    plLog::Warning("A component of type '{0}' is already present in this world. Having more than one is not allowed.",
-      plGetStaticRTTI<ComponentType>()->GetTypeName());
+    plLog::Warning("A component of type '{0}' is already present in this world. Having more than one is not allowed.", plGetStaticRTTI<ComponentType>()->GetTypeName());
   }
 
-  m_Components.PushBack(PLASMA_NEW(GetAllocator(), ComponentType));
+  m_Components.PushBack(PL_NEW(GetAllocator(), ComponentType));
   return m_Components.PeekBack().Borrow();
 }
 

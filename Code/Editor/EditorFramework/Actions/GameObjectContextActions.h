@@ -4,14 +4,14 @@
 #include <GuiFoundation/Action/BaseActions.h>
 #include <GuiFoundation/GuiFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextActions
+class PL_EDITORFRAMEWORK_DLL plGameObjectContextActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapToolbarActions(const char* szMapping, const char* szPath);
-  static void MapContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
+  static void MapContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hPickContextScene;
@@ -19,9 +19,9 @@ public:
   static plActionDescriptorHandle s_hClearContextObject;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plGameObjectContextAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectContextAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectContextAction, plButtonAction);
 
 public:
   enum class ActionType

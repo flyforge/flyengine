@@ -51,13 +51,13 @@ void plGameApplicationBase::ExecuteInitFunctions()
 
 void plGameApplicationBase::Init_PlatformProfile_SetPreferred()
 {
-  m_PlatformProfile.m_sName = opt_Profile.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified);
+  m_PlatformProfile.SetConfigName(opt_Profile.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
   m_PlatformProfile.AddMissingConfigs();
 }
 
 void plGameApplicationBase::BaseInit_ConfigureLogging()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   plGlobalLog::RemoveLogWriter(m_LogToConsoleID);
   plGlobalLog::RemoveLogWriter(m_LogToVsID);
 
@@ -72,7 +72,7 @@ void plGameApplicationBase::BaseInit_ConfigureLogging()
 
 void plGameApplicationBase::Init_ConfigureTelemetry()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   plTelemetry::s_uiPort = static_cast<plUInt16>(opt_TelemetryPort.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
   plTelemetry::SetServerName(GetApplicationName());
   plTelemetry::CreateServer();
@@ -90,7 +90,7 @@ void plGameApplicationBase::Init_LoadRequiredPlugins()
 {
   plPlugin::InitializeStaticallyLinkedPlugins();
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   plPlugin::LoadPlugin("XBoxControllerPlugin", plPluginLoadFlags::PluginIsOptional).IgnoreResult();
 #endif
 }
@@ -107,7 +107,7 @@ void plGameApplicationBase::Init_FileSystem_ConfigureDataDirs()
   plString writableBinRoot = ">appdir/";
   plString shaderCacheRoot = ">appdir/";
 
-#if PLASMA_DISABLED(PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
+#if PL_DISABLED(PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
   // On platforms where this is disabled, one can usually only write to the user directory
   // e.g. on UWP and mobile platforms
   writableBinRoot = sUserDataPath;
@@ -176,7 +176,7 @@ void plGameApplicationBase::Init_LoadProjectPlugins()
 
 void plGameApplicationBase::Init_PlatformProfile_LoadForRuntime()
 {
-  const plStringBuilder sRuntimeProfileFile(":project/RuntimeConfigs/", m_PlatformProfile.m_sName, ".plProfile");
+  const plStringBuilder sRuntimeProfileFile(":project/RuntimeConfigs/", m_PlatformProfile.GetConfigName(), ".plProfile");
   m_PlatformProfile.AddMissingConfigs();
   m_PlatformProfile.LoadForRuntime(sRuntimeProfileFile).IgnoreResult();
 }
@@ -185,11 +185,11 @@ void plGameApplicationBase::Init_ConfigureInput() {}
 
 void plGameApplicationBase::Init_ConfigureTags()
 {
-  PLASMA_LOG_BLOCK("Reading Tags", "Tags.ddl");
+  PL_LOG_BLOCK("Reading Tags", "Tags.ddl");
 
   plStringView sFile = ":project/RuntimeConfigs/Tags.ddl";
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   sFile = plFileSystem::MigrateFileLocation(":project/Tags.ddl", sFile);
 #endif
 
@@ -238,7 +238,7 @@ void plGameApplicationBase::Init_ConfigureCVars()
 void plGameApplicationBase::Init_SetupDefaultResources()
 {
   // continuously unload resources that are not in use anymore
-  plResourceManager::SetAutoFreeUnused(plTime::Microseconds(100), plTime::Seconds(10.0f));
+  plResourceManager::SetAutoFreeUnused(plTime::MakeFromMicroseconds(100), plTime::MakeFromSeconds(10.0f));
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -254,13 +254,9 @@ void plGameApplicationBase::Deinit_UnloadPlugins()
 
 void plGameApplicationBase::Deinit_ShutdownLogging()
 {
-#if PLASMA_DISABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_DISABLED(PL_COMPILE_FOR_DEVELOPMENT)
   // during development, keep these loggers active
   plGlobalLog::RemoveLogWriter(m_LogToConsoleID);
   plGlobalLog::RemoveLogWriter(m_LogToVsID);
 #endif
 }
-
-
-
-PLASMA_STATICLINK_FILE(Core, Core_GameApplication_Implementation_GameApplicationBaseInit);

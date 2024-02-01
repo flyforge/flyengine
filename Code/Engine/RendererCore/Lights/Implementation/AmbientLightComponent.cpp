@@ -8,27 +8,27 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plAmbientLightComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plAmbientLightComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("TopColor", GetTopColor, SetTopColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.2f, 0.2f, 0.3f)))),
-    PLASMA_ACCESSOR_PROPERTY("BottomColor", GetBottomColor, SetBottomColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.1f, 0.1f, 0.15f)))),
-    PLASMA_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f))
+    PL_ACCESSOR_PROPERTY("TopColor", GetTopColor, SetTopColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.2f, 0.2f, 0.3f)))),
+    PL_ACCESSOR_PROPERTY("BottomColor", GetBottomColor, SetBottomColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.1f, 0.1f, 0.15f)))),
+    PL_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f))
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Lighting"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plAmbientLightComponent::plAmbientLightComponent() = default;
@@ -170,4 +170,4 @@ plAmbientLightComponentPatch_1_2 g_plAmbientLightComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_AmbientLightComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_AmbientLightComponent);

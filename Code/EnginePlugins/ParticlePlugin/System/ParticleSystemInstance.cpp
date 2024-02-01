@@ -337,7 +337,7 @@ void plParticleSystemInstance::ReinitializeStreamProcessors(const plParticleSyst
 
 plParticleSystemInstance::plParticleSystemInstance()
 {
-  m_BoundingVolume.SetInvalid();
+  m_BoundingVolume = plBoundingBoxSphere::MakeInvalid();
 }
 
 void plParticleSystemInstance::Construct(plUInt32 uiMaxParticles, plWorld* pWorld, plParticleEffectInstance* pOwnerEffect, float fSpawnCountMultiplier)
@@ -365,9 +365,9 @@ void plParticleSystemInstance::Destruct()
   m_StreamInfo.Clear();
 }
 
-plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& tDiff)
+plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& diff)
 {
-  PLASMA_PROFILE_SCOPE("PFX: System Update");
+  PL_PROFILE_SCOPE("PFX: System Update");
 
   plUInt32 uiSpawnedParticles = 0;
 
@@ -381,11 +381,11 @@ plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& tDiff
       if (pEmitter->IsFinished() == plParticleEmitterState::Active)
       {
         bAllEmittersInactive = false;
-        const plUInt32 uiSpawn = pEmitter->ComputeSpawnCount(tDiff);
+        const plUInt32 uiSpawn = pEmitter->ComputeSpawnCount(diff);
 
         if (uiSpawn > 0)
         {
-          PLASMA_PROFILE_SCOPE("PFX: System Emit");
+          PL_PROFILE_SCOPE("PFX: System Emit");
           m_StreamGroup.InitializeElements(uiSpawn);
           uiSpawnedParticles += uiSpawn;
         }
@@ -410,11 +410,11 @@ plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& tDiff
       {
         bHasReactingEmitters = true;
 
-        const plUInt32 uiSpawn = pEmitter->ComputeSpawnCount(tDiff);
+        const plUInt32 uiSpawn = pEmitter->ComputeSpawnCount(diff);
 
         if (uiSpawn > 0)
         {
-          PLASMA_PROFILE_SCOPE("PFX: System Emit (React)");
+          PL_PROFILE_SCOPE("PFX: System Emit (React)");
           m_StreamGroup.InitializeElements(uiSpawn);
           uiSpawnedParticles += uiSpawn;
         }
@@ -423,31 +423,31 @@ plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& tDiff
   }
 
   {
-    PLASMA_PROFILE_SCOPE("PFX: System Step Behaviors");
+    PL_PROFILE_SCOPE("PFX: System Step Behaviors");
     for (auto pBehavior : m_Behaviors)
     {
-      pBehavior->StepParticleSystem(tDiff, uiSpawnedParticles);
+      pBehavior->StepParticleSystem(diff, uiSpawnedParticles);
     }
   }
 
   {
-    PLASMA_PROFILE_SCOPE("PFX: System Step Finalizers");
+    PL_PROFILE_SCOPE("PFX: System Step Finalizers");
     for (auto pFinalizer : m_Finalizers)
     {
-      pFinalizer->StepParticleSystem(tDiff, uiSpawnedParticles);
+      pFinalizer->StepParticleSystem(diff, uiSpawnedParticles);
     }
   }
 
   {
-    PLASMA_PROFILE_SCOPE("PFX: System Step Types");
+    PL_PROFILE_SCOPE("PFX: System Step Types");
     for (auto pType : m_Types)
     {
-      pType->StepParticleSystem(tDiff, uiSpawnedParticles);
+      pType->StepParticleSystem(diff, uiSpawnedParticles);
     }
   }
 
   {
-    PLASMA_PROFILE_SCOPE("PFX: System Process");
+    PL_PROFILE_SCOPE("PFX: System Process");
     m_StreamGroup.Process();
   }
 
@@ -461,27 +461,27 @@ plParticleSystemState::Enum plParticleSystemInstance::Update(const plTime& tDiff
   return bHasReactingEmitters ? plParticleSystemState::OnlyReacting : plParticleSystemState::Inactive;
 }
 
-plProcessingStream* plParticleSystemInstance::QueryStream(const char* szName, plProcessingStream::DataType Type) const
+plProcessingStream* plParticleSystemInstance::QueryStream(const char* szName, plProcessingStream::DataType type) const
 {
   plStringBuilder fullName;
-  plParticleStreamFactory::GetFullStreamName(szName, Type, fullName);
+  plParticleStreamFactory::GetFullStreamName(szName, type, fullName);
 
   return m_StreamGroup.GetStreamByName(fullName);
 }
 
-void plParticleSystemInstance::CreateStream(const char* szName, plProcessingStream::DataType Type, plProcessingStream** ppStream, plParticleStreamBinding& binding, bool bWillInitializeElements)
+void plParticleSystemInstance::CreateStream(const char* szName, plProcessingStream::DataType type, plProcessingStream** pStream, plParticleStreamBinding& inout_binding, bool bWillInitializeElements)
 {
-  PLASMA_ASSERT_DEV(ppStream != nullptr, "The pointer to the stream pointer must not be null");
+  PL_ASSERT_DEV(pStream != nullptr, "The pointer to the stream pointer must not be null");
 
   plStringBuilder fullName;
-  plParticleStreamFactory::GetFullStreamName(szName, Type, fullName);
+  plParticleStreamFactory::GetFullStreamName(szName, type, fullName);
 
   StreamInfo* pInfo = nullptr;
 
-  plProcessingStream* pStream = m_StreamGroup.GetStreamByName(fullName);
-  if (pStream == nullptr)
+  plProcessingStream* pSubStream = m_StreamGroup.GetStreamByName(fullName);
+  if (pSubStream == nullptr)
   {
-    pStream = m_StreamGroup.AddStream(fullName, Type);
+    pSubStream = m_StreamGroup.AddStream(fullName, type);
 
     pInfo = &m_StreamInfo.ExpandAndGetRef();
     pInfo->m_sName = fullName;
@@ -497,19 +497,19 @@ void plParticleSystemInstance::CreateStream(const char* szName, plProcessingStre
       }
     }
 
-    PLASMA_ASSERT_DEV(pInfo != nullptr, "Could not find info for stream");
+    PL_ASSERT_DEV(pInfo != nullptr, "Could not find info for stream");
   }
 
   pInfo->m_bInUse = true;
   if (bWillInitializeElements)
     pInfo->m_bGetsInitialized = true;
 
-  PLASMA_ASSERT_DEV(pStream != nullptr, "Stream creation failed ('{0}' -> '{1}')", szName, fullName);
-  *ppStream = pStream;
+  PL_ASSERT_DEV(pSubStream != nullptr, "Stream creation failed ('{0}' -> '{1}')", szName, fullName);
+  *pStream = pSubStream;
 
   {
-    auto& bind = binding.m_Bindings.ExpandAndGetRef();
-    bind.m_ppStream = ppStream;
+    auto& bind = inout_binding.m_Bindings.ExpandAndGetRef();
+    bind.m_ppStream = pStream;
     bind.m_sName = fullName;
   }
 }
@@ -542,7 +542,7 @@ void plParticleSystemInstance::CreateStreamZeroInitializers()
     if (info.m_bGetsInitialized)
       continue;
 
-    PLASMA_ASSERT_DEV(info.m_bInUse, "Invalid state");
+    PL_ASSERT_DEV(info.m_bInUse, "Invalid state");
 
     if (info.m_pDefaultInitializer == nullptr)
     {
@@ -552,7 +552,7 @@ void plParticleSystemInstance::CreateStreamZeroInitializers()
       {
         plLog::Warning("Particle stream '{0}' is zero-initialized.", info.m_sName);
 
-        plProcessingStreamSpawnerZeroInitialized* pZeroInit = PLASMA_DEFAULT_NEW(plProcessingStreamSpawnerZeroInitialized);
+        plProcessingStreamSpawnerZeroInitialized* pZeroInit = PL_DEFAULT_NEW(plProcessingStreamSpawnerZeroInitialized);
         pZeroInit->SetStreamName(info.m_sName);
 
         info.m_pDefaultInitializer = pZeroInit;
@@ -573,7 +573,7 @@ void plParticleStreamBinding::UpdateBindings(const plProcessingStreamGroup* pGro
   for (const auto& bind : m_Bindings)
   {
     plProcessingStream* pStream = pGroup->GetStreamByName(bind.m_sName);
-    PLASMA_ASSERT_DEV(pStream != nullptr, "Stream binding '{0}' is invalid now", bind.m_sName);
+    PL_ASSERT_DEV(pStream != nullptr, "Stream binding '{0}' is invalid now", bind.m_sName);
 
     *bind.m_ppStream = pStream;
   }
@@ -592,11 +592,11 @@ plParticleWorldModule* plParticleSystemInstance::GetOwnerWorldModule() const
   return m_pOwnerEffect->GetOwnerWorldModule();
 }
 
-void plParticleSystemInstance::ExtractSystemRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleSystemInstance::ExtractSystemRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
   for (auto pType : m_Types)
   {
-    pType->ExtractTypeRenderData(msg, instanceTransform);
+    pType->ExtractTypeRenderData(ref_msg, instanceTransform);
   }
 }
 
@@ -635,4 +635,4 @@ bool plParticleSystemInstance::IsContinuous() const
   return false;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_System_ParticleSystemInstance);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_System_ParticleSystemInstance);

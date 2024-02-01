@@ -12,7 +12,7 @@ plStopwatch::plStopwatch()
 
 void plStopwatch::StopAndReset()
 {
-  m_TotalDuration.SetZero();
+  m_TotalDuration = plTime::MakeZero();
   m_bRunning = false;
 }
 
@@ -59,5 +59,3 @@ plTime plStopwatch::Checkpoint()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_Stopwatch);

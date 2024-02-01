@@ -1,0 +1,27 @@
+# Asset Types
+
+VisualScriptClass;Visual Script Class
+
+# UI
+
+# Properties
+
+plVisualScriptDataType::Bool;Bool
+plVisualScriptDataType::Byte;Byte
+plVisualScriptDataType::Int;Int
+plVisualScriptDataType::Int64;Int64
+plVisualScriptDataType::Float;Float
+plVisualScriptDataType::Double;Double
+plVisualScriptDataType::Color;Color
+plVisualScriptDataType::Vector3;Vector3
+plVisualScriptDataType::Quaternion;Quaternion
+plVisualScriptDataType::Transform;Transform
+plVisualScriptDataType::Time;Time
+plVisualScriptDataType::Angle;Angle
+plVisualScriptDataType::String;String
+plVisualScriptDataType::GameObject;GameObject
+plVisualScriptDataType::Component;Component
+plVisualScriptDataType::TypedPointer;TypedPointer
+plVisualScriptDataType::Variant;Variant
+plVisualScriptDataType::Array;Array
+plVisualScriptDataType::Map;Map

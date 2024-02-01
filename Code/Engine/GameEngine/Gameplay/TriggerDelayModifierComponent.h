@@ -18,16 +18,16 @@ using plTriggerDelayModifierComponentManager = plComponentManager<class plTrigge
 /// inside it for the full duration of the delay. Which exact object may change, but once the trigger contains no object, the timer is reset.
 ///
 /// The sent plMsgTriggerTriggered does not contain a reference to the 'triggering' object, since there may be multiple and they may change randomly.
-class PLASMA_GAMEENGINE_DLL plTriggerDelayModifierComponent : public plComponent
+class PL_GAMEENGINE_DLL plTriggerDelayModifierComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plTriggerDelayModifierComponent, plComponent, plTriggerDelayModifierComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plTriggerDelayModifierComponent, plComponent, plTriggerDelayModifierComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plTriggerDelayModifierComponent

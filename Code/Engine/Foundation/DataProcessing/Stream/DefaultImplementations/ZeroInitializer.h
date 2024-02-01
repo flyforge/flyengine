@@ -9,9 +9,9 @@
 class plProcessingStream;
 
 /// \brief This element spawner initializes new elements with 0 (by writing 0 bytes into the whole element)
-class PLASMA_FOUNDATION_DLL plProcessingStreamSpawnerZeroInitialized : public plProcessingStreamProcessor
+class PL_FOUNDATION_DLL plProcessingStreamSpawnerZeroInitialized : public plProcessingStreamProcessor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcessingStreamSpawnerZeroInitialized, plProcessingStreamProcessor);
+  PL_ADD_DYNAMIC_REFLECTION(plProcessingStreamSpawnerZeroInitialized, plProcessingStreamProcessor);
 
 public:
   plProcessingStreamSpawnerZeroInitialized();

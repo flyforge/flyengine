@@ -3,8 +3,8 @@
 #include <Core/World/World.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plWorldModule::plWorldModule(plWorld* pWorld)
@@ -12,7 +12,7 @@ plWorldModule::plWorldModule(plWorld* pWorld)
 {
 }
 
-plWorldModule::~plWorldModule() {}
+plWorldModule::~plWorldModule() = default;
 
 plUInt32 plWorldModule::GetWorldIndex() const
 {
@@ -31,7 +31,7 @@ void plWorldModule::DeregisterUpdateFunction(const UpdateFunctionDesc& desc)
   m_pWorld->DeregisterUpdateFunction(desc);
 }
 
-plAllocatorBase* plWorldModule::GetAllocator()
+plAllocator* plWorldModule::GetAllocator()
 {
   return m_pWorld->GetAllocator();
 }
@@ -49,7 +49,7 @@ bool plWorldModule::GetWorldSimulationEnabled() const
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, WorldModuleFactory)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, WorldModuleFactory)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Reflection"
@@ -66,7 +66,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, WorldModuleFactory)
     plPlugin::Events().RemoveEventHandler(plWorldModuleFactory::PluginEventHandler);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 static plWorldModuleTypeId s_uiNextTypeId = 0;
@@ -122,15 +122,15 @@ void plWorldModuleFactory::RegisterInterfaceImplementation(plStringView sInterfa
   {
     if (m_CreatorFuncs[uiTypeId].m_pRtti->GetTypeName() != sImplementationName)
     {
-      PLASMA_ASSERT_DEV(pImplementationRtti == nullptr, "Implementation error");
+      PL_ASSERT_DEV(pImplementationRtti == nullptr, "Implementation error");
       m_TypeToId.Remove(pInterfaceRtti);
     }
   }
 }
 plWorldModuleTypeId plWorldModuleFactory::RegisterWorldModule(const plRTTI* pRtti, CreatorFunc creatorFunc)
 {
-  PLASMA_ASSERT_DEV(pRtti != plGetStaticRTTI<plWorldModule>(), "Trying to register a world module that is not reflected!");
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(pRtti != plGetStaticRTTI<plWorldModule>(), "Trying to register a world module that is not reflected!");
+  PL_ASSERT_DEV(
     m_TypeToId.GetCount() < plWorld::GetMaxNumWorldModules(), "Max number of world modules reached: {}", plWorld::GetMaxNumWorldModules());
 
   plWorldModuleTypeId uiTypeId = s_InvalidWorldModuleTypeId;
@@ -141,7 +141,7 @@ plWorldModuleTypeId plWorldModuleFactory::RegisterWorldModule(const plRTTI* pRtt
 
   if (s_freeTypeIds.IsEmpty())
   {
-    PLASMA_ASSERT_DEV(s_uiNextTypeId < PLASMA_MAX_WORLD_MODULE_TYPES - 1, "World module id overflow!");
+    PL_ASSERT_DEV(s_uiNextTypeId < PL_MAX_WORLD_MODULE_TYPES - 1, "World module id overflow!");
 
   uiTypeId = s_uiNextTypeId++;
   }
@@ -180,7 +180,7 @@ namespace
 {
   struct NewEntry
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const plRTTI* m_pRtti;
     plWorldModuleTypeId m_uiTypeId;
@@ -206,7 +206,6 @@ void plWorldModuleFactory::AdjustBaseTypeId(const plRTTI* pParentRtti, const plR
 
   plStringView szPlugin1 = m_CreatorFuncs[uiParentTypeId].m_pRtti->GetPluginName();
   plStringView szPlugin2 = pRtti->GetPluginName();
-
 
   const bool bPrio1 = HasManualDependency(szPlugin1);
   const bool bPrio2 = HasManualDependency(szPlugin2);
@@ -236,7 +235,7 @@ void plWorldModuleFactory::FillBaseTypeIds()
   // the mapping for m_TypeToId[plWorldModule(interface)], such that querying the TypeID for the interface works as well
   // and yields the implementation
 
-  plHybridArray<NewEntry, 64, plStaticAllocatorWrapper> newEntries;
+  plHybridArray<NewEntry, 64, plStaticsAllocatorWrapper> newEntries;
   const plRTTI* pModuleRtti = plGetStaticRTTI<plWorldModule>(); // base type where we want to stop iterating upwards
 
   // explicit mappings
@@ -299,7 +298,6 @@ void plWorldModuleFactory::FillBaseTypeIds()
 void plWorldModuleFactory::ClearUnloadedTypeToIDs()
 {
   plSet<const plRTTI*> allRttis;
-
   plRTTI::ForEachType([&](const plRTTI* pRtti) { allRttis.Insert(pRtti); });
 
   plSet<plWorldModuleTypeId> mappedIdsToRemove;
@@ -346,4 +344,4 @@ void plWorldModuleFactory::ClearUnloadedTypeToIDs()
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_WorldModule);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_WorldModule);

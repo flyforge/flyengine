@@ -18,9 +18,9 @@ using plJoltGrabObjectComponentManager = plComponentManagerSimple<class plJoltGr
 /// The grabbed object can be dropped or thrown away.
 ///
 /// If the picked object has a plGrabbableItemComponent, the custom grab points are used to determine how to grab the object.
-class PLASMA_JOLTPLUGIN_DLL plJoltGrabObjectComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltGrabObjectComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltGrabObjectComponent, plComponent, plJoltGrabObjectComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltGrabObjectComponent, plComponent, plJoltGrabObjectComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

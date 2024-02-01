@@ -4,9 +4,9 @@
 #include <ProcGenPlugin/Resources/ProcGenGraphResource.h>
 #include <RendererCore/Meshes/MeshComponent.h>
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVertexColorRenderData : public plMeshRenderData
+class PL_PROCGENPLUGIN_DLL plProcVertexColorRenderData : public plMeshRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcVertexColorRenderData, plMeshRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plProcVertexColorRenderData, plMeshRenderData);
 
 public:
   virtual void FillBatchIdAndSortingKey() override;
@@ -21,9 +21,9 @@ struct plRenderWorldExtractionEvent;
 struct plRenderWorldRenderEvent;
 class plProcVertexColorComponent;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVertexColorComponentManager : public plComponentManager<plProcVertexColorComponent, plBlockStorageType::Compact>
+class PL_PROCGENPLUGIN_DLL plProcVertexColorComponentManager : public plComponentManager<plProcVertexColorComponent, plBlockStorageType::Compact>
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plProcVertexColorComponentManager);
+  PL_DISALLOW_COPY_AND_ASSIGN(plProcVertexColorComponentManager);
 
 public:
   plProcVertexColorComponentManager(plWorld* pWorld);
@@ -77,19 +77,19 @@ struct plProcVertexColorOutputDesc
   void SetName(const char* szName);
   const char* GetName() const { return m_sName; }
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PROCGENPLUGIN_DLL, plProcVertexColorOutputDesc);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PROCGENPLUGIN_DLL, plProcVertexColorOutputDesc);
 
 //////////////////////////////////////////////////////////////////////////
 
 struct plMsgTransformChanged;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVertexColorComponent : public plMeshComponent
+class PL_PROCGENPLUGIN_DLL plProcVertexColorComponent : public plMeshComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plProcVertexColorComponent, plMeshComponent, plProcVertexColorComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plProcVertexColorComponent, plMeshComponent, plProcVertexColorComponentManager);
 
 public:
   plProcVertexColorComponent();
@@ -107,10 +107,10 @@ public:
   const plProcVertexColorOutputDesc& GetOutputDesc(plUInt32 uiIndex) const;
   void SetOutputDesc(plUInt32 uiIndex, const plProcVertexColorOutputDesc& outputDesc);
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  void OnTransformChanged(plMsgTransformChanged& msg);
+  void OnTransformChanged(plMsgTransformChanged& ref_msg);
 
 protected:
   virtual plMeshRenderData* CreateRenderData() const override;

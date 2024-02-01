@@ -5,12 +5,12 @@
 
 struct plMsgExtractRenderData;
 
-typedef plComponentManager<class plDebugTextComponent, plBlockStorageType::Compact> plDebugTextComponentManager;
+using plDebugTextComponentManager = plComponentManager<class plDebugTextComponent, plBlockStorageType::Compact>;
 
 /// \brief This component prints debug text at the owner object's position.
-class PLASMA_RENDERERCORE_DLL plDebugTextComponent : public plComponent
+class PL_RENDERERCORE_DLL plDebugTextComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plDebugTextComponent, plComponent, plDebugTextComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plDebugTextComponent, plComponent, plDebugTextComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -27,10 +27,10 @@ public:
   plString m_sText;       // [ property ]
   plColorGammaUB m_Color; // [ property ]
 
-  float m_fValue0; // [ property ]
-  float m_fValue1; // [ property ]
-  float m_fValue2; // [ property ]
-  float m_fValue3; // [ property ]
+  float m_fValue0 = 0.0f; // [ property ]
+  float m_fValue1 = 0.0f; // [ property ]
+  float m_fValue2 = 0.0f; // [ property ]
+  float m_fValue3 = 0.0f; // [ property ]
 
 protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const; // [ msg handler ]

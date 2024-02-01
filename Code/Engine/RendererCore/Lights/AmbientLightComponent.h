@@ -6,11 +6,11 @@
 
 struct plMsgUpdateLocalBounds;
 
-typedef plSettingsComponentManager<class plAmbientLightComponent> plAmbientLightComponentManager;
+using plAmbientLightComponentManager = plSettingsComponentManager<class plAmbientLightComponent>;
 
-class PLASMA_RENDERERCORE_DLL plAmbientLightComponent : public plSettingsComponent
+class PL_RENDERERCORE_DLL plAmbientLightComponent : public plSettingsComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plAmbientLightComponent, plSettingsComponent, plAmbientLightComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plAmbientLightComponent, plSettingsComponent, plAmbientLightComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

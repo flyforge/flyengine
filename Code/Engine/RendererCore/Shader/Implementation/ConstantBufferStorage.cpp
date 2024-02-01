@@ -5,8 +5,7 @@
 #include <RendererFoundation/Device/Device.h>
 
 plConstantBufferStorageBase::plConstantBufferStorageBase(plUInt32 uiSizeInBytes)
-  : m_bHasBeenModified(false)
-  , m_uiLastHash(0)
+
 {
   m_Data = plMakeArrayPtr(static_cast<plUInt8*>(plFoundation::GetAlignedAllocator()->Allocate(uiSizeInBytes, 16)), uiSizeInBytes);
   plMemoryUtils::ZeroFill(m_Data.GetPtr(), m_Data.GetCount());
@@ -49,5 +48,3 @@ void plConstantBufferStorageBase::UploadData(plGALCommandEncoder* pCommandEncode
 }
 
 
-
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ConstantBufferStorage);

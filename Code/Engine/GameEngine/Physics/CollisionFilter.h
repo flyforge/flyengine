@@ -5,14 +5,14 @@
 #include <GameEngine/GameEngineDLL.h>
 
 /// \brief A 32x32 matrix of named filters that can be configured to enable or disable collisions
-class PLASMA_GAMEENGINE_DLL plCollisionFilterConfig
+class PL_GAMEENGINE_DLL plCollisionFilterConfig
 {
 public:
   plCollisionFilterConfig();
 
-  void SetGroupName(plUInt32 uiGroup, const char* szName);
+  void SetGroupName(plUInt32 uiGroup, plStringView sName);
 
-  const char* GetGroupName(plUInt32 uiGroup) const;
+  plStringView GetGroupName(plUInt32 uiGroup) const;
 
   void EnableCollision(plUInt32 uiGroup1, plUInt32 uiGroup2, bool bEnable = true);
 
@@ -27,14 +27,14 @@ public:
   /// between)
   plUInt32 GetNamedGroupIndex(plUInt32 uiGroup) const;
 
-  /// \brief Returns -1 if no group with the given name exists.
-  plInt32 GetFilterGroupByName(plStringView sName) const;
+  /// \brief Returns plInvalidIndex if no group with the given name exists.
+  plUInt32 GetFilterGroupByName(plStringView sName) const;
 
-  /// \brief Searches for a group without a name and returns the index or -1 if none found.
-  plInt32 FindUnnamedGroup() const;
+  /// \brief Searches for a group without a name and returns the index or plInvalidIndex if none found.
+  plUInt32 FindUnnamedGroup() const;
 
-  void Save(plStreamWriter& stream) const;
-  void Load(plStreamReader& stream);
+  void Save(plStreamWriter& inout_stream) const;
+  void Load(plStreamReader& inout_stream);
 
   static constexpr const plStringView s_sConfigFile = ":project/RuntimeConfigs/CollisionLayers.cfg"_plsv;
 

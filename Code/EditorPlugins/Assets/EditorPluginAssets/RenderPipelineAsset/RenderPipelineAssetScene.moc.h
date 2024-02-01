@@ -11,7 +11,7 @@ class plQtRenderPipelineAssetScene : public plQtNodeScene
   Q_OBJECT
 
 public:
-  plQtRenderPipelineAssetScene(QObject* parent = nullptr);
+  plQtRenderPipelineAssetScene(QObject* pParent = nullptr);
   ~plQtRenderPipelineAssetScene();
 };
 

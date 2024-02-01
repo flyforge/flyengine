@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginVisualScript/DragDropHandlers/VisualScriptDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptComponentDragDropHandler, 1, plRTTIDefaultAllocator<plVisualScriptComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptComponentDragDropHandler, 1, plRTTIDefaultAllocator<plVisualScriptComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plVisualScriptComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const

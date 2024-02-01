@@ -23,7 +23,7 @@ const plTag& plTagRegistry::RegisterTag(plStringView sTagString)
 
 const plTag& plTagRegistry::RegisterTag(const plHashedString& sTagString)
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
 
   // Early out if the tag is already registered
   const plTag* pResult = GetTagByName(sTagString);
@@ -50,7 +50,7 @@ const plTag& plTagRegistry::RegisterTag(const plHashedString& sTagString)
 
 const plTag* plTagRegistry::GetTagByName(const plTempHashedString& sTagString) const
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
 
   auto It = m_RegisteredTags.Find(sTagString);
   if (It.IsValid())
@@ -63,7 +63,7 @@ const plTag* plTagRegistry::GetTagByName(const plTempHashedString& sTagString) c
 
 const plTag* plTagRegistry::GetTagByMurmurHash(plUInt32 uiMurmurHash) const
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
 
   for (plTag* pTag : m_TagsByIndex)
   {
@@ -78,19 +78,19 @@ const plTag* plTagRegistry::GetTagByMurmurHash(plUInt32 uiMurmurHash) const
 
 const plTag* plTagRegistry::GetTagByIndex(plUInt32 uiIndex) const
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
   return m_TagsByIndex[uiIndex];
 }
 
 plUInt32 plTagRegistry::GetNumTags() const
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
   return m_TagsByIndex.GetCount();
 }
 
 plResult plTagRegistry::Load(plStreamReader& inout_stream)
 {
-  PLASMA_LOCK(m_TagRegistryMutex);
+  PL_LOCK(m_TagRegistryMutex);
 
   plUInt8 uiVersion = 0;
   inout_stream >> uiVersion;
@@ -98,7 +98,7 @@ plResult plTagRegistry::Load(plStreamReader& inout_stream)
   if (uiVersion != 1)
   {
     plLog::Error("Invalid plTagRegistry version {0}", uiVersion);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt32 uiNumTags = 0;
@@ -107,7 +107,7 @@ plResult plTagRegistry::Load(plStreamReader& inout_stream)
   if (uiNumTags > 16 * 1024)
   {
     plLog::Error("plTagRegistry::Load, unreasonable amount of tags {0}, cancelling load.", uiNumTags);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringBuilder temp;
@@ -118,7 +118,7 @@ plResult plTagRegistry::Load(plStreamReader& inout_stream)
     RegisterTag(temp);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_TagRegistry);
+

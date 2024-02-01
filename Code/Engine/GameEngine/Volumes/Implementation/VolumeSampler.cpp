@@ -3,15 +3,14 @@
 #include <GameEngine/Volumes/VolumeComponent.h>
 #include <GameEngine/Volumes/VolumeSampler.h>
 
-extern plSpatialData::Category s_VolumeCategory;
-
 plVolumeSampler::plVolumeSampler() = default;
 plVolumeSampler::~plVolumeSampler() = default;
 
-void plVolumeSampler::RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration /*= plTime::Zero()*/)
+void plVolumeSampler::RegisterValue(plHashedString sName, plVariant defaultValue, plTime interpolationDuration /*= plTime::MakeZero()*/)
 {
   auto& value = m_Values[sName];
   value.m_DefaultValue = defaultValue;
+  value.m_TargetValue = defaultValue;
   value.m_CurrentValue = defaultValue;
 
   if (interpolationDuration.IsPositive())
@@ -39,7 +38,7 @@ void plVolumeSampler::DeregisterAllValues()
   m_Values.Clear();
 }
 
-void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosition, plTime deltaTime)
+void plVolumeSampler::SampleAtPosition(const plWorld& world, plSpatialData::Category spatialCategory, const plVec3& vGlobalPosition, plTime deltaTime)
 {
   struct ComponentInfo
   {
@@ -53,17 +52,14 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
     }
   };
 
-  m_TargetValues.Clear();
-
   auto vPos = plSimdConversion::ToVec3(vGlobalPosition);
-  plBoundingSphere sphere(vGlobalPosition, 0.01f);
+  plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(vGlobalPosition, 0.01f);
 
   plSpatialSystem::QueryParams queryParams;
-  queryParams.m_uiCategoryBitmask = s_VolumeCategory.GetBitmask();
+  queryParams.m_uiCategoryBitmask = spatialCategory.GetBitmask();
 
   plHybridArray<ComponentInfo, 16> componentInfos;
-  world.GetSpatialSystem()->FindObjectsInSphere(sphere, queryParams, [&](plGameObject* pObject)
-    {
+  world.GetSpatialSystem()->FindObjectsInSphere(sphere, queryParams, [&](plGameObject* pObject) {
       plVolumeComponent* pComponent = nullptr;
       if (pObject->TryGetComponentOfBaseType(pComponent))
       {
@@ -80,8 +76,8 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
           const plSimdVec4f absLocalPos = globalToLocalTransform.TransformPosition(vPos).Abs();
           if ((absLocalPos <= plSimdVec4f(1.0f)).AllSet<3>())
           {
-            plSimdVec4f vAlpha = (plSimdVec4f(1.0f) - absLocalPos).CompDiv(plSimdConversion::ToVec3(pBoxComponent->GetFalloff().CompMax(plVec3(0.0001f))));
-            vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
+            plSimdVec4f vAlpha = (plSimdVec4f(1.0f) - absLocalPos).CompDiv(plSimdConversion::ToVec3(pBoxComponent->GetFalloff()));
+            vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
             info.m_fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
           }
         }
@@ -99,7 +95,7 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
         }
         else
         {
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
         }
 
         if (info.m_fAlpha > 0.0f)
@@ -117,57 +113,39 @@ void plVolumeSampler::SampleAtPosition(plWorld& world, const plVec3& vGlobalPosi
     componentInfos.Sort();
   }
 
-  for (auto& info : componentInfos)
-  {
-    plResourceLock<plBlackboardTemplateResource> blackboardTemplate(info.m_pComponent->GetTemplate(), plResourceAcquireMode::BlockTillLoaded_NeverFail);
-    if (blackboardTemplate.GetAcquireResult() != plResourceAcquireResult::Final)
-      continue;
-
-    auto& desc = blackboardTemplate->GetDescriptor();
-    for (auto& entry : desc.m_Entries)
-    {
-      auto pValue = m_Values.GetValue(entry.m_sName);
-      if (pValue == nullptr)
-        continue;
-
-      plVariant currentValue;
-      if (m_TargetValues.TryGetValue(entry.m_sName, currentValue) == false)
-      {
-        currentValue = pValue->m_DefaultValue;
-      }
-
-      plEnum<plVariantType> targetType = currentValue.GetType();
-
-      plResult conversionStatus = PLASMA_SUCCESS;
-      plVariant targetValue = entry.m_InitialValue.ConvertTo(targetType, &conversionStatus);
-      if (conversionStatus.Failed())
-      {
-        plLog::Error("VolumeSampler: Can't convert template value '{}' to '{}'.", entry.m_sName, targetType);
-        continue;
-      }      
-
-      m_TargetValues[entry.m_sName] = plMath::Lerp(currentValue, targetValue, double(info.m_fAlpha));
-    }
-  }
-
   for (auto& it : m_Values)
   {
+    auto& sName = it.Key();
     auto& value = it.Value();
 
-    plVariant targetValue;
-    if (m_TargetValues.TryGetValue(it.Key(), targetValue) == false)
+    value.m_TargetValue = value.m_DefaultValue;
+
+    for (auto& info : componentInfos)
     {
-      targetValue = value.m_DefaultValue;
+      plVariant volumeValue = info.m_pComponent->GetValue(sName);
+      if (volumeValue.IsValid() == false)
+        continue;
+
+      plResult conversionStatus = PL_SUCCESS;
+      plEnum<plVariantType> targetType = value.m_TargetValue.GetType();
+      plVariant newTargetValue = volumeValue.ConvertTo(targetType, &conversionStatus);
+      if (conversionStatus.Failed())
+      {
+        plLog::Error("VolumeSampler: Can't convert volume value '{}' to '{}'.", sName, targetType);
+        continue;
+      }
+
+      value.m_TargetValue = plMath::Lerp(value.m_TargetValue, newTargetValue, double(info.m_fAlpha));
     }
 
     if (value.m_fInterpolationFactor > 0.0)
     {
       double f = 1.0 - plMath::Pow(1.0 - value.m_fInterpolationFactor, deltaTime.GetSeconds());
-      value.m_CurrentValue = plMath::Lerp(value.m_CurrentValue, targetValue, f);
+      value.m_CurrentValue = plMath::Lerp(value.m_CurrentValue, value.m_TargetValue, f);
     }
     else
     {
-      value.m_CurrentValue = targetValue;
+      value.m_CurrentValue = value.m_TargetValue;
     }
   }
 }
@@ -179,3 +157,5 @@ plUInt32 plVolumeSampler::ComputeSortingKey(float fSortOrder, float fMaxScale)
   uiSortingKey = (uiSortingKey << 16) | (0xFFFF - ((plUInt32)(fMaxScale * 100.0f) & 0xFFFF));
   return uiSortingKey;
 }
+
+

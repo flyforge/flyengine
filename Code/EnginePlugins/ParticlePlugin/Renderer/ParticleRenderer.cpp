@@ -5,8 +5,8 @@
 #include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleRenderer, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleRenderer, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleRenderer::TempSystemCB::TempSystemCB(plRenderContext* pRenderContext)
@@ -22,7 +22,7 @@ plParticleRenderer::TempSystemCB::~TempSystemCB()
   plRenderContext::DeleteConstantBufferStorage(m_hConstantBuffer);
 }
 
-void plParticleRenderer::TempSystemCB::SetGenericData(bool bApplyObjectTransform, const plTransform& ObjectTransform, plTime effectLifeTime,
+void plParticleRenderer::TempSystemCB::SetGenericData(bool bApplyObjectTransform, const plTransform& objectTransform, plTime effectLifeTime,
   plUInt8 uiNumVariationsX, plUInt8 uiNumVariationsY, plUInt8 uiNumFlipbookAnimsX, plUInt8 uiNumFlipbookAnimsY, float fDistortionStrength /*= 0*/)
 {
   plParticleSystemConstants& cb = m_pConstants->GetDataForWriting();
@@ -34,7 +34,7 @@ void plParticleRenderer::TempSystemCB::SetGenericData(bool bApplyObjectTransform
   cb.TotalEffectLifeTime = effectLifeTime.AsFloatInSeconds();
 
   if (bApplyObjectTransform)
-    cb.ObjectToWorldMatrix = ObjectTransform.GetAsMat4();
+    cb.ObjectToWorldMatrix = objectTransform.GetAsMat4();
   else
     cb.ObjectToWorldMatrix.SetIdentity();
 }
@@ -50,9 +50,9 @@ void plParticleRenderer::TempSystemCB::SetTrailData(float fSnapshotFraction, plI
 plParticleRenderer::plParticleRenderer() = default;
 plParticleRenderer::~plParticleRenderer() = default;
 
-void plParticleRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
+void plParticleRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
-  categories.PushBack(plDefaultRenderDataCategories::LitTransparent);
+  ref_categories.PushBack(plDefaultRenderDataCategories::LitTransparent);
 }
 
 void plParticleRenderer::CreateParticleDataBuffer(plGALBufferHandle& inout_hBuffer, plUInt32 uiDataTypeSize, plUInt32 uiNumParticlesPerBatch)
@@ -91,4 +91,4 @@ void plParticleRenderer::BindParticleShader(plRenderContext* pRenderContext, con
   pRenderContext->BindShader(m_hShader);
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Renderer_ParticleRenderer);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Renderer_ParticleRenderer);

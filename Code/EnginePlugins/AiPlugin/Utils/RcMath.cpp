@@ -5,7 +5,7 @@
 
 plRcPos::plRcPos()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   m_Pos[0] = plMath::NaN<float>();
   m_Pos[1] = plMath::NaN<float>();
   m_Pos[2] = plMath::NaN<float>();

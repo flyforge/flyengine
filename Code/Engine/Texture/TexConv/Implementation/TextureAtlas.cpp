@@ -10,13 +10,13 @@
 plResult plTexConvProcessor::GenerateTextureAtlas(plMemoryStreamWriter& stream)
 {
   if (m_Descriptor.m_OutputType != plTexConvOutputType::Atlas)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
 
   if (m_Descriptor.m_sTextureAtlasDescFile.IsEmpty())
   {
     plLog::Error("Texture atlas description file is not specified.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plTextureAtlasCreationDesc atlasDesc;
@@ -25,12 +25,12 @@ plResult plTexConvProcessor::GenerateTextureAtlas(plMemoryStreamWriter& stream)
   if (atlasDesc.Load(m_Descriptor.m_sTextureAtlasDescFile).Failed())
   {
     plLog::Error("Failed to load texture atlas description '{0}'", plArgSensitive(m_Descriptor.m_sTextureAtlasDescFile, "File"));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_Descriptor.m_uiMinResolution = plMath::Max(32u, m_Descriptor.m_uiMinResolution);
 
-  PLASMA_SUCCEED_OR_RETURN(LoadAtlasInputs(atlasDesc, atlasItems));
+  PL_SUCCEED_OR_RETURN(LoadAtlasInputs(atlasDesc, atlasItems));
 
   const plUInt8 uiVersion = 3;
   stream << uiVersion;
@@ -40,31 +40,31 @@ plResult plTexConvProcessor::GenerateTextureAtlas(plMemoryStreamWriter& stream)
 
   for (plUInt32 layerIdx = 0; layerIdx < atlasDesc.m_Layers.GetCount(); ++layerIdx)
   {
-    PLASMA_SUCCEED_OR_RETURN(CreateAtlasLayerTexture(atlasDesc, atlasItems, layerIdx, atlasImg));
+    PL_SUCCEED_OR_RETURN(CreateAtlasLayerTexture(atlasDesc, atlasItems, layerIdx, atlasImg));
 
     if (ddsWriter.WriteImage(stream, atlasImg, "dds").Failed())
     {
       plLog::Error("Failed to write DDS image to texture atlas file.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // debug: write out atlas slices as pure DDS
     if (false)
     {
       plStringBuilder sOut;
-      sOut.Format("D:/atlas_{}.dds", layerIdx);
+      sOut.SetFormat("D:/atlas_{}.dds", layerIdx);
 
       plFileWriter fOut;
       if (fOut.Open(sOut).Succeeded())
       {
-        PLASMA_SUCCEED_OR_RETURN(ddsWriter.WriteImage(fOut, atlasImg, "dds"));
+        PL_SUCCEED_OR_RETURN(ddsWriter.WriteImage(fOut, atlasImg, "dds"));
       }
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(WriteTextureAtlasInfo(atlasItems, atlasDesc.m_Layers.GetCount(), stream));
+  PL_SUCCEED_OR_RETURN(WriteTextureAtlasInfo(atlasItems, atlasDesc.m_Layers.GetCount(), stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::LoadAtlasInputs(const plTextureAtlasCreationDesc& atlasDesc, plDynamicArray<TextureAtlasItem>& items) const
@@ -84,7 +84,7 @@ plResult plTexConvProcessor::LoadAtlasInputs(const plTextureAtlasCreationDesc& a
         if (item.m_InputImage[layer].LoadFrom(srcItem.m_sLayerInput[layer]).Failed())
         {
           plLog::Error("Failed to load texture atlas texture '{0}'", plArgSensitive(srcItem.m_sLayerInput[layer], "File"));
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
 
         if (atlasDesc.m_Layers[layer].m_Usage == plTexConvUsage::Color)
@@ -94,9 +94,9 @@ plResult plTexConvProcessor::LoadAtlasInputs(const plTextureAtlasCreationDesc& a
         }
 
         plUInt32 uiResX = 0, uiResY = 0;
-        PLASMA_SUCCEED_OR_RETURN(DetermineTargetResolution(item.m_InputImage[layer], plImageFormat::UNKNOWN, uiResX, uiResY));
+        PL_SUCCEED_OR_RETURN(DetermineTargetResolution(item.m_InputImage[layer], plImageFormat::UNKNOWN, uiResX, uiResY));
 
-        PLASMA_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[layer], item.m_InputImage[layer], uiResX, uiResY, atlasDesc.m_Layers[layer].m_Usage));
+        PL_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[layer], item.m_InputImage[layer], uiResX, uiResY, atlasDesc.m_Layers[layer].m_Usage));
       }
     }
 
@@ -108,20 +108,20 @@ plResult plTexConvProcessor::LoadAtlasInputs(const plTextureAtlasCreationDesc& a
       if (alphaImg.LoadFrom(srcItem.m_sAlphaInput).Failed())
       {
         plLog::Error("Failed to load texture atlas alpha mask '{0}'", srcItem.m_sAlphaInput);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       plUInt32 uiResX = 0, uiResY = 0;
-      PLASMA_SUCCEED_OR_RETURN(DetermineTargetResolution(alphaImg, plImageFormat::UNKNOWN, uiResX, uiResY));
+      PL_SUCCEED_OR_RETURN(DetermineTargetResolution(alphaImg, plImageFormat::UNKNOWN, uiResX, uiResY));
 
-      PLASMA_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sAlphaInput, alphaImg, uiResX, uiResY, plTexConvUsage::Linear));
+      PL_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sAlphaInput, alphaImg, uiResX, uiResY, plTexConvUsage::Linear));
 
 
       // layer 0 must have the exact same size as the alpha texture
-      PLASMA_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[0], item.m_InputImage[0], uiResX, uiResY, plTexConvUsage::Linear));
+      PL_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[0], item.m_InputImage[0], uiResX, uiResY, plTexConvUsage::Linear));
 
       // copy alpha channel into layer 0
-      PLASMA_SUCCEED_OR_RETURN(plImageUtils::CopyChannel(item.m_InputImage[0], 3, alphaImg, 0));
+      PL_SUCCEED_OR_RETURN(plImageUtils::CopyChannel(item.m_InputImage[0], 3, alphaImg, 0));
 
       // rescale all layers to be no larger than the alpha mask texture
       for (plUInt32 layer = 1; layer < atlasDesc.m_Layers.GetCount(); ++layer)
@@ -129,12 +129,12 @@ plResult plTexConvProcessor::LoadAtlasInputs(const plTextureAtlasCreationDesc& a
         if (item.m_InputImage[layer].GetWidth() <= uiResX && item.m_InputImage[layer].GetHeight() <= uiResY)
           continue;
 
-        PLASMA_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[layer], item.m_InputImage[layer], uiResX, uiResY, plTexConvUsage::Linear));
+        PL_SUCCEED_OR_RETURN(ConvertAndScaleImage(srcItem.m_sLayerInput[layer], item.m_InputImage[layer], uiResX, uiResY, plTexConvUsage::Linear));
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::WriteTextureAtlasInfo(const plDynamicArray<TextureAtlasItem>& atlasItems, plUInt32 uiNumLayers, plStreamWriter& stream)
@@ -177,7 +177,7 @@ plResult plTexConvProcessor::TrySortItemsIntoAtlas(plDynamicArray<TextureAtlasIt
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(packer.PackTextures());
+  PL_SUCCEED_OR_RETURN(packer.PackTextures());
 
   plUInt32 uiTexIdx = 0;
   for (auto& item : items)
@@ -193,7 +193,7 @@ plResult plTexConvProcessor::TrySortItemsIntoAtlas(plDynamicArray<TextureAtlasIt
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::SortItemsIntoAtlas(plDynamicArray<TextureAtlasItem>& items, plUInt32& out_ResX, plUInt32& out_ResY, plInt32 layer)
@@ -209,26 +209,26 @@ plResult plTexConvProcessor::SortItemsIntoAtlas(plDynamicArray<TextureAtlasItem>
     {
       out_ResX = resolution;
       out_ResY = halfRes;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (TrySortItemsIntoAtlas(items, halfResDivCellSize, resDivCellSize, layer).Succeeded())
     {
       out_ResX = halfRes;
       out_ResY = resolution;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (TrySortItemsIntoAtlas(items, resDivCellSize, resDivCellSize, layer).Succeeded())
     {
       out_ResX = resolution;
       out_ResY = resolution;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
   plLog::Error("Could not sort items into texture atlas. Too many too large textures.");
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plTexConvProcessor::CreateAtlasTexture(plDynamicArray<TextureAtlasItem>& items, plUInt32 uiResX, plUInt32 uiResY, plImage& atlas, plInt32 layer)
@@ -257,11 +257,11 @@ plResult plTexConvProcessor::CreateAtlasTexture(plDynamicArray<TextureAtlasItem>
       r.width = itemImage.GetWidth();
       r.height = itemImage.GetHeight();
 
-      PLASMA_SUCCEED_OR_RETURN(plImageUtils::Copy(itemImage, r, atlas, plVec3U32(item.m_AtlasRect[layer].x, item.m_AtlasRect[layer].y, 0)));
+      PL_SUCCEED_OR_RETURN(plImageUtils::Copy(itemImage, r, atlas, plVec3U32(item.m_AtlasRect[layer].x, item.m_AtlasRect[layer].y, 0)));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::FillAtlasBorders(plDynamicArray<TextureAtlasItem>& items, plImage& atlas, plInt32 layer)
@@ -315,35 +315,34 @@ plResult plTexConvProcessor::FillAtlasBorders(plDynamicArray<TextureAtlasItem>& 
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::CreateAtlasLayerTexture(const plTextureAtlasCreationDesc& atlasDesc, plDynamicArray<TextureAtlasItem>& atlasItems, plInt32 layer, plImage& dstImg)
 {
   plUInt32 uiTexWidth, uiTexHeight;
-  PLASMA_SUCCEED_OR_RETURN(SortItemsIntoAtlas(atlasItems, uiTexWidth, uiTexHeight, layer));
+  PL_SUCCEED_OR_RETURN(SortItemsIntoAtlas(atlasItems, uiTexWidth, uiTexHeight, layer));
 
   plLog::Success("Required Resolution for Texture Atlas: {0} x {1}", uiTexWidth, uiTexHeight);
 
   plImage atlasImg;
-  PLASMA_SUCCEED_OR_RETURN(CreateAtlasTexture(atlasItems, uiTexWidth, uiTexHeight, atlasImg, layer));
+  PL_SUCCEED_OR_RETURN(CreateAtlasTexture(atlasItems, uiTexWidth, uiTexHeight, atlasImg, layer));
 
   plUInt32 uiNumMipmaps = atlasImg.GetHeader().ComputeNumberOfMipMaps();
-  PLASMA_SUCCEED_OR_RETURN(GenerateMipmaps(atlasImg, uiNumMipmaps));
+  PL_SUCCEED_OR_RETURN(GenerateMipmaps(atlasImg, uiNumMipmaps));
 
   if (atlasDesc.m_Layers[layer].m_uiNumChannels == 4)
   {
-    PLASMA_SUCCEED_OR_RETURN(FillAtlasBorders(atlasItems, atlasImg, layer));
+    PL_SUCCEED_OR_RETURN(FillAtlasBorders(atlasItems, atlasImg, layer));
   }
 
   plEnum<plImageFormat> OutputImageFormat;
 
-  PLASMA_SUCCEED_OR_RETURN(ChooseOutputFormat(OutputImageFormat, atlasDesc.m_Layers[layer].m_Usage, atlasDesc.m_Layers[layer].m_uiNumChannels));
+  PL_SUCCEED_OR_RETURN(ChooseOutputFormat(OutputImageFormat, atlasDesc.m_Layers[layer].m_Usage, atlasDesc.m_Layers[layer].m_uiNumChannels));
 
-  PLASMA_SUCCEED_OR_RETURN(GenerateOutput(std::move(atlasImg), dstImg, OutputImageFormat));
+  PL_SUCCEED_OR_RETURN(GenerateOutput(std::move(atlasImg), dstImg, OutputImageFormat));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_TextureAtlas);

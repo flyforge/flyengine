@@ -5,7 +5,7 @@
 /// Heavily 'inspired' by https://github.com/Mysticial/FeatureDetector
 struct plCpuFeatures
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_X86)
+#if PL_ENABLED(PL_PLATFORM_ARCH_X86)
   //  Vendor
   bool Vendor_AMD = false;
   bool Vendor_Intel = false;
@@ -93,7 +93,7 @@ struct plCpuFeatures
 ///
 /// Retrieve the system configuration by using plSystemInformation::Get(). If you use the system configuration in startup code
 /// make sure to add the correct dependency to the system "SystemInformation" in "Foundation".
-class PLASMA_FOUNDATION_DLL plSystemInformation
+class PL_FOUNDATION_DLL plSystemInformation
 {
 public:
   /// \brief Returns the installed physical memory in bytes

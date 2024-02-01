@@ -3,8 +3,8 @@
 #include <EditorFramework/Dialogs/PluginSelectionWidget.moc.h>
 #include <EditorFramework/EditorApp/Configuration/Plugins.h>
 
-plQtPluginSelectionWidget::plQtPluginSelectionWidget(QWidget* parent)
-  : QWidget(parent)
+plQtPluginSelectionWidget::plQtPluginSelectionWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   setupUi(this);
 }

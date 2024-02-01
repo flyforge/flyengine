@@ -9,19 +9,19 @@
 
 /// \brief Use this helper macro to easily create a scoped logging group. Will generate unique variable names to make the static code
 /// analysis happy.
-#define PLASMA_LOG_BLOCK plLogBlock PLASMA_CONCAT(_logblock_, PLASMA_SOURCE_LINE)
+#define PL_LOG_BLOCK plLogBlock PL_CONCAT(_logblock_, PL_SOURCE_LINE)
 
 /// \brief Use this helper macro to easily mute all logging in a scope.
-#define PLASMA_LOG_BLOCK_MUTE()                            \
-  plMuteLog PLASMA_CONCAT(_logmuteblock_, PLASMA_SOURCE_LINE); \
-  plLogSystemScope PLASMA_CONCAT(_logscope_, PLASMA_SOURCE_LINE)(&PLASMA_CONCAT(_logmuteblock_, PLASMA_SOURCE_LINE))
+#define PL_LOG_BLOCK_MUTE()                            \
+  plMuteLog PL_CONCAT(_logmuteblock_, PL_SOURCE_LINE); \
+  plLogSystemScope PL_CONCAT(_logscope_, PL_SOURCE_LINE)(&PL_CONCAT(_logmuteblock_, PL_SOURCE_LINE))
 
 // Forward declaration, class is at the end of this file
 class plLogBlock;
 
 
 /// \brief Describes the types of events that plLog sends.
-struct PLASMA_FOUNDATION_DLL plLogMsgType
+struct PL_FOUNDATION_DLL plLogMsgType
 {
   using StorageType = plInt8;
 
@@ -46,7 +46,7 @@ struct PLASMA_FOUNDATION_DLL plLogMsgType
 };
 
 /// \brief The data that is sent through plLogInterface.
-struct PLASMA_FOUNDATION_DLL plLoggingEventData
+struct PL_FOUNDATION_DLL plLoggingEventData
 {
   /// \brief The type of information that is sent.
   plLogMsgType::Enum m_EventType = plLogMsgType::None;
@@ -61,7 +61,7 @@ struct PLASMA_FOUNDATION_DLL plLoggingEventData
   /// additional configuration, or simply be ignored.
   plStringView m_sTag;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   /// \brief Used by log-blocks for profiling the duration of the block
   double m_fSeconds = 0;
 #endif
@@ -73,7 +73,7 @@ using plLoggingEvent = plEvent<const plLoggingEventData&, plMutex>;
 ///
 /// You can derive from this class to create your own logging system,
 /// which you can pass to the functions in plLog.
-class PLASMA_FOUNDATION_DLL plLogInterface
+class PL_FOUNDATION_DLL plLogInterface
 {
 public:
   /// \brief Override this function to handle logging events.
@@ -81,10 +81,10 @@ public:
 
   /// \brief LogLevel is between plLogEventType::None and plLogEventType::All and defines which messages will be logged and which will be
   /// filtered out.
-  PLASMA_ALWAYS_INLINE void SetLogLevel(plLogMsgType::Enum logLevel) { m_LogLevel = logLevel; }
+  PL_ALWAYS_INLINE void SetLogLevel(plLogMsgType::Enum logLevel) { m_LogLevel = logLevel; }
 
   /// \brief Returns the currently set log level.
-  PLASMA_ALWAYS_INLINE plLogMsgType::Enum GetLogLevel() { return m_LogLevel; }
+  PL_ALWAYS_INLINE plLogMsgType::Enum GetLogLevel() { return m_LogLevel; }
 
 private:
   friend class plLog;
@@ -97,7 +97,7 @@ private:
 
 
 /// \brief Used to ignore all log messages.
-/// \sa PLASMA_LOG_BLOCK_MUTE
+/// \sa PL_LOG_BLOCK_MUTE
 class plMuteLog : public plLogInterface
 {
 public:
@@ -114,7 +114,7 @@ public:
 ///
 /// It allows to register log writers, such that you can be informed of all log messages and write them
 /// to different outputs.
-class PLASMA_FOUNDATION_DLL plGlobalLog : public plLogInterface
+class PL_FOUNDATION_DLL plGlobalLog : public plLogInterface
 {
 public:
   virtual void HandleLogMessage(const plLoggingEventData& le) override;
@@ -149,7 +149,7 @@ private:
   static plLogInterface* s_pOverrideLog;
 
 private:
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plGlobalLog);
+  PL_DISALLOW_COPY_AND_ASSIGN(plGlobalLog);
 
   friend class plLog; // only plLog may create instances of this class
   plGlobalLog() = default;
@@ -163,7 +163,7 @@ private:
 /// network or pop up a message box. Whatever suits the current situation.
 /// Since event handlers can be registered only temporarily, it is also possible to just gather all
 /// errors that occur during some operation and then unregister the event handler again.
-class PLASMA_FOUNDATION_DLL plLog
+class PL_FOUNDATION_DLL plLog
 {
 public:
   /// \brief Allows to change which logging system is used by default on the current thread. If nothing is set, plGlobalLog is used.
@@ -324,7 +324,7 @@ public:
   /// However, a flush is always ignored if not a single message was logged in between.
   ///
   /// \return Returns true if the flush is executed.
-  static bool Flush(plUInt32 uiNumNewMsgThreshold = 0, plTime timeIntervalThreshold = plTime::Seconds(10), plLogInterface* pInterface = GetThreadLocalLogSystem());
+  static bool Flush(plUInt32 uiNumNewMsgThreshold = 0, plTime timeIntervalThreshold = plTime::MakeFromSeconds(10), plLogInterface* pInterface = GetThreadLocalLogSystem());
 
   /// \brief Usually called internally by the other log functions, but can be called directly, if the message type is already known.
   /// pInterface must be != nullptr.
@@ -382,7 +382,7 @@ private:
 
 
 /// \brief Instances of this class will group messages in a scoped block together.
-class PLASMA_FOUNDATION_DLL plLogBlock
+class PL_FOUNDATION_DLL plLogBlock
 {
 public:
   /// \brief Creates a named grouping block for log messages.
@@ -413,14 +413,14 @@ private:
   plStringView m_sContextInfo;
   plUInt8 m_uiBlockDepth;
   bool m_bWritten;
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   double m_fSeconds; // for profiling
 #endif
 };
 
 /// \brief A class that sets a custom plLogInterface as the thread local default log system,
 /// and resets the previous system when it goes out of scope.
-class PLASMA_FOUNDATION_DLL plLogSystemScope
+class PL_FOUNDATION_DLL plLogSystemScope
 {
 public:
   /// \brief The given plLogInterface is passed to plLog::SetThreadLocalLogSystem().
@@ -437,7 +437,7 @@ protected:
   plLogInterface* m_pPrevious;
 
 private:
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plLogSystemScope);
+  PL_DISALLOW_COPY_AND_ASSIGN(plLogSystemScope);
 };
 
 

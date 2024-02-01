@@ -14,77 +14,67 @@
 #include <ToolsFoundation/Object/ObjectCommandAccessor.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneLayerBase, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneLayerBase, 1, plRTTINoAllocator)
 {
-  //PLASMA_BEGIN_PROPERTIES
+  //PL_BEGIN_PROPERTIES
   //{
   //}
-  //PLASMA_END_PROPERTIES;
+  //PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneLayer, 1, plRTTIDefaultAllocator<plSceneLayer>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneLayer, 1, plRTTIDefaultAllocator<plSceneLayer>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Layer", m_Layer)
+    PL_MEMBER_PROPERTY("Layer", m_Layer)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentSettings, 2, plRTTIDefaultAllocator<plSceneDocumentSettings>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentSettings, 2, plRTTIDefaultAllocator<plSceneDocumentSettings>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("Layers", m_Layers)->AddFlags(plPropertyFlags::PointerOwner)
+    PL_ARRAY_MEMBER_PROPERTY("Layers", m_Layers)->AddFlags(plPropertyFlags::PointerOwner)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScene2Document, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScene2Document, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 
-plSceneLayerBase::plSceneLayerBase()
-{
-}
+plSceneLayerBase::plSceneLayerBase() = default;
 
-plSceneLayerBase::~plSceneLayerBase()
-{
-}
+plSceneLayerBase::~plSceneLayerBase() = default;
 
 //////////////////////////////////////////////////////////////////////////
 
-plSceneLayer::plSceneLayer()
-{
-}
+plSceneLayer::plSceneLayer() = default;
 
-plSceneLayer::~plSceneLayer()
-{
-}
+plSceneLayer::~plSceneLayer() = default;
 
 //////////////////////////////////////////////////////////////////////////
 
-plSceneDocumentSettings::plSceneDocumentSettings()
-{
-}
+plSceneDocumentSettings::plSceneDocumentSettings() = default;
 
 plSceneDocumentSettings::~plSceneDocumentSettings()
 {
   for (plSceneLayerBase* pLayer : m_Layers)
   {
-    PLASMA_DEFAULT_DELETE(pLayer);
+    PL_DEFAULT_DELETE(pLayer);
   }
 }
 
-plScene2Document::plScene2Document(const char* szDocumentPath)
-  : plSceneDocument(szDocumentPath, plSceneDocument::DocumentType::Scene)
+plScene2Document::plScene2Document(plStringView sDocumentPath)
+  : plSceneDocument(sDocumentPath, plSceneDocument::DocumentType::Scene)
 {
   // Separate selection for the layer panel.
-  m_pLayerSelection = PLASMA_DEFAULT_NEW(plSelectionManager, m_pObjectManager.Borrow());
+  m_pLayerSelection = PL_DEFAULT_NEW(plSelectionManager, m_pObjectManager.Borrow());
 }
 
 plScene2Document::~plScene2Document()
@@ -140,9 +130,9 @@ void plScene2Document::InitializeAfterLoading(bool bFirstTimeCreation)
   if (pRoot->GetChildren().IsEmpty())
   {
     plUuid objectGuid;
-    pAccessor->AddObject(pRoot, "Layers", 0, plGetStaticRTTI<plSceneLayer>(), objectGuid).IgnoreResult();
+    pAccessor->AddObject(pRoot, "Layers", 0, plGetStaticRTTI<plSceneLayer>(), objectGuid).AssertSuccess();
     const plDocumentObject* pObject = pAccessor->GetObject(objectGuid);
-    pAccessor->SetValue(pObject, "Layer", GetGuid()).IgnoreResult();
+    pAccessor->SetValue(pObject, "Layer", GetGuid()).AssertSuccess();
   }
 
   SUPER::InitializeAfterLoading(bFirstTimeCreation);
@@ -170,19 +160,19 @@ void plScene2Document::InitializeAfterLoadingAndSaving()
   m_pSceneGameObjectMetaData = std::move(m_GameObjectMetaData);
 
   // Replace real scene elements with copies.
-  m_pObjectManager = PLASMA_DEFAULT_NEW(plSceneObjectManager);
+  m_pObjectManager = PL_DEFAULT_NEW(plSceneObjectManager);
   m_pObjectManager->SetDocument(this);
   m_pObjectManager->SwapStorage(m_pSceneObjectManager->GetStorage());
-  m_pCommandHistory = PLASMA_DEFAULT_NEW(plCommandHistory, this);
+  m_pCommandHistory = PL_DEFAULT_NEW(plCommandHistory, this);
   m_pCommandHistory->SwapStorage(m_pSceneCommandHistory->GetStorage());
-  m_pSelectionManager = PLASMA_DEFAULT_NEW(plSelectionManager, m_pSceneObjectManager.Borrow());
+  m_pSelectionManager = PL_DEFAULT_NEW(plSelectionManager, m_pSceneObjectManager.Borrow());
   m_pSelectionManager->SwapStorage(m_pSceneSelectionManager->GetStorage());
-  m_pObjectAccessor = PLASMA_DEFAULT_NEW(plObjectCommandAccessor, m_pCommandHistory.Borrow());
+  m_pObjectAccessor = PL_DEFAULT_NEW(plObjectCommandAccessor, m_pCommandHistory.Borrow());
   using ObjectMetaData = plObjectMetaData<plUuid, plDocumentObjectMetaData>;
-  m_DocumentObjectMetaData = PLASMA_DEFAULT_NEW(ObjectMetaData);
+  m_DocumentObjectMetaData = PL_DEFAULT_NEW(ObjectMetaData);
   m_DocumentObjectMetaData->SwapStorage(m_pSceneDocumentObjectMetaData->GetStorage());
   using GameObjectMetaData = plObjectMetaData<plUuid, plGameObjectMetaData>;
-  m_GameObjectMetaData = PLASMA_DEFAULT_NEW(GameObjectMetaData);
+  m_GameObjectMetaData = PL_DEFAULT_NEW(GameObjectMetaData);
   m_GameObjectMetaData->SwapStorage(m_pSceneGameObjectMetaData->GetStorage());
 
   // See comment above for UnsubscribeGameObjectEventHandlers.
@@ -203,12 +193,12 @@ const plDocumentObject* plScene2Document::GetSettingsObject() const
 
   auto pRoot = GetSceneObjectManager()->GetRootObject();
   plVariant value;
-  PLASMA_VERIFY(GetSceneObjectAccessor()->GetValue(pRoot, "Settings", value).Succeeded(), "The scene doc root should have a settings property.");
+  PL_VERIFY(GetSceneObjectAccessor()->GetValue(pRoot, "Settings", value).Succeeded(), "The scene doc root should have a settings property.");
   plUuid id = value.Get<plUuid>();
   return GetSceneObjectManager()->GetObject(id);
 }
 
-void plScene2Document::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plScene2Document::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   if (const plPushObjectStateMsgToEditor* msg = plDynamicCast<const plPushObjectStateMsgToEditor*>(pMsg))
   {
@@ -234,7 +224,7 @@ void plScene2Document::SendGameWorldToEngine()
     plSceneDocument* pLayer = layer.Value().m_pLayer;
     if (pLayer != this && pLayer != nullptr)
     {
-      PlasmaEditorEngineProcessConnection::GetSingleton()->SendDocumentOpenMessage(pLayer, true);
+      pLayer->SendDocumentOpenMessage(true);
     }
   }
 }
@@ -370,19 +360,19 @@ void plScene2Document::HandleObjectStateFromEngineMsg2(const plPushObjectStateMs
           continue;
 
         auto pBonesProperty = pComponentType->FindPropertyByName(pBoneManipAttr->GetTransformProperty());
-        PLASMA_ASSERT_DEBUG(pBonesProperty, "Invalid transform property set on plBoneManipulatorAttribute");
+        PL_ASSERT_DEBUG(pBonesProperty, "Invalid transform property set on plBoneManipulatorAttribute");
 
         const plExposedParametersAttribute* pExposedParamsAttr = pBonesProperty->GetAttributeByType<plExposedParametersAttribute>();
-        PLASMA_ASSERT_DEBUG(pExposedParamsAttr, "Expected exposed parameters on plBoneManipulatorAttribute property");
+        PL_ASSERT_DEBUG(pExposedParamsAttr, "Expected exposed parameters on plBoneManipulatorAttribute property");
 
         const plAbstractProperty* pParameterSourceProp = pComponentType->FindPropertyByName(pExposedParamsAttr->GetParametersSource());
-        PLASMA_ASSERT_DEBUG(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pExposedParamsAttr->GetParametersSource(), pComponentType->GetTypeName());
+        PL_ASSERT_DEBUG(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pExposedParamsAttr->GetParametersSource(), pComponentType->GetTypeName());
 
         // retrieve all the bone keys and values, these will contain the exposed default values, in case a bone has never been overridden before
         plVariantArray boneValues, boneKeys;
         plExposedParameterCommandAccessor proxy(pAccessor, pBonesProperty, pParameterSourceProp);
-        proxy.GetValues(pComponent, pBonesProperty, boneValues).IgnoreResult();
-        proxy.GetKeys(pComponent, pBonesProperty, boneKeys).IgnoreResult();
+        proxy.GetValues(pComponent, pBonesProperty, boneValues).AssertSuccess();
+        proxy.GetKeys(pComponent, pBonesProperty, boneKeys).AssertSuccess();
 
         // apply all the new bone transforms
         for (const auto& bone : pState->m_BoneTransforms)
@@ -392,7 +382,7 @@ void plScene2Document::HandleObjectStateFromEngineMsg2(const plPushObjectStateMs
           if (idx == plInvalidIndex)
             continue;
 
-          PLASMA_ASSERT_DEBUG(boneValues[idx].GetReflectedType() == plGetStaticRTTI<plExposedBone>(), "Expected an plExposedBone in variant");
+          PL_ASSERT_DEBUG(boneValues[idx].GetReflectedType() == plGetStaticRTTI<plExposedBone>(), "Expected an plExposedBone in variant");
 
           // retrieve the default/previous value of the bone
           const plExposedBone* pDefVal = reinterpret_cast<const plExposedBone*>(boneValues[idx].GetData());
@@ -405,7 +395,7 @@ void plScene2Document::HandleObjectStateFromEngineMsg2(const plPushObjectStateMs
           plVariant var;
           var.CopyTypedObject(&b, plGetStaticRTTI<plExposedBone>());
 
-          proxy.SetValue(pComponent, pBonesProperty, var, bone.Key()).IgnoreResult();
+          proxy.SetValue(pComponent, pBonesProperty, var, bone.Key()).AssertSuccess();
         }
 
         // found a component/property to apply bones to, so we can stop
@@ -415,7 +405,7 @@ void plScene2Document::HandleObjectStateFromEngineMsg2(const plPushObjectStateMs
 
     pHistory->FinishTransaction();
   }
-  SetActiveLayer(activeLayer).IgnoreResult();
+  SetActiveLayer(activeLayer).LogFailure();
 }
 
 void plScene2Document::UpdateLayers()
@@ -540,20 +530,20 @@ plStatus plScene2Document::CreateLayer(const char* szName, plUuid& out_layerGuid
 
   plObjectAccessorBase* pAccessor = GetSceneObjectAccessor();
   plStringBuilder sTransactionText;
-  pAccessor->StartTransaction(plFmt("Add Layer - '{}'", szName).GetTextCStr(sTransactionText));
+  pAccessor->StartTransaction(plFmt("Add Layer - '{}'", szName).GetText(sTransactionText));
   {
     auto pRoot = m_pSceneObjectManager->GetObject(GetSettingsObject()->GetGuid());
     plInt32 uiCount = 0;
-    PLASMA_VERIFY(pAccessor->GetCount(pRoot, "Layers", uiCount).Succeeded(), "Failed to get layer count.");
+    PL_VERIFY(pAccessor->GetCount(pRoot, "Layers", uiCount).Succeeded(), "Failed to get layer count.");
     plUuid sceneLayerGuid;
-    PLASMA_VERIFY(pAccessor->AddObject(pRoot, "Layers", uiCount, plGetStaticRTTI<plSceneLayer>(), sceneLayerGuid).Succeeded(), "Failed to add layer to scene.");
+    PL_VERIFY(pAccessor->AddObject(pRoot, "Layers", uiCount, plGetStaticRTTI<plSceneLayer>(), sceneLayerGuid).Succeeded(), "Failed to add layer to scene.");
     auto pLayer = pAccessor->GetObject(sceneLayerGuid);
-    PLASMA_VERIFY(pAccessor->SetValue(pLayer, "Layer", pLayerDoc->GetGuid()).Succeeded(), "Failed to set layer GUID.");
+    PL_VERIFY(pAccessor->SetValue(pLayer, "Layer", pLayerDoc->GetGuid()).Succeeded(), "Failed to set layer GUID.");
   }
   pAccessor->FinishTransaction();
 
   LayerInfo* pInfo = nullptr;
-  PLASMA_ASSERT_DEV(m_Layers.Contains(pLayerDoc->GetGuid()), "FinishTransaction should have triggered UpdateLayers and filled m_Layers.");
+  PL_ASSERT_DEV(m_Layers.Contains(pLayerDoc->GetGuid()), "FinishTransaction should have triggered UpdateLayers and filled m_Layers.");
   // We need to manually emit this here as when the layer doc was loaded DocumentManagerEventHandler will not fire as the document was not added as a layer yet.
   if (m_Layers.TryGetValue(pLayerDoc->GetGuid(), pInfo) && pInfo->m_pLayer != pLayerDoc)
   {
@@ -565,7 +555,7 @@ plStatus plScene2Document::CreateLayer(const char* szName, plUuid& out_layerGuid
     m_LayerEvents.Broadcast(e);
   }
   out_layerGuid = pLayerDoc->GetGuid();
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plScene2Document::DeleteLayer(const plUuid& layerGuid)
@@ -597,7 +587,7 @@ plStatus plScene2Document::DeleteLayer(const plUuid& layerGuid)
     auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(layerGuid);
     if (assetInfo.isValid())
     {
-      sName = plPathUtils::GetFileName(assetInfo->m_pAssetInfo->m_sDataDirParentRelativePath);
+      sName = plPathUtils::GetFileName(assetInfo->m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
     }
     else
     {
@@ -607,12 +597,12 @@ plStatus plScene2Document::DeleteLayer(const plUuid& layerGuid)
 
   plObjectAccessorBase* pAccessor = GetSceneObjectAccessor();
   plStringBuilder sTransactionText;
-  pAccessor->StartTransaction(plFmt("Remove Layer - '{}'", sName).GetTextCStr(sTransactionText));
+  pAccessor->StartTransaction(plFmt("Remove Layer - '{}'", sName).GetText(sTransactionText));
   {
-    PLASMA_VERIFY(pAccessor->RemoveObject(pObject).Succeeded(), "Failed to remove Layer.");
+    PL_VERIFY(pAccessor->RemoveObject(pObject).Succeeded(), "Failed to remove Layer.");
   }
   pAccessor->FinishTransaction();
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 const plUuid& plScene2Document::GetActiveLayer() const
@@ -622,11 +612,11 @@ const plUuid& plScene2Document::GetActiveLayer() const
 
 plStatus plScene2Document::SetActiveLayer(const plUuid& layerGuid)
 {
-  PLASMA_ASSERT_DEV(!m_pCommandHistory->IsInTransaction(), "Active layer must not be changed while an operation is in progress.");
-  PLASMA_ASSERT_DEV(!m_pSceneCommandHistory || !m_pSceneCommandHistory->IsInTransaction(), "Active layer must not be changed while an operation is in progress.");
+  PL_ASSERT_DEV(!m_pCommandHistory->IsInTransaction(), "Active layer must not be changed while an operation is in progress.");
+  PL_ASSERT_DEV(!m_pSceneCommandHistory || !m_pSceneCommandHistory->IsInTransaction(), "Active layer must not be changed while an operation is in progress.");
 
   if (layerGuid == m_ActiveLayerGuid)
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
   if (layerGuid == GetGuid())
   {
@@ -713,7 +703,7 @@ plStatus plScene2Document::SetActiveLayer(const plUuid& layerGuid)
   {
     m_pLayerSelection->SetSelection(pLayerObject);
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 bool plScene2Document::IsLayerLoaded(const plUuid& layerGuid) const
@@ -749,7 +739,7 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
   }
 
   if ((pInfo->m_pLayer != nullptr) == bLoaded)
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
   if (bLoaded)
   {
@@ -763,7 +753,7 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
       auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(layerGuid);
       if (assetInfo.isValid())
       {
-        sAbsPath = assetInfo->m_pAssetInfo->m_sAbsolutePath;
+        sAbsPath = assetInfo->m_pAssetInfo->m_Path;
       }
       else
       {
@@ -792,7 +782,7 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
         m_LayerEvents.Broadcast(e);
       }
 
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
     else
     {
@@ -802,7 +792,7 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
   else
   {
     if (pInfo->m_pLayer == nullptr)
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
 
     // Unload document (save and close)
     plDocumentManager* pManager = pInfo->m_pLayer->GetDocumentManager();
@@ -814,27 +804,27 @@ plStatus plScene2Document::SetLayerLoaded(const plUuid& layerGuid, bool bLoaded)
     // e.m_layerGuid = layerGuid;
     // m_LayerEvents.Broadcast(e);
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 }
 
-void plScene2Document::GetAllLayers(plDynamicArray<plUuid>& out_LayerGuids)
+void plScene2Document::GetAllLayers(plDynamicArray<plUuid>& out_layerGuids)
 {
-  out_LayerGuids.Clear();
+  out_layerGuids.Clear();
   for (auto it = m_Layers.GetIterator(); it.IsValid(); ++it)
   {
-    out_LayerGuids.PushBack(it.Key());
+    out_layerGuids.PushBack(it.Key());
   }
 }
 
-void plScene2Document::GetLoadedLayers(plDynamicArray<plSceneDocument*>& out_Layers) const
+void plScene2Document::GetLoadedLayers(plDynamicArray<plSceneDocument*>& out_layers) const
 {
-  out_Layers.Clear();
+  out_layers.Clear();
   for (auto it = m_Layers.GetIterator(); it.IsValid(); ++it)
   {
     if (it.Value().m_pLayer)
     {
-      out_Layers.PushBack(it.Value().m_pLayer);
+      out_layers.PushBack(it.Value().m_pLayer);
     }
   }
 }
@@ -865,7 +855,7 @@ plStatus plScene2Document::SetLayerVisible(const plUuid& layerGuid, bool bVisibl
       }
       SendLayerVisibility();
     }
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   return plStatus("Unknown layer.");
 }

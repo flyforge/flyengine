@@ -7,8 +7,8 @@
 #include <EditorPluginAssets/AnimationClipAsset/AnimationClipAssetWindow.moc.h>
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipAssetDocumentManager, 1, plRTTIDefaultAllocator<plAnimationClipAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipAssetDocumentManager, 1, plRTTIDefaultAllocator<plAnimationClipAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plAnimationClipAssetDocumentManager::plAnimationClipAssetDocumentManager()
 {
@@ -25,7 +25,7 @@ plAnimationClipAssetDocumentManager::plAnimationClipAssetDocumentManager()
   m_DocTypeDesc.m_sResourceFileExtension = "plAnimationClip";
   m_DocTypeDesc.m_AssetDocumentFlags = plAssetDocumentFlags::SupportsThumbnail;
 
-  //plQtImageCache::GetSingleton()->RegisterTypeImage("Animation Clip", QPixmap(":/AssetIcons/Animation_Clip.png"));
+  // plQtImageCache::GetSingleton()->RegisterTypeImage("Animation Clip", QPixmap(":/AssetIcons/Animation_Clip.svg"));
 }
 
 plAnimationClipAssetDocumentManager::~plAnimationClipAssetDocumentManager()
@@ -41,8 +41,7 @@ void plAnimationClipAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plAnimationClipAssetDocument>())
       {
-        plQtAnimationClipAssetDocumentWindow* pDocWnd =
-          new plQtAnimationClipAssetDocumentWindow(static_cast<plAnimationClipAssetDocument*>(e.m_pDocument));
+        new plQtAnimationClipAssetDocumentWindow(static_cast<plAnimationClipAssetDocument*>(e.m_pDocument)); // NOLINT
       }
     }
     break;
@@ -52,10 +51,9 @@ void plAnimationClipAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
   }
 }
 
-void plAnimationClipAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plAnimationClipAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plAnimationClipAssetDocument(szPath);
+  out_pDocument = new plAnimationClipAssetDocument(sPath);
 }
 
 void plAnimationClipAssetDocumentManager::InternalGetSupportedDocumentTypes(

@@ -2,7 +2,7 @@
 
 #include <Fileserve/Fileserve.h>
 
-#ifdef PLASMA_USE_QT
+#ifdef PL_USE_QT
 
 #  include <EditorPluginFileserve/FileserveUI/FileserveWidget.moc.h>
 #  include <Fileserve/Gui.moc.h>
@@ -15,8 +15,8 @@ void CreateFileserveMainWindow(plApplication* pApp)
   pMainWnd->show();
 }
 
-plQtFileserveMainWnd::plQtFileserveMainWnd(plApplication* pApp, QWidget* parent)
-  : QMainWindow(parent)
+plQtFileserveMainWnd::plQtFileserveMainWnd(plApplication* pApp, QWidget* pParent)
+  : QMainWindow(pParent)
   , m_pApp(pApp)
 {
   OnServerStopped();
@@ -52,7 +52,7 @@ void plQtFileserveMainWnd::OnServerStarted(const QString& ip, plUInt16 uiPort)
 {
   QString title = QString("plFileserve (Port %1)").arg(uiPort);
 
-  setWindowTitle(title.toUpper());
+  setWindowTitle(title);
 }
 
 void plQtFileserveMainWnd::OnServerStopped()

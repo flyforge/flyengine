@@ -8,9 +8,9 @@
 #include <Foundation/Utilities/ConversionUtils.h>
 #include <ToolsFoundation/Utilities/RecentFilesList.h>
 
-void plRecentFilesList::Insert(const char* szFile, plInt32 iContainerWindow)
+void plRecentFilesList::Insert(plStringView sFile, plInt32 iContainerWindow)
 {
-  plStringBuilder sCleanPath = szFile;
+  plStringBuilder sCleanPath = sFile;
   sCleanPath.MakeCleanPath();
 
   plString s = sCleanPath;
@@ -29,29 +29,29 @@ void plRecentFilesList::Insert(const char* szFile, plInt32 iContainerWindow)
     m_Files.SetCount(m_uiMaxElements);
 }
 
-void plRecentFilesList::Save(const char* szFile)
+void plRecentFilesList::Save(plStringView sFile)
 {
   plDeferredFileWriter File;
-  File.SetOutput(szFile);
+  File.SetOutput(sFile);
 
   for (const RecentFile& file : m_Files)
   {
     plStringBuilder sTemp;
-    sTemp.Format("{0}|{1}", file.m_File, file.m_iContainerWindow);
+    sTemp.SetFormat("{0}|{1}", file.m_File, file.m_iContainerWindow);
     File.WriteBytes(sTemp.GetData(), sTemp.GetElementCount()).IgnoreResult();
     File.WriteBytes("\n", sizeof(char)).IgnoreResult();
   }
 
   if (File.Close().Failed())
-    plLog::Error("Unable to open file '{0}' for writing!", szFile);
+    plLog::Error("Unable to open file '{0}' for writing!", sFile);
 }
 
-void plRecentFilesList::Load(const char* szFile)
+void plRecentFilesList::Load(plStringView sFile)
 {
   m_Files.Clear();
 
   plFileReader File;
-  if (File.Open(szFile).Failed())
+  if (File.Open(sFile).Failed())
     return;
 
   plStringBuilder sAllLines;

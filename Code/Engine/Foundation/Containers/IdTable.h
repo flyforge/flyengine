@@ -73,10 +73,10 @@ public:
 
 protected:
   /// \brief Creates an empty id-table. Does not allocate any data yet.
-  explicit plIdTableBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plIdTableBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given id-table.
-  plIdTableBase(const plIdTableBase<IdType, ValueType>& rhs, plAllocatorBase* pAllocator); // [tested]
+  plIdTableBase(const plIdTableBase<IdType, ValueType>& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plIdTableBase(); // [tested]
@@ -134,7 +134,7 @@ public:
   ConstIterator GetIterator() const; // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const;
+  plAllocator* GetAllocator() const;
 
   /// \brief Returns whether the internal free-list is valid. For testing purpose only.
   bool IsFreelistValid() const;
@@ -159,7 +159,7 @@ private:
   IndexType m_FreelistEnqueue;
   IndexType m_FreelistDequeue;
 
-  plAllocatorBase* m_pAllocator;
+  plAllocator* m_pAllocator;
 
   void SetCapacity(IndexType uiCapacity);
   void InitializeFreelist(IndexType uiStart, IndexType uiEnd);
@@ -171,7 +171,7 @@ class plIdTable : public plIdTableBase<IdType, ValueType>
 {
 public:
   plIdTable();
-  explicit plIdTable(plAllocatorBase* pAllocator);
+  explicit plIdTable(plAllocator* pAllocator);
 
   plIdTable(const plIdTable<IdType, ValueType, AllocatorWrapper>& other);
   plIdTable(const plIdTableBase<IdType, ValueType>& other);

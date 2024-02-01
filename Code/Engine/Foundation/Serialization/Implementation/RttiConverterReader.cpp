@@ -32,7 +32,9 @@ plInternal::NewInstance<void> plRttiConverterReader::CreateObjectFromNode(const 
 
 void plRttiConverterReader::ApplyPropertiesToObject(const plAbstractObjectNode* pNode, const plRTTI* pRtti, void* pObject)
 {
-  PLASMA_ASSERT_DEBUG(pNode != nullptr, "Invalid node");
+  PL_ASSERT_DEBUG(pNode != nullptr, "Invalid node");
+  if (!pNode)
+    return;
 
   if (pRtti->GetParentType() != nullptr)
     ApplyPropertiesToObject(pNode, pRtti->GetParentType(), pObject);
@@ -75,7 +77,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
           if (pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner))
           {
             auto* pNode = m_pGraph->GetNode(guid);
-            PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+            PL_ASSERT_DEV(pNode != nullptr, "node must exist");
             pRefrencedObject = CreateObjectFromNode(pNode);
             if (pRefrencedObject == nullptr)
             {
@@ -117,7 +119,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
           }
 
           auto* pNode = m_pGraph->GetNode(sourceGuid);
-          PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+          PL_ASSERT_DEV(pNode != nullptr, "node must exist");
 
           ApplyPropertiesToObject(pNode, pPropType, pDirectPtr);
 
@@ -164,7 +166,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
             if (guid.IsValid())
             {
               auto* pNode = m_pGraph->GetNode(guid);
-              PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+              PL_ASSERT_DEV(pNode != nullptr, "node must exist");
               pRefrencedObject = CreateObjectFromNode(pNode);
               if (pRefrencedObject == nullptr)
               {
@@ -191,7 +193,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::CreateUuid();
+          const plUuid temp = plUuid::MakeUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 
@@ -202,7 +204,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
 
             const plUuid sourceGuid = array[i].Get<plUuid>();
             auto* pNode = m_pGraph->GetNode(sourceGuid);
-            PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+            PL_ASSERT_DEV(pNode != nullptr, "node must exist");
 
             ApplyPropertiesToObject(pNode, pPropType, pValuePtr);
             pSpecific->SetValue(pObject, i, pValuePtr);
@@ -249,7 +251,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
           if (pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner))
           {
             auto* pNode = m_pGraph->GetNode(guid);
-            PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+            PL_ASSERT_DEV(pNode != nullptr, "node must exist");
             pRefrencedObject = CreateObjectFromNode(pNode);
             if (pRefrencedObject == nullptr)
             {
@@ -275,7 +277,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::CreateUuid();
+          const plUuid temp = plUuid::MakeUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 
@@ -286,7 +288,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
 
             const plUuid sourceGuid = array[i].Get<plUuid>();
             auto* pNode = m_pGraph->GetNode(sourceGuid);
-            PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+            PL_ASSERT_DEV(pNode != nullptr, "node must exist");
 
             ApplyPropertiesToObject(pNode, pPropType, pValuePtr);
             pSpecific->Insert(pObject, pValuePtr);
@@ -336,7 +338,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
             if (guid.IsValid())
             {
               auto* pNode = m_pGraph->GetNode(guid);
-              PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+              PL_ASSERT_DEV(pNode != nullptr, "node must exist");
               pRefrencedObject = CreateObjectFromNode(pNode);
               if (pRefrencedObject == nullptr)
               {
@@ -363,7 +365,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
         }
         else if (pProp->GetFlags().IsAnySet(plPropertyFlags::Class))
         {
-          const plUuid temp = plUuid::CreateUuid();
+          const plUuid temp = plUuid::MakeUuid();
 
           void* pValuePtr = m_pContext->CreateObject(temp, pPropType);
 
@@ -374,7 +376,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
 
             const plUuid sourceGuid = it.Value().Get<plUuid>();
             auto* pNode = m_pGraph->GetNode(sourceGuid);
-            PLASMA_ASSERT_DEV(pNode != nullptr, "node must exist");
+            PL_ASSERT_DEV(pNode != nullptr, "node must exist");
 
             ApplyPropertiesToObject(pNode, pPropType, pValuePtr);
             pSpecific->Insert(pObject, it.Key(), pValuePtr);
@@ -387,7 +389,7 @@ void plRttiConverterReader::ApplyProperty(void* pObject, const plAbstractPropert
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 }
@@ -408,4 +410,4 @@ void plRttiConverterReader::CallOnObjectCreated(const plAbstractObjectNode* pNod
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_RttiConverterReader);
+

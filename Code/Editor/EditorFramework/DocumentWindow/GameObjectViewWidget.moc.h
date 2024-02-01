@@ -11,11 +11,11 @@ class plContextMenuContext;
 class plSelectionContext;
 class plCameraMoveContext;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectViewWidget : public plQtEngineViewWidget
+class PL_EDITORFRAMEWORK_DLL plQtGameObjectViewWidget : public plQtEngineViewWidget
 {
   Q_OBJECT
 public:
-  plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig);
+  plQtGameObjectViewWidget(QWidget* pParent, plQtGameObjectDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig);
   ~plQtGameObjectViewWidget();
 
   plOrthoGizmoContext* m_pOrthoGizmoContext;

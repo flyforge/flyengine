@@ -10,7 +10,7 @@
 #include <Foundation/Types/ScopeExit.h>
 #include <Foundation/Utilities/CommandLineUtils.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plFileserveClient);
+PL_IMPLEMENT_SINGLETON(plFileserveClient);
 
 bool plFileserveClient::s_bEnableFileserve = true;
 
@@ -32,9 +32,8 @@ plFileserveClient::plFileserveClient()
     }
   }
 
-  plStringBuilder tmp;
   // command line argument
-  AddServerAddressToTry(plCommandLineUtils::GetGlobalInstance()->GetStringOption("-fs_server", 0, "").GetData(tmp));
+  AddServerAddressToTry(plCommandLineUtils::GetGlobalInstance()->GetStringOption("-fs_server", 0, ""));
 
   // last successful IP is stored in the user directory
   {
@@ -79,9 +78,9 @@ void plFileserveClient::ClearState()
 
 plResult plFileserveClient::EnsureConnected(plTime timeout)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!s_bEnableFileserve || m_bFailedToConnect)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (m_pNetwork == nullptr)
   {
@@ -93,13 +92,13 @@ plResult plFileserveClient::EnsureConnected(plTime timeout)
     if (plOSFile::CreateDirectoryStructure(m_sFileserveCacheFolder).Failed())
     {
       plLog::Error("Could not create fileserve cache folder '{0}'", m_sFileserveCacheFolder);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (plOSFile::CreateDirectoryStructure(m_sFileserveCacheMetaFolder).Failed())
     {
       plLog::Error("Could not create fileserve cache folder '{0}'", m_sFileserveCacheMetaFolder);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -109,18 +108,18 @@ plResult plFileserveClient::EnsureConnected(plTime timeout)
     m_bFailedToConnect = true;
 
     if (m_pNetwork->ConnectToServer('PLFS', m_sServerConnectionAddress).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (timeout.GetSeconds() < 0)
     {
-      timeout = plTime::Seconds(plCommandLineUtils::GetGlobalInstance()->GetFloatOption("-fs_timeout", -timeout.GetSeconds()));
+      timeout = plTime::MakeFromSeconds(plCommandLineUtils::GetGlobalInstance()->GetFloatOption("-fs_timeout", -timeout.GetSeconds()));
     }
 
     if (m_pNetwork->WaitForConnectionToServer(timeout).Failed())
     {
       m_pNetwork->ShutdownConnection();
       plLog::Error("Connection to plFileserver timed out");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
@@ -133,12 +132,12 @@ plResult plFileserveClient::EnsureConnected(plTime timeout)
     m_bFailedToConnect = false;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plFileserveClient::UpdateClient()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (m_pNetwork == nullptr || m_bFailedToConnect || !s_bEnableFileserve)
     return;
 
@@ -157,24 +156,24 @@ void plFileserveClient::UpdateClient()
   m_pNetwork->ExecuteAllMessageHandlers();
 }
 
-void plFileserveClient::AddServerAddressToTry(const char* szAddress)
+void plFileserveClient::AddServerAddressToTry(plStringView sAddress)
 {
-  PLASMA_LOCK(m_Mutex);
-  if (plStringUtils::IsNullOrEmpty(szAddress))
+  PL_LOCK(m_Mutex);
+  if (sAddress.IsEmpty())
     return;
 
-  if (m_TryServerAddresses.Contains(szAddress))
+  if (m_TryServerAddresses.Contains(sAddress))
     return;
 
-  m_TryServerAddresses.PushBack(szAddress);
+  m_TryServerAddresses.PushBack(sAddress);
 
   // always set the most recent address as the default one
-  m_sServerConnectionAddress = szAddress;
+  m_sServerConnectionAddress = sAddress;
 }
 
 void plFileserveClient::UploadFile(plUInt16 uiDataDirID, const char* szFile, const plDynamicArray<plUInt8>& fileContent)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_pNetwork == nullptr)
     return;
@@ -199,8 +198,7 @@ void plFileserveClient::UploadFile(plUInt16 uiDataDirID, const char* szFile, con
 
   const plUInt32 uiFileSize = fileContent.GetCount();
 
-  plUuid uploadGuid;
-  uploadGuid.CreateNewUuid();
+  plUuid uploadGuid = plUuid::MakeUuid();
 
   {
     plRemoteMessage msg;
@@ -254,11 +252,11 @@ void plFileserveClient::UploadFile(plUInt16 uiDataDirID, const char* szFile, con
 
 void plFileserveClient::InvalidateFileCache(plUInt16 uiDataDirID, plStringView sFile, plUInt64 uiHash)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   auto& cache = m_MountedDataDirs[uiDataDirID].m_CacheStatus[sFile];
   cache.m_FileHash = uiHash;
   cache.m_TimeStamp = 0;
-  cache.m_LastCheck.SetZero(); // will trigger a server request and that in turn will update the file timestamp
+  cache.m_LastCheck = plTime::MakeZero(); // will trigger a server request and that in turn will update the file timestamp
 
   // redirect the next access to this cache entry
   // together with the zero LastCheck that will make sure the best match gets updated as well
@@ -267,7 +265,7 @@ void plFileserveClient::InvalidateFileCache(plUInt16 uiDataDirID, plStringView s
 
 void plFileserveClient::FillFileStatusCache(const char* szFile)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   auto it = m_FileDataDir.FindOrAdd(szFile);
   it.Value() = 0xffff; // does not exist
 
@@ -281,7 +279,7 @@ void plFileserveClient::FillFileStatusCache(const char* szFile)
     auto& cache = m_MountedDataDirs[dd].m_CacheStatus[szFile];
 
     DetermineCacheStatus(dd, szFile, cache);
-    cache.m_LastCheck.SetZero();
+    cache.m_LastCheck = plTime::MakeZero();
 
     if (cache.m_TimeStamp != 0 && cache.m_FileHash != 0) // file exists
     {
@@ -297,8 +295,8 @@ void plFileserveClient::FillFileStatusCache(const char* szFile)
 
 void plFileserveClient::BuildPathInCache(const char* szFile, const char* szMountPoint, plStringBuilder* out_pAbsPath, plStringBuilder* out_pFullPathMeta) const
 {
-  PLASMA_ASSERT_DEV(!plPathUtils::IsAbsolutePath(szFile), "Invalid path");
-  PLASMA_LOCK(m_Mutex);
+  PL_ASSERT_DEV(!plPathUtils::IsAbsolutePath(szFile), "Invalid path");
+  PL_LOCK(m_Mutex);
   if (out_pAbsPath)
   {
     *out_pAbsPath = m_sFileserveCacheFolder;
@@ -315,15 +313,15 @@ void plFileserveClient::BuildPathInCache(const char* szFile, const char* szMount
 
 void plFileserveClient::ComputeDataDirMountPoint(plStringView sDataDir, plStringBuilder& out_sMountPoint)
 {
-  PLASMA_ASSERT_DEV(sDataDir.IsEmpty() || sDataDir.EndsWith("/"), "Invalid path");
+  PL_ASSERT_DEV(sDataDir.IsEmpty() || sDataDir.EndsWith("/"), "Invalid path");
 
   const plUInt32 uiMountPoint = plHashingUtils::xxHash32String(sDataDir);
-  out_sMountPoint.Format("{0}", plArgU(uiMountPoint, 8, true, 16));
+  out_sMountPoint.SetFormat("{0}", plArgU(uiMountPoint, 8, true, 16));
 }
 
 void plFileserveClient::GetFullDataDirCachePath(const char* szDataDir, plStringBuilder& out_sFullPath, plStringBuilder& out_sFullPathMeta) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   plStringBuilder sMountPoint;
   ComputeDataDirMountPoint(szDataDir, sMountPoint);
 
@@ -336,7 +334,7 @@ void plFileserveClient::GetFullDataDirCachePath(const char* szDataDir, plStringB
 
 void plFileserveClient::NetworkMsgHandler(plRemoteMessage& msg)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (msg.GetMessageID() == 'DWNL')
   {
     HandleFileTransferMsg(msg);
@@ -358,7 +356,7 @@ void plFileserveClient::NetworkMsgHandler(plRemoteMessage& msg)
 
   if (!m_bDownloading && s_bReloadResources)
   {
-    PLASMA_BROADCAST_EVENT(plResourceManager_ReloadAllResources);
+    PL_BROADCAST_EVENT(plResourceManager_ReloadAllResources);
     s_bReloadResources = false;
     return;
   }
@@ -377,7 +375,7 @@ void plFileserveClient::NetworkMsgHandler(plRemoteMessage& msg)
 
 plUInt16 plFileserveClient::MountDataDirectory(plStringView sDataDirectory, plStringView sRootName)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!m_pNetwork->IsConnectedToServer())
     return 0xffff;
 
@@ -409,7 +407,7 @@ plUInt16 plFileserveClient::MountDataDirectory(plStringView sDataDirectory, plSt
 
 void plFileserveClient::UnmountDataDirectory(plUInt16 uiDataDir)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!m_pNetwork->IsConnectedToServer())
     return;
 
@@ -424,7 +422,7 @@ void plFileserveClient::UnmountDataDirectory(plUInt16 uiDataDir)
 
 void plFileserveClient::DeleteFile(plUInt16 uiDataDir, plStringView sFile)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!m_pNetwork->IsConnectedToServer())
     return;
 
@@ -439,7 +437,7 @@ void plFileserveClient::DeleteFile(plUInt16 uiDataDir, plStringView sFile)
 
 void plFileserveClient::HandleFileTransferMsg(plRemoteMessage& msg)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   {
     plUuid fileRequestGuid;
     msg.GetReader() >> fileRequestGuid;
@@ -471,8 +469,8 @@ void plFileserveClient::HandleFileTransferMsg(plRemoteMessage& msg)
 
 void plFileserveClient::HandleFileTransferFinishedMsg(plRemoteMessage& msg)
 {
-  PLASMA_LOCK(m_Mutex);
-  PLASMA_SCOPE_EXIT(m_bDownloading = false);
+  PL_LOCK(m_Mutex);
+  PL_SCOPE_EXIT(m_bDownloading = false);
 
   {
     plUuid fileRequestGuid;
@@ -573,7 +571,7 @@ void plFileserveClient::WriteMetaFile(plStringBuilder sCachedMetaFile, plInt64 i
 
 void plFileserveClient::WriteDownloadToDisk(plStringBuilder sCachedFile)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   plOSFile file;
   if (file.Open(sCachedFile, plFileOpenMode::Write).Succeeded())
   {
@@ -591,19 +589,19 @@ void plFileserveClient::WriteDownloadToDisk(plStringBuilder sCachedFile)
 plResult plFileserveClient::DownloadFile(plUInt16 uiDataDirID, const char* szFile, bool bForceThisDataDir, plStringBuilder* out_pFullPath)
 {
   // bForceThisDataDir = true;
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (m_bDownloading)
   {
     plLog::Warning("Trying to download a file over fileserve while another file is already downloading. Recursive download is ignored.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(uiDataDirID < m_MountedDataDirs.GetCount(), "Invalid data dir index {0}", uiDataDirID);
-  PLASMA_ASSERT_DEV(m_MountedDataDirs[uiDataDirID].m_bMounted, "Data directory {0} is not mounted", uiDataDirID);
-  PLASMA_ASSERT_DEV(!m_bDownloading, "Cannot start a download, while one is still running");
+  PL_ASSERT_DEV(uiDataDirID < m_MountedDataDirs.GetCount(), "Invalid data dir index {0}", uiDataDirID);
+  PL_ASSERT_DEV(m_MountedDataDirs[uiDataDirID].m_bMounted, "Data directory {0} is not mounted", uiDataDirID);
+  PL_ASSERT_DEV(!m_bDownloading, "Cannot start a download, while one is still running");
 
   if (!m_pNetwork->IsConnectedToServer())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   bool bCachedYet = false;
   auto itFileDataDir = m_FileDataDir.FindOrAdd(szFile, &bCachedYet);
@@ -615,20 +613,20 @@ plResult plFileserveClient::DownloadFile(plUInt16 uiDataDirID, const char* szFil
   const plUInt16 uiUseDataDirCache = bForceThisDataDir ? uiDataDirID : itFileDataDir.Value();
   const FileCacheStatus& CacheStatus = m_MountedDataDirs[uiUseDataDirCache].m_CacheStatus[szFile];
 
-  if (m_CurrentTime - CacheStatus.m_LastCheck < plTime::Seconds(5.0f))
+  if (m_CurrentTime - CacheStatus.m_LastCheck < plTime::MakeFromSeconds(5.0f))
   {
     if (CacheStatus.m_FileHash == 0) // file does not exist
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (out_pFullPath)
       BuildPathInCache(szFile, m_MountedDataDirs[uiUseDataDirCache].m_sMountPoint, out_pFullPath, nullptr);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   m_Download.Clear();
   m_sCurFileRequest = szFile;
-  m_CurFileRequestGuid.CreateNewUuid();
+  m_CurFileRequestGuid = plUuid::MakeUuid();
   m_bDownloading = true;
 
   plRemoteMessage msg('FSRV', 'READ');
@@ -650,12 +648,12 @@ plResult plFileserveClient::DownloadFile(plUInt16 uiDataDirID, const char* szFil
   if (bForceThisDataDir)
   {
     if (m_MountedDataDirs[uiDataDirID].m_CacheStatus[m_sCurFileRequest].m_FileHash == 0)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (out_pFullPath)
       BuildPathInCache(szFile, m_MountedDataDirs[uiDataDirID].m_sMountPoint, out_pFullPath, nullptr);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
@@ -664,25 +662,25 @@ plResult plFileserveClient::DownloadFile(plUInt16 uiDataDirID, const char* szFil
     {
       // file does not exist
       if (m_MountedDataDirs[uiBestDir].m_CacheStatus[m_sCurFileRequest].m_FileHash == 0)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (out_pFullPath)
         BuildPathInCache(szFile, m_MountedDataDirs[uiBestDir].m_sMountPoint, out_pFullPath, nullptr);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 void plFileserveClient::DetermineCacheStatus(plUInt16 uiDataDirID, const char* szFile, FileCacheStatus& out_Status) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   plStringBuilder sAbsPathFile, sAbsPathMeta;
   const auto& dd = m_MountedDataDirs[uiDataDirID];
 
-  PLASMA_ASSERT_DEV(dd.m_bMounted, "Data directory {0} is not mounted", uiDataDirID);
+  PL_ASSERT_DEV(dd.m_bMounted, "Data directory {0} is not mounted", uiDataDirID);
 
   BuildPathInCache(szFile, dd.m_sMountPoint, &sAbsPathFile, &sAbsPathMeta);
 
@@ -715,64 +713,62 @@ plResult plFileserveClient::TryReadFileserveConfig(const char* szFile, plStringB
     res.Trim(" \t\n\r");
 
     if (res.IsEmpty())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // has to contain a port number
     if (res.FindSubString(":") == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // otherwise could be an arbitrary string
     out_Result = res;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-plResult plFileserveClient::SearchForServerAddress(plTime timeout /*= plTime::Seconds(5)*/)
+plResult plFileserveClient::SearchForServerAddress(plTime timeout /*= plTime::MakeFromSeconds(5)*/)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!s_bEnableFileserve)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plStringBuilder sAddress;
 
-  plStringBuilder tmp;
-
   // add the command line argument again, in case this was modified since the constructor ran
   // will not change anything, if this is a duplicate
-  AddServerAddressToTry(plCommandLineUtils::GetGlobalInstance()->GetStringOption("-fs_server", 0, "").GetData(tmp));
+  AddServerAddressToTry(plCommandLineUtils::GetGlobalInstance()->GetStringOption("-fs_server", 0, ""));
 
   // go through the available options
   for (plInt32 idx = m_TryServerAddresses.GetCount() - 1; idx >= 0; --idx)
   {
     if (TryConnectWithFileserver(m_TryServerAddresses[idx], timeout).Succeeded())
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plFileserveClient::TryConnectWithFileserver(const char* szAddress, plTime timeout) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (plStringUtils::IsNullOrEmpty(szAddress))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plLog::Info("File server address: '{0}' ({1} sec)", szAddress, timeout.GetSeconds());
 
   plUniquePtr<plRemoteInterfaceEnet> network = plRemoteInterfaceEnet::Make(); /// \todo Abstract this somehow ?
   if (network->ConnectToServer('PLFS', szAddress, false).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   bool bServerFound = false;
-  network->SetMessageHandler('FSRV', [&bServerFound](plRemoteMessage& msg) {
-      switch (msg.GetMessageID())
-      {
-        case ' YES':
-          bServerFound = true;
-          break;
-      } });
+  network->SetMessageHandler('FSRV', [&bServerFound](plRemoteMessage& ref_msg) {
+    switch (ref_msg.GetMessageID())
+    {
+      case ' YES':
+        bServerFound = true;
+        break;
+    } });
 
   if (network->WaitForConnectionToServer(timeout).Succeeded())
   {
@@ -782,7 +778,7 @@ plResult plFileserveClient::TryConnectWithFileserver(const char* szAddress, plTi
     {
       network->Send('FSRV', 'RUTR');
 
-      plThreadUtils::Sleep(plTime::Milliseconds(100));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
 
       network->UpdateRemoteInterface();
       network->ExecuteAllMessageHandlers();
@@ -792,52 +788,52 @@ plResult plFileserveClient::TryConnectWithFileserver(const char* szAddress, plTi
   network->ShutdownConnection();
 
   if (!bServerFound)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_sServerConnectionAddress = szAddress;
 
   // always store the IP that was successful in the user directory
   SaveCurrentConnectionInfoToDisk().IgnoreResult();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plFileserveClient::WaitForServerInfo(plTime timeout /*= plTime::Seconds(60.0 * 5)*/)
+plResult plFileserveClient::WaitForServerInfo(plTime timeout /*= plTime::MakeFromSeconds(60.0 * 5)*/)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (!s_bEnableFileserve)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt16 uiPort = 1042;
   plHybridArray<plStringBuilder, 4> sServerIPs;
 
   {
     plUniquePtr<plRemoteInterfaceEnet> network = plRemoteInterfaceEnet::Make(); /// \todo Abstract this somehow ?
-    network->SetMessageHandler('FSRV', [&sServerIPs, &uiPort](plRemoteMessage& msg)
+    network->SetMessageHandler('FSRV', [&sServerIPs, &uiPort](plRemoteMessage& ref_msg)
 
       {
-        switch (msg.GetMessageID())
+        switch (ref_msg.GetMessageID())
         {
           case 'MYIP':
-            msg.GetReader() >> uiPort;
+            ref_msg.GetReader() >> uiPort;
 
             plUInt8 uiCount = 0;
-            msg.GetReader() >> uiCount;
+            ref_msg.GetReader() >> uiCount;
 
             sServerIPs.SetCount(uiCount);
             for (plUInt32 i = 0; i < uiCount; ++i)
             {
-              msg.GetReader() >> sServerIPs[i];
+              ref_msg.GetReader() >> sServerIPs[i];
             }
 
             break;
         } });
 
-    PLASMA_SUCCEED_OR_RETURN(network->StartServer('PLIP', "2042", false));
+    PL_SUCCEED_OR_RETURN(network->StartServer('PLIP', "2042", false));
 
     plTime tStart = plTime::Now();
     while (plTime::Now() - tStart < timeout && sServerIPs.IsEmpty())
     {
-      plThreadUtils::Sleep(plTime::Milliseconds(1));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(1));
 
       network->UpdateRemoteInterface();
       network->ExecuteAllMessageHandlers();
@@ -847,7 +843,7 @@ plResult plFileserveClient::WaitForServerInfo(plTime timeout /*= plTime::Seconds
   }
 
   if (sServerIPs.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // network connections are unreliable and surprisingly slow sometimes
   // we just got an IP from a server, so we know it's there and we should be able to connect to it
@@ -858,34 +854,34 @@ plResult plFileserveClient::WaitForServerInfo(plTime timeout /*= plTime::Seconds
     plStringBuilder sAddress;
     for (auto& ip : sServerIPs)
     {
-      sAddress.Format("{0}:{1}", ip, uiPort);
+      sAddress.SetFormat("{0}:{1}", ip, uiPort);
 
-      plThreadUtils::Sleep(plTime::Milliseconds(500));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(500));
 
-      if (TryConnectWithFileserver(sAddress, plTime::Seconds(3)).Succeeded())
-        return PLASMA_SUCCESS;
+      if (TryConnectWithFileserver(sAddress, plTime::MakeFromSeconds(3)).Succeeded())
+        return PL_SUCCESS;
     }
 
-    plThreadUtils::Sleep(plTime::Milliseconds(1000));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(1000));
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plFileserveClient::SaveCurrentConnectionInfoToDisk() const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   plStringBuilder sFile = plOSFile::GetUserDataFolder("plFileserve.txt");
   plOSFile file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile, plFileOpenMode::Write));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile, plFileOpenMode::Write));
 
-  PLASMA_SUCCEED_OR_RETURN(file.Write(m_sServerConnectionAddress.GetData(), m_sServerConnectionAddress.GetElementCount()));
+  PL_SUCCEED_OR_RETURN(file.Write(m_sServerConnectionAddress.GetData(), m_sServerConnectionAddress.GetElementCount()));
   file.Close();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
+PL_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
 {
   if (plFileserveClient::GetSingleton())
   {
@@ -895,4 +891,4 @@ PLASMA_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
 
 
 
-PLASMA_STATICLINK_FILE(FileservePlugin, FileservePlugin_Client_FileserveClient);
+PL_STATICLINK_FILE(FileservePlugin, FileservePlugin_Client_FileserveClient);

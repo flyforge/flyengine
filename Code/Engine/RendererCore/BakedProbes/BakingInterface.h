@@ -4,7 +4,7 @@
 #include <Foundation/Utilities/Progress.h>
 #include <RendererCore/RendererCoreDLL.h>
 
-struct PLASMA_RENDERERCORE_DLL plBakingSettings
+struct PL_RENDERERCORE_DLL plBakingSettings
 {
   plVec3 m_vProbeSpacing = plVec3(4);
   plUInt32 m_uiNumSamplesPerProbe = 128;
@@ -14,7 +14,7 @@ struct PLASMA_RENDERERCORE_DLL plBakingSettings
   plResult Deserialize(plStreamReader& inout_stream);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plBakingSettings);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plBakingSettings);
 
 class plWorld;
 

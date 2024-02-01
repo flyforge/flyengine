@@ -8,16 +8,16 @@
 class plLogInterface;
 
 /// \brief An plResult with an additional message for the reason of failure
-struct [[nodiscard]] PLASMA_FOUNDATION_DLL plStatus
+struct [[nodiscard]] PL_FOUNDATION_DLL plStatus
 {
-  PLASMA_ALWAYS_INLINE explicit plStatus()
-    : m_Result(PLASMA_FAILURE)
+  PL_ALWAYS_INLINE explicit plStatus()
+    : m_Result(PL_FAILURE)
   {
   }
 
   // const char* version is needed for disambiguation
   explicit plStatus(const char* szError)
-    : m_Result(PLASMA_FAILURE)
+    : m_Result(PL_FAILURE)
     , m_sMessage(szError)
   {
   }
@@ -29,28 +29,28 @@ struct [[nodiscard]] PLASMA_FOUNDATION_DLL plStatus
   }
 
   explicit plStatus(plStringView sError)
-    : m_Result(PLASMA_FAILURE)
+    : m_Result(PL_FAILURE)
     , m_sMessage(sError)
   {
   }
 
-  PLASMA_ALWAYS_INLINE plStatus(plResult r)
+  PL_ALWAYS_INLINE plStatus(plResult r)
     : m_Result(r)
   {
   }
 
   explicit plStatus(const plFormatString& fmt);
 
-  [[nodiscard]] PLASMA_ALWAYS_INLINE bool Succeeded() const { return m_Result.Succeeded(); }
-  [[nodiscard]] PLASMA_ALWAYS_INLINE bool Failed() const { return m_Result.Failed(); }
+  [[nodiscard]] PL_ALWAYS_INLINE bool Succeeded() const { return m_Result.Succeeded(); }
+  [[nodiscard]] PL_ALWAYS_INLINE bool Failed() const { return m_Result.Failed(); }
 
   /// \brief Used to silence compiler warnings, when success or failure doesn't matter.
-  PLASMA_ALWAYS_INLINE void IgnoreResult()
+  PL_ALWAYS_INLINE void IgnoreResult()
   {
     /* dummy to be called when a return value is [[nodiscard]] but the result is not needed */
   }
 
-  /// \brief If the state is PLASMA_FAILURE, the message is written to the given log (or the currently active thread-local log).
+  /// \brief If the state is PL_FAILURE, the message is written to the given log (or the currently active thread-local log).
   ///
   /// The return value is the same as 'Failed()' but isn't marked as [[nodiscard]], ie returns true, if a failure happened.
   bool LogFailure(plLogInterface* pLog = nullptr);
@@ -65,7 +65,7 @@ struct [[nodiscard]] PLASMA_FOUNDATION_DLL plStatus
   plString m_sMessage;
 };
 
-PLASMA_ALWAYS_INLINE plResult plToResult(const plStatus& result)
+PL_ALWAYS_INLINE plResult plToResult(const plStatus& result)
 {
   return result.m_Result;
 }

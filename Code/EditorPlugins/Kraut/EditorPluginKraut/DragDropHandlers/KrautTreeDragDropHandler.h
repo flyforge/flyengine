@@ -4,7 +4,7 @@
 
 class plKrautTreeComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautTreeComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautTreeComponentDragDropHandler, plComponentDragDropHandler);
 
 public:
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;

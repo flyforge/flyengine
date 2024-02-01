@@ -10,7 +10,7 @@ void plLongOpManager::Startup(plProcessCommunicationChannel* pCommunicationChann
 
 void plLongOpManager::Shutdown()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   m_Unsubscriber.Unsubscribe();
   m_pCommunicationChannel = nullptr;

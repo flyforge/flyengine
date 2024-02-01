@@ -42,11 +42,12 @@ private:
   void StructureEventHandler(const plDocumentObjectStructureEvent& e);
   void ParticleEventHandler(const plParticleEffectAssetEvent& e);
   void UpdateSystemList();
-  void SelectSystem(plDocumentObject* pObject);
+  void SelectSystem(const plDocumentObject* pObject);
+  plStatus SetupSystem(plStringView sName);
 
   plParticleEffectAssetDocument* m_pAssetDoc;
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 
   QComboBox* m_pSystemsCombo = nullptr;
@@ -61,5 +62,6 @@ private:
 
   plString m_sSelectedSystem;
   plMap<plString, plDocumentObject*> m_ParticleSystems;
+  bool m_bDoLiveResourceUpdate = true;
 };
 

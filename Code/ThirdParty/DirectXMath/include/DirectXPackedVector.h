@@ -430,7 +430,7 @@ namespace DirectX
         // is stored in the most significant bits and the x component mantissa is in
         // the least significant bits. No sign bits so all partial-precision numbers
         // are positive.
-        // (E5Z9Y9X9): [32] EEEEPlzz zzzzzzyy yyyyyyyx xxxxxxxx [0]
+        // (E5Z9Y9X9): [32] EEEEEzzz zzzzzzyy yyyyyyyx xxxxxxxx [0]
         struct XMFLOAT3SE
         {
             union

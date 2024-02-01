@@ -28,7 +28,7 @@ class QSlider;
 
 /// *** CHECKBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorCheckboxWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorCheckboxWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -52,7 +52,7 @@ protected:
 
 /// *** DOUBLE SPINBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorDoubleSpinboxWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorDoubleSpinboxWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -80,7 +80,7 @@ protected:
 
 /// *** TIME SPINBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorTimeWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorTimeWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -102,7 +102,7 @@ protected:
 
 /// *** ANGLE SPINBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorAngleWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorAngleWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -124,7 +124,7 @@ protected:
 
 /// *** INT SPINBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorIntSpinboxWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorIntSpinboxWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -150,9 +150,68 @@ protected:
   QSlider* m_pSlider = nullptr;
 };
 
+/// *** SLIDER ***
+
+class PL_GUIFOUNDATION_DLL plQtImageSliderWidget : public QWidget
+{
+  Q_OBJECT
+public:
+  using ImageGeneratorFunc = QImage (*)(plUInt32 uiWidth, plUInt32 uiHeight, double fMinValue, double fMaxValue);
+
+  plQtImageSliderWidget(ImageGeneratorFunc generator, double fMinValue, double fMaxValue, QWidget* pParent);
+
+  static plMap<plString, ImageGeneratorFunc> s_ImageGenerators;
+
+  double GetValue() const { return m_fValue; }
+  void SetValue(double fValue);
+
+Q_SIGNALS:
+  void valueChanged(double x);
+  void sliderReleased();
+
+protected:
+  virtual void paintEvent(QPaintEvent*) override;
+  virtual void mouseMoveEvent(QMouseEvent*) override;
+  virtual void mousePressEvent(QMouseEvent*) override;
+  virtual void mouseReleaseEvent(QMouseEvent*) override;
+
+  void UpdateImage();
+
+  ImageGeneratorFunc m_Generator = nullptr;
+  QImage m_Image;
+  double m_fValue = 0;
+  double m_fMinValue = 0;
+  double m_fMaxValue = 0;
+};
+
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorSliderWidget : public plQtStandardPropertyWidget
+{
+  Q_OBJECT
+
+public:
+  plQtPropertyEditorSliderWidget();
+  ~plQtPropertyEditorSliderWidget();
+
+private Q_SLOTS:
+  void SlotSliderValueChanged(double fValue);
+  void on_EditingFinished_triggered();
+
+protected:
+  virtual void OnInit() override;
+  virtual void InternalSetValue(const plVariant& value) override;
+
+  bool m_bTemporaryCommand = false;
+  plEnum<plVariantType> m_OriginalType;
+  QHBoxLayout* m_pLayout = nullptr;
+  plQtImageSliderWidget* m_pSlider = nullptr;
+
+  double m_fMinValue = 0;
+  double m_fMaxValue = 0;
+};
+
 /// *** QUATERNION ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorQuaternionWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorQuaternionWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -179,7 +238,7 @@ protected:
 
 /// *** LINEEDIT ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorLineEditWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorLineEditWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -203,7 +262,7 @@ protected:
 
 /// *** COLOR ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtColorButtonWidget : public QFrame
+class PL_GUIFOUNDATION_DLL plQtColorButtonWidget : public QFrame
 {
   Q_OBJECT
 
@@ -225,7 +284,7 @@ private:
   QPalette m_Pal;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorColorWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorColorWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -252,7 +311,7 @@ protected:
 
 /// *** ENUM COMBOBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorEnumWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorEnumWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -275,7 +334,7 @@ protected:
 
 /// *** BITFLAGS COMBOBOX ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorBitflagsWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorBitflagsWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 
@@ -290,19 +349,22 @@ private Q_SLOTS:
 protected:
   virtual void OnInit() override;
   virtual void InternalSetValue(const plVariant& value) override;
+  void SetAllChecked(bool bChecked);
 
 protected:
   plMap<plInt64, QCheckBox*> m_Constants;
-  QHBoxLayout* m_pLayout;
-  QPushButton* m_pWidget;
-  QMenu* m_pMenu;
-  plInt64 m_iCurrentBitflags;
+  QHBoxLayout* m_pLayout = nullptr;
+  QPushButton* m_pWidget = nullptr;
+  QPushButton* m_pAllButton = nullptr;
+  QPushButton* m_pClearButton = nullptr;
+  QMenu* m_pMenu = nullptr;
+  plInt64 m_iCurrentBitflags = 0;
 };
 
 
 /// *** CURVE1D ***
 
-class PLASMA_GUIFOUNDATION_DLL plQtCurve1DButtonWidget : public QLabel
+class PL_GUIFOUNDATION_DLL plQtCurve1DButtonWidget : public QLabel
 {
   Q_OBJECT
 
@@ -318,7 +380,7 @@ protected:
   virtual void mouseReleaseEvent(QMouseEvent* event) override;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyEditorCurve1DWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyEditorCurve1DWidget : public plQtPropertyWidget
 {
   Q_OBJECT
 

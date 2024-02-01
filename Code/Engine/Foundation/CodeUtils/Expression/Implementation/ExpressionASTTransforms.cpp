@@ -266,7 +266,7 @@ plExpressionAST::Node* plExpressionAST::ScalarizeVectorInstructions(Node* pNode)
         return CreateFunctionCall(*pFunctionCall->m_Descs[pFunctionCall->m_uiOverloadIndex], std::move(newSwizzleNodes));
       }
 
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
     else
     {
@@ -391,7 +391,7 @@ plExpressionAST::Node* plExpressionAST::ReplaceUnsupportedInstructions(Node* pNo
       }
 
       const bool isWholeNumber = fExpValue == plMath::Trunc(fExpValue);
-      if (isWholeNumber && fExpValue > 1 && fExpValue < PLASMA_ARRAY_SIZE(s_MultiplicationChains))
+      if (isWholeNumber && fExpValue > 1 && fExpValue < PL_ARRAY_SIZE(s_MultiplicationChains))
       {
         plHybridArray<Node*, 8> multiplierStack;
         multiplierStack.PushBack(pBase);
@@ -449,6 +449,35 @@ plExpressionAST::Node* plExpressionAST::ReplaceUnsupportedInstructions(Node* pNo
     auto pBMinusA = CreateBinaryOperator(NodeType::Subtract, pBValue, pAValue);
     return CreateBinaryOperator(NodeType::Add, pAValue, CreateBinaryOperator(NodeType::Multiply, pSValue, pBMinusA));
   }
+  else if (nodeType == NodeType::SmoothStep || nodeType == NodeType::SmootherStep)
+  {
+    auto pTernaryNode = static_cast<const TernaryOperator*>(pNode);
+    auto pXValue = pTernaryNode->m_pFirstOperand;
+    auto pEdge1Value = pTernaryNode->m_pSecondOperand;
+    auto pEdge2Value = pTernaryNode->m_pThirdOperand;
+
+    auto pXMinusEdge1 = CreateBinaryOperator(NodeType::Subtract, pXValue, pEdge1Value);
+    auto pDivider = CreateBinaryOperator(NodeType::Subtract, pEdge2Value, pEdge1Value);
+    auto pNormalizedX = CreateBinaryOperator(NodeType::Divide, pXMinusEdge1, pDivider);
+    auto pX = ReplaceUnsupportedInstructions(CreateUnaryOperator(NodeType::Saturate, pNormalizedX));
+    auto pXX = CreateBinaryOperator(NodeType::Multiply, pX, pX);
+
+    if (nodeType == NodeType::SmoothStep)
+    {      
+      auto p2X = CreateBinaryOperator(NodeType::Multiply, pX, CreateConstant(2));
+      auto p3Minus2X = CreateBinaryOperator(NodeType::Subtract, CreateConstant(3), p2X);
+      return CreateBinaryOperator(NodeType::Multiply, pXX, p3Minus2X);
+    }
+    else
+    {
+      auto pXXX = CreateBinaryOperator(NodeType::Multiply, pXX, pX);
+      auto p6X = CreateBinaryOperator(NodeType::Multiply, pX, CreateConstant(6));
+      auto p6XMinus15 = CreateBinaryOperator(NodeType::Subtract, p6X, CreateConstant(15));
+      auto pTimesX = CreateBinaryOperator(NodeType::Multiply, p6XMinus15, pX);
+      auto pAdd10 = CreateBinaryOperator(NodeType::Add, pTimesX, CreateConstant(10));
+      return CreateBinaryOperator(NodeType::Multiply, pXXX, pAdd10);
+    }
+  }
   else if (nodeType == NodeType::TypeConversion)
   {
     auto pUnaryNode = static_cast<const UnaryOperator*>(pNode);
@@ -505,7 +534,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::LogicalNot:
             return CreateConstant(!bValue, returnType);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -528,7 +557,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::BitwiseNot:
             return CreateConstant(~iValue, returnType);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -557,11 +586,11 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::Pow2:
             return CreateConstant(plMath::Pow2(fValue));
           case NodeType::Sin:
-            return CreateConstant(plMath::Sin(plAngle::Radian(fValue)));
+            return CreateConstant(plMath::Sin(plAngle::MakeFromRadian(fValue)));
           case NodeType::Cos:
-            return CreateConstant(plMath::Cos(plAngle::Radian(fValue)));
+            return CreateConstant(plMath::Cos(plAngle::MakeFromRadian(fValue)));
           case NodeType::Tan:
-            return CreateConstant(plMath::Tan(plAngle::Radian(fValue)));
+            return CreateConstant(plMath::Tan(plAngle::MakeFromRadian(fValue)));
           case NodeType::ASin:
             return CreateConstant(plMath::ASin(fValue).GetRadian());
           case NodeType::ACos:
@@ -583,7 +612,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::Frac:
             return CreateConstant(plMath::Fraction(fValue));
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -616,7 +645,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::LogicalOr:
             return CreateConstant(bLeftValue || bRightValue, returnType);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -666,7 +695,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::GreaterEqual:
             return CreateConstant(iLeftValue >= iRightValue, returnType);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -708,7 +737,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::GreaterEqual:
             return CreateConstant(fLeftValue >= fRightValue, returnType);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -742,7 +771,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
             }
             return CreateBinaryOperator(NodeType::LogicalOr, pOperand, pConstant);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -801,7 +830,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
           case NodeType::GreaterEqual:
             return CreateBinaryOperator(NodeType::LessEqual, pOperand, pConstant);
           default:
-            PLASMA_ASSERT_NOT_IMPLEMENTED;
+            PL_ASSERT_NOT_IMPLEMENTED;
             return pNode;
         }
       }
@@ -889,8 +918,10 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
   else if (NodeType::IsTernary(nodeType))
   {
     auto pTernaryNode = static_cast<const TernaryOperator*>(pNode);
-    if (nodeType == NodeType::Clamp || nodeType == NodeType::Lerp)
+    if (nodeType == NodeType::Clamp || nodeType == NodeType::Lerp ||
+        nodeType == NodeType::SmoothStep || nodeType == NodeType::SmootherStep)
     {
+      // Nothing to do here since these nodes will be replaced at a later step anyways
       return pNode;
     }
     else if (nodeType == NodeType::Select)
@@ -905,7 +936,7 @@ plExpressionAST::Node* plExpressionAST::FoldConstants(Node* pNode)
       return pNode;
     }
 
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
     return pNode;
   }
 
@@ -990,13 +1021,38 @@ plExpressionAST::Node* plExpressionAST::Validate(Node* pNode)
   return pNode;
 }
 
+plResult plExpressionAST::ScalarizeInputs()
+{
+  for (plUInt32 uiInputIndex = 0; uiInputIndex < m_InputNodes.GetCount(); ++uiInputIndex)
+  {
+    const auto pInput = m_InputNodes[uiInputIndex];
+    if (pInput == nullptr)
+      return PL_FAILURE;
+
+    const plUInt32 uiNumElements = pInput->m_uiNumInputElements;
+    if (uiNumElements > 1)
+    {
+      m_InputNodes.RemoveAtAndCopy(uiInputIndex);
+
+      for (plUInt32 i = 0; i < uiNumElements; ++i)
+      {
+        plEnum<VectorComponent> component = static_cast<VectorComponent::Enum>(i);
+        auto pNewInput = CreateInput(CreateScalarizedStreamDesc(pInput->m_Desc, component));
+        m_InputNodes.Insert(pNewInput, uiInputIndex + i);
+      }
+    }
+  }
+
+  return PL_SUCCESS;
+}
+
 plResult plExpressionAST::ScalarizeOutputs()
 {
   for (plUInt32 uiOutputIndex = 0; uiOutputIndex < m_OutputNodes.GetCount(); ++uiOutputIndex)
   {
     const auto pOutput = m_OutputNodes[uiOutputIndex];
     if (pOutput == nullptr || pOutput->m_pExpression == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const plUInt32 uiNumElements = pOutput->m_uiNumInputElements;
     if (uiNumElements > 1)
@@ -1013,8 +1069,5 @@ plResult plExpressionAST::ScalarizeOutputs()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Expression_Implementation_ExpressionASTTransforms);

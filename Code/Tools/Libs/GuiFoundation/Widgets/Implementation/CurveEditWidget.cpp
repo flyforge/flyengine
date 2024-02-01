@@ -9,8 +9,8 @@
 #include <QRubberBand>
 #include <qevent.h>
 
-plQtCurveEditWidget::plQtCurveEditWidget(QWidget* parent)
-  : QWidget(parent)
+plQtCurveEditWidget::plQtCurveEditWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   setFocusPolicy(Qt::FocusPolicy::ClickFocus);
   setMouseTracking(true);
@@ -203,10 +203,10 @@ QPointF plQtCurveEditWidget::MapToScene(const QPoint& pos) const
   return QPointF(x, y) + m_SceneTranslation;
 }
 
-plVec2 plQtCurveEditWidget::MapDirFromScene(const plVec2& pos) const
+plVec2 plQtCurveEditWidget::MapDirFromScene(const plVec2& vPos) const
 {
-  const float x = pos.x * m_SceneToPixelScale.x();
-  const float y = pos.y * m_SceneToPixelScale.y();
+  const float x = vPos.x * m_SceneToPixelScale.x();
+  const float y = vPos.y * m_SceneToPixelScale.y();
 
   return plVec2(x, y);
 }
@@ -276,9 +276,9 @@ void plQtCurveEditWidget::ToggleSelected(const plSelectedCurveCP& cp)
   Q_EMIT SelectionChangedEvent();
 }
 
-void plQtCurveEditWidget::SetSelected(const plSelectedCurveCP& cp, bool set)
+void plQtCurveEditWidget::SetSelected(const plSelectedCurveCP& cp, bool bSet)
 {
-  if (!set)
+  if (!bSet)
   {
     for (plUInt32 i = 0; i < m_SelectedCPs.GetCount(); ++i)
     {
@@ -462,7 +462,7 @@ void plQtCurveEditWidget::mousePressEvent(QMouseEvent* e)
         m_State = EditState::MultiSelect;
       }
 
-      PLASMA_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
+      PL_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
 
       if (m_State == EditState::DraggingCurve)
       {
@@ -491,7 +491,7 @@ void plQtCurveEditWidget::mousePressEvent(QMouseEvent* e)
     {
       m_State = EditState::DraggingTangents;
       Q_EMIT BeginOperationEvent("Drag Tangents");
-      PLASMA_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
+      PL_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
       m_bBegunChanges = true;
     }
   }
@@ -1287,7 +1287,7 @@ void plQtCurveEditWidget::RenderSideLinesAndText(QPainter* painter, const QRectF
       const QPoint pos = MapFromScene(QPointF(0, y));
 
       textRect.setRect(0, pos.y() - 15, areaRect.width(), 15);
-      tmp.Format("{0}", plArgF(y));
+      tmp.SetFormat("{0}", plArgF(y));
 
       painter->drawText(textRect, tmp.GetData(), textOpt);
     }
@@ -1512,7 +1512,7 @@ void plQtCurveEditWidget::ComputeSelectionRect()
     return;
 
   plBoundingBox bbox;
-  bbox.SetInvalid();
+  bbox = plBoundingBox::MakeInvalid();
 
   for (const auto& cpSel : m_SelectedCPs)
   {

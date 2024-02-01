@@ -20,6 +20,7 @@ namespace ozz::animation
   class Skeleton;
 }
 
+/// \brief What shape is used to approximate a bone's geometry
 struct plSkeletonJointGeometryType
 {
   using StorageType = plUInt8;
@@ -30,7 +31,7 @@ struct plSkeletonJointGeometryType
     Capsule,
     Sphere,
     Box,
-    ConvexMesh,
+    ConvexMesh, ///< A convex mesh is extracted from the mesh file.
 
     Default = None
   };
@@ -40,9 +41,9 @@ struct plSkeletonJointGeometryType
 ///
 /// The pose matrices are still in local space and in the ozz internal structure-of-arrays format.
 /// At this point individual bones can still be modified, to propagate the effect to the child bones.
-struct PLASMA_RENDERERCORE_DLL plMsgAnimationPosePreparing : public plMessage
+struct PL_RENDERERCORE_DLL plMsgAnimationPosePreparing : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgAnimationPosePreparing, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgAnimationPosePreparing, plMessage);
 
   const plSkeleton* m_pSkeleton = nullptr;
   plArrayPtr<ozz::math::SoaTransform> m_LocalTransforms;
@@ -53,23 +54,13 @@ struct PLASMA_RENDERERCORE_DLL plMsgAnimationPosePreparing : public plMessage
 /// This can be used by child nodes/components to synchronize their state to the new animation pose.
 /// The message is sent while the pose is in object space.
 /// Both skeleton and pose pointer are always valid.
-struct PLASMA_RENDERERCORE_DLL plMsgAnimationPoseUpdated : public plMessage
+struct PL_RENDERERCORE_DLL plMsgAnimationPoseUpdated : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgAnimationPoseUpdated, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgAnimationPoseUpdated, plMessage);
 
   static void ComputeFullBoneTransform(const plMat4& mRootTransform, const plMat4& mModelTransform, plMat4& ref_mFullTransform, plQuat& ref_qRotationOnly);
   void ComputeFullBoneTransform(plUInt32 uiJointIndex, plMat4& ref_mFullTransform) const;
   void ComputeFullBoneTransform(plUInt32 uiJointIndex, plMat4& ref_mFullTransform, plQuat& ref_qRotationOnly) const;
-
-  const plTransform* m_pRootTransform = nullptr;
-  const plSkeleton* m_pSkeleton = nullptr;
-  plArrayPtr<const plMat4> m_ModelTransforms;
-  bool m_bContinueAnimating = true;
-};
-
-struct PLASMA_RENDERERCORE_DLL plMsgAnimationPoseProposal : public plMessage
-{
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgAnimationPoseProposal, plMessage);
 
   const plTransform* m_pRootTransform = nullptr;
   const plSkeleton* m_pSkeleton = nullptr;
@@ -84,9 +75,9 @@ struct PLASMA_RENDERERCORE_DLL plMsgAnimationPoseProposal : public plMessage
 /// connected as one long string.
 ///
 /// For a rope with N segments, N+1 poses are sent. The last pose may use the same rotation as the one before.
-struct PLASMA_RENDERERCORE_DLL plMsgRopePoseUpdated : public plMessage
+struct PL_RENDERERCORE_DLL plMsgRopePoseUpdated : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgRopePoseUpdated, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgRopePoseUpdated, plMessage);
 
   plArrayPtr<const plTransform> m_LinkTransforms;
 };
@@ -94,9 +85,9 @@ struct PLASMA_RENDERERCORE_DLL plMsgRopePoseUpdated : public plMessage
 /// \brief The animated mesh component listens to this message and 'answers' by filling out the skeleton resource handle.
 ///
 /// This can be used by components that require a skeleton, to ask the nearby components to provide it to them.
-struct PLASMA_RENDERERCORE_DLL plMsgQueryAnimationSkeleton : public plMessage
+struct PL_RENDERERCORE_DLL plMsgQueryAnimationSkeleton : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgQueryAnimationSkeleton, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgQueryAnimationSkeleton, plMessage);
 
   plSkeletonResourceHandle m_hSkeleton;
 };
@@ -104,9 +95,9 @@ struct PLASMA_RENDERERCORE_DLL plMsgQueryAnimationSkeleton : public plMessage
 /// \brief This message is sent when animation root motion data is available.
 ///
 /// Listening components can use this to move a character.
-struct PLASMA_RENDERERCORE_DLL plMsgApplyRootMotion : public plMessage
+struct PL_RENDERERCORE_DLL plMsgApplyRootMotion : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgApplyRootMotion, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgApplyRootMotion, plMessage);
 
   plVec3 m_vTranslation;
   plAngle m_RotationX;
@@ -117,35 +108,39 @@ struct PLASMA_RENDERERCORE_DLL plMsgApplyRootMotion : public plMessage
 /// \brief Queries the local transforms of each bone in an object with a skeleton
 ///
 /// Used to retrieve the pose of a ragdoll after simulation.
-struct PLASMA_RENDERERCORE_DLL plMsgRetrieveBoneState : public plMessage
+struct PL_RENDERERCORE_DLL plMsgRetrieveBoneState : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgRetrieveBoneState, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgRetrieveBoneState, plMessage);
 
   // maps from bone name to its local transform
   plMap<plString, plTransform> m_BoneTransforms;
 };
 
+/// \brief What type of physics constraint to use for a bone.
 struct plSkeletonJointType
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
-    None,
-    Fixed,
+    None,  ///< The bone is not constrained, at all. It will not be connected to another bone and fall down separately.
+    Fixed, ///< The bone is joined to the parent bone by a fixed joint type and can't move, at all.
     //  Hinge,
-    SwingTwist,
+    SwingTwist, ///< The bone is joined to the parent bone and can swing and twist relative to it in limited fashion.
 
     Default = None,
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plSkeletonJointType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plSkeletonJointType);
 
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief What to do when an animated object is not visible.
-struct PLASMA_RENDERERCORE_DLL plAnimationInvisibleUpdateRate
+///
+/// It is often important to still update animated meshes, so that animation events get handled.
+/// Also even though a mesh may be invisible itself, its shadow or reflection may still be visible.
+struct PL_RENDERERCORE_DLL plAnimationInvisibleUpdateRate
 {
   using StorageType = plUInt8;
 
@@ -165,4 +160,4 @@ struct PLASMA_RENDERERCORE_DLL plAnimationInvisibleUpdateRate
   static plTime GetTimeStep(plAnimationInvisibleUpdateRate::Enum value);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plAnimationInvisibleUpdateRate);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plAnimationInvisibleUpdateRate);

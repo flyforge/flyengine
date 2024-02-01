@@ -6,9 +6,9 @@
 #include <RendererCore/BakedProbes/ProbeTreeSectorResource.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plBakedProbesWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBakedProbesWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE
+PL_IMPLEMENT_WORLD_MODULE(plBakedProbesWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBakedProbesWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE
 // clang-format on
 
 plBakedProbesWorldModule::plBakedProbesWorldModule(plWorld* pWorld)
@@ -36,14 +36,14 @@ plResult plBakedProbesWorldModule::GetProbeIndexData(const plVec3& vGlobalPositi
   // TODO: optimize
 
   if (!HasProbeData())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plResourceLock<plProbeTreeSectorResource> pProbeTree(m_hProbeTree, plResourceAcquireMode::BlockTillLoaded_NeverFail);
   if (pProbeTree.GetAcquireResult() != plResourceAcquireResult::Final)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plSimdVec4f gridSpacePos = plSimdConversion::ToVec3((vGlobalPosition - pProbeTree->GetGridOrigin()).CompDiv(pProbeTree->GetProbeSpacing()));
-  gridSpacePos = gridSpacePos.CompMax(plSimdVec4f::ZeroVector());
+  gridSpacePos = gridSpacePos.CompMax(plSimdVec4f::MakeZero());
 
   plSimdVec4f gridSpacePosFloor = gridSpacePos.Floor();
   plSimdVec4f weights = gridSpacePos - gridSpacePosFloor;
@@ -97,7 +97,7 @@ plResult plBakedProbesWorldModule::GetProbeIndexData(const plVec3& vGlobalPositi
     out_probeIndexData.m_probeWeights[i] *= normalizeFactor;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plAmbientCube<float> plBakedProbesWorldModule::GetSkyVisibility(const ProbeIndexData& indexData) const
@@ -129,10 +129,10 @@ plAmbientCube<float> plBakedProbesWorldModule::GetSkyVisibility(const ProbeIndex
 void plBakedProbesWorldModule::SetProbeTreeResourcePrefix(const plHashedString& prefix)
 {
   plStringBuilder sResourcePath;
-  sResourcePath.Format("{}_Global.plProbeTreeSector", prefix);
+  sResourcePath.SetFormat("{}_Global.plProbeTreeSector", prefix);
 
   m_hProbeTree = plResourceManager::LoadResource<plProbeTreeSectorResource>(sResourcePath);
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesWorldModule);
+PL_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesWorldModule);

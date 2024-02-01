@@ -4,15 +4,15 @@
 #include <GuiFoundation/GuiFoundationDLL.h>
 #include <ToolsFoundation/Selection/SelectionManager.h>
 ///
-class PLASMA_GUIFOUNDATION_DLL plEditActions
+class PL_GUIFOUNDATION_DLL plEditActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath, bool bDeleteAction, bool bAdvancedPasteActions);
-  static void MapContextMenuActions(const char* szMapping, const char* szPath);
-  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping, bool bDeleteAction, bool bAdvancedPasteActions);
+  static void MapContextMenuActions(plStringView sMapping);
+  static void MapViewContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hEditCategory;
   static plActionDescriptorHandle s_hCopy;
@@ -24,9 +24,9 @@ public:
 
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plEditAction : public plButtonAction
+class PL_GUIFOUNDATION_DLL plEditAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plEditAction, plButtonAction);
 
 public:
   enum class ButtonType

@@ -30,4 +30,4 @@ void RemoveTimeEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Time);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Time);

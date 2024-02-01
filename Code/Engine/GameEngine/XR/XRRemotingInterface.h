@@ -16,7 +16,7 @@ struct plXRRemotingConnectionState
     Default = Disconnected
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRRemotingConnectionState);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRRemotingConnectionState);
 
 struct plXRRemotingDisconnectReason
 {
@@ -54,7 +54,7 @@ struct plXRRemotingDisconnectReason
     Default = None
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRRemotingDisconnectReason);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRRemotingDisconnectReason);
 
 struct plXRRemotingConnectionEventData
 {
@@ -62,7 +62,7 @@ struct plXRRemotingConnectionEventData
   plEnum<plXRRemotingDisconnectReason> m_disconnectReason;
 };
 
-typedef plEvent<const plXRRemotingConnectionEventData&> plXRRemotingConnectionEvent;
+using plXRRemotingConnectionEvent = plEvent<const plXRRemotingConnectionEventData&>;
 
 /// \brief XR Remoting singleton interface. Allows for streaming the XR application to a remote device.
 ///
@@ -86,7 +86,7 @@ public:
   ///@{
 
   /// \brief Tries to connect to the remote device.
-  virtual plResult Connect(const char* remoteHostName, uint16_t remotePort = 8265, bool enableAudio = true, int maxBitrateKbps = 20000) = 0;
+  virtual plResult Connect(const char* szRemoteHostName, uint16_t remotePort = 8265, bool bEnableAudio = true, int iMaxBitrateKbps = 20000) = 0;
   /// \brief Disconnects from the remote device.
   virtual plResult Disconnect() = 0;
   /// \brief Get the current connection state to the remote device.

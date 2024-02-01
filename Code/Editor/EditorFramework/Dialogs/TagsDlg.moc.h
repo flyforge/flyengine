@@ -7,13 +7,13 @@
 #include <QDialog>
 #include <ToolsFoundation/Settings/ToolsTagRegistry.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtTagsDlg : public QDialog, public Ui_plQtTagsDlg
+class PL_EDITORFRAMEWORK_DLL plQtTagsDlg : public QDialog, public Ui_plQtTagsDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtTagsDlg(QWidget* parent);
+  plQtTagsDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_ButtonNewCategory_clicked();

@@ -6,22 +6,22 @@
 #include <EditorFramework/Gizmos/DrawBoxGizmo.h>
 #include <EditorFramework/Gizmos/SnapProvider.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDrawBoxGizmo, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDrawBoxGizmo, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDrawBoxGizmo::plDrawBoxGizmo()
 {
   m_ManipulateMode = ManipulateMode::None;
 
   m_vLastStartPoint.SetZero();
-  m_hBox.ConfigureHandle(this, PlasmaEngineGizmoHandleType::LineBox, plColorLinearUB(255, 100, 0), plGizmoFlags::ShowInOrtho);
+  m_hBox.ConfigureHandle(this, plEngineGizmoHandleType::LineBox, plColorLinearUB(255, 100, 0), plGizmoFlags::ShowInOrtho);
 
   SetVisible(false);
-  SetTransformation(plTransform::IdentityTransform());
+  SetTransformation(plTransform::MakeIdentity());
 }
 
-plDrawBoxGizmo::~plDrawBoxGizmo() {}
+plDrawBoxGizmo::~plDrawBoxGizmo() = default;
 
 void plDrawBoxGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
 {
@@ -71,7 +71,7 @@ bool plDrawBoxGizmo::PickPosition(QMouseEvent* e)
   return true;
 }
 
-PlasmaEditorInput plDrawBoxGizmo::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plDrawBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (e->buttons() == Qt::LeftButton && e->modifiers().testFlag(Qt::ControlModifier))
   {
@@ -79,45 +79,46 @@ PlasmaEditorInput plDrawBoxGizmo::DoMousePressEvent(QMouseEvent* e)
     {
       if (!PickPosition(e))
       {
-        return PlasmaEditorInput::WasExclusivelyHandled; // failed to pick anything
+        return plEditorInput::WasExclusivelyHandled; // failed to pick anything
       }
 
       m_vLastStartPoint = m_vCurrentPosition;
       SwitchMode(false);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plDrawBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plDrawBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() == Qt::LeftButton)
   {
     if (m_ManipulateMode == ManipulateMode::DrawBase || m_ManipulateMode == ManipulateMode::DrawHeight)
     {
       SwitchMode(m_vFirstCorner == m_vSecondCorner);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plDrawBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plDrawBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   UpdateGrid(e);
 
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_ManipulateMode == ManipulateMode::DrawHeight)
   {
-    const plVec2I32 vMouseMove = plVec2I32(e->globalPos().x(), e->globalPos().y()) - m_vLastMousePos;
+    const QPoint mousePosition = e->globalPosition().toPoint();
+    const plVec2I32 vMouseMove = plVec2I32(mousePosition.x(), mousePosition.y()) - m_vLastMousePos;
     m_iHeightChange -= vMouseMove.y;
 
     m_vLastMousePos = UpdateMouseMode(e);
@@ -125,7 +126,7 @@ PlasmaEditorInput plDrawBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
   else
   {
     plPlane plane;
-    plane.SetFromNormalAndPoint(m_vUpAxis, m_vFirstCorner);
+    plane = plPlane::MakeFromNormalAndPoint(m_vUpAxis, m_vFirstCorner);
 
     GetOwnerView()->PickPlane(e->pos().x(), e->pos().y(), plane, m_vCurrentPosition).IgnoreResult();
 
@@ -134,14 +135,14 @@ PlasmaEditorInput plDrawBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 
   UpdateBox();
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plDrawBoxGizmo::DoKeyPressEvent(QKeyEvent* e)
+plEditorInput plDrawBoxGizmo::DoKeyPressEvent(QKeyEvent* e)
 {
   // is the gizmo in general visible == is it active
   if (!IsVisible())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   DisableGrid(e->modifiers().testFlag(Qt::ControlModifier));
 
@@ -150,18 +151,18 @@ PlasmaEditorInput plDrawBoxGizmo::DoKeyPressEvent(QKeyEvent* e)
     if (m_ManipulateMode != ManipulateMode::None)
     {
       SwitchMode(true);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plDrawBoxGizmo::DoKeyReleaseEvent(QKeyEvent* e)
+plEditorInput plDrawBoxGizmo::DoKeyReleaseEvent(QKeyEvent* e)
 {
   DisableGrid(e->modifiers().testFlag(Qt::ControlModifier));
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 void plDrawBoxGizmo::SwitchMode(bool bCancel)
@@ -197,7 +198,7 @@ void plDrawBoxGizmo::SwitchMode(bool bCancel)
     m_ManipulateMode = ManipulateMode::DrawHeight;
     m_iHeightChange = 0;
     m_fOriginalBoxHeight = m_fBoxHeight;
-    m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+    m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
     UpdateBox();
     return;
   }
@@ -227,7 +228,7 @@ void plDrawBoxGizmo::UpdateBox()
 
   if (m_ManipulateMode == ManipulateMode::None || m_vFirstCorner == m_vSecondCorner)
   {
-    m_hBox.SetTransformation(plTransform(plVec3(0), plQuat::IdentityQuaternion(), plVec3(0)));
+    m_hBox.SetTransformation(plTransform(plVec3(0), plQuat::MakeIdentity(), plVec3(0)));
     m_hBox.SetVisible(false);
     return;
   }
@@ -266,7 +267,7 @@ void plDrawBoxGizmo::UpdateBox()
     vSize.y = m_fBoxHeight;
   }
 
-  m_hBox.SetTransformation(plTransform(vCenter, plQuat::IdentityQuaternion(), vSize));
+  m_hBox.SetTransformation(plTransform(vCenter, plQuat::MakeIdentity(), vSize));
   m_hBox.SetVisible(true);
 }
 
@@ -292,9 +293,9 @@ void plDrawBoxGizmo::UpdateGrid(QMouseEvent* e)
   }
 }
 
-void plDrawBoxGizmo::GetResult(plVec3& out_Origin, float& out_fSizeNegX, float& out_fSizePosX, float& out_fSizeNegY, float& out_fSizePosY, float& out_fSizeNegZ, float& out_fSizePosZ) const
+void plDrawBoxGizmo::GetResult(plVec3& out_vOrigin, float& out_fSizeNegX, float& out_fSizePosX, float& out_fSizeNegY, float& out_fSizePosY, float& out_fSizeNegZ, float& out_fSizePosZ) const
 {
-  out_Origin = m_vFirstCorner;
+  out_vOrigin = m_vFirstCorner;
 
   float fBoxX = m_vSecondCorner.x - m_vFirstCorner.x;
   float fBoxY = m_vSecondCorner.y - m_vFirstCorner.y;

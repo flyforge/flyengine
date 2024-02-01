@@ -5,16 +5,16 @@
 #include <Foundation/Types/UniquePtr.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plPropertyPathStep, plNoBase, 1, plRTTIDefaultAllocator<plPropertyPathStep>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plPropertyPathStep, plNoBase, 1, plRTTIDefaultAllocator<plPropertyPathStep>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("Index", m_Index),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plPropertyPath::plPropertyPath() = default;
@@ -62,7 +62,7 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI& rootObjectRtti, const 
     const plAbstractProperty* pAbsProp = pCurRtti->FindPropertyByName(sFieldName);
 
     if (pAbsProp == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     auto& step = m_PathSteps.ExpandAndGetRef();
     step.m_pProperty = pAbsProp;
@@ -76,7 +76,7 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI& rootObjectRtti, const 
       else
       {
         plInt32 iIndex;
-        PLASMA_SUCCEED_OR_RETURN(plConversionUtils::StringToInt(sIndex, iIndex));
+        PL_SUCCEED_OR_RETURN(plConversionUtils::StringToInt(sIndex, iIndex));
         step.m_Index = iIndex;
       }
     }
@@ -88,7 +88,7 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI& rootObjectRtti, const 
       }
       else
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
     else if (pAbsProp->GetCategory() == plPropertyCategory::Map)
@@ -100,7 +100,7 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI& rootObjectRtti, const 
   }
 
   m_bIsValid = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPropertyPath::InitializeFromPath(const plRTTI* pRootObjectRtti, const plArrayPtr<const plPropertyPathStep> path)
@@ -115,7 +115,7 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI* pRootObjectRtti, const
   {
     const plAbstractProperty* pAbsProp = pCurRtti->FindPropertyByName(pathStep.m_sProperty);
     if (pAbsProp == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     auto& step = m_PathSteps.ExpandAndGetRef();
     step.m_pProperty = pAbsProp;
@@ -125,12 +125,12 @@ plResult plPropertyPath::InitializeFromPath(const plRTTI* pRootObjectRtti, const
   }
 
   m_bIsValid = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPropertyPath::WriteToLeafObject(void* pRootObject, const plRTTI& type, plDelegate<void(void* pLeaf, const plRTTI& pType)> func) const
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     m_PathSteps.IsEmpty() || m_PathSteps[m_PathSteps.GetCount() - 1].m_pProperty->GetSpecificType()->GetTypeFlags().IsSet(plTypeFlags::Class),
     "To resolve the leaf object the path needs to be empty or end in a class.");
   return ResolvePath(pRootObject, &type, m_PathSteps.GetArrayPtr(), true, func);
@@ -138,7 +138,7 @@ plResult plPropertyPath::WriteToLeafObject(void* pRootObject, const plRTTI& type
 
 plResult plPropertyPath::ReadFromLeafObject(void* pRootObject, const plRTTI& type, plDelegate<void(void* pLeaf, const plRTTI& pType)> func) const
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     m_PathSteps.IsEmpty() || m_PathSteps[m_PathSteps.GetCount() - 1].m_pProperty->GetSpecificType()->GetTypeFlags().IsSet(plTypeFlags::Class),
     "To resolve the leaf object the path needs to be empty or end in a class.");
   return ResolvePath(pRootObject, &type, m_PathSteps.GetArrayPtr(), false, func);
@@ -147,7 +147,7 @@ plResult plPropertyPath::ReadFromLeafObject(void* pRootObject, const plRTTI& typ
 plResult plPropertyPath::WriteProperty(
   void* pRootObject, const plRTTI& type, plDelegate<void(void* pLeafObject, const plRTTI& pLeafType, const plAbstractProperty* pProp, const plVariant& index)> func) const
 {
-  PLASMA_ASSERT_DEBUG(!m_PathSteps.IsEmpty(), "Call InitializeFromPath before WriteToObject");
+  PL_ASSERT_DEBUG(!m_PathSteps.IsEmpty(), "Call InitializeFromPath before WriteToObject");
   return ResolvePath(pRootObject, &type, m_PathSteps.GetArrayPtr().GetSubArray(0, m_PathSteps.GetCount() - 1), true,
     [this, &func](void* pLeafObject, const plRTTI& leafType) {
       auto& lastStep = m_PathSteps[m_PathSteps.GetCount() - 1];
@@ -158,7 +158,7 @@ plResult plPropertyPath::WriteProperty(
 plResult plPropertyPath::ReadProperty(
   void* pRootObject, const plRTTI& type, plDelegate<void(void* pLeafObject, const plRTTI& pLeafType, const plAbstractProperty* pProp, const plVariant& index)> func) const
 {
-  PLASMA_ASSERT_DEBUG(m_bIsValid, "Call InitializeFromPath before WriteToObject");
+  PL_ASSERT_DEBUG(m_bIsValid, "Call InitializeFromPath before WriteToObject");
   return ResolvePath(pRootObject, &type, m_PathSteps.GetArrayPtr().GetSubArray(0, m_PathSteps.GetCount() - 1), false,
     [this, &func](void* pLeafObject, const plRTTI& leafType) {
       auto& lastStep = m_PathSteps[m_PathSteps.GetCount() - 1];
@@ -168,7 +168,7 @@ plResult plPropertyPath::ReadProperty(
 
 void plPropertyPath::SetValue(void* pRootObject, const plRTTI& type, const plVariant& value) const
 {
-  // PLASMA_ASSERT_DEBUG(!m_PathSteps.IsEmpty() &&
+  // PL_ASSERT_DEBUG(!m_PathSteps.IsEmpty() &&
   //                    value.CanConvertTo(m_PathSteps[m_PathSteps.GetCount() - 1].m_pProperty->GetSpecificType()->GetVariantType()),
   //                "The given value does not match the type at the given path.");
 
@@ -185,7 +185,7 @@ void plPropertyPath::SetValue(void* pRootObject, const plRTTI& type, const plVar
         plReflectionUtils::SetMapPropertyValue(static_cast<const plAbstractMapProperty*>(pProp), pLeaf, index.Get<plString>(), value);
         break;
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         break;
     }
   }).IgnoreResult();
@@ -193,7 +193,7 @@ void plPropertyPath::SetValue(void* pRootObject, const plRTTI& type, const plVar
 
 void plPropertyPath::GetValue(void* pRootObject, const plRTTI& type, plVariant& out_value) const
 {
-  // PLASMA_ASSERT_DEBUG(!m_PathSteps.IsEmpty() &&
+  // PL_ASSERT_DEBUG(!m_PathSteps.IsEmpty() &&
   //                    m_PathSteps[m_PathSteps.GetCount() - 1].m_pProperty->GetSpecificType()->GetVariantType() != plVariantType::Invalid,
   //                "The property path of value {} cannot be stored in an plVariant.", m_PathSteps[m_PathSteps.GetCount() -
   //                1].m_pProperty->GetSpecificType()->GetTypeName());
@@ -211,7 +211,7 @@ void plPropertyPath::GetValue(void* pRootObject, const plRTTI& type, plVariant& 
         out_value = plReflectionUtils::GetMapPropertyValue(static_cast<const plAbstractMapProperty*>(pProp), pLeaf, index.Get<plString>());
         break;
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         break;
     }
   }).IgnoreResult();
@@ -223,7 +223,7 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
   if (path.IsEmpty())
   {
     func(pCurrentObject, *pType);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else // Recurse
   {
@@ -259,7 +259,7 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
           }
           else
           {
-            PLASMA_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
+            PL_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
           }
         }
       }
@@ -272,7 +272,7 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
         {
           const plUInt32 uiIndex = path[0].m_Index.ConvertTo<plUInt32>();
           if (uiIndex >= pSpecific->GetCount(pCurrentObject))
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
 
           void* pSubObject = pPropType->GetAllocator()->Allocate<void>();
           pSpecific->GetValue(pCurrentObject, uiIndex, pSubObject);
@@ -287,7 +287,7 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
         }
         else
         {
-          PLASMA_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
+          PL_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
         }
       }
       break;
@@ -296,7 +296,7 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
         auto pSpecific = static_cast<const plAbstractMapProperty*>(pProp);
         const plString& sKey = path[0].m_Index.Get<plString>();
         if (!pSpecific->Contains(pCurrentObject, sKey))
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         if (pPropType->GetAllocator()->CanAllocate())
         {
@@ -314,21 +314,21 @@ plResult plPropertyPath::ResolvePath(void* pCurrentObject, const plRTTI* pType, 
         }
         else
         {
-          PLASMA_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
+          PL_REPORT_FAILURE("Non-allocatable property should not be part of an object chain!");
         }
       }
       break;
       case plPropertyCategory::Set:
       default:
       {
-        PLASMA_REPORT_FAILURE("Property of type Set should not be part of an object chain!");
+        PL_REPORT_FAILURE("Property of type Set should not be part of an object chain!");
       }
       break;
     }
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyPath);
+PL_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyPath);

@@ -1,3 +1,0 @@
-Processing failed
-Preprocessor/InvalidLogic2.txt: Line 1 [6]: Warning: Expected end-of-line, found token '('
-Log: 'File 'Preprocessor/InvalidLogic2.txt', Line 1 (6): Expected end-of-line, found token '(''

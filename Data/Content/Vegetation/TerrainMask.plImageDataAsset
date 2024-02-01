@@ -14,10 +14,14 @@ o
 			s{"Vegetation/TerrainMask.jpg"}
 		}
 		Uuid %DocumentID{u4{1527564486751623325,4620496772036806148}}
-		u4 %Hash{1572033454554921826}
+		u4 %Hash{14645565065917209979}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %References{}
+		VarArray %PackageDeps{}
+		VarArray %References
+		{
+			s{"Vegetation/TerrainMask.jpg"}
+		}
 	}
 }
 }
@@ -52,25 +56,7 @@ Types
 {
 o
 {
-	Uuid %id{u4{7311963824766092013,3079277721885661103}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plImageDataAssetProperties"}
-		u3 %TypeSize{72}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -82,13 +68,29 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDocumentRoot"}
-		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{14302079050274622407,14178533165904756964}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plImageDataAssetProperties"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -100,7 +102,6 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
-		u3 %TypeSize{8}
 		u3 %TypeVersion{1}
 	}
 }

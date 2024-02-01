@@ -5,11 +5,10 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 #include <RendererFoundation/Profiling/Profiling.h>
 
-#include <RendererCore/../../../Data/Base/Shaders/Common/ObjectConstants.h>
+#include <Shaders/Common/ObjectConstants.h>
 
 plInstanceData::plInstanceData(plUInt32 uiMaxInstanceCount /*= 1024*/)
-  : m_uiBufferSize(0)
-  , m_uiBufferOffset(0)
+
 {
   CreateBuffer(uiMaxInstanceCount);
 
@@ -47,7 +46,7 @@ plArrayPtr<plPerInstanceData> plInstanceData::GetInstanceData(plUInt32 uiCount, 
 
 void plInstanceData::UpdateInstanceData(plRenderContext* pRenderContext, plUInt32 uiCount)
 {
-  PLASMA_ASSERT_DEV(m_uiBufferOffset + uiCount <= m_uiBufferSize, "Implementation error");
+  PL_ASSERT_DEV(m_uiBufferOffset + uiCount <= m_uiBufferSize, "Implementation error");
 
   plGALCommandEncoder* pGALCommandEncoder = pRenderContext->GetCommandEncoder();
 
@@ -89,14 +88,14 @@ void plInstanceData::Reset()
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstanceDataProvider, 1, plRTTIDefaultAllocator<plInstanceDataProvider>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstanceDataProvider, 1, plRTTIDefaultAllocator<plInstanceDataProvider>)
   {
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plInstanceDataProvider::plInstanceDataProvider() {}
+plInstanceDataProvider::plInstanceDataProvider() = default;
 
-plInstanceDataProvider::~plInstanceDataProvider() {}
+plInstanceDataProvider::~plInstanceDataProvider() = default;
 
 void* plInstanceDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {
@@ -107,4 +106,4 @@ void* plInstanceDataProvider::UpdateData(const plRenderViewContext& renderViewCo
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_InstanceDataProvider);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_InstanceDataProvider);

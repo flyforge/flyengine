@@ -12,16 +12,16 @@
 class plRenderContext;
 
 /// \brief Implements rendering of particle systems
-class PLASMA_PARTICLEPLUGIN_DLL plParticleRenderer : public plRenderer
+class PL_PARTICLEPLUGIN_DLL plParticleRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plParticleRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plParticleRenderer);
 
 public:
   plParticleRenderer();
   ~plParticleRenderer();
 
-  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const override;
+  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const override;
 
 protected:
   struct TempSystemCB
@@ -29,7 +29,7 @@ protected:
     TempSystemCB(plRenderContext* pRenderContext);
     ~TempSystemCB();
 
-    void SetGenericData(bool bApplyObjectTransform, const plTransform& ObjectTransform, plTime effectLifeTime, plUInt8 uiNumVariationsX,
+    void SetGenericData(bool bApplyObjectTransform, const plTransform& objectTransform, plTime effectLifeTime, plUInt8 uiNumVariationsX,
       plUInt8 uiNumVariationsY, plUInt8 uiNumFlipbookAnimsX, plUInt8 uiNumFlipbookAnimsY, float fDistortionStrength = 0);
     void SetTrailData(float fSnapshotFraction, plInt32 iNumUsedTrailPoints);
 

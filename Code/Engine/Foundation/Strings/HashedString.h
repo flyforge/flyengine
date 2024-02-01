@@ -21,22 +21,22 @@ class plTempHashedString;
 /// are rare, but checks for equality might be frequent (e.g. in a system where objects are identified via their name).\n
 /// At runtime when you need to compare plHashedString objects with some temporary string object, used plTempHashedString,
 /// as it will only use the string's hash value for comparison, but will not store the actual string anywhere.
-class PLASMA_FOUNDATION_DLL plHashedString
+class PL_FOUNDATION_DLL plHashedString
 {
 public:
   struct HashedData
   {
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
     plAtomicInteger32 m_iRefCount;
 #endif
     plString m_sString;
   };
 
   // Do NOT use a hash-table! The map does not relocate memory when it resizes, which is a vital aspect for the hashed strings to work.
-  using StringStorage = plMap<plUInt64, HashedData, plCompareHelper<plUInt64>, plStaticAllocatorWrapper>;
+  using StringStorage = plMap<plUInt64, HashedData, plCompareHelper<plUInt64>, plStaticsAllocatorWrapper>;
   using HashedType = StringStorage::Iterator;
 
-#if PLASMA_ENABLED(PLASMA_HASHED_STRING_REF_COUNTING)
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   /// \brief This will remove all hashed strings from the central storage, that are not referenced anymore.
   ///
   /// All hashed string values are stored in a central location and plHashedString just references them. Those strings are then
@@ -49,7 +49,7 @@ public:
   static plUInt32 ClearUnusedStrings();
 #endif
 
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   /// \brief Initializes this string to the empty string.
   plHashedString(); // [tested]
@@ -60,8 +60,10 @@ public:
   /// \brief Moves the given plHashedString.
   plHashedString(plHashedString&& rhs); // [tested]
 
+#if PL_ENABLED(PL_HASHED_STRING_REF_COUNTING)
   /// \brief Releases the reference to the internal data. Does NOT deallocate any data, even if this held the last reference to some string.
   ~plHashedString();
+#endif
 
   /// \brief Copies the given plHashedString.
   void operator=(const plHashedString& rhs); // [tested]
@@ -91,16 +93,12 @@ public:
   /// \note Comparing between plHashedString objects is always error-free, so even if two string had the same hash value, although they are
   /// different, this comparison function will not report they are the same.
   bool operator==(const plHashedString& rhs) const; // [tested]
-
-  /// \brief \see operator==
-  bool operator!=(const plHashedString& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plHashedString&);
 
   /// \brief Compares this string object to an plTempHashedString object. This should be used whenever some object needs to be found
   /// and the string to compare against is not yet an plHashedString object.
   bool operator==(const plTempHashedString& rhs) const; // [tested]
-
-  /// \brief \see operator==
-  bool operator!=(const plTempHashedString& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plTempHashedString&);
 
   /// \brief This operator allows sorting objects by hash value, not by alphabetical order.
   bool operator<(const plHashedString& rhs) const; // [tested]
@@ -124,13 +122,13 @@ public:
   void Clear();
 
   /// \brief Returns a string view to this string's data.
-  PLASMA_ALWAYS_INLINE operator plStringView() const { return GetString().GetView(); }
+  PL_ALWAYS_INLINE operator plStringView() const { return GetString().GetView(); }
 
   /// \brief Returns a string view to this string's data.
-  PLASMA_ALWAYS_INLINE plStringView GetView() const { return GetString().GetView(); }
+  PL_ALWAYS_INLINE plStringView GetView() const { return GetString().GetView(); }
 
   /// \brief Returns a pointer to the internal Utf8 string.
-  PLASMA_ALWAYS_INLINE operator const char*() const { return GetData(); }
+  PL_ALWAYS_INLINE operator const char*() const { return GetData(); }
 
 private:
   static void InitHashedString();
@@ -149,7 +147,7 @@ plHashedString plMakeHashedString(const char (&string)[N]);
 /// Whenever you have objects that use plHashedString members and you need to compare against them with some temporary string,
 /// prefer to use plTempHashedString instead of plHashedString, as the latter requires thread synchronization to actually set up the
 /// object.
-class PLASMA_FOUNDATION_DLL plTempHashedString
+class PL_FOUNDATION_DLL plTempHashedString
 {
   friend class plHashedString;
 
@@ -165,7 +163,7 @@ public:
 
   /// \brief Creates an plTempHashedString object from the given string. Computes the hash of the given string during runtime, which might
   /// be slow.
-  plTempHashedString(plStringView sString); // [tested]
+  explicit plTempHashedString(plStringView sString); // [tested]
 
   /// \brief Copies the hash from rhs.
   plTempHashedString(const plTempHashedString& rhs); // [tested]
@@ -193,9 +191,7 @@ public:
 
   /// \brief Compares the two objects by their hash value. Might report incorrect equality, if two strings have the same hash value.
   bool operator==(const plTempHashedString& rhs) const; // [tested]
-
-  /// \brief \see operator==
-  bool operator!=(const plTempHashedString& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plTempHashedString&);
 
   /// \brief This operator allows soring objects by hash value, not by alphabetical order.
   bool operator<(const plTempHashedString& rhs) const; // [tested]
@@ -214,6 +210,6 @@ private:
 };
 
 // For plFormatString
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plHashedString& sArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plHashedString& sArg);
 
 #include <Foundation/Strings/Implementation/HashedString_inl.h>

@@ -2,7 +2,7 @@
 
 #include <Core/Scripting/ScriptCoroutine.h>
 
-class PLASMA_CORE_DLL plScriptCoroutine_Wait : public plTypedScriptCoroutine<plScriptCoroutine_Wait, plTime>
+class PL_CORE_DLL plScriptCoroutine_Wait : public plTypedScriptCoroutine<plScriptCoroutine_Wait, plTime>
 {
 public:
   void Start(plTime timeout);
@@ -12,4 +12,4 @@ private:
   plTime m_TimeRemaing;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutine_Wait);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutine_Wait);

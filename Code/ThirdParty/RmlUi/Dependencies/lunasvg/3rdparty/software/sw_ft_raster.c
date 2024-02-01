@@ -305,7 +305,7 @@ typedef struct gray_TWorker_ {
 
     TPos x, y;
 
-    SW_FT_Vector bpl_stack[32 * 3 + 1];
+    SW_FT_Vector bez_stack[32 * 3 + 1];
     int          lev_stack[32];
 
     SW_FT_Outline outline;
@@ -665,7 +665,7 @@ static void gray_render_conic(RAS_ARG_ const SW_FT_Vector* control,
 
     levels = ras.lev_stack;
 
-    arc = ras.bpl_stack;
+    arc = ras.bez_stack;
     arc[0].x = UPSCALE(to->x);
     arc[0].y = UPSCALE(to->y);
     arc[1].x = UPSCALE(control->x);
@@ -755,7 +755,7 @@ gray_render_cubic(RAS_ARG_ const SW_FT_Vector* control1,
                               const SW_FT_Vector*          control2,
                               const SW_FT_Vector*          to)
 {
-    SW_FT_Vector* arc = ras.bpl_stack;
+    SW_FT_Vector* arc = ras.bez_stack;
 
     arc[0].x = UPSCALE( to->x );
     arc[0].y = UPSCALE( to->y );
@@ -794,7 +794,7 @@ gray_render_cubic(RAS_ARG_ const SW_FT_Vector* control1,
 
       gray_render_line( RAS_VAR_ arc[0].x, arc[0].y );
 
-      if ( arc == ras.bpl_stack )
+      if ( arc == ras.bez_stack )
         return;
 
       arc -= 3;

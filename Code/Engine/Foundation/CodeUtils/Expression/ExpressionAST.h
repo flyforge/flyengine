@@ -1,11 +1,11 @@
 #pragma once
 
 #include <Foundation/CodeUtils/Expression/ExpressionDeclarations.h>
-#include <Foundation/Memory/StackAllocator.h>
+#include <Foundation/Memory/LinearAllocator.h>
 
 class plDGMLGraph;
 
-class PLASMA_FOUNDATION_DLL plExpressionAST
+class PL_FOUNDATION_DLL plExpressionAST
 {
 public:
   struct NodeType
@@ -84,6 +84,8 @@ public:
       Clamp,
       Select,
       Lerp,
+      SmoothStep,
+      SmootherStep,
       LastTernary,
 
       Constant,
@@ -148,17 +150,17 @@ public:
 
     static Enum FromStreamType(plProcessingStream::DataType dataType);
 
-    PLASMA_ALWAYS_INLINE static plExpression::RegisterType::Enum GetRegisterType(Enum dataType)
+    PL_ALWAYS_INLINE static plExpression::RegisterType::Enum GetRegisterType(Enum dataType)
     {
       return static_cast<plExpression::RegisterType::Enum>(dataType >> 2);
     }
 
-    PLASMA_ALWAYS_INLINE static Enum FromRegisterType(plExpression::RegisterType::Enum registerType, plUInt32 uiElementCount = 1)
+    PL_ALWAYS_INLINE static Enum FromRegisterType(plExpression::RegisterType::Enum registerType, plUInt32 uiElementCount = 1)
     {
       return static_cast<plExpressionAST::DataType::Enum>((registerType << 2) + uiElementCount - 1);
     }
 
-    PLASMA_ALWAYS_INLINE static plUInt32 GetElementCount(Enum dataType) { return (dataType & 0x3) + 1; }
+    PL_ALWAYS_INLINE static plUInt32 GetElementCount(Enum dataType) { return (dataType & 0x3) + 1; }
 
     static const char* GetName(Enum dataType);
   };
@@ -274,7 +276,8 @@ public:
 
   void PrintGraph(plDGMLGraph& inout_graph) const;
 
-  plHybridArray<Output*, 8> m_OutputNodes;
+  plSmallArray<Input*, 8> m_InputNodes;
+  plSmallArray<Output*, 8> m_OutputNodes;
 
   // Transforms
   Node* TypeDeductionAndConversion(Node* pNode);
@@ -285,6 +288,7 @@ public:
   Node* CommonSubexpressionElimination(Node* pNode);
   Node* Validate(Node* pNode);
 
+  plResult ScalarizeInputs();
   plResult ScalarizeOutputs();
 
 private:
@@ -295,7 +299,7 @@ private:
   static void UpdateHash(Node* pNode);
   static bool IsEqual(const Node* pNodeA, const Node* pNodeB);
 
-  plStackAllocator<> m_Allocator;
+  plLinearAllocator<> m_Allocator;
 
   plSet<plExpression::FunctionDesc> m_FunctionDescs;
 

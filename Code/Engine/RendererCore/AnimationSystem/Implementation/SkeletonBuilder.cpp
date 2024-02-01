@@ -9,7 +9,7 @@ plSkeletonBuilder::~plSkeletonBuilder() = default;
 
 plUInt16 plSkeletonBuilder::AddJoint(plStringView sName, const plTransform& localRestPose, plUInt16 uiParentIndex /*= plInvalidJointIndex*/)
 {
-  PLASMA_ASSERT_DEV(uiParentIndex == plInvalidJointIndex || uiParentIndex < m_Joints.GetCount(), "Invalid parent index for joint");
+  PL_ASSERT_DEV(uiParentIndex == plInvalidJointIndex || uiParentIndex < m_Joints.GetCount(), "Invalid parent index for joint");
 
   auto& joint = m_Joints.ExpandAndGetRef();
 
@@ -55,7 +55,7 @@ void plSkeletonBuilder::SetJointCollisionLayer(plUInt16 uiJointIndex, plUInt8 ui
 
 void plSkeletonBuilder::BuildSkeleton(plSkeleton& ref_skeleton) const
 {
-  // PLASMA_ASSERT_DEV(HasJoints(), "Can't build a skeleton with no joints!");
+  // PL_ASSERT_DEV(HasJoints(), "Can't build a skeleton with no joints!");
 
   const plUInt32 numJoints = m_Joints.GetCount();
 
@@ -87,5 +87,3 @@ bool plSkeletonBuilder::HasJoints() const
 }
 
 
-
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonBuilder);

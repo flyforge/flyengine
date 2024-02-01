@@ -4,13 +4,13 @@
 #include <Core/World/World.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plWindWorldModuleInterface, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plWindWorldModuleInterface, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plWindStrength, 1)
-  PLASMA_ENUM_CONSTANTS(plWindStrength::Calm, plWindStrength::LightBreple, plWindStrength::GentleBreple, plWindStrength::ModerateBreple, plWindStrength::StrongBreple, plWindStrength::Storm)
-  PLASMA_ENUM_CONSTANTS(plWindStrength::WeakShockwave, plWindStrength::MediumShockwave, plWindStrength::StrongShockwave, plWindStrength::ExtremeShockwave)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plWindStrength, 1)
+  PL_ENUM_CONSTANTS(plWindStrength::Calm, plWindStrength::LightBreple, plWindStrength::GentleBreple, plWindStrength::ModerateBreple, plWindStrength::StrongBreple, plWindStrength::Storm)
+  PL_ENUM_CONSTANTS(plWindStrength::WeakShockwave, plWindStrength::MediumShockwave, plWindStrength::StrongShockwave, plWindStrength::ExtremeShockwave)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 float plWindStrength::GetInMetersPerSecond(Enum strength)
@@ -50,7 +50,7 @@ float plWindStrength::GetInMetersPerSecond(Enum strength)
     case ExtremeShockwave:
       return 150.0f;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return 0;
@@ -64,25 +64,25 @@ plWindWorldModuleInterface::plWindWorldModuleInterface(plWorld* pWorld)
 plVec3 plWindWorldModuleInterface::ComputeWindFlutter(const plVec3& vWind, const plVec3& vObjectDir, float fFlutterSpeed, plUInt32 uiFlutterRandomOffset) const
 {
   if (vWind.IsZero(0.001f))
-    return plVec3::ZeroVector();
+    return plVec3::MakeZero();
 
   plVec3 windDir = vWind;
   const float fWindStrength = windDir.GetLengthAndNormalize();
 
   if (fWindStrength <= 0.01f)
-    return plVec3::ZeroVector();
+    return plVec3::MakeZero();
 
   plVec3 mainDir = vObjectDir;
-  mainDir.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
+  mainDir.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
 
   plVec3 flutterDir = windDir.CrossRH(mainDir);
-  flutterDir.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
+  flutterDir.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
 
   const float fFlutterOffset = (uiFlutterRandomOffset & 1023u) / 256.0f;
 
-  const float fFlutter = plMath::Sin(plAngle::Radian(fFlutterOffset + fFlutterSpeed * fWindStrength * GetWorld()->GetClock().GetAccumulatedTime().AsFloatInSeconds())) * fWindStrength;
+  const float fFlutter = plMath::Sin(plAngle::MakeFromRadian(fFlutterOffset + fFlutterSpeed * fWindStrength * GetWorld()->GetClock().GetAccumulatedTime().AsFloatInSeconds())) * fWindStrength;
 
   return flutterDir * fFlutter;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Interfaces_WindWorldModule);
+PL_STATICLINK_FILE(Core, Core_Interfaces_WindWorldModule);

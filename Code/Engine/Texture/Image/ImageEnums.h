@@ -4,7 +4,7 @@
 #include <Foundation/Types/Types.h>
 #include <Texture/TextureDLL.h>
 
-struct PLASMA_TEXTURE_DLL plImageAddressMode
+struct PL_TEXTURE_DLL plImageAddressMode
 {
   using StorageType = plUInt8;
 
@@ -21,13 +21,13 @@ struct PLASMA_TEXTURE_DLL plImageAddressMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TEXTURE_DLL, plImageAddressMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TEXTURE_DLL, plImageAddressMode);
 
 //////////////////////////////////////////////////////////////////////////
 // plTextureFilterSetting
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_TEXTURE_DLL plTextureFilterSetting
+struct PL_TEXTURE_DLL plTextureFilterSetting
 {
   using StorageType = plUInt8;
 
@@ -51,4 +51,4 @@ struct PLASMA_TEXTURE_DLL plTextureFilterSetting
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TEXTURE_DLL, plTextureFilterSetting);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TEXTURE_DLL, plTextureFilterSetting);

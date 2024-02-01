@@ -6,17 +6,17 @@
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 #include <ToolsFoundation/Command/TreeCommands.h>
 
-plQtDocumentTreeModelAdapter::plQtDocumentTreeModelAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* sChildProperty)
+plQtDocumentTreeModelAdapter::plQtDocumentTreeModelAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* szChildProperty)
   : m_pTree(pTree)
   , m_pType(pType)
-  , m_sChildProperty(sChildProperty)
+  , m_sChildProperty(szChildProperty)
 {
   if (!m_sChildProperty.IsEmpty())
   {
     auto pProp = pType->FindPropertyByName(m_sChildProperty);
-    PLASMA_ASSERT_DEV(pProp != nullptr && (pProp->GetCategory() == plPropertyCategory::Array || pProp->GetCategory() == plPropertyCategory::Set),
+    PL_ASSERT_DEV(pProp != nullptr && (pProp->GetCategory() == plPropertyCategory::Array || pProp->GetCategory() == plPropertyCategory::Set),
       "The visualized object property tree must either be a set or array!");
-    PLASMA_ASSERT_DEV(!pProp->GetFlags().IsSet(plPropertyFlags::Pointer) || pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner),
+    PL_ASSERT_DEV(!pProp->GetFlags().IsSet(plPropertyFlags::Pointer) || pProp->GetFlags().IsSet(plPropertyFlags::PointerOwner),
       "The visualized object must have ownership of the property objects!");
   }
 }
@@ -32,14 +32,14 @@ const plString& plQtDocumentTreeModelAdapter::GetChildProperty() const
   return m_sChildProperty;
 }
 
-bool plQtDocumentTreeModelAdapter::setData(const plDocumentObject* pObject, int row, int column, const QVariant& value, int role) const
+bool plQtDocumentTreeModelAdapter::setData(const plDocumentObject* pObject, int iRow, int iColumn, const QVariant& value, int iRole) const
 {
   return false;
 }
 
-Qt::ItemFlags plQtDocumentTreeModelAdapter::flags(const plDocumentObject* pObject, int row, int column) const
+Qt::ItemFlags plQtDocumentTreeModelAdapter::flags(const plDocumentObject* pObject, int iRow, int iColumn) const
 {
-  if (column == 0)
+  if (iColumn == 0)
   {
     return (Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
   }
@@ -48,16 +48,16 @@ Qt::ItemFlags plQtDocumentTreeModelAdapter::flags(const plDocumentObject* pObjec
 }
 
 
-plQtDummyAdapter::plQtDummyAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* m_sChildProperty)
-  : plQtDocumentTreeModelAdapter(pTree, pType, m_sChildProperty)
+plQtDummyAdapter::plQtDummyAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* szChildProperty)
+  : plQtDocumentTreeModelAdapter(pTree, pType, szChildProperty)
 {
 }
 
-QVariant plQtDummyAdapter::data(const plDocumentObject* pObject, int row, int column, int role) const
+QVariant plQtDummyAdapter::data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const
 {
-  if (column == 0)
+  if (iColumn == 0)
   {
-    switch (role)
+    switch (iRole)
     {
       case Qt::DisplayRole:
       case Qt::EditRole:
@@ -71,12 +71,12 @@ QVariant plQtDummyAdapter::data(const plDocumentObject* pObject, int row, int co
   return QVariant();
 }
 
-plQtNamedAdapter::plQtNamedAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* m_sChildProperty, const char* szNameProperty)
-  : plQtDocumentTreeModelAdapter(pTree, pType, m_sChildProperty)
+plQtNamedAdapter::plQtNamedAdapter(const plDocumentObjectManager* pTree, const plRTTI* pType, const char* szChildProperty, const char* szNameProperty)
+  : plQtDocumentTreeModelAdapter(pTree, pType, szChildProperty)
   , m_sNameProperty(szNameProperty)
 {
-  auto pProp = pType->FindPropertyByName(szNameProperty);
-  PLASMA_ASSERT_DEV(pProp != nullptr && pProp->GetCategory() == plPropertyCategory::Member && pProp->GetSpecificType()->GetVariantType() == plVariantType::String, "The name property must be a string member property.");
+  auto pProp = pType->FindPropertyByName(m_sNameProperty);
+  PL_ASSERT_DEV(pProp != nullptr && pProp->GetCategory() == plPropertyCategory::Member && pProp->GetSpecificType()->GetVariantType() == plVariantType::String, "The name property must be a string member property.");
 
   m_pTree->m_PropertyEvents.AddEventHandler(plMakeDelegate(&plQtNamedAdapter::TreePropertyEventHandler, this));
 }
@@ -86,11 +86,11 @@ plQtNamedAdapter::~plQtNamedAdapter()
   m_pTree->m_PropertyEvents.RemoveEventHandler(plMakeDelegate(&plQtNamedAdapter::TreePropertyEventHandler, this));
 }
 
-QVariant plQtNamedAdapter::data(const plDocumentObject* pObject, int row, int column, int role) const
+QVariant plQtNamedAdapter::data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const
 {
-  if (column == 0)
+  if (iColumn == 0)
   {
-    switch (role)
+    switch (iRole)
     {
       case Qt::DisplayRole:
       case Qt::EditRole:
@@ -115,16 +115,16 @@ void plQtNamedAdapter::TreePropertyEventHandler(const plDocumentObjectPropertyEv
 }
 
 plQtNameableAdapter::plQtNameableAdapter(
-  const plDocumentObjectManager* pTree, const plRTTI* pType, const char* m_sChildProperty, const char* szNameProperty)
-  : plQtNamedAdapter(pTree, pType, m_sChildProperty, szNameProperty)
+  const plDocumentObjectManager* pTree, const plRTTI* pType, const char* szChildProperty, const char* szNameProperty)
+  : plQtNamedAdapter(pTree, pType, szChildProperty, szNameProperty)
 {
 }
 
-plQtNameableAdapter::~plQtNameableAdapter() {}
+plQtNameableAdapter::~plQtNameableAdapter() = default;
 
-bool plQtNameableAdapter::setData(const plDocumentObject* pObject, int row, int column, const QVariant& value, int role) const
+bool plQtNameableAdapter::setData(const plDocumentObject* pObject, int iRow, int iColumn, const QVariant& value, int iRole) const
 {
-  if (column == 0 && role == Qt::EditRole)
+  if (iColumn == 0 && iRole == Qt::EditRole)
   {
     auto pHistory = m_pTree->GetDocument()->GetCommandHistory();
 
@@ -135,7 +135,7 @@ bool plQtNameableAdapter::setData(const plDocumentObject* pObject, int row, int 
     cmd.m_Object = pObject->GetGuid();
     cmd.m_sProperty = m_sNameProperty;
 
-    pHistory->AddCommand(cmd).IgnoreResult();
+    pHistory->AddCommand(cmd).AssertSuccess();
 
     pHistory->FinishTransaction();
 
@@ -144,9 +144,9 @@ bool plQtNameableAdapter::setData(const plDocumentObject* pObject, int row, int 
   return false;
 }
 
-Qt::ItemFlags plQtNameableAdapter::flags(const plDocumentObject* pObject, int row, int column) const
+Qt::ItemFlags plQtNameableAdapter::flags(const plDocumentObject* pObject, int iRow, int iColumn) const
 {
-  if (column == 0)
+  if (iColumn == 0)
   {
     return (Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
   }
@@ -169,21 +169,19 @@ plQtDocumentTreeModel::~plQtDocumentTreeModel()
   m_pDocumentTree->m_StructureEvents.RemoveEventHandler(plMakeDelegate(&plQtDocumentTreeModel::TreeEventHandler, this));
 }
 
-void plQtDocumentTreeModel::AddAdapter(plQtDocumentTreeModelAdapter* adapter)
+void plQtDocumentTreeModel::AddAdapter(plQtDocumentTreeModelAdapter* pAdapter)
 {
-  PLASMA_ASSERT_DEV(!m_Adapters.Contains(adapter->GetType()), "An adapter for the given type was already registered.");
+  PL_ASSERT_DEV(!m_Adapters.Contains(pAdapter->GetType()), "An adapter for the given type was already registered.");
 
-  adapter->setParent(this);
-  connect(adapter, &plQtDocumentTreeModelAdapter::dataChanged, this, [this](const plDocumentObject* pObject, QVector<int> roles) {
+  pAdapter->setParent(this);
+  connect(pAdapter, &plQtDocumentTreeModelAdapter::dataChanged, this, [this](const plDocumentObject* pObject, QVector<int> roles) {
     if (!pObject)
       return;
     auto index = ComputeModelIndex(pObject);
     if (!index.isValid())
       return;
-    dataChanged(index, index, roles);
-  });
-
-  m_Adapters.Insert(adapter->GetType(), adapter);
+    dataChanged(index, index, roles); });
+  m_Adapters.Insert(pAdapter->GetType(), pAdapter);
   beginResetModel();
   endResetModel();
 }
@@ -224,7 +222,7 @@ void plQtDocumentTreeModel::TreeEventHandler(const plDocumentObjectStructureEven
       pParent = e.m_pNewParent;
       break;
   }
-  PLASMA_ASSERT_DEV(pParent != nullptr, "Each structure event should have a parent set.");
+  PL_ASSERT_DEV(pParent != nullptr, "Each structure event should have a parent set.");
   if (!IsUnderRoot(pParent))
     return;
   auto pType = pParent->GetTypeAccessor().GetType();
@@ -282,7 +280,7 @@ void plQtDocumentTreeModel::TreeEventHandler(const plDocumentObjectStructureEven
   }
 }
 
-QModelIndex plQtDocumentTreeModel::index(int row, int column, const QModelIndex& parent) const
+QModelIndex plQtDocumentTreeModel::index(int iRow, int iColumn, const QModelIndex& parent) const
 {
   const plDocumentObject* pObject = nullptr;
   if (!parent.isValid())
@@ -298,13 +296,13 @@ QModelIndex plQtDocumentTreeModel::index(int row, int column, const QModelIndex&
   auto pAdapter = GetAdapter(pType);
   if (!pAdapter)
     return QModelIndex();
-  if (row >= pObject->GetTypeAccessor().GetCount(pAdapter->GetChildProperty()))
+  if (iRow >= pObject->GetTypeAccessor().GetCount(pAdapter->GetChildProperty()))
     return QModelIndex();
 
-  plVariant value = pObject->GetTypeAccessor().GetValue(pAdapter->GetChildProperty(), row);
-  PLASMA_ASSERT_DEV(value.IsValid() && value.IsA<plUuid>(), "Tree corruption!");
+  plVariant value = pObject->GetTypeAccessor().GetValue(pAdapter->GetChildProperty(), iRow);
+  PL_ASSERT_DEV(value.IsValid() && value.IsA<plUuid>(), "Tree corruption!");
   const plDocumentObject* pChild = m_pDocumentTree->GetObject(value.Get<plUuid>());
-  return createIndex(row, column, const_cast<plDocumentObject*>(pChild));
+  return createIndex(iRow, iColumn, const_cast<plDocumentObject*>(pChild));
 }
 
 plInt32 plQtDocumentTreeModel::ComputeIndex(const plDocumentObject* pObject) const
@@ -408,7 +406,7 @@ int plQtDocumentTreeModel::columnCount(const QModelIndex& parent) const
   return 1;
 }
 
-QVariant plQtDocumentTreeModel::data(const QModelIndex& index, int role) const
+QVariant plQtDocumentTreeModel::data(const QModelIndex& index, int iRole) const
 {
   // if (index.isValid())
   {
@@ -416,7 +414,7 @@ QVariant plQtDocumentTreeModel::data(const QModelIndex& index, int role) const
     auto pType = pObject->GetTypeAccessor().GetType();
     if (auto pAdapter = GetAdapter(pType))
     {
-      return pAdapter->data(pObject, index.row(), index.column(), role);
+      return pAdapter->data(pObject, index.row(), index.column(), iRole);
     }
   }
 
@@ -447,15 +445,15 @@ Qt::ItemFlags plQtDocumentTreeModel::flags(const QModelIndex& index) const
 }
 
 
-bool plQtDocumentTreeModel::canDropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) const
+bool plQtDocumentTreeModel::canDropMimeData(const QMimeData* pData, Qt::DropAction action, int iRow, int iColumn, const QModelIndex& parent) const
 {
   const plDocumentObject* pNewParent = (const plDocumentObject*)parent.internalPointer();
   if (!pNewParent)
     pNewParent = GetRoot();
 
   plDragDropInfo info;
-  info.m_iTargetObjectInsertChildIndex = row;
-  info.m_pMimeData = data;
+  info.m_iTargetObjectInsertChildIndex = iRow;
+  info.m_pMimeData = pData;
   info.m_sTargetContext = m_sTargetContext;
   info.m_TargetDocument = m_pDocumentTree->GetDocument()->GetGuid();
   info.m_TargetObject = pNewParent->GetGuid();
@@ -468,7 +466,7 @@ bool plQtDocumentTreeModel::canDropMimeData(const QMimeData* data, Qt::DropActio
 
   {
     // Test 'CanMove' of the target object manager.
-    QByteArray encodedData = data->data("application/PlasmaEditor.ObjectSelection");
+    QByteArray encodedData = pData->data("application/plEditor.ObjectSelection");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     plHybridArray<plDocumentObject*, 32> Dragged;
     stream >> Dragged;
@@ -484,17 +482,17 @@ bool plQtDocumentTreeModel::canDropMimeData(const QMimeData* data, Qt::DropActio
       if (m_pDocumentTree->CanMove(pItem, pNewParent, sProperty, info.m_iTargetObjectInsertChildIndex).Failed())
         return false;
     }
-    return QAbstractItemModel::canDropMimeData(data, action, row, column, parent);
+    return QAbstractItemModel::canDropMimeData(pData, action, iRow, iColumn, parent);
   }
   return false;
 }
 
-bool plQtDocumentTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
+bool plQtDocumentTreeModel::dropMimeData(const QMimeData* pData, Qt::DropAction action, int iRow, int iColumn, const QModelIndex& parent)
 {
   if (!m_bAllowDragDrop)
     return false;
 
-  if (column > 0)
+  if (iColumn > 0)
     return false;
 
   const plDocumentObject* pNewParent = (const plDocumentObject*)parent.internalPointer();
@@ -502,8 +500,8 @@ bool plQtDocumentTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction a
     pNewParent = GetRoot();
 
   plDragDropInfo info;
-  info.m_iTargetObjectInsertChildIndex = row;
-  info.m_pMimeData = data;
+  info.m_iTargetObjectInsertChildIndex = iRow;
+  info.m_pMimeData = pData;
   info.m_sTargetContext = m_sTargetContext;
   info.m_TargetDocument = m_pDocumentTree->GetDocument()->GetGuid();
   info.m_TargetObject = pNewParent->GetGuid();
@@ -519,19 +517,20 @@ bool plQtDocumentTreeModel::dropMimeData(const QMimeData* data, Qt::DropAction a
 
 bool plQtDocumentTreeModel::MoveObjects(const plDragDropInfo& info)
 {
-  if (info.m_pMimeData->hasFormat("application/PlasmaEditor.ObjectSelection"))
+  if (info.m_pMimeData->hasFormat("application/plEditor.ObjectSelection"))
   {
     auto pDoc = plDocumentManager::GetDocumentByGuid(info.m_TargetDocument);
     const plDocumentObject* pTarget = pDoc->GetObjectManager()->GetObject(info.m_TargetObject);
+    PL_ASSERT_DEBUG(pTarget != nullptr, "object from info should always be valid");
 
-    QByteArray encodedData = info.m_pMimeData->data("application/PlasmaEditor.ObjectSelection");
+    QByteArray encodedData = info.m_pMimeData->data("application/plEditor.ObjectSelection");
     QDataStream stream(&encodedData, QIODevice::ReadOnly);
     plHybridArray<plDocumentObject*, 32> Dragged;
     stream >> Dragged;
 
     for (const plDocumentObject* pDocObject : Dragged)
     {
-      //if (action != Qt::DropAction::MoveAction)
+      // if (action != Qt::DropAction::MoveAction)
       {
         bool bCanMove = true;
         const plDocumentObject* pCurParent = pTarget;
@@ -558,7 +557,7 @@ bool plQtDocumentTreeModel::MoveObjects(const plDragDropInfo& info)
     auto pHistory = pDoc->GetCommandHistory();
     pHistory->StartTransaction("Reparent Object");
 
-    plStatus res(PLASMA_SUCCESS);
+    plStatus res(PL_SUCCESS);
     for (plUInt32 i = 0; i < Dragged.GetCount(); ++i)
     {
       plMoveObjectCommand cmd;
@@ -589,7 +588,7 @@ QStringList plQtDocumentTreeModel::mimeTypes() const
   QStringList types;
   if (m_bAllowDragDrop)
   {
-    types << "application/PlasmaEditor.ObjectSelection";
+    types << "application/plEditor.ObjectSelection";
   }
 
   return types;
@@ -600,41 +599,32 @@ QMimeData* plQtDocumentTreeModel::mimeData(const QModelIndexList& indexes) const
   if (!m_bAllowDragDrop)
     return nullptr;
 
-  QMimeData* mimeData = new QMimeData();
-  QByteArray encodedData;
-
-  QDataStream stream(&encodedData, QIODevice::WriteOnly);
-
-  int iCount = 0;
-
-  foreach (QModelIndex index, indexes)
-  {
-    if (index.isValid())
-      ++iCount;
-  }
-
-  stream << iCount;
-
-  foreach (QModelIndex index, indexes)
+  plHybridArray<void*, 1> ptrs;
+  for (const QModelIndex& index : indexes)
   {
     if (index.isValid())
     {
       void* pObject = index.internalPointer();
-      stream.writeRawData((const char*)&pObject, sizeof(void*));
+      ptrs.PushBack(pObject);
     }
   }
 
-  mimeData->setData("application/PlasmaEditor.ObjectSelection", encodedData);
+  QByteArray encodedData;
+  QDataStream stream(&encodedData, QIODevice::WriteOnly);
+  stream << ptrs;
+
+  QMimeData* mimeData = new QMimeData();
+  mimeData->setData("application/plEditor.ObjectSelection", encodedData);
   return mimeData;
 }
 
-bool plQtDocumentTreeModel::setData(const QModelIndex& index, const QVariant& value, int role)
+bool plQtDocumentTreeModel::setData(const QModelIndex& index, const QVariant& value, int iRole)
 {
   const plDocumentObject* pObject = (const plDocumentObject*)index.internalPointer();
   auto pType = pObject->GetTypeAccessor().GetType();
   if (auto pAdapter = GetAdapter(pType))
   {
-    return pAdapter->setData(pObject, index.row(), index.column(), value, role);
+    return pAdapter->setData(pObject, index.row(), index.column(), value, iRole);
   }
 
   return false;

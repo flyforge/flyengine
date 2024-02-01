@@ -56,7 +56,6 @@ PS_OUT main(PS_IN Input)
   #endif
 
   float3 litColor = light.diffuseLight + light.specularLight;
-  litColor *= Exposure;
   litColor += matData.emissiveColor;
 
   #if RENDER_PASS == RENDER_PASS_FORWARD

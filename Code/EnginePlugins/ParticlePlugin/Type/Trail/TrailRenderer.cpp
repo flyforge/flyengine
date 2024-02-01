@@ -11,11 +11,11 @@
 #include <RendererCore/../../../Data/Base/Shaders/Particles/ParticleSystemConstants.h>
 
 //clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTrailRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTrailRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTrailRenderer, 1, plRTTIDefaultAllocator<plParticleTrailRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTrailRenderer, 1, plRTTIDefaultAllocator<plParticleTrailRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleTrailRenderer::plParticleTrailRenderer()
@@ -44,9 +44,9 @@ plParticleTrailRenderer::~plParticleTrailRenderer()
   DestroyParticleDataBuffer(m_hTrailPointsDataBuffer64);
 }
 
-void plParticleTrailRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plParticleTrailRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plParticleTrailRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plParticleTrailRenderData>());
 }
 
 void plParticleTrailRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -167,4 +167,4 @@ bool plParticleTrailRenderer::ConfigureShader(const plParticleTrailRenderData* p
   return true;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Trail_TrailRenderer);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Trail_TrailRenderer);

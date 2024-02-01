@@ -24,7 +24,7 @@ plCameraComponentManager::~plCameraComponentManager()
 
 void plCameraComponentManager::Initialize()
 {
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plCameraComponentManager::Update, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plCameraComponentManager::Update, this);
   desc.m_Phase = UpdateFunctionDesc::Phase::PostTransform;
 
   this->RegisterUpdateFunction(desc);
@@ -84,7 +84,7 @@ void plCameraComponentManager::Update(const plWorldModule::UpdateContext& contex
 
 void plCameraComponentManager::ReinitializeAllRenderTargetCameras()
 {
-  PLASMA_LOCK(GetWorld()->GetWriteMarker());
+  PL_LOCK(GetWorld()->GetWriteMarker());
 
   for (auto it = GetComponents(); it.IsValid(); ++it)
   {
@@ -149,42 +149,41 @@ void plCameraComponentManager::OnCameraConfigsChanged(void* dummy)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plCameraComponent, 11, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plCameraComponent, 10, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("EditorShortcut", m_iEditorShortcut)->AddAttributes(new plDefaultValueAttribute(-1), new plClampValueAttribute(-1, 9)),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("UsageHint", plCameraUsageHint, GetUsageHint, SetUsageHint),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Mode", plCameraMode, GetCameraMode, SetCameraMode),
-    PLASMA_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target")),
-    PLASMA_ACCESSOR_PROPERTY("RenderTargetOffset", GetRenderTargetRectOffset, SetRenderTargetRectOffset)->AddAttributes(new plClampValueAttribute(plVec2(0.0f), plVec2(0.9f))),
-    PLASMA_ACCESSOR_PROPERTY("RenderTargetSize", GetRenderTargetRectSize, SetRenderTargetRectSize)->AddAttributes(new plDefaultValueAttribute(plVec2(1.0f)), new plClampValueAttribute(plVec2(0.1f), plVec2(1.0f))),
-    PLASMA_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.01f, 4.0f)),
-    PLASMA_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(1000.0f), new plClampValueAttribute(5.0, 10000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("FOV", GetFieldOfView, SetFieldOfView)->AddAttributes(new plDefaultValueAttribute(60.0f), new plClampValueAttribute(1.0f, 170.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Dimensions", GetOrthoDimension, SetOrthoDimension)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.01f, 10000.0f)),
-    PLASMA_SET_MEMBER_PROPERTY("IncludeTags", m_IncludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
-    PLASMA_SET_MEMBER_PROPERTY("ExcludeTags", m_ExcludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
-    PLASMA_ACCESSOR_PROPERTY("CameraRenderPipeline", GetRenderPipelineEnum, SetRenderPipelineEnum)->AddAttributes(new plDynamicStringEnumAttribute("CameraPipelines")),
-    PLASMA_ACCESSOR_PROPERTY("Aperture", GetAperture, SetAperture)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(1.0f, 32.0f), new plSuffixAttribute(" f-stop(s)")),
-    PLASMA_ACCESSOR_PROPERTY("ShutterTime", GetShutterTime, SetShutterTime)->AddAttributes(new plDefaultValueAttribute(plTime::Seconds(0.005)), new plClampValueAttribute(plTime::Seconds(1.0f / 100000.0f), plTime::Seconds(600.0f))),
-    PLASMA_ACCESSOR_PROPERTY("ISO", GetISO, SetISO)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(50.0f, 64000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("FocusDistance", GetFocusDistance, SetFocusDistance)->AddAttributes(new plDefaultValueAttribute(0.2f)),
-    PLASMA_ACCESSOR_PROPERTY("ExposureCompensation", GetExposureCompensation, SetExposureCompensation)->AddAttributes(new plClampValueAttribute(-32.0f, 32.0f)),
-    PLASMA_MEMBER_PROPERTY("ShowStats", m_bShowStats),
-    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("EV100", GetEV100),
-    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("FinalExposure", GetExposure),
+    PL_MEMBER_PROPERTY("EditorShortcut", m_iEditorShortcut)->AddAttributes(new plDefaultValueAttribute(-1), new plClampValueAttribute(-1, 9)),
+    PL_ENUM_ACCESSOR_PROPERTY("UsageHint", plCameraUsageHint, GetUsageHint, SetUsageHint),
+    PL_ENUM_ACCESSOR_PROPERTY("Mode", plCameraMode, GetCameraMode, SetCameraMode),
+    PL_ACCESSOR_PROPERTY("RenderTarget", GetRenderTargetFile, SetRenderTargetFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Target", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("RenderTargetOffset", GetRenderTargetRectOffset, SetRenderTargetRectOffset)->AddAttributes(new plClampValueAttribute(plVec2(0.0f), plVec2(0.9f))),
+    PL_ACCESSOR_PROPERTY("RenderTargetSize", GetRenderTargetRectSize, SetRenderTargetRectSize)->AddAttributes(new plDefaultValueAttribute(plVec2(1.0f)), new plClampValueAttribute(plVec2(0.1f), plVec2(1.0f))),
+    PL_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.01f, 4.0f)),
+    PL_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(1000.0f), new plClampValueAttribute(5.0, 10000.0f)),
+    PL_ACCESSOR_PROPERTY("FOV", GetFieldOfView, SetFieldOfView)->AddAttributes(new plDefaultValueAttribute(60.0f), new plClampValueAttribute(1.0f, 170.0f)),
+    PL_ACCESSOR_PROPERTY("Dimensions", GetOrthoDimension, SetOrthoDimension)->AddAttributes(new plDefaultValueAttribute(10.0f), new plClampValueAttribute(0.01f, 10000.0f)),
+    PL_SET_MEMBER_PROPERTY("IncludeTags", m_IncludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_SET_MEMBER_PROPERTY("ExcludeTags", m_ExcludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_ACCESSOR_PROPERTY("CameraRenderPipeline", GetRenderPipelineEnum, SetRenderPipelineEnum)->AddAttributes(new plDynamicStringEnumAttribute("CameraPipelines")),
+    PL_ACCESSOR_PROPERTY("Aperture", GetAperture, SetAperture)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(1.0f, 32.0f), new plSuffixAttribute(" f-stop(s)")),
+    PL_ACCESSOR_PROPERTY("ShutterTime", GetShutterTime, SetShutterTime)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromSeconds(1.0)), new plClampValueAttribute(plTime::MakeFromSeconds(1.0f / 100000.0f), plTime::MakeFromSeconds(600.0f))),
+    PL_ACCESSOR_PROPERTY("ISO", GetISO, SetISO)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(50.0f, 64000.0f)),
+    PL_ACCESSOR_PROPERTY("ExposureCompensation", GetExposureCompensation, SetExposureCompensation)->AddAttributes(new plClampValueAttribute(-32.0f, 32.0f)),
+    PL_MEMBER_PROPERTY("ShowStats", m_bShowStats),
+    //PL_ACCESSOR_PROPERTY_READ_ONLY("EV100", GetEV100),
+    //PL_ACCESSOR_PROPERTY_READ_ONLY("FinalExposure", GetExposure),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::DarkSlateBlue),
     new plCameraVisualizerAttribute("Mode", "FOV", "Dimensions", "NearPlane", "FarPlane"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCameraComponent::plCameraComponent() = default;
@@ -227,9 +226,6 @@ void plCameraComponent::SerializeComponent(plWorldWriter& inout_stream) const
 
   // Version 10
   s << m_bShowStats;
-
-  // Version 11
-  s << m_fFocusDistance;
 }
 
 void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -264,7 +260,7 @@ void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
     s >> m_fAperture;
     float shutterTime;
     s >> shutterTime;
-    m_ShutterTime = plTime::Seconds(shutterTime);
+    m_ShutterTime = plTime::MakeFromSeconds(shutterTime);
     s >> m_fISO;
     s >> m_fExposureCompensation;
   }
@@ -294,11 +290,6 @@ void plCameraComponent::DeserializeComponent(plWorldReader& inout_stream)
   if (uiVersion >= 10)
   {
     s >> m_bShowStats;
-  }
-
-  if (uiVersion >= 11)
-  {
-    s >> m_fFocusDistance;
   }
 
   MarkAsModified();
@@ -341,7 +332,7 @@ void plCameraComponent::ShowStats(plView* pView)
     const plStringView sName = GetOwner()->GetName();
 
     plStringBuilder sb;
-    sb.Format("Camera '{0}':\nEV100: {1}, Exposure: {2}", sName.IsEmpty() ? pView->GetName() : sName, GetEV100(), GetExposure());
+    sb.SetFormat("Camera '{0}':\nEV100: {1}, Exposure: {2}", sName.IsEmpty() ? pView->GetName() : sName, GetEV100(), GetExposure());
     plDebugRenderer::DrawInfoText(pView->GetHandle(), plDebugTextPlacement::TopLeft, "CamStats", sb, plColor::White);
   }
 
@@ -357,8 +348,7 @@ void plCameraComponent::ShowStats(plView* pView)
     plMat4 projectionMatrix = pView->GetProjectionMatrix(plCameraEye::Left); // todo: Stereo support
     plMat4 viewProjectionMatrix = projectionMatrix * viewMatrix;
 
-    plFrustum frustum;
-    frustum.SetFrustum(viewProjectionMatrix);
+    plFrustum frustum = plFrustum::MakeFromMVP(viewProjectionMatrix);
 
     // TODO: limit far plane to 10 meters
 
@@ -528,15 +518,6 @@ void plCameraComponent::SetISO(float fISO)
   MarkAsModified();
 }
 
-void plCameraComponent::SetFocusDistance(float fFocusDistance)
-{
-  if (m_fFocusDistance == fFocusDistance)
-    return;
-  m_fFocusDistance = fFocusDistance;
-
-  MarkAsModified();
-}
-
 void plCameraComponent::SetExposureCompensation(float fEC)
 {
   if (m_fExposureCompensation == fEC)
@@ -584,11 +565,7 @@ void plCameraComponent::ApplySettingsToView(plView* pView) const
 
   plCamera* pCamera = pView->GetCamera();
   pCamera->SetCameraMode(m_Mode, fFovOrDim, m_fNearPlane, plMath::Max(m_fNearPlane + 0.00001f, m_fFarPlane));
-  pCamera->SetShutterSpeed(GetShutterTime().AsFloatInSeconds());
   pCamera->SetExposure(GetExposure());
-  pCamera->SetAperture(GetAperture());
-  pCamera->SetISO(GetISO());
-  pCamera->SetFocusDistance(GetFocusDistance());
 
   pView->m_IncludeTags = m_IncludeTags;
   pView->m_ExcludeTags = m_ExcludeTags;
@@ -668,10 +645,10 @@ void plCameraComponent::ActivateRenderToTexture()
 
   m_bRenderTargetInitialized = true;
 
-  PLASMA_ASSERT_DEV(m_hRenderTargetView.IsInvalidated(), "Render target view is already created");
+  PL_ASSERT_DEV(m_hRenderTargetView.IsInvalidated(), "Render target view is already created");
 
   plStringBuilder name;
-  name.Format("Camera RT: {0}", GetOwner()->GetName());
+  name.SetFormat("Camera RT: {0}", GetOwner()->GetName());
 
   plView* pRenderTargetView = nullptr;
   m_hRenderTargetView = plRenderWorld::CreateView(name, pRenderTargetView);
@@ -714,7 +691,7 @@ void plCameraComponent::DeactivateRenderToTexture()
   m_bRenderTargetInitialized = false;
   m_hCachedRenderPipeline.Invalidate();
 
-  PLASMA_ASSERT_DEBUG(m_hRenderTarget.IsValid(), "Render Target should be valid");
+  PL_ASSERT_DEBUG(m_hRenderTarget.IsValid(), "Render Target should be valid");
 
   if (m_hRenderTarget.IsValid())
   {
@@ -795,7 +772,7 @@ public:
       if (pProp->m_Value.IsA<float>())
       {
         const float shutterTime = pProp->m_Value.Get<float>();
-        pProp->m_Value = plTime::Seconds(shutterTime);
+        pProp->m_Value = plTime::MakeFromSeconds(shutterTime);
       }
     }
   }
@@ -804,4 +781,4 @@ public:
 plCameraComponentPatch_8_9 g_plCameraComponentPatch_8_9;
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_CameraComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_CameraComponent);

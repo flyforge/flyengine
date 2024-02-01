@@ -6,12 +6,12 @@
 
 struct plMsgUpdateLocalBounds;
 
-typedef plSettingsComponentManager<class plFogComponent> plFogComponentManager;
+using plFogComponentManager = plSettingsComponentManager<class plFogComponent>;
 
 /// \brief The render data object for ambient light.
-class PLASMA_RENDERERCORE_DLL plFogRenderData : public plRenderData
+class PL_RENDERERCORE_DLL plFogRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plFogRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plFogRenderData, plRenderData);
 
 public:
   plColor m_Color;
@@ -20,9 +20,9 @@ public:
   float m_fInvSkyDistance;
 };
 
-class PLASMA_RENDERERCORE_DLL plFogComponent : public plSettingsComponent
+class PL_RENDERERCORE_DLL plFogComponent : public plSettingsComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plFogComponent, plSettingsComponent, plFogComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plFogComponent, plSettingsComponent, plFogComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

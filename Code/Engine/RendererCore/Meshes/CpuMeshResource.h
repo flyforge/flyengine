@@ -2,11 +2,11 @@
 
 #include <RendererCore/Meshes/MeshResourceDescriptor.h>
 
-class PLASMA_RENDERERCORE_DLL plCpuMeshResource : public plResource
+class PL_RENDERERCORE_DLL plCpuMeshResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCpuMeshResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plCpuMeshResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plCpuMeshResource, plMeshResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plCpuMeshResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plCpuMeshResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plCpuMeshResource, plMeshResourceDescriptor);
 
 public:
   plCpuMeshResource();

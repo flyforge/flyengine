@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/StateMachineAsset/StateMachineAssetManager.h>
 #include <EditorPluginAssets/StateMachineAsset/StateMachineAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetManager, 1, plRTTIDefaultAllocator<plStateMachineAssetManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetManager, 1, plRTTIDefaultAllocator<plStateMachineAssetManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plStateMachineAssetManager::plStateMachineAssetManager()
 {
@@ -38,7 +38,7 @@ void plStateMachineAssetManager::OnDocumentManagerEvent(const plDocumentManager:
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plStateMachineAssetDocument>())
       {
-        plQtStateMachineAssetDocumentWindow* pDocWnd = new plQtStateMachineAssetDocumentWindow(e.m_pDocument);
+        new plQtStateMachineAssetDocumentWindow(e.m_pDocument); // Not a memory leak
       }
     }
     break;
@@ -49,9 +49,9 @@ void plStateMachineAssetManager::OnDocumentManagerEvent(const plDocumentManager:
 }
 
 void plStateMachineAssetManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plStateMachineAssetDocument(szPath);
+  out_pDocument = new plStateMachineAssetDocument(sPath);
 }
 
 void plStateMachineAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

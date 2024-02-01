@@ -2,24 +2,25 @@
 
 #include <EnginePluginScene/RenderPipeline/EditorShapeIconsExtractor.h>
 #include <Foundation/IO/FileSystem/FileSystem.h>
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Components/SpriteComponent.h>
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorShapeIconsExtractor, 1, plRTTIDefaultAllocator<PlasmaEditorShapeIconsExtractor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorShapeIconsExtractor, 1, plRTTIDefaultAllocator<plEditorShapeIconsExtractor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Size", m_fSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f), new plSuffixAttribute(" m")),
-    PLASMA_MEMBER_PROPERTY("MaxScreenSize", m_fMaxScreenSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(64.0f), new plSuffixAttribute(" px")),
-    PLASMA_ACCESSOR_PROPERTY("SceneContext", GetSceneContext, SetSceneContext),
+    PL_MEMBER_PROPERTY("Size", m_fSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f), new plSuffixAttribute(" m")),
+    PL_MEMBER_PROPERTY("MaxScreenSize", m_fMaxScreenSize)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(64.0f), new plSuffixAttribute(" px")),
+    PL_ACCESSOR_PROPERTY("SceneContext", GetSceneContext, SetSceneContext),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PlasmaEditorShapeIconsExtractor::PlasmaEditorShapeIconsExtractor(const char* szName)
+plEditorShapeIconsExtractor::plEditorShapeIconsExtractor(const char* szName)
   : plExtractor(szName)
 {
   m_fSize = 1.0f;
@@ -29,12 +30,12 @@ PlasmaEditorShapeIconsExtractor::PlasmaEditorShapeIconsExtractor(const char* szN
   FillShapeIconInfo();
 }
 
-PlasmaEditorShapeIconsExtractor::~PlasmaEditorShapeIconsExtractor() {}
+plEditorShapeIconsExtractor::~plEditorShapeIconsExtractor() = default;
 
-void PlasmaEditorShapeIconsExtractor::Extract(
-  const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
+void plEditorShapeIconsExtractor::Extract(
+  const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData)
 {
-  PLASMA_LOCK(view.GetWorld()->GetReadMarker());
+  PL_LOCK(view.GetWorld()->GetReadMarker());
 
   /// \todo Once we have a solution for objects that only have a shape icon we can switch this loop to use visibleObjects instead.
   for (auto it = view.GetWorld()->GetObjects(); it.IsValid(); ++it)
@@ -43,7 +44,7 @@ void PlasmaEditorShapeIconsExtractor::Extract(
     if (FilterByViewTags(view, pObject))
       continue;
 
-    ExtractShapeIcon(pObject, view, extractedRenderData, plDefaultRenderDataCategories::SimpleOpaque);
+    ExtractShapeIcon(pObject, view, ref_extractedRenderData, plDefaultRenderDataCategories::SimpleOpaque);
   }
 
   if (m_pSceneContext != nullptr)
@@ -58,13 +59,31 @@ void PlasmaEditorShapeIconsExtractor::Extract(
         if (FilterByViewTags(view, pObject))
           continue;
 
-        ExtractShapeIcon(pObject, view, extractedRenderData, plDefaultRenderDataCategories::Selection);
+        ExtractShapeIcon(pObject, view, ref_extractedRenderData, plDefaultRenderDataCategories::Selection);
       }
     }
   }
 }
 
-void PlasmaEditorShapeIconsExtractor::ExtractShapeIcon(const plGameObject* pObject, const plView& view, plExtractedRenderData& extractedRenderData, plRenderData::Category category)
+plResult plEditorShapeIconsExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_fSize;
+  inout_stream << m_fMaxScreenSize;
+  return PL_SUCCESS;
+}
+
+plResult plEditorShapeIconsExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_fSize;
+  inout_stream >> m_fMaxScreenSize;
+  return PL_SUCCESS;
+}
+
+void plEditorShapeIconsExtractor::ExtractShapeIcon(const plGameObject* pObject, const plView& view, plExtractedRenderData& extractedRenderData, plRenderData::Category category)
 {
   static const plTag& tagHidden = plTagRegistry::GetGlobalRegistry().RegisterTag("EditorHidden");
   static const plTag& tagEditor = plTagRegistry::GetGlobalRegistry().RegisterTag("Editor");
@@ -107,7 +126,7 @@ void PlasmaEditorShapeIconsExtractor::ExtractShapeIcon(const plGameObject* pObje
       pRenderData->m_BlendMode = plSpriteBlendMode::ShapeIcon;
       pRenderData->m_texCoordScale = plVec2(1.0f);
       pRenderData->m_texCoordOffset = plVec2(0.0f);
-      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(pComponent);
+      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(*pComponent);
 
       // prefer color gamma properties
       if (pShapeIconInfo->m_pColorGammaProperty != nullptr)
@@ -132,7 +151,7 @@ void PlasmaEditorShapeIconsExtractor::ExtractShapeIcon(const plGameObject* pObje
   }
 }
 
-const plTypedMemberProperty<plColor>* PlasmaEditorShapeIconsExtractor::FindColorProperty(const plRTTI* pRtti) const
+const plTypedMemberProperty<plColor>* plEditorShapeIconsExtractor::FindColorProperty(const plRTTI* pRtti) const
 {
   plHybridArray<const plAbstractProperty*, 32> properties;
   pRtti->GetAllProperties(properties);
@@ -148,7 +167,7 @@ const plTypedMemberProperty<plColor>* PlasmaEditorShapeIconsExtractor::FindColor
   return nullptr;
 }
 
-const plTypedMemberProperty<plColorGammaUB>* PlasmaEditorShapeIconsExtractor::FindColorGammaProperty(const plRTTI* pRtti) const
+const plTypedMemberProperty<plColorGammaUB>* plEditorShapeIconsExtractor::FindColorGammaProperty(const plRTTI* pRtti) const
 {
   plHybridArray<const plAbstractProperty*, 32> properties;
   pRtti->GetAllProperties(properties);
@@ -164,27 +183,27 @@ const plTypedMemberProperty<plColorGammaUB>* PlasmaEditorShapeIconsExtractor::Fi
   return nullptr;
 }
 
-void PlasmaEditorShapeIconsExtractor::FillShapeIconInfo()
+void plEditorShapeIconsExtractor::FillShapeIconInfo()
 {
-  PLASMA_LOG_BLOCK("LoadShapeIconTextures");
+  PL_LOG_BLOCK("LoadShapeIconTextures");
 
   plStringBuilder sPath;
 
   plRTTI::ForEachDerivedType<plComponent>(
-  [&](const plRTTI* pRtti) {
-    sPath.Set("Editor/ShapeIcons/", pRtti->GetTypeName(), ".dds");
+    [&](const plRTTI* pRtti) {
+      sPath.Set("Editor/ShapeIcons/", pRtti->GetTypeName(), ".dds");
 
-    if (plFileSystem::ExistsFile(sPath))
-    {
-      auto& shapeIconInfo = m_ShapeIconInfos[pRtti];
-      shapeIconInfo.m_hTexture = plResourceManager::LoadResource<plTexture2DResource>(sPath);
-      shapeIconInfo.m_pColorProperty = FindColorProperty(pRtti);
-      shapeIconInfo.m_pColorGammaProperty = FindColorGammaProperty(pRtti);
-
-      if (auto pCatAttribute = pRtti->GetAttributeByType<plCategoryAttribute>())
+      if (plFileSystem::ExistsFile(sPath))
       {
-        shapeIconInfo.m_FallbackColor = plColorScheme::GetCategoryColor(pCatAttribute->GetCategory(), plColorScheme::CategoryColorUsage::ViewportIcon);
+        auto& shapeIconInfo = m_ShapeIconInfos[pRtti];
+        shapeIconInfo.m_hTexture = plResourceManager::LoadResource<plTexture2DResource>(sPath);
+        shapeIconInfo.m_pColorProperty = FindColorProperty(pRtti);
+        shapeIconInfo.m_pColorGammaProperty = FindColorGammaProperty(pRtti);
+
+        if (auto pCatAttribute = pRtti->GetAttributeByType<plCategoryAttribute>())
+        {
+          shapeIconInfo.m_FallbackColor = plColorScheme::GetCategoryColor(pCatAttribute->GetCategory(), plColorScheme::CategoryColorUsage::ViewportIcon);
+        }
       }
-    }
-  });
+    });
 }

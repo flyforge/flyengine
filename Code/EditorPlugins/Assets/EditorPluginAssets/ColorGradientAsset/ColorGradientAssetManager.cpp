@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/ColorGradientAsset/ColorGradientAssetManager.h>
 #include <EditorPluginAssets/ColorGradientAsset/ColorGradientAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetDocumentManager, 1, plRTTIDefaultAllocator<plColorGradientAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetDocumentManager, 1, plRTTIDefaultAllocator<plColorGradientAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plColorGradientAssetDocumentManager::plColorGradientAssetDocumentManager()
 {
@@ -36,7 +36,7 @@ void plColorGradientAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plColorGradientAssetDocument>())
       {
-        plQtColorGradientAssetDocumentWindow* pDocWnd = new plQtColorGradientAssetDocumentWindow(e.m_pDocument);
+        new plQtColorGradientAssetDocumentWindow(e.m_pDocument); // NOLINT: not a memory leak
       }
     }
     break;
@@ -47,9 +47,9 @@ void plColorGradientAssetDocumentManager::OnDocumentManagerEvent(const plDocumen
 }
 
 void plColorGradientAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plColorGradientAssetDocument(szPath);
+  out_pDocument = new plColorGradientAssetDocument(sPath);
 }
 
 void plColorGradientAssetDocumentManager::InternalGetSupportedDocumentTypes(

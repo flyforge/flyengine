@@ -3,15 +3,15 @@
 #include <Core/GameState/GameStateBase.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plForwardEventsToGameStateComponent, 1 /* version */, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plForwardEventsToGameStateComponent, 1 /* version */, plComponentMode::Static)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Gameplay/Logic"),
+    new plCategoryAttribute("Logic"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plForwardEventsToGameStateComponent::plForwardEventsToGameStateComponent() = default;
@@ -57,3 +57,6 @@ void plForwardEventsToGameStateComponent::Initialize()
 
   EnableUnhandledMessageHandler(true);
 }
+
+
+PL_STATICLINK_FILE(Core, Core_GameState_Implementation_ForwardEventsToGameStateComponent);

@@ -5,22 +5,22 @@
 namespace
 {
   // https://docs.microsoft.com/en-us/windows/win32/medfound/recommended-8-bit-yuv-formats-for-video-rendering#converting-8-bit-yuv-to-rgb888
-  plVec3I32 RGB2YUV(plVec3I32 rgb)
+  plVec3I32 RGB2YUV(plVec3I32 vRgb)
   {
     plVec3I32 yuv;
-    yuv.x = ((66 * rgb.x + 129 * rgb.y + 25 * rgb.z + 128) >> 8) + 16;
-    yuv.y = ((-38 * rgb.x - 74 * rgb.y + 112 * rgb.z + 128) >> 8) + 128;
-    yuv.z = ((112 * rgb.x - 94 * rgb.y - 18 * rgb.z + 128) >> 8) + 128;
+    yuv.x = ((66 * vRgb.x + 129 * vRgb.y + 25 * vRgb.z + 128) >> 8) + 16;
+    yuv.y = ((-38 * vRgb.x - 74 * vRgb.y + 112 * vRgb.z + 128) >> 8) + 128;
+    yuv.z = ((112 * vRgb.x - 94 * vRgb.y - 18 * vRgb.z + 128) >> 8) + 128;
     return yuv;
   }
 
-  plVec3I32 YUV2RGB(plVec3I32 yuv)
+  plVec3I32 YUV2RGB(plVec3I32 vYuv)
   {
     plVec3I32 rgb;
 
-    plInt32 C = yuv.x - 16;
-    plInt32 D = yuv.y - 128;
-    plInt32 E = yuv.z - 128;
+    plInt32 C = vYuv.x - 16;
+    plInt32 D = vYuv.y - 128;
+    plInt32 E = vYuv.z - 128;
 
     rgb.x = plMath::Clamp((298 * C + 409 * E + 128) >> 8, 0, 255);
     rgb.y = plMath::Clamp((298 * C - 100 * D - 208 * E + 128) >> 8, 0, 255);
@@ -39,10 +39,10 @@ struct plImageConversion_NV12_sRGB : public plImageConversionStepDeplanarize
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(plArrayPtr<plImageView> source, plImage target, plUInt32 numPixelsX, plUInt32 numPixelsY, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(plArrayPtr<plImageView> source, plImage target, plUInt32 uiNumPixelsX, plUInt32 uiNumPixelsY, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
-    for (plUInt32 y = 0; y < numPixelsY; y += 2)
+    for (plUInt32 y = 0; y < uiNumPixelsY; y += 2)
     {
       const plUInt8* luma0 = source[0].GetPixelPointer<plUInt8>(0, 0, 0, 0, y);
       const plUInt8* luma1 = source[0].GetPixelPointer<plUInt8>(0, 0, 0, 0, y + 1);
@@ -51,7 +51,7 @@ struct plImageConversion_NV12_sRGB : public plImageConversionStepDeplanarize
       plUInt8* rgba0 = target.GetPixelPointer<plUInt8>(0, 0, 0, 0, y);
       plUInt8* rgba1 = target.GetPixelPointer<plUInt8>(0, 0, 0, 0, y + 1);
 
-      for (plUInt32 x = 0; x < numPixelsX; x += 2)
+      for (plUInt32 x = 0; x < uiNumPixelsX; x += 2)
       {
         plVec3I32 p00 = YUV2RGB(plVec3I32(luma0[0], chroma[0], chroma[1]));
         plVec3I32 p01 = YUV2RGB(plVec3I32(luma0[1], chroma[0], chroma[1]));
@@ -85,7 +85,7 @@ struct plImageConversion_NV12_sRGB : public plImageConversionStepDeplanarize
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -99,10 +99,10 @@ struct plImageConversion_sRGB_NV12 : public plImageConversionStepPlanarize
     return supportedConversions;
   }
 
-  virtual plResult ConvertPixels(const plImageView& source, plArrayPtr<plImage> target, plUInt32 numPixelsX, plUInt32 numPixelsY, plImageFormat::Enum sourceFormat,
+  virtual plResult ConvertPixels(const plImageView& source, plArrayPtr<plImage> target, plUInt32 uiNumPixelsX, plUInt32 uiNumPixelsY, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
-    for (plUInt32 y = 0; y < numPixelsY; y += 2)
+    for (plUInt32 y = 0; y < uiNumPixelsY; y += 2)
     {
       const plUInt8* rgba0 = source.GetPixelPointer<plUInt8>(0, 0, 0, 0, y);
       const plUInt8* rgba1 = source.GetPixelPointer<plUInt8>(0, 0, 0, 0, y + 1);
@@ -111,7 +111,7 @@ struct plImageConversion_sRGB_NV12 : public plImageConversionStepPlanarize
       plUInt8* luma1 = target[0].GetPixelPointer<plUInt8>(0, 0, 0, 0, y + 1);
       plUInt8* chroma = target[1].GetPixelPointer<plUInt8>(0, 0, 0, 0, y / 2);
 
-      for (plUInt32 x = 0; x < numPixelsX; x += 2)
+      for (plUInt32 x = 0; x < uiNumPixelsX; x += 2)
       {
         plVec3I32 p00 = RGB2YUV(plVec3I32(rgba0[0], rgba0[1], rgba0[2]));
         plVec3I32 p01 = RGB2YUV(plVec3I32(rgba0[4], rgba0[5], rgba0[6]));
@@ -137,11 +137,16 @@ struct plImageConversion_sRGB_NV12 : public plImageConversionStepPlanarize
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
+// PL_STATICLINK_FORCE
 static plImageConversion_NV12_sRGB s_conversion_NV12_sRGB;
 static plImageConversion_sRGB_NV12 s_conversion_sRGB_NV12;
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Conversions_PlanarConversions);
+
+
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Conversions_PlanarConversions);
+

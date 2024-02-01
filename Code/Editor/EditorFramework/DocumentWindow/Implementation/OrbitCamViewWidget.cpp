@@ -4,17 +4,17 @@
 #include <EditorFramework/InputContexts/OrbitCameraContext.h>
 #include <EditorFramework/InputContexts/SelectionContext.h>
 
-plQtOrbitCamViewWidget::plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, PlasmaEngineViewConfig* pViewConfig, bool bPicking)
+plQtOrbitCamViewWidget::plQtOrbitCamViewWidget(plQtEngineDocumentWindow* pOwnerWindow, plEngineViewConfig* pViewConfig, bool bPicking)
   : plQtEngineViewWidget(nullptr, pOwnerWindow, pViewConfig)
 {
   setAcceptDrops(true);
 
-  m_pOrbitCameraContext = PLASMA_DEFAULT_NEW(plOrbitCameraContext, pOwnerWindow, this);
+  m_pOrbitCameraContext = PL_DEFAULT_NEW(plOrbitCameraContext, pOwnerWindow, this);
   m_pOrbitCameraContext->SetCamera(&m_pViewConfig->m_Camera);
 
   if (bPicking)
   {
-    m_pSelectionContext = PLASMA_DEFAULT_NEW(plSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
+    m_pSelectionContext = PL_DEFAULT_NEW(plSelectionContext, pOwnerWindow, this, &m_pViewConfig->m_Camera);
     m_InputContexts.PushBack(m_pSelectionContext.Borrow());
   }
 

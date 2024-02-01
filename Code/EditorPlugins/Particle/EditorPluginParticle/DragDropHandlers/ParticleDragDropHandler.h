@@ -4,7 +4,7 @@
 
 class plParticleComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleComponentDragDropHandler, plComponentDragDropHandler);
 
 public:
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;

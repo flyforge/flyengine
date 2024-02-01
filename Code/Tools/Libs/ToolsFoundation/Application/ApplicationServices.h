@@ -6,9 +6,9 @@
 
 class plDocument;
 
-class PLASMA_TOOLSFOUNDATION_DLL plApplicationServices
+class PL_TOOLSFOUNDATION_DLL plApplicationServices
 {
-  PLASMA_DECLARE_SINGLETON(plApplicationServices);
+  PL_DECLARE_SINGLETON(plApplicationServices);
 
 public:
   plApplicationServices();

@@ -3,7 +3,7 @@
 
 #include <RendererFoundation/Descriptors/Descriptors.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALBlendState : public plGALObject<plGALBlendStateCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALBlendState : public plGALObject<plGALBlendStateCreationDescription>
 {
 public:
 protected:
@@ -16,7 +16,7 @@ protected:
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 };
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALDepthStencilState : public plGALObject<plGALDepthStencilStateCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALDepthStencilState : public plGALObject<plGALDepthStencilStateCreationDescription>
 {
 public:
 protected:
@@ -29,7 +29,7 @@ protected:
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 };
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALRasterizerState : public plGALObject<plGALRasterizerStateCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALRasterizerState : public plGALObject<plGALRasterizerStateCreationDescription>
 {
 public:
 protected:
@@ -42,7 +42,7 @@ protected:
   virtual plResult DeInitPlatform(plGALDevice* pDevice) = 0;
 };
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALSamplerState : public plGALObject<plGALSamplerStateCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALSamplerState : public plGALObject<plGALSamplerStateCreationDescription>
 {
 public:
 protected:

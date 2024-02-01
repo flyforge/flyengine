@@ -3,15 +3,15 @@
 #include <Core/World/SettingsComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSettingsComponent, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSettingsComponent, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Utilities"),
+    new plCategoryAttribute("Settings"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSettingsComponent::plSettingsComponent()
@@ -22,4 +22,4 @@ plSettingsComponent::plSettingsComponent()
 plSettingsComponent::~plSettingsComponent() = default;
 
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_SettingsComponent);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_SettingsComponent);

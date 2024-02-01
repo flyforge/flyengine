@@ -24,7 +24,7 @@ struct plCommandHistoryEvent;
 class plObjectAccessorBase;
 
 /// \brief Base class for all property widgets
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyWidget : public QWidget
 {
   Q_OBJECT;
 
@@ -93,7 +93,7 @@ private:
 
 
 /// \brief Fallback widget for all property types for which no other widget type is registered
-class PLASMA_GUIFOUNDATION_DLL plQtUnsupportedPropertyWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtUnsupportedPropertyWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -111,7 +111,7 @@ protected:
 
 
 /// \brief Base class for most 'simple' property type widgets. Implements some of the standard functionality.
-class PLASMA_GUIFOUNDATION_DLL plQtStandardPropertyWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtStandardPropertyWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -134,7 +134,7 @@ protected:
 
 /// \brief Base class for more 'advanced' property type widgets for Pointer or Class type properties.
 /// Implements some of plQtTypeWidget functionality at property widget level.
-class PLASMA_GUIFOUNDATION_DLL plQtEmbeddedClassPropertyWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtEmbeddedClassPropertyWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -157,8 +157,8 @@ private:
   void FlushQueuedChanges();
 
 protected:
-  bool m_bTemporaryCommand;
-  const plRTTI* m_pResolvedType;
+  bool m_bTemporaryCommand = false;
+  const plRTTI* m_pResolvedType = nullptr;
   plHybridArray<plPropertySelection, 8> m_ResolvedObjects;
 
   plHybridArray<plString, 1> m_QueuedChanges;
@@ -168,7 +168,7 @@ protected:
 /// Used for pointers and embedded classes.
 /// Does not inherit from plQtEmbeddedClassPropertyWidget as it just embeds
 /// a plQtTypeWidget for the property's value which handles everything already.
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyTypeWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyTypeWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -192,7 +192,7 @@ protected:
 };
 
 /// \brief Used for property types that are pointers.
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyPointerWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyPointerWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -224,7 +224,7 @@ protected:
 
 
 /// \brief Base class for all container properties
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyContainerWidget : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyContainerWidget : public plQtPropertyWidget
 {
   Q_OBJECT;
 
@@ -288,7 +288,7 @@ protected:
   QHBoxLayout* m_pLayout;
   plQtGroupBoxBase* m_pGroup;
   QVBoxLayout* m_pGroupLayout;
-  plQtAddSubElementButton* m_pAddButton;
+  plQtAddSubElementButton* m_pAddButton = nullptr;
   QPalette m_Pal;
 
   mutable plHybridArray<plVariant, 16> m_Keys;
@@ -298,7 +298,7 @@ protected:
 };
 
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyStandardTypeContainerWidget : public plQtPropertyContainerWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyStandardTypeContainerWidget : public plQtPropertyContainerWidget
 {
   Q_OBJECT;
 
@@ -314,7 +314,7 @@ protected:
   virtual void UpdateElement(plUInt32 index) override;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyTypeContainerWidget : public plQtPropertyContainerWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyTypeContainerWidget : public plQtPropertyContainerWidget
 {
   Q_OBJECT;
 
@@ -330,10 +330,10 @@ protected:
   void CommandHistoryEventHandler(const plCommandHistoryEvent& e);
 
 private:
-  bool m_bNeedsUpdate;
+  bool m_bNeedsUpdate = false;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtVariantPropertyWidget : public plQtStandardPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtVariantPropertyWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT;
 

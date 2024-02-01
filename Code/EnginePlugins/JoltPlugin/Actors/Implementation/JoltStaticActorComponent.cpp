@@ -18,23 +18,23 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltStaticActorComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltStaticActorComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle", plDependencyFlags::Package)),
-    PLASMA_MEMBER_PROPERTY("IncludeInNavmesh", m_bIncludeInNavmesh)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("PullSurfacesFromGraphicsMesh", m_bPullSurfacesFromGraphicsMesh),
-    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("CollisionMesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Jolt_Colmesh_Triangle", plDependencyFlags::Package)),
+    PL_MEMBER_PROPERTY("IncludeInNavmesh", m_bIncludeInNavmesh)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("PullSurfacesFromGraphicsMesh", m_bPullSurfacesFromGraphicsMesh),
+    PL_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
+    PL_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltStaticActorComponent::plJoltStaticActorComponent()
@@ -134,7 +134,7 @@ void plJoltStaticActorComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
       plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
       sub.m_pShape = pShape;
-      sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+      sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
     }
   }
 
@@ -157,7 +157,7 @@ void plJoltStaticActorComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
     plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
     sub.m_pShape = pNewShape;
-    sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+    sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
   }
 }
 
@@ -212,7 +212,7 @@ void plJoltStaticActorComponent::PullSurfacesFromGraphicsMesh(plDynamicArray<con
     if (pSurface.GetAcquireResult() != plResourceAcquireResult::Final)
       continue;
 
-    PLASMA_ASSERT_DEV(pSurface->m_pPhysicsMaterialJolt != nullptr, "Invalid Jolt material pointer on surface");
+    PL_ASSERT_DEV(pSurface->m_pPhysicsMaterialJolt != nullptr, "Invalid Jolt material pointer on surface");
     ref_materials[s] = static_cast<plJoltMaterial*>(pSurface->m_pPhysicsMaterialJolt);
   }
 }
@@ -292,5 +292,5 @@ const char* plJoltStaticActorComponent::GetSurfaceFile() const
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltStaticActorComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltStaticActorComponent);
 

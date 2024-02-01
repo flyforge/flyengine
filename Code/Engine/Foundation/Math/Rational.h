@@ -12,7 +12,7 @@
 class plRational
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Default constructor, initializes to 0/1.
   plRational();

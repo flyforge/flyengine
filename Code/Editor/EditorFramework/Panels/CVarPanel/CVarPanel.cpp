@@ -5,27 +5,27 @@
 #include <Foundation/Configuration/CVar.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plQtCVarPanel);
+PL_IMPLEMENT_SINGLETON(plQtCVarPanel);
 
 class plCommandInterpreterFwd : public plCommandInterpreter
 {
 public:
-  virtual void Interpret(plCommandInterpreterState& inout_State) override
+  virtual void Interpret(plCommandInterpreterState& inout_state) override
   {
     plConsoleCmdMsgToEngine msg;
     msg.m_iType = 0;
-    msg.m_sCommand = inout_State.m_sInput;
+    msg.m_sCommand = inout_state.m_sInput;
 
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 
-  virtual void AutoComplete(plCommandInterpreterState& inout_State) override
+  virtual void AutoComplete(plCommandInterpreterState& inout_state) override
   {
     plConsoleCmdMsgToEngine msg;
     msg.m_iType = 1;
-    msg.m_sCommand = inout_State.m_sInput;
+    msg.m_sCommand = inout_state.m_sInput;
 
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 };
 
@@ -34,25 +34,25 @@ plQtCVarPanel::plQtCVarPanel()
   , m_SingletonRegistrar(this)
 {
   setIcon(plQtUiServices::GetCachedIconResource(":/GuiFoundation/Icons/CVar.svg"));
-  setWindowTitle(QString::fromUtf8(plTranslate("Panel.CVar")));
+  setWindowTitle(plMakeQString(plTranslate("Panel.CVar")));
   m_pCVarWidget = new plQtCVarWidget(this);
   m_pCVarWidget->layout()->setContentsMargins(0, 0, 0, 0);
   // m_pCVarWidget->setContentsMargins(0, 0, 0, 0);
   setWidget(m_pCVarWidget);
 
-  PlasmaEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.AddEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
 
   connect(m_pCVarWidget, &plQtCVarWidget::onBoolChanged, this, &plQtCVarPanel::BoolChanged);
   connect(m_pCVarWidget, &plQtCVarWidget::onFloatChanged, this, &plQtCVarPanel::FloatChanged);
   connect(m_pCVarWidget, &plQtCVarWidget::onIntChanged, this, &plQtCVarPanel::IntChanged);
   connect(m_pCVarWidget, &plQtCVarWidget::onStringChanged, this, &plQtCVarPanel::StringChanged);
 
-  m_pCVarWidget->GetConsole().SetCommandInterpreter(PLASMA_DEFAULT_NEW(plCommandInterpreterFwd));
+  m_pCVarWidget->GetConsole().SetCommandInterpreter(PL_DEFAULT_NEW(plCommandInterpreterFwd));
 }
 
 plQtCVarPanel::~plQtCVarPanel()
 {
-  PlasmaEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
+  plEditorEngineProcessConnection::s_Events.RemoveEventHandler(plMakeDelegate(&plQtCVarPanel::EngineProcessMsgHandler, this));
 }
 
 void plQtCVarPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e)
@@ -76,11 +76,11 @@ void plQtCVarPanel::ToolsProjectEventHandler(const plToolsProjectEvent& e)
   plQtApplicationPanel::ToolsProjectEventHandler(e);
 }
 
-void plQtCVarPanel::EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e)
+void plQtCVarPanel::EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e)
 {
   switch (e.m_Type)
   {
-    case PlasmaEditorEngineProcessConnection::Event::Type::ProcessMessage:
+    case plEditorEngineProcessConnection::Event::Type::ProcessMessage:
     {
       if (e.m_pMsg->GetDynamicRTTI()->IsDerivedFrom<plCVarMsgToEditor>())
       {
@@ -164,7 +164,7 @@ void plQtCVarPanel::BoolChanged(const char* szCVar, bool newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::FloatChanged(const char* szCVar, float newValue)
@@ -172,7 +172,7 @@ void plQtCVarPanel::FloatChanged(const char* szCVar, float newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::IntChanged(const char* szCVar, int newValue)
@@ -180,7 +180,7 @@ void plQtCVarPanel::IntChanged(const char* szCVar, int newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }
 
 void plQtCVarPanel::StringChanged(const char* szCVar, const char* newValue)
@@ -188,5 +188,5 @@ void plQtCVarPanel::StringChanged(const char* szCVar, const char* newValue)
   plChangeCVarMsgToEngine msg;
   msg.m_sCVarName = szCVar;
   msg.m_NewValue = newValue;
-  PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
 }

@@ -10,8 +10,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocument, 10, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocument, 10, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 static plTransform CalculateTransformationMatrix(const plEditableSkeleton* pProp)
@@ -59,13 +59,13 @@ static plTransform CalculateTransformationMatrix(const plEditableSkeleton* pProp
   }
 
   plMat3 rot = plBasisAxis::CalculateTransformationMatrix(forwardDir, rightDir, upDir, 1.0f);
-  t.m_qRotation.SetFromMat3(rot);
+  t.m_qRotation = plQuat::MakeFromMat3(rot);
 
   return t;
 }
 
-plSkeletonAssetDocument::plSkeletonAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plEditableSkeleton>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
+plSkeletonAssetDocument::plSkeletonAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plEditableSkeleton>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
@@ -149,9 +149,9 @@ plStatus plSkeletonAssetDocument::WriteResource(plStreamWriter& inout_stream, co
   desc.m_RootTransform = CalculateTransformationMatrix(&skeleton);
   skeleton.FillResourceDescriptor(desc);
 
-  PLASMA_SUCCEED_OR_RETURN(desc.Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(desc.Serialize(inout_stream));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plSkeletonAssetDocument::SetRenderBones(bool bEnable)
@@ -240,7 +240,7 @@ void plSkeletonAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
   // such that we can create components that modify these bones
 
   auto* desc = GetProperties();
-  plExposedParameters* pExposedParams = PLASMA_DEFAULT_NEW(plExposedParameters);
+  plExposedParameters* pExposedParams = PL_DEFAULT_NEW(plExposedParameters);
 
 
   {
@@ -248,7 +248,7 @@ void plSkeletonAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
     bone.m_sName = "<root-transform>";
     bone.m_Transform = CalculateTransformationMatrix(desc);
 
-    plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+    plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
     param->m_sName = "<root-transform>";
     param->m_DefaultValue.CopyTypedObject(&bone, plGetStaticRTTI<plExposedBone>());
 
@@ -261,7 +261,7 @@ void plSkeletonAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
     bone.m_sParent = szParent;
     bone.m_Transform = pJoint->m_LocalTransform;
 
-    plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+    plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
     param->m_sName = pJoint->GetName();
     param->m_DefaultValue.CopyTypedObject(&bone, plGetStaticRTTI<plExposedBone>());
 
@@ -282,11 +282,11 @@ void plSkeletonAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
   pInfo->m_MetaInfo.PushBack(pExposedParams);
 }
 
-plTransformStatus plSkeletonAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plSkeletonAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   {
     m_bIsTransforming = true;
-    PLASMA_SCOPE_EXIT(m_bIsTransforming = false);
+    PL_SCOPE_EXIT(m_bIsTransforming = false);
 
     plProgressRange range("Transforming Asset", 3, false);
 
@@ -297,7 +297,7 @@ plTransformStatus plSkeletonAssetDocument::InternalTransformAsset(plStreamWriter
     if (sAbsFilename.IsEmpty())
     {
       range.BeginNextStep("Writing Result");
-      PLASMA_SUCCEED_OR_RETURN(WriteResource(stream, *GetProperties()));
+      PL_SUCCEED_OR_RETURN(WriteResource(stream, *GetProperties()));
     }
     else
     {
@@ -327,7 +327,7 @@ plTransformStatus plSkeletonAssetDocument::InternalTransformAsset(plStreamWriter
       const plEditableSkeleton* pFinalSkeleton = MergeWithNewSkeleton(newSkeleton);
 
       range.BeginNextStep("Writing Result");
-      PLASMA_SUCCEED_OR_RETURN(WriteResource(stream, *pFinalSkeleton));
+      PL_SUCCEED_OR_RETURN(WriteResource(stream, *pFinalSkeleton));
 
       // merge the new data with the actual asset document
       ApplyNativePropertyChangesToObjectManager(true);
@@ -339,7 +339,7 @@ plTransformStatus plSkeletonAssetDocument::InternalTransformAsset(plStreamWriter
   e.m_Type = plSkeletonAssetEvent::Transformed;
   m_Events.Broadcast(e);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plTransformStatus plSkeletonAssetDocument::InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo)
@@ -395,7 +395,7 @@ const plEditableSkeleton* plSkeletonAssetDocument::MergeWithNewSkeleton(plEditab
       modelTransform = origin.GetAsMat4();
       plMsgAnimationPoseUpdated::ComputeFullBoneTransform(root.GetAsMat4(), modelTransform, fullTransform, pJoint->m_qGizmoOffsetRotationRO);
 
-      origin.SetGlobalTransform(origin, pJoint->m_LocalTransform);
+      origin = plTransform::MakeGlobalTransform(origin, pJoint->m_LocalTransform);
       pJoint->m_vGizmoOffsetPositionRO = root.TransformPosition(origin.m_vPosition);
 
       for (plEditableSkeletonJoint* pChild : pJoint->m_Children)
@@ -406,7 +406,7 @@ const plEditableSkeleton* plSkeletonAssetDocument::MergeWithNewSkeleton(plEditab
 
     for (plEditableSkeletonJoint* pChild : newSkeleton.m_Children)
     {
-      TraverseJoints(TraverseJoints, pChild, CalculateTransformationMatrix(pOldSkeleton), plTransform::IdentityTransform());
+      TraverseJoints(TraverseJoints, pChild, CalculateTransformationMatrix(pOldSkeleton), plTransform::MakeIdentity());
     }
   }
 
@@ -423,8 +423,8 @@ const plEditableSkeleton* plSkeletonAssetDocument::MergeWithNewSkeleton(plEditab
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plSkeletonAssetDocumentGenerator>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plSkeletonAssetDocumentGenerator>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSkeletonAssetDocumentGenerator::plSkeletonAssetDocumentGenerator()
 {
@@ -435,34 +435,35 @@ plSkeletonAssetDocumentGenerator::plSkeletonAssetDocumentGenerator()
 
 plSkeletonAssetDocumentGenerator::~plSkeletonAssetDocumentGenerator() = default;
 
-void plSkeletonAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
+void plSkeletonAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
 {
-  plStringBuilder baseOutputFile = sParentDirRelativePath;
-  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
-
   {
-    plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::Undecided;
     info.m_sName = "SkeletonImport";
-    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Skeleton.svg";
   }
 }
 
-plStatus plSkeletonAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
+plStatus plSkeletonAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
 {
+  plStringBuilder sOutFile = sInputFileAbs;
+  sOutFile.ChangeFileExtension(GetDocumentExtension());
+  plOSFile::FindFreeFilename(sOutFile);
+
   auto pApp = plQtEditorApp::GetSingleton();
 
-  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
+  plStringBuilder sInputFileRel = sInputFileAbs;
+  pApp->MakePathDataDirectoryRelative(sInputFileRel);
+
+  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plSkeletonAssetDocument* pAssetDoc = plDynamicCast<plSkeletonAssetDocument*>(out_pGeneratedDocument);
-  if (pAssetDoc == nullptr)
-    return plStatus("Target document is not a valid plSkeletonAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("File", sDataDirRelativePath);
+  accessor.SetValue("File", sInputFileRel.GetView());
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

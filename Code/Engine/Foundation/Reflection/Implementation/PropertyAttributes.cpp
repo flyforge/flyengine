@@ -3,66 +3,51 @@
 #include <Foundation/Reflection/Reflection.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAttribute, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPropertyAttribute, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReadOnlyAttribute, 1, plRTTIDefaultAllocator<plReadOnlyAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plReadOnlyAttribute, 1, plRTTIDefaultAllocator<plReadOnlyAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plHiddenAttribute, 1, plRTTIDefaultAllocator<plHiddenAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plHiddenAttribute, 1, plRTTIDefaultAllocator<plHiddenAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTemporaryAttribute, 1, plRTTIDefaultAllocator<plTemporaryAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTemporaryAttribute, 1, plRTTIDefaultAllocator<plTemporaryAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plDependencyFlags, 1)
-  PLASMA_BITFLAGS_CONSTANTS(plDependencyFlags::Package, plDependencyFlags::Thumbnail, plDependencyFlags::Transform)
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plDependencyFlags, 1)
+  PL_BITFLAGS_CONSTANTS(plDependencyFlags::Package, plDependencyFlags::Thumbnail, plDependencyFlags::Transform)
+PL_END_STATIC_REFLECTED_BITFLAGS;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCategoryAttribute, 1, plRTTIDefaultAllocator<plCategoryAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCategoryAttribute, 1, plRTTIDefaultAllocator<plCategoryAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Category", m_sCategory),
+    PL_MEMBER_PROPERTY("Category", m_sCategory),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorAttribute, 1, plRTTIDefaultAllocator<plColorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInDevelopmentAttribute, 1, plRTTIDefaultAllocator<plInDevelopmentAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("Phase", m_Phase),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plColor),
+    PL_CONSTRUCTOR_PROPERTY(plInt32),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInDevelopmentAttribute, 1, plRTTIDefaultAllocator<plInDevelopmentAttribute>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Phase", m_Phase),
-  }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
-  {
-    PLASMA_CONSTRUCTOR_PROPERTY(plInt32),
-  }
-  PLASMA_END_FUNCTIONS;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 const char* plInDevelopmentAttribute::GetString() const
@@ -75,106 +60,136 @@ const char* plInDevelopmentAttribute::GetString() const
   case Phase::Beta:
     return "BETA";
 
-    PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+    PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return "";
 }
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTitleAttribute, 1, plRTTIDefaultAllocator<plTitleAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTitleAttribute, 1, plRTTIDefaultAllocator<plTitleAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Title", m_sTitle),
+    PL_MEMBER_PROPERTY("Title", m_sTitle),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plExposeColorAlphaAttribute, 1, plRTTIDefaultAllocator<plExposeColorAlphaAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSuffixAttribute, 1, plRTTIDefaultAllocator<plSuffixAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorAttribute, 1, plRTTIDefaultAllocator<plColorAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Suffix", m_sSuffix),
+    PL_MEMBER_PROPERTY("Color", m_Color),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(plColor),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMinValueTextAttribute, 1, plRTTIDefaultAllocator<plMinValueTextAttribute>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Text", m_sText),
-  }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
-  {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
-  }
-  PLASMA_END_FUNCTIONS;
-}
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExposeColorAlphaAttribute, 1, plRTTIDefaultAllocator<plExposeColorAlphaAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDefaultValueAttribute, 1, plRTTIDefaultAllocator<plDefaultValueAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSuffixAttribute, 1, plRTTIDefaultAllocator<plSuffixAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Value", m_Value),
+    PL_MEMBER_PROPERTY("Suffix", m_sSuffix),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const plVariant&),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plClampValueAttribute, 1, plRTTIDefaultAllocator<plClampValueAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMinValueTextAttribute, 1, plRTTIDefaultAllocator<plMinValueTextAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Min", m_MinValue),
-    PLASMA_MEMBER_PROPERTY("Max", m_MaxValue),
+    PL_MEMBER_PROPERTY("Text", m_sText),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const plVariant&, const plVariant&),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGroupAttribute, 1, plRTTIDefaultAllocator<plGroupAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDefaultValueAttribute, 1, plRTTIDefaultAllocator<plDefaultValueAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Group", m_sGroup),
+    PL_MEMBER_PROPERTY("Value", m_Value),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, float),
+    PL_CONSTRUCTOR_PROPERTY(const plVariant&),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageSliderUiAttribute, 1, plRTTIDefaultAllocator<plImageSliderUiAttribute>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("ImageGenerator", m_sImageGenerator),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_CONSTRUCTOR_PROPERTY(const char*),
+  }
+  PL_END_FUNCTIONS;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plClampValueAttribute, 1, plRTTIDefaultAllocator<plClampValueAttribute>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("Min", m_MinValue),
+    PL_MEMBER_PROPERTY("Max", m_MaxValue),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_CONSTRUCTOR_PROPERTY(const plVariant&, const plVariant&),
+  }
+  PL_END_FUNCTIONS;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGroupAttribute, 1, plRTTIDefaultAllocator<plGroupAttribute>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("Group", m_sGroup),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_CONSTRUCTOR_PROPERTY(const char*, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, float),
+  }
+  PL_END_FUNCTIONS;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plGroupAttribute::plGroupAttribute()
 = default;
@@ -192,175 +207,176 @@ plGroupAttribute::plGroupAttribute(const char* szGroup, const char* szIconName, 
 {
 }
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeWidgetAttribute, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeWidgetAttribute, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plContainerWidgetAttribute, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plContainerWidgetAttribute, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTagSetWidgetAttribute, 1, plRTTIDefaultAllocator<plTagSetWidgetAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTagSetWidgetAttribute, 1, plRTTIDefaultAllocator<plTagSetWidgetAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Filter", m_sTagFilter),
+    PL_MEMBER_PROPERTY("Filter", m_sTagFilter),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plNoTemporaryTransactionsAttribute, 1, plRTTIDefaultAllocator<plNoTemporaryTransactionsAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plNoTemporaryTransactionsAttribute, 1, plRTTIDefaultAllocator<plNoTemporaryTransactionsAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plExposedParametersAttribute, 1, plRTTIDefaultAllocator<plExposedParametersAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExposedParametersAttribute, 1, plRTTIDefaultAllocator<plExposedParametersAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ParametersSource", m_sParametersSource),
+    PL_MEMBER_PROPERTY("ParametersSource", m_sParametersSource),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicDefaultValueAttribute, 1, plRTTIDefaultAllocator<plDynamicDefaultValueAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicDefaultValueAttribute, 1, plRTTIDefaultAllocator<plDynamicDefaultValueAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ClassSource", m_sClassSource),
-    PLASMA_MEMBER_PROPERTY("ClassType", m_sClassType),
+    PL_MEMBER_PROPERTY("ClassSource", m_sClassSource),
+    PL_MEMBER_PROPERTY("ClassType", m_sClassType),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plContainerAttribute, 1, plRTTIDefaultAllocator<plContainerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plContainerAttribute, 1, plRTTIDefaultAllocator<plContainerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("CanAdd", m_bCanAdd),
-    PLASMA_MEMBER_PROPERTY("CanDelete", m_bCanDelete),
-    PLASMA_MEMBER_PROPERTY("CanMove", m_bCanMove),
+    PL_MEMBER_PROPERTY("CanAdd", m_bCanAdd),
+    PL_MEMBER_PROPERTY("CanDelete", m_bCanDelete),
+    PL_MEMBER_PROPERTY("CanMove", m_bCanMove),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(bool, bool, bool),
+    PL_CONSTRUCTOR_PROPERTY(bool, bool, bool),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFileBrowserAttribute, 1, plRTTIDefaultAllocator<plFileBrowserAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plFileBrowserAttribute, 1, plRTTIDefaultAllocator<plFileBrowserAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Title", m_sDialogTitle),
-    PLASMA_MEMBER_PROPERTY("Filter", m_sTypeFilter),
-    PLASMA_MEMBER_PROPERTY("CustomAction", m_sCustomAction),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("DependencyFlags", plDependencyFlags, m_DependencyFlags),
+    PL_MEMBER_PROPERTY("Title", m_sDialogTitle),
+    PL_MEMBER_PROPERTY("Filter", m_sTypeFilter),
+    PL_MEMBER_PROPERTY("CustomAction", m_sCustomAction),
+    PL_BITFLAGS_MEMBER_PROPERTY("DependencyFlags", plDependencyFlags, m_DependencyFlags),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plStringView, plStringView),
+    PL_CONSTRUCTOR_PROPERTY(plStringView, plStringView, plStringView),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetBrowserAttribute, 1, plRTTIDefaultAllocator<plAssetBrowserAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetBrowserAttribute, 1, plRTTIDefaultAllocator<plAssetBrowserAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Filter", m_sTypeFilter),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("DependencyFlags", plDependencyFlags, m_DependencyFlags),
+    PL_MEMBER_PROPERTY("Filter", m_sTypeFilter),
+    PL_BITFLAGS_MEMBER_PROPERTY("DependencyFlags", plDependencyFlags, m_DependencyFlags),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicEnumAttribute, 1, plRTTIDefaultAllocator<plDynamicEnumAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicEnumAttribute, 1, plRTTIDefaultAllocator<plDynamicEnumAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-   PLASMA_MEMBER_PROPERTY("DynamicEnum", m_sDynamicEnumName),
+   PL_MEMBER_PROPERTY("DynamicEnum", m_sDynamicEnumName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-   PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+   PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicStringEnumAttribute, 1, plRTTIDefaultAllocator<plDynamicStringEnumAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicStringEnumAttribute, 1, plRTTIDefaultAllocator<plDynamicStringEnumAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("DynamicEnum", m_sDynamicEnumName),
+    PL_MEMBER_PROPERTY("DynamicEnum", m_sDynamicEnumName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicBitflagsAttribute, 1, plRTTIDefaultAllocator<plDynamicBitflagsAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicBitflagsAttribute, 1, plRTTIDefaultAllocator<plDynamicBitflagsAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-   PLASMA_MEMBER_PROPERTY("DynamicBitflags", m_sDynamicBitflagsName),
+   PL_MEMBER_PROPERTY("DynamicBitflags", m_sDynamicBitflagsName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-   PLASMA_CONSTRUCTOR_PROPERTY(plStringView),
+   PL_CONSTRUCTOR_PROPERTY(plStringView),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plManipulatorAttribute, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plManipulatorAttribute, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Property1", m_sProperty1),
-    PLASMA_MEMBER_PROPERTY("Property2", m_sProperty2),
-    PLASMA_MEMBER_PROPERTY("Property3", m_sProperty3),
-    PLASMA_MEMBER_PROPERTY("Property4", m_sProperty4),
-    PLASMA_MEMBER_PROPERTY("Property5", m_sProperty5),
-    PLASMA_MEMBER_PROPERTY("Property6", m_sProperty6),
+    PL_MEMBER_PROPERTY("Property1", m_sProperty1),
+    PL_MEMBER_PROPERTY("Property2", m_sProperty2),
+    PL_MEMBER_PROPERTY("Property3", m_sProperty3),
+    PL_MEMBER_PROPERTY("Property4", m_sProperty4),
+    PL_MEMBER_PROPERTY("Property5", m_sProperty5),
+    PL_MEMBER_PROPERTY("Property6", m_sProperty6),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plManipulatorAttribute::plManipulatorAttribute(const char* szProperty1, const char* szProperty2 /*= nullptr*/, const char* szProperty3 /*= nullptr*/,
@@ -377,16 +393,16 @@ plManipulatorAttribute::plManipulatorAttribute(const char* szProperty1, const ch
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereManipulatorAttribute, 1, plRTTIDefaultAllocator<plSphereManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereManipulatorAttribute, 1, plRTTIDefaultAllocator<plSphereManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSphereManipulatorAttribute::plSphereManipulatorAttribute()
@@ -402,15 +418,15 @@ plSphereManipulatorAttribute::plSphereManipulatorAttribute(const char* szOuterRa
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCapsuleManipulatorAttribute, 1, plRTTIDefaultAllocator<plCapsuleManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCapsuleManipulatorAttribute, 1, plRTTIDefaultAllocator<plCapsuleManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCapsuleManipulatorAttribute::plCapsuleManipulatorAttribute()
@@ -427,24 +443,24 @@ plCapsuleManipulatorAttribute::plCapsuleManipulatorAttribute(const char* szLengt
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxManipulatorAttribute, 1, plRTTIDefaultAllocator<plBoxManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxManipulatorAttribute, 1, plRTTIDefaultAllocator<plBoxManipulatorAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("scale", m_fSizeScale),
-    PLASMA_MEMBER_PROPERTY("recenter", m_bRecenterParent),
+    PL_MEMBER_PROPERTY("scale", m_fSizeScale),
+    PL_MEMBER_PROPERTY("recenter", m_bRecenterParent),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, bool, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, bool, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, bool, float, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, bool, float, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, bool, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*, bool, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*, bool, float, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, bool, float, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBoxManipulatorAttribute::plBoxManipulatorAttribute()
@@ -462,16 +478,16 @@ plBoxManipulatorAttribute::plBoxManipulatorAttribute(const char* szSizeProperty,
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plNonUniformBoxManipulatorAttribute, 1, plRTTIDefaultAllocator<plNonUniformBoxManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plNonUniformBoxManipulatorAttribute, 1, plRTTIDefaultAllocator<plNonUniformBoxManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const char*, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plNonUniformBoxManipulatorAttribute::plNonUniformBoxManipulatorAttribute()
@@ -493,15 +509,15 @@ plNonUniformBoxManipulatorAttribute::plNonUniformBoxManipulatorAttribute(const c
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeLengthManipulatorAttribute, 1, plRTTIDefaultAllocator<plConeLengthManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeLengthManipulatorAttribute, 1, plRTTIDefaultAllocator<plConeLengthManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plConeLengthManipulatorAttribute::plConeLengthManipulatorAttribute()
@@ -517,22 +533,22 @@ plConeLengthManipulatorAttribute::plConeLengthManipulatorAttribute(const char* s
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeAngleManipulatorAttribute, 1, plRTTIDefaultAllocator<plConeAngleManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeAngleManipulatorAttribute, 1, plRTTIDefaultAllocator<plConeAngleManipulatorAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("scale", m_fScale),
+    PL_MEMBER_PROPERTY("scale", m_fScale),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plConeAngleManipulatorAttribute::plConeAngleManipulatorAttribute()
@@ -550,15 +566,15 @@ plConeAngleManipulatorAttribute::plConeAngleManipulatorAttribute(const char* szA
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformManipulatorAttribute, 1, plRTTIDefaultAllocator<plTransformManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransformManipulatorAttribute, 1, plRTTIDefaultAllocator<plTransformManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTransformManipulatorAttribute::plTransformManipulatorAttribute()
@@ -575,15 +591,15 @@ plTransformManipulatorAttribute::plTransformManipulatorAttribute(
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoneManipulatorAttribute, 1, plRTTIDefaultAllocator<plBoneManipulatorAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoneManipulatorAttribute, 1, plRTTIDefaultAllocator<plBoneManipulatorAttribute>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBoneManipulatorAttribute::plBoneManipulatorAttribute()
@@ -599,28 +615,28 @@ plBoneManipulatorAttribute::plBoneManipulatorAttribute(const char* szTransformPr
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plVisualizerAnchor, 1)
-  PLASMA_BITFLAGS_CONSTANTS(plVisualizerAnchor::Center, plVisualizerAnchor::PosX, plVisualizerAnchor::NegX, plVisualizerAnchor::PosY, plVisualizerAnchor::NegY, plVisualizerAnchor::PosZ, plVisualizerAnchor::NegZ)
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plVisualizerAnchor, 1)
+  PL_BITFLAGS_CONSTANTS(plVisualizerAnchor::Center, plVisualizerAnchor::PosX, plVisualizerAnchor::NegX, plVisualizerAnchor::PosY, plVisualizerAnchor::NegY, plVisualizerAnchor::PosZ, plVisualizerAnchor::NegZ)
+PL_END_STATIC_REFLECTED_BITFLAGS;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualizerAttribute, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualizerAttribute, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Property1", m_sProperty1),
-    PLASMA_MEMBER_PROPERTY("Property2", m_sProperty2),
-    PLASMA_MEMBER_PROPERTY("Property3", m_sProperty3),
-    PLASMA_MEMBER_PROPERTY("Property4", m_sProperty4),
-    PLASMA_MEMBER_PROPERTY("Property5", m_sProperty5),
-    PLASMA_BITFLAGS_MEMBER_PROPERTY("Anchor", plVisualizerAnchor, m_Anchor),
+    PL_MEMBER_PROPERTY("Property1", m_sProperty1),
+    PL_MEMBER_PROPERTY("Property2", m_sProperty2),
+    PL_MEMBER_PROPERTY("Property3", m_sProperty3),
+    PL_MEMBER_PROPERTY("Property4", m_sProperty4),
+    PL_MEMBER_PROPERTY("Property5", m_sProperty5),
+    PL_BITFLAGS_MEMBER_PROPERTY("Anchor", plVisualizerAnchor, m_Anchor),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plVisualizerAttribute::plVisualizerAttribute(const char* szProperty1, const char* szProperty2 /*= nullptr*/, const char* szProperty3 /*= nullptr*/,
@@ -636,29 +652,29 @@ plVisualizerAttribute::plVisualizerAttribute(const char* szProperty1, const char
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxVisualizerAttribute, 1, plRTTIDefaultAllocator<plBoxVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxVisualizerAttribute, 1, plRTTIDefaultAllocator<plBoxVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-    PLASMA_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
-    PLASMA_MEMBER_PROPERTY("SizeScale", m_fSizeScale),
+    PL_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
+    PL_MEMBER_PROPERTY("SizeScale", m_fSizeScale),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBoxVisualizerAttribute::plBoxVisualizerAttribute()
@@ -678,26 +694,26 @@ plBoxVisualizerAttribute::plBoxVisualizerAttribute(const char* szSizeProperty, f
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereVisualizerAttribute, 1, plRTTIDefaultAllocator<plSphereVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereVisualizerAttribute, 1, plRTTIDefaultAllocator<plSphereVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-    PLASMA_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
+    PL_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSphereVisualizerAttribute::plSphereVisualizerAttribute()
@@ -716,23 +732,23 @@ plSphereVisualizerAttribute::plSphereVisualizerAttribute(const char* szRadiusPro
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCapsuleVisualizerAttribute, 1, plRTTIDefaultAllocator<plCapsuleVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCapsuleVisualizerAttribute, 1, plRTTIDefaultAllocator<plCapsuleVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("Color", m_Color),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCapsuleVisualizerAttribute::plCapsuleVisualizerAttribute()
@@ -750,33 +766,33 @@ plCapsuleVisualizerAttribute::plCapsuleVisualizerAttribute(const char* szHeightP
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCylinderVisualizerAttribute, 1, plRTTIDefaultAllocator<plCylinderVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCylinderVisualizerAttribute, 1, plRTTIDefaultAllocator<plCylinderVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-    PLASMA_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
-    PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
+    PL_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("OffsetOrScale", m_vOffsetOrScale),
+    PL_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>, plVec3),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*, plBitflags<plVisualizerAnchor>),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCylinderVisualizerAttribute::plCylinderVisualizerAttribute()
@@ -805,29 +821,29 @@ plCylinderVisualizerAttribute::plCylinderVisualizerAttribute(const char* szAxisP
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDirectionVisualizerAttribute, 1, plRTTIDefaultAllocator<plDirectionVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDirectionVisualizerAttribute, 1, plRTTIDefaultAllocator<plDirectionVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-    PLASMA_MEMBER_PROPERTY("Scale", m_fScale)
+    PL_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
+    PL_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("Scale", m_fScale)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&, const char*, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, float),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, float),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(const char*, float),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDirectionVisualizerAttribute::plDirectionVisualizerAttribute()
@@ -857,24 +873,24 @@ plDirectionVisualizerAttribute::plDirectionVisualizerAttribute(const char* szAxi
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeVisualizerAttribute, 1, plRTTIDefaultAllocator<plConeVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plConeVisualizerAttribute, 1, plRTTIDefaultAllocator<plConeVisualizerAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
-    PLASMA_MEMBER_PROPERTY("Scale", m_fScale),
+    PL_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis),
+    PL_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("Scale", m_fScale),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*, const plColor&, const char*),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*, const plColor&),
-    PLASMA_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*, const plColor&, const char*),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*, const plColor&),
+    PL_CONSTRUCTOR_PROPERTY(plEnum<plBasisAxis>, const char*, float, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plConeVisualizerAttribute::plConeVisualizerAttribute()
@@ -897,17 +913,17 @@ plConeVisualizerAttribute::plConeVisualizerAttribute(plEnum<plBasisAxis> axis, c
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCameraVisualizerAttribute, 1, plRTTIDefaultAllocator<plCameraVisualizerAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCameraVisualizerAttribute, 1, plRTTIDefaultAllocator<plCameraVisualizerAttribute>)
 {
-  //PLASMA_BEGIN_PROPERTIES
-  //PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  //PL_BEGIN_PROPERTIES
+  //PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const char*, const char*),
+    PL_CONSTRUCTOR_PROPERTY(const char*, const char*, const char*, const char*, const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCameraVisualizerAttribute::plCameraVisualizerAttribute()
@@ -924,50 +940,50 @@ plCameraVisualizerAttribute::plCameraVisualizerAttribute(const char* szModePrope
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaxArraySizeAttribute, 1, plRTTIDefaultAllocator<plMaxArraySizeAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaxArraySizeAttribute, 1, plRTTIDefaultAllocator<plMaxArraySizeAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MaxSize", m_uiMaxSize),
+    PL_MEMBER_PROPERTY("MaxSize", m_uiMaxSize),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(plUInt32),
+    PL_CONSTRUCTOR_PROPERTY(plUInt32),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreventDuplicatesAttribute, 1, plRTTIDefaultAllocator<plPreventDuplicatesAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreventDuplicatesAttribute, 1, plRTTIDefaultAllocator<plPreventDuplicatesAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plExcludeFromScript, 1, plRTTIDefaultAllocator<plExcludeFromScript>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExcludeFromScript, 1, plRTTIDefaultAllocator<plExcludeFromScript>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptableFunctionAttribute, 1, plRTTIDefaultAllocator<plScriptableFunctionAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptableFunctionAttribute, 1, plRTTIDefaultAllocator<plScriptableFunctionAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("ArgNames", m_ArgNames),
-    PLASMA_ARRAY_MEMBER_PROPERTY("ArgTypes", m_ArgTypes),
+    PL_ARRAY_MEMBER_PROPERTY("ArgNames", m_ArgNames),
+    PL_ARRAY_MEMBER_PROPERTY("ArgTypes", m_ArgTypes),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptableFunctionAttribute::plScriptableFunctionAttribute(ArgType argType1 /*= In*/, const char* szArg1 /*= nullptr*/, ArgType argType2 /*= In*/,
@@ -1022,16 +1038,16 @@ plScriptableFunctionAttribute::plScriptableFunctionAttribute(ArgType argType1 /*
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFunctionArgumentAttributes, 1, plRTTIDefaultAllocator<plFunctionArgumentAttributes>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plFunctionArgumentAttributes, 1, plRTTIDefaultAllocator<plFunctionArgumentAttributes>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ArgIndex", m_uiArgIndex),
-    PLASMA_ARRAY_MEMBER_PROPERTY("ArgAttributes", m_ArgAttributes),
+    PL_MEMBER_PROPERTY("ArgIndex", m_uiArgIndex),
+    PL_ARRAY_MEMBER_PROPERTY("ArgAttributes", m_ArgAttributes),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plFunctionArgumentAttributes::plFunctionArgumentAttributes(plUInt32 uiArgIndex, const plPropertyAttribute* pAttribute1, const plPropertyAttribute* pAttribute2 /*= nullptr*/, const plPropertyAttribute* pAttribute3 /*= nullptr*/, const plPropertyAttribute* pAttribute4 /*= nullptr*/)
@@ -1066,15 +1082,15 @@ plFunctionArgumentAttributes::plFunctionArgumentAttributes(plUInt32 uiArgIndex, 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicPinAttribute, 1, plRTTIDefaultAllocator<plDynamicPinAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDynamicPinAttribute, 1, plRTTIDefaultAllocator<plDynamicPinAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty)
+    PL_MEMBER_PROPERTY("Property", m_sProperty)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDynamicPinAttribute::plDynamicPinAttribute(const char* szProperty)
@@ -1085,37 +1101,38 @@ plDynamicPinAttribute::plDynamicPinAttribute(const char* szProperty)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLongOpAttribute, 1, plRTTIDefaultAllocator<plLongOpAttribute>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLongOpAttribute, 1, plRTTIDefaultAllocator<plLongOpAttribute>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Type", m_sOpTypeName),
+    PL_MEMBER_PROPERTY("Type", m_sOpTypeName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_CONSTRUCTOR_PROPERTY(),
-    PLASMA_CONSTRUCTOR_PROPERTY(const char*),
+    PL_CONSTRUCTOR_PROPERTY(),
+    PL_CONSTRUCTOR_PROPERTY(const char*),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectReferenceAttribute, 1, plRTTIDefaultAllocator<plGameObjectReferenceAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectReferenceAttribute, 1, plRTTIDefaultAllocator<plGameObjectReferenceAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGroupNextAttribute, 1, plRTTIDefaultAllocator<plGroupNextAttribute>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGroupNextAttribute, 1, plRTTIDefaultAllocator<plGroupNextAttribute>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
+
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyAttributes);
+PL_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_PropertyAttributes);

@@ -5,13 +5,13 @@
 #include <QDialog>
 #include <ToolsFoundation/Document/Document.h>
 
-class PLASMA_GUIFOUNDATION_DLL plQtModifiedDocumentsDlg : public QDialog, public Ui_DocumentList
+class PL_GUIFOUNDATION_DLL plQtModifiedDocumentsDlg : public QDialog, public Ui_DocumentList
 {
 public:
   Q_OBJECT
 
 public:
-  plQtModifiedDocumentsDlg(QWidget* parent, const plHybridArray<plDocument*, 32>& ModifiedDocs);
+  plQtModifiedDocumentsDlg(QWidget* pParent, const plHybridArray<plDocument*, 32>& modifiedDocs);
 
 
 private Q_SLOTS:

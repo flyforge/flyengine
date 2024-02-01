@@ -4,12 +4,12 @@
 #include <EditorPluginAssets/TextureCubeAsset/TextureCubeAsset.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocument, 3, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocument, 3, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTextureCubeChannelMode, 1)
-  PLASMA_ENUM_CONSTANTS(plTextureCubeChannelMode::RGB, plTextureCubeChannelMode::Red, plTextureCubeChannelMode::Green, plTextureCubeChannelMode::Blue, plTextureCubeChannelMode::Alpha)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTextureCubeChannelMode, 1)
+  PL_ENUM_CONSTANTS(plTextureCubeChannelMode::RGB, plTextureCubeChannelMode::Red, plTextureCubeChannelMode::Green, plTextureCubeChannelMode::Blue, plTextureCubeChannelMode::Alpha)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 const char* ToFilterMode(plTextureFilterSetting::Enum mode);
@@ -17,8 +17,8 @@ const char* ToUsageMode(plTexConvUsage::Enum mode);
 const char* ToCompressionMode(plTexConvCompressionMode::Enum mode);
 const char* ToMipmapMode(plTexConvMipmapMode::Enum mode);
 
-plTextureCubeAssetDocument::plTextureCubeAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plTextureCubeAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple)
+plTextureCubeAssetDocument::plTextureCubeAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plTextureCubeAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple)
 {
   m_iTextureLod = -1;
 }
@@ -42,11 +42,11 @@ plStatus plTextureCubeAssetDocument::RunTexConv(const char* szTargetFile, const 
     const plUInt32 uiHashLow32 = uiHash64 & 0xFFFFFFFF;
     const plUInt32 uiHashHigh32 = (uiHash64 >> 32) & 0xFFFFFFFF;
 
-    temp.Format("{0}", plArgU(uiHashLow32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashLow32, 8, true, 16, true));
     arguments << "-assetHashLow";
     arguments << temp.GetData();
 
-    temp.Format("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
     arguments << "-assetHashHigh";
     arguments << temp.GetData();
   }
@@ -72,7 +72,7 @@ plStatus plTextureCubeAssetDocument::RunTexConv(const char* szTargetFile, const 
   if (pProp->m_TextureUsage == plTexConvUsage::Hdr)
   {
     arguments << "-hdrExposure";
-    temp.Format("{0}", plArgF(pProp->m_fHdrExposureBias, 2));
+    temp.SetFormat("{0}", plArgF(pProp->m_fHdrExposureBias, 2));
     arguments << temp.GetData();
   }
 
@@ -136,7 +136,7 @@ plStatus plTextureCubeAssetDocument::RunTexConv(const char* szTargetFile, const 
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   const plInt32 iNumInputFiles = pProp->GetNumInputFiles();
@@ -145,17 +145,17 @@ plStatus plTextureCubeAssetDocument::RunTexConv(const char* szTargetFile, const 
     if (plStringUtils::IsNullOrEmpty(pProp->GetInputFile(i)))
       break;
 
-    temp.Format("-in{0}", i);
+    temp.SetFormat("-in{0}", i);
     arguments << temp.GetData();
     arguments << QString(pProp->GetAbsoluteInputFilePath(i).GetData());
   }
 
-  PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
+  PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
 
   if (bUpdateThumbnail)
   {
     plUInt64 uiThumbnailHash = plAssetCurator::GetSingleton()->GetAssetReferenceHash(GetGuid());
-    PLASMA_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
+    PL_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
 
     ThumbnailInfo thumbnailInfo;
     thumbnailInfo.SetFileHashAndVersion(uiThumbnailHash, GetAssetTypeVersion());
@@ -163,7 +163,7 @@ plStatus plTextureCubeAssetDocument::RunTexConv(const char* szTargetFile, const 
     InvalidateAssetThumbnail();
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plTextureCubeAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
@@ -176,11 +176,11 @@ void plTextureCubeAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pI
     case plTextureCubeChannelMappingEnum::RGBA1:
     {
       // remove file dependencies, that aren't used
-      pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile1());
-      pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile2());
-      pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile3());
-      pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile4());
-      pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetInputFile5());
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile1());
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile2());
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile3());
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile4());
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetInputFile5());
       break;
     }
 
@@ -189,13 +189,13 @@ void plTextureCubeAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pI
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
-plTransformStatus plTextureCubeAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plTextureCubeAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  // PLASMA_ASSERT_DEV(plStringUtils::IsEqual(szPlatform, "PC"), "Platform '{0}' is not supported", szPlatform);
+  // PL_ASSERT_DEV(plStringUtils::IsEqual(szPlatform, "PC"), "Platform '{0}' is not supported", szPlatform);
   const bool bUpdateThumbnail = pAssetProfile == plAssetCurator::GetSingleton()->GetDevelopmentAssetProfile();
 
   plTransformStatus result = RunTexConv(szTargetFile, AssetHeader, bUpdateThumbnail);
@@ -215,13 +215,14 @@ plTransformStatus plTextureCubeAssetDocument::InternalTransformAsset(const char*
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plTextureCubeAssetDocumentGenerator>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plTextureCubeAssetDocumentGenerator>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plTextureCubeAssetDocumentGenerator::plTextureCubeAssetDocumentGenerator()
 {
   AddSupportedFileType("dds");
   AddSupportedFileType("hdr");
+  AddSupportedFileType("exr");
 
   // these formats would need to use 6 files for the faces
   // more elaborate detection and mapping would need to be implemented
@@ -231,66 +232,66 @@ plTextureCubeAssetDocumentGenerator::plTextureCubeAssetDocumentGenerator()
   // AddSupportedFileType("png");
 }
 
-plTextureCubeAssetDocumentGenerator::~plTextureCubeAssetDocumentGenerator() {}
+plTextureCubeAssetDocumentGenerator::~plTextureCubeAssetDocumentGenerator() = default;
 
-void plTextureCubeAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
+void plTextureCubeAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
 {
-  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  const plStringBuilder baseFilename = sAbsInputFile.GetFileName();
+  const bool isHDR = sAbsInputFile.HasExtension("hdr") || sAbsInputFile.HasExtension("exr");
 
-  const plStringBuilder baseFilename = baseOutputFile.GetFileName();
-  const bool isHDR = plPathUtils::HasExtension(sParentDirRelativePath, "hdr");
-
-  /// \todo Make this configurable
   const bool isCubemap = ((baseFilename.FindSubString_NoCase("cubemap") != nullptr) || (baseFilename.FindSubString_NoCase("skybox") != nullptr));
 
-  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
+  // TODO: if (sAbsInputFile.IsEmpty()) -> CubemapImport.SkyboxAuto
 
   if (isHDR)
   {
     {
-      plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
+      plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
       info.m_Priority = isCubemap ? plAssetDocGeneratorPriority::HighPriority : plAssetDocGeneratorPriority::Undecided;
       info.m_sName = "CubemapImport.SkyboxHDR";
-      info.m_sOutputFileParentRelative = baseOutputFile;
       info.m_sIcon = ":/AssetIcons/Texture_Cube.svg";
     }
   }
   else
   {
     {
-      plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
+      plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
       info.m_Priority = isCubemap ? plAssetDocGeneratorPriority::HighPriority : plAssetDocGeneratorPriority::Undecided;
       info.m_sName = "CubemapImport.Skybox";
-      info.m_sOutputFileParentRelative = baseOutputFile;
       info.m_sIcon = ":/AssetIcons/Texture_Cube.svg";
     }
   }
 }
 
-plStatus plTextureCubeAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
+plStatus plTextureCubeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
 {
+  plStringBuilder sOutFile = sInputFileAbs;
+  sOutFile.ChangeFileExtension(GetDocumentExtension());
+  plOSFile::FindFreeFilename(sOutFile);
+
   auto pApp = plQtEditorApp::GetSingleton();
 
-  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
+  plStringBuilder sInputFileRel = sInputFileAbs;
+  pApp->MakePathDataDirectoryRelative(sInputFileRel);
+
+  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plTextureCubeAssetDocument* pAssetDoc = plDynamicCast<plTextureCubeAssetDocument*>(out_pGeneratedDocument);
-  if (pAssetDoc == nullptr)
-    return plStatus("Target document is not a valid plTextureCubeAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("Input1", sDataDirRelativePath);
+  accessor.SetValue("Input1", sInputFileRel.GetView());
   accessor.SetValue("ChannelMapping", (int)plTextureCubeChannelMappingEnum::RGB1);
 
-  if (info.m_sName == "CubemapImport.SkyboxHDR")
+  if (sMode == "CubemapImport.SkyboxHDR")
   {
     accessor.SetValue("Usage", (int)plTexConvUsage::Hdr);
   }
-  else if (info.m_sName == "CubemapImport.Skybox")
+  else if (sMode == "CubemapImport.Skybox")
   {
     accessor.SetValue("Usage", (int)plTexConvUsage::Color);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

@@ -3,9 +3,9 @@
 #include <Foundation/Types/VarianceTypes.h>
 #include <ParticlePlugin/Emitter/ParticleEmitter.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Distance final : public plParticleEmitterFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Distance final : public plParticleEmitterFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Distance, plParticleEmitterFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Distance, plParticleEmitterFactory);
 
 public:
   plParticleEmitterFactory_Distance();
@@ -14,8 +14,8 @@ public:
   virtual void CopyEmitterProperties(plParticleEmitter* pEmitter, bool bFirstTime) const override;
   virtual void QueryMaxParticleCount(plUInt32& out_uiMaxParticlesAbs, plUInt32& out_uiMaxParticlesPerSecond) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
 public:
   float m_fDistanceThreshold = 0.1f;
@@ -25,9 +25,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitter_Distance final : public plParticleEmitter
+class PL_PARTICLEPLUGIN_DLL plParticleEmitter_Distance final : public plParticleEmitter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Distance, plParticleEmitter);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Distance, plParticleEmitter);
 
 public:
   float m_fDistanceThresholdSQR;

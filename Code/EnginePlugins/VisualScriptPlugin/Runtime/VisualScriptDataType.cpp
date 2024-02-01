@@ -6,29 +6,29 @@
 #include <Core/World/World.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plVisualScriptDataType, 1)
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Invalid),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Bool),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Byte),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Int),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Int64),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Float),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Double),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Color),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Vector3),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Quaternion),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Transform),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Time),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Angle),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::String),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::HashedString),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::GameObject),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Component),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::TypedPointer),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Variant),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Array),
-  PLASMA_ENUM_CONSTANT(plVisualScriptDataType::Map),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plVisualScriptDataType, 1)
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Invalid),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Bool),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Byte),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Int),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Int64),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Float),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Double),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Color),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Vector3),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Quaternion),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Transform),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Time),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Angle),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::String),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::HashedString),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::GameObject),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Component),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::TypedPointer),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Variant),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Array),
+  PL_ENUM_CONSTANT(plVisualScriptDataType::Map),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 namespace
@@ -58,7 +58,7 @@ namespace
     plVariantType::VariantDictionary, // Map,
     plVariantType::TypedObject,       // Coroutine,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_ScriptDataTypeVariantTypes) == (size_t)plVisualScriptDataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_ScriptDataTypeVariantTypes) == (size_t)plVisualScriptDataType::Count);
 
   static plUInt32 s_ScriptDataTypeSizes[] = {
     0, // Invalid,
@@ -85,34 +85,34 @@ namespace
     sizeof(plVariantDictionary),            // Map,
     sizeof(plScriptCoroutineHandle),        // Coroutine,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_ScriptDataTypeSizes) == (size_t)plVisualScriptDataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_ScriptDataTypeSizes) == (size_t)plVisualScriptDataType::Count);
 
   static plUInt32 s_ScriptDataTypeAlignments[] = {
     0, // Invalid,
 
-    PLASMA_ALIGNMENT_OF(bool),                           // Bool,
-    PLASMA_ALIGNMENT_OF(plUInt8),                        // Byte,
-    PLASMA_ALIGNMENT_OF(plInt32),                        // Int,
-    PLASMA_ALIGNMENT_OF(plInt64),                        // Int64,
-    PLASMA_ALIGNMENT_OF(float),                          // Float,
-    PLASMA_ALIGNMENT_OF(double),                         // Double,
-    PLASMA_ALIGNMENT_OF(plColor),                        // Color,
-    PLASMA_ALIGNMENT_OF(plVec3),                         // Vector3,
-    PLASMA_ALIGNMENT_OF(plQuat),                         // Quaternion,
-    PLASMA_ALIGNMENT_OF(plTransform),                    // Transform,
-    PLASMA_ALIGNMENT_OF(plTime),                         // Time,
-    PLASMA_ALIGNMENT_OF(plAngle),                        // Angle,
-    PLASMA_ALIGNMENT_OF(plString),                       // String,
-    PLASMA_ALIGNMENT_OF(plHashedString),                 // HashedString,
-    PLASMA_ALIGNMENT_OF(plVisualScriptGameObjectHandle), // GameObject,
-    PLASMA_ALIGNMENT_OF(plVisualScriptComponentHandle),  // Component,
-    PLASMA_ALIGNMENT_OF(plTypedPointer),                 // TypedPointer,
-    PLASMA_ALIGNMENT_OF(plVariant),                      // Variant,
-    PLASMA_ALIGNMENT_OF(plVariantArray),                 // Array,
-    PLASMA_ALIGNMENT_OF(plVariantDictionary),            // Map,
-    PLASMA_ALIGNMENT_OF(plScriptCoroutineHandle),        // Coroutine,
+    PL_ALIGNMENT_OF(bool),                           // Bool,
+    PL_ALIGNMENT_OF(plUInt8),                        // Byte,
+    PL_ALIGNMENT_OF(plInt32),                        // Int,
+    PL_ALIGNMENT_OF(plInt64),                        // Int64,
+    PL_ALIGNMENT_OF(float),                          // Float,
+    PL_ALIGNMENT_OF(double),                         // Double,
+    PL_ALIGNMENT_OF(plColor),                        // Color,
+    PL_ALIGNMENT_OF(plVec3),                         // Vector3,
+    PL_ALIGNMENT_OF(plQuat),                         // Quaternion,
+    PL_ALIGNMENT_OF(plTransform),                    // Transform,
+    PL_ALIGNMENT_OF(plTime),                         // Time,
+    PL_ALIGNMENT_OF(plAngle),                        // Angle,
+    PL_ALIGNMENT_OF(plString),                       // String,
+    PL_ALIGNMENT_OF(plHashedString),                 // HashedString,
+    PL_ALIGNMENT_OF(plVisualScriptGameObjectHandle), // GameObject,
+    PL_ALIGNMENT_OF(plVisualScriptComponentHandle),  // Component,
+    PL_ALIGNMENT_OF(plTypedPointer),                 // TypedPointer,
+    PL_ALIGNMENT_OF(plVariant),                      // Variant,
+    PL_ALIGNMENT_OF(plVariantArray),                 // Array,
+    PL_ALIGNMENT_OF(plVariantDictionary),            // Map,
+    PL_ALIGNMENT_OF(plScriptCoroutineHandle),        // Coroutine,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_ScriptDataTypeAlignments) == (size_t)plVisualScriptDataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_ScriptDataTypeAlignments) == (size_t)plVisualScriptDataType::Count);
 
   static const char* s_ScriptDataTypeNames[] = {
     "Invalid",
@@ -141,13 +141,13 @@ namespace
     "", // Count,
     "Enum",
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_ScriptDataTypeNames) == (size_t)plVisualScriptDataType::ExtendedCount);
+  static_assert(PL_ARRAY_SIZE(s_ScriptDataTypeNames) == (size_t)plVisualScriptDataType::ExtendedCount);
 } // namespace
 
 // static
 plVariantType::Enum plVisualScriptDataType::GetVariantType(Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_ScriptDataTypeVariantTypes), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_ScriptDataTypeVariantTypes), "Out of bounds access");
   return s_ScriptDataTypeVariantTypes[dataType];
 }
 
@@ -200,6 +200,33 @@ plVisualScriptDataType::Enum plVisualScriptDataType::FromVariantType(plVariantTy
   }
 }
 
+plProcessingStream::DataType plVisualScriptDataType::GetStreamDataType(Enum dataType)
+{
+  // We treat plColor and plVec4 as the same in the visual script <=> expression binding
+  // so ensure that they have the same size and layout
+  static_assert(sizeof(plColor) == sizeof(plVec4));
+  static_assert(offsetof(plColor, r) == offsetof(plVec4, x));
+  static_assert(offsetof(plColor, g) == offsetof(plVec4, y));
+  static_assert(offsetof(plColor, b) == offsetof(plVec4, z));
+  static_assert(offsetof(plColor, a) == offsetof(plVec4, w));
+
+  switch (dataType)
+  {
+    case Int:
+      return plProcessingStream::DataType::Int;
+    case Float:
+      return plProcessingStream::DataType::Float;
+    case Vector3:
+      return plProcessingStream::DataType::Float3;
+    case Color:
+      return plProcessingStream::DataType::Float4;
+    default:
+      PL_ASSERT_NOT_IMPLEMENTED;
+  }
+
+  return plProcessingStream::DataType::Float;
+}
+
 // static
 const plRTTI* plVisualScriptDataType::GetRtti(Enum dataType)
 {
@@ -231,9 +258,9 @@ const plRTTI* plVisualScriptDataType::GetRtti(Enum dataType)
     nullptr,                                    // Count,
     nullptr,                                    // EnumValue,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_Rttis) == (size_t)plVisualScriptDataType::ExtendedCount);
+  static_assert(PL_ARRAY_SIZE(s_Rttis) == (size_t)plVisualScriptDataType::ExtendedCount);
 
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_Rttis), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_Rttis), "Out of bounds access");
   return s_Rttis[dataType];
 }
 
@@ -268,14 +295,14 @@ plVisualScriptDataType::Enum plVisualScriptDataType::FromRtti(const plRTTI* pRtt
 // static
 plUInt32 plVisualScriptDataType::GetStorageSize(Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_ScriptDataTypeSizes), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_ScriptDataTypeSizes), "Out of bounds access");
   return s_ScriptDataTypeSizes[dataType];
 }
 
 // static
 plUInt32 plVisualScriptDataType::GetStorageAlignment(Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_ScriptDataTypeAlignments), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_ScriptDataTypeAlignments), "Out of bounds access");
   return s_ScriptDataTypeAlignments[dataType];
 }
 
@@ -291,7 +318,7 @@ const char* plVisualScriptDataType::GetName(Enum dataType)
     return "Any";
   }
 
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_ScriptDataTypeNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_ScriptDataTypeNames), "Out of bounds access");
   return s_ScriptDataTypeNames[dataType];
 }
 
@@ -315,7 +342,7 @@ bool plVisualScriptDataType::CanConvertTo(Enum sourceDataType, Enum targetDataTy
 
 plGameObject* plVisualScriptGameObjectHandle::GetPtr(plUInt32 uiExecutionCounter) const
 {
-  if (m_uiExecutionCounter == uiExecutionCounter)
+  if (m_uiExecutionCounter == uiExecutionCounter || m_Handle.GetInternalID().m_Data == 0)
   {
     return m_Ptr;
   }
@@ -326,7 +353,7 @@ plGameObject* plVisualScriptGameObjectHandle::GetPtr(plUInt32 uiExecutionCounter
   if (plWorld* pWorld = plWorld::GetWorld(m_Handle))
   {
     bool objectExists = pWorld->TryGetObject(m_Handle, m_Ptr);
-    PLASMA_IGNORE_UNUSED(objectExists);
+    PL_IGNORE_UNUSED(objectExists);
   }
 
   return m_Ptr;
@@ -334,7 +361,7 @@ plGameObject* plVisualScriptGameObjectHandle::GetPtr(plUInt32 uiExecutionCounter
 
 plComponent* plVisualScriptComponentHandle::GetPtr(plUInt32 uiExecutionCounter) const
 {
-  if (m_uiExecutionCounter == uiExecutionCounter)
+  if (m_uiExecutionCounter == uiExecutionCounter || m_Handle.GetInternalID().m_Data == 0)
   {
     return m_Ptr;
   }
@@ -345,7 +372,7 @@ plComponent* plVisualScriptComponentHandle::GetPtr(plUInt32 uiExecutionCounter) 
   if (plWorld* pWorld = plWorld::GetWorld(m_Handle))
   {
     bool componentExists = pWorld->TryGetComponent(m_Handle, m_Ptr);
-    PLASMA_IGNORE_UNUSED(componentExists);
+    PL_IGNORE_UNUSED(componentExists);
   }
 
   return m_Ptr;

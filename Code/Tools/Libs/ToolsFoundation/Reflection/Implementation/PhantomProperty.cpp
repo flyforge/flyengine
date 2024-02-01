@@ -122,7 +122,7 @@ plBitflags<plPropertyFlags> plPhantomFunctionProperty::GetArgumentFlags(plUInt32
 
 void plPhantomFunctionProperty::Execute(void* pInstance, plArrayPtr<plVariant> values, plVariant& ref_returnValue) const
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 plPhantomArrayProperty::plPhantomArrayProperty(const plReflectedPropertyDescriptor* pDesc)

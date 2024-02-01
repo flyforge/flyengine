@@ -9,23 +9,23 @@ class plParticleComponent;
 
 using plParticleEffectResourceHandle = plTypedResourceHandle<class plParticleEffectResource>;
 
-class PLASMA_ENGINEPLUGINPARTICLE_DLL plParticleContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINPARTICLE_DLL plParticleContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleContext, plEngineProcessDocumentContext);
 
 public:
   plParticleContext();
   ~plParticleContext();
 
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
 
 protected:
   virtual void OnInitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
   virtual void OnThumbnailViewContextRequested() override;
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
 
   void RestartEffect();
   void SetAutoRestartEffect(bool loop);

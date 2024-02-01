@@ -7,7 +7,7 @@ PluginInfo
 	string %Description{"Allows to create AR and VR applications using the OpenXR API."}
 	string %EditorPlugins{}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaOpenXRPlugin"}
+	string %RuntimePlugins{"plOpenXRPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

@@ -2,8 +2,8 @@
 
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropInfo, 1, plRTTIDefaultAllocator<plDragDropInfo>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropInfo, 1, plRTTIDefaultAllocator<plDragDropInfo>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDragDropInfo::plDragDropInfo()
 {
@@ -16,30 +16,10 @@ plDragDropInfo::plDragDropInfo()
 }
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropConfig, 1, plRTTIDefaultAllocator<plDragDropConfig>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropConfig, 1, plRTTIDefaultAllocator<plDragDropConfig>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDragDropConfig::plDragDropConfig()
 {
   m_bPickSelectedObjects = false;
-}
-
-void operator>>(QDataStream& stream, plDynamicArray<plDocumentObject*>& rhs)
-{
-  int iIndices = 0;
-  stream >> iIndices;
-  rhs.Clear();
-  rhs.Reserve(static_cast<plUInt32>(iIndices));
-
-  for (int i = 0; i < iIndices; ++i)
-  {
-    void* p = nullptr;
-
-    uint len = sizeof(void*);
-    stream.readRawData((char*)&p, len);
-
-    plDocumentObject* pDocObject = (plDocumentObject*)p;
-
-    rhs.PushBack(pDocObject);
-  }
 }

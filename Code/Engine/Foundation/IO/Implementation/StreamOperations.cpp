@@ -38,5 +38,3 @@ plStreamReader& operator>>(plStreamReader& inout_stream, plStringBuilder& out_sV
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_StreamOperations);

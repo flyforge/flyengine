@@ -6,7 +6,7 @@
 /// \brief Helper class to convert between Recast's convention (float[3] and Y is up) and plVec3 (Z up)
 ///
 /// Will automatically swap Y and Z when assigning between the different types.
-struct PLASMA_AIPLUGIN_DLL plRcPos
+struct PL_AIPLUGIN_DLL plRcPos
 {
   float m_Pos[3];
 

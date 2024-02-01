@@ -13,8 +13,8 @@ enum class plCompressionMethod : plUInt16
 namespace plCompressionUtils
 {
   ///\brief Compresses the given data using the compression method eMethod into the dynamic array given in out_Data.
-  PLASMA_FOUNDATION_DLL plResult Compress(plArrayPtr<const plUInt8> uncompressedData, plCompressionMethod method, plDynamicArray<plUInt8>& out_data);
+  PL_FOUNDATION_DLL plResult Compress(plArrayPtr<const plUInt8> uncompressedData, plCompressionMethod method, plDynamicArray<plUInt8>& out_data);
 
   ///\brief Decompresses the given data using the compression method eMethod into the dynamic array given in out_Data.
-  PLASMA_FOUNDATION_DLL plResult Decompress(plArrayPtr<const plUInt8> compressedData, plCompressionMethod method, plDynamicArray<plUInt8>& out_data);
+  PL_FOUNDATION_DLL plResult Decompress(plArrayPtr<const plUInt8> compressedData, plCompressionMethod method, plDynamicArray<plUInt8>& out_data);
 } // namespace plCompressionUtils

@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 
 #  include <Foundation/Logging/Log.h>
 #  include <Foundation/Strings/StringBuilder.h>
@@ -51,7 +51,7 @@ enum class plJniErrorState
 ///       plJniClass myClassType = activity.Call<plJniObject>("getClassLoader").Call<plJniClass>("loadClass", plJniString("com.myproject.MyClass"));
 ///     }
 ///   \endcode
-class PLASMA_FOUNDATION_DLL plJniAttachment
+class PL_FOUNDATION_DLL plJniAttachment
 {
 public:
   /// \brief Constructor.
@@ -123,7 +123,7 @@ enum class plJniOwnerShip
 };
 
 /// \brief Class that manages a local reference to a Java object.
-class PLASMA_FOUNDATION_DLL plJniObject
+class PL_FOUNDATION_DLL plJniObject
 {
 public:
   /// \brief Creates a null object.
@@ -342,7 +342,7 @@ private:
 /// This encoding is identical to UTF-8, except that null characters inside the string are encoded as 0xC0, 0x80,
 /// and that code points above 0xFFFF are represented by separately encoding each of the two UTF-16 surrogate characters
 /// as 3 bytes each.
-class PLASMA_FOUNDATION_DLL plJniString : public plJniObject
+class PL_FOUNDATION_DLL plJniString : public plJniObject
 {
 public:
   /// \brief Constructs a null String.
@@ -380,7 +380,7 @@ private:
 };
 
 /// \brief Class holding a local reference to a Java object of type Class.
-class PLASMA_FOUNDATION_DLL plJniClass : public plJniObject
+class PL_FOUNDATION_DLL plJniClass : public plJniObject
 {
 public:
   /// \brief Constructs a null Class.

@@ -1,6 +1,6 @@
 #include <ProcGenPlugin/ProcGenPluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Curves/ColorGradientResource.h>
 #include <Core/Physics/SurfaceResource.h>
 #include <Core/Prefabs/PrefabResource.h>
@@ -12,16 +12,16 @@
 
 namespace plProcGenInternal
 {
-  extern Pattern* GetPattern(plTempHashedString sName);
+  extern Pattern* GetPattern(plProcPlacementPattern::Enum pattern);
 }
 
 using namespace plProcGenInternal;
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphResource, 1, plRTTIDefaultAllocator<plProcGenGraphResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenGraphResource, 1, plRTTIDefaultAllocator<plProcGenGraphResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plProcGenGraphResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plProcGenGraphResource);
 // clang-format on
 
 plProcGenGraphResource::plProcGenGraphResource()
@@ -57,7 +57,7 @@ plResourceLoadDesc plProcGenGraphResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plProcGenGraphResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plProcGenGraphResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -81,7 +81,7 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
   plUniquePtr<plStringDeduplicationReadContext> pStringDedupReadContext;
   if (AssetHash.GetFileVersion() >= 5)
   {
-    pStringDedupReadContext = PLASMA_DEFAULT_NEW(plStringDeduplicationReadContext, *Stream);
+    pStringDedupReadContext = PL_DEFAULT_NEW(plStringDeduplicationReadContext, *Stream);
   }
 
   // load
@@ -98,7 +98,7 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
     {
       if (chunk.GetCurrentChunk().m_sChunkName == "SharedData")
       {
-        plSharedPtr<GraphSharedData> pSharedData = PLASMA_DEFAULT_NEW(GraphSharedData);
+        plSharedPtr<GraphSharedData> pSharedData = PL_DEFAULT_NEW(GraphSharedData);
         if (pSharedData->Load(chunk).Succeeded())
         {
           m_pSharedData = pSharedData;
@@ -119,13 +119,13 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
         m_PlacementOutputs.Reserve(uiNumOutputs);
         for (plUInt32 uiIndex = 0; uiIndex < uiNumOutputs; ++uiIndex)
         {
-          plUniquePtr<plExpressionByteCode> pByteCode = PLASMA_DEFAULT_NEW(plExpressionByteCode);
+          plUniquePtr<plExpressionByteCode> pByteCode = PL_DEFAULT_NEW(plExpressionByteCode);
           if (pByteCode->Load(chunk).Failed())
           {
             break;
           }
 
-          plSharedPtr<PlacementOutput> pOutput = PLASMA_DEFAULT_NEW(PlacementOutput);
+          plSharedPtr<PlacementOutput> pOutput = PL_DEFAULT_NEW(PlacementOutput);
           pOutput->m_pByteCode = std::move(pByteCode);
 
           chunk >> pOutput->m_sName;
@@ -139,8 +139,6 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
             chunk >> sTemp;
             pOutput->m_ObjectsToPlace.ExpandAndGetRef() = plResourceManager::LoadResource<plPrefabResource>(sTemp);
           }
-
-          pOutput->m_pPattern = plProcGenInternal::GetPattern("Bayer");
 
           chunk >> pOutput->m_fFootprint;
 
@@ -177,6 +175,14 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
             chunk >> pOutput->m_Mode;
           }
 
+          plEnum<plProcPlacementPattern> pattern = plProcPlacementPattern::RegularGrid;
+          if (chunk.GetCurrentChunk().m_uiChunkVersion >= 7)
+          {
+            chunk >> pattern;
+          }
+          
+          pOutput->m_pPattern = plProcGenInternal::GetPattern(pattern);
+
           m_PlacementOutputs.PushBack(pOutput);
         }
       }
@@ -195,13 +201,13 @@ plResourceLoadDesc plProcGenGraphResource::UpdateContent(plStreamReader* Stream)
         m_VertexColorOutputs.Reserve(uiNumOutputs);
         for (plUInt32 uiIndex = 0; uiIndex < uiNumOutputs; ++uiIndex)
         {
-          plUniquePtr<plExpressionByteCode> pByteCode = PLASMA_DEFAULT_NEW(plExpressionByteCode);
+          plUniquePtr<plExpressionByteCode> pByteCode = PL_DEFAULT_NEW(plExpressionByteCode);
           if (pByteCode->Load(chunk).Failed())
           {
             break;
           }
 
-          plSharedPtr<VertexColorOutput> pOutput = PLASMA_DEFAULT_NEW(VertexColorOutput);
+          plSharedPtr<VertexColorOutput> pOutput = PL_DEFAULT_NEW(VertexColorOutput);
           pOutput->m_pByteCode = std::move(pByteCode);
 
           chunk >> pOutput->m_sName;
@@ -242,16 +248,16 @@ void plProcGenGraphResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plProcGenGraphResource, plProcGenGraphResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plProcGenGraphResource, plProcGenGraphResourceDescriptor)
 {
-  // PLASMA_REPORT_FAILURE("This resource type does not support creating data.");
+  // PL_REPORT_FAILURE("This resource type does not support creating data.");
 
   // Missing resource
 
-  auto pOutput = PLASMA_DEFAULT_NEW(PlacementOutput);
+  auto pOutput = PL_DEFAULT_NEW(PlacementOutput);
   pOutput->m_sName.Assign("MissingPlacementOutput");
   pOutput->m_ObjectsToPlace.PushBack(plResourceManager::GetResourceTypeMissingFallback<plPrefabResource>());
-  pOutput->m_pPattern = plProcGenInternal::GetPattern("Bayer");
+  pOutput->m_pPattern = plProcGenInternal::GetPattern(plProcPlacementPattern::RegularGrid);
   pOutput->m_fFootprint = 3.0f;
   pOutput->m_vMinOffset.Set(-1.0f, -1.0f, -0.5f);
   pOutput->m_vMaxOffset.Set(1.0f, 1.0f, 0.0f);

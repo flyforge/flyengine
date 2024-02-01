@@ -4,9 +4,9 @@
 #include <GameEngine/StateMachine/StateMachineResource.h>
 
 /// \brief Message that is sent by plStateMachineState_SendMsg once the state is entered.
-struct PLASMA_GAMEENGINE_DLL plMsgStateMachineStateChanged : public plEventMessage
+struct PL_GAMEENGINE_DLL plMsgStateMachineStateChanged : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgStateMachineStateChanged, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgStateMachineStateChanged, plEventMessage);
 
   plHashedString m_sOldStateName;
   plHashedString m_sNewStateName;
@@ -27,17 +27,17 @@ private:
 /// Optionally it can also log a message on state enter or exit.
 class plStateMachineState_SendMsg : public plStateMachineState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState_SendMsg, plStateMachineState);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_SendMsg, plStateMachineState);
 
 public:
   plStateMachineState_SendMsg(plStringView sName = plStringView());
   ~plStateMachineState_SendMsg();
 
-  virtual void OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
-  virtual void OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const override;
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
+  virtual void OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plTime m_MessageDelay;
 
@@ -67,16 +67,16 @@ public:
 /// Make sure that essential other objects (like the physics representation or other scripts) are located on other objects, that don't get deactivated.
 class plStateMachineState_SwitchObject : public plStateMachineState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState_SwitchObject, plStateMachineState);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_SwitchObject, plStateMachineState);
 
 public:
   plStateMachineState_SwitchObject(plStringView sName = plStringView());
   ~plStateMachineState_SwitchObject();
 
-  virtual void OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plString m_sGroupPath;
   plString m_sObjectToEnable;
@@ -85,7 +85,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_GAMEENGINE_DLL plStateMachineComponentManager : public plComponentManager<class plStateMachineComponent, plBlockStorageType::Compact>
+class PL_GAMEENGINE_DLL plStateMachineComponentManager : public plComponentManager<class plStateMachineComponent, plBlockStorageType::Compact>
 {
 public:
   plStateMachineComponentManager(plWorld* pWorld);
@@ -104,16 +104,16 @@ private:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief A component that holds an plStateMachineInstance using the plStateMachineDescription from the resource assigned to this component.
-class PLASMA_GAMEENGINE_DLL plStateMachineComponent : public plComponent
+class PL_GAMEENGINE_DLL plStateMachineComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plStateMachineComponent, plComponent, plStateMachineComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plStateMachineComponent, plComponent, plStateMachineComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   virtual void OnActivated() override;
@@ -146,6 +146,12 @@ public:
 
   /// \brief Sets the current state with the given name.
   bool SetState(plStringView sName); // [ scriptable ]
+
+  /// \brief Returns the name of the currently active state.
+  plStringView GetCurrentState() const; // [ scriptable ]
+
+  /// \brief Sends a named event that state transitions can react to.
+  void FireTransitionEvent(plStringView sEvent);
 
   void SetBlackboardName(const char* szName);                         // [ property ]
   const char* GetBlackboardName() const { return m_sBlackboardName; } // [ property ]

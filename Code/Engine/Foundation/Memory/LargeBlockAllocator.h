@@ -12,7 +12,7 @@
 template <typename T, plUInt32 SizeInBytes>
 struct plDataBlock
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   enum
   {
@@ -39,7 +39,7 @@ template <plUInt32 BlockSizeInByte>
 class plLargeBlockAllocator
 {
 public:
-  plLargeBlockAllocator(plStringView sName, plAllocatorBase* pParent, plBitflags<plMemoryTrackingFlags> flags = plMemoryTrackingFlags::Default);
+  plLargeBlockAllocator(plStringView sName, plAllocator* pParent, plAllocatorTrackingMode mode = plAllocatorTrackingMode::Default);
   ~plLargeBlockAllocator();
 
   template <typename T>
@@ -53,21 +53,21 @@ public:
 
   plAllocatorId GetId() const;
 
-  const plAllocatorBase::Stats& GetStats() const;
+  const plAllocator::Stats& GetStats() const;
 
 private:
   void* Allocate(size_t uiAlign);
   void Deallocate(void* ptr);
 
   plAllocatorId m_Id;
-  plBitflags<plMemoryTrackingFlags> m_TrackingFlags;
+  plAllocatorTrackingMode m_TrackingMode;
 
   plMutex m_Mutex;
   plThreadID m_ThreadID;
 
   struct SuperBlock
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     enum
     {

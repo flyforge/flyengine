@@ -5,16 +5,16 @@
 #include <Core/World/Declarations.h>
 #include <Foundation/Types/RefCounted.h>
 
-struct PLASMA_CORE_DLL plCoordinateSystem
+struct PL_CORE_DLL plCoordinateSystem
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plVec3 m_vForwardDir;
   plVec3 m_vRightDir;
   plVec3 m_vUpDir;
 };
 
-class PLASMA_CORE_DLL plCoordinateSystemProvider : public plRefCounted
+class PL_CORE_DLL plCoordinateSystemProvider : public plRefCounted
 {
 public:
   plCoordinateSystemProvider(const plWorld* pOwnerWorld)
@@ -22,9 +22,9 @@ public:
   {
   }
 
-  virtual ~plCoordinateSystemProvider() {}
+  virtual ~plCoordinateSystemProvider() = default;
 
-  virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_CoordinateSystem) const = 0;
+  virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_coordinateSystem) const = 0;
 
 protected:
   friend class plWorld;
@@ -39,7 +39,7 @@ protected:
 /// the two systems in both directions.
 /// Currently, only uniformly scaled orthogonal coordinate systems are supported.
 /// They can however be right handed or left handed.
-class PLASMA_CORE_DLL plCoordinateSystemConversion
+class PL_CORE_DLL plCoordinateSystemConversion
 {
 public:
   /// \brief Creates a new conversion that until set up, does identity conversions.
@@ -50,14 +50,14 @@ public:
   /// \brief Returns the equivalent point in the target coordinate system.
   plVec3 ConvertSourcePosition(const plVec3& vPos) const; // [tested]
   /// \brief Returns the equivalent rotation in the target coordinate system.
-  plQuat ConvertSourceRotation(const plQuat& vOrientation) const; // [tested]
+  plQuat ConvertSourceRotation(const plQuat& qOrientation) const; // [tested]
   /// \brief Returns the equivalent length in the target coordinate system.
   float ConvertSourceLength(float fLength) const; // [tested]
 
   /// \brief Returns the equivalent point in the source coordinate system.
   plVec3 ConvertTargetPosition(const plVec3& vPos) const; // [tested]
   /// \brief Returns the equivalent rotation in the source coordinate system.
-  plQuat ConvertTargetRotation(const plQuat& vOrientation) const; // [tested]
+  plQuat ConvertTargetRotation(const plQuat& qOrientation) const; // [tested]
   /// \brief Returns the equivalent length in the source coordinate system.
   float ConvertTargetLength(float fLength) const; // [tested]
 

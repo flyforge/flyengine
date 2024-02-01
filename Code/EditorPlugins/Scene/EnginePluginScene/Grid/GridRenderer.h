@@ -13,7 +13,7 @@ using plShaderResourceHandle = plTypedResourceHandle<class plShaderResource>;
 
 class plGridRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGridRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plGridRenderData, plRenderData);
 
 public:
   float m_fDensity;
@@ -25,14 +25,16 @@ public:
   bool m_bGlobal;
 };
 
-class PlasmaEditorGridExtractor : public plExtractor
+class plEditorGridExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorGridExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plEditorGridExtractor, plExtractor);
 
 public:
-  PlasmaEditorGridExtractor(const char* szName = "EditorGridExtractor");
+  plEditorGridExtractor(const char* szName = "EditorGridExtractor");
 
-  virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;
+  virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   void SetSceneContext(plSceneContext* pSceneContext) { m_pSceneContext = pSceneContext; }
   plSceneContext* GetSceneContext() const { return m_pSceneContext; }
@@ -49,22 +51,22 @@ struct alignas(16) GridVertex
 
 class plGridRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGridRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plGridRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plGridRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plGridRenderer);
 
 public:
   plGridRenderer();
 
   // plRenderer implementation
-  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const override;
-  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const override;
+  virtual void GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const override;
+  virtual void GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const override;
   virtual void RenderBatch(const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const override;
 
 protected:
   void CreateVertexBuffer();
 
-  static const plUInt32 s_uiBufferSize = 1024 * 8;
-  static const plUInt32 s_uiLineVerticesPerBatch = s_uiBufferSize / sizeof(GridVertex);
+  static constexpr plUInt32 s_uiBufferSize = 1024 * 8;
+  static constexpr plUInt32 s_uiLineVerticesPerBatch = s_uiBufferSize / sizeof(GridVertex);
 
   plShaderResourceHandle m_hShader;
   plGALBufferHandle m_hVertexBuffer;

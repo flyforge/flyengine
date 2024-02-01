@@ -2,13 +2,9 @@
 
 #include <Utilities/DataStructures/DynamicQuadtree.h>
 
-const float plDynamicQuadtree::s_LooseOctreeFactor = 1.1f;
+const float plDynamicQuadtree::s_fLooseOctreeFactor = 1.1f;
 
-plDynamicQuadtree::plDynamicQuadtree()
-  : m_uiMaxTreeDepth(0)
-  , m_uiAddIDTopLevel(0)
-{
-}
+plDynamicQuadtree::plDynamicQuadtree() = default;
 
 void plDynamicQuadtree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExtents, float fMinNodeSize)
 {
@@ -26,7 +22,7 @@ void plDynamicQuadtree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExt
   // the bounding box should be square, so use the maximum of the x and z extents
   float fMax = plMath::Max(vHalfExtents.x, vHalfExtents.z);
 
-  m_BBox.SetInvalid();
+  m_BBox = plBoundingBox::MakeInvalid();
 
   m_BBox.m_vMin.x = vCenter.x - fMax;
   m_BBox.m_vMax.x = vCenter.x + fMax;
@@ -41,7 +37,7 @@ void plDynamicQuadtree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExt
   while (fLength > fMinNodeSize)
   {
     ++m_uiMaxTreeDepth;
-    fLength = (fLength / 2.0f) * s_LooseOctreeFactor;
+    fLength = (fLength / 2.0f) * s_fLooseOctreeFactor;
   }
 
   // at every tree depth there are pow(4, depth) additional nodes, each node needs a unique ID
@@ -59,26 +55,26 @@ void plDynamicQuadtree::CreateTree(const plVec3& vCenter, const plVec3& vHalfExt
 ///
 /// The min and max Y value of the tree's bounding box is updated, if the object lies above/below previously inserted objects.
 plResult plDynamicQuadtree::InsertObject(const plVec3& vCenter, const plVec3& vHalfExtents, plInt32 iObjectType, plInt32 iObjectInstance,
-  plDynamicTreeObject* out_Object, bool bOnlyIfInside)
+  plDynamicTreeObject* out_pObject, bool bOnlyIfInside)
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::InsertObject: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::InsertObject: You have to first create the tree.");
 
-  if (out_Object)
-    *out_Object = plDynamicTreeObject();
+  if (out_pObject)
+    *out_pObject = plDynamicTreeObject();
 
   if (bOnlyIfInside)
   {
     if (vCenter.x + vHalfExtents.x < m_fRealMinX)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.x - vHalfExtents.x > m_fRealMaxX)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.z + vHalfExtents.z < m_fRealMinZ)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (vCenter.z - vHalfExtents.z > m_fRealMaxZ)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   // update the bounding boxes min/max Y values
@@ -92,7 +88,7 @@ plResult plDynamicQuadtree::InsertObject(const plVec3& vCenter, const plVec3& vH
 
   // insert the object into the best child
   if (!InsertObject(vCenter, vHalfExtents, oData, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel,
-        plMath::Pow(4, m_uiMaxTreeDepth - 1), out_Object))
+        plMath::Pow(4, m_uiMaxTreeDepth - 1), out_pObject))
   {
     if (!bOnlyIfInside)
     {
@@ -102,16 +98,16 @@ plResult plDynamicQuadtree::InsertObject(const plVec3& vCenter, const plVec3& vH
 
       auto key = m_NodeMap.Insert(mmk, oData);
 
-      if (out_Object)
-        *out_Object = key;
+      if (out_pObject)
+        *out_pObject = key;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plDynamicQuadtree::RemoveObject(plDynamicTreeObject obj)
@@ -164,8 +160,8 @@ bool plDynamicQuadtree::InsertObject(const plVec3& vCenter, const plVec3& vHalfE
   // if there are any child-nodes, try inserting there
   if (uiAddID > 0)
   {
-    const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-    const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+    const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+    const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
     // to compute the ID of child node 'n', the number of children in child node 'n-1' has to be considered
     // uiAddID is the number of IDs that need to be skipped to get from the ID of child node 'n' to the ID of child 'n+1'
@@ -204,18 +200,18 @@ bool plDynamicQuadtree::InsertObject(const plVec3& vCenter, const plVec3& vHalfE
   return true;
 }
 
-void plDynamicQuadtree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicQuadtree::FindVisibleObjects(const plFrustum& viewfrustum, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindVisibleObjects: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindVisibleObjects: You have to first create the tree.");
 
   if (m_NodeMap.IsEmpty())
     return;
 
-  FindVisibleObjects(Viewfrustum, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel,
+  FindVisibleObjects(viewfrustum, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel,
     plMath::Pow(4, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-void plDynamicQuadtree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
+void plDynamicQuadtree::FindVisibleObjects(const plFrustum& Viewfrustum, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
   float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   // build the bounding box of this node
@@ -280,8 +276,8 @@ void plDynamicQuadtree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_
     // if there are additional child nodes
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -301,9 +297,9 @@ void plDynamicQuadtree::FindVisibleObjects(const plFrustum& Viewfrustum, PLASMA_
 }
 
 
-void plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindObjectsInRange: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindObjectsInRange: You have to first create the tree.");
 
   if (m_NodeMap.IsEmpty())
     return;
@@ -311,11 +307,11 @@ void plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_
   if (!m_BBox.Contains(vPoint))
     return;
 
-  FindObjectsInRange(vPoint, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel,
+  FindObjectsInRange(vPoint, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0, m_uiAddIDTopLevel,
     plMath::Pow(4, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
+bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx, float maxx,
   float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   if (vPoint.x < minx)
@@ -358,8 +354,8 @@ bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_
     // if this node has children
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -385,21 +381,21 @@ bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, PLASMA_VISIBLE_
 
 
 
-void plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough) const
+void plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK callback, void* pPassThrough) const
 {
-  PLASMA_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindObjectsInRange: You have to first create the tree.");
+  PL_ASSERT_DEV(m_uiMaxTreeDepth > 0, "plDynamicQuadtree::FindObjectsInRange: You have to first create the tree.");
 
   if (m_NodeMap.IsEmpty())
     return;
 
-  if (!m_BBox.Overlaps(plBoundingBox(vPoint - plVec3(fRadius), vPoint + plVec3(fRadius))))
+  if (!m_BBox.Overlaps(plBoundingBox::MakeFromMinMax(vPoint - plVec3(fRadius), vPoint + plVec3(fRadius))))
     return;
 
-  FindObjectsInRange(vPoint, fRadius, Callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0,
+  FindObjectsInRange(vPoint, fRadius, callback, pPassThrough, m_BBox.m_vMin.x, m_BBox.m_vMax.x, m_BBox.m_vMin.z, m_BBox.m_vMax.z, 0,
     m_uiAddIDTopLevel, plMath::Pow(4, m_uiMaxTreeDepth - 1), 0xFFFFFFFF);
 }
 
-bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PLASMA_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx,
+bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, PL_VISIBLE_OBJ_CALLBACK Callback, void* pPassThrough, float minx,
   float maxx, float minz, float maxz, plUInt32 uiNodeID, plUInt32 uiAddID, plUInt32 uiSubAddID, plUInt32 uiNextNodeID) const
 {
   if (vPoint.x + fRadius < minx)
@@ -438,8 +434,8 @@ bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, 
     // if the node has children
     if (uiAddID > 0)
     {
-      const float lx = ((maxx - minx) * 0.5f) * s_LooseOctreeFactor;
-      const float lz = ((maxz - minz) * 0.5f) * s_LooseOctreeFactor;
+      const float lx = ((maxx - minx) * 0.5f) * s_fLooseOctreeFactor;
+      const float lz = ((maxz - minz) * 0.5f) * s_fLooseOctreeFactor;
 
       const plUInt32 uiNodeIDBase = uiNodeID + 1;
       const plUInt32 uiAddIDChild = uiAddID - uiSubAddID;
@@ -464,5 +460,3 @@ bool plDynamicQuadtree::FindObjectsInRange(const plVec3& vPoint, float fRadius, 
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_DataStructures_Implementation_DynamicQuadtree);

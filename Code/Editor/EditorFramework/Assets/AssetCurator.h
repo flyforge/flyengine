@@ -9,7 +9,6 @@
 #include <Foundation/Application/Config/FileSystemConfig.h>
 #include <Foundation/Configuration/Singleton.h>
 #include <Foundation/Containers/HashTable.h>
-#include <Foundation/Containers/DynamicArray.h>
 #include <Foundation/IO/DirectoryWatcher.h>
 #include <Foundation/Logging/LogEntry.h>
 #include <Foundation/Profiling/Profiling.h>
@@ -20,6 +19,9 @@
 #include <Foundation/Threading/TaskSystem.h>
 #include <Foundation/Time/Timestamp.h>
 #include <ToolsFoundation/Document/DocumentManager.h>
+#include <ToolsFoundation/FileSystem/DataDirPath.h>
+#include <ToolsFoundation/FileSystem/Declarations.h>
+
 #include <tuple>
 
 class plUpdateTask;
@@ -29,10 +31,14 @@ class plDirectoryWatcher;
 class plProcessTask;
 struct plFileStats;
 class plAssetProcessorLog;
-class plAssetWatcher;
+class plFileSystemWatcher;
+class plAssetTableWriter;
+struct plFileChangedEvent;
+class plFileSystemModel;
+
 
 #if 0 // Define to enable extensive curator profile scopes
-#  define CURATOR_PROFILE(szName) PLASMA_PROFILE_SCOPE(szName)
+#  define CURATOR_PROFILE(szName) PL_PROFILE_SCOPE(szName)
 
 #else
 #  define CURATOR_PROFILE(Name)
@@ -52,7 +58,7 @@ public:
   void Unlock() { plMutex::Unlock(); }
 };
 
-struct PLASMA_EDITORFRAMEWORK_DLL plAssetInfo
+struct PL_EDITORFRAMEWORK_DLL plAssetInfo
 {
   plAssetInfo() = default;
   void Update(plUniquePtr<plAssetInfo>& rhs);
@@ -67,9 +73,9 @@ struct PLASMA_EDITORFRAMEWORK_DLL plAssetInfo
     NeedsTransform,
     NeedsThumbnail,
     TransformError,
-    MissingDependency,
-    MissingReference,
-    Folder,
+    MissingTransformDependency,
+    MissingThumbnailDependency,
+    CircularDependency,
     COUNT,
   };
 
@@ -82,23 +88,22 @@ struct PLASMA_EDITORFRAMEWORK_DLL plAssetInfo
   plDynamicArray<plLogEntry> m_LogEntries;
 
   const plAssetDocumentTypeDescriptor* m_pDocumentTypeDescriptor = nullptr;
-  plString m_sAbsolutePath;
-  plString m_sDataDirParentRelativePath;
-  plString m_sDataDirRelativePath;
+  plDataDirPath m_Path;
 
   plUniquePtr<plAssetDocumentInfo> m_Info;
 
-  plSet<plString> m_MissingDependencies;
-  plSet<plString> m_MissingReferences;
+  plSet<plString> m_MissingTransformDeps;
+  plSet<plString> m_MissingThumbnailDeps;
+  plSet<plString> m_CircularDependencies;
 
   plSet<plUuid> m_SubAssets; ///< Main asset uses the same GUID as this (see m_Info), but is NOT stored in m_SubAssets
 
 private:
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAssetInfo);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAssetInfo);
 };
 
 /// \brief Information about an asset or sub-asset.
-struct PLASMA_EDITORFRAMEWORK_DLL plSubAsset
+struct PL_EDITORFRAMEWORK_DLL plSubAsset
 {
   plStringView GetName() const;
   void GetSubAssetIdentifier(plStringBuilder& out_sPath) const;
@@ -107,33 +112,11 @@ struct PLASMA_EDITORFRAMEWORK_DLL plSubAsset
   plAssetInfo* m_pAssetInfo = nullptr;
   plTime m_LastAccess;
   bool m_bMainAsset = true;
-  bool m_bIsDir = false;
 
   plSubAssetData m_Data;
 };
 
-/// \brief Information about a single file on disk. The file might be an asset or any other file (needed for dependencies).
-struct PLASMA_EDITORFRAMEWORK_DLL plFileStatus
-{
-  enum class Status
-  {
-    Unknown,    ///< Since the file has been tagged as 'Unknown' it has not been encountered again on disk (yet)
-    FileLocked, ///< The file is probably an asset, but we could not read it
-    Valid       ///< The file exists on disk
-  };
 
-  plFileStatus()
-  {
-    m_uiHash = 0;
-    m_Status = Status::Unknown;
-  }
-
-  plTimestamp m_Timestamp;
-  plUInt64 m_uiHash;
-  plUuid m_AssetGuid; ///< If the file is linked to an asset, the GUID is valid, otherwise not.
-  Status m_Status;
-};
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plFileStatus);
 
 struct plAssetCuratorEvent
 {
@@ -141,6 +124,7 @@ struct plAssetCuratorEvent
   {
     AssetAdded,
     AssetRemoved,
+    AssetMoved,
     AssetUpdated,
     AssetListReset,
     ActivePlatformChanged,
@@ -151,9 +135,9 @@ struct plAssetCuratorEvent
   Type m_Type;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plAssetCurator
+class PL_EDITORFRAMEWORK_DLL plAssetCurator
 {
-  PLASMA_DECLARE_SINGLETON(plAssetCurator);
+  PL_DECLARE_SINGLETON(plAssetCurator);
 
 public:
   plAssetCurator();
@@ -192,10 +176,10 @@ public:
   plUInt32 GetNumAssetProfiles() const;
 
   /// \brief Always returns a valid config. E.g. even if plInvalidIndex is passed in, it will fall back to the default config (at index 0).
-  const plPlatformProfile* GetAssetProfile(plUInt32 index) const;
+  const plPlatformProfile* GetAssetProfile(plUInt32 uiIndex) const;
 
   /// \brief Always returns a valid config. E.g. even if plInvalidIndex is passed in, it will fall back to the default config (at index 0).
-  plPlatformProfile* GetAssetProfile(plUInt32 index);
+  plPlatformProfile* GetAssetProfile(plUInt32 uiIndex);
 
   /// \brief Adds a new profile. The name should be set afterwards to a unique name.
   plPlatformProfile* CreateAssetProfile();
@@ -209,7 +193,7 @@ public:
   /// \brief Switches the currently active asset target platform.
   ///
   /// Broadcasts plAssetCuratorEvent::Type::ActivePlatformChanged on change.
-  void SetActiveAssetProfileByIndex(plUInt32 index, bool bForceReevaluation = false);
+  void SetActiveAssetProfileByIndex(plUInt32 uiIndex, bool bForceReevaluation = false);
 
   /// \brief Saves the current asset configurations. Returns failure if the output file could not be written to.
   plResult SaveAssetProfiles();
@@ -238,28 +222,37 @@ public:
   plTransformStatus TransformAsset(const plUuid& assetGuid, plBitflags<plTransformFlags> transformFlags, const plPlatformProfile* pAssetProfile = nullptr);
   plTransformStatus CreateThumbnail(const plUuid& assetGuid);
 
+  /// Some assets are not automatically updated by the asset dependency detection (mainly Collections) because of their transitive data dependencies.
+  /// So we must update them when the user does something 'significant' like doing TransformAllAssets or a scene export.
+  void TransformAssetsForSceneExport(const plPlatformProfile* pAssetProfile = nullptr);
+
   /// \brief Writes the asset lookup table for the given platform, or the currently active platform if nullptr is passed.
-  plResult WriteAssetTables(const plPlatformProfile* pAssetProfile = nullptr);
+  plResult WriteAssetTables(const plPlatformProfile* pAssetProfile = nullptr, bool bForce = false);
 
   ///@}
   /// \name Asset Access
   ///@{
-  typedef plLockedObject<plMutex, const plSubAsset> plLockedSubAsset;
+  using plLockedSubAsset = plLockedObject<plMutex, const plSubAsset>;
 
   /// \brief Tries to find the asset information for an asset identified through a string.
   ///
   /// The string may be a stringyfied asset GUID or a relative or absolute path. The function will try all possibilities.
   /// If no asset can be found, an empty/invalid plAssetInfo is returned.
   /// If bExhaustiveSearch is set the function will go through all known assets and find the closest match.
-  const plLockedSubAsset FindSubAsset(const char* szPathOrGuid, bool bExhaustiveSearch = false) const;
+  const plLockedSubAsset FindSubAsset(plStringView sPathOrGuid, bool bExhaustiveSearch = false) const;
 
   /// \brief Same as GetAssteInfo, but wraps the return value into a plLockedSubAsset struct
   const plLockedSubAsset GetSubAsset(const plUuid& assetGuid) const;
 
-  typedef plLockedObject<plMutex, const plHashTable<plUuid, plSubAsset>> plLockedSubAssetTable;
+  using plLockedSubAssetTable = plLockedObject<plMutex, const plHashTable<plUuid, plSubAsset>>;
 
   /// \brief Returns the table of all known assets in a locked structure
   const plLockedSubAssetTable GetKnownSubAssets() const;
+
+  using plLockedAssetTable = plLockedObject<plMutex, const plHashTable<plUuid, plAssetInfo*>>;
+
+  /// \brief Returns the table of all known assets in a locked structure
+  const plLockedAssetTable GetKnownAssets() const;
 
   /// \brief Computes the combined hash for the asset and its dependencies. Returns 0 if anything went wrong.
   plUInt64 GetAssetDependencyHash(plUuid assetGuid);
@@ -267,24 +260,18 @@ public:
   /// \brief Computes the combined hash for the asset and its references. Returns 0 if anything went wrong.
   plUInt64 GetAssetReferenceHash(plUuid assetGuid);
 
-  void GenerateTransitiveHull(const plStringView assetOrPath, plSet<plString>* pDependencies, plSet<plString>* pReferences);
-
-  plAssetInfo::TransformState IsAssetUpToDate(const plUuid& assetGuid, const plPlatformProfile* pAssetProfile, const plAssetDocumentTypeDescriptor* pTypeDescriptor, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce = false);
+  plAssetInfo::TransformState IsAssetUpToDate(const plUuid& assetGuid, const plPlatformProfile* pAssetProfile, const plAssetDocumentTypeDescriptor* pTypeDescriptor, plUInt64& out_uiAssetHash, plUInt64& out_uiThumbHash, bool bForce = false);
   /// \brief Returns the number of assets in the system and how many are in what transform state
   void GetAssetTransformStats(plUInt32& out_uiNumAssets, plHybridArray<plUInt32, plAssetInfo::TransformState::COUNT>& out_count);
 
   /// \brief Iterates over all known data directories and returns the absolute path to the directory in which this asset is located
-  plString FindDataDirectoryForAsset(const char* szAbsoluteAssetPath) const;
-
-  /// \brief The curator gathers all folders.
-  const plMap<plString, plFileStatus, plCompareString_NoCase>& GetAllAssetFolders() const { return m_AssetFolders; }
-  plDynamicArray<plString>& GetRemovedFolders() { return m_RemovedFolders; }
+  plString FindDataDirectoryForAsset(plStringView sAbsoluteAssetPath) const;
 
   /// \brief Uses knowledge about all existing files on disk to find the best match for a file. Very slow.
   ///
   /// \param sFile
   ///   File name (may include a path) to search for. Will be modified both on success and failure to give a 'reasonable' result.
-  plResult FindBestMatchForFile(plStringBuilder& sFile, plArrayPtr<plString> AllowedFileExtensions) const;
+  plResult FindBestMatchForFile(plStringBuilder& ref_sFile, plArrayPtr<plString> allowedFileExtensions) const;
 
   /// \brief Finds all uses, either as references or dependencies to a given asset.
   ///
@@ -293,18 +280,28 @@ public:
   /// \param assetGuid
   ///   The asset to find use cases for.
   /// \param uses
-  ///   List of assets that use 'assetGuid'.
+  ///   List of assets that use 'assetGuid'. Any previous content of the set is not removed.
   /// \param transitive
   ///   If set, will also find indirect uses of the asset.
-  void FindAllUses(plUuid assetGuid, plSet<plUuid>& uses, bool transitive) const;
+  void FindAllUses(plUuid assetGuid, plSet<plUuid>& ref_uses, bool bTransitive) const;
+
+  /// \brief Returns all assets that use a file for transform. Use this to e.g. figure which assets still reference a .tga file in the project.
+  /// \param sAbsolutePath Absolute path to any file inside a data directory.
+  /// \param ref_uses List of assets that use 'sAbsolutePath'. Any previous content of the set is not removed.
+  void FindAllUses(plStringView sAbsolutePath, plSet<plUuid>& ref_uses) const;
+
+  /// \brief Returns whether a file is referenced, i.e. used for transforming an asset. Use this to e.g. figure out whether a .tga file is still in use by any asset.
+  /// \param sAbsolutePath Absolute path to any file inside a data directory.
+  /// \return True, if at least one asset references the given file.
+  bool IsReferenced(plStringView sAbsolutePath) const;
+
 
   ///@}
   /// \name Manual and Automatic Change Notification
   ///@{
 
   /// \brief Allows to tell the system of a new or changed file, that might be of interest to the Curator.
-  void NotifyOfFileChange(const char* szAbsolutePath);
-
+  void NotifyOfFileChange(plStringView sAbsolutePath);
   /// \brief Allows to tell the system to re-evaluate an assets status.
   void NotifyOfAssetChange(const plUuid& assetGuid);
   void UpdateAssetLastAccessTime(const plUuid& assetGuid);
@@ -312,11 +309,26 @@ public:
   /// \brief Checks file system for any changes. Call in case the file system watcher does not pick up certain changes.
   void CheckFileSystem();
 
-  void NeedsReloadResources();
+  void NeedsReloadResources(const plUuid& assetGuid);
+
+  void InvalidateAssetsWithTransformState(plAssetInfo::TransformState state);
+
 
   ///@}
 
-  void InvalidateAssetsWithTransformState(plAssetInfo::TransformState state);
+  /// \name Utilities
+  ///@{
+
+  /// \brief Generates one transitive hull for all the dependencies that are enabled. The set will contain dependencies that are reachable via any combination of enabled reference types.
+  void GenerateTransitiveHull(const plStringView sAssetOrPath, plSet<plString>& inout_deps, bool bIncludeTransformDeps = false, bool bIncludeThumbnailDeps = false, bool bIncludePackageDeps = false) const;
+
+  /// \brief Generates one inverse transitive hull for all the types dependencies that are enabled. The set will contain inverse dependencies that can reach the given asset (pAssetInfo) via any combination of the enabled reference types. As only assets can have dependencies, the inverse hull is always just asset GUIDs.
+  void GenerateInverseTransitiveHull(const plAssetInfo* pAssetInfo, plSet<plUuid>& inout_inverseDeps, bool bIncludeTransformDeps = false, bool bIncludeThumbnailDeps = false) const;
+
+  /// \brief Generates a DGML graph of all transform and thumbnail dependencies.
+  void WriteDependencyDGML(const plUuid& guid, plStringView sOutputFile) const;
+
+  ///@}
 
 public:
   plEvent<const plAssetCuratorEvent&> m_Events;
@@ -336,16 +348,8 @@ private:
   /// \brief Returns the asset info for the asset with the given (stringyfied) GUID or nullptr if no such asset exists.
   plAssetInfo* GetAssetInfo(const plString& sAssetGuid);
 
-  /// \brief Handles removing files and then forwards to HandleSingleFile overload.
-  void HandleSingleFile(const plString& sAbsolutePath);
-  /// \brief Handles adding and updating files. FileStat must be valid.
-  void HandleSingleFile(const plString& sAbsolutePath, const plFileStats& FileStat);
-  /// \brief Handles creating the minimal data structure for a directory and save it
-  void HandleSingleDir(const plString& sAbsolutePath);
-  /// \brief Handles creating the minimal data structure for a directory and save it
-  void HandleSingleDir(const plString& sAbsolutePath, const plFileStats& FileStat);
-  /// \brief Writes the asset lookup table for the given platform, or the currently active platform if nullptr is passed.
-  plResult WriteAssetTable(const char* szDataDirectory, const plPlatformProfile* pAssetProfile = nullptr);
+  void OnFileChangedEvent(const plFileChangedEvent& e);
+
   /// \brief Some assets are vital for the engine to run. Each data directory can contain a [DataDirName].plCollectionAsset
   ///   that has all its references transformed before any other documents are loaded.
   void ProcessAllCoreAssets();
@@ -365,22 +369,22 @@ private:
   /// \name Asset Hashing and Status Updates (AssetUpdates.cpp)
   ///@{
 
-  plAssetInfo::TransformState HashAsset(plUInt64 uiSettingsHash, const plHybridArray<plString, 16>& assetTransformDependencies, const plHybridArray<plString, 16>& runtimeDependencies, plSet<plString>& missingDependencies, plSet<plString>& missingReferences, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce);
+  plAssetInfo::TransformState HashAsset(
+    plUInt64 uiSettingsHash, const plHybridArray<plString, 16>& assetTransformDeps, const plHybridArray<plString, 16>& assetThumbnailDeps, plSet<plString>& missingTransformDeps, plSet<plString>& missingThumbnailDeps, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce);
   bool AddAssetHash(plString& sPath, bool bIsReference, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce);
 
-  plResult EnsureAssetInfoUpdated(const plUuid& assetGuid);
-  plResult EnsureAssetInfoUpdated(const char* szAbsFilePath);
+  plResult EnsureAssetInfoUpdated(const plDataDirPath& absFilePath, const plFileStatus& stat, bool bForce = false);
   void TrackDependencies(plAssetInfo* pAssetInfo);
   void UntrackDependencies(plAssetInfo* pAssetInfo);
+  plResult CheckForCircularDependencies(plAssetInfo* pAssetInfo);
   void UpdateTrackedFiles(const plUuid& assetGuid, const plSet<plString>& files, plMap<plString, plHybridArray<plUuid, 1>>& inverseTracker, plSet<std::tuple<plUuid, plUuid>>& unresolved, bool bAdd);
   void UpdateUnresolvedTrackedFiles(plMap<plString, plHybridArray<plUuid, 1>>& inverseTracker, plSet<std::tuple<plUuid, plUuid>>& unresolved);
-  plResult ReadAssetDocumentInfo(const char* szAbsFilePath, plFileStatus& stat, plUniquePtr<plAssetInfo>& assetInfo);
+  plResult ReadAssetDocumentInfo(const plDataDirPath& absFilePath, const plFileStatus& stat, plUniquePtr<plAssetInfo>& assetInfo);
   void UpdateSubAssets(plAssetInfo& assetInfo);
-  /// \brief Computes the hash of the given file. Optionally passes the data stream through into another stream writer.
-  static plUInt64 HashFile(plStreamReader& InputStream, plStreamWriter* pPassThroughStream);
 
   void RemoveAssetTransformState(const plUuid& assetGuid);
   void InvalidateAssetTransformState(const plUuid& assetGuid);
+
   plAssetInfo::TransformState UpdateAssetTransformState(plUuid assetGuid, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce);
   void UpdateAssetTransformState(const plUuid& assetGuid, plAssetInfo::TransformState state);
   void UpdateAssetTransformLog(const plUuid& assetGuid, plDynamicArray<plLogEntry>& logEntries);
@@ -390,11 +394,21 @@ private:
   /// \name Check File System Helper
   ///@{
   void SetAllAssetStatusUnknown();
-  void RemoveStaleFileInfos();
+  void LoadCaches(plMap<plDataDirPath, plFileStatus, plCompareDataDirPath>& out_referencedFiles, plMap<plDataDirPath, plFileStatus::Status, plCompareDataDirPath>& out_referencedFolders);
+  void SaveCaches(const plMap<plDataDirPath, plFileStatus, plCompareDataDirPath>& referencedFiles, const plMap<plDataDirPath, plFileStatus::Status, plCompareDataDirPath>& referencedFolders);
   static void BuildFileExtensionSet(plSet<plString>& AllExtensions);
-  void IterateDataDirectory(const char* szDataDir, plSet<plString>* pFoundFiles = nullptr);
-  void LoadCaches();
-  void SaveCaches();
+
+  ///@}
+  /// \name Utilities
+  ///@{
+
+public:
+  /// \brief Deletes all files in all asset caches, except for the asset outputs that exceed the threshold.
+  ///
+  /// -> OutputReliability::Perfect -> deletes everything
+  /// -> OutputReliability::Good -> keeps the 'Perfect' files
+  /// -> OutputReliability::Unknown -> keeps the 'Good' and 'Perfect' files
+  void ClearAssetCaches(plAssetDocumentManager::OutputReliability threshold);
 
   ///@}
 
@@ -402,31 +416,21 @@ private:
   friend class plUpdateTask;
   friend class plAssetProcessor;
   friend class plProcessTask;
-  friend class plAssetWatcher;
-  friend class plDirectoryUpdateTask;
 
   mutable plCuratorMutex m_CuratorMutex; // Global lock
   plTaskGroupID m_InitializeCuratorTaskID;
-  bool m_bNeedToReloadResources = false;
-  plTime m_NextReloadResources;
+
   plUInt32 m_uiActiveAssetProfile = 0;
 
   // Actual data stored in the curator
   plHashTable<plUuid, plAssetInfo*> m_KnownAssets;
-  plHashTable<plUuid, plSubAsset> m_KnownSubAssets; //contains informations for both folders and "real" assets
-  plMap<plString, plFileStatus, plCompareString_NoCase> m_ReferencedFiles;
-
-  //Folders stuff
-  plMap<plString, plFileStatus, plCompareString_NoCase> m_AssetFolders;
-  plHashTable<plUuid, plAssetInfo*> m_KnownDirectories;
-  plDynamicArray<plString> m_RemovedFolders;
-  plAssetDocumentTypeDescriptor m_DirDescriptor;  //provides directories thumbnail info
+  plHashTable<plUuid, plSubAsset> m_KnownSubAssets;
 
   // Derived dependency lookup tables
-  plMap<plString, plHybridArray<plUuid, 1>> m_InverseDependency;
-  plMap<plString, plHybridArray<plUuid, 1>> m_InverseReferences;
-  plSet<std::tuple<plUuid, plUuid>> m_UnresolvedDependencies; ///< If a dependency wasn't known yet when an asset info was loaded, it is put in here.
-  plSet<std::tuple<plUuid, plUuid>> m_UnresolvedReferences;
+  plMap<plString, plHybridArray<plUuid, 1>> m_InverseTransformDeps; // [Absolute path -> asset Guid]
+  plMap<plString, plHybridArray<plUuid, 1>> m_InverseThumbnailDeps; // [Absolute path -> asset Guid]
+  plSet<std::tuple<plUuid, plUuid>> m_UnresolvedTransformDeps;      ///< If a dependency wasn't known yet when an asset info was loaded, it is put in here.
+  plSet<std::tuple<plUuid, plUuid>> m_UnresolvedThumbnailDeps;
 
   // State caches
   plHashSet<plUuid> m_TransformState[plAssetInfo::TransformState::COUNT];
@@ -441,8 +445,8 @@ private:
 
   // Immutable data after StartInitialize
   plApplicationFileSystemConfig m_FileSystemConfig;
+  plUniquePtr<plAssetTableWriter> m_pAssetTableWriter;
   plSet<plString> m_ValidAssetExtensions;
-  plUniquePtr<plAssetWatcher> m_pWatcher;
 
   // Update task
   bool m_bRunUpdateTask = false;

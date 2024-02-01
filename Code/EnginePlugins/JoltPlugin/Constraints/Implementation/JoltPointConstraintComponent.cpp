@@ -6,10 +6,10 @@
 #include <JoltPlugin/Constraints/JoltPointConstraintComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltPointConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltPointConstraintComponent, 1, plComponentMode::Static)
 {
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltPointConstraintComponent::plJoltPointConstraintComponent() = default;
@@ -65,4 +65,4 @@ bool plJoltPointConstraintComponent::ExceededBreakingPoint()
   return false;
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltPointConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltPointConstraintComponent);

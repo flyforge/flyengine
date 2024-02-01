@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/CollectionAsset/CollectionAssetManager.h>
 #include <EditorPluginAssets/CollectionAsset/CollectionAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionAssetDocumentManager, 1, plRTTIDefaultAllocator<plCollectionAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionAssetDocumentManager, 1, plRTTIDefaultAllocator<plCollectionAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plCollectionAssetDocumentManager::plCollectionAssetDocumentManager()
 {
@@ -30,6 +30,12 @@ plCollectionAssetDocumentManager::~plCollectionAssetDocumentManager()
   plDocumentManager::s_Events.RemoveEventHandler(plMakeDelegate(&plCollectionAssetDocumentManager::OnDocumentManagerEvent, this));
 }
 
+
+void plCollectionAssetDocumentManager::GetAssetTypesRequiringTransformForSceneExport(plSet<plTempHashedString>& inout_assetTypes)
+{
+  inout_assetTypes.Insert(plTempHashedString(m_DocTypeDesc.m_sDocumentTypeName));
+}
+
 void plCollectionAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager::Event& e)
 {
   switch (e.m_Type)
@@ -38,7 +44,7 @@ void plCollectionAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plCollectionAssetDocument>())
       {
-        plQtCollectionAssetDocumentWindow* pDocWnd = new plQtCollectionAssetDocumentWindow(e.m_pDocument);
+        new plQtCollectionAssetDocumentWindow(e.m_pDocument); // NOLINT: not a memory leak
       }
     }
     break;
@@ -49,9 +55,9 @@ void plCollectionAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
 }
 
 void plCollectionAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plCollectionAssetDocument(szPath);
+  out_pDocument = new plCollectionAssetDocument(sPath);
 }
 
 void plCollectionAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

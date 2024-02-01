@@ -1,5 +1,7 @@
 #include <Core/CorePCH.h>
 
+#include <Core/ResourceManager/ResourceManager.h>
+#include <Core/World/Implementation/WorldData.h>
 #include <Core/World/SpatialSystem_RegularGrid.h>
 #include <Core/World/World.h>
 
@@ -15,11 +17,11 @@ namespace plInternal
     {
     }
 
-    virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_CoordinateSystem) const override
+    virtual void GetCoordinateSystem(const plVec3& vGlobalPosition, plCoordinateSystem& out_coordinateSystem) const override
     {
-      out_CoordinateSystem.m_vForwardDir = plVec3(1.0f, 0.0f, 0.0f);
-      out_CoordinateSystem.m_vRightDir = plVec3(0.0f, 1.0f, 0.0f);
-      out_CoordinateSystem.m_vUpDir = plVec3(0.0f, 0.0f, 1.0f);
+      out_coordinateSystem.m_vForwardDir = plVec3(1.0f, 0.0f, 0.0f);
+      out_coordinateSystem.m_vRightDir = plVec3(0.0f, 1.0f, 0.0f);
+      out_coordinateSystem.m_vUpDir = plVec3(0.0f, 0.0f, 1.0f);
     }
   };
 
@@ -46,12 +48,10 @@ namespace plInternal
     , m_MaxInitializationTimePerFrame(desc.m_MaxComponentInitializationTimePerFrame)
     , m_Clock(desc.m_sName)
     , m_WriteThreadID((plThreadID)0)
-    , m_iWriteCounter(0)
-    , m_bSimulateWorld(true)
     , m_bReportErrorWhenStaticObjectMoves(desc.m_bReportErrorWhenStaticObjectMoves)
     , m_ReadMarker(*this)
     , m_WriteMarker(*this)
-    , m_pUserData(nullptr)
+
   {
     m_AllocatorWrapper.Reset();
 
@@ -67,17 +67,17 @@ namespace plInternal
     // insert dummy entry to save some checks
     m_Objects.Insert(nullptr);
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-    PLASMA_CHECK_AT_COMPILETIME(sizeof(plGameObject::TransformationData) == 240);
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+    PL_CHECK_AT_COMPILETIME(sizeof(plGameObject::TransformationData) == 240);
 #else
-    PLASMA_CHECK_AT_COMPILETIME(sizeof(plGameObject::TransformationData) == 192);
+    PL_CHECK_AT_COMPILETIME(sizeof(plGameObject::TransformationData) == 192);
 #endif
 
-    PLASMA_CHECK_AT_COMPILETIME(sizeof(plGameObject) == 128);
-    PLASMA_CHECK_AT_COMPILETIME(sizeof(QueuedMsgMetaData) == 16);
-    PLASMA_CHECK_AT_COMPILETIME(PLASMA_COMPONENT_TYPE_INDEX_BITS <= sizeof(plWorldModuleTypeId) * 8);
+    PL_CHECK_AT_COMPILETIME(sizeof(plGameObject) == 128);
+    PL_CHECK_AT_COMPILETIME(sizeof(QueuedMsgMetaData) == 16);
+    PL_CHECK_AT_COMPILETIME(PL_COMPONENT_TYPE_INDEX_BITS <= sizeof(plWorldModuleTypeId) * 8);
 
-    auto pDefaultInitBatch = PLASMA_NEW(&m_Allocator, InitBatch, &m_Allocator, "Default", true);
+    auto pDefaultInitBatch = PL_NEW(&m_Allocator, InitBatch, &m_Allocator, "Default", true);
     pDefaultInitBatch->m_bIsReady = true;
     m_InitBatches.Insert(pDefaultInitBatch);
     m_pDefaultInitBatch = pDefaultInitBatch;
@@ -88,23 +88,28 @@ namespace plInternal
 
     if (m_pSpatialSystem == nullptr && desc.m_bAutoCreateSpatialSystem)
     {
-      m_pSpatialSystem = PLASMA_NEW(plFoundation::GetAlignedAllocator(), plSpatialSystem_RegularGrid);
+      m_pSpatialSystem = PL_NEW(plFoundation::GetAlignedAllocator(), plSpatialSystem_RegularGrid);
     }
 
     if (m_pCoordinateSystemProvider == nullptr)
     {
-      m_pCoordinateSystemProvider = PLASMA_NEW(&m_Allocator, DefaultCoordinateSystemProvider);
+      m_pCoordinateSystemProvider = PL_NEW(&m_Allocator, DefaultCoordinateSystemProvider);
     }
 
     if (m_pTimeStepSmoothing == nullptr)
     {
-      m_pTimeStepSmoothing = PLASMA_NEW(&m_Allocator, plDefaultTimeStepSmoothing);
+      m_pTimeStepSmoothing = PL_NEW(&m_Allocator, plDefaultTimeStepSmoothing);
     }
 
     m_Clock.SetTimeStepSmoothing(m_pTimeStepSmoothing.Borrow());
+
+    plResourceManager::GetResourceEvents().AddEventHandler(plMakeDelegate(&WorldData::ResourceEventHandler, this));
   }
 
-  WorldData::~WorldData() = default;
+  WorldData::~WorldData()
+  {
+    plResourceManager::GetResourceEvents().RemoveEventHandler(plMakeDelegate(&WorldData::ResourceEventHandler, this));
+  }
 
   void WorldData::Clear()
   {
@@ -132,7 +137,7 @@ namespace plInternal
     {
       if (pModule != nullptr)
       {
-        PLASMA_DELETE(&m_Allocator, pModule);
+        PL_DELETE(&m_Allocator, pModule);
       }
     }
     m_Modules.Clear();
@@ -152,7 +157,7 @@ namespace plInternal
         {
           m_BlockAllocator.DeallocateBlock((*blocks)[j]);
         }
-        PLASMA_DELETE(&m_Allocator, blocks);
+        PL_DELETE(&m_Allocator, blocks);
       }
 
       hierarchy.m_Data.Clear();
@@ -176,7 +181,7 @@ namespace plInternal
         while (!queue.IsEmpty())
         {
           MessageQueue::Entry& entry = queue.Peek();
-          PLASMA_DELETE(&m_Allocator, entry.m_pMessage);
+          PL_DELETE(&m_Allocator, entry.m_pMessage);
 
           queue.Dequeue();
         }
@@ -190,7 +195,7 @@ namespace plInternal
 
     while (uiHierarchyLevel >= hierarchy.m_Data.GetCount())
     {
-      hierarchy.m_Data.PushBack(PLASMA_NEW(&m_Allocator, Hierarchy::DataBlockArray, &m_Allocator));
+      hierarchy.m_Data.PushBack(PL_NEW(&m_Allocator, Hierarchy::DataBlockArray, &m_Allocator));
     }
 
     Hierarchy::DataBlockArray& blocks = *hierarchy.m_Data[uiHierarchyLevel];
@@ -244,7 +249,7 @@ namespace plInternal
   {
     struct Helper
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData) { return (*static_cast<VisitorFunc*>(pUserData))(pData->m_pObject); }
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData) { return (*static_cast<VisitorFunc*>(pUserData))(pData->m_pObject); }
     };
 
     const plUInt32 uiMaxHierarchyLevel = plMath::Max(m_Hierarchies[HierarchyType::Static].m_Data.GetCount(), m_Hierarchies[HierarchyType::Dynamic].m_Data.GetCount());
@@ -257,7 +262,7 @@ namespace plInternal
         if (uiHierarchyLevel < hierarchy.m_Data.GetCount())
         {
           plVisitorExecution::Enum execution = TraverseHierarchyLevel<Helper>(*hierarchy.m_Data[uiHierarchyLevel], &func);
-          PLASMA_ASSERT_DEV(execution != plVisitorExecution::Skip, "Skip is not supported when using breadth first traversal");
+          PL_ASSERT_DEV(execution != plVisitorExecution::Skip, "Skip is not supported when using breadth first traversal");
           if (execution == plVisitorExecution::Stop)
             return;
         }
@@ -269,7 +274,7 @@ namespace plInternal
   {
     struct Helper
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData) { return WorldData::TraverseObjectDepthFirst(pData->m_pObject, *static_cast<VisitorFunc*>(pUserData)); }
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData) { return WorldData::TraverseObjectDepthFirst(pData->m_pObject, *static_cast<VisitorFunc*>(pUserData)); }
     };
 
     for (plUInt32 uiHierarchyIndex = 0; uiHierarchyIndex < HierarchyType::COUNT; ++uiHierarchyIndex)
@@ -316,7 +321,7 @@ namespace plInternal
 
     struct RootLevel
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
       {
         auto pUserData = static_cast<const UserData*>(pUserData0);
         WorldData::UpdateGlobalTransform(pData, pUserData->m_uiUpdateCounter);
@@ -326,7 +331,7 @@ namespace plInternal
 
     struct WithParent
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
       {
         auto pUserData = static_cast<const UserData*>(pUserData0);
         WorldData::UpdateGlobalTransformWithParent(pData, pUserData->m_uiUpdateCounter);
@@ -336,7 +341,7 @@ namespace plInternal
 
     struct RootLevelWithSpatialData
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
       {
         auto pUserData = static_cast<UserData*>(pUserData0);
         WorldData::UpdateGlobalTransformAndSpatialData(pData, pUserData->m_uiUpdateCounter, *pUserData->m_pSpatialSystem);
@@ -346,7 +351,7 @@ namespace plInternal
 
     struct WithParentWithSpatialData
     {
-      PLASMA_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
+      PL_ALWAYS_INLINE static plVisitorExecution::Enum Visit(plGameObject::TransformationData* pData, void* pUserData0)
       {
         auto pUserData = static_cast<UserData*>(pUserData0);
         WorldData::UpdateGlobalTransformWithParentAndSpatialData(pData, pUserData->m_uiUpdateCounter, *pUserData->m_pSpatialSystem);
@@ -382,7 +387,18 @@ namespace plInternal
     }
   }
 
+  void WorldData::ResourceEventHandler(const plResourceEvent& e)
+  {
+    if (e.m_Type != plResourceEvent::Type::ResourceContentUnloading || e.m_pResource->GetReferenceCount() == 0)
+      return;
+
+    plTypelessResourceHandle hResource(e.m_pResource);
+    if (m_ReloadFunctions.Contains(hResource))
+    {
+      m_NeedReload.Insert(hResource);
+    }
+  }
+
 } // namespace plInternal
 
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_WorldData);

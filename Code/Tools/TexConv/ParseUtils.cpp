@@ -12,7 +12,7 @@ plResult plTexConv::ParseUIntOption(plStringView sOption, plInt32 iMinValue, plI
   if (!plMath::IsInRange(val, iMinValue, iMaxValue))
   {
     plLog::Error("'{}' value {} is out of valid range [{}; {}]", sOption, val, iMinValue, iMaxValue);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ref_uiResult = static_cast<plUInt32>(val);
@@ -20,12 +20,12 @@ plResult plTexConv::ParseUIntOption(plStringView sOption, plInt32 iMinValue, plI
   if (ref_uiResult == uiDefault)
   {
     plLog::Info("Using default '{}': '{}'.", sOption, ref_uiResult);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plLog::Info("Selected '{}': '{}'.", sOption, ref_uiResult);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseStringOption(plStringView sOption, const plDynamicArray<KeyEnumValuePair>& allowed, plInt32& ref_iResult) const
@@ -38,7 +38,7 @@ plResult plTexConv::ParseStringOption(plStringView sOption, const plDynamicArray
     ref_iResult = allowed[0].m_iEnumValue;
 
     plLog::Info("Using default '{}': '{}'", sOption, allowed[0].m_sKey);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   for (plUInt32 i = 0; i < allowed.GetCount(); ++i)
@@ -48,7 +48,7 @@ plResult plTexConv::ParseStringOption(plStringView sOption, const plDynamicArray
       ref_iResult = allowed[i].m_iEnumValue;
 
       plLog::Info("Selected '{}': '{}'", sOption, allowed[i].m_sKey);
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
@@ -56,7 +56,7 @@ plResult plTexConv::ParseStringOption(plStringView sOption, const plDynamicArray
 
   PrintOptionValues(sOption, allowed);
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plTexConv::PrintOptionValues(plStringView sOption, const plDynamicArray<KeyEnumValuePair>& allowed) const

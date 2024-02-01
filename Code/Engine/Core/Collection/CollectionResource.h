@@ -4,7 +4,7 @@
 #include <Core/ResourceManager/Resource.h>
 
 /// \brief Represents one resource to load / preload through an plCollectionResource
-struct PLASMA_CORE_DLL plCollectionEntry
+struct PL_CORE_DLL plCollectionEntry
 {
   plString m_sOptionalNiceLookupName; ///< Optional, can be used to lookup the resource at runtime with a nice name. E.g. "SkyTexture" instead of some GUID.
   plString m_sResourceID;             ///< The ID / path to the resource to load.
@@ -13,12 +13,12 @@ struct PLASMA_CORE_DLL plCollectionEntry
 };
 
 /// \brief Describes a full plCollectionResource, ie. lists all the resources that the collection contains
-struct PLASMA_CORE_DLL plCollectionResourceDescriptor
+struct PL_CORE_DLL plCollectionResourceDescriptor
 {
   plDynamicArray<plCollectionEntry> m_Resources;
 
-  void Save(plStreamWriter& stream) const;
-  void Load(plStreamReader& stream);
+  void Save(plStreamWriter& inout_stream) const;
+  void Load(plStreamReader& inout_stream);
 };
 
 using plCollectionResourceHandle = plTypedResourceHandle<class plCollectionResource>;
@@ -41,14 +41,15 @@ using plCollectionResourceHandle = plTypedResourceHandle<class plCollectionResou
 /// \note Once plCollectionResource::PreloadResources() has been triggered, the resource will hold a handle to all referenced resources,
 ///       meaning those resources cannot get unloaded anymore. Make sure to discard the collection resource if the data it references
 ///       should get freed up.
-class PLASMA_CORE_DLL plCollectionResource : public plResource
+class PL_CORE_DLL plCollectionResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCollectionResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plCollectionResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plCollectionResource, plCollectionResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plCollectionResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plCollectionResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plCollectionResource, plCollectionResourceDescriptor);
 
 public:
   plCollectionResource();
+  ~plCollectionResource();
 
   /// \brief Registers the named resources in the collection with the plResourceManager, such that they can be loaded by those names.
   ///
@@ -70,7 +71,7 @@ public:
   /// This has to be called manually. It will return false if no more resources can be queued for preloading. This can be used
   /// as a workflow where PreloadResources and IsLoadingFinished are called repeadedly in tandem, so only a smaller fraction
   /// of resources gets queued and waited for, to allow simple resource load-balancing.
-  bool PreloadResources(plUInt32 numResourcesToPreload = plMath::MaxValue<plUInt32>());
+  bool PreloadResources(plUInt32 uiNumResourcesToPreload = plMath::MaxValue<plUInt32>());
 
   /// \brief Returns true if all resources added for preloading via PreloadResources have finished loading.
   /// if `out_progress` is defined:
@@ -79,10 +80,13 @@ public:
   ///     * Always assigns 1.0 if the collection contains no resources, or PreloadResources() was not triggered previously.
   /// Note: the progress can reach at maximum the fraction of resources that have been queued for preloading via PreloadResources.
   /// The progress will only reach 1.0 if all resources of this collection have been queued via PreloadResources and finished loading.
-  bool IsLoadingFinished(float* out_progress = nullptr)  const;
+  bool IsLoadingFinished(float* out_pProgress = nullptr) const;
 
   /// \brief Returns the resource descriptor for this resource.
   const plCollectionResourceDescriptor& GetDescriptor() const;
+
+  /// \brief Returns the current list of resources that have already been added to the preload list. See PreloadResources().
+  plArrayPtr<const plTypelessResourceHandle> GetPreloadedResources() const { return m_PreloadedResources; }
 
 private:
   virtual plResourceLoadDesc UnloadData(Unload WhatToUnload) override;

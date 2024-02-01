@@ -4,6 +4,10 @@
 
 #include <type_traits>
 
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+#  include <string_view>
+#endif
+
 /// Base class which marks a class as containing string data
 struct plThisIsAString
 {
@@ -20,10 +24,10 @@ class plStringBuilder;
 /// That means that an plStringView is only valid as long as its source data is not modified. Once you make any kind
 /// of modification to the source data, you should not continue using the plStringView to that data anymore,
 /// as it might now point into invalid memory.
-struct PLASMA_FOUNDATION_DLL plStringView : public plThisIsAString
+struct PL_FOUNDATION_DLL plStringView : public plThisIsAString
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using iterator = plStringIterator;
   using const_iterator = plStringIterator;
@@ -42,7 +46,7 @@ public:
 
   /// \brief Creates a string view from any class / struct which is implicitly convertible to const char *
   template <typename T>
-  PLASMA_ALWAYS_INLINE plStringView(const T&& str, typename std::enable_if<std::is_same<T, const char*>::value == false && std::is_convertible<T, const char*>::value, int>::type* = 0); // [tested]
+  PL_ALWAYS_INLINE plStringView(const T&& str, typename std::enable_if<std::is_same<T, const char*>::value == false && std::is_convertible<T, const char*>::value, int>::type* = 0); // [tested]
 
   /// \brief Creates a string view for the range from pStart to pEnd.
   plStringView(const char* pStart, const char* pEnd); // [tested]
@@ -159,11 +163,11 @@ public:
 
   /// Searches for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word, the position is
   /// returned. Otherwise nullptr.
-  const char* FindWholeWord(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
+  const char* FindWholeWord(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
 
   /// Searches for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word, the position is
   /// returned. Otherwise nullptr. Ignores case.
-  const char* FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
+  const char* FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt = nullptr) const; // [tested]
 
 
   /// \brief Shrinks the view range by uiShrinkCharsFront characters at the front and by uiShrinkCharsBack characters at the back.
@@ -176,7 +180,14 @@ public:
   void Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack); // [tested]
 
   /// \brief Returns a sub-string that is shrunk at the start and front by the given amount of characters (not bytes!).
-  plStringView GetShrunk(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack = 0) const;
+  plStringView GetShrunk(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack = 0) const; // [tested]
+
+  /// \brief Returns a sub-string starting at a given character (not byte offset!) and including a number of characters (not bytes).
+  ///
+  /// If this is a Utf-8 string, the correct number of bytes are skipped to reach the given character.
+  /// If you instead want to construct a sub-string from byte offsets, use the plStringView constructor that takes a start pointer like so:
+  ///   plStringView subString(this->GetStartPointer() + byteOffset, byteCount);
+  plStringView GetSubString(plUInt32 uiFirstCharacter, plUInt32 uiNumCharacters) const; // [tested]
 
   /// \brief Identical to 'Shrink(1, 0)' in functionality, but slightly more efficient.
   void ChopAwayFirstCharacterUtf8(); // [tested]
@@ -267,6 +278,20 @@ public:
   /// Returns an empty string, if the path is not rooted.
   plStringView GetRootedPathRootName() const; // [tested]
 
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+  /// \brief Makes the plStringView reference the same memory as the const std::string_view&.
+  plStringView(const std::string_view& rhs);
+
+  /// \brief Makes the plStringView reference the same memory as the const std::string_view&.
+  plStringView(const std::string& rhs);
+
+  /// \brief Returns a std::string_view to this string.
+  operator std::string_view() const;
+
+  /// \brief Returns a std::string_view to this string.
+  std::string_view GetAsStdView() const;
+#endif
+
 private:
   const char* m_pStart = nullptr;
   const char* m_pEnd = nullptr;
@@ -278,43 +303,43 @@ private:
 /// "Hello World"
 constexpr plStringView operator"" _plsv(const char* pString, size_t uiLen);
 
-PLASMA_ALWAYS_INLINE typename plStringView::iterator begin(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::iterator begin(plStringView sContainer)
 {
   return typename plStringView::iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetStartPointer());
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::const_iterator cbegin(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::const_iterator cbegin(plStringView sContainer)
 {
   return typename plStringView::const_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetStartPointer());
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::iterator end(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::iterator end(plStringView sContainer)
 {
   return typename plStringView::iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetEndPointer());
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::const_iterator cend(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::const_iterator cend(plStringView sContainer)
 {
   return typename plStringView::const_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetEndPointer());
 }
 
 
-PLASMA_ALWAYS_INLINE typename plStringView::reverse_iterator rbegin(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::reverse_iterator rbegin(plStringView sContainer)
 {
   return typename plStringView::reverse_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetEndPointer());
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::const_reverse_iterator crbegin(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::const_reverse_iterator crbegin(plStringView sContainer)
 {
   return typename plStringView::const_reverse_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), sContainer.GetEndPointer());
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::reverse_iterator rend(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::reverse_iterator rend(plStringView sContainer)
 {
   return typename plStringView::reverse_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), nullptr);
 }
 
-PLASMA_ALWAYS_INLINE typename plStringView::const_reverse_iterator crend(plStringView sContainer)
+PL_ALWAYS_INLINE typename plStringView::const_reverse_iterator crend(plStringView sContainer)
 {
   return typename plStringView::const_reverse_iterator(sContainer.GetStartPointer(), sContainer.GetEndPointer(), nullptr);
 }

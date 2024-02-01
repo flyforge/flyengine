@@ -7,10 +7,10 @@
 #include <RendererFoundation/Resources/Buffer.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshBufferResource, 1, plRTTIDefaultAllocator<plMeshBufferResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshBufferResource, 1, plRTTIDefaultAllocator<plMeshBufferResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plMeshBufferResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plMeshBufferResource);
 // clang-format on
 
 plMeshBufferResourceDescriptor::plMeshBufferResourceDescriptor()
@@ -45,23 +45,23 @@ plArrayPtr<const plUInt8> plMeshBufferResourceDescriptor::GetIndexBufferData() c
 
 plDynamicArray<plUInt8, plAlignedAllocatorWrapper>& plMeshBufferResourceDescriptor::GetVertexBufferData()
 {
-  PLASMA_ASSERT_DEV(!m_VertexStreamData.IsEmpty(), "The vertex data must be allocated first");
+  PL_ASSERT_DEV(!m_VertexStreamData.IsEmpty(), "The vertex data must be allocated first");
   return m_VertexStreamData;
 }
 
 plDynamicArray<plUInt8, plAlignedAllocatorWrapper>& plMeshBufferResourceDescriptor::GetIndexBufferData()
 {
-  PLASMA_ASSERT_DEV(!m_IndexBufferData.IsEmpty(), "The index data must be allocated first");
+  PL_ASSERT_DEV(!m_IndexBufferData.IsEmpty(), "The index data must be allocated first");
   return m_IndexBufferData;
 }
 
 plUInt32 plMeshBufferResourceDescriptor::AddStream(plGALVertexAttributeSemantic::Enum semantic, plGALResourceFormat::Enum format)
 {
-  PLASMA_ASSERT_DEV(m_VertexStreamData.IsEmpty(), "This function can only be called before 'AllocateStreams' is called");
+  PL_ASSERT_DEV(m_VertexStreamData.IsEmpty(), "This function can only be called before 'AllocateStreams' is called");
 
   for (plUInt32 i = 0; i < m_VertexDeclaration.m_VertexStreams.GetCount(); ++i)
   {
-    PLASMA_ASSERT_DEV(m_VertexDeclaration.m_VertexStreams[i].m_Semantic != semantic, "The given semantic {0} is already used by a previous stream", semantic);
+    PL_ASSERT_DEV(m_VertexDeclaration.m_VertexStreams[i].m_Semantic != semantic, "The given semantic {0} is already used by a previous stream", semantic);
   }
 
   plVertexStreamInfo si;
@@ -72,7 +72,7 @@ plUInt32 plMeshBufferResourceDescriptor::AddStream(plGALVertexAttributeSemantic:
   si.m_uiElementSize = static_cast<plUInt16>(plGALResourceFormat::GetBitsPerElement(format) / 8);
   m_uiVertexSize += si.m_uiElementSize;
 
-  PLASMA_ASSERT_DEV(si.m_uiElementSize > 0, "Invalid Element Size. Format not supported?");
+  PL_ASSERT_DEV(si.m_uiElementSize > 0, "Invalid Element Size. Format not supported?");
 
   if (!m_VertexDeclaration.m_VertexStreams.IsEmpty())
     si.m_uiOffset = m_VertexDeclaration.m_VertexStreams.PeekBack().m_uiOffset + m_VertexDeclaration.m_VertexStreams.PeekBack().m_uiElementSize;
@@ -92,7 +92,7 @@ void plMeshBufferResourceDescriptor::AddCommonStreams()
 
 void plMeshBufferResourceDescriptor::AllocateStreams(plUInt32 uiNumVertices, plGALPrimitiveTopology::Enum topology, plUInt32 uiNumPrimitives, bool bZeroFill /*= false*/)
 {
-  PLASMA_ASSERT_DEV(!m_VertexDeclaration.m_VertexStreams.IsEmpty(), "You have to add streams via 'AddStream' before calling this function");
+  PL_ASSERT_DEV(!m_VertexDeclaration.m_VertexStreams.IsEmpty(), "You have to add streams via 'AddStream' before calling this function");
 
   m_Topology = topology;
   m_uiVertexCount = uiNumVertices;
@@ -325,7 +325,7 @@ void plMeshBufferResourceDescriptor::AllocateStreamsFromGeometry(const plGeometr
 
 void plMeshBufferResourceDescriptor::SetPointIndices(plUInt32 uiPoint, plUInt32 uiVertex0)
 {
-  PLASMA_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Points, "Wrong topology");
+  PL_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Points, "Wrong topology");
 
   if (Uses32BitIndices())
   {
@@ -341,7 +341,7 @@ void plMeshBufferResourceDescriptor::SetPointIndices(plUInt32 uiPoint, plUInt32 
 
 void plMeshBufferResourceDescriptor::SetLineIndices(plUInt32 uiLine, plUInt32 uiVertex0, plUInt32 uiVertex1)
 {
-  PLASMA_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Lines, "Wrong topology");
+  PL_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Lines, "Wrong topology");
 
   if (Uses32BitIndices())
   {
@@ -359,7 +359,7 @@ void plMeshBufferResourceDescriptor::SetLineIndices(plUInt32 uiLine, plUInt32 ui
 
 void plMeshBufferResourceDescriptor::SetTriangleIndices(plUInt32 uiTriangle, plUInt32 uiVertex0, plUInt32 uiVertex1, plUInt32 uiVertex2)
 {
-  PLASMA_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Triangles, "Wrong topology");
+  PL_ASSERT_DEBUG(m_Topology == plGALPrimitiveTopology::Triangles, "Wrong topology");
 
   if (Uses32BitIndices())
   {
@@ -396,20 +396,19 @@ plUInt32 plMeshBufferResourceDescriptor::GetPrimitiveCount() const
 
 plBoundingBoxSphere plMeshBufferResourceDescriptor::ComputeBounds() const
 {
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   for (plUInt32 i = 0; i < m_VertexDeclaration.m_VertexStreams.GetCount(); ++i)
   {
     if (m_VertexDeclaration.m_VertexStreams[i].m_Semantic == plGALVertexAttributeSemantic::Position)
     {
-      PLASMA_ASSERT_DEBUG(m_VertexDeclaration.m_VertexStreams[i].m_Format == plGALResourceFormat::XYZFloat, "Position format is not usable");
+      PL_ASSERT_DEBUG(m_VertexDeclaration.m_VertexStreams[i].m_Format == plGALResourceFormat::XYZFloat, "Position format is not usable");
 
       const plUInt32 offset = m_VertexDeclaration.m_VertexStreams[i].m_uiOffset;
 
       if (!m_VertexStreamData.IsEmpty() && m_uiVertexCount > 0)
       {
-        bounds.SetFromPoints(reinterpret_cast<const plVec3*>(&m_VertexStreamData[offset]), m_uiVertexCount, m_uiVertexSize);
+        bounds = plBoundingBoxSphere::MakeFromPoints(reinterpret_cast<const plVec3*>(&m_VertexStreamData[offset]), m_uiVertexCount, m_uiVertexSize);
       }
 
       return bounds;
@@ -422,7 +421,7 @@ plBoundingBoxSphere plMeshBufferResourceDescriptor::ComputeBounds() const
 plResult plMeshBufferResourceDescriptor::RecomputeNormals()
 {
   if (m_Topology != plGALPrimitiveTopology::Triangles)
-    return PLASMA_FAILURE; // normals not needed
+    return PL_FAILURE; // normals not needed
 
   const plUInt32 uiVertexSize = m_uiVertexSize;
   const plUInt8* pPositions = nullptr;
@@ -444,7 +443,7 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
   }
 
   if (pPositions == nullptr || pNormals == nullptr)
-    return PLASMA_FAILURE; // there are no normals that could be recomputed
+    return PL_FAILURE; // there are no normals that could be recomputed
 
   plDynamicArray<plVec3> newNormals;
   newNormals.SetCountUninitialized(m_uiVertexCount);
@@ -454,7 +453,7 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
     n.SetZero();
   }
 
-  plResult res = PLASMA_SUCCESS;
+  plResult res = PL_SUCCESS;
 
   const plUInt16* pIndices16 = reinterpret_cast<const plUInt16*>(m_IndexBufferData.GetData());
   const plUInt32* pIndices32 = reinterpret_cast<const plUInt32*>(m_IndexBufferData.GetData());
@@ -488,11 +487,11 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
   for (plUInt32 i = 0; i < newNormals.GetCount(); ++i)
   {
     // normalize the new normal
-    if (newNormals[i].NormalizeIfNotZero(plVec3::UnitXAxis()).Failed())
-      res = PLASMA_FAILURE;
+    if (newNormals[i].NormalizeIfNotZero(plVec3::MakeAxisX()).Failed())
+      res = PL_FAILURE;
 
     // then encode it in the target format precision and write it back to the buffer
-    PLASMA_SUCCEED_OR_RETURN(plMeshBufferUtils::EncodeNormal(newNormals[i], plByteArrayPtr(pNormals + plMath::SafeMultiply64(uiVertexSize, i), sizeof(plVec3)), normalsFormat));
+    PL_SUCCEED_OR_RETURN(plMeshBufferUtils::EncodeNormal(newNormals[i], plByteArrayPtr(pNormals + plMath::SafeMultiply64(uiVertexSize, i), sizeof(plVec3)), normalsFormat));
   }
 
   return res;
@@ -503,15 +502,10 @@ plResult plMeshBufferResourceDescriptor::RecomputeNormals()
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-plMeshBufferResource::plMeshBufferResource()
-  : plResource(DoUpdate::OnAnyThread, 1)
-{
-}
-
 plMeshBufferResource::~plMeshBufferResource()
 {
-  PLASMA_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
 }
 
 plResourceLoadDesc plMeshBufferResource::UnloadData(Unload WhatToUnload)
@@ -543,7 +537,7 @@ plResourceLoadDesc plMeshBufferResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plMeshBufferResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_REPORT_FAILURE("This resource type does not support loading data from file.");
+  PL_REPORT_FAILURE("This resource type does not support loading data from file.");
 
   return plResourceLoadDesc();
 }
@@ -556,10 +550,10 @@ void plMeshBufferResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = ModifyMemoryUsage().m_uiMemoryGPU;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshBufferResource, plMeshBufferResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plMeshBufferResource, plMeshBufferResourceDescriptor)
 {
-  PLASMA_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
-  PLASMA_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hVertexBuffer.IsInvalidated(), "Implementation error");
+  PL_ASSERT_DEBUG(m_hIndexBuffer.IsInvalidated(), "Implementation error");
 
   m_VertexDeclaration = descriptor.GetVertexDeclaration();
   m_VertexDeclaration.ComputeHash();
@@ -572,14 +566,14 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshBufferResource, plMeshBufferResourceD
   m_hVertexBuffer = pDevice->CreateVertexBuffer(descriptor.GetVertexDataSize(), descriptor.GetVertexCount(), descriptor.GetVertexBufferData().GetArrayPtr());
 
   plStringBuilder sName;
-  sName.Format("{0} Vertex Buffer", GetResourceDescription());
+  sName.SetFormat("{0} Vertex Buffer", GetResourceDescription());
   pDevice->GetBuffer(m_hVertexBuffer)->SetDebugName(sName);
 
   if (descriptor.HasIndexBuffer())
   {
     m_hIndexBuffer = pDevice->CreateIndexBuffer(descriptor.Uses32BitIndices() ? plGALIndexType::UInt : plGALIndexType::UShort, m_uiPrimitiveCount * plGALPrimitiveTopology::VerticesPerPrimitive(m_Topology), descriptor.GetIndexBufferData());
 
-    sName.Format("{0} Index Buffer", GetResourceDescription());
+    sName.SetFormat("{0} Index Buffer", GetResourceDescription());
     pDevice->GetBuffer(m_hIndexBuffer)->SetDebugName(sName);
 
     // we only know the memory usage here, so we write it back to the internal variable directly and then read it in UpdateMemoryUsage() again
@@ -610,8 +604,8 @@ void plVertexDeclarationInfo::ComputeHash()
   {
     m_uiHash += vs.CalculateHash();
 
-    PLASMA_ASSERT_DEBUG(m_uiHash != 0, "Invalid Hash Value");
+    PL_ASSERT_DEBUG(m_uiHash != 0, "Invalid Hash Value");
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshBufferResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshBufferResource);

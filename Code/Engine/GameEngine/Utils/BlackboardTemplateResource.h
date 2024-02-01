@@ -7,7 +7,7 @@
 
 using plBlackboardTemplateResourceHandle = plTypedResourceHandle<class plBlackboardTemplateResource>;
 
-struct PLASMA_GAMEENGINE_DLL plBlackboardTemplateResourceDescriptor
+struct PL_GAMEENGINE_DLL plBlackboardTemplateResourceDescriptor
 {
   plResult Serialize(plStreamWriter& inout_stream) const;
   plResult Deserialize(plStreamReader& inout_stream);
@@ -18,11 +18,11 @@ struct PLASMA_GAMEENGINE_DLL plBlackboardTemplateResourceDescriptor
 /// \brief Describes the initial state of a blackboard.
 ///
 /// Used by plBlackboardComponent to initialize its blackboard from.
-class PLASMA_GAMEENGINE_DLL plBlackboardTemplateResource : public plResource
+class PL_GAMEENGINE_DLL plBlackboardTemplateResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plBlackboardTemplateResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plBlackboardTemplateResource, plBlackboardTemplateResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plBlackboardTemplateResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plBlackboardTemplateResource, plBlackboardTemplateResourceDescriptor);
 
 public:
   plBlackboardTemplateResource();

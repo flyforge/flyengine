@@ -36,7 +36,7 @@ private:
   /// \brief base-class for all iterators
   struct ConstIterator
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Constructor.
     ConstIterator()
@@ -46,9 +46,7 @@ private:
 
     /// \brief Equality comparison operator.
     bool operator==(typename plListBase<T>::ConstIterator it2) const { return (m_pElement == it2.m_pElement); } // [tested]
-
-    /// \brief Inequality comparison operator.
-    bool operator!=(typename plListBase<T>::ConstIterator it2) const { return (m_pElement != it2.m_pElement); } // [tested]
+    PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(typename plListBase<T>::ConstIterator);
 
     /// \brief Grants access to the node-data.
     const T& operator*() const { return (m_pElement->m_Data); } // [tested]
@@ -90,7 +88,7 @@ public:
     using ConstIterator::operator*;
     using ConstIterator::operator->;
 
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Constructor.
     Iterator()
@@ -115,10 +113,10 @@ public:
 
 protected:
   /// \brief Initializes the list to be empty.
-  explicit plListBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plListBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Initializes the list with a copy from another list.
-  plListBase(const plListBase<T>& cc, plAllocatorBase* pAllocator); // [tested]
+  plListBase(const plListBase<T>& cc, plAllocator* pAllocator); // [tested]
 
   /// \brief Destroys the list and all its content.
   ~plListBase(); // [tested]
@@ -203,13 +201,11 @@ public:
   ConstIterator GetEndIterator() const; // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const { return m_Elements.GetAllocator(); }
+  plAllocator* GetAllocator() const { return m_Elements.GetAllocator(); }
 
   /// \brief Comparison operator
   bool operator==(const plListBase<T>& rhs) const; // [tested]
-
-  /// \brief Comparison operator
-  bool operator!=(const plListBase<T>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plListBase<T>&);
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const { return m_Elements.GetHeapMemoryUsage(); } // [tested]
@@ -246,7 +242,7 @@ class plList : public plListBase<T>
 {
 public:
   plList();
-  explicit plList(plAllocatorBase* pAllocator);
+  explicit plList(plAllocator* pAllocator);
 
   plList(const plList<T, AllocatorWrapper>& other);
   plList(const plListBase<T>& other);

@@ -2,19 +2,19 @@
 
 #include <EditorFramework/DragDrop/DragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropHandler, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragDropHandler, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDragDropHandler* plDragDropHandler::s_pActiveDnD = nullptr;
 
-plDragDropHandler::plDragDropHandler() {}
+plDragDropHandler::plDragDropHandler() = default;
 
 
 plDragDropHandler* plDragDropHandler::FindDragDropHandler(const plDragDropInfo* pInfo)
 {
   float fBestValue = 0.0f;
   plDragDropHandler* pBestDnD = nullptr;
-  
+
   plRTTI::ForEachDerivedType<plDragDropHandler>(
     [&](const plRTTI* pRtti) {
       plDragDropHandler* pDnD = pRtti->GetAllocator()->Allocate<plDragDropHandler>();
@@ -42,7 +42,7 @@ plDragDropHandler* plDragDropHandler::FindDragDropHandler(const plDragDropInfo* 
 
 bool plDragDropHandler::BeginDragDropOperation(const plDragDropInfo* pInfo, plDragDropConfig* pConfigToFillOut)
 {
-  PLASMA_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
+  PL_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
 
   plDragDropHandler* pHandler = FindDragDropHandler(pInfo);
 
@@ -91,7 +91,7 @@ void plDragDropHandler::CancelDragDrop()
 
 bool plDragDropHandler::CanDropOnly(const plDragDropInfo* pInfo)
 {
-  PLASMA_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
+  PL_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
 
   plDragDropHandler* pHandler = FindDragDropHandler(pInfo);
 
@@ -106,7 +106,7 @@ bool plDragDropHandler::CanDropOnly(const plDragDropInfo* pInfo)
 
 bool plDragDropHandler::DropOnly(const plDragDropInfo* pInfo)
 {
-  PLASMA_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
+  PL_ASSERT_DEV(s_pActiveDnD == nullptr, "A drag & drop handler is already active");
 
   if (BeginDragDropOperation(pInfo))
   {

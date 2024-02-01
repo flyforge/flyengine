@@ -10,19 +10,19 @@ namespace plInternal
   struct QueryHelper;
 }
 
-class PLASMA_CORE_DLL plSpatialSystem_RegularGrid : public plSpatialSystem
+class PL_CORE_DLL plSpatialSystem_RegularGrid : public plSpatialSystem
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpatialSystem_RegularGrid, plSpatialSystem);
+  PL_ADD_DYNAMIC_REFLECTION(plSpatialSystem_RegularGrid, plSpatialSystem);
 
 public:
   plSpatialSystem_RegularGrid(plUInt32 uiCellSize = 128);
   ~plSpatialSystem_RegularGrid();
 
   /// \brief Returns the bounding box of the cell associated with the given spatial data. Useful for debug visualizations.
-  plResult GetCellBoxForSpatialData(const plSpatialDataHandle& hData, plBoundingBox& out_BoundingBox) const;
+  plResult GetCellBoxForSpatialData(const plSpatialDataHandle& hData, plBoundingBox& out_boundingBox) const;
 
   /// \brief Returns bounding boxes of all existing cells.
-  void GetAllCellBoxes(plDynamicArray<plBoundingBox>& out_BoundingBoxes, plSpatialData::Category filterCategory = plInvalidSpatialDataCategory) const;
+  void GetAllCellBoxes(plDynamicArray<plBoundingBox>& out_boundingBoxes, plSpatialData::Category filterCategory = plInvalidSpatialDataCategory) const;
 
 private:
   friend plInternal::QueryHelper;
@@ -45,7 +45,7 @@ private:
 
   plVisibilityState GetVisibilityState(const plSpatialDataHandle& hData, plUInt32 uiNumFramesBeforeInvisible) const override;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   virtual void GetInternalStats(plStringBuilder& sb) const override;
 #endif
 
@@ -69,7 +69,7 @@ private:
 
   struct Data
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt64 m_uiGridBitmask : MAX_NUM_GRIDS;
     plUInt64 m_uiAlwaysVisible : 1;
@@ -87,7 +87,6 @@ private:
   struct Stats;
   using CellCallback = plDelegate<plVisitorExecution::Enum(const Cell&, const QueryParams&, Stats&, void*, plVisibilityState)>;
   void ForEachCellInBoxInMatchingGrids(const plSimdBBox& box, const QueryParams& queryParams, CellCallback noFilterCallback, CellCallback filterByTagsCallback, void* pUserData, plVisibilityState visType) const;
-  
 
   struct CacheCandidate
   {
@@ -124,5 +123,5 @@ private:
   void RemoveCachedGrid(plUInt32 uiCandidateIndex);
   void RemoveAllCachedGrids();
 
-  void UpdateCacheCandidate(const plTagSet& includeTags, const plTagSet& excludeTags, plSpatialData::Category category, float filteredRatio) const;
+  void UpdateCacheCandidate(const plTagSet* pIncludeTags, const plTagSet* pExcludeTags, plSpatialData::Category category, float filteredRatio) const;
 };

@@ -164,7 +164,7 @@ static void QtDebugMessageHandler(QtMsgType type, const QMessageLogContext& cont
       }
       break;
     case QtFatalMsg:
-      PLASMA_ASSERT_DEBUG("|Qt| {0} ({1}:{2} {3})", sMsg, context.file, context.line, context.function);
+      PL_ASSERT_DEBUG("|Qt| {0} ({1}:{2} {3})", sMsg, context.file, context.line, context.function);
       break;
   }
 }
@@ -173,14 +173,12 @@ void plQtEditorApp::InitQt(int iArgc, char** pArgv)
 {
   qInstallMessageHandler(QtDebugMessageHandler);
 
-  QGuiApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-
   if (qApp != nullptr)
   {
     m_pQtApplication = qApp;
     bool ok = false;
     const int iCount = m_pQtApplication->property("Shared").toInt(&ok);
-    PLASMA_ASSERT_DEV(ok, "Existing QApplication was not constructed by PLASMA!");
+    PL_ASSERT_DEV(ok, "Existing QApplication was not constructed by PL!");
     m_pQtApplication->setProperty("Shared", QVariant::fromValue(iCount + 1));
   }
   else

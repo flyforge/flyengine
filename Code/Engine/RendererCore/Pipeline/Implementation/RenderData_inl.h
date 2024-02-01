@@ -1,18 +1,18 @@
 #include <Core/World/GameObject.h>
 
-PLASMA_ALWAYS_INLINE plRenderData::Category::Category() = default;
+PL_ALWAYS_INLINE plRenderData::Category::Category() = default;
 
-PLASMA_ALWAYS_INLINE plRenderData::Category::Category(plUInt16 uiValue)
+PL_ALWAYS_INLINE plRenderData::Category::Category(plUInt16 uiValue)
   : m_uiValue(uiValue)
 {
 }
 
-PLASMA_ALWAYS_INLINE bool plRenderData::Category::operator==(const Category& other) const
+PL_ALWAYS_INLINE bool plRenderData::Category::operator==(const Category& other) const
 {
   return m_uiValue == other.m_uiValue;
 }
 
-PLASMA_ALWAYS_INLINE bool plRenderData::Category::operator!=(const Category& other) const
+PL_ALWAYS_INLINE bool plRenderData::Category::operator!=(const Category& other) const
 {
   return m_uiValue != other.m_uiValue;
 }
@@ -20,7 +20,7 @@ PLASMA_ALWAYS_INLINE bool plRenderData::Category::operator!=(const Category& oth
 //////////////////////////////////////////////////////////////////////////
 
 // static
-PLASMA_FORCE_INLINE const plRenderer* plRenderData::GetCategoryRenderer(Category category, const plRTTI* pRenderDataType)
+PL_FORCE_INLINE const plRenderer* plRenderData::GetCategoryRenderer(Category category, const plRTTI* pRenderDataType)
 {
   if (s_bRendererInstancesDirty)
   {
@@ -39,7 +39,7 @@ PLASMA_FORCE_INLINE const plRenderer* plRenderData::GetCategoryRenderer(Category
 }
 
 // static
-PLASMA_FORCE_INLINE plHashedString plRenderData::GetCategoryName(Category category)
+PL_FORCE_INLINE plHashedString plRenderData::GetCategoryName(Category category)
 {
   if (category.m_uiValue < s_CategoryData.GetCount())
   {
@@ -49,9 +49,9 @@ PLASMA_FORCE_INLINE plHashedString plRenderData::GetCategoryName(Category catego
   return plHashedString();
 }
 
-PLASMA_FORCE_INLINE plUInt64 plRenderData::GetCategorySortingKey(Category category, const plCamera& camera) const
+PL_FORCE_INLINE plUInt64 plRenderData::GetCategorySortingKey(Category category, const plCamera& camera) const
 {
-  return s_CategoryData[category.m_uiValue].m_sortingKeyFunc(this, m_uiSortingKey, camera);
+  return s_CategoryData[category.m_uiValue].m_sortingKeyFunc(this, camera);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -59,16 +59,16 @@ PLASMA_FORCE_INLINE plUInt64 plRenderData::GetCategorySortingKey(Category catego
 template <typename T>
 static T* plCreateRenderDataForThisFrame(const plGameObject* pOwner)
 {
-  PLASMA_CHECK_AT_COMPILETIME(PLASMA_IS_DERIVED_FROM_STATIC(plRenderData, T));
+  PL_CHECK_AT_COMPILETIME(PL_IS_DERIVED_FROM_STATIC(plRenderData, T));
 
-  T* pRenderData = PLASMA_NEW(plFrameAllocator::GetCurrentAllocator(), T);
+  T* pRenderData = PL_NEW(plFrameAllocator::GetCurrentAllocator(), T);
 
   if (pOwner != nullptr)
   {
     pRenderData->m_hOwner = pOwner->GetHandle();
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   pRenderData->m_pOwner = pOwner;
 #endif
 

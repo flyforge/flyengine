@@ -15,12 +15,13 @@ plCollisionFilterConfig::plCollisionFilterConfig()
   }
 }
 
-void plCollisionFilterConfig::SetGroupName(plUInt32 uiGroup, const char* szName)
+void plCollisionFilterConfig::SetGroupName(plUInt32 uiGroup, plStringView sName)
 {
-  plStringUtils::Copy(m_GroupNames[uiGroup], 32, szName);
+  plStringBuilder tmp;
+  plStringUtils::Copy(m_GroupNames[uiGroup], 32, sName.GetData(tmp));
 }
 
-const char* plCollisionFilterConfig::GetGroupName(plUInt32 uiGroup) const
+plStringView plCollisionFilterConfig::GetGroupName(plUInt32 uiGroup) const
 {
   return m_GroupNames[uiGroup];
 }
@@ -29,19 +30,19 @@ void plCollisionFilterConfig::EnableCollision(plUInt32 uiGroup1, plUInt32 uiGrou
 {
   if (bEnable)
   {
-    m_GroupMasks[uiGroup1] |= PLASMA_BIT(uiGroup2);
-    m_GroupMasks[uiGroup2] |= PLASMA_BIT(uiGroup1);
+    m_GroupMasks[uiGroup1] |= PL_BIT(uiGroup2);
+    m_GroupMasks[uiGroup2] |= PL_BIT(uiGroup1);
   }
   else
   {
-    m_GroupMasks[uiGroup1] &= ~PLASMA_BIT(uiGroup2);
-    m_GroupMasks[uiGroup2] &= ~PLASMA_BIT(uiGroup1);
+    m_GroupMasks[uiGroup1] &= ~PL_BIT(uiGroup2);
+    m_GroupMasks[uiGroup2] &= ~PL_BIT(uiGroup1);
   }
 }
 
 bool plCollisionFilterConfig::IsCollisionEnabled(plUInt32 uiGroup1, plUInt32 uiGroup2) const
 {
-  return (m_GroupMasks[uiGroup1] & PLASMA_BIT(uiGroup2)) != 0;
+  return (m_GroupMasks[uiGroup1] & PL_BIT(uiGroup2)) != 0;
 }
 
 plUInt32 plCollisionFilterConfig::GetNumNamedGroups() const
@@ -70,11 +71,11 @@ plUInt32 plCollisionFilterConfig::GetNamedGroupIndex(plUInt32 uiGroup) const
     }
   }
 
-  PLASMA_REPORT_FAILURE("Invalid index, there are not so many named collision filter groups");
-  return -1;
+  PL_REPORT_FAILURE("Invalid index, there are not so many named collision filter groups");
+  return plInvalidIndex;
 }
 
-plInt32 plCollisionFilterConfig::GetFilterGroupByName(plStringView sName) const
+plUInt32 plCollisionFilterConfig::GetFilterGroupByName(plStringView sName) const
 {
   for (plUInt32 i = 0; i < 32; ++i)
   {
@@ -85,7 +86,7 @@ plInt32 plCollisionFilterConfig::GetFilterGroupByName(plStringView sName) const
   return plInvalidIndex;
 }
 
-plInt32 plCollisionFilterConfig::FindUnnamedGroup() const
+plUInt32 plCollisionFilterConfig::FindUnnamedGroup() const
 {
   for (plUInt32 i = 0; i < 32; ++i)
   {
@@ -93,23 +94,23 @@ plInt32 plCollisionFilterConfig::FindUnnamedGroup() const
       return i;
   }
 
-  return -1;
+  return plInvalidIndex;
 }
 
 plResult plCollisionFilterConfig::Save(plStringView sFile) const
 {
   plFileWriter file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Save(file);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCollisionFilterConfig::Load(plStringView sFile)
 {
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   if (sFile == s_sConfigFile)
   {
     sFile = plFileSystem::MigrateFileLocation(":project/CollisionLayers.cfg", s_sConfigFile);
@@ -118,35 +119,33 @@ plResult plCollisionFilterConfig::Load(plStringView sFile)
 
   plFileReader file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Load(file);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-void plCollisionFilterConfig::Save(plStreamWriter& stream) const
+void plCollisionFilterConfig::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
 
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream.WriteBytes(m_GroupMasks, sizeof(plUInt32) * 32).IgnoreResult();
-  stream.WriteBytes(m_GroupNames, sizeof(char) * 32 * 32).IgnoreResult();
+  inout_stream.WriteBytes(m_GroupMasks, sizeof(plUInt32) * 32).IgnoreResult();
+  inout_stream.WriteBytes(m_GroupNames, sizeof(char) * 32 * 32).IgnoreResult();
 }
 
 
-void plCollisionFilterConfig::Load(plStreamReader& stream)
+void plCollisionFilterConfig::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
 
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion == 1, "Invalid version {0} for plCollisionFilterConfig file", uiVersion);
+  PL_ASSERT_DEV(uiVersion == 1, "Invalid version {0} for plCollisionFilterConfig file", uiVersion);
 
-  stream.ReadBytes(m_GroupMasks, sizeof(plUInt32) * 32);
-  stream.ReadBytes(m_GroupNames, sizeof(char) * 32 * 32);
+  inout_stream.ReadBytes(m_GroupMasks, sizeof(plUInt32) * 32);
+  inout_stream.ReadBytes(m_GroupNames, sizeof(char) * 32 * 32);
 }
 
 
-
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Physics_Implementation_CollisionFilter);

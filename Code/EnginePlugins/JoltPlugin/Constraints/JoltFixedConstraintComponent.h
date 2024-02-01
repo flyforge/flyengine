@@ -9,9 +9,9 @@ using plJoltFixedConstraintComponentManager = plComponentManager<class plJoltFix
 /// Actors constrained this way may not move apart, at all.
 /// This is mainly useful for adding constraints dynamically, for example to attach a dynamic object to another one once it hits it,
 /// or to make it breakable, such that it gets removed when too much force acts on it.
-class PLASMA_JOLTPLUGIN_DLL plJoltFixedConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltFixedConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltFixedConstraintComponent, plJoltConstraintComponent, plJoltFixedConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltFixedConstraintComponent, plJoltConstraintComponent, plJoltFixedConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plJoltFixedConstraintComponent

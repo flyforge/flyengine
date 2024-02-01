@@ -42,7 +42,7 @@ protected:
   plVariantArray m_Keys;
   plDynamicArray<plExposedBone> m_Bones;
   plDeque<ElementGizmo> m_Gizmos;
-  plTransform m_RootTransform = plTransform::IdentityTransform();
+  plTransform m_RootTransform = plTransform::MakeIdentity();
 
   void RetrieveBones();
   void ConfigureGizmos();

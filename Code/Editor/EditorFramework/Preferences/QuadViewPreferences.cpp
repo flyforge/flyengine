@@ -4,20 +4,20 @@
 #include <Foundation/Serialization/GraphPatch.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(PlasmaEngineViewPreferences, plNoBase, 2, plRTTIDefaultAllocator<PlasmaEngineViewPreferences>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plEngineViewPreferences, plNoBase, 2, plRTTIDefaultAllocator<plEngineViewPreferences>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("CamPos", m_vCamPos),
-    PLASMA_MEMBER_PROPERTY("CamDir", m_vCamDir),
-    PLASMA_MEMBER_PROPERTY("CamUp", m_vCamUp),
-    PLASMA_ENUM_MEMBER_PROPERTY("Perspective", plSceneViewPerspective, m_PerspectiveMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("RenderMode", plViewRenderMode, m_RenderMode),
-    PLASMA_MEMBER_PROPERTY("FOV", m_fFov),
+    PL_MEMBER_PROPERTY("CamPos", m_vCamPos),
+    PL_MEMBER_PROPERTY("CamDir", m_vCamDir),
+    PL_MEMBER_PROPERTY("CamUp", m_vCamUp),
+    PL_ENUM_MEMBER_PROPERTY("Perspective", plSceneViewPerspective, m_PerspectiveMode),
+    PL_ENUM_MEMBER_PROPERTY("RenderMode", plViewRenderMode, m_RenderMode),
+    PL_MEMBER_PROPERTY("FOV", m_fFov),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 namespace
@@ -30,30 +30,30 @@ namespace
       : plGraphPatch("plSceneViewPreferences", 2)
     {
     }
-    virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+    virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
     {
-      context.RenameClass("PlasmaEngineViewPreferences");
+      ref_context.RenameClass("plEngineViewPreferences");
     }
   };
   plSceneViewPreferencesPatch_1_2 g_plSceneViewPreferencesPatch_1_2;
 } // namespace
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plQuadViewPreferencesUser, 1, plRTTIDefaultAllocator<plQuadViewPreferencesUser>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plQuadViewPreferencesUser, 1, plRTTIDefaultAllocator<plQuadViewPreferencesUser>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("QuadView", m_bQuadView)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ViewSingle", m_ViewSingle)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ViewQuad0", m_ViewQuad0)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ViewQuad1", m_ViewQuad1)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ViewQuad2", m_ViewQuad2)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("ViewQuad3", m_ViewQuad3)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("FavoriteCams", FavCams_GetCount, FavCams_GetCam, FavCams_SetCam, FavCams_Insert, FavCams_Remove)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("QuadView", m_bQuadView)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ViewSingle", m_ViewSingle)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ViewQuad0", m_ViewQuad0)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ViewQuad1", m_ViewQuad1)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ViewQuad2", m_ViewQuad2)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("ViewQuad3", m_ViewQuad3)->AddAttributes(new plHiddenAttribute()),
+    PL_ARRAY_ACCESSOR_PROPERTY("FavoriteCams", FavCams_GetCount, FavCams_GetCam, FavCams_SetCam, FavCams_Insert, FavCams_Remove)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plQuadViewPreferencesUser::plQuadViewPreferencesUser()

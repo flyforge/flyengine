@@ -17,9 +17,9 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plParticleWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_WORLD_MODULE(plParticleWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleWorldModule::plParticleWorldModule(plWorld* pWorld)
@@ -37,7 +37,7 @@ void plParticleWorldModule::Initialize()
   ConfigureParticleStreamFactories();
 
   {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plParticleWorldModule::UpdateEffects, this);
+    auto updateDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plParticleWorldModule::UpdateEffects, this);
     updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
     updateDesc.m_bOnlyUpdateWhenSimulating = true;
     updateDesc.m_fPriority = 1000.0f; // kick off particle tasks as early as possible
@@ -46,7 +46,7 @@ void plParticleWorldModule::Initialize()
   }
 
   {
-    auto finishDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plParticleWorldModule::EnsureUpdatesFinished, this);
+    auto finishDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plParticleWorldModule::EnsureUpdatesFinished, this);
     finishDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostTransform;
     finishDesc.m_bOnlyUpdateWhenSimulating = true;
     finishDesc.m_fPriority = -1000.0f; // sync with particle tasks as late as possible
@@ -67,7 +67,7 @@ void plParticleWorldModule::Initialize()
 
 void plParticleWorldModule::Deinitialize()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plResourceManager::GetResourceEvents().RemoveEventHandler(plMakeDelegate(&plParticleWorldModule::ResourceEventHandler, this));
 
@@ -80,7 +80,7 @@ void plParticleWorldModule::EnsureUpdatesFinished(const plWorldModule::UpdateCon
   plTaskSystem::WaitForGroup(m_EffectUpdateTaskGroup);
 
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     // The simulation tasks are done and the game objects have their global transform updated at this point, so we can push the transform
     // to the particle effects for the next simulation step and also ensure that the bounding volumes are correct for culling and rendering.
@@ -103,11 +103,11 @@ void plParticleWorldModule::EnsureUpdatesFinished(const plWorldModule::UpdateCon
   }
 }
 
-void plParticleWorldModule::ExtractEffectRenderData(const plParticleEffectInstance* pEffect, plMsgExtractRenderData& msg, const plTransform& systemTransform) const
+void plParticleWorldModule::ExtractEffectRenderData(const plParticleEffectInstance* pEffect, plMsgExtractRenderData& ref_msg, const plTransform& systemTransform) const
 {
-  PLASMA_ASSERT_DEBUG(plTaskSystem::IsTaskGroupFinished(m_EffectUpdateTaskGroup), "Particle Effect Update Task is not finished!");
+  PL_ASSERT_DEBUG(plTaskSystem::IsTaskGroupFinished(m_EffectUpdateTaskGroup), "Particle Effect Update Task is not finished!");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (plUInt32 i = 0; i < pEffect->GetParticleSystems().GetCount(); ++i)
   {
@@ -119,7 +119,7 @@ void plParticleWorldModule::ExtractEffectRenderData(const plParticleEffectInstan
     if (!pSystem->HasActiveParticles() || !pSystem->IsVisible())
       continue;
 
-    pSystem->ExtractSystemRenderData(msg, systemTransform);
+    pSystem->ExtractSystemRenderData(ref_msg, systemTransform);
   }
 }
 
@@ -127,7 +127,7 @@ void plParticleWorldModule::ResourceEventHandler(const plResourceEvent& e)
 {
   if (e.m_Type == plResourceEvent::Type::ResourceContentUnloading && e.m_pResource->GetDynamicRTTI()->IsDerivedFrom<plParticleEffectResource>())
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     plParticleEffectResourceHandle hResource((plParticleEffectResource*)(e.m_pResource));
 
@@ -213,7 +213,7 @@ void plParticleWorldModule::CreateFinisherComponent(plParticleEffectInstance* pE
     plParticleFinisherComponent::CreateComponent(pFinisher, pFinisherComp);
 
     pFinisherComp->m_EffectController = plParticleEffectController(this, pEffect->GetHandle());
-    pFinisherComp->m_EffectController.SetTransform(transform, plVec3::ZeroVector()); // clear the velocity
+    pFinisherComp->m_EffectController.SetTransform(transform, plVec3::MakeZero()); // clear the velocity
   }
 }
 
@@ -222,7 +222,7 @@ void plParticleWorldModule::WorldClear()
   // make sure no particle update task is still in the pipeline
   plTaskSystem::WaitForGroup(m_EffectUpdateTaskGroup);
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   m_FinishingEffects.Clear();
   m_NeedFinisherComponent.Clear();
@@ -234,4 +234,4 @@ void plParticleWorldModule::WorldClear()
   m_ParticleSystemFreeList.Clear();
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleWorldModule);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleWorldModule);

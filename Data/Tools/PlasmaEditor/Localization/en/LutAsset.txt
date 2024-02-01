@@ -1,7 +1,0 @@
-# Asset Types
-
-LUT;Lookup Table
-
-# Properties
-
-plLUTAssetProperties::CUBEfile;CUBE File

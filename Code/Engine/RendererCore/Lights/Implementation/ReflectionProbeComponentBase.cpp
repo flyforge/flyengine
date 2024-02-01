@@ -12,7 +12,7 @@ namespace
 {
   static plVariantArray GetDefaultExcludeTags()
   {
-    plVariantArray value(plStaticAllocatorWrapper::GetAllocator());
+    plVariantArray value(plStaticsAllocatorWrapper::GetAllocator());
     value.PushBack(plStringView("SkyLight"));
     return value;
   }
@@ -20,38 +20,36 @@ namespace
 
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionProbeComponentBase, 2, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionProbeComponentBase, 2, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("ReflectionProbeMode", plReflectionProbeMode, GetReflectionProbeMode, SetReflectionProbeMode)->AddAttributes(new plDefaultValueAttribute(plReflectionProbeMode::Static), new plGroupAttribute("Capture Description")),
-    PLASMA_SET_ACCESSOR_PROPERTY("IncludeTags", GetIncludeTags, InsertIncludeTag, RemoveIncludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default")),
-    PLASMA_SET_ACCESSOR_PROPERTY("ExcludeTags", GetExcludeTags, InsertExcludeTag, RemoveExcludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultExcludeTags())),
-    PLASMA_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, {}), new plMinValueTextAttribute("Auto")),
-    PLASMA_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.01f, 10000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("CaptureOffset", GetCaptureOffset, SetCaptureOffset),
-    PLASMA_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
-    PLASMA_ACCESSOR_PROPERTY("ShowMipMaps", GetShowMipMaps, SetShowMipMaps),
+    PL_ENUM_ACCESSOR_PROPERTY("ReflectionProbeMode", plReflectionProbeMode, GetReflectionProbeMode, SetReflectionProbeMode)->AddAttributes(new plDefaultValueAttribute(plReflectionProbeMode::Static), new plGroupAttribute("Capture Description")),
+    PL_SET_ACCESSOR_PROPERTY("IncludeTags", GetIncludeTags, InsertIncludeTag, RemoveIncludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_SET_ACCESSOR_PROPERTY("ExcludeTags", GetExcludeTags, InsertExcludeTag, RemoveExcludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultExcludeTags())),
+    PL_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, {}), new plMinValueTextAttribute("Auto")),
+    PL_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.01f, 10000.0f)),
+    PL_ACCESSOR_PROPERTY("CaptureOffset", GetCaptureOffset, SetCaptureOffset),
+    PL_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
+    PL_ACCESSOR_PROPERTY("ShowMipMaps", GetShowMipMaps, SetShowMipMaps),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
+    new plCategoryAttribute("Rendering/Reflections"),
     new plTransformManipulatorAttribute("CaptureOffset"),
-    new plCategoryAttribute("Lighting/Probes"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plReflectionProbeComponentBase::plReflectionProbeComponentBase()
 {
-  m_Desc.m_uniqueID.CreateNewUuid();
+  m_Desc.m_uniqueID = plUuid::MakeUuid();
 }
 
-plReflectionProbeComponentBase::~plReflectionProbeComponentBase()
-{
-}
+plReflectionProbeComponentBase::~plReflectionProbeComponentBase() = default;
 
 void plReflectionProbeComponentBase::SetReflectionProbeMode(plEnum<plReflectionProbeMode> mode)
 {
@@ -158,7 +156,7 @@ void plReflectionProbeComponentBase::SerializeComponent(plWorldWriter& inout_str
 void plReflectionProbeComponentBase::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  //const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
   plStreamReader& s = inout_stream.GetStream();
 
   m_Desc.m_IncludeTags.Load(s, plTagRegistry::GetGlobalRegistry());
@@ -178,7 +176,7 @@ float plReflectionProbeComponentBase::ComputePriority(plMsgExtractRenderData& ms
   // This sorting is only by size to make sure the probes in a cluster are iterating from smallest to largest on the GPU. Which probes are actually used is determined below by the returned priority.
   pRenderData->m_uiSortingKey = plMath::FloatToInt(static_cast<float>(plMath::MaxValue<plUInt32>()) * fLogVolume / 40.0f);
 
-  //#TODO This is a pretty poor distance / size based score.
+  // #TODO This is a pretty poor distance / size based score.
   if (msg.m_pView)
   {
     if (auto pCamera = msg.m_pView->GetLodCamera())
@@ -189,12 +187,12 @@ float plReflectionProbeComponentBase::ComputePriority(plMsgExtractRenderData& ms
     }
   }
 
-#ifdef PLASMA_SHOW_REFLECTION_PROBE_PRIORITIES
+#ifdef PL_SHOW_REFLECTION_PROBE_PRIORITIES
   plStringBuilder s;
-  s.Format("{}, {}", pRenderData->m_uiSortingKey, fPriority);
+  s.SetFormat("{}, {}", pRenderData->m_uiSortingKey, fPriority);
   plDebugRenderer::Draw3DText(GetWorld(), s, pRenderData->m_GlobalTransform.m_vPosition, plColor::Wheat);
 #endif
   return fPriority;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionProbeComponentBase);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionProbeComponentBase);

@@ -10,9 +10,9 @@
 class plRasterizerObject;
 
 /// \brief Base class for all render data. Render data must contain all information that is needed to render the corresponding object.
-class PLASMA_RENDERERCORE_DLL plRenderData : public plReflectedClass
+class PL_RENDERERCORE_DLL plRenderData : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRenderData, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plRenderData, plReflectedClass);
 
 public:
   struct Category
@@ -37,7 +37,7 @@ public:
   };
 
   /// \brief This function generates a 64bit sorting key for the given render data. Data with lower sorting key is rendered first.
-  using SortingKeyFunc = plUInt64 (*)(const plRenderData*, plUInt32, const plCamera&);
+  using SortingKeyFunc = plUInt64 (*)(const plRenderData*, const plCamera&);
 
   static Category RegisterCategory(const char* szCategoryName, SortingKeyFunc sortingKeyFunc);
   static Category FindCategory(plTempHashedString sCategoryName);
@@ -48,24 +48,23 @@ public:
 
   static plHashedString GetCategoryName(Category category);
 
-
   plUInt64 GetCategorySortingKey(Category category, const plCamera& camera) const;
+
+  plTransform m_GlobalTransform = plTransform::MakeIdentity();
+  plBoundingBoxSphere m_GlobalBounds;
 
   plUInt32 m_uiBatchId = 0; ///< BatchId is used to group render data in batches.
   plUInt32 m_uiSortingKey = 0;
-
-  plTransform m_LastGlobalTransform = plTransform::IdentityTransform();
-  plTransform m_GlobalTransform = plTransform::IdentityTransform();
-  plBoundingBoxSphere m_GlobalBounds;
+  float m_fSortingDepthOffset = 0.0f;
 
   plGameObjectHandle m_hOwner;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   const plGameObject* m_pOwner = nullptr; ///< Debugging only. It is not allowed to access the game object during rendering.
 #endif
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, RenderData);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, RenderData);
 
   static void PluginEventHandler(const plPluginEvent& e);
   static void UpdateRendererTypes();
@@ -92,17 +91,17 @@ private:
 template <typename T>
 static T* plCreateRenderDataForThisFrame(const plGameObject* pOwner);
 
-struct PLASMA_RENDERERCORE_DLL plDefaultRenderDataCategories
+struct PL_RENDERERCORE_DLL plDefaultRenderDataCategories
 {
   static plRenderData::Category Light;
   static plRenderData::Category Decal;
   static plRenderData::Category ReflectionProbe;
   static plRenderData::Category Sky;
-  static plRenderData::Category PostSky;
   static plRenderData::Category LitOpaque;
   static plRenderData::Category LitMasked;
   static plRenderData::Category LitTransparent;
   static plRenderData::Category LitForeground;
+  static plRenderData::Category LitScreenFX;
   static plRenderData::Category SimpleOpaque;
   static plRenderData::Category SimpleTransparent;
   static plRenderData::Category SimpleForeground;
@@ -112,9 +111,9 @@ struct PLASMA_RENDERERCORE_DLL plDefaultRenderDataCategories
 
 #define plInvalidRenderDataCategory plRenderData::Category()
 
-struct PLASMA_RENDERERCORE_DLL plMsgExtractRenderData : public plMessage
+struct PL_RENDERERCORE_DLL plMsgExtractRenderData : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgExtractRenderData, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgExtractRenderData, plMessage);
 
   const plView* m_pView = nullptr;
   plRenderData::Category m_OverrideCategory = plInvalidRenderDataCategory;
@@ -137,9 +136,9 @@ private:
   plUInt32 m_uiNumCacheIfStatic = 0;
 };
 
-struct PLASMA_RENDERERCORE_DLL plMsgExtractOccluderData : public plMessage
+struct PL_RENDERERCORE_DLL plMsgExtractOccluderData : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgExtractOccluderData, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgExtractOccluderData, plMessage);
 
   void AddOccluder(const plRasterizerObject* pObject, const plTransform& transform)
   {

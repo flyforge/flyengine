@@ -19,12 +19,12 @@
 template <>
 struct plHashHelper<plGALShaderHandle>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plGALShaderHandle value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(plGALShaderHandle value)
   {
     return plHashHelper<plGALShaderHandle::IdType::StorageType>::Hash(value.GetInternalID().m_Data);
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plGALShaderHandle a, plGALShaderHandle b)
+  PL_ALWAYS_INLINE static bool Equal(plGALShaderHandle a, plGALShaderHandle b)
   {
     return plHashHelper<plGALShaderHandle::IdType::StorageType>::Equal(a.GetInternalID().m_Data, b.GetInternalID().m_Data);
   }
@@ -33,12 +33,12 @@ struct plHashHelper<plGALShaderHandle>
 template <>
 struct plHashHelper<plImageCopyVulkan::RenderPassCacheKey>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::RenderPassCacheKey& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::RenderPassCacheKey& value)
   {
     return plHashingUtils::CombineHashValues32(static_cast<uint32_t>(value.targetFormat), static_cast<uint32_t>(value.targetSamples));
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::RenderPassCacheKey& a, const plImageCopyVulkan::RenderPassCacheKey& b)
+  PL_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::RenderPassCacheKey& a, const plImageCopyVulkan::RenderPassCacheKey& b)
   {
     return a.targetFormat == b.targetFormat && a.targetSamples == b.targetSamples;
   }
@@ -47,12 +47,12 @@ struct plHashHelper<plImageCopyVulkan::RenderPassCacheKey>
 template <>
 struct plHashHelper<vk::Image>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(vk::Image value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(vk::Image value)
   {
     return plHashHelper<void*>::Hash((VkImage)value);
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(vk::Image a, vk::Image b)
+  PL_ALWAYS_INLINE static bool Equal(vk::Image a, vk::Image b)
   {
     return a == b;
   }
@@ -61,7 +61,7 @@ struct plHashHelper<vk::Image>
 template <>
 struct plHashHelper<plImageCopyVulkan::FramebufferCacheKey>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::FramebufferCacheKey& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::FramebufferCacheKey& value)
   {
     plHashStreamWriter32 writer;
     writer << (VkRenderPass)value.m_renderpass;
@@ -72,7 +72,7 @@ struct plHashHelper<plImageCopyVulkan::FramebufferCacheKey>
     return writer.GetHashValue();
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::FramebufferCacheKey& a, const plImageCopyVulkan::FramebufferCacheKey& b)
+  PL_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::FramebufferCacheKey& a, const plImageCopyVulkan::FramebufferCacheKey& b)
   {
     return a.m_renderpass == b.m_renderpass && a.m_targetView == b.m_targetView && a.m_extends == b.m_extends && a.m_layerCount == b.m_layerCount;
   }
@@ -81,7 +81,7 @@ struct plHashHelper<plImageCopyVulkan::FramebufferCacheKey>
 template <>
 struct plHashHelper<plImageCopyVulkan::ImageViewCacheKey>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::ImageViewCacheKey& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plImageCopyVulkan::ImageViewCacheKey& value)
   {
     plHashStreamWriter32 writer;
     writer << (VkImage)value.m_image;
@@ -92,7 +92,7 @@ struct plHashHelper<plImageCopyVulkan::ImageViewCacheKey>
     return writer.GetHashValue();
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::ImageViewCacheKey& a, const plImageCopyVulkan::ImageViewCacheKey& b)
+  PL_ALWAYS_INLINE static bool Equal(const plImageCopyVulkan::ImageViewCacheKey& a, const plImageCopyVulkan::ImageViewCacheKey& b)
   {
     return a.m_image == b.m_image && a.m_subresourceLayers == b.m_subresourceLayers;
   }
@@ -101,14 +101,14 @@ struct plHashHelper<plImageCopyVulkan::ImageViewCacheKey>
 template <>
 struct plHashHelper<plShaderUtils::plBuiltinShaderType>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plShaderUtils::plBuiltinShaderType& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plShaderUtils::plBuiltinShaderType& value)
   {
     plHashStreamWriter32 writer;
     writer << plConversionUtilsVulkan::GetUnderlyingValue(value);
     return writer.GetHashValue();
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plShaderUtils::plBuiltinShaderType& a, const plShaderUtils::plBuiltinShaderType& b)
+  PL_ALWAYS_INLINE static bool Equal(const plShaderUtils::plBuiltinShaderType& a, const plShaderUtils::plBuiltinShaderType& b)
   {
     return a == b;
   }
@@ -116,7 +116,7 @@ struct plHashHelper<plShaderUtils::plBuiltinShaderType>
 
 plUniquePtr<plImageCopyVulkan::Cache> plImageCopyVulkan::s_cache;
 
-plImageCopyVulkan::Cache::Cache(plAllocatorBase* pAllocator)
+plImageCopyVulkan::Cache::Cache(plAllocator* pAllocator)
   : m_vertexDeclarations(pAllocator)
   , m_renderPasses(pAllocator)
   , m_sourceImageViews(pAllocator)
@@ -139,7 +139,7 @@ plImageCopyVulkan::~plImageCopyVulkan() = default;
 
 void plImageCopyVulkan::Initialize(plGALDeviceVulkan& GALDeviceVulkan)
 {
-  s_cache = PLASMA_NEW(&GALDeviceVulkan.GetAllocator(), plImageCopyVulkan::Cache, &GALDeviceVulkan.GetAllocator());
+  s_cache = PL_NEW(&GALDeviceVulkan.GetAllocator(), plImageCopyVulkan::Cache, &GALDeviceVulkan.GetAllocator());
 
   s_cache->m_onBeforeImageDeletedSubscription = GALDeviceVulkan.OnBeforeImageDestroyed.AddEventHandler(plMakeDelegate(OnBeforeImageDestroyed));
 }
@@ -180,8 +180,8 @@ void plImageCopyVulkan::OnBeforeImageDestroyed(plGALDeviceVulkan::OnBeforeImageD
     ImageViewCacheKey cacheKey{data.image, it.Value().m_subresourceLayers};
 
     bool removed = s_cache->m_sourceImageViews.Remove(cacheKey);
-    PLASMA_IGNORE_UNUSED(removed);
-    PLASMA_ASSERT_DEV(removed, "m_imageToSourceImageViewCacheKey and m_sourceImageViews should always be in sync");
+    PL_IGNORE_UNUSED(removed);
+    PL_ASSERT_DEV(removed, "m_imageToSourceImageViewCacheKey and m_sourceImageViews should always be in sync");
     s_cache->m_imageToSourceImageViewCacheKey.Remove(it);
   }
   if (auto it = s_cache->m_imageToTargetImageViewCacheKey.Find(data.image); it.IsValid())
@@ -191,8 +191,8 @@ void plImageCopyVulkan::OnBeforeImageDestroyed(plGALDeviceVulkan::OnBeforeImageD
     ImageViewCacheKey cacheKey{data.image, it.Value().m_subresourceLayers};
 
     bool removed = s_cache->m_targetImageViews.Remove(cacheKey);
-    PLASMA_IGNORE_UNUSED(removed);
-    PLASMA_ASSERT_DEV(removed, "m_imageToTargetImageViewCacheKey and m_targetImageViews should always be in sync");
+    PL_IGNORE_UNUSED(removed);
+    PL_ASSERT_DEV(removed, "m_imageToTargetImageViewCacheKey and m_targetImageViews should always be in sync");
     s_cache->m_imageToTargetImageViewCacheKey.Remove(it);
   }
 }
@@ -209,7 +209,7 @@ void plImageCopyVulkan::Init(const plGALTextureVulkan* pSource, const plGALTextu
   vk::Format targetFormat = m_pTarget->GetImageFormat();
 
   bool bTargetIsDepth = plConversionUtilsVulkan::IsDepthFormat(targetFormat);
-  PLASMA_ASSERT_DEV(bTargetIsDepth == false, "Writing to depth is not implemented");
+  PL_ASSERT_DEV(bTargetIsDepth == false, "Writing to depth is not implemented");
 
   // Render pass
   {
@@ -297,7 +297,7 @@ void plImageCopyVulkan::Init(const plGALTextureVulkan* pSource, const plGALTextu
       m_PipelineDesc.m_pCurrentDepthStencilState = static_cast<const plGALDepthStencilStateVulkan*>(m_GALDeviceVulkan.GetDepthStencilState(m_shader.m_hDepthStencilState));
       m_PipelineDesc.m_pCurrentShader = static_cast<const plGALShaderVulkan*>(m_GALDeviceVulkan.GetShader(m_shader.m_hActiveGALShader));
 
-      PLASMA_ASSERT_DEV(m_PipelineDesc.m_pCurrentRasterizerState && m_PipelineDesc.m_pCurrentBlendState && m_PipelineDesc.m_pCurrentDepthStencilState && m_PipelineDesc.m_pCurrentShader, "");
+      PL_ASSERT_DEV(m_PipelineDesc.m_pCurrentRasterizerState && m_PipelineDesc.m_pCurrentBlendState && m_PipelineDesc.m_pCurrentDepthStencilState && m_PipelineDesc.m_pCurrentShader, "");
     }
 
     m_PipelineDesc.m_renderPass = m_renderPass;
@@ -322,8 +322,12 @@ void plImageCopyVulkan::Init(const plGALTextureVulkan* pSource, const plGALTextu
       m_PipelineDesc.m_pCurrentVertexDecl = static_cast<const plGALVertexDeclarationVulkan*>(m_GALDeviceVulkan.GetVertexDeclaration(m_hVertexDecl));
     }
 
-    const plGALShaderVulkan::DescriptorSetLayoutDesc& descriptorLayoutDesc = m_PipelineDesc.m_pCurrentShader->GetDescriptorSetLayout();
-    m_LayoutDesc.m_layout = plResourceCacheVulkan::RequestDescriptorSetLayout(descriptorLayoutDesc);
+    const plUInt32 uiSets = m_PipelineDesc.m_pCurrentShader->GetSetCount();
+    m_LayoutDesc.m_layout.SetCount(uiSets);
+    for (plUInt32 uiSet = 0; uiSet < uiSets; ++uiSet)
+    {
+      m_LayoutDesc.m_layout[uiSet] = m_PipelineDesc.m_pCurrentShader->GetDescriptorSetLayout(uiSet);
+    }
     m_PipelineDesc.m_layout = plResourceCacheVulkan::RequestPipelineLayout(m_LayoutDesc);
     m_pipeline = plResourceCacheVulkan::RequestGraphicsPipeline(m_PipelineDesc);
   }
@@ -331,11 +335,11 @@ void plImageCopyVulkan::Init(const plGALTextureVulkan* pSource, const plGALTextu
 
 void plImageCopyVulkan::Copy(const plVec3U32& sourceOffset, const vk::ImageSubresourceLayers& sourceLayers, const plVec3U32& targetOffset, const vk::ImageSubresourceLayers& targetLayers, const plVec3U32& extends)
 {
-  PLASMA_ASSERT_DEV(sourceOffset.IsZero(), "Offset not implemented yet.");
-  PLASMA_ASSERT_DEV(targetOffset.IsZero(), "Offset not implemented yet.");
+  PL_ASSERT_DEV(sourceOffset.IsZero(), "Offset not implemented yet.");
+  PL_ASSERT_DEV(targetOffset.IsZero(), "Offset not implemented yet.");
   if (m_type == plShaderUtils::plBuiltinShaderType::CopyImage || m_type == plShaderUtils::plBuiltinShaderType::CopyImage)
   {
-    PLASMA_ASSERT_DEV(sourceLayers.layerCount == 1 && targetLayers.layerCount == 1, "If plBuiltinShaderType is not one of the array variants, layerCount must be 1.");
+    PL_ASSERT_DEV(sourceLayers.layerCount == 1 && targetLayers.layerCount == 1, "If plBuiltinShaderType is not one of the array variants, layerCount must be 1.");
   }
 
   vk::CommandBuffer commandBuffer = m_GALDeviceVulkan.GetCurrentCommandBuffer();
@@ -457,7 +461,7 @@ void plImageCopyVulkan::RenderInternal(const plVec3U32& sourceOffset, const vk::
   }
 
   // Descriptor Set
-  vk::DescriptorSet descriptorSet = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout);
+  vk::DescriptorSet descriptorSet = plDescriptorSetPoolVulkan::CreateDescriptorSet(m_LayoutDesc.m_layout[0]);
   {
     plHybridArray<vk::WriteDescriptorSet, 16> descriptorWrites;
 
@@ -465,27 +469,27 @@ void plImageCopyVulkan::RenderInternal(const plVec3U32& sourceOffset, const vk::
     sourceInfo.imageLayout = bSourceIsDepth ? vk::ImageLayout::eDepthStencilReadOnlyOptimal : vk::ImageLayout::eShaderReadOnlyOptimal;
     sourceInfo.imageView = sourceView;
 
-    plArrayPtr<const plGALShaderVulkan::BindingMapping> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindingMapping();
+    plArrayPtr<const plShaderResourceBinding> bindingMapping = m_PipelineDesc.m_pCurrentShader->GetBindings();
     const plUInt32 uiCount = bindingMapping.GetCount();
     for (plUInt32 i = 0; i < uiCount; i++)
     {
-      const plGALShaderVulkan::BindingMapping& mapping = bindingMapping[i];
+      const plShaderResourceBinding& mapping = bindingMapping[i];
       vk::WriteDescriptorSet& write = descriptorWrites.ExpandAndGetRef();
       write.dstArrayElement = 0;
-      write.descriptorType = mapping.m_descriptorType;
-      write.dstBinding = mapping.m_uiTarget;
+      write.descriptorType = plConversionUtilsVulkan::GetDescriptorType(mapping.m_ResourceType);
+      write.dstBinding = mapping.m_iSlot;
       write.dstSet = descriptorSet;
       write.descriptorCount = 1;
-      switch (mapping.m_type)
+      switch (mapping.m_ResourceType)
       {
-        case plGALShaderVulkan::BindingMapping::ConstantBuffer:
+        case plGALShaderResourceType::ConstantBuffer:
         {
           //#TODO_VULKAN constant buffer for offset in the shader to allow region copy
           //const plGALBufferVulkan* pBuffer = m_pBoundConstantBuffers[mapping.m_uiSource];
           //write.pBufferInfo = &pBuffer->GetBufferInfo();
         }
         break;
-        case plGALShaderVulkan::BindingMapping::ResourceView:
+        case plGALShaderResourceType::Texture:
         {
           write.pImageInfo = &sourceInfo;
         }
@@ -503,7 +507,7 @@ void plImageCopyVulkan::RenderInternal(const plVec3U32& sourceOffset, const vk::
       begin.framebuffer = frameBuffer;
       begin.renderArea.offset.setX(0).setY(0);
       begin.renderArea.extent.setWidth(extends.x).setHeight(extends.y);
-      plHybridArray<vk::ClearValue, PLASMA_GAL_MAX_RENDERTARGET_COUNT + 1> m_clearValues;
+      plHybridArray<vk::ClearValue, PL_GAL_MAX_RENDERTARGET_COUNT + 1> m_clearValues;
       vk::ClearValue& colorClear = m_clearValues.ExpandAndGetRef();
       plColor col = plColor::Pink;
       colorClear.color.setFloat32({col.r, col.g, col.b, col.a});

@@ -10,13 +10,13 @@
 
 struct plActionDescriptor;
 
-class PLASMA_GUIFOUNDATION_DLL plQtShortcutEditorDlg : public QDialog, public Ui_ShortcutEditor
+class PL_GUIFOUNDATION_DLL plQtShortcutEditorDlg : public QDialog, public Ui_ShortcutEditor
 {
 public:
   Q_OBJECT
 
 public:
-  plQtShortcutEditorDlg(QWidget* parent);
+  plQtShortcutEditorDlg(QWidget* pParent);
   ~plQtShortcutEditorDlg();
 
   void UpdateTable();

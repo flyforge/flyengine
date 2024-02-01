@@ -13,12 +13,12 @@ bool plQtExportAndRunDlg::s_bCompileCpp = true;
 
 static int s_iLastPlayerApp = 0;
 
-plQtExportAndRunDlg::plQtExportAndRunDlg(QWidget* parent)
-  : QDialog(parent)
+plQtExportAndRunDlg::plQtExportAndRunDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   ToolCombo->addItem("plPlayer", "Player.exe");
 #else
   ToolCombo->addItem("plPlayer", "Player");

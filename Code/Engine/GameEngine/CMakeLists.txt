@@ -18,11 +18,11 @@ target_link_libraries(${PROJECT_NAME}
   Utilities
 )
 
-if (PLASMA_3RDPARTY_IMGUI_SUPPORT)
+if (PL_3RDPARTY_IMGUI_SUPPORT)
   target_link_libraries(${PROJECT_NAME} PUBLIC Imgui)
 endif()
 
-if (PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
+if (PL_CMAKE_PLATFORM_WINDOWS_UWP)
 
   target_link_libraries(${PROJECT_NAME}
     PRIVATE

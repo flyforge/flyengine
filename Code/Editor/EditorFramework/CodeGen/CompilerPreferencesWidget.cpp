@@ -15,7 +15,7 @@ plQtCompilerPreferencesWidget::plQtCompilerPreferencesWidget()
   int counter = 0;
   for (auto& compiler : plCppProject::GetMachineSpecificCompilers())
   {
-    m_pCompilerPreset->addItem(compiler.m_sNiceName.GetData(), counter);
+    m_pCompilerPreset->addItem(plMakeQString(compiler.m_sNiceName), counter);
     ++counter;
   }
   connect(m_pCompilerPreset, &QComboBox::currentIndexChanged, this, &plQtCompilerPreferencesWidget::on_compiler_preset_changed);
@@ -29,10 +29,11 @@ plQtCompilerPreferencesWidget::plQtCompilerPreferencesWidget()
   gridLayout->setSpacing(0);
 
   plStringBuilder fmt;
-  QLabel* versionText = new QLabel((
+  QLabel* versionText = new QLabel(plMakeQString(
     plFmt("This SDK was compiled with {} version {}. Select a compatible compiler.",
       plCppProject::CompilerToString(plCppProject::GetSdkCompiler()),
-      plCppProject::GetSdkCompilerMajorVersion()).GetTextCStr(fmt)));
+      plCppProject::GetSdkCompilerMajorVersion())
+      .GetText(fmt)));
   versionText->setWordWrap(true);
   gridLayout->addWidget(versionText, 0, 0, 1, 3);
 
@@ -53,7 +54,7 @@ void plQtCompilerPreferencesWidget::SetSelection(const plHybridArray<plPropertyS
   {
     const auto& selection = m_pTypeWidget->GetSelection();
 
-    PLASMA_ASSERT_DEBUG(selection.GetCount() == 1, "Expected exactly one object");
+    PL_ASSERT_DEBUG(selection.GetCount() == 1, "Expected exactly one object");
     auto pObj = selection[0].m_pObject;
 
     plEnum<plCompiler> m_Compiler;
@@ -122,7 +123,7 @@ void plQtCompilerPreferencesWidget::on_compiler_preset_changed(int index)
     const auto& preset = compilerPresets[index];
 
     const auto& selection = m_pTypeWidget->GetSelection();
-    PLASMA_ASSERT_DEV(selection.GetCount() == 1, "This Widget does not support multi selection");
+    PL_ASSERT_DEV(selection.GetCount() == 1, "This Widget does not support multi selection");
 
     auto obj = selection[0].m_pObject;
     m_pObjectAccessor->StartTransaction("Change Compiler Preset");
@@ -150,7 +151,7 @@ void plCompilerPreferences_PropertyMetaStateEventHandler(plPropertyMetaStateEven
   {
     compilerFieldsVisibility = plPropertyUiState::Disabled;
   }
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   auto compiler = typeAccessor.GetValue("Compiler").Get<plInt64>();
   if (compiler == plCompiler::Vs2022)
   {
@@ -162,7 +163,7 @@ void plCompilerPreferences_PropertyMetaStateEventHandler(plPropertyMetaStateEven
 
   props["CCompiler"].m_Visibility = compilerFieldsVisibility;
   props["CppCompiler"].m_Visibility = compilerFieldsVisibility;
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
   props["RcCompiler"].m_Visibility = plPropertyUiState::Invisible;
 #else
   props["RcCompiler"].m_Visibility = (compiler == plCompiler::Vs2022) ? plPropertyUiState::Invisible : plPropertyUiState::Default;

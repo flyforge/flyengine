@@ -4,7 +4,7 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <Foundation/Strings/String.h>
 
-class PLASMA_CORE_DLL plWorldModuleConfig
+class PL_CORE_DLL plWorldModuleConfig
 {
 public:
   plResult Save();

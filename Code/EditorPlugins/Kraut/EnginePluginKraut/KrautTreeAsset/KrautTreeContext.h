@@ -8,25 +8,25 @@
 class plObjectSelectionMsgToEngine;
 class plRenderContext;
 
-class PLASMA_ENGINEPLUGINKRAUT_DLL plKrautTreeContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINKRAUT_DLL plKrautTreeContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautTreeContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautTreeContext, plEngineProcessDocumentContext);
 
 public:
   plKrautTreeContext();
 
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
   const plKrautGeneratorResourceHandle& GetResource() const { return m_hMainResource; }
 
 protected:
   virtual void OnInitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
 
 private:
-  void QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg);
+  void QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg);
 
   plGameObject* m_pMainObject;
   plComponentHandle m_hKrautComponent;

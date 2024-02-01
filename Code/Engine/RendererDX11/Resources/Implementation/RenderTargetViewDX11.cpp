@@ -13,13 +13,11 @@ bool IsArrayView(const plGALTextureCreationDescription& texDesc, const plGALRend
 
 plGALRenderTargetViewDX11::plGALRenderTargetViewDX11(plGALTexture* pTexture, const plGALRenderTargetViewCreationDescription& Description)
   : plGALRenderTargetView(pTexture, Description)
-  , m_pRenderTargetView(nullptr)
-  , m_pDepthStencilView(nullptr)
-  , m_pUnorderedAccessView(nullptr)
+
 {
 }
 
-plGALRenderTargetViewDX11::~plGALRenderTargetViewDX11() {}
+plGALRenderTargetViewDX11::~plGALRenderTargetViewDX11() = default;
 
 plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -30,7 +28,7 @@ plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
   if (pTexture == nullptr)
   {
     plLog::Error("No valid texture handle given for rendertarget view creation!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plGALTextureCreationDescription& texDesc = pTexture->GetDescription();
@@ -57,7 +55,7 @@ plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
   if (DXViewFormat == DXGI_FORMAT_UNKNOWN)
   {
     plLog::Error("Couldn't get DXGI format for view!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ID3D11Resource* pDXResource = static_cast<const plGALTextureDX11*>(pTexture->GetParentResource())->GetDXTexture();
@@ -105,11 +103,11 @@ plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
     if (FAILED(pDXDevice->GetDXDevice()->CreateDepthStencilView(pDXResource, &DSViewDesc, &m_pDepthStencilView)))
     {
       plLog::Error("Couldn't create depth stencil view!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
   else
@@ -150,24 +148,24 @@ plResult plGALRenderTargetViewDX11::InitPlatform(plGALDevice* pDevice)
     if (FAILED(pDXDevice->GetDXDevice()->CreateRenderTargetView(pDXResource, &RTViewDesc, &m_pRenderTargetView)))
     {
       plLog::Error("Couldn't create rendertarget view!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 }
 
 plResult plGALRenderTargetViewDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pRenderTargetView);
-  PLASMA_GAL_DX11_RELEASE(m_pDepthStencilView);
-  PLASMA_GAL_DX11_RELEASE(m_pUnorderedAccessView);
+  PL_GAL_DX11_RELEASE(m_pRenderTargetView);
+  PL_GAL_DX11_RELEASE(m_pDepthStencilView);
+  PL_GAL_DX11_RELEASE(m_pUnorderedAccessView);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_RenderTargetViewDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_RenderTargetViewDX11);

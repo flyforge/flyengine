@@ -6,16 +6,16 @@
 #include <GuiFoundation/GuiFoundationDLL.h>
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plSelectionActions
+class PL_EDITORPLUGINSCENE_DLL plSelectionActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
-  static void MapPrefabActions(const char* szMapping, const char* szPath, float fPriority);
-  static void MapContextMenuActions(const char* szMapping, const char* szPath);
-  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
+  static void MapPrefabActions(plStringView sMapping, float fPriority);
+  static void MapContextMenuActions(plStringView sMapping);
+  static void MapViewContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hGroupSelectedItems;
   static plActionDescriptorHandle s_hCreateEmptyChildObject;
@@ -39,9 +39,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plSelectionAction : public plButtonAction
+class PL_EDITORPLUGINSCENE_DLL plSelectionAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSelectionAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plSelectionAction, plButtonAction);
 
 public:
   enum class ActionType

@@ -7,7 +7,7 @@ PluginInfo
 	string %Description{"Adds support for input via the XBox controller."}
 	string %EditorPlugins{}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaXBoxControllerPlugin"}
+	string %RuntimePlugins{"plXBoxControllerPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

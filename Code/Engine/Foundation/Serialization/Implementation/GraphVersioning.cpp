@@ -8,17 +8,17 @@
 #include <Foundation/Serialization/RttiConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plTypeVersionInfo, plNoBase, 1, plRTTIDefaultAllocator<plTypeVersionInfo>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plTypeVersionInfo, plNoBase, 1, plRTTIDefaultAllocator<plTypeVersionInfo>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("TypeName", GetTypeName, SetTypeName),
-    PLASMA_ACCESSOR_PROPERTY("ParentTypeName", GetParentTypeName, SetParentTypeName),
-    PLASMA_MEMBER_PROPERTY("TypeVersion", m_uiTypeVersion),
+    PL_ACCESSOR_PROPERTY("TypeName", GetTypeName, SetTypeName),
+    PL_ACCESSOR_PROPERTY("ParentTypeName", GetParentTypeName, SetParentTypeName),
+    PL_MEMBER_PROPERTY("TypeVersion", m_uiTypeVersion),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 const char* plTypeVersionInfo::GetTypeName() const
@@ -53,7 +53,7 @@ void plGraphPatchContext::PatchBaseClass(const char* szType, plUInt32 uiTypeVers
       return;
     }
   }
-  PLASMA_REPORT_FAILURE("Base class of name '{0}' not found in parent types of '{1}'", sType.GetData(), m_pNode->GetType());
+  PL_REPORT_FAILURE("Base class of name '{0}' not found in parent types of '{1}'", sType.GetData(), m_pNode->GetType());
 }
 
 void plGraphPatchContext::RenameClass(const char* szTypeName)
@@ -68,7 +68,7 @@ void plGraphPatchContext::RenameClass(const char* szTypeName, plUInt32 uiVersion
   m_pNode->SetType(m_pGraph->RegisterString(szTypeName));
   m_BaseClasses[m_uiBaseClassIndex].m_sType.Assign(szTypeName);
   // After a Patch is applied, the version is always increased. So if we want to change the version we need to reduce it by one so that in the next patch loop the requested version is not skipped.
-  PLASMA_ASSERT_DEV(uiVersion > 0, "Cannot change the version of a class to 0, target version must be at least 1.");
+  PL_ASSERT_DEV(uiVersion > 0, "Cannot change the version of a class to 0, target version must be at least 1.");
   m_BaseClasses[m_uiBaseClassIndex].m_uiTypeVersion = uiVersion - 1;
 }
 
@@ -85,7 +85,7 @@ void plGraphPatchContext::ChangeBaseClass(plArrayPtr<plVersionKey> baseClasses)
 
 plGraphPatchContext::plGraphPatchContext(plGraphVersioning* pParent, plAbstractObjectGraph* pGraph, plAbstractObjectGraph* pTypesGraph)
 {
-  PLASMA_PROFILE_SCOPE("plGraphPatchContext");
+  PL_PROFILE_SCOPE("plGraphPatchContext");
   m_pParent = pParent;
   m_pGraph = pGraph;
   if (pTypesGraph)
@@ -190,10 +190,10 @@ void plGraphPatchContext::UpdateBaseClasses()
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_SINGLETON(plGraphVersioning);
+PL_IMPLEMENT_SINGLETON(plGraphVersioning);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, GraphVersioning)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, GraphVersioning)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Reflection"
@@ -201,16 +201,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, GraphVersioning)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plGraphVersioning);
+    PL_DEFAULT_NEW(plGraphVersioning);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plGraphVersioning* pDummy = plGraphVersioning::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plGraphVersioning::plGraphVersioning()
@@ -228,7 +228,7 @@ plGraphVersioning::~plGraphVersioning()
 
 void plGraphVersioning::PatchGraph(plAbstractObjectGraph* pGraph, plAbstractObjectGraph* pTypesGraph)
 {
-  PLASMA_PROFILE_SCOPE("PatchGraph");
+  PL_PROFILE_SCOPE("PatchGraph");
 
   plGraphPatchContext context(this, pGraph, pTypesGraph);
   for (const plGraphPatch* pPatch : m_GraphPatches)
@@ -307,4 +307,4 @@ plUInt32 plGraphVersioning::GetMaxPatchVersion(const plHashedString& sType) cons
   return 0;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_GraphVersioning);
+PL_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_GraphVersioning);

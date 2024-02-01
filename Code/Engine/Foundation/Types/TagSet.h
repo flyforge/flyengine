@@ -70,9 +70,9 @@ public:
     const plTag* operator->() const;
 
     /// \brief Returns whether the iterator is still pointing to a valid item
-    PLASMA_ALWAYS_INLINE bool IsValid() const { return m_uiIndex != 0xFFFFFFFF; }
+    PL_ALWAYS_INLINE bool IsValid() const { return m_uiIndex != 0xFFFFFFFF; }
 
-    PLASMA_ALWAYS_INLINE bool operator!=(const Iterator& rhs) const { return m_pTagSet != rhs.m_pTagSet || m_uiIndex != rhs.m_uiIndex; }
+    PL_ALWAYS_INLINE bool operator!=(const Iterator& rhs) const { return m_pTagSet != rhs.m_pTagSet || m_uiIndex != rhs.m_uiIndex; }
 
     /// \brief Advances the iterator to the next item
     void operator++();
@@ -121,7 +121,7 @@ private:
 /// Default tag set, uses plDefaultAllocatorWrapper for allocations.
 using plTagSet = plTagSetTemplate<>;
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plTagSet);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plTagSet);
 
 template <typename BlockStorageAllocator>
 typename plTagSetTemplate<BlockStorageAllocator>::Iterator cbegin(const plTagSetTemplate<BlockStorageAllocator>& cont)

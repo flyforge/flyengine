@@ -2,20 +2,20 @@
 
 #include <EditorPluginAssets/SurfaceAsset/SurfaceAsset.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceAssetDocument, 2, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceAssetDocument, 2, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plSurfaceAssetDocument::plSurfaceAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plSurfaceResourceDescriptor>(szDocumentPath, plAssetDocEngineConnection::None)
+plSurfaceAssetDocument::plSurfaceAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plSurfaceResourceDescriptor>(sDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plSurfaceAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+plTransformStatus plSurfaceAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
   const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const plSurfaceResourceDescriptor* pProp = GetProperties();
 
   pProp->Save(stream);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

@@ -5,7 +5,7 @@
 #include <RendererCore/ShaderCompiler/PermutationGenerator.h>
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 
-class PLASMA_RENDERERCORE_DLL plShaderManager
+class PL_RENDERERCORE_DLL plShaderManager
 {
 public:
   static void Configure(const char* szActivePlatform, bool bEnableRuntimeCompilation, const char* szShaderCacheDirectory = ":shadercache/ShaderCache",

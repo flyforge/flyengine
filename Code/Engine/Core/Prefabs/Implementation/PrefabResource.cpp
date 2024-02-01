@@ -1,15 +1,15 @@
 #include <Core/CorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Prefabs/PrefabResource.h>
 #include <Foundation/Reflection/PropertyPath.h>
 #include <Foundation/Reflection/ReflectionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabResource, 1, plRTTIDefaultAllocator<plPrefabResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabResource, 1, plRTTIDefaultAllocator<plPrefabResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plPrefabResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plPrefabResource);
 // clang-format on
 
 plPrefabResource::plPrefabResource()
@@ -39,7 +39,7 @@ void plPrefabResource::InstantiatePrefab(plWorld& ref_world, const plTransform& 
 
     m_WorldReader.InstantiatePrefab(ref_world, rootTransform, options);
 
-    PLASMA_ASSERT_DEBUG(options.m_pCreatedRootObjectsOut != options.m_pCreatedChildObjectsOut, "These pointers must point to different arrays, otherwise applying exposed properties doesn't work correctly.");
+    PL_ASSERT_DEBUG(options.m_pCreatedRootObjectsOut != options.m_pCreatedChildObjectsOut, "These pointers must point to different arrays, otherwise applying exposed properties doesn't work correctly.");
     ApplyExposedParameterValues(pExposedParamValues, *options.m_pCreatedChildObjectsOut, *options.m_pCreatedRootObjectsOut);
   }
   else
@@ -129,7 +129,7 @@ plResourceLoadDesc plPrefabResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plPrefabResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plPrefabResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plPrefabResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -154,7 +154,7 @@ plResourceLoadDesc plPrefabResource::UpdateContent(plStreamReader* Stream)
 
   char szSceneTag[16];
   s.ReadBytes(szSceneTag, sizeof(char) * 16);
-  PLASMA_ASSERT_DEV(plStringUtils::IsEqualN(szSceneTag, "[plBinaryScene]", 16), "The given file is not a valid prefab file");
+  PL_ASSERT_DEV(plStringUtils::IsEqualN(szSceneTag, "[plBinaryScene]", 16), "The given file is not a valid prefab file");
 
   if (!plStringUtils::IsEqualN(szSceneTag, "[plBinaryScene]", 16))
   {
@@ -176,7 +176,7 @@ plResourceLoadDesc plPrefabResource::UpdateContent(plStreamReader* Stream)
     {
       auto& ppd = m_PrefabParamDescs[i];
 
-      PLASMA_ASSERT_DEV(assetHeader.GetFileVersion() >= 6, "Old resource version not supported anymore");
+      PL_ASSERT_DEV(assetHeader.GetFileVersion() >= 6, "Old resource version not supported anymore");
       ppd.Load(s);
 
       // initialize the cached property path here once
@@ -197,8 +197,7 @@ plResourceLoadDesc plPrefabResource::UpdateContent(plStreamReader* Stream)
     }
 
     // sort exposed parameter descriptions by name hash for quicker access
-    m_PrefabParamDescs.Sort([](const plExposedPrefabParameterDesc& lhs, const plExposedPrefabParameterDesc& rhs) -> bool
-      { return lhs.m_sExposeName.GetHash() < rhs.m_sExposeName.GetHash(); });
+    m_PrefabParamDescs.Sort([](const plExposedPrefabParameterDesc& lhs, const plExposedPrefabParameterDesc& rhs) -> bool { return lhs.m_sExposeName.GetHash() < rhs.m_sExposeName.GetHash(); });
   }
 
   res.m_State = plResourceState::Loaded;
@@ -211,7 +210,7 @@ void plPrefabResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryCPU = m_WorldReader.GetHeapMemoryUsage() + sizeof(this);
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plPrefabResource, plPrefabResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plPrefabResource, plPrefabResourceDescriptor)
 {
   plResourceLoadDesc desc;
   desc.m_State = plResourceState::Loaded;
@@ -265,4 +264,4 @@ void plExposedPrefabParameterDesc::Load(plStreamReader& inout_stream)
   m_uiWorldReaderChildObject = (comb >> 31);
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Prefabs_Implementation_PrefabResource);
+PL_STATICLINK_FILE(Core, Core_Prefabs_Implementation_PrefabResource);

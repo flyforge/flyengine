@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 
 /// \brief A render pass that renders into a depth target only.
-class PLASMA_RENDERERCORE_DLL plDepthOnlyPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plDepthOnlyPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDepthOnlyPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plDepthOnlyPass, plRenderPipelinePass);
 
 public:
   plDepthOnlyPass(const char* szName = "DepthOnlyPass");

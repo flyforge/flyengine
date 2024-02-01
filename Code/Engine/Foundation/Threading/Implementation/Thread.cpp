@@ -17,16 +17,13 @@ plThread::plThread(const char* szName /*= "plThread"*/, plUInt32 uiStackSize /*=
 
 plThread::~plThread()
 {
-  PLASMA_ASSERT_DEV(!IsRunning(), "Thread deletion while still running detected!");
+  PL_ASSERT_DEV(!IsRunning(), "Thread deletion while still running detected!");
 
   plThreadEvent e;
   e.m_pThread = this;
   e.m_Type = plThreadEvent::Type::ThreadDestroyed;
   plThread::s_ThreadEvents.Broadcast(e, 255);
 }
-
-// Deactivate Doxygen document generation for the following block.
-/// \cond
 
 plUInt32 RunThread(plThread* pThread)
 {
@@ -61,16 +58,4 @@ plUInt32 RunThread(plThread* pThread)
   return uiReturnCode;
 }
 
-/// \endcond
 
-// Include inline file
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/Threading/Implementation/Win/Thread_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
-#  include <Foundation/Threading/Implementation/Posix/Thread_posix.h>
-#else
-#  error "Runnable thread entry functions are not implemented on current platform"
-#endif
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_Thread);

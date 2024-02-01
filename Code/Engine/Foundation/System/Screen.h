@@ -6,7 +6,7 @@
 #include <Foundation/Strings/String.h>
 
 /// \brief Describes the properties of a screen
-struct PLASMA_FOUNDATION_DLL plScreenInfo
+struct PL_FOUNDATION_DLL plScreenInfo
 {
   plString m_sDisplayName; ///< Some OS provided name for the screen, typically the manufacturer and model name.
 
@@ -18,10 +18,10 @@ struct PLASMA_FOUNDATION_DLL plScreenInfo
 };
 
 /// \brief Provides functionality to detect available monitors
-class PLASMA_FOUNDATION_DLL plScreen
+class PL_FOUNDATION_DLL plScreen
 {
 public:
-  /// \brief Enumerates all available screens. When it returns PLASMA_SUCCESS, at least one screen has been found.
+  /// \brief Enumerates all available screens. When it returns PL_SUCCESS, at least one screen has been found.
   static plResult EnumerateScreens(plHybridArray<plScreenInfo, 2>& out_screens);
 
   /// \brief Prints the available screen information to the provided log.

@@ -7,7 +7,7 @@
 static plUniquePtr<plBaking> s_Baking;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Baking, BakingPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Baking, BakingPlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -24,7 +24,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Baking, BakingPlugin)
 
   ON_HIGHLEVELSYSTEMS_STARTUP
   {
-    s_Baking = PLASMA_DEFAULT_NEW(plBaking);
+    s_Baking = PL_DEFAULT_NEW(plBaking);
     s_Baking->Startup();
   }
 
@@ -34,5 +34,5 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Baking, BakingPlugin)
     s_Baking = nullptr;
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on

@@ -28,7 +28,7 @@ protected:
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
 
-  IDXGISwapChain* m_pDXSwapChain;
+  IDXGISwapChain* m_pDXSwapChain = nullptr;
 
   plGALTextureHandle m_hBackBufferTexture;
 

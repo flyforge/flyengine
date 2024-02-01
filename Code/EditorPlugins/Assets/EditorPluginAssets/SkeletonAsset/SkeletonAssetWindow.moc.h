@@ -22,7 +22,7 @@ public:
 
 protected:
   virtual void InternalRedraw() override;
-  virtual void ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg) override;
 
 private:
   void SendRedrawMsg();
@@ -36,7 +36,7 @@ private:
   void SendLiveResourcePreview();
   void RestoreResource();
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget = nullptr;
 };
 

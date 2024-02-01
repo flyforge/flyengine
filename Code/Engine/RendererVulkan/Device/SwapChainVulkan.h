@@ -16,7 +16,7 @@ public:
   virtual void PresentRenderTarget(plGALDevice* pDevice) override;
   virtual plResult UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALPresentMode> newPresentMode) override;
 
-  PLASMA_ALWAYS_INLINE vk::SwapchainKHR GetVulkanSwapChain() const;
+  PL_ALWAYS_INLINE vk::SwapchainKHR GetVulkanSwapChain() const;
 
 protected:
   friend class plGALDeviceVulkan;

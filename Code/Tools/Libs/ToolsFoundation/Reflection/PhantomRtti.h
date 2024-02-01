@@ -11,8 +11,8 @@ public:
   ~plPhantomRTTI();
 
 private:
-  plPhantomRTTI(const char* szName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
-    plBitflags<plTypeFlags> flags, const char* szPluginName);
+  plPhantomRTTI(plStringView sName, const plRTTI* pParentType, plUInt32 uiTypeSize, plUInt32 uiTypeVersion, plUInt8 uiVariantType,
+    plBitflags<plTypeFlags> flags, plStringView sPluginName);
 
   void SetProperties(plDynamicArray<plReflectedPropertyDescriptor>& properties);
   void SetFunctions(plDynamicArray<plReflectedFunctionDescriptor>& functions);

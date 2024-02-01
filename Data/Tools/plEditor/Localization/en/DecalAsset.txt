@@ -1,0 +1,24 @@
+# Asset Types
+
+Decal;Decal
+
+# Component Types
+
+plDecalComponent;Decal
+
+# UI
+
+DecalImport.All;Decal
+
+# Properties
+
+plDecalMode::BaseColor;Base Color
+plDecalMode::BaseColorNormal;Base Color, Normal
+plDecalMode::BaseColorORM;Base Color, ORM
+plDecalMode::BaseColorNormalORM;Base Color, Normal, ORM
+plDecalMode::BaseColorEmissive;BaseColor, Emissive
+
+plDecalAssetProperties::BaseColor;Base Color Texture
+plDecalAssetProperties::Emissive;Emissive Texture
+plDecalAssetProperties::Normal;Normal Map
+plDecalAssetProperties::ORM;ORM Texture

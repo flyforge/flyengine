@@ -5,7 +5,7 @@
 #include <Foundation/Basics/Platform/Win/MinWindows.h>
 #include <Foundation/Types/Status.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 extern "C"
 {
   struct _EXCEPTION_POINTERS;
@@ -13,7 +13,7 @@ extern "C"
 #endif
 
 /// \brief Functionality for writing process mini-dumps (callstacks, memory snapshots, etc)
-struct PLASMA_FOUNDATION_DLL plMiniDumpUtils
+struct PL_FOUNDATION_DLL plMiniDumpUtils
 {
   /// \brief Tries to write a mini-dump for the external process with the given process ID.
   ///
@@ -25,7 +25,7 @@ struct PLASMA_FOUNDATION_DLL plMiniDumpUtils
   /// \note On Windows: If the command line option '-fullcrashdumps' is specified, it is forwarded to the MiniDumpTool.
   static plStatus LaunchMiniDumpTool(plStringView sDumpFile);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   /// \brief Windows-specific implementation for writing a mini-dump of the running process.
   ///
   /// \sa WriteProcessMiniDump()
@@ -37,12 +37,12 @@ struct PLASMA_FOUNDATION_DLL plMiniDumpUtils
   /// \brief Windows-specific implementation for writing a mini-dump of another process.
   ///
   /// \sa WriteProcessMiniDump()
-  static plStatus WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess);
+  static plStatus WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess);
 
   /// \brief Windows-specific implementation for writing a mini-dump of the running process.
   ///
   /// \note On Windows: If the command line option '-fullcrashdumps' is specified, a crash-dump with a full memory capture is made.
-  static plStatus WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE pProcess, struct _EXCEPTION_POINTERS* pExceptionInfo);
+  static plStatus WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, struct _EXCEPTION_POINTERS* pExceptionInfo);
 
 #endif
 };

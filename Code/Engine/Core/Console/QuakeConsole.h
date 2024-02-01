@@ -12,7 +12,7 @@ struct plLoggingEventData;
 /// easily.
 /// The default implementation uses plConsoleInterpreter::Lua as the interpreter for commands typed into it.
 /// The interpreter can be replaced with custom implementations.
-class PLASMA_CORE_DLL plQuakeConsole : public plConsole
+class PL_CORE_DLL plQuakeConsole final : public plConsole
 {
 public:
   plQuakeConsole();
@@ -33,10 +33,10 @@ public:
   virtual void EnableLogOutput(bool bEnable);
 
   /// \brief Writes the state of the console (history, bound keys) to the stream.
-  virtual void SaveState(plStreamWriter& Stream) const;
+  virtual void SaveState(plStreamWriter& inout_stream) const;
 
   /// \brief Reads the state of the console (history, bound keys) from the stream.
-  virtual void LoadState(plStreamReader& Stream);
+  virtual void LoadState(plStreamReader& inout_stream);
 
   /// @}
 
@@ -46,7 +46,7 @@ public:
 
 
   /// \brief Executes the given command using the current command interpreter.
-  virtual void ExecuteCommand(plStringView input) override;
+  virtual void ExecuteCommand(plStringView sInput) override;
 
   /// \brief Binds \a szCommand to \a szKey. Calling ExecuteBoundKey() with this key will then run that command.
   ///
@@ -114,7 +114,7 @@ public:
   /// @{
 
   /// \brief Adds a string to the console.
-  virtual void AddConsoleString(plStringView text, plConsoleString::Type type = plConsoleString::Type::Default) override;
+  virtual void AddConsoleString(plStringView sText, plConsoleString::Type type = plConsoleString::Type::Default) override;
 
   /// \brief Returns all current console strings. Use GetScrollPosition() to know which one should be displayed as the first one.
   const plDeque<plConsoleString>& GetConsoleStrings() const;

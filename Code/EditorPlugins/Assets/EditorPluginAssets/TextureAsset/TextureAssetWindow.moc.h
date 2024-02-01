@@ -24,13 +24,13 @@ private:
   virtual void InternalRedraw() override;
   void SendRedrawMsg();
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 };
 
 class plTextureChannelModeAction : public plEnumerationMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureChannelModeAction, plEnumerationMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureChannelModeAction, plEnumerationMenuAction);
 
 public:
   plTextureChannelModeAction(const plActionContext& context, const char* szName, const char* szIconPath);
@@ -40,7 +40,7 @@ public:
 
 class plTextureLodSliderAction : public plSliderAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureLodSliderAction, plSliderAction);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureLodSliderAction, plSliderAction);
 
 public:
   plTextureLodSliderAction(const plActionContext& context, const char* szName);
@@ -57,7 +57,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hTextureChannelMode;
   static plActionDescriptorHandle s_hLodSlider;

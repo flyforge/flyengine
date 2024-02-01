@@ -8,6 +8,19 @@
 
 plCVarInt cvar_SpatialQueriesCachingThreshold("Spatial.Queries.CachingThreshold", 100, plCVarFlags::Default, "Number of objects that are tested for a query before it is considered for caching");
 
+struct PlaneData
+{
+  plSimdVec4f m_x0x1x2x3;
+  plSimdVec4f m_y0y1y2y3;
+  plSimdVec4f m_z0z1z2z3;
+  plSimdVec4f m_w0w1w2w3;
+
+  plSimdVec4f m_x4x5x4x5;
+  plSimdVec4f m_y4y5y4y5;
+  plSimdVec4f m_z4z5z4z5;
+  plSimdVec4f m_w4w5w4w5;
+};
+
 namespace
 {
   enum
@@ -16,18 +29,18 @@ namespace
     CELL_INDEX_MASK = (1 << 21) - 1
   };
 
-  PLASMA_ALWAYS_INLINE plSimdVec4f ToVec3(const plSimdVec4i& v)
+  PL_ALWAYS_INLINE plSimdVec4f ToVec3(const plSimdVec4i& v)
   {
     return v.ToFloat();
   }
 
-  PLASMA_ALWAYS_INLINE plSimdVec4i ToVec3I32(const plSimdVec4f& v)
+  PL_ALWAYS_INLINE plSimdVec4i ToVec3I32(const plSimdVec4f& v)
   {
     plSimdVec4f vf = v.Floor();
     return plSimdVec4i::Truncate(vf);
   }
 
-  PLASMA_ALWAYS_INLINE plUInt64 GetCellKey(plInt32 x, plInt32 y, plInt32 z)
+  PL_ALWAYS_INLINE plUInt64 GetCellKey(plInt32 x, plInt32 y, plInt32 z)
   {
     plUInt64 sx = (x + MAX_CELL_INDEX) & CELL_INDEX_MASK;
     plUInt64 sy = (y + MAX_CELL_INDEX) & CELL_INDEX_MASK;
@@ -36,7 +49,7 @@ namespace
     return (sx << 42) | (sy << 21) | sz;
   }
 
-  PLASMA_ALWAYS_INLINE plSimdBBox ComputeCellBoundingBox(const plSimdVec4i& vCellIndex, const plSimdVec4i& vCellSize)
+  PL_ALWAYS_INLINE plSimdBBox ComputeCellBoundingBox(const plSimdVec4i& vCellIndex, const plSimdVec4i& vCellSize)
   {
     plSimdVec4i overlapSize = vCellSize >> 2;
     plSimdVec4i minPos = vCellIndex.CompMul(vCellSize);
@@ -47,27 +60,34 @@ namespace
     return plSimdBBox(bmin, bmax);
   }
 
-  PLASMA_ALWAYS_INLINE bool FilterByCategory(plUInt32 uiCategoryBitmask, plUInt32 uiQueryBitmask)
+  PL_ALWAYS_INLINE bool AreTagSetsEqual(const plTagSet& a, const plTagSet* pB)
   {
-    return (uiCategoryBitmask & uiQueryBitmask) == 0;
+    if (pB != nullptr)
+    {
+      return a == *pB;
+    }
+
+    return a.IsEmpty();
   }
 
-  PLASMA_ALWAYS_INLINE bool FilterByTags(const plTagSet& tags, const plTagSet& includeTags, const plTagSet& excludeTags)
+  PL_ALWAYS_INLINE bool FilterByTags(const plTagSet& tags, const plTagSet* pIncludeTags, const plTagSet* pExcludeTags)
   {
-    if (!excludeTags.IsEmpty() && excludeTags.IsAnySet(tags))
+    if (pExcludeTags != nullptr && !pExcludeTags->IsEmpty() && pExcludeTags->IsAnySet(tags))
       return true;
 
-    if (!includeTags.IsEmpty() && !includeTags.IsAnySet(tags))
+    if (pIncludeTags != nullptr && !pIncludeTags->IsEmpty() && !pIncludeTags->IsAnySet(tags))
       return true;
 
     return false;
   }
 
-  PLASMA_ALWAYS_INLINE bool CanBeCached(plSpatialData::Category category)
+  PL_ALWAYS_INLINE bool CanBeCached(plSpatialData::Category category)
   {
     return plSpatialData::GetCategoryFlags(category).IsSet(plSpatialData::Flags::FrequentChanges) == false;
   }
 
+
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   void TagsToString(const plTagSet& tags, plStringBuilder& out_sSb)
   {
     out_sSb.Append("{ ");
@@ -85,21 +105,9 @@ namespace
 
     out_sSb.Append(" }");
   }
+#endif
 
-  struct PlaneData
-  {
-    plSimdVec4f m_x0x1x2x3;
-    plSimdVec4f m_y0y1y2y3;
-    plSimdVec4f m_z0z1z2z3;
-    plSimdVec4f m_w0w1w2w3;
-
-    plSimdVec4f m_x4x5x4x5;
-    plSimdVec4f m_y4y5y4y5;
-    plSimdVec4f m_z4z5z4z5;
-    plSimdVec4f m_w4w5w4w5;
-  };
-
-  PLASMA_FORCE_INLINE bool SphereFrustumIntersect(const plSimdBSphere& sphere, const PlaneData& planeData)
+  PL_FORCE_INLINE bool SphereFrustumIntersect(const plSimdBSphere& sphere, const PlaneData& planeData)
   {
     plSimdVec4f pos_xxxx(sphere.m_CenterAndRadius.x());
     plSimdVec4f pos_yyyy(sphere.m_CenterAndRadius.y());
@@ -121,7 +129,7 @@ namespace
     return (cmp_0123 || cmp_4545).NoneSet<4>();
   }
 
-  PLASMA_FORCE_INLINE plUInt32 SphereFrustumIntersect(const plSimdBSphere& sphereA, const plSimdBSphere& sphereB, const PlaneData& planeData)
+  PL_FORCE_INLINE plUInt32 SphereFrustumIntersect(const plSimdBSphere& sphereA, const plSimdBSphere& sphereB, const PlaneData& planeData)
   {
     plSimdVec4f posA_xxxx(sphereA.m_CenterAndRadius.x());
     plSimdVec4f posA_yyyy(sphereA.m_CenterAndRadius.y());
@@ -171,7 +179,7 @@ namespace
 
 struct CellDataMapping
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt32 m_uiCellIndex = plInvalidIndex;
   plUInt32 m_uiCellDataIndex = plInvalidIndex;
@@ -179,7 +187,7 @@ struct CellDataMapping
 
 struct plSpatialSystem_RegularGrid::Cell
 {
-  Cell(plAllocatorBase* pAlignedAlloctor, plAllocatorBase* pAllocator)
+  Cell(plAllocator* pAlignedAlloctor, plAllocator* pAllocator)
     : m_BoundingSpheres(pAlignedAlloctor)
     , m_BoundingBoxHalfExtents(pAlignedAlloctor)
     , m_TagSets(pAllocator)
@@ -188,7 +196,7 @@ struct plSpatialSystem_RegularGrid::Cell
   {
   }
 
-  PLASMA_FORCE_INLINE plUInt32 AddData(const plSimdBBoxSphere& bounds, const plTagSet& tags, plGameObject* pObject, plUInt64 uiLastVisibleFrameIdxAndVisType, plUInt32 uiDataIndex)
+  PL_FORCE_INLINE plUInt32 AddData(const plSimdBBoxSphere& bounds, const plTagSet& tags, plGameObject* pObject, plUInt64 uiLastVisibleFrameIdxAndVisType, plUInt32 uiDataIndex)
   {
     m_BoundingSpheres.PushBack(bounds.GetSphere());
     m_BoundingBoxHalfExtents.PushBack(bounds.m_BoxHalfExtents);
@@ -201,7 +209,7 @@ struct plSpatialSystem_RegularGrid::Cell
   }
 
   // Returns the data index of the moved data
-  PLASMA_FORCE_INLINE plUInt32 RemoveData(plUInt32 uiCellDataIndex)
+  PL_FORCE_INLINE plUInt32 RemoveData(plUInt32 uiCellDataIndex)
   {
     plUInt32 uiMovedDataIndex = m_DataIndices.PeekBack();
 
@@ -212,12 +220,12 @@ struct plSpatialSystem_RegularGrid::Cell
     m_DataIndices.RemoveAtAndSwap(uiCellDataIndex);
     m_LastVisibleFrameIdxAndVisType.RemoveAtAndSwap(uiCellDataIndex);
 
-    PLASMA_ASSERT_DEBUG(m_DataIndices.GetCount() == uiCellDataIndex || m_DataIndices[uiCellDataIndex] == uiMovedDataIndex, "Implementation error");
+    PL_ASSERT_DEBUG(m_DataIndices.GetCount() == uiCellDataIndex || m_DataIndices[uiCellDataIndex] == uiMovedDataIndex, "Implementation error");
 
     return uiMovedDataIndex;
   }
 
-  PLASMA_ALWAYS_INLINE plBoundingBox GetBoundingBox() const { return plSimdConversion::ToBBoxSphere(m_Bounds).GetBox(); }
+  PL_ALWAYS_INLINE plBoundingBox GetBoundingBox() const { return plSimdConversion::ToBBoxSphere(m_Bounds).GetBox(); }
 
   plSimdBBoxSphere m_Bounds;
 
@@ -233,13 +241,13 @@ struct plSpatialSystem_RegularGrid::Cell
 
 struct CellKeyHashHelper
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plUInt64 value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(plUInt64 value)
   {
     // return plUInt32(value * 2654435761U);
     return plHashHelper<plUInt64>::Hash(value);
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plUInt64 a, plUInt64 b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plUInt64 a, plUInt64 b) { return a == b; }
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -253,10 +261,9 @@ struct plSpatialSystem_RegularGrid::Grid
     , m_Category(category)
     , m_bCanBeCached(CanBeCached(category))
   {
-    plSimdBBox overflowBox;
-    overflowBox.SetCenterAndHalfExtents(plSimdVec4f::ZeroVector(), plSimdVec4f((float)(ref_system.m_vCellSize.x() * MAX_CELL_INDEX)));
+    const plSimdBBox overflowBox = plSimdBBox::MakeFromCenterAndHalfExtents(plSimdVec4f::MakeZero(), plSimdVec4f((float)(ref_system.m_vCellSize.x() * MAX_CELL_INDEX)));
 
-    auto pOverflowCell = PLASMA_NEW(&m_System.m_AlignedAllocator, Cell, &m_System.m_AlignedAllocator, &m_System.m_Allocator);
+    auto pOverflowCell = PL_NEW(&m_System.m_AlignedAllocator, Cell, &m_System.m_AlignedAllocator, &m_System.m_Allocator);
     pOverflowCell->m_Bounds = overflowBox;
 
     m_Cells.PushBack(pOverflowCell);
@@ -280,7 +287,7 @@ struct plSpatialSystem_RegularGrid::Grid
       uiCellIndex = m_Cells.GetCount();
       m_CellKeyToCellIndex.Insert(cellKey, uiCellIndex);
 
-      auto pNewCell = PLASMA_NEW(&m_System.m_AlignedAllocator, Cell, &m_System.m_AlignedAllocator, &m_System.m_Allocator);
+      auto pNewCell = PL_NEW(&m_System.m_AlignedAllocator, Cell, &m_System.m_AlignedAllocator, &m_System.m_Allocator);
       pNewCell->m_Bounds = cellBox;
 
       m_Cells.PushBack(pNewCell);
@@ -301,7 +308,7 @@ struct plSpatialSystem_RegularGrid::Grid
     plUInt32 uiCellDataIndex = m_Cells[uiCellIndex]->AddData(bounds, tags, pObject, uiLastVisibleFrameIdxAndVisType, uiDataIndex);
 
     m_CellDataMappings.EnsureCount(uiDataIndex + 1);
-    PLASMA_ASSERT_DEBUG(m_CellDataMappings[uiDataIndex].m_uiCellIndex == plInvalidIndex, "data has already been added to a cell");
+    PL_ASSERT_DEBUG(m_CellDataMappings[uiDataIndex].m_uiCellIndex == plInvalidIndex, "data has already been added to a cell");
     m_CellDataMappings[uiDataIndex] = {uiCellIndex, uiCellDataIndex};
   }
 
@@ -332,7 +339,7 @@ struct plSpatialSystem_RegularGrid::Grid
     auto& pOtherCell = other.m_Cells[mapping.m_uiCellIndex];
 
     const plTagSet& tags = pOtherCell->m_TagSets[mapping.m_uiCellDataIndex];
-    if (FilterByTags(tags, m_IncludeTags, m_ExcludeTags))
+    if (FilterByTags(tags, &m_IncludeTags, &m_ExcludeTags))
       return false;
 
     plSimdBBoxSphere bounds;
@@ -341,23 +348,23 @@ struct plSpatialSystem_RegularGrid::Grid
     plGameObject* objectPointer = pOtherCell->m_ObjectPointers[mapping.m_uiCellDataIndex];
     const plUInt64 uiLastVisibleFrameIdxAndVisType = pOtherCell->m_LastVisibleFrameIdxAndVisType[mapping.m_uiCellDataIndex];
 
-    PLASMA_ASSERT_DEBUG(pOtherCell->m_DataIndices[mapping.m_uiCellDataIndex] == uiDataIndex, "Implementation error");
+    PL_ASSERT_DEBUG(pOtherCell->m_DataIndices[mapping.m_uiCellDataIndex] == uiDataIndex, "Implementation error");
     plSpatialDataHandle hData = plSpatialDataHandle(plSpatialDataId(uiDataIndex, 1));
 
     AddSpatialData(bounds, tags, objectPointer, uiLastVisibleFrameIdxAndVisType, hData);
     return true;
   }
 
-  PLASMA_ALWAYS_INLINE bool CachingCompleted() const { return m_uiLastMigrationIndex == plInvalidIndex; }
+  PL_ALWAYS_INLINE bool CachingCompleted() const { return m_uiLastMigrationIndex == plInvalidIndex; }
 
   template <typename Functor>
-  PLASMA_FORCE_INLINE void ForEachCellInBox(const plSimdBBox& box, Functor func) const
+  PL_FORCE_INLINE void ForEachCellInBox(const plSimdBBox& box, Functor func) const
   {
     plSimdVec4i minIndex = ToVec3I32((box.m_Min - m_System.m_vOverlapSize) * m_System.m_fInvCellSize);
     plSimdVec4i maxIndex = ToVec3I32((box.m_Max + m_System.m_vOverlapSize) * m_System.m_fInvCellSize);
 
-    PLASMA_ASSERT_DEBUG((minIndex.Abs() < plSimdVec4i(MAX_CELL_INDEX)).AllSet<3>(), "Position is too big");
-    PLASMA_ASSERT_DEBUG((maxIndex.Abs() < plSimdVec4i(MAX_CELL_INDEX)).AllSet<3>(), "Position is too big");
+    PL_ASSERT_DEBUG((minIndex.Abs() < plSimdVec4i(MAX_CELL_INDEX)).AllSet<3>(), "Position is too big");
+    PL_ASSERT_DEBUG((maxIndex.Abs() < plSimdVec4i(MAX_CELL_INDEX)).AllSet<3>(), "Position is too big");
 
     const plInt32 iMinX = minIndex.x();
     const plInt32 iMinY = minIndex.y();
@@ -458,7 +465,7 @@ namespace plInternal
 
         if constexpr (UseTagsFilter)
         {
-          if (FilterByTags(tagSets[i], queryParams.m_IncludeTags, queryParams.m_ExcludeTags))
+          if (FilterByTags(tagSets[i], queryParams.m_pIncludeTags, queryParams.m_pExcludeTags))
           {
             ref_stats.m_uiNumObjectsFiltered++;
             continue;
@@ -500,7 +507,6 @@ namespace plInternal
         }
       }
 
-      plSimdBBox bbox;
       auto boundingSpheres = cell.m_BoundingSpheres.GetData();
       auto boundingBoxHalfExtents = cell.m_BoundingBoxHalfExtents.GetData();
       auto tagSets = cell.m_TagSets.GetData();
@@ -534,7 +540,7 @@ namespace plInternal
 
             if constexpr (UseTagsFilter)
             {
-              if (FilterByTags(tagSets[i], queryParams.m_IncludeTags, queryParams.m_ExcludeTags))
+              if (FilterByTags(tagSets[i], queryParams.m_pIncludeTags, queryParams.m_pExcludeTags))
               {
                 ref_stats.m_uiNumObjectsFiltered++;
                 continue;
@@ -543,7 +549,7 @@ namespace plInternal
 
             if constexpr (UseOcclusionCallback)
             {
-              bbox.SetCenterAndHalfExtents(boundingSpheres[i].GetCenter(), boundingBoxHalfExtents[i]);
+              const plSimdBBox bbox = plSimdBBox::MakeFromCenterAndHalfExtents(boundingSpheres[i].GetCenter(), boundingBoxHalfExtents[i]);
               if (pQueryData->m_IsOccludedCB(bbox))
               {
                 continue;
@@ -568,7 +574,7 @@ namespace plInternal
 
           if constexpr (UseTagsFilter)
           {
-            if (FilterByTags(tagSets[i], queryParams.m_IncludeTags, queryParams.m_ExcludeTags))
+            if (FilterByTags(tagSets[i], queryParams.m_pIncludeTags, queryParams.m_pExcludeTags))
             {
               ref_stats.m_uiNumObjectsFiltered++;
               continue;
@@ -577,7 +583,7 @@ namespace plInternal
 
           if constexpr (UseOcclusionCallback)
           {
-            bbox.SetCenterAndHalfExtents(boundingSpheres[i].GetCenter(), boundingBoxHalfExtents[i]);
+            const plSimdBBox bbox = plSimdBBox::MakeFromCenterAndHalfExtents(boundingSpheres[i].GetCenter(), boundingBoxHalfExtents[i]);
 
             if (pQueryData->m_IsOccludedCB(bbox))
             {
@@ -599,26 +605,26 @@ namespace plInternal
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSpatialSystem_RegularGrid, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSpatialSystem_RegularGrid, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSpatialSystem_RegularGrid::plSpatialSystem_RegularGrid(plUInt32 uiCellSize /*= 128*/)
   : m_AlignedAllocator("Spatial System Aligned", plFoundation::GetAlignedAllocator())
-  , m_Grids(&m_Allocator)
-  , m_DataTable(&m_Allocator)
   , m_vCellSize(uiCellSize)
   , m_vOverlapSize(uiCellSize / 4.0f)
   , m_fInvCellSize(1.0f / uiCellSize)
+  , m_Grids(&m_Allocator)
+  , m_DataTable(&m_Allocator)
 {
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(Data) == 8);
+  PL_CHECK_AT_COMPILETIME(sizeof(Data) == 8);
 
   m_Grids.SetCount(MAX_NUM_GRIDS);
 
   cvar_SpatialQueriesCachingThreshold.m_CVarEvents.AddEventHandler([&](const plCVarEvent& e) {
-      if (e.m_EventType == plCVarEvent::ValueChanged)
-      {
-        RemoveAllCachedGrids();
-      } });
+    if (e.m_EventType == plCVarEvent::ValueChanged)
+    {
+      RemoveAllCachedGrids();
+    } });
 }
 
 plSpatialSystem_RegularGrid::~plSpatialSystem_RegularGrid() = default;
@@ -627,7 +633,7 @@ plResult plSpatialSystem_RegularGrid::GetCellBoxForSpatialData(const plSpatialDa
 {
   Data* pData = nullptr;
   if (!m_DataTable.TryGetValue(hData.GetInternalID(), pData))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   ForEachGrid(*pData, hData,
     [&](Grid& ref_grid, const CellDataMapping& mapping) {
@@ -637,15 +643,15 @@ plResult plSpatialSystem_RegularGrid::GetCellBoxForSpatialData(const plSpatialDa
       return plVisitorExecution::Stop;
     });
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <>
 struct plHashHelper<plBoundingBox>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plBoundingBox& value) { return plHashingUtils::xxHash32(&value, sizeof(plBoundingBox)); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plBoundingBox& value) { return plHashingUtils::xxHash32(&value, sizeof(plBoundingBox)); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plBoundingBox& a, const plBoundingBox& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plBoundingBox& a, const plBoundingBox& b) { return a == b; }
 };
 
 void plSpatialSystem_RegularGrid::GetAllCellBoxes(plDynamicArray<plBoundingBox>& out_boundingBoxes, plSpatialData::Category filterCategory /*= plInvalidSpatialDataCategory*/) const
@@ -691,7 +697,7 @@ void plSpatialSystem_RegularGrid::StartNewFrame()
   m_SortedCacheCandidates.Clear();
 
   {
-    PLASMA_LOCK(m_CacheCandidatesMutex);
+    PL_LOCK(m_CacheCandidatesMutex);
 
     for (plUInt32 i = 0; i < m_CacheCandidates.GetCount(); ++i)
     {
@@ -736,8 +742,7 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::CreateSpatialDataAlwaysVisible(
   if (uiCategoryBitmask == 0)
     return plSpatialDataHandle();
 
-  plSimdBBox hugeBox;
-  hugeBox.SetCenterAndHalfExtents(plSimdVec4f::ZeroVector(), plSimdVec4f((float)(m_vCellSize.x() * MAX_CELL_INDEX)));
+  const plSimdBBox hugeBox = plSimdBBox::MakeFromCenterAndHalfExtents(plSimdVec4f::MakeZero(), plSimdVec4f((float)(m_vCellSize.x() * MAX_CELL_INDEX)));
 
   return AddSpatialDataToGrids(hugeBox, pObject, uiCategoryBitmask, tags, true);
 }
@@ -745,7 +750,7 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::CreateSpatialDataAlwaysVisible(
 void plSpatialSystem_RegularGrid::DeleteSpatialData(const plSpatialDataHandle& hData)
 {
   Data oldData;
-  PLASMA_VERIFY(m_DataTable.Remove(hData.GetInternalID(), &oldData), "Invalid spatial data handle");
+  PL_VERIFY(m_DataTable.Remove(hData.GetInternalID(), &oldData), "Invalid spatial data handle");
 
   ForEachGrid(oldData, hData,
     [&](Grid& ref_grid, const CellDataMapping& mapping) {
@@ -757,7 +762,7 @@ void plSpatialSystem_RegularGrid::DeleteSpatialData(const plSpatialDataHandle& h
 void plSpatialSystem_RegularGrid::UpdateSpatialDataBounds(const plSpatialDataHandle& hData, const plSimdBBoxSphere& bounds)
 {
   Data* pData = nullptr;
-  PLASMA_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
+  PL_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
 
   // No need to update bounds for always visible data
   if (IsAlwaysVisibleData(*pData))
@@ -791,7 +796,7 @@ void plSpatialSystem_RegularGrid::UpdateSpatialDataBounds(const plSpatialDataHan
 void plSpatialSystem_RegularGrid::UpdateSpatialDataObject(const plSpatialDataHandle& hData, plGameObject* pObject)
 {
   Data* pData = nullptr;
-  PLASMA_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
+  PL_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
 
   ForEachGrid(*pData, hData,
     [&](Grid& ref_grid, const CellDataMapping& mapping) {
@@ -803,11 +808,11 @@ void plSpatialSystem_RegularGrid::UpdateSpatialDataObject(const plSpatialDataHan
 
 void plSpatialSystem_RegularGrid::FindObjectsInSphere(const plBoundingSphere& sphere, const QueryParams& queryParams, QueryCallback callback) const
 {
-  PLASMA_PROFILE_SCOPE("FindObjectsInSphere");
+  PL_PROFILE_SCOPE("FindObjectsInSphere");
 
   plSimdBSphere simdSphere(plSimdConversion::ToVec3(sphere.m_vCenter), sphere.m_fRadius);
-  plSimdBBox simdBox;
-  simdBox.SetCenterAndHalfExtents(simdSphere.m_CenterAndRadius, simdSphere.m_CenterAndRadius.Get<plSwizzle::WWWW>());
+
+  const plSimdBBox simdBox = plSimdBBox::MakeFromCenterAndHalfExtents(simdSphere.m_CenterAndRadius, simdSphere.m_CenterAndRadius.Get<plSwizzle::WWWW>());
 
   plInternal::QueryHelper::ShapeQueryData<plSimdBSphere> queryData = {simdSphere, callback};
 
@@ -819,7 +824,7 @@ void plSpatialSystem_RegularGrid::FindObjectsInSphere(const plBoundingSphere& sp
 
 void plSpatialSystem_RegularGrid::FindObjectsInBox(const plBoundingBox& box, const QueryParams& queryParams, QueryCallback callback) const
 {
-  PLASMA_PROFILE_SCOPE("FindObjectsInBox");
+  PL_PROFILE_SCOPE("FindObjectsInBox");
 
   plSimdBBox simdBox(plSimdConversion::ToVec3(box.m_vMin), plSimdConversion::ToVec3(box.m_vMax));
 
@@ -833,14 +838,14 @@ void plSpatialSystem_RegularGrid::FindObjectsInBox(const plBoundingBox& box, con
 
 void plSpatialSystem_RegularGrid::FindVisibleObjects(const plFrustum& frustum, const QueryParams& queryParams, plDynamicArray<const plGameObject*>& out_Objects, plSpatialSystem::IsOccludedFunc IsOccluded, plVisibilityState visType) const
 {
-  PLASMA_PROFILE_SCOPE("FindVisibleObjects");
+  PL_PROFILE_SCOPE("FindVisibleObjects");
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   plStopwatch timer;
 #endif
 
   plVec3 cornerPoints[8];
-  frustum.ComputeCornerPoints(cornerPoints);
+  frustum.ComputeCornerPoints(cornerPoints).AssertSuccess();
 
   plSimdVec4f simdCornerPoints[8];
   for (plUInt32 i = 0; i < 8; ++i)
@@ -848,8 +853,7 @@ void plSpatialSystem_RegularGrid::FindVisibleObjects(const plFrustum& frustum, c
     simdCornerPoints[i] = plSimdConversion::ToVec3(cornerPoints[i]);
   }
 
-  plSimdBBox simdBox;
-  simdBox.SetFromPoints(simdCornerPoints, 8);
+  const plSimdBBox simdBox = plSimdBBox::MakeFromPoints(simdCornerPoints, 8);
 
   plInternal::QueryHelper::FrustumQueryData queryData;
   {
@@ -897,7 +901,7 @@ void plSpatialSystem_RegularGrid::FindVisibleObjects(const plFrustum& frustum, c
       &queryData, visType);
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   if (queryParams.m_pStats != nullptr)
   {
     queryParams.m_pStats->m_TimeTaken = timer.GetRunningTotal();
@@ -908,7 +912,7 @@ void plSpatialSystem_RegularGrid::FindVisibleObjects(const plFrustum& frustum, c
 plVisibilityState plSpatialSystem_RegularGrid::GetVisibilityState(const plSpatialDataHandle& hData, plUInt32 uiNumFramesBeforeInvisible) const
 {
   Data* pData = nullptr;
-  PLASMA_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
+  PL_VERIFY(m_DataTable.TryGetValue(hData.GetInternalID(), pData), "Invalid spatial data handle");
 
   if (IsAlwaysVisibleData(*pData))
     return plVisibilityState::Direct;
@@ -930,42 +934,64 @@ plVisibilityState plSpatialSystem_RegularGrid::GetVisibilityState(const plSpatia
   return static_cast<plVisibilityState>(uiLastVisibilityType);
 }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 void plSpatialSystem_RegularGrid::GetInternalStats(plStringBuilder& sb) const
 {
-  sb = "Cache Candidates:\n";
+  PL_LOCK(m_CacheCandidatesMutex);
 
-  PLASMA_LOCK(m_CacheCandidatesMutex);
+  plUInt32 uiNumActiveGrids = 0;
+  for (auto& pGrid : m_Grids)
+  {
+    uiNumActiveGrids += (pGrid != nullptr) ? 1 : 0;
+  }
+
+  sb.SetFormat("Num Grids: {}\n", uiNumActiveGrids);
+
+  for (auto& pGrid : m_Grids)
+  {
+    if (pGrid == nullptr)
+      continue;
+
+    sb.AppendFormat(" \nCategory: {}, CanBeCached: {}\nIncludeTags: ", plSpatialData::GetCategoryName(pGrid->m_Category), pGrid->m_bCanBeCached);
+    TagsToString(pGrid->m_IncludeTags, sb);
+    sb.Append(", ExcludeTags: ");
+    TagsToString(pGrid->m_ExcludeTags, sb);
+    sb.Append("\n");
+  }
+
+  sb.Append("\nCache Candidates:\n");
 
   for (auto& sortedCandidate : m_SortedCacheCandidates)
   {
     auto& candidate = m_CacheCandidates[sortedCandidate.m_uiIndex];
+    const plUInt32 uiGridIndex = candidate.m_uiGridIndex;
+    Grid* pGrid = nullptr;
 
-    sb.AppendFormat(" \nCategory: {}\nInclude Tags: ", candidate.m_Category.m_uiValue);
+    if (uiGridIndex != plInvalidIndex)
+    {
+      pGrid = m_Grids[uiGridIndex].Borrow();
+      if (pGrid->CachingCompleted())
+      {
+        continue;
+      }
+    }
+
+    sb.AppendFormat(" \nCategory: {}\nIncludeTags: ", plSpatialData::GetCategoryName(candidate.m_Category));
     TagsToString(candidate.m_IncludeTags, sb);
-    sb.Append("\nExclude Tags: ");
+    sb.Append(", ExcludeTags: ");
     TagsToString(candidate.m_ExcludeTags, sb);
     sb.AppendFormat("\nScore: {}", plArgF(sortedCandidate.m_fScore, 2));
 
-    const plUInt32 uiGridIndex = candidate.m_uiGridIndex;
-    if (uiGridIndex != plInvalidIndex)
+    if (pGrid != nullptr)
     {
-      auto& pGrid = m_Grids[uiGridIndex];
-      if (pGrid->CachingCompleted())
-      {
-        sb.Append("\nReady to use!\n");
-      }
-      else
-      {
-        const plUInt32 uiNumObjectsMigrated = pGrid->m_uiLastMigrationIndex;
-        sb.AppendFormat("\nMigration Status: {}%%\n", plArgF(float(uiNumObjectsMigrated) / m_DataTable.GetCount() * 100.0f, 2));
-      }
+      const plUInt32 uiNumObjectsMigrated = pGrid->m_uiLastMigrationIndex;
+      sb.AppendFormat("\nMigrationStatus: {}%%\n", plArgF(float(uiNumObjectsMigrated) / m_DataTable.GetCount() * 100.0f, 2));
     }
   }
 }
 #endif
 
-PLASMA_ALWAYS_INLINE bool plSpatialSystem_RegularGrid::IsAlwaysVisibleData(const Data& data) const
+PL_ALWAYS_INLINE bool plSpatialSystem_RegularGrid::IsAlwaysVisibleData(const Data& data) const
 {
   return data.m_uiAlwaysVisible != 0;
 }
@@ -984,10 +1010,10 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::AddSpatialDataToGrids(const plS
       continue;
 
     if ((pGrid->m_Category.GetBitmask() & uiCategoryBitmask) == 0 ||
-        FilterByTags(tags, pGrid->m_IncludeTags, pGrid->m_ExcludeTags))
+        FilterByTags(tags, &pGrid->m_IncludeTags, &pGrid->m_ExcludeTags))
       continue;
 
-    data.m_uiGridBitmask |= PLASMA_BIT(uiCachedGridIndex);
+    data.m_uiGridBitmask |= PL_BIT(uiCachedGridIndex);
   }
 
   auto hData = plSpatialDataHandle(m_DataTable.Insert(data));
@@ -1001,7 +1027,7 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::AddSpatialDataToGrids(const plS
     auto& pGrid = m_Grids[uiGridIndex];
     if (pGrid == nullptr)
     {
-      pGrid = PLASMA_NEW(&m_Allocator, Grid, *this, plSpatialData::Category(uiGridIndex));
+      pGrid = PL_NEW(&m_Allocator, Grid, *this, plSpatialData::Category(static_cast<plUInt16>(uiGridIndex)));
     }
 
     pGrid->AddSpatialData(bounds, tags, pObject, m_uiFrameCounter, hData);
@@ -1011,7 +1037,7 @@ plSpatialDataHandle plSpatialSystem_RegularGrid::AddSpatialDataToGrids(const plS
 }
 
 template <typename Functor>
-PLASMA_FORCE_INLINE void plSpatialSystem_RegularGrid::ForEachGrid(const Data& data, const plSpatialDataHandle& hData, Functor func) const
+PL_FORCE_INLINE void plSpatialSystem_RegularGrid::ForEachGrid(const Data& data, const plSpatialDataHandle& hData, Functor func) const
 {
   plUInt64 uiGridBitmask = data.m_uiGridBitmask;
   plUInt32 uiDataIndex = hData.GetInternalID().m_InstanceIndex;
@@ -1031,7 +1057,7 @@ PLASMA_FORCE_INLINE void plSpatialSystem_RegularGrid::ForEachGrid(const Data& da
 
 void plSpatialSystem_RegularGrid::ForEachCellInBoxInMatchingGrids(const plSimdBBox& box, const QueryParams& queryParams, CellCallback noFilterCallback, CellCallback filterByTagsCallback, void* pUserData, plVisibilityState visType) const
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   if (queryParams.m_pStats != nullptr)
   {
     queryParams.m_pStats->m_uiTotalNumObjects = m_DataTable.GetCount();
@@ -1048,8 +1074,8 @@ void plSpatialSystem_RegularGrid::ForEachCellInBoxInMatchingGrids(const plSimdBB
       continue;
 
     if ((pGrid->m_Category.GetBitmask() & uiGridBitmask) == 0 ||
-        pGrid->m_IncludeTags != queryParams.m_IncludeTags ||
-        pGrid->m_ExcludeTags != queryParams.m_ExcludeTags)
+        AreTagSetsEqual(pGrid->m_IncludeTags, queryParams.m_pIncludeTags) == false ||
+        AreTagSetsEqual(pGrid->m_ExcludeTags, queryParams.m_pExcludeTags) == false)
       continue;
 
     uiGridBitmask &= ~pGrid->m_Category.GetBitmask();
@@ -1060,9 +1086,9 @@ void plSpatialSystem_RegularGrid::ForEachCellInBoxInMatchingGrids(const plSimdBB
         return noFilterCallback(cell, queryParams, stats, pUserData, visType);
       });
 
-    UpdateCacheCandidate(queryParams.m_IncludeTags, queryParams.m_ExcludeTags, pGrid->m_Category, 0.0f);
+    UpdateCacheCandidate(queryParams.m_pIncludeTags, queryParams.m_pExcludeTags, pGrid->m_Category, 0.0f);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     if (queryParams.m_pStats != nullptr)
     {
       queryParams.m_pStats->m_uiNumObjectsTested += stats.m_uiNumObjectsTested;
@@ -1072,7 +1098,7 @@ void plSpatialSystem_RegularGrid::ForEachCellInBoxInMatchingGrids(const plSimdBB
   }
 
   // then search for the rest
-  const bool useTagsFilter = queryParams.m_IncludeTags.IsEmpty() == false || queryParams.m_ExcludeTags.IsEmpty() == false;
+  const bool useTagsFilter = (queryParams.m_pIncludeTags && queryParams.m_pIncludeTags->IsEmpty() == false) || (queryParams.m_pExcludeTags && queryParams.m_pExcludeTags->IsEmpty() == false);
   CellCallback cellCallback = useTagsFilter ? filterByTagsCallback : noFilterCallback;
 
   while (uiGridBitmask > 0)
@@ -1101,11 +1127,11 @@ void plSpatialSystem_RegularGrid::ForEachCellInBoxInMatchingGrids(const plSimdBB
       // Doesn't make sense to cache if there are only few objects in total or only few objects have been filtered
       if (totalNumObjectsAfterSpatialTest > cacheThreshold && filteredRatio > 0.1f)
       {
-        UpdateCacheCandidate(queryParams.m_IncludeTags, queryParams.m_ExcludeTags, pGrid->m_Category, filteredRatio);
+        UpdateCacheCandidate(queryParams.m_pIncludeTags, queryParams.m_pExcludeTags, pGrid->m_Category, filteredRatio);
       }
     }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     if (queryParams.m_pStats != nullptr)
     {
       queryParams.m_pStats->m_uiNumObjectsTested += stats.m_uiNumObjectsTested;
@@ -1121,7 +1147,7 @@ void plSpatialSystem_RegularGrid::MigrateCachedGrid(plUInt32 uiCandidateIndex)
   plUInt32 uiSourceGridIndex = plInvalidIndex;
 
   {
-    PLASMA_LOCK(m_CacheCandidatesMutex);
+    PL_LOCK(m_CacheCandidatesMutex);
 
     auto& cacheCandidate = m_CacheCandidates[uiCandidateIndex];
     uiTargetGridIndex = cacheCandidate.m_uiGridIndex;
@@ -1138,10 +1164,10 @@ void plSpatialSystem_RegularGrid::MigrateCachedGrid(plUInt32 uiCandidateIndex)
         }
       }
 
-      PLASMA_ASSERT_DEBUG(uiTargetGridIndex != plInvalidIndex, "No free cached grid");
+      PL_ASSERT_DEBUG(uiTargetGridIndex != plInvalidIndex, "No free cached grid");
       cacheCandidate.m_uiGridIndex = uiTargetGridIndex;
 
-      auto pGrid = PLASMA_NEW(&m_Allocator, Grid, *this, cacheCandidate.m_Category);
+      auto pGrid = PL_NEW(&m_Allocator, Grid, *this, cacheCandidate.m_Category);
       pGrid->m_IncludeTags = cacheCandidate.m_IncludeTags;
       pGrid->m_ExcludeTags = cacheCandidate.m_ExcludeTags;
 
@@ -1171,7 +1197,7 @@ void plSpatialSystem_RegularGrid::MigrateSpatialData(plUInt32 uiTargetGridIndex,
   {
     if (pTargetGrid->MigrateSpatialDataFromOtherGrid(i, *pSourceGrid))
     {
-      m_DataTable.GetValueUnchecked(i).m_uiGridBitmask |= PLASMA_BIT(uiTargetGridIndex);
+      m_DataTable.GetValueUnchecked(i).m_uiGridBitmask |= PL_BIT(uiTargetGridIndex);
     }
   }
 
@@ -1183,7 +1209,7 @@ void plSpatialSystem_RegularGrid::RemoveCachedGrid(plUInt32 uiCandidateIndex)
   plUInt32 uiGridIndex;
 
   {
-    PLASMA_LOCK(m_CacheCandidatesMutex);
+    PL_LOCK(m_CacheCandidatesMutex);
 
     auto& cacheCandidate = m_CacheCandidates[uiCandidateIndex];
     uiGridIndex = cacheCandidate.m_uiGridIndex;
@@ -1201,7 +1227,7 @@ void plSpatialSystem_RegularGrid::RemoveCachedGrid(plUInt32 uiCandidateIndex)
 
 void plSpatialSystem_RegularGrid::RemoveAllCachedGrids()
 {
-  PLASMA_LOCK(m_CacheCandidatesMutex);
+  PL_LOCK(m_CacheCandidatesMutex);
 
   for (plUInt32 i = 0; i < m_CacheCandidates.GetCount(); ++i)
   {
@@ -1209,16 +1235,16 @@ void plSpatialSystem_RegularGrid::RemoveAllCachedGrids()
   }
 }
 
-void plSpatialSystem_RegularGrid::UpdateCacheCandidate(const plTagSet& includeTags, const plTagSet& excludeTags, plSpatialData::Category category, float filteredRatio) const
+void plSpatialSystem_RegularGrid::UpdateCacheCandidate(const plTagSet* pIncludeTags, const plTagSet* pExcludeTags, plSpatialData::Category category, float filteredRatio) const
 {
-  PLASMA_LOCK(m_CacheCandidatesMutex);
+  PL_LOCK(m_CacheCandidatesMutex);
 
   CacheCandidate* pCacheCandiate = nullptr;
   for (auto& cacheCandidate : m_CacheCandidates)
   {
     if (cacheCandidate.m_Category == category &&
-        cacheCandidate.m_IncludeTags == includeTags &&
-        cacheCandidate.m_ExcludeTags == excludeTags)
+        AreTagSetsEqual(cacheCandidate.m_IncludeTags, pIncludeTags) &&
+        AreTagSetsEqual(cacheCandidate.m_ExcludeTags, pExcludeTags))
     {
       pCacheCandiate = &cacheCandidate;
       break;
@@ -1232,8 +1258,20 @@ void plSpatialSystem_RegularGrid::UpdateCacheCandidate(const plTagSet& includeTa
   }
   else
   {
-    m_CacheCandidates.PushBack({includeTags, excludeTags, category, 1, filteredRatio});
+    auto& cacheCandidate = m_CacheCandidates.ExpandAndGetRef();
+    cacheCandidate.m_Category = category;
+    cacheCandidate.m_fQueryCount = 1;
+    cacheCandidate.m_fFilteredRatio = filteredRatio;
+
+    if (pIncludeTags != nullptr)
+    {
+      cacheCandidate.m_IncludeTags = *pIncludeTags;
+    }
+    if (pExcludeTags != nullptr)
+    {
+      cacheCandidate.m_ExcludeTags = *pExcludeTags;
+    }
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_SpatialSystem_RegularGrid);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_SpatialSystem_RegularGrid);

@@ -5,9 +5,9 @@
 #include <QIcon>
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plNamedAction : public plAction
+class PL_GUIFOUNDATION_DLL plNamedAction : public plAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plNamedAction, plAction);
+  PL_ADD_DYNAMIC_REFLECTION(plNamedAction, plAction);
 
 public:
   plNamedAction(const plActionContext& context, const char* szName, const char* szIconPath)
@@ -19,10 +19,10 @@ public:
 
   const char* GetName() const { return m_sName; }
 
-  const char* GetAdditionalDisplayString() { return m_sAdditionalDisplayString; }
-  void SetAdditionalDisplayString(const char* szString, bool bTriggerUpdate = true)
+  plStringView GetAdditionalDisplayString() { return m_sAdditionalDisplayString; }
+  void SetAdditionalDisplayString(plStringView sString, bool bTriggerUpdate = true)
   {
-    m_sAdditionalDisplayString = szString;
+    m_sAdditionalDisplayString = sString;
     if (bTriggerUpdate)
       TriggerUpdate();
   }
@@ -37,9 +37,9 @@ protected:
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plCategoryAction : public plAction
+class PL_GUIFOUNDATION_DLL plCategoryAction : public plAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCategoryAction, plAction);
+  PL_ADD_DYNAMIC_REFLECTION(plCategoryAction, plAction);
 
 public:
   plCategoryAction(const plActionContext& context)
@@ -51,9 +51,9 @@ public:
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plMenuAction : public plNamedAction
+class PL_GUIFOUNDATION_DLL plMenuAction : public plNamedAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMenuAction, plNamedAction);
+  PL_ADD_DYNAMIC_REFLECTION(plMenuAction, plNamedAction);
 
 public:
   plMenuAction(const plActionContext& context, const char* szName, const char* szIconPath)
@@ -65,9 +65,9 @@ public:
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plDynamicMenuAction : public plMenuAction
+class PL_GUIFOUNDATION_DLL plDynamicMenuAction : public plMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicMenuAction, plMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicMenuAction, plMenuAction);
 
 public:
   struct Item
@@ -81,12 +81,12 @@ public:
 
     struct ItemFlags
     {
-      typedef plUInt8 StorageType;
+      using StorageType = plUInt8;
 
       enum Enum
       {
         Default = 0,
-        Separator = PLASMA_BIT(0),
+        Separator = PL_BIT(0),
       };
       struct Bits
       {
@@ -107,13 +107,13 @@ public:
     : plMenuAction(context, szName, szIconPath)
   {
   }
-  virtual void GetEntries(plHybridArray<Item, 16>& out_Entries) = 0;
+  virtual void GetEntries(plHybridArray<Item, 16>& out_entries) = 0;
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plDynamicActionAndMenuAction : public plDynamicMenuAction
+class PL_GUIFOUNDATION_DLL plDynamicActionAndMenuAction : public plDynamicMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicActionAndMenuAction, plDynamicMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicActionAndMenuAction, plDynamicMenuAction);
 
 public:
   plDynamicActionAndMenuAction(const plActionContext& context, const char* szName, const char* szIconPath);
@@ -140,14 +140,14 @@ protected:
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plEnumerationMenuAction : public plDynamicMenuAction
+class PL_GUIFOUNDATION_DLL plEnumerationMenuAction : public plDynamicMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEnumerationMenuAction, plDynamicMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plEnumerationMenuAction, plDynamicMenuAction);
 
 public:
   plEnumerationMenuAction(const plActionContext& context, const char* szName, const char* szIconPath);
   void InitEnumerationType(const plRTTI* pEnumerationType);
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
   virtual plInt64 GetValue() const = 0;
 
 protected:
@@ -155,9 +155,9 @@ protected:
 };
 
 ///
-class PLASMA_GUIFOUNDATION_DLL plButtonAction : public plNamedAction
+class PL_GUIFOUNDATION_DLL plButtonAction : public plNamedAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plButtonAction, plNamedAction);
+  PL_ADD_DYNAMIC_REFLECTION(plButtonAction, plNamedAction);
 
 public:
   plButtonAction(const plActionContext& context, const char* szName, bool bCheckable, const char* szIconPath);
@@ -202,9 +202,9 @@ protected:
 };
 
 
-class PLASMA_GUIFOUNDATION_DLL plSliderAction : public plNamedAction
+class PL_GUIFOUNDATION_DLL plSliderAction : public plNamedAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSliderAction, plNamedAction);
+  PL_ADD_DYNAMIC_REFLECTION(plSliderAction, plNamedAction);
 
 public:
   plSliderAction(const plActionContext& context, const char* szName);
@@ -234,7 +234,7 @@ public:
   void SetRange(plInt32 iMin, plInt32 iMax, bool bTriggerUpdate = true);
 
   plInt32 GetValue() const { return m_iCurValue; }
-  void SetValue(plInt32 val, bool bTriggerUpdate = true);
+  void SetValue(plInt32 iVal, bool bTriggerUpdate = true);
 
 protected:
   bool m_bEnabled;

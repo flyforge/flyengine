@@ -3,8 +3,8 @@
 #include <EditorPluginAssets/AnimatedMeshAsset/AnimatedMeshAssetManager.h>
 #include <EditorPluginAssets/AnimatedMeshAsset/AnimatedMeshAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshAssetDocumentManager, 1, plRTTIDefaultAllocator<plAnimatedMeshAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimatedMeshAssetDocumentManager, 1, plRTTIDefaultAllocator<plAnimatedMeshAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plAnimatedMeshAssetDocumentManager::plAnimatedMeshAssetDocumentManager()
 {
@@ -36,8 +36,7 @@ void plAnimatedMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocument
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plAnimatedMeshAssetDocument>())
       {
-        plQtAnimatedMeshAssetDocumentWindow* pDocWnd =
-          new plQtAnimatedMeshAssetDocumentWindow(static_cast<plAnimatedMeshAssetDocument*>(e.m_pDocument));
+        new plQtAnimatedMeshAssetDocumentWindow(static_cast<plAnimatedMeshAssetDocument*>(e.m_pDocument)); // NOLINT
       }
     }
     break;
@@ -47,10 +46,9 @@ void plAnimatedMeshAssetDocumentManager::OnDocumentManagerEvent(const plDocument
   }
 }
 
-void plAnimatedMeshAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plAnimatedMeshAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plAnimatedMeshAssetDocument(szPath);
+  out_pDocument = new plAnimatedMeshAssetDocument(sPath);
 }
 
 void plAnimatedMeshAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

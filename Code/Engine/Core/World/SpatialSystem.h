@@ -6,9 +6,9 @@
 #include <Foundation/SimdMath/SimdBBoxSphere.h>
 #include <Foundation/Types/TagSet.h>
 
-class PLASMA_CORE_DLL plSpatialSystem : public plReflectedClass
+class PL_CORE_DLL plSpatialSystem : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpatialSystem, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plSpatialSystem, plReflectedClass);
 
 public:
   plSpatialSystem();
@@ -31,9 +31,9 @@ public:
   /// \name Simple Queries
   ///@{
 
-  typedef plDelegate<plVisitorExecution::Enum(plGameObject*)> QueryCallback;
+  using QueryCallback = plDelegate<plVisitorExecution::Enum(plGameObject*)>;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   struct QueryStats
   {
     plUInt32 m_uiTotalNumObjects = 0;  ///< The total number of spatial objects in this system.
@@ -46,17 +46,17 @@ public:
   struct QueryParams
   {
     plUInt32 m_uiCategoryBitmask = 0;
-    plTagSet m_IncludeTags;
-    plTagSet m_ExcludeTags;
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+    const plTagSet* m_pIncludeTags = nullptr;
+    const plTagSet* m_pExcludeTags = nullptr;
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     QueryStats* m_pStats = nullptr;
 #endif
   };
 
-  virtual void FindObjectsInSphere(const plBoundingSphere& sphere, const QueryParams& queryParams, plDynamicArray<plGameObject*>& out_Objects) const;
+  virtual void FindObjectsInSphere(const plBoundingSphere& sphere, const QueryParams& queryParams, plDynamicArray<plGameObject*>& out_objects) const;
   virtual void FindObjectsInSphere(const plBoundingSphere& sphere, const QueryParams& queryParams, QueryCallback callback) const = 0;
 
-  virtual void FindObjectsInBox(const plBoundingBox& box, const QueryParams& queryParams, plDynamicArray<plGameObject*>& out_Objects) const;
+  virtual void FindObjectsInBox(const plBoundingBox& box, const QueryParams& queryParams, plDynamicArray<plGameObject*>& out_objects) const;
   virtual void FindObjectsInBox(const plBoundingBox& box, const QueryParams& queryParams, QueryCallback callback) const = 0;
 
   ///@}
@@ -76,8 +76,8 @@ public:
 
   ///@}
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-  virtual void GetInternalStats(plStringBuilder& sb) const;
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  virtual void GetInternalStats(plStringBuilder& ref_sSb) const;
 #endif
 
 protected:

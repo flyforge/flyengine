@@ -5,12 +5,12 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <Foundation/Strings/String.h>
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plLogMsgType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plLogMsgType);
 
 /// \brief A persistent log entry created from a plLoggingEventData.
 /// Allows for a log event to survive for longer than just the event
 /// and is reflected, allowing for it to be sent to remote targets.
-struct PLASMA_FOUNDATION_DLL plLogEntry
+struct PL_FOUNDATION_DLL plLogEntry
 {
   plLogEntry();
   plLogEntry(const plLoggingEventData& le);
@@ -22,7 +22,7 @@ struct PLASMA_FOUNDATION_DLL plLogEntry
   double m_fSeconds = 0;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plLogEntry);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plLogEntry);
 
 /// \brief A log interface implementation that converts a log event into
 /// a plLogEntry and calls a delegate with it.
@@ -38,7 +38,7 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plLogEntry);
 ///     *log something*
 ///   }
 /// \endcode
-class PLASMA_FOUNDATION_DLL plLogEntryDelegate : public plLogInterface
+class PL_FOUNDATION_DLL plLogEntryDelegate : public plLogInterface
 {
 public:
   using Callback = plDelegate<void(plLogEntry&)>;

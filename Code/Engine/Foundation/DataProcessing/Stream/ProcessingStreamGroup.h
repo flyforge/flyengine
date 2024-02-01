@@ -21,7 +21,7 @@ struct plStreamGroupElementsClearedEvent
 };
 
 /// \brief A stream group encapsulates the streams and the corresponding data processors.
-class PLASMA_FOUNDATION_DLL plProcessingStreamGroup
+class PL_FOUNDATION_DLL plProcessingStreamGroup
 {
 public:
   /// \brief Constructor

@@ -15,10 +15,10 @@ namespace plRmlUiInternal
   class EventListener;
 } // namespace plRmlUiInternal
 
-class PLASMA_RMLUIPLUGIN_DLL plRmlUiContext final : public Rml::Context
+class PL_RMLUIPLUGIN_DLL plRmlUiContext final : public Rml::Context
 {
 public:
-  plRmlUiContext(const Rml::String& name);
+  plRmlUiContext(const Rml::String& sName);
   ~plRmlUiContext();
 
 public:
@@ -31,11 +31,11 @@ public:
   void ShowDocument();
   void HideDocument();
 
-  void UpdateInput(const plVec2& mousePos);
+  void UpdateInput(const plVec2& vMousePos);
   bool WantsInput() const { return m_bWantsInput; }
 
-  void SetOffset(const plVec2I32& offset);
-  void SetSize(const plVec2U32& size);
+  void SetOffset(const plVec2I32& vOffset);
+  void SetSize(const plVec2U32& vSize);
   void SetDpiScale(float fScale);
 
   using EventHandler = plDelegate<void(Rml::Event&)>;
@@ -52,7 +52,7 @@ private:
   friend class plRmlUiInternal::EventListener;
   void ProcessEvent(const plHashedString& sIdentifier, Rml::Event& event);
 
-  plVec2I32 m_vOffset = plVec2I32::ZeroVector();
+  plVec2I32 m_vOffset = plVec2I32::MakeZero();
 
   plHashTable<plHashedString, EventHandler> m_EventHandler;
 
@@ -67,8 +67,8 @@ namespace plRmlUiInternal
   class ContextInstancer : public Rml::ContextInstancer
   {
   public:
-    virtual Rml::ContextPtr InstanceContext(const Rml::String& name) override;
-    virtual void ReleaseContext(Rml::Context* context) override;
+    virtual Rml::ContextPtr InstanceContext(const Rml::String& sName) override;
+    virtual void ReleaseContext(Rml::Context* pContext) override;
 
   private:
     virtual void Release() override;

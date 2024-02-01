@@ -13,14 +13,21 @@ using plAnimGraphResourceHandle = plTypedResourceHandle<class plAnimGraphResourc
 
 using plAnimationControllerComponentManager = plComponentManagerSimple<class plAnimationControllerComponent, plComponentUpdateType::WhenSimulating, plBlockStorageType::FreeList>;
 
-class PLASMA_GAMEENGINE_DLL plAnimationControllerComponent : public plComponent
+/// \brief Evaluates an plAnimGraphResource and provides the result through the plMsgAnimationPoseUpdated.
+///
+/// plAnimGraph's contain logic to generate an animation pose. This component decides when it is necessary
+/// to reevaluate the state, which mostly means it tracks when the object is visible.
+///
+/// The result is sent as a recursive message, which is usually consumed by an plAnimatedMeshComponent.
+/// The mesh component may be on the same game object or a child object.
+class PL_GAMEENGINE_DLL plAnimationControllerComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plAnimationControllerComponent, plComponent, plAnimationControllerComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plAnimationControllerComponent, plComponent, plAnimationControllerComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
-  public:
+public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
@@ -30,16 +37,18 @@ protected:
   //////////////////////////////////////////////////////////////////////////
   // plAnimationControllerComponent
 
-  public:
+public:
   plAnimationControllerComponent();
   ~plAnimationControllerComponent();
 
+  /// \brief Sets the plAnimGraphResource file to use.
   void SetAnimGraphFile(const char* szFile); // [ property ]
   const char* GetAnimGraphFile() const;      // [ property ]
 
+  /// \brief How often to update the animation while the animated mesh is invisible.
   plEnum<plAnimationInvisibleUpdateRate> m_InvisibleUpdateRate; // [ property ]
 
-  protected:
+protected:
   void Update();
 
   plEnum<plRootMotionMode> m_RootMotionMode;
@@ -48,5 +57,5 @@ protected:
   plAnimController m_AnimController;
   plAnimPoseGenerator m_PoseGenerator;
 
-  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 };

@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/Configuration/CVar.h>
 #include <Foundation/Configuration/Startup.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
@@ -19,7 +19,7 @@ static plTextureResourceLoader s_TextureResourceLoader;
 plCVarFloat cvar_StreamingTextureLoadDelay("Streaming.TextureLoadDelay", 0.0f, plCVarFlags::Save, "Artificial texture loading slowdown");
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, TextureResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, TextureResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -50,12 +50,12 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, TextureResource)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plResourceLoadData plTextureResourceLoader::OpenDataStream(const plResource* pResource)
 {
-  LoadedData* pData = PLASMA_DEFAULT_NEW(LoadedData);
+  LoadedData* pData = PL_DEFAULT_NEW(LoadedData);
 
   plResourceLoadData res;
 
@@ -102,7 +102,7 @@ plResourceLoadData plTextureResourceLoader::OpenDataStream(const plResource* pRe
     const plStringBuilder sAbsolutePath = File.GetFilePathAbsolute();
     res.m_sResourceDescription = File.GetFilePathRelative().GetView();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
     {
       plFileStats stat;
       if (plFileSystem::GetFileStats(pResource->GetResourceID(), stat).Succeeded())
@@ -149,7 +149,7 @@ plResourceLoadData plTextureResourceLoader::OpenDataStream(const plResource* pRe
 
   if (cvar_StreamingTextureLoadDelay > 0)
   {
-    plThreadUtils::Sleep(plTime::Seconds(cvar_StreamingTextureLoadDelay));
+    plThreadUtils::Sleep(plTime::MakeFromSeconds(cvar_StreamingTextureLoadDelay));
   }
 
   return res;
@@ -159,7 +159,7 @@ void plTextureResourceLoader::CloseDataStream(const plResource* pResource, const
 {
   LoadedData* pData = (LoadedData*)loaderData.m_pCustomLoaderData;
 
-  PLASMA_DEFAULT_DELETE(pData);
+  PL_DEFAULT_DELETE(pData);
 }
 
 bool plTextureResourceLoader::IsResourceOutdated(const plResource* pResource) const
@@ -173,7 +173,7 @@ bool plTextureResourceLoader::IsResourceOutdated(const plResource* pResource) co
   if (plFileSystem::ResolvePath(pResource->GetResourceID(), &sAbs, nullptr).Failed())
     return false;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
   if (pResource->GetLoadedFileModificationTime().IsValid())
   {
@@ -193,7 +193,7 @@ plResult plTextureResourceLoader::LoadTexFile(plStreamReader& inout_stream, Load
 {
   // read the hash, ignore it
   plAssetFileHeader AssetHash;
-  PLASMA_SUCCEED_OR_RETURN(AssetHash.Read(inout_stream));
+  PL_SUCCEED_OR_RETURN(AssetHash.Read(inout_stream));
 
   ref_data.m_TexFormat.ReadHeader(inout_stream);
 
@@ -204,7 +204,7 @@ plResult plTextureResourceLoader::LoadTexFile(plStreamReader& inout_stream, Load
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
@@ -217,4 +217,4 @@ void plTextureResourceLoader::WriteTextureLoadStream(plStreamWriter& w, const Lo
   data.m_TexFormat.WriteRenderTargetHeader(w);
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Textures_TextureLoader);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Textures_TextureLoader);

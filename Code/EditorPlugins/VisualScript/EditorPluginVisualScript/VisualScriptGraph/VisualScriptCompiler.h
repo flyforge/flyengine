@@ -46,7 +46,7 @@ public:
 
   struct DataInput
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     AstNode* m_pSourceNode = nullptr;
     plUInt32 m_uiId = 0;
@@ -70,20 +70,24 @@ public:
     plHashedString m_sTargetTypeName;
     plVariant m_Value;
 
-    plSmallArray<AstNode*, 8> m_Next;
-    plSmallArray<DataInput, 4> m_Inputs;
-    plSmallArray<DataOutput, 4> m_Outputs;
+    plSmallArray<AstNode*, 4> m_Next;
+    plSmallArray<DataInput, 5> m_Inputs;
+    plSmallArray<DataOutput, 2> m_Outputs;
   };
+
+#if PL_ENABLED(PL_PLATFORM_64BIT)
+  static_assert(sizeof(AstNode) == 256);
+#endif
 
 private:
   using DataOffset = plVisualScriptDataDescription::DataOffset;
 
-  PLASMA_ALWAYS_INLINE static plStringView GetNiceTypeName(const plDocumentObject* pObject)
+  PL_ALWAYS_INLINE static plStringView GetNiceTypeName(const plDocumentObject* pObject)
   {
     return plVisualScriptNodeManager::GetNiceTypeName(pObject);
   }
 
-  PLASMA_ALWAYS_INLINE plVisualScriptDataType::Enum GetDeductedType(const plDocumentObject* pObject) const
+  PL_ALWAYS_INLINE plVisualScriptDataType::Enum GetDeductedType(const plDocumentObject* pObject) const
   {
     return m_pManager->GetDeductedType(pObject);
   }
@@ -91,7 +95,7 @@ private:
   plUInt32 GetPinId(const plVisualScriptPin* pPin);
   DataOutput& GetDataOutput(const DataInput& dataInput);
   AstNode& CreateAstNode(plVisualScriptNodeDescription::Type::Enum type, plVisualScriptDataType::Enum deductedDataType = plVisualScriptDataType::Invalid, bool bImplicitExecution = false);
-  PLASMA_ALWAYS_INLINE AstNode& CreateAstNode(plVisualScriptNodeDescription::Type::Enum type, bool bImplicitExecution)
+  PL_ALWAYS_INLINE AstNode& CreateAstNode(plVisualScriptNodeDescription::Type::Enum type, bool bImplicitExecution)
   {
     return CreateAstNode(type, plVisualScriptDataType::Invalid, bImplicitExecution);
   }
@@ -139,7 +143,7 @@ private:
   plResult BuildDataExecutions(AstNode* pEntryAstNode);
   plResult FillDataOutputConnections(AstNode* pEntryAstNode);
   plResult AssignLocalVariables(AstNode* pEntryAstNode, plVisualScriptDataDescription& inout_localDataDesc);
-  plResult BuildNodeDescriptions(AstNode* pEntryAstNode, plDynamicArray<plVisualScriptNodeDescription>& out_NodeDescriptions);  
+  plResult BuildNodeDescriptions(AstNode* pEntryAstNode, plDynamicArray<plVisualScriptNodeDescription>& out_NodeDescriptions);
 
   struct ConnectionHasher
   {
@@ -179,7 +183,7 @@ private:
 
   struct DataDesc
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     DataOffset m_DataOffset;
     plUInt32 m_uiUsageCounter = 0;

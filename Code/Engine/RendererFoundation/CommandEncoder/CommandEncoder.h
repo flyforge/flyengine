@@ -5,26 +5,20 @@
 #include <RendererFoundation/CommandEncoder/CommandEncoderPlatformInterface.h>
 #include <RendererFoundation/CommandEncoder/CommandEncoderState.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALCommandEncoder
+class PL_RENDERERFOUNDATION_DLL plGALCommandEncoder
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plGALCommandEncoder);
+  PL_DISALLOW_COPY_AND_ASSIGN(plGALCommandEncoder);
 
 public:
   // State setting functions
 
   void SetShader(plGALShaderHandle hShader);
 
-  void SetConstantBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer);
-  void SetSamplerState(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALSamplerStateHandle hSamplerState);
-  void SetResourceView(plGALShaderStage::Enum stage, plUInt32 uiSlot, plGALResourceViewHandle hResourceView);
-  void SetUnorderedAccessView(plUInt32 uiSlot, plGALUnorderedAccessViewHandle hUnorderedAccessView);
-
-  // Returns whether a resource view has been unset for the given resource
-  bool UnsetResourceViews(const plGALResourceBase* pResource);
-  bool UnsetResourceViews(plGALResourceViewHandle hResourceView);
-  // Returns whether a unordered access view has been unset for the given resource
-  bool UnsetUnorderedAccessViews(const plGALResourceBase* pResource);
-  bool UnsetUnorderedAccessViews(plGALUnorderedAccessViewHandle hUnorderedAccessView);
+  void SetConstantBuffer(const plShaderResourceBinding& binding, plGALBufferHandle hBuffer);
+  void SetSamplerState(const plShaderResourceBinding& binding, plGALSamplerStateHandle hSamplerState);
+  void SetResourceView(const plShaderResourceBinding& binding, plGALResourceViewHandle hResourceView);
+  void SetUnorderedAccessView(const plShaderResourceBinding& binding, plGALUnorderedAccessViewHandle hUnorderedAccessView);
+  void SetPushConstants(plArrayPtr<const plUInt8> data);
 
   // Query functions
 
@@ -74,7 +68,7 @@ public:
 
   virtual void ClearStatisticsCounters();
 
-  PLASMA_ALWAYS_INLINE plGALDevice& GetDevice() { return m_Device; }
+  PL_ALWAYS_INLINE plGALDevice& GetDevice() { return m_Device; }
   // Don't use light hearted ;)
   void InvalidateState();
 
@@ -87,23 +81,14 @@ protected:
 
   void AssertRenderingThread()
   {
-    PLASMA_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function can only be executed on the main thread.");
+    PL_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function can only be executed on the main thread.");
   }
-
-  void CountStateChange() { m_uiStateChanges++; }
-  void CountRedundantStateChange() { m_uiRedundantStateChanges++; }
 
 private:
   friend class plMemoryUtils;
 
   // Parent Device
   plGALDevice& m_Device;
-
-  // Statistic variables
-  plUInt32 m_uiStateChanges = 0;
-  plUInt32 m_uiRedundantStateChanges = 0;
-
   plGALCommandEncoderState& m_State;
-
   plGALCommandEncoderCommonPlatformInterface& m_CommonImpl;
 };

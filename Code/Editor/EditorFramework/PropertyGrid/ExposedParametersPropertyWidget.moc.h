@@ -9,10 +9,10 @@
 class QToolButton;
 class QAction;
 
-class PLASMA_EDITORFRAMEWORK_DLL plExposedParameterCommandAccessor : public plObjectProxyAccessor
+class PL_EDITORFRAMEWORK_DLL plExposedParameterCommandAccessor : public plObjectProxyAccessor
 {
 public:
-  plExposedParameterCommandAccessor(plObjectAccessorBase* pSource, const plAbstractProperty* pParameterProp, const plAbstractProperty* m_pParameterSourceProp);
+  plExposedParameterCommandAccessor(plObjectAccessorBase* pSource, const plAbstractProperty* pParameterProp, const plAbstractProperty* pM_pParameterSourceProp);
 
   virtual plStatus GetValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant& out_value, plVariant index = plVariant()) override;
   virtual plStatus SetValue(const plDocumentObject* pObject, const plAbstractProperty* pProp, const plVariant& newValue, plVariant index = plVariant()) override;
@@ -33,7 +33,7 @@ public:
   const plAbstractProperty* m_pParameterSourceProp = nullptr;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtExposedParameterPropertyWidget : public plQtVariantPropertyWidget
+class PL_EDITORFRAMEWORK_DLL plQtExposedParameterPropertyWidget : public plQtVariantPropertyWidget
 {
   Q_OBJECT;
 
@@ -41,7 +41,7 @@ protected:
   virtual void InternalSetValue(const plVariant& value);
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtExposedParametersPropertyWidget : public plQtPropertyStandardTypeContainerWidget
+class PL_EDITORFRAMEWORK_DLL plQtExposedParametersPropertyWidget : public plQtPropertyStandardTypeContainerWidget
 {
   Q_OBJECT
 

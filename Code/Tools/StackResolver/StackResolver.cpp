@@ -105,7 +105,7 @@ plResult plStackResolver::ParseModules()
     if (plConversionUtils::ConvertHexStringToUInt64(parts2[1], base).Failed())
     {
       plLog::Error("Failed to convert HEX string '{}' to UINT64", parts2[1]);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plStringBuilder sSize = parts2[2];
@@ -113,7 +113,7 @@ plResult plStackResolver::ParseModules()
     if (plConversionUtils::StringToUInt(sSize, size).Failed())
     {
       plLog::Error("Failed to convert string '{}' to UINT32", sSize);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plStringBuilder sModuleName = parts2[0];
@@ -127,7 +127,7 @@ plResult plStackResolver::ParseModules()
     mod.m_uiSize = size;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStackResolver::ParseCallstack()
@@ -142,13 +142,13 @@ plResult plStackResolver::ParseCallstack()
     if (plConversionUtils::ConvertHexStringToUInt64(sModView, base).Failed())
     {
       plLog::Error("Failed to convert HEX string '{}' to UINT64", sModView);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     m_Callstack.PushBack(base);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStackResolver::LoadModules()
@@ -156,7 +156,7 @@ plResult plStackResolver::LoadModules()
   if (SymInitialize(m_hProcess, nullptr, FALSE) != TRUE) // TODO specify PDB search path as second parameter?
   {
     plLog::Error("SymInitialize failed");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   for (const auto& curModule : m_Modules)
@@ -171,7 +171,7 @@ plResult plStackResolver::LoadModules()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plStackResolver::ResolveStackFrames()
@@ -186,7 +186,7 @@ void plStackResolver::ResolveStackFrames()
     _SYMBOL_INFOW& symbolInfo = *(_SYMBOL_INFOW*)buffer;
     plMemoryUtils::ZeroFill(&symbolInfo, 1);
     symbolInfo.SizeOfStruct = sizeof(_SYMBOL_INFOW);
-    symbolInfo.MaxNameLen = (PLASMA_ARRAY_SIZE(buffer) - symbolInfo.SizeOfStruct) / sizeof(WCHAR);
+    symbolInfo.MaxNameLen = (PL_ARRAY_SIZE(buffer) - symbolInfo.SizeOfStruct) / sizeof(WCHAR);
 
     DWORD64 displacement = 0;
     BOOL result = SymFromAddrW(m_hProcess, symbolAddress, &displacement, &symbolInfo);
@@ -364,7 +364,7 @@ plApplication::Execution plStackResolver::Run()
   {
     plLog::Info("Writing output to console.");
 
-    PLASMA_LOG_BLOCK("Resolved callstack");
+    PL_LOG_BLOCK("Resolved callstack");
 
     plDynamicArray<plStringView> lines;
     output.Split(true, lines, "\n");
@@ -378,4 +378,4 @@ plApplication::Execution plStackResolver::Run()
   return Execution::Quit;
 }
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plStackResolver);
+PL_CONSOLEAPP_ENTRY_POINT(plStackResolver);

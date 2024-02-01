@@ -13,17 +13,12 @@
 #define LIGHT_TYPE_SPOT 1
 #define LIGHT_TYPE_DIR 2
 
-struct PLASMA_SHADER_STRUCT plPerLightData
+struct PL_SHADER_STRUCT plPerLightData
 {
   UINT1(colorAndType);
   FLOAT1(intensity);
   UINT1(direction); // 10 bits fixed point per axis
-  UINT1(rightDirection); // 10 bits fixed point per axis
-
-  UINT1(upDirection);
   UINT1(shadowDataOffset);
-  UINT1(ununsed1);
-  UINT1(unused2);
 
   FLOAT3(position);
   FLOAT1(invSqrAttRadius);
@@ -31,33 +26,28 @@ struct PLASMA_SHADER_STRUCT plPerLightData
   UINT1(spotParams); // scale and offset as 16 bit floats
   UINT1(projectorAtlasOffset); // xy as 16 bit floats
   UINT1(projectorAtlasScale); // xy as 16 bit floats
-  FLOAT1(falloff);
-
-  FLOAT1(size);
-  FLOAT1(length);
-  FLOAT1(specularIntensity);
-  FLOAT1(volumetricIntensity);
+  FLOAT1(specularMultiplier);
 };
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerLightData> perLightDataBuffer;
 #else
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 80);
+  PL_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 48);
 #endif
 
-struct PLASMA_SHADER_STRUCT plPointShadowData
+struct PL_SHADER_STRUCT plPointShadowData
 {
   FLOAT4(shadowParams); // x = slope bias, y = constant bias, z = penumbra size in texel, w = fadeout
   MAT4(worldToLightMatrix)[6];
 };
 
-struct PLASMA_SHADER_STRUCT plSpotShadowData
+struct PL_SHADER_STRUCT plSpotShadowData
 {
   FLOAT4(shadowParams); // x = slope bias, y = constant bias, z = penumbra size in texel, w = fadeout
   MAT4(worldToLightMatrix);
 };
 
-struct PLASMA_SHADER_STRUCT plDirShadowData
+struct PL_SHADER_STRUCT plDirShadowData
 {
   FLOAT4(shadowParams); // x = slope bias, y = constant bias, z = penumbra size in texel, w = num cascades
   MAT4(worldToLightMatrix);
@@ -68,15 +58,15 @@ struct PLASMA_SHADER_STRUCT plDirShadowData
 
 };
 
-#define GET_SHADOW_PARAMS_INDEX(baseOffset) (baseOffset + 0)
-#define GET_WORLD_TO_LIGHT_MATRIX_INDEX(baseOffset, index) (baseOffset + 1 + 4 * (index))
-#define GET_SHADOW_PARAMS2_INDEX(baseOffset) (baseOffset + 5)
-#define GET_FADE_OUT_PARAMS_INDEX(baseOffset) (baseOffset + 6)
-#define GET_CASCADE_SCALE_INDEX(baseOffset, index) (baseOffset + 7 + 2 * (index))
-#define GET_CASCADE_OFFSET_INDEX(baseOffset, index) (baseOffset + 8 + 2 * (index))
-#define GET_ATLAS_SCALE_OFFSET_INDEX(baseOffset, index) (baseOffset + 13 + (index))
+#define GET_SHADOW_PARAMS_INDEX(baseOffset) ((baseOffset) + 0)
+#define GET_WORLD_TO_LIGHT_MATRIX_INDEX(baseOffset, index) ((baseOffset) + 1 + 4 * (index))
+#define GET_SHADOW_PARAMS2_INDEX(baseOffset) ((baseOffset) + 5)
+#define GET_FADE_OUT_PARAMS_INDEX(baseOffset) ((baseOffset) + 6)
+#define GET_CASCADE_SCALE_INDEX(baseOffset, index) ((baseOffset) + 7 + 2 * (index))
+#define GET_CASCADE_OFFSET_INDEX(baseOffset, index) ((baseOffset) + 8 + 2 * (index))
+#define GET_ATLAS_SCALE_OFFSET_INDEX(baseOffset, index) ((baseOffset) + 13 + (index))
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<float4> shadowDataBuffer;
 #endif
 
@@ -87,7 +77,7 @@ struct PLASMA_SHADER_STRUCT plDirShadowData
 #define DECAL_WRAP_AROUND (1 << 8)
 #define DECAL_MAP_NORMAL_TO_GEOMETRY (1 << 9)
 
-struct PLASMA_SHADER_STRUCT plPerDecalData
+struct PL_SHADER_STRUCT plPerDecalData
 {
   TRANSFORM(worldToDecalMatrix);
 
@@ -109,18 +99,18 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
   UINT1(ormAtlasOffset); // xy as 16 bit floats
 };
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerDecalData> perDecalDataBuffer;
 #else // C++
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerDecalData) == 96);
+  PL_CHECK_AT_COMPILETIME(sizeof(plPerDecalData) == 96);
 #endif
 
 #define REFLECTION_PROBE_IS_SPHERE (1 << 31)
 #define REFLECTION_PROBE_IS_PROJECTED (1 << 30)
 #define REFLECTION_PROBE_INDEX_BITMASK 0x3FFFFFFF
-#define GET_REFLECTION_PROBE_INDEX(index) (index & REFLECTION_PROBE_INDEX_BITMASK)
+#define GET_REFLECTION_PROBE_INDEX(index) ((index) & REFLECTION_PROBE_INDEX_BITMASK)
 
-  struct PLASMA_SHADER_STRUCT plPerReflectionProbeData
+  struct PL_SHADER_STRUCT plPerReflectionProbeData
   {
     TRANSFORM(WorldToProbeProjectionMatrix);
     FLOAT4(Scale);
@@ -135,10 +125,10 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
     UINT1(Padding3);
   };
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerReflectionProbeData> perPerReflectionProbeDataBuffer;
 #else // C++
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plPerReflectionProbeData) == 160);
+  PL_CHECK_AT_COMPILETIME(sizeof(plPerReflectionProbeData) == 160);
 #endif
 
   CONSTANT_BUFFER(plClusteredDataConstants, 3)
@@ -162,7 +152,7 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
 };
 
 #define NUM_CLUSTERS_X 16
-#define NUM_CLUSTERS_Y 9
+#define NUM_CLUSTERS_Y 8
 #define NUM_CLUSTERS_Z 24
 #define NUM_CLUSTERS_XY (NUM_CLUSTERS_X * NUM_CLUSTERS_Y)
 #define NUM_CLUSTERS (NUM_CLUSTERS_X * NUM_CLUSTERS_Y * NUM_CLUSTERS_Z)
@@ -173,7 +163,7 @@ struct PLASMA_SHADER_STRUCT plPerDecalData
 #define PROBE_SHIFT 20
 #define PROBE_BITMASK 0x3FF
 
-#define GET_LIGHT_INDEX(index) (index & LIGHT_BITMASK)
+#define GET_LIGHT_INDEX(index) ((index) & LIGHT_BITMASK)
 #define GET_DECAL_INDEX(index) ((index >> DECAL_SHIFT) & DECAL_BITMASK)
 #define GET_PROBE_INDEX(index) ((index >> PROBE_SHIFT) & PROBE_BITMASK)
 
@@ -183,7 +173,7 @@ struct plPerClusterData
   UINT1(counts);
 };
 
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerClusterData> perClusterDataBuffer;
   StructuredBuffer<uint> clusterItemBuffer;
 #endif

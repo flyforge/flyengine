@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/Passes/ForwardRenderPass.h>
 
 /// \brief A forward render pass that renders all opaque objects into the color target.
-class PLASMA_RENDERERCORE_DLL plOpaqueForwardRenderPass : public plForwardRenderPass
+class PL_RENDERERCORE_DLL plOpaqueForwardRenderPass : public plForwardRenderPass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plOpaqueForwardRenderPass, plForwardRenderPass);
+  PL_ADD_DYNAMIC_REFLECTION(plOpaqueForwardRenderPass, plForwardRenderPass);
 
 public:
   plOpaqueForwardRenderPass(const char* szName = "OpaqueForwardRenderPass");
@@ -23,7 +23,7 @@ protected:
   // plRenderPipelineNodeOutputPin m_PinNormal;
   // plRenderPipelineNodeOutputPin m_PinSpecularColorRoughness;
 
-  bool m_bWriteDepth;
+  bool m_bWriteDepth = true;
 
   plTexture2DResourceHandle m_hWhiteTexture;
 };

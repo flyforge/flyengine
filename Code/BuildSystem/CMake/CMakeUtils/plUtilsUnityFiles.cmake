@@ -1,8 +1,9 @@
 # #####################################
 # ## pl_add_pvs_header(<target-var> <optional-text>)
 # #####################################
+
 function(pl_add_pvs_header TARGET_VAR OPTIONAL_TEXT)
-	if(PLASMA_ENABLE_PVS_STUDIO_HEADER_IN_UNITY_FILES)
+	if(PL_ENABLE_PVS_STUDIO_HEADER_IN_UNITY_FILES)
 		set(${TARGET_VAR} "// This is an open source non-commercial project. Dear PVS-Studio, please check it.\n// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com \n\n${OPTIONAL_TEXT}" PARENT_SCOPE)
 	else()
 		set(${TARGET_VAR} "${OPTIONAL_TEXT}" PARENT_SCOPE)
@@ -13,7 +14,7 @@ endfunction()
 # ## pl_generate_folder_unity_file(<target> <project-path> <rel-path-to-folder> <files-in-folder>)
 # #####################################
 function(pl_generate_folder_unity_file TARGET_NAME PROJECT_DIRECTORY SUB_FOLDER_PATH FILE_LIST)
-	if(NOT ${PLASMA_ENABLE_FOLDER_UNITY_FILES})
+	if(NOT ${PL_ENABLE_FOLDER_UNITY_FILES})
 		return()
 	endif()
 
@@ -44,7 +45,7 @@ function(pl_generate_folder_unity_file TARGET_NAME PROJECT_DIRECTORY SUB_FOLDER_
 
 	set(FOLDER_UNITY_FILE "${CMAKE_BINARY_DIR}/${CURRENT_FOLDER_RELATIVE}/unity_${CURRENT_FOLDER_HASH}.cpp")
 	set(TMP_UNITY_FILE "${CMAKE_BINARY_DIR}/temp/unity.cpp")
-
+	
 	set(UNITY_FILE_CONTENTS "")
 
 	# message (STATUS "Generating ${FOLDER_UNITY_FILE}")
@@ -68,7 +69,7 @@ function(pl_generate_folder_unity_file TARGET_NAME PROJECT_DIRECTORY SUB_FOLDER_
 
 		set_source_files_properties(${CUR_FILE_FULL} PROPERTIES HEADER_FILE_ONLY true)
 	endforeach()
-
+	
 	file(APPEND ${TMP_UNITY_FILE} ${UNITY_FILE_CONTENTS})
 
 	set(UNITY_FILE_NEEDS_UPDATE true)

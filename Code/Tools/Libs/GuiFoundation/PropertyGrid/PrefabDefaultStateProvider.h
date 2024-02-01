@@ -5,7 +5,7 @@
 #include <GuiFoundation/PropertyGrid/DefaultState.h>
 
 /// \brief Default state provider that reflects the default state defined in the prefab template.
-class PLASMA_GUIFOUNDATION_DLL plPrefabDefaultStateProvider : public plDefaultStateProvider
+class PL_GUIFOUNDATION_DLL plPrefabDefaultStateProvider : public plDefaultStateProvider
 {
 public:
   static plSharedPtr<plDefaultStateProvider> CreateProvider(plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp);

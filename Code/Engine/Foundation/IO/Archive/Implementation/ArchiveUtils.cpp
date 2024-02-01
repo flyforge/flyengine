@@ -9,9 +9,9 @@
 #include <Foundation/IO/MemoryStream.h>
 #include <Foundation/Logging/Log.h>
 
-plHybridArray<plString, 4, plStaticAllocatorWrapper>& plArchiveUtils::GetAcceptedArchiveFileExtensions()
+plHybridArray<plString, 4, plStaticsAllocatorWrapper>& plArchiveUtils::GetAcceptedArchiveFileExtensions()
 {
-  static plHybridArray<plString, 4, plStaticAllocatorWrapper> extensions;
+  static plHybridArray<plString, 4, plStaticsAllocatorWrapper> extensions;
 
   if (extensions.IsEmpty())
   {
@@ -34,8 +34,8 @@ bool plArchiveUtils::IsAcceptedArchiveFileExtensions(plStringView sExtension)
 
 plResult plArchiveUtils::WriteHeader(plStreamWriter& inout_stream)
 {
-  const char* szTag = "PLASMAARCHIVE";
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(szTag, 10));
+  const char* szTag = "PLARCHIVE";
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteBytes(szTag, 10));
 
   const plUInt8 uiArchiveVersion = 4;
 
@@ -45,18 +45,18 @@ plResult plArchiveUtils::WriteHeader(plStreamWriter& inout_stream)
   inout_stream << uiArchiveVersion;
 
   const plUInt8 uiPadding[5] = {0, 0, 0, 0, 0};
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(uiPadding, 5));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteBytes(uiPadding, 5));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveUtils::ReadHeader(plStreamReader& inout_stream, plUInt8& out_uiVersion)
 {
   char szTag[10];
-  if (inout_stream.ReadBytes(szTag, 10) != 10 || !plStringUtils::IsEqual(szTag, "PLASMAARCHIVE"))
+  if (inout_stream.ReadBytes(szTag, 10) != 10 || !plStringUtils::IsEqual(szTag, "PLARCHIVE"))
   {
     plLog::Error("Invalid or corrupted archive. Archive-marker not found.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   out_uiVersion = 0;
@@ -65,14 +65,14 @@ plResult plArchiveUtils::ReadHeader(plStreamReader& inout_stream, plUInt8& out_u
   if (out_uiVersion != 1 && out_uiVersion != 2 && out_uiVersion != 3 && out_uiVersion != 4)
   {
     plLog::Error("Unsupported archive version '{}'.", out_uiVersion);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt8 uiPadding[5] = {255, 255, 255, 255, 255};
   if (inout_stream.ReadBytes(uiPadding, 5) != 5)
   {
     plLog::Error("Invalid or corrupted archive. Missing header data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plUInt8 uiZeroPadding[5] = {0, 0, 0, 0, 0};
@@ -80,10 +80,10 @@ plResult plArchiveUtils::ReadHeader(plStreamReader& inout_stream, plUInt8& out_u
   if (plMemoryUtils::Compare<plUInt8>(uiPadding, uiZeroPadding, 5) != 0)
   {
     plLog::Error("Invalid or corrupted archive. Unexpected header data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveUtils::WriteEntry(
@@ -91,7 +91,7 @@ plResult plArchiveUtils::WriteEntry(
   plInt32 iCompressionLevel, plArchiveEntry& inout_tocEntry, plUInt64& inout_uiCurrentStreamPosition, FileWriteProgressCallback progress /*= FileWriteProgressCallback()*/)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sAbsSourcePath, 1024 * 1024));
+  PL_SUCCEED_OR_RETURN(file.Open(sAbsSourcePath, 1024 * 1024));
 
   const plUInt64 uiMaxBytes = file.GetFileSize();
 
@@ -114,9 +114,12 @@ plResult plArchiveUtils::WriteEntry(
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
     case plArchiveCompressionMode::Compressed_zstd:
-      zstdWriter.SetOutputStream(&inout_stream, (plCompressedStreamWriterZstd::Compression)iCompressionLevel);
+    {
+      constexpr plUInt32 uiMaxNumWorkerThreads = 12u;
+      zstdWriter.SetOutputStream(&inout_stream, uiMaxNumWorkerThreads, (plCompressedStreamWriterZstd::Compression)iCompressionLevel);
       pWriter = &zstdWriter;
-      break;
+    }
+    break;
 #endif
 
     default:
@@ -129,7 +132,7 @@ plResult plArchiveUtils::WriteEntry(
   plUInt64 uiRead = 0;
   while (true)
   {
-    uiRead = file.ReadBytes(uiTemp, PLASMA_ARRAY_SIZE(uiTemp));
+    uiRead = file.ReadBytes(uiTemp, PL_ARRAY_SIZE(uiTemp));
 
     if (uiRead == 0)
       break;
@@ -139,10 +142,10 @@ plResult plArchiveUtils::WriteEntry(
     if (progress.IsValid())
     {
       if (!progress(inout_tocEntry.m_uiUncompressedDataSize, uiMaxBytes))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
 
-    PLASMA_SUCCEED_OR_RETURN(pWriter->WriteBytes(uiTemp, uiRead));
+    PL_SUCCEED_OR_RETURN(pWriter->WriteBytes(uiTemp, uiRead));
   }
 
 
@@ -150,7 +153,7 @@ plResult plArchiveUtils::WriteEntry(
   {
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
     case plArchiveCompressionMode::Compressed_zstd:
-      PLASMA_SUCCEED_OR_RETURN(zstdWriter.FinishCompressedStream());
+      PL_SUCCEED_OR_RETURN(zstdWriter.FinishCompressedStream());
       inout_tocEntry.m_uiStoredDataSize = zstdWriter.GetWrittenBytes();
       break;
 #endif
@@ -163,7 +166,7 @@ plResult plArchiveUtils::WriteEntry(
 
   inout_uiCurrentStreamPosition += inout_tocEntry.m_uiStoredDataSize;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveUtils::WriteEntryOptimal(plStreamWriter& inout_stream, plStringView sAbsSourcePath, plUInt32 uiPathStringOffset, plArchiveCompressionMode compression, plInt32 iCompressionLevel, plArchiveEntry& ref_tocEntry, plUInt64& inout_uiCurrentStreamPosition, FileWriteProgressCallback progress /*= FileWriteProgressCallback()*/)
@@ -178,7 +181,7 @@ plResult plArchiveUtils::WriteEntryOptimal(plStreamWriter& inout_stream, plStrin
     plMemoryStreamWriter writer(&storage);
 
     plUInt64 streamPos = inout_uiCurrentStreamPosition;
-    PLASMA_SUCCEED_OR_RETURN(WriteEntry(writer, sAbsSourcePath, uiPathStringOffset, compression, iCompressionLevel, ref_tocEntry, streamPos, progress));
+    PL_SUCCEED_OR_RETURN(WriteEntry(writer, sAbsSourcePath, uiPathStringOffset, compression, iCompressionLevel, ref_tocEntry, streamPos, progress));
 
     if (ref_tocEntry.m_uiStoredDataSize * 12 >= ref_tocEntry.m_uiUncompressedDataSize * 10)
     {
@@ -214,7 +217,7 @@ plUniquePtr<plStreamReader> plArchiveUtils::CreateEntryReader(const plArchiveEnt
   {
     case plArchiveCompressionMode::Uncompressed:
     {
-      reader = PLASMA_DEFAULT_NEW(plRawMemoryStreamReader);
+      reader = PL_DEFAULT_NEW(plRawMemoryStreamReader);
       plRawMemoryStreamReader* pRawReader = static_cast<plRawMemoryStreamReader*>(reader.Borrow());
       ConfigureRawMemoryStreamReader(entry, pStartOfArchiveData, *pRawReader);
       break;
@@ -223,7 +226,7 @@ plUniquePtr<plStreamReader> plArchiveUtils::CreateEntryReader(const plArchiveEnt
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
     case plArchiveCompressionMode::Compressed_zstd:
     {
-      reader = PLASMA_DEFAULT_NEW(plCompressedStreamReaderZstdWithSource);
+      reader = PL_DEFAULT_NEW(plCompressedStreamReaderZstdWithSource);
       plCompressedStreamReaderZstdWithSource* pRawReader = static_cast<plCompressedStreamReaderZstdWithSource*>(reader.Borrow());
       ConfigureRawMemoryStreamReader(entry, pStartOfArchiveData, pRawReader->m_Source);
       pRawReader->SetInputStream(&pRawReader->m_Source);
@@ -232,7 +235,7 @@ plUniquePtr<plStreamReader> plArchiveUtils::CreateEntryReader(const plArchiveEnt
 #endif
 
     default:
-      PLASMA_REPORT_FAILURE("Archive entry compression mode '{}' is not supported by plArchiveReader", (int)entry.m_CompressionMode);
+      PL_REPORT_FAILURE("Archive entry compression mode '{}' is not supported by plArchiveReader", (int)entry.m_CompressionMode);
       break;
   }
 
@@ -241,10 +244,10 @@ plUniquePtr<plStreamReader> plArchiveUtils::CreateEntryReader(const plArchiveEnt
 
 void plArchiveUtils::ConfigureRawMemoryStreamReader(const plArchiveEntry& entry, const void* pStartOfArchiveData, plRawMemoryStreamReader& ref_memReader)
 {
-  ref_memReader.Reset(plMemoryUtils::AddByteOffset(pStartOfArchiveData, static_cast<ptrdiff_t>(entry.m_uiDataStartOffset)), entry.m_uiStoredDataSize);
+  ref_memReader.Reset(plMemoryUtils::AddByteOffset(pStartOfArchiveData, static_cast<std::ptrdiff_t>(entry.m_uiDataStartOffset)), entry.m_uiStoredDataSize);
 }
 
-static const char* szEndMarker = "PLASMAARCHIVE-END";
+static const char* szEndMarker = "PLARCHIVE-END";
 
 static plUInt32 GetEndMarkerSize(plUInt8 uiFileVersion)
 {
@@ -273,14 +276,14 @@ plResult plArchiveUtils::AppendTOC(plStreamWriter& inout_stream, const plArchive
   plDefaultMemoryStreamStorage storage;
   plMemoryStreamWriter writer(&storage);
 
-  PLASMA_SUCCEED_OR_RETURN(toc.Serialize(writer));
+  PL_SUCCEED_OR_RETURN(toc.Serialize(writer));
 
-  PLASMA_SUCCEED_OR_RETURN(storage.CopyToStream(inout_stream));
+  PL_SUCCEED_OR_RETURN(storage.CopyToStream(inout_stream));
 
   TocMetaData tocMeta;
 
   plHashStreamWriter64 hashStream(tocMeta.m_uiSize);
-  PLASMA_SUCCEED_OR_RETURN(storage.CopyToStream(hashStream));
+  PL_SUCCEED_OR_RETURN(storage.CopyToStream(hashStream));
 
   // Added in file version 2: hash of the TOC
   tocMeta.m_uiSize = storage.GetStorageSize32();
@@ -299,7 +302,7 @@ static plResult VerifyEndMarker(plMemoryMappedFile& ref_memFile, plUInt8 uiArchi
   const plUInt32 uiEndMarkerSize = GetEndMarkerSize(uiArchiveVersion);
 
   if (uiEndMarkerSize == 0)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   const void* pStart = ref_memFile.GetReadPointer(uiEndMarkerSize, plMemoryMappedFile::OffsetBase::End);
 
@@ -309,15 +312,15 @@ static plResult VerifyEndMarker(plMemoryMappedFile& ref_memFile, plUInt8 uiArchi
   if (reader.ReadBytes(szMarker, uiEndMarkerSize) != uiEndMarkerSize || !plStringUtils::IsEqual(szMarker, szEndMarker))
   {
     plLog::Error("Archive is corrupt or cut off. End-marker not found.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveUtils::ExtractTOC(plMemoryMappedFile& ref_memFile, plArchiveTOC& ref_toc, plUInt8 uiArchiveVersion)
 {
-  PLASMA_SUCCEED_OR_RETURN(VerifyEndMarker(ref_memFile, uiArchiveVersion));
+  PL_SUCCEED_OR_RETURN(VerifyEndMarker(ref_memFile, uiArchiveVersion));
 
   const plUInt32 uiEndMarkerSize = GetEndMarkerSize(uiArchiveVersion);
   const plUInt32 uiTocMetaSize = GetTocMetaSize(uiArchiveVersion);
@@ -336,7 +339,7 @@ plResult plArchiveUtils::ExtractTOC(plMemoryMappedFile& ref_memFile, plArchiveTO
     if (uiTocSize > 1024 * 1024 * 1024) // 1GB of TOC is enough for ~16M entries...
     {
       plLog::Error("Archive TOC is probably corrupted. Unreasonable TOC size: {0}", plArgFileSize(uiTocSize));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (uiArchiveVersion >= 2)
@@ -354,7 +357,7 @@ plResult plArchiveUtils::ExtractTOC(plMemoryMappedFile& ref_memFile, plArchiveTO
     if (uiExpectedTocHash != uiActualTocHash)
     {
       plLog::Error("Archive TOC is corrupted. Hashes do not match.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -365,11 +368,11 @@ plResult plArchiveUtils::ExtractTOC(plMemoryMappedFile& ref_memFile, plArchiveTO
     if (ref_toc.Deserialize(tocReader, uiArchiveVersion).Failed())
     {
       plLog::Error("Failed to deserialize plArchive TOC");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 namespace ZipFormat
@@ -409,7 +412,7 @@ namespace ZipFormat
   {
     inout_stream >> ref_value.signature >> ref_value.diskNumber >> ref_value.diskWithCD >> ref_value.diskEntries >> ref_value.totalEntries >> ref_value.cdSize;
     inout_stream >> ref_value.cdOffset >> ref_value.commentLength;
-    PLASMA_ASSERT_DEBUG(ref_value.signature == EndOfCDMagicSignature, "ZIP: Corrupt end of central directory header.");
+    PL_ASSERT_DEBUG(ref_value.signature == EndOfCDMagicSignature, "ZIP: Corrupt end of central directory header.");
     return inout_stream;
   }
 
@@ -439,7 +442,8 @@ namespace ZipFormat
     inout_stream >> ref_value.signature >> ref_value.version >> ref_value.versionNeeded >> ref_value.flags >> ref_value.compression >> ref_value.modTime >> ref_value.modDate;
     inout_stream >> ref_value.crc32 >> ref_value.compressedSize >> ref_value.uncompressedSize >> ref_value.fileNameLength >> ref_value.extraFieldLength;
     inout_stream >> ref_value.fileCommentLength >> ref_value.diskNumStart >> ref_value.internalAttr >> ref_value.externalAttr >> ref_value.offsetLocalHeader;
-    PLASMA_ASSERT_DEBUG(ref_value.signature == CDFileMagicSignature, "ZIP: Corrupt central directory file entry header.");
+    PL_IGNORE_UNUSED(CDFileMagicSignature);
+    PL_ASSERT_DEBUG(ref_value.signature == CDFileMagicSignature, "ZIP: Corrupt central directory file entry header.");
     return inout_stream;
   }
 
@@ -462,7 +466,7 @@ namespace ZipFormat
   {
     inout_stream >> ref_value.signature >> ref_value.version >> ref_value.flags >> ref_value.compression >> ref_value.modTime >> ref_value.modDate >> ref_value.crc32;
     inout_stream >> ref_value.compressedSize >> ref_value.uncompressedSize >> ref_value.fileNameLength >> ref_value.extraFieldLength;
-    PLASMA_ASSERT_DEBUG(ref_value.signature == LocalFileMagicSignature, "ZIP: Corrupt local file entry header.");
+    PL_ASSERT_DEBUG(ref_value.signature == LocalFileMagicSignature, "ZIP: Corrupt local file entry header.");
     return inout_stream;
   }
 }; // namespace ZipFormat
@@ -476,9 +480,9 @@ plResult plArchiveUtils::ReadZipHeader(plStreamReader& inout_stream, plUInt8& ou
   if (header == LocalFileMagicSignature)
   {
     out_uiVersion = 0;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveUtils::ExtractZipTOC(plMemoryMappedFile& ref_memFile, plArchiveTOC& ref_toc)
@@ -502,7 +506,7 @@ plResult plArchiveUtils::ExtractZipTOC(plMemoryMappedFile& ref_memFile, plArchiv
       pSearchStart--;
     }
     if (pEndOfCDStart == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plRawMemoryStreamReader tocReader(pEndOfCDStart, EndOfCDHeaderLength);
@@ -549,8 +553,7 @@ plResult plArchiveUtils::ExtractZipTOC(plMemoryMappedFile& ref_memFile, plArchiv
     uiEntryOffset += CDFileHeaderLength + cdfHeader.fileNameLength + cdfHeader.extraFieldLength + cdfHeader.fileCommentLength;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Archive_Implementation_ArchiveUtils);

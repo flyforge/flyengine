@@ -8,25 +8,25 @@
 using plMeshResourceHandle = plTypedResourceHandle<class plMeshResource>;
 using plMaterialResourceHandle = plTypedResourceHandle<class plMaterialResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeMeshFactory final : public plParticleTypeFactory
+class PL_PARTICLEPLUGIN_DLL plParticleTypeMeshFactory final : public plParticleTypeFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeMeshFactory, plParticleTypeFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeMeshFactory, plParticleTypeFactory);
 
 public:
   virtual const plRTTI* GetTypeType() const override;
   virtual void CopyTypeProperties(plParticleType* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plString m_sMesh;
   plString m_sMaterial;
   plString m_sTintColorParameter;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeMesh final : public plParticleType
+class PL_PARTICLEPLUGIN_DLL plParticleTypeMesh final : public plParticleType
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeMesh, plParticleType);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeMesh, plParticleType);
 
 public:
   plParticleTypeMesh();
@@ -38,7 +38,7 @@ public:
   mutable plMaterialResourceHandle m_hMaterial;
   plTempHashedString m_sTintColorParameter;
 
-  virtual void ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const override;
+  virtual void ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const override;
 
 protected:
   virtual void InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements) override;

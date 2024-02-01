@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/SurfaceAsset/SurfaceAssetManager.h>
 #include <EditorPluginAssets/SurfaceAsset/SurfaceAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceAssetDocumentManager, 1, plRTTIDefaultAllocator<plSurfaceAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceAssetDocumentManager, 1, plRTTIDefaultAllocator<plSurfaceAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSurfaceAssetDocumentManager::plSurfaceAssetDocumentManager()
 {
@@ -38,7 +38,7 @@ void plSurfaceAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plSurfaceAssetDocument>())
       {
-        plQtSurfaceAssetDocumentWindow* pDocWnd = new plQtSurfaceAssetDocumentWindow(e.m_pDocument);
+        new plQtSurfaceAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -48,10 +48,9 @@ void plSurfaceAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManag
   }
 }
 
-void plSurfaceAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plSurfaceAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plSurfaceAssetDocument(szPath);
+  out_pDocument = new plSurfaceAssetDocument(sPath);
 }
 
 void plSurfaceAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

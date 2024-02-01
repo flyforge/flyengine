@@ -7,8 +7,6 @@ plGALBuffer::plGALBuffer(const plGALBufferCreationDescription& Description)
 {
 }
 
-plGALBuffer::~plGALBuffer() {}
+plGALBuffer::~plGALBuffer() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_Buffer);

@@ -5,7 +5,7 @@
 
 struct plForwardRenderShadingQuality
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -16,12 +16,12 @@ struct plForwardRenderShadingQuality
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plForwardRenderShadingQuality);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plForwardRenderShadingQuality);
 
 /// \brief A standard forward render pass that renders into the color target.
-class PLASMA_RENDERERCORE_DLL plForwardRenderPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plForwardRenderPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plForwardRenderPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plForwardRenderPass, plRenderPipelinePass);
 
 public:
   plForwardRenderPass(const char* szName = "ForwardRenderPass");
@@ -29,6 +29,8 @@ public:
 
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
 protected:
   virtual void SetupResources(plGALPass* pGALPass, const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs);
@@ -38,7 +40,6 @@ protected:
   virtual void RenderObjects(const plRenderViewContext& renderViewContext) = 0;
 
   plRenderPipelineNodePassThrougPin m_PinColor;
-  plRenderPipelineNodePassThrougPin m_PinVelocity;
   plRenderPipelineNodePassThrougPin m_PinDepthStencil;
 
   plEnum<plForwardRenderShadingQuality> m_ShadingQuality;

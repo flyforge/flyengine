@@ -11,7 +11,7 @@ namespace
     plExpression::Register* m_pRegisters = nullptr;
     plUInt32 m_uiNumInstances = 0;
     plUInt32 m_uiNumSimd4Instances = 0;
-    plArrayPtr<plProcessingStream*> m_Inputs;
+    plArrayPtr<const plProcessingStream*> m_Inputs;
     plArrayPtr<plProcessingStream*> m_Outputs;
     plArrayPtr<const plExpressionFunction*> m_Functions;
     const plExpression::GlobalData* m_pGlobalData = nullptr;
@@ -22,13 +22,15 @@ namespace
 
 #define DEFINE_TARGET_REGISTER()                                                                                                        \
   plExpression::Register* r = context.m_pRegisters + plExpressionByteCode::GetRegisterIndex(pByteCode) * context.m_uiNumSimd4Instances; \
-  plExpression::Register* re = r + context.m_uiNumSimd4Instances;
+  plExpression::Register* re = r + context.m_uiNumSimd4Instances;                                                                       \
+  PL_IGNORE_UNUSED(re);
 
 #define DEFINE_OP_REGISTER(name) \
   const plExpression::Register* name = context.m_pRegisters + plExpressionByteCode::GetRegisterIndex(pByteCode) * context.m_uiNumSimd4Instances;
 
 #define DEFINE_CONSTANT(name)                                                      \
-  const plUInt32 PLASMA_CONCAT(name, Raw) = *pByteCode;                                \
+  const plUInt32 PL_CONCAT(name, Raw) = *pByteCode;                                \
+  PL_IGNORE_UNUSED(PL_CONCAT(name, Raw));                                          \
   const plExpression::Register tmp = plExpressionByteCode::GetConstant(pByteCode); \
   const plExpression::Register* name = &tmp;
 
@@ -37,28 +39,15 @@ namespace
   ++r;                            \
   ++a;
 
-#define DEFINE_UNARY_OP(name, code)                                                    \
-  void PLASMA_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context)  \
-  {                                                                                    \
-    DEFINE_TARGET_REGISTER();                                                          \
-    DEFINE_OP_REGISTER(a);                                                             \
-    while (r != re)                                                                    \
-    {                                                                                  \
-      UNARY_OP_INNER_LOOP(code)                                                        \
-    }                                                                                  \
-  }                                                                                    \
-                                                                                       \
-  void PLASMA_CONCAT(name, _16)(const ByteCodeType*& pByteCode, ExecutionContext& context) \
-  {                                                                                    \
-    DEFINE_TARGET_REGISTER();                                                          \
-    DEFINE_OP_REGISTER(a);                                                             \
-    while (r != re)                                                                    \
-    {                                                                                  \
-      UNARY_OP_INNER_LOOP(code)                                                        \
-      UNARY_OP_INNER_LOOP(code)                                                        \
-      UNARY_OP_INNER_LOOP(code)                                                        \
-      UNARY_OP_INNER_LOOP(code)                                                        \
-    }                                                                                  \
+#define DEFINE_UNARY_OP(name, code)                                                   \
+  void PL_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context) \
+  {                                                                                   \
+    DEFINE_TARGET_REGISTER();                                                         \
+    DEFINE_OP_REGISTER(a);                                                            \
+    while (r != re)                                                                   \
+    {                                                                                 \
+      UNARY_OP_INNER_LOOP(code)                                                       \
+    }                                                                                 \
   }
 
 #define BINARY_OP_INNER_LOOP(code)        \
@@ -72,13 +61,15 @@ namespace
 
 #define DEFINE_BINARY_OP(name, code)                                                                                \
   template <bool RightIsConstant>                                                                                   \
-  void PLASMA_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context)                               \
+  void PL_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context)                               \
   {                                                                                                                 \
     DEFINE_TARGET_REGISTER();                                                                                       \
     DEFINE_OP_REGISTER(a);                                                                                          \
     plUInt32 bRaw;                                                                                                  \
+    PL_IGNORE_UNUSED(bRaw);                                                                                         \
     plExpression::Register bConstant;                                                                               \
     const plExpression::Register* b;                                                                                \
+    PL_IGNORE_UNUSED(b);                                                                                            \
     if constexpr (RightIsConstant)                                                                                  \
     {                                                                                                               \
       bRaw = *pByteCode;                                                                                            \
@@ -103,7 +94,7 @@ namespace
   ++c;
 
 #define DEFINE_TERNARY_OP(name, code)                                                 \
-  void PLASMA_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context) \
+  void PL_CONCAT(name, _4)(const ByteCodeType*& pByteCode, ExecutionContext& context) \
   {                                                                                   \
     DEFINE_TARGET_REGISTER();                                                         \
     DEFINE_OP_REGISTER(a);                                                            \
@@ -212,6 +203,9 @@ namespace
 
   void VM_MovX_C_4(const ByteCodeType*& pByteCode, ExecutionContext& context)
   {
+    PL_WARNING_PUSH()
+    PL_WARNING_DISABLE_MSVC(4189)
+
     DEFINE_TARGET_REGISTER();
     DEFINE_CONSTANT(a);
     while (r != re)
@@ -219,10 +213,12 @@ namespace
       r->i = a->i;
       ++r;
     }
+
+    PL_WARNING_POP()
   }
 
   template <typename ValueType, typename StreamType>
-  PLASMA_ALWAYS_INLINE ValueType ReadInputData(const plUInt8*& ref_pData, plUInt32 uiStride)
+  PL_ALWAYS_INLINE ValueType ReadInputData(const plUInt8*& ref_pData, plUInt32 uiStride)
   {
     ValueType value = *reinterpret_cast<const StreamType*>(ref_pData);
     ref_pData += uiStride;
@@ -273,7 +269,7 @@ namespace
   }
 
   template <typename ValueType, typename StreamType>
-  PLASMA_ALWAYS_INLINE void StoreOutputData(plUInt8*& ref_pData, plUInt32 uiStride, ValueType value)
+  PL_ALWAYS_INLINE void StoreOutputData(plUInt8*& ref_pData, plUInt32 uiStride, ValueType value)
   {
     *reinterpret_cast<StreamType*>(ref_pData) = static_cast<StreamType>(value);
     ref_pData += uiStride;
@@ -340,7 +336,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(input.GetDataType() == plProcessingStream::DataType::Half, "Unsupported input type '{}' for LoadF instruction", plProcessingStream::GetDataTypeName(input.GetDataType()));
+      PL_ASSERT_DEBUG(input.GetDataType() == plProcessingStream::DataType::Half, "Unsupported input type '{}' for LoadF instruction", plProcessingStream::GetDataTypeName(input.GetDataType()));
       LoadInput<plSimdVec4f, float, plFloat16>(reinterpret_cast<plSimdVec4f*>(r), reinterpret_cast<plSimdVec4f*>(re), input, uiNumRemainderInstances);
     }
   }
@@ -366,7 +362,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(input.GetDataType() == plProcessingStream::DataType::Byte, "Unsupported input type '{}' for LoadI instruction", plProcessingStream::GetDataTypeName(input.GetDataType()));
+      PL_ASSERT_DEBUG(input.GetDataType() == plProcessingStream::DataType::Byte, "Unsupported input type '{}' for LoadI instruction", plProcessingStream::GetDataTypeName(input.GetDataType()));
       LoadInput<plSimdVec4i, int, plInt8>(reinterpret_cast<plSimdVec4i*>(r), reinterpret_cast<plSimdVec4i*>(re), input, uiNumRemainderInstances);
     }
   }
@@ -389,7 +385,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(output.GetDataType() == plProcessingStream::DataType::Half, "Unsupported input type '{}' for StoreF instruction", plProcessingStream::GetDataTypeName(output.GetDataType()));
+      PL_ASSERT_DEBUG(output.GetDataType() == plProcessingStream::DataType::Half, "Unsupported input type '{}' for StoreF instruction", plProcessingStream::GetDataTypeName(output.GetDataType()));
       StoreOutput<plSimdVec4f, float, plFloat16>(reinterpret_cast<plSimdVec4f*>(r), reinterpret_cast<plSimdVec4f*>(re), output, uiNumRemainderInstances);
     }
   }
@@ -416,13 +412,16 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(output.GetDataType() == plProcessingStream::DataType::Byte, "Unsupported input type '{}' for StoreI instruction", plProcessingStream::GetDataTypeName(output.GetDataType()));
+      PL_ASSERT_DEBUG(output.GetDataType() == plProcessingStream::DataType::Byte, "Unsupported input type '{}' for StoreI instruction", plProcessingStream::GetDataTypeName(output.GetDataType()));
       StoreOutput<plSimdVec4i, int, plInt8>(reinterpret_cast<plSimdVec4i*>(r), reinterpret_cast<plSimdVec4i*>(re), output, uiNumRemainderInstances);
     }
   }
 
   void VM_Call(const ByteCodeType*& pByteCode, ExecutionContext& context)
   {
+    PL_WARNING_PUSH()
+    PL_WARNING_DISABLE_MSVC(4189)
+
     plUInt32 uiFunctionIndex = plExpressionByteCode::GetRegisterIndex(pByteCode);
     auto& function = *context.m_Functions[uiFunctionIndex];
 
@@ -440,6 +439,8 @@ namespace
     plExpression::Output output = plMakeArrayPtr(r, context.m_uiNumSimd4Instances);
 
     function.m_Func(inputs, output, *context.m_pGlobalData);
+
+    PL_WARNING_POP()
   }
 
   static constexpr OpFunc s_Simd4Funcs[] = {
@@ -599,7 +600,7 @@ namespace
     nullptr, // LastSpecial,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_Simd4Funcs) == plExpressionByteCode::OpCode::Count);
+  static_assert(PL_ARRAY_SIZE(s_Simd4Funcs) == plExpressionByteCode::OpCode::Count);
 
 } // namespace
 

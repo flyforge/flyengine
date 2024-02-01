@@ -10,14 +10,14 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_Age, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_Age>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_Age, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_Age>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_Age, 1, plRTTIDefaultAllocator<plParticleFinalizer_Age>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_Age, 1, plRTTIDefaultAllocator<plParticleFinalizer_Age>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleFinalizerFactory_Age::plParticleFinalizerFactory_Age() {}
+plParticleFinalizerFactory_Age::plParticleFinalizerFactory_Age() = default;
 
 const plRTTI* plParticleFinalizerFactory_Age::GetFinalizerType() const
 {
@@ -71,7 +71,7 @@ void plParticleFinalizer_Age::CreateRequiredStreams()
 
 void plParticleFinalizer_Age::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Age Init");
+  PL_PROFILE_SCOPE("PFX: Age Init");
 
   plFloat16Vec2* pLifeTime = m_pStreamLifeTime->GetWritableData<plFloat16Vec2>();
   const float fLifeScale = plMath::Clamp(GetOwnerEffect()->GetFloatParameter(m_sLifeScaleParameter, 1.0f), 0.0f, 2.0f);
@@ -105,7 +105,7 @@ void plParticleFinalizer_Age::InitializeElements(plUInt64 uiStartIndex, plUInt64
 
 void plParticleFinalizer_Age::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Age");
+  PL_PROFILE_SCOPE("PFX: Age");
 
   plFloat16Vec2* pLifeTime = m_pStreamLifeTime->GetWritableData<plFloat16Vec2>();
 
@@ -141,4 +141,4 @@ void plParticleFinalizer_Age::OnParticleDeath(const plStreamGroupElementRemovedE
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer_Age);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer_Age);

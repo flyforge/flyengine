@@ -5,14 +5,14 @@
 plResult plFileReader::Open(plStringView sFile, plUInt32 uiCacheSize /*= 1024 * 64*/,
   plFileShareMode::Enum fileShareMode /*= plFileShareMode::SharedReads*/, bool bAllowFileEvents /*= true*/)
 {
-  PLASMA_ASSERT_DEV(m_pDataDirReader == nullptr, "The file reader is already open. (File: '{0}')", sFile);
+  PL_ASSERT_DEV(m_pDataDirReader == nullptr, "The file reader is already open. (File: '{0}')", sFile);
 
   uiCacheSize = plMath::Clamp<plUInt32>(uiCacheSize, 1024, 1024 * 1024 * 32);
 
   m_pDataDirReader = GetFileReader(sFile, fileShareMode, bAllowFileEvents);
 
   if (!m_pDataDirReader)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Cache.SetCountUninitialized(uiCacheSize);
 
@@ -20,7 +20,7 @@ plResult plFileReader::Open(plStringView sFile, plUInt32 uiCacheSize /*= 1024 * 
   m_uiBytesCached = m_pDataDirReader->Read(&m_Cache[0], m_Cache.GetCount());
   m_bEOF = m_uiBytesCached > 0 ? false : true;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plFileReader::Close()
@@ -34,7 +34,7 @@ void plFileReader::Close()
 
 plUInt64 plFileReader::ReadBytes(void* pReadBuffer, plUInt64 uiBytesToRead)
 {
-  PLASMA_ASSERT_DEV(m_pDataDirReader != nullptr, "The file has not been opened (successfully).");
+  PL_ASSERT_DEV(m_pDataDirReader != nullptr, "The file has not been opened (successfully).");
   if (m_bEOF)
     return 0;
 
@@ -112,5 +112,3 @@ plUInt64 plFileReader::ReadBytes(void* pReadBuffer, plUInt64 uiBytesToRead)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_FileReader);

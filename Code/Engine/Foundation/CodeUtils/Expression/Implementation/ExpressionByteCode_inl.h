@@ -1,41 +1,46 @@
 
-PLASMA_ALWAYS_INLINE const plExpressionByteCode::StorageType* plExpressionByteCode::GetByteCode() const
+PL_ALWAYS_INLINE const plExpressionByteCode::StorageType* plExpressionByteCode::GetByteCodeStart() const
 {
-  return m_ByteCode.GetData();
+  return m_pByteCode;
 }
 
-PLASMA_ALWAYS_INLINE const plExpressionByteCode::StorageType* plExpressionByteCode::GetByteCodeEnd() const
+PL_ALWAYS_INLINE const plExpressionByteCode::StorageType* plExpressionByteCode::GetByteCodeEnd() const
 {
-  return m_ByteCode.GetData() + m_ByteCode.GetCount();
+  return m_pByteCode + m_uiByteCodeCount;
 }
 
-PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetNumInstructions() const
+PL_ALWAYS_INLINE plArrayPtr<const plExpressionByteCode::StorageType> plExpressionByteCode::GetByteCode() const
+{
+  return plMakeArrayPtr(m_pByteCode, m_uiByteCodeCount);
+}
+
+PL_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetNumInstructions() const
 {
   return m_uiNumInstructions;
 }
 
-PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetNumTempRegisters() const
+PL_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetNumTempRegisters() const
 {
   return m_uiNumTempRegisters;
 }
 
-PLASMA_ALWAYS_INLINE plArrayPtr<const plExpression::StreamDesc> plExpressionByteCode::GetInputs() const
+PL_ALWAYS_INLINE plArrayPtr<const plExpression::StreamDesc> plExpressionByteCode::GetInputs() const
 {
-  return m_Inputs;
+  return plMakeArrayPtr(m_pInputs, m_uiNumInputs);
 }
 
-PLASMA_ALWAYS_INLINE plArrayPtr<const plExpression::StreamDesc> plExpressionByteCode::GetOutputs() const
+PL_ALWAYS_INLINE plArrayPtr<const plExpression::StreamDesc> plExpressionByteCode::GetOutputs() const
 {
-  return m_Outputs;
+  return plMakeArrayPtr(m_pOutputs, m_uiNumOutputs);
 }
 
-PLASMA_ALWAYS_INLINE plArrayPtr<const plExpression::FunctionDesc> plExpressionByteCode::GetFunctions() const
+PL_ALWAYS_INLINE plArrayPtr<const plExpression::FunctionDesc> plExpressionByteCode::GetFunctions() const
 {
-  return m_Functions;
+  return plMakeArrayPtr(m_pFunctions, m_uiNumFunctions);
 }
 
 // static
-PLASMA_ALWAYS_INLINE plExpressionByteCode::OpCode::Enum plExpressionByteCode::GetOpCode(const StorageType*& ref_pByteCode)
+PL_ALWAYS_INLINE plExpressionByteCode::OpCode::Enum plExpressionByteCode::GetOpCode(const StorageType*& ref_pByteCode)
 {
   plUInt32 uiOpCode = *ref_pByteCode;
   ++ref_pByteCode;
@@ -43,7 +48,7 @@ PLASMA_ALWAYS_INLINE plExpressionByteCode::OpCode::Enum plExpressionByteCode::Ge
 }
 
 // static
-PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetRegisterIndex(const StorageType*& ref_pByteCode)
+PL_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetRegisterIndex(const StorageType*& ref_pByteCode)
 {
   plUInt32 uiIndex = *ref_pByteCode;
   ++ref_pByteCode;
@@ -51,7 +56,7 @@ PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetRegisterIndex(const Stora
 }
 
 // static
-PLASMA_ALWAYS_INLINE plExpression::Register plExpressionByteCode::GetConstant(const StorageType*& ref_pByteCode)
+PL_ALWAYS_INLINE plExpression::Register plExpressionByteCode::GetConstant(const StorageType*& ref_pByteCode)
 {
   plExpression::Register r;
   r.i = plSimdVec4i(*ref_pByteCode);
@@ -60,7 +65,7 @@ PLASMA_ALWAYS_INLINE plExpression::Register plExpressionByteCode::GetConstant(co
 }
 
 // static
-PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetFunctionIndex(const StorageType*& ref_pByteCode)
+PL_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetFunctionIndex(const StorageType*& ref_pByteCode)
 {
   plUInt32 uiIndex = *ref_pByteCode;
   ++ref_pByteCode;
@@ -68,7 +73,7 @@ PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetFunctionIndex(const Stora
 }
 
 // static
-PLASMA_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetFunctionArgCount(const StorageType*& ref_pByteCode)
+PL_ALWAYS_INLINE plUInt32 plExpressionByteCode::GetFunctionArgCount(const StorageType*& ref_pByteCode)
 {
   plUInt32 uiArgCount = *ref_pByteCode;
   ++ref_pByteCode;

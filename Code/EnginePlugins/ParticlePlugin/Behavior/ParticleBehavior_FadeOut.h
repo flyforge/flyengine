@@ -2,16 +2,16 @@
 
 #include <ParticlePlugin/Behavior/ParticleBehavior.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_FadeOut final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_FadeOut final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_FadeOut, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_FadeOut, plParticleBehaviorFactory);
 
 public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   // ************************************* PROPERTIES ***********************************
 
@@ -20,9 +20,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_FadeOut final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_FadeOut final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_FadeOut, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_FadeOut, plParticleBehavior);
 
 public:
   float m_fStartAlpha = 1.0f;

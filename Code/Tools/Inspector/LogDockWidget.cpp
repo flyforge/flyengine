@@ -44,7 +44,7 @@ void plQtLogDockWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage(' LOG', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage(' LOG', Msg) == PL_SUCCESS)
   {
     plLogEntry lm;
     plInt8 iEventType = 0;

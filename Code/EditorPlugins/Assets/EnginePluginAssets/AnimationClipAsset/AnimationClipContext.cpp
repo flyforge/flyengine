@@ -7,23 +7,23 @@
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipContext, 1, plRTTIDefaultAllocator<plAnimationClipContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipContext, 1, plRTTIDefaultAllocator<plAnimationClipContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Animation Clip"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Animation Clip"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAnimationClipContext::plAnimationClipContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plAnimationClipContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg0)
+void plAnimationClipContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg0)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pMsg0))
   {
@@ -45,7 +45,7 @@ void plAnimationClipContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* 
       m_sAnimatedMeshToUse = pMsg->m_sPayload;
 
       auto pWorld = m_pWorld;
-      PLASMA_LOCK(pWorld->GetWriteMarker());
+      PL_LOCK(pWorld->GetWriteMarker());
 
       plStringBuilder sAnimClipGuid;
       plConversionUtils::ToString(GetDocumentGuid(), sAnimClipGuid);
@@ -84,7 +84,7 @@ void plAnimationClipContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* 
   if (auto pMsg = plDynamicCast<const plViewRedrawMsgToEngine*>(pMsg0))
   {
     auto pWorld = m_pWorld;
-    PLASMA_LOCK(pWorld->GetWriteMarker());
+    PL_LOCK(pWorld->GetWriteMarker());
 
     plSimpleAnimationComponent* pAnimController;
     if (pWorld->TryGetComponent(m_hAnimControllerComponent, pAnimController))
@@ -106,13 +106,13 @@ void plAnimationClipContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* 
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg0);
+  plEngineProcessDocumentContext::HandleMessage(pMsg0);
 }
 
 void plAnimationClipContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   plGameObjectDesc obj;
 
@@ -124,23 +124,23 @@ void plAnimationClipContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plAnimationClipContext::CreateViewContext()
+plEngineProcessViewContext* plAnimationClipContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plAnimationClipViewContext, this);
+  return PL_DEFAULT_NEW(plAnimationClipViewContext, this);
 }
 
-void plAnimationClipContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plAnimationClipContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plAnimationClipContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plAnimationClipContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
   if (!m_hAnimControllerComponent.IsInvalidated())
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     plSimpleAnimationComponent* pAnimController;
     if (m_pWorld->TryGetComponent(m_hAnimControllerComponent, pAnimController))
@@ -159,16 +159,15 @@ bool plAnimationClipContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewC
 }
 
 
-void plAnimationClipContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plAnimationClipContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_pGameObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pGameObject->UpdateLocalBounds();
     m_pGameObject->UpdateGlobalTransformAndBounds();
@@ -192,7 +191,7 @@ void plAnimationClipContext::QuerySelectionBBox(const PlasmaEditorEngineDocument
 
 void plAnimationClipContext::SetPlaybackPosition(double pos)
 {
-  PLASMA_LOCK(m_pWorld->GetWriteMarker());
+  PL_LOCK(m_pWorld->GetWriteMarker());
 
   plSimpleAnimationComponent* pAnimController;
   if (m_pWorld->TryGetComponent(m_hAnimControllerComponent, pAnimController))

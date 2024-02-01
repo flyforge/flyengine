@@ -10,11 +10,11 @@
 #include <RendererCore/../../../Data/Base/Shaders/Particles/ParticleSystemConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticlePointRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticlePointRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticlePointRenderer, 1, plRTTIDefaultAllocator<plParticlePointRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticlePointRenderer, 1, plRTTIDefaultAllocator<plParticlePointRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticlePointRenderer::plParticlePointRenderer()
@@ -32,9 +32,9 @@ plParticlePointRenderer::~plParticlePointRenderer()
   DestroyParticleDataBuffer(m_hBillboardDataBuffer);
 }
 
-void plParticlePointRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plParticlePointRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plParticlePointRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plParticlePointRenderData>());
 }
 
 void plParticlePointRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -86,4 +86,4 @@ void plParticlePointRenderer::RenderBatch(const plRenderViewContext& renderViewC
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Point_PointRenderer);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Point_PointRenderer);

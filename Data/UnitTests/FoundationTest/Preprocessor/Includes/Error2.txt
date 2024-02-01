@@ -1,3 +1,0 @@
-
-#line 200
-#error This is an error

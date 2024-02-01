@@ -2,7 +2,7 @@
 
 #include <GameEngine/GameEngineDLL.h>
 
-typedef plGenericId<32, 16> plXRSpatialAnchorID;
+using plXRSpatialAnchorID = plGenericId<32, 16>;
 
 /// \brief XR spatial anchors interface.
 ///

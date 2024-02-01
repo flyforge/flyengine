@@ -22,38 +22,38 @@ namespace
       case plProcGenBinaryOperator::Min:
         return plExpressionAST::NodeType::Min;
 
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     return plExpressionAST::NodeType::Invalid;
   }
 
-  plExpressionAST::Node* CreateRandom(plUInt32 uiSeed, plExpressionAST& out_Ast, const plProcGenNodeBase::GraphContext& context)
+  plExpressionAST::Node* CreateRandom(plUInt32 uiSeed, plExpressionAST& out_ast, const plProcGenNodeBase::GraphContext& context)
   {
-    PLASMA_ASSERT_DEV(context.m_OutputType != plProcGenNodeBase::GraphContext::Unknown, "Unkown output type");
+    PL_ASSERT_DEV(context.m_OutputType != plProcGenNodeBase::GraphContext::Unknown, "Unkown output type");
 
     auto pointIndexDataType = context.m_OutputType == plProcGenNodeBase::GraphContext::Placement ? plProcessingStream::DataType::Short : plProcessingStream::DataType::Int;
-    plExpressionAST::Node* pPointIndex = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPointIndex, pointIndexDataType});
+    plExpressionAST::Node* pPointIndex = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPointIndex, pointIndexDataType});
 
-    plExpressionAST::Node* pSeed = out_Ast.CreateFunctionCall(plProcGenExpressionFunctions::s_GetInstanceSeedFunc.m_Desc, plArrayPtr<plExpressionAST::Node*>());
-    pSeed = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pSeed, out_Ast.CreateConstant(uiSeed, plExpressionAST::DataType::Int));
+    plExpressionAST::Node* pSeed = out_ast.CreateFunctionCall(plProcGenExpressionFunctions::s_GetInstanceSeedFunc.m_Desc, plArrayPtr<plExpressionAST::Node*>());
+    pSeed = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pSeed, out_ast.CreateConstant(uiSeed, plExpressionAST::DataType::Int));
 
     plExpressionAST::Node* arguments[] = {pPointIndex, pSeed};
-    return out_Ast.CreateFunctionCall(plDefaultExpressionFunctions::s_RandomFunc.m_Desc, arguments);
+    return out_ast.CreateFunctionCall(plDefaultExpressionFunctions::s_RandomFunc.m_Desc, arguments);
   }
 
-  plExpressionAST::Node* CreateRemapFrom01(plExpressionAST::Node* pInput, float fMin, float fMax, plExpressionAST& out_Ast)
+  plExpressionAST::Node* CreateRemapFrom01(plExpressionAST::Node* pInput, float fMin, float fMax, plExpressionAST& out_ast)
   {
-    auto pOffset = out_Ast.CreateConstant(fMin);
-    auto pScale = out_Ast.CreateConstant(fMax - fMin);
+    auto pOffset = out_ast.CreateConstant(fMin);
+    auto pScale = out_ast.CreateConstant(fMax - fMin);
 
-    auto pValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pInput, pScale);
-    pValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pValue, pOffset);
+    auto pValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pInput, pScale);
+    pValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pValue, pOffset);
 
     return pValue;
   }
 
-  plExpressionAST::Node* CreateRemapTo01WithFadeout(plExpressionAST::Node* pInput, float fMin, float fMax, float fLowerFade, float fUpperFade, plExpressionAST& out_Ast)
+  plExpressionAST::Node* CreateRemapTo01WithFadeout(plExpressionAST::Node* pInput, float fMin, float fMax, float fLowerFade, float fUpperFade, plExpressionAST& out_ast)
   {
     // Note that we need to clamp the scale if it is below eps or we would end up with a division by 0.
     // To counter the clamp we move the lower and upper bounds by eps.
@@ -68,107 +68,124 @@ namespace
     if (fUpperScale < eps)
       fMax = fMax + eps;
 
-    auto pLowerOffset = out_Ast.CreateConstant(fMin);
-    auto pLowerValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Subtract, pInput, pLowerOffset);
-    auto pLowerScale = out_Ast.CreateConstant(plMath::Max(fLowerScale, eps));
-    pLowerValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pLowerValue, pLowerScale);
+    auto pLowerOffset = out_ast.CreateConstant(fMin);
+    auto pLowerValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Subtract, pInput, pLowerOffset);
+    auto pLowerScale = out_ast.CreateConstant(plMath::Max(fLowerScale, eps));
+    pLowerValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pLowerValue, pLowerScale);
 
-    auto pUpperOffset = out_Ast.CreateConstant(fMax);
-    auto pUpperValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Subtract, pUpperOffset, pInput);
-    auto pUpperScale = out_Ast.CreateConstant(plMath::Max(fUpperScale, eps));
-    pUpperValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pUpperValue, pUpperScale);
+    auto pUpperOffset = out_ast.CreateConstant(fMax);
+    auto pUpperValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Subtract, pUpperOffset, pInput);
+    auto pUpperScale = out_ast.CreateConstant(plMath::Max(fUpperScale, eps));
+    pUpperValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pUpperValue, pUpperScale);
 
-    auto pValue = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Min, pLowerValue, pUpperValue);
-    return out_Ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pValue);
+    auto pValue = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Min, pLowerValue, pUpperValue);
+    return out_ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pValue);
+  }
+
+  void AddDefaultInputs(plExpressionAST& out_ast)
+  {
+    out_ast.m_InputNodes.Clear();
+
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionX, plProcessingStream::DataType::Float}));
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionY, plProcessingStream::DataType::Float}));
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionZ, plProcessingStream::DataType::Float}));
+
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sNormalX, plProcessingStream::DataType::Float}));
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sNormalY, plProcessingStream::DataType::Float}));
+    out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sNormalZ, plProcessingStream::DataType::Float}));
   }
 } // namespace
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenNodeBase, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenNodeBase, 1, plRTTINoAllocator)
 {
   flags.Add(plTypeFlags::Abstract);
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenOutput, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGenOutput, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Name", m_sName),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
   flags.Add(plTypeFlags::Abstract);
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plProcGenOutput::Save(plStreamWriter& stream)
+void plProcGenOutput::Save(plStreamWriter& inout_stream)
 {
-  stream << m_sName;
-  stream.WriteArray(m_VolumeTagSetIndices).IgnoreResult();
+  inout_stream << m_sName;
+  inout_stream.WriteArray(m_VolumeTagSetIndices).IgnoreResult();
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_PlacementOutput, 1, plRTTIDefaultAllocator<plProcGen_PlacementOutput>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_PlacementOutput, 1, plRTTIDefaultAllocator<plProcGen_PlacementOutput>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("Objects", m_ObjectsToPlace)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_MEMBER_PROPERTY("Footprint", m_fFootprint)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("MinOffset", m_vMinOffset),
-    PLASMA_MEMBER_PROPERTY("MaxOffset", m_vMaxOffset),
-    PLASMA_MEMBER_PROPERTY("YawRotationSnap", m_YawRotationSnap)->AddAttributes(new plClampValueAttribute(plAngle::Radian(0.0f), plVariant())),
-    PLASMA_MEMBER_PROPERTY("AlignToNormal", m_fAlignToNormal)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("MinScale", m_vMinScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
-    PLASMA_MEMBER_PROPERTY("MaxScale", m_vMaxScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
-    PLASMA_MEMBER_PROPERTY("ColorGradient", m_sColorGradient)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
-    PLASMA_MEMBER_PROPERTY("CullDistance", m_fCullDistance)->AddAttributes(new plDefaultValueAttribute(30.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ENUM_MEMBER_PROPERTY("PlacementMode", plProcPlacementMode, m_PlacementMode),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_MEMBER_PROPERTY("Surface", m_sSurface)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
+    PL_ARRAY_MEMBER_PROPERTY("Objects", m_ObjectsToPlace)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
+    PL_MEMBER_PROPERTY("Footprint", m_fFootprint)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("MinOffset", m_vMinOffset),
+    PL_MEMBER_PROPERTY("MaxOffset", m_vMaxOffset),
+    PL_MEMBER_PROPERTY("YawRotationSnap", m_YawRotationSnap)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromRadian(0.0f), plVariant())),
+    PL_MEMBER_PROPERTY("AlignToNormal", m_fAlignToNormal)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("MinScale", m_vMinScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
+    PL_MEMBER_PROPERTY("MaxScale", m_vMaxScale)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.0f), plVariant())),
+    PL_MEMBER_PROPERTY("ColorGradient", m_sColorGradient)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
+    PL_MEMBER_PROPERTY("CullDistance", m_fCullDistance)->AddAttributes(new plDefaultValueAttribute(30.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ENUM_MEMBER_PROPERTY("PlacementMode", plProcPlacementMode, m_PlacementMode),
+    PL_ENUM_MEMBER_PROPERTY("PlacementPattern", plProcPlacementPattern, m_PlacementPattern),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("Surface", m_sSurface)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
 
-    PLASMA_MEMBER_PROPERTY("Density", m_DensityPin),
-    PLASMA_MEMBER_PROPERTY("Scale", m_ScalePin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Pink))),
-    PLASMA_MEMBER_PROPERTY("ColorIndex", m_ColorIndexPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Violet))),
-    PLASMA_MEMBER_PROPERTY("ObjectIndex", m_ObjectIndexPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Cyan)))
+    PL_MEMBER_PROPERTY("Density", m_DensityPin),
+    PL_MEMBER_PROPERTY("Scale", m_ScalePin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Pink))),
+    PL_MEMBER_PROPERTY("ColorIndex", m_ColorIndexPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Violet))),
+    PL_MEMBER_PROPERTY("ObjectIndex", m_ObjectIndexPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Cyan)))
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("{Active} Placement Output: {Name}"),
     new plCategoryAttribute("Output"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_PlacementOutput::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_PlacementOutput::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "", "Implementation error");
 
-  out_Ast.m_OutputNodes.Clear();
+  AddDefaultInputs(out_ast);
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPointIndex, plProcessingStream::DataType::Short}));
+
+  out_ast.m_OutputNodes.Clear();
 
   // density
   {
     auto pDensity = inputs[0];
     if (pDensity == nullptr)
     {
-      pDensity = out_Ast.CreateConstant(1.0f);
+      pDensity = out_ast.CreateConstant(1.0f);
     }
 
-    out_Ast.m_OutputNodes.PushBack(out_Ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutDensity, plProcessingStream::DataType::Float}, pDensity));
+    out_ast.m_OutputNodes.PushBack(out_ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutDensity, plProcessingStream::DataType::Float}, pDensity));
   }
 
   // scale
@@ -176,10 +193,10 @@ plExpressionAST::Node* plProcGen_PlacementOutput::GenerateExpressionASTNode(plTe
     auto pScale = inputs[1];
     if (pScale == nullptr)
     {
-      pScale = CreateRandom(11.0f, out_Ast, context);
+      pScale = CreateRandom(11.0f, out_ast, ref_context);
     }
 
-    out_Ast.m_OutputNodes.PushBack(out_Ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutScale, plProcessingStream::DataType::Float}, pScale));
+    out_ast.m_OutputNodes.PushBack(out_ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutScale, plProcessingStream::DataType::Float}, pScale));
   }
 
   // color index
@@ -187,14 +204,14 @@ plExpressionAST::Node* plProcGen_PlacementOutput::GenerateExpressionASTNode(plTe
     auto pColorIndex = inputs[2];
     if (pColorIndex == nullptr)
     {
-      pColorIndex = CreateRandom(13.0f, out_Ast, context);
+      pColorIndex = CreateRandom(13.0f, out_ast, ref_context);
     }
 
-    pColorIndex = out_Ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pColorIndex);
-    pColorIndex = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pColorIndex, out_Ast.CreateConstant(255.0f));
-    pColorIndex = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pColorIndex, out_Ast.CreateConstant(0.5f));
+    pColorIndex = out_ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pColorIndex);
+    pColorIndex = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pColorIndex, out_ast.CreateConstant(255.0f));
+    pColorIndex = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pColorIndex, out_ast.CreateConstant(0.5f));
 
-    out_Ast.m_OutputNodes.PushBack(out_Ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutColorIndex, plProcessingStream::DataType::Byte}, pColorIndex));
+    out_ast.m_OutputNodes.PushBack(out_ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutColorIndex, plProcessingStream::DataType::Byte}, pColorIndex));
   }
 
   // object index
@@ -202,79 +219,91 @@ plExpressionAST::Node* plProcGen_PlacementOutput::GenerateExpressionASTNode(plTe
     auto pObjectIndex = inputs[3];
     if (pObjectIndex == nullptr)
     {
-      pObjectIndex = CreateRandom(17.0f, out_Ast, context);
+      pObjectIndex = CreateRandom(17.0f, out_ast, ref_context);
     }
 
-    pObjectIndex = out_Ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pObjectIndex);
-    pObjectIndex = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pObjectIndex, out_Ast.CreateConstant(m_ObjectsToPlace.GetCount() - 1));
-    pObjectIndex = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pObjectIndex, out_Ast.CreateConstant(0.5f));
+    pObjectIndex = out_ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pObjectIndex);
+    pObjectIndex = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Multiply, pObjectIndex, out_ast.CreateConstant(m_ObjectsToPlace.GetCount() - 1));
+    pObjectIndex = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pObjectIndex, out_ast.CreateConstant(0.5f));
 
-    out_Ast.m_OutputNodes.PushBack(out_Ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutObjectIndex, plProcessingStream::DataType::Byte}, pObjectIndex));
+    out_ast.m_OutputNodes.PushBack(out_ast.CreateOutput({plProcGenInternal::ExpressionOutputs::s_sOutObjectIndex, plProcessingStream::DataType::Byte}, pObjectIndex));
   }
 
   return nullptr;
 }
 
-void plProcGen_PlacementOutput::Save(plStreamWriter& stream)
+void plProcGen_PlacementOutput::Save(plStreamWriter& inout_stream)
 {
-  SUPER::Save(stream);
+  SUPER::Save(inout_stream);
 
-  stream.WriteArray(m_ObjectsToPlace).IgnoreResult();
+  inout_stream.WriteArray(m_ObjectsToPlace).IgnoreResult();
 
-  stream << m_fFootprint;
+  inout_stream << m_fFootprint;
 
-  stream << m_vMinOffset;
-  stream << m_vMaxOffset;
+  inout_stream << m_vMinOffset;
+  inout_stream << m_vMaxOffset;
 
   // chunk version 6
-  stream << m_YawRotationSnap;
-  stream << m_fAlignToNormal;
+  inout_stream << m_YawRotationSnap;
+  inout_stream << m_fAlignToNormal;
 
-  stream << m_vMinScale;
-  stream << m_vMaxScale;
+  inout_stream << m_vMinScale;
+  inout_stream << m_vMaxScale;
 
-  stream << m_fCullDistance;
+  inout_stream << m_fCullDistance;
 
-  stream << m_uiCollisionLayer;
+  inout_stream << m_uiCollisionLayer;
 
-  stream << m_sColorGradient;
+  inout_stream << m_sColorGradient;
 
   // chunk version 3
-  stream << m_sSurface;
+  inout_stream << m_sSurface;
 
   // chunk version 5
-  stream << m_PlacementMode;
+  inout_stream << m_PlacementMode;
+
+  // chunk version 7
+  inout_stream << m_PlacementPattern;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_VertexColorOutput, 1, plRTTIDefaultAllocator<plProcGen_VertexColorOutput>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_VertexColorOutput, 1, plRTTIDefaultAllocator<plProcGen_VertexColorOutput>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("R", m_RPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red))),
-    PLASMA_MEMBER_PROPERTY("G", m_GPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Green))),
-    PLASMA_MEMBER_PROPERTY("B", m_BPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue))),
-    PLASMA_MEMBER_PROPERTY("A", m_APin),
+    PL_MEMBER_PROPERTY("R", m_RPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red))),
+    PL_MEMBER_PROPERTY("G", m_GPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Green))),
+    PL_MEMBER_PROPERTY("B", m_BPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue))),
+    PL_MEMBER_PROPERTY("A", m_APin),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("{Active} Vertex Color Output: {Name}"),
     new plCategoryAttribute("Output"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_VertexColorOutput::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_VertexColorOutput::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "", "Implementation error");
 
-  out_Ast.m_OutputNodes.Clear();
+  AddDefaultInputs(out_ast);
+
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorR, plProcessingStream::DataType::Float}));
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorG, plProcessingStream::DataType::Float}));
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorB, plProcessingStream::DataType::Float}));
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorA, plProcessingStream::DataType::Float}));
+
+  out_ast.m_InputNodes.PushBack(out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPointIndex, plProcessingStream::DataType::Int}));
+
+  out_ast.m_OutputNodes.Clear();
 
   plHashedString sOutputNames[4] = {
     plProcGenInternal::ExpressionOutputs::s_sOutColorR,
@@ -283,62 +312,62 @@ plExpressionAST::Node* plProcGen_VertexColorOutput::GenerateExpressionASTNode(pl
     plProcGenInternal::ExpressionOutputs::s_sOutColorA,
   };
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(sOutputNames); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(sOutputNames); ++i)
   {
     auto pInput = inputs[i];
     if (pInput == nullptr)
     {
-      pInput = out_Ast.CreateConstant(0.0f);
+      pInput = out_ast.CreateConstant(0.0f);
     }
 
-    out_Ast.m_OutputNodes.PushBack(out_Ast.CreateOutput({sOutputNames[i], plProcessingStream::DataType::Float}, pInput));
+    out_ast.m_OutputNodes.PushBack(out_ast.CreateOutput({sOutputNames[i], plProcessingStream::DataType::Float}, pInput));
   }
 
   return nullptr;
 }
 
-void plProcGen_VertexColorOutput::Save(plStreamWriter& stream)
+void plProcGen_VertexColorOutput::Save(plStreamWriter& inout_stream)
 {
-  SUPER::Save(stream);
+  SUPER::Save(inout_stream);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Random, 1, plRTTIDefaultAllocator<plProcGen_Random>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Random, 1, plRTTIDefaultAllocator<plProcGen_Random>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Seed", m_iSeed)->AddAttributes(new plClampValueAttribute(-1, plVariant()), new plDefaultValueAttribute(-1), new plMinValueTextAttribute("Auto")),
-    PLASMA_MEMBER_PROPERTY("OutputMin", m_fOutputMin),
-    PLASMA_MEMBER_PROPERTY("OutputMax", m_fOutputMax)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Seed", m_iSeed)->AddAttributes(new plClampValueAttribute(-1, plVariant()), new plDefaultValueAttribute(-1), new plMinValueTextAttribute("Auto")),
+    PL_MEMBER_PROPERTY("OutputMin", m_fOutputMin),
+    PL_MEMBER_PROPERTY("OutputMax", m_fOutputMax)->AddAttributes(new plDefaultValueAttribute(1.0f)),
 
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(OnObjectCreated),
+    PL_FUNCTION_PROPERTY(OnObjectCreated),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Random: {Seed}"),
     new plCategoryAttribute("Math"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_Random::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_Random::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
   float fSeed = m_iSeed < 0 ? m_uiAutoSeed : m_iSeed;
 
-  auto pRandom = CreateRandom(fSeed, out_Ast, context);
-  return CreateRemapFrom01(pRandom, m_fOutputMin, m_fOutputMax, out_Ast);
+  auto pRandom = CreateRandom(fSeed, out_ast, ref_context);
+  return CreateRemapFrom01(pRandom, m_fOutputMin, m_fOutputMax, out_ast);
 }
 
 void plProcGen_Random::OnObjectCreated(const plAbstractObjectNode& node)
@@ -349,98 +378,98 @@ void plProcGen_Random::OnObjectCreated(const plAbstractObjectNode& node)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_PerlinNoise, 1, plRTTIDefaultAllocator<plProcGen_PerlinNoise>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_PerlinNoise, 1, plRTTIDefaultAllocator<plProcGen_PerlinNoise>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Scale", m_Scale)->AddAttributes(new plDefaultValueAttribute(plVec3(10))),
-    PLASMA_MEMBER_PROPERTY("Offset", m_Offset),
-    PLASMA_MEMBER_PROPERTY("NumOctaves", m_uiNumOctaves)->AddAttributes(new plClampValueAttribute(1, 6), new plDefaultValueAttribute(3)),
-    PLASMA_MEMBER_PROPERTY("OutputMin", m_fOutputMin),
-    PLASMA_MEMBER_PROPERTY("OutputMax", m_fOutputMax)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Scale", m_Scale)->AddAttributes(new plDefaultValueAttribute(plVec3(10))),
+    PL_MEMBER_PROPERTY("Offset", m_Offset),
+    PL_MEMBER_PROPERTY("NumOctaves", m_uiNumOctaves)->AddAttributes(new plClampValueAttribute(1, 6), new plDefaultValueAttribute(3)),
+    PL_MEMBER_PROPERTY("OutputMin", m_fOutputMin),
+    PL_MEMBER_PROPERTY("OutputMax", m_fOutputMax)->AddAttributes(new plDefaultValueAttribute(1.0f)),
 
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Perlin Noise"),
     new plCategoryAttribute("Math"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_PerlinNoise::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_PerlinNoise::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
-  plExpressionAST::Node* pPos = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPosition, plProcessingStream::DataType::Float3});
-  pPos = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pPos, out_Ast.CreateConstant(m_Scale, plExpressionAST::DataType::Float3));
-  pPos = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pPos, out_Ast.CreateConstant(m_Offset, plExpressionAST::DataType::Float3));
+  plExpressionAST::Node* pPos = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPosition, plProcessingStream::DataType::Float3});
+  pPos = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Divide, pPos, out_ast.CreateConstant(m_Scale, plExpressionAST::DataType::Float3));
+  pPos = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Add, pPos, out_ast.CreateConstant(m_Offset, plExpressionAST::DataType::Float3));
 
-  auto pPosX = out_Ast.CreateSwizzle(plExpressionAST::VectorComponent::X, pPos);
-  auto pPosY = out_Ast.CreateSwizzle(plExpressionAST::VectorComponent::Y, pPos);
-  auto pPosZ = out_Ast.CreateSwizzle(plExpressionAST::VectorComponent::Z, pPos);
+  auto pPosX = out_ast.CreateSwizzle(plExpressionAST::VectorComponent::X, pPos);
+  auto pPosY = out_ast.CreateSwizzle(plExpressionAST::VectorComponent::Y, pPos);
+  auto pPosZ = out_ast.CreateSwizzle(plExpressionAST::VectorComponent::Z, pPos);
 
-  auto pNumOctaves = out_Ast.CreateConstant(m_uiNumOctaves, plExpressionAST::DataType::Int);
+  auto pNumOctaves = out_ast.CreateConstant(m_uiNumOctaves, plExpressionAST::DataType::Int);
 
   plExpressionAST::Node* arguments[] = {pPosX, pPosY, pPosZ, pNumOctaves};
 
-  auto pNoiseFunc = out_Ast.CreateFunctionCall(plDefaultExpressionFunctions::s_PerlinNoiseFunc.m_Desc, arguments);
+  auto pNoiseFunc = out_ast.CreateFunctionCall(plDefaultExpressionFunctions::s_PerlinNoiseFunc.m_Desc, arguments);
 
-  return CreateRemapFrom01(pNoiseFunc, m_fOutputMin, m_fOutputMax, out_Ast);
+  return CreateRemapFrom01(pNoiseFunc, m_fOutputMin, m_fOutputMax, out_ast);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Blend, 2, plRTTIDefaultAllocator<plProcGen_Blend>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Blend, 2, plRTTIDefaultAllocator<plProcGen_Blend>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Operator", plProcGenBinaryOperator, m_Operator),
-    PLASMA_MEMBER_PROPERTY("InputA", m_fInputValueA)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("InputB", m_fInputValueB)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("ClampOutput", m_bClampOutput),
+    PL_ENUM_MEMBER_PROPERTY("Operator", plProcGenBinaryOperator, m_Operator),
+    PL_MEMBER_PROPERTY("InputA", m_fInputValueA)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("InputB", m_fInputValueB)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("ClampOutput", m_bClampOutput),
 
-    PLASMA_MEMBER_PROPERTY("A", m_InputValueAPin),
-    PLASMA_MEMBER_PROPERTY("B", m_InputValueBPin),
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("A", m_InputValueAPin),
+    PL_MEMBER_PROPERTY("B", m_InputValueBPin),
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("{Operator}({A}, {B})"),
     new plCategoryAttribute("Math"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_Blend::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_Blend::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
   auto pInputA = inputs[0];
   if (pInputA == nullptr)
   {
-    pInputA = out_Ast.CreateConstant(m_fInputValueA);
+    pInputA = out_ast.CreateConstant(m_fInputValueA);
   }
 
   auto pInputB = inputs[1];
   if (pInputB == nullptr)
   {
-    pInputB = out_Ast.CreateConstant(m_fInputValueB);
+    pInputB = out_ast.CreateConstant(m_fInputValueB);
   }
 
-  plExpressionAST::Node* pBlend = out_Ast.CreateBinaryOperator(GetOperator(m_Operator), pInputA, pInputB);
+  plExpressionAST::Node* pBlend = out_ast.CreateBinaryOperator(GetOperator(m_Operator), pInputA, pInputB);
 
   if (m_bClampOutput)
   {
-    pBlend = out_Ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pBlend);
+    pBlend = out_ast.CreateUnaryOperator(plExpressionAST::NodeType::Saturate, pBlend);
   }
 
   return pBlend;
@@ -449,164 +478,164 @@ plExpressionAST::Node* plProcGen_Blend::GenerateExpressionASTNode(plTempHashedSt
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Height, 1, plRTTIDefaultAllocator<plProcGen_Height>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Height, 1, plRTTIDefaultAllocator<plProcGen_Height>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MinHeight", m_fMinHeight)->AddAttributes(new plDefaultValueAttribute(0.0f)),
-    PLASMA_MEMBER_PROPERTY("MaxHeight", m_fMaxHeight)->AddAttributes(new plDefaultValueAttribute(1000.0f)),
-    PLASMA_MEMBER_PROPERTY("LowerFade", m_fLowerFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("UpperFade", m_fUpperFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("MinHeight", m_fMinHeight)->AddAttributes(new plDefaultValueAttribute(0.0f)),
+    PL_MEMBER_PROPERTY("MaxHeight", m_fMaxHeight)->AddAttributes(new plDefaultValueAttribute(1000.0f)),
+    PL_MEMBER_PROPERTY("LowerFade", m_fLowerFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("UpperFade", m_fUpperFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
 
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Height: [{MinHeight}, {MaxHeight}]"),
     new plCategoryAttribute("Input"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_Height::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_Height::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
-  auto pHeight = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionZ, plProcessingStream::DataType::Float});
-  return CreateRemapTo01WithFadeout(pHeight, m_fMinHeight, m_fMaxHeight, m_fLowerFade, m_fUpperFade, out_Ast);
+  auto pHeight = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionZ, plProcessingStream::DataType::Float});
+  return CreateRemapTo01WithFadeout(pHeight, m_fMinHeight, m_fMaxHeight, m_fLowerFade, m_fUpperFade, out_ast);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Slope, 1, plRTTIDefaultAllocator<plProcGen_Slope>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_Slope, 1, plRTTIDefaultAllocator<plProcGen_Slope>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MinSlope", m_MinSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(0.0f))),
-    PLASMA_MEMBER_PROPERTY("MaxSlope", m_MaxSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(60.0f))),
-    PLASMA_MEMBER_PROPERTY("LowerFade", m_fLowerFade)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("UpperFade", m_fUpperFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("MinSlope", m_MinSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(0.0f))),
+    PL_MEMBER_PROPERTY("MaxSlope", m_MaxSlope)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(60.0f))),
+    PL_MEMBER_PROPERTY("LowerFade", m_fLowerFade)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("UpperFade", m_fUpperFade)->AddAttributes(new plDefaultValueAttribute(0.2f), new plClampValueAttribute(0.0f, 1.0f)),
 
 
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Slope: [{MinSlope}, {MaxSlope}]"),
     new plCategoryAttribute("Input"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_Slope::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_Slope::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
-  auto pNormalZ = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sNormalZ, plProcessingStream::DataType::Float});
+  auto pNormalZ = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sNormalZ, plProcessingStream::DataType::Float});
   // acos explodes for values slightly larger than 1 so make sure to clamp before
-  auto pClampedNormalZ = out_Ast.CreateBinaryOperator(plExpressionAST::NodeType::Min, out_Ast.CreateConstant(1.0f), pNormalZ);
-  auto pAngle = out_Ast.CreateUnaryOperator(plExpressionAST::NodeType::ACos, pClampedNormalZ);
-  return CreateRemapTo01WithFadeout(pAngle, m_MinSlope.GetRadian(), m_MaxSlope.GetRadian(), m_fLowerFade, m_fUpperFade, out_Ast);
+  auto pClampedNormalZ = out_ast.CreateBinaryOperator(plExpressionAST::NodeType::Min, out_ast.CreateConstant(1.0f), pNormalZ);
+  auto pAngle = out_ast.CreateUnaryOperator(plExpressionAST::NodeType::ACos, pClampedNormalZ);
+  return CreateRemapTo01WithFadeout(pAngle, m_MinSlope.GetRadian(), m_MaxSlope.GetRadian(), m_fLowerFade, m_fUpperFade, out_ast);
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_MeshVertexColor, 1, plRTTIDefaultAllocator<plProcGen_MeshVertexColor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_MeshVertexColor, 1, plRTTIDefaultAllocator<plProcGen_MeshVertexColor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("R", m_RPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red))),
-    PLASMA_MEMBER_PROPERTY("G", m_GPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Green))),
-    PLASMA_MEMBER_PROPERTY("B", m_BPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue))),
-    PLASMA_MEMBER_PROPERTY("A", m_APin),
+    PL_MEMBER_PROPERTY("R", m_RPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red))),
+    PL_MEMBER_PROPERTY("G", m_GPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Green))),
+    PL_MEMBER_PROPERTY("B", m_BPin)->AddAttributes(new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue))),
+    PL_MEMBER_PROPERTY("A", m_APin),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Mesh Vertex Color"),
     new plCategoryAttribute("Input"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_MeshVertexColor::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_MeshVertexColor::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
   if (sOutputName == "R")
   {
-    return out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorR, plProcessingStream::DataType::Float});
+    return out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorR, plProcessingStream::DataType::Float});
   }
   else if (sOutputName == "G")
   {
-    return out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorG, plProcessingStream::DataType::Float});
+    return out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorG, plProcessingStream::DataType::Float});
   }
   else if (sOutputName == "B")
   {
-    return out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorB, plProcessingStream::DataType::Float});
+    return out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorB, plProcessingStream::DataType::Float});
   }
   else
   {
-    PLASMA_ASSERT_DEBUG(sOutputName == "A", "Implementation error");
-    return out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorA, plProcessingStream::DataType::Float});
+    PL_ASSERT_DEBUG(sOutputName == "A", "Implementation error");
+    return out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sColorA, plProcessingStream::DataType::Float});
   }
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_ApplyVolumes, 1, plRTTIDefaultAllocator<plProcGen_ApplyVolumes>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcGen_ApplyVolumes, 1, plRTTIDefaultAllocator<plProcGen_ApplyVolumes>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_SET_MEMBER_PROPERTY("IncludeTags", m_IncludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_SET_MEMBER_PROPERTY("IncludeTags", m_IncludeTags)->AddAttributes(new plTagSetWidgetAttribute("Default")),
 
-    PLASMA_MEMBER_PROPERTY("InputValue", m_fInputValue),
+    PL_MEMBER_PROPERTY("InputValue", m_fInputValue),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("ImageVolumeMode", plProcVolumeImageMode, m_ImageVolumeMode),
-    PLASMA_MEMBER_PROPERTY("RefColor", m_RefColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ENUM_MEMBER_PROPERTY("ImageVolumeMode", plProcVolumeImageMode, m_ImageVolumeMode),
+    PL_MEMBER_PROPERTY("RefColor", m_RefColor)->AddAttributes(new plExposeColorAlphaAttribute()),
 
-    PLASMA_MEMBER_PROPERTY("In", m_InputValuePin),
-    PLASMA_MEMBER_PROPERTY("Value", m_OutputValuePin)
+    PL_MEMBER_PROPERTY("In", m_InputValuePin),
+    PL_MEMBER_PROPERTY("Value", m_OutputValuePin)
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Volumes: {IncludeTags}"),
     new plCategoryAttribute("Modifiers"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plExpressionAST::Node* plProcGen_ApplyVolumes::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context)
+plExpressionAST::Node* plProcGen_ApplyVolumes::GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context)
 {
-  PLASMA_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
+  PL_ASSERT_DEBUG(sOutputName == "Value", "Implementation error");
 
-  plUInt32 tagSetIndex = context.m_SharedData.AddTagSet(m_IncludeTags);
-  PLASMA_ASSERT_DEV(tagSetIndex <= 255, "Too many tag sets");
-  if (!context.m_VolumeTagSetIndices.Contains(tagSetIndex))
+  plUInt32 tagSetIndex = ref_context.m_SharedData.AddTagSet(m_IncludeTags);
+  PL_ASSERT_DEV(tagSetIndex <= 255, "Too many tag sets");
+  if (!ref_context.m_VolumeTagSetIndices.Contains(tagSetIndex))
   {
-    context.m_VolumeTagSetIndices.PushBack(tagSetIndex);
+    ref_context.m_VolumeTagSetIndices.PushBack(tagSetIndex);
   }
 
-  auto pPosX = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionX, plProcessingStream::DataType::Float});
-  auto pPosY = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionY, plProcessingStream::DataType::Float});
-  auto pPosZ = out_Ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionZ, plProcessingStream::DataType::Float});
+  auto pPosX = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionX, plProcessingStream::DataType::Float});
+  auto pPosY = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionY, plProcessingStream::DataType::Float});
+  auto pPosZ = out_ast.CreateInput({plProcGenInternal::ExpressionInputs::s_sPositionZ, plProcessingStream::DataType::Float});
 
   auto pInput = inputs[0];
   if (pInput == nullptr)
   {
-    pInput = out_Ast.CreateConstant(m_fInputValue);
+    pInput = out_ast.CreateConstant(m_fInputValue);
   }
 
   plExpressionAST::Node* arguments[] = {
@@ -614,15 +643,15 @@ plExpressionAST::Node* plProcGen_ApplyVolumes::GenerateExpressionASTNode(plTempH
     pPosY,
     pPosZ,
     pInput,
-    out_Ast.CreateConstant(tagSetIndex, plExpressionAST::DataType::Int),
-    out_Ast.CreateConstant(m_ImageVolumeMode.GetValue(), plExpressionAST::DataType::Int),
-    out_Ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.r)),
-    out_Ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.g)),
-    out_Ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.b)),
-    out_Ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.a)),
+    out_ast.CreateConstant(tagSetIndex, plExpressionAST::DataType::Int),
+    out_ast.CreateConstant(m_ImageVolumeMode.GetValue(), plExpressionAST::DataType::Int),
+    out_ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.r)),
+    out_ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.g)),
+    out_ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.b)),
+    out_ast.CreateConstant(plMath::ColorByteToFloat(m_RefColor.a)),
   };
 
-  return out_Ast.CreateFunctionCall(plProcGenExpressionFunctions::s_ApplyVolumesFunc.m_Desc, arguments);
+  return out_ast.CreateFunctionCall(plProcGenExpressionFunctions::s_ApplyVolumesFunc.m_Desc, arguments);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -640,7 +669,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pMode = pNode->FindProperty("Mode");
     if (pMode && pMode->m_Value.IsA<plString>())

@@ -50,7 +50,7 @@ namespace
     }
     if (!pBlock->m_Graph)
     {
-      pBlock->m_Graph = PLASMA_DEFAULT_NEW(plAbstractObjectGraph);
+      pBlock->m_Graph = PL_DEFAULT_NEW(plAbstractObjectGraph);
     }
     return pBlock;
   }
@@ -139,14 +139,14 @@ static void ReadGraph(plAbstractObjectGraph* pGraph, const plOpenDdlReaderElemen
 
     if (pGuid == nullptr || pType == nullptr || pProps == nullptr)
     {
-      PLASMA_REPORT_FAILURE("Object contains invalid elements");
+      PL_REPORT_FAILURE("Object contains invalid elements");
       continue;
     }
 
     plUuid guid;
     if (plOpenDdlUtils::ConvertToUuid(pGuid, guid).Failed())
     {
-      PLASMA_REPORT_FAILURE("Object has an invalid guid");
+      PL_REPORT_FAILURE("Object has an invalid guid");
       continue;
     }
 
@@ -185,7 +185,7 @@ plResult plAbstractGraphDdlSerializer::Read(
   if (reader.ParseDocument(inout_stream, 0, plLog::GetThreadLocalLogSystem()).Failed())
   {
     plLog::Error("Failed to parse DDL graph");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   return Read(reader.GetRootElement(), pGraph, pTypesGraph, bApplyPatches);
@@ -203,13 +203,13 @@ plResult plAbstractGraphDdlSerializer::Read(const plOpenDdlReaderElement* pRootE
   else
   {
     plLog::Error("DDL graph does not contain an 'Objects' root object");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plAbstractObjectGraph* pTempTypesGraph = pTypesGraph;
   if (pTempTypesGraph == nullptr)
   {
-    pTempTypesGraph = PLASMA_DEFAULT_NEW(plAbstractObjectGraph);
+    pTempTypesGraph = PL_DEFAULT_NEW(plAbstractObjectGraph);
   }
   const plOpenDdlReaderElement* pTypes = pRootElement->FindChildOfType("Types");
   if (pTypes != nullptr)
@@ -225,9 +225,9 @@ plResult plAbstractGraphDdlSerializer::Read(const plOpenDdlReaderElement* pRootE
   }
 
   if (pTypesGraph == nullptr)
-    PLASMA_DEFAULT_DELETE(pTempTypesGraph);
+    PL_DEFAULT_DELETE(pTempTypesGraph);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAbstractGraphDdlSerializer::ReadBlocks(plStreamReader& stream, plHybridArray<plSerializedBlock, 3>& blocks)
@@ -236,7 +236,7 @@ plResult plAbstractGraphDdlSerializer::ReadBlocks(plStreamReader& stream, plHybr
   if (reader.ParseDocument(stream, 0, plLog::GetThreadLocalLogSystem()).Failed())
   {
     plLog::Error("Failed to parse DDL graph");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plOpenDdlReaderElement* pRoot = reader.GetRootElement();
@@ -245,10 +245,10 @@ plResult plAbstractGraphDdlSerializer::ReadBlocks(plStreamReader& stream, plHybr
     plSerializedBlock* pBlock = GetOrCreateBlock(blocks, pChild->GetCustomType());
     ReadGraph(pBlock->m_Graph.Borrow(), pChild);
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-#define PLASMA_DOCUMENT_VERSION 2
+#define PL_DOCUMENT_VERSION 2
 
 void plAbstractGraphDdlSerializer::WriteDocument(plStreamWriter& inout_stream, const plAbstractObjectGraph* pHeader, const plAbstractObjectGraph* pGraph,
   const plAbstractObjectGraph* pTypes, bool bCompactMode, plOpenDdlWriter::TypeStringMode typeMode)
@@ -263,7 +263,7 @@ void plAbstractGraphDdlSerializer::WriteDocument(plStreamWriter& inout_stream, c
     writer.SetIndentation(-1);
 
   plStringBuilder sHeaderVersion;
-  sHeaderVersion.Format("HeaderV{0}", (int)PLASMA_DOCUMENT_VERSION);
+  sHeaderVersion.SetFormat("HeaderV{0}", (int)PL_DOCUMENT_VERSION);
   WriteGraph(writer, pHeader, sHeaderVersion);
   WriteGraph(writer, pGraph, "Objects");
   WriteGraph(writer, pTypes, "Types");
@@ -275,7 +275,7 @@ plResult plAbstractGraphDdlSerializer::ReadDocument(plStreamReader& inout_stream
   plHybridArray<plSerializedBlock, 3> blocks;
   if (ReadBlocks(inout_stream, blocks).Failed())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plInt32 iVersion = 2;
@@ -285,7 +285,7 @@ plResult plAbstractGraphDdlSerializer::ReadDocument(plStreamReader& inout_stream
   if (!pOB)
   {
     plLog::Error("No 'Objects' block in document");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   if (!pTB && !pHB)
   {
@@ -299,7 +299,7 @@ plResult plAbstractGraphDdlSerializer::ReadDocument(plStreamReader& inout_stream
   {
     // Move header into its own graph.
     plStringBuilder sHeaderVersion;
-    sHeaderVersion.Format("HeaderV{0}", iVersion);
+    sHeaderVersion.SetFormat("HeaderV{0}", iVersion);
     pHB = GetOrCreateBlock(blocks, sHeaderVersion);
     plAbstractObjectGraph& graph = *pOB->m_Graph.Borrow();
     if (auto* pHeaderNode = graph.GetNodeByName("Header"))
@@ -325,7 +325,7 @@ plResult plAbstractGraphDdlSerializer::ReadDocument(plStreamReader& inout_stream
     ref_pTypes = std::move(pTB->m_Graph);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // This is a handcrafted DDL reader that ignores everything that is not an 'AssetInfo' object
@@ -425,8 +425,8 @@ plResult plAbstractGraphDdlSerializer::ReadHeader(plStreamReader& inout_stream, 
   HeaderReader reader;
   if (reader.ParseDocument(inout_stream, 0, plLog::GetThreadLocalLogSystem()).Failed())
   {
-    PLASMA_REPORT_FAILURE("Failed to parse DDL graph");
-    return PLASMA_FAILURE;
+    PL_REPORT_FAILURE("Failed to parse DDL graph");
+    return PL_FAILURE;
   }
 
   const plOpenDdlReaderElement* pObjects = nullptr;
@@ -445,12 +445,10 @@ plResult plAbstractGraphDdlSerializer::ReadHeader(plStreamReader& inout_stream, 
   }
   else
   {
-    PLASMA_REPORT_FAILURE("DDL graph does not contain an 'Objects' root object");
-    return PLASMA_FAILURE;
+    PL_REPORT_FAILURE("DDL graph does not contain an 'Objects' root object");
+    return PL_FAILURE;
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_DdlSerializer);

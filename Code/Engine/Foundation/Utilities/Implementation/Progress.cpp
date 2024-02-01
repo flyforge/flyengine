@@ -21,7 +21,7 @@ float plProgress::GetCompletion() const
 
 void plProgress::SetCompletion(float fCompletion)
 {
-  PLASMA_ASSERT_DEV(fCompletion >= 0.0f && fCompletion <= 1.0f, "Completion value {0} is out of valid range", fCompletion);
+  PL_ASSERT_DEV(fCompletion >= 0.0f && fCompletion <= 1.0f, "Completion value {0} is out of valid range", fCompletion);
 
   m_fCurrentCompletion = fCompletion;
 
@@ -125,7 +125,7 @@ void plProgress::SetGlobalProgressbar(plProgress* pProgress)
 
 plProgressRange::plProgressRange(plStringView sDisplayText, plUInt32 uiSteps, bool bAllowCancel, plProgress* pProgressbar /*= nullptr*/)
 {
-  PLASMA_ASSERT_DEV(uiSteps > 0, "Every progress range must have at least one step to complete");
+  PL_ASSERT_DEV(uiSteps > 0, "Every progress range must have at least one step to complete");
 
   m_iCurrentStep = -1;
   m_fWeightedCompletion = -1.0;
@@ -146,7 +146,7 @@ void plProgressRange::Init(plStringView sDisplayText, bool bAllowCancel, plProgr
   else
     m_pProgressbar = pProgressbar;
 
-  PLASMA_ASSERT_DEV(m_pProgressbar != nullptr, "No global progress-bar context available.");
+  PL_ASSERT_DEV(m_pProgressbar != nullptr, "No global progress-bar context available.");
 
   m_bAllowCancel = bAllowCancel;
   m_sDisplayText = sDisplayText;
@@ -179,7 +179,7 @@ plProgress* plProgressRange::GetProgressbar() const
 
 void plProgressRange::SetStepWeighting(plUInt32 uiStep, float fWeight)
 {
-  PLASMA_ASSERT_DEV(m_fSummedWeight > 0.0, "This function is only supported if ProgressRange was initialized with steps");
+  PL_ASSERT_DEV(m_fSummedWeight > 0.0, "This function is only supported if ProgressRange was initialized with steps");
 
   m_fSummedWeight -= GetStepWeight(uiStep);
   m_fSummedWeight += fWeight;
@@ -200,14 +200,14 @@ void plProgressRange::ComputeCurStepBaseAndRange(double& out_base, double& out_r
   out_range = internalRange * m_fPercentageRange;
   out_base = m_fPercentageBase + (internalBase * m_fPercentageRange);
 
-  PLASMA_ASSERT_DEBUG(out_base <= 1.0f, "Invalid range");
-  PLASMA_ASSERT_DEBUG(out_range <= 1.0f, "Invalid range");
-  PLASMA_ASSERT_DEBUG(out_base + out_range <= 1.0f, "Invalid range");
+  PL_ASSERT_DEBUG(out_base <= 1.0f, "Invalid range");
+  PL_ASSERT_DEBUG(out_range <= 1.0f, "Invalid range");
+  PL_ASSERT_DEBUG(out_base + out_range <= 1.0f, "Invalid range");
 }
 
 bool plProgressRange::BeginNextStep(plStringView sStepDisplayText, plUInt32 uiNumSteps)
 {
-  PLASMA_ASSERT_DEV(m_fSummedWeight > 0.0, "This function is only supported if ProgressRange was initialized with steps");
+  PL_ASSERT_DEV(m_fSummedWeight > 0.0, "This function is only supported if ProgressRange was initialized with steps");
 
   m_sStepDisplayText = sStepDisplayText;
 
@@ -227,7 +227,7 @@ bool plProgressRange::BeginNextStep(plStringView sStepDisplayText, plUInt32 uiNu
 
 bool plProgressRange::SetCompletion(double fCompletionFactor)
 {
-  PLASMA_ASSERT_DEV(m_fSummedWeight == 0.0, "This function is only supported if ProgressRange was initialized without steps");
+  PL_ASSERT_DEV(m_fSummedWeight == 0.0, "This function is only supported if ProgressRange was initialized without steps");
 
   const double finalCompletion = m_fPercentageBase + fCompletionFactor * m_fPercentageRange;
 
@@ -257,5 +257,3 @@ bool plProgressRange::WasCanceled() const
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_Progress);

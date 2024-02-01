@@ -14,11 +14,11 @@ struct plRenderWorldRenderEvent;
 struct plMsgExtractRenderData;
 struct plReflectionProbeDesc;
 class plReflectionProbeRenderData;
-typedef plGenericId<24, 8> plReflectionProbeId;
+using plReflectionProbeId = plGenericId<24, 8>;
 class plReflectionProbeComponentBase;
 class plSkyLightComponent;
 
-class PLASMA_RENDERERCORE_DLL plReflectionPool
+class PL_RENDERERCORE_DLL plReflectionPool
 {
 public:
   //Probes
@@ -41,7 +41,7 @@ public:
   static plGALTextureHandle GetSkyIrradianceTexture();
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, ReflectionPool);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, ReflectionPool);
 
   static void OnEngineStartup();
   static void OnEngineShutdown();

@@ -10,12 +10,12 @@
 #include <Foundation/Utilities/ConversionUtils.h>
 
 // clang-format off
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plCVar);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plCVar);
 
 // The CVars need to be saved and loaded whenever plugins are loaded and unloaded.
 // Therefore we register as early as possible (Base Startup) at the plugin system,
 // to be informed about plugin changes.
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, CVars)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, CVars)
 
   // for saving and loading we need the filesystem, so make sure we are initialized after
   // and shutdown before the filesystem is
@@ -49,7 +49,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, CVars)
   // The user is responsible to call 'plCVar::SetStorageFolder' to define where the CVars are
   // actually stored. That call will automatically load all CVar states.
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
@@ -109,11 +109,7 @@ plCVar::plCVar(plStringView sName, plBitflags<plCVarFlags> Flags, plStringView s
   , m_sDescription(sDescription)
   , m_Flags(Flags)
 {
-  // 'RequiresRestart' only works together with 'Save'
-  if (m_Flags.IsAnySet(plCVarFlags::RequiresRestart))
-    m_Flags.Add(plCVarFlags::Save);
-
-  PLASMA_ASSERT_DEV(!m_sDescription.IsEmpty(), "Please add a useful description for CVar '{}'.", sName);
+  PL_ASSERT_DEV(!m_sDescription.IsEmpty(), "Please add a useful description for CVar '{}'.", sName);
 }
 
 plCVar* plCVar::FindCVarByName(plStringView sName)
@@ -122,7 +118,7 @@ plCVar* plCVar::FindCVarByName(plStringView sName)
 
   while (pCVar)
   {
-    if (pCVar->GetName().IsEqual_NoCase(sName))
+    if (pCVar->GetName() == sName)
       return pCVar;
 
     pCVar = pCVar->GetNextInstance();
@@ -190,7 +186,7 @@ void plCVar::SaveCVars()
   while (it.IsValid())
   {
     // create the plugin specific file
-    sTemp.Format("{0}/CVars_{1}.cfg", s_sStorageFolder, it.Key());
+    sTemp.SetFormat("{0}/CVars_{1}.cfg", s_sStorageFolder, it.Key());
 
     SaveCVarsToFileInternal(sTemp, it.Value());
 
@@ -203,7 +199,7 @@ void plCVar::SaveCVarsToFileInternal(plStringView path, const plDynamicArray<plC
 {
   plStringBuilder sTemp;
   plFileWriter File;
-  if (File.Open(path.GetData(sTemp)) == PLASMA_SUCCESS)
+  if (File.Open(path.GetData(sTemp)) == PL_SUCCESS)
   {
     // write one line for each cvar, to save its current value
     for (plUInt32 var = 0; var < vars.GetCount(); ++var)
@@ -215,29 +211,29 @@ void plCVar::SaveCVarsToFileInternal(plStringView path, const plDynamicArray<plC
         case plCVarType::Int:
         {
           plCVarInt* pInt = (plCVarInt*)pCVar;
-          sTemp.Format("{0} = {1}\n", pCVar->GetName(), pInt->GetValue(plCVarValue::Restart));
+          sTemp.SetFormat("{0} = {1}\n", pCVar->GetName(), pInt->GetValue(plCVarValue::DelayedSync));
         }
         break;
         case plCVarType::Bool:
         {
           plCVarBool* pBool = (plCVarBool*)pCVar;
-          sTemp.Format("{0} = {1}\n", pCVar->GetName(), pBool->GetValue(plCVarValue::Restart) ? "true" : "false");
+          sTemp.SetFormat("{0} = {1}\n", pCVar->GetName(), pBool->GetValue(plCVarValue::DelayedSync) ? "true" : "false");
         }
         break;
         case plCVarType::Float:
         {
           plCVarFloat* pFloat = (plCVarFloat*)pCVar;
-          sTemp.Format("{0} = {1}\n", pCVar->GetName(), pFloat->GetValue(plCVarValue::Restart));
+          sTemp.SetFormat("{0} = {1}\n", pCVar->GetName(), pFloat->GetValue(plCVarValue::DelayedSync));
         }
         break;
         case plCVarType::String:
         {
           plCVarString* pString = (plCVarString*)pCVar;
-          sTemp.Format("{0} = \"{1}\"\n", pCVar->GetName(), pString->GetValue(plCVarValue::Restart));
+          sTemp.SetFormat("{0} = \"{1}\"\n", pCVar->GetName(), pString->GetValue(plCVarValue::DelayedSync));
         }
         break;
         default:
-          PLASMA_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
+          PL_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
           break;
       }
 
@@ -258,7 +254,7 @@ static plResult ParseLine(const plString& sLine, plStringBuilder& out_sVarName, 
   const char* szSign = sLine.FindSubString("=");
 
   if (szSign == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   {
     plStringView sSubString(sLine.GetData(), szSign);
@@ -293,7 +289,7 @@ static plResult ParseLine(const plString& sLine, plStringBuilder& out_sVarName, 
     out_sVarValue = sSubString;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plCVar::LoadCVarsFromFile(bool bOnlyNewOnes, bool bSetAsCurrentValue, plDynamicArray<plCVar*>* pOutCVars)
@@ -336,7 +332,7 @@ void plCVar::LoadCVarsFromFile(bool bOnlyNewOnes, bool bSetAsCurrentValue, plDyn
     while (it.IsValid())
     {
       // create the plugin specific file
-      sTemp.Format("{0}/CVars_{1}.cfg", s_sStorageFolder, it.Key());
+      sTemp.SetFormat("{0}/CVars_{1}.cfg", s_sStorageFolder, it.Key());
 
       LoadCVarsFromFileInternal(sTemp.GetView(), it.Value(), bOnlyNewOnes, bSetAsCurrentValue, pOutCVars);
 
@@ -372,7 +368,7 @@ void plCVar::LoadCVarsFromFileInternal(plStringView path, const plDynamicArray<p
   plFileReader File;
   plStringBuilder sTemp;
 
-  if (File.Open(path.GetData(sTemp)) == PLASMA_SUCCESS)
+  if (File.Open(path.GetData(sTemp)) == PL_SUCCESS)
   {
     plStringBuilder sContent;
     sContent.ReadAll(File);
@@ -388,7 +384,7 @@ void plCVar::LoadCVarsFromFileInternal(plStringView path, const plDynamicArray<p
 
     for (const plString& sLine : Lines)
     {
-      if (ParseLine(sLine, sVarName, sVarValue) == PLASMA_FAILURE)
+      if (ParseLine(sLine, sVarName, sVarValue) == PL_FAILURE)
         continue;
 
       // now find a variable with the same name
@@ -443,7 +439,7 @@ void plCVar::LoadCVarsFromFileInternal(plStringView path, const plDynamicArray<p
           }
           break;
           default:
-            PLASMA_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
+            PL_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
             break;
         }
 
@@ -453,7 +449,7 @@ void plCVar::LoadCVarsFromFileInternal(plStringView path, const plDynamicArray<p
         }
 
         if (bSetAsCurrentValue)
-          pCVar->SetToRestartValue();
+          pCVar->SetToDelayedSyncValue();
       }
     }
   }
@@ -530,12 +526,12 @@ void plCVar::LoadCVarsFromCommandLine(bool bOnlyNewOnes /*= true*/, bool bSetAsC
         }
         break;
         default:
-          PLASMA_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
+          PL_REPORT_FAILURE("Unknown CVar Type: {0}", pCVar->GetType());
           break;
       }
 
       if (bSetAsCurrentValue)
-        pCVar->SetToRestartValue();
+        pCVar->SetToDelayedSyncValue();
     }
   }
 }
@@ -553,4 +549,4 @@ void plCVar::ListOfCVarsChanged(plStringView sSetPluginNameTo)
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Configuration_Implementation_CVar);
+PL_STATICLINK_FILE(Foundation, Foundation_Configuration_Implementation_CVar);

@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
-class PLASMA_RENDERERCORE_DLL plMsaaResolvePass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plMsaaResolvePass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMsaaResolvePass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plMsaaResolvePass, plRenderPipelinePass);
 
 public:
   plMsaaResolvePass();
@@ -19,7 +19,7 @@ protected:
   plRenderPipelineNodeInputPin m_PinInput;
   plRenderPipelineNodeOutputPin m_PinOutput;
 
-  bool m_bIsDepth;
-  plGALMSAASampleCount::Enum m_MsaaSampleCount;
+  bool m_bIsDepth = false;
+  plGALMSAASampleCount::Enum m_MsaaSampleCount = plGALMSAASampleCount::None;
   plShaderResourceHandle m_hDepthResolveShader;
 };

@@ -14,17 +14,17 @@ namespace plModelImporter2
 
     if (sFile.HasExtension(".fbx") || sFile.HasExtension(".obj") || sFile.HasExtension(".gltf") || sFile.HasExtension(".glb") || sFile.HasExtension(".blend"))
     {
-      return PLASMA_DEFAULT_NEW(ImporterAssimp);
+      return PL_DEFAULT_NEW(ImporterAssimp);
     }
 
     if (sFile.HasExtension(".bsp"))
     {
-      return PLASMA_DEFAULT_NEW(ImporterSourceBSP);
+      return PL_DEFAULT_NEW(ImporterSourceBSP);
     }
 
     if (sFile.HasExtension(".vox"))
     {
-      return PLASMA_DEFAULT_NEW(ImporterMagicaVoxel);
+      return PL_DEFAULT_NEW(ImporterMagicaVoxel);
     }
 
     return nullptr;

@@ -9,7 +9,7 @@
 #include <Foundation/Types/UniquePtr.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 
-class PlasmaEditorEngineConnection;
+class plEditorEngineConnection;
 class plDocument;
 class plDocumentObject;
 struct plDocumentObjectPropertyEvent;
@@ -17,13 +17,13 @@ struct plDocumentObjectStructureEvent;
 class plQtEngineDocumentWindow;
 class plAssetDocument;
 
-class PLASMA_EDITORFRAMEWORK_DLL PlasmaEditorEngineProcessConnection
+class PL_EDITORFRAMEWORK_DLL plEditorEngineProcessConnection
 {
-  PLASMA_DECLARE_SINGLETON(PlasmaEditorEngineProcessConnection);
+  PL_DECLARE_SINGLETON(plEditorEngineProcessConnection);
 
 public:
-  PlasmaEditorEngineProcessConnection();
-  ~PlasmaEditorEngineProcessConnection();
+  plEditorEngineProcessConnection();
+  ~plEditorEngineProcessConnection();
 
   /// \brief The given file system configuration will be used by the engine process to setup the runtime data directories.
   ///        This only takes effect if the editor process is restarted.
@@ -38,33 +38,22 @@ public:
   void ShutdownProcess();
   bool IsProcessCrashed() const { return m_bProcessCrashed; }
 
-  PlasmaEditorEngineConnection* CreateEngineConnection(plAssetDocument* pDocument);
+  plEditorEngineConnection* CreateEngineConnection(plAssetDocument* pDocument);
   void DestroyEngineConnection(plAssetDocument* pDocument);
 
-  void SendMessage(plProcessMessage* pMessage);
+  bool SendMessage(plProcessMessage* pMessage);
 
   /// /brief Waits for a message of type pMessageType. If tTimeout is zero, the function will not timeout. If the timeout is valid
-  ///        and is it, PLASMA_FAILURE is returned. If the message type matches and pCallback is valid, the function will be called
+  ///        and is it, PL_FAILURE is returned. If the message type matches and pCallback is valid, the function will be called
   ///        and the return values decides whether the message is to be accepted and the waiting has ended.
-  plResult WaitForMessage(const plRTTI* pMessageType, plTime tTimeout, plProcessCommunicationChannel ::WaitForMessageCallback* pCallback = nullptr);
+  plResult WaitForMessage(const plRTTI* pMessageType, plTime timeout, plProcessCommunicationChannel ::WaitForMessageCallback* pCallback = nullptr);
   /// /brief Same as WaitForMessage but the message must be to a specific document. Therefore,
-  ///        pMessageType must be derived from PlasmaEditorEngineDocumentMsg and the function will only return if the received
+  ///        pMessageType must be derived from plEditorEngineDocumentMsg and the function will only return if the received
   ///        message matches both type, document and is accepted by pCallback.
   plResult WaitForDocumentMessage(
-    const plUuid& assetGuid, const plRTTI* pMessageType, plTime tTimeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback = nullptr);
-
-  void SetWaitForDebugger(bool bWait) { m_bProcessShouldWaitForDebugger = bWait; }
-  bool GetWaitForDebugger() const { return m_bProcessShouldWaitForDebugger; }
-
-  void SetRenderer(const char* szRenderer) { m_sRenderer = szRenderer; }
-  const char* GetRenderer() const { return m_sRenderer; }
+    const plUuid& assetGuid, const plRTTI* pMessageType, plTime timeout, plProcessCommunicationChannel::WaitForMessageCallback* pCallback = nullptr);
 
   bool IsEngineSetup() const { return m_bClientIsConfigured; }
-
-  /// /brief Sends a message that the document has been opened or closed. Resends all document data.
-  ///
-  /// Calling this will always clear the existing document on the engine side and reset the state to the editor state.
-  void SendDocumentOpenMessage(const plAssetDocument* pDocument, bool bOpen);
 
   void ActivateRemoteProcess(const plAssetDocument* pDocument, plUInt32 uiViewID);
 
@@ -101,7 +90,6 @@ private:
   bool ConnectToRemoteProcess();
   void ShutdownRemoteProcess();
 
-  bool m_bProcessShouldWaitForDebugger;
   bool m_bProcessShouldBeRunning;
   bool m_bProcessCrashed;
   bool m_bClientIsConfigured;
@@ -109,26 +97,25 @@ private:
   plUInt32 m_uiRedrawCountSent = 0;
   plUInt32 m_uiRedrawCountReceived = 0;
 
-  plString m_sRenderer;
-  PlasmaEditorProcessCommunicationChannel m_IPC;
-  plUniquePtr<PlasmaEditorProcessRemoteCommunicationChannel> m_pRemoteProcess;
+  plEditorProcessCommunicationChannel m_IPC;
+  plUniquePtr<plEditorProcessRemoteCommunicationChannel> m_pRemoteProcess;
   plApplicationFileSystemConfig m_FileSystemConfig;
   plApplicationPluginConfig m_PluginConfig;
   plHashTable<plUuid, plAssetDocument*> m_DocumentByGuid;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL PlasmaEditorEngineConnection
+class PL_EDITORFRAMEWORK_DLL plEditorEngineConnection
 {
 public:
-  void SendMessage(PlasmaEditorEngineDocumentMsg* pMessage);
+  bool SendMessage(plEditorEngineDocumentMsg* pMessage);
   void SendHighlightObjectMessage(plViewHighlightMsgToEngine* pMessage);
 
   plDocument* GetDocument() const { return m_pDocument; }
 
 private:
-  friend class PlasmaEditorEngineProcessConnection;
-  PlasmaEditorEngineConnection(plDocument* pDocument) { m_pDocument = pDocument; }
-  ~PlasmaEditorEngineConnection() {}
+  friend class plEditorEngineProcessConnection;
+  plEditorEngineConnection(plDocument* pDocument) { m_pDocument = pDocument; }
+  ~plEditorEngineConnection() = default;
 
   plDocument* m_pDocument;
 };

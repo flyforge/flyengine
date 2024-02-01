@@ -50,23 +50,23 @@ struct plPropertyFlags
 
   enum Enum : plUInt16
   {
-    StandardType = PLASMA_BIT(0), ///< Anything that can be stored inside an plVariant except for pointers and containers.
-    IsEnum = PLASMA_BIT(1),       ///< enum property, cast to plAbstractEnumerationProperty.
-    Bitflags = PLASMA_BIT(2),     ///< Bitflags property, cast to plAbstractEnumerationProperty.
-    Class = PLASMA_BIT(3),        ///< A struct or class. All of the above are mutually exclusive.
+    StandardType = PL_BIT(0), ///< Anything that can be stored inside an plVariant except for pointers and containers.
+    IsEnum = PL_BIT(1),       ///< enum property, cast to plAbstractEnumerationProperty.
+    Bitflags = PL_BIT(2),     ///< Bitflags property, cast to plAbstractEnumerationProperty.
+    Class = PL_BIT(3),        ///< A struct or class. All of the above are mutually exclusive.
 
-    Const = PLASMA_BIT(4),     ///< Property value is const.
-    Reference = PLASMA_BIT(5), ///< Property value is a reference.
-    Pointer = PLASMA_BIT(6),   ///< Property value is a pointer.
+    Const = PL_BIT(4),     ///< Property value is const.
+    Reference = PL_BIT(5), ///< Property value is a reference.
+    Pointer = PL_BIT(6),   ///< Property value is a pointer.
 
-    PointerOwner = PLASMA_BIT(7), ///< This pointer property takes ownership of the passed pointer.
-    ReadOnly = PLASMA_BIT(8),     ///< Can only be read but not modified.
-    Hidden = PLASMA_BIT(9),       ///< This property should not appear in the UI.
-    Phantom = PLASMA_BIT(10),     ///< Phantom types are mirrored types on the editor side. Ie. they do not exist as actual classes in the process. Also used
+    PointerOwner = PL_BIT(7), ///< This pointer property takes ownership of the passed pointer.
+    ReadOnly = PL_BIT(8),     ///< Can only be read but not modified.
+    Hidden = PL_BIT(9),       ///< This property should not appear in the UI.
+    Phantom = PL_BIT(10),     ///< Phantom types are mirrored types on the editor side. Ie. they do not exist as actual classes in the process. Also used
                               ///< for data driven types, e.g. by the Visual Shader asset.
 
-    VarOut = PLASMA_BIT(11),   ///< Tag for non-const-ref function parameters to indicate usage 'out'
-    VarInOut = PLASMA_BIT(12), ///< Tag for non-const-ref function parameters to indicate usage 'inout'
+    VarOut = PL_BIT(11),   ///< Tag for non-const-ref function parameters to indicate usage 'out'
+    VarInOut = PL_BIT(12), ///< Tag for non-const-ref function parameters to indicate usage 'inout'
 
     Default = 0,
     Void = 0
@@ -125,7 +125,7 @@ inline plBitflags<plPropertyFlags> plPropertyFlags::GetParameterFlags<void>()
   return plBitflags<plPropertyFlags>();
 }
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plPropertyFlags)
+PL_DECLARE_FLAGS_OPERATORS(plPropertyFlags)
 
 /// \brief Describes what category a property belongs to.
 struct plPropertyCategory
@@ -146,7 +146,7 @@ struct plPropertyCategory
 
 /// \brief This is the base interface for all properties in the reflection system. It provides enough information to cast to the next better
 /// base class.
-class PLASMA_FOUNDATION_DLL plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractProperty
 {
 public:
   /// \brief The constructor must get the name of the property. The string must be a compile-time constant.
@@ -179,7 +179,7 @@ public:
   plAbstractProperty* AddAttributes(plPropertyAttribute* pAttrib1, plPropertyAttribute* pAttrib2 = nullptr, plPropertyAttribute* pAttrib3 = nullptr,
     plPropertyAttribute* pAttrib4 = nullptr, plPropertyAttribute* pAttrib5 = nullptr, plPropertyAttribute* pAttrib6 = nullptr)
   {
-    PLASMA_ASSERT_DEV(pAttrib1 != nullptr, "invalid attribute");
+    PL_ASSERT_DEV(pAttrib1 != nullptr, "invalid attribute");
 
     m_Attributes.PushBack(pAttrib1);
     if (pAttrib2)
@@ -205,11 +205,11 @@ public:
 protected:
   plBitflags<plPropertyFlags> m_Flags;
   const char* m_szPropertyName;
-  plHybridArray<const plPropertyAttribute*, 2, plStaticAllocatorWrapper> m_Attributes; // Do not track RTTI data.
+  plHybridArray<const plPropertyAttribute*, 2, plStaticsAllocatorWrapper> m_Attributes; // Do not track RTTI data.
 };
 
 /// \brief This is the base class for all constant properties that are stored inside the RTTI data.
-class PLASMA_FOUNDATION_DLL plAbstractConstantProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractConstantProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.
@@ -233,7 +233,7 @@ public:
 /// If plPropertyFlags::Pointer is set as a flag, you must not cast this property to plTypedMemberProperty, instead use GetValuePtr and
 /// SetValuePtr. This is because reference and const-ness of the property are only fixed for the pointer but not the type, so the actual
 /// property type cannot be derived.
-class PLASMA_FOUNDATION_DLL plAbstractMemberProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractMemberProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.
@@ -269,7 +269,7 @@ public:
 
 
 /// \brief The base class for a property that represents an array of values.
-class PLASMA_FOUNDATION_DLL plAbstractArrayProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractArrayProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.
@@ -309,7 +309,7 @@ public:
 /// \brief The base class for a property that represents a set of values.
 ///
 /// The element type must either be a standard type or a pointer.
-class PLASMA_FOUNDATION_DLL plAbstractSetProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractSetProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.
@@ -344,7 +344,7 @@ public:
 /// \brief The base class for a property that represents a set of values.
 ///
 /// The element type must either be a standard type or a pointer.
-class PLASMA_FOUNDATION_DLL plAbstractMapProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractMapProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.
@@ -407,7 +407,7 @@ struct plFunctionParameterTypeResolver<I, R (*)(P...)>
   {
     Arguments = sizeof...(P),
   };
-  PLASMA_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
+  PL_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
   using ParameterType = typename getArgument<I, P...>::Type;
   using ReturnType = R;
 };
@@ -419,7 +419,7 @@ struct plFunctionParameterTypeResolver<I, R (Class::*)(P...)>
   {
     Arguments = sizeof...(P),
   };
-  PLASMA_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
+  PL_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
   using ParameterType = typename getArgument<I, P...>::Type;
   using ReturnType = R;
 };
@@ -431,7 +431,7 @@ struct plFunctionParameterTypeResolver<I, R (Class::*)(P...) const>
   {
     Arguments = sizeof...(P),
   };
-  PLASMA_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
+  PL_CHECK_AT_COMPILETIME_MSG(I < Arguments, "I needs to be smaller than the number of function parameters.");
   using ParameterType = typename getArgument<I, P...>::Type;
   using ReturnType = R;
 };
@@ -531,7 +531,7 @@ struct plFunctionType
 };
 
 /// \brief The base class for a property that represents a function.
-class PLASMA_FOUNDATION_DLL plAbstractFunctionProperty : public plAbstractProperty
+class PL_FOUNDATION_DLL plAbstractFunctionProperty : public plAbstractProperty
 {
 public:
   /// \brief Passes the property name through to plAbstractProperty.

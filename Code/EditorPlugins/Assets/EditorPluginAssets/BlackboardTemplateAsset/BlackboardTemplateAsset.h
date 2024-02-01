@@ -7,7 +7,7 @@
 
 struct plBlackboardTemplateAssetObject : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetObject, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetObject, plReflectedClass);
 
   plDynamicArray<plString> m_BaseTemplates;
   plDynamicArray<plBlackboardEntry> m_Entries;
@@ -15,13 +15,15 @@ struct plBlackboardTemplateAssetObject : public plReflectedClass
 
 class plBlackboardTemplateAssetDocument : public plSimpleAssetDocument<plBlackboardTemplateAssetObject>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetDocument, plSimpleAssetDocument<plBlackboardTemplateAssetObject>);
+  PL_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetDocument, plSimpleAssetDocument<plBlackboardTemplateAssetObject>);
 
 public:
-  plBlackboardTemplateAssetDocument(const char* szDocumentPath);
+  plBlackboardTemplateAssetDocument(plStringView sDocumentPath);
+
+  plStatus WriteAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile) const;
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& inout_stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
-  plStatus RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc);
+  plStatus RetrieveState(const plBlackboardTemplateAssetObject* pProp, plBlackboardTemplateResourceDescriptor& inout_Desc) const;
 };

@@ -5,7 +5,7 @@ get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE)
 
 pl_create_target(LIBRARY ${PROJECT_NAME})
 
-if(PLASMA_CMAKE_PLATFORM_WINDOWS)
+if(PL_CMAKE_PLATFORM_WINDOWS)
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
 
@@ -13,11 +13,13 @@ if(PLASMA_CMAKE_PLATFORM_WINDOWS)
   )
 endif()
 
-if (MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+pl_enable_strict_warnings(${PROJECT_NAME})
+
+if (PL_CMAKE_COMPILER_CLANG)
+  set_source_files_properties(ThirdParty/xxHash/xxHash.c PROPERTIES COMPILE_FLAGS "-Wno-unused-function")
 endif()
 
-if (PLASMA_CMAKE_PLATFORM_LINUX)
+if (PL_CMAKE_PLATFORM_LINUX)
   CHECK_INCLUDE_FILE_CXX("uuid/uuid.h" UUID_HEADER)
   if (NOT UUID_HEADER)
     message(FATAL_ERROR "Missing uuid/uuid.h. Have you installed the uuid-dev package?")
@@ -46,32 +48,28 @@ if (CURRENT_OSX_VERSION)
 endif()
 
 
-if (PLASMA_3RDPARTY_ENET_SUPPORT)
+if (PL_3RDPARTY_ENET_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PUBLIC enet)
 
 endif()
 
-if (PLASMA_3RDPARTY_ZSTD_SUPPORT)
+if (PL_3RDPARTY_ZSTD_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PUBLIC zstd)
 
 endif()
 
-if(PLASMA_3RDPARTY_BROTLIG_SUPPORT)
 
-  target_link_libraries(${PROJECT_NAME} PUBLIC brotlig)
-
-endif()
-
-
-if(PLASMA_3RDPARTY_GLFW_SUPPORT)
+if(PL_3RDPARTY_GLFW_SUPPORT)
 
   target_compile_definitions(${PROJECT_NAME} PUBLIC BUILDSYSTEM_ENABLE_GLFW_SUPPORT)
   target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 
 endif()
 
-
+if(PL_3RDPARTY_TRACELOGGING_LTTNG_SUPPORT)
+  target_link_libraries(${PROJECT_NAME} PRIVATE tracelogging)
+endif()
 
 

@@ -20,34 +20,34 @@ namespace ozz::animation
   }
 } // namespace ozz::animation
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plSkeletonJointGeometryType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plSkeletonJointGeometryType);
 
-struct PLASMA_RENDERERCORE_DLL plEditableSkeletonBoneShape : public plReflectedClass
+struct PL_RENDERERCORE_DLL plEditableSkeletonBoneShape : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditableSkeletonBoneShape, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEditableSkeletonBoneShape, plReflectedClass);
 
   plEnum<plSkeletonJointGeometryType> m_Geometry;
 
-  plVec3 m_vOffset = plVec3::ZeroVector();
-  plQuat m_qRotation = plQuat::IdentityQuaternion();
+  plVec3 m_vOffset = plVec3::MakeZero();
+  plQuat m_qRotation = plQuat::MakeIdentity();
 
   float m_fLength = 0;    // Box, Capsule; 0 means parent joint to this joint (auto mode)
   float m_fWidth = 0;     // Box
   float m_fThickness = 0; // Sphere radius, Capsule radius
 };
 
-struct PLASMA_RENDERERCORE_DLL plEditableSkeletonBoneCollider : public plReflectedClass
+struct PL_RENDERERCORE_DLL plEditableSkeletonBoneCollider : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditableSkeletonBoneCollider, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEditableSkeletonBoneCollider, plReflectedClass);
 
   plString m_sIdentifier;
   plDynamicArray<plVec3> m_VertexPositions;
   plDynamicArray<plUInt8> m_TriangleIndices;
 };
 
-class PLASMA_RENDERERCORE_DLL plEditableSkeletonJoint : public plReflectedClass
+class PL_RENDERERCORE_DLL plEditableSkeletonJoint : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditableSkeletonJoint, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEditableSkeletonJoint, plReflectedClass);
 
 public:
   plEditableSkeletonJoint();
@@ -63,7 +63,7 @@ public:
   void CopyPropertiesFrom(const plEditableSkeletonJoint* pJoint);
 
   plHashedString m_sName;
-  plTransform m_LocalTransform = plTransform::IdentityTransform();
+  plTransform m_LocalTransform = plTransform::MakeIdentity();
 
   plEnum<plSkeletonJointType> m_JointType;
 
@@ -74,10 +74,10 @@ public:
   plAngle m_SwingLimitY;
   plAngle m_SwingLimitZ;
 
-  plVec3 m_vGizmoOffsetPositionRO = plVec3::ZeroVector();
-  plQuat m_qGizmoOffsetRotationRO = plQuat::IdentityQuaternion();
+  plVec3 m_vGizmoOffsetPositionRO = plVec3::MakeZero();
+  plQuat m_qGizmoOffsetRotationRO = plQuat::MakeIdentity();
 
-  plQuat m_qLocalJointRotation = plQuat::IdentityQuaternion();
+  plQuat m_qLocalJointRotation = plQuat::MakeIdentity();
 
   plHybridArray<plEditableSkeletonJoint*, 4> m_Children;
   plHybridArray<plEditableSkeletonBoneShape, 1> m_BoneShapes;
@@ -89,9 +89,9 @@ public:
   plUInt8 m_uiCollisionLayerOverride;
 };
 
-class PLASMA_RENDERERCORE_DLL plEditableSkeleton : public plReflectedClass
+class PL_RENDERERCORE_DLL plEditableSkeleton : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plEditableSkeleton, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEditableSkeleton, plReflectedClass);
 
 public:
   plEditableSkeleton();
@@ -120,7 +120,7 @@ public:
   plHybridArray<plEditableSkeletonJoint*, 4> m_Children;
 };
 
-struct PLASMA_RENDERERCORE_DLL plExposedBone
+struct PL_RENDERERCORE_DLL plExposedBone
 {
   plString m_sName;
   plString m_sParent;
@@ -128,21 +128,21 @@ struct PLASMA_RENDERERCORE_DLL plExposedBone
   // when adding new values, the hash function below has to be adjusted
 };
 
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plExposedBone);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plExposedBone);
 
-PLASMA_RENDERERCORE_DLL void operator<<(plStreamWriter& inout_stream, const plExposedBone& bone);
-PLASMA_RENDERERCORE_DLL void operator>>(plStreamReader& inout_stream, plExposedBone& ref_bone);
-PLASMA_RENDERERCORE_DLL bool operator==(const plExposedBone& lhs, const plExposedBone& rhs);
+PL_RENDERERCORE_DLL void operator<<(plStreamWriter& inout_stream, const plExposedBone& bone);
+PL_RENDERERCORE_DLL void operator>>(plStreamReader& inout_stream, plExposedBone& ref_bone);
+PL_RENDERERCORE_DLL bool operator==(const plExposedBone& lhs, const plExposedBone& rhs);
 
 template <>
 struct plHashHelper<plExposedBone>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plExposedBone& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plExposedBone& value)
   {
     return plHashingUtils::xxHash32String(value.m_sName) + plHashingUtils::xxHash32String(value.m_sParent) + plHashingUtils::xxHash32(&value, sizeof(plTransform));
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plExposedBone& a, const plExposedBone& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plExposedBone& a, const plExposedBone& b) { return a == b; }
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plExposedBone);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plExposedBone);

@@ -40,9 +40,9 @@ using plRenderPipelineResourceHandle = plTypedResourceHandle<class plRenderPipel
 /// it is the best fit for that level.
 ///
 /// \note Do not forget to reflect your derived class, otherwise plGameApplication may not find it.
-class PLASMA_GAMEENGINE_DLL plGameState : public plGameStateBase
+class PL_GAMEENGINE_DLL plGameState : public plGameStateBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameState, plGameStateBase)
+  PL_ADD_DYNAMIC_REFLECTION(plGameState, plGameStateBase)
 
 protected:
   /// \brief This class cannot be instantiated directly.
@@ -90,7 +90,7 @@ protected:
   /// locations. If pStartPosition is not nullptr, it will be used as the spawn position for the player prefab, otherwise the location of
   /// the plPlayerStartComponent will be used.
   ///
-  /// Returns PLASMA_SUCCESS if a prefab was spawned, PLASMA_FAILURE if nothing was done.
+  /// Returns PL_SUCCESS if a prefab was spawned, PL_FAILURE if nothing was done.
   virtual plResult SpawnPlayer(const plTransform* pStartPosition);
 
   /// \brief Creates an XR Actor if XR is configured and available for the project.
@@ -112,7 +112,7 @@ protected:
   virtual plUniquePtr<plWindowOutputTargetGAL> CreateMainOutputTarget(plWindow* pMainWindow);
 
   /// \brief Creates a default render view. Unless overridden, OnActivation() will do this for the main window.
-  virtual void SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 renderSize, plSizeU32 windowSize);
+  virtual void SetupMainView(plGALSwapChainHandle hSwapChain, plSizeU32 viewportSize);
 
   /// \brief Configures available input devices, e.g. sets mouse speed, cursor clipping, etc.
   /// Called by CreateActors() with the result of CreateMainWindow().

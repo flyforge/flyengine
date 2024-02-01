@@ -28,7 +28,7 @@ plPreprocessor::plPreprocessor()
   plStringBuilder s;
   for (plUInt32 i = 0; i < 32; ++i)
   {
-    s.Format("__Param{0}__", i);
+    s.SetFormat("__Param{0}__", i);
     s_ParamNames[i] = s;
 
     m_ParameterTokens[i].m_iType = s_iMacroParameter0 + i;
@@ -67,7 +67,7 @@ plResult plPreprocessor::ProcessFile(plStringView sFile, TokenStream& TokenOutpu
   const plTokenizer* pTokenizer = nullptr;
 
   if (OpenFile(sFile, &pTokenizer).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   FileData fd;
   fd.m_sFileName.Assign(sFile);
@@ -90,14 +90,14 @@ plResult plPreprocessor::ProcessFile(plStringView sFile, TokenStream& TokenOutpu
       if (!TokensCode.IsEmpty())
       {
         if (Expand(TokensCode, TokenOutput).Failed())
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         TokensCode.Clear();
       }
 
       // process the command
       if (ProcessCmd(TokensLine, TokenOutput).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
     else
     {
@@ -114,19 +114,19 @@ plResult plPreprocessor::ProcessFile(plStringView sFile, TokenStream& TokenOutpu
   if (!TokensCode.IsEmpty())
   {
     if (Expand(TokensCode, TokenOutput).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     TokensCode.Clear();
   }
 
   m_CurrentFileStack.PopBack();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::Process(plStringView sMainFile, TokenStream& ref_tokenOutput)
 {
-  PLASMA_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "No file locator callback has been set.");
+  PL_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "No file locator callback has been set.");
 
   ref_tokenOutput.Clear();
 
@@ -165,27 +165,27 @@ plResult plPreprocessor::Process(plStringView sMainFile, TokenStream& ref_tokenO
   if (m_FileLocatorCallback("", sMainFile, IncludeType::MainFile, sFileToOpen).Failed())
   {
     plLog::Error(m_pLog, "Could not locate file '{0}'", sMainFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (ProcessFile(sFileToOpen, ref_tokenOutput).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_IfdefActiveStack.PopBack();
 
   if (!m_IfdefActiveStack.IsEmpty())
   {
     plLog::Error(m_pLog, "Incomplete nesting of #if / #else / #endif");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!m_CurrentFileStack.IsEmpty())
   {
     plLog::Error(m_pLog, "Internal error, file stack is not empty after processing. {0} elements, top stack item: '{1}'", m_CurrentFileStack.GetCount(), m_CurrentFileStack.PeekBack().m_sFileName);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::Process(plStringView sMainFile, plStringBuilder& ref_sOutput, bool bKeepComments, bool bRemoveRedundantWhitespace, bool bInsertLine)
@@ -194,12 +194,12 @@ plResult plPreprocessor::Process(plStringView sMainFile, plStringBuilder& ref_sO
 
   TokenStream TokenOutput;
   if (Process(sMainFile, TokenOutput).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // generate the final text output
   CombineTokensToString(TokenOutput, 0, ref_sOutput, bKeepComments, bRemoveRedundantWhitespace, bInsertLine);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ProcessCmd(const TokenStream& Tokens, TokenStream& TokenOutput)
@@ -209,11 +209,11 @@ plResult plPreprocessor::ProcessCmd(const TokenStream& Tokens, TokenStream& Toke
   plUInt32 uiHashToken = 0;
 
   if (Expect(Tokens, uiCurToken, "#", &uiHashToken).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // just a single hash sign is a valid preprocessor line
   if (IsEndOfLine(Tokens, uiCurToken, true))
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plUInt32 uiAccepted = uiCurToken;
 
@@ -259,18 +259,18 @@ plResult plPreprocessor::ProcessCmd(const TokenStream& Tokens, TokenStream& Toke
     // check that the following command is valid, even if it is ignored
     if (Accept(Tokens, uiCurToken, "line", &uiAccepted) || Accept(Tokens, uiCurToken, "include", &uiAccepted) || Accept(Tokens, uiCurToken, "define") || Accept(Tokens, uiCurToken, "undef", &uiAccepted) || Accept(Tokens, uiCurToken, "error", &uiAccepted) ||
         Accept(Tokens, uiCurToken, "warning", &uiAccepted) || Accept(Tokens, uiCurToken, "pragma"))
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     if (m_PassThroughUnknownCmdCB.IsValid())
     {
       plString sCmd = Tokens[uiCurToken]->m_DataView;
 
       if (m_PassThroughUnknownCmdCB(sCmd))
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
     }
 
     PP_LOG0(Error, "Expected a preprocessor command", Tokens[0]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (Accept(Tokens, uiCurToken, "line", &uiAccepted))
@@ -297,7 +297,7 @@ plResult plPreprocessor::ProcessCmd(const TokenStream& Tokens, TokenStream& Toke
     if (m_bPassThroughPragma)
       CopyRelevantTokens(Tokens, uiHashToken, TokenOutput, true);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (m_PassThroughUnknownCmdCB.IsValid())
@@ -307,12 +307,12 @@ plResult plPreprocessor::ProcessCmd(const TokenStream& Tokens, TokenStream& Toke
     if (m_PassThroughUnknownCmdCB(sCmd))
     {
       TokenOutput.PushBackRange(Tokens);
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
   PP_LOG0(Error, "Expected a preprocessor command", Tokens[0]);
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plPreprocessor::HandleLine(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiHashToken, TokenStream& TokenOutput)
@@ -325,7 +325,7 @@ plResult plPreprocessor::HandleLine(const TokenStream& Tokens, plUInt32 uiCurTok
 
   plUInt32 uiNumberToken = 0;
   if (Expect(Tokens, uiCurToken, plTokenType::Integer, &uiNumberToken).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plInt32 iNextLine = 0;
 
@@ -333,7 +333,7 @@ plResult plPreprocessor::HandleLine(const TokenStream& Tokens, plUInt32 uiCurTok
   if (plConversionUtils::StringToInt(sNumber, iNextLine).Failed())
   {
     PP_LOG(Error, "Could not parse '{0}' as a line number", Tokens[uiNumberToken], sNumber);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt32 uiFileNameToken = 0;
@@ -346,7 +346,7 @@ plResult plPreprocessor::HandleLine(const TokenStream& Tokens, plUInt32 uiCurTok
   else
   {
     if (ExpectEndOfLine(Tokens, uiCurToken).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   // there is one case that is not handled here:
@@ -354,7 +354,7 @@ plResult plPreprocessor::HandleLine(const TokenStream& Tokens, plUInt32 uiCurTok
   // and then checked again for the above form
   // since this is probably not in common use, we ignore this case
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleIfdef(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken, bool bIsIfdef)
@@ -362,12 +362,12 @@ plResult plPreprocessor::HandleIfdef(const TokenStream& Tokens, plUInt32 uiCurTo
   if (m_IfdefActiveStack.PeekBack().m_ActiveState != IfDefActivity::IsActive)
   {
     m_IfdefActiveStack.PushBack(IfDefActivity::IsInactive);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plUInt32 uiIdentifier = uiCurToken;
   if (Expect(Tokens, uiCurToken, plTokenType::Identifier, &uiIdentifier).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const bool bDefined = m_Macros.Find(Tokens[uiIdentifier]->m_DataView).IsValid();
 
@@ -382,7 +382,7 @@ plResult plPreprocessor::HandleIfdef(const TokenStream& Tokens, plUInt32 uiCurTo
 
   m_IfdefActiveStack.PushBack(bIsIfdef == bDefined ? IfDefActivity::IsActive : IfDefActivity::IsInactive);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleElse(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -393,13 +393,13 @@ plResult plPreprocessor::HandleElse(const TokenStream& Tokens, plUInt32 uiCurTok
   if (m_IfdefActiveStack.IsEmpty())
   {
     PP_LOG0(Error, "Unexpected '#else'", Tokens[uiDirectiveToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (m_IfdefActiveStack.PeekBack().m_bIsInElseClause)
   {
     PP_LOG0(Error, "Unexpected '#else'", Tokens[uiDirectiveToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_IfdefActiveStack.PeekBack().m_bIsInElseClause = true;
@@ -407,7 +407,7 @@ plResult plPreprocessor::HandleElse(const TokenStream& Tokens, plUInt32 uiCurTok
   if (m_IfdefActiveStack.PeekBack().m_ActiveState != IfDefActivity::IsActive)
   {
     m_IfdefActiveStack.PushBack(IfDefActivity::IsInactive);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (bCur == IfDefActivity::WasActive || bCur == IfDefActivity::IsActive)
@@ -415,7 +415,7 @@ plResult plPreprocessor::HandleElse(const TokenStream& Tokens, plUInt32 uiCurTok
   else
     m_IfdefActiveStack.PushBack(IfDefActivity::IsActive);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleIf(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -423,16 +423,16 @@ plResult plPreprocessor::HandleIf(const TokenStream& Tokens, plUInt32 uiCurToken
   if (m_IfdefActiveStack.PeekBack().m_ActiveState != IfDefActivity::IsActive)
   {
     m_IfdefActiveStack.PushBack(IfDefActivity::IsInactive);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plInt64 iResult = 0;
 
   if (EvaluateCondition(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_IfdefActiveStack.PushBack(iResult != 0 ? IfDefActivity::IsActive : IfDefActivity::IsInactive);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleElif(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -443,54 +443,54 @@ plResult plPreprocessor::HandleElif(const TokenStream& Tokens, plUInt32 uiCurTok
   if (m_IfdefActiveStack.IsEmpty())
   {
     PP_LOG0(Error, "Unexpected '#elif'", Tokens[uiDirectiveToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (m_IfdefActiveStack.PeekBack().m_bIsInElseClause)
   {
     PP_LOG0(Error, "Unexpected '#elif'", Tokens[uiDirectiveToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (m_IfdefActiveStack.PeekBack().m_ActiveState != IfDefActivity::IsActive)
   {
     m_IfdefActiveStack.PushBack(IfDefActivity::IsInactive);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plInt64 iResult = 0;
   if (EvaluateCondition(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (Cur != IfDefActivity::IsInactive)
   {
     m_IfdefActiveStack.PushBack(IfDefActivity::WasActive);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   m_IfdefActiveStack.PushBack(iResult != 0 ? IfDefActivity::IsActive : IfDefActivity::IsInactive);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleEndif(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
 {
   SkipWhitespace(Tokens, uiCurToken);
 
-  PLASMA_SUCCEED_OR_RETURN(ExpectEndOfLine(Tokens, uiCurToken));
+  PL_SUCCEED_OR_RETURN(ExpectEndOfLine(Tokens, uiCurToken));
 
   m_IfdefActiveStack.PopBack();
 
   if (m_IfdefActiveStack.IsEmpty())
   {
     PP_LOG0(Error, "Unexpected '#endif'", Tokens[uiDirectiveToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
     m_IfdefActiveStack.PeekBack().m_bIsInElseClause = false;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleUndef(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -498,19 +498,19 @@ plResult plPreprocessor::HandleUndef(const TokenStream& Tokens, plUInt32 uiCurTo
   plUInt32 uiIdentifierToken = uiCurToken;
 
   if (Expect(Tokens, uiCurToken, plTokenType::Identifier, &uiIdentifierToken).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plString sUndef = Tokens[uiIdentifierToken]->m_DataView;
   if (!RemoveDefine(sUndef))
   {
     PP_LOG(Warning, "'#undef' of undefined macro '{0}'", Tokens[uiIdentifierToken], sUndef);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // this is an error, but not one that will cause it to fail
   ExpectEndOfLine(Tokens, uiCurToken).IgnoreResult();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::HandleErrorDirective(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -525,7 +525,7 @@ plResult plPreprocessor::HandleErrorDirective(const TokenStream& Tokens, plUInt3
 
   PP_LOG(Error, "#error '{0}'", Tokens[uiDirectiveToken], sTemp);
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plPreprocessor::HandleWarningDirective(const TokenStream& Tokens, plUInt32 uiCurToken, plUInt32 uiDirectiveToken)
@@ -540,9 +540,7 @@ plResult plPreprocessor::HandleWarningDirective(const TokenStream& Tokens, plUIn
 
   PP_LOG(Warning, "#warning '{0}'", Tokens[uiDirectiveToken], sTemp);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Preprocessor);

@@ -4,6 +4,7 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/IO/FileSystem/FileWriter.h>
 #include <Foundation/Profiling/Profiling.h>
+#include <Foundation/Time/Stopwatch.h>
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 #include <QDesktopServices>
 #include <QDir>
@@ -13,7 +14,7 @@
 #include <QSettings>
 #include <QUrl>
 
-PLASMA_IMPLEMENT_SINGLETON(plQtUiServices);
+PL_IMPLEMENT_SINGLETON(plQtUiServices);
 
 plEvent<const plQtUiServices::Event&> plQtUiServices::s_Events;
 plEvent<const plQtUiServices::TickEvent&> plQtUiServices::s_TickEvent;
@@ -27,26 +28,26 @@ plQtUiServices::TickEvent plQtUiServices::s_LastTickEvent;
 static plQtUiServices* g_pInstance = nullptr;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, QtUiServices)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, QtUiServices)
 
   ON_CORESYSTEMS_STARTUP
   {
-    g_pInstance = PLASMA_DEFAULT_NEW(plQtUiServices);
+    g_pInstance = PL_DEFAULT_NEW(plQtUiServices);
     plQtUiServices::GetSingleton()->Init();
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
-    PLASMA_DEFAULT_DELETE(g_pInstance);
+    PL_DEFAULT_DELETE(g_pInstance);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plQtUiServices::plQtUiServices()
   : m_SingletonRegistrar(this)
 {
-  int id = qRegisterMetaType<plUuid>();
+  qRegisterMetaType<plUuid>();
   m_pColorDlg = nullptr;
 }
 
@@ -72,74 +73,119 @@ void plQtUiServices::SaveState()
   Settings.endGroup();
 }
 
-plMutex m;
+plTime g_Total = plTime::MakeZero();
 
-const QIcon& plQtUiServices::GetCachedIconResource(const char* szIdentifier, plColor color)
+const QIcon& plQtUiServices::GetCachedIconResource(plStringView sIdentifier, plColor svgTintColor)
 {
-  plStringBuilder sIdentifier = szIdentifier;
+  plStringBuilder sFullIdentifier = sIdentifier;
   auto& map = s_IconsCache;
 
-  if (color != plColor::ZeroColor())
+  const bool bNeedsColoring = svgTintColor != plColor::MakeZero() && sIdentifier.EndsWith_NoCase(".svg");
+
+  if (bNeedsColoring)
   {
-    sIdentifier.AppendFormat("-{}", plColorGammaUB(color));
+    sFullIdentifier.AppendFormat("-{}", plColorGammaUB(svgTintColor));
   }
 
-  auto it = map.Find(sIdentifier);
+  auto it = map.Find(sFullIdentifier);
 
   if (it.IsValid())
     return it.Value();
 
-  plStringBuilder filename = sIdentifier.GetFileName();
-
-  if (color != plColor::ZeroColor())
+  if (bNeedsColoring)
   {
-    PLASMA_LOCK(m);
+    plStopwatch sw;
 
-    const plColorGammaUB color8 = color;
-
-    plOSFile::CreateDirectoryStructure(plOSFile::GetTempDataFolder("QIcons")).AssertSuccess();
-    const plStringBuilder name(plOSFile::GetTempDataFolder("QIcons"), "/", filename, ".svg");
-
-    QFile file(szIdentifier);
-    file.open(QIODeviceBase::OpenModeFlag::ReadOnly);
-    QByteArray content = file.readAll();
-    file.close();
-
-    QString sContent = content;
-
-    const QChar c0 = '0';
-
-    sContent = sContent.replace("#ffffff", QString("#%1%2%3").arg((int)color8.r, 2, 16, c0).arg((int)color8.g, 2, 16, c0).arg((int)color8.b, 2, 16, c0), Qt::CaseInsensitive);
-
+    // read the icon from the Qt virtual file system (QResource)
+    QFile file(plString(sIdentifier).GetData());
+    if (!file.open(QIODeviceBase::OpenModeFlag::ReadOnly))
     {
-      plStringBuilder tmp = sContent.toUtf8().data();
+      // if it doesn't exist, return an empty QIcon
 
-      QFile fileOut(name.GetData());
-      fileOut.open(QIODeviceBase::OpenModeFlag::WriteOnly);
-      fileOut.write(tmp.GetData(), tmp.GetElementCount());
-      fileOut.flush();
-      fileOut.close();
+      map[sFullIdentifier] = QIcon();
+      return map[sFullIdentifier];
     }
 
-    QIcon icon(name.GetData());
+    // get the entire SVG file content
+    plStringBuilder sContent = QString(file.readAll()).toUtf8().data();
+
+    // replace the occurrence of the color white ("#FFFFFF") with the desired target color
+    {
+      const plColorGammaUB color8 = svgTintColor;
+
+      plStringBuilder rep;
+      rep.SetFormat("#{}{}{}", plArgI((int)color8.r, 2, true, 16), plArgI((int)color8.g, 2, true, 16), plArgI((int)color8.b, 2, true, 16));
+
+      sContent.ReplaceAll_NoCase("#ffffff", rep);
+
+      rep.Append(";");
+      sContent.ReplaceAll_NoCase("#fff;", rep);
+      rep.Shrink(0, 1);
+
+      rep.Prepend("\"");
+      rep.Append("\"");
+      sContent.ReplaceAll_NoCase("\"#fff\"", rep);
+    }
+
+    // hash the content AFTER the color replacement, so it includes the custom color change
+    const plUInt32 uiSrcHash = plHashingUtils::xxHash32String(sContent);
+
+    // file the path to the temp file, including the source hash
+    const plStringBuilder sTempFolder = plOSFile::GetTempDataFolder("plEditor/QIcons");
+    plStringBuilder sTempIconFile(sTempFolder, "/", sIdentifier.GetFileName());
+    sTempIconFile.AppendFormat("-{}.svg", uiSrcHash);
+
+    // only write to the file system, if the target file doesn't exist yet, this saves more than half the time
+    if (!plOSFile::ExistsFile(sTempIconFile))
+    {
+      // now write the new SVG file back to a dummy file
+      // yes, this is as stupid as it sounds, we really write the file BACK TO THE FILESYSTEM, rather than doing this stuff in-memory
+      // that's because I wasn't able to figure out whether we can somehow read a QIcon from a string rather than from file
+      // it doesn't appear to be easy at least, since we can only give it a path, not a memory stream or anything like that
+      {
+        // necessary for Qt to be able to write to the folder
+        plOSFile::CreateDirectoryStructure(sTempFolder).AssertSuccess();
+
+        QFile fileOut(sTempIconFile.GetData());
+        fileOut.open(QIODeviceBase::OpenModeFlag::WriteOnly);
+        fileOut.write(sContent.GetData(), sContent.GetElementCount());
+        fileOut.flush();
+        fileOut.close();
+      }
+    }
+
+    QIcon icon(sTempIconFile.GetData());
 
     if (!icon.pixmap(QSize(16, 16)).isNull())
-      map[sIdentifier] = icon;
+      map[sFullIdentifier] = icon;
     else
-      map[sIdentifier] = QIcon();
+      map[sFullIdentifier] = QIcon();
+
+    plTime local = sw.GetRunningTotal();
+    g_Total += local;
+
+    // kept here for debug purposes, but don't waste time on logging
+    // plLog::Info("Icon load time: {}, total = {}", local, g_Total);
   }
   else
   {
-    QIcon icon(szIdentifier);
+    const QString sFile = plString(sIdentifier).GetData();
 
-    // Workaround for QIcon being stupid and treating failed to load icons as not-null.
-    if (!icon.pixmap(QSize(16, 16)).isNull())
-      map[sIdentifier] = icon;
+    if (QFile::exists(sFile)) // prevent Qt from spamming warnings about non-existing files by checking this manually
+    {
+      QIcon icon(sFile);
+
+      // Workaround for QIcon being stupid and treating failed to load icons as not-null.
+      if (!icon.pixmap(QSize(16, 16)).isNull())
+        map[sFullIdentifier] = icon;
+      else
+        map[sFullIdentifier] = QIcon();
+    }
     else
-      map[sIdentifier] = QIcon();
+      map[sFullIdentifier] = QIcon();
   }
 
-  return map[sIdentifier];
+  return map[sFullIdentifier];
 }
 
 
@@ -199,7 +245,7 @@ plResult plQtUiServices::AddToGitIgnore(const char* szGitIgnoreFile, const char*
 
       if (end == '\0' || end == '\r' || end == '\n') // line does not continue with an extended pattern
       {
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
   }
@@ -209,12 +255,12 @@ plResult plQtUiServices::AddToGitIgnore(const char* szGitIgnoreFile, const char*
 
   {
     plFileWriter file;
-    PLASMA_SUCCEED_OR_RETURN(file.Open(szGitIgnoreFile));
+    PL_SUCCEED_OR_RETURN(file.Open(szGitIgnoreFile));
 
-    PLASMA_SUCCEED_OR_RETURN(file.WriteBytes(ignoreFile.GetData(), ignoreFile.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(file.WriteBytes(ignoreFile.GetData(), ignoreFile.GetElementCount()));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plQtUiServices::CheckForUpdates()
@@ -232,14 +278,14 @@ void plQtUiServices::Init()
     s_LastTickEvent.m_fRefreshRate = pScreen->refreshRate();
   }
 
-  QTimer::singleShot(0, this, SLOT(TickEventHandler()));
+  QTimer::singleShot((plInt32)plMath::Floor(1000.0 / s_LastTickEvent.m_fRefreshRate), this, SLOT(TickEventHandler()));
 }
 
 void plQtUiServices::TickEventHandler()
 {
-  PLASMA_PROFILE_SCOPE("TickEvent");
+  PL_PROFILE_SCOPE("TickEvent");
 
-  PLASMA_ASSERT_DEV(!m_bIsDrawingATM, "Implementation error");
+  PL_ASSERT_DEV(!m_bIsDrawingATM, "Implementation error");
   plTime startTime = plTime::Now();
 
   m_bIsDrawingATM = true;
@@ -255,11 +301,11 @@ void plQtUiServices::TickEventHandler()
   const plTime endTime = plTime::Now();
   plTime lastFrameTime = endTime - startTime;
 
-  plTime delay = plTime::Milliseconds(1000.0 / s_LastTickEvent.m_fRefreshRate);
+  plTime delay = plTime::MakeFromMilliseconds(1000.0 / s_LastTickEvent.m_fRefreshRate);
   delay -= lastFrameTime;
-  delay = plMath::Max(delay, plTime::Zero());
+  delay = plMath::Max(delay, plTime::MakeZero());
 
-  QTimer::singleShot(0, this, SLOT(TickEventHandler()));
+  QTimer::singleShot((plInt32)plMath::Floor(delay.GetMilliseconds()), this, SLOT(TickEventHandler()));
 }
 
 void plQtUiServices::LoadState()
@@ -303,7 +349,7 @@ void plQtUiServices::ShowGlobalStatusBarMessage(const plFormatString& msg)
   Event e;
   e.m_Type = Event::ShowGlobalStatusBarText;
   e.m_sText = msg.GetText(tmp);
-  e.m_Time = plTime::Seconds(0);
+  e.m_Time = plTime::MakeFromSeconds(0);
 
   s_Events.Broadcast(e);
 }
@@ -318,14 +364,14 @@ void plQtUiServices::OpenInExplorer(const char* szPath, bool bIsFile)
 {
   QStringList args;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   if (bIsFile)
     args << "/select,";
 
   args << QDir::toNativeSeparators(szPath);
 
   QProcess::startDetached("explorer", args);
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
   plStringBuilder parentDir;
 
   if (bIsFile)
@@ -338,14 +384,14 @@ void plQtUiServices::OpenInExplorer(const char* szPath, bool bIsFile)
 
   QProcess::startDetached("xdg-open", args);
 #else
-  PLASMA_ASSERT_NOT_IMPLEMENTED
+  PL_ASSERT_NOT_IMPLEMENTED
 #endif
 }
 
 plStatus plQtUiServices::OpenInVsCode(const QStringList& arguments)
 {
   QString sVsCodeExe;
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   sVsCodeExe =
     QStandardPaths::locate(QStandardPaths::GenericDataLocation, "Programs/Microsoft VS Code/Code.exe", QStandardPaths::LocateOption::LocateFile);
 
@@ -361,6 +407,7 @@ plStatus plQtUiServices::OpenInVsCode(const QStringList& arguments)
     }
   }
 #endif
+
   if(sVsCodeExe.isEmpty() || !QFile().exists(sVsCodeExe))
   {
     // Try code executable in PATH
@@ -381,5 +428,5 @@ plStatus plQtUiServices::OpenInVsCode(const QStringList& arguments)
     return plStatus("Failed to launch Visual Studio Code.");
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

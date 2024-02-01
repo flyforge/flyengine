@@ -5,9 +5,9 @@
 #include <QPoint>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plTranslateGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plTranslateGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTranslateGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plTranslateGizmo, plGizmo);
 
 public:
   plTranslateGizmo();
@@ -48,9 +48,9 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -66,13 +66,13 @@ private:
   plVec3 m_vLastMoveDiff;
 
   MovementMode m_MovementMode;
-  PlasmaEngineGizmoHandle m_hAxisX;
-  PlasmaEngineGizmoHandle m_hAxisY;
-  PlasmaEngineGizmoHandle m_hAxisZ;
+  plEngineGizmoHandle m_hAxisX;
+  plEngineGizmoHandle m_hAxisY;
+  plEngineGizmoHandle m_hAxisZ;
 
-  PlasmaEngineGizmoHandle m_hPlaneXY;
-  PlasmaEngineGizmoHandle m_hPlaneXZ;
-  PlasmaEngineGizmoHandle m_hPlaneYZ;
+  plEngineGizmoHandle m_hPlaneXY;
+  plEngineGizmoHandle m_hPlaneXZ;
+  plEngineGizmoHandle m_hPlaneYZ;
 
   TranslateMode m_Mode;
   PlaneInteraction m_LastPlaneInteraction;
@@ -85,6 +85,4 @@ private:
   plVec3 m_vPlaneAxis[2];
   plVec3 m_vStartPosition;
   plMat4 m_mInvViewProj;
-
-  bool m_bUseExperimentalGizmo = false;
 };

@@ -5,15 +5,15 @@
 class plDocumentObject;
 class plCommandHistory;
 
-class PLASMA_TOOLSFOUNDATION_DLL plObjectCommandAccessor : public plObjectDirectAccessor
+class PL_TOOLSFOUNDATION_DLL plObjectCommandAccessor : public plObjectDirectAccessor
 {
 public:
   plObjectCommandAccessor(plCommandHistory* pHistory);
 
-  virtual void StartTransaction(const char* szDisplayString) override;
+  virtual void StartTransaction(plStringView sDisplayString) override;
   virtual void CancelTransaction() override;
   virtual void FinishTransaction() override;
-  virtual void BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands = false) override;
+  virtual void BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands = false) override;
   virtual void CancelTemporaryCommands() override;
   virtual void FinishTemporaryCommands() override;
 

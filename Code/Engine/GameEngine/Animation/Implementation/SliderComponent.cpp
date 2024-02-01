@@ -5,28 +5,28 @@
 #include <GameEngine/Animation/SliderComponent.h>
 
 float CalculateAcceleratedMovement(
-  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& fTimeSinceStartInSec);
+  float fDistanceInMeters, float fAcceleration, float fMaxVelocity, float fDeceleration, plTime& ref_timeSinceStartInSec);
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSliderComponent, 3, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plSliderComponent, 3, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveZ)),
-    PLASMA_MEMBER_PROPERTY("Distance", m_fDistanceToTravel)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("Acceleration", m_fAcceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Deceleration", m_fDeceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("RandomStart", m_RandomStart)->AddAttributes(new plClampValueAttribute(plTime::Zero(), plVariant())),
+    PL_ENUM_MEMBER_PROPERTY("Axis", plBasisAxis, m_Axis)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveZ)),
+    PL_MEMBER_PROPERTY("Distance", m_fDistanceToTravel)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Acceleration", m_fAcceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Deceleration", m_fDeceleration)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("RandomStart", m_RandomStart)->AddAttributes(new plClampValueAttribute(plTime::MakeZero(), plVariant())),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plDirectionVisualizerAttribute("Axis", 1.0, plColor::MediumPurple, nullptr, "Distance")
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSliderComponent::plSliderComponent() = default;
@@ -65,8 +65,7 @@ void plSliderComponent::Update()
     else
       m_AnimationTime += GetWorld()->GetClock().GetTimeDiff();
 
-    const float fNewDistance =
-      CalculateAcceleratedMovement(m_fDistanceToTravel, m_fAcceleration, m_fAnimationSpeed, m_fDeceleration, m_AnimationTime);
+    const float fNewDistance = CalculateAcceleratedMovement(m_fDistanceToTravel, m_fAcceleration, m_fAnimationSpeed, m_fDeceleration, m_AnimationTime);
 
     const float fDistanceDiff = fNewDistance - m_fLastDistance;
 
@@ -107,21 +106,24 @@ void plSliderComponent::Update()
   }
 }
 
-
-
 void plSliderComponent::OnSimulationStarted()
 {
+  SUPER::OnSimulationStarted();
+
+  // reset to start state
+  m_fLastDistance = 0.0f;
+
   if (m_RandomStart.IsPositive())
   {
-    m_AnimationTime = plTime::Seconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_RandomStart.GetSeconds()));
+    m_AnimationTime = plTime::MakeFromSeconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_RandomStart.GetSeconds()));
   }
 }
 
-void plSliderComponent::SerializeComponent(plWorldWriter& stream) const
+void plSliderComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s << m_fDistanceToTravel;
   s << m_fAcceleration;
@@ -132,12 +134,12 @@ void plSliderComponent::SerializeComponent(plWorldWriter& stream) const
 }
 
 
-void plSliderComponent::DeserializeComponent(plWorldReader& stream)
+void plSliderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_fDistanceToTravel;
   s >> m_fAcceleration;
@@ -165,14 +167,14 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     // Base class
-    context.PatchBaseClass("plTransformComponent", 2, true);
+    ref_context.PatchBaseClass("plTransformComponent", 2, true);
   }
 };
 
 plSliderComponentPatch_1_2 g_plSliderComponentPatch_1_2;
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_SliderComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_SliderComponent);

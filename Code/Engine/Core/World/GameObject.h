@@ -28,12 +28,12 @@ enum class plVisibilityState : plUInt8;
 /// \see plWorld
 /// \see plComponent
 /// \see plGameObjectHandle
-class PLASMA_CORE_DLL plGameObject final
+class PL_CORE_DLL plGameObject final
 {
 private:
   enum
   {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     NUM_INPLACE_COMPONENTS = 12
 #else
     NUM_INPLACE_COMPONENTS = 6
@@ -52,7 +52,7 @@ private:
 
 public:
   /// \brief Iterates over all children of one object.
-  class PLASMA_CORE_DLL ConstChildIterator
+  class PL_CORE_DLL ConstChildIterator
   {
   public:
     const plGameObject& operator*() const;
@@ -78,7 +78,7 @@ public:
     const plWorld* m_pWorld = nullptr;
   };
 
-  class PLASMA_CORE_DLL ChildIterator : public ConstChildIterator
+  class PL_CORE_DLL ChildIterator : public ConstChildIterator
   {
   public:
     plGameObject& operator*();
@@ -262,7 +262,7 @@ public:
   void SetGlobalTransform(const plTransform& transform);
   plTransform GetGlobalTransform() const;
 
-  /// \brief Last frame's global transform (only valid if PLASMA_GAMEOBJECT_VELOCITY is set, otherwise the same as GetGlobalTransform())
+  /// \brief Last frame's global transform (only valid if PL_GAMEOBJECT_VELOCITY is set, otherwise the same as GetGlobalTransform())
   plTransform GetLastGlobalTransform() const;
 
   // Simd variants of above methods
@@ -301,7 +301,7 @@ public:
   /// \brief Returns the 'up' direction of the world's plCoordinateSystem, rotated into the object's global space
   plVec3 GetGlobalDirUp() const;
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
   /// \brief The last global transform is used to calculate the object's velocity. By default this is set automatically to the global transform of the last frame.
   ///
   /// It might make sense to manually override the last global transform to e.g. indicate an object has been teleported instead of moved.
@@ -505,7 +505,7 @@ private:
   bool SendMessageRecursiveInternal(plMessage& msg, bool bWasPostedMsg);
   bool SendMessageRecursiveInternal(plMessage& msg, bool bWasPostedMsg) const;
 
-  PLASMA_ALLOW_PRIVATE_PROPERTIES(plGameObject);
+  PL_ALLOW_PRIVATE_PROPERTIES(plGameObject);
 
   // Add / Detach child used by the reflected property keep their local transform as
   // updating that is handled by the editor.
@@ -543,14 +543,14 @@ private:
 
   void SendNotificationMessage(plMessage& msg);
 
-  struct PLASMA_CORE_DLL alignas(16) TransformationData
+  struct PL_CORE_DLL alignas(16) TransformationData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plGameObject* m_pObject;
     TransformationData* m_pParentData;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt64 m_uiPadding;
 #endif
 
@@ -560,7 +560,7 @@ private:
 
     plSimdTransform m_globalTransform;
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
     plSimdTransform m_lastGlobalTransform;
 #endif
 
@@ -572,7 +572,7 @@ private:
 
     plUInt32 m_uiStableRandomSeed = 0;
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
     plUInt32 m_uiLastGlobalTransformUpdateCounter = 0;
 #else
     plUInt32 m_uiPadding2[1];
@@ -609,7 +609,7 @@ private:
   plGameObjectId m_InternalId;
   plHashedString m_sName;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
   plUInt32 m_uiNamePadding;
 #endif
 
@@ -630,7 +630,7 @@ private:
 
   TransformationData* m_pTransformationData = nullptr;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
   plUInt32 m_uiPadding = 0;
 #endif
 
@@ -645,6 +645,6 @@ private:
   plTagSet m_Tags;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plGameObject);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plGameObject);
 
 #include <Core/World/Implementation/GameObject_inl.h>

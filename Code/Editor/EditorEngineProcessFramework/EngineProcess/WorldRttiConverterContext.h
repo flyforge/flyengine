@@ -10,16 +10,9 @@
 ///
 /// Atm it does not remove owner ptr when a parent is deleted, so it will accumulate zombie entries.
 /// As requests to dead objects shouldn't generally happen this is for the time being not a problem.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plWorldRttiConverterContext : public plRttiConverterContext
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plWorldRttiConverterContext : public plRttiConverterContext
 {
 public:
-  plWorldRttiConverterContext()
-    : m_pWorld(nullptr)
-    , m_uiNextComponentPickingID(1)
-    , m_uiHighlightID(1)
-  {
-  }
-
   virtual void Clear() override;
   void DeleteExistingObjects();
 
@@ -34,14 +27,14 @@ public:
 
   virtual void OnUnknownTypeError(plStringView sTypeName) override;
 
-  plWorld* m_pWorld;
-  PlasmaEditorGuidEngineHandleMap<plGameObjectHandle> m_GameObjectMap;
-  PlasmaEditorGuidEngineHandleMap<plComponentHandle> m_ComponentMap;
+  plWorld* m_pWorld = nullptr;
+  plEditorGuidEngineHandleMap<plGameObjectHandle> m_GameObjectMap;
+  plEditorGuidEngineHandleMap<plComponentHandle> m_ComponentMap;
 
-  PlasmaEditorGuidEngineHandleMap<plUInt32> m_OtherPickingMap;
-  PlasmaEditorGuidEngineHandleMap<plUInt32> m_ComponentPickingMap;
-  plUInt32 m_uiNextComponentPickingID;
-  plUInt32 m_uiHighlightID;
+  plEditorGuidEngineHandleMap<plUInt32> m_OtherPickingMap;
+  plEditorGuidEngineHandleMap<plUInt32> m_ComponentPickingMap;
+  plUInt32 m_uiNextComponentPickingID = 1;
+  plUInt32 m_uiHighlightID = 1;
 
   struct Event
   {

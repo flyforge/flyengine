@@ -2,8 +2,8 @@
 
 #include <EditorFramework/Actions/CommonAssetActions.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCommonAssetAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCommonAssetAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plCommonAssetActions::s_hCategory;
 plActionDescriptorHandle plCommonAssetActions::s_hPause;
@@ -17,24 +17,24 @@ plActionDescriptorHandle plCommonAssetActions::s_hVisualizers;
 
 void plCommonAssetActions::RegisterActions()
 {
-  s_hCategory = PLASMA_REGISTER_CATEGORY("CommonAssetCategory");
-  s_hPause = PLASMA_REGISTER_ACTION_1("Common.Pause", plActionScope::Document, "Animations", "Pause", plCommonAssetAction, plCommonAssetAction::ActionType::Pause);
-  s_hRestart = PLASMA_REGISTER_ACTION_1("Common.Restart", plActionScope::Document, "Animations", "F5", plCommonAssetAction, plCommonAssetAction::ActionType::Restart);
-  s_hLoop = PLASMA_REGISTER_ACTION_1("Common.Loop", plActionScope::Document, "Animations", "", plCommonAssetAction, plCommonAssetAction::ActionType::Loop);
-  s_hGrid = PLASMA_REGISTER_ACTION_1("Common.Grid", plActionScope::Document, "Misc", "G", plCommonAssetAction, plCommonAssetAction::ActionType::Grid);
-  s_hVisualizers = PLASMA_REGISTER_ACTION_1("Common.Visualizers", plActionScope::Document, "Misc", "V", plCommonAssetAction, plCommonAssetAction::ActionType::Visualizers);
+  s_hCategory = PL_REGISTER_CATEGORY("CommonAssetCategory");
+  s_hPause = PL_REGISTER_ACTION_1("Common.Pause", plActionScope::Document, "Animations", "Pause", plCommonAssetAction, plCommonAssetAction::ActionType::Pause);
+  s_hRestart = PL_REGISTER_ACTION_1("Common.Restart", plActionScope::Document, "Animations", "F5", plCommonAssetAction, plCommonAssetAction::ActionType::Restart);
+  s_hLoop = PL_REGISTER_ACTION_1("Common.Loop", plActionScope::Document, "Animations", "", plCommonAssetAction, plCommonAssetAction::ActionType::Loop);
+  s_hGrid = PL_REGISTER_ACTION_1("Common.Grid", plActionScope::Document, "Misc", "G", plCommonAssetAction, plCommonAssetAction::ActionType::Grid);
+  s_hVisualizers = PL_REGISTER_ACTION_1("Common.Visualizers", plActionScope::Document, "Misc", "V", plCommonAssetAction, plCommonAssetAction::ActionType::Visualizers);
 
-  s_hSimulationSpeedMenu = PLASMA_REGISTER_MENU_WITH_ICON("Common.Speed.Menu", ":/EditorPluginParticle/Icons/Speed.svg");
-  s_hSimulationSpeed[0] = PLASMA_REGISTER_ACTION_2("Common.Speed.01", plActionScope::Document, "Animations", "Ctrl+1", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.1f);
-  s_hSimulationSpeed[1] = PLASMA_REGISTER_ACTION_2("Common.Speed.025", plActionScope::Document, "Animations", "Ctrl+2", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.25f);
-  s_hSimulationSpeed[2] = PLASMA_REGISTER_ACTION_2("Common.Speed.05", plActionScope::Document, "Animations", "Ctrl+3", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.5f);
-  s_hSimulationSpeed[3] = PLASMA_REGISTER_ACTION_2("Common.Speed.1", plActionScope::Document, "Animations", "Ctrl+4", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 1.0f);
-  s_hSimulationSpeed[4] = PLASMA_REGISTER_ACTION_2("Common.Speed.15", plActionScope::Document, "Animations", "Ctrl+5", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 1.5f);
-  s_hSimulationSpeed[5] = PLASMA_REGISTER_ACTION_2("Common.Speed.2", plActionScope::Document, "Animations", "Ctrl+6", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 2.0f);
-  s_hSimulationSpeed[6] = PLASMA_REGISTER_ACTION_2("Common.Speed.3", plActionScope::Document, "Animations", "Ctrl+7", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 3.0f);
-  s_hSimulationSpeed[7] = PLASMA_REGISTER_ACTION_2("Common.Speed.4", plActionScope::Document, "Animations", "Ctrl+8", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 4.0f);
-  s_hSimulationSpeed[8] = PLASMA_REGISTER_ACTION_2("Common.Speed.5", plActionScope::Document, "Animations", "Ctrl+9", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 5.0f);
-  s_hSimulationSpeed[9] = PLASMA_REGISTER_ACTION_2("Common.Speed.10", plActionScope::Document, "Animations", "Ctrl+0", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 10.0f);
+  s_hSimulationSpeedMenu = PL_REGISTER_MENU_WITH_ICON("Common.Speed.Menu", ":/EditorPluginParticle/Icons/Speed.svg");
+  s_hSimulationSpeed[0] = PL_REGISTER_ACTION_2("Common.Speed.01", plActionScope::Document, "Animations", "Ctrl+1", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.1f);
+  s_hSimulationSpeed[1] = PL_REGISTER_ACTION_2("Common.Speed.025", plActionScope::Document, "Animations", "Ctrl+2", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.25f);
+  s_hSimulationSpeed[2] = PL_REGISTER_ACTION_2("Common.Speed.05", plActionScope::Document, "Animations", "Ctrl+3", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 0.5f);
+  s_hSimulationSpeed[3] = PL_REGISTER_ACTION_2("Common.Speed.1", plActionScope::Document, "Animations", "Ctrl+4", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 1.0f);
+  s_hSimulationSpeed[4] = PL_REGISTER_ACTION_2("Common.Speed.15", plActionScope::Document, "Animations", "Ctrl+5", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 1.5f);
+  s_hSimulationSpeed[5] = PL_REGISTER_ACTION_2("Common.Speed.2", plActionScope::Document, "Animations", "Ctrl+6", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 2.0f);
+  s_hSimulationSpeed[6] = PL_REGISTER_ACTION_2("Common.Speed.3", plActionScope::Document, "Animations", "Ctrl+7", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 3.0f);
+  s_hSimulationSpeed[7] = PL_REGISTER_ACTION_2("Common.Speed.4", plActionScope::Document, "Animations", "Ctrl+8", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 4.0f);
+  s_hSimulationSpeed[8] = PL_REGISTER_ACTION_2("Common.Speed.5", plActionScope::Document, "Animations", "Ctrl+9", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 5.0f);
+  s_hSimulationSpeed[9] = PL_REGISTER_ACTION_2("Common.Speed.10", plActionScope::Document, "Animations", "Ctrl+0", plCommonAssetAction, plCommonAssetAction::ActionType::SimulationSpeed, 10.0f);
 }
 
 void plCommonAssetActions::UnregisterActions()
@@ -47,52 +47,52 @@ void plCommonAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hGrid);
   plActionManager::UnregisterAction(s_hVisualizers);
 
-  for (int i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+  for (int i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
     plActionManager::UnregisterAction(s_hSimulationSpeed[i]);
 }
 
-void plCommonAssetActions::MapActions(const char* szMapping, const char* szPath, plUInt32 stateMask)
+void plCommonAssetActions::MapToolbarActions(plStringView sMapping, plUInt32 uiStateMask)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 
   const char* szSubPath = "CommonAssetCategory";
 
-  if (stateMask & plCommonAssetUiState::Pause)
+  if (uiStateMask & plCommonAssetUiState::Pause)
   {
     pMap->MapAction(s_hPause, szSubPath, 0.5f);
   }
 
-  if (stateMask & plCommonAssetUiState::Restart)
+  if (uiStateMask & plCommonAssetUiState::Restart)
   {
     pMap->MapAction(s_hRestart, szSubPath, 1.0f);
   }
 
-  if (stateMask & plCommonAssetUiState::Loop)
+  if (uiStateMask & plCommonAssetUiState::Loop)
   {
     pMap->MapAction(s_hLoop, szSubPath, 2.0f);
   }
 
-  if (stateMask & plCommonAssetUiState::SimulationSpeed)
+  if (uiStateMask & plCommonAssetUiState::SimulationSpeed)
   {
     pMap->MapAction(s_hSimulationSpeedMenu, szSubPath, 3.0f);
 
     plStringBuilder sSubPath(szSubPath, "/Common.Speed.Menu");
 
-    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+    for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
     {
       pMap->MapAction(s_hSimulationSpeed[i], sSubPath, i + 1.0f);
     }
   }
 
-  if (stateMask & plCommonAssetUiState::Grid)
+  if (uiStateMask & plCommonAssetUiState::Grid)
   {
     pMap->MapAction(s_hGrid, szSubPath, 4.0f);
   }
 
-  if (stateMask & plCommonAssetUiState::Visualizers)
+  if (uiStateMask & plCommonAssetUiState::Visualizers)
   {
     pMap->MapAction(s_hVisualizers, szSubPath, 5.0f);
   }

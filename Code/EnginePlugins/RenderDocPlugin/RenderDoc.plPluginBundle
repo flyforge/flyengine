@@ -7,7 +7,7 @@ PluginInfo
 	string %Description{"Adds support for recording GPU commands for investigation with RenderDoc. This plugin should only be enabled while needed during development."}
 	string %EditorPlugins{}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaRenderDocPlugin"}
+	string %RuntimePlugins{"plRenderDocPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

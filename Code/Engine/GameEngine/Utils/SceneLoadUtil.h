@@ -10,9 +10,9 @@
 using plCollectionResourceHandle = plTypedResourceHandle<class plCollectionResource>;
 
 /// \brief This class allows to load a scene in the background and switch to it, once loading has finished.
-class PLASMA_GAMEENGINE_DLL plSceneLoadUtility
+class PL_GAMEENGINE_DLL plSceneLoadUtility
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSceneLoadUtility);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSceneLoadUtility);
 
 public:
   plSceneLoadUtility();

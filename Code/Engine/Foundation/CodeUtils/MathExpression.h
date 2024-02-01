@@ -7,7 +7,7 @@
 class plLogInterface;
 
 /// \brief A wrapper around plExpression infrastructure to evaluate simple math expressions
-class PLASMA_FOUNDATION_DLL plMathExpression
+class PL_FOUNDATION_DLL plMathExpression
 {
 public:
   /// \brief Creates a new invalid math expression.

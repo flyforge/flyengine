@@ -24,9 +24,9 @@ struct plActorEvent
   plActor* m_pActor = nullptr;
 };
 
-class PLASMA_CORE_DLL plActorManager final
+class PL_CORE_DLL plActorManager final
 {
-  PLASMA_DECLARE_SINGLETON(plActorManager);
+  PL_DECLARE_SINGLETON(plActorManager);
 
 public:
   plActorManager();
@@ -62,7 +62,7 @@ public:
   void DestroyAllActors(const void* pCreatedBy, DestructionMode mode = DestructionMode::Immediate);
 
   /// \brief Returns all actors currently in the system, including ones that are queued for destruction.
-  void GetAllActors(plHybridArray<plActor*, 8>& out_AllActors);
+  void GetAllActors(plHybridArray<plActor*, 8>& out_allActors);
 
   /// \brief Destroys all actors that are queued for destruction.
   /// This is already executed by Update(), calling it directly only makes sense if one needs to clean up actors without also updating the others.

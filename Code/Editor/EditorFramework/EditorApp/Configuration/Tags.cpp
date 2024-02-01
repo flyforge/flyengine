@@ -7,7 +7,7 @@
 
 plStatus plQtEditorApp::SaveTagRegistry()
 {
-  PLASMA_LOG_BLOCK("plQtEditorApp::SaveTagRegistry()");
+  PL_LOG_BLOCK("plQtEditorApp::SaveTagRegistry()");
 
   plStringBuilder sPath;
   sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
@@ -22,12 +22,13 @@ plStatus plQtEditorApp::SaveTagRegistry()
   {
     return plStatus(plFmt("Could not open tags config file '{0}' for writing", sPath));
   }
-  return plStatus(PLASMA_SUCCESS);
+
+  return plStatus(PL_SUCCESS);
 }
 
 void plQtEditorApp::ReadTagRegistry()
 {
-  PLASMA_LOG_BLOCK("plQtEditorApp::ReadTagRegistry");
+  PL_LOG_BLOCK("plQtEditorApp::ReadTagRegistry");
 
   plToolsTagRegistry::Clear();
 
@@ -35,7 +36,7 @@ void plQtEditorApp::ReadTagRegistry()
   sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sPath.AppendPath("RuntimeConfigs/Tags.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sOldPath;
   sOldPath = plToolsProject::GetSingleton()->GetProjectDirectory();
   sOldPath.AppendPath("Tags.ddl");

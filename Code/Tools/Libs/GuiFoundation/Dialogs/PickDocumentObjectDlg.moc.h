@@ -7,7 +7,7 @@
 
 class plDocumentObject;
 
-class PLASMA_GUIFOUNDATION_DLL plQtPickDocumentObjectDlg : public QDialog, public Ui_PickDocumentObjectDlg
+class PL_GUIFOUNDATION_DLL plQtPickDocumentObjectDlg : public QDialog, public Ui_PickDocumentObjectDlg
 {
   Q_OBJECT
 
@@ -18,7 +18,7 @@ public:
     plString m_sDisplayName;
   };
 
-  plQtPickDocumentObjectDlg(QWidget* parent, const plArrayPtr<Element>& objects, const plUuid& currentObject);
+  plQtPickDocumentObjectDlg(QWidget* pParent, const plArrayPtr<Element>& objects, const plUuid& currentObject);
 
   /// Stores the result that the user picked
   const plDocumentObject* m_pPickedObject = nullptr;

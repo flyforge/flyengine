@@ -9,11 +9,11 @@
 
 using namespace AE_NS_FOUNDATION;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeAssetDocument, 4, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeAssetDocument, 4, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plKrautTreeAssetDocument::plKrautTreeAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plKrautTreeAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
+plKrautTreeAssetDocument::plKrautTreeAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plKrautTreeAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
@@ -37,28 +37,28 @@ static void GetMaterialLabel(plStringBuilder& ref_sOut, plKrautBranchType branch
     case plKrautBranchType::Trunk1:
     case plKrautBranchType::Trunk2:
     case plKrautBranchType::Trunk3:
-      ref_sOut.Format("Trunk {}", (int)branchType - (int)plKrautBranchType::Trunk1 + 1);
+      ref_sOut.SetFormat("Trunk {}", (int)branchType - (int)plKrautBranchType::Trunk1 + 1);
       break;
 
     case plKrautBranchType::MainBranches1:
     case plKrautBranchType::MainBranches2:
     case plKrautBranchType::MainBranches3:
-      ref_sOut.Format("Branch {}", (int)branchType - (int)plKrautBranchType::MainBranches1 + 1);
+      ref_sOut.SetFormat("Branch {}", (int)branchType - (int)plKrautBranchType::MainBranches1 + 1);
       break;
 
     case plKrautBranchType::SubBranches1:
     case plKrautBranchType::SubBranches2:
     case plKrautBranchType::SubBranches3:
-      ref_sOut.Format("Twig {}", (int)branchType - (int)plKrautBranchType::SubBranches1 + 1);
+      ref_sOut.SetFormat("Twig {}", (int)branchType - (int)plKrautBranchType::SubBranches1 + 1);
       break;
 
     case plKrautBranchType::Twigs1:
     case plKrautBranchType::Twigs2:
     case plKrautBranchType::Twigs3:
-      ref_sOut.Format("Twigy {}", (int)branchType - (int)plKrautBranchType::Twigs1 + 1);
+      ref_sOut.SetFormat("Twigy {}", (int)branchType - (int)plKrautBranchType::Twigs1 + 1);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   switch (materialType)
@@ -73,11 +73,11 @@ static void GetMaterialLabel(plStringBuilder& ref_sOut, plKrautBranchType branch
       ref_sOut.Append(" - Leaf");
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }
 
-plTransformStatus plKrautTreeAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plKrautTreeAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plProgressRange range("Transforming Asset", 2, false);
 
@@ -170,7 +170,7 @@ plTransformStatus plKrautTreeAssetDocument::InternalTransformAsset(plStreamWrite
 
   SyncBackAssetProperties(pProp, desc);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plKrautTreeAssetDocument::SyncBackAssetProperties(plKrautTreeAssetProperties*& pProp, const plKrautGeneratorResourceDescriptor& desc)
@@ -215,8 +215,8 @@ plTransformStatus plKrautTreeAssetDocument::InternalCreateThumbnail(const Thumbn
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plKrautTreeAssetDocumentGenerator>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plKrautTreeAssetDocumentGenerator>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plKrautTreeAssetDocumentGenerator::plKrautTreeAssetDocumentGenerator()
 {
@@ -225,25 +225,28 @@ plKrautTreeAssetDocumentGenerator::plKrautTreeAssetDocumentGenerator()
 
 plKrautTreeAssetDocumentGenerator::~plKrautTreeAssetDocumentGenerator() = default;
 
-void plKrautTreeAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_modes) const
+void plKrautTreeAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
 {
-  plStringBuilder baseOutputFile = sParentDirRelativePath;
-  baseOutputFile.ChangeFileExtension("plKrautTreeAsset");
-
   {
-    plAssetDocumentGenerator::Info& info = out_modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
     info.m_Priority = plAssetDocGeneratorPriority::DefaultPriority;
     info.m_sName = "KrautTreeImport.Tree";
-    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Kraut_Tree.svg";
   }
 }
 
-plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
+plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
 {
+  plStringBuilder sOutFile = sInputFileAbs;
+  sOutFile.ChangeFileExtension(GetDocumentExtension());
+  plOSFile::FindFreeFilename(sOutFile);
+
   auto pApp = plQtEditorApp::GetSingleton();
 
-  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
+  plStringBuilder sInputFileRel = sInputFileAbs;
+  pApp->MakePathDataDirectoryRelative(sInputFileRel);
+
+  out_pGeneratedDocument = pApp->CreateDocument(sInputFileAbs, plDocumentFlags::None);
 
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
@@ -254,7 +257,7 @@ plStatus plKrautTreeAssetDocumentGenerator::Generate(plStringView sDataDirRelati
     return plStatus("Target document is not a valid plKrautTreeAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("KrautFile", sDataDirRelativePath);
+  accessor.SetValue("KrautFile", sInputFileRel.GetView());
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

@@ -8,7 +8,7 @@ plUInt8 plGALRenderTargetSetup::GetRenderTargetCount() const
 
 plGALRenderTargetViewHandle plGALRenderTargetSetup::GetRenderTarget(plUInt8 uiIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiRTCount, "Render target index out of range");
+  PL_ASSERT_DEBUG(uiIndex < m_uiRTCount, "Render target index out of range");
 
   return m_hRTs[uiIndex];
 }

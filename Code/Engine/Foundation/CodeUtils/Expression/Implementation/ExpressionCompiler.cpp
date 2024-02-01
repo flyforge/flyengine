@@ -134,11 +134,11 @@ namespace
       case plExpressionAST::NodeType::FunctionCall:
         return plExpressionByteCode::OpCode::Call;
       case plExpressionAST::NodeType::ConstructorCall:
-        PLASMA_REPORT_FAILURE("Constructor calls should not exist anymore after AST transformations");
+        PL_REPORT_FAILURE("Constructor calls should not exist anymore after AST transformations");
         return plExpressionByteCode::OpCode::Nop;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
         return plExpressionByteCode::OpCode::Nop;
     }
   }
@@ -153,43 +153,44 @@ plResult plExpressionCompiler::Compile(plExpressionAST& ref_ast, plExpressionByt
 {
   out_byteCode.Clear();
 
-  PLASMA_SUCCEED_OR_RETURN(TransformAndOptimizeAST(ref_ast, sDebugAstOutputPath));
-  PLASMA_SUCCEED_OR_RETURN(BuildNodeInstructions(ref_ast));
-  PLASMA_SUCCEED_OR_RETURN(UpdateRegisterLifetime(ref_ast));
-  PLASMA_SUCCEED_OR_RETURN(AssignRegisters());
-  PLASMA_SUCCEED_OR_RETURN(GenerateByteCode(ref_ast, out_byteCode));
+  PL_SUCCEED_OR_RETURN(TransformAndOptimizeAST(ref_ast, sDebugAstOutputPath));
+  PL_SUCCEED_OR_RETURN(BuildNodeInstructions(ref_ast));
+  PL_SUCCEED_OR_RETURN(UpdateRegisterLifetime(ref_ast));
+  PL_SUCCEED_OR_RETURN(AssignRegisters());
+  PL_SUCCEED_OR_RETURN(GenerateByteCode(ref_ast, out_byteCode));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::TransformAndOptimizeAST(plExpressionAST& ast, plStringView sDebugAstOutputPath)
 {
   DumpAST(ast, sDebugAstOutputPath, "_00");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::TypeDeductionAndConversion, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::TypeDeductionAndConversion, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_01_TypeConv");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ReplaceVectorInstructions, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ReplaceVectorInstructions, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_02_ReplacedVectorInst");
 
-  PLASMA_SUCCEED_OR_RETURN(ast.ScalarizeOutputs());
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ScalarizeVectorInstructions, &ast)));
+  PL_SUCCEED_OR_RETURN(ast.ScalarizeInputs());
+  PL_SUCCEED_OR_RETURN(ast.ScalarizeOutputs());
+  PL_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ScalarizeVectorInstructions, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_03_Scalarized");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::FoldConstants, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::FoldConstants, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_04_ConstantFolded1");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ReplaceUnsupportedInstructions, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::ReplaceUnsupportedInstructions, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_05_ReplacedUnsupportedInst");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::FoldConstants, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::FoldConstants, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_06_ConstantFolded2");
 
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::CommonSubexpressionElimination, &ast)));
-  PLASMA_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::Validate, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPostOrder(ast, plMakeDelegate(&plExpressionAST::CommonSubexpressionElimination, &ast)));
+  PL_SUCCEED_OR_RETURN(TransformASTPreOrder(ast, plMakeDelegate(&plExpressionAST::Validate, &ast)));
   DumpAST(ast, sDebugAstOutputPath, "_07_Optimized");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::BuildNodeInstructions(const plExpressionAST& ast)
@@ -202,9 +203,9 @@ plResult plExpressionCompiler::BuildNodeInstructions(const plExpressionAST& ast)
   for (plExpressionAST::Node* pOutputNode : ast.m_OutputNodes)
   {
     if (pOutputNode == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
-    PLASMA_ASSERT_DEV(nodeStackTemp.IsEmpty(), "Implementation error");
+    PL_ASSERT_DEV(nodeStackTemp.IsEmpty(), "Implementation error");
 
     nodeStackTemp.PushBack(pOutputNode);
 
@@ -215,7 +216,7 @@ plResult plExpressionCompiler::BuildNodeInstructions(const plExpressionAST& ast)
 
       if (pCurrentNode == nullptr)
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       m_NodeStack.PushBack(pCurrentNode);
@@ -247,10 +248,10 @@ plResult plExpressionCompiler::BuildNodeInstructions(const plExpressionAST& ast)
   if (m_NodeStack.IsEmpty())
   {
     // Nothing to compile
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(m_NodeInstructions.IsEmpty(), "Implementation error");
+  PL_ASSERT_DEV(m_NodeInstructions.IsEmpty(), "Implementation error");
 
   m_NodeToRegisterIndex.Clear();
   m_LiveIntervals.Clear();
@@ -274,11 +275,11 @@ plResult plExpressionCompiler::BuildNodeInstructions(const plExpressionAST& ast)
 
       plUInt32 uiCurrentInstructionIndex = m_NodeInstructions.GetCount() - 1;
       m_LiveIntervals.PushBack({uiCurrentInstructionIndex, uiCurrentInstructionIndex, pCurrentNode});
-      PLASMA_ASSERT_DEV(m_LiveIntervals.GetCount() == uiNextRegisterIndex, "Implementation error");
+      PL_ASSERT_DEV(m_LiveIntervals.GetCount() == uiNextRegisterIndex, "Implementation error");
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::UpdateRegisterLifetime(const plExpressionAST& ast)
@@ -301,12 +302,12 @@ plResult plExpressionCompiler::UpdateRegisterLifetime(const plExpressionAST& ast
       }
       else
       {
-        PLASMA_ASSERT_DEV(plExpressionAST::NodeType::IsConstant(pChild->m_Type), "Must have a valid register for nodes that are not constants");
+        PL_ASSERT_DEV(plExpressionAST::NodeType::IsConstant(pChild->m_Type), "Must have a valid register for nodes that are not constants");
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::AssignRegisters()
@@ -315,7 +316,8 @@ plResult plExpressionCompiler::AssignRegisters()
   // https://www2.seas.gwu.edu/~hchoi/teaching/cs160d/linearscan.pdf
 
   // Sort register lifetime by start index
-  m_LiveIntervals.Sort([](const LiveInterval& a, const LiveInterval& b) { return a.m_uiStart < b.m_uiStart; });
+  m_LiveIntervals.Sort([](const LiveInterval& a, const LiveInterval& b)
+    { return a.m_uiStart < b.m_uiStart; });
 
   // Assign registers
   plHybridArray<LiveInterval, 64> activeIntervals;
@@ -352,17 +354,37 @@ plResult plExpressionCompiler::AssignRegisters()
     activeIntervals.PushBack(liveInterval);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plExpressionByteCode& out_byteCode)
 {
-  auto& byteCode = out_byteCode.m_ByteCode;
+  plHybridArray<plExpression::StreamDesc, 8> inputs;
+  plHybridArray<plExpression::StreamDesc, 8> outputs;
+  plHybridArray<plExpression::FunctionDesc, 4> functions;
 
+  m_ByteCode.Clear();
+  
   plUInt32 uiMaxRegisterIndex = 0;
 
-  m_InputToIndex.Clear();
-  m_OutputToIndex.Clear();
+  m_InputToIndex.Clear();  
+  for (plUInt32 i = 0; i < ast.m_InputNodes.GetCount(); ++i)
+  {
+    auto& desc = ast.m_InputNodes[i]->m_Desc;
+    m_InputToIndex.Insert(desc.m_sName, i);
+
+    inputs.PushBack(desc);
+  }
+
+  m_OutputToIndex.Clear();  
+  for (plUInt32 i = 0; i < ast.m_OutputNodes.GetCount(); ++i)
+  {
+    auto& desc = ast.m_OutputNodes[i]->m_Desc;
+    m_OutputToIndex.Insert(desc.m_sName, i);
+
+    outputs.PushBack(desc);
+  }
+
   m_FunctionToIndex.Clear();
 
   for (auto pCurrentNode : m_NodeInstructions)
@@ -371,7 +393,7 @@ plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plEx
     plExpressionAST::DataType::Enum dataType = pCurrentNode->m_ReturnType;
     if (dataType == plExpressionAST::DataType::Unknown)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     bool bRightIsConstant = false;
@@ -384,7 +406,7 @@ plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plEx
 
     const auto opCode = NodeTypeToOpCode(nodeType, dataType, bRightIsConstant);
     if (opCode == plExpressionByteCode::OpCode::Nop)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     plUInt32 uiTargetRegister = m_NodeToRegisterIndex[pCurrentNode];
     if (plExpressionAST::NodeType::IsOutput(nodeType) == false)
@@ -396,42 +418,42 @@ plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plEx
     {
       auto pUnary = static_cast<const plExpressionAST::UnaryOperator*>(pCurrentNode);
 
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiTargetRegister);
-      byteCode.PushBack(m_NodeToRegisterIndex[pUnary->m_pOperand]);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiTargetRegister);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pUnary->m_pOperand]);
     }
     else if (plExpressionAST::NodeType::IsBinary(nodeType))
     {
       auto pBinary = static_cast<const plExpressionAST::BinaryOperator*>(pCurrentNode);
 
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiTargetRegister);
-      byteCode.PushBack(m_NodeToRegisterIndex[pBinary->m_pLeftOperand]);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiTargetRegister);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pBinary->m_pLeftOperand]);
 
       if (bRightIsConstant)
       {
-        PLASMA_SUCCEED_OR_RETURN(GenerateConstantByteCode(static_cast<const plExpressionAST::Constant*>(pBinary->m_pRightOperand), out_byteCode));
+        PL_SUCCEED_OR_RETURN(GenerateConstantByteCode(static_cast<const plExpressionAST::Constant*>(pBinary->m_pRightOperand)));
       }
       else
       {
-        byteCode.PushBack(m_NodeToRegisterIndex[pBinary->m_pRightOperand]);
+        m_ByteCode.PushBack(m_NodeToRegisterIndex[pBinary->m_pRightOperand]);
       }
     }
     else if (plExpressionAST::NodeType::IsTernary(nodeType))
     {
       auto pTernary = static_cast<const plExpressionAST::TernaryOperator*>(pCurrentNode);
 
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiTargetRegister);
-      byteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pFirstOperand]);
-      byteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pSecondOperand]);
-      byteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pThirdOperand]);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiTargetRegister);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pFirstOperand]);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pSecondOperand]);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pTernary->m_pThirdOperand]);
     }
     else if (plExpressionAST::NodeType::IsConstant(nodeType))
     {
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiTargetRegister);
-      PLASMA_SUCCEED_OR_RETURN(GenerateConstantByteCode(static_cast<const plExpressionAST::Constant*>(pCurrentNode), out_byteCode));
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiTargetRegister);
+      PL_SUCCEED_OR_RETURN(GenerateConstantByteCode(static_cast<const plExpressionAST::Constant*>(pCurrentNode)));
     }
     else if (plExpressionAST::NodeType::IsInput(nodeType))
     {
@@ -439,32 +461,26 @@ plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plEx
       plUInt32 uiInputIndex = 0;
       if (!m_InputToIndex.TryGetValue(desc.m_sName, uiInputIndex))
       {
-        uiInputIndex = out_byteCode.m_Inputs.GetCount();
+        uiInputIndex = inputs.GetCount();
         m_InputToIndex.Insert(desc.m_sName, uiInputIndex);
 
-        out_byteCode.m_Inputs.PushBack(desc);
+        inputs.PushBack(desc);
       }
 
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiTargetRegister);
-      byteCode.PushBack(uiInputIndex);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiTargetRegister);
+      m_ByteCode.PushBack(uiInputIndex);
     }
     else if (plExpressionAST::NodeType::IsOutput(nodeType))
     {
       auto pOutput = static_cast<const plExpressionAST::Output*>(pCurrentNode);
       auto& desc = pOutput->m_Desc;
       plUInt32 uiOutputIndex = 0;
-      if (!m_OutputToIndex.TryGetValue(desc.m_sName, uiOutputIndex))
-      {
-        uiOutputIndex = out_byteCode.m_Outputs.GetCount();
-        m_OutputToIndex.Insert(desc.m_sName, uiOutputIndex);
+      PL_VERIFY(m_OutputToIndex.TryGetValue(desc.m_sName, uiOutputIndex), "Invalid output '{}'", desc.m_sName);
 
-        out_byteCode.m_Outputs.PushBack(desc);
-      }
-
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiOutputIndex);
-      byteCode.PushBack(m_NodeToRegisterIndex[pOutput->m_pExpression]);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiOutputIndex);
+      m_ByteCode.PushBack(m_NodeToRegisterIndex[pOutput->m_pExpression]);
     }
     else if (plExpressionAST::NodeType::IsFunctionCall(nodeType))
     {
@@ -475,58 +491,54 @@ plResult plExpressionCompiler::GenerateByteCode(const plExpressionAST& ast, plEx
       plUInt32 uiFunctionIndex = 0;
       if (!m_FunctionToIndex.TryGetValue(sMangledName, uiFunctionIndex))
       {
-        uiFunctionIndex = out_byteCode.m_Functions.GetCount();
+        uiFunctionIndex = functions.GetCount();
         m_FunctionToIndex.Insert(sMangledName, uiFunctionIndex);
 
-        out_byteCode.m_Functions.PushBack(*pDesc);
-        out_byteCode.m_Functions.PeekBack().m_sName = std::move(sMangledName);
+        functions.PushBack(*pDesc);
+        functions.PeekBack().m_sName = std::move(sMangledName);
       }
 
-      byteCode.PushBack(opCode);
-      byteCode.PushBack(uiFunctionIndex);
-      byteCode.PushBack(uiTargetRegister);
+      m_ByteCode.PushBack(opCode);
+      m_ByteCode.PushBack(uiFunctionIndex);
+      m_ByteCode.PushBack(uiTargetRegister);
 
-      byteCode.PushBack(pFunctionCall->m_Arguments.GetCount());
+      m_ByteCode.PushBack(pFunctionCall->m_Arguments.GetCount());
       for (auto pArg : pFunctionCall->m_Arguments)
       {
         plUInt32 uiArgRegister = m_NodeToRegisterIndex[pArg];
-        byteCode.PushBack(uiArgRegister);
+        m_ByteCode.PushBack(uiArgRegister);
       }
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 
-  out_byteCode.m_uiNumInstructions = m_NodeInstructions.GetCount();
-  out_byteCode.m_uiNumTempRegisters = uiMaxRegisterIndex + 1;
-
-  return PLASMA_SUCCESS;
+  out_byteCode.Init(m_ByteCode, inputs, outputs, functions, uiMaxRegisterIndex + 1, m_NodeInstructions.GetCount());
+  return PL_SUCCESS;
 }
 
-plResult plExpressionCompiler::GenerateConstantByteCode(const plExpressionAST::Constant* pConstant, plExpressionByteCode& out_byteCode)
+plResult plExpressionCompiler::GenerateConstantByteCode(const plExpressionAST::Constant* pConstant)
 {
-  auto& byteCode = out_byteCode.m_ByteCode;
-
   if (pConstant->m_ReturnType == plExpressionAST::DataType::Float)
   {
-    byteCode.PushBack(*reinterpret_cast<const plUInt32*>(&pConstant->m_Value.Get<float>()));
-    return PLASMA_SUCCESS;
+    m_ByteCode.PushBack(*reinterpret_cast<const plUInt32*>(&pConstant->m_Value.Get<float>()));
+    return PL_SUCCESS;
   }
   else if (pConstant->m_ReturnType == plExpressionAST::DataType::Int)
   {
-    byteCode.PushBack(pConstant->m_Value.Get<int>());
-    return PLASMA_SUCCESS;
+    m_ByteCode.PushBack(pConstant->m_Value.Get<int>());
+    return PL_SUCCESS;
   }
   else if (pConstant->m_ReturnType == plExpressionAST::DataType::Bool)
   {
-    byteCode.PushBack(pConstant->m_Value.Get<bool>() ? 0xFFFFFFFF : 0);
-    return PLASMA_SUCCESS;
+    m_ByteCode.PushBack(pConstant->m_Value.Get<bool>() ? 0xFFFFFFFF : 0);
+    return PL_SUCCESS;
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  return PLASMA_FAILURE;
+  PL_ASSERT_NOT_IMPLEMENTED;
+  return PL_FAILURE;
 }
 
 plResult plExpressionCompiler::TransformASTPreOrder(plExpressionAST& ast, TransformFunc func)
@@ -537,9 +549,9 @@ plResult plExpressionCompiler::TransformASTPreOrder(plExpressionAST& ast, Transf
   for (plExpressionAST::Output*& pOutputNode : ast.m_OutputNodes)
   {
     if (pOutputNode == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
-    PLASMA_SUCCEED_OR_RETURN(TransformOutputNode(pOutputNode, func));
+    PL_SUCCEED_OR_RETURN(TransformOutputNode(pOutputNode, func));
 
     m_NodeStack.PushBack(pOutputNode);
 
@@ -551,14 +563,14 @@ plResult plExpressionCompiler::TransformASTPreOrder(plExpressionAST& ast, Transf
       auto children = plExpressionAST::GetChildren(pParent);
       for (auto& pChild : children)
       {
-        PLASMA_SUCCEED_OR_RETURN(TransformNode(pChild, func));
+        PL_SUCCEED_OR_RETURN(TransformNode(pChild, func));
 
         m_NodeStack.PushBack(pChild);
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::TransformASTPostOrder(plExpressionAST& ast, TransformFunc func)
@@ -570,7 +582,7 @@ plResult plExpressionCompiler::TransformASTPostOrder(plExpressionAST& ast, Trans
   for (plExpressionAST::Node* pOutputNode : ast.m_OutputNodes)
   {
     if (pOutputNode == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     nodeStackTemp.PushBack(pOutputNode);
 
@@ -602,22 +614,22 @@ plResult plExpressionCompiler::TransformASTPostOrder(plExpressionAST& ast, Trans
     auto children = plExpressionAST::GetChildren(pParent);
     for (auto& pChild : children)
     {
-      PLASMA_SUCCEED_OR_RETURN(TransformNode(pChild, func));
+      PL_SUCCEED_OR_RETURN(TransformNode(pChild, func));
     }
   }
 
   for (plExpressionAST::Output*& pOutputNode : ast.m_OutputNodes)
   {
-    PLASMA_SUCCEED_OR_RETURN(TransformOutputNode(pOutputNode, func));
+    PL_SUCCEED_OR_RETURN(TransformOutputNode(pOutputNode, func));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::TransformNode(plExpressionAST::Node*& pNode, TransformFunc& func)
 {
   if (pNode == nullptr)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plExpressionAST::Node* pNewNode = nullptr;
   if (m_TransformCache.TryGetValue(pNode, pNewNode) == false)
@@ -625,7 +637,7 @@ plResult plExpressionCompiler::TransformNode(plExpressionAST::Node*& pNode, Tran
     pNewNode = func(pNode);
     if (pNewNode == nullptr)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     m_TransformCache.Insert(pNode, pNewNode);
@@ -633,13 +645,13 @@ plResult plExpressionCompiler::TransformNode(plExpressionAST::Node*& pNode, Tran
 
   pNode = pNewNode;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plExpressionCompiler::TransformOutputNode(plExpressionAST::Output*& pOutputNode, TransformFunc& func)
 {
   if (pOutputNode == nullptr)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   auto pNewOutput = func(pOutputNode);
   if (pNewOutput != pOutputNode)
@@ -651,11 +663,11 @@ plResult plExpressionCompiler::TransformOutputNode(plExpressionAST::Output*& pOu
     else
     {
       plLog::Error("Transformed output node for '{}' is invalid", pOutputNode->m_Desc.m_sName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plExpressionCompiler::DumpAST(const plExpressionAST& ast, plStringView sOutputPath, plStringView sSuffix)
@@ -680,6 +692,3 @@ void plExpressionCompiler::DumpAST(const plExpressionAST& ast, plStringView sOut
     plLog::Error("Failed to dump AST to: {}", sFullPath);
   }
 }
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Expression_Implementation_ExpressionCompiler);

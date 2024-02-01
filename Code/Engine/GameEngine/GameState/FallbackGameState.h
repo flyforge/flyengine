@@ -16,10 +16,10 @@ using plCollectionResourceHandle = plTypedResourceHandle<class plCollectionResou
 /// It implements a simple first person camera to fly around a scene.
 ///
 /// This game state cannot be used in stand-alone applications that require the game state to create
-/// a new world. It is mainly for PlasmaEditor and plPlayer which make sure that a world already exists.
-class PLASMA_GAMEENGINE_DLL plFallbackGameState : public plGameState
+/// a new world. It is mainly for plEditor and plPlayer which make sure that a world already exists.
+class PL_GAMEENGINE_DLL plFallbackGameState : public plGameState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plFallbackGameState, plGameState)
+  PL_ADD_DYNAMIC_REFLECTION(plFallbackGameState, plGameState)
 
 public:
   plFallbackGameState();

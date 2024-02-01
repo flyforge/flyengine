@@ -25,7 +25,7 @@ void plFencePoolVulkan::DeInitialize()
 
 vk::Fence plFencePoolVulkan::RequestFence()
 {
-  PLASMA_ASSERT_DEBUG(s_device, "plFencePoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(s_device, "plFencePoolVulkan::Initialize not called");
   if (!s_Fences.IsEmpty())
   {
     vk::Fence Fence = s_Fences.PeekBack();
@@ -53,6 +53,6 @@ void plFencePoolVulkan::ReclaimFence(vk::Fence& fence)
   }
   VK_ASSERT_DEV(fenceStatus);
   s_device.resetFences(1, &fence);
-  PLASMA_ASSERT_DEBUG(s_device, "plFencePoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(s_device, "plFencePoolVulkan::Initialize not called");
   s_Fences.PushBack(fence);
 }

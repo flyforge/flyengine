@@ -14,31 +14,31 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plJoltMsgDisconnectConstraints);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltMsgDisconnectConstraints, 1, plRTTIDefaultAllocator<plJoltMsgDisconnectConstraints>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plJoltMsgDisconnectConstraints);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltMsgDisconnectConstraints, 1, plRTTIDefaultAllocator<plJoltMsgDisconnectConstraints>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, 2)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, 2)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Actors"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 // clang-format on
 
 plJoltActorComponent::plJoltActorComponent() = default;
@@ -145,10 +145,10 @@ plResult plJoltActorComponent::CreateShape(JPH::BodyCreationSettings* pSettings,
     }
   };
 
-  PLASMA_SCOPE_EXIT(cleanShapes());
+  PL_SCOPE_EXIT(cleanShapes());
 
   if (shapes.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (shapes.GetCount() > 0)
   {
@@ -169,10 +169,10 @@ plResult plJoltActorComponent::CreateShape(JPH::BodyCreationSettings* pSettings,
 
     auto res = opt.Create();
     if (!res.IsValid())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pSettings->SetShape(res.Get());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
@@ -184,19 +184,19 @@ plResult plJoltActorComponent::CreateShape(JPH::BodyCreationSettings* pSettings,
       pShape = pScaledShape;
     }
 
-    if (!shapes[0].m_Transform.m_vPosition.IsZero(0.01f) || shapes[0].m_Transform.m_qRotation != plQuat::IdentityQuaternion())
+    if (!shapes[0].m_Transform.m_vPosition.IsZero(0.01f) || shapes[0].m_Transform.m_qRotation != plQuat::MakeIdentity())
     {
       JPH::RotatedTranslatedShapeSettings opt(plJoltConversionUtils::ToVec3(shapes[0].m_Transform.m_vPosition), plJoltConversionUtils::ToQuat(shapes[0].m_Transform.m_qRotation), pShape);
 
       auto res = opt.Create();
       if (!res.IsValid())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       pShape = res.Get();
     }
 
     pSettings->SetShape(pShape);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
@@ -233,10 +233,10 @@ const plJoltUserData* plJoltActorComponent::GetUserData() const
 
 void plJoltActorComponent::SetInitialObjectFilterID(plUInt32 uiObjectFilterID)
 {
-  PLASMA_ASSERT_DEBUG(!IsActiveAndSimulating(), "The object filter ID can't be changed after simulation has started.");
+  PL_ASSERT_DEBUG(!IsActiveAndSimulating(), "The object filter ID can't be changed after simulation has started.");
   m_uiObjectFilterID = uiObjectFilterID;
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltActorComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltActorComponent);
 

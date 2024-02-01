@@ -20,13 +20,13 @@ class QGraphicsDropShadowEffect;
 
 struct plNodeFlags
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
     None = 0,
-    Moved = PLASMA_BIT(0),
-    UpdateTitle = PLASMA_BIT(1),
+    Moved = PL_BIT(0),
+    UpdateTitle = PL_BIT(1),
     Default = None
   };
 
@@ -37,7 +37,7 @@ struct plNodeFlags
   };
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtNode : public QGraphicsPathItem
+class PL_GUIFOUNDATION_DLL plQtNode : public QGraphicsPathItem
 {
 public:
   plQtNode();
@@ -57,15 +57,15 @@ public:
   plBitflags<plNodeFlags> GetFlags() const;
   void ResetFlags();
 
-  void EnableDropShadow(bool enable);
+  void EnableDropShadow(bool bEnable);
   virtual void UpdateState();
 
   const plHybridArray<plQtPin*, 6>& GetInputPins() const { return m_Inputs; }
   const plHybridArray<plQtPin*, 6>& GetOutputPins() const { return m_Outputs; }
 
-  void SetActive(bool active);
+  void SetActive(bool bActive);
 
-  virtual void ExtendContextMenu(QMenu& menu) {}
+  virtual void ExtendContextMenu(QMenu& ref_menu) {}
 
 protected:
   virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

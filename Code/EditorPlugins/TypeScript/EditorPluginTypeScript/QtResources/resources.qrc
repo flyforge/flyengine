@@ -4,6 +4,6 @@
   </qresource>
   <qresource prefix="TypeIcons">
     <file>plTypeScriptComponent.svg</file>
-  </qresource>
+  </qresource>  
 </RCC>
 

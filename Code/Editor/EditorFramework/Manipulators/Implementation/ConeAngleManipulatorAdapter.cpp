@@ -4,9 +4,9 @@
 #include <EditorFramework/Manipulators/ConeAngleManipulatorAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plConeAngleManipulatorAdapter::plConeAngleManipulatorAdapter() {}
+plConeAngleManipulatorAdapter::plConeAngleManipulatorAdapter() = default;
 
-plConeAngleManipulatorAdapter::~plConeAngleManipulatorAdapter() {}
+plConeAngleManipulatorAdapter::~plConeAngleManipulatorAdapter() = default;
 
 void plConeAngleManipulatorAdapter::Finalize()
 {
@@ -15,7 +15,7 @@ void plConeAngleManipulatorAdapter::Finalize()
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
 
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmo.SetTransformation(GetObjectTransform());
   m_Gizmo.SetVisible(m_bManipulatorIsVisible);
@@ -31,10 +31,10 @@ void plConeAngleManipulatorAdapter::Update()
   plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
   const plConeAngleManipulatorAttribute* pAttr = static_cast<const plConeAngleManipulatorAttribute*>(m_pManipulatorAttr);
 
-  if (!pAttr->GetRadiusProperty().IsEmpty())
+  /* if (!pAttr->GetRadiusProperty().IsEmpty())
   {
     float fValue = pObjectAccessor->Get<float>(m_pObject, GetProperty(pAttr->GetRadiusProperty()));
-  }
+  } */
 
   m_Gizmo.SetRadius(pAttr->m_fScale);
 

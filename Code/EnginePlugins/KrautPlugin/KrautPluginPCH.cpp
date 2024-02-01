@@ -9,7 +9,7 @@
 #include <RendererCore/Meshes/MeshResource.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Kraut, KrautPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Kraut, KrautPlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -25,7 +25,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Kraut, KrautPlugin)
 
     {
       plKrautTreeResourceDescriptor desc;
-      desc.m_Details.m_Bounds.SetInvalid();
+      desc.m_Details.m_Bounds = plBoundingBoxSphere::MakeInvalid();
 
         plKrautTreeResourceHandle hResource = plResourceManager::CreateResource<plKrautTreeResource>("Missing Kraut Tree Mesh", std::move(desc), "Empty Kraut Tree Mesh");
       plResourceManager::SetResourceTypeMissingFallback<plKrautTreeResource>(hResource);
@@ -54,5 +54,5 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Kraut, KrautPlugin)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on

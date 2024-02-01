@@ -1,60 +1,22 @@
 #include <Texture/TexturePCH.h>
 
-PLASMA_STATICLINK_LIBRARY(Texture)
+PL_STATICLINK_LIBRARY(Texture)
 {
   if (bReturn)
     return;
 
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_BC);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_BC4BC5);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_BC6HBC7);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_BCDirectCompute);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexCompress);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexCompressGPU);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexConvert);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexD3D11);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexD3D12);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexDDS);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexFlipRotate);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexHDR);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexImage);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexMipmaps);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexMisc);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexNormalMaps);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexPMAlpha);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexResize);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexTGA);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexUtil);
-  PLASMA_STATICLINK_REFERENCE(Texture_DirectXTex_DirectXTexWIC);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTexConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTexCpuConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_PixelConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_PlanarConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Conversions_SwizzleConversions);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Formats_BmpFileFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Formats_DdsFileFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Formats_StbImageFileFormats);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Formats_TgaFileFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Formats_WicFileFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_Image);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageConversion);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageEnums);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageFileFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageFilter);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageFormatMappings);
-  PLASMA_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageUtils);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_AutoUsage);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_InputFiles);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_OutputFormat);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_Processor);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_Texture2D);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_Texture3D);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_TextureAtlas);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_TextureCube);
-  PLASMA_STATICLINK_REFERENCE(Texture_TexConv_Implementation_TextureModifications);
-  PLASMA_STATICLINK_REFERENCE(Texture_Utils_Implementation_TextureAtlasDesc);
-  PLASMA_STATICLINK_REFERENCE(Texture_Utils_Implementation_TexturePacker);
-  PLASMA_STATICLINK_REFERENCE(Texture_plTexFormat_plTexFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTConversions);
+  PL_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTexConversions);
+  PL_STATICLINK_REFERENCE(Texture_Image_Conversions_DXTexCpuConversions);
+  PL_STATICLINK_REFERENCE(Texture_Image_Conversions_PixelConversions);
+  PL_STATICLINK_REFERENCE(Texture_Image_Conversions_PlanarConversions);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_BmpFileFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_DdsFileFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_ExrFileFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_StbImageFileFormats);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_TgaFileFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Formats_WicFileFormat);
+  PL_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageEnums);
+  PL_STATICLINK_REFERENCE(Texture_Image_Implementation_ImageFormat);
+  PL_STATICLINK_REFERENCE(Texture_TexConv_Implementation_Processor);
 }

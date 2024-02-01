@@ -128,6 +128,42 @@ namespace plTokenParseUtils
     return false;
   }
 
+  bool Accept(const TokenStream& tokens, plUInt32& ref_uiCurToken, plArrayPtr<const TokenMatch> matches, plDynamicArray<plUInt32>* pAccepted)
+  {
+    if (pAccepted)
+      pAccepted->Clear();
+
+    plUInt32 uiCurToken = ref_uiCurToken;
+    bool bAccepted = true;
+    for (plUInt32 i = 0; i < matches.GetCount() && bAccepted; ++i)
+    {
+      plUInt32 uiAcceptedToken = uiCurToken;
+      const TokenMatch& match = matches[i];
+      if (match.m_Type == plTokenType::Unknown)
+      {
+        bAccepted = Accept(tokens, uiCurToken, match.m_sToken, &uiAcceptedToken);
+      }
+      else
+      {
+        bAccepted = Accept(tokens, uiCurToken, match.m_Type, &uiAcceptedToken);
+      }
+
+      if (pAccepted && bAccepted)
+        pAccepted->PushBack(uiAcceptedToken);
+    }
+
+    if (bAccepted)
+    {
+      ref_uiCurToken = uiCurToken;
+    }
+    else
+    {
+      if (pAccepted)
+        pAccepted->Clear();
+    }
+    return bAccepted;
+  }
+
   void CombineRelevantTokensToString(const TokenStream& tokens, plUInt32 uiCurToken, plStringBuilder& ref_sResult)
   {
     ref_sResult.Clear();
@@ -143,7 +179,7 @@ namespace plTokenParseUtils
     }
   }
 
-  void CreateCleanTokenStream(const TokenStream& tokens, plUInt32 uiCurToken, TokenStream& ref_destination, bool bKeepComments)
+  void CreateCleanTokenStream(const TokenStream& tokens, plUInt32 uiCurToken, TokenStream& ref_destination)
   {
     SkipWhitespace(tokens, uiCurToken);
 
@@ -170,7 +206,7 @@ namespace plTokenParseUtils
 
     if (bRemoveRedundantWhitespace)
     {
-      CreateCleanTokenStream(tokens0, uiCurToken, Tokens, bKeepComments);
+      CreateCleanTokenStream(tokens0, uiCurToken, Tokens);
       uiCurToken = 0;
     }
     else
@@ -222,4 +258,4 @@ namespace plTokenParseUtils
   }
 } // namespace plTokenParseUtils
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_TokenParseUtils);
+

@@ -2,10 +2,10 @@
 
 #include <Texture/Image/Formats/ImageFileFormat.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 /// \brief File format implementation for loading TIFF files using WIC
-class PLASMA_TEXTURE_DLL plWicFileFormat : public plImageFileFormat
+class PL_TEXTURE_DLL plWicFileFormat : public plImageFileFormat
 {
 public:
   plWicFileFormat();

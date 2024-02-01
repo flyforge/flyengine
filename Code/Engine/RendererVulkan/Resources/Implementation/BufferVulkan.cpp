@@ -45,7 +45,7 @@ plResult plGALBufferVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<const 
       break;
     default:
       plLog::Error("Unknown buffer type supplied to CreateBuffer()!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   if (m_Description.m_bAllowShaderResourceView)
@@ -58,14 +58,6 @@ plResult plGALBufferVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<const 
   {
     m_stages |= m_pDeviceVulkan->GetSupportedStages();
     m_access |= vk::AccessFlagBits::eShaderRead | vk::AccessFlagBits::eShaderWrite;
-  }
-
-  if (m_Description.m_bStreamOutputTarget)
-  {
-    m_usage |= vk::BufferUsageFlagBits::eStorageBuffer | vk::BufferUsageFlagBits::eTransformFeedbackBufferEXT;
-    //#TODO_VULKAN will need to create a counter buffer.
-    m_stages |= vk::PipelineStageFlagBits::eTransformFeedbackEXT;
-    m_access |= vk::AccessFlagBits::eTransformFeedbackWriteEXT;
   }
 
   if (m_Description.m_bUseForIndirectArguments)
@@ -84,7 +76,7 @@ plResult plGALBufferVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<const 
   m_usage |= vk::BufferUsageFlagBits::eTransferDst;
   m_access |= vk::AccessFlagBits::eTransferWrite;
 
-  PLASMA_ASSERT_DEBUG(pInitialData.GetCount() <= m_Description.m_uiTotalSize, "Initial data is bigger than target buffer.");
+  PL_ASSERT_DEBUG(pInitialData.GetCount() <= m_Description.m_uiTotalSize, "Initial data is bigger than target buffer.");
   vk::DeviceSize alignment = GetAlignment(m_pDeviceVulkan, m_usage);
   m_size = plMemoryUtils::AlignSize((vk::DeviceSize)m_Description.m_uiTotalSize, alignment);
 
@@ -102,11 +94,11 @@ plResult plGALBufferVulkan::InitPlatform(plGALDevice* pDevice, plArrayPtr<const 
   {
     void* pData = nullptr;
     VK_ASSERT_DEV(plMemoryAllocatorVulkan::MapMemory(m_currentBuffer.m_alloc, &pData));
-    PLASMA_ASSERT_DEV(pData, "Implementation error");
+    PL_ASSERT_DEV(pData, "Implementation error");
     plMemoryUtils::Copy((plUInt8*)pData, pInitialData.GetPtr(), pInitialData.GetCount());
     plMemoryAllocatorVulkan::UnmapMemory(m_currentBuffer.m_alloc);
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALBufferVulkan::DeInitPlatform(plGALDevice* pDevice)
@@ -132,7 +124,7 @@ plResult plGALBufferVulkan::DeInitPlatform(plGALDevice* pDevice)
   m_pDeviceVulkan = nullptr;
   m_device = nullptr;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALBufferVulkan::DiscardBuffer() const
@@ -215,4 +207,4 @@ vk::DeviceSize plGALBufferVulkan::GetAlignment(const plGALDeviceVulkan* pDevice,
   return alignment;
 }
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_BufferVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_BufferVulkan);

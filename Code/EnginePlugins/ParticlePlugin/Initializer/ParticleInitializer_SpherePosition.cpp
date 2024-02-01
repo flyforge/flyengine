@@ -10,28 +10,28 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_SpherePosition, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_SpherePosition>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_SpherePosition, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_SpherePosition>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.01f, 100.0f)),
-    PLASMA_MEMBER_PROPERTY("OnSurface", m_bSpawnOnSurface),
-    PLASMA_MEMBER_PROPERTY("SetVelocity", m_bSetVelocity),
-    PLASMA_MEMBER_PROPERTY("Speed", m_Speed),
-    PLASMA_MEMBER_PROPERTY("ScaleRadiusParam", m_sScaleRadiusParameter),
+    PL_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
+    PL_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(0.25f), new plClampValueAttribute(0.01f, 100.0f)),
+    PL_MEMBER_PROPERTY("OnSurface", m_bSpawnOnSurface),
+    PL_MEMBER_PROPERTY("SetVelocity", m_bSetVelocity),
+    PL_MEMBER_PROPERTY("Speed", m_Speed),
+    PL_MEMBER_PROPERTY("ScaleRadiusParam", m_sScaleRadiusParameter),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plSphereVisualizerAttribute("Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset"),
+    new plSphereVisualizerAttribute("Radius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1.0f), "PositionOffset"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_SpherePosition, 1, plRTTIDefaultAllocator<plParticleInitializer_SpherePosition>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_SpherePosition, 1, plRTTIDefaultAllocator<plParticleInitializer_SpherePosition>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleInitializerFactory_SpherePosition::plParticleInitializerFactory_SpherePosition()
@@ -90,51 +90,51 @@ float plParticleInitializerFactory_SpherePosition::GetSpawnCountMultiplier(const
   return 1.0f;
 }
 
-void plParticleInitializerFactory_SpherePosition::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_SpherePosition::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 3;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fRadius;
-  stream << m_bSpawnOnSurface;
-  stream << m_bSetVelocity;
-  stream << m_Speed.m_Value;
-  stream << m_Speed.m_fVariance;
+  inout_stream << m_fRadius;
+  inout_stream << m_bSpawnOnSurface;
+  inout_stream << m_bSetVelocity;
+  inout_stream << m_Speed.m_Value;
+  inout_stream << m_Speed.m_fVariance;
 
   // version 2
-  stream << m_vPositionOffset;
+  inout_stream << m_vPositionOffset;
 
   // version 3
-  stream << m_sScaleRadiusParameter;
+  inout_stream << m_sScaleRadiusParameter;
 }
 
-void plParticleInitializerFactory_SpherePosition::Load(plStreamReader& stream)
+void plParticleInitializerFactory_SpherePosition::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_fRadius;
-  stream >> m_bSpawnOnSurface;
-  stream >> m_bSetVelocity;
-  stream >> m_Speed.m_Value;
-  stream >> m_Speed.m_fVariance;
+  inout_stream >> m_fRadius;
+  inout_stream >> m_bSpawnOnSurface;
+  inout_stream >> m_bSetVelocity;
+  inout_stream >> m_Speed.m_Value;
+  inout_stream >> m_Speed.m_fVariance;
 
   if (uiVersion >= 2)
   {
-    stream >> m_vPositionOffset;
+    inout_stream >> m_vPositionOffset;
   }
 
   if (uiVersion >= 3)
   {
-    stream >> m_sScaleRadiusParameter;
+    inout_stream >> m_sScaleRadiusParameter;
   }
 }
 
-void plParticleInitializerFactory_SpherePosition::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleInitializerFactory_SpherePosition::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
   if (m_bSetVelocity)
   {
-    inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+    inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
   }
 }
 
@@ -154,7 +154,7 @@ void plParticleInitializer_SpherePosition::CreateRequiredStreams()
 
 void plParticleInitializer_SpherePosition::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Sphere Position");
+  PL_PROFILE_SCOPE("PFX: Sphere Position");
 
   const plVec3 startVel = GetOwnerSystem()->GetParticleStartVelocity();
 
@@ -167,7 +167,7 @@ void plParticleInitializer_SpherePosition::InitializeElements(plUInt64 uiStartIn
 
   for (plUInt64 i = uiStartIndex; i < uiStartIndex + uiNumElements; ++i)
   {
-    plVec3 pos = plVec3::CreateRandomPointInSphere(rng) * m_fRadius;
+    plVec3 pos = plVec3::MakeRandomPointInSphere(rng) * m_fRadius;
     plVec3 normalPos = pos;
 
     if (m_bSpawnOnSurface || m_bSetVelocity)
@@ -201,7 +201,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->InlineProperty("Speed").IgnoreResult();
   }
@@ -209,4 +209,4 @@ public:
 
 plParticleInitializerFactory_SpherePosition_1_2 g_plParticleInitializerFactory_SpherePosition_1_2;
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_SpherePosition);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_SpherePosition);

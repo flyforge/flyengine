@@ -44,6 +44,8 @@ struct JSEdit
     KeywordPink,
     KeywordGreen,
     BuiltIn,
+
+    Count,
   };
 };
 
@@ -56,7 +58,7 @@ public:
 class JSHighlighter : public QSyntaxHighlighter
 {
 public:
-  JSHighlighter(QTextDocument* parent = 0);
+  JSHighlighter(QTextDocument* pParent = 0);
 
 protected:
   void highlightBlock(const QString& text) override;
@@ -66,6 +68,6 @@ private:
   QSet<QString> m_KeywordsPink;
   QSet<QString> m_KeywordsGreen;
   QSet<QString> m_BuiltIn;
-  QHash<JSEdit::ColorComponent, QColor> m_Colors;
+  QColor m_Colors[JSEdit::Count];
 };
 

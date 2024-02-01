@@ -5,37 +5,36 @@
 
 class plVisualScriptPin : public plPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVisualScriptPin, plPin);
+  PL_ADD_DYNAMIC_REFLECTION(plVisualScriptPin, plPin);
 
 public:
-  plVisualScriptPin(Type type, plStringView sName, const plVisualScriptNodeRegistry::PinDesc& pinDesc, const plDocumentObject* pObject, plUInt32 uiDataPinIndex);
+  plVisualScriptPin(Type type, plStringView sName, const plVisualScriptNodeRegistry::PinDesc& pinDesc, const plDocumentObject* pObject, plUInt32 uiDataPinIndex, plUInt32 uiElementIndex);
   ~plVisualScriptPin();
 
-  PLASMA_ALWAYS_INLINE bool IsExecutionPin() const { return m_ScriptDataType == plVisualScriptDataType::Invalid; }
-  PLASMA_ALWAYS_INLINE bool IsDataPin() const { return m_ScriptDataType != plVisualScriptDataType::Invalid; }
+  PL_ALWAYS_INLINE bool IsExecutionPin() const { return m_pDesc->IsExecutionPin(); }
+  PL_ALWAYS_INLINE bool IsDataPin() const { return m_pDesc->IsDataPin(); }
 
-  PLASMA_ALWAYS_INLINE const plRTTI* GetDataType() const { return m_pDataType; }
-  PLASMA_ALWAYS_INLINE plVisualScriptDataType::Enum GetScriptDataType() const { return m_ScriptDataType; }
+  PL_ALWAYS_INLINE const plRTTI* GetDataType() const { return m_pDesc->m_pDataType; }
+  PL_ALWAYS_INLINE plVisualScriptDataType::Enum GetScriptDataType() const { return m_pDesc->m_ScriptDataType; }
   plVisualScriptDataType::Enum GetResolvedScriptDataType() const;
   plStringView GetDataTypeName() const;
-  PLASMA_ALWAYS_INLINE plUInt32 GetDataPinIndex() const { return m_uiDataPinIndex; }
-  PLASMA_ALWAYS_INLINE bool IsRequired() const { return m_bRequired; }
-  PLASMA_ALWAYS_INLINE bool HasDynamicPinProperty() const { return m_bHasDynamicPinProperty; }
-  PLASMA_ALWAYS_INLINE bool SplitExecution() const { return m_bSplitExecution; }
-  PLASMA_ALWAYS_INLINE bool NeedsTypeDeduction() const { return m_DeductTypeFunc != nullptr; }
+  PL_ALWAYS_INLINE plUInt32 GetDataPinIndex() const { return m_uiDataPinIndex; }
+  PL_ALWAYS_INLINE plUInt32 GetElementIndex() const { return m_uiElementIndex; }
+  PL_ALWAYS_INLINE bool IsRequired() const { return m_pDesc->m_bRequired; }
+  PL_ALWAYS_INLINE bool HasDynamicPinProperty() const { return m_pDesc->m_sDynamicPinProperty.IsEmpty() == false; }
+  PL_ALWAYS_INLINE bool SplitExecution() const { return m_pDesc->m_bSplitExecution; }
+  PL_ALWAYS_INLINE bool ReplaceWithArray() const { return m_pDesc->m_bReplaceWithArray; }
+  PL_ALWAYS_INLINE bool NeedsTypeDeduction() const { return m_pDesc->m_DeductTypeFunc != nullptr; }
 
-  PLASMA_ALWAYS_INLINE plVisualScriptNodeRegistry::PinDesc::DeductTypeFunc GetDeductTypeFunc() const { return m_DeductTypeFunc; }
+  PL_ALWAYS_INLINE const plHashedString& GetDynamicPinProperty() const { return m_pDesc->m_sDynamicPinProperty; }
+  PL_ALWAYS_INLINE plVisualScriptNodeRegistry::PinDesc::DeductTypeFunc GetDeductTypeFunc() const { return m_pDesc->m_DeductTypeFunc; }
 
   bool CanConvertTo(const plVisualScriptPin& targetPin, bool bUseResolvedDataTypes = true) const;
 
 private:
-  const plRTTI* m_pDataType = nullptr;
-  plVisualScriptNodeRegistry::PinDesc::DeductTypeFunc m_DeductTypeFunc = nullptr;
+  const plVisualScriptNodeRegistry::PinDesc* m_pDesc = nullptr;
   plUInt32 m_uiDataPinIndex = 0;
-  plEnum<plVisualScriptDataType> m_ScriptDataType;
-  bool m_bRequired = false;
-  bool m_bHasDynamicPinProperty = false;
-  bool m_bSplitExecution = false;
+  plUInt32 m_uiElementIndex = 0;
 };
 
 class plVisualScriptNodeManager : public plDocumentNodeManager
@@ -76,7 +75,7 @@ private:
 
   virtual void InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node) override;
 
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override;
+  virtual void GetNodeCreationTemplates(plDynamicArray<plNodeCreationTemplate>& out_templates) const override;
 
   void NodeEventsHandler(const plDocumentNodeManagerEvent& e);
   void PropertyEventsHandler(const plDocumentObjectPropertyEvent& e);
@@ -90,4 +89,7 @@ private:
   plHashTable<const plDocumentObject*, plEnum<plVisualScriptDataType>> m_ObjectToDeductedType;
   plHashTable<const plVisualScriptPin*, plEnum<plVisualScriptDataType>> m_PinToDeductedType;
   plHashSet<const plDocumentObject*> m_CoroutineObjects;
+
+  mutable plDynamicArray<plNodePropertyValue> m_PropertyValues;
+  mutable plDeque<plString> m_VariableNodeTypeNames;
 };

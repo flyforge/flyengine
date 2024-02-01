@@ -7,13 +7,13 @@
 
 class plAssetDocument;
 
-class PLASMA_EDITORFRAMEWORK_DLL plCommonAssetActions
+class PL_EDITORFRAMEWORK_DLL plCommonAssetActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath, plUInt32 stateMask);
+  static void MapToolbarActions(plStringView sMapping, plUInt32 uiStateMask);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hPause;
@@ -25,9 +25,9 @@ public:
   static plActionDescriptorHandle s_hVisualizers;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plCommonAssetAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plCommonAssetAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCommonAssetAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plCommonAssetAction, plButtonAction);
 
 public:
   enum class ActionType

@@ -4,7 +4,7 @@
 
 class plRmlUiComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRmlUiComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plRmlUiComponentDragDropHandler, plComponentDragDropHandler);
 
 public:
   float CanHandle(const plDragDropInfo* pInfo) const override;

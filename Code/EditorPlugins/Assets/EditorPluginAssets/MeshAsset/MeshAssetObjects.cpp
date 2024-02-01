@@ -5,35 +5,34 @@
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshAssetProperties, 3, plRTTIDefaultAllocator<plMeshAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshAssetProperties, 3, plRTTIDefaultAllocator<plMeshAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("PrimitiveType", plMeshPrimitive, m_PrimitiveType),
-    PLASMA_MEMBER_PROPERTY("MeshFile", m_sMeshFile)->AddAttributes(new plFileBrowserAttribute("Select Mesh", plFileBrowserAttribute::Meshes)),
-    PLASMA_ENUM_MEMBER_PROPERTY("RightDir", plBasisAxis, m_RightDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveX)),
-    PLASMA_ENUM_MEMBER_PROPERTY("UpDir", plBasisAxis, m_UpDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
-    PLASMA_MEMBER_PROPERTY("FlipForwardDir", m_bFlipForwardDir),
-    PLASMA_MEMBER_PROPERTY("UniformScaling", m_fUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0001f, 10000.0f)),
-    PLASMA_MEMBER_PROPERTY("RecalculateNormals", m_bRecalculateNormals),
-    PLASMA_MEMBER_PROPERTY("RecalculateTangents", m_bRecalculateTrangents)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ENUM_MEMBER_PROPERTY("NormalPrecision", plMeshNormalPrecision, m_NormalPrecision),
-    PLASMA_ENUM_MEMBER_PROPERTY("TexCoordPrecision", plMeshTexCoordPrecision, m_TexCoordPrecision),
-    PLASMA_MEMBER_PROPERTY("ImportMaterials", m_bImportMaterials)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Optimize", m_bOptimize)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Radius2", m_fRadius2)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Height", m_fHeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Detail", m_uiDetail)->AddAttributes(new plDefaultValueAttribute(0), new plClampValueAttribute(0, 128)),
-    PLASMA_MEMBER_PROPERTY("Detail2", m_uiDetail2)->AddAttributes(new plDefaultValueAttribute(0), new plClampValueAttribute(0, 128)),
-    PLASMA_MEMBER_PROPERTY("Cap", m_bCap)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Cap2", m_bCap2)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(360.0f)), new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(360.0f))),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Materials", m_Slots)->AddAttributes(new plContainerAttribute(false, true, true)),
+    PL_ENUM_MEMBER_PROPERTY("PrimitiveType", plMeshPrimitive, m_PrimitiveType),
+    PL_MEMBER_PROPERTY("MeshFile", m_sMeshFile)->AddAttributes(new plFileBrowserAttribute("Select Mesh", plFileBrowserAttribute::Meshes)),
+    PL_ENUM_MEMBER_PROPERTY("RightDir", plBasisAxis, m_RightDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveX)),
+    PL_ENUM_MEMBER_PROPERTY("UpDir", plBasisAxis, m_UpDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
+    PL_MEMBER_PROPERTY("FlipForwardDir", m_bFlipForwardDir),
+    PL_MEMBER_PROPERTY("UniformScaling", m_fUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0001f, 10000.0f)),
+    PL_MEMBER_PROPERTY("RecalculateNormals", m_bRecalculateNormals),
+    PL_MEMBER_PROPERTY("RecalculateTangents", m_bRecalculateTrangents)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ENUM_MEMBER_PROPERTY("NormalPrecision", plMeshNormalPrecision, m_NormalPrecision),
+    PL_ENUM_MEMBER_PROPERTY("TexCoordPrecision", plMeshTexCoordPrecision, m_TexCoordPrecision),
+    PL_MEMBER_PROPERTY("ImportMaterials", m_bImportMaterials)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Radius", m_fRadius)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Radius2", m_fRadius2)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Height", m_fHeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Detail", m_uiDetail)->AddAttributes(new plDefaultValueAttribute(0), new plClampValueAttribute(0, 128)),
+    PL_MEMBER_PROPERTY("Detail2", m_uiDetail2)->AddAttributes(new plDefaultValueAttribute(0), new plClampValueAttribute(0, 128)),
+    PL_MEMBER_PROPERTY("Cap", m_bCap)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Cap2", m_bCap2)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Angle", m_Angle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(360.0f)), new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(360.0f))),
+    PL_ARRAY_MEMBER_PROPERTY("Materials", m_Slots)->AddAttributes(new plContainerAttribute(false, true, true)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 class plMeshAssetPropertiesPatch_1_2 : public plGraphPatch
@@ -44,7 +43,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Primitive Type", "PrimitiveType");
     pNode->RenameProperty("Forward Dir", "ForwardDir");
@@ -62,9 +61,9 @@ public:
 
 plMeshAssetPropertiesPatch_1_2 g_MeshAssetPropertiesPatch_1_2;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plMeshPrimitive, 1)
-  PLASMA_ENUM_CONSTANT(plMeshPrimitive::File), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Box), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Rect), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Cylinder), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Cone), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Pyramid), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Sphere), PLASMA_ENUM_CONSTANT(plMeshPrimitive::HalfSphere), PLASMA_ENUM_CONSTANT(plMeshPrimitive::GeodesicSphere), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Capsule), PLASMA_ENUM_CONSTANT(plMeshPrimitive::Torus),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plMeshPrimitive, 1)
+  PL_ENUM_CONSTANT(plMeshPrimitive::File), PL_ENUM_CONSTANT(plMeshPrimitive::Box), PL_ENUM_CONSTANT(plMeshPrimitive::Rect), PL_ENUM_CONSTANT(plMeshPrimitive::Cylinder), PL_ENUM_CONSTANT(plMeshPrimitive::Cone), PL_ENUM_CONSTANT(plMeshPrimitive::Pyramid), PL_ENUM_CONSTANT(plMeshPrimitive::Sphere), PL_ENUM_CONSTANT(plMeshPrimitive::HalfSphere), PL_ENUM_CONSTANT(plMeshPrimitive::GeodesicSphere), PL_ENUM_CONSTANT(plMeshPrimitive::Capsule), PL_ENUM_CONSTANT(plMeshPrimitive::Torus),
+PL_END_STATIC_REFLECTED_ENUM;
 
 plMeshAssetProperties::plMeshAssetProperties() = default;
 plMeshAssetProperties::~plMeshAssetProperties() = default;
@@ -88,12 +87,20 @@ void plMeshAssetProperties::PropertyMetaStateEventHandler(plPropertyMetaStateEve
     props["Cap2"].m_Visibility = plPropertyUiState::Invisible;
     props["Angle"].m_Visibility = plPropertyUiState::Invisible;
     props["ImportMaterials"].m_Visibility = plPropertyUiState::Invisible;
+    props["RecalculateNormals"].m_Visibility = plPropertyUiState::Invisible;
+    props["RecalculateTangents"].m_Visibility = plPropertyUiState::Invisible;
+    props["NormalPrecision"].m_Visibility = plPropertyUiState::Invisible;
+    props["TexCoordPrecision"].m_Visibility = plPropertyUiState::Invisible;
 
     switch (primType)
     {
       case plMeshPrimitive::File:
         props["MeshFile"].m_Visibility = plPropertyUiState::Default;
         props["ImportMaterials"].m_Visibility = plPropertyUiState::Default;
+        props["RecalculateNormals"].m_Visibility = plPropertyUiState::Default;
+        props["RecalculateTangents"].m_Visibility = plPropertyUiState::Default;
+        props["NormalPrecision"].m_Visibility = plPropertyUiState::Default;
+        props["TexCoordPrecision"].m_Visibility = plPropertyUiState::Default;
         break;
 
       case plMeshPrimitive::Box:
@@ -198,7 +205,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     // convert the "Angle" property from float to plAngle
     if (auto pProp = pNode->FindProperty("Angle"))
@@ -206,7 +213,7 @@ public:
       if (pProp->m_Value.IsA<float>())
       {
         const float valFloat = pProp->m_Value.Get<float>();
-        pProp->m_Value = plAngle::Degree(valFloat);
+        pProp->m_Value = plAngle::MakeFromDegree(valFloat);
       }
     }
   }

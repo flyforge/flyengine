@@ -5,7 +5,6 @@
 #include <RendererCore/Pipeline/InstanceDataProvider.h>
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
-#include <Core/Interfaces/WindWorldModule.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <RendererCore/../../../Data/Base/Shaders/Common/ObjectConstants.h>
@@ -13,26 +12,25 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plMeshInstanceData, plNoBase, 1, plRTTIDefaultAllocator<plMeshInstanceData>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plMeshInstanceData, plNoBase, 1, plRTTIDefaultAllocator<plMeshInstanceData>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("LocalPosition", GetLocalPosition, SetLocalPosition)->AddAttributes(new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("LocalRotation", GetLocalRotation, SetLocalRotation),
-    PLASMA_ACCESSOR_PROPERTY("LocalScaling", GetLocalScaling, SetLocalScaling)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f, 1.0f, 1.0f))),
+    PL_ACCESSOR_PROPERTY("LocalPosition", GetLocalPosition, SetLocalPosition)->AddAttributes(new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("LocalRotation", GetLocalRotation, SetLocalRotation),
+    PL_ACCESSOR_PROPERTY("LocalScaling", GetLocalScaling, SetLocalScaling)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f, 1.0f, 1.0f))),
 
-    PLASMA_MEMBER_PROPERTY("Color", m_color)
+    PL_MEMBER_PROPERTY("Color", m_color)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering"),
     new plTransformManipulatorAttribute("LocalPosition", "LocalRotation", "LocalScaling"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE
+PL_END_STATIC_REFLECTED_TYPE
 // clang-format on
 
 void plMeshInstanceData::SetLocalPosition(plVec3 vPosition)
@@ -64,7 +62,7 @@ plVec3 plMeshInstanceData::GetLocalScaling() const
   return m_transform.m_vScale;
 }
 
-static const plTypeVersion s_MeshInstanceDataVersion = 1;
+static constexpr plTypeVersion s_MeshInstanceDataVersion = 1;
 plResult plMeshInstanceData::Serialize(plStreamWriter& ref_writer) const
 {
   ref_writer.WriteVersion(s_MeshInstanceDataVersion);
@@ -72,7 +70,7 @@ plResult plMeshInstanceData::Serialize(plStreamWriter& ref_writer) const
   ref_writer << m_transform;
   ref_writer << m_color;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plMeshInstanceData::Deserialize(plStreamReader& ref_reader)
@@ -82,14 +80,14 @@ plResult plMeshInstanceData::Deserialize(plStreamReader& ref_reader)
   ref_reader >> m_transform;
   ref_reader >> m_color;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstancedMeshRenderData, 1, plRTTIDefaultAllocator<plInstancedMeshRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstancedMeshRenderData, 1, plRTTIDefaultAllocator<plInstancedMeshRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plInstancedMeshRenderData::FillBatchIdAndSortingKey()
@@ -110,7 +108,7 @@ void plInstancedMeshComponentManager::EnqueueUpdate(const plInstancedMeshCompone
   if (pComponent->m_uiEnqueuedFrame == uiCurrentFrame)
     return;
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (pComponent->m_uiEnqueuedFrame == uiCurrentFrame)
     return;
 
@@ -127,7 +125,7 @@ void plInstancedMeshComponentManager::OnRenderEvent(const plRenderWorldRenderEve
   if (e.m_Type != plRenderWorldRenderEvent::Type::BeginRender)
     return;
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_RequireUpdate.IsEmpty())
     return;
@@ -177,25 +175,25 @@ void plInstancedMeshComponentManager::Deinitialize()
 //////////////////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plInstancedMeshComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plInstancedMeshComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Mesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Static")),
-    PLASMA_ACCESSOR_PROPERTY("MainColor", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Materials", Materials_GetCount, Materials_GetValue, Materials_SetValue, Materials_Insert, Materials_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_ACCESSOR_PROPERTY("Mesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Static")),
+    PL_ACCESSOR_PROPERTY("MainColor", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ARRAY_ACCESSOR_PROPERTY("Materials", Materials_GetCount, Materials_GetValue, Materials_SetValue, Materials_Insert, Materials_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
 
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("InstanceData", Instances_GetCount, Instances_GetValue, Instances_SetValue, Instances_Insert, Instances_Remove),
+    PL_ARRAY_ACCESSOR_PROPERTY("InstanceData", Instances_GetCount, Instances_GetValue, Instances_SetValue, Instances_Insert, Instances_Remove),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plInstancedMeshComponent::plInstancedMeshComponent() = default;
@@ -219,13 +217,13 @@ void plInstancedMeshComponent::OnActivated()
 {
   SUPER::OnActivated();
 
-  PLASMA_ASSERT_DEV(m_pExplicitInstanceData == nullptr, "Instance data must not be initialized at this point");
-  m_pExplicitInstanceData = PLASMA_DEFAULT_NEW(plInstanceData);
+  PL_ASSERT_DEV(m_pExplicitInstanceData == nullptr, "Instance data must not be initialized at this point");
+  m_pExplicitInstanceData = PL_DEFAULT_NEW(plInstanceData);
 }
 
 void plInstancedMeshComponent::OnDeactivated()
 {
-  PLASMA_DEFAULT_DELETE(m_pExplicitInstanceData);
+  PL_DEFAULT_DELETE(m_pExplicitInstanceData);
   m_pExplicitInstanceData = nullptr;
 
   SUPER::OnDeactivated();
@@ -249,10 +247,10 @@ plResult plInstancedMeshComponent::GetLocalBounds(plBoundingBoxSphere& ref_bound
       ref_bounds.ExpandToInclude(instanceBounds);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plInstancedMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -273,15 +271,6 @@ plMeshRenderData* plInstancedMeshComponent::CreateRenderData() const
   {
     pRenderData->m_pExplicitInstanceData = m_pExplicitInstanceData;
     pRenderData->m_uiExplicitInstanceCount = m_RawInstancedData.GetCount();
-
-    const plWindWorldModuleInterface* pWindInterface = GetWorld()->GetModuleReadOnly<plWindWorldModuleInterface>();
-    if (pWindInterface)
-    {
-      const plVec3 position = GetOwner()->GetGlobalPosition();
-      const plVec3 windSamplePosition = position + plVec3(0, 0, 2); // avoid issues where position is at the contact point with the floor
-      const plVec3 windowForce = pWindInterface->GetWindAt(windSamplePosition);
-      pRenderData->m_Wind = windowForce;
-    }
   }
 
   return pRenderData;
@@ -323,7 +312,7 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
   if (!m_pExplicitInstanceData || m_RawInstancedData.IsEmpty())
     return plArrayPtr<plPerInstanceData>();
 
-  auto instanceData = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerInstanceData, m_RawInstancedData.GetCount());
+  auto instanceData = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plPerInstanceData, m_RawInstancedData.GetCount());
 
   const plTransform ownerTransform = GetOwner()->GetGlobalTransform();
 
@@ -342,18 +331,9 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
 
     instanceData[i].ObjectToWorld = objectToWorld;
 
-    #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-      const plMat4 lastObjectToWorld = (GetOwner()->GetLastGlobalTransform() * m_RawInstancedData[i].m_transform).GetAsMat4();
-      instanceData[i].LastObjectToWorld = lastObjectToWorld;
-    #endif
-
     if (m_RawInstancedData[i].m_transform.ContainsUniformScale())
     {
       instanceData[i].ObjectToWorldNormal = objectToWorld;
-
-      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-        instanceData[i].LastObjectToWorldNormal = lastObjectToWorld;
-      #endif
     }
     else
     {
@@ -365,16 +345,6 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
       plShaderTransform shaderT;
       shaderT = mInverse.GetTranspose();
       instanceData[i].ObjectToWorldNormal = shaderT;
-
-      #if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-        mInverse = lastObjectToWorld.GetRotationalPart();
-        mInverse.Invert(0.0f).IgnoreResult();
-        // we explicitly ignore the return value here (success / failure)
-        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
-
-        shaderT = mInverse.GetTranspose();
-        instanceData[i].LastObjectToWorldNormal = shaderT;
-      #endif
     }
 
     instanceData[i].GameObjectID = GetUniqueIdForRendering();
@@ -387,4 +357,4 @@ plArrayPtr<plPerInstanceData> plInstancedMeshComponent::GetInstanceData() const
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_InstancedMeshComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_InstancedMeshComponent);

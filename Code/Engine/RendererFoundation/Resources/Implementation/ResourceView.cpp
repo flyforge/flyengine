@@ -6,13 +6,10 @@
 plGALResourceView::plGALResourceView(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& description)
   : plGALObject(description)
   , m_pResource(pResource)
-  , m_bUnsetUAV(description.m_bUnsetUAV)
 {
-  PLASMA_ASSERT_DEV(m_pResource != nullptr, "Resource must not be null");
+  PL_ASSERT_DEV(m_pResource != nullptr, "Resource must not be null");
 }
 
-plGALResourceView::~plGALResourceView() {}
+plGALResourceView::~plGALResourceView() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_ResourceView);

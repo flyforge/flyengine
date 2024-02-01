@@ -6,7 +6,7 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <GameEngine/Configuration/InputConfig.h>
 
-PLASMA_CHECK_AT_COMPILETIME_MSG(plGameAppInputConfig::MaxInputSlotAlternatives == plInputActionConfig::MaxInputSlotAlternatives, "Max values should be kept in sync");
+PL_CHECK_AT_COMPILETIME_MSG(plGameAppInputConfig::MaxInputSlotAlternatives == plInputActionConfig::MaxInputSlotAlternatives, "Max values should be kept in sync");
 
 plGameAppInputConfig::plGameAppInputConfig()
 {
@@ -31,13 +31,13 @@ void plGameAppInputConfig::Apply() const
   plInputManager::SetInputActionConfig(m_sInputSet, m_sInputAction, cfg, true);
 }
 
-void plGameAppInputConfig::WriteToDDL(plStreamWriter& stream, const plArrayPtr<plGameAppInputConfig>& actions)
+void plGameAppInputConfig::WriteToDDL(plStreamWriter& inout_stream, const plArrayPtr<plGameAppInputConfig>& actions)
 {
   plOpenDdlWriter writer;
   writer.SetCompactMode(false);
   writer.SetFloatPrecisionMode(plOpenDdlWriter::FloatPrecisionMode::Readable);
   writer.SetPrimitiveTypeStringMode(plOpenDdlWriter::TypeStringMode::Compliant);
-  writer.SetOutputStream(&stream);
+  writer.SetOutputStream(&inout_stream);
 
   for (const plGameAppInputConfig& config : actions)
   {
@@ -45,35 +45,35 @@ void plGameAppInputConfig::WriteToDDL(plStreamWriter& stream, const plArrayPtr<p
   }
 }
 
-void plGameAppInputConfig::WriteToDDL(plOpenDdlWriter& writer) const
+void plGameAppInputConfig::WriteToDDL(plOpenDdlWriter& ref_writer) const
 {
-  writer.BeginObject("InputAction");
+  ref_writer.BeginObject("InputAction");
   {
-    plOpenDdlUtils::StoreString(writer, m_sInputSet, "Set");
-    plOpenDdlUtils::StoreString(writer, m_sInputAction, "Action");
-    plOpenDdlUtils::StoreBool(writer, m_bApplyTimeScaling, "TimeScale");
+    plOpenDdlUtils::StoreString(ref_writer, m_sInputSet, "Set");
+    plOpenDdlUtils::StoreString(ref_writer, m_sInputAction, "Action");
+    plOpenDdlUtils::StoreBool(ref_writer, m_bApplyTimeScaling, "TimeScale");
 
     for (int i = 0; i < 3; ++i)
     {
       if (!m_sInputSlotTrigger[i].IsEmpty())
       {
-        writer.BeginObject("Slot");
+        ref_writer.BeginObject("Slot");
         {
-          plOpenDdlUtils::StoreString(writer, m_sInputSlotTrigger[i], "Key");
-          plOpenDdlUtils::StoreFloat(writer, m_fInputSlotScale[i], "Scale");
+          plOpenDdlUtils::StoreString(ref_writer, m_sInputSlotTrigger[i], "Key");
+          plOpenDdlUtils::StoreFloat(ref_writer, m_fInputSlotScale[i], "Scale");
         }
-        writer.EndObject();
+        ref_writer.EndObject();
       }
     }
   }
-  writer.EndObject();
+  ref_writer.EndObject();
 }
 
-void plGameAppInputConfig::ReadFromDDL(plStreamReader& stream, plHybridArray<plGameAppInputConfig, 32>& out_actions)
+void plGameAppInputConfig::ReadFromDDL(plStreamReader& inout_stream, plHybridArray<plGameAppInputConfig, 32>& out_actions)
 {
   plOpenDdlReader reader;
 
-  if (reader.ParseDocument(stream, 0, plLog::GetThreadLocalLogSystem()).Failed())
+  if (reader.ParseDocument(inout_stream, 0, plLog::GetThreadLocalLogSystem()).Failed())
     return;
 
   const plOpenDdlReaderElement* pRoot = reader.GetRootElement();
@@ -136,5 +136,3 @@ void plGameAppInputConfig::ApplyAll(const plArrayPtr<plGameAppInputConfig>& acti
 }
 
 
-
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Configuration_Implementation_InputConfig);

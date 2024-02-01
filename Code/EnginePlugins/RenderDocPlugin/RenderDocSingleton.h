@@ -16,16 +16,16 @@ struct RENDERDOC_API_1_4_1;
 /// If an outdated RenderDoc DLL is found, initialization will fail and the plugin will be deactivated.
 ///
 /// For interface documentation see \ref plFrameCaptureInterface
-class PLASMA_RENDERDOCPLUGIN_DLL plRenderDoc : public plFrameCaptureInterface
+class PL_RENDERDOCPLUGIN_DLL plRenderDoc : public plFrameCaptureInterface
 {
-  PLASMA_DECLARE_SINGLETON_OF_INTERFACE(plRenderDoc, plFrameCaptureInterface);
+  PL_DECLARE_SINGLETON_OF_INTERFACE(plRenderDoc, plFrameCaptureInterface);
 
 public:
   plRenderDoc();
   virtual ~plRenderDoc();
 
   virtual bool IsInitialized() const override;
-  virtual void SetAbsCaptureFilePathTemplate(plStringView szFilePathTemplate) override;
+  virtual void SetAbsCaptureFilePathTemplate(plStringView sFilePathTemplate) override;
   virtual plStringView GetAbsCaptureFilePathTemplate() const override;
   virtual void StartFrameCapture(plWindowHandle hWnd) override;
   virtual bool IsFrameCapturing() const override;

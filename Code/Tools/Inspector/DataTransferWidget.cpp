@@ -43,7 +43,7 @@ void plQtDataWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage msg;
 
-  while (plTelemetry::RetrieveMessage('TRAN', msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('TRAN', msg) == PL_SUCCESS)
   {
     if (msg.GetMessageID() == ' CLR')
     {
@@ -57,7 +57,7 @@ void plQtDataWidget::ProcessTelemetry(void* pUnuseed)
 
       // this will create the item, do not remove!
       TransferData& td = s_pWidget->m_Transfers[sName];
-      PLASMA_IGNORE_UNUSED(td);
+      PL_IGNORE_UNUSED(td);
 
       s_pWidget->ComboTransfers->addItem(sName.GetData());
     }
@@ -236,7 +236,7 @@ void plQtDataWidget::on_ComboItems_currentIndexChanged(int index)
   else
   {
     plStringBuilder sText;
-    sText.Format("Cannot display data of Mime-Type '{0}'", sMime);
+    sText.SetFormat("Cannot display data of Mime-Type '{0}'", sMime);
 
     LabelImage->setText(sText.GetData());
   }

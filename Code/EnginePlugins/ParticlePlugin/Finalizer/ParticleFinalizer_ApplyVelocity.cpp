@@ -7,14 +7,14 @@
 #include <ParticlePlugin/Finalizer/ParticleFinalizer_ApplyVelocity.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_ApplyVelocity, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_ApplyVelocity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_ApplyVelocity, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_ApplyVelocity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_ApplyVelocity, 1, plRTTIDefaultAllocator<plParticleFinalizer_ApplyVelocity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_ApplyVelocity, 1, plRTTIDefaultAllocator<plParticleFinalizer_ApplyVelocity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleFinalizerFactory_ApplyVelocity::plParticleFinalizerFactory_ApplyVelocity() {}
+plParticleFinalizerFactory_ApplyVelocity::plParticleFinalizerFactory_ApplyVelocity() = default;
 
 const plRTTI* plParticleFinalizerFactory_ApplyVelocity::GetFinalizerType() const
 {
@@ -32,7 +32,7 @@ plParticleFinalizer_ApplyVelocity::plParticleFinalizer_ApplyVelocity()
   m_fPriority = 525.0f;
 }
 
-plParticleFinalizer_ApplyVelocity::~plParticleFinalizer_ApplyVelocity() {}
+plParticleFinalizer_ApplyVelocity::~plParticleFinalizer_ApplyVelocity() = default;
 
 void plParticleFinalizer_ApplyVelocity::CreateRequiredStreams()
 {
@@ -42,7 +42,7 @@ void plParticleFinalizer_ApplyVelocity::CreateRequiredStreams()
 
 void plParticleFinalizer_ApplyVelocity::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: ApplyVelocity");
+  PL_PROFILE_SCOPE("PFX: ApplyVelocity");
 
   const float tDiff = (float)m_TimeDiff.GetSeconds();
 
@@ -59,3 +59,7 @@ void plParticleFinalizer_ApplyVelocity::Process(plUInt64 uiNumElements)
     itVelocity.Advance();
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer_ApplyVelocity);
+

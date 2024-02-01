@@ -12,7 +12,7 @@ plAiNavigationConfig::plAiNavigationConfig()
   plStringBuilder tmp;
   for (plUInt32 i = 2; i < plAiNumGroundTypes; ++i)
   {
-    tmp.Format("Custom Ground Type {}", i + 1);
+    tmp.SetFormat("Custom Ground Type {}", i + 1);
     m_GroundTypes[i].m_sName = tmp;
   }
 
@@ -34,21 +34,21 @@ plResult plAiNavigationConfig::Save(plStringView sFile) const
 {
   plFileWriter file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Save(file);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAiNavigationConfig::Load(plStringView sFile)
 {
   plFileReader file;
   if (file.Open(sFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Load(file);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plAiNavigationConfig::Save(plStreamWriter& inout_stream) const
@@ -111,7 +111,7 @@ void plAiNavigationConfig::Load(plStreamReader& inout_stream)
 
   inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= 1, "Invalid version {0} for plAiNavigationConfig file", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= 1, "Invalid version {0} for plAiNavigationConfig file", uiVersion);
 
   plUInt8 numGroundTypes = 0;
   inout_stream >> numGroundTypes;

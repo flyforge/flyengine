@@ -6,7 +6,7 @@
 
 plGALRenderCommandEncoder* plGALPass::BeginRendering(const plGALRenderingSetup& renderingSetup, const char* szName /*= ""*/)
 {
-  PLASMA_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Invalid, "Nested Command Encoder are not allowed");
+  PL_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Invalid, "Nested Command Encoder are not allowed");
   m_CurrentCommandEncoderType = CommandEncoderType::Render;
 
   plGALRenderCommandEncoder* pCommandEncoder = BeginRenderingPlatform(renderingSetup, szName);
@@ -22,7 +22,7 @@ plGALRenderCommandEncoder* plGALPass::BeginRendering(const plGALRenderingSetup& 
 
 void plGALPass::EndRendering(plGALRenderCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Render, "BeginRendering has not been called");
+  PL_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Render, "BeginRendering has not been called");
   m_CurrentCommandEncoderType = CommandEncoderType::Invalid;
 
   if (m_bMarker)
@@ -36,7 +36,7 @@ void plGALPass::EndRendering(plGALRenderCommandEncoder* pCommandEncoder)
 
 plGALComputeCommandEncoder* plGALPass::BeginCompute(const char* szName /*= ""*/)
 {
-  PLASMA_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Invalid, "Nested Command Encoder are not allowed");
+  PL_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Invalid, "Nested Command Encoder are not allowed");
   m_CurrentCommandEncoderType = CommandEncoderType::Compute;
 
   plGALComputeCommandEncoder* pCommandEncoder = BeginComputePlatform(szName);
@@ -52,7 +52,7 @@ plGALComputeCommandEncoder* plGALPass::BeginCompute(const char* szName /*= ""*/)
 
 void plGALPass::EndCompute(plGALComputeCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Compute, "BeginCompute has not been called");
+  PL_ASSERT_DEV(m_CurrentCommandEncoderType == CommandEncoderType::Compute, "BeginCompute has not been called");
   m_CurrentCommandEncoderType = CommandEncoderType::Invalid;
 
   if (m_bMarker)
@@ -72,4 +72,3 @@ plGALPass::plGALPass(plGALDevice& device)
 plGALPass::~plGALPass() = default;
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Device_Implementation_Pass);

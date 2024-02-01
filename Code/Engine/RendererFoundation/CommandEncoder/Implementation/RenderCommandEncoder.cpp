@@ -21,116 +21,59 @@ plGALRenderCommandEncoder::~plGALRenderCommandEncoder() = default;
 void plGALRenderCommandEncoder::Clear(const plColor& clearColor, plUInt32 uiRenderTargetClearMask /*= 0xFFFFFFFFu*/, bool bClearDepth /*= true*/, bool bClearStencil /*= true*/, float fDepthClear /*= 1.0f*/, plUInt8 uiStencilClear /*= 0x0u*/)
 {
   AssertRenderingThread();
-
   m_RenderImpl.ClearPlatform(clearColor, uiRenderTargetClearMask, bClearDepth, bClearStencil, fDepthClear, uiStencilClear);
 }
 
-void plGALRenderCommandEncoder::Draw(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
+plResult plGALRenderCommandEncoder::Draw(plUInt32 uiVertexCount, plUInt32 uiStartVertex)
 {
   AssertRenderingThread();
-
-  /// \todo If platform indicates that non-indexed rendering is not possible bind a helper index buffer which contains continuous indices
-  /// (0, 1, 2, ..)
-
-  m_RenderImpl.DrawPlatform(uiVertexCount, uiStartVertex);
-
   CountDrawCall();
+  return m_RenderImpl.DrawPlatform(uiVertexCount, uiStartVertex);
 }
 
-void plGALRenderCommandEncoder::DrawIndexed(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
+plResult plGALRenderCommandEncoder::DrawIndexed(plUInt32 uiIndexCount, plUInt32 uiStartIndex)
 {
   AssertRenderingThread();
-
-  m_RenderImpl.DrawIndexedPlatform(uiIndexCount, uiStartIndex);
-
   CountDrawCall();
+  return m_RenderImpl.DrawIndexedPlatform(uiIndexCount, uiStartIndex);
 }
 
-void plGALRenderCommandEncoder::DrawIndexedInstanced(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
+plResult plGALRenderCommandEncoder::DrawIndexedInstanced(plUInt32 uiIndexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartIndex)
 {
   AssertRenderingThread();
-  /// \todo Assert for instancing
-
-  m_RenderImpl.DrawIndexedInstancedPlatform(uiIndexCountPerInstance, uiInstanceCount, uiStartIndex);
-
   CountDrawCall();
+  return m_RenderImpl.DrawIndexedInstancedPlatform(uiIndexCountPerInstance, uiInstanceCount, uiStartIndex);
 }
 
-void plGALRenderCommandEncoder::DrawIndexedInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALRenderCommandEncoder::DrawIndexedInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
   AssertRenderingThread();
-  /// \todo Assert for instancing
-  /// \todo Assert for indirect draw
-  /// \todo Assert offset < buffer size
-
   const plGALBuffer* pBuffer = GetDevice().GetBuffer(hIndirectArgumentBuffer);
-  PLASMA_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
-
-  /// \todo Assert that the buffer can be used for indirect arguments (flag in desc)
-  m_RenderImpl.DrawIndexedInstancedIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
-
+  PL_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
   CountDrawCall();
+  return m_RenderImpl.DrawIndexedInstancedIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
 }
 
-void plGALRenderCommandEncoder::DrawInstanced(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
+plResult plGALRenderCommandEncoder::DrawInstanced(plUInt32 uiVertexCountPerInstance, plUInt32 uiInstanceCount, plUInt32 uiStartVertex)
 {
   AssertRenderingThread();
-  /// \todo Assert for instancing
-
-  /// \todo If platform indicates that non-indexed rendering is not possible bind a helper index buffer which contains continuous indices
-  /// (0, 1, 2, ..)
-
-  m_RenderImpl.DrawInstancedPlatform(uiVertexCountPerInstance, uiInstanceCount, uiStartVertex);
-
   CountDrawCall();
+  return m_RenderImpl.DrawInstancedPlatform(uiVertexCountPerInstance, uiInstanceCount, uiStartVertex);
 }
 
-void plGALRenderCommandEncoder::DrawInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALRenderCommandEncoder::DrawInstancedIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
   AssertRenderingThread();
-  /// \todo Assert for instancing
-  /// \todo Assert for indirect draw
-  /// \todo Assert offset < buffer size
-
   const plGALBuffer* pBuffer = GetDevice().GetBuffer(hIndirectArgumentBuffer);
-  PLASMA_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
-
-  /// \todo Assert that the buffer can be used for indirect arguments (flag in desc)
-  m_RenderImpl.DrawInstancedIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
-
+  PL_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
   CountDrawCall();
-}
-
-void plGALRenderCommandEncoder::DrawAuto()
-{
-  AssertRenderingThread();
-  /// \todo Assert for draw auto support
-
-  m_RenderImpl.DrawAutoPlatform();
-
-  CountDrawCall();
-}
-
-void plGALRenderCommandEncoder::BeginStreamOut()
-{
-  AssertRenderingThread();
-  /// \todo Assert for streamout support
-
-  m_RenderImpl.BeginStreamOutPlatform();
-}
-
-void plGALRenderCommandEncoder::EndStreamOut()
-{
-  AssertRenderingThread();
-
-  m_RenderImpl.EndStreamOutPlatform();
+  return m_RenderImpl.DrawInstancedIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
 }
 
 void plGALRenderCommandEncoder::SetIndexBuffer(plGALBufferHandle hIndexBuffer)
 {
   if (m_RenderState.m_hIndexBuffer == hIndexBuffer)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -141,14 +84,12 @@ void plGALRenderCommandEncoder::SetIndexBuffer(plGALBufferHandle hIndexBuffer)
   m_RenderImpl.SetIndexBufferPlatform(pBuffer);
 
   m_RenderState.m_hIndexBuffer = hIndexBuffer;
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetVertexBuffer(plUInt32 uiSlot, plGALBufferHandle hVertexBuffer)
 {
   if (m_RenderState.m_hVertexBuffers[uiSlot] == hVertexBuffer)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -159,7 +100,6 @@ void plGALRenderCommandEncoder::SetVertexBuffer(plUInt32 uiSlot, plGALBufferHand
   m_RenderImpl.SetVertexBufferPlatform(uiSlot, pBuffer);
 
   m_RenderState.m_hVertexBuffers[uiSlot] = hVertexBuffer;
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetPrimitiveTopology(plGALPrimitiveTopology::Enum topology)
@@ -168,15 +108,12 @@ void plGALRenderCommandEncoder::SetPrimitiveTopology(plGALPrimitiveTopology::Enu
 
   if (m_RenderState.m_Topology == topology)
   {
-    CountRedundantStateChange();
     return;
   }
 
   m_RenderImpl.SetPrimitiveTopologyPlatform(topology);
 
   m_RenderState.m_Topology = topology;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandle hVertexDeclaration)
@@ -185,7 +122,6 @@ void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandl
 
   if (m_RenderState.m_hVertexDeclaration == hVertexDeclaration)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -195,8 +131,6 @@ void plGALRenderCommandEncoder::SetVertexDeclaration(plGALVertexDeclarationHandl
   m_RenderImpl.SetVertexDeclarationPlatform(pVertexDeclaration);
 
   m_RenderState.m_hVertexDeclaration = hVertexDeclaration;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState, const plColor& blendFactor, plUInt32 uiSampleMask)
@@ -205,7 +139,6 @@ void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState,
 
   if (m_RenderState.m_hBlendState == hBlendState && m_RenderState.m_BlendFactor.IsEqualRGBA(blendFactor, 0.001f) && m_RenderState.m_uiSampleMask == uiSampleMask)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -216,8 +149,6 @@ void plGALRenderCommandEncoder::SetBlendState(plGALBlendStateHandle hBlendState,
   m_RenderState.m_hBlendState = hBlendState;
   m_RenderState.m_BlendFactor = blendFactor;
   m_RenderState.m_uiSampleMask = uiSampleMask;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandle hDepthStencilState, plUInt8 uiStencilRefValue /*= 0xFFu*/)
@@ -226,7 +157,6 @@ void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandl
 
   if (m_RenderState.m_hDepthStencilState == hDepthStencilState && m_RenderState.m_uiStencilRefValue == uiStencilRefValue)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -236,8 +166,6 @@ void plGALRenderCommandEncoder::SetDepthStencilState(plGALDepthStencilStateHandl
 
   m_RenderState.m_hDepthStencilState = hDepthStencilState;
   m_RenderState.m_uiStencilRefValue = uiStencilRefValue;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hRasterizerState)
@@ -246,7 +174,6 @@ void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hR
 
   if (m_RenderState.m_hRasterizerState == hRasterizerState)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -255,8 +182,6 @@ void plGALRenderCommandEncoder::SetRasterizerState(plGALRasterizerStateHandle hR
   m_RenderImpl.SetRasterizerStatePlatform(pRasterizerState);
 
   m_RenderState.m_hRasterizerState = hRasterizerState;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinDepth, float fMaxDepth)
@@ -265,7 +190,6 @@ void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinD
 
   if (m_RenderState.m_ViewPortRect == rect && m_RenderState.m_fViewPortMinDepth == fMinDepth && m_RenderState.m_fViewPortMaxDepth == fMaxDepth)
   {
-    CountRedundantStateChange();
     return;
   }
 
@@ -274,8 +198,6 @@ void plGALRenderCommandEncoder::SetViewport(const plRectFloat& rect, float fMinD
   m_RenderState.m_ViewPortRect = rect;
   m_RenderState.m_fViewPortMinDepth = fMinDepth;
   m_RenderState.m_fViewPortMaxDepth = fMaxDepth;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::SetScissorRect(const plRectU32& rect)
@@ -284,22 +206,12 @@ void plGALRenderCommandEncoder::SetScissorRect(const plRectU32& rect)
 
   if (m_RenderState.m_ScissorRect == rect)
   {
-    CountRedundantStateChange();
     return;
   }
 
   m_RenderImpl.SetScissorRectPlatform(rect);
 
   m_RenderState.m_ScissorRect = rect;
-
-  CountStateChange();
-}
-
-void plGALRenderCommandEncoder::SetStreamOutBuffer(plUInt32 uiSlot, plGALBufferHandle hBuffer, plUInt32 uiOffset)
-{
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-
-  CountStateChange();
 }
 
 void plGALRenderCommandEncoder::ClearStatisticsCounters()
@@ -310,4 +222,3 @@ void plGALRenderCommandEncoder::ClearStatisticsCounters()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_CommandEncoder_Implementation_RenderCommandEncoder);

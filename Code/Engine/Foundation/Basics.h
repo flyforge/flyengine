@@ -10,27 +10,27 @@
 #include <Foundation/UserConfig.h>
 
 // Configure the DLL Import/Export Define
-#if PLASMA_ENABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
+#if PL_ENABLED(PL_COMPILE_ENGINE_AS_DLL)
 #  ifdef BUILDSYSTEM_BUILDING_FOUNDATION_LIB
-#    define PLASMA_FOUNDATION_DLL PLASMA_DECL_EXPORT
-#    define PLASMA_FOUNDATION_DLL_FRIEND PLASMA_DECL_EXPORT_FRIEND
+#    define PL_FOUNDATION_DLL PL_DECL_EXPORT
+#    define PL_FOUNDATION_DLL_FRIEND PL_DECL_EXPORT_FRIEND
 #  else
-#    define PLASMA_FOUNDATION_DLL PLASMA_DECL_IMPORT
-#    define PLASMA_FOUNDATION_DLL_FRIEND PLASMA_DECL_IMPORT_FRIEND
+#    define PL_FOUNDATION_DLL PL_DECL_IMPORT
+#    define PL_FOUNDATION_DLL_FRIEND PL_DECL_IMPORT_FRIEND
 #  endif
 #else
-#  define PLASMA_FOUNDATION_DLL
-#  define PLASMA_FOUNDATION_DLL_FRIEND
+#  define PL_FOUNDATION_DLL
+#  define PL_FOUNDATION_DLL_FRIEND
 #endif
 
 #include <Foundation/FoundationInternal.h>
 
 // include the different headers for the supported platforms
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/Platform_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#elif PL_ENABLED(PL_PLATFORM_OSX)
 #  include <Foundation/Basics/Platform/OSX/Platform_OSX.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX) || PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_LINUX) || PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <Foundation/Basics/Platform/Linux/Platform_Linux.h>
 #else
 #  error "Undefined platform!"
@@ -42,7 +42,7 @@
 // Include this last, it will ensure the previous includes have setup everything correctly
 #include <Foundation/Basics/Platform/CheckDefinitions.h>
 
-// Include common definitions and macros (e.g. PLASMA_CHECK_AT_COMPILETIME)
+// Include common definitions and macros (e.g. PL_CHECK_AT_COMPILETIME)
 #include <Foundation/Basics/Platform/Common.h>
 
 // Include magic preprocessor macros
@@ -52,11 +52,11 @@
 #include <Foundation/Types/Types.h>
 
 #ifdef BUILDSYSTEM_BUILDING_FOUNDATION_LIB
-#  if BUILDSYSTEM_COMPILE_ENGINE_AS_DLL && PLASMA_DISABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
-#    error "The Buildsystem is configured to build the Engine as a shared library, but PLASMA_COMPILE_ENGINE_AS_DLL is not defined in UserConfig.h"
+#  if BUILDSYSTEM_COMPILE_ENGINE_AS_DLL && PL_DISABLED(PL_COMPILE_ENGINE_AS_DLL)
+#    error "The Buildsystem is configured to build the Engine as a shared library, but PL_COMPILE_ENGINE_AS_DLL is not defined in UserConfig.h"
 #  endif
-#  if !BUILDSYSTEM_COMPILE_ENGINE_AS_DLL && PLASMA_ENABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
-#    error "The Buildsystem is configured to build the Engine as a static library, but PLASMA_COMPILE_ENGINE_AS_DLL is defined in UserConfig.h"
+#  if !BUILDSYSTEM_COMPILE_ENGINE_AS_DLL && PL_ENABLED(PL_COMPILE_ENGINE_AS_DLL)
+#    error "The Buildsystem is configured to build the Engine as a static library, but PL_COMPILE_ENGINE_AS_DLL is defined in UserConfig.h"
 #  endif
 #endif
 
@@ -65,44 +65,43 @@
 
 #include <Foundation/Types/TypeTraits.h>
 
-#include <Foundation/Memory/AllocatorBase.h>
+#include <Foundation/Memory/Allocator.h>
 
 #include <Foundation/Configuration/StaticSubSystem.h>
 #include <Foundation/Strings/FormatString.h>
 
-class PLASMA_FOUNDATION_DLL plFoundation
+class PL_FOUNDATION_DLL plFoundation
 {
 public:
-  static plAllocatorBase* s_pDefaultAllocator;
-  static plAllocatorBase* s_pAlignedAllocator;
+  static plAllocator* s_pDefaultAllocator;
+  static plAllocator* s_pAlignedAllocator;
 
   /// \brief The default allocator can be used for any kind of allocation if no alignment is required
-  PLASMA_ALWAYS_INLINE static plAllocatorBase* GetDefaultAllocator()
+  PL_ALWAYS_INLINE static plAllocator* GetDefaultAllocator()
   {
     if (s_bIsInitialized)
       return s_pDefaultAllocator;
     else // the default allocator is not yet set so we return the static allocator instead.
-      return GetStaticAllocator();
+      return GetStaticsAllocator();
   }
 
   /// \brief The aligned allocator should be used for all allocations which need alignment
-  PLASMA_ALWAYS_INLINE static plAllocatorBase* GetAlignedAllocator()
+  PL_ALWAYS_INLINE static plAllocator* GetAlignedAllocator()
   {
-    PLASMA_ASSERT_RELEASE(s_pAlignedAllocator != nullptr, "plFoundation must have been initialized before this function can be called. This "
+    PL_ASSERT_RELEASE(s_pAlignedAllocator != nullptr, "plFoundation must have been initialized before this function can be called. This "
                                                       "error can occur when you have a global variable or a static member variable that "
                                                       "(indirectly) requires an allocator. Check out the documentation for 'plStatic' for "
                                                       "more information about this issue.");
     return s_pAlignedAllocator;
   }
 
+  /// \brief Returns the allocator that is used by global data and static members before the default allocator is created.
+  static plAllocator* GetStaticsAllocator();
+
 private:
   friend class plStartup;
-  friend struct plStaticAllocatorWrapper;
+  friend struct plStaticsAllocatorWrapper;
 
   static void Initialize();
-
-  /// \brief Returns the allocator that is used by global data and static members before the default allocator is created.
-  static plAllocatorBase* GetStaticAllocator();
-
   static bool s_bIsInitialized;
 };

@@ -11,13 +11,13 @@
 template <typename Object>
 class plRttiMappedObjectFactory
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plRttiMappedObjectFactory);
+  PL_DISALLOW_COPY_AND_ASSIGN(plRttiMappedObjectFactory);
 
 public:
   plRttiMappedObjectFactory();
   ~plRttiMappedObjectFactory();
 
-  typedef Object* (*CreateObjectFunc)(const plRTTI* pType);
+  using CreateObjectFunc = Object* (*)(const plRTTI*);
 
   void RegisterCreator(const plRTTI* pType, CreateObjectFunc creator);
   void UnregisterCreator(const plRTTI* pType);

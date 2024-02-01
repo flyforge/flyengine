@@ -6,11 +6,11 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleQuadRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleQuadRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleQuadRenderer, 1, plRTTIDefaultAllocator<plParticleQuadRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleQuadRenderer, 1, plRTTIDefaultAllocator<plParticleQuadRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleQuadRenderer::plParticleQuadRenderer()
@@ -29,9 +29,9 @@ plParticleQuadRenderer::~plParticleQuadRenderer()
   DestroyParticleDataBuffer(m_hTangentDataBuffer);
 }
 
-void plParticleQuadRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plParticleQuadRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plParticleQuadRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plParticleQuadRenderData>());
 }
 
 void plParticleQuadRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -124,3 +124,7 @@ void plParticleQuadRenderer::ConfigureRenderMode(const plParticleQuadRenderData*
       break;
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Quad_QuadParticleRenderer);
+

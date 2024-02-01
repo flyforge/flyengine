@@ -20,7 +20,7 @@
 using namespace plProcGenInternal;
 
 plCVarInt cvar_ProcGenProcessingMaxTiles("ProcGen.Processing.MaxTiles", 8, plCVarFlags::Default, "Maximum number of tiles in process");
-plCVarInt cvar_ProcGenProcessingMaxNewObjectsPerFrame("ProcGen.Processing.MaxNewObjectsPerFrame", 128, plCVarFlags::Default, "Maximum number of objects placed per frame");
+plCVarInt cvar_ProcGenProcessingMaxNewObjectsPerFrame("ProcGen.Processing.MaxNewObjectsPerFrame", 256, plCVarFlags::Default, "Maximum number of objects placed per frame");
 plCVarBool cvar_ProcGenVisTiles("ProcGen.VisTiles", false, plCVarFlags::Default, "Enables debug visualization of procedural placement tiles");
 
 plProcPlacementComponentManager::plProcPlacementComponentManager(plWorld* pWorld)
@@ -28,14 +28,14 @@ plProcPlacementComponentManager::plProcPlacementComponentManager(plWorld* pWorld
 {
 }
 
-plProcPlacementComponentManager::~plProcPlacementComponentManager() {}
+plProcPlacementComponentManager::~plProcPlacementComponentManager() = default;
 
 void plProcPlacementComponentManager::Initialize()
 {
   SUPER::Initialize();
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::FindTiles, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::FindTiles, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
     desc.m_fPriority = 10000.0f;
 
@@ -43,14 +43,14 @@ void plProcPlacementComponentManager::Initialize()
   }
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::PreparePlace, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::PreparePlace, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::Async;
 
     this->RegisterUpdateFunction(desc);
   }
 
   {
-    auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::PlaceObjects, this);
+    auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plProcPlacementComponentManager::PlaceObjects, this);
     desc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostAsync;
 
     this->RegisterUpdateFunction(desc);
@@ -98,7 +98,7 @@ void plProcPlacementComponentManager::FindTiles(const plWorldModule::UpdateConte
       {
         auto& outputContext = pComponent->m_OutputContexts.ExpandAndGetRef();
         outputContext.m_pOutput = pOutput;
-        outputContext.m_pUpdateTilesTask = PLASMA_DEFAULT_NEW(FindPlacementTilesTask, pComponent, uiIndex);
+        outputContext.m_pUpdateTilesTask = PL_DEFAULT_NEW(FindPlacementTilesTask, pComponent, uiIndex);
       }
     }
   }
@@ -140,7 +140,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
 {
   // Find new active tiles and remove old ones
   {
-    PLASMA_PROFILE_SCOPE("Add new/remove old tiles");
+    PL_PROFILE_SCOPE("Add new/remove old tiles");
 
     plTaskSystem::WaitForGroup(m_UpdateTilesTaskGroupID);
     m_UpdateTilesTaskGroupID.Invalidate();
@@ -187,7 +187,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
 
     // Sort new tiles
     {
-      PLASMA_PROFILE_SCOPE("Sort new tiles");
+      PL_PROFILE_SCOPE("Sort new tiles");
 
       // Update distance to camera
       for (auto& newTile : m_NewTiles)
@@ -205,7 +205,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
       }
 
       // Sort by distance, larger distances come first since new tiles are processed in reverse order.
-      m_NewTiles.Sort([](auto& tileA, auto& tileB) { return tileA.m_fDistanceToCamera > tileB.m_fDistanceToCamera; });
+      m_NewTiles.Sort([](auto& ref_tileA, auto& ref_tileB) { return ref_tileA.m_fDistanceToCamera > ref_tileB.m_fDistanceToCamera; });
     }
 
     ClearVisibleComponents();
@@ -215,7 +215,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
   if (cvar_ProcGenVisTiles)
   {
     plStringBuilder sb;
-    sb.Format("Procedural Placement Stats:\nNum Tiles to process: {}", m_NewTiles.GetCount());
+    sb.SetFormat("Procedural Placement Stats:\nNum Tiles to process: {}", m_NewTiles.GetCount());
 
     plColor textColor = plColorScheme::LightUI(plColorScheme::Grape);
     plDebugRenderer::DrawInfoText(GetWorld(), plDebugTextPlacement::TopLeft, "ProcPlaceStats", sb, textColor);
@@ -236,7 +236,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
 
   // Allocate new tiles and placement tasks
   {
-    PLASMA_PROFILE_SCOPE("Allocate new tiles");
+    PL_PROFILE_SCOPE("Allocate new tiles");
 
     while (!m_NewTiles.IsEmpty() && GetNumAllocatedProcessingTasks() < (plUInt32)cvar_ProcGenProcessingMaxTiles)
     {
@@ -261,7 +261,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
   if (GetWorldSimulationEnabled())
   {
     {
-      PLASMA_PROFILE_SCOPE("Prepare processing tasks");
+      PL_PROFILE_SCOPE("Prepare processing tasks");
 
       plTaskGroupID prepareTaskGroupID = plTaskSystem::CreateTaskGroup(plTaskPriority::EarlyThisFrame);
 
@@ -281,7 +281,7 @@ void plProcPlacementComponentManager::PreparePlace(const plWorldModule::UpdateCo
     }
 
     {
-      PLASMA_PROFILE_SCOPE("Kickoff placement tasks");
+      PL_PROFILE_SCOPE("Kickoff placement tasks");
 
       for (auto& processingTask : m_ProcessingTasks)
       {
@@ -305,7 +305,7 @@ void plProcPlacementComponentManager::PlaceObjects(const plWorldModule::UpdateCo
     sortedTask.m_uiTaskIndex = i;
   }
 
-  m_SortedProcessingTasks.Sort([](auto& taskA, auto& taskB) { return taskA.m_uiScheduledFrame < taskB.m_uiScheduledFrame; });
+  m_SortedProcessingTasks.Sort([](auto& ref_taskA, auto& ref_taskB) { return ref_taskA.m_uiScheduledFrame < ref_taskB.m_uiScheduledFrame; });
 
   plUInt32 uiTotalNumPlacedObjects = 0;
 
@@ -376,7 +376,7 @@ void plProcPlacementComponentManager::DebugDrawTile(const plProcGenInternal::Pla
   plStringBuilder sb;
   if (uiQueueIndex != plInvalidIndex)
   {
-    sb.Format("Queue Index: {}\n", uiQueueIndex);
+    sb.SetFormat("Queue Index: {}\n", uiQueueIndex);
   }
   sb.AppendFormat("Age: {}\nDistance: {}", uiAge, desc.m_fDistanceToCamera);
   plDebugRenderer::Draw3DText(GetWorld(), sb, bbox.GetCenter(), color);
@@ -441,14 +441,14 @@ plUInt32 plProcPlacementComponentManager::AllocateProcessingTask(plUInt32 uiTile
     uiNewTaskIndex = m_ProcessingTasks.GetCount();
     auto& newTask = m_ProcessingTasks.ExpandAndGetRef();
 
-    newTask.m_pData = PLASMA_DEFAULT_NEW(PlacementData);
+    newTask.m_pData = PL_DEFAULT_NEW(PlacementData);
 
     plStringBuilder sName;
-    sName.Format("Prepare Task {}", uiNewTaskIndex);
-    newTask.m_pPrepareTask = PLASMA_DEFAULT_NEW(PreparePlacementTask, newTask.m_pData.Borrow(), sName);
+    sName.SetFormat("Prepare Task {}", uiNewTaskIndex);
+    newTask.m_pPrepareTask = PL_DEFAULT_NEW(PreparePlacementTask, newTask.m_pData.Borrow(), sName);
 
-    sName.Format("Placement Task {}", uiNewTaskIndex);
-    newTask.m_pPlacementTask = PLASMA_DEFAULT_NEW(PlacementTask, newTask.m_pData.Borrow(), sName);
+    sName.SetFormat("Placement Task {}", uiNewTaskIndex);
+    newTask.m_pPlacementTask = PL_DEFAULT_NEW(PlacementTask, newTask.m_pData.Borrow(), sName);
   }
 
   m_ProcessingTasks[uiNewTaskIndex].m_uiTileIndex = uiTileIndex;
@@ -519,7 +519,7 @@ void plProcPlacementComponentManager::RemoveTilesForComponent(plProcPlacementCom
 
 void plProcPlacementComponentManager::OnResourceEvent(const plResourceEvent& resourceEvent)
 {
-  if (resourceEvent.m_Type != plResourceEvent::Type::ResourceContentUnloading)
+  if (resourceEvent.m_Type != plResourceEvent::Type::ResourceContentUnloading || resourceEvent.m_pResource->GetReferenceCount() == 0)
     return;
 
   if (auto pResource = plDynamicCast<const plProcGenGraphResource*>(resourceEvent.m_pResource))
@@ -538,7 +538,7 @@ void plProcPlacementComponentManager::OnResourceEvent(const plResourceEvent& res
 
 void plProcPlacementComponentManager::AddVisibleComponent(const plComponentHandle& hComponent, const plVec3& cameraPosition, const plVec3& cameraDirection) const
 {
-  PLASMA_LOCK(m_VisibleComponentsMutex);
+  PL_LOCK(m_VisibleComponentsMutex);
 
   for (auto& visibleComponent : m_VisibleComponents)
   {
@@ -562,46 +562,46 @@ void plProcPlacementComponentManager::ClearVisibleComponents()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plProcGenBoxExtents, plNoBase, 1, plRTTIDefaultAllocator<plProcGenBoxExtents>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plProcGenBoxExtents, plNoBase, 1, plRTTIDefaultAllocator<plProcGenBoxExtents>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Offset", m_vOffset),
-    PLASMA_MEMBER_PROPERTY("Rotation", m_Rotation),
-    PLASMA_MEMBER_PROPERTY("Extents", m_vExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
+    PL_MEMBER_PROPERTY("Offset", m_vOffset),
+    PL_MEMBER_PROPERTY("Rotation", m_Rotation),
+    PL_MEMBER_PROPERTY("Extents", m_vExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plBoxManipulatorAttribute("Extents", 1.0f, false, "Offset", "Rotation"),
-    new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue), nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "Offset", "Rotation"),
+    new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue), nullptr, plVisualizerAnchor::Center, plVec3(1.0f), "Offset", "Rotation"),
     new plTransformManipulatorAttribute("Offset", "Rotation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plProcPlacementComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plProcPlacementComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ProcGen_Graph")),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("BoxExtents", BoxExtents_GetCount, BoxExtents_GetValue, BoxExtents_SetValue, BoxExtents_Insert, BoxExtents_Remove),
+    PL_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ProcGen_Graph")),
+    PL_ARRAY_ACCESSOR_PROPERTY("BoxExtents", BoxExtents_GetCount, BoxExtents_GetValue, BoxExtents_SetValue, BoxExtents_Insert, BoxExtents_Remove),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Construction/PCG"),
+    new plCategoryAttribute("Construction/Procedural Generation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plProcPlacementComponent::plProcPlacementComponent() = default;
@@ -662,34 +662,33 @@ void plProcPlacementComponent::SetResource(const plProcGenGraphResourceHandle& h
   }
 }
 
-void plProcPlacementComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
+void plProcPlacementComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg)
 {
   if (m_BoxExtents.IsEmpty())
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   for (auto& boxExtent : m_BoxExtents)
   {
-    plBoundingBoxSphere localBox = plBoundingBox(-boxExtent.m_vExtents * 0.5f, boxExtent.m_vExtents * 0.5f);
+    plBoundingBoxSphere localBox = plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-boxExtent.m_vExtents * 0.5f, boxExtent.m_vExtents * 0.5f));
     localBox.Transform(plTransform(boxExtent.m_vOffset, boxExtent.m_Rotation).GetAsMat4());
 
     bounds.ExpandToInclude(localBox);
   }
 
-  msg.AddBounds(bounds, GetOwner()->IsDynamic() ? plDefaultSpatialDataCategories::RenderDynamic : plDefaultSpatialDataCategories::RenderStatic);
+  ref_msg.AddBounds(bounds, GetOwner()->IsDynamic() ? plDefaultSpatialDataCategories::RenderDynamic : plDefaultSpatialDataCategories::RenderStatic);
 }
 
-void plProcPlacementComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
+void plProcPlacementComponent::OnMsgExtractRenderData(plMsgExtractRenderData& ref_msg) const
 {
   // Don't extract render data for selection or in shadow views.
-  if (msg.m_OverrideCategory != plInvalidRenderDataCategory)
+  if (ref_msg.m_OverrideCategory != plInvalidRenderDataCategory)
     return;
 
-  if (msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::MainView || msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::EditorView)
+  if (ref_msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::MainView || ref_msg.m_pView->GetCameraUsageHint() == plCameraUsageHint::EditorView)
   {
-    const plCamera* pCamera = msg.m_pView->GetCullingCamera();
+    const plCamera* pCamera = ref_msg.m_pView->GetCullingCamera();
 
     plVec3 cameraPosition = pCamera->GetCenterPosition();
     plVec3 cameraDirection = pCamera->GetCenterDirForwards();
@@ -702,21 +701,21 @@ void plProcPlacementComponent::OnMsgExtractRenderData(plMsgExtractRenderData& ms
   }
 }
 
-void plProcPlacementComponent::SerializeComponent(plWorldWriter& stream) const
+void plProcPlacementComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_hResource;
   s.WriteArray(m_BoxExtents).IgnoreResult();
 }
 
-void plProcPlacementComponent::DeserializeComponent(plWorldReader& stream)
+void plProcPlacementComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_hResource;
   s.ReadArray(m_BoxExtents).IgnoreResult();
@@ -776,7 +775,7 @@ void plProcPlacementComponent::UpdateBoundsAndTiles()
       localBoxTransform.m_Scale = plSimdConversion::ToVec3(boxExtent.m_vExtents * 0.5f);
 
       plSimdTransform finalBoxTransform;
-      finalBoxTransform.SetGlobalTransform(ownerTransform, localBoxTransform);
+      finalBoxTransform = plSimdTransform::MakeGlobalTransform(ownerTransform, localBoxTransform);
 
       plSimdMat4f finalBoxMat = finalBoxTransform.GetAsMat4();
 
@@ -794,20 +793,20 @@ void plProcPlacementComponent::UpdateBoundsAndTiles()
 
 //////////////////////////////////////////////////////////////////////////
 
-plResult plProcGenBoxExtents::Serialize(plStreamWriter& stream) const
+plResult plProcGenBoxExtents::Serialize(plStreamWriter& inout_stream) const
 {
-  stream << m_vOffset;
-  stream << m_Rotation;
-  stream << m_vExtents;
+  inout_stream << m_vOffset;
+  inout_stream << m_Rotation;
+  inout_stream << m_vExtents;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plProcGenBoxExtents::Deserialize(plStreamReader& stream)
+plResult plProcGenBoxExtents::Deserialize(plStreamReader& inout_stream)
 {
-  stream >> m_vOffset;
-  stream >> m_Rotation;
-  stream >> m_vExtents;
+  inout_stream >> m_vOffset;
+  inout_stream >> m_Rotation;
+  inout_stream >> m_vExtents;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

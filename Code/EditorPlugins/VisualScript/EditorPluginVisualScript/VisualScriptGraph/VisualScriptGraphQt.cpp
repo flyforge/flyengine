@@ -5,7 +5,7 @@
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptNodeRegistry.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginVisualScript, Factories)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginVisualScript, Factories)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager"
@@ -13,7 +13,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginVisualScript, Factories)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plVisualScriptNodeRegistry);
+    PL_DEFAULT_NEW(plVisualScriptNodeRegistry);
     const plRTTI* pBaseType = plVisualScriptNodeRegistry::GetSingleton()->GetNodeBaseType();
 
     plQtNodeScene::GetPinFactory().RegisterCreator(plGetStaticRTTI<plVisualScriptPin>(), [](const plRTTI* pRtti)->plQtPin* { return new plQtVisualScriptPin(); });
@@ -30,10 +30,10 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginVisualScript, Factories)
     plQtNodeScene::GetNodeFactory().UnregisterCreator(pBaseType);
 
     plVisualScriptNodeRegistry* pDummy = plVisualScriptNodeRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -157,6 +157,9 @@ void plQtVisualScriptNode::UpdateState()
       else if (val.IsA<plString>() || val.IsA<plHashedString>())
       {
         sVal = val.ConvertTo<plString>();
+        sVal.ReplaceAll("\n", " ");
+        sVal.ReplaceAll("\t", " ");
+
         if (sVal.GetCharacterCount() > 16)
         {
           sVal.Shrink(0, sVal.GetCharacterCount() - 13);
@@ -240,14 +243,10 @@ plQtVisualScriptNodeScene::plQtVisualScriptNodeScene(QObject* pParent /*= nullpt
   constexpr int iconSize = 32;
   m_CoroutineIcon = QIcon(":/EditorPluginVisualScript/Coroutine.svg").pixmap(QSize(iconSize, iconSize));
   m_LoopIcon = QIcon(":/EditorPluginVisualScript/Loop.svg").pixmap(QSize(iconSize, iconSize));
-
-  plGameObjectDocument::s_GameObjectDocumentEvents.AddEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::GameObjectDocumentEventHandler, this));
 }
 
 plQtVisualScriptNodeScene::~plQtVisualScriptNodeScene()
 {
-  plGameObjectDocument::s_GameObjectDocumentEvents.RemoveEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::GameObjectDocumentEventHandler, this));
-
   if (m_pManager != nullptr)
   {
     static_cast<const plVisualScriptNodeManager*>(m_pManager)->m_NodeChangedEvent.RemoveEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::NodeChangedHandler, this));
@@ -259,25 +258,6 @@ void plQtVisualScriptNodeScene::InitScene(const plDocumentNodeManager* pManager)
   plQtNodeScene::InitScene(pManager);
 
   static_cast<const plVisualScriptNodeManager*>(pManager)->m_NodeChangedEvent.AddEventHandler(plMakeDelegate(&plQtVisualScriptNodeScene::NodeChangedHandler, this));
-}
-
-void plQtVisualScriptNodeScene::GameObjectDocumentEventHandler(const plGameObjectDocumentEvent& e)
-{
-  switch (e.m_Type)
-  {
-    case plGameObjectDocumentEvent::Type::GameMode_StartingSimulate:
-    case plGameObjectDocumentEvent::Type::GameMode_StartingPlay:
-    case plGameObjectDocumentEvent::Type::GameMode_StartingExternal:
-    {
-      SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Debugging);
-      break;
-    }
-    case plGameObjectDocumentEvent::Type::GameMode_Stopped:
-    {
-      SetConnectionDecorationFlags(plQtNodeScene::ConnectionDecorationFlags::Default);
-      break;
-    }
-  }
 }
 
 void plQtVisualScriptNodeScene::NodeChangedHandler(const plDocumentObject* pObject)

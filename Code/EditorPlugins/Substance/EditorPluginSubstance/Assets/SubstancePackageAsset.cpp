@@ -1,6 +1,6 @@
 #include <EditorPluginSubstance/EditorPluginSubstancePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorPluginAssets/TextureAsset/TextureAssetManager.h>
 #include <EditorPluginSubstance/Assets/SubstancePackageAsset.h>
@@ -15,10 +15,10 @@ namespace
   plResult GetSbsContent(plStringView sAbsolutePath, plStringBuilder& out_sContent)
   {
     plFileReader fileReader;
-    PLASMA_SUCCEED_OR_RETURN(fileReader.Open(sAbsolutePath));
+    PL_SUCCEED_OR_RETURN(fileReader.Open(sAbsolutePath));
 
     out_sContent.ReadAll(fileReader);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult ReadUntilStartElement(QXmlStreamReader& inout_reader, const char* szName)
@@ -26,13 +26,13 @@ namespace
     while (inout_reader.atEnd() == false)
     {
       auto tokenType = inout_reader.readNext();
-      PLASMA_IGNORE_UNUSED(tokenType);
+      PL_IGNORE_UNUSED(tokenType);
 
       if (inout_reader.isStartElement() && inout_reader.name() == QLatin1StringView(szName))
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plResult ReadUntilEndElement(QXmlStreamReader& inout_reader, const char* szName)
@@ -40,13 +40,13 @@ namespace
     while (inout_reader.atEnd() == false)
     {
       auto tokenType = inout_reader.readNext();
-      PLASMA_IGNORE_UNUSED(tokenType);
+      PL_IGNORE_UNUSED(tokenType);
 
       if (inout_reader.isEndElement() && inout_reader.name() == QLatin1StringView(szName))
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   template <typename T>
@@ -78,7 +78,7 @@ namespace
     "roughness",        // Roughness,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szSubstanceUsageMapping) == plSubstanceUsage::Count);
+  static_assert(PL_ARRAY_SIZE(s_szSubstanceUsageMapping) == plSubstanceUsage::Count);
 
   static plUInt8 s_substanceNumChannelsMapping[] = {
     1, // Unknown,
@@ -94,7 +94,7 @@ namespace
     1, // Roughness,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szSubstanceUsageMapping) == plSubstanceUsage::Count);
+  static_assert(PL_ARRAY_SIZE(s_szSubstanceUsageMapping) == plSubstanceUsage::Count);
 
 
   plSubstanceUsage::Enum GetUsage(QXmlStreamReader& inout_reader)
@@ -111,9 +111,9 @@ namespace
     return plSubstanceUsage::Unknown;
   }
 
-  plResult ParseGraphOutput(QXmlStreamReader& inout_reader, plUInt32 graphUid, plSubstanceGraphOutput& out_graphOutput)
+  plResult ParseGraphOutput(QXmlStreamReader& inout_reader, plUInt32 uiGraphUid, plSubstanceGraphOutput& out_graphOutput)
   {
-    PLASMA_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graphoutput"), "");
+    PL_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graphoutput"), "");
 
     while (inout_reader.readNextStartElement())
     {
@@ -124,15 +124,15 @@ namespace
       else if (inout_reader.name() == QLatin1StringView("uid"))
       {
         plUInt32 outputUid = GetValueAttribute<plUInt32>(inout_reader);
-        plUInt64 seed = plUInt64(graphUid) << 32ull | outputUid;
-        out_graphOutput.m_Uuid = plUuid::StableUuidForInt(seed);
+        plUInt64 seed = plUInt64(uiGraphUid) << 32ull | outputUid;
+        out_graphOutput.m_Uuid = plUuid::MakeStableUuidFromInt(seed);
       }
       else if (inout_reader.name() == QLatin1StringView("attributes"))
       {
         if (ReadUntilStartElement(inout_reader, "label").Succeeded())
         {
           out_graphOutput.m_sLabel = GetValueAttribute<plString>(inout_reader);
-          PLASMA_SUCCEED_OR_RETURN(ReadUntilEndElement(inout_reader, "label"));
+          PL_SUCCEED_OR_RETURN(ReadUntilEndElement(inout_reader, "label"));
         }
       }
       else if (inout_reader.name() == QLatin1StringView("usages"))
@@ -141,32 +141,58 @@ namespace
         {
           out_graphOutput.m_Usage = GetUsage(inout_reader);
           out_graphOutput.m_uiNumChannels = s_substanceNumChannelsMapping[out_graphOutput.m_Usage];
-          PLASMA_SUCCEED_OR_RETURN(ReadUntilEndElement(inout_reader, "usage"));
+          PL_SUCCEED_OR_RETURN(ReadUntilEndElement(inout_reader, "usage"));
         }
       }
 
       inout_reader.skipCurrentElement();
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
+  }
+
+  struct Option
+  {
+    plString m_sName;
+    plString m_sValue;
+  };
+
+  plResult ParseOption(QXmlStreamReader& inout_reader, Option& out_option)
+  {
+    PL_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("option"), "");
+
+    while (inout_reader.readNextStartElement())
+    {
+      if (inout_reader.name() == QLatin1StringView("name"))
+      {
+        out_option.m_sName = GetValueAttribute<plString>(inout_reader);
+      }
+      else if (inout_reader.name() == QLatin1StringView("value"))
+      {
+        out_option.m_sValue = GetValueAttribute<plString>(inout_reader);
+      }
+
+      inout_reader.skipCurrentElement();
+    }
+
+    return PL_SUCCESS;
   }
 
   plResult ParseGraph(QXmlStreamReader& inout_reader, plSubstanceGraph& out_graph)
   {
-    PLASMA_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graph"), "");
+    PL_ASSERT_DEBUG(inout_reader.name() == QLatin1StringView("graph"), "");
 
-    plUInt32 graphUid = 0;
+    plUInt32 uiGraphUid = 0;
     while (inout_reader.readNextStartElement())
     {
       if (inout_reader.name() == QLatin1StringView("identifier"))
       {
         out_graph.m_sName = GetValueAttribute<plString>(inout_reader);
-        out_graph.m_bEnabled = out_graph.m_sName.StartsWith("_") == false;
         inout_reader.skipCurrentElement();
       }
       else if (inout_reader.name() == QLatin1StringView("uid"))
       {
-        graphUid = GetValueAttribute<plUInt32>(inout_reader);
+        uiGraphUid = GetValueAttribute<plUInt32>(inout_reader);
         inout_reader.skipCurrentElement();
       }
       else if (inout_reader.name() == QLatin1StringView("graphOutputs"))
@@ -176,7 +202,50 @@ namespace
           if (inout_reader.name() == QLatin1StringView("graphoutput"))
           {
             auto& graphOutput = out_graph.m_Outputs.ExpandAndGetRef();
-            PLASMA_SUCCEED_OR_RETURN(ParseGraphOutput(inout_reader, graphUid, graphOutput));
+            PL_SUCCEED_OR_RETURN(ParseGraphOutput(inout_reader, uiGraphUid, graphOutput));
+          }
+        }
+      }
+      else if (inout_reader.name() == QLatin1StringView("options"))
+      {
+        Option option;
+        while (inout_reader.readNextStartElement())
+        {
+          if (inout_reader.name() == QLatin1StringView("option"))
+          {
+            PL_SUCCEED_OR_RETURN(ParseOption(inout_reader, option));
+
+            if (option.m_sName == "defaultParentSize")
+            {
+              plStringView sValue = option.m_sValue;
+              plUInt32 tmp = 0;
+              const char* szLastPos = nullptr;
+              PL_SUCCEED_OR_RETURN(plConversionUtils::StringToUInt(sValue, tmp, &szLastPos));
+              out_graph.m_uiOutputWidth = static_cast<plUInt8>(tmp);
+
+              if (*szLastPos != 'x')
+                return PL_FAILURE;
+
+              sValue = plStringView(szLastPos + 1);
+              PL_SUCCEED_OR_RETURN(plConversionUtils::StringToUInt(sValue, tmp));
+              out_graph.m_uiOutputHeight = static_cast<plUInt8>(tmp);
+            }
+            else if (option.m_sName.StartsWith("export/fromGraph/outputs/"))
+            {
+              const char* szLastSlash = option.m_sName.FindLastSubString("/");
+              plStringView sOutputIdentifier = plStringView(szLastSlash + 1);
+
+              bool bEnabled = false;
+              PL_SUCCEED_OR_RETURN(plConversionUtils::StringToBool(option.m_sValue, bEnabled));
+
+              for (auto& output : out_graph.m_Outputs)
+              {
+                if (output.m_sName == sOutputIdentifier)
+                {
+                  output.m_bEnabled = bEnabled;
+                }
+              }
+            }
           }
         }
       }
@@ -186,7 +255,7 @@ namespace
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult ReadDependencies(plStringView sSbsFile, plSet<plString>& out_dependencies)
@@ -194,14 +263,14 @@ namespace
     plStringBuilder sAbsolutePath = sSbsFile;
     if (!plQtEditorApp::GetSingleton()->MakeDataDirectoryRelativePathAbsolute(sAbsolutePath))
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plStringBuilder sFileContent;
-    PLASMA_SUCCEED_OR_RETURN(GetSbsContent(sAbsolutePath, sFileContent));
+    PL_SUCCEED_OR_RETURN(GetSbsContent(sAbsolutePath, sFileContent));
 
-    QXmlStreamReader reader(sFileContent);
-    PLASMA_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "dependencies"));
+    QXmlStreamReader reader(sFileContent.GetData());
+    PL_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "dependencies"));
 
     while (reader.readNextStartElement())
     {
@@ -220,7 +289,7 @@ namespace
         plStringBuilder sFullPath;
         if (sDependency.IsAbsolutePath())
         {
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
         }
         else
         {
@@ -233,24 +302,24 @@ namespace
         {
           out_dependencies.Insert(sFullPath);
 
-          PLASMA_SUCCEED_OR_RETURN(ReadDependencies(sFullPath, out_dependencies));
+          PL_SUCCEED_OR_RETURN(ReadDependencies(sFullPath, out_dependencies));
         }
       }
 
-      PLASMA_SUCCEED_OR_RETURN(ReadUntilEndElement(reader, "dependency"));
+      PL_SUCCEED_OR_RETURN(ReadUntilEndElement(reader, "dependency"));
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult GetInstallationPath(plStringBuilder& out_sPath)
   {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
     static plUntrackedString s_CachedPath;
     if (s_CachedPath.IsEmpty() == false)
     {
       out_sPath = s_CachedPath;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     auto CheckPath = [&](plStringView sPath)
@@ -268,10 +337,10 @@ namespace
       return false;
     };
 
-    plStringBuilder sPath = "C:/Program Files/Adobe/Adobe Substance 3D Designer";
+    plStringBuilder sPath = "C:/Program Files/Allegorithmic/Substance Designer";
     if (CheckPath(sPath))
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     QSettings settings("\\HKEY_LOCAL_MACHINE\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{e9e3d6d9-3023-41c7-b223-11d8fdd691b9}_is1", QSettings::NativeFormat);
@@ -279,20 +348,20 @@ namespace
 
     if (CheckPath(sPath))
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     plLog::Error("Installation of Substance Designer could not be located.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 #endif
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStatus RunSbsCooker(const char* szSbsFile, const char* szOutputPath)
   {
     plStringBuilder sToolPath;
-    PLASMA_SUCCEED_OR_RETURN(GetInstallationPath(sToolPath));
+    PL_SUCCEED_OR_RETURN(GetInstallationPath(sToolPath));
     sToolPath.AppendPath("sbscooker");
 
     QStringList arguments;
@@ -303,25 +372,26 @@ namespace
     arguments << "--output-path";
     arguments << szOutputPath;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
-    auto logLevel = plLogMsgType::InfoMsg;
-#else
-    auto logLevel = plLogMsgType::WarningMsg;
-#endif
+    arguments << "--no-optimization";
 
-    PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool(sToolPath, arguments, 180, plLog::GetThreadLocalLogSystem(), logLevel));
+    PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool(sToolPath, arguments, 180, plLog::GetThreadLocalLogSystem(), plLogMsgType::InfoMsg));
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 
-  plStatus RunSbsRender(const char* szSbsarFile, const char* szGraph, const char* szGraphOutput, const char* szOutputName, const char* szOutputPath)
+  plStatus RunSbsRender(const char* szSbsarFile, const char* szGraph, const char* szGraphOutput, const char* szOutputName, const char* szOutputPath, plUInt8 uiOutputWidth, plUInt8 uiOutputHeight)
   {
     plStringBuilder sToolPath;
-    PLASMA_SUCCEED_OR_RETURN(GetInstallationPath(sToolPath));
+    PL_SUCCEED_OR_RETURN(GetInstallationPath(sToolPath));
     sToolPath.AppendPath("sbsrender");
+
+    plStringBuilder sTmp;
 
     QStringList arguments;
     arguments << "render";
+
+    arguments << "--engine";
+    arguments << "d3d11pc";
 
     arguments << "--input";
     arguments << szSbsarFile;
@@ -344,83 +414,90 @@ namespace
     arguments << "--output-path";
     arguments << szOutputPath;
 
-    PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool(sToolPath, arguments, 180, plLog::GetThreadLocalLogSystem()));
+    sTmp.SetFormat("$outputsize@{},{}", uiOutputWidth, uiOutputHeight);
+    arguments << "--set-value";
+    arguments << sTmp.GetData();
 
-    return plStatus(PLASMA_SUCCESS);
+    PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool(sToolPath, arguments, 180, plLog::GetThreadLocalLogSystem()));
+
+    return plStatus(PL_SUCCESS);
   }
 } // namespace
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSubstanceUsage, 1)
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Unknown),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::BaseColor),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Emissive),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Height),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Metallic),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Mask),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Normal),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Occlusion),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Opacity),
-  PLASMA_ENUM_CONSTANT(plSubstanceUsage::Roughness),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSubstanceUsage, 1)
+  PL_ENUM_CONSTANT(plSubstanceUsage::Unknown),
+  PL_ENUM_CONSTANT(plSubstanceUsage::BaseColor),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Emissive),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Height),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Metallic),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Mask),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Normal),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Occlusion),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Opacity),
+  PL_ENUM_CONSTANT(plSubstanceUsage::Roughness),
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plSubstanceGraphOutput, plNoBase, 1, plRTTIDefaultAllocator<plSubstanceGraphOutput>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plSubstanceGraphOutput, plNoBase, 1, plRTTIDefaultAllocator<plSubstanceGraphOutput>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Enabled", m_bEnabled)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_MEMBER_PROPERTY("Label", m_sLabel),
-    PLASMA_ENUM_MEMBER_PROPERTY("Usage", plSubstanceUsage, m_Usage),
-    PLASMA_MEMBER_PROPERTY("NumChannels", m_uiNumChannels)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 4)),
-    PLASMA_MEMBER_PROPERTY("UseHighCompression", m_bUseHighCompression)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Uuid", m_Uuid)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("Enabled", m_bEnabled)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("Label", m_sLabel),
+    PL_ENUM_MEMBER_PROPERTY("Usage", plSubstanceUsage, m_Usage),
+    PL_MEMBER_PROPERTY("NumChannels", m_uiNumChannels)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 4)),
+    PL_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode)->AddAttributes(new plDefaultValueAttribute(plTexConvCompressionMode::High)),
+    PL_MEMBER_PROPERTY("PreserveAlphaCoverage", m_bPreserveAlphaCoverage),
+    PL_MEMBER_PROPERTY("Uuid", m_Uuid)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plSubstanceGraph, plNoBase, 1, plRTTIDefaultAllocator<plSubstanceGraph>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plSubstanceGraph, plNoBase, 1, plRTTIDefaultAllocator<plSubstanceGraph>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Enabled", m_bEnabled)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Outputs", m_Outputs),
+    PL_MEMBER_PROPERTY("Enabled", m_bEnabled)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("OutputWidth", m_uiOutputWidth)->AddAttributes(new plClampValueAttribute(4, 12)),
+    PL_MEMBER_PROPERTY("OutputHeight", m_uiOutputHeight)->AddAttributes(new plClampValueAttribute(4, 12)),
+    PL_ARRAY_MEMBER_PROPERTY("Outputs", m_Outputs),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetProperties, 1, plRTTIDefaultAllocator<plSubstancePackageAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetProperties, 1, plRTTIDefaultAllocator<plSubstancePackageAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("SubstanceFile", m_sSubstancePackage)->AddAttributes(new plFileBrowserAttribute("Select Substance File", "*.sbs")),
-    PLASMA_MEMBER_PROPERTY("OutputPattern", m_sOutputPattern)->AddAttributes(new plDefaultValueAttribute(plStringView("$(graph)_$(label)"))),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Graphs", m_Graphs)
+    PL_MEMBER_PROPERTY("SubstanceFile", m_sSubstancePackage)->AddAttributes(new plFileBrowserAttribute("Select Substance File", "*.sbs")),
+    PL_MEMBER_PROPERTY("OutputPattern", m_sOutputPattern)->AddAttributes(new plDefaultValueAttribute(plStringView("$(graph)_$(label)"))),
+    PL_ARRAY_MEMBER_PROPERTY("Graphs", m_Graphs)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetMetaData, 1, plRTTIDefaultAllocator<plSubstancePackageAssetMetaData>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetMetaData, 1, plRTTIDefaultAllocator<plSubstancePackageAssetMetaData>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("OutputUuids", m_OutputUuids),
-    PLASMA_ARRAY_MEMBER_PROPERTY("OutputNames", m_OutputNames)
+    PL_ARRAY_MEMBER_PROPERTY("OutputUuids", m_OutputUuids),
+    PL_ARRAY_MEMBER_PROPERTY("OutputNames", m_OutputNames)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSubstancePackageAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plSubstancePackageAssetDocument::plSubstancePackageAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument(szDocumentPath, plAssetDocEngineConnection::None)
+plSubstancePackageAssetDocument::plSubstancePackageAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument(sDocumentPath, plAssetDocEngineConnection::None)
 {
   GetObjectManager()->m_PropertyEvents.AddEventHandler(plMakeDelegate(&plSubstancePackageAssetDocument::OnPropertyChanged, this));
 }
@@ -438,7 +515,9 @@ void plSubstancePackageAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInf
 
   // Dependencies
   {
-    pInfo->m_AssetTransformDependencies.Insert(pProp->m_sSubstancePackage);
+    pInfo->m_TransformDependencies.Insert(pProp->m_sSubstancePackage);
+
+    ReadDependencies(pProp->m_sSubstancePackage, pInfo->m_TransformDependencies).IgnoreResult();
   }
 
   // Outputs
@@ -472,7 +551,7 @@ void plSubstancePackageAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInf
   }
 }
 
-plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& assetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& assetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plSubstancePackageAssetProperties* pProp = GetProperties();
   plStringBuilder sAbsolutePackagePath = pProp->m_sSubstancePackage;
@@ -481,13 +560,13 @@ plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const 
     return plStatus(plFmt("Couldn't make path absolute: '{0};", sAbsolutePackagePath));
   }
 
-  PLASMA_SUCCEED_OR_RETURN(UpdateGraphOutputs(sAbsolutePackagePath, transformFlags.IsSet(plTransformFlags::BackgroundProcessing) == false));
+  PL_SUCCEED_OR_RETURN(UpdateGraphOutputs(sAbsolutePackagePath, transformFlags.IsSet(plTransformFlags::BackgroundProcessing) == false));
 
   plStringBuilder sTempDir;
-  PLASMA_SUCCEED_OR_RETURN(GetTempDir(sTempDir));
-  PLASMA_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sTempDir));
+  PL_SUCCEED_OR_RETURN(GetTempDir(sTempDir));
+  PL_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sTempDir));
 
-  PLASMA_SUCCEED_OR_RETURN(RunSbsCooker(sAbsolutePackagePath, sTempDir));
+  PL_SUCCEED_OR_RETURN(RunSbsCooker(sAbsolutePackagePath, sTempDir));
 
   plStringView sPackageName = sAbsolutePackagePath.GetFileName();
 
@@ -505,7 +584,7 @@ plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const 
     if (graph.m_bEnabled == false)
       continue;
 
-    PLASMA_SUCCEED_OR_RETURN(RunSbsRender(sSbsarPath, graph.m_sName, nullptr, nullptr, sTempDir));
+    PL_SUCCEED_OR_RETURN(RunSbsRender(sSbsarPath, graph.m_sName, nullptr, nullptr, sTempDir, graph.m_uiOutputWidth, graph.m_uiOutputHeight));
 
     for (auto& output : graph.m_Outputs)
     {
@@ -522,11 +601,11 @@ plTransformStatus plSubstancePackageAssetDocument::InternalTransformAsset(const 
       plString sAbsTargetFile = GetAssetDocumentManager()->GetAbsoluteOutputFileName(&textureTypeDesc, sTargetFile, "", pAssetProfile);
 
       plString sThumbnailFile = GetAssetDocumentManager()->GenerateResourceThumbnailPath(sTargetFile);
-      PLASMA_SUCCEED_OR_RETURN(RunTexConv(sPngPath, sAbsTargetFile, assetHeader, output, sThumbnailFile, pAssetConfig));
+      PL_SUCCEED_OR_RETURN(RunTexConv(sPngPath, sAbsTargetFile, assetHeader, output, sThumbnailFile, pAssetConfig));
     }
   }
 
-  return SUPER::InternalTransformAsset(szTargetFile, szOutputTag, pAssetProfile, assetHeader, transformFlags);
+  return SUPER::InternalTransformAsset(szTargetFile, sOutputTag, pAssetProfile, assetHeader, transformFlags);
 }
 
 void plSubstancePackageAssetDocument::OnPropertyChanged(const plDocumentObjectPropertyEvent& e)
@@ -551,11 +630,11 @@ plResult plSubstancePackageAssetDocument::GetTempDir(plStringBuilder& out_sTempD
   const plString sDataDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(szDocumentPath);
 
   plStringBuilder sRelativePath(szDocumentPath);
-  PLASMA_SUCCEED_OR_RETURN(sRelativePath.MakeRelativeTo(sDataDir));
+  PL_SUCCEED_OR_RETURN(sRelativePath.MakeRelativeTo(sDataDir));
 
   out_sTempDir.Set(sDataDir, "/AssetCache/Temp/", sRelativePath.GetFileDirectory());
   out_sTempDir.MakeCleanPath();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSubstancePackageAssetDocument::GenerateOutputName(const plSubstanceGraph& graph, const plSubstanceGraphOutput& graphOutput, plStringBuilder& out_sOutputName) const
@@ -574,22 +653,27 @@ void plSubstancePackageAssetDocument::GenerateOutputName(const plSubstanceGraph&
 plTransformStatus plSubstancePackageAssetDocument::UpdateGraphOutputs(plStringView sAbsolutePath, bool bAllowPropertyModifications)
 {
   plStringBuilder sFileContent;
-  PLASMA_SUCCEED_OR_RETURN(GetSbsContent(sAbsolutePath, sFileContent));
+  PL_SUCCEED_OR_RETURN(GetSbsContent(sAbsolutePath, sFileContent));
 
   plHybridArray<plSubstanceGraph, 2> graphs;
 
-  QXmlStreamReader reader(sFileContent);
-  PLASMA_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "content"));
+  QXmlStreamReader reader(sFileContent.GetData());
+  PL_SUCCEED_OR_RETURN(ReadUntilStartElement(reader, "content"));
 
   while (reader.atEnd() == false)
   {
     auto tokenType = reader.readNext();
-    PLASMA_IGNORE_UNUSED(tokenType);
+    PL_IGNORE_UNUSED(tokenType);
 
     if (reader.isStartElement() && reader.name() == QLatin1StringView("graph"))
     {
-      auto& graph = graphs.ExpandAndGetRef();
-      PLASMA_SUCCEED_OR_RETURN(ParseGraph(reader, graph));
+      plSubstanceGraph graph;
+      PL_SUCCEED_OR_RETURN(ParseGraph(reader, graph));
+
+      if (graph.m_sName.StartsWith("_") == false)
+      {
+        graphs.PushBack(std::move(graph));
+      }
     }
   }
 
@@ -619,7 +703,9 @@ plTransformStatus plSubstancePackageAssetDocument::UpdateGraphOutputs(plStringVi
         if (newOutput.m_sName == existingOutput.m_sName)
         {
           newOutput.m_bEnabled = existingOutput.m_bEnabled;
-          newOutput.m_bUseHighCompression = existingOutput.m_bUseHighCompression;
+          newOutput.m_CompressionMode = existingOutput.m_CompressionMode;
+          newOutput.m_uiNumChannels = existingOutput.m_uiNumChannels;
+          newOutput.m_bPreserveAlphaCoverage = existingOutput.m_bPreserveAlphaCoverage;
           newOutput.m_Usage = existingOutput.m_Usage;
           newOutput.m_sLabel = existingOutput.m_sLabel;
           break;
@@ -643,7 +729,7 @@ plTransformStatus plSubstancePackageAssetDocument::UpdateGraphOutputs(plStringVi
     GetObjectAccessor()->FinishTransaction();
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 static const char* s_szTexConvUsageMapping[] = {
@@ -660,7 +746,15 @@ static const char* s_szTexConvUsageMapping[] = {
   "Linear",    // Roughness,
 };
 
-static_assert(PLASMA_ARRAY_SIZE(s_szTexConvUsageMapping) == plSubstanceUsage::Count);
+static_assert(PL_ARRAY_SIZE(s_szTexConvUsageMapping) == plSubstanceUsage::Count);
+
+static const char* s_szTexConvCompressionMapping[] = {
+  "None",
+  "Medium",
+  "High",
+};
+
+static_assert(PL_ARRAY_SIZE(s_szTexConvCompressionMapping) == plTexConvCompressionMode::High + 1);
 
 plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, const char* szTargetFile, const plAssetFileHeader& assetHeader, const plSubstanceGraphOutput& graphOutput, plStringView sThumbnailFile, const plTextureAssetProfileConfig* pAssetConfig)
 {
@@ -679,11 +773,11 @@ plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, co
     const plUInt32 uiHashLow32 = uiHash64 & 0xFFFFFFFF;
     const plUInt32 uiHashHigh32 = (uiHash64 >> 32) & 0xFFFFFFFF;
 
-    temp.Format("{0}", plArgU(uiHashLow32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashLow32, 8, true, 16, true));
     arguments << "-assetHashLow";
     arguments << temp.GetData();
 
-    temp.Format("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
     arguments << "-assetHashHigh";
     arguments << temp.GetData();
   }
@@ -708,7 +802,7 @@ plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, co
   }
 
   arguments << "-compression";
-  arguments << (graphOutput.m_bUseHighCompression ? "High" : "Medium");
+  arguments << s_szTexConvCompressionMapping[graphOutput.m_CompressionMode];
 
   arguments << "-maxRes" << QString::number(pAssetConfig->m_uiMaxResolution);
 
@@ -738,17 +832,24 @@ plStatus plSubstancePackageAssetDocument::RunTexConv(const char* szInputFile, co
       break;
   }
 
-  PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
+  if (graphOutput.m_bPreserveAlphaCoverage)
+  {
+    arguments << "-mipsPreserveCoverage";
+    arguments << "-mipsAlphaThreshold";
+    arguments << "0.5";
+  }
+
+  PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
 
   if (sThumbnailFile.IsEmpty() == false)
   {
     plUInt64 uiThumbnailHash = plAssetCurator::GetSingleton()->GetAssetReferenceHash(GetGuid());
-    PLASMA_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
+    PL_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
 
     ThumbnailInfo thumbnailInfo;
     thumbnailInfo.SetFileHashAndVersion(uiThumbnailHash, GetAssetTypeVersion());
     AppendThumbnailInfo(sThumbnailFile, thumbnailInfo);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

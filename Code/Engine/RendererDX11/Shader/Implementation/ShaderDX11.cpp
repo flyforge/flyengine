@@ -7,16 +7,11 @@
 
 plGALShaderDX11::plGALShaderDX11(const plGALShaderCreationDescription& Description)
   : plGALShader(Description)
-  , m_pVertexShader(nullptr)
-  , m_pHullShader(nullptr)
-  , m_pDomainShader(nullptr)
-  , m_pGeometryShader(nullptr)
-  , m_pPixelShader(nullptr)
-  , m_pComputeShader(nullptr)
+
 {
 }
 
-plGALShaderDX11::~plGALShaderDX11() {}
+plGALShaderDX11::~plGALShaderDX11() = default;
 
 void plGALShaderDX11::SetDebugName(const char* szName) const
 {
@@ -55,6 +50,8 @@ void plGALShaderDX11::SetDebugName(const char* szName) const
 
 plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
 {
+  PL_SUCCEED_OR_RETURN(CreateBindingMapping());
+
   plGALDeviceDX11* pDXDevice = static_cast<plGALDeviceDX11*>(pDevice);
   ID3D11Device* pD3D11Device = pDXDevice->GetDXDevice();
 
@@ -64,7 +61,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::VertexShader]->GetSize(), nullptr, &m_pVertexShader)))
     {
       plLog::Error("Couldn't create native vertex shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -74,7 +71,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::HullShader]->GetSize(), nullptr, &m_pHullShader)))
     {
       plLog::Error("Couldn't create native hull shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -84,7 +81,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::DomainShader]->GetSize(), nullptr, &m_pDomainShader)))
     {
       plLog::Error("Couldn't create native domain shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -94,7 +91,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::GeometryShader]->GetSize(), nullptr, &m_pGeometryShader)))
     {
       plLog::Error("Couldn't create native geometry shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -104,7 +101,7 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::PixelShader]->GetSize(), nullptr, &m_pPixelShader)))
     {
       plLog::Error("Couldn't create native pixel shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -114,26 +111,25 @@ plResult plGALShaderDX11::InitPlatform(plGALDevice* pDevice)
           m_Description.m_ByteCodes[plGALShaderStage::ComputeShader]->GetSize(), nullptr, &m_pComputeShader)))
     {
       plLog::Error("Couldn't create native compute shader from bytecode!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALShaderDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pVertexShader);
-  PLASMA_GAL_DX11_RELEASE(m_pHullShader);
-  PLASMA_GAL_DX11_RELEASE(m_pDomainShader);
-  PLASMA_GAL_DX11_RELEASE(m_pGeometryShader);
-  PLASMA_GAL_DX11_RELEASE(m_pPixelShader);
-  PLASMA_GAL_DX11_RELEASE(m_pComputeShader);
+  DestroyBindingMapping();
+  PL_GAL_DX11_RELEASE(m_pVertexShader);
+  PL_GAL_DX11_RELEASE(m_pHullShader);
+  PL_GAL_DX11_RELEASE(m_pDomainShader);
+  PL_GAL_DX11_RELEASE(m_pGeometryShader);
+  PL_GAL_DX11_RELEASE(m_pPixelShader);
+  PL_GAL_DX11_RELEASE(m_pComputeShader);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-
-
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Shader_Implementation_ShaderDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Shader_Implementation_ShaderDX11);

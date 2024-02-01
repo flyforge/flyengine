@@ -19,7 +19,7 @@ plJoltQueryShapeActorComponentManager::~plJoltQueryShapeActorComponentManager() 
 
 void plJoltQueryShapeActorComponentManager::UpdateMovingQueryShapes()
 {
-  PLASMA_PROFILE_SCOPE("UpdateMovingQueryShapes");
+  PL_PROFILE_SCOPE("UpdateMovingQueryShapes");
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
   auto* pSystem = pModule->GetJoltSystem();
@@ -46,15 +46,15 @@ void plJoltQueryShapeActorComponentManager::UpdateMovingQueryShapes()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltQueryShapeActorComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltQueryShapeActorComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("Surface", GetSurfaceFile, SetSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plJoltQueryShapeActorComponent::plJoltQueryShapeActorComponent() = default;
@@ -165,5 +165,5 @@ const plJoltMaterial* plJoltQueryShapeActorComponent::GetJoltMaterial() const
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltQueryShapeActorComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Actors_Implementation_JoltQueryShapeActorComponent);
 

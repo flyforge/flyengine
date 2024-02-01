@@ -40,7 +40,7 @@ void plCompressedStreamReaderZstd::SetInputStream(plStreamReader* pInputStream)
 
 plUInt64 plCompressedStreamReaderZstd::ReadBytes(void* pReadBuffer, plUInt64 uiBytesToRead)
 {
-  PLASMA_ASSERT_DEV(m_pInputStream != nullptr, "No input stream has been specified");
+  PL_ASSERT_DEV(m_pInputStream != nullptr, "No input stream has been specified");
 
   if (uiBytesToRead == 0 || m_bReachedEnd)
     return 0;
@@ -78,7 +78,8 @@ plUInt64 plCompressedStreamReaderZstd::ReadBytes(void* pReadBuffer, plUInt64 uiB
       return outBuffer.pos;
 
     const size_t res = ZSTD_decompressStream(reinterpret_cast<ZSTD_DStream*>(m_pZstdDStream), &outBuffer, reinterpret_cast<ZSTD_inBuffer*>(&m_InBuffer));
-    PLASMA_ASSERT_DEV(!ZSTD_isError(res), "Decompressing the stream failed: '{0}'", ZSTD_getErrorName(res));
+    PL_IGNORE_UNUSED(res);
+    PL_ASSERT_DEV(!ZSTD_isError(res), "Decompressing the stream failed: '{0}'", ZSTD_getErrorName(res));
   }
 
   if (m_InBuffer.pos == m_InBuffer.size)
@@ -98,7 +99,7 @@ plResult plCompressedStreamReaderZstd::RefillReadCache()
   if (m_InBuffer.pos == m_InBuffer.size)
   {
     plUInt16 uiCompressedSize = 0;
-    PLASMA_VERIFY(m_pInputStream->ReadBytes(&uiCompressedSize, sizeof(plUInt16)) == sizeof(plUInt16), "Reading the compressed chunk size from the input stream failed.");
+    PL_VERIFY(m_pInputStream->ReadBytes(&uiCompressedSize, sizeof(plUInt16)) == sizeof(plUInt16), "Reading the compressed chunk size from the input stream failed.");
 
     m_InBuffer.pos = 0;
     m_InBuffer.size = uiCompressedSize;
@@ -112,7 +113,7 @@ plResult plCompressedStreamReaderZstd::RefillReadCache()
         m_InBuffer.src = m_CompressedCache.GetData();
       }
 
-      PLASMA_VERIFY(m_pInputStream->ReadBytes(m_CompressedCache.GetData(), sizeof(plUInt8) * uiCompressedSize) == sizeof(plUInt8) * uiCompressedSize, "Reading the compressed chunk of size {0} from the input stream failed.", uiCompressedSize);
+      PL_VERIFY(m_pInputStream->ReadBytes(m_CompressedCache.GetData(), sizeof(plUInt8) * uiCompressedSize) == sizeof(plUInt8) * uiCompressedSize, "Reading the compressed chunk of size {0} from the input stream failed.", uiCompressedSize);
     }
   }
 
@@ -121,10 +122,10 @@ plResult plCompressedStreamReaderZstd::RefillReadCache()
   {
     // in this case there is also no output that can be generated anymore
     m_bReachedEnd = true;
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -135,9 +136,9 @@ plResult plCompressedStreamReaderZstd::RefillReadCache()
 
 plCompressedStreamWriterZstd::plCompressedStreamWriterZstd() = default;
 
-plCompressedStreamWriterZstd::plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, Compression ratio)
+plCompressedStreamWriterZstd::plCompressedStreamWriterZstd(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
 {
-  SetOutputStream(pOutputStream, ratio);
+  SetOutputStream(pOutputStream, uiMaxNumWorkerThreads, ratio, uiCompressionCacheSizeKB);
 }
 
 plCompressedStreamWriterZstd::~plCompressedStreamWriterZstd()
@@ -146,7 +147,7 @@ plCompressedStreamWriterZstd::~plCompressedStreamWriterZstd()
   {
     // NOTE: FinishCompressedStream() WILL write a couple of bytes, even if the user did not write anything.
     // If plCompressedStreamWriterZstd was not supposed to be used, this may end up in a corrupted output file.
-    // PLASMA_ASSERT_DEV(m_uiWrittenBytes > 0, "Output stream was set, but not a single byte was written to the compressed stream before destruction.
+    // PL_ASSERT_DEV(m_uiWrittenBytes > 0, "Output stream was set, but not a single byte was written to the compressed stream before destruction.
     // Incorrect usage?");
 
     FinishCompressedStream().IgnoreResult();
@@ -159,7 +160,7 @@ plCompressedStreamWriterZstd::~plCompressedStreamWriterZstd()
   }
 }
 
-void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
+void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream, plUInt32 uiMaxNumWorkerThreads, Compression ratio /*= Compression::Default*/, plUInt32 uiCompressionCacheSizeKB /*= 4*/)
 {
   if (m_pOutputStream == pOutputStream)
     return;
@@ -183,7 +184,7 @@ void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream
       m_pZstdCStream = ZSTD_createCStream();
     }
 
-    const plUInt32 uiCoreCount = plMath::Clamp(plSystemInformation::Get().GetCPUCoreCount(), 1u, 12u);
+    const plUInt32 uiCoreCount = (uiMaxNumWorkerThreads > 0) ? plMath::Clamp(plSystemInformation::Get().GetCPUCoreCount(), 1u, uiMaxNumWorkerThreads) : 0u;
 
     ZSTD_CCtx_reset(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), ZSTD_reset_session_only);
     ZSTD_CCtx_refCDict(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), nullptr);
@@ -201,10 +202,10 @@ void plCompressedStreamWriterZstd::SetOutputStream(plStreamWriter* pOutputStream
 plResult plCompressedStreamWriterZstd::FinishCompressedStream()
 {
   if (m_pOutputStream == nullptr)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   if (Flush().Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   ZSTD_inBuffer emptyBuffer;
   emptyBuffer.pos = 0;
@@ -212,27 +213,27 @@ plResult plCompressedStreamWriterZstd::FinishCompressedStream()
   emptyBuffer.src = nullptr;
 
   const size_t res = ZSTD_compressStream2(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), reinterpret_cast<ZSTD_outBuffer*>(&m_OutBuffer), &emptyBuffer, ZSTD_e_end);
-  PLASMA_VERIFY(!ZSTD_isError(res), "Deinitializing the zstd compression stream failed: '{0}'", ZSTD_getErrorName(res));
+  PL_VERIFY(!ZSTD_isError(res), "Deinitializing the zstd compression stream failed: '{0}'", ZSTD_getErrorName(res));
 
   // one more flush to write out the last chunk
-  if (FlushWriteCache() == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (FlushWriteCache() == PL_FAILURE)
+    return PL_FAILURE;
 
   // write a zero-terminator
   const plUInt16 uiTerminator = 0;
-  if (m_pOutputStream->WriteBytes(&uiTerminator, sizeof(plUInt16)) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (m_pOutputStream->WriteBytes(&uiTerminator, sizeof(plUInt16)) == PL_FAILURE)
+    return PL_FAILURE;
 
   m_uiWrittenBytes += sizeof(plUInt16);
   m_pOutputStream = nullptr;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCompressedStreamWriterZstd::Flush()
 {
   if (m_pOutputStream == nullptr)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   ZSTD_inBuffer emptyBuffer;
   emptyBuffer.pos = 0;
@@ -241,31 +242,31 @@ plResult plCompressedStreamWriterZstd::Flush()
 
   while (ZSTD_compressStream2(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), reinterpret_cast<ZSTD_outBuffer*>(&m_OutBuffer), &emptyBuffer, ZSTD_e_flush) > 0)
   {
-    if (FlushWriteCache() == PLASMA_FAILURE)
-      return PLASMA_FAILURE;
+    if (FlushWriteCache() == PL_FAILURE)
+      return PL_FAILURE;
   }
 
-  if (FlushWriteCache() == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (FlushWriteCache() == PL_FAILURE)
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCompressedStreamWriterZstd::FlushWriteCache()
 {
   if (m_pOutputStream == nullptr)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   const plUInt16 uiUsedCache = static_cast<plUInt16>(m_OutBuffer.pos);
 
   if (uiUsedCache == 0)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  if (m_pOutputStream->WriteBytes(&uiUsedCache, sizeof(plUInt16)) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (m_pOutputStream->WriteBytes(&uiUsedCache, sizeof(plUInt16)) == PL_FAILURE)
+    return PL_FAILURE;
 
-  if (m_pOutputStream->WriteBytes(m_CompressedCache.GetData(), sizeof(plUInt8) * uiUsedCache) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (m_pOutputStream->WriteBytes(m_CompressedCache.GetData(), sizeof(plUInt8) * uiUsedCache) == PL_FAILURE)
+    return PL_FAILURE;
 
   m_uiCompressedSize += uiUsedCache;
   m_uiWrittenBytes += sizeof(plUInt16) + uiUsedCache;
@@ -273,12 +274,12 @@ plResult plCompressedStreamWriterZstd::FlushWriteCache()
   // reset the write position
   m_OutBuffer.pos = 0;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plCompressedStreamWriterZstd::WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWrite)
 {
-  PLASMA_ASSERT_DEV(m_pZstdCStream != nullptr, "The stream is already closed, you cannot write more data to it.");
+  PL_ASSERT_DEV(m_pZstdCStream != nullptr, "The stream is already closed, you cannot write more data to it.");
 
   m_uiUncompressedSize += static_cast<plUInt32>(uiBytesToWrite);
 
@@ -291,20 +292,18 @@ plResult plCompressedStreamWriterZstd::WriteBytes(const void* pWriteBuffer, plUI
   {
     if (m_OutBuffer.pos == m_OutBuffer.size)
     {
-      if (FlushWriteCache() == PLASMA_FAILURE)
-        return PLASMA_FAILURE;
+      if (FlushWriteCache() == PL_FAILURE)
+        return PL_FAILURE;
     }
 
     const size_t res = ZSTD_compressStream2(reinterpret_cast<ZSTD_CStream*>(m_pZstdCStream), reinterpret_cast<ZSTD_outBuffer*>(&m_OutBuffer), &inBuffer, ZSTD_e_continue);
 
-    PLASMA_VERIFY(!ZSTD_isError(res), "Compressing the zstd stream failed: '{0}'", ZSTD_getErrorName(res));
+    PL_VERIFY(!ZSTD_isError(res), "Compressing the zstd stream failed: '{0}'", ZSTD_getErrorName(res));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_CompressedStreamZstd);

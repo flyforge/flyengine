@@ -3,7 +3,7 @@
 #include <Utilities/GridAlgorithms/Rasterization.h>
 
 plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLine(
-  plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */)
+  plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */)
 {
   // Implements Bresenham's line algorithm:
   // http://en.wikipedia.org/wiki/Bresenham%27s_line_algorithm
@@ -19,7 +19,7 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLine(
   while (true)
   {
     // The user callback can stop the algorithm at any point, if no further points on the line are required
-    if (Callback(iStartX, iStartY, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX, iStartY, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
 
     if ((iStartX == iEndX) && (iStartY == iEndY))
@@ -42,7 +42,7 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLine(
 }
 
 plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLineConservative(plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY,
-  PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */, bool bVisitBothNeighbors /* = false */)
+  PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */, bool bVisitBothNeighbors /* = false */)
 {
   plInt32 dx = plMath::Abs(iEndX - iStartX);
   plInt32 dy = plMath::Abs(iEndY - iStartY);
@@ -63,18 +63,18 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLineConservative(plInt
     {
       // This part is the difference to the non-conservative line algorithm
 
-      if (Callback(iLastX, iStartY, pPassThrough) == plCallbackResult::Continue)
+      if (callback(iLastX, iStartY, pPassThrough) == plCallbackResult::Continue)
       {
         // first one succeeded, going to continue
 
         // if this is true, the user still wants a callback for the alternative, even though it does not change the outcome anymore
         if (bVisitBothNeighbors)
-          Callback(iStartX, iLastY, pPassThrough);
+          callback(iStartX, iLastY, pPassThrough);
       }
       else
       {
         // first one failed, try the second
-        if (Callback(iStartX, iLastY, pPassThrough) == plCallbackResult::Stop)
+        if (callback(iStartX, iLastY, pPassThrough) == plCallbackResult::Stop)
           return plRasterizationResult::Aborted;
       }
     }
@@ -83,7 +83,7 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLineConservative(plInt
     iLastY = iStartY;
 
     // The user callback can stop the algorithm at any point, if no further points on the line are required
-    if (Callback(iStartX, iStartY, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX, iStartY, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
 
     if ((iStartX == iEndX) && (iStartY == iEndY))
@@ -107,7 +107,7 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnLineConservative(plInt
 
 
 plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnCircle(
-  plInt32 iStartX, plInt32 iStartY, plUInt32 uiRadius, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */)
+  plInt32 iStartX, plInt32 iStartY, plUInt32 uiRadius, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */)
 {
   int f = 1 - uiRadius;
   int ddF_x = 1;
@@ -116,13 +116,13 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnCircle(
   int y = uiRadius;
 
   // report the four extremes
-  if (Callback(iStartX, iStartY + uiRadius, pPassThrough) == plCallbackResult::Stop)
+  if (callback(iStartX, iStartY + uiRadius, pPassThrough) == plCallbackResult::Stop)
     return plRasterizationResult::Aborted;
-  if (Callback(iStartX, iStartY - uiRadius, pPassThrough) == plCallbackResult::Stop)
+  if (callback(iStartX, iStartY - uiRadius, pPassThrough) == plCallbackResult::Stop)
     return plRasterizationResult::Aborted;
-  if (Callback(iStartX + uiRadius, iStartY, pPassThrough) == plCallbackResult::Stop)
+  if (callback(iStartX + uiRadius, iStartY, pPassThrough) == plCallbackResult::Stop)
     return plRasterizationResult::Aborted;
-  if (Callback(iStartX - uiRadius, iStartY, pPassThrough) == plCallbackResult::Stop)
+  if (callback(iStartX - uiRadius, iStartY, pPassThrough) == plCallbackResult::Stop)
     return plRasterizationResult::Aborted;
 
   // the loop iterates over an eighth of the circle (a 45 degree segment) and then mirrors each point 8 times to fill the entire circle
@@ -138,28 +138,28 @@ plRasterizationResult::Enum pl2DGridUtils::ComputePointsOnCircle(
     ddF_x += 2;
     f += ddF_x;
 
-    if (Callback(iStartX + x, iStartY + y, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX + x, iStartY + y, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX - x, iStartY + y, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX - x, iStartY + y, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX + x, iStartY - y, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX + x, iStartY - y, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX - x, iStartY - y, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX - x, iStartY - y, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX + y, iStartY + x, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX + y, iStartY + x, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX - y, iStartY + x, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX - y, iStartY + x, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX + y, iStartY - x, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX + y, iStartY - x, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
-    if (Callback(iStartX - y, iStartY - x, pPassThrough) == plCallbackResult::Stop)
+    if (callback(iStartX - y, iStartY - x, pPassThrough) == plCallbackResult::Stop)
       return plRasterizationResult::Aborted;
   }
 
   return plRasterizationResult::Finished;
 }
 
-plUInt32 pl2DGridUtils::FloodFill(plInt32 iStartX, plInt32 iStartY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */,
+plUInt32 pl2DGridUtils::FloodFill(plInt32 iStartX, plInt32 iStartY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */,
   plDeque<plVec2I32>* pTempArray /* = nullptr */)
 {
   plUInt32 uiFilled = 0;
@@ -177,7 +177,7 @@ plUInt32 pl2DGridUtils::FloodFill(plInt32 iStartX, plInt32 iStartY, PLASMA_RASTE
     plVec2I32 v = pTempArray->PeekBack();
     pTempArray->PopBack();
 
-    if (Callback(v.x, v.y, pPassThrough) == plCallbackResult::Continue)
+    if (callback(v.x, v.y, pPassThrough) == plCallbackResult::Continue)
     {
       ++uiFilled;
 
@@ -192,7 +192,7 @@ plUInt32 pl2DGridUtils::FloodFill(plInt32 iStartX, plInt32 iStartY, PLASMA_RASTE
   return uiFilled;
 }
 
-plUInt32 pl2DGridUtils::FloodFillDiag(plInt32 iStartX, plInt32 iStartY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /*= nullptr*/,
+plUInt32 pl2DGridUtils::FloodFillDiag(plInt32 iStartX, plInt32 iStartY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /*= nullptr*/,
   plDeque<plVec2I32>* pTempArray /*= nullptr*/)
 {
   plUInt32 uiFilled = 0;
@@ -210,7 +210,7 @@ plUInt32 pl2DGridUtils::FloodFillDiag(plInt32 iStartX, plInt32 iStartY, PLASMA_R
     plVec2I32 v = pTempArray->PeekBack();
     pTempArray->PopBack();
 
-    if (Callback(v.x, v.y, pPassThrough) == plCallbackResult::Continue)
+    if (callback(v.x, v.y, pPassThrough) == plCallbackResult::Continue)
     {
       ++uiFilled;
 
@@ -245,9 +245,9 @@ static const plUInt8 CircleAreaMin[9] = {7, 6, 6, 5, 4, 3, 2, 1, 0};
 static const plUInt8 CircleAreaMax[9] = {7, 8, 8, 9, 10, 11, 12, 13, 14};
 
 plRasterizationResult::Enum pl2DGridUtils::RasterizeBlob(
-  plInt32 iPosX, plInt32 iPosY, plBlobType eType, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */)
+  plInt32 iPosX, plInt32 iPosY, plBlobType type, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */)
 {
-  const plUInt8 uiCircleType = plMath::Clamp<plUInt8>(eType, 0, 8);
+  const plUInt8 uiCircleType = plMath::Clamp<plUInt8>(type, 0, 8);
 
   const plInt32 iAreaMin = CircleAreaMin[uiCircleType];
   const plInt32 iAreaMax = CircleAreaMax[uiCircleType];
@@ -261,7 +261,7 @@ plRasterizationResult::Enum pl2DGridUtils::RasterizeBlob(
     {
       if (OverlapCircle[y][x] <= uiCircleType)
       {
-        if (Callback(iPosX + x, iPosY + y, pPassThrough) == plCallbackResult::Stop)
+        if (callback(iPosX + x, iPosY + y, pPassThrough) == plCallbackResult::Stop)
           return plRasterizationResult::Aborted;
       }
     }
@@ -271,9 +271,9 @@ plRasterizationResult::Enum pl2DGridUtils::RasterizeBlob(
 }
 
 plRasterizationResult::Enum pl2DGridUtils::RasterizeBlobWithDistance(
-  plInt32 iPosX, plInt32 iPosY, plBlobType eType, PLASMA_RASTERIZED_BLOB_CALLBACK Callback, void* pPassThrough /*= nullptr*/)
+  plInt32 iPosX, plInt32 iPosY, plBlobType type, PL_RASTERIZED_BLOB_CALLBACK callback, void* pPassThrough /*= nullptr*/)
 {
-  const plUInt8 uiCircleType = plMath::Clamp<plUInt8>(eType, 0, 8);
+  const plUInt8 uiCircleType = plMath::Clamp<plUInt8>(type, 0, 8);
 
   const plInt32 iAreaMin = CircleAreaMin[uiCircleType];
   const plInt32 iAreaMax = CircleAreaMax[uiCircleType];
@@ -289,7 +289,7 @@ plRasterizationResult::Enum pl2DGridUtils::RasterizeBlobWithDistance(
 
       if (uiDistance <= uiCircleType)
       {
-        if (Callback(iPosX + x, iPosY + y, pPassThrough, uiDistance) == plCallbackResult::Stop)
+        if (callback(iPosX + x, iPosY + y, pPassThrough, uiDistance) == plCallbackResult::Stop)
           return plRasterizationResult::Aborted;
       }
     }
@@ -299,7 +299,7 @@ plRasterizationResult::Enum pl2DGridUtils::RasterizeBlobWithDistance(
 }
 
 plRasterizationResult::Enum pl2DGridUtils::RasterizeCircle(
-  plInt32 iPosX, plInt32 iPosY, float fRadius, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */)
+  plInt32 iPosX, plInt32 iPosY, float fRadius, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */)
 {
   const plVec2 vCenter((float)iPosX, (float)iPosY);
 
@@ -315,7 +315,7 @@ plRasterizationResult::Enum pl2DGridUtils::RasterizeCircle(
       if ((v - vCenter).GetLengthSquared() > fRadiusSqr)
         continue;
 
-      if (Callback(x, y, pPassThrough) == plCallbackResult::Stop)
+      if (callback(x, y, pPassThrough) == plCallbackResult::Stop)
         return plRasterizationResult::Aborted;
     }
   }
@@ -331,7 +331,7 @@ struct VisibilityLine
   plUInt32 m_uiRadius;
   plInt32 m_iCenterX;
   plInt32 m_iCenterY;
-  pl2DGridUtils::PLASMA_RASTERIZED_POINT_CALLBACK m_VisCallback;
+  pl2DGridUtils::PL_RASTERIZED_POINT_CALLBACK m_VisCallback;
   void* m_pUserPassThrough;
   plUInt32 m_uiWidth;
   plUInt32 m_uiHeight;
@@ -344,8 +344,8 @@ struct CellFlags
   enum Enum
   {
     NotVisited = 0,
-    Visited = PLASMA_BIT(0),
-    Visible = Visited | PLASMA_BIT(1),
+    Visited = PL_BIT(0),
+    Visible = Visited | PL_BIT(1),
     Invisible = Visited,
   };
 };
@@ -407,7 +407,7 @@ static plCallbackResult::Enum MarkPointsInCircleVisible(plInt32 x, plInt32 y, vo
 }
 
 void pl2DGridUtils::ComputeVisibleArea(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, plUInt32 uiWidth, plUInt32 uiHeight,
-  PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */, plDynamicArray<plUInt8>* pTempArray /* = nullptr */)
+  PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */, plDynamicArray<plUInt8>* pTempArray /* = nullptr */)
 {
   const plUInt32 uiSize = uiRadius * 2 + 1;
 
@@ -426,7 +426,7 @@ void pl2DGridUtils::ComputeVisibleArea(plInt32 iPosX, plInt32 iPosY, plUInt16 ui
   ld.m_pVisible = pTempArray;
   ld.m_iCenterX = iPosX;
   ld.m_iCenterY = iPosY;
-  ld.m_VisCallback = Callback;
+  ld.m_VisCallback = callback;
   ld.m_pUserPassThrough = pPassThrough;
   ld.m_uiWidth = uiWidth;
   ld.m_uiHeight = uiHeight;
@@ -453,8 +453,8 @@ static plCallbackResult::Enum MarkPointsInConeVisible(plInt32 x, plInt32 y, void
   return plCallbackResult::Continue;
 }
 
-void pl2DGridUtils::ComputeVisibleAreaInCone(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, const plVec2& vDirection, plAngle ConeAngle,
-  plUInt32 uiWidth, plUInt32 uiHeight, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough /* = nullptr */,
+void pl2DGridUtils::ComputeVisibleAreaInCone(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, const plVec2& vDirection, plAngle coneAngle,
+  plUInt32 uiWidth, plUInt32 uiHeight, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough /* = nullptr */,
   plDynamicArray<plUInt8>* pTempArray /* = nullptr */)
 {
   const plUInt32 uiSize = uiRadius * 2 + 1;
@@ -475,16 +475,14 @@ void pl2DGridUtils::ComputeVisibleAreaInCone(plInt32 iPosX, plInt32 iPosY, plUIn
   ld.m_pVisible = pTempArray;
   ld.m_iCenterX = iPosX;
   ld.m_iCenterY = iPosY;
-  ld.m_VisCallback = Callback;
+  ld.m_VisCallback = callback;
   ld.m_pUserPassThrough = pPassThrough;
   ld.m_uiWidth = uiWidth;
   ld.m_uiHeight = uiHeight;
   ld.m_vDirection = vDirection;
-  ld.m_ConeAngle = ConeAngle;
+  ld.m_ConeAngle = coneAngle;
 
   pl2DGridUtils::ComputePointsOnCircle(iPosX, iPosY, uiRadius, MarkPointsInConeVisible, &ld);
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_GridAlgorithms_Implementation_Rasterization);

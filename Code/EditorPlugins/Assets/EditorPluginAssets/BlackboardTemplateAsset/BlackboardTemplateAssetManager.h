@@ -5,7 +5,7 @@
 
 class plBlackboardTemplateAssetDocumentManager : public plAssetDocumentManager
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetDocumentManager, plAssetDocumentManager);
+  PL_ADD_DYNAMIC_REFLECTION(plBlackboardTemplateAssetDocumentManager, plAssetDocumentManager);
 
 public:
   plBlackboardTemplateAssetDocumentManager();
@@ -14,7 +14,7 @@ public:
 private:
   void OnDocumentManagerEvent(const plDocumentManager::Event& e);
 
-  virtual void InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
+  virtual void InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
 
   virtual void InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const override;
 

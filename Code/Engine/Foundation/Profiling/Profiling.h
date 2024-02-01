@@ -12,8 +12,8 @@ class plThread;
 /// \brief This class encapsulates a profiling scope.
 ///
 /// The constructor creates a new scope in the profiling system and the destructor pops the scope.
-/// You shouldn't need to use this directly, just use the macro PLASMA_PROFILE_SCOPE provided below.
-class PLASMA_FOUNDATION_DLL plProfilingScope
+/// You shouldn't need to use this directly, just use the macro PL_PROFILE_SCOPE provided below.
+class PL_FOUNDATION_DLL plProfilingScope
 {
 public:
   plProfilingScope(plStringView sName, const char* szFunctionName, plTime timeout);
@@ -33,14 +33,14 @@ protected:
 /// The function StartNextSection() will end the nested scope and start a new inner scope.
 /// This allows to end one scope and start a new one, without having to add actual C++ scopes for starting/stopping profiling scopes.
 ///
-/// You shouldn't need to use this directly, just use the macro PLASMA_PROFILE_LIST_SCOPE provided below.
+/// You shouldn't need to use this directly, just use the macro PL_PROFILE_LIST_SCOPE provided below.
 class plProfilingListScope
 {
 public:
-  PLASMA_FOUNDATION_DLL plProfilingListScope(plStringView sListName, plStringView sFirstSectionName, const char* szFunctionName);
-  PLASMA_FOUNDATION_DLL ~plProfilingListScope();
+  PL_FOUNDATION_DLL plProfilingListScope(plStringView sListName, plStringView sFirstSectionName, const char* szFunctionName);
+  PL_FOUNDATION_DLL ~plProfilingListScope();
 
-  PLASMA_FOUNDATION_DLL static void StartNextSection(plStringView sNextSectionName);
+  PL_FOUNDATION_DLL static void StartNextSection(plStringView sNextSectionName);
 
 protected:
   static thread_local plProfilingListScope* s_pCurrentList;
@@ -56,7 +56,7 @@ protected:
 };
 
 /// \brief Helper functionality of the profiling system.
-class PLASMA_FOUNDATION_DLL plProfilingSystem
+class PL_FOUNDATION_DLL plProfilingSystem
 {
 public:
   struct ThreadInfo
@@ -67,7 +67,7 @@ public:
 
   struct CPUScope
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     static constexpr plUInt32 NAME_SIZE = 40;
 
@@ -86,7 +86,7 @@ public:
   /// \brief Helper struct to hold GPU profiling data.
   struct GPUScope
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     static constexpr plUInt32 NAME_SIZE = 48;
 
@@ -95,7 +95,7 @@ public:
     char m_szName[NAME_SIZE];
   };
 
-  struct PLASMA_FOUNDATION_DLL ProfilingData
+  struct PL_FOUNDATION_DLL ProfilingData
   {
     plUInt32 m_uiFramesThreadID = 0;
     plUInt32 m_uiProcessSortIndex = 0;
@@ -142,7 +142,7 @@ public:
   static plUInt64 GetFrameCount();
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, ProfilingSystem);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, ProfilingSystem);
   friend plUInt32 RunThread(plThread* pThread);
 
   static void Initialize();
@@ -163,55 +163,55 @@ public:
   static void AddGPUScope(plStringView sName, plTime beginTime, plTime endTime, plUInt32 uiGpuIndex = 0);
 };
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_USE_PROFILING) || defined(PL_DOCS)
 
 /// \brief Profiles the current scope using the given name.
 ///
-/// It is allowed to nest PLASMA_PROFILE_SCOPE, also with PLASMA_PROFILE_LIST_SCOPE. However PLASMA_PROFILE_SCOPE should start and end within the same list scope
+/// It is allowed to nest PL_PROFILE_SCOPE, also with PL_PROFILE_LIST_SCOPE. However PL_PROFILE_SCOPE should start and end within the same list scope
 /// section.
 ///
 /// \note The name string must not be destroyed before the current scope ends.
 ///
 /// \sa plProfilingScope
-/// \sa PLASMA_PROFILE_LIST_SCOPE
-#  define PLASMA_PROFILE_SCOPE(szScopeName) plProfilingScope PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(szScopeName, PLASMA_SOURCE_FUNCTION, plTime::Zero())
+/// \sa PL_PROFILE_LIST_SCOPE
+#  define PL_PROFILE_SCOPE(szScopeName) plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, plTime::MakeZero())
 
 
-/// \brief Same as PLASMA_PROFILE_SCOPE but if the scope takes longer than 'Timeout', the plProfilingSystem's timeout callback is executed.
+/// \brief Same as PL_PROFILE_SCOPE but if the scope takes longer than 'Timeout', the plProfilingSystem's timeout callback is executed.
 ///
 /// This can be used to log an error or save a callstack, etc. when a scope exceeds an expected amount of time.
 /// 
 /// \sa plProfilingSystem::SetScopeTimeoutCallback()
-#  define PLASMA_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) plProfilingScope PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(szScopeName, PLASMA_SOURCE_FUNCTION, Timeout)
+#  define PL_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, Timeout)
 
 /// \brief Profiles the current scope using the given name as the overall list scope name and the section name for the first section in the list.
 ///
-/// Use PLASMA_PROFILE_LIST_NEXT_SECTION to start a new section in the list scope.
+/// Use PL_PROFILE_LIST_NEXT_SECTION to start a new section in the list scope.
 ///
-/// It is allowed to nest PLASMA_PROFILE_SCOPE, also with PLASMA_PROFILE_LIST_SCOPE. However PLASMA_PROFILE_SCOPE should start and end within the same list scope
+/// It is allowed to nest PL_PROFILE_SCOPE, also with PL_PROFILE_LIST_SCOPE. However PL_PROFILE_SCOPE should start and end within the same list scope
 /// section.
 ///
 /// \note The name string must not be destroyed before the current scope ends.
 ///
 /// \sa plProfilingListScope
-/// \sa PLASMA_PROFILE_LIST_NEXT_SECTION
-#  define PLASMA_PROFILE_LIST_SCOPE(szListName, szFirstSectionName) \
-    plProfilingListScope PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(szListName, szFirstSectionName, PLASMA_SOURCE_FUNCTION)
+/// \sa PL_PROFILE_LIST_NEXT_SECTION
+#  define PL_PROFILE_LIST_SCOPE(szListName, szFirstSectionName) \
+    plProfilingListScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szListName, szFirstSectionName, PL_SOURCE_FUNCTION)
 
-/// \brief Starts a new section in a PLASMA_PROFILE_LIST_SCOPE
+/// \brief Starts a new section in a PL_PROFILE_LIST_SCOPE
 ///
 /// \sa plProfilingListScope
-/// \sa PLASMA_PROFILE_LIST_SCOPE
-#  define PLASMA_PROFILE_LIST_NEXT_SECTION(szNextSectionName) plProfilingListScope::StartNextSection(szNextSectionName)
+/// \sa PL_PROFILE_LIST_SCOPE
+#  define PL_PROFILE_LIST_NEXT_SECTION(szNextSectionName) plProfilingListScope::StartNextSection(szNextSectionName)
 
 #else
 
-#  define PLASMA_PROFILE_SCOPE(Name) /*empty*/
+#  define PL_PROFILE_SCOPE(Name) /*empty*/
 
-#  define PLASMA_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) /*empty*/
+#  define PL_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) /*empty*/
 
-#  define PLASMA_PROFILE_LIST_SCOPE(szListName, szFirstSectionName) /*empty*/
+#  define PL_PROFILE_LIST_SCOPE(szListName, szFirstSectionName) /*empty*/
 
-#  define PLASMA_PROFILE_LIST_NEXT_SECTION(szNextSectionName) /*empty*/
+#  define PL_PROFILE_LIST_NEXT_SECTION(szNextSectionName) /*empty*/
 
 #endif

@@ -7,18 +7,18 @@
 struct plGameObjectEvent;
 struct plManipulatorManagerEvent;
 
-class PLASMA_EDITORPLUGINSCENE_DLL plGreyBoxEditTool : public plGameObjectEditTool
+class PL_EDITORPLUGINSCENE_DLL plGreyBoxEditTool : public plGameObjectEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGreyBoxEditTool, plGameObjectEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plGreyBoxEditTool, plGameObjectEditTool);
 
 public:
   plGreyBoxEditTool();
   ~plGreyBoxEditTool();
 
-  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() override;
+  virtual plEditorInputContext* GetEditorInputContextOverride() override;
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const override;
   virtual bool GetSupportsMoveParentOnly() const override;
-  virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;
+  virtual void GetGridSettings(plGridSettingsMsgToEngine& out_gridSettings) override;
 
 protected:
   virtual void OnConfigured() override;

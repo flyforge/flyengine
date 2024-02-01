@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 #include <RendererCore/AnimationSystem/AnimationPose.h>
 #include <RendererCore/AnimationSystem/Skeleton.h>
@@ -12,10 +12,10 @@
 #include <ozz/animation/runtime/skeleton.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipResource, 1, plRTTIDefaultAllocator<plAnimationClipResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipResource, 1, plRTTIDefaultAllocator<plAnimationClipResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plAnimationClipResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plAnimationClipResource);
 // clang-format on
 
 plAnimationClipResource::plAnimationClipResource()
@@ -23,9 +23,9 @@ plAnimationClipResource::plAnimationClipResource()
 {
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plAnimationClipResource, plAnimationClipResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plAnimationClipResource, plAnimationClipResourceDescriptor)
 {
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plAnimationClipResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plAnimationClipResourceDescriptor);
   *m_pDescriptor = std::move(descriptor);
 
   plResourceLoadDesc res;
@@ -50,7 +50,7 @@ plResourceLoadDesc plAnimationClipResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plAnimationClipResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plAnimationClipResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plAnimationClipResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -72,7 +72,7 @@ plResourceLoadDesc plAnimationClipResource::UpdateContent(plStreamReader* Stream
   plAssetFileHeader AssetHash;
   AssetHash.Read(*Stream).IgnoreResult();
 
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plAnimationClipResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plAnimationClipResourceDescriptor);
   m_pDescriptor->Deserialize(*Stream).IgnoreResult();
 
   res.m_State = plResourceState::Loaded;
@@ -108,7 +108,7 @@ struct plAnimationClipResourceDescriptor::OzzImpl
 
 plAnimationClipResourceDescriptor::plAnimationClipResourceDescriptor()
 {
-  m_pOzzImpl = PLASMA_DEFAULT_NEW(OzzImpl);
+  m_pOzzImpl = PL_DEFAULT_NEW(OzzImpl);
 }
 
 plAnimationClipResourceDescriptor::plAnimationClipResourceDescriptor(plAnimationClipResourceDescriptor&& rhs)
@@ -154,7 +154,7 @@ plResult plAnimationClipResourceDescriptor::Serialize(plStreamWriter& inout_stre
   inout_stream << m_uiNumTotalRotations;
   inout_stream << m_uiNumTotalScales;
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Transforms));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Transforms));
 
   inout_stream << m_vConstantRootMotion;
 
@@ -162,7 +162,7 @@ plResult plAnimationClipResourceDescriptor::Serialize(plStreamWriter& inout_stre
 
   inout_stream << m_bAdditive;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAnimationClipResourceDescriptor::Deserialize(plStreamReader& inout_stream)
@@ -170,7 +170,7 @@ plResult plAnimationClipResourceDescriptor::Deserialize(plStreamReader& inout_st
   const plTypeVersion uiVersion = inout_stream.ReadVersion(9);
 
   if (uiVersion < 6)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt16 uiNumJoints = 0;
   inout_stream >> uiNumJoints;
@@ -201,7 +201,7 @@ plResult plAnimationClipResourceDescriptor::Deserialize(plStreamReader& inout_st
   inout_stream >> m_uiNumTotalRotations;
   inout_stream >> m_uiNumTotalScales;
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Transforms));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Transforms));
 
   if (uiVersion >= 7)
   {
@@ -218,7 +218,7 @@ plResult plAnimationClipResourceDescriptor::Deserialize(plStreamReader& inout_st
     inout_stream >> m_bAdditive;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt64 plAnimationClipResourceDescriptor::GetHeapMemoryUsage() const
@@ -241,18 +241,18 @@ void plAnimationClipResourceDescriptor::SetDuration(plTime duration)
   m_Duration = duration;
 }
 
-PLASMA_FORCE_INLINE void pl2ozz(const plVec3& vIn, ozz::math::Float3& ref_out)
+PL_FORCE_INLINE void pl2ozz(const plVec3& vIn, ozz::math::Float3& ref_out)
 {
   ref_out.x = vIn.x;
   ref_out.y = vIn.y;
   ref_out.z = vIn.z;
 }
 
-PLASMA_FORCE_INLINE void pl2ozz(const plQuat& qIn, ozz::math::Quaternion& ref_out)
+PL_FORCE_INLINE void pl2ozz(const plQuat& qIn, ozz::math::Quaternion& ref_out)
 {
-  ref_out.x = qIn.v.x;
-  ref_out.y = qIn.v.y;
-  ref_out.z = qIn.v.z;
+  ref_out.x = qIn.x;
+  ref_out.y = qIn.y;
+  ref_out.z = qIn.z;
   ref_out.w = qIn.w;
 }
 
@@ -290,7 +290,7 @@ const ozz::animation::Animation& plAnimationClipResourceDescriptor::GetMappedOzz
 
       const plUInt16 uiFallbackIdx = skeleton.GetDescriptor().m_Skeleton.FindJointByName(sJointName);
 
-      PLASMA_ASSERT_DEV(uiFallbackIdx != plInvalidJointIndex, "");
+      PL_ASSERT_DEV(uiFallbackIdx != plInvalidJointIndex, "");
 
       const auto& fallbackJoint = skeleton.GetDescriptor().m_Skeleton.GetJointByIndex(uiFallbackIdx);
 
@@ -356,7 +356,7 @@ const ozz::animation::Animation& plAnimationClipResourceDescriptor::GetMappedOzz
 
   ozz::animation::offline::AnimationBuilder animBuilder;
 
-  PLASMA_ASSERT_DEBUG(rawAnim.Validate(), "Invalid animation data");
+  PL_ASSERT_DEBUG(rawAnim.Validate(), "Invalid animation data");
 
   auto& cached = m_pOzzImpl->m_MappedOzzAnimations[&skeleton];
   cached.m_pAnim = std::move(animBuilder(rawAnim));
@@ -404,7 +404,7 @@ void plAnimationClipResourceDescriptor::AllocateJointTransforms()
 
 plArrayPtr<plAnimationClipResourceDescriptor::KeyframeVec3> plAnimationClipResourceDescriptor::GetPositionKeyframes(const JointInfo& jointInfo)
 {
-  PLASMA_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
+  PL_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
 
   plUInt32 uiByteOffsetStart = 0;
   uiByteOffsetStart += sizeof(KeyframeVec3) * jointInfo.m_uiPositionIdx;
@@ -414,7 +414,7 @@ plArrayPtr<plAnimationClipResourceDescriptor::KeyframeVec3> plAnimationClipResou
 
 plArrayPtr<plAnimationClipResourceDescriptor::KeyframeQuat> plAnimationClipResourceDescriptor::GetRotationKeyframes(const JointInfo& jointInfo)
 {
-  PLASMA_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
+  PL_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
 
   plUInt32 uiByteOffsetStart = 0;
   uiByteOffsetStart += sizeof(KeyframeVec3) * m_uiNumTotalPositions;
@@ -425,7 +425,7 @@ plArrayPtr<plAnimationClipResourceDescriptor::KeyframeQuat> plAnimationClipResou
 
 plArrayPtr<plAnimationClipResourceDescriptor::KeyframeVec3> plAnimationClipResourceDescriptor::GetScaleKeyframes(const JointInfo& jointInfo)
 {
-  PLASMA_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
+  PL_ASSERT_DEBUG(!m_Transforms.IsEmpty(), "Joint transforms have not been allocated yet.");
 
   plUInt32 uiByteOffsetStart = 0;
   uiByteOffsetStart += sizeof(KeyframeVec3) * m_uiNumTotalPositions;
@@ -471,16 +471,16 @@ plArrayPtr<const plAnimationClipResourceDescriptor::KeyframeVec3> plAnimationCli
 //{
 //  plUInt16 jointIdx = 0;
 //
-//#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+//#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 //
 //  const plUInt32 idx = m_JointNameToIndex.Find(plTempHashedString("plRootMotionTransform"));
-//  PLASMA_ASSERT_DEBUG(idx != plInvalidIndex, "Animation Clip has no root motion transforms");
+//  PL_ASSERT_DEBUG(idx != plInvalidIndex, "Animation Clip has no root motion transforms");
 //
 //  jointIdx = m_JointNameToIndex.GetValue(idx);
-//  PLASMA_ASSERT_DEBUG(jointIdx == 0, "The root motion joint should always be at index 0");
+//  PL_ASSERT_DEBUG(jointIdx == 0, "The root motion joint should always be at index 0");
 //#endif
 //
 //  return jointIdx;
 //}
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_AnimationClipResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_AnimationClipResource);

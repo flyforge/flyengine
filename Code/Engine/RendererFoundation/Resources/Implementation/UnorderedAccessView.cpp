@@ -5,11 +5,10 @@
 plGALUnorderedAccessView::plGALUnorderedAccessView(plGALResourceBase* pResource, const plGALUnorderedAccessViewCreationDescription& description)
   : plGALObject(description)
   , m_pResource(pResource)
-  , m_bUnsetResourceView(description.m_bUnsetResourceView)
 {
-  PLASMA_ASSERT_DEV(m_pResource != nullptr, "Resource must not be null");
+  PL_ASSERT_DEV(m_pResource != nullptr, "Resource must not be null");
 }
 
-plGALUnorderedAccessView::~plGALUnorderedAccessView() {}
+plGALUnorderedAccessView::~plGALUnorderedAccessView() = default;
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_UnorderedAccessView);
+

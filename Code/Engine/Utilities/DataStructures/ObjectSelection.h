@@ -6,7 +6,7 @@
 #include <Utilities/UtilitiesDLL.h>
 
 /// \brief Stores a list of game objects as a 'selection'. Provides some common convenience functions for working with selections.
-class PLASMA_UTILITIES_DLL plObjectSelection
+class PL_UTILITIES_DLL plObjectSelection
 {
 public:
   plObjectSelection();
@@ -37,7 +37,7 @@ public:
   plUInt32 GetCount() const { return m_Objects.GetCount(); }
 
   /// \brief Returns the n-th object in the selection.
-  plGameObjectHandle GetObject(plUInt32 index) const { return m_Objects[index]; }
+  plGameObjectHandle GetObject(plUInt32 uiIndex) const { return m_Objects[uiIndex]; }
 
 private:
   plWorld* m_pWorld;

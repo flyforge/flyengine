@@ -13,7 +13,7 @@ inline plResult plExpressionParser::Expect(plStringView sToken, const plToken** 
     const plUInt32 uiErrorToken = plMath::Min(m_TokenStream.GetCount() - 1, m_uiCurrentToken);
     auto pToken = m_TokenStream[uiErrorToken];
     ReportError(pToken, plFmt("Syntax error, expected {} but got {}", sToken, pToken->m_DataView));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (pExpectedToken != nullptr)
@@ -21,7 +21,7 @@ inline plResult plExpressionParser::Expect(plStringView sToken, const plToken** 
     *pExpectedToken = m_TokenStream[uiAcceptedToken];
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 inline plResult plExpressionParser::Expect(plTokenType::Enum Type, const plToken** pExpectedToken /*= nullptr*/)
@@ -32,7 +32,7 @@ inline plResult plExpressionParser::Expect(plTokenType::Enum Type, const plToken
     const plUInt32 uiErrorToken = plMath::Min(m_TokenStream.GetCount() - 1, m_uiCurrentToken);
     auto pToken = m_TokenStream[uiErrorToken];
     ReportError(pToken, plFmt("Syntax error, expected token type {} but got {}", plTokenType::EnumNames[Type], plTokenType::EnumNames[pToken->m_iType]));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (pExpectedToken != nullptr)
@@ -40,7 +40,7 @@ inline plResult plExpressionParser::Expect(plTokenType::Enum Type, const plToken
     *pExpectedToken = m_TokenStream[uiAcceptedToken];
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 inline void plExpressionParser::ReportError(const plToken* pToken, const plFormatString& message0)

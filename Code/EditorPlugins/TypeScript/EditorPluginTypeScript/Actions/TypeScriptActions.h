@@ -14,7 +14,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hEditScript;
@@ -22,7 +22,7 @@ public:
 
 class plTypeScriptAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptAction, plButtonAction);
 
 public:
   enum class ActionType

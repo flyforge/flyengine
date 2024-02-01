@@ -11,9 +11,9 @@ class plCommandTransaction;
 ///
 /// Commands are the only objects that have non-const access to any data structures (contexts, documents etc.).
 /// Thus, any modification must go through a command and the plCommandHistory is the only class capable of executing commands.
-class PLASMA_TOOLSFOUNDATION_DLL plCommand : public plReflectedClass
+class PL_TOOLSFOUNDATION_DLL plCommand : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCommand, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plCommand, plReflectedClass);
 
 public:
   plCommand();

@@ -4,10 +4,10 @@
 #include <EditorEngineProcessFramework/LongOps/LongOpControllerManager.h>
 #include <EditorFramework/LongOps/LongOpsAdapter.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plLongOpsAdapter);
+PL_IMPLEMENT_SINGLETON(plLongOpsAdapter);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, LongOpsAdapter)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, LongOpsAdapter)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager",
@@ -16,7 +16,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, LongOpsAdapter)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plLongOpsAdapter);
+    PL_DEFAULT_NEW(plLongOpsAdapter);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -24,11 +24,11 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, LongOpsAdapter)
     if (plLongOpsAdapter::GetSingleton())
     {
       auto ptr = plLongOpsAdapter::GetSingleton();
-      PLASMA_DEFAULT_DELETE(ptr);
+      PL_DEFAULT_DELETE(ptr);
     }
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plLongOpsAdapter::plLongOpsAdapter()

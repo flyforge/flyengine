@@ -3,21 +3,21 @@
 #include <Foundation/Time/Timestamp.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plTimestamp, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plTimestamp, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("time", m_iTimestamp),
+    PL_MEMBER_PROPERTY("time", m_iTimestamp),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plInt64 plTimestamp::GetInt64(plSIUnitOfTime::Enum unitOfTime) const
 {
-  PLASMA_ASSERT_DEV(IsValid(), "Can't retrieve timestamp of invalid values!");
-  PLASMA_ASSERT_DEV(unitOfTime >= plSIUnitOfTime::Nanosecond && unitOfTime <= plSIUnitOfTime::Second, "Invalid plSIUnitOfTime value ({0})", unitOfTime);
+  PL_ASSERT_DEV(IsValid(), "Can't retrieve timestamp of invalid values!");
+  PL_ASSERT_DEV(unitOfTime >= plSIUnitOfTime::Nanosecond && unitOfTime <= plSIUnitOfTime::Second, "Invalid plSIUnitOfTime value ({0})", unitOfTime);
 
   switch (unitOfTime)
   {
@@ -30,28 +30,34 @@ plInt64 plTimestamp::GetInt64(plSIUnitOfTime::Enum unitOfTime) const
     case plSIUnitOfTime::Second:
       return m_iTimestamp / 1000000LL;
   }
-  return PLASMA_INVALID_TIME_STAMP;
+  return PL_INVALID_TIME_STAMP;
 }
 
-void plTimestamp::SetInt64(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime)
+plTimestamp plTimestamp::MakeFromInt(plInt64 iTimeValue, plSIUnitOfTime::Enum unitOfTime)
 {
-  PLASMA_ASSERT_DEV(unitOfTime >= plSIUnitOfTime::Nanosecond && unitOfTime <= plSIUnitOfTime::Second, "Invalid plSIUnitOfTime value ({0})", unitOfTime);
+  PL_ASSERT_DEV(unitOfTime >= plSIUnitOfTime::Nanosecond && unitOfTime <= plSIUnitOfTime::Second, "Invalid plSIUnitOfTime value ({0})", unitOfTime);
+
+  plTimestamp ts;
 
   switch (unitOfTime)
   {
     case plSIUnitOfTime::Nanosecond:
-      m_iTimestamp = iTimeValue / 1000LL;
+      ts.m_iTimestamp = iTimeValue / 1000LL;
       break;
     case plSIUnitOfTime::Microsecond:
-      m_iTimestamp = iTimeValue;
+      ts.m_iTimestamp = iTimeValue;
       break;
     case plSIUnitOfTime::Millisecond:
-      m_iTimestamp = iTimeValue * 1000LL;
+      ts.m_iTimestamp = iTimeValue * 1000LL;
       break;
     case plSIUnitOfTime::Second:
-      m_iTimestamp = iTimeValue * 1000000LL;
+      ts.m_iTimestamp = iTimeValue * 1000000LL;
       break;
+
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
+
+  return ts;
 }
 
 bool plTimestamp::Compare(const plTimestamp& rhs, CompareMode::Enum mode) const
@@ -70,26 +76,41 @@ bool plTimestamp::Compare(const plTimestamp& rhs, CompareMode::Enum mode) const
       return (m_iTimestamp / 1000000LL) > (rhs.m_iTimestamp / 1000000LL);
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return false;
 }
 
-plDateTime::plDateTime()
-  : m_uiMicroseconds(0)
-  , m_iYear(0)
-  , m_uiMonth(0)
-  , m_uiDay(0)
-  , m_uiDayOfWeek(0)
-  , m_uiHour(0)
-  , m_uiMinute(0)
-  , m_uiSecond(0)
+plDateTime::plDateTime() = default;
+plDateTime::~plDateTime() = default;
+
+plDateTime plDateTime::MakeFromTimestamp(plTimestamp timestamp)
 {
+  plDateTime res;
+  res.SetFromTimestamp(timestamp).AssertSuccess("Invalid timestamp");
+  return res;
 }
 
-plDateTime::plDateTime(plTimestamp timestamp)
-  : plDateTime()
+bool plDateTime::IsValid() const
 {
-  SetTimestamp(timestamp);
+  if (m_uiMonth <= 0 || m_uiMonth > 12)
+    return false;
+
+  if (m_uiDay <= 0 || m_uiDay > 31)
+    return false;
+
+  if (m_uiDayOfWeek > 6)
+    return false;
+
+  if (m_uiHour > 23)
+    return false;
+
+  if (m_uiMinute > 59)
+    return false;
+
+  if (m_uiSecond > 59)
+    return false;
+
+  return true;
 }
 
 plStringView BuildString(char* szTmp, plUInt32 uiLength, const plDateTime& arg)
@@ -134,7 +155,7 @@ namespace
       case 12:
         return "Dec";
       default:
-        PLASMA_ASSERT_DEV(false, "Unknown month.");
+        PL_ASSERT_DEV(false, "Unknown month.");
         return "Unknown Month";
     }
   }
@@ -161,7 +182,7 @@ namespace
       case 6:
         return "Sat";
       default:
-        PLASMA_ASSERT_DEV(false, "Unknown day of week.");
+        PL_ASSERT_DEV(false, "Unknown day of week.");
         return "Unknown Day of Week";
     }
   }
@@ -233,17 +254,4 @@ plStringView BuildString(char* szTmp, plUInt32 uiLength, const plArgDateTime& ar
   return szTmp;
 }
 
-// Include inline file
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/Time/Implementation/Win/Timestamp_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
-#  include <Foundation/Time/Implementation/OSX/Timestamp_osx.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
-#  include <Foundation/Time/Implementation/Android/Timestamp_android.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-#  include <Foundation/Time/Implementation/Posix/Timestamp_posix.h>
-#else
-#  error "Time functions are not implemented on current platform"
-#endif
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_Timestamp);
+PL_STATICLINK_FILE(Foundation, Foundation_Time_Implementation_Timestamp);

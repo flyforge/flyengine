@@ -3,7 +3,7 @@
 #include <ParticlePlugin/Effect/ParticleEffectInstance.h>
 #include <ParticlePlugin/ParticlePluginDLL.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEffectController
+class PL_PARTICLEPLUGIN_DLL plParticleEffectController
 {
 public:
   plParticleEffectController();
@@ -24,15 +24,15 @@ public:
 
   void SetTransform(const plTransform& t, const plVec3& vParticleStartVelocity) const;
 
-  void Tick(const plTime& tDiff) const;
+  void Tick(const plTime& diff) const;
 
-  void ExtractRenderData(plMsgExtractRenderData& msg, const plTransform& systemTransform) const;
+  void ExtractRenderData(plMsgExtractRenderData& ref_msg, const plTransform& systemTransform) const;
 
   void StopImmediate();
 
   /// \brief Returns the bounding volume of the effect.
   /// The volume is in the local space of the effect.
-  void GetBoundingVolume(plBoundingBoxSphere& volume) const;
+  void GetBoundingVolume(plBoundingBoxSphere& ref_volume) const;
 
   void UpdateWindSamples();
 
@@ -45,10 +45,10 @@ public:
   ///@{
 public:
   /// \brief Passes an effect parameter on to the effect instance
-  void SetParameter(const plTempHashedString& name, float value);
+  void SetParameter(const plTempHashedString& sName, float value);
 
   /// \brief Passes an effect parameter on to the effect instance
-  void SetParameter(const plTempHashedString& name, const plColor& value);
+  void SetParameter(const plTempHashedString& sName, const plColor& value);
 
   ///@}
 

@@ -4,7 +4,7 @@
 
 /// *** Example Subsystem declarations ***
 ///
-/// PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ExampleSubSystem)
+/// PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ExampleSubSystem)
 ///
 ///  BEGIN_SUBSYSTEM_DEPENDENCIES
 ///    "SomeOtherSubSystem",
@@ -31,12 +31,12 @@
 ///    plExampleSubSystem::EngineShutdown();
 ///  }
 ///
-/// PLASMA_END_SUBSYSTEM_DECLARATION;
+/// PL_END_SUBSYSTEM_DECLARATION;
 
 /// \brief Put this in some cpp file of a subsystem to start its startup / shutdown sequence declaration.
 ///
 /// The first parameter is the name of the group, in which the subsystem resides, the second is the name of the subsystem itself.
-#define PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GroupName, SubsystemName) \
+#define PL_BEGIN_SUBSYSTEM_DECLARATION(GroupName, SubsystemName) \
   class GroupName##SubsystemName##SubSystem;                     \
   class GroupName##SubsystemName##SubSystem : public plSubSystem \
   {                                                              \
@@ -53,9 +53,9 @@
     }
 
 /// \brief Finishes a subsystem's startup / shutdown sequence declaration.
-#define PLASMA_END_SUBSYSTEM_DECLARATION \
+#define PL_END_SUBSYSTEM_DECLARATION \
   }                                  \
-  static PLASMA_CONCAT(s_SubSystem, PLASMA_SOURCE_LINE)
+  static PL_CONCAT(s_SubSystem, PL_SOURCE_LINE)
 
 /// \brief Defines what code is to be executed upon base startup.
 ///
@@ -110,4 +110,4 @@ public:                                                     \
   }
 
 /// \brief This inserts a friend declaration into a class, such that the given group/subsystem can access private functions which it might need.
-#define PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(GroupName, SubsystemName) friend class GroupName##SubsystemName##SubSystem;
+#define PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(GroupName, SubsystemName) friend class GroupName##SubsystemName##SubSystem;

@@ -2,7 +2,7 @@
 
 #include <Texture/Image/Formats/ImageFileFormat.h>
 
-class PLASMA_TEXTURE_DLL plBmpFileFormat : public plImageFileFormat
+class PL_TEXTURE_DLL plBmpFileFormat : public plImageFileFormat
 {
 public:
   virtual plResult ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const override;

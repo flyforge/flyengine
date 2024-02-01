@@ -27,10 +27,10 @@ struct plRasterizationResult
 namespace pl2DGridUtils
 {
   /// \brief The callback declaration for the function that needs to be passed to the various rasterization functions.
-  typedef plCallbackResult::Enum (*PLASMA_RASTERIZED_POINT_CALLBACK)(plInt32 x, plInt32 y, void* pPassThrough);
+  using PL_RASTERIZED_POINT_CALLBACK = plCallbackResult::Enum (*)(plInt32, plInt32, void*);
 
   /// \brief The callback declaration for the function that needs to be passed to RasterizeBlobWithDistance().
-  typedef plCallbackResult::Enum (*PLASMA_RASTERIZED_BLOB_CALLBACK)(plInt32 x, plInt32 y, void* pPassThrough, plUInt8 uiDistanceFromCenter);
+  using PL_RASTERIZED_BLOB_CALLBACK = plCallbackResult::Enum (*)(plInt32, plInt32, void*, plUInt8);
 
   /// \brief Computes all the points on a 2D line and calls a function to report every point.
   ///
@@ -43,8 +43,8 @@ namespace pl2DGridUtils
   /// It returns plRasterizationResult::Finished if the entire line was rasterized.
   ///
   /// This function does not do any dynamic memory allocations internally.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnLine(
-    plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr);
+  PL_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnLine(
+    plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr);
 
   /// \brief Computes all the points on a 2D line and calls a function to report every point.
   ///
@@ -56,8 +56,8 @@ namespace pl2DGridUtils
   /// If bVisitBothNeighbors is false, the line will continue with the diagonal cell if the first tried neighbor cell is free.
   /// However, if bVisitBothNeighbors is true, the second alternative cell is also reported to the callback, even though its return value
   /// has no effect on whether the line continues or aborts.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnLineConservative(plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY,
-    PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr, bool bVisitBothNeighbors = false);
+  PL_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnLineConservative(plInt32 iStartX, plInt32 iStartY, plInt32 iEndX, plInt32 iEndY,
+    PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr, bool bVisitBothNeighbors = false);
 
   /// \brief Computes all the points on a 2D circle and calls a function to report every point.
   ///
@@ -65,8 +65,8 @@ namespace pl2DGridUtils
   /// The callback may abort the operation by returning plCallbackResult::Stop.
   ///
   /// This function does not do any dynamic memory allocations internally.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnCircle(
-    plInt32 iStartX, plInt32 iStartY, plUInt32 uiRadius, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr);
+  PL_UTILITIES_DLL plRasterizationResult::Enum ComputePointsOnCircle(
+    plInt32 iStartX, plInt32 iStartY, plUInt32 uiRadius, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr);
 
   /// \brief Starts at the given point and then fills all surrounding cells until a border is detected.
   ///
@@ -81,12 +81,12 @@ namespace pl2DGridUtils
   /// Note that the FloodFill function requires an internal queue to store which cells still need to be visited, as such it will do
   /// dynamic memory allocations. You can pass in a queue that will be used as the temp buffer, thus you can reuse the same container for
   /// several operations, which will reduce the amount of memory allocations that need to be done.
-  PLASMA_UTILITIES_DLL plUInt32 FloodFill(
-    plInt32 iStartX, plInt32 iStartY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr, plDeque<plVec2I32>* pTempArray = nullptr);
+  PL_UTILITIES_DLL plUInt32 FloodFill(
+    plInt32 iStartX, plInt32 iStartY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr, plDeque<plVec2I32>* pTempArray = nullptr);
 
   /// \brief Same as FloodFill() but also visits the diagonal neighbors, ie. all eight neighboring cells.
-  PLASMA_UTILITIES_DLL plUInt32 FloodFillDiag(
-    plInt32 iStartX, plInt32 iStartY, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr, plDeque<plVec2I32>* pTempArray = nullptr);
+  PL_UTILITIES_DLL plUInt32 FloodFillDiag(
+    plInt32 iStartX, plInt32 iStartY, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr, plDeque<plVec2I32>* pTempArray = nullptr);
 
   /// \brief Describes the different circle types that can be rasterized
   enum plBlobType : plUInt8
@@ -112,13 +112,13 @@ namespace pl2DGridUtils
   ///
   /// RasterizeBlob() will stop immediately and return plRasterizationResult::Aborted when the callback function returns
   /// plCallbackResult::Stop.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum RasterizeBlob(
-    plInt32 iPosX, plInt32 iPosY, plBlobType eType, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr);
+  PL_UTILITIES_DLL plRasterizationResult::Enum RasterizeBlob(
+    plInt32 iPosX, plInt32 iPosY, plBlobType type, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr);
 
   /// \brief Same as RasterizeBlob(), but the distance from the center is passed through to the callback, which can use this information to
   /// adjust what it is doing.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum RasterizeBlobWithDistance(
-    plInt32 iPosX, plInt32 iPosY, plBlobType eType, PLASMA_RASTERIZED_BLOB_CALLBACK Callback, void* pPassThrough = nullptr);
+  PL_UTILITIES_DLL plRasterizationResult::Enum RasterizeBlobWithDistance(
+    plInt32 iPosX, plInt32 iPosY, plBlobType type, PL_RASTERIZED_BLOB_CALLBACK callback, void* pPassThrough = nullptr);
 
   /// \brief Rasterizes a circle of any size (unlike RasterizeBlob()), though finding the right radius values for nice looking small circles
   /// can be more difficult.
@@ -128,8 +128,8 @@ namespace pl2DGridUtils
   ///
   /// RasterizeCircle() will stop immediately and return plRasterizationResult::Aborted when the callback function returns
   /// plCallbackResult::Stop.
-  PLASMA_UTILITIES_DLL plRasterizationResult::Enum RasterizeCircle(
-    plInt32 iPosX, plInt32 iPosY, float fRadius, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr);
+  PL_UTILITIES_DLL plRasterizationResult::Enum RasterizeCircle(
+    plInt32 iPosX, plInt32 iPosY, float fRadius, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr);
 
 
   /// \brief Computes which points are visible from the start position by tracing lines radially outwards.
@@ -143,14 +143,14 @@ namespace pl2DGridUtils
   ///
   /// The algorithm requires internal state and thus needs to do dynamic memory allocations. If you want to reduce the number of
   /// allocations, you can pass in your own array, that can be reused for many queries.
-  PLASMA_UTILITIES_DLL void ComputeVisibleArea(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, plUInt32 uiWidth, plUInt32 uiHeight,
-    PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr, plDynamicArray<plUInt8>* pTempArray = nullptr);
+  PL_UTILITIES_DLL void ComputeVisibleArea(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, plUInt32 uiWidth, plUInt32 uiHeight,
+    PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr, plDynamicArray<plUInt8>* pTempArray = nullptr);
 
   /// \brief Computes which points are visible from the start position by tracing lines radially outwards. Limits the computation to a cone.
   ///
   /// This function works exactly like ComputeVisibleArea() but limits the computation to a cone that is defined by vDirection and
   /// ConeAngle.
-  PLASMA_UTILITIES_DLL void ComputeVisibleAreaInCone(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, const plVec2& vDirection, plAngle ConeAngle,
-    plUInt32 uiWidth, plUInt32 uiHeight, PLASMA_RASTERIZED_POINT_CALLBACK Callback, void* pPassThrough = nullptr,
+  PL_UTILITIES_DLL void ComputeVisibleAreaInCone(plInt32 iPosX, plInt32 iPosY, plUInt16 uiRadius, const plVec2& vDirection, plAngle coneAngle,
+    plUInt32 uiWidth, plUInt32 uiHeight, PL_RASTERIZED_POINT_CALLBACK callback, void* pPassThrough = nullptr,
     plDynamicArray<plUInt8>* pTempArray = nullptr);
 } // namespace pl2DGridUtils

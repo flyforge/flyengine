@@ -24,9 +24,9 @@ namespace plDataDirectory
 /// The timeout for connecting to the server can be configured through the command line option "-fs_timeout seconds"
 /// The server to connect to can be configured through command line option "-fs_server address".
 /// The default address is "localhost:1042".
-class PLASMA_FILESERVEPLUGIN_DLL plFileserveClient
+class PL_FILESERVEPLUGIN_DLL plFileserveClient
 {
-  PLASMA_DECLARE_SINGLETON(plFileserveClient);
+  PL_DECLARE_SINGLETON(plFileserveClient);
 
 public:
   plFileserveClient();
@@ -36,11 +36,11 @@ public:
   ///
   /// Ie. checks the command line, plFileserve.txt in different directories, etc.
   /// For every potential IP it checks whether a fileserve connection could be established (e.g. tries to connect and
-  /// checks whether the server answers). If a valid connection is found, the IP is stored internally and PLASMA_SUCCESS is returned.
+  /// checks whether the server answers). If a valid connection is found, the IP is stored internally and PL_SUCCESS is returned.
   /// Call GetServerConnectionAddress() to retrieve the address.
   ///
   /// \param timeout Specifies the timeout for checking whether a server can be reached.
-  plResult SearchForServerAddress(plTime timeout = plTime::Seconds(5));
+  plResult SearchForServerAddress(plTime timeout = plTime::MakeFromSeconds(5));
 
   /// \brief Waits for a Fileserver application to try to connect to this device and send its own information.
   ///
@@ -50,7 +50,7 @@ public:
   /// thus enabling the exchange of connection information.
   /// Once this has happened, this function stores the valid server IP internally and returns with success.
   /// A subsequent call to EnsureConnected() should then succeed.
-  plResult WaitForServerInfo(plTime timeout = plTime::Seconds(60.0 * 5));
+  plResult WaitForServerInfo(plTime timeout = plTime::MakeFromSeconds(60.0 * 5));
 
   /// \brief Stores the current connection info to a text file in the user data folder.
   plResult SaveCurrentConnectionInfoToDisk() const;
@@ -70,14 +70,14 @@ public:
   /// A zero timeout means the application will wait indefinitely.
   /// A negative number means to either wait that time, or whatever was specified through the command-line.
   /// The timeout can be specified with the command line switch "-fs_timeout X" (in seconds).
-  plResult EnsureConnected(plTime timeout = plTime::Seconds(-5));
+  plResult EnsureConnected(plTime timeout = plTime::MakeFromSeconds(-5));
 
   /// \brief Needs to be called regularly to update the network. By default this is automatically called when the global event
   /// 'GameApp_UpdatePlugins' is fired, which is done by plGameApplication.
   void UpdateClient();
 
   /// \brief Adds an address that should be tried for connecting with the server.
-  void AddServerAddressToTry(const char* szAddress);
+  void AddServerAddressToTry(plStringView sAddress);
 
 private:
   friend class plDataDirectory::FileserveType;

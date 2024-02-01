@@ -11,9 +11,9 @@
 /// allows easier control over a game. The virtual thumb-stick takes input inside a certain screen area. It tracks the users finger
 /// movements inside this area and translates those into input from a controller thumb-stick, which it then feeds back into the input
 /// system. That makes it then possible to be mapped to input actions again. This way a game controller type of input is emulated.
-class PLASMA_CORE_DLL plVirtualThumbStick : public plInputDevice
+class PL_CORE_DLL plVirtualThumbStick final : public plInputDevice
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVirtualThumbStick, plInputDevice);
+  PL_ADD_DYNAMIC_REFLECTION(plVirtualThumbStick, plInputDevice);
 
 public:
   /// \brief Constructor.
@@ -83,17 +83,16 @@ public:
   ///
   /// If \a Input is 'Custom' the remaining parameters define the filter axes and up to three input slots that trigger the thumb-stick.
   /// Otherwise the remaining parameters are ignored.
-  void SetTriggerInputSlot(Input::Enum Input, const plInputActionConfig* pCustomConfig = nullptr);
+  void SetTriggerInputSlot(Input::Enum input, const plInputActionConfig* pCustomConfig = nullptr);
 
   /// \brief Specifies which output the thumb-stick generates.
   ///
   /// If \a Output is 'Custom' the remaining parameters define which input slots the thumb-stick triggers for which direction.
   /// Otherwise the remaining parameters are ignored.
-  void SetThumbstickOutput(Output::Enum Output, plStringView sOutputLeft = {}, plStringView sOutputRight = {},
-    plStringView sOutputUp = {}, plStringView sOutputDown = {});
+  void SetThumbstickOutput(Output::Enum output, plStringView sOutputLeft = {}, plStringView sOutputRight = {}, plStringView sOutputUp = {}, plStringView sOutputDown = {});
 
   /// \brief Specifies what happens when the input slots that trigger the thumb-stick are active while entering or leaving the input area.
-  void SetAreaFocusMode(plInputActionConfig::OnEnterArea OnEnter, plInputActionConfig::OnLeaveArea OnLeave);
+  void SetAreaFocusMode(plInputActionConfig::OnEnterArea onEnter, plInputActionConfig::OnLeaveArea onLeave);
 
   /// \brief Allows to enable or disable the entire thumb-stick temporarily.
   void SetEnabled(bool bEnabled) { m_bEnabled = bEnabled; }

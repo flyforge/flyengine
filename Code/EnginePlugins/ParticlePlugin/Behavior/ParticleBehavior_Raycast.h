@@ -5,9 +5,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleRaycastHitReaction
+struct PL_PARTICLEPLUGIN_DLL plParticleRaycastHitReaction
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -19,11 +19,11 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleRaycastHitReaction
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plParticleRaycastHitReaction);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plParticleRaycastHitReaction);
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Raycast final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Raycast final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Raycast, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Raycast, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_Raycast();
@@ -32,10 +32,10 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plEnum<plParticleRaycastHitReaction> m_Reaction;
   plUInt8 m_uiCollisionLayer = 0;
@@ -44,9 +44,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_Raycast final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_Raycast final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Raycast, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Raycast, plParticleBehavior);
 
 public:
   plParticleBehavior_Raycast();

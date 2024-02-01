@@ -9,27 +9,27 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_BoxPosition, 1, plRTTIDefaultAllocator<plParticleInitializerFactory_BoxPosition>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_BoxPosition, 1, plRTTIDefaultAllocator<plParticleInitializerFactory_BoxPosition>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
-    PLASMA_MEMBER_PROPERTY("Size", m_vSize)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, 0))),
-    PLASMA_MEMBER_PROPERTY("ScaleXParam", m_sScaleXParameter),
-    PLASMA_MEMBER_PROPERTY("ScaleYParam", m_sScaleYParameter),
-    PLASMA_MEMBER_PROPERTY("ScaleZParam", m_sScaleZParameter),
+    PL_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
+    PL_MEMBER_PROPERTY("Size", m_vSize)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, 0))),
+    PL_MEMBER_PROPERTY("ScaleXParam", m_sScaleXParameter),
+    PL_MEMBER_PROPERTY("ScaleYParam", m_sScaleYParameter),
+    PL_MEMBER_PROPERTY("ScaleZParam", m_sScaleZParameter),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plBoxVisualizerAttribute("Size", 1.0f, plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset")
+    new plBoxVisualizerAttribute("Size", 1.0f, plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1.0f), "PositionOffset")
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_BoxPosition, 1, plRTTIDefaultAllocator<plParticleInitializer_BoxPosition>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_BoxPosition, 1, plRTTIDefaultAllocator<plParticleInitializer_BoxPosition>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleInitializerFactory_BoxPosition::plParticleInitializerFactory_BoxPosition()
@@ -80,39 +80,39 @@ float plParticleInitializerFactory_BoxPosition::GetSpawnCountMultiplier(const pl
   return fSpawnMultiplier;
 }
 
-void plParticleInitializerFactory_BoxPosition::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_BoxPosition::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 3;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_vSize;
+  inout_stream << m_vSize;
 
   // version 2
-  stream << m_vPositionOffset;
+  inout_stream << m_vPositionOffset;
 
   // version 3
-  stream << m_sScaleXParameter;
-  stream << m_sScaleYParameter;
-  stream << m_sScaleZParameter;
+  inout_stream << m_sScaleXParameter;
+  inout_stream << m_sScaleYParameter;
+  inout_stream << m_sScaleZParameter;
 }
 
-void plParticleInitializerFactory_BoxPosition::Load(plStreamReader& stream)
+void plParticleInitializerFactory_BoxPosition::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_vSize;
+  inout_stream >> m_vSize;
 
   if (uiVersion >= 2)
   {
-    stream >> m_vPositionOffset;
+    inout_stream >> m_vPositionOffset;
   }
 
   if (uiVersion >= 3)
   {
-    stream >> m_sScaleXParameter;
-    stream >> m_sScaleYParameter;
-    stream >> m_sScaleZParameter;
+    inout_stream >> m_sScaleXParameter;
+    inout_stream >> m_sScaleYParameter;
+    inout_stream >> m_sScaleZParameter;
   }
 }
 
@@ -123,7 +123,7 @@ void plParticleInitializer_BoxPosition::CreateRequiredStreams()
 
 void plParticleInitializer_BoxPosition::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Box Position");
+  PL_PROFILE_SCOPE("PFX: Box Position");
 
   plSimdVec4f* pPosition = m_pStreamPosition->GetWritableData<plSimdVec4f>();
 
@@ -148,7 +148,7 @@ void plParticleInitializer_BoxPosition::InitializeElements(plUInt64 uiStartIndex
     plSimdVec4f pos;
     plSimdTransform transform;
     transform.m_Position.Load<3>(&ownerTransform.m_vPosition.x);
-    transform.m_Rotation.m_v.Load<4>(&ownerTransform.m_qRotation.v.x);
+    transform.m_Rotation.m_v.Load<4>(&ownerTransform.m_qRotation.x);
     transform.m_Scale.Load<3>(&ownerTransform.m_vScale.x);
 
     float p0[4];
@@ -169,4 +169,4 @@ void plParticleInitializer_BoxPosition::InitializeElements(plUInt64 uiStartIndex
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_BoxPosition);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_BoxPosition);

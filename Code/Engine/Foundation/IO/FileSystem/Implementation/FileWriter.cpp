@@ -9,13 +9,13 @@ plResult plFileWriter::Open(plStringView sFile, plUInt32 uiCacheSize /*= 1024 * 
   m_pDataDirWriter = GetFileWriter(sFile, fileShareMode, bAllowFileEvents);
 
   if (!m_pDataDirWriter)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Cache.SetCountUninitialized(uiCacheSize);
 
   m_uiCacheWritePosition = 0;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plFileWriter::Close()
@@ -39,7 +39,7 @@ plResult plFileWriter::Flush()
 
 plResult plFileWriter::WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWrite)
 {
-  PLASMA_ASSERT_DEV(m_pDataDirWriter != nullptr, "The file has not been opened (successfully).");
+  PL_ASSERT_DEV(m_pDataDirWriter != nullptr, "The file has not been opened (successfully).");
 
   if (uiBytesToWrite > m_Cache.GetCount())
   {
@@ -48,7 +48,7 @@ plResult plFileWriter::WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWr
 
     if (m_uiCacheWritePosition > 0)
     {
-      PLASMA_SUCCEED_OR_RETURN(Flush());
+      PL_SUCCEED_OR_RETURN(Flush());
     }
 
     return m_pDataDirWriter->Write(pWriteBuffer, uiBytesToWrite);
@@ -77,15 +77,13 @@ plResult plFileWriter::WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWr
       // if the cache is full or nearly full, flush it to disk
       if (m_uiCacheWritePosition + 32 >= m_Cache.GetCount())
       {
-        if (Flush() == PLASMA_FAILURE)
-          return PLASMA_FAILURE;
+        if (Flush() == PL_FAILURE)
+          return PL_FAILURE;
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_FileWriter);

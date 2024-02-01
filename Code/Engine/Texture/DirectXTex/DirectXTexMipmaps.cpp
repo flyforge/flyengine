@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexMipMaps.cpp
@@ -1468,7 +1468,7 @@ namespace
                             // Steal and reuse scanline from 'free row' list
                             // (it will always be at least as wide as nwidth due to loop decending order)
                             assert(rowFree->scanline != nullptr);
-                            rowAcc->scanline.reset(rowFree->scanline.release());
+                            rowAcc->scanline = std::move(rowFree->scanline);
                             rowFree = rowFree->next;
                         }
                         else
@@ -2623,7 +2623,7 @@ namespace
                             // Steal and reuse scanline from 'free slice' list
                             // (it will always be at least as large as nwidth*nheight due to loop decending order)
                             assert(sliceFree->scanline != nullptr);
-                            sliceAcc->scanline.reset(sliceFree->scanline.release());
+                            sliceAcc->scanline = std::move(sliceFree->scanline);
                             sliceFree = sliceFree->next;
                         }
                         else
@@ -3503,5 +3503,4 @@ HRESULT DirectX::ScaleMipMapsAlphaForCoverage(
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexMipmaps);
 

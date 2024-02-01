@@ -7,8 +7,6 @@ plGALTexture::plGALTexture(const plGALTextureCreationDescription& Description)
 {
 }
 
-plGALTexture::~plGALTexture() {}
+plGALTexture::~plGALTexture() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_Texture);

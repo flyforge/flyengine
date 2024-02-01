@@ -31,7 +31,7 @@ plQtPropertyEditorCheckboxWidget::plQtPropertyEditorCheckboxWidget()
   m_pWidget->setLayoutDirection(Qt::RightToLeft);
   m_pLayout->addWidget(m_pWidget);
 
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(stateChanged(int)), this, SLOT(on_StateChanged_triggered(int))) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pWidget, SIGNAL(stateChanged(int)), this, SLOT(on_StateChanged_triggered(int))) != nullptr, "signal/slot connection failed");
 }
 
 void plQtPropertyEditorCheckboxWidget::InternalSetValue(const plVariant& value)
@@ -76,7 +76,7 @@ void plQtPropertyEditorCheckboxWidget::on_StateChanged_triggered(int state)
 plQtPropertyEditorDoubleSpinboxWidget::plQtPropertyEditorDoubleSpinboxWidget(plInt8 iNumComponents)
   : plQtStandardPropertyWidget()
 {
-  PLASMA_ASSERT_DEBUG(iNumComponents <= 4, "Only up to 4 components are supported");
+  PL_ASSERT_DEBUG(iNumComponents <= 4, "Only up to 4 components are supported");
 
   m_iNumComponents = iNumComponents;
 
@@ -433,7 +433,7 @@ void plQtPropertyEditorTimeWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  BroadcastValueChanged(plTime::Seconds(m_pWidget->value()));
+  BroadcastValueChanged(plTime::MakeFromSeconds(m_pWidget->value()));
 }
 
 
@@ -525,11 +525,10 @@ void plQtPropertyEditorAngleWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  BroadcastValueChanged(plAngle::Degree(m_pWidget->value()));
+  BroadcastValueChanged(plAngle::MakeFromDegree(m_pWidget->value()));
 }
 
 /// *** INT SPINBOX ***
-
 
 plQtPropertyEditorIntSpinboxWidget::plQtPropertyEditorIntSpinboxWidget(plInt8 iNumComponents, plInt32 iMinValue, plInt32 iMaxValue)
   : plQtStandardPropertyWidget()
@@ -836,6 +835,200 @@ void plQtPropertyEditorIntSpinboxWidget::on_EditingFinished_triggered()
   m_bTemporaryCommand = false;
 }
 
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+plMap<plString, plQtImageSliderWidget::ImageGeneratorFunc> plQtImageSliderWidget::s_ImageGenerators;
+
+plQtImageSliderWidget::plQtImageSliderWidget(ImageGeneratorFunc generator, double fMinValue, double fMaxValue, QWidget* pParent)
+  : QWidget(pParent)
+{
+  m_Generator = generator;
+  m_fMinValue = fMinValue;
+  m_fMaxValue = fMaxValue;
+
+  setAutoFillBackground(false);
+}
+
+void plQtImageSliderWidget::SetValue(double fValue)
+{
+  if (m_fValue == fValue)
+    return;
+
+  m_fValue = fValue;
+  update();
+}
+
+void plQtImageSliderWidget::paintEvent(QPaintEvent* event)
+{
+  QPainter painter(this);
+  painter.setRenderHint(QPainter::RenderHint::Antialiasing);
+
+  const QRect area = rect();
+
+  if (area.width() != m_Image.width())
+    UpdateImage();
+
+  painter.drawTiledPixmap(area, QPixmap::fromImage(m_Image));
+
+  const float factor = plMath::Unlerp(m_fMinValue, m_fMaxValue, m_fValue);
+
+  const double pos = (int)(factor * area.width()) + 0.5f;
+
+  const double top = area.top() + 0.5;
+  const double bot = area.bottom() + 0.5;
+  const double len = 5.0;
+  const double wid = 2.0;
+
+  const QColor col = qRgb(80, 80, 80);
+
+  painter.setPen(col);
+  painter.setBrush(col);
+
+  {
+    QPainterPath path;
+    path.moveTo(QPointF(pos - wid, top));
+    path.lineTo(QPointF(pos, top + len));
+    path.lineTo(QPointF(pos + wid, top));
+    path.closeSubpath();
+
+    painter.drawPath(path);
+  }
+
+  {
+    QPainterPath path;
+    path.moveTo(QPointF(pos - wid, bot));
+    path.lineTo(QPointF(pos, bot - len));
+    path.lineTo(QPointF(pos + wid, bot));
+    path.closeSubpath();
+
+    painter.drawPath(path);
+  }
+}
+
+void plQtImageSliderWidget::UpdateImage()
+{
+  const int width = rect().width();
+
+  if (m_Generator)
+  {
+    m_Image = m_Generator(rect().width(), rect().height(), m_fMinValue, m_fMaxValue);
+  }
+  else
+  {
+    m_Image = QImage(width, 1, QImage::Format::Format_RGB32);
+
+    plColorGammaUB cg = plColor::HotPink;
+    for (int x = 0; x < width; ++x)
+    {
+      m_Image.setPixel(x, 0, qRgb(cg.r, cg.g, cg.b));
+    }
+  }
+}
+
+void plQtImageSliderWidget::mouseMoveEvent(QMouseEvent* event)
+{
+  if (event->buttons().testFlag(Qt::LeftButton))
+  {
+    const int width = rect().width();
+    const int height = rect().height();
+
+    QPoint coord = event->pos();
+    const int x = plMath::Clamp(coord.x(), 0, width - 1);
+
+    const double fx = (double)x / (width - 1);
+    const double val = plMath::Lerp(m_fMinValue, m_fMaxValue, fx);
+
+    valueChanged(val);
+  }
+
+  event->accept();
+}
+
+void plQtImageSliderWidget::mousePressEvent(QMouseEvent* event)
+{
+  mouseMoveEvent(event);
+  event->accept();
+}
+
+void plQtImageSliderWidget::mouseReleaseEvent(QMouseEvent* event)
+{
+  if (event->button() == Qt::LeftButton)
+  {
+    Q_EMIT sliderReleased();
+  }
+  event->accept();
+}
+
+/// *** SLIDER ***
+
+plQtPropertyEditorSliderWidget::plQtPropertyEditorSliderWidget()
+  : plQtStandardPropertyWidget()
+{
+  m_pLayout = new QHBoxLayout(this);
+  m_pLayout->setContentsMargins(0, 0, 0, 0);
+  setLayout(m_pLayout);
+}
+
+plQtPropertyEditorSliderWidget::~plQtPropertyEditorSliderWidget() = default;
+
+void plQtPropertyEditorSliderWidget::OnInit()
+{
+  const plImageSliderUiAttribute* pSliderAttr = m_pProp->GetAttributeByType<plImageSliderUiAttribute>();
+  const plClampValueAttribute* pRange = m_pProp->GetAttributeByType<plClampValueAttribute>();
+  PL_ASSERT_DEV(pRange != nullptr, "plImageSliderUiAttribute always has to be compined with plClampValueAttribute to specify the valid range.");
+  PL_ASSERT_DEV(pRange->GetMinValue().IsValid() && pRange->GetMaxValue().IsValid(), "The min and max values used with plImageSliderUiAttribute both have to be valid.");
+
+  m_fMinValue = pRange->GetMinValue().ConvertTo<double>();
+  m_fMaxValue = pRange->GetMaxValue().ConvertTo<double>();
+
+  m_pSlider = new plQtImageSliderWidget(plQtImageSliderWidget::s_ImageGenerators[pSliderAttr->m_sImageGenerator], m_fMinValue, m_fMaxValue, this);
+
+  m_pLayout->insertWidget(0, m_pSlider);
+  connect(m_pSlider, SIGNAL(valueChanged(double)), this, SLOT(SlotSliderValueChanged(double)));
+  connect(m_pSlider, SIGNAL(sliderReleased()), this, SLOT(on_EditingFinished_triggered()));
+
+  if (const plDefaultValueAttribute* pDefault = m_pProp->GetAttributeByType<plDefaultValueAttribute>())
+  {
+    plQtScopedBlockSignals bs(m_pSlider);
+
+    if (pDefault->GetValue().CanConvertTo<double>())
+    {
+      m_pSlider->SetValue(pDefault->GetValue().ConvertTo<double>());
+    }
+  }
+}
+
+void plQtPropertyEditorSliderWidget::InternalSetValue(const plVariant& value)
+{
+  plQtScopedBlockSignals bs(m_pSlider);
+
+  m_OriginalType = value.GetType();
+
+  m_pSlider->SetValue(value.ConvertTo<double>());
+}
+
+void plQtPropertyEditorSliderWidget::SlotSliderValueChanged(double fValue)
+{
+  if (!m_bTemporaryCommand)
+    Broadcast(plPropertyEvent::Type::BeginTemporary);
+
+  m_bTemporaryCommand = true;
+
+  BroadcastValueChanged(plVariant(fValue).ConvertTo(m_OriginalType));
+
+  m_pSlider->SetValue(fValue);
+}
+
+void plQtPropertyEditorSliderWidget::on_EditingFinished_triggered()
+{
+  if (m_bTemporaryCommand)
+    Broadcast(plPropertyEvent::Type::EndTemporary);
+
+  m_bTemporaryCommand = false;
+}
+
 
 /// *** QUATERNION ***
 
@@ -925,12 +1118,11 @@ void plQtPropertyEditorQuaternionWidget::SlotValueChanged()
 
   m_bTemporaryCommand = true;
 
-  plAngle x = plAngle::Degree(m_pWidget[0]->value());
-  plAngle y = plAngle::Degree(m_pWidget[1]->value());
-  plAngle z = plAngle::Degree(m_pWidget[2]->value());
+  plAngle x = plAngle::MakeFromDegree(m_pWidget[0]->value());
+  plAngle y = plAngle::MakeFromDegree(m_pWidget[1]->value());
+  plAngle z = plAngle::MakeFromDegree(m_pWidget[2]->value());
 
-  plQuat qRot;
-  qRot.SetFromEulerAngles(x, y, z);
+  plQuat qRot = plQuat::MakeFromEulerAngles(x, y, z);
 
   BroadcastValueChanged(qRot);
 }
@@ -998,7 +1190,6 @@ void plQtPropertyEditorLineEditWidget::on_TextFinished_triggered()
 {
   BroadcastValueChanged(plVariant(m_pWidget->text().toUtf8().data()).ConvertTo(m_OriginalType));
 }
-
 
 
 /// *** COLOR ***
@@ -1071,7 +1262,7 @@ plQtPropertyEditorColorWidget::plQtPropertyEditorColorWidget()
 
   m_pLayout->addWidget(m_pWidget);
 
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(clicked()), this, SLOT(on_Button_triggered())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pWidget, SIGNAL(clicked()), this, SLOT(on_Button_triggered())) != nullptr, "signal/slot connection failed");
 }
 
 void plQtPropertyEditorColorWidget::OnInit()
@@ -1171,7 +1362,7 @@ void plQtPropertyEditorEnumWidget::OnInit()
 
     const plAbstractConstantProperty* pConstant = static_cast<const plAbstractConstantProperty*>(pProp);
 
-    m_pWidget->addItem(QString::fromUtf8(plTranslate(pConstant->GetPropertyName())), pConstant->GetConstant().ConvertTo<plInt64>());
+    m_pWidget->addItem(plMakeQString(plTranslate(pConstant->GetPropertyName())), pConstant->GetConstant().ConvertTo<plInt64>());
   }
 }
 
@@ -1182,7 +1373,7 @@ void plQtPropertyEditorEnumWidget::InternalSetValue(const plVariant& value)
   if (value.IsValid())
   {
     plInt32 iIndex = m_pWidget->findData(value.ConvertTo<plInt64>());
-    PLASMA_ASSERT_DEV(iIndex != -1, "Enum widget is set to an invalid value!");
+    PL_ASSERT_DEV(iIndex != -1, "Enum widget is set to an invalid value!");
     m_pWidget->setCurrentIndex(iIndex);
   }
   else
@@ -1209,7 +1400,6 @@ plQtPropertyEditorBitflagsWidget::plQtPropertyEditorBitflagsWidget()
 
   m_pWidget = new QPushButton(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
-  m_pMenu = nullptr;
   m_pMenu = new QMenu(m_pWidget);
   m_pWidget->setMenu(m_pMenu);
   m_pLayout->addWidget(m_pWidget);
@@ -1220,11 +1410,8 @@ plQtPropertyEditorBitflagsWidget::plQtPropertyEditorBitflagsWidget()
 
 plQtPropertyEditorBitflagsWidget::~plQtPropertyEditorBitflagsWidget()
 {
-  m_Constants.Clear();
   m_pWidget->setMenu(nullptr);
-
   delete m_pMenu;
-  m_pMenu = nullptr;
 }
 
 void plQtPropertyEditorBitflagsWidget::OnInit()
@@ -1245,13 +1432,30 @@ void plQtPropertyEditorBitflagsWidget::OnInit()
     const plAbstractConstantProperty* pConstant = static_cast<const plAbstractConstantProperty*>(pProp);
 
     QWidgetAction* pAction = new QWidgetAction(m_pMenu);
-    QCheckBox* pCheckBox = new QCheckBox(QString::fromUtf8(plTranslate(pConstant->GetPropertyName())), m_pMenu);
+    QCheckBox* pCheckBox = new QCheckBox(plMakeQString(plTranslate(pConstant->GetPropertyName())), m_pMenu);
     pCheckBox->setCheckable(true);
     pCheckBox->setCheckState(Qt::Unchecked);
     pAction->setDefaultWidget(pCheckBox);
 
     m_Constants[pConstant->GetConstant().ConvertTo<plInt64>()] = pCheckBox;
     m_pMenu->addAction(pAction);
+  }
+
+  // sets all bits to clear or set
+  {
+    QWidgetAction* pAllAction = new QWidgetAction(m_pMenu);
+    m_pAllButton = new QPushButton(QString::fromUtf8("All"), m_pMenu);
+    connect(m_pAllButton, &QPushButton::clicked, this, [this](bool bChecked)
+      { SetAllChecked(true); });
+    pAllAction->setDefaultWidget(m_pAllButton);
+    m_pMenu->addAction(pAllAction);
+
+    QWidgetAction* pClearAction = new QWidgetAction(m_pMenu);
+    m_pClearButton = new QPushButton(QString::fromUtf8("Clear"), m_pMenu);
+    connect(m_pClearButton, &QPushButton::clicked, this, [this](bool bChecked)
+      { SetAllChecked(false); });
+    pClearAction->setDefaultWidget(m_pClearButton);
+    m_pMenu->addAction(pClearAction);
   }
 }
 
@@ -1275,6 +1479,14 @@ void plQtPropertyEditorBitflagsWidget::InternalSetValue(const plVariant& value)
     sText = sText.left(sText.size() - 1);
 
   m_pWidget->setText(sText);
+}
+
+void plQtPropertyEditorBitflagsWidget::SetAllChecked(bool bChecked)
+{
+  for (auto& pCheckBox : m_Constants)
+  {
+    pCheckBox.Value()->setCheckState(bChecked ? Qt::Checked : Qt::Unchecked);
+  }
 }
 
 void plQtPropertyEditorBitflagsWidget::on_Menu_aboutToShow()
@@ -1322,7 +1534,7 @@ plQtCurve1DButtonWidget::plQtCurve1DButtonWidget(QWidget* pParent)
 void plQtCurve1DButtonWidget::UpdatePreview(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pCurveObject, QColor color, double fLowerExtents, bool bLowerFixed, double fUpperExtents, bool bUpperFixed, double fDefaultValue, double fLowerRange, double fUpperRange)
 {
   plInt32 iNumPoints = 0;
-  pObjectAccessor->GetCount(pCurveObject, "ControlPoints", iNumPoints).IgnoreResult();
+  pObjectAccessor->GetCount(pCurveObject, "ControlPoints", iNumPoints).AssertSuccess();
 
   plVariant v;
   plHybridArray<plVec2d, 32> points;
@@ -1340,10 +1552,10 @@ void plQtCurve1DButtonWidget::UpdatePreview(plObjectAccessorBase* pObjectAccesso
 
     plVec2d p;
 
-    pObjectAccessor->GetValue(pPoint, "Tick", v).IgnoreResult();
+    pObjectAccessor->GetValue(pPoint, "Tick", v).AssertSuccess();
     p.x = v.ConvertTo<double>();
 
-    pObjectAccessor->GetValue(pPoint, "Value", v).IgnoreResult();
+    pObjectAccessor->GetValue(pPoint, "Value", v).AssertSuccess();
     p.y = v.ConvertTo<double>();
 
     points.PushBack(p);
@@ -1437,7 +1649,7 @@ plQtPropertyEditorCurve1DWidget::plQtPropertyEditorCurve1DWidget()
 
   m_pLayout->addWidget(m_pButton);
 
-  PLASMA_VERIFY(connect(m_pButton, SIGNAL(clicked()), this, SLOT(on_Button_triggered())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pButton, SIGNAL(clicked()), this, SLOT(on_Button_triggered())) != nullptr, "signal/slot connection failed");
 }
 
 void plQtPropertyEditorCurve1DWidget::SetSelection(const plHybridArray<plPropertySelection, 8>& items)

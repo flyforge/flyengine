@@ -1,6 +1,6 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <GameEngine/Utils/ImageDataResource.h>
 #include <Texture/Image/Formats/DdsFileFormat.h>
 #include <Texture/Image/Formats/ImageFileFormat.h>
@@ -8,10 +8,10 @@
 #include <Texture/plTexFormat/plTexFormat.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataResource, 1, plRTTIDefaultAllocator<plImageDataResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataResource, 1, plRTTIDefaultAllocator<plImageDataResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plImageDataResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plImageDataResource);
 // clang-format on
 
 plImageDataResource::plImageDataResource()
@@ -35,7 +35,7 @@ plResourceLoadDesc plImageDataResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plImageDataResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plImageDataResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plImageDataResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -113,9 +113,9 @@ void plImageDataResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   }
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plImageDataResource, plImageDataResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plImageDataResource, plImageDataResourceDescriptor)
 {
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plImageDataResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plImageDataResourceDescriptor);
 
   *m_pDescriptor = std::move(descriptor);
 
@@ -134,14 +134,17 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plImageDataResource, plImageDataResourceDes
 
 // plResult plImageDataResourceDescriptor::Serialize(plStreamWriter& stream) const
 //{
-//  PLASMA_SUCCEED_OR_RETURN(plImageFileFormat::GetWriterFormat("png")->WriteImage(stream, m_Image, "png"));
+//  PL_SUCCEED_OR_RETURN(plImageFileFormat::GetWriterFormat("png")->WriteImage(stream, m_Image, "png"));
 //
-//  return PLASMA_SUCCESS;
+//  return PL_SUCCESS;
 //}
 //
 // plResult plImageDataResourceDescriptor::Deserialize(plStreamReader& stream)
 //{
-//  PLASMA_SUCCEED_OR_RETURN(plImageFileFormat::GetReaderFormat("png")->ReadImage(stream, m_Image, "png"));
+//  PL_SUCCEED_OR_RETURN(plImageFileFormat::GetReaderFormat("png")->ReadImage(stream, m_Image, "png"));
 //
-//  return PLASMA_SUCCESS;
+//  return PL_SUCCESS;
 //}
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Utils_Implementation_ImageDataResource);

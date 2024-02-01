@@ -19,12 +19,12 @@ void plDescriptorSetPoolVulkan::Initialize(vk::Device device)
   s_descriptorWeights[vk::DescriptorType::eStorageBuffer] = 1.0f; // Read / write struct (UAV).
   s_descriptorWeights[vk::DescriptorType::eUniformTexelBuffer] = 0.5f; // Read-only linear texel buffer with view.
 
-  // Not used by PLASMA so far.
+  // Not used by PL so far.
   s_descriptorWeights[vk::DescriptorType::eStorageTexelBuffer] = 0.0f;   // Read / write linear texel buffer with view.
   s_descriptorWeights[vk::DescriptorType::eUniformBufferDynamic] = 0.0f; // Same as eUniformBuffer but allows updating the memory offset into the buffer dynamically.
   s_descriptorWeights[vk::DescriptorType::eStorageBufferDynamic] = 0.0f; // Same as eStorageBuffer but allows updating the memory offset into the buffer dynamically.
 
-  // Not supported by PLASMA so far.
+  // Not supported by PL so far.
   s_descriptorWeights[vk::DescriptorType::eInputAttachment] = 0.0f; //frame-buffer local read-only image view.
   s_descriptorWeights[vk::DescriptorType::eCombinedImageSampler] = 0.0f;
   s_descriptorWeights[vk::DescriptorType::eInlineUniformBlock] = 0.0f;

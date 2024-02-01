@@ -23,37 +23,37 @@ struct plParticleEffectAssetEvent
 
 class plParticleEffectAssetDocument : public plSimpleAssetDocument<plParticleEffectDescriptor>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEffectAssetDocument, plSimpleAssetDocument<plParticleEffectDescriptor>);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEffectAssetDocument, plSimpleAssetDocument<plParticleEffectDescriptor>);
 
 public:
-  plParticleEffectAssetDocument(const char* szDocumentPath);
+  plParticleEffectAssetDocument(plStringView sDocumentPath);
 
   static void PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);
 
-  void WriteResource(plStreamWriter& stream) const;
+  void WriteResource(plStreamWriter& inout_stream) const;
 
   void TriggerRestartEffect();
 
   plEvent<const plParticleEffectAssetEvent&> m_Events;
 
-  void SetAutoRestart(bool enable);
+  void SetAutoRestart(bool bEnable);
   bool GetAutoRestart() const { return m_bAutoRestart; }
 
   void SetSimulationPaused(bool bPaused);
   bool GetSimulationPaused() const { return m_bSimulationPaused; }
 
-  void SetSimulationSpeed(float speed);
+  void SetSimulationSpeed(float fSpeed);
   float GetSimulationSpeed() const { return m_fSimulationSpeed; }
 
   bool GetRenderVisualizers() const { return m_bRenderVisualizers; }
   void SetRenderVisualizers(bool b);
 
   // Overridden to enable support for visualizers/manipulators
-  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_Result) const override;
+  virtual plResult ComputeObjectTransformation(const plDocumentObject* pObject, plTransform& out_result) const override;
 
 protected:
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 

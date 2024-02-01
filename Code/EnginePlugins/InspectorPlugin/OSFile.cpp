@@ -126,4 +126,4 @@ void RemoveOSFileEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_OSFile);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_OSFile);

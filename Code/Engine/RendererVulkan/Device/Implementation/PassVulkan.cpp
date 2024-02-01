@@ -11,11 +11,11 @@
 plGALPassVulkan::plGALPassVulkan(plGALDevice& device)
   : plGALPass(device)
 {
-  m_pCommandEncoderState = PLASMA_DEFAULT_NEW(plGALCommandEncoderRenderState);
-  m_pCommandEncoderImpl = PLASMA_DEFAULT_NEW(plGALCommandEncoderImplVulkan, static_cast<plGALDeviceVulkan&>(device));
+  m_pCommandEncoderState = PL_DEFAULT_NEW(plGALCommandEncoderRenderState);
+  m_pCommandEncoderImpl = PL_DEFAULT_NEW(plGALCommandEncoderImplVulkan, static_cast<plGALDeviceVulkan&>(device));
 
-  m_pRenderCommandEncoder = PLASMA_DEFAULT_NEW(plGALRenderCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
-  m_pComputeCommandEncoder = PLASMA_DEFAULT_NEW(plGALComputeCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
+  m_pRenderCommandEncoder = PL_DEFAULT_NEW(plGALRenderCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
+  m_pComputeCommandEncoder = PL_DEFAULT_NEW(plGALComputeCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
 }
 
 plGALPassVulkan::~plGALPassVulkan() = default;
@@ -49,7 +49,7 @@ plGALRenderCommandEncoder* plGALPassVulkan::BeginRenderingPlatform(const plGALRe
 
 void plGALPassVulkan::EndRenderingPlatform(plGALRenderCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_pRenderCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
+  PL_ASSERT_DEV(m_pRenderCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
 
   m_pCommandEncoderImpl->EndRendering();
 }
@@ -66,7 +66,7 @@ plGALComputeCommandEncoder* plGALPassVulkan::BeginComputePlatform(const char* sz
 
 void plGALPassVulkan::EndComputePlatform(plGALComputeCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_pComputeCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
+  PL_ASSERT_DEV(m_pComputeCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
 
   m_pCommandEncoderImpl->EndCompute();
 }

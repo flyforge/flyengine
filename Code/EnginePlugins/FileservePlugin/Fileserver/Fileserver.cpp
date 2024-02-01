@@ -7,7 +7,7 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/Utilities/CommandLineUtils.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plFileserver);
+PL_IMPLEMENT_SINGLETON(plFileserver);
 
 plFileserver::plFileserver()
   : m_SingletonRegistrar(this)
@@ -65,7 +65,7 @@ bool plFileserver::IsServerRunning() const
 
 void plFileserver::SetPort(plUInt16 uiPort)
 {
-  PLASMA_ASSERT_DEV(m_pNetwork == nullptr, "The port cannot be changed after the server was started");
+  PL_ASSERT_DEV(m_pNetwork == nullptr, "The port cannot be changed after the server was started");
   m_uiPort = uiPort;
 }
 
@@ -202,7 +202,7 @@ void plFileserver::HandleMountRequest(plFileserveClientContext& client, plRemote
   msg.GetReader() >> sMountPoint;
   msg.GetReader() >> uiDataDirID;
 
-  PLASMA_ASSERT_DEV(uiDataDirID >= client.m_MountedDataDirs.GetCount(), "Data dir ID should be larger than previous IDs");
+  PL_ASSERT_DEV(uiDataDirID >= client.m_MountedDataDirs.GetCount(), "Data dir ID should be larger than previous IDs");
 
   client.m_MountedDataDirs.SetCount(plMath::Max<plUInt32>(uiDataDirID + 1, client.m_MountedDataDirs.GetCount()));
   auto& dir = client.m_MountedDataDirs[uiDataDirID];
@@ -237,7 +237,7 @@ void plFileserver::HandleUnmountRequest(plFileserveClientContext& client, plRemo
   plUInt16 uiDataDirID = 0xffff;
   msg.GetReader() >> uiDataDirID;
 
-  PLASMA_ASSERT_DEV(uiDataDirID < client.m_MountedDataDirs.GetCount(), "Invalid data dir ID to unmount");
+  PL_ASSERT_DEV(uiDataDirID < client.m_MountedDataDirs.GetCount(), "Invalid data dir ID to unmount");
 
   auto& dir = client.m_MountedDataDirs[uiDataDirID];
   dir.m_bMounted = false;
@@ -342,7 +342,7 @@ void plFileserver::HandleDeleteFileRequest(plFileserveClientContext& client, plR
   plStringBuilder sFile;
   msg.GetReader() >> sFile;
 
-  PLASMA_ASSERT_DEV(uiDataDirID < client.m_MountedDataDirs.GetCount(), "Invalid data dir ID to unmount");
+  PL_ASSERT_DEV(uiDataDirID < client.m_MountedDataDirs.GetCount(), "Invalid data dir ID to unmount");
 
   plFileserverEvent e;
   e.m_Type = plFileserverEvent::Type::FileDeleteRequest;
@@ -453,27 +453,27 @@ void plFileserver::HandleUploadFileFinished(plFileserveClientContext& client, pl
 }
 
 
-plResult plFileserver::SendConnectionInfo(const char* szClientAddress, plUInt16 uiMyPort, const plArrayPtr<plStringBuilder>& MyIPs, plTime timeout)
+plResult plFileserver::SendConnectionInfo(const char* szClientAddress, plUInt16 uiMyPort, const plArrayPtr<plStringBuilder>& myIPs, plTime timeout)
 {
   plStringBuilder sAddress = szClientAddress;
   sAddress.Append(":2042"); // hard-coded port
 
   plUniquePtr<plRemoteInterfaceEnet> network = plRemoteInterfaceEnet::Make();
-  PLASMA_SUCCEED_OR_RETURN(network->ConnectToServer('PLIP', sAddress, false));
+  PL_SUCCEED_OR_RETURN(network->ConnectToServer('PLIP', sAddress, false));
 
   if (network->WaitForConnectionToServer(timeout).Failed())
   {
     network->ShutdownConnection();
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  const plUInt8 uiCount = static_cast<plUInt8>(MyIPs.GetCount());
+  const plUInt8 uiCount = static_cast<plUInt8>(myIPs.GetCount());
 
   plRemoteMessage msg('FSRV', 'MYIP');
   msg.GetWriter() << uiMyPort;
   msg.GetWriter() << uiCount;
 
-  for (const auto& info : MyIPs)
+  for (const auto& info : myIPs)
   {
     msg.GetWriter() << info;
   }
@@ -484,13 +484,13 @@ plResult plFileserver::SendConnectionInfo(const char* szClientAddress, plUInt16 
   for (plUInt32 i = 0; i < 10; ++i)
   {
     network->UpdateRemoteInterface();
-    plThreadUtils::Sleep(plTime::Milliseconds(1));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(1));
   }
 
   network->ShutdownConnection();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(FileservePlugin, FileservePlugin_Fileserver_Fileserver);
+PL_STATICLINK_FILE(FileservePlugin, FileservePlugin_Fileserver_Fileserver);

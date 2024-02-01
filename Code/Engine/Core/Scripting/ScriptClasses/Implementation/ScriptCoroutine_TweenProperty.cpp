@@ -4,48 +4,21 @@
 #include <Core/World/World.h>
 #include <Foundation/Reflection/ReflectionUtils.h>
 
-namespace
-{
-  constexpr bool CanInterpolate(plVariantType::Enum variantType)
-  {
-    return (variantType >= plVariantType::Int8 && variantType <= plVariantType::Vector4) || variantType == plVariantType::Quaternion;
-  }
-
-  struct LerpFunc
-  {
-    template <typename T>
-    PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, float x, plVariant& out_res)
-    {
-      if constexpr (std::is_same_v<T, plQuat>)
-      {
-        plQuat q;
-        q.SetSlerp(a.Get<plQuat>(), b.Get<plQuat>(), x);
-        out_res = q;
-      }
-      else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
-      {
-        out_res = plMath::Lerp(a.Get<T>(), b.Get<T>(), x);
-      }
-    }
-  };
-
-} // namespace
-
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_TweenProperty, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_TweenProperty>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_TweenProperty, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_TweenProperty>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Start, In, "Component", In, "PropertyName", In, "TargetValue", In, "Duration", In, "Easing"),
+    PL_SCRIPT_FUNCTION_PROPERTY(Start, In, "Component", In, "PropertyName", In, "TargetValue", In, "Duration", In, "Easing"),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Coroutine::TweenProperty {PropertyName}"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plScriptCoroutine_TweenProperty::Start(plComponentHandle hComponent, plStringView sPropertyName, plVariant targetValue, plTime duration, plEnum<plCurveFunction> easing)
@@ -66,13 +39,13 @@ void plScriptCoroutine_TweenProperty::Start(plComponentHandle hComponent, plStri
   }
 
   plVariantType::Enum variantType = pProp->GetSpecificType()->GetVariantType();
-  if (variantType == plVariantType::Invalid || CanInterpolate(variantType) == false)
+  if (variantType == plVariantType::Invalid)
   {
     plLog::Error("TweenProperty: Can't tween property '{}' of type '{}'.", sPropertyName, pProp->GetSpecificType()->GetTypeName());
     return;
   }
 
-  plResult conversionStatus = PLASMA_SUCCESS;
+  plResult conversionStatus = PL_SUCCESS;
   m_TargetValue = targetValue.ConvertTo(variantType, &conversionStatus);
   if (conversionStatus.Failed())
   {
@@ -86,7 +59,7 @@ void plScriptCoroutine_TweenProperty::Start(plComponentHandle hComponent, plStri
   m_Easing = easing;
 
   m_Duration = duration;
-  m_TimePassed = plTime::Zero();
+  m_TimePassed = plTime::MakeZero();
 }
 
 plScriptCoroutine::Result plScriptCoroutine_TweenProperty::Update(plTime deltaTimeSinceLastUpdate)
@@ -109,10 +82,7 @@ plScriptCoroutine::Result plScriptCoroutine_TweenProperty::Update(plTime deltaTi
     const double fDuration = m_Duration.GetSeconds();
     double fCurrentX = plMath::Min(fDuration > 0 ? m_TimePassed.GetSeconds() / fDuration : 1.0, 1.0);
     fCurrentX = plCurveFunction::GetValue(m_Easing, fCurrentX);
-
-    LerpFunc func;
-    plVariant currentValue;
-    plVariant::DispatchTo(func, m_TargetValue.GetType(), m_SourceValue, m_TargetValue, static_cast<float>(fCurrentX), currentValue);
+    plVariant currentValue = plMath::Lerp(m_SourceValue, m_TargetValue, fCurrentX);
 
     plReflectionUtils::SetMemberPropertyValue(m_pProperty, pComponent, currentValue);
   }
@@ -124,3 +94,7 @@ plScriptCoroutine::Result plScriptCoroutine_TweenProperty::Update(plTime deltaTi
 
   return Result::Completed();
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_ScriptClasses_Implementation_ScriptCoroutine_TweenProperty);
+

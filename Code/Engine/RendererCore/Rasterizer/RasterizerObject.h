@@ -9,9 +9,9 @@
 
 class plGeometry;
 
-class PLASMA_RENDERERCORE_DLL plRasterizerObject : public plRefCounted
+class PL_RENDERERCORE_DLL plRasterizerObject : public plRefCounted
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plRasterizerObject);
+  PL_DISALLOW_COPY_AND_ASSIGN(plRasterizerObject);
 
 public:
   plRasterizerObject();

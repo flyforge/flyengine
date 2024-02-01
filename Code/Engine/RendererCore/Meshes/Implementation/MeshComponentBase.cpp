@@ -6,22 +6,21 @@
 #include <RendererCore/Meshes/MeshComponentBase.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 #include <RendererFoundation/Device/Device.h>
-#include <RendererCore/Debug/DebugRenderer.h>
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgSetMeshMaterial);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetMeshMaterial, 1, plRTTIDefaultAllocator<plMsgSetMeshMaterial>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgSetMeshMaterial);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgSetMeshMaterial, 1, plRTTIDefaultAllocator<plMsgSetMeshMaterial>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_MEMBER_PROPERTY("MaterialSlot", m_uiMaterialSlot),
+    PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_MEMBER_PROPERTY("MaterialSlot", m_uiMaterialSlot),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plMsgSetMeshMaterial::SetMaterialFile(const char* szFile)
@@ -63,8 +62,8 @@ void plMsgSetMeshMaterial::Deserialize(plStreamReader& inout_stream, plUInt8 uiT
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshRenderData, 1, plRTTIDefaultAllocator<plMeshRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshRenderData, 1, plRTTIDefaultAllocator<plMeshRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plMeshRenderData::FillBatchIdAndSortingKey()
@@ -75,21 +74,21 @@ void plMeshRenderData::FillBatchIdAndSortingKey()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plMeshComponentBase, 2)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plMeshComponentBase, 3)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
-  } PLASMA_END_MESSAGEHANDLERS;
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+  } PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
 plMeshComponentBase::plMeshComponentBase() = default;
@@ -111,6 +110,7 @@ void plMeshComponentBase::SerializeComponent(plWorldWriter& inout_stream) const
   }
 
   s << m_Color;
+  s << m_fSortingDepthOffset;
 }
 
 void plMeshComponentBase::DeserializeComponent(plWorldReader& inout_stream)
@@ -139,6 +139,11 @@ void plMeshComponentBase::DeserializeComponent(plWorldReader& inout_stream)
   }
 
   s >> m_Color;
+
+  if (uiVersion >= 3)
+  {
+    s >> m_fSortingDepthOffset;
+  }
 }
 
 plResult plMeshComponentBase::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
@@ -147,10 +152,10 @@ plResult plMeshComponentBase::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bo
   {
     plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::AllowLoadingFallback);
     ref_bounds = pMesh->GetBounds();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plMeshComponentBase::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -160,9 +165,6 @@ void plMeshComponentBase::OnMsgExtractRenderData(plMsgExtractRenderData& msg) co
 
   plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::AllowLoadingFallback);
   plArrayPtr<const plMeshResourceDescriptor::SubMesh> parts = pMesh->GetSubMeshes();
-
-  ComputeWind();
-  const plVec3 vLocalWind = -GetOwner()->GetGlobalRotation() * m_vWindSpringPos;
 
   for (plUInt32 uiPartIndex = 0; uiPartIndex < parts.GetCount(); ++uiPartIndex)
   {
@@ -177,15 +179,14 @@ void plMeshComponentBase::OnMsgExtractRenderData(plMsgExtractRenderData& msg) co
 
     plMeshRenderData* pRenderData = CreateRenderData();
     {
-      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform() * pRenderData->m_LastGlobalTransform;
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform() * pRenderData->m_GlobalTransform;
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
+      pRenderData->m_fSortingDepthOffset = m_fSortingDepthOffset;
       pRenderData->m_hMesh = m_hMesh;
       pRenderData->m_hMaterial = hMaterial;
       pRenderData->m_Color = m_Color;
       pRenderData->m_uiSubMeshIndex = uiPartIndex;
       pRenderData->m_uiUniqueID = GetUniqueIdForRendering(uiMaterialIndex);
-      pRenderData->m_Wind = vLocalWind;
 
       pRenderData->FillBatchIdAndSortingKey();
     }
@@ -205,95 +206,6 @@ void plMeshComponentBase::OnMsgExtractRenderData(plMsgExtractRenderData& msg) co
     }
 
     msg.AddRenderData(pRenderData, category, bDontCacheYet ? plRenderData::Caching::Never : plRenderData::Caching::IfStatic);
-  }
-}
-
-void plMeshComponentBase::ComputeWind() const
-{
-  if (!IsActiveAndSimulating())
-    return;
-
-  // ComputeWind() is called by the renderer extraction, which happens once for every view
-  // make sure the wind update happens only once per frame, otherwise the spring would behave differently
-  // depending on how many light sources (with shadows) shine on a tree
-  if (plRenderWorld::GetFrameCounter() == m_uiLastWindUpdate)
-    return;
-
-  m_uiLastWindUpdate = plRenderWorld::GetFrameCounter();
-
-  const plWindWorldModuleInterface* pWindInterface = GetWorld()->GetModuleReadOnly<plWindWorldModuleInterface>();
-
-  if (!pWindInterface)
-    return;
-
-  auto pOwnder = GetOwner();
-
-  const plVec3 vOwnerPos = pOwnder->GetGlobalPosition();
-  const plVec3 vSampleWindPos = vOwnerPos + plVec3(0, 0, 2);
-  const plVec3 vWindForce = pWindInterface->GetWindAt(vSampleWindPos);
-
-  const float realTimeStep = GetWorld()->GetClock().GetTimeDiff().AsFloatInSeconds();
-
-  // springy wind force
-  {
-    const float fOverallStrength = 4.0f;
-
-    const float fSpringConstant = 1.0f;
-    const float fSpringDamping = 0.5f;
-    const float fMass = 1.0f;
-
-    const plVec3 vSpringForce = -(fSpringConstant * m_vWindSpringPos + fSpringDamping * m_vWindSpringVel);
-
-    const plVec3 vTotalForce = vWindForce + vSpringForce;
-
-    // F = mass*acc
-    // acc = F / mass
-    const plVec3 vTreeAcceleration = vTotalForce / fMass;
-
-    m_vWindSpringVel += vTreeAcceleration * realTimeStep * fOverallStrength;
-    m_vWindSpringPos += m_vWindSpringVel * realTimeStep * fOverallStrength;
-  }
-
-  // debug draw wind vectors
-  if (false)
-  {
-    const plVec3 offset = GetOwner()->GetGlobalPosition() + plVec3(2, 0, 1);
-
-    plHybridArray<plDebugRenderer::Line, 2> lines;
-
-    // actual wind
-    {
-      auto& l = lines.ExpandAndGetRef();
-      l.m_start = offset;
-      l.m_end = offset + vWindForce;
-      l.m_startColor = plColor::BlueViolet;
-      l.m_endColor = plColor::PowderBlue;
-    }
-
-    // springy wind
-    {
-      auto& l = lines.ExpandAndGetRef();
-      l.m_start = offset;
-      l.m_end = offset + m_vWindSpringPos;
-      l.m_startColor = plColor::BlueViolet;
-      l.m_endColor = plColor::MediumVioletRed;
-    }
-
-    // springy wind 2
-    {
-      auto& l = lines.ExpandAndGetRef();
-      l.m_start = offset;
-      l.m_end = offset + m_vWindSpringPos;
-      l.m_startColor = plColor::LightGoldenRodYellow;
-      l.m_endColor = plColor::MediumVioletRed;
-    }
-
-    plDebugRenderer::DrawLines(GetWorld(), lines, plColor::White);
-
-    plStringBuilder tmp;
-    tmp.Format("Wind: {}m/s", m_vWindSpringPos.GetLength());
-
-    plDebugRenderer::Draw3DText(GetWorld(), tmp, GetOwner()->GetGlobalPosition() + plVec3(0, 0, 1), plColor::DeepSkyBlue);
   }
 }
 
@@ -358,6 +270,18 @@ void plMeshComponentBase::SetColor(const plColor& color)
 const plColor& plMeshComponentBase::GetColor() const
 {
   return m_Color;
+}
+
+void plMeshComponentBase::SetSortingDepthOffset(float fOffset)
+{
+  m_fSortingDepthOffset = fOffset;
+
+  InvalidateCachedRenderData();
+}
+
+float plMeshComponentBase::GetSortingDepthOffset() const
+{
+  return m_fSortingDepthOffset;
 }
 
 void plMeshComponentBase::OnMsgSetMeshMaterial(plMsgSetMeshMaterial& ref_msg)
@@ -427,4 +351,4 @@ void plMeshComponentBase::Materials_Remove(plUInt32 uiIndex)
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshComponentBase);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshComponentBase);

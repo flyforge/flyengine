@@ -52,7 +52,7 @@ void plBoneManipulatorAdapter::RotateGizmoEventHandler(const plGizmoEvent& e)
     }
   }
 
-  PLASMA_ASSERT_DEBUG(uiGizmo != plInvalidIndex, "Gizmo event from unknown gizmo.");
+  PL_ASSERT_DEBUG(uiGizmo != plInvalidIndex, "Gizmo event from unknown gizmo.");
   if (uiGizmo == plInvalidIndex)
     return;
 
@@ -106,7 +106,7 @@ void plBoneManipulatorAdapter::ClickGizmoEventHandler(const plGizmoEvent& e)
     }
   }
 
-  PLASMA_ASSERT_DEBUG(uiGizmo != plInvalidIndex, "Gizmo event from unknown gizmo.");
+  PL_ASSERT_DEBUG(uiGizmo != plInvalidIndex, "Gizmo event from unknown gizmo.");
   if (uiGizmo == plInvalidIndex)
     return;
 
@@ -145,16 +145,16 @@ void plBoneManipulatorAdapter::RetrieveBones()
   if (const plExposedParametersAttribute* pAttrib = pProperty->GetAttributeByType<plExposedParametersAttribute>())
   {
     const plAbstractProperty* pParameterSourceProp = m_pObject->GetType()->FindPropertyByName(pAttrib->GetParametersSource());
-    PLASMA_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(), m_pObject->GetType()->GetTypeName());
+    PL_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(), m_pObject->GetType()->GetTypeName());
 
     plExposedParameterCommandAccessor proxy(pObjectAccessor, pProperty, pParameterSourceProp);
-    proxy.GetValues(m_pObject, pProperty, values).IgnoreResult();
-    proxy.GetKeys(m_pObject, pProperty, m_Keys).IgnoreResult();
+    proxy.GetValues(m_pObject, pProperty, values).AssertSuccess();
+    proxy.GetKeys(m_pObject, pProperty, m_Keys).AssertSuccess();
   }
   else
   {
-    pObjectAccessor->GetKeys(m_pObject, pProperty, m_Keys).IgnoreResult();
-    pObjectAccessor->GetValues(m_pObject, pProperty, values).IgnoreResult();
+    pObjectAccessor->GetKeys(m_pObject, pProperty, m_Keys).AssertSuccess();
+    pObjectAccessor->GetValues(m_pObject, pProperty, values).AssertSuccess();
   }
 
   m_RootTransform.SetIdentity();
@@ -177,7 +177,7 @@ void plBoneManipulatorAdapter::RetrieveBones()
     }
     else
     {
-      //PLASMA_REPORT_FAILURE("Property is not an plExposedBone");
+      //PL_REPORT_FAILURE("Property is not an plExposedBone");
       m_Bones.Clear();
       return;
     }
@@ -217,7 +217,7 @@ void plBoneManipulatorAdapter::ConfigureGizmos()
   auto* pDoc = m_pObject->GetDocumentObjectManager()->GetDocument()->GetMainDocument();
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmos.SetCount(m_Bones.GetCount());
 
@@ -268,14 +268,14 @@ void plBoneManipulatorAdapter::SetTransform(plUInt32 uiBone, const plTransform& 
   const plExposedParametersAttribute* pAttrib = pProperty->GetAttributeByType<plExposedParametersAttribute>();
 
   const plAbstractProperty* pParameterSourceProp = m_pObject->GetType()->FindPropertyByName(pAttrib->GetParametersSource());
-  PLASMA_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(), m_pObject->GetType()->GetTypeName());
+  PL_ASSERT_DEV(pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", pAttrib->GetParametersSource(), m_pObject->GetType()->GetTypeName());
 
   plExposedParameterCommandAccessor proxy(pObjectAccessor, pProperty, pParameterSourceProp);
 
   // for some reason the first command in plExposedParameterCommandAccessor returns failure 'the property X does not exist' and the insert
   // command than fails with 'the property X already exists' ???
 
-  proxy.SetValue(m_pObject, pProperty, var, m_Keys[uiBone]).IgnoreResult();
+  proxy.SetValue(m_pObject, pProperty, var, m_Keys[uiBone]).AssertSuccess();
 }
 
 plMat4 plBoneManipulatorAdapter::ComputeFullTransform(plUInt32 uiBone) const
@@ -300,5 +300,5 @@ plMat4 plBoneManipulatorAdapter::ComputeParentTransform(plUInt32 uiBone) const
     }
   }
 
-  return plMat4::IdentityMatrix();
+  return plMat4::MakeIdentity();
 }

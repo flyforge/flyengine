@@ -12,18 +12,18 @@
 #include <ParticlePlugin/WorldModule/ParticleWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Gravity, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Gravity>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Gravity, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Gravity>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("GravityFactor", m_fGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("GravityFactor", m_fGravityFactor)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Gravity, 1, plRTTIDefaultAllocator<plParticleBehavior_Gravity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Gravity, 1, plRTTIDefaultAllocator<plParticleBehavior_Gravity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleBehaviorFactory_Gravity::plParticleBehaviorFactory_Gravity()
@@ -45,25 +45,25 @@ void plParticleBehaviorFactory_Gravity::CopyBehaviorProperties(plParticleBehavio
   pBehavior->m_pPhysicsModule = (plPhysicsWorldModuleInterface*)pBehavior->GetOwnerSystem()->GetOwnerWorldModule()->GetCachedWorldModule(plGetStaticRTTI<plPhysicsWorldModuleInterface>());
 }
 
-void plParticleBehaviorFactory_Gravity::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_Gravity::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fGravityFactor;
+  inout_stream << m_fGravityFactor;
 }
 
-void plParticleBehaviorFactory_Gravity::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_Gravity::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_fGravityFactor;
+  inout_stream >> m_fGravityFactor;
 }
 
-void plParticleBehaviorFactory_Gravity::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const
+void plParticleBehaviorFactory_Gravity::QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const
 {
-  inout_FinalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
+  inout_finalizerDeps.Insert(plGetStaticRTTI<plParticleFinalizerFactory_ApplyVelocity>());
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -75,7 +75,7 @@ void plParticleBehavior_Gravity::CreateRequiredStreams()
 
 void plParticleBehavior_Gravity::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Gravity");
+  PL_PROFILE_SCOPE("PFX: Gravity");
 
   const plVec3 vGravity = m_pPhysicsModule != nullptr ? m_pPhysicsModule->GetGravity() : plVec3(0.0f, 0.0f, -10.0f);
 
@@ -98,4 +98,4 @@ void plParticleBehavior_Gravity::RequestRequiredWorldModulesForCache(plParticleW
 }
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Gravity);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Gravity);

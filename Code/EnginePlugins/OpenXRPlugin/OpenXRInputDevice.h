@@ -8,19 +8,19 @@
 
 class plOpenXR;
 
-PLASMA_DEFINE_AS_POD_TYPE(XrActionSuggestedBinding);
-PLASMA_DEFINE_AS_POD_TYPE(XrActiveActionSet);
+PL_DEFINE_AS_POD_TYPE(XrActionSuggestedBinding);
+PL_DEFINE_AS_POD_TYPE(XrActiveActionSet);
 
-class PLASMA_OPENXRPLUGIN_DLL plOpenXRInputDevice : public plXRInputDevice
+class PL_OPENXRPLUGIN_DLL plOpenXRInputDevice : public plXRInputDevice
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plOpenXRInputDevice, plXRInputDevice);
+  PL_ADD_DYNAMIC_REFLECTION(plOpenXRInputDevice, plXRInputDevice);
 
 public:
-  void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_Devices) const override;
+  void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_devices) const override;
   plXRDeviceID GetDeviceIDByType(plXRDeviceType::Enum type) const override;
-  const plXRDeviceState& GetDeviceState(plXRDeviceID iDeviceID) const override;
-  plString GetDeviceName(plXRDeviceID iDeviceID) const override;
-  plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID iDeviceID) const override;
+  const plXRDeviceState& GetDeviceState(plXRDeviceID deviceID) const override;
+  plString GetDeviceName(plXRDeviceID deviceID) const override;
+  plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID deviceID) const override;
 
 private:
   friend class plOpenXR;
@@ -39,7 +39,7 @@ private:
 
   struct Vec2Action
   {
-    Vec2Action(plXRDeviceFeatures::Enum feature, XrAction action, plStringView sLeft, plStringView sRight);
+    Vec2Action(plXRDeviceFeatures::Enum feature, XrAction pAction, plStringView sLeft, plStringView sRight);
     plXRDeviceFeatures::Enum m_Feature;
     XrAction m_Action;
     plString m_sKey_negx[2];
@@ -67,8 +67,8 @@ private:
 
 private:
   plOpenXR* m_pOpenXR = nullptr;
-  XrInstance m_instance = XR_NULL_HANDLE;
-  XrSession m_session = XR_NULL_HANDLE;
+  XrInstance m_pInstance = XR_NULL_HANDLE;
+  XrSession m_pSession = XR_NULL_HANDLE;
 
   plXRDeviceState m_DeviceState[3]; // Hard-coded for now
   plString m_sActiveProfile[3];
@@ -76,16 +76,16 @@ private:
   const plInt8 m_iLeftControllerDeviceID = 1;
   const plInt8 m_iRightControllerDeviceID = 2;
 
-  XrActionSet m_ActionSet = XR_NULL_HANDLE;
+  XrActionSet m_pActionSet = XR_NULL_HANDLE;
   plHashTable<XrPath, plString> m_InteractionProfileToNiceName;
 
-  plStaticArray<const char*, 2> m_subActionPrefix;
-  plStaticArray<XrPath, 2> m_subActionPath;
+  plStaticArray<const char*, 2> m_SubActionPrefix;
+  plStaticArray<XrPath, 2> m_SubActionPath;
 
-  plHybridArray<Action, 4> m_booleanActions;
-  plHybridArray<Action, 4> m_floatActions;
-  plHybridArray<Vec2Action, 4> m_vec2Actions;
-  plHybridArray<Action, 4> m_poseActions;
+  plHybridArray<Action, 4> m_BooleanActions;
+  plHybridArray<Action, 4> m_FloatActions;
+  plHybridArray<Vec2Action, 4> m_Vec2Actions;
+  plHybridArray<Action, 4> m_PoseActions;
 
   XrSpace m_gripSpace[2];
   XrSpace m_aimSpace[2];

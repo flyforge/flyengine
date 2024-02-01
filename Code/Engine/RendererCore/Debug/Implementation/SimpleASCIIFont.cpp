@@ -5,7 +5,7 @@
 #include <Texture/Image/Formats/TgaFileFormat.h>
 #include <Texture/Image/ImageConversion.h>
 
-#if PLASMA_ENABLED(PLASMA_EMBED_FONT_FILE)
+#if PL_ENABLED(PL_EMBED_FONT_FILE)
 
 extern plUInt32 g_FontFileTGASize;
 extern const plUInt8 g_FontFileTGA[];
@@ -1002,7 +1002,7 @@ static void CopyCharacter(plUInt32* pImage, plInt32 c, const char* szChar)
 
 void plGraphicsUtils::CreateSimpleASCIIFontTexture(plImage& ref_img, bool bSetEmptyToUnknown)
 {
-#if PLASMA_DISABLED(PLASMA_EMBED_FONT_FILE)
+#if PL_DISABLED(PL_EMBED_FONT_FILE)
   Img.SetWidth(256);
   Img.SetHeight(128);
   Img.SetImageFormat(plImageFormat::R8G8B8A8_UNORM);
@@ -1196,4 +1196,4 @@ void plGraphicsUtils::CreateSimpleASCIIFontTexture(plImage& ref_img, bool bSetEm
 #endif
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Debug_Implementation_SimpleASCIIFont);
+

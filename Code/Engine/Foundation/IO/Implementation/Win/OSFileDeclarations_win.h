@@ -14,13 +14,13 @@
 #  undef CopyFile
 #endif
 
-#if PLASMA_DISABLED(PLASMA_USE_POSIX_FILE_API)
+#if PL_DISABLED(PL_USE_POSIX_FILE_API)
 
 #  include <Foundation/Basics/Platform/Win/MinWindows.h>
 
 struct plOSFileData
 {
-  plOSFileData() { m_pFileHandle = PLASMA_WINDOWS_INVALID_HANDLE_VALUE; }
+  plOSFileData() { m_pFileHandle = PL_WINDOWS_INVALID_HANDLE_VALUE; }
 
   plMinWindows::HANDLE m_pFileHandle;
 };

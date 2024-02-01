@@ -9,7 +9,7 @@
 static plConfigFileResourceLoader s_ConfigFileResourceLoader;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Utilties, ConfigFileResource)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Utilties, ConfigFileResource)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Core"
@@ -30,15 +30,15 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Utilties, ConfigFileResource)
     plConfigFileResource::CleanupDynamicPluginReferences();
   }
 
-  PLASMA_END_SUBSYSTEM_DECLARATION;
+  PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plConfigFileResource, 1, plRTTIDefaultAllocator<plConfigFileResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plConfigFileResource, 1, plRTTIDefaultAllocator<plConfigFileResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plConfigFileResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plConfigFileResource);
 
 plConfigFileResource::plConfigFileResource()
   : plResource(plResource::DoUpdate::OnAnyThread, 0)
@@ -47,70 +47,69 @@ plConfigFileResource::plConfigFileResource()
 
 plConfigFileResource::~plConfigFileResource() = default;
 
-plInt32 plConfigFileResource::GetInt(plTempHashedString szName, plInt32 fallback) const
+plInt32 plConfigFileResource::GetInt(plTempHashedString sName, plInt32 iFallback) const
 {
-  auto it = m_IntData.Find(szName);
+  auto it = m_IntData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  return fallback;
+  return iFallback;
 }
 
-plInt32 plConfigFileResource::GetInt(plTempHashedString szName) const
+plInt32 plConfigFileResource::GetInt(plTempHashedString sName) const
 {
-  auto it = m_IntData.Find(szName);
+  auto it = m_IntData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  plLog::Error("{}: 'int' config variable (name hash = {}) doesn't exist.", this->GetResourceDescription(), szName.GetHash());
+  plLog::Error("{}: 'int' config variable (name hash = {}) doesn't exist.", this->GetResourceIdOrDescription(), sName.GetHash());
   return 0;
 }
 
-float plConfigFileResource::GetFloat(plTempHashedString szName, float fallback) const
+float plConfigFileResource::GetFloat(plTempHashedString sName, float fFallback) const
 {
-  auto it = m_FloatData.Find(szName);
+  auto it = m_FloatData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  return fallback;
+  return fFallback;
 }
 
-float plConfigFileResource::GetFloat(plTempHashedString szName) const
+float plConfigFileResource::GetFloat(plTempHashedString sName) const
 {
-  auto it = m_FloatData.Find(szName);
+  auto it = m_FloatData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  plLog::Error("{}: 'float' config variable (name hash = {}) doesn't exist.", this->GetResourceDescription(), szName.GetHash());
+  plLog::Error("{}: 'float' config variable (name hash = {}) doesn't exist.", this->GetResourceIdOrDescription(), sName.GetHash());
   return 0;
 }
 
-bool plConfigFileResource::GetBool(plTempHashedString szName, bool fallback) const
+bool plConfigFileResource::GetBool(plTempHashedString sName, bool bFallback) const
 {
-  auto it = m_BoolData.Find(szName);
+  auto it = m_BoolData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  return fallback;
+  return bFallback;
 }
 
-bool plConfigFileResource::GetBool(plTempHashedString szName) const
+bool plConfigFileResource::GetBool(plTempHashedString sName) const
 {
-  auto it = m_BoolData.Find(szName);
+  auto it = m_BoolData.Find(sName);
   if (it.IsValid())
     return it.Value();
 
-  plLog::Error("{}: 'float' config variable (name hash = {}) doesn't exist.", this->GetResourceDescription(), szName.GetHash());
+  plLog::Error("{}: 'float' config variable (name hash = {}) doesn't exist.", this->GetResourceIdOrDescription(), sName.GetHash());
   return false;
 }
-
 
 plStringView plConfigFileResource::GetString(plTempHashedString sName, plStringView sFallback) const
 {
   auto it = m_StringData.Find(sName);
   if (it.IsValid())
     return it.Value();
-  
+
   return sFallback;
 }
 
@@ -120,7 +119,7 @@ plStringView plConfigFileResource::GetString(plTempHashedString sName) const
   if (it.IsValid())
     return it.Value();
 
-  plLog::Error("{}: 'string' config variable '(name hash = {}) doesn't exist.", this->GetResourceDescription(), sName.GetHash());
+  plLog::Error("{}: 'string' config variable '(name hash = {}) doesn't exist.", this->GetResourceIdOrDescription(), sName.GetHash());
   return "";
 }
 
@@ -179,8 +178,8 @@ plResult plConfigFileResourceLoader::LoadedData::PrePropFileLocator(plStringView
 
 plResourceLoadData plConfigFileResourceLoader::OpenDataStream(const plResource* pResource)
 {
-  PLASMA_PROFILE_SCOPE("ReadResourceFile");
-  PLASMA_LOG_BLOCK("Load Config Resource", pResource->GetResourceID());
+  PL_PROFILE_SCOPE("ReadResourceFile");
+  PL_LOG_BLOCK("Load Config Resource", pResource->GetResourceID());
 
   plStringBuilder sConfig;
 
@@ -189,7 +188,7 @@ plResourceLoadData plConfigFileResourceLoader::OpenDataStream(const plResource* 
   plMap<plString, plString> stringData;
   plMap<plString, bool> boolData;
 
-  LoadedData* pData = PLASMA_DEFAULT_NEW(LoadedData);
+  LoadedData* pData = PL_DEFAULT_NEW(LoadedData);
   pData->m_Reader.SetStorage(&pData->m_Storage);
 
   plPreprocessor preprop;
@@ -335,7 +334,7 @@ plResourceLoadData plConfigFileResourceLoader::OpenDataStream(const plResource* 
   res.m_pDataStream = &pData->m_Reader;
   res.m_pCustomLoaderData = pData;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   plFileStats stat;
   if (plFileSystem::GetFileStats(pResource->GetResourceID(), stat).Succeeded())
   {
@@ -356,14 +355,17 @@ plResourceLoadData plConfigFileResourceLoader::OpenDataStream(const plResource* 
   return res;
 }
 
-void plConfigFileResourceLoader::CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData)
+void plConfigFileResourceLoader::CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData)
 {
-  LoadedData* pData = static_cast<LoadedData*>(LoaderData.m_pCustomLoaderData);
+  LoadedData* pData = static_cast<LoadedData*>(loaderData.m_pCustomLoaderData);
 
-  PLASMA_DEFAULT_DELETE(pData);
+  PL_DEFAULT_DELETE(pData);
 }
 
 bool plConfigFileResourceLoader::IsResourceOutdated(const plResource* pResource) const
 {
   return static_cast<const plConfigFileResource*>(pResource)->m_RequiredFiles.HasAnyFileChanged();
 }
+
+
+PL_STATICLINK_FILE(Utilities, Utilities_Resources_ConfigFileResource);

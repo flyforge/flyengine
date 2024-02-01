@@ -9,10 +9,10 @@
 #include <RendererFoundation/Shader/Shader.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderPermutationResource, 1, plRTTIDefaultAllocator<plShaderPermutationResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderPermutationResource, 1, plRTTIDefaultAllocator<plShaderPermutationResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plShaderPermutationResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plShaderPermutationResource);
 // clang-format on
 
 static plShaderPermutationResourceLoader g_PermutationResourceLoader;
@@ -24,7 +24,7 @@ plShaderPermutationResource::plShaderPermutationResource()
 
   for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
   {
-    m_pShaderStageBinaries[stage] = nullptr;
+    m_ByteCodes[stage] = nullptr;
   }
 }
 
@@ -123,13 +123,13 @@ plResourceLoadDesc plShaderPermutationResource::UpdateContent(plStreamReader* St
 
     // store not only the hash but also the pointer to the stage binary
     // since it contains other useful information (resource bindings), that we need for shader binding
-    m_pShaderStageBinaries[stage] = pStageBin;
+    m_ByteCodes[stage] = pStageBin->GetByteCode();
 
-    PLASMA_ASSERT_DEV(pStageBin->m_Stage == stage, "Invalid shader stage! Expected stage '{0}', but loaded data is for stage '{1}'", plGALShaderStage::Names[stage], plGALShaderStage::Names[pStageBin->m_Stage]);
+    PL_ASSERT_DEV(pStageBin->m_pGALByteCode->m_Stage == stage, "Invalid shader stage! Expected stage '{0}', but loaded data is for stage '{1}'", plGALShaderStage::Names[stage], plGALShaderStage::Names[pStageBin->m_pGALByteCode->m_Stage]);
 
-    ShaderDesc.m_ByteCodes[stage] = pStageBin->m_GALByteCode;
+    ShaderDesc.m_ByteCodes[stage] = pStageBin->m_pGALByteCode;
 
-    uiGPUMem += pStageBin->m_ByteCode.GetCount();
+    uiGPUMem += pStageBin->m_pGALByteCode->m_ByteCode.GetCount();
   }
 
   m_hShader = pDevice->CreateShader(ShaderDesc);
@@ -157,7 +157,7 @@ void plShaderPermutationResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUs
   out_NewMemoryUsage.m_uiMemoryGPU = ModifyMemoryUsage().m_uiMemoryGPU;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plShaderPermutationResource, plShaderPermutationResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plShaderPermutationResource, plShaderPermutationResourceDescriptor)
 {
   plResourceLoadDesc ret;
   ret.m_State = plResourceState::Loaded;
@@ -197,7 +197,7 @@ plResult plShaderPermutationResourceLoader::RunCompiler(const plResource* pResou
     }
 
     if (!bForce) // no recompilation necessary
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     plStringBuilder sPermutationFile = pResource->GetResourceID();
 
@@ -217,11 +217,11 @@ plResult plShaderPermutationResourceLoader::RunCompiler(const plResource* pResou
     if (bForce)
     {
       plLog::Error("Shader was forced to be compiled, but runtime shader compilation is not available");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plShaderPermutationResourceLoader::IsResourceOutdated(const plResource* pResource) const
@@ -231,7 +231,7 @@ bool plShaderPermutationResourceLoader::IsResourceOutdated(const plResource* pRe
   if (plFileSystem::ResolvePath(pResource->GetResourceID(), &sAbs, nullptr).Failed())
     return false;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   if (pResource->GetLoadedFileModificationTime().IsValid())
   {
     plFileStats stat;
@@ -280,7 +280,7 @@ plResourceLoadData plShaderPermutationResourceLoader::OpenDataStream(const plRes
 
     res.m_sResourceDescription = File.GetFilePathRelative().GetData();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
     plFileStats stat;
     if (plFileSystem::GetFileStats(pResource->GetResourceID(), stat).Succeeded())
     {
@@ -326,7 +326,7 @@ plResourceLoadData plShaderPermutationResourceLoader::OpenDataStream(const plRes
 
 
 
-  ShaderPermutationResourceLoadData* pData = PLASMA_DEFAULT_NEW(ShaderPermutationResourceLoadData);
+  ShaderPermutationResourceLoadData* pData = PL_DEFAULT_NEW(ShaderPermutationResourceLoadData);
 
   plMemoryStreamWriter w(&pData->m_Storage);
 
@@ -357,9 +357,9 @@ void plShaderPermutationResourceLoader::CloseDataStream(const plResource* pResou
 {
   ShaderPermutationResourceLoadData* pData = static_cast<ShaderPermutationResourceLoadData*>(loaderData.m_pCustomLoaderData);
 
-  PLASMA_DEFAULT_DELETE(pData);
+  PL_DEFAULT_DELETE(pData);
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ShaderPermutationResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ShaderPermutationResource);

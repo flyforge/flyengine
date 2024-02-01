@@ -3,13 +3,13 @@
 #include <GuiFoundation/GuiFoundationDLL.h>
 #include <GuiFoundation/Widgets/GroupBoxBase.moc.h>
 
-class PLASMA_GUIFOUNDATION_DLL plQtInlinedGroupBox : public plQtGroupBoxBase
+class PL_GUIFOUNDATION_DLL plQtInlinedGroupBox : public plQtGroupBoxBase
 {
   Q_OBJECT
 public:
   explicit plQtInlinedGroupBox(QWidget* pParent);
 
-  virtual void SetTitle(const char* szTitle) override;
+  virtual void SetTitle(plStringView sTitle) override;
   virtual void SetIcon(const QIcon& icon) override;
   virtual void SetFillColor(const QColor& color) override;
 

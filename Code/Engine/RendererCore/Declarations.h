@@ -20,12 +20,12 @@ using plRenderPipelineResourceHandle = plTypedResourceHandle<class plRenderPipel
 using plDecalResourceHandle = plTypedResourceHandle<class plDecalResource>;
 using plDecalAtlasResourceHandle = plTypedResourceHandle<class plDecalAtlasResource>;
 
-struct PLASMA_RENDERERCORE_DLL plPermutationVar
+struct PL_RENDERERCORE_DLL plPermutationVar
 {
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   plHashedString m_sName;
   plHashedString m_sValue;
 
-  PLASMA_ALWAYS_INLINE bool operator==(const plPermutationVar& other) const { return m_sName == other.m_sName && m_sValue == other.m_sValue; }
+  PL_ALWAYS_INLINE bool operator==(const plPermutationVar& other) const { return m_sName == other.m_sName && m_sValue == other.m_sValue; }
 };

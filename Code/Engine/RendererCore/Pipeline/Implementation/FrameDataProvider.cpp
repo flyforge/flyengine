@@ -4,15 +4,12 @@
 #include <RendererCore/Pipeline/RenderPipeline.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFrameDataProviderBase, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plFrameDataProviderBase, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plFrameDataProviderBase::plFrameDataProviderBase()
-  : m_pOwnerPipeline(nullptr)
-  , m_pData(nullptr)
-  , m_uiLastUpdateFrame(0)
-{
-}
+
+  = default;
 
 void* plFrameDataProviderBase::GetData(const plRenderViewContext& renderViewContext)
 {
@@ -28,4 +25,4 @@ void* plFrameDataProviderBase::GetData(const plRenderViewContext& renderViewCont
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_FrameDataProvider);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_FrameDataProvider);

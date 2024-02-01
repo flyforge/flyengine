@@ -148,7 +148,7 @@ video tutorials.
  - Peoro
  - Braden Pellett
  - Christopher Pelloux
- - Arturo J. Pérpl
+ - Arturo J. Pérez
  - Vladimir Perminov
  - Anthony Pesch
  - Orson Peters
@@ -166,7 +166,7 @@ video tutorials.
  - Philip Rideout
  - Eddie Ringle
  - Max Risuhin
- - Jorge Rodrigupl
+ - Jorge Rodriguez
  - Luca Rood
  - Ed Ropple
  - Aleksey Rybalkin
@@ -211,7 +211,7 @@ video tutorials.
  - Ricardo Vieira
  - Nicholas Vitovitch
  - Simon Voordouw
- - Corentin Wallpl
+ - Corentin Wallez
  - Torsten Walluhn
  - Patrick Walton
  - Xo Wang

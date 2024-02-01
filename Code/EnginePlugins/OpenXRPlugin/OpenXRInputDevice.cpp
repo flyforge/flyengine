@@ -7,9 +7,9 @@
 #include <OpenXRPlugin/OpenXRSingleton.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plOpenXRInputDevice, 1, plRTTINoAllocator);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plOpenXRInputDevice, 1, plRTTINoAllocator);
 // no properties or message handlers
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
   // clang-format on
 
 
@@ -30,15 +30,15 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 #define XR_Grip_Pose "grip_pose"
 #define XR_Aim_Pose "aim_pose"
 
-void plOpenXRInputDevice::GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_Devices) const
+void plOpenXRInputDevice::GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_devices) const
 {
-  PLASMA_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
-  out_Devices.PushBack(0);
+  PL_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
+  out_devices.PushBack(0);
   for (plXRDeviceID i = 0; i < 3; i++)
   {
     if (m_DeviceState[i].m_bDeviceIsConnected)
     {
-      out_Devices.PushBack(i);
+      out_devices.PushBack(i);
     }
   }
 }
@@ -69,40 +69,40 @@ plXRDeviceID plOpenXRInputDevice::GetDeviceIDByType(plXRDeviceType::Enum type) c
   return deviceID;
 }
 
-const plXRDeviceState& plOpenXRInputDevice::GetDeviceState(plXRDeviceID iDeviceID) const
+const plXRDeviceState& plOpenXRInputDevice::GetDeviceState(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
-  PLASMA_ASSERT_DEV(iDeviceID < 3 && iDeviceID >= 0, "Invalid device ID.");
-  PLASMA_ASSERT_DEV(m_DeviceState[iDeviceID].m_bDeviceIsConnected, "Invalid device ID.");
-  return m_DeviceState[iDeviceID];
+  PL_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
+  PL_ASSERT_DEV(deviceID < 3 && deviceID >= 0, "Invalid device ID.");
+  PL_ASSERT_DEV(m_DeviceState[deviceID].m_bDeviceIsConnected, "Invalid device ID.");
+  return m_DeviceState[deviceID];
 }
 
-plString plOpenXRInputDevice::GetDeviceName(plXRDeviceID iDeviceID) const
+plString plOpenXRInputDevice::GetDeviceName(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
-  PLASMA_ASSERT_DEV(iDeviceID < 3 && iDeviceID >= 0, "Invalid device ID.");
-  PLASMA_ASSERT_DEV(m_DeviceState[iDeviceID].m_bDeviceIsConnected, "Invalid device ID.");
-  return m_sActiveProfile[iDeviceID];
+  PL_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
+  PL_ASSERT_DEV(deviceID < 3 && deviceID >= 0, "Invalid device ID.");
+  PL_ASSERT_DEV(m_DeviceState[deviceID].m_bDeviceIsConnected, "Invalid device ID.");
+  return m_sActiveProfile[deviceID];
 }
 
-plBitflags<plXRDeviceFeatures> plOpenXRInputDevice::GetDeviceFeatures(plXRDeviceID iDeviceID) const
+plBitflags<plXRDeviceFeatures> plOpenXRInputDevice::GetDeviceFeatures(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
-  PLASMA_ASSERT_DEV(iDeviceID < 3 && iDeviceID >= 0, "Invalid device ID.");
-  PLASMA_ASSERT_DEV(m_DeviceState[iDeviceID].m_bDeviceIsConnected, "Invalid device ID.");
-  return m_SupportedFeatures[iDeviceID];
+  PL_ASSERT_DEV(m_pOpenXR->IsInitialized(), "Need to call 'Initialize' first.");
+  PL_ASSERT_DEV(deviceID < 3 && deviceID >= 0, "Invalid device ID.");
+  PL_ASSERT_DEV(m_DeviceState[deviceID].m_bDeviceIsConnected, "Invalid device ID.");
+  return m_SupportedFeatures[deviceID];
 }
 
 plOpenXRInputDevice::plOpenXRInputDevice(plOpenXR* pOpenXR)
   : plXRInputDevice()
   , m_pOpenXR(pOpenXR)
 {
-  m_instance = m_pOpenXR->m_instance;
+  m_pInstance = m_pOpenXR->m_pInstance;
 }
 
 XrResult plOpenXRInputDevice::CreateActions(XrSession session, XrSpace sceneSpace)
 {
-  m_session = session;
+  m_pSession = session;
 
   // HMD is always connected or we wouldn't have been able to create a session.
   m_DeviceState[0] = plXRDeviceState();
@@ -121,15 +121,15 @@ XrResult plOpenXRInputDevice::CreateActions(XrSession session, XrSpace sceneSpac
   plStringUtils::Copy(actionSetInfo.actionSetName, XR_MAX_ACTION_SET_NAME_SIZE, "gameplay");
   plStringUtils::Copy(actionSetInfo.localizedActionSetName, XR_MAX_LOCALIZED_ACTION_SET_NAME_SIZE, "Gameplay");
   actionSetInfo.priority = 0;
-  XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSet(m_instance, &actionSetInfo, &m_ActionSet), DestroyActions);
+  XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSet(m_pInstance, &actionSetInfo, &m_pActionSet), DestroyActions);
 
-  m_subActionPrefix.SetCount(2);
-  m_subActionPrefix[0] = "xr_hand_left_";
-  m_subActionPrefix[1] = "xr_hand_right_";
+  m_SubActionPrefix.SetCount(2);
+  m_SubActionPrefix[0] = "xr_hand_left_";
+  m_SubActionPrefix[1] = "xr_hand_right_";
 
-  m_subActionPath.SetCount(2);
-  m_subActionPath[0] = CreatePath("/user/hand/left");
-  m_subActionPath[1] = CreatePath("/user/hand/right");
+  m_SubActionPath.SetCount(2);
+  m_SubActionPath[0] = CreatePath("/user/hand/left");
+  m_SubActionPath[1] = CreatePath("/user/hand/right");
 
   XrAction Trigger = XR_NULL_HANDLE;
   XrAction SelectClick = XR_NULL_HANDLE;
@@ -216,7 +216,7 @@ XrResult plOpenXRInputDevice::CreateActions(XrSession session, XrSpace sceneSpac
   };
   SuggestInteractionProfileBindings("/interaction_profiles/microsoft/motion_controller", "Mixed Reality Motion Controller", motionController);
 
-  if (m_pOpenXR->m_extensions.m_bHandInteraction)
+  if (m_pOpenXR->m_Extensions.m_bHandInteraction)
   {
     Bind handInteraction[] = {
       {SelectClick, "/user/hand/left/input/select"},
@@ -232,49 +232,49 @@ XrResult plOpenXRInputDevice::CreateActions(XrSession session, XrSpace sceneSpac
 
 
   XrActionSpaceCreateInfo spaceCreateInfo{XR_TYPE_ACTION_SPACE_CREATE_INFO};
-  spaceCreateInfo.poseInActionSpace = m_pOpenXR->ConvertTransform(plTransform::IdentityTransform());
+  spaceCreateInfo.poseInActionSpace = m_pOpenXR->ConvertTransform(plTransform::MakeIdentity());
   for (plUInt32 uiSide : {0, 1})
   {
-    spaceCreateInfo.subactionPath = m_subActionPath[uiSide];
+    spaceCreateInfo.subactionPath = m_SubActionPath[uiSide];
     spaceCreateInfo.action = GripPose;
-    XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSpace(m_session, &spaceCreateInfo, &m_gripSpace[uiSide]), DestroyActions);
+    XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSpace(m_pSession, &spaceCreateInfo, &m_gripSpace[uiSide]), DestroyActions);
 
     spaceCreateInfo.action = AimPose;
-    XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSpace(m_session, &spaceCreateInfo, &m_aimSpace[uiSide]), DestroyActions);
+    XR_SUCCEED_OR_CLEANUP_LOG(xrCreateActionSpace(m_pSession, &spaceCreateInfo, &m_aimSpace[uiSide]), DestroyActions);
   }
   return XR_SUCCESS;
 }
 
 void plOpenXRInputDevice::DestroyActions()
 {
-  for (Action& action : m_booleanActions)
+  for (Action& action : m_BooleanActions)
   {
     XR_LOG_ERROR(xrDestroyAction(action.m_Action));
   }
-  m_booleanActions.Clear();
+  m_BooleanActions.Clear();
 
-  for (Action& action : m_floatActions)
+  for (Action& action : m_FloatActions)
   {
     XR_LOG_ERROR(xrDestroyAction(action.m_Action));
   }
-  m_floatActions.Clear();
+  m_FloatActions.Clear();
 
-  for (Vec2Action& action : m_vec2Actions)
+  for (Vec2Action& action : m_Vec2Actions)
   {
     XR_LOG_ERROR(xrDestroyAction(action.m_Action));
   }
-  m_vec2Actions.Clear();
+  m_Vec2Actions.Clear();
 
-  for (Action& action : m_poseActions)
+  for (Action& action : m_PoseActions)
   {
     XR_LOG_ERROR(xrDestroyAction(action.m_Action));
   }
-  m_poseActions.Clear();
+  m_PoseActions.Clear();
 
-  if (m_ActionSet)
+  if (m_pActionSet)
   {
-    XR_LOG_ERROR(xrDestroyActionSet(m_ActionSet));
-    m_ActionSet = XR_NULL_HANDLE;
+    XR_LOG_ERROR(xrDestroyActionSet(m_pActionSet));
+    m_pActionSet = XR_NULL_HANDLE;
   }
 
   for (plUInt32 uiSide : {0, 1})
@@ -301,7 +301,7 @@ void plOpenXRInputDevice::DestroyActions()
 
 XrPath plOpenXRInputDevice::CreatePath(const char* szPath)
 {
-  XrInstance instance = m_pOpenXR->m_instance;
+  XrInstance instance = m_pOpenXR->m_pInstance;
 
   XrPath path;
   if (xrStringToPath(instance, szPath, &path) != XR_SUCCESS)
@@ -315,32 +315,32 @@ XrResult plOpenXRInputDevice::CreateAction(plXRDeviceFeatures::Enum feature, con
 {
   XrActionCreateInfo actionCreateInfo{XR_TYPE_ACTION_CREATE_INFO};
   actionCreateInfo.actionType = actionType;
-  actionCreateInfo.countSubactionPaths = m_subActionPath.GetCount();
-  actionCreateInfo.subactionPaths = m_subActionPath.GetData();
+  actionCreateInfo.countSubactionPaths = m_SubActionPath.GetCount();
+  actionCreateInfo.subactionPaths = m_SubActionPath.GetData();
   plStringUtils::Copy(actionCreateInfo.actionName, XR_MAX_ACTION_NAME_SIZE, actionName);
   plStringUtils::Copy(actionCreateInfo.localizedActionName, XR_MAX_LOCALIZED_ACTION_NAME_SIZE, actionName);
 
-  XR_SUCCEED_OR_CLEANUP_LOG(xrCreateAction(m_ActionSet, &actionCreateInfo, &out_action), voidFunction);
+  XR_SUCCEED_OR_CLEANUP_LOG(xrCreateAction(m_pActionSet, &actionCreateInfo, &out_action), voidFunction);
 
-  plStringBuilder sLeft(m_subActionPrefix[0], actionName);
-  plStringBuilder sRight(m_subActionPrefix[1], actionName);
+  plStringBuilder sLeft(m_SubActionPrefix[0], actionName);
+  plStringBuilder sRight(m_SubActionPrefix[1], actionName);
 
   switch (actionType)
   {
     case XR_ACTION_TYPE_BOOLEAN_INPUT:
-      m_booleanActions.PushBack({feature, out_action, sLeft, sRight});
+      m_BooleanActions.PushBack({feature, out_action, sLeft, sRight});
       break;
     case XR_ACTION_TYPE_FLOAT_INPUT:
-      m_floatActions.PushBack({feature, out_action, sLeft, sRight});
+      m_FloatActions.PushBack({feature, out_action, sLeft, sRight});
       break;
     case XR_ACTION_TYPE_VECTOR2F_INPUT:
-      m_vec2Actions.PushBack(Vec2Action(feature, out_action, sLeft, sRight));
+      m_Vec2Actions.PushBack(Vec2Action(feature, out_action, sLeft, sRight));
       break;
     case XR_ACTION_TYPE_POSE_INPUT:
-      m_poseActions.PushBack({feature, out_action, sLeft, sRight});
+      m_PoseActions.PushBack({feature, out_action, sLeft, sRight});
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return XR_SUCCESS;
@@ -348,7 +348,7 @@ XrResult plOpenXRInputDevice::CreateAction(plXRDeviceFeatures::Enum feature, con
 
 XrResult plOpenXRInputDevice::SuggestInteractionProfileBindings(const char* szInteractionProfile, const char* szNiceName, plArrayPtr<Bind> bindings)
 {
-  XrInstance instance = m_pOpenXR->m_instance;
+  XrInstance instance = m_pOpenXR->m_pInstance;
 
   XrPath InteractionProfile = CreatePath(szInteractionProfile);
 
@@ -373,10 +373,10 @@ XrResult plOpenXRInputDevice::SuggestInteractionProfileBindings(const char* szIn
 
 XrResult plOpenXRInputDevice::AttachSessionActionSets(XrSession session)
 {
-  m_session = session;
+  m_pSession = session;
   XrSessionActionSetsAttachInfo attachInfo{XR_TYPE_SESSION_ACTION_SETS_ATTACH_INFO};
   plHybridArray<XrActionSet, 1> actionSets;
-  actionSets.PushBack(m_ActionSet);
+  actionSets.PushBack(m_pActionSet);
 
   attachInfo.countActionSets = actionSets.GetCount();
   attachInfo.actionSets = actionSets.GetData();
@@ -392,16 +392,16 @@ XrResult plOpenXRInputDevice::UpdateCurrentInteractionProfile()
   // so we check both controllers again.
   auto GetActiveControllerProfile = [this](plUInt32 uiSide) -> XrPath {
     XrInteractionProfileState state{XR_TYPE_INTERACTION_PROFILE_STATE};
-    XrResult res = xrGetCurrentInteractionProfile(m_session, m_subActionPath[uiSide], &state);
+    XrResult res = xrGetCurrentInteractionProfile(m_pSession, m_SubActionPath[uiSide], &state);
     if (res == XR_SUCCESS)
     {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
       if (state.interactionProfile != XR_NULL_PATH && !m_InteractionProfileToNiceName.Contains(state.interactionProfile))
       {
         char buffer[256];
         plUInt32 temp;
-        xrPathToString(m_instance, state.interactionProfile, 256, &temp, buffer);
-        PLASMA_REPORT_FAILURE("Unknown interaction profile was selected by the OpenXR runtime: '{}'", buffer);
+        xrPathToString(m_pInstance, state.interactionProfile, 256, &temp, buffer);
+        PL_REPORT_FAILURE("Unknown interaction profile was selected by the OpenXR runtime: '{}'", buffer);
       }
 #endif
       return state.interactionProfile;
@@ -425,21 +425,21 @@ void plOpenXRInputDevice::InitializeDevice() {}
 
 void plOpenXRInputDevice::RegisterInputSlots()
 {
-  for (const Action& action : m_booleanActions)
+  for (const Action& action : m_BooleanActions)
   {
     for (plUInt32 uiSide : {0, 1})
     {
       RegisterInputSlot(action.m_sKey[uiSide], action.m_sKey[uiSide], plInputSlotFlags::IsButton);
     }
   }
-  for (const Action& action : m_floatActions)
+  for (const Action& action : m_FloatActions)
   {
     for (plUInt32 uiSide : {0, 1})
     {
       RegisterInputSlot(action.m_sKey[uiSide], action.m_sKey[uiSide], plInputSlotFlags::IsAnalogTrigger);
     }
   }
-  for (const Vec2Action& action : m_vec2Actions)
+  for (const Vec2Action& action : m_Vec2Actions)
   {
     for (plUInt32 uiSide : {0, 1})
     {
@@ -453,19 +453,19 @@ void plOpenXRInputDevice::RegisterInputSlots()
 
 XrResult plOpenXRInputDevice::UpdateActions()
 {
-  if (m_session == XR_NULL_HANDLE)
+  if (m_pSession == XR_NULL_HANDLE)
     return XR_SUCCESS;
 
-  PLASMA_PROFILE_SCOPE("UpdateActions");
-  const XrFrameState& frameState = m_pOpenXR->m_frameState;
+  PL_PROFILE_SCOPE("UpdateActions");
+  const XrFrameState& frameState = m_pOpenXR->m_FrameState;
 
   plHybridArray<XrActiveActionSet, 1> activeActionSets;
-  activeActionSets.PushBack({m_ActionSet, XR_NULL_PATH});
+  activeActionSets.PushBack({m_pActionSet, XR_NULL_PATH});
 
   XrActionsSyncInfo syncInfo{XR_TYPE_ACTIONS_SYNC_INFO};
   syncInfo.countActiveActionSets = activeActionSets.GetCount();
   syncInfo.activeActionSets = activeActionSets.GetData();
-  XrResult res = xrSyncActions(m_session, &syncInfo);
+  XrResult res = xrSyncActions(m_pSession, &syncInfo);
   if (res == XR_SESSION_NOT_FOCUSED)
     return XR_SUCCESS;
 
@@ -475,45 +475,45 @@ XrResult plOpenXRInputDevice::UpdateActions()
   {
     const plUInt32 uiControllerId = uiSide == 0 ? m_iLeftControllerDeviceID : m_iRightControllerDeviceID;
 
-    for (const Action& action : m_poseActions)
+    for (const Action& action : m_PoseActions)
     {
       XrActionStatePose state{XR_TYPE_ACTION_STATE_POSE};
       XrActionStateGetInfo getInfo{XR_TYPE_ACTION_STATE_GET_INFO};
       getInfo.action = action.m_Action;
-      getInfo.subactionPath = m_subActionPath[uiSide];
-      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStatePose(m_session, &getInfo, &state));
+      getInfo.subactionPath = m_SubActionPath[uiSide];
+      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStatePose(m_pSession, &getInfo, &state));
       m_SupportedFeatures[uiControllerId].AddOrRemove(action.m_Feature, state.isActive);
     }
 
-    for (const Action& action : m_booleanActions)
+    for (const Action& action : m_BooleanActions)
     {
       XrActionStateBoolean state{XR_TYPE_ACTION_STATE_BOOLEAN};
       XrActionStateGetInfo getInfo{XR_TYPE_ACTION_STATE_GET_INFO};
       getInfo.action = action.m_Action;
-      getInfo.subactionPath = m_subActionPath[uiSide];
-      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateBoolean(m_session, &getInfo, &state));
+      getInfo.subactionPath = m_SubActionPath[uiSide];
+      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateBoolean(m_pSession, &getInfo, &state));
       m_InputSlotValues[action.m_sKey[uiSide]] = state.currentState ? 1.0f : 0.0f;
       m_SupportedFeatures[uiControllerId].AddOrRemove(action.m_Feature, state.isActive);
     }
 
-    for (const Action& action : m_floatActions)
+    for (const Action& action : m_FloatActions)
     {
       XrActionStateFloat state{XR_TYPE_ACTION_STATE_FLOAT};
       XrActionStateGetInfo getInfo{XR_TYPE_ACTION_STATE_GET_INFO};
       getInfo.action = action.m_Action;
-      getInfo.subactionPath = m_subActionPath[uiSide];
-      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateFloat(m_session, &getInfo, &state));
+      getInfo.subactionPath = m_SubActionPath[uiSide];
+      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateFloat(m_pSession, &getInfo, &state));
       m_InputSlotValues[action.m_sKey[uiSide]] = state.currentState;
       m_SupportedFeatures[uiControllerId].AddOrRemove(action.m_Feature, state.isActive);
     }
 
-    for (const Vec2Action& action : m_vec2Actions)
+    for (const Vec2Action& action : m_Vec2Actions)
     {
       XrActionStateVector2f state{XR_TYPE_ACTION_STATE_VECTOR2F};
       XrActionStateGetInfo getInfo{XR_TYPE_ACTION_STATE_GET_INFO};
       getInfo.action = action.m_Action;
-      getInfo.subactionPath = m_subActionPath[uiSide];
-      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateVector2f(m_session, &getInfo, &state));
+      getInfo.subactionPath = m_SubActionPath[uiSide];
+      XR_SUCCEED_OR_RETURN_LOG(xrGetActionStateVector2f(m_pSession, &getInfo, &state));
 
       m_InputSlotValues[action.m_sKey_negx[uiSide]] = state.currentState.x < 0 ? -state.currentState.x : 0.0f;
       m_InputSlotValues[action.m_sKey_posx[uiSide]] = state.currentState.x > 0 ? state.currentState.x : 0.0f;
@@ -537,7 +537,7 @@ XrResult plOpenXRInputDevice::UpdateActions()
     };
 
     XrInteractionProfileState state2{XR_TYPE_INTERACTION_PROFILE_STATE};
-    XrResult res2 = xrGetCurrentInteractionProfile(m_session, m_subActionPath[uiSide], &state2);
+    XrResult res2 = xrGetCurrentInteractionProfile(m_pSession, m_SubActionPath[uiSide], &state2);
 
     plXRDeviceState& state = m_DeviceState[uiControllerId];
     const XrTime time = frameState.predictedDisplayTime;
@@ -584,10 +584,10 @@ void plOpenXRInputDevice::UpdateControllerState()
   }
 }
 
-plOpenXRInputDevice::Vec2Action::Vec2Action(plXRDeviceFeatures::Enum feature, XrAction action, plStringView sLeft, plStringView sRight)
+plOpenXRInputDevice::Vec2Action::Vec2Action(plXRDeviceFeatures::Enum feature, XrAction pAction, plStringView sLeft, plStringView sRight)
 {
   m_Feature = feature;
-  m_Action = action;
+  m_Action = pAction;
 
   plStringView sides[2] = {sLeft, sRight};
   for (plUInt32 uiSide : {0, 1})

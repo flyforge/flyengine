@@ -24,42 +24,6 @@ private:
   virtual void InternalRedraw() override;
   void SendRedrawMsg();
 
-  PlasmaEngineViewConfig m_ViewConfig;
+  plEngineViewConfig m_ViewConfig;
   plQtOrbitCamViewWidget* m_pViewWidget;
 };
-
-class plTextureCubeChannelModeAction : public plEnumerationMenuAction
-{
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeChannelModeAction, plEnumerationMenuAction);
-
-public:
-  plTextureCubeChannelModeAction(const plActionContext& context, const char* szName, const char* szIconPath);
-  virtual plInt64 GetValue() const override;
-  virtual void Execute(const plVariant& value) override;
-};
-
-class plTextureCubeLodSliderAction : public plSliderAction
-{
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeLodSliderAction, plSliderAction);
-
-public:
-  plTextureCubeLodSliderAction(const plActionContext& context, const char* szName);
-
-  virtual void Execute(const plVariant& value) override;
-
-private:
-  plTextureCubeAssetDocument* m_pDocument;
-};
-
-class plTextureCubeAssetActions
-{
-public:
-  static void RegisterActions();
-  static void UnregisterActions();
-
-  static void MapActions(const char* szMapping, const char* szPath);
-
-  static plActionDescriptorHandle s_hTextureChannelMode;
-  static plActionDescriptorHandle s_hLodSlider;
-};
-

@@ -1,7 +1,7 @@
 #include <ToolsFoundation/ToolsFoundationPCH.h>
 
 #include <Foundation/Configuration/Startup.h>
-#include <Foundation/Memory/Allocator.h>
+#include <Foundation/Memory/AllocatorWithPolicy.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <Foundation/Reflection/Reflection.h>
 #include <ToolsFoundation/Reflection/PhantomRtti.h>
@@ -13,7 +13,7 @@ plCopyOnBroadcastEvent<const plPhantomRttiManagerEvent&> plPhantomRttiManager::s
 plHashTable<plStringView, plPhantomRTTI*> plPhantomRttiManager::s_NameToPhantom;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation"
@@ -29,19 +29,19 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, ReflectedTypeManager)
     plPhantomRttiManager::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
 // plPhantomRttiManager public functions
 ////////////////////////////////////////////////////////////////////////
 
-const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& desc)
+const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& ref_desc)
 {
-  PLASMA_PROFILE_SCOPE("RegisterType");
-  const plRTTI* pType = plRTTI::FindTypeByName(desc.m_sTypeName);
+  PL_PROFILE_SCOPE("RegisterType");
+  const plRTTI* pType = plRTTI::FindTypeByName(ref_desc.m_sTypeName);
   plPhantomRTTI* pPhantom = nullptr;
-  s_NameToPhantom.TryGetValue(desc.m_sTypeName, pPhantom);
+  s_NameToPhantom.TryGetValue(ref_desc.m_sTypeName, pPhantom);
 
   // concrete type !
   if (pPhantom == nullptr && pType != nullptr)
@@ -49,17 +49,17 @@ const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& desc
     return pType;
   }
 
-  if (pPhantom != nullptr && pPhantom->IsEqualToDescriptor(desc))
+  if (pPhantom != nullptr && pPhantom->IsEqualToDescriptor(ref_desc))
     return pPhantom;
 
   if (pPhantom == nullptr)
   {
-    pPhantom = PLASMA_DEFAULT_NEW(plPhantomRTTI, desc.m_sTypeName.GetData(), plRTTI::FindTypeByName(desc.m_sParentTypeName), 0,
-      desc.m_uiTypeVersion, plVariantType::Invalid, desc.m_Flags, desc.m_sPluginName.GetData());
+    pPhantom = PL_DEFAULT_NEW(plPhantomRTTI, ref_desc.m_sTypeName.GetData(), plRTTI::FindTypeByName(ref_desc.m_sParentTypeName), 0,
+      ref_desc.m_uiTypeVersion, plVariantType::Invalid, ref_desc.m_Flags, ref_desc.m_sPluginName.GetData());
 
-    pPhantom->SetProperties(desc.m_Properties);
-    pPhantom->SetAttributes(desc.m_Attributes);
-    pPhantom->SetFunctions(desc.m_Functions);
+    pPhantom->SetProperties(ref_desc.m_Properties);
+    pPhantom->SetAttributes(ref_desc.m_Attributes);
+    pPhantom->SetFunctions(ref_desc.m_Functions);
     pPhantom->SetupParentHierarchy();
 
     s_NameToPhantom[pPhantom->GetTypeName()] = pPhantom;
@@ -72,7 +72,7 @@ const plRTTI* plPhantomRttiManager::RegisterType(plReflectedTypeDescriptor& desc
   }
   else
   {
-    pPhantom->UpdateType(desc);
+    pPhantom->UpdateType(ref_desc);
 
     plPhantomRttiManagerEvent msg;
     msg.m_pChangedType = pPhantom;
@@ -100,7 +100,7 @@ bool plPhantomRttiManager::UnregisterType(const plRTTI* pRtti)
 
   s_NameToPhantom.Remove(pPhantom->GetTypeName());
 
-  PLASMA_DEFAULT_DELETE(pPhantom);
+  PL_DEFAULT_DELETE(pPhantom);
   return true;
 }
 
@@ -117,7 +117,7 @@ void plPhantomRttiManager::PluginEventHandler(const plPluginEvent& e)
       UnregisterType(s_NameToPhantom.GetIterator().Value());
     }
 
-    PLASMA_ASSERT_DEV(s_NameToPhantom.IsEmpty(), "plPhantomRttiManager::Shutdown: Removal of types failed!");
+    PL_ASSERT_DEV(s_NameToPhantom.IsEmpty(), "plPhantomRttiManager::Shutdown: Removal of types failed!");
   }
 }
 
@@ -136,5 +136,5 @@ void plPhantomRttiManager::Shutdown()
     UnregisterType(s_NameToPhantom.GetIterator().Value());
   }
 
-  PLASMA_ASSERT_DEV(s_NameToPhantom.IsEmpty(), "plPhantomRttiManager::Shutdown: Removal of types failed!");
+  PL_ASSERT_DEV(s_NameToPhantom.IsEmpty(), "plPhantomRttiManager::Shutdown: Removal of types failed!");
 }

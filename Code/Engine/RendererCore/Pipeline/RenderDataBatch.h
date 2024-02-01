@@ -7,17 +7,17 @@ class plRenderDataBatch
 private:
   struct SortableRenderData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const plRenderData* m_pRenderData;
     plUInt64 m_uiSortingKey;
   };
 
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  // PL_DECLARE_POD_TYPE(); // plDelegate has a destructor and therefore plRenderDataBatch can't be POD
 
   /// \brief This function should return true if the given render data should be filtered and not rendered.
-  typedef plDelegate<bool(const plRenderData*)> Filter;
+  using Filter = plDelegate<bool(const plRenderData*)>;
 
   template <typename T>
   class Iterator

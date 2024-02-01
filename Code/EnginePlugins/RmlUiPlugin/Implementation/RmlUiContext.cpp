@@ -8,7 +8,7 @@
 
 namespace
 {
-  static const char* s_szEzKeys[] = {plInputSlot_KeyTab, plInputSlot_KeyLeft, plInputSlot_KeyUp, plInputSlot_KeyRight, plInputSlot_KeyDown,
+  static const char* s_szPlKeys[] = {plInputSlot_KeyTab, plInputSlot_KeyLeft, plInputSlot_KeyUp, plInputSlot_KeyRight, plInputSlot_KeyDown,
     plInputSlot_KeyPageUp, plInputSlot_KeyPageDown, plInputSlot_KeyHome, plInputSlot_KeyEnd, plInputSlot_KeyDelete, plInputSlot_KeyBackspace,
     plInputSlot_KeyReturn, plInputSlot_KeyNumpadEnter, plInputSlot_KeyEscape};
 
@@ -17,11 +17,11 @@ namespace
     Rml::Input::KI_END, Rml::Input::KI_DELETE, Rml::Input::KI_BACK, Rml::Input::KI_RETURN, Rml::Input::KI_RETURN,
     Rml::Input::KI_ESCAPE};
 
-  PLASMA_CHECK_AT_COMPILETIME(PLASMA_ARRAY_SIZE(s_szEzKeys) == PLASMA_ARRAY_SIZE(s_rmlKeys));
+  PL_CHECK_AT_COMPILETIME(PL_ARRAY_SIZE(s_szPlKeys) == PL_ARRAY_SIZE(s_rmlKeys));
 } // namespace
 
-plRmlUiContext::plRmlUiContext(const Rml::String& name)
-  : Rml::Context(name)
+plRmlUiContext::plRmlUiContext(const Rml::String& sName)
+  : Rml::Context(sName)
 {
 }
 
@@ -40,7 +40,7 @@ plResult plRmlUiContext::LoadDocumentFromResource(const plRmlUiResourceHandle& h
     }
   }
 
-  return HasDocument() ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return HasDocument() ? PL_SUCCESS : PL_FAILURE;
 }
 
 plResult plRmlUiContext::LoadDocumentFromString(const plStringView& sContent)
@@ -54,7 +54,7 @@ plResult plRmlUiContext::LoadDocumentFromString(const plStringView& sContent)
     LoadDocumentFromMemory(sRmlContent);
   }
 
-  return HasDocument() ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return HasDocument() ? PL_SUCCESS : PL_FAILURE;
 }
 
 void plRmlUiContext::UnloadDocument()
@@ -89,12 +89,12 @@ void plRmlUiContext::HideDocument()
   }
 }
 
-void plRmlUiContext::UpdateInput(const plVec2& mousePos)
+void plRmlUiContext::UpdateInput(const plVec2& vMousePos)
 {
   float width = static_cast<float>(GetDimensions().x);
   float height = static_cast<float>(GetDimensions().y);
 
-  m_bWantsInput = mousePos.x >= 0.0f && mousePos.x <= width && mousePos.y >= 0.0f && mousePos.y <= height;
+  m_bWantsInput = vMousePos.x >= 0.0f && vMousePos.x <= width && vMousePos.y >= 0.0f && vMousePos.y <= height;
 
   const bool bCtrlPressed = plInputManager::GetInputSlotState(plInputSlot_KeyLeftCtrl) >= plKeyState::Pressed ||
                             plInputManager::GetInputSlotState(plInputSlot_KeyRightCtrl) >= plKeyState::Pressed;
@@ -110,10 +110,10 @@ void plRmlUiContext::UpdateInput(const plVec2& mousePos)
 
   // Mouse
   {
-    ProcessMouseMove(static_cast<int>(mousePos.x), static_cast<int>(mousePos.y), modifierState);
+    ProcessMouseMove(static_cast<int>(vMousePos.x), static_cast<int>(vMousePos.y), modifierState);
 
     static const char* szMouseButtons[] = {plInputSlot_MouseButton0, plInputSlot_MouseButton1, plInputSlot_MouseButton2};
-    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(szMouseButtons); ++i)
+    for (plUInt32 i = 0; i < PL_ARRAY_SIZE(szMouseButtons); ++i)
     {
       plKeyState::Enum state = plInputManager::GetInputSlotState(szMouseButtons[i]);
       if (state == plKeyState::Pressed)
@@ -150,9 +150,9 @@ void plRmlUiContext::UpdateInput(const plVec2& mousePos)
       }
     }
 
-    for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_szEzKeys); ++i)
+    for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_szPlKeys); ++i)
     {
-      plKeyState::Enum state = plInputManager::GetInputSlotState(s_szEzKeys[i]);
+      plKeyState::Enum state = plInputManager::GetInputSlotState(s_szPlKeys[i]);
       if (state == plKeyState::Pressed)
       {
         m_bWantsInput |= !ProcessKeyDown(s_rmlKeys[i], modifierState);
@@ -165,14 +165,14 @@ void plRmlUiContext::UpdateInput(const plVec2& mousePos)
   }
 }
 
-void plRmlUiContext::SetOffset(const plVec2I32& offset)
+void plRmlUiContext::SetOffset(const plVec2I32& vOffset)
 {
-  m_vOffset = offset;
+  m_vOffset = vOffset;
 }
 
-void plRmlUiContext::SetSize(const plVec2U32& size)
+void plRmlUiContext::SetSize(const plVec2U32& vSize)
 {
-  SetDimensions(Rml::Vector2i(size.x, size.y));
+  SetDimensions(Rml::Vector2i(vSize.x, vSize.y));
 }
 
 void plRmlUiContext::SetDpiScale(float fScale)
@@ -219,14 +219,14 @@ void plRmlUiContext::ProcessEvent(const plHashedString& sIdentifier, Rml::Event&
 
 //////////////////////////////////////////////////////////////////////////
 
-Rml::ContextPtr plRmlUiInternal::ContextInstancer::InstanceContext(const Rml::String& name)
+Rml::ContextPtr plRmlUiInternal::ContextInstancer::InstanceContext(const Rml::String& sName)
 {
-  return Rml::ContextPtr(PLASMA_DEFAULT_NEW(plRmlUiContext, name));
+  return Rml::ContextPtr(PL_DEFAULT_NEW(plRmlUiContext, sName));
 }
 
-void plRmlUiInternal::ContextInstancer::ReleaseContext(Rml::Context* context)
+void plRmlUiInternal::ContextInstancer::ReleaseContext(Rml::Context* pContext)
 {
-  PLASMA_DEFAULT_DELETE(context);
+  PL_DEFAULT_DELETE(pContext);
 }
 
 void plRmlUiInternal::ContextInstancer::Release()

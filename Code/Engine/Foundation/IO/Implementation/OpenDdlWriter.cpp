@@ -84,7 +84,7 @@ void plOpenDdlWriter::OutputPrimitiveTypeNameCompliant(plOpenDdlPrimitiveType ty
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
+      PL_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
       break;
   }
 }
@@ -132,7 +132,7 @@ void plOpenDdlWriter::OutputPrimitiveTypeNameShort(plOpenDdlPrimitiveType type)
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
+      PL_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
       break;
   }
 }
@@ -181,24 +181,24 @@ void plOpenDdlWriter::OutputPrimitiveTypeNameShortest(plOpenDdlPrimitiveType typ
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
+      PL_REPORT_FAILURE("Unknown DDL primitive type {0}", (plUInt32)type);
       break;
   }
 }
 
 plOpenDdlWriter::plOpenDdlWriter()
 {
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesBool == (int)plOpenDdlPrimitiveType::Bool);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt8 == (int)plOpenDdlPrimitiveType::Int8);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt16 == (int)plOpenDdlPrimitiveType::Int16);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt32 == (int)plOpenDdlPrimitiveType::Int32);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt64 == (int)plOpenDdlPrimitiveType::Int64);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt8 == (int)plOpenDdlPrimitiveType::UInt8);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt16 == (int)plOpenDdlPrimitiveType::UInt16);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt32 == (int)plOpenDdlPrimitiveType::UInt32);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt64 == (int)plOpenDdlPrimitiveType::UInt64);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesFloat == (int)plOpenDdlPrimitiveType::Float);
-  PLASMA_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesString == (int)plOpenDdlPrimitiveType::String);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesBool == (int)plOpenDdlPrimitiveType::Bool);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt8 == (int)plOpenDdlPrimitiveType::Int8);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt16 == (int)plOpenDdlPrimitiveType::Int16);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt32 == (int)plOpenDdlPrimitiveType::Int32);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesInt64 == (int)plOpenDdlPrimitiveType::Int64);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt8 == (int)plOpenDdlPrimitiveType::UInt8);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt16 == (int)plOpenDdlPrimitiveType::UInt16);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt32 == (int)plOpenDdlPrimitiveType::UInt32);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesUInt64 == (int)plOpenDdlPrimitiveType::UInt64);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesFloat == (int)plOpenDdlPrimitiveType::Float);
+  PL_CHECK_AT_COMPILETIME((int)plOpenDdlWriter::State::PrimitivesString == (int)plOpenDdlPrimitiveType::String);
 
   m_StateStack.ExpandAndGetRef().m_State = State::Invalid;
   m_StateStack.ExpandAndGetRef().m_State = State::Empty;
@@ -215,8 +215,8 @@ void plOpenDdlWriter::BeginObject(plStringView sType, plStringView sName /*= {}*
 {
   {
     const auto state = m_StateStack.PeekBack().m_State;
-    PLASMA_IGNORE_UNUSED(state);
-    PLASMA_ASSERT_DEBUG(state == State::Empty || state == State::ObjectMultiLine || state == State::ObjectStart,
+    PL_IGNORE_UNUSED(state);
+    PL_ASSERT_DEBUG(state == State::Empty || state == State::ObjectMultiLine || state == State::ObjectStart,
       "DDL Writer is in a state where no further objects may be created");
   }
 
@@ -224,9 +224,9 @@ void plOpenDdlWriter::BeginObject(plStringView sType, plStringView sName /*= {}*
 
   {
     const auto state = m_StateStack.PeekBack().m_State;
-    PLASMA_IGNORE_UNUSED(state);
-    PLASMA_ASSERT_DEBUG(state != State::ObjectSingleLine, "Cannot put an object into another single-line object");
-    PLASMA_ASSERT_DEBUG(state != State::ObjectStart, "Object beginning should have been written");
+    PL_IGNORE_UNUSED(state);
+    PL_ASSERT_DEBUG(state != State::ObjectSingleLine, "Cannot put an object into another single-line object");
+    PL_ASSERT_DEBUG(state != State::ObjectStart, "Object beginning should have been written");
   }
 
   OutputIndentation();
@@ -286,7 +286,7 @@ void plOpenDdlWriter::OutputObjectName(plStringView sName, bool bGlobalName)
 {
   if (!sName.IsEmpty())
   {
-    // PLASMA_ASSERT_DEBUG(plStringUtils::FindSubString(szName, " ") == nullptr, "Spaces are not allowed in DDL object names: '{0}'", szName);
+    // PL_ASSERT_DEBUG(plStringUtils::FindSubString(szName, " ") == nullptr, "Spaces are not allowed in DDL object names: '{0}'", szName);
 
 
     /// \test This code path is untested
@@ -330,7 +330,7 @@ void plOpenDdlWriter::OutputObjectName(plStringView sName, bool bGlobalName)
 void plOpenDdlWriter::EndObject()
 {
   const auto state = m_StateStack.PeekBack().m_State;
-  PLASMA_ASSERT_DEBUG(state == State::ObjectSingleLine || state == State::ObjectMultiLine || state == State::ObjectStart, "No object is open");
+  PL_ASSERT_DEBUG(state == State::ObjectSingleLine || state == State::ObjectMultiLine || state == State::ObjectStart, "No object is open");
 
   if (state == State::ObjectStart)
   {
@@ -340,8 +340,8 @@ void plOpenDdlWriter::EndObject()
     m_StateStack.PopBack();
 
     const auto newState = m_StateStack.PeekBack().m_State;
-    PLASMA_IGNORE_UNUSED(newState);
-    PLASMA_ASSERT_DEBUG(newState == State::ObjectSingleLine || newState == State::ObjectMultiLine, "No object is open");
+    PL_IGNORE_UNUSED(newState);
+    PL_ASSERT_DEBUG(newState == State::ObjectSingleLine || newState == State::ObjectMultiLine, "No object is open");
   }
   else
   {
@@ -372,7 +372,7 @@ void plOpenDdlWriter::BeginPrimitiveList(plOpenDdlPrimitiveType type, plStringVi
   OutputObjectBeginning();
 
   const auto state = m_StateStack.PeekBack().m_State;
-  PLASMA_ASSERT_DEBUG(state == State::Empty || state == State::ObjectSingleLine || state == State::ObjectMultiLine,
+  PL_ASSERT_DEBUG(state == State::Empty || state == State::ObjectSingleLine || state == State::ObjectMultiLine,
     "DDL Writer is in a state where no primitive list may be created");
 
   if (state == State::ObjectMultiLine)
@@ -401,8 +401,8 @@ void plOpenDdlWriter::BeginPrimitiveList(plOpenDdlPrimitiveType type, plStringVi
 void plOpenDdlWriter::EndPrimitiveList()
 {
   const auto state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEBUG(state >= State::PrimitivesBool && state <= State::PrimitivesString, "No primitive list is open");
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEBUG(state >= State::PrimitivesBool && state <= State::PrimitivesString, "No primitive list is open");
 
   m_StateStack.PopBack();
 
@@ -420,7 +420,7 @@ void plOpenDdlWriter::EndPrimitiveList()
 void plOpenDdlWriter::WritePrimitiveType(plOpenDdlWriter::State exp)
 {
   auto& state = m_StateStack.PeekBack();
-  PLASMA_ASSERT_DEBUG(state.m_State == exp, "Cannot write thie primitive type without have the correct primitive list open");
+  PL_ASSERT_DEBUG(state.m_State == exp, "Cannot write thie primitive type without have the correct primitive list open");
 
   if (state.m_bPrimitivesWritten)
   {
@@ -449,8 +449,8 @@ void plOpenDdlWriter::WriteBinaryAsHex(const void* pData, plUInt32 uiBytes)
 
 void plOpenDdlWriter::WriteBool(const bool* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesBool);
 
@@ -490,68 +490,68 @@ void plOpenDdlWriter::WriteBool(const bool* pValues, plUInt32 uiCount /*= 1*/)
 
 void plOpenDdlWriter::WriteInt8(const plInt8* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesInt8);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteInt16(const plInt16* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesInt16);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteInt32(const plInt32* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesInt32);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteInt64(const plInt64* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesInt64);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
@@ -559,87 +559,87 @@ void plOpenDdlWriter::WriteInt64(const plInt64* pValues, plUInt32 uiCount /*= 1*
 
 void plOpenDdlWriter::WriteUInt8(const plUInt8* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesUInt8);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteUInt16(const plUInt16* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesUInt16);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteUInt32(const plUInt32* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesUInt32);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteUInt64(const plUInt64* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesUInt64);
 
-  m_sTemp.Format("{0}", pValues[0]);
+  m_sTemp.SetFormat("{0}", pValues[0]);
   OutputString(m_sTemp.GetData());
 
   for (plUInt32 i = 1; i < uiCount; ++i)
   {
-    m_sTemp.Format(",{0}", pValues[i]);
+    m_sTemp.SetFormat(",{0}", pValues[i]);
     OutputString(m_sTemp.GetData());
   }
 }
 
 void plOpenDdlWriter::WriteFloat(const float* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesFloat);
 
   if (m_FloatPrecisionMode == FloatPrecisionMode::Readable)
   {
-    m_sTemp.Format("{0}", pValues[0]);
+    m_sTemp.SetFormat("{0}", pValues[0]);
     OutputString(m_sTemp.GetData());
 
     for (plUInt32 i = 1; i < uiCount; ++i)
     {
-      m_sTemp.Format(",{0}", pValues[i]);
+      m_sTemp.SetFormat(",{0}", pValues[i]);
       OutputString(m_sTemp.GetData());
     }
   }
@@ -674,19 +674,19 @@ void plOpenDdlWriter::WriteFloat(const float* pValues, plUInt32 uiCount /*= 1*/)
 
 void plOpenDdlWriter::WriteDouble(const double* pValues, plUInt32 uiCount /*= 1*/)
 {
-  PLASMA_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
-  PLASMA_ASSERT_DEBUG(uiCount > 0, "This is pointless");
+  PL_ASSERT_DEBUG(pValues != nullptr, "Invalid value array");
+  PL_ASSERT_DEBUG(uiCount > 0, "This is pointless");
 
   WritePrimitiveType(State::PrimitivesDouble);
 
   if (m_FloatPrecisionMode == FloatPrecisionMode::Readable)
   {
-    m_sTemp.Format("{0}", pValues[0]);
+    m_sTemp.SetFormat("{0}", pValues[0]);
     OutputString(m_sTemp.GetData());
 
     for (plUInt32 i = 1; i < uiCount; ++i)
     {
-      m_sTemp.Format(",{0}", pValues[i]);
+      m_sTemp.SetFormat(",{0}", pValues[i]);
       OutputString(m_sTemp.GetData());
     }
   }
@@ -738,5 +738,3 @@ void plOpenDdlWriter::WriteBinaryAsString(const void* pData, plUInt32 uiBytes)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_OpenDdlWriter);

@@ -7,11 +7,11 @@
 
 plGALQueryDX11::plGALQueryDX11(const plGALQueryCreationDescription& Description)
   : plGALQuery(Description)
-  , m_pDXQuery(nullptr)
+
 {
 }
 
-plGALQueryDX11::~plGALQueryDX11() {}
+plGALQueryDX11::~plGALQueryDX11() = default;
 
 plResult plGALQueryDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -32,24 +32,24 @@ plResult plGALQueryDX11::InitPlatform(plGALDevice* pDevice)
       desc.Query = D3D11_QUERY_OCCLUSION_PREDICATE;
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   if (SUCCEEDED(pDXDevice->GetDXDevice()->CreateQuery(&desc, &m_pDXQuery)))
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
     plLog::Error("Creation of native DirectX query failed!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 plResult plGALQueryDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXQuery);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXQuery);
+  return PL_SUCCESS;
 }
 
 void plGALQueryDX11::SetDebugNamePlatform(const char* szName) const
@@ -62,4 +62,4 @@ void plGALQueryDX11::SetDebugNamePlatform(const char* szName) const
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_QueryDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_QueryDX11);

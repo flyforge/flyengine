@@ -6,5 +6,4 @@
 CONSTANT_BUFFER(plCopyConstants, 3)
 {
   INT2(Offset);
-  UINT2(OutputSize);
 };

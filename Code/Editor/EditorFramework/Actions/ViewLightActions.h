@@ -5,13 +5,13 @@
 #include <GuiFoundation/Action/BaseActions.h>
 
 /// \brief Actions for configuring the engine view light settings.
-class PLASMA_EDITORFRAMEWORK_DLL plViewLightActions
+class PL_EDITORFRAMEWORK_DLL plViewLightActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hLightMenu;
   static plActionDescriptorHandle s_hSkyBox;
@@ -26,38 +26,38 @@ public:
   static plActionDescriptorHandle s_hSetAsDefault;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plViewLightButtonAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plViewLightButtonAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewLightButtonAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plViewLightButtonAction, plButtonAction);
 
 public:
-  plViewLightButtonAction(const plActionContext& context, const char* szName, PlasmaEngineViewLightSettingsEvent::Type button);
+  plViewLightButtonAction(const plActionContext& context, const char* szName, plEngineViewLightSettingsEvent::Type button);
   ~plViewLightButtonAction();
 
   virtual void Execute(const plVariant& value) override;
-  void LightSettingsEventHandler(const PlasmaEngineViewLightSettingsEvent& e);
+  void LightSettingsEventHandler(const plEngineViewLightSettingsEvent& e);
   void UpdateAction();
 
 private:
-  PlasmaEngineViewLightSettingsEvent::Type m_ButtonType;
-  PlasmaEngineViewLightSettings* m_pSettings = nullptr;
+  plEngineViewLightSettingsEvent::Type m_ButtonType;
+  plEngineViewLightSettings* m_pSettings = nullptr;
   plEventSubscriptionID m_SettingsID;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plViewLightSliderAction : public plSliderAction
+class PL_EDITORFRAMEWORK_DLL plViewLightSliderAction : public plSliderAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plViewLightSliderAction, plSliderAction);
+  PL_ADD_DYNAMIC_REFLECTION(plViewLightSliderAction, plSliderAction);
 
 public:
-  plViewLightSliderAction(const plActionContext& context, const char* szName, PlasmaEngineViewLightSettingsEvent::Type button);
+  plViewLightSliderAction(const plActionContext& context, const char* szName, plEngineViewLightSettingsEvent::Type button);
   ~plViewLightSliderAction();
 
   virtual void Execute(const plVariant& value) override;
-  void LightSettingsEventHandler(const PlasmaEngineViewLightSettingsEvent& e);
+  void LightSettingsEventHandler(const plEngineViewLightSettingsEvent& e);
   void UpdateAction();
 
 private:
-  PlasmaEngineViewLightSettingsEvent::Type m_ButtonType;
-  PlasmaEngineViewLightSettings* m_pSettings = nullptr;
+  plEngineViewLightSettingsEvent::Type m_ButtonType;
+  plEngineViewLightSettings* m_pSettings = nullptr;
   plEventSubscriptionID m_SettingsID;
 };

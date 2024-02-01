@@ -9,15 +9,15 @@ struct plSelectionManagerEvent;
 class plDocumentObject;
 class plVisualizerAttribute;
 
-struct PLASMA_GUIFOUNDATION_DLL plVisualizerManagerEvent
+struct PL_GUIFOUNDATION_DLL plVisualizerManagerEvent
 {
   const plDocument* m_pDocument;
   const plDeque<const plDocumentObject*>* m_pSelection;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plVisualizerManager
+class PL_GUIFOUNDATION_DLL plVisualizerManager
 {
-  PLASMA_DECLARE_SINGLETON(plVisualizerManager);
+  PL_DECLARE_SINGLETON(plVisualizerManager);
 
 public:
   plVisualizerManager();

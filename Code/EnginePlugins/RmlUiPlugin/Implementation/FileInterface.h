@@ -25,15 +25,15 @@ namespace plRmlUiInternal
     FileInterface();
     virtual ~FileInterface();
 
-    virtual Rml::FileHandle Open(const Rml::String& path) override;
-    virtual void Close(Rml::FileHandle file) override;
+    virtual Rml::FileHandle Open(const Rml::String& sPath) override;
+    virtual void Close(Rml::FileHandle hFile) override;
 
-    virtual size_t Read(void* buffer, size_t size, Rml::FileHandle file) override;
+    virtual size_t Read(void* pBuffer, size_t uiSize, Rml::FileHandle hFile) override;
 
-    virtual bool Seek(Rml::FileHandle file, long offset, int origin) override;
-    virtual size_t Tell(Rml::FileHandle file) override;
+    virtual bool Seek(Rml::FileHandle hFile, long iOffset, int iOrigin) override;
+    virtual size_t Tell(Rml::FileHandle hFile) override;
 
-    virtual size_t Length(Rml::FileHandle file) override;
+    virtual size_t Length(Rml::FileHandle hFile) override;
 
   private:
     struct OpenFile

@@ -5,17 +5,17 @@
 
 class plWorld;
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneExportModifier : public plReflectedClass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneExportModifier : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneExportModifier, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneExportModifier, plReflectedClass);
 
 public:
-  static void CreateModifiers(plHybridArray<plSceneExportModifier*, 8>& modifiers);
-  static void DestroyModifiers(plHybridArray<plSceneExportModifier*, 8>& modifiers);
+  static void CreateModifiers(plHybridArray<plSceneExportModifier*, 8>& ref_modifiers);
+  static void DestroyModifiers(plHybridArray<plSceneExportModifier*, 8>& ref_modifiers);
 
-  static void ApplyAllModifiers(plWorld& world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport);
+  static void ApplyAllModifiers(plWorld& ref_world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport);
 
-  virtual void ModifyWorld(plWorld& world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport) = 0;
+  virtual void ModifyWorld(plWorld& ref_world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport) = 0;
 
-  static void CleanUpWorld(plWorld& world);
+  static void CleanUpWorld(plWorld& ref_world);
 };

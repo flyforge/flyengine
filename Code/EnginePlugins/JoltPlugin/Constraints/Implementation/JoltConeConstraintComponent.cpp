@@ -6,20 +6,20 @@
 #include <JoltPlugin/System/JoltWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltConeConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltConeConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("ConeAngle", GetConeAngle, SetConeAngle)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(175))),
+    PL_ACCESSOR_PROPERTY("ConeAngle", GetConeAngle, SetConeAngle)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "ConeAngle", 0.3f, nullptr)
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltConeConstraintComponent::plJoltConeConstraintComponent() = default;
@@ -55,8 +55,8 @@ void plJoltConeConstraintComponent::CreateContstraintType(JPH::Body* pBody0, JPH
   opt.mPoint1 = inv1 * plJoltConversionUtils::ToVec3(m_LocalFrameA.m_vPosition);
   opt.mPoint2 = inv2 * plJoltConversionUtils::ToVec3(m_LocalFrameB.m_vPosition);
   opt.mHalfConeAngle = m_ConeAngle.GetRadian() * 0.5f;
-  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::UnitXAxis()));
-  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::UnitXAxis()));
+  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::MakeAxisX()));
+  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::MakeAxisX()));
 
   m_pConstraint = opt.Create(*pBody0, *pBody1);
 }
@@ -107,4 +107,4 @@ void plJoltConeConstraintComponent::SetConeAngle(plAngle f)
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltConeConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltConeConstraintComponent);

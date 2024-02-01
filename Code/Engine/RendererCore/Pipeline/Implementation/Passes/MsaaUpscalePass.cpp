@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/Passes/MsaaUpscalePass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -8,36 +9,34 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsaaUpscalePass, 2, plRTTIDefaultAllocator<plMsaaUpscalePass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsaaUpscalePass, 2, plRTTIDefaultAllocator<plMsaaUpscalePass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput),
-    PLASMA_ENUM_MEMBER_PROPERTY("MSAA_Mode", plGALMSAASampleCount, m_MsaaMode)
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput),
+    PL_ENUM_MEMBER_PROPERTY("MSAA_Mode", plGALMSAASampleCount, m_MsaaMode)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMsaaUpscalePass::plMsaaUpscalePass()
   : plRenderPipelinePass("MsaaUpscalePass")
-  , m_MsaaMode(plGALMSAASampleCount::None)
+
 {
   {
     // Load shader.
     m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/MsaaUpscale.plShader");
-    PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load msaa upscale shader!");
+    PL_ASSERT_DEV(m_hShader.IsValid(), "Could not load msaa upscale shader!");
   }
 }
 
-plMsaaUpscalePass::~plMsaaUpscalePass() {}
+plMsaaUpscalePass::~plMsaaUpscalePass() = default;
 
 bool plMsaaUpscalePass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-
   auto pInput = inputs[m_PinInput.m_uiInputIndex];
   if (pInput != nullptr)
   {
@@ -86,14 +85,28 @@ void plMsaaUpscalePass::Execute(const plRenderViewContext& renderViewContext, co
   renderViewContext.m_pRenderContext->DrawMeshBuffer().IgnoreResult();
 }
 
+plResult plMsaaUpscalePass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_MsaaMode;
+  return PL_SUCCESS;
+}
 
+plResult plMsaaUpscalePass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_MsaaMode;
+  return PL_SUCCESS;
+}
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-#include <Foundation/Serialization/GraphPatch.h>
 #include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
 
 class plMsaaUpscalePassPatch_1_2 : public plGraphPatch
 {
@@ -103,11 +116,11 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override { pNode->RenameProperty("MSAA Mode", "MSAA_Mode"); }
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override { pNode->RenameProperty("MSAA Mode", "MSAA_Mode"); }
 };
 
 plMsaaUpscalePassPatch_1_2 g_plMsaaUpscalePassPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_MsaaUpscalePass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_MsaaUpscalePass);

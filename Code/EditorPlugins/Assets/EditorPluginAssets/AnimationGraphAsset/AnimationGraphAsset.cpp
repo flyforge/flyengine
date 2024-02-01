@@ -11,24 +11,24 @@
 #include <ToolsFoundation/Serialization/ToolsSerializationUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetDocument, 5, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetDocument, 5, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphNodePin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphNodePin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetProperties, 1, plRTTIDefaultAllocator<plAnimationGraphAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetProperties, 1, plRTTIDefaultAllocator<plAnimationGraphAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("IncludeGraphs", m_IncludeGraphs)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Graph")),
-    PLASMA_ARRAY_MEMBER_PROPERTY("AnimationClipMapping", m_AnimationClipMapping),
+    PL_ARRAY_MEMBER_PROPERTY("IncludeGraphs", m_IncludeGraphs)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Graph")),
+    PL_ARRAY_MEMBER_PROPERTY("AnimationClipMapping", m_AnimationClipMapping),
   }
-    PLASMA_END_PROPERTIES;
+    PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, AnimationGraph)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, AnimationGraph)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Core"
@@ -44,7 +44,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, AnimationGraph)
     plQtNodeScene::GetNodeFactory().UnregisterCreator(plGetStaticRTTI<plAnimGraphNode>());
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 bool plAnimationGraphNodeManager::InternalIsNode(const plDocumentObject* pObject) const
@@ -72,7 +72,7 @@ void plAnimationGraphNodeManager::InternalCreatePins(const plDocumentObject* pOb
 
   plHybridArray<plString, 16> pinNames;
 
-  for (const plAbstractProperty* pProp : properties)
+  for (auto pProp : properties)
   {
     if (!pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphPin>())
       continue;
@@ -97,61 +97,61 @@ void plAnimationGraphNodeManager::InternalCreatePins(const plDocumentObject* pOb
 
       if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphTriggerInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, triggerPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, triggerPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Trigger;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphTriggerOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, triggerPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, triggerPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Trigger;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphNumberInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, numberPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, numberPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Number;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphNumberOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, numberPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, numberPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Number;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphBoolInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, boolPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, boolPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Bool;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphBoolOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, boolPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, boolPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::Bool;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphBoneWeightsInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, weightPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, weightPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::BoneWeights;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphBoneWeightsOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, weightPinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, weightPinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::BoneWeights;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphLocalPoseInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, localPosePinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, localPosePinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::LocalPose;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphLocalPoseMultiInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, localPosePinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, localPosePinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::LocalPose;
         pPin->m_bMultiInputPin = true;
         pPin->m_Shape = plPin::Shape::RoundRect;
@@ -159,26 +159,26 @@ void plAnimationGraphNodeManager::InternalCreatePins(const plDocumentObject* pOb
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphLocalPoseOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, localPosePinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, localPosePinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::LocalPose;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphModelPoseInputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, modelPosePinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Input, pinName, modelPosePinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::ModelPose;
         ref_node.m_Inputs.PushBack(pPin);
       }
       else if (pProp->GetSpecificType()->IsDerivedFrom<plAnimGraphModelPoseOutputPin>())
       {
-        auto pPin = PLASMA_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, modelPosePinColor, pObject);
+        auto pPin = PL_DEFAULT_NEW(plAnimationGraphNodePin, plPin::Type::Output, pinName, modelPosePinColor, pObject);
         pPin->m_DataType = plAnimGraphPin::ModelPose;
         ref_node.m_Outputs.PushBack(pPin);
       }
       else
       {
         // EXTEND THIS if a new type is introduced
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
     }
   }
@@ -242,7 +242,7 @@ plStatus plAnimationGraphNodeManager::InternalCanConnect(const plPin& source, co
       break;
 
       // EXTEND THIS if a new type is introduced
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   if (out_result != CanConnectResult::ConnectNever && WouldConnectionCreateCircle(source, target))
@@ -251,7 +251,7 @@ plStatus plAnimationGraphNodeManager::InternalCanConnect(const plPin& source, co
     return plStatus("Connecting these pins would create a circle in the graph.");
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 bool plAnimationGraphNodeManager::InternalIsDynamicPinProperty(const plDocumentObject* pObject, const plAbstractProperty* pProp) const
@@ -259,13 +259,13 @@ bool plAnimationGraphNodeManager::InternalIsDynamicPinProperty(const plDocumentO
   return pProp->GetAttributeByType<plDynamicPinAttribute>() != nullptr;
 }
 
-plAnimationGraphAssetDocument::plAnimationGraphAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plAnimationGraphAssetProperties>(PLASMA_DEFAULT_NEW(plAnimationGraphNodeManager), szDocumentPath, plAssetDocEngineConnection::None)
+plAnimationGraphAssetDocument::plAnimationGraphAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plAnimationGraphAssetProperties>(PL_DEFAULT_NEW(plAnimationGraphNodeManager), sDocumentPath, plAssetDocEngineConnection::None)
 {
-  m_pObjectAccessor = PLASMA_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
+  m_pObjectAccessor = PL_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
 }
 
-plTransformStatus plAnimationGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plAnimationGraphAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const auto* pNodeManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
 
@@ -333,9 +333,9 @@ plTransformStatus plAnimationGraphAssetDocument::InternalTransformAsset(plStream
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(animGraph.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(animGraph.Serialize(stream));
 
-  return plTransformStatus(PLASMA_SUCCESS);
+  return plTransformStatus(PL_SUCCESS);
 }
 
 void plAnimationGraphAssetDocument::InternalGetMetaDataHash(const plDocumentObject* pObject, plUInt64& inout_uiHash) const
@@ -375,7 +375,7 @@ bool plAnimationGraphAssetDocument::CopySelectedObjects(plAbstractObjectGraph& o
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plAnimationGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
+bool plAnimationGraphAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

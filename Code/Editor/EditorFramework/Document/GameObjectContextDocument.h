@@ -3,7 +3,7 @@
 #include <EditorFramework/Document/GameObjectDocument.h>
 #include <EditorFramework/EditorFrameworkDLL.h>
 
-struct PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextEvent
+struct PL_EDITORFRAMEWORK_DLL plGameObjectContextEvent
 {
   enum class Type
   {
@@ -13,12 +13,12 @@ struct PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextEvent
   Type m_Type;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectContextDocument : public plGameObjectDocument
+class PL_EDITORFRAMEWORK_DLL plGameObjectContextDocument : public plGameObjectDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectContextDocument, plGameObjectDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectContextDocument, plGameObjectDocument);
 
 public:
-  plGameObjectContextDocument(const char* szDocumentPath, plDocumentObjectManager* pObjectManager,
+  plGameObjectContextDocument(plStringView sDocumentPath, plDocumentObjectManager* pObjectManager,
     plAssetDocEngineConnection engineConnectionType = plAssetDocEngineConnection::FullObjectMirroring);
   ~plGameObjectContextDocument();
 

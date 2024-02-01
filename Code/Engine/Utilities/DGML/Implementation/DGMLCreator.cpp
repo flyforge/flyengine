@@ -5,7 +5,7 @@
 #include <Foundation/Utilities/DGMLWriter.h>
 #include <Utilities/DGML/DGMLCreator.h>
 
-void plDGMLGraphCreator::FillGraphFromWorld(plWorld* pWorld, plDGMLGraph& Graph)
+void plDGMLGraphCreator::FillGraphFromWorld(plWorld* pWorld, plDGMLGraph& ref_graph)
 {
   if (!pWorld)
   {
@@ -16,19 +16,19 @@ void plDGMLGraphCreator::FillGraphFromWorld(plWorld* pWorld, plDGMLGraph& Graph)
 
   struct GraphVisitor
   {
-    GraphVisitor(plDGMLGraph& Graph)
-      : m_Graph(Graph)
+    GraphVisitor(plDGMLGraph& ref_graph)
+      : m_Graph(ref_graph)
     {
       plDGMLGraph::NodeDesc nd;
       nd.m_Color = plColor::DarkRed;
       nd.m_Shape = plDGMLGraph::NodeShape::Button;
-      m_WorldNodeId = Graph.AddNode("World", &nd);
+      m_WorldNodeId = ref_graph.AddNode("World", &nd);
     }
 
     plVisitorExecution::Enum Visit(plGameObject* pObject)
     {
       plStringBuilder name;
-      name.Format("GameObject: \"{0}\"", pObject->GetName().IsEmpty() ? "<Unnamed>" : pObject->GetName());
+      name.SetFormat("GameObject: \"{0}\"", pObject->GetName().IsEmpty() ? "<Unnamed>" : pObject->GetName());
 
       // Create node for game object
       plDGMLGraph::NodeDesc gameobjectND;
@@ -78,10 +78,8 @@ void plDGMLGraphCreator::FillGraphFromWorld(plWorld* pWorld, plDGMLGraph& Graph)
     plMap<const plGameObject*, plDGMLGraph::NodeId> m_VisitedObjects;
   };
 
-  GraphVisitor visitor(Graph);
+  GraphVisitor visitor(ref_graph);
   pWorld->Traverse(plWorld::VisitorFunc(&GraphVisitor::Visit, &visitor), plWorld::BreadthFirst);
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_DGML_Implementation_DGMLCreator);

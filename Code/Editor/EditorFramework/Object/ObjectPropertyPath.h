@@ -13,7 +13,7 @@ struct plPropertyReference;
 class plStringBuilder;
 class plAbstractProperty;
 
-struct PLASMA_EDITORFRAMEWORK_DLL plPropertyReference
+struct PL_EDITORFRAMEWORK_DLL plPropertyReference
 {
   bool operator==(const plPropertyReference& rhs) const
   {
@@ -24,21 +24,21 @@ struct PLASMA_EDITORFRAMEWORK_DLL plPropertyReference
   plVariant m_Index;
 };
 
-struct PLASMA_EDITORFRAMEWORK_DLL plObjectPropertyPathContext
+struct PL_EDITORFRAMEWORK_DLL plObjectPropertyPathContext
 {
   const plDocumentObject* m_pContextObject; ///< Paths start at this object.
   plObjectAccessorBase* m_pAccessor;        ///< Accessor used to traverse hierarchy and query properties.
   plString m_sRootProperty;                 ///< In case m_pContextObject points to the root object, this is the property to follow.
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plObjectPropertyPath
+class PL_EDITORFRAMEWORK_DLL plObjectPropertyPath
 {
 public:
   static plStatus CreatePath(const plObjectPropertyPathContext& context, const plPropertyReference& prop, plStringBuilder& out_sObjectSearchSequence,
     plStringBuilder& out_sComponentType, plStringBuilder& out_sPropertyPath);
   static plStatus CreatePropertyPath(const plObjectPropertyPathContext& context, const plPropertyReference& prop, plStringBuilder& out_sPropertyPath);
 
-  static plStatus ResolvePath(const plObjectPropertyPathContext& context, plHybridArray<plPropertyReference, 1>& out_keys,
+  static plStatus ResolvePath(const plObjectPropertyPathContext& context, plDynamicArray<plPropertyReference>& out_keys,
     const char* szObjectSearchSequence, const char* szComponentType, const char* szPropertyPath);
   static plStatus ResolvePropertyPath(const plObjectPropertyPathContext& context, const char* szPropertyPath, plPropertyReference& out_key);
 

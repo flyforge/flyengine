@@ -18,7 +18,7 @@ void plJoltDebugRenderer::TriangleBatch::Release()
   if (m_iRefCount == 0)
   {
     auto* pThis = this;
-    PLASMA_DEFAULT_DELETE(pThis);
+    PL_DEFAULT_DELETE(pThis);
   }
 }
 
@@ -49,7 +49,7 @@ void plJoltDebugRenderer::DrawTriangle(JPH::Vec3Arg inV1, JPH::Vec3Arg inV2, JPH
 
 JPH::DebugRenderer::Batch plJoltDebugRenderer::CreateTriangleBatch(const JPH::DebugRenderer::Triangle* pInTriangles, int iInTriangleCount)
 {
-  TriangleBatch* pBatch = PLASMA_DEFAULT_NEW(TriangleBatch);
+  TriangleBatch* pBatch = PL_DEFAULT_NEW(TriangleBatch);
   pBatch->m_Triangles.Reserve(iInTriangleCount);
 
   for (int i = 0; i < iInTriangleCount; ++i)
@@ -69,7 +69,7 @@ JPH::DebugRenderer::Batch plJoltDebugRenderer::CreateTriangleBatch(const JPH::De
 {
   const plUInt32 numTris = iInIndexCount / 3;
 
-  TriangleBatch* pBatch = PLASMA_DEFAULT_NEW(TriangleBatch);
+  TriangleBatch* pBatch = PL_DEFAULT_NEW(TriangleBatch);
   pBatch->m_Triangles.Reserve(numTris);
 
   plUInt32 index = 0;
@@ -156,4 +156,4 @@ void plJoltDebugRenderer::DrawGeometry(JPH::Mat44Arg modelMatrix, const JPH::AAB
 #endif
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltDebugRenderer);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_System_JoltDebugRenderer);

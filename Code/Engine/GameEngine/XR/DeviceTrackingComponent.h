@@ -16,16 +16,17 @@ struct plXRPoseLocation
     Default = Grip,
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRPoseLocation);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRPoseLocation);
 
 //////////////////////////////////////////////////////////////////////////
 
-typedef plComponentManagerSimple<class plDeviceTrackingComponent, plComponentUpdateType::WhenSimulating> plDeviceTrackingComponentManager;
+
+using plDeviceTrackingComponentManager = plComponentManagerSimple<class plDeviceTrackingComponent, plComponentUpdateType::WhenSimulating>;
 
 /// \brief Tracks the position of a XR device and applies it to the owner.
-class PLASMA_GAMEENGINE_DLL plDeviceTrackingComponent : public plComponent
+class PL_GAMEENGINE_DLL plDeviceTrackingComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plDeviceTrackingComponent, plComponent, plDeviceTrackingComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plDeviceTrackingComponent, plComponent, plDeviceTrackingComponentManager);
 
 public:
   plDeviceTrackingComponent();

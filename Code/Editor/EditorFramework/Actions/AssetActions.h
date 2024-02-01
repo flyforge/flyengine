@@ -4,14 +4,14 @@
 #include <GuiFoundation/Action/BaseActions.h>
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plAssetActions
+class PL_EDITORFRAMEWORK_DLL plAssetActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping, const char* szPath);
-  static void MapToolBarActions(const char* szMapping, bool bDocument);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapToolBarActions(plStringView sMapping, bool bDocument);
 
   static plActionDescriptorHandle s_hAssetCategory;
   static plActionDescriptorHandle s_hTransformAsset;
@@ -19,12 +19,13 @@ public:
   static plActionDescriptorHandle s_hResaveAllAssets;
   static plActionDescriptorHandle s_hCheckFileSystem;
   static plActionDescriptorHandle s_hWriteLookupTable;
+  static plActionDescriptorHandle s_hWriteDependencyDGML;
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plAssetAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plAssetAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetAction, plButtonAction);
 
 public:
   enum class ButtonType
@@ -34,6 +35,7 @@ public:
     ResaveAllAssets,
     CheckFileSystem,
     WriteLookupTable,
+    WriteDependencyDGML,
   };
 
   plAssetAction(const plActionContext& context, const char* szName, ButtonType button);

@@ -6,7 +6,7 @@ namespace plLogWriter
 {
 
   /// \brief A simple log writer that outputs all log messages to the pl ETW provider.
-  class PLASMA_FOUNDATION_DLL ETW
+  class PL_FOUNDATION_DLL ETW
   {
   public:
     /// \brief Register this at plLog to write all log messages to ETW.

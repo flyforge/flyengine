@@ -11,7 +11,7 @@
 /// Just add all permutation variables and their possible values.
 /// Then the number of possible permutations and each permutation
 /// can be queried.
-class PLASMA_RENDERERCORE_DLL plPermutationGenerator
+class PL_RENDERERCORE_DLL plPermutationGenerator
 {
 public:
   /// \brief Resets everything.

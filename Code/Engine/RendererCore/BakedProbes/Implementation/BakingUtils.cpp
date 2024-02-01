@@ -10,7 +10,7 @@ plVec3 plBakingUtils::FibonacciSphere(plUInt32 uiSampleIndex, plUInt32 uiNumSamp
   float y = ((uiSampleIndex * offset) - 1) + (offset / 2);
   float r = plMath::Sqrt(1 - y * y);
 
-  plAngle phi = plAngle::Radian(((uiSampleIndex + 1) % uiNumSamples) * increment);
+  plAngle phi = plAngle::MakeFromRadian(((uiSampleIndex + 1) % uiNumSamples) * increment);
 
   float x = plMath::Cos(phi) * r;
   float z = plMath::Sin(phi) * r;
@@ -47,4 +47,3 @@ void plBakingUtils::DecompressSkyVisibility(plCompressedSkyVisibility compressed
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakingUtils);

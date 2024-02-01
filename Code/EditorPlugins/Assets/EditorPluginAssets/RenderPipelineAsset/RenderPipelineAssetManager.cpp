@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/RenderPipelineAsset/RenderPipelineAssetManager.h>
 #include <EditorPluginAssets/RenderPipelineAsset/RenderPipelineAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineAssetManager, 1, plRTTIDefaultAllocator<plRenderPipelineAssetManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineAssetManager, 1, plRTTIDefaultAllocator<plRenderPipelineAssetManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plRenderPipelineAssetManager::plRenderPipelineAssetManager()
 {
@@ -38,7 +38,7 @@ void plRenderPipelineAssetManager::OnDocumentManagerEvent(const plDocumentManage
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plRenderPipelineAssetDocument>())
       {
-        plQtRenderPipelineAssetDocumentWindow* pDocWnd = new plQtRenderPipelineAssetDocumentWindow(e.m_pDocument);
+        new plQtRenderPipelineAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -49,9 +49,9 @@ void plRenderPipelineAssetManager::OnDocumentManagerEvent(const plDocumentManage
 }
 
 void plRenderPipelineAssetManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plRenderPipelineAssetDocument(szPath);
+  out_pDocument = new plRenderPipelineAssetDocument(sPath);
 }
 
 void plRenderPipelineAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

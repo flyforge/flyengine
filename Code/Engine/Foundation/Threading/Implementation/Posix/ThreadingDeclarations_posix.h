@@ -18,7 +18,7 @@ struct plSemaphoreHandle
   sem_t m_Unnamed;
 };
 
-#define PLASMA_THREAD_CLASS_ENTRY_POINT void* plThreadClassEntryPoint(void* pThreadParameter);
+#define PL_THREAD_CLASS_ENTRY_POINT void* plThreadClassEntryPoint(void* pThreadParameter);
 
 struct plConditionVariableData
 {

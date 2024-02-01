@@ -9,7 +9,7 @@ class QString;
 using QStringList = QList<QString>;
 class QProcess;
 
-class PLASMA_EDITORFRAMEWORK_DLL PlasmaEditorProcessCommunicationChannel : public plProcessCommunicationChannel
+class PL_EDITORFRAMEWORK_DLL plEditorProcessCommunicationChannel : public plProcessCommunicationChannel
 {
 public:
   plResult StartClientProcess(const char* szProcess, const QStringList& args, bool bRemote, const plRTTI* pFirstAllowedMessageType = nullptr,
@@ -25,7 +25,7 @@ private:
   QProcess* m_pClientProcess = nullptr;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL PlasmaEditorProcessRemoteCommunicationChannel : public plProcessCommunicationChannel
+class PL_EDITORFRAMEWORK_DLL plEditorProcessRemoteCommunicationChannel : public plProcessCommunicationChannel
 {
 public:
   plResult ConnectToServer(const char* szAddress);

@@ -38,9 +38,9 @@ protected:
 ///
 /// This is used for displaying the collision mesh of a single object.
 /// It doesn't work for non-mesh shape types (sphere, box, capsule).
-class PLASMA_JOLTPLUGIN_DLL plJoltVisColMeshComponent : public plRenderComponent
+class PL_JOLTPLUGIN_DLL plJoltVisColMeshComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltVisColMeshComponent, plRenderComponent, plJoltVisColMeshComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltVisColMeshComponent, plRenderComponent, plJoltVisColMeshComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -70,7 +70,7 @@ public:
 
   /// \brief If this is set directly, the mesh is not taken from the sibling components.
   void SetMesh(const plJoltMeshResourceHandle& hMesh);
-  PLASMA_ALWAYS_INLINE const plJoltMeshResourceHandle& GetMesh() const { return m_hCollisionMesh; }
+  PL_ALWAYS_INLINE const plJoltMeshResourceHandle& GetMesh() const { return m_hCollisionMesh; }
 
 protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;

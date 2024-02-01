@@ -32,7 +32,7 @@ plReflectionPool::Data::~Data()
   for (plUInt32 i = 0; i < uiWorldReflectionCount; ++i)
   {
     WorldReflectionData* pData = m_WorldReflectionData[i].Borrow();
-    PLASMA_ASSERT_DEV(!pData || pData->m_Probes.IsEmpty(), "Not all probes were deregistered.");
+    PL_ASSERT_DEV(!pData || pData->m_Probes.IsEmpty(), "Not all probes were deregistered.");
   }
   m_WorldReflectionData.Clear();
 
@@ -52,7 +52,7 @@ plReflectionProbeId plReflectionPool::Data::AddProbe(const plWorld* pWorld, Prob
 
   if (s_pData->m_WorldReflectionData[uiWorldIndex] == nullptr)
   {
-    s_pData->m_WorldReflectionData[uiWorldIndex] = PLASMA_DEFAULT_NEW(WorldReflectionData);
+    s_pData->m_WorldReflectionData[uiWorldIndex] = PL_DEFAULT_NEW(WorldReflectionData);
     s_pData->m_WorldReflectionData[uiWorldIndex]->m_mappingSubscriptionId = s_pData->m_WorldReflectionData[uiWorldIndex]->m_mapping.m_Events.AddEventHandler([uiWorldIndex, this](const plReflectionProbeMappingEvent& e) {
       OnReflectionProbeMappingEvent(uiWorldIndex, e);
     });
@@ -123,7 +123,7 @@ void plReflectionPool::Data::UpdateProbeData(ProbeData& ref_probeData, const plR
     plConversionUtils::ToString(ref_probeData.m_desc.m_uniqueID, sComponentGuid);
 
     // this is where the editor will put the file for this probe
-    sCubeMapFile.Format(":project/AssetCache/Generated/{0}.plTexture", sComponentGuid);
+    sCubeMapFile.SetFormat(":project/AssetCache/Generated/{0}.plTexture", sComponentGuid);
 
     ref_probeData.m_hCubeMap = plResourceManager::LoadResource<plTextureCubeResource>(sCubeMapFile);
   }
@@ -161,7 +161,7 @@ bool plReflectionPool::Data::UpdateSkyLightData(ProbeData& ref_probeData, const 
         plConversionUtils::ToString(ref_probeData.m_desc.m_uniqueID, sComponentGuid);
 
         // this is where the editor will put the file for this probe
-        sCubeMapFile.Format(":project/AssetCache/Generated/{0}.plTexture", sComponentGuid);
+        sCubeMapFile.SetFormat(":project/AssetCache/Generated/{0}.plTexture", sComponentGuid);
 
         ref_probeData.m_hCubeMap = plResourceManager::LoadResource<plTextureCubeResource>(sCubeMapFile);
       }
@@ -212,7 +212,7 @@ void plReflectionPool::Data::OnReflectionProbeMappingEvent(const plUInt32 uiWorl
 
 void plReflectionPool::Data::PreExtraction()
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   const plUInt32 uiWorldCount = s_pData->m_WorldReflectionData.GetCount();
 
   for (plUInt32 uiWorld = 0; uiWorld < uiWorldCount; uiWorld++)
@@ -264,12 +264,12 @@ void plReflectionPool::Data::PreExtraction()
 
       if (probeData.m_Flags.IsSet(plProbeFlags::HasCustomCubeMap))
       {
-        PLASMA_ASSERT_DEBUG(probeData.m_hCubeMap.IsValid(), "");
-        PLASMA_VERIFY(m_ReflectionProbeUpdater.StartFilterUpdate(nextUpdate, probeData.m_desc, probeData.m_hCubeMap, target).Succeeded(), "GetFreeUpdateSlots returned incorrect result");
+        PL_ASSERT_DEBUG(probeData.m_hCubeMap.IsValid(), "");
+        PL_VERIFY(m_ReflectionProbeUpdater.StartFilterUpdate(nextUpdate, probeData.m_desc, probeData.m_hCubeMap, target).Succeeded(), "GetFreeUpdateSlots returned incorrect result");
       }
       else
       {
-        PLASMA_VERIFY(m_ReflectionProbeUpdater.StartDynamicUpdate(nextUpdate, probeData.m_desc, probeData.m_GlobalTransform, target).Succeeded(), "GetFreeUpdateSlots returned incorrect result");
+        PL_VERIFY(m_ReflectionProbeUpdater.StartDynamicUpdate(nextUpdate, probeData.m_desc, probeData.m_GlobalTransform, target).Succeeded(), "GetFreeUpdateSlots returned incorrect result");
       }
       m_ActiveDynamicUpdate.Insert(nextUpdate);
     }
@@ -279,7 +279,7 @@ void plReflectionPool::Data::PreExtraction()
 
 void plReflectionPool::Data::PostExtraction()
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   const plUInt32 uiWorldCount = s_pData->m_WorldReflectionData.GetCount();
   for (plUInt32 uiWorld = 0; uiWorld < uiWorldCount; uiWorld++)
   {
@@ -318,7 +318,7 @@ void plReflectionPool::Data::CreateReflectionViewsAndResources()
     }
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   if (!m_hDebugSphere.IsValid())
   {
     plGeometry geom;
@@ -387,7 +387,7 @@ void plReflectionPool::Data::CreateReflectionViewsAndResources()
         desc.m_Parameters[uiMipLevel].m_Value = iMipLevel;
         desc.m_Parameters[uiReflectionProbeIndex].m_Value = iReflectionProbeIndex;
         plStringBuilder sMaterialName;
-        sMaterialName.Format("ReflectionProbeVisualization - MipLevel {}, Index {}", iMipLevel, iReflectionProbeIndex);
+        sMaterialName.SetFormat("ReflectionProbeVisualization - MipLevel {}, Index {}", iMipLevel, iReflectionProbeIndex);
 
         plMaterialResourceDescriptor desc2 = desc;
         m_hDebugMaterial[iReflectionProbeIndex * uiMipLevelCount + iMipLevel] = plResourceManager::GetOrCreateResource<plMaterialResource>(sMaterialName, std::move(desc2));
@@ -416,4 +416,4 @@ void plReflectionPool::Data::CreateSkyIrradianceTexture()
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionPoolData);
+

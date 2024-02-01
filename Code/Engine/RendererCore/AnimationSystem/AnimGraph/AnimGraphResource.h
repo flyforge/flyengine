@@ -15,9 +15,9 @@ class plAnimGraphNode;
 
 using plAnimGraphResourceHandle = plTypedResourceHandle<class plAnimGraphResource>;
 
-struct PLASMA_RENDERERCORE_DLL plAnimationClipMapping : public plReflectedClass
+struct PL_RENDERERCORE_DLL plAnimationClipMapping : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimationClipMapping, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimationClipMapping, plReflectedClass);
 
   plHashedString m_sClipName;
   plAnimationClipResourceHandle m_hClip;
@@ -29,10 +29,10 @@ struct PLASMA_RENDERERCORE_DLL plAnimationClipMapping : public plReflectedClass
   void SetClip(const char* szName);
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimGraphResource : public plResource
+class PL_RENDERERCORE_DLL plAnimGraphResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimGraphResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plAnimGraphResource);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimGraphResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plAnimGraphResource);
 
 public:
   plAnimGraphResource();

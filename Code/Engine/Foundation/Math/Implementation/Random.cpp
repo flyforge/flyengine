@@ -5,7 +5,7 @@
 
 plRandom::plRandom()
 {
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_uiState); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_uiState); ++i)
     m_uiState[i] = 0;
 
   m_uiIndex = 0xFFFFFFFF;
@@ -19,7 +19,7 @@ void plRandom::Initialize(plUInt64 uiSeed)
 
   m_uiIndex = 0;
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_uiState); i += 2)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_uiState); i += 2)
   {
     m_uiState[i + 0] = uiSeed & 0xFFFFFFFF;
     m_uiState[i + 1] = (uiSeed >> 32) & 0xFFFFFFFF;
@@ -56,7 +56,7 @@ void plRandom::Load(plStreamReader& inout_stream)
 
 plUInt32 plRandom::UInt()
 {
-  PLASMA_ASSERT_DEBUG(m_uiIndex < 16, "Random number generator has not been initialized");
+  PL_ASSERT_DEBUG(m_uiIndex < 16, "Random number generator has not been initialized");
 
   // Implementation for the random number generator was copied from here:
   // http://stackoverflow.com/questions/1046714/what-is-a-good-random-number-generator-for-a-game
@@ -80,7 +80,7 @@ plUInt32 plRandom::UInt()
 
 plUInt32 plRandom::UIntInRange(plUInt32 uiRange)
 {
-  PLASMA_ASSERT_DEBUG(uiRange > 0, "Invalid range for random number");
+  PL_ASSERT_DEBUG(uiRange > 0, "Invalid range for random number");
 
   const plUInt32 uiSteps = 0xFFFFFFFF / uiRange;
   const plUInt32 uiMaxValue = uiRange * uiSteps;
@@ -102,7 +102,7 @@ plInt32 plRandom::IntInRange(plInt32 iMinValue, plUInt32 uiRange)
 
 plInt32 plRandom::IntMinMax(plInt32 iMinValue, plInt32 iMaxValue)
 {
-  PLASMA_ASSERT_DEBUG(iMinValue <= iMaxValue, "Invalid min/max values");
+  PL_ASSERT_DEBUG(iMinValue <= iMaxValue, "Invalid min/max values");
 
   return IntInRange(iMinValue, iMaxValue - iMinValue + 1);
 }
@@ -114,7 +114,7 @@ double plRandom::DoubleInRange(double fMinValue, double fRange)
 
 double plRandom::DoubleMinMax(double fMinValue, double fMaxValue)
 {
-  PLASMA_ASSERT_DEBUG(fMinValue <= fMaxValue, "Invalid min/max values");
+  PL_ASSERT_DEBUG(fMinValue <= fMaxValue, "Invalid min/max values");
 
   return fMinValue + DoubleZeroToOneExclusive() * (fMaxValue - fMinValue); /// \todo Probably not correct
 }
@@ -153,7 +153,7 @@ static double Gauss(double x, double fSigma)
 
 void plRandomGauss::Initialize(plUInt64 uiRandomSeed, plUInt32 uiMaxValue, float fVariance)
 {
-  PLASMA_ASSERT_DEV(uiMaxValue >= 2, "Invalid value");
+  PL_ASSERT_DEV(uiMaxValue >= 2, "Invalid value");
 
   m_Generator.Initialize(uiRandomSeed);
 
@@ -246,5 +246,3 @@ void plRandomGauss::Load(plStreamReader& inout_stream)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Random);

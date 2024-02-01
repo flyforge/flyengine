@@ -32,9 +32,14 @@ const plString& plTypelessResourceHandle::GetResourceID() const
   return m_pResource->GetResourceID();
 }
 
+const plRTTI* plTypelessResourceHandle::GetResourceType() const
+{
+  return IsValid() ? m_pResource->GetDynamicRTTI() : nullptr;
+}
+
 void plTypelessResourceHandle::operator=(const plTypelessResourceHandle& rhs)
 {
-  PLASMA_ASSERT_DEBUG(this != &rhs, "Cannot assign a resource handle to itself! This would invalidate the handle.");
+  PL_ASSERT_DEBUG(this != &rhs, "Cannot assign a resource handle to itself! This would invalidate the handle.");
 
   Invalidate();
 
@@ -103,5 +108,3 @@ void plResourceHandleStreamOperations::ReadHandle(plStreamReader& Stream, plType
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_ResourceHandle);

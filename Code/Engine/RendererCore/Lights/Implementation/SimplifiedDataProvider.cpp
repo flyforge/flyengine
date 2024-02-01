@@ -8,17 +8,15 @@
 #include <RendererFoundation/Profiling/Profiling.h>
 
 #include <RendererCore/../../../Data/Base/Shaders/Common/LightDataSimplified.h>
-PLASMA_DEFINE_AS_POD_TYPE(plSimplifiedDataConstants);
+PL_DEFINE_AS_POD_TYPE(plSimplifiedDataConstants);
 
 plSimplifiedDataGPU::plSimplifiedDataGPU()
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   m_hConstantBuffer = plRenderContext::CreateConstantBufferStorage<plSimplifiedDataConstants>();
 }
 
 plSimplifiedDataGPU::~plSimplifiedDataGPU()
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plRenderContext::DeleteConstantBufferStorage(m_hConstantBuffer);
 }
 
@@ -38,19 +36,19 @@ void plSimplifiedDataGPU::BindResources(plRenderContext* pRenderContext)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimplifiedDataProvider, 1, plRTTIDefaultAllocator<plSimplifiedDataProvider>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimplifiedDataProvider, 1, plRTTIDefaultAllocator<plSimplifiedDataProvider>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plSimplifiedDataProvider::plSimplifiedDataProvider() {}
+plSimplifiedDataProvider::plSimplifiedDataProvider() = default;
 
-plSimplifiedDataProvider::~plSimplifiedDataProvider() {}
+plSimplifiedDataProvider::~plSimplifiedDataProvider() = default;
 
 void* plSimplifiedDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {
   plGALCommandEncoder* pGALCommandEncoder = renderViewContext.m_pRenderContext->GetRenderCommandEncoder();
 
-  PLASMA_PROFILE_AND_MARKER(pGALCommandEncoder, "Update Clustered Data");
+  PL_PROFILE_AND_MARKER(pGALCommandEncoder, "Update Clustered Data");
 
   if (auto pData = extractedData.GetFrameData<plSimplifiedDataCPU>())
   {
@@ -71,4 +69,4 @@ void* plSimplifiedDataProvider::UpdateData(const plRenderViewContext& renderView
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SimplifiedDataProvider);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SimplifiedDataProvider);

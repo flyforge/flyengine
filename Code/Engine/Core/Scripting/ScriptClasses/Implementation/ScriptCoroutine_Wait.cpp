@@ -3,20 +3,20 @@
 #include <Core/Scripting/ScriptClasses/ScriptCoroutine_Wait.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_Wait, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_Wait>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plScriptCoroutine_Wait, plScriptCoroutine, 1, plRTTIDefaultAllocator<plScriptCoroutine_Wait>)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Start, In, "Timeout"),
+    PL_SCRIPT_FUNCTION_PROPERTY(Start, In, "Timeout"),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTitleAttribute("Coroutine::Wait {Timeout}"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plScriptCoroutine_Wait::Start(plTime timeout)
@@ -29,8 +29,13 @@ plScriptCoroutine::Result plScriptCoroutine_Wait::Update(plTime deltaTimeSinceLa
   m_TimeRemaing -= deltaTimeSinceLastUpdate;
   if (m_TimeRemaing.IsPositive())
   {
-    return Result::Running(m_TimeRemaing);
+    // Don't wait for the full remaining time to prevent oversleeping due to scheduling precision.
+    return Result::Running(m_TimeRemaing * 0.8);
   }
 
   return Result::Completed();
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_ScriptClasses_Implementation_ScriptCoroutine_Wait);
+

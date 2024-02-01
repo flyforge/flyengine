@@ -4,64 +4,38 @@
 #include <Foundation/Containers/Set.h>
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Reflection/Reflection.h>
-#include <Foundation/Strings/String.h>
-#include <Foundation/Types/Bitflags.h>
-#include <RendererCore/Declarations.h>
 #include <RendererCore/Shader/Implementation/Helper.h>
 #include <RendererCore/Shader/ShaderPermutationBinary.h>
+#include <RendererCore/ShaderCompiler/Declarations.h>
 #include <RendererCore/ShaderCompiler/PermutationGenerator.h>
+#include <RendererCore/ShaderCompiler/ShaderParser.h>
 #include <RendererFoundation/Descriptors/Descriptors.h>
 
-// \brief Flags that affect the compilation process of a shader
-struct plShaderCompilerFlags
+/// \brief Shader compiler interface.
+/// Custom shader compiles need to derive from this class and implement the pure virtual interface functions. Instances are created via reflection so each implementation must be properly reflected.
+class PL_RENDERERCORE_DLL plShaderProgramCompiler : public plReflectedClass
 {
-  using StorageType = plUInt8;
-  enum Enum
-  {
-    Debug = PLASMA_BIT(0),
-    Default = 0,
-  };
-
-  struct Bits
-  {
-    StorageType Debug : 1;
-  };
-};
-PLASMA_DECLARE_FLAGS_OPERATORS(plShaderCompilerFlags);
-
-class PLASMA_RENDERERCORE_DLL plShaderProgramCompiler : public plReflectedClass
-{
-  PLASMA_ADD_DYNAMIC_REFLECTION(plShaderProgramCompiler, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plShaderProgramCompiler, plReflectedClass);
 
 public:
-  struct plShaderProgramData
-  {
-    plShaderProgramData()
-    {
-      m_sPlatform = {};
-      m_sSourceFile = {};
+  /// \brief Returns the platforms that this shader compiler supports.
+  /// \param out_platforms Filled with the platforms this compiler supports.
+  virtual void GetSupportedPlatforms(plHybridArray<plString, 4>& out_platforms) = 0;
 
-      for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
-      {
-        m_bWriteToDisk[stage] = true;
-        m_sShaderSource[stage] = {};
-      }
-    }
+  /// Allows the shader compiler to modify the shader source before hashing and compiling. This allows it to implement custom features by injecting code before the compile process. Mostly used to define resource bindings that do not cause conflicts across shader stages.
+  /// \param inout_data The state of the shader compiler. Only m_sShaderSource should be modified by the implementation.
+  /// \param pLog Logging interface to be used when outputting any errors.
+  /// \return Returns whether the shader could be modified. On failure, the shader won't be compiled.
+  virtual plResult ModifyShaderSource(plShaderProgramData& inout_data, plLogInterface* pLog) = 0;
 
-    plBitflags<plShaderCompilerFlags> m_Flags;
-    plStringView m_sPlatform;
-    plStringView m_sSourceFile;
-    plStringView m_sShaderSource[plGALShaderStage::ENUM_COUNT];
-    plShaderStageBinary m_StageBinary[plGALShaderStage::ENUM_COUNT];
-    bool m_bWriteToDisk[plGALShaderStage::ENUM_COUNT];
-  };
-
-  virtual void GetSupportedPlatforms(plHybridArray<plString, 4>& ref_platforms) = 0;
-
+  /// Compiles the shader comprised of multiple stages defined in inout_data.
+  /// \param inout_data The state of the shader compiler. m_Resources and m_ByteCode should be written to on successful return code.
+  /// \param pLog Logging interface to be used when outputting any errors.
+  /// \return Returns whether the shader was compiled successfully. On failure, errors should be written to pLog.
   virtual plResult Compile(plShaderProgramData& inout_data, plLogInterface* pLog) = 0;
 };
 
-class PLASMA_RENDERERCORE_DLL plShaderCompiler
+class PL_RENDERERCORE_DLL plShaderCompiler
 {
 public:
   plResult CompileShaderPermutationForPlatforms(plStringView sFile, const plArrayPtr<const plPermutationVar>& permutationVars, plLogInterface* pLog, plStringView sPlatform = "ALL");
@@ -69,7 +43,7 @@ public:
 private:
   plResult RunShaderCompiler(plStringView sFile, plStringView sPlatform, plShaderProgramCompiler* pCompiler, plLogInterface* pLog);
 
-  void WriteFailedShaderSource(plShaderProgramCompiler::plShaderProgramData& spd, plLogInterface* pLog);
+  void WriteFailedShaderSource(plShaderProgramData& spd, plLogInterface* pLog);
 
   bool PassThroughUnknownCommandCB(plStringView sCmd) { return sCmd == "version"; }
 

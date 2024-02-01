@@ -23,6 +23,8 @@ void plControllerInput::SetDevice(plInputDeviceController* pDevice)
   g_pInputDeviceController = pDevice;
 }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
 #  include <Core/System/Implementation/glfw/ControllerInput_glfw.inl>
 #endif
+
+

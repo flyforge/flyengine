@@ -8,7 +8,7 @@ struct plMeshBufferResourceDescriptor;
 
 struct plMeshNormalPrecision
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -26,11 +26,11 @@ struct plMeshNormalPrecision
   static plGALResourceFormat::Enum ToResourceFormatTangent(Enum value);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshNormalPrecision);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plMeshNormalPrecision);
 
 struct plMeshTexCoordPrecision
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -44,7 +44,7 @@ struct plMeshTexCoordPrecision
   static plGALResourceFormat::Enum ToResourceFormat(Enum value);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshTexCoordPrecision);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plMeshTexCoordPrecision);
 
 struct plMeshBoneWeigthPrecision
 {
@@ -64,10 +64,9 @@ struct plMeshBoneWeigthPrecision
   static plGALResourceFormat::Enum ToResourceFormat(Enum value);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMeshBoneWeigthPrecision);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plMeshBoneWeigthPrecision);
 
-
-struct PLASMA_RENDERERCORE_DLL plMeshBufferUtils
+struct PL_RENDERERCORE_DLL plMeshBufferUtils
 {
   static plResult EncodeNormal(const plVec3& vNormal, plArrayPtr<plUInt8> dest, plMeshNormalPrecision::Enum normalPrecision);
   static plResult EncodeTangent(const plVec3& vTangent, float fTangentSign, plArrayPtr<plUInt8> dest, plMeshNormalPrecision::Enum tangentPrecision);

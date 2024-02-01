@@ -8,7 +8,7 @@ class plDocumentObjectManager;
 class plDocumentObject;
 
 /// \brief Implements visitor pattern for content of the document object manager.
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentObjectVisitor
+class PL_TOOLSFOUNDATION_DLL plDocumentObjectVisitor
 {
 public:
   /// \brief Constructor
@@ -20,9 +20,9 @@ public:
   /// \param szRootProperty
   ///   Same as szChildrenProperty, but for the root object of the document.
   plDocumentObjectVisitor(
-    const plDocumentObjectManager* pManager, const char* szChildrenProperty = "Children", const char* szRootProperty = "Children");
+    const plDocumentObjectManager* pManager, plStringView sChildrenProperty = "Children", plStringView sRootProperty = "Children");
 
-  typedef plDelegate<bool(const plDocumentObject*)> VisitorFunction;
+  using VisitorFunction = plDelegate<bool(const plDocumentObject*)>;
   /// \brief Executes depth first traversal starting at the given node.
   ///
   /// \param pObject
@@ -34,7 +34,7 @@ public:
   void Visit(const plDocumentObject* pObject, bool bVisitStart, VisitorFunction function);
 
 private:
-  void TraverseChildren(const plDocumentObject* pObject, const char* szProperty, VisitorFunction& function);
+  void TraverseChildren(const plDocumentObject* pObject, plStringView sProperty, VisitorFunction& function);
 
   const plDocumentObjectManager* m_pManager = nullptr;
   plString m_sChildrenProperty;

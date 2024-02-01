@@ -49,7 +49,7 @@ void plTaskSystem::ParallelForInternal(plArrayPtr<ElemType> taskItems, plParalle
     ArrayPtrTask<ElemType> arrayPtrTask(taskItems, std::move(taskCallback), taskItems.GetCount());
     arrayPtrTask.ConfigureTask(taskName ? taskName : "Generic ArrayPtr Task", params.m_NestingMode);
 
-    PLASMA_PROFILE_SCOPE(arrayPtrTask.m_sTaskName);
+    PL_PROFILE_SCOPE(arrayPtrTask.m_sTaskName);
     arrayPtrTask.Execute();
   }
   else
@@ -58,9 +58,9 @@ void plTaskSystem::ParallelForInternal(plArrayPtr<ElemType> taskItems, plParalle
     plUInt64 uiItemsPerInvocation;
     params.DetermineThreading(taskItems.GetCount(), uiMultiplicity, uiItemsPerInvocation);
 
-    plAllocatorBase* pAllocator = (params.m_pTaskAllocator != nullptr) ? params.m_pTaskAllocator : plFoundation::GetDefaultAllocator();
+    plAllocator* pAllocator = (params.m_pTaskAllocator != nullptr) ? params.m_pTaskAllocator : plFoundation::GetDefaultAllocator();
 
-    plSharedPtr<ArrayPtrTask<ElemType>> pArrayPtrTask = PLASMA_NEW(pAllocator, ArrayPtrTask<ElemType>, taskItems, std::move(taskCallback), static_cast<plUInt32>(uiItemsPerInvocation));
+    plSharedPtr<ArrayPtrTask<ElemType>> pArrayPtrTask = PL_NEW(pAllocator, ArrayPtrTask<ElemType>, taskItems, std::move(taskCallback), static_cast<plUInt32>(uiItemsPerInvocation));
     pArrayPtrTask->ConfigureTask(taskName ? taskName : "Generic ArrayPtr Task", params.m_NestingMode);
 
     pArrayPtrTask->SetMultiplicity(uiMultiplicity);

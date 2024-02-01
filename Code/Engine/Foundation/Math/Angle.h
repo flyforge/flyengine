@@ -6,16 +6,18 @@
 ///
 /// Uses radian internally. Will <b>not</b> automatically keep its range between 0 degree - 360 degree (0 - 2PI) but you can call NormalizeRange to do
 /// so.
-class PLASMA_FOUNDATION_DLL plAngle
+class PL_FOUNDATION_DLL plAngle
 {
 public:
-  /// \brief Returns the constant to multiply with an angle in degree to convert it to radians.
-  template <typename Type>
-  constexpr static PLASMA_ALWAYS_INLINE Type DegToRadMultiplier(); // [tested]
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Returns the constant to multiply with an angle in degree to convert it to radians.
   template <typename Type>
-  constexpr static PLASMA_ALWAYS_INLINE Type RadToDegMultiplier(); // [tested]
+  constexpr static PL_ALWAYS_INLINE Type DegToRadMultiplier(); // [tested]
+
+  /// \brief Returns the constant to multiply with an angle in degree to convert it to radians.
+  template <typename Type>
+  constexpr static PL_ALWAYS_INLINE Type RadToDegMultiplier(); // [tested]
 
   /// \brief Converts an angle in degree to radians.
   template <typename Type>
@@ -25,15 +27,14 @@ public:
   template <typename Type>
   constexpr static Type RadToDeg(Type f); // [tested]
 
+  /// \brief Returns a zero initialized angle. Same as a default constructed object.
+  [[nodiscard]] constexpr static plAngle MakeZero() { return plAngle(); }
+
   /// \brief Creates an instance of plAngle that was initialized from degree. (Performs a conversion)
-  constexpr static plAngle Degree(float fDegree); // [tested]
+  [[nodiscard]] constexpr static plAngle MakeFromDegree(float fDegree); // [tested]
 
   /// \brief Creates an instance of plAngle that was initialized from radian. (No need for any conversion)
-  constexpr static plAngle Radian(float fRadian); // [tested]
-
-
-
-  PLASMA_DECLARE_POD_TYPE();
+  [[nodiscard]] constexpr static plAngle MakeFromRadian(float fRadian); // [tested]
 
   /// \brief Standard constructor, initializing with 0.
   constexpr plAngle()
@@ -48,7 +49,7 @@ public:
   constexpr float GetRadian() const; // [tested]
 
   /// \brief Sets the radian value. (No need for any conversion)
-  PLASMA_ALWAYS_INLINE void SetRadian(float fRad) { m_fRadian = fRad; };
+  PL_ALWAYS_INLINE void SetRadian(float fRad) { m_fRadian = fRad; };
 
   /// \brief Brings the angle into the range of 0 degree - 360 degree
   /// \see GetNormalizedRange()

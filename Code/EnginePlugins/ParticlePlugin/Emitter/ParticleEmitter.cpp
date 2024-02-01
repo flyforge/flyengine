@@ -3,11 +3,11 @@
 #include <Foundation/DataProcessing/Stream/ProcessingStreamGroup.h>
 #include <ParticlePlugin/Emitter/ParticleEmitter.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitterFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEmitter, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleEmitter* plParticleEmitterFactory::CreateEmitter(plParticleSystemInstance* pOwner) const
 {
@@ -31,4 +31,4 @@ void plParticleEmitter::Process(plUInt64 uiNumElements) {}
 void plParticleEmitter::ProcessEventQueue(plParticleEventQueue queue) {}
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Emitter_ParticleEmitter);

@@ -19,9 +19,9 @@ namespace JPH
 /// It is often also called a (rigid) body.
 /// An actor is made out of one or multiple shapes that define its geometry.
 /// Different types of actors differ in how they participate in the simulation.
-class PLASMA_JOLTPLUGIN_DLL plJoltActorComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltActorComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plJoltActorComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

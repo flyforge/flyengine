@@ -182,62 +182,62 @@ void plJSONWriter::AddVariableVariant(plStringView sName, const plVariant& value
 
 void plJSONWriter::WriteColor(const plColor& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plColor is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plColor is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteColorGamma(const plColorGammaUB& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plColorGammaUB is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plColorGammaUB is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec2(const plVec2& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec2 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec2 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec3(const plVec3& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec3 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec3 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec4(const plVec4& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec4 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec4 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec2I32(const plVec2I32& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec2I32 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec2I32 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec3I32(const plVec3I32& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec3I32 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec3I32 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVec4I32(const plVec4I32& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plVec4I32 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plVec4I32 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteQuat(const plQuat& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plQuat is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plQuat is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteMat3(const plMat3& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plMat3 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plMat3 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteMat4(const plMat4& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plMat4 is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plMat4 is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteDataBuffer(const plDataBuffer& value)
 {
-  PLASMA_REPORT_FAILURE("The complex data type plDateBuffer is not supported by this JSON writer.");
+  PL_REPORT_FAILURE("The complex data type plDateBuffer is not supported by this JSON writer.");
 }
 
 void plJSONWriter::WriteVariant(const plVariant& value)
@@ -245,7 +245,7 @@ void plJSONWriter::WriteVariant(const plVariant& value)
   switch (value.GetType())
   {
     case plVariant::Type::Invalid:
-      // PLASMA_REPORT_FAILURE("Variant of Type 'Invalid' cannot be written as JSON.");
+      // PL_REPORT_FAILURE("Variant of Type 'Invalid' cannot be written as JSON.");
       WriteNULL();
       return;
     case plVariant::Type::Bool:
@@ -362,11 +362,12 @@ void plJSONWriter::WriteVariant(const plVariant& value)
       EndObject();
     }
       return;
+
     default:
       break;
   }
 
-  PLASMA_REPORT_FAILURE("The Variant Type {0} is not supported by plJSONWriter::WriteVariant.", value.GetType());
+  PL_REPORT_FAILURE("The Variant Type {0} is not supported by plJSONWriter::WriteVariant.", value.GetType());
 }
 
 
@@ -380,4 +381,4 @@ void plJSONWriter::SetWriteErrorState()
   m_bHadWriteError = true;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_JSONWriter);
+

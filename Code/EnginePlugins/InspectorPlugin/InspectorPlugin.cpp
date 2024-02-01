@@ -51,7 +51,7 @@ void RemoveResourceManagerEventHandler();
 void SetAppStats();
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(InspectorPlugin, InspectorPluginMain)
+PL_BEGIN_SUBSYSTEM_DECLARATION(InspectorPlugin, InspectorPluginMain)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -99,7 +99,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(InspectorPlugin, InspectorPluginMain)
     plTelemetry::AcceptMessagesForSystem(' APP', false);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Main);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Main);

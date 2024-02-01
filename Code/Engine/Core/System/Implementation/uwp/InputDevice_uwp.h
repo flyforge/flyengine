@@ -5,9 +5,9 @@
 #include <windows.applicationmodel.core.h>
 #include <wrl/client.h>
 
-class PLASMA_CORE_DLL plStandardInputDevice : public plInputDeviceMouseKeyboard
+class PL_CORE_DLL plStandardInputDevice : public plInputDeviceMouseKeyboard
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStandardInputDevice, plInputDeviceMouseKeyboard);
+  PL_ADD_DYNAMIC_REFLECTION(plStandardInputDevice, plInputDeviceMouseKeyboard);
 
 public:
   plStandardInputDevice(ABI::Windows::UI::Core::ICoreWindow* coreWindow);

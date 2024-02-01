@@ -4,9 +4,9 @@
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 
-class PLASMA_RENDERERCORE_DLL plSampleAnimClipAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSampleAnimClipAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSampleAnimClipAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSampleAnimClipAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

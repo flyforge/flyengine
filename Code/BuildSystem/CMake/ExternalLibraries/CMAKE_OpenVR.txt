@@ -1,38 +1,38 @@
 # TODO: This entire file needs to be migrated to modern CMake
-# e.g. turn it into an Find_PlOpenVR file with IMPORTED targets etc.
+# e.g. turn it into an Find_EzOpenVR file with IMPORTED targets etc.
 
 macro(AddOpenVR)
 
 	# Ignore call if OpenVR is disabled!
-	if (PLASMA_BUILD_OPENVR)
-		set (PLASMA_OPENVR_DIR "" CACHE PATH "Directory of the OpenVR SDK")
+	if (PL_BUILD_OPENVR)
+		set (PL_OPENVR_DIR "" CACHE PATH "Directory of the OpenVR SDK")
 		
-		include_directories ("${PLASMA_OPENVR_DIR}/headers")
+		include_directories ("${PL_OPENVR_DIR}/headers")
 
-		set (PLASMA_OPENVR_PLATFORM "")
+		set (PL_OPENVR_PLATFORM "")
 
 		if (${BUILDSYSTEM_PLATFORM_WINDOWS})
-			set (PLASMA_OPENVR_PLATFORM "win")
+			set (PL_OPENVR_PLATFORM "win")
 		elseif (${BUILDSYSTEM_PLATFORM_OSX})
-			set (PLASMA_OPENVR_PLATFORM "osx")
+			set (PL_OPENVR_PLATFORM "osx")
 		elseif (${BUILDSYSTEM_PLATFORM_LINUX})
-			set (PLASMA_OPENVR_PLATFORM "linux")
+			set (PL_OPENVR_PLATFORM "linux")
 		endif()
 
 		if (${BUILDSYSTEM_PLATFORM_64BIT})
-			set (PLASMA_OPENVR_PLATFORM "${PLASMA_OPENVR_PLATFORM}64")
+			set (PL_OPENVR_PLATFORM "${PL_OPENVR_PLATFORM}64")
 		else()
-			set (PLASMA_OPENVR_PLATFORM "${PLASMA_OPENVR_PLATFORM}32")
+			set (PL_OPENVR_PLATFORM "${PL_OPENVR_PLATFORM}32")
 		endif()
 		  
-		link_directories ("${PLASMA_OPENVR_DIR}/lib/${PLASMA_OPENVR_PLATFORM}")
+		link_directories ("${PL_OPENVR_DIR}/lib/${PL_OPENVR_PLATFORM}")
 
 		SET (LINK_LIBRARIES ${LINK_LIBRARIES} openvr_api)
 
 		# Make part of the AppX bundle for uwp build
 		if (BUILDSYSTEM_PLATFORM_WINDOWS_UWP)
 			SET (OPENVR_DLLS
-				${PLASMA_OPENVR_DIR}/bin/${PLASMA_OPENVR_PLATFORM}/openvr_api.dll
+				${PL_OPENVR_DIR}/bin/${PL_OPENVR_PLATFORM}/openvr_api.dll
 			)
 
 			set_property(SOURCE ${OPENVR_DLLS} PROPERTY VS_DEPLOYMENT_CONTENT 1)
@@ -47,10 +47,10 @@ endmacro()
 
 # TODO: Currently windows only.
 MACRO(CopyOpenVRDlls)
-	if (PLASMA_BUILD_OPENVR)
+	if (PL_BUILD_OPENVR)
 		add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_if_different
-			"${PLASMA_OPENVR_DIR}/bin/${PLASMA_OPENVR_PLATFORM}/openvr_api.dll"
+			"${PL_OPENVR_DIR}/bin/${PL_OPENVR_PLATFORM}/openvr_api.dll"
 			$<TARGET_FILE_DIR:${PROJECT_NAME}>)
 	endif()
 ENDMACRO()

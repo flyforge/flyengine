@@ -4,8 +4,8 @@
 #include <EditorPluginVisualScript/VisualScriptClassAsset/VisualScriptClassAssetManager.h>
 #include <EditorPluginVisualScript/VisualScriptGraph/VisualScriptWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetManager, 1, plRTTIDefaultAllocator<plVisualScriptClassAssetManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetManager, 1, plRTTIDefaultAllocator<plVisualScriptClassAssetManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plVisualScriptClassAssetManager::plVisualScriptClassAssetManager()
 {
@@ -49,9 +49,9 @@ void plVisualScriptClassAssetManager::OnDocumentManagerEvent(const plDocumentMan
 }
 
 void plVisualScriptClassAssetManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plVisualScriptClassAssetDocument(szPath);
+  out_pDocument = new plVisualScriptClassAssetDocument(sPath);
 }
 
 void plVisualScriptClassAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

@@ -9,15 +9,26 @@ struct plMsgTransformChanged;
 struct plMsgUpdateLocalBounds;
 struct plMsgExtractOccluderData;
 
-class PLASMA_RENDERERCORE_DLL plOccluderComponentManager final : public plComponentManager<class plOccluderComponent, plBlockStorageType::FreeList>
+class PL_RENDERERCORE_DLL plOccluderComponentManager final : public plComponentManager<class plOccluderComponent, plBlockStorageType::FreeList>
 {
 public:
   plOccluderComponentManager(plWorld* pWorld);
 };
 
-class PLASMA_RENDERERCORE_DLL plOccluderComponent : public plComponent
+/// \brief Adds invisible geometry to a scene that is used for occlusion culling.
+///
+/// The component adds a box occluder to the scene. The renderer uses this geometry
+/// to cull other objects which are behind occluder geometry. Use occluder components to optimize levels.
+/// Make the shapes conservative, meaning that they shouldn't be bigger than the actual shapes, otherwise
+/// they may incorrectly occlude other objects and lead to incorrectly culled objects.
+///
+/// The plGreyBoxComponent can also create occluder geometry in different shapes.
+///
+/// Contrary to plGreyBoxComponent, occluder components can be moved around dynamically and thus can be attached to
+/// doors and other objects that may dynamically change the visible areas of a level.
+class PL_RENDERERCORE_DLL plOccluderComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plOccluderComponent, plComponent, plOccluderComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plOccluderComponent, plComponent, plOccluderComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -31,18 +42,15 @@ protected:
   virtual void OnDeactivated() override;
 
   //////////////////////////////////////////////////////////////////////////
-  // plBoxReflectionProbeComponent
+  // plOccluderComponent
 
 public:
   plOccluderComponent();
   ~plOccluderComponent();
 
-  const plVec3& GetExtents() const
-  {
-    return m_vExtents;
-  }
-
-  void SetExtents(const plVec3& vExtents);
+  /// \brief Sets the size of the box occluder.
+  void SetExtents(const plVec3& vExtents);                // [ property ]
+  const plVec3& GetExtents() const { return m_vExtents; } // [ property ]
 
 private:
   plVec3 m_vExtents = plVec3(5.0f);

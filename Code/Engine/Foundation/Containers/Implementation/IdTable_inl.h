@@ -17,33 +17,33 @@ plIdTableBase<IdType, ValueType>::ConstIterator::ConstIterator(const plIdTableBa
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::IsValid() const
+PL_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::IsValid() const
 {
   return m_CurrentCount < m_IdTable.m_Count;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::operator==(
+PL_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::operator==(
   const typename plIdTableBase<IdType, ValueType>::ConstIterator& it2) const
 {
   return m_IdTable.m_pEntries == it2.m_IdTable.m_pEntries && m_CurrentIndex == it2.m_CurrentIndex;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::operator!=(
+PL_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::ConstIterator::operator!=(
   const typename plIdTableBase<IdType, ValueType>::ConstIterator& it2) const
 {
   return !(*this == it2);
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE IdType plIdTableBase<IdType, ValueType>::ConstIterator::Id() const
+PL_ALWAYS_INLINE IdType plIdTableBase<IdType, ValueType>::ConstIterator::Id() const
 {
   return m_IdTable.m_pEntries[m_CurrentIndex].id;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::ConstIterator::Value() const
+PL_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::ConstIterator::Value() const
 {
   return m_IdTable.m_pEntries[m_CurrentIndex].value;
 }
@@ -62,7 +62,7 @@ void plIdTableBase<IdType, ValueType>::ConstIterator::Next()
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE void plIdTableBase<IdType, ValueType>::ConstIterator::operator++()
+PL_ALWAYS_INLINE void plIdTableBase<IdType, ValueType>::ConstIterator::operator++()
 {
   Next();
 }
@@ -77,7 +77,7 @@ plIdTableBase<IdType, ValueType>::Iterator::Iterator(const plIdTableBase<IdType,
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE ValueType& plIdTableBase<IdType, ValueType>::Iterator::Value()
+PL_ALWAYS_INLINE ValueType& plIdTableBase<IdType, ValueType>::Iterator::Value()
 {
   return this->m_IdTable.m_pEntries[this->m_CurrentIndex].value;
 }
@@ -86,7 +86,7 @@ PLASMA_ALWAYS_INLINE ValueType& plIdTableBase<IdType, ValueType>::Iterator::Valu
 // ***** plIdTableBase *****
 
 template <typename IdType, typename ValueType>
-plIdTableBase<IdType, ValueType>::plIdTableBase(plAllocatorBase* pAllocator)
+plIdTableBase<IdType, ValueType>::plIdTableBase(plAllocator* pAllocator)
 {
   m_pEntries = nullptr;
   m_Count = 0;
@@ -97,7 +97,7 @@ plIdTableBase<IdType, ValueType>::plIdTableBase(plAllocatorBase* pAllocator)
 }
 
 template <typename IdType, typename ValueType>
-plIdTableBase<IdType, ValueType>::plIdTableBase(const plIdTableBase<IdType, ValueType>& other, plAllocatorBase* pAllocator)
+plIdTableBase<IdType, ValueType>::plIdTableBase(const plIdTableBase<IdType, ValueType>& other, plAllocator* pAllocator)
 {
   m_pEntries = nullptr;
   m_Count = 0;
@@ -120,7 +120,7 @@ plIdTableBase<IdType, ValueType>::~plIdTableBase()
     }
   }
 
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
   m_Capacity = 0;
 }
 
@@ -165,13 +165,13 @@ void plIdTableBase<IdType, ValueType>::Reserve(IndexType capacity)
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::IndexType plIdTableBase<IdType, ValueType>::GetCount() const
+PL_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::IndexType plIdTableBase<IdType, ValueType>::GetCount() const
 {
   return m_Count;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::IsEmpty() const
+PL_ALWAYS_INLINE bool plIdTableBase<IdType, ValueType>::IsEmpty() const
 {
   return m_Count == 0;
 }
@@ -264,7 +264,7 @@ bool plIdTableBase<IdType, ValueType>::Remove(const IdType id, ValueType* out_pO
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdType id, ValueType& out_value) const
+PL_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdType id, ValueType& out_value) const
 {
   const IndexType index = id.m_InstanceIndex;
   if (index < m_Capacity && m_pEntries[index].id.IsIndexAndGenerationEqual(id))
@@ -276,7 +276,7 @@ PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdT
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdType id, ValueType*& out_pValue) const
+PL_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdType id, ValueType*& out_pValue) const
 {
   const IndexType index = id.m_InstanceIndex;
   if (index < m_Capacity && m_pEntries[index].id.IsIndexAndGenerationEqual(id))
@@ -288,63 +288,63 @@ PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::TryGetValue(const IdT
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::operator[](const IdType id) const
+PL_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::operator[](const IdType id) const
 {
-  PLASMA_ASSERT_DEBUG(id.m_InstanceIndex < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.",
+  PL_ASSERT_DEBUG(id.m_InstanceIndex < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.",
     m_Capacity, id.m_InstanceIndex);
   const Entry& entry = m_pEntries[id.m_InstanceIndex];
-  PLASMA_ASSERT_DEBUG(entry.id.IsIndexAndGenerationEqual(id), "Stale access. Trying to access a value (generation: {0}) that has been removed and replaced by a new value (generation: {1})", entry.id.m_Generation, id.m_Generation);
+  PL_ASSERT_DEBUG(entry.id.IsIndexAndGenerationEqual(id), "Stale access. Trying to access a value (generation: {0}) that has been removed and replaced by a new value (generation: {1})", entry.id.m_Generation, id.m_Generation);
 
   return entry.value;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE ValueType& plIdTableBase<IdType, ValueType>::operator[](const IdType id)
+PL_FORCE_INLINE ValueType& plIdTableBase<IdType, ValueType>::operator[](const IdType id)
 {
-  PLASMA_ASSERT_DEBUG(id.m_InstanceIndex < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, id.m_InstanceIndex);
+  PL_ASSERT_DEBUG(id.m_InstanceIndex < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, id.m_InstanceIndex);
 
   Entry& entry = m_pEntries[id.m_InstanceIndex];
 
-  PLASMA_ASSERT_DEBUG(entry.id.IsIndexAndGenerationEqual(id), "Stale access. Trying to access a value (generation: {0}) that has been removed and replaced by a new value (generation: {1})", static_cast<int>(entry.id.m_Generation), id.m_Generation);
+  PL_ASSERT_DEBUG(entry.id.IsIndexAndGenerationEqual(id), "Stale access. Trying to access a value (generation: {0}) that has been removed and replaced by a new value (generation: {1})", static_cast<int>(entry.id.m_Generation), id.m_Generation);
 
   return entry.value;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::GetValueUnchecked(const IndexType index) const
+PL_FORCE_INLINE const ValueType& plIdTableBase<IdType, ValueType>::GetValueUnchecked(const IndexType index) const
 {
-  PLASMA_ASSERT_DEBUG(index < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, index);
+  PL_ASSERT_DEBUG(index < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, index);
   return m_pEntries[index].value;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE ValueType& plIdTableBase<IdType, ValueType>::GetValueUnchecked(const IndexType index)
+PL_FORCE_INLINE ValueType& plIdTableBase<IdType, ValueType>::GetValueUnchecked(const IndexType index)
 {
-  PLASMA_ASSERT_DEBUG(index < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, index);
+  PL_ASSERT_DEBUG(index < m_Capacity, "Out of bounds access. Table has {0} elements, trying to access element at index {1}.", m_Capacity, index);
   return m_pEntries[index].value;
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::Contains(const IdType id) const
+PL_FORCE_INLINE bool plIdTableBase<IdType, ValueType>::Contains(const IdType id) const
 {
   const IndexType index = id.m_InstanceIndex;
   return index < m_Capacity && m_pEntries[index].id.IsIndexAndGenerationEqual(id);
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::Iterator plIdTableBase<IdType, ValueType>::GetIterator()
+PL_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::Iterator plIdTableBase<IdType, ValueType>::GetIterator()
 {
   return Iterator(*this);
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::ConstIterator plIdTableBase<IdType, ValueType>::GetIterator() const
+PL_ALWAYS_INLINE typename plIdTableBase<IdType, ValueType>::ConstIterator plIdTableBase<IdType, ValueType>::GetIterator() const
 {
   return ConstIterator(*this);
 }
 
 template <typename IdType, typename ValueType>
-PLASMA_ALWAYS_INLINE plAllocatorBase* plIdTableBase<IdType, ValueType>::GetAllocator() const
+PL_ALWAYS_INLINE plAllocator* plIdTableBase<IdType, ValueType>::GetAllocator() const
 {
   return m_pAllocator;
 }
@@ -372,7 +372,7 @@ bool plIdTableBase<IdType, ValueType>::IsFreelistValid() const
 template <typename IdType, typename ValueType>
 void plIdTableBase<IdType, ValueType>::SetCapacity(IndexType uiCapacity)
 {
-  Entry* pNewEntries = PLASMA_NEW_RAW_BUFFER(m_pAllocator, Entry, (size_t)uiCapacity);
+  Entry* pNewEntries = PL_NEW_RAW_BUFFER(m_pAllocator, Entry, (size_t)uiCapacity);
 
   for (IndexType i = 0; i < m_Capacity; ++i)
   {
@@ -384,7 +384,7 @@ void plIdTableBase<IdType, ValueType>::SetCapacity(IndexType uiCapacity)
     }
   }
 
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pEntries);
   m_pEntries = pNewEntries;
 
   InitializeFreelist(m_Capacity, uiCapacity);
@@ -411,7 +411,7 @@ plIdTable<IdType, V, A>::plIdTable()
 }
 
 template <typename IdType, typename V, typename A>
-plIdTable<IdType, V, A>::plIdTable(plAllocatorBase* pAllocator)
+plIdTable<IdType, V, A>::plIdTable(plAllocator* pAllocator)
   : plIdTableBase<IdType, V>(pAllocator)
 {
 }

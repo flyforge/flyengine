@@ -18,15 +18,15 @@ class QStandardItem;
 /// Fill the searchable menu object with items (use slashes to indicate hierarchy) then use QMenu::addAction to insert it
 /// into another QMenu.
 /// Connect to MenuItemTriggered() to handle the item activation and also call QMenu::close() on the parent menu.
-class PLASMA_GUIFOUNDATION_DLL plQtSearchableMenu : public QWidgetAction
+class PL_GUIFOUNDATION_DLL plQtSearchableMenu : public QWidgetAction
 {
   Q_OBJECT
 public:
   /// \brief The parent should usually be a QMenu into which this QWidgetAction is inserted as an action.
-  plQtSearchableMenu(QObject* parent);
+  plQtSearchableMenu(QObject* pParent);
 
-  /// \brief Use slashes to separate sub-items.
-  void AddItem(const char* szName, const QVariant& variant, QIcon icon = QIcon());
+  /// \brief Use slashes in the szInternalPath to separate sub-items.
+  void AddItem(plStringView sDisplayName, const char* szInternalPath, const QVariant& variant, QIcon icon = QIcon());
 
   /// \brief Returns the currently entered search text.
   QString GetSearchText() const;
@@ -39,7 +39,7 @@ Q_SIGNALS:
   void MenuItemTriggered(const QString& sName, const QVariant& variant);
 
   /// \brief Triggered whenever the search text is modified.
-  void SearchTextChanged(const QString& text);
+  void SearchTextChanged(const QString& sText);
 
 private Q_SLOTS:
   void OnItemActivated(const QModelIndex& index);
@@ -52,7 +52,7 @@ protected:
   virtual bool eventFilter(QObject*, QEvent*) override;
 
 private:
-  QStandardItem* CreateCategoryMenu(const char* szCategory);
+  QStandardItem* CreateCategoryMenu(plStringView sCategory);
   bool SelectFirstLeaf(QModelIndex parent);
 
   QWidget* m_pGroup;

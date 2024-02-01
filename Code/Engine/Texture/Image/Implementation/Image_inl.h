@@ -25,7 +25,7 @@ plBlobPtr<const T> plImageView::GetBlobPtr() const
   {
     ValidateDataTypeAccessor<T>(uiPlaneIndex);
   }
-  return plBlobPtr<const T>(reinterpret_cast<T*>(static_cast<plUInt8*>(m_dataPtr.GetPtr())), m_dataPtr.GetCount() / plImageSizeofHelper<T>::Size);
+  return plBlobPtr<const T>(reinterpret_cast<T*>(static_cast<plUInt8*>(m_DataPtr.GetPtr())), m_DataPtr.GetCount() / plImageSizeofHelper<T>::Size);
 }
 
 inline plConstByteBlobPtr plImageView::GetByteBlobPtr() const
@@ -34,7 +34,7 @@ inline plConstByteBlobPtr plImageView::GetByteBlobPtr() const
   {
     ValidateDataTypeAccessor<plUInt8>(uiPlaneIndex);
   }
-  return plConstByteBlobPtr(static_cast<plUInt8*>(m_dataPtr.GetPtr()), m_dataPtr.GetCount());
+  return plConstByteBlobPtr(static_cast<plUInt8*>(m_DataPtr.GetPtr()), m_DataPtr.GetCount());
 }
 
 template <typename T>
@@ -57,15 +57,15 @@ const T* plImageView::GetPixelPointer(plUInt32 uiMipLevel /*= 0*/, plUInt32 uiFa
   plUInt32 y /*= 0*/, plUInt32 z /*= 0*/, plUInt32 uiPlaneIndex /*= 0*/) const
 {
   ValidateDataTypeAccessor<T>(uiPlaneIndex);
-  PLASMA_ASSERT_DEV(x < GetNumBlocksX(uiMipLevel, uiPlaneIndex), "Invalid x coordinate");
-  PLASMA_ASSERT_DEV(y < GetNumBlocksY(uiMipLevel, uiPlaneIndex), "Invalid y coordinate");
-  PLASMA_ASSERT_DEV(z < GetNumBlocksZ(uiMipLevel, uiPlaneIndex), "Invalid z coordinate");
+  PL_ASSERT_DEV(x < GetNumBlocksX(uiMipLevel, uiPlaneIndex), "Invalid x coordinate");
+  PL_ASSERT_DEV(y < GetNumBlocksY(uiMipLevel, uiPlaneIndex), "Invalid y coordinate");
+  PL_ASSERT_DEV(z < GetNumBlocksZ(uiMipLevel, uiPlaneIndex), "Invalid z coordinate");
 
   plUInt64 offset = GetSubImageOffset(uiMipLevel, uiFace, uiArrayIndex, uiPlaneIndex) +
                     z * GetDepthPitch(uiMipLevel, uiPlaneIndex) +
                     y * GetRowPitch(uiMipLevel, uiPlaneIndex) +
                     x * plImageFormat::GetBitsPerBlock(m_Format, uiPlaneIndex) / 8;
-  return reinterpret_cast<const T*>(&m_dataPtr[offset]);
+  return reinterpret_cast<const T*>(&m_DataPtr[offset]);
 }
 
 template <typename T>
@@ -80,5 +80,6 @@ template <typename T>
 void plImageView::ValidateDataTypeAccessor(plUInt32 uiPlaneIndex) const
 {
   plUInt32 bytesPerBlock = plImageFormat::GetBitsPerBlock(GetImageFormat(), uiPlaneIndex) / 8;
-  PLASMA_ASSERT_DEV(bytesPerBlock % plImageSizeofHelper<T>::Size == 0, "Accessor type is not suitable for interpreting contained data");
+  PL_IGNORE_UNUSED(bytesPerBlock);
+  PL_ASSERT_DEV(bytesPerBlock % plImageSizeofHelper<T>::Size == 0, "Accessor type is not suitable for interpreting contained data");
 }

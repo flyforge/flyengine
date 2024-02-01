@@ -5,9 +5,9 @@ PluginInfo
 {
 	string %DisplayName{"Kraut Tree"}
 	string %Description{"Adds support for procedurally generated trees."}
-	string %EditorPlugins{"plasmaEditorPluginKraut"}
-	string %EditorEnginePlugins{"plasmaEnginePluginKraut"}
-	string %RuntimePlugins{"plasmaKrautPlugin"}
+	string %EditorPlugins{"plEditorPluginKraut"}
+	string %EditorEnginePlugins{"plEnginePluginKraut"}
+	string %RuntimePlugins{"plKrautPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

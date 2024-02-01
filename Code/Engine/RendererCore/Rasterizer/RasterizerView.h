@@ -12,9 +12,9 @@ class plColorLinearUB;
 class plCamera;
 class plSimdBBox;
 
-class PLASMA_RENDERERCORE_DLL plRasterizerView final
+class PL_RENDERERCORE_DLL plRasterizerView final
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plRasterizerView);
+  PL_DISALLOW_COPY_AND_ASSIGN(plRasterizerView);
 
 public:
   plRasterizerView();

@@ -6,7 +6,7 @@
 #include <Foundation/Time/Timestamp.h>
 
 /// \brief Data returned by plResourceTypeLoader implementations.
-struct PLASMA_CORE_DLL plResourceLoadData
+struct PL_CORE_DLL plResourceLoadData
 {
   /// Additional (optional) description that can help during debugging (e.g. the final file path).
   plString m_sResourceDescription;
@@ -25,11 +25,11 @@ struct PLASMA_CORE_DLL plResourceLoadData
 ///
 /// A resource loader handles preparing the data before the resource is updated with the data.
 /// Resource loaders are always executed on a separate thread.
-class PLASMA_CORE_DLL plResourceTypeLoader
+class PL_CORE_DLL plResourceTypeLoader
 {
 public:
-  plResourceTypeLoader() {}
-  virtual ~plResourceTypeLoader() {}
+  plResourceTypeLoader() = default;
+  virtual ~plResourceTypeLoader() = default;
 
   /// \brief Override this function to implement the resource loading.
   ///
@@ -42,7 +42,7 @@ public:
 
   /// \brief This function is called when the resource has been updated with the data from the resource loader and the loader can deallocate
   /// any temporary memory.
-  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData) = 0;
+  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData) = 0;
 
   /// \brief If this function returns true, a resource is unloaded and loaded again to update its content.
   ///
@@ -56,11 +56,11 @@ public:
 /// The loader will interpret the plResource 'resource ID' as a path, read that full file into a memory stream.
 /// The file modification data is stored as well.
 /// Resources that use this loader can update their data as if they were reading the file directly.
-class PLASMA_CORE_DLL plResourceLoaderFromFile : public plResourceTypeLoader
+class PL_CORE_DLL plResourceLoaderFromFile : public plResourceTypeLoader
 {
 public:
   virtual plResourceLoadData OpenDataStream(const plResource* pResource) override;
-  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData) override;
+  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData) override;
   virtual bool IsResourceOutdated(const plResource* pResource) const override;
 };
 
@@ -68,18 +68,18 @@ public:
 /// \brief A resource loader that is mainly used to update a resource on the fly with custom data, e.g. in an editor
 ///
 /// Use like this:
-/// Allocate a plResourceLoaderFromMemory instance on the heap, using PLASMA_DEFAULT_NEW and store the result in a
+/// Allocate a plResourceLoaderFromMemory instance on the heap, using PL_DEFAULT_NEW and store the result in a
 /// plUniquePtr<plResourceTypeLoader>. Then set the description, the modification time (simply use plTimestamp::CurrentTimestamp()), and the
 /// custom data. Use a plMemoryStreamWriter to write your custom data. Make sure to write EXACTLY the same format that the targeted resource
 /// type would read, including all data that would typically be written by outside code, e.g. the default plResourceLoaderFromFile
 /// additionally writes the path to the resource at the start of the stream. If such data is usually present in the stream, you must write
 /// this yourself. Then call plResourceManager::UpdateResourceWithCustomLoader(), specify the target resource and std::move your created
 /// loader in there.
-class PLASMA_CORE_DLL plResourceLoaderFromMemory : public plResourceTypeLoader
+class PL_CORE_DLL plResourceLoaderFromMemory : public plResourceTypeLoader
 {
 public:
   virtual plResourceLoadData OpenDataStream(const plResource* pResource) override;
-  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& LoaderData) override;
+  virtual void CloseDataStream(const plResource* pResource, const plResourceLoadData& loaderData) override;
   virtual bool IsResourceOutdated(const plResource* pResource) const override;
 
   plString m_sResourceDescription;

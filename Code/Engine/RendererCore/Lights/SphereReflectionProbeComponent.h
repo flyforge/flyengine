@@ -2,7 +2,7 @@
 
 #include <RendererCore/Lights/ReflectionProbeComponentBase.h>
 
-class PLASMA_RENDERERCORE_DLL plSphereReflectionProbeComponentManager final : public plComponentManager<class plSphereReflectionProbeComponent, plBlockStorageType::Compact>
+class PL_RENDERERCORE_DLL plSphereReflectionProbeComponentManager final : public plComponentManager<class plSphereReflectionProbeComponent, plBlockStorageType::Compact>
 {
 public:
   plSphereReflectionProbeComponentManager(plWorld* pWorld);
@@ -14,9 +14,9 @@ public:
 /// \brief Sphere reflection probe component.
 ///
 /// The generated reflection cube map is is projected to infinity. So parallax correction takes place.
-class PLASMA_RENDERERCORE_DLL plSphereReflectionProbeComponent : public plReflectionProbeComponentBase
+class PL_RENDERERCORE_DLL plSphereReflectionProbeComponent : public plReflectionProbeComponentBase
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSphereReflectionProbeComponent, plReflectionProbeComponentBase, plSphereReflectionProbeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSphereReflectionProbeComponent, plReflectionProbeComponentBase, plSphereReflectionProbeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -56,6 +56,6 @@ protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   void OnTransformChanged(plMsgTransformChanged& msg);
   float m_fRadius = 5.0f;
-  float m_fFalloff = 0.2f;
+  float m_fFalloff = 0.1f;
   bool m_bSphereProjection = true;
 };

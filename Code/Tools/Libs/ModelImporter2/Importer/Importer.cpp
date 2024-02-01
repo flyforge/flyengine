@@ -12,7 +12,7 @@ namespace plModelImporter2
 
   plResult Importer::Import(const ImportOptions& options, plLogInterface* pLogInterface /*= nullptr*/, plProgress* pProgress /*= nullptr*/)
   {
-    plResult res = PLASMA_FAILURE;
+    plResult res = PL_FAILURE;
 
     plLogInterface* pPrevLogSystem = plLog::GetThreadLocalLogSystem();
 
@@ -25,7 +25,7 @@ namespace plModelImporter2
       m_pProgress = pProgress;
       m_Options = options;
 
-      PLASMA_LOG_BLOCK("ModelImport", m_Options.m_sSourceFile);
+      PL_LOG_BLOCK("ModelImport", m_Options.m_sSourceFile);
 
       res = DoImport();
     }
@@ -34,6 +34,14 @@ namespace plModelImporter2
     plLog::SetThreadLocalLogSystem(pPrevLogSystem);
 
     return res;
+  }
+
+  void OutputTexture::GenerateFileName(plStringBuilder& out_sName) const
+  {
+    plStringBuilder tmp("Embedded_", m_sFilename);
+
+    plPathUtils::MakeValidFilename(tmp.GetFileName(), '_', out_sName);
+    out_sName.ChangeFileExtension(m_sFileFormatExtension);
   }
 
 } // namespace plModelImporter2

@@ -3,7 +3,7 @@
 
 #include <RendererFoundation/Resources/Texture.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALProxyTexture : public plGALTexture
+class PL_RENDERERFOUNDATION_DLL plGALProxyTexture : public plGALTexture
 {
 public:
   virtual ~plGALProxyTexture();

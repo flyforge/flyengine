@@ -1,6 +1,6 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plInt32 plStringUtils::CompareChars(plUInt32 uiCharacter1, plUInt32 uiCharacter2)
+PL_ALWAYS_INLINE plInt32 plStringUtils::CompareChars(plUInt32 uiCharacter1, plUInt32 uiCharacter2)
 {
   return (plInt32)uiCharacter1 - (plInt32)uiCharacter2;
 }
@@ -21,19 +21,19 @@ inline plInt32 plStringUtils::CompareChars_NoCase(const char* szUtf8Char1, const
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE constexpr bool plStringUtils::IsNullOrEmpty(const T* pString)
+PL_ALWAYS_INLINE constexpr bool plStringUtils::IsNullOrEmpty(const T* pString)
 {
   return (pString == nullptr) || (pString[0] == '\0');
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsNullOrEmpty(const T* pString, const T* pStringEnd)
+PL_ALWAYS_INLINE bool plStringUtils::IsNullOrEmpty(const T* pString, const T* pStringEnd)
 {
   return (pString == nullptr) || (pString[0] == '\0') || pString == pStringEnd;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStringUtils::UpdateStringEnd(const T* pStringStart, const T*& ref_pStringEnd)
+PL_ALWAYS_INLINE void plStringUtils::UpdateStringEnd(const T* pStringStart, const T*& ref_pStringEnd)
 {
   if (ref_pStringEnd != plUnicodeUtils::GetMaxStringEnd<T>())
     return;
@@ -95,8 +95,7 @@ inline plUInt32 plStringUtils::GetCharacterCount(const char* szUtf8, const char*
   return uiCharacters;
 }
 
-inline void plStringUtils::GetCharacterAndElementCount(
-  const char* szUtf8, plUInt32& ref_uiCharacterCount, plUInt32& ref_uiElementCount, const char* pStringEnd)
+inline void plStringUtils::GetCharacterAndElementCount(const char* szUtf8, plUInt32& ref_uiCharacterCount, plUInt32& ref_uiElementCount, const char* pStringEnd)
 {
   ref_uiCharacterCount = 0;
   ref_uiElementCount = 0;
@@ -121,34 +120,34 @@ inline void plStringUtils::GetCharacterAndElementCount(
   }
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsEqual(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
+PL_ALWAYS_INLINE bool plStringUtils::IsEqual(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
 {
   return plStringUtils::Compare(pString1, pString2, pString1End, pString2End) == 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsEqualN(
+PL_ALWAYS_INLINE bool plStringUtils::IsEqualN(
   const char* pString1, const char* pString2, plUInt32 uiCharsToCompare, const char* pString1End, const char* pString2End)
 {
   return plStringUtils::CompareN(pString1, pString2, uiCharsToCompare, pString1End, pString2End) == 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsEqual_NoCase(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
+PL_ALWAYS_INLINE bool plStringUtils::IsEqual_NoCase(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
 {
   return plStringUtils::Compare_NoCase(pString1, pString2, pString1End, pString2End) == 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsEqualN_NoCase(
+PL_ALWAYS_INLINE bool plStringUtils::IsEqualN_NoCase(
   const char* pString1, const char* pString2, plUInt32 uiCharsToCompare, const char* pString1End, const char* pString2End)
 {
   return plStringUtils::CompareN_NoCase(pString1, pString2, uiCharsToCompare, pString1End, pString2End) == 0;
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsDecimalDigit(plUInt32 uiChar)
+PL_ALWAYS_INLINE bool plStringUtils::IsDecimalDigit(plUInt32 uiChar)
 {
   return (uiChar >= '0' && uiChar <= '9');
 }
 
-PLASMA_ALWAYS_INLINE bool plStringUtils::IsHexDigit(plUInt32 uiChar)
+PL_ALWAYS_INLINE bool plStringUtils::IsHexDigit(plUInt32 uiChar)
 {
   return IsDecimalDigit(uiChar) || (uiChar >= 'A' && uiChar <= 'F') || (uiChar >= 'a' && uiChar <= 'f');
 }

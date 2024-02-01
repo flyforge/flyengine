@@ -1,35 +1,32 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
 #include <EditorFramework/Assets/AssetBrowserFilter.moc.h>
+#include <EditorFramework/Assets/AssetBrowserFolderView.moc.h>
+#include <EditorFramework/Assets/AssetBrowserModel.moc.h>
 #include <EditorFramework/Assets/AssetBrowserWidget.moc.h>
 #include <EditorFramework/Assets/AssetCurator.h>
+#include <EditorFramework/Assets/AssetDocumentGenerator.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <EditorFramework/Preferences/EditorPreferences.h>
-#include <EditorFramework/Assets/AssetDocumentGenerator.h>
 #include <Foundation/Strings/TranslationLookup.h>
-#include <Foundation/IO/OSFile.h>
 #include <GuiFoundation/ActionViews/ToolBarActionMapView.moc.h>
-#include "AssetBrowserWidget.h"
+#include <ToolsFoundation/FileSystem/FileSystemModel.h>
 
-plQtAssetBrowserWidget::plQtAssetBrowserWidget(QWidget* parent)
-  : QWidget(parent)
+#include <GuiFoundation/GuiFoundationDLL.h>
+#include <QFile>
+
+plQtAssetBrowserWidget::plQtAssetBrowserWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
-  m_uiKnownAssetFolderCount = 0;
-  m_bDialogMode = false;
-
   setupUi(this);
 
   ButtonListMode->setVisible(false);
   ButtonIconMode->setVisible(false);
 
-  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
-
-  ListTypeFilter->setVisible(true);
-  TypeFilter->setVisible(false);
-
   m_pFilter = new plQtAssetBrowserFilter(this);
-  m_pModel = new plQtAssetBrowserModel(this, m_pFilter);
+  TreeFolderFilter->SetFilter(m_pFilter);
 
+  m_pModel = new plQtAssetBrowserModel(this, m_pFilter);
   SearchWidget->setPlaceholderText("Search Assets");
 
   IconSizeSlider->setValue(50);
@@ -37,26 +34,10 @@ plQtAssetBrowserWidget::plQtAssetBrowserWidget(QWidget* parent)
   ListAssets->setModel(m_pModel);
   ListAssets->SetIconScale(IconSizeSlider->value());
   ListAssets->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-  ListAssets->setDragEnabled(true);
-  ListAssets->setAcceptDrops(true);
-  ListAssets->setDropIndicatorShown(true);
   on_ButtonIconMode_clicked();
 
   splitter->setStretchFactor(0, 0);
   splitter->setStretchFactor(1, 1);
-
-  m_pStatusBar = new QStatusBar(this);
-  m_pStatusBar->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-  m_pStatusBar->setSizeGripEnabled(false);
-
-  m_pCuratorControl = new plQtCuratorControl(this, curatorPanel, splitter);
-  m_pCuratorControl->setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Maximum);
-
-  m_pStatusBar->addPermanentWidget(m_pCuratorControl, 1);
-
-  verticalLayout_2->addWidget(m_pStatusBar);
-
-
 
   // Tool Bar
   {
@@ -66,41 +47,25 @@ plQtAssetBrowserWidget::plQtAssetBrowserWidget(QWidget* parent)
     context.m_pDocument = nullptr;
     m_pToolbar->SetActionContext(context);
     m_pToolbar->setObjectName("AssetBrowserToolBar");
-
-    m_pToolbar->addSeparator();
-
-    //Adding other actions related to the filtering here and not in the actionMap because they need access to the filter
-    //and making the filters a singleton or part of curator wouldn't make much sense
-    m_pToolbar->addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Undo.svg")), QLatin1String("Back"), this, SLOT(onPreviousFolder()));
-    m_pToolbar->addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Redo.svg")), QLatin1String("Forward"), this, SLOT(onNextFolder()));
-
     ToolBarLayout->insertWidget(0, m_pToolbar);
   }
 
-  TreeFolderFilter->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
-
-  PLASMA_VERIFY(connect(m_pFilter, SIGNAL(TextFilterChanged()), this, SLOT(OnTextFilterChanged())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(m_pFilter, SIGNAL(TypeFilterChanged()), this, SLOT(OnTypeFilterChanged())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(m_pFilter, SIGNAL(PathFilterChanged()), this, SLOT(OnPathFilterChanged())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(m_pModel, SIGNAL(modelReset()), this, SLOT(OnModelReset())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(ListAssets->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(OnAssetSelectionChanged(const QItemSelection&, const QItemSelection&))) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(ListAssets->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(OnAssetSelectionCurrentChanged(const QModelIndex&, const QModelIndex&))) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(ListAssets, SIGNAL(doubleClicked(const QModelIndex&)), this, SLOT(on_ListAssets_doubleClicked(const QModelIndex&))) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(connect(ListAssets, SIGNAL(customContextMenuRequested(const QPoint&)), this, SLOT(on_ListAssets_customContextMenuRequested(const QPoint&))) != nullptr, "signal/slot connection failed");
 
 
+  PL_VERIFY(connect(m_pFilter, SIGNAL(TextFilterChanged()), this, SLOT(OnTextFilterChanged())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pFilter, SIGNAL(TypeFilterChanged()), this, SLOT(OnTypeFilterChanged())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pFilter, SIGNAL(PathFilterChanged()), this, SLOT(OnPathFilterChanged())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pModel, SIGNAL(modelReset()), this, SLOT(OnModelReset())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pModel, &plQtAssetBrowserModel::editingFinished, this, &plQtAssetBrowserWidget::OnFileEditingFinished, Qt::QueuedConnection), "signal/slot connection failed");
+
+  PL_VERIFY(connect(ListAssets->selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this, SLOT(OnAssetSelectionChanged(const QItemSelection&, const QItemSelection&))) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(ListAssets->selectionModel(), SIGNAL(currentChanged(const QModelIndex&, const QModelIndex&)), this, SLOT(OnAssetSelectionCurrentChanged(const QModelIndex&, const QModelIndex&))) != nullptr, "signal/slot connection failed");
   connect(SearchWidget, &plQtSearchWidget::textChanged, this, &plQtAssetBrowserWidget::OnSearchWidgetTextChanged);
 
   UpdateAssetTypes();
 
   plAssetCurator::GetSingleton()->m_Events.AddEventHandler(plMakeDelegate(&plQtAssetBrowserWidget::AssetCuratorEventHandler, this));
   plToolsProject::s_Events.AddEventHandler(plMakeDelegate(&plQtAssetBrowserWidget::ProjectEventHandler, this));
-
-  setAcceptDrops(true);
-  filterView->SetFilter(m_pFilter);
-  filterView->SetTree(TreeFolderFilter);
-  filterView->Reset();
-  ListTypeFilter->setIconSize(QSize(16, 16));
 }
 
 plQtAssetBrowserWidget::~plQtAssetBrowserWidget()
@@ -108,159 +73,8 @@ plQtAssetBrowserWidget::~plQtAssetBrowserWidget()
   plToolsProject::s_Events.RemoveEventHandler(plMakeDelegate(&plQtAssetBrowserWidget::ProjectEventHandler, this));
   plAssetCurator::GetSingleton()->m_Events.RemoveEventHandler(plMakeDelegate(&plQtAssetBrowserWidget::AssetCuratorEventHandler, this));
 
+
   ListAssets->setModel(nullptr);
-}
-
-void plQtAssetBrowserWidget::dragEnterEvent(QDragEnterEvent* event)
-{
-  if (!event->source())
-    event->acceptProposedAction();
-}
-
-void plQtAssetBrowserWidget::dragMoveEvent(QDragMoveEvent* event)
-{
-  event->acceptProposedAction();
-}
-
-void plQtAssetBrowserWidget::dragLeaveEvent(QDragLeaveEvent* event)
-{
-  event->accept();
-}
-
-void plQtAssetBrowserWidget::dropEvent(QDropEvent* event)
-{
-  const QMimeData* mime = event->mimeData();
-  if (mime->hasUrls())
-  {
-    QList<QUrl> urlList = mime->urls();
-    plHybridArray<plString, 16> assetsToImport;
-
-    plString pDir = plToolsProject::GetSingleton()->GetProjectDirectory();
-
-    bool overWriteAll = false;
-    for (qsizetype i = 0, count = qMin(urlList.size(), qsizetype(32)); i < count; ++i)
-    {
-      QUrl url = urlList.at(i);
-      QFileInfo fileinfo = QFileInfo(url.toLocalFile());
-
-      if (fileinfo.exists())
-      {
-        //build source and destination paths info ===================================================================
-        plStringBuilder srcPath = urlList.at(i).path().toUtf8().constData();
-        srcPath.Shrink(1, 0); // remove a "/" at the beginning of the sourcepath that keeps it from opening
-
-        plStringBuilder dstPath = plStringBuilder();
-        dstPath.Append(pDir);
-        dstPath.ReplaceFirst(plToolsProject::GetSingleton()->GetProjectName(false), "");
-        dstPath.Append(m_pFilter->GetPathFilter());
-        if (!dstPath.EndsWith("/"))
-          dstPath.Append("/");
-        dstPath.Append(fileinfo.fileName().toUtf8().constData());
-
-        //Move the file/folder ==============================================
-        if (fileinfo.isDir())
-        {
-
-          if (!overWriteAll && plOSFile::ExistsDirectory(dstPath))
-          {
-            QMessageBox msgBox;
-            msgBox.setText("Overwrite folder?");
-            msgBox.setInformativeText("The folder you are copying already exists, overwrite the existing one?");
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Cancel);
-            int res = msgBox.exec();
-            switch (res)
-            {
-              case QMessageBox::Yes:
-                break;
-              case QMessageBox::YesToAll:
-                overWriteAll = true;
-                break;
-              case QMessageBox::Cancel:
-              default:
-                for (auto file : assetsToImport)
-                {
-                  if (plOSFile::DeleteFile(file) == PLASMA_FAILURE)
-                  {
-                    plLog::Error("failed to delete temp file {}", file);
-                  }
-                }
-                return;
-            }
-          }
-
-          if (plOSFile::CopyFolder(srcPath, dstPath) != PLASMA_SUCCESS)
-          {
-            plLog::Error("Failed to copy the folder in the project directory");
-            return;
-          }
-
-          plDynamicArray<plFileStats> movedFiles = plDynamicArray<plFileStats>();
-          plOSFile::GatherAllItemsInFolder(movedFiles, dstPath);
-          for (int i = 0; i < movedFiles.GetCount(); i++)
-          {
-            movedFiles[i].GetFullPath(dstPath);
-            assetsToImport.PushBack(dstPath);
-          }
-  }
-        else if (fileinfo.isFile())
-        {
-          if (!overWriteAll && plOSFile::ExistsFile(dstPath))
-          {
-            QMessageBox msgBox;
-            msgBox.setText("Overwrite file?");
-            msgBox.setInformativeText("The file you are copying already exists, overwrite the existing one?");
-            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::Cancel);
-            msgBox.setDefaultButton(QMessageBox::Cancel);
-            int res = msgBox.exec();
-            switch (res)
-            {
-              case QMessageBox::Yes:
-                break;
-              case QMessageBox::YesToAll:
-                overWriteAll = true;
-                break;
-              case QMessageBox::Cancel:
-              default:
-                for (auto file : assetsToImport)
-                {
-                  if (plOSFile::DeleteFile(file) == PLASMA_FAILURE)
-                  {
-                    plLog::Error("failed to delete temp file {}", file);
-                  }
-                }
-                return;
-            }
-          }
-          if (plOSFile::CopyFile(srcPath, dstPath) != PLASMA_SUCCESS)
-          {
-            plLog::Error("Failed to copy the file in the project directory");
-            return;
-          }
-          assetsToImport.PushBack(dstPath);
-        }
-      }
-  else
-      {
-        plLog::Error("Couldn't find file at {} for copying", urlList.at(i).path().toUtf8().constData());
-        return;
-      }
-    }
-    if (!plAssetDocumentGenerator::ImportAssets(assetsToImport)) {
-      for (auto file : assetsToImport)
-      {
-        if (plOSFile::DeleteFile(file) == PLASMA_FAILURE)
-        {
-          plLog::Error("failed to delete temp file {}", file);
-        }
-      }
-    }
-  }
-  else
-    plLog::Dev("Ignoring unhandled MIME data received");
-
-
-  event->acceptProposedAction();
 }
 
 void plQtAssetBrowserWidget::UpdateAssetTypes()
@@ -275,38 +89,21 @@ void plQtAssetBrowserWidget::UpdateAssetTypes()
   }
 
   {
-    plQtScopedBlockSignals block(ListTypeFilter);
-
-    ListTypeFilter->clear();
-
-    // 'All' Filter
-    {
-      QListWidgetItem* pItem = new QListWidgetItem(QIcon(QLatin1String(":/AssetIcons/All.svg")), QLatin1String("<All>"));
-      pItem->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsUserCheckable);
-      pItem->setCheckState(Qt::CheckState::Checked);
-      pItem->setData(Qt::UserRole, QLatin1String("<All>"));
-
-      ListTypeFilter->addItem(pItem);
-    }
-
-    for (const auto& it : assetTypes)
-    {
-      QListWidgetItem* pItem = new QListWidgetItem(plQtUiServices::GetCachedIconResource(it.Value()->m_sIcon, plColorScheme::GetCategoryColor(it.Value()->m_sAssetCategory, plColorScheme::CategoryColorUsage::AssetMenuIcon)), QString::fromUtf8(it.Key(), it.Key().GetElementCount()));
-      pItem->setFlags(Qt::ItemFlag::ItemIsEnabled | Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsUserCheckable);
-      pItem->setCheckState(Qt::CheckState::Unchecked);
-      pItem->setData(Qt::UserRole, QLatin1String(it.Value()->m_sDocumentTypeName));
-
-      ListTypeFilter->addItem(pItem);
-    }
-  }
-
-  {
     plQtScopedBlockSignals block(TypeFilter);
 
     TypeFilter->clear();
 
-    // 'All' Filter
-    TypeFilter->addItem(QIcon(QLatin1String(":/AssetIcons/All.svg")), QLatin1String("<All>"));
+    if (m_Mode == Mode::Browser)
+    {
+      // '<All Files>' Filter
+      TypeFilter->addItem(QIcon(QLatin1String(":/GuiFoundation/Icons/Document.svg")), QLatin1String("<All Files>"));
+
+      // '<Importable Files>' Filter
+      TypeFilter->addItem(QIcon(QLatin1String(":/EditorFramework/Icons/ImportableFileType.svg")), QLatin1String("<Importable Files>"));
+    }
+
+    // '<All Assets>' Filter
+    TypeFilter->addItem(QIcon(QLatin1String(":/AssetIcons/Icons/AllAssets.svg")), QLatin1String("<All Assets>"));
 
     for (const auto& it : assetTypes)
     {
@@ -315,18 +112,42 @@ void plQtAssetBrowserWidget::UpdateAssetTypes()
     }
   }
 
-  UpdateDirectoryTree();
-
   // make sure to apply the previously active type filter settings to the UI
+  if (m_Mode == Mode::Browser)
+  {
+    plSet<plString> importExtensions;
+    plAssetDocumentGenerator::GetSupportsFileTypes(importExtensions);
+    m_pFilter->UpdateImportExtensions(importExtensions);
+  }
+
   OnTypeFilterChanged();
 }
 
-void plQtAssetBrowserWidget::SetDialogMode()
+void plQtAssetBrowserWidget::SetMode(Mode mode)
 {
-  m_pToolbar->hide();
-  m_bDialogMode = true;
+  if (m_Mode == mode)
+    return;
 
-  ListAssets->SetDialogMode(true);
+  m_Mode = mode;
+
+  switch (m_Mode)
+  {
+    case Mode::Browser:
+      m_pToolbar->show();
+      TreeFolderFilter->SetDialogMode(false);
+      ListAssets->SetDialogMode(false);
+      break;
+    case Mode::FilePicker:
+      TypeFilter->setVisible(false);
+      [[fallthrough]];
+    case Mode::AssetPicker:
+      m_pToolbar->hide();
+      TreeFolderFilter->SetDialogMode(true);
+      ListAssets->SetDialogMode(true);
+      break;
+  }
+
+  UpdateAssetTypes();
 }
 
 void plQtAssetBrowserWidget::SaveState(const char* szSettingsName)
@@ -371,9 +192,6 @@ void plQtAssetBrowserWidget::ProjectEventHandler(const plToolsProjectEvent& e)
     break;
     case plToolsProjectEvent::Type::ProjectClosed:
     {
-      // remove project structure from asset browser
-      ClearDirectoryTree();
-
       m_pFilter->Reset();
     }
     break;
@@ -382,17 +200,16 @@ void plQtAssetBrowserWidget::ProjectEventHandler(const plToolsProjectEvent& e)
   }
 }
 
-
 void plQtAssetBrowserWidget::AddAssetCreatorMenu(QMenu* pMenu, bool useSelectedAsset)
 {
-  if (m_bDialogMode)
+  if (m_Mode != Mode::Browser)
     return;
 
   const plHybridArray<plDocumentManager*, 16>& managers = plDocumentManager::GetAllDocumentManagers();
 
   plDynamicArray<const plDocumentTypeDescriptor*> documentTypes;
 
-  QMenu* pSubMenu = pMenu->addMenu("New asset");
+  QMenu* pSubMenu = pMenu->addMenu("New");
 
   plStringBuilder sTypeFilter = m_pFilter->GetTypeFilter();
 
@@ -404,130 +221,134 @@ void plQtAssetBrowserWidget::AddAssetCreatorMenu(QMenu* pMenu, bool useSelectedA
     pMan->GetSupportedDocumentTypes(documentTypes);
   }
 
-  documentTypes.Sort([](const plDocumentTypeDescriptor* a, const plDocumentTypeDescriptor* b) -> bool { return plStringUtils::Compare(plTranslate(a->m_sDocumentTypeName), plTranslate(b->m_sDocumentTypeName)) < 0; });
+  documentTypes.Sort([](const plDocumentTypeDescriptor* a, const plDocumentTypeDescriptor* b) -> bool
+    { return plTranslate(a->m_sDocumentTypeName).Compare(plTranslate(b->m_sDocumentTypeName)) < 0; });
+
+  QAction* pAction = pSubMenu->addAction(plMakeQString(plTranslate("Folder")));
+  pAction->setIcon(plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/Folder.svg"));
+  connect(pAction, &QAction::triggered, static_cast<eqQtAssetBrowserFolderView*>(TreeFolderFilter), &eqQtAssetBrowserFolderView::NewFolder);
+
+  pSubMenu->addSeparator();
 
   for (const plDocumentTypeDescriptor* desc : documentTypes)
   {
     if (!desc->m_bCanCreate || desc->m_sFileExtension.IsEmpty())
       continue;
 
-    QAction* pAction = pSubMenu->addAction(plTranslate(desc->m_sDocumentTypeName));
+    QAction* pAction = pSubMenu->addAction(plMakeQString(plTranslate(desc->m_sDocumentTypeName)));
     pAction->setIcon(plQtUiServices::GetSingleton()->GetCachedIconResource(desc->m_sIcon, plColorScheme::GetCategoryColor(desc->m_sAssetCategory, plColorScheme::CategoryColorUsage::MenuEntryIcon)));
     pAction->setProperty("AssetType", desc->m_sDocumentTypeName.GetData());
     pAction->setProperty("AssetManager", QVariant::fromValue<void*>(desc->m_pManager));
     pAction->setProperty("Extension", desc->m_sFileExtension.GetData());
     pAction->setProperty("UseSelection", useSelectedAsset);
 
-    connect(pAction, &QAction::triggered, this, &plQtAssetBrowserWidget::OnNewAsset);
+    connect(pAction, &QAction::triggered, this, &plQtAssetBrowserWidget::NewAsset);
   }
 }
 
-QString plQtAssetBrowserWidget::getSelectedPath()
+
+void plQtAssetBrowserWidget::AddImportedViaMenu(QMenu* pMenu)
 {
-  QString sStartDir = plToolsProject::GetSingleton()->GetProjectDirectory().GetData();
+  QModelIndexList selection = ListAssets->selectionModel()->selectedIndexes();
 
-  // find path
+  // Find all uses
+  plSet<plUuid> importedVia;
+  for (const QModelIndex& id : selection)
   {
-    plString pathfilter = m_pFilter->GetPathFilter();
-    if (!pathfilter.IsEmpty())
-    {
-      plStringBuilder path = m_pFilter->GetPathFilter();
+    const bool bImportable = id.data(plQtAssetBrowserModel::UserRoles::Importable).toBool();
+    if (!bImportable)
+      continue;
 
-      if (path.IsEmpty())
-      {
-        plLog::Error("Can't create asset on root");
-        return QString();
-      }
-
-      plMap<plString, plFileStatus, plCompareString_NoCase> folders = plAssetCurator::GetSingleton()->GetAllAssetFolders();
-      plStringBuilder result = plStringBuilder();
-      auto it = folders.GetIterator();
-      if (!it.IsValid())
-      {
-        return QString();
-      }
-
-      for (; it != folders.GetLastIterator(); it.Next())
-      {
-        if (it.Key().EndsWith_NoCase(path))
-        {
-          if (result.IsEmpty())
-          {
-            result = it.Key();
-          }
-          else if (result.GetCharacterCount() > it.Key().GetCharacterCount())
-          {
-            result = it.Key();
-          }
-        }
-      }
-      if (result)
-        sStartDir = QString(result.GetData());
-    }
-
-    // this will take precedence
-    if (ListAssets->selectionModel()->hasSelection())
-    {
-      plString sPath = m_pModel->data(ListAssets->currentIndex(), plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
-
-      if (!sPath.IsEmpty() && plQtEditorApp::GetSingleton()->MakeDataDirectoryRelativePathAbsolute(sPath))
-      {
-        plStringBuilder temp = sPath;
-        if (plOSFile::ExistsFile(temp)) // if we clicked create asset on a folder, we want to create it INSIDE this folder
-        {
-          sPath = temp.GetFileDirectory();
-        }
-
-        sStartDir = sPath.GetData();
-      }
-    }
+    plString sAbsPath = qtToPlString(m_pModel->data(id, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+    plAssetCurator::GetSingleton()->FindAllUses(sAbsPath, importedVia);
   }
 
-  return sStartDir;
+  // Sort by path
+  plHybridArray<plUuid, 8> importedViaSorted;
+  {
+    importedViaSorted.Reserve(importedVia.GetCount());
+    plAssetCurator::plLockedSubAssetTable allAssets = plAssetCurator::GetSingleton()->GetKnownSubAssets();
+    for (const plUuid& guid : importedVia)
+    {
+      if (allAssets->Contains(guid))
+        importedViaSorted.PushBack(guid);
+    }
+
+    importedViaSorted.Sort([&](const plUuid& a, const plUuid& b) -> bool
+      { return allAssets->Find(a).Value().m_pAssetInfo->m_Path.GetDataDirParentRelativePath().Compare(allAssets->Find(b).Value().m_pAssetInfo->m_Path.GetDataDirParentRelativePath()) < 0; });
+  }
+
+  if (importedViaSorted.IsEmpty())
+    return;
+
+  // Create actions to open
+  QMenu* pSubMenu = pMenu->addMenu("Imported via");
+  pSubMenu->setIcon(QIcon(QLatin1String(":/GuiFoundation/Icons/Import.svg")));
+
+  for (const plUuid& guid : importedViaSorted)
+  {
+    const plAssetCurator::plLockedSubAsset pSubAsset = plAssetCurator::GetSingleton()->GetSubAsset(guid);
+    QIcon icon = plQtUiServices::GetCachedIconResource(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sIcon, plColorScheme::GetCategoryColor(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor->m_sAssetCategory, plColorScheme::CategoryColorUsage::OverlayIcon));
+    QString sRelPath = plMakeQString(pSubAsset->m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
+
+    QAction* pAction = pSubMenu->addAction(sRelPath);
+    pAction->setIcon(icon);
+    pAction->setProperty("AbsPath", plMakeQString(pSubAsset->m_pAssetInfo->m_Path.GetAbsolutePath()));
+    connect(pAction, &QAction::triggered, this, &plQtAssetBrowserWidget::OnOpenImportReferenceAsset);
+  }
 }
 
+void plQtAssetBrowserWidget::GetSelectedImportableFiles(plDynamicArray<plString>& out_Files) const
+{
+  out_Files.Clear();
+
+  QModelIndexList selection = ListAssets->selectionModel()->selectedIndexes();
+  for (const QModelIndex& id : selection)
+  {
+    const bool bImportable = id.data(plQtAssetBrowserModel::UserRoles::Importable).toBool();
+    if (bImportable)
+    {
+      out_Files.PushBack(qtToPlString(id.data(plQtAssetBrowserModel::UserRoles::AbsolutePath).toString()));
+    }
+  }
+}
 
 void plQtAssetBrowserWidget::on_ListAssets_clicked(const QModelIndex& index)
 {
-  Q_EMIT ItemSelected(m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
-}
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
 
-void plQtAssetBrowserWidget::onPreviousFolder()
-{
-  m_pFilter->OnPrevious();
-}
-
-void plQtAssetBrowserWidget::onNextFolder()
-{
-  m_pFilter->OnNext();
+  Q_EMIT ItemSelected(m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
 }
 
 void plQtAssetBrowserWidget::on_ListAssets_activated(const QModelIndex& index)
 {
-  Q_EMIT ItemSelected(m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+
+  Q_EMIT ItemSelected(m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
 }
 
 void plQtAssetBrowserWidget::on_ListAssets_doubleClicked(const QModelIndex& index)
 {
-  plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>();
-  bool isDir = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::Type).value<bool>();
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+  const plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>();
 
-  if (guid.IsValid())
+  if (itemType.IsAnySet(plAssetBrowserItemFlags::Asset | plAssetBrowserItemFlags::SubAsset))
   {
-    plAssetCurator::GetSingleton()->UpdateAssetLastAccessTime(guid);
+    if (guid.IsValid())
+    {
+      plAssetCurator::GetSingleton()->UpdateAssetLastAccessTime(guid);
+    }
+    Q_EMIT ItemChosen(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
   }
-  if (isDir)
+  else if (itemType.IsSet(plAssetBrowserItemFlags::File))
   {
-    if (!ListAssets->selectionModel()->hasSelection())
-      return;
+    Q_EMIT ItemChosen(plUuid::MakeInvalid(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
 
-    plStringBuilder sPath = m_pModel->data(ListAssets->currentIndex(), plQtAssetBrowserModel::UserRoles::RelativePath).toString().toUtf8().data();
-
-    m_pFilter->SetPathFilter(sPath);
+    // plQtUiServices::OpenFileInDefaultProgram(qtToPlString(sAbsPath));
   }
-  else
+  else if (itemType.IsAnySet(plAssetBrowserItemFlags::Folder | plAssetBrowserItemFlags::DataDirectory))
   {
-    Q_EMIT ItemChosen(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+    m_pFilter->SetPathFilter(m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString().toUtf8().data());
   }
 }
 
@@ -572,36 +393,18 @@ void plQtAssetBrowserWidget::on_ListAssets_ViewZoomed(plInt32 iIconSizePercentag
 
 void plQtAssetBrowserWidget::OnTextFilterChanged()
 {
-  SearchWidget->setText(QString::fromUtf8(m_pFilter->GetTextFilter()));
-
-  QTimer::singleShot(0, this, SLOT(OnSelectionTimer()));
+  QString sText = plMakeQString(m_pFilter->GetTextFilter());
+  if (SearchWidget->text() != sText)
+  {
+    SearchWidget->setText(sText);
+    QTimer::singleShot(0, this, SLOT(OnSelectionTimer()));
+  }
 }
 
 void plQtAssetBrowserWidget::OnTypeFilterChanged()
 {
   plStringBuilder sTemp;
   const plStringBuilder sFilter(";", m_pFilter->GetTypeFilter(), ";");
-
-
-  {
-    plQtScopedBlockSignals _(ListTypeFilter);
-
-    bool bNoneChecked = true;
-
-    for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
-    {
-      sTemp.Set(";", ListTypeFilter->item(i)->data(Qt::UserRole).toString().toUtf8().data(), ";");
-
-      const bool bChecked = sFilter.FindSubString(sTemp) != nullptr;
-
-      ListTypeFilter->item(i)->setCheckState(bChecked ? Qt::Checked : Qt::Unchecked);
-
-      if (bChecked)
-        bNoneChecked = false;
-    }
-
-    ListTypeFilter->item(0)->setCheckState(bNoneChecked ? Qt::Checked : Qt::Unchecked);
-  }
 
   {
     plQtScopedBlockSignals _(TypeFilter);
@@ -620,91 +423,188 @@ void plQtAssetBrowserWidget::OnTypeFilterChanged()
       }
     }
 
-    if (iNumChecked == 1)
+    if (iNumChecked == 3)
       TypeFilter->setCurrentIndex(iCheckedFilter);
     else
-      TypeFilter->setCurrentIndex(0);
+      TypeFilter->setCurrentIndex((m_Mode != Mode::Browser) ? 0 : 2); // "<All Assets>"
+
+    int index = TypeFilter->currentIndex();
+
+    switch (m_Mode)
+    {
+      case Mode::Browser:
+        m_pFilter->SetShowNonImportableFiles(index == 0);
+        m_pFilter->SetShowFiles(index == 0 || index == 1);
+        break;
+      case Mode::AssetPicker:
+        m_pFilter->SetShowNonImportableFiles(false);
+        m_pFilter->SetShowFiles(false);
+        break;
+      case Mode::FilePicker:
+        m_pFilter->SetShowNonImportableFiles(true);
+        m_pFilter->SetShowFiles(true);
+        break;
+    }
   }
 
   QTimer::singleShot(0, this, SLOT(OnSelectionTimer()));
 }
 
+void plQtAssetBrowserWidget::OnPathFilterChanged()
+{
+  QTimer::singleShot(0, this, SLOT(OnSelectionTimer()));
+}
 
 void plQtAssetBrowserWidget::OnSearchWidgetTextChanged(const QString& text)
 {
   m_pFilter->SetTextFilter(text.toUtf8().data());
 }
 
-void plQtAssetBrowserWidget::on_ListTypeFilter_itemChanged(QListWidgetItem* item)
+void plQtAssetBrowserWidget::keyPressEvent(QKeyEvent* e)
 {
-  plQtScopedBlockSignals block(ListTypeFilter);
+  QWidget::keyPressEvent(e);
 
-  if (item->data(Qt::UserRole).toString() == "<All>")
+  if (e->key() == Qt::Key_Delete && m_Mode == Mode::Browser)
   {
-    if (item->checkState() == Qt::Checked)
+    e->accept();
+    DeleteSelection();
+    return;
+  }
+
+  if (e->key() == Qt::Key_Enter || e->key() == Qt::Key_Return)
+  {
+    e->accept();
+    OnListOpenAssetDocument();
+    return;
+  }
+}
+
+
+void plQtAssetBrowserWidget::DeleteSelection()
+{
+  QModelIndexList selection = ListAssets->selectionModel()->selectedIndexes();
+  for (const QModelIndex& id : selection)
+  {
+    const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)id.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+    if (itemType.IsAnySet(plAssetBrowserItemFlags::SubAsset | plAssetBrowserItemFlags::DataDirectory))
     {
-      // deactivate all others
-      for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
+      plQtUiServices::MessageBoxWarning(plFmt("Sub-assets and data directories can't be deleted."));
+      return;
+    }
+  }
+
+  QMessageBox::StandardButton choice = plQtUiServices::MessageBoxQuestion(plFmt("Do you want to delete the selected items?"), QMessageBox::StandardButton::Cancel | QMessageBox::StandardButton::Yes, QMessageBox::StandardButton::Yes);
+  if (choice == QMessageBox::StandardButton::Cancel)
+    return;
+
+  for (const QModelIndex& id : selection)
+  {
+    const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)id.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+    QString sQtAbsPath = id.data(plQtAssetBrowserModel::UserRoles::AbsolutePath).toString();
+    plString sAbsPath = qtToPlString(sQtAbsPath);
+
+    if (itemType.IsSet(plAssetBrowserItemFlags::File))
+    {
+      if (!QFile::moveToTrash(sQtAbsPath))
       {
-        ListTypeFilter->item(i)->setCheckState(Qt::Unchecked);
+        plLog::Error("Failed to delete file '{}'", sAbsPath);
       }
     }
     else
     {
-      plStringBuilder sFilter;
-
-      // activate all others
-      for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
+      if (!QFile::moveToTrash(sQtAbsPath))
       {
-        if (!m_sAllTypesFilter.IsEmpty())
+        plLog::Error("Failed to delete folder '{}'", sAbsPath);
+      }
+    }
+    plFileSystemModel::GetSingleton()->NotifyOfChange(sAbsPath);
+  }
+}
+
+void plQtAssetBrowserWidget::OnImportAsAboutToShow()
+{
+  QMenu* pMenu = qobject_cast<QMenu*>(sender());
+
+  if (!pMenu->actions().isEmpty())
+    return;
+
+  plHybridArray<plString, 8> filesToImport;
+  GetSelectedImportableFiles(filesToImport);
+
+  if (filesToImport.IsEmpty())
+    return;
+
+  plSet<plString> extensions;
+  plStringBuilder sExt;
+  for (const auto& file : filesToImport)
+  {
+    sExt = file.GetFileExtension();
+    sExt.ToLower();
+    extensions.Insert(sExt);
+  }
+
+  plHybridArray<plAssetDocumentGenerator*, 16> generators;
+  plAssetDocumentGenerator::CreateGenerators(generators);
+  plHybridArray<plAssetDocumentGenerator::ImportMode, 16> importModes;
+
+  for (plAssetDocumentGenerator* pGen : generators)
+  {
+    for (plStringView ext : extensions)
+    {
+      if (pGen->SupportsFileType(ext))
+      {
+        pGen->GetImportModes({}, importModes);
+        break;
+      }
+    }
+  }
+
+  for (const auto& mode : importModes)
+  {
+    QAction* act = pMenu->addAction(QIcon(plMakeQString(mode.m_sIcon)), plMakeQString(plTranslate(mode.m_sName)));
+    act->setData(plMakeQString(mode.m_sName));
+    connect(act, &QAction::triggered, this, &plQtAssetBrowserWidget::OnImportAsClicked);
+  }
+
+  plAssetDocumentGenerator::DestroyGenerators(generators);
+}
+
+void plQtAssetBrowserWidget::OnImportAsClicked()
+{
+  plHybridArray<plString, 8> filesToImport;
+  GetSelectedImportableFiles(filesToImport);
+
+  QAction* act = qobject_cast<QAction*>(sender());
+  plString sMode = qtToPlString(act->data().toString());
+
+  plHybridArray<plAssetDocumentGenerator*, 16> generators;
+  plAssetDocumentGenerator::CreateGenerators(generators);
+
+  plHybridArray<plAssetDocumentGenerator::ImportMode, 16> importModes;
+  for (plAssetDocumentGenerator* pGen : generators)
+  {
+    importModes.Clear();
+    pGen->GetImportModes({}, importModes);
+
+    for (const auto& mode : importModes)
+    {
+      if (mode.m_sName == sMode)
+      {
+        for (const plString& file : filesToImport)
         {
-          sFilter.Set(";", ListTypeFilter->item(i)->data(Qt::UserRole).toString().toUtf8().data(), ";");
-
-          if (m_sAllTypesFilter.FindSubString(sFilter) != nullptr)
-            ListTypeFilter->item(i)->setCheckState(Qt::Checked);
-          else
-            ListTypeFilter->item(i)->setCheckState(Qt::Unchecked);
+          if (pGen->SupportsFileType(file))
+          {
+            pGen->Import(file, sMode, true).LogFailure();
+          }
         }
-        else
-          ListTypeFilter->item(i)->setCheckState(Qt::Checked);
+
+        goto done;
       }
     }
   }
-  else
-  {
-    if (item->checkState() == Qt::Checked)
-    {
-      // deactivate the 'all' button
-      ListTypeFilter->item(0)->setCheckState(Qt::Unchecked);
-    }
-    else
-    {
-      bool bAnyChecked = false;
 
-      for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
-      {
-        if (ListTypeFilter->item(i)->checkState() == Qt::Checked)
-          bAnyChecked = true;
-      }
-
-      // activate the 'All' item
-      if (!bAnyChecked)
-        ListTypeFilter->item(0)->setCheckState(Qt::Checked);
-    }
-  }
-
-  plStringBuilder sFilter;
-
-  for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
-  {
-    if (ListTypeFilter->item(i)->checkState() == Qt::Checked)
-      sFilter.Append(";", ListTypeFilter->item(i)->data(Qt::UserRole).toString().toUtf8().data(), ";");
-  }
-
-  if (sFilter.IsEmpty())         // all filters enabled
-    sFilter = m_sAllTypesFilter; // might be different for dialogs
-
-  m_pFilter->SetTypeFilter(sFilter);
+done:
+  plAssetDocumentGenerator::DestroyGenerators(generators);
 }
 
 void plQtAssetBrowserWidget::AssetCuratorEventHandler(const plAssetCuratorEvent& e)
@@ -713,166 +613,10 @@ void plQtAssetBrowserWidget::AssetCuratorEventHandler(const plAssetCuratorEvent&
   {
     case plAssetCuratorEvent::Type::AssetListReset:
       UpdateAssetTypes();
-      filterView->Reset();
-      UpdateDirectoryTree();
-      break;
-    case plAssetCuratorEvent::Type::AssetAdded:
-    case plAssetCuratorEvent::Type::AssetRemoved:
-      UpdateDirectoryTree();
       break;
     default:
       break;
   }
-}
-
-void plQtAssetBrowserWidget::UpdateDirectoryTree()
-{
-  plQtScopedBlockSignals block(TreeFolderFilter);
-
-  if (TreeFolderFilter->topLevelItemCount() == 0)
-  {
-    QTreeWidgetItem* pNewParent = new QTreeWidgetItem();
-    pNewParent->setText(0, QLatin1String("<root>"));
-
-    TreeFolderFilter->addTopLevelItem(pNewParent);
-
-    pNewParent->setExpanded(true);
-  }
-
-  plMap<plString, plFileStatus, plCompareString_NoCase> Folders = plAssetCurator::GetSingleton()->GetAllAssetFolders();
-
-  plDynamicArray<plString>& removed = plAssetCurator::GetSingleton()->GetRemovedFolders();
-  for (plString path : removed) {
-    plDynamicArray<plStringView> compTypes;
-    path.Split(false, compTypes, "/");
-
-    QTreeWidgetItem* parNode = TreeFolderFilter->topLevelItem(0);
-
-    for (int i = 0; i < compTypes.GetCount(); i++)
-    {
-      plStringBuilder str;
-      compTypes[i].GetData(str);
-
-      if (parNode->childCount() > 0)
-      {
-        for (int j = 0; j < parNode->childCount(); j++)
-        {
-          QTreeWidgetItem* node = parNode->child(j);
-          if (node->text(0) == str)
-          {
-            if (i == compTypes.GetCount() - 1)
-            {
-              // found the node to remove
-              TreeFolderFilter->removeItemWidget(node, 0);
-              delete node;
-              break;
-            }
-            parNode = node;
-          }
-        }
-      }
-    }
-  }
-
-  removed.Clear();
-
-  plStringBuilder tmp;
-
-  for (const auto& sDir : Folders)
-  {
-    tmp = sDir.Key();
-    plString abspath = tmp;
-
-    if (!plQtEditorApp::GetSingleton()->MakePathDataDirectoryParentRelative(tmp))
-    {
-      continue;
-    }
-
-
-    BuildDirectoryTree(tmp, TreeFolderFilter->topLevelItem(0), "", false, abspath.GetData());
-  }
-
-  m_uiKnownAssetFolderCount = Folders.GetCount();
-  TreeFolderFilter->setSortingEnabled(true);
-  TreeFolderFilter->sortItems(0, Qt::SortOrder::AscendingOrder);
-}
-
-
-void plQtAssetBrowserWidget::ClearDirectoryTree()
-{
-  TreeFolderFilter->clear();
-  m_uiKnownAssetFolderCount = 0;
-}
-
-void plQtAssetBrowserWidget::BuildDirectoryTree(const char* szCurPath, QTreeWidgetItem* pParent, const char* szCurPathToItem, bool bIsHidden, const char* szAbsPath)
-{
-  if (plStringUtils::IsNullOrEmpty(szCurPath))
-    return;
-
-  const char* szNextSep = plStringUtils::FindSubString(szCurPath, "/");
-
-  QTreeWidgetItem* pNewParent = nullptr;
-
-  plString sFolderName;
-
-  if (szNextSep == nullptr)
-    sFolderName = szCurPath;
-  else
-    sFolderName = plStringView(szCurPath, szNextSep);
-
-  if (sFolderName.EndsWith_NoCase("_data"))
-  {
-    bIsHidden = true;
-  }
-
-  plStringBuilder sCurPath = szCurPathToItem;
-  sCurPath.AppendPath(sFolderName);
-
-  const QString sQtFolderName = QString::fromUtf8(sFolderName.GetData());
-
-  for (plInt32 i = 0; i < pParent->childCount(); ++i)
-  {
-    if (pParent->child(i)->text(0) == sQtFolderName)
-    {
-      // item already exists
-      pNewParent = pParent->child(i);
-      goto godown;
-    }
-  }
-
-  pNewParent = new QTreeWidgetItem();
-  pNewParent->setText(0, sQtFolderName);
-  pNewParent->setData(0, plQtAssetBrowserModel::UserRoles::RelativePath, QString::fromUtf8(sCurPath.GetData()));
-  pNewParent->setData(0, plQtAssetBrowserModel::UserRoles::AbsolutePath, QString::fromUtf8(szAbsPath));
-
-  if (bIsHidden)
-  {
-    pNewParent->setForeground(0, QColor::fromRgba(qRgb(110, 110, 120)));
-  }
-
-  pParent->addChild(pNewParent);
-
-godown:
-
-  if (szNextSep == nullptr)
-    return;
-
-  BuildDirectoryTree(szNextSep + 1, pNewParent, sCurPath, bIsHidden, szAbsPath);
-}
-
-void plQtAssetBrowserWidget::on_TreeFolderFilter_itemSelectionChanged()
-{
-  if (m_bTreeSelectionChangeInProgress)
-    return;
-
-  plStringBuilder sCurPath;
-
-  if (!TreeFolderFilter->selectedItems().isEmpty())
-  {
-    sCurPath = TreeFolderFilter->selectedItems()[0]->data(0, plQtAssetBrowserModel::UserRoles::RelativePath).toString().toUtf8().data();
-  }
-
-  m_pFilter->SetPathFilter(sCurPath);
 }
 
 void plQtAssetBrowserWidget::on_TreeFolderFilter_customContextMenuRequested(const QPoint& pt)
@@ -880,10 +624,32 @@ void plQtAssetBrowserWidget::on_TreeFolderFilter_customContextMenuRequested(cons
   QMenu m;
   m.setToolTipsVisible(true);
 
-  if (TreeFolderFilter->currentItem())
+  const bool bClickedValid = TreeFolderFilter->indexAt(pt).isValid();
+
+  if (bClickedValid)
   {
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/OpenFolder.svg")), QLatin1String("Open in Explorer"), this, SLOT(OnTreeOpenExplorer()));
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Delete.svg")), QLatin1String("Delete"), this, SLOT(OnDelete()));
+    const bool bIsRoot = TreeFolderFilter->currentItem() && TreeFolderFilter->currentItem() == TreeFolderFilter->topLevelItem(0);
+    if (TreeFolderFilter->currentItem() && !bIsRoot)
+    {
+      m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/OpenFolder.svg")), QLatin1String("Open in Explorer"), TreeFolderFilter, SLOT(TreeOpenExplorer()));
+    }
+
+    if (TreeFolderFilter->currentItem() && !bIsRoot)
+    {
+      // Delete
+      const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)TreeFolderFilter->currentItem()->data(0, plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+      QAction* pDelete = m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Delete.svg")), QLatin1String("Delete"), TreeFolderFilter, &eqQtAssetBrowserFolderView::DeleteFolder);
+      if (itemType.IsSet(plAssetBrowserItemFlags::DataDirectory))
+      {
+        pDelete->setEnabled(false);
+        pDelete->setToolTip("Data directories can't be deleted.");
+      }
+
+      // Create
+      AddAssetCreatorMenu(&m, false);
+    }
+
+    m.addSeparator();
   }
 
   {
@@ -896,11 +662,9 @@ void plQtAssetBrowserWidget::on_TreeFolderFilter_customContextMenuRequested(cons
     QAction* pAction = m.addAction(QLatin1String("Show Items in hidden folders"), this, SLOT(OnShowHiddenFolderItemsToggled()));
     pAction->setCheckable(true);
     pAction->setChecked(m_pFilter->GetShowItemsInHiddenFolders());
+    pAction->setEnabled(m_pFilter->GetShowItemsInSubFolders());
+    pAction->setToolTip("Whether to ignore '_data' folders when showing items in sub-folders is enabled.");
   }
-
-  m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/DataDirAdd.svg")), QLatin1String("Add folder"), this, SLOT(OnAddFolder()));
-
-  AddAssetCreatorMenu(&m, false);
 
   m.exec(TreeFolderFilter->viewport()->mapToGlobal(pt));
 }
@@ -911,15 +675,36 @@ void plQtAssetBrowserWidget::on_TypeFilter_currentIndexChanged(int index)
 
   plStringBuilder sFilter;
 
-  if (index > 0)
+  switch (m_Mode)
   {
-    sFilter.Set(";", TypeFilter->itemData(index, Qt::UserRole).toString().toUtf8().data(), ";");
+    case Mode::Browser:
+      m_pFilter->SetShowNonImportableFiles(index == 0);
+      m_pFilter->SetShowFiles(index == 0 || index == 1);
+      break;
+    case Mode::AssetPicker:
+      m_pFilter->SetShowNonImportableFiles(false);
+      m_pFilter->SetShowFiles(false);
+      break;
+    case Mode::FilePicker:
+      m_pFilter->SetShowNonImportableFiles(true);
+      m_pFilter->SetShowFiles(true);
+      break;
   }
-  else
+
+
+  switch (index)
   {
-    // all filters enabled
-    // might be different for dialogs
-    sFilter = m_sAllTypesFilter;
+    case 0:
+    case 1:
+    case 2:
+      // all filters enabled
+      // might be different for dialogs
+      sFilter = m_sAllTypesFilter;
+      break;
+
+    default:
+      sFilter.Set(";", TypeFilter->itemData(index, Qt::UserRole).toString().toUtf8().data(), ";");
+      break;
   }
 
   m_pFilter->SetTypeFilter(sFilter);
@@ -935,19 +720,6 @@ void plQtAssetBrowserWidget::OnShowHiddenFolderItemsToggled()
   m_pFilter->SetShowItemsInHiddenFolders(!m_pFilter->GetShowItemsInHiddenFolders());
 }
 
-void plQtAssetBrowserWidget::OnTreeOpenExplorer()
-{
-  if (!TreeFolderFilter->currentItem())
-    return;
-
-  plStringBuilder sPath = TreeFolderFilter->currentItem()->data(0, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
-
-  if (!plQtEditorApp::GetSingleton()->MakeParentDataDirectoryRelativePathAbsolute(sPath, true))
-    return;
-
-  plQtUiServices::OpenInExplorer(sPath, false);
-}
-
 void plQtAssetBrowserWidget::on_ListAssets_customContextMenuRequested(const QPoint& pt)
 {
   QMenu m;
@@ -955,8 +727,30 @@ void plQtAssetBrowserWidget::on_ListAssets_customContextMenuRequested(const QPoi
 
   if (ListAssets->selectionModel()->hasSelection())
   {
-    if (!m_bDialogMode)
-      m.setDefaultAction(m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Document.svg")), QLatin1String("Open Document"), this, SLOT(OnListOpenAssetDocument())));
+    if (m_Mode == Mode::Browser)
+    {
+      QString sTitle = "Open Selection";
+      QIcon icon = QIcon(QLatin1String(":/GuiFoundation/Icons/Document.svg"));
+      if (ListAssets->selectionModel()->selectedIndexes().count() == 1)
+      {
+        const QModelIndex firstItem = ListAssets->selectionModel()->selectedIndexes()[0];
+        const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)firstItem.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+        if (itemType.IsAnySet(plAssetBrowserItemFlags::Asset | plAssetBrowserItemFlags::SubAsset))
+        {
+          sTitle = "Open Document";
+        }
+        else if (itemType.IsSet(plAssetBrowserItemFlags::File))
+        {
+          sTitle = "Open File";
+        }
+        else if (itemType.IsAnySet(plAssetBrowserItemFlags::DataDirectory | plAssetBrowserItemFlags::Folder))
+        {
+          sTitle = "Enter Folder";
+          icon = QIcon(QLatin1String(":/EditorFramework/Icons/Folder.svg"));
+        }
+      }
+      m.setDefaultAction(m.addAction(icon, sTitle, this, SLOT(OnListOpenAssetDocument())));
+    }
     else
       m.setDefaultAction(m.addAction(QLatin1String("Select"), this, SLOT(OnListOpenAssetDocument())));
 
@@ -964,24 +758,56 @@ void plQtAssetBrowserWidget::on_ListAssets_customContextMenuRequested(const QPoi
 
     m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/OpenFolder.svg")), QLatin1String("Open in Explorer"), this, SLOT(OnListOpenExplorer()));
     m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Guid.svg")), QLatin1String("Copy Asset Guid"), this, SLOT(OnListCopyAssetGuid()));
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Search.svg")), QLatin1String("Find all direct references to this asset"), this, [&]() { OnListFindAllReferences(false); });
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Search.svg")), QLatin1String("Find all direct and indirect references to this asset"), this, [&]() { OnListFindAllReferences(true); });
+    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Search.svg")), QLatin1String("Find all direct references to this asset"), this, [&]()
+      { OnListFindAllReferences(false); });
+    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Search.svg")), QLatin1String("Find all direct and indirect references to this asset"), this, [&]()
+      { OnListFindAllReferences(true); });
     m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/ZoomOut.svg")), QLatin1String("Filter to this Path"), this, SLOT(OnFilterToThisPath()));
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Delete.svg")), QLatin1String("Delete"), this, SLOT(OnDelete()));
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Copy.svg")), QLatin1String("Duplicate"), this, SLOT(OnDuplicate()));
-    m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Rename.svg")), QLatin1String("Rename"), this, SLOT(OnRename()));
-
   }
 
   auto pSortAction = m.addAction(QLatin1String("Sort by Recently Used"), this, SLOT(OnListToggleSortByRecentlyUsed()));
   pSortAction->setCheckable(true);
   pSortAction->setChecked(m_pFilter->GetSortByRecentUse());
 
-  m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/DataDirAdd.svg")), QLatin1String("Add folder"), this, SLOT(OnAddFolder()));
 
+  if (m_Mode == Mode::Browser && ListAssets->selectionModel()->hasSelection())
+  {
+    QModelIndexList selection = ListAssets->selectionModel()->selectedIndexes();
+    bool bImportable = false;
+    bool bAllFiles = true;
+    for (const QModelIndex& id : selection)
+    {
+      bImportable |= id.data(plQtAssetBrowserModel::UserRoles::Importable).toBool();
 
+      const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)id.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+      if (itemType.IsAnySet(plAssetBrowserItemFlags::SubAsset | plAssetBrowserItemFlags::DataDirectory))
+      {
+        bAllFiles = false;
+      }
+    }
 
+    // Delete
+    {
+      QAction* pDelete = m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Delete.svg")), QLatin1String("Delete"), this, SLOT(DeleteSelection()));
+      if (!bAllFiles)
+      {
+        pDelete->setEnabled(false);
+        pDelete->setToolTip("Sub-assets and data directories can't be deleted.");
+      }
+    }
 
+    // Import assets
+    if (bImportable)
+    {
+      m.addSeparator();
+      m.addAction(QIcon(QLatin1String(":/GuiFoundation/Icons/Import.svg")), QLatin1String("Import..."), this, SLOT(ImportSelection()));
+      QMenu* imp = m.addMenu(QIcon(QLatin1String(":/GuiFoundation/Icons/Import.svg")), "Import As");
+      connect(imp, &QMenu::aboutToShow, this, &plQtAssetBrowserWidget::OnImportAsAboutToShow);
+      AddImportedViaMenu(&m);
+    }
+  }
+
+  m.addSeparator();
   AddAssetCreatorMenu(&m, true);
 
   m.exec(ListAssets->viewport()->mapToGlobal(pt));
@@ -996,14 +822,11 @@ void plQtAssetBrowserWidget::OnListOpenAssetDocument()
 
   for (auto& index : selection)
   {
-    plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>();
-
-    if (guid.IsValid())
-    {
-      plAssetCurator::GetSingleton()->UpdateAssetLastAccessTime(guid);
-    }
-
-    Q_EMIT ItemChosen(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+    // Only enter folders on a single selection. Otherwise the results are undefined.
+    const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+    if (selection.count() > 1 && itemType.IsAnySet(plAssetBrowserItemFlags::DataDirectory | plAssetBrowserItemFlags::Folder))
+      continue;
+    on_ListAssets_doubleClicked(index);
   }
 }
 
@@ -1020,7 +843,7 @@ void plQtAssetBrowserWidget::OnTransform()
       break;
 
     plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AssetGuid).value<plUuid>();
-    QString sPath = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString();
+    QString sPath = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString();
     range.BeginNextStep(sPath.toUtf8());
     plTransformStatus res = plAssetCurator::GetSingleton()->TransformAsset(guid, plTransformFlags::TriggeredManually);
     if (res.Failed())
@@ -1057,7 +880,7 @@ void plQtAssetBrowserWidget::OnListCopyAssetGuid()
   mimeData->setText(plConversionUtils::ToString(guid, tmp).GetData());
   clipboard->setMimeData(mimeData);
 
-  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", tmp), plTime::Seconds(5));
+  plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(plFmt("Copied asset GUID: {}", tmp), plTime::MakeFromSeconds(5));
 }
 
 void plQtAssetBrowserWidget::OnFilterToThisPath()
@@ -1065,12 +888,9 @@ void plQtAssetBrowserWidget::OnFilterToThisPath()
   if (!ListAssets->selectionModel()->hasSelection())
     return;
 
-  plStringBuilder sPath = m_pModel->data(ListAssets->currentIndex(), plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
+  plStringBuilder sPath = m_pModel->data(ListAssets->currentIndex(), plQtAssetBrowserModel::UserRoles::RelativePath).toString().toUtf8().data();
   sPath.PathParentDirectory();
   sPath.Trim("/");
-
-  if (!plQtEditorApp::GetSingleton()->MakePathDataDirectoryParentRelative(sPath))
-    return;
 
   m_pFilter->SetPathFilter(sPath);
 }
@@ -1085,7 +905,7 @@ void plQtAssetBrowserWidget::OnListFindAllReferences(bool transitive)
   plConversionUtils::ToString(guid, sAssetGuid);
 
   plStringBuilder sFilter;
-  sFilter.Format("{}:{}", transitive ? "ref-all" : "ref", sAssetGuid);
+  sFilter.SetFormat("{}:{}", transitive ? "ref-all" : "ref", sAssetGuid);
   m_pFilter->SetTextFilter(sFilter);
   m_pFilter->SetPathFilter("");
 }
@@ -1111,8 +931,10 @@ void plQtAssetBrowserWidget::OnAssetSelectionChanged(const QItemSelection& selec
   {
     QModelIndex index = ListAssets->selectionModel()->selectedIndexes()[0];
 
+    const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+
     plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>();
-    Q_EMIT ItemSelected(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+    Q_EMIT ItemSelected(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
   }
 }
 
@@ -1126,8 +948,10 @@ void plQtAssetBrowserWidget::OnAssetSelectionCurrentChanged(const QModelIndex& c
   {
     QModelIndex index = ListAssets->selectionModel()->selectedIndexes()[0];
 
+    const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+
     plUuid guid = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>();
-    Q_EMIT ItemSelected(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString());
+    Q_EMIT ItemSelected(guid, m_pModel->data(index, plQtAssetBrowserModel::UserRoles::RelativePath).toString(), m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString(), itemType.GetValue());
   }
 }
 
@@ -1138,7 +962,7 @@ void plQtAssetBrowserWidget::OnModelReset()
 }
 
 
-void plQtAssetBrowserWidget::OnNewAsset()
+void plQtAssetBrowserWidget::NewAsset()
 {
   QAction* pSender = qobject_cast<QAction*>(sender());
 
@@ -1148,222 +972,165 @@ void plQtAssetBrowserWidget::OnNewAsset()
   plString sExtension = pSender->property("Extension").toString().toUtf8().data();
   bool useSelection = pSender->property("UseSelection").toBool();
 
-  QString sStartDir = getSelectedPath();
+  QString sStartDir = plToolsProject::GetSingleton()->GetProjectDirectory().GetData();
 
-  plStringBuilder title("Create ", sTranslateAssetType), sFilter;
+  // find path
+  {
+    if (TreeFolderFilter->currentItem())
+    {
+      sStartDir = TreeFolderFilter->currentItem()->data(0, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
+    }
 
-  sFilter.Format("{0} (*.{1})", sTranslateAssetType, sExtension);
+    // this will take precedence
+    if (useSelection && ListAssets->selectionModel()->hasSelection())
+    {
+      plString sPath = m_pModel->data(ListAssets->currentIndex(), plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
 
-  QString sSelectedFilter = sFilter.GetData();
-  plStringBuilder sOutput = QFileDialog::getSaveFileName(QApplication::activeWindow(), title.GetData(), sStartDir, sFilter.GetData(), &sSelectedFilter, QFileDialog::Option::DontResolveSymlinks).toUtf8().data();
+      if (!sPath.IsEmpty())
+      {
+        plStringBuilder temp = sPath;
+        sPath = temp.GetFileDirectory();
 
-  if (sOutput.IsEmpty())
-    return;
+        sStartDir = sPath.GetData();
+      }
+    }
+  }
+
+  //
+  plStringBuilder sNewAsset = qtToPlString(sStartDir);
+  plStringBuilder sBaseFileName;
+  plPathUtils::MakeValidFilename(sTranslateAssetType, ' ', sBaseFileName);
+  sNewAsset.AppendFormat("/{}.{}", sBaseFileName, sExtension);
+
+  for (plUInt32 i = 0; plOSFile::ExistsFile(sNewAsset); i++)
+  {
+    sNewAsset = qtToPlString(sStartDir);
+    sNewAsset.AppendFormat("/{}{}.{}", sBaseFileName, i, sExtension);
+  }
+
+  sNewAsset.MakeCleanPath();
 
   plDocument* pDoc;
-  if (pManager->CreateDocument(sAssetType, sOutput, pDoc, plDocumentFlags::RequestWindow | plDocumentFlags::AddToRecentFilesList).m_Result.Succeeded())
+  if (pManager->CreateDocument(sAssetType, sNewAsset, pDoc, plDocumentFlags::Default).m_Result.Failed())
   {
-    pDoc->EnsureVisible();
+    plLog::Error("Failed to create document: {}", sNewAsset);
+    return;
+  }
+
+  {
+    plStringBuilder sRelativePath = sNewAsset;
+    if (plQtEditorApp::GetSingleton()->MakePathDataDirectoryParentRelative(sRelativePath))
+    {
+      m_pFilter->SetTemporaryPinnedItem(sRelativePath);
+    }
+    plFileSystemModel::GetSingleton()->NotifyOfChange(sNewAsset);
+    m_pModel->OnFileSystemUpdate();
+  }
+
+  plInt32 iNewIndex = m_pModel->FindIndex(sNewAsset);
+  if (iNewIndex != -1)
+  {
+    m_bOpenAfterRename = true;
+    QModelIndex idx = m_pModel->index(iNewIndex, 0);
+    ListAssets->selectionModel()->select(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+    ListAssets->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+    ListAssets->scrollTo(idx, QAbstractItemView::ScrollHint::EnsureVisible);
+    ListAssets->edit(idx);
   }
 }
 
-void plQtAssetBrowserWidget::OnAddFolder()
+
+void plQtAssetBrowserWidget::OnFileEditingFinished(const QString& sAbsPath, const QString& sNewName, bool bIsAsset)
 {
-  bool ok;
-  QString text = QInputDialog::getText(this, tr("Add folder"),
-    tr("Folder's name:"), QLineEdit::Normal,
-    QString(), &ok);
-
-  if (!ok || text.isEmpty())
-  {
-    return;
-  }
-
-  plStringBuilder result = getSelectedPath().toUtf8().data();
-  result.AppendFormat("/{}/", text.toUtf8());
-
-  if (plOSFile::CreateDirectoryStructure(result).Failed())
-  {
-    plLog::Error("Couldn't create folder {}", result);
-    return;
-  }
-
-  plAssetCurator::GetSingleton()->CheckFileSystem();
-  UpdateDirectoryTree();
-}
-
-void plQtAssetBrowserWidget::OnDelete()
-{
-  if (!ListAssets->selectionModel()->hasSelection())
-  {
-    return;
-  }
-  for (QModelIndex index : ListAssets->selectionModel()->selectedIndexes())
-  {
-    plString path = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).value<QString>().toUtf8().data();
-    if (plOSFile::ExistsFile(path))
-    {
-      // TODO : remove linked files?  Might need the assets rewrite before doing that
-      if (plOSFile::DeleteFile(path).Failed())
-      {
-        plLog::Error("failed to delete file {}", path);
-      }
-    }
-    else if (plOSFile::ExistsDirectory(path))
-    {
-      if (plOSFile::DeleteFolder(path).Failed())
-      {
-        plLog::Error("failed to delete folder {}", path);
-      }
-    }
-    else
-    {
-      plLog::Error("File/folder {} doesn't exists", path);
-    }
-  }
-}
-
-void plQtAssetBrowserWidget::OnDuplicate()
-{
-  if (!ListAssets->selectionModel()->hasSelection())
-  {
-    return;
-  }
-  for (QModelIndex index : ListAssets->selectionModel()->selectedIndexes())
-  {
-    plString path = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).value<QString>().toUtf8().data();
-    plStringBuilder fileName = path.GetFileName();
-    fileName.Append("_copy");
-    plStringBuilder destPath = path;
-    destPath.ChangeFileName(fileName);
-    while (plOSFile::ExistsFile(destPath))
-    {
-      fileName.Append("_copy");
-      destPath.ChangeFileName(fileName);
-    }
-    // find document manager for what we want to clone and use clonedocument on it
-    if (plOSFile::ExistsFile(path))
-    {
-      const plDocumentTypeDescriptor* pTypeDesc = nullptr;
-      if (plDocumentManager::FindDocumentTypeFromPath(path, false, pTypeDesc).Failed())
-      {
-        PLASMA_REPORT_FAILURE("Invalid asset setup");
-      }
-      plUuid newUid = plUuid();
-      newUid.CreateNewUuid();
-      if (pTypeDesc->m_pManager->CloneDocument(path, destPath, newUid).Failed())//TODO: after duplicating an asset, renaming the original will make it appear twice in the browser
-      {
-        plLog::Error("failed to clone asset {}", path);
-      }
-    }
-    if (plOSFile::ExistsDirectory(path))
-    {
-      plLog::Error("Cannot duplicate folders");
-    }
-    else
-    {
-      plLog::Error("File/folder {} doesn't exists", path);
-    }
-  }
-}
-
-void plQtAssetBrowserWidget::OnRename()
-{
-  if (!ListAssets->selectionModel()->hasSelection())
-  {
-    return;
-  }
-  if (ListAssets->selectionModel()->selectedIndexes().size() > 1)
-  {
-    plLog::Error("Cannot rename multiple items at a time");
-    return;
-  }
-
-  bool ok;
-  QString text = QInputDialog::getText(this, tr("Add folder"),
-    tr("Folder's name:"), QLineEdit::Normal,
-    QString(), &ok);
-
-  if (!ok || text.isEmpty())
-  {
-    return;
-  }
-
-  QModelIndex index = ListAssets->selectionModel()->selectedIndexes()[0];
-  plString path = m_pModel->data(index, plQtAssetBrowserModel::UserRoles::AbsolutePath).value<QString>().toUtf8().data();
-  plStringBuilder destPath = path;
-  destPath.ChangeFileName(text.toUtf8().data());
-  if (plOSFile::ExistsFile(path))
-  {
-    if (plOSFile::ExistsFile(destPath))
-    {
-      plLog::Error("File {} already exists", destPath);
-      return;
-    }
-    if (plOSFile::CopyFile(path, destPath).Failed())
-    {
-      plLog::Error("Failed to copy file {} during renaming", path);
-      return;
-    }
-    if (plOSFile::DeleteFile(path).Failed())
-    {
-      plLog::Error("Failed to delete file {} during renaming", path);
-      return;
-    }
-  }
-  else if (plOSFile::ExistsDirectory(path))
-  {
-    plLog::Error("Cannot rename folders yet");
-  }
+  plStringBuilder sOldPath = qtToPlString(sAbsPath);
+  plStringBuilder sNewPath = sOldPath;
+  if (bIsAsset)
+    sNewPath.ChangeFileName(qtToPlString(sNewName));
   else
+    sNewPath.ChangeFileNameAndExtension(qtToPlString(sNewName));
+
+  if (sOldPath != sNewPath)
   {
-    plLog::Error("Cannot find file/folder {} for renaming", path);
+    if (plOSFile::MoveFileOrDirectory(sOldPath, sNewPath).Failed())
+    {
+      plLog::Error("Failed to rename '{}' to '{}'", sOldPath, sNewPath);
+      return;
+    }
+
+    plFileSystemModel::GetSingleton()->NotifyOfChange(sNewPath);
+    plFileSystemModel::GetSingleton()->NotifyOfChange(sOldPath);
+
+    // If we have a temporary item, make sure that any renames ensure that the item is still set as the new temporary
+    // A common case is: a type filter is active that excludes a newly created asset. Thus, on creation the new asset is set as the pinned item. Editing of the item is started and the user gives it a new name and we end up here. We want the item to remain pinned.
+    if (!m_pFilter->GetTemporaryPinnedItem().IsEmpty())
+    {
+      plStringBuilder sOldRelativePath = sOldPath;
+      plStringBuilder sNewRelativePath = sNewPath;
+      if (plQtEditorApp::GetSingleton()->MakePathDataDirectoryParentRelative(sOldRelativePath) && plQtEditorApp::GetSingleton()->MakePathDataDirectoryParentRelative(sNewRelativePath))
+      {
+        if (sOldRelativePath == m_pFilter->GetTemporaryPinnedItem())
+        {
+          m_pFilter->SetTemporaryPinnedItem(sNewRelativePath);
+        }
+      }
+    }
+    m_pModel->OnFileSystemUpdate();
+
+    // it is necessary to flush the events queued on the main thread, otherwise opening the asset may not work as intended
+    plAssetCurator::GetSingleton()->MainThreadTick(true);
+
+    plInt32 iNewIndex = m_pModel->FindIndex(sNewPath);
+    if (iNewIndex != -1)
+    {
+      QModelIndex idx = m_pModel->index(iNewIndex, 0);
+      ListAssets->selectionModel()->select(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->scrollTo(idx, QAbstractItemView::ScrollHint::EnsureVisible);
+    }
   }
 
+  if (m_bOpenAfterRename)
+  {
+    m_bOpenAfterRename = false;
+
+    plInt32 iNewIndex = m_pModel->FindIndex(sNewPath);
+    if (iNewIndex != -1)
+    {
+      QModelIndex idx = m_pModel->index(iNewIndex, 0);
+      on_ListAssets_doubleClicked(idx);
+    }
+  }
 }
 
+void plQtAssetBrowserWidget::ImportSelection()
+{
+  plHybridArray<plString, 4> filesToImport;
+  GetSelectedImportableFiles(filesToImport);
+
+  if (filesToImport.IsEmpty())
+    return;
+
+  plAssetDocumentGenerator::ImportAssets(filesToImport);
+
+  QModelIndexList selection = ListAssets->selectionModel()->selectedIndexes();
+  for (const QModelIndex& id : selection)
+  {
+    Q_EMIT m_pModel->dataChanged(id, id);
+  }
+}
+
+
+void plQtAssetBrowserWidget::OnOpenImportReferenceAsset()
+{
+  QAction* pSender = qobject_cast<QAction*>(sender());
+  plString sAbsPath = qtToPlString(pSender->property("AbsPath").toString());
+
+  plQtEditorApp::GetSingleton()->OpenDocument(sAbsPath, plDocumentFlags::RequestWindow | plDocumentFlags::AddToRecentFilesList);
+}
 
 void plQtAssetBrowserWidget::OnListToggleSortByRecentlyUsed()
 {
   m_pFilter->SetSortByRecentUse(!m_pFilter->GetSortByRecentUse());
-}
-
-void plQtAssetBrowserWidget::OnPathFilterChanged()
-{
-  const QString sPath = QString::fromUtf8(m_pFilter->GetPathFilter());
-
-  if (TreeFolderFilter->topLevelItemCount() == 1)
-  {
-    if (m_bTreeSelectionChangeInProgress)
-      return;
-
-    m_bTreeSelectionChangeInProgress = true;
-    TreeFolderFilter->clearSelection();
-    SelectPathFilter(TreeFolderFilter->topLevelItem(0), sPath);
-    m_bTreeSelectionChangeInProgress = false;
-  }
-
-  QTimer::singleShot(0, this, SLOT(OnSelectionTimer()));
-}
-
-bool plQtAssetBrowserWidget::SelectPathFilter(QTreeWidgetItem* pParent, const QString& sPath)
-{
-  if (pParent->data(0, plQtAssetBrowserModel::UserRoles::AbsolutePath).toString() == sPath)
-  {
-    pParent->setSelected(true);
-    return true;
-  }
-
-  for (plInt32 i = 0; i < pParent->childCount(); ++i)
-  {
-    if (SelectPathFilter(pParent->child(i), sPath))
-    {
-      pParent->setExpanded(true);
-      return true;
-    }
-  }
-
-  return false;
 }
 
 void plQtAssetBrowserWidget::SetSelectedAsset(plUuid preselectedAsset)
@@ -1377,14 +1144,27 @@ void plQtAssetBrowserWidget::SetSelectedAsset(plUuid preselectedAsset)
   QMetaObject::invokeMethod(this, "OnScrollToItem", Qt::ConnectionType::QueuedConnection, Q_ARG(plUuid, preselectedAsset));
 }
 
+void plQtAssetBrowserWidget::SetSelectedFile(plStringView sAbsPath)
+{
+  if (sAbsPath.IsEmpty())
+    return;
+
+  // cannot do this immediately, since the UI is probably still building up
+  // ListAssets->scrollTo either hangs, or has no effect
+  // so we put this into the message queue, and do it later
+  QMetaObject::invokeMethod(this, "OnScrollToFile", Qt::ConnectionType::QueuedConnection, Q_ARG(QString, plMakeQString(sAbsPath)));
+}
+
 void plQtAssetBrowserWidget::OnScrollToItem(plUuid preselectedAsset)
 {
   for (plInt32 i = 0; i < m_pModel->rowCount(); ++i)
   {
-    if (m_pModel->data(m_pModel->index(i, 0), plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>() == preselectedAsset)
+    QModelIndex idx = m_pModel->index(i, 0);
+    if (m_pModel->data(idx, plQtAssetBrowserModel::UserRoles::SubAssetGuid).value<plUuid>() == preselectedAsset)
     {
-      ListAssets->selectionModel()->select(m_pModel->index(i, 0), QItemSelectionModel::SelectionFlag::ClearAndSelect);
-      ListAssets->scrollTo(m_pModel->index(i, 0), QAbstractItemView::ScrollHint::EnsureVisible);
+      ListAssets->selectionModel()->select(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->scrollTo(idx, QAbstractItemView::ScrollHint::EnsureVisible);
       return;
     }
   }
@@ -1392,30 +1172,34 @@ void plQtAssetBrowserWidget::OnScrollToItem(plUuid preselectedAsset)
   raise();
 }
 
-void plQtAssetBrowserWidget::ShowOnlyTheseTypeFilters(const char* szFilters)
+void plQtAssetBrowserWidget::OnScrollToFile(QString sPreselectedFile)
+{
+  for (plInt32 i = 0; i < m_pModel->rowCount(); ++i)
+  {
+    QModelIndex idx = m_pModel->index(i, 0);
+
+    if (m_pModel->data(idx, plQtAssetBrowserModel::UserRoles::AbsolutePath).value<QString>() == sPreselectedFile)
+    {
+      ListAssets->selectionModel()->select(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->selectionModel()->setCurrentIndex(idx, QItemSelectionModel::SelectionFlag::ClearAndSelect);
+      ListAssets->scrollTo(idx, QAbstractItemView::ScrollHint::EnsureVisible);
+      return;
+    }
+  }
+
+  raise();
+}
+
+void plQtAssetBrowserWidget::ShowOnlyTheseTypeFilters(plStringView sFilters)
 {
   m_sAllTypesFilter.Clear();
 
-  if (!plStringUtils::IsNullOrEmpty(szFilters))
+  if (!sFilters.IsEmpty())
   {
     plStringBuilder sFilter;
-    const plStringBuilder sAllFilters(";", szFilters, ";");
+    const plStringBuilder sAllFilters(";", sFilters, ";");
 
     m_sAllTypesFilter = sAllFilters;
-
-    {
-      plQtScopedBlockSignals block(ListTypeFilter);
-
-      for (plInt32 i = 1; i < ListTypeFilter->count(); ++i)
-      {
-        sFilter.Set(";", ListTypeFilter->item(i)->data(Qt::UserRole).toString().toUtf8().data(), ";");
-
-        if (sAllFilters.FindSubString(sFilter) == nullptr)
-        {
-          ListTypeFilter->item(i)->setHidden(true);
-        }
-      }
-    }
 
     {
       plQtScopedBlockSignals block(TypeFilter);
@@ -1435,4 +1219,9 @@ void plQtAssetBrowserWidget::ShowOnlyTheseTypeFilters(const char* szFilters)
   }
 
   m_pFilter->SetTypeFilter(m_sAllTypesFilter);
+}
+
+void plQtAssetBrowserWidget::UseFileExtensionFilters(plStringView sFileExtensions)
+{
+  m_pFilter->SetFileExtensionFilters(sFileExtensions);
 }

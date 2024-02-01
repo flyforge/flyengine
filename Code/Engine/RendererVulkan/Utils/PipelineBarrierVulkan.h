@@ -13,7 +13,7 @@ class plGALResourceViewVulkan;
 class plGALUnorderedAccessViewVulkan;
 
 /// \brief
-class PLASMA_RENDERERVULKAN_DLL plPipelineBarrierVulkan
+class PL_RENDERERVULKAN_DLL plPipelineBarrierVulkan
 {
 public:
   /// \name Barrier handling

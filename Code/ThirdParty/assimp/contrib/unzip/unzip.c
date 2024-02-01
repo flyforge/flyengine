@@ -53,7 +53,7 @@
 
 #define SIZECENTRALDIRITEM          (0x2e)
 #define SIZECENTRALHEADERLOCATOR    (0x14)
-#define SIZEZIPLOCALHEADER          (0x1e)
+#define SIZplIPLOCALHEADER          (0x1e)
 
 #ifndef BUFREADCOMMENT
 #  define BUFREADCOMMENT            (0x400)
@@ -1032,7 +1032,7 @@ static int unzCheckCurrentFileCoherencyHeader(unz64_s *s, uint32_t *psize_variab
     if (unzReadUInt16(&s->z_filefunc, s->filestream, &size_extra_field) != UNZ_OK)
         err = UNZ_ERRNO;
 
-    *poffset_local_extrafield = s->cur_file_info_internal.offset_curfile + SIZEZIPLOCALHEADER + size_filename;
+    *poffset_local_extrafield = s->cur_file_info_internal.offset_curfile + SIZplIPLOCALHEADER + size_filename;
     *psize_local_extrafield = size_extra_field;
     *psize_variable += size_extra_field;
 
@@ -1208,7 +1208,7 @@ extern int ZEXPORT unzOpenCurrentFile3(unzFile file, int *method, int *level, in
 
     pfile_in_zip_read_info->rest_read_compressed = s->cur_file_info.compressed_size;
     pfile_in_zip_read_info->rest_read_uncompressed = s->cur_file_info.uncompressed_size;
-    pfile_in_zip_read_info->pos_in_zipfile = s->cur_file_info_internal.offset_curfile + SIZEZIPLOCALHEADER + size_variable;
+    pfile_in_zip_read_info->pos_in_zipfile = s->cur_file_info_internal.offset_curfile + SIZplIPLOCALHEADER + size_variable;
     pfile_in_zip_read_info->stream.avail_in = 0;
 
     s->pfile_in_zip_read = pfile_in_zip_read_info;

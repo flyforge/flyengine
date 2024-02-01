@@ -11,7 +11,7 @@ plVisualScriptCoroutine::plVisualScriptCoroutine(const plSharedPtr<const plVisua
 
 plVisualScriptCoroutine::~plVisualScriptCoroutine() = default;
 
-void plVisualScriptCoroutine::Start(plArrayPtr<plVariant> arguments)
+void plVisualScriptCoroutine::StartWithVarargs(plArrayPtr<plVariant> arguments)
 {
   m_LocalDataStorage.AllocateStorage();
 
@@ -42,12 +42,12 @@ plVisualScriptCoroutineAllocator::plVisualScriptCoroutineAllocator(const plShare
 {
 }
 
-void plVisualScriptCoroutineAllocator::Deallocate(void* pObject, plAllocatorBase* pAllocator /*= nullptr*/)
+void plVisualScriptCoroutineAllocator::Deallocate(void* pObject, plAllocator* pAllocator /*= nullptr*/)
 {
-  PLASMA_REPORT_FAILURE("Deallocate is not supported");
+  PL_REPORT_FAILURE("Deallocate is not supported");
 }
 
-plInternal::NewInstance<void> plVisualScriptCoroutineAllocator::AllocateInternal(plAllocatorBase* pAllocator)
+plInternal::NewInstance<void> plVisualScriptCoroutineAllocator::AllocateInternal(plAllocator* pAllocator)
 {
-  return PLASMA_DEFAULT_NEW(plVisualScriptCoroutine, m_pDesc);
+  return PL_SCRIPT_NEW(plVisualScriptCoroutine, m_pDesc);
 }

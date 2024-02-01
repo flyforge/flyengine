@@ -8,7 +8,7 @@ plGALBlendState::plGALBlendState(const plGALBlendStateCreationDescription& Descr
 {
 }
 
-plGALBlendState::~plGALBlendState() {}
+plGALBlendState::~plGALBlendState() = default;
 
 
 
@@ -17,7 +17,7 @@ plGALDepthStencilState::plGALDepthStencilState(const plGALDepthStencilStateCreat
 {
 }
 
-plGALDepthStencilState::~plGALDepthStencilState() {}
+plGALDepthStencilState::~plGALDepthStencilState() = default;
 
 
 
@@ -26,7 +26,7 @@ plGALRasterizerState::plGALRasterizerState(const plGALRasterizerStateCreationDes
 {
 }
 
-plGALRasterizerState::~plGALRasterizerState() {}
+plGALRasterizerState::~plGALRasterizerState() = default;
 
 
 plGALSamplerState::plGALSamplerState(const plGALSamplerStateCreationDescription& Description)
@@ -34,8 +34,6 @@ plGALSamplerState::plGALSamplerState(const plGALSamplerStateCreationDescription&
 {
 }
 
-plGALSamplerState::~plGALSamplerState() {}
+plGALSamplerState::~plGALSamplerState() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_State_Implementation_State);

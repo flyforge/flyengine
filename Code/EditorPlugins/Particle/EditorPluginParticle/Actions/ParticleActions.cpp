@@ -4,8 +4,8 @@
 #include <EditorPluginParticle/ParticleEffectAsset/ParticleEffectAsset.h>
 #include <GuiFoundation/Action/ActionManager.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plParticleActions::s_hCategory;
 plActionDescriptorHandle plParticleActions::s_hPauseEffect;
@@ -18,36 +18,36 @@ plActionDescriptorHandle plParticleActions::s_hRenderVisualizers;
 
 void plParticleActions::RegisterActions()
 {
-  s_hCategory = PLASMA_REGISTER_CATEGORY("ParticleCategory");
+  s_hCategory = PL_REGISTER_CATEGORY("ParticleCategory");
   s_hPauseEffect =
-    PLASMA_REGISTER_ACTION_1("PFX.Pause", plActionScope::Document, "Particles", "Pause", plParticleAction, plParticleAction::ActionType::PauseEffect);
+    PL_REGISTER_ACTION_1("PFX.Pause", plActionScope::Document, "Particles", "Pause", plParticleAction, plParticleAction::ActionType::PauseEffect);
   s_hRestartEffect =
-    PLASMA_REGISTER_ACTION_1("PFX.Restart", plActionScope::Document, "Particles", "F5", plParticleAction, plParticleAction::ActionType::RestartEffect);
+    PL_REGISTER_ACTION_1("PFX.Restart", plActionScope::Document, "Particles", "F5", plParticleAction, plParticleAction::ActionType::RestartEffect);
   s_hAutoRestart =
-    PLASMA_REGISTER_ACTION_1("PFX.AutoRestart", plActionScope::Document, "Particles", "", plParticleAction, plParticleAction::ActionType::AutoRestart);
+    PL_REGISTER_ACTION_1("PFX.AutoRestart", plActionScope::Document, "Particles", "", plParticleAction, plParticleAction::ActionType::AutoRestart);
 
-  s_hSimulationSpeedMenu = PLASMA_REGISTER_MENU_WITH_ICON("PFX.Speed.Menu", ":/EditorPluginParticle/Icons/Speed.svg");
-  s_hSimulationSpeed[0] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeedMenu = PL_REGISTER_MENU_WITH_ICON("PFX.Speed.Menu", ":/EditorPluginParticle/Icons/Speed.svg");
+  s_hSimulationSpeed[0] = PL_REGISTER_ACTION_2(
     "PFX.Speed.01", plActionScope::Document, "Particles", "Ctrl+1", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 0.1f);
-  s_hSimulationSpeed[1] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[1] = PL_REGISTER_ACTION_2(
     "PFX.Speed.025", plActionScope::Document, "Particles", "Ctrl+2", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 0.25f);
-  s_hSimulationSpeed[2] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[2] = PL_REGISTER_ACTION_2(
     "PFX.Speed.05", plActionScope::Document, "Particles", "Ctrl+3", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 0.5f);
-  s_hSimulationSpeed[3] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[3] = PL_REGISTER_ACTION_2(
     "PFX.Speed.1", plActionScope::Document, "Particles", "Ctrl+4", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 1.0f);
-  s_hSimulationSpeed[4] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[4] = PL_REGISTER_ACTION_2(
     "PFX.Speed.15", plActionScope::Document, "Particles", "Ctrl+5", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 1.5f);
-  s_hSimulationSpeed[5] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[5] = PL_REGISTER_ACTION_2(
     "PFX.Speed.2", plActionScope::Document, "Particles", "Ctrl+6", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 2.0f);
-  s_hSimulationSpeed[6] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[6] = PL_REGISTER_ACTION_2(
     "PFX.Speed.3", plActionScope::Document, "Particles", "Ctrl+7", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 3.0f);
-  s_hSimulationSpeed[7] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[7] = PL_REGISTER_ACTION_2(
     "PFX.Speed.4", plActionScope::Document, "Particles", "Ctrl+8", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 4.0f);
-  s_hSimulationSpeed[8] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[8] = PL_REGISTER_ACTION_2(
     "PFX.Speed.5", plActionScope::Document, "Particles", "Ctrl+9", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 5.0f);
-  s_hSimulationSpeed[9] = PLASMA_REGISTER_ACTION_2(
+  s_hSimulationSpeed[9] = PL_REGISTER_ACTION_2(
     "PFX.Speed.10", plActionScope::Document, "Particles", "Ctrl+0", plParticleAction, plParticleAction::ActionType::SimulationSpeed, 10.0f);
-  s_hRenderVisualizers = PLASMA_REGISTER_ACTION_1(
+  s_hRenderVisualizers = PL_REGISTER_ACTION_1(
     "PFX.Render.Visualizers", plActionScope::Document, "Particles", "V", plParticleAction, plParticleAction::ActionType::RenderVisualizers);
 }
 
@@ -60,14 +60,14 @@ void plParticleActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hSimulationSpeedMenu);
   plActionManager::UnregisterAction(s_hRenderVisualizers);
 
-  for (int i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+  for (int i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
     plActionManager::UnregisterAction(s_hSimulationSpeed[i]);
 }
 
-void plParticleActions::MapActions(const char* szMapping, const char* szPath)
+void plParticleActions::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 
@@ -81,7 +81,7 @@ void plParticleActions::MapActions(const char* szMapping, const char* szPath)
 
   plStringBuilder sSubPath(szSubPath, "/PFX.Speed.Menu");
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(s_hSimulationSpeed); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(s_hSimulationSpeed); ++i)
     pMap->MapAction(s_hSimulationSpeed[i], sSubPath, i + 1.0f);
 
   pMap->MapAction(s_hRenderVisualizers, szSubPath, 4.0f);

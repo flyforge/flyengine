@@ -12,15 +12,15 @@
 ///
 /// If you have a class A that you want to be enumerable, add this to its header:
 ///
-///   class PLASMA_DLL_IMPORT_EXPORT_STUFF A : public plEnumerable<A>
+///   class PL_DLL_IMPORT_EXPORT_STUFF A : public plEnumerable<A>
 ///   {
-///     PLASMA_DECLARE_ENUMERABLE_CLASS(A); // since A is declared as DLL import/export all code embedded in its body will also work properly
+///     PL_DECLARE_ENUMERABLE_CLASS(A); // since A is declared as DLL import/export all code embedded in its body will also work properly
 ///     ...
 ///   };
 ///
 /// Also add this somewhere in its source-file:
 ///
-///   PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(A);
+///   PL_ENUMERABLE_CLASS_IMPLEMENTATION(A);
 ///
 /// That's it, now the class instances can be enumerated with 'GetFirstInstance' and 'GetNextInstance'
 template <typename Derived, typename Base = plNoBase>
@@ -72,12 +72,12 @@ protected:
 /// \brief Insert this macro in a class that is supposed to be enumerable, and pass the class name as the parameter.
 ///
 /// See class plEnumerable for more details.
-#define PLASMA_DECLARE_ENUMERABLE_CLASS(self) PLASMA_DECLARE_ENUMERABLE_CLASS_WITH_BASE(self, plNoBase)
+#define PL_DECLARE_ENUMERABLE_CLASS(self) PL_DECLARE_ENUMERABLE_CLASS_WITH_BASE(self, plNoBase)
 
 /// \brief Insert this macro in a class that is supposed to be enumerable, and pass the class name as the parameter.
 ///
 /// See class plEnumerable for more details.
-#define PLASMA_DECLARE_ENUMERABLE_CLASS_WITH_BASE(self, base)                      \
+#define PL_DECLARE_ENUMERABLE_CLASS_WITH_BASE(self, base)                      \
 private:                                                                       \
   using plEnumerableBase = base;                                               \
   friend class plEnumerable<self, base>;                                       \
@@ -95,7 +95,7 @@ private:
 /// \brief Insert this macro in a cpp file and pass the class name of the to-be-enumerable class as the parameter.
 ///
 /// See class plEnumerable for more details.
-#define PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(self)                                \
+#define PL_ENUMERABLE_CLASS_IMPLEMENTATION(self)                                \
   plEnumerable<self, self::plEnumerableBase>* self::s_pFirstInstance = nullptr; \
   plEnumerable<self, self::plEnumerableBase>* self::s_pLastInstance = nullptr;  \
   plUInt32 self::s_uiInstances = 0

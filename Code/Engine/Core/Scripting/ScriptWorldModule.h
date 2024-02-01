@@ -4,15 +4,16 @@
 #include <Core/Scripting/ScriptCoroutine.h>
 #include <Core/Utils/IntervalScheduler.h>
 #include <Core/World/World.h>
+#include <Foundation/CodeUtils/Expression/ExpressionVM.h>
 
 using plScriptClassResourceHandle = plTypedResourceHandle<class plScriptClassResource>;
 class plScriptInstance;
 
-class PLASMA_CORE_DLL plScriptWorldModule : public plWorldModule
+class PL_CORE_DLL plScriptWorldModule : public plWorldModule
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScriptWorldModule, plWorldModule);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plScriptWorldModule);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plScriptWorldModule, plWorldModule);
+  PL_DISALLOW_COPY_AND_ASSIGN(plScriptWorldModule);
 
 public:
   plScriptWorldModule(plWorld* pWorld);
@@ -48,14 +49,10 @@ public:
   bool IsCoroutineFinished(plScriptCoroutineHandle hCoroutine) const;
 
   ///@}
-  /// \name Script Reload Functions
-  ///@{
 
-  using ReloadFunction = plDelegate<void()>;
-  void AddScriptReloadFunction(plScriptClassResourceHandle hScript, ReloadFunction function);
-  void RemoveScriptReloadFunction(plScriptClassResourceHandle hScript, ReloadFunction function);
-
-  ///@}
+  /// \brief Returns a expression vm that can be used in custom script implementations.
+  /// Make sure to only execute one expression at a time, the VM is NOT thread safe.
+  plExpressionVM& GetSharedExpressionVM() { return m_SharedExpressionVM; }
 
   struct FunctionContext
   {
@@ -76,8 +73,6 @@ public:
 
 private:
   void CallUpdateFunctions(const plWorldModule::UpdateContext& context);
-  void ReloadScripts(const plWorldModule::UpdateContext& context);
-  void ResourceEventHandler(const plResourceEvent& e);
 
   plIntervalScheduler<FunctionContext> m_Scheduler;
 
@@ -85,10 +80,7 @@ private:
   plHashTable<plScriptInstance*, plSmallArray<plScriptCoroutineHandle, 8>> m_InstanceToScriptCoroutines;
   plDynamicArray<plUniquePtr<plScriptCoroutine>> m_DeadScriptCoroutines;
 
-  using ReloadFunctionList = plHybridArray<ReloadFunction, 8>;
-  plHashTable<plScriptClassResourceHandle, ReloadFunctionList> m_ReloadFunctions;
-  plHashSet<plScriptClassResourceHandle> m_NeedReload;
-  ReloadFunctionList m_TempReloadFunctions;
+  plExpressionVM m_SharedExpressionVM;
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -96,12 +88,12 @@ private:
 template <>
 struct plHashHelper<plScriptWorldModule::FunctionContext>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plScriptWorldModule::FunctionContext& value)
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plScriptWorldModule::FunctionContext& value)
   {
     plUInt32 hash = plHashHelper<const void*>::Hash(value.m_pFunctionAndFlags);
     hash = plHashingUtils::CombineHashValues32(hash, plHashHelper<void*>::Hash(value.m_pInstance));
     return hash;
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plScriptWorldModule::FunctionContext& a, const plScriptWorldModule::FunctionContext& b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(const plScriptWorldModule::FunctionContext& a, const plScriptWorldModule::FunctionContext& b) { return a == b; }
 };

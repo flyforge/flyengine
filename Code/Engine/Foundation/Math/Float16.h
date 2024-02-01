@@ -4,11 +4,11 @@
 ///
 /// This class only contains functions to convert between float and float16. It does not support any mathematical operations.
 /// It is only intended for conversion, always do all mathematical operations on regular floats (or let the GPU do them on halfs).
-class PLASMA_FOUNDATION_DLL plFloat16
+class PL_FOUNDATION_DLL plFloat16
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Default constructor does not initialize the value.
   plFloat16() = default;
@@ -40,11 +40,11 @@ private:
 };
 
 /// \brief A simple helper class to use half-precision floats (plFloat16) as vectors
-class PLASMA_FOUNDATION_DLL plFloat16Vec2
+class PL_FOUNDATION_DLL plFloat16Vec2
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plFloat16Vec2() = default;
   plFloat16Vec2(const plVec2& vVec);
@@ -56,11 +56,11 @@ public:
 };
 
 /// \brief A simple helper class to use half-precision floats (plFloat16) as vectors
-class PLASMA_FOUNDATION_DLL plFloat16Vec3
+class PL_FOUNDATION_DLL plFloat16Vec3
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plFloat16Vec3() = default;
   plFloat16Vec3(const plVec3& vVec);
@@ -72,11 +72,11 @@ public:
 };
 
 /// \brief A simple helper class to use half-precision floats (plFloat16) as vectors
-class PLASMA_FOUNDATION_DLL plFloat16Vec4
+class PL_FOUNDATION_DLL plFloat16Vec4
 {
 public:
   // Means that vectors can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plFloat16Vec4() = default;
   plFloat16Vec4(const plVec4& vVec);

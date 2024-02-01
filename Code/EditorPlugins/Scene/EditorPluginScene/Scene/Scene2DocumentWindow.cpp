@@ -2,6 +2,7 @@
 
 #include <EditorFramework/DocumentWindow/QuadViewWidget.moc.h>
 #include <EditorFramework/Gizmos/SnapProvider.h>
+#include <EditorFramework/Preferences/EditorPreferences.h>
 #include <EditorPluginScene/Panels/LayerPanel/LayerPanel.moc.h>
 #include <EditorPluginScene/Panels/ScenegraphPanel/ScenegraphPanel.moc.h>
 #include <EditorPluginScene/Scene/Scene2Document.h>
@@ -16,19 +17,20 @@
 plQtScene2DocumentWindow::plQtScene2DocumentWindow(plScene2Document* pDocument)
   : plQtSceneDocumentWindowBase(pDocument)
 {
-  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, PlasmaEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
+  auto ViewFactory = [](plQtEngineDocumentWindow* pWindow, plEngineViewConfig* pConfig) -> plQtEngineViewWidget* {
     plQtSceneViewWidget* pWidget = new plQtSceneViewWidget(nullptr, static_cast<plQtSceneDocumentWindowBase*>(pWindow), pConfig);
     pWindow->AddViewWidget(pWidget);
     return pWidget;
   };
   m_pQuadViewWidget = new plQtQuadViewWidget(pDocument, this, ViewFactory, "EditorPluginScene_ViewToolBar");
 
-  pDocument->SetEditToolConfigDelegate(
-    [this](plGameObjectEditTool* pTool) { pTool->ConfigureTool(static_cast<plGameObjectDocument*>(GetDocument()), this, this); });
+  pDocument->SetEditToolConfigDelegate([this](plGameObjectEditTool* pTool)
+    { pTool->ConfigureTool(static_cast<plGameObjectDocument*>(GetDocument()), this, this); });
 
   setCentralWidget(m_pQuadViewWidget);
 
-  SetTargetFramerate(60);
+  plEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<plEditorPreferencesUser>();
+  SetTargetFramerate(pPreferences->GetMaxFramerate());
 
   {
     // Menu Bar
@@ -52,13 +54,11 @@ plQtScene2DocumentWindow::plQtScene2DocumentWindow(plScene2Document* pDocument)
     addToolBar(pToolBar);
   }
 
-  const plSceneDocument* pSceneDoc = static_cast<const plSceneDocument*>(GetDocument());
-
   {
     // Panels
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("PropertyPanel");
-    pPropertyPanel->setWindowTitle("PROPERTIES");
+    pPropertyPanel->setWindowTitle("Properties");
     pPropertyPanel->show();
 
     plQtDocumentPanel* pPanelTree = new plQtScenegraphPanel(this, pDocument);
@@ -69,7 +69,7 @@ plQtScene2DocumentWindow::plQtScene2DocumentWindow(plScene2Document* pDocument)
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
     pPropertyPanel->setWidget(pPropertyGrid);
-    PLASMA_VERIFY(connect(pPropertyGrid, &plQtPropertyGridWidget::ExtendContextMenu, this, &plQtScene2DocumentWindow::ExtendPropertyGridContextMenu), "");
+    PL_VERIFY(connect(pPropertyGrid, &plQtPropertyGridWidget::ExtendContextMenu, this, &plQtScene2DocumentWindow::ExtendPropertyGridContextMenu), "");
 
     addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, pPropertyPanel);
     addDockWidget(Qt::DockWidgetArea::LeftDockWidgetArea, pPanelTree);
@@ -78,9 +78,7 @@ plQtScene2DocumentWindow::plQtScene2DocumentWindow(plScene2Document* pDocument)
   FinishWindowCreation();
 }
 
-plQtScene2DocumentWindow::~plQtScene2DocumentWindow()
-{
-}
+plQtScene2DocumentWindow::~plQtScene2DocumentWindow() = default;
 
 bool plQtScene2DocumentWindow::InternalCanCloseWindow()
 {
@@ -128,5 +126,5 @@ plStatus plQtScene2DocumentWindow::SaveAllLayers()
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

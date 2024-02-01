@@ -5,7 +5,7 @@
 
 class plCollectionAssetEntry : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCollectionAssetEntry, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plCollectionAssetEntry, plReflectedClass);
 
 public:
   plString m_sLookupName;
@@ -14,7 +14,7 @@ public:
 
 class plCollectionAssetData : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCollectionAssetData, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plCollectionAssetData, plReflectedClass);
 
 public:
   plDynamicArray<plCollectionAssetEntry> m_Entries;
@@ -22,13 +22,11 @@ public:
 
 class plCollectionAssetDocument : public plSimpleAssetDocument<plCollectionAssetData>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCollectionAssetDocument, plSimpleAssetDocument<plCollectionAssetData>);
+  PL_ADD_DYNAMIC_REFLECTION(plCollectionAssetDocument, plSimpleAssetDocument<plCollectionAssetData>);
 
 public:
-  plCollectionAssetDocument(const char* szDocumentPath);
+  plCollectionAssetDocument(plStringView sDocumentPath);
 
 protected:
-  virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
-
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 };

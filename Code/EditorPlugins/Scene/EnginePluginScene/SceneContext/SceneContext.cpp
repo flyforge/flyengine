@@ -3,7 +3,7 @@
 #include <EnginePluginScene/SceneContext/SceneContext.h>
 #include <EnginePluginScene/SceneView/SceneView.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Interfaces/SoundInterface.h>
 #include <Core/Prefabs/PrefabResource.h>
 #include <Core/World/EventMessageHandlerComponent.h>
@@ -21,15 +21,15 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneContext, 1, plRTTIDefaultAllocator<plSceneContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneContext, 1, plRTTIDefaultAllocator<plSceneContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Scene;Prefab;PropertyAnim"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Scene;Prefab;PropertyAnim"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plSceneContext::ComputeHierarchyBounds(plGameObject* pObj, plBoundingBoxSphere& bounds)
@@ -51,12 +51,11 @@ void plSceneContext::DrawSelectionBounds(const plViewHandle& hView)
   if (!m_bRenderSelectionBoxes)
     return;
 
-  PLASMA_LOCK(m_pWorld->GetWriteMarker());
+  PL_LOCK(m_pWorld->GetWriteMarker());
 
   for (const auto& obj : m_Selection)
   {
-    plBoundingBoxSphere bounds;
-    bounds.SetInvalid();
+    plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
     plGameObject* pObj;
     if (!m_pWorld->TryGetObject(obj, pObj))
@@ -66,7 +65,7 @@ void plSceneContext::DrawSelectionBounds(const plViewHandle& hView)
 
     if (bounds.IsValid())
     {
-      plDebugRenderer::DrawLineBoxCorners(hView, bounds.GetBox(), 0.25f, plColorScheme::LightUI(plColorScheme::PlasmaBranding));
+      plDebugRenderer::DrawLineBoxCorners(hView, bounds.GetBox(), 0.25f, plColorScheme::LightUI(plColorScheme::Yellow));
     }
   }
 }
@@ -101,7 +100,7 @@ void plSceneContext::UpdateInvisibleLayerTags()
       }
     }
 
-    for (PlasmaEngineProcessViewContext* pView : m_ViewContexts)
+    for (plEngineProcessViewContext* pView : m_ViewContexts)
     {
       if (pView)
       {
@@ -113,7 +112,7 @@ void plSceneContext::UpdateInvisibleLayerTags()
 }
 
 plSceneContext::plSceneContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_bRenderSelectionOverlay = true;
   m_bRenderSelectionBoxes = true;
@@ -132,7 +131,7 @@ plSceneContext::~plSceneContext()
   plGameApplicationBase::GetGameApplicationBaseInstance()->m_ExecutionEvents.RemoveEventHandler(plMakeDelegate(&plSceneContext::GameApplicationEventHandler, this));
 }
 
-void plSceneContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plSceneContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plWorldSettingsMsgToEngine>())
   {
@@ -219,11 +218,11 @@ void plSceneContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
     return;
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
+  plEngineProcessDocumentContext::HandleMessage(pMsg);
 
   if (pMsg->IsInstanceOf<plEntityMsgToEngine>())
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
     AddLayerIndexTag(*static_cast<const plEntityMsgToEngine*>(pMsg), m_Context, m_LayerTag);
   }
 }
@@ -234,7 +233,7 @@ void plSceneContext::HandleViewRedrawMsg(const plViewRedrawMsgToEngine* pMsg)
   {
     m_bUpdateAllLocalBounds = false;
 
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     for (auto it = m_pWorld->GetObjects(); it.IsValid(); ++it)
     {
@@ -255,7 +254,7 @@ void plSceneContext::AnswerObjectStatePullRequest(const plViewRedrawMsgToEngine*
   if (m_pWorld->GetWorldSimulationEnabled() || m_PushObjectStateMsg.m_ObjectStates.IsEmpty())
     return;
 
-  PLASMA_LOCK(m_pWorld->GetReadMarker());
+  PL_LOCK(m_pWorld->GetReadMarker());
 
   for (auto& state : m_PushObjectStateMsg.m_ObjectStates)
   {
@@ -302,8 +301,8 @@ void plSceneContext::AnswerObjectStatePullRequest(const plViewRedrawMsgToEngine*
     const plQuat localRot = pChild->GetLocalRotation();
 
     // now adjust the position
-    state.m_vPosition -= state.m_qRotation * -localRot * localPos;
-    state.m_qRotation = state.m_qRotation * -localRot;
+    state.m_vPosition -= state.m_qRotation * localRot.GetInverse() * localPos;
+    state.m_qRotation = state.m_qRotation * localRot.GetInverse();
   }
 
   // send a return message with the result
@@ -320,7 +319,7 @@ void plSceneContext::HandleActiveLayerChangedMsg(const plActiveLayerChangedMsgTo
 
 void plSceneContext::HandleTagMsgToEngineMsg(const plObjectTagMsgToEngine* pMsg)
 {
-  PLASMA_LOCK(m_pWorld->GetWriteMarker());
+  PL_LOCK(m_pWorld->GetWriteMarker());
 
   plGameObjectHandle hObject = GetActiveContext().m_GameObjectMap.GetHandle(pMsg->m_ObjectGuid);
 
@@ -371,7 +370,7 @@ void plSceneContext::HandleGridSettingsMsg(const plGridSettingsMsgToEngine* pMsg
       mRot.SetColumn(0, pMsg->m_vGridTangent1);
       mRot.SetColumn(1, pMsg->m_vGridTangent2);
       mRot.SetColumn(2, pMsg->m_vGridTangent1.CrossRH(pMsg->m_vGridTangent2));
-      m_GridTransform.m_qRotation.SetFromMat3(mRot);
+      m_GridTransform.m_qRotation = plQuat::MakeFromMat3(mRot);
     }
   }
 }
@@ -400,21 +399,20 @@ void plSceneContext::HandleWorldSettingsMsg(const plWorldSettingsMsgToEngine* pM
   m_bRenderSelectionBoxes = pMsg->m_bRenderSelectionBoxes;
 
   if (pMsg->m_bAddAmbientLight)
-    AddAmbientLight(true);
+    AddAmbientLight(true, false);
   else
     RemoveAmbientLight();
 }
 
-void plSceneContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plSceneContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_Selection.IsEmpty())
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     for (const auto& obj : m_Selection)
     {
@@ -434,12 +432,12 @@ void plSceneContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMs
         if (!m_pWorld->TryGetObject(obj, pObj))
           continue;
 
-        bounds.ExpandToInclude(plBoundingBoxSphere(pObj->GetGlobalPosition(), plVec3(0.0f), 0.0f));
+        bounds.ExpandToInclude(plBoundingBoxSphere::MakeFromCenterExtents(pObj->GetGlobalPosition(), plVec3(0.0f), 0.0f));
       }
     }
   }
 
-  // PLASMA_ASSERT_DEV(bounds.IsValid() && !bounds.IsNaN(), "Invalid bounds");
+  // PL_ASSERT_DEV(bounds.IsValid() && !bounds.IsNaN(), "Invalid bounds");
 
   if (!bounds.IsValid() || bounds.IsNaN())
   {
@@ -524,14 +522,14 @@ void plSceneContext::UnregisterLayer(plLayerContext* pLayer)
     m_Layers.PopBack();
 }
 
-void plSceneContext::AddLayerIndexTag(const plEntityMsgToEngine& msg, plWorldRttiConverterContext& context, const plTag& layerTag)
+void plSceneContext::AddLayerIndexTag(const plEntityMsgToEngine& msg, plWorldRttiConverterContext& ref_context, const plTag& layerTag)
 {
   if (msg.m_change.m_Change.m_Operation == plObjectChangeType::NodeAdded)
   {
     if ((msg.m_change.m_Change.m_sProperty == "Children" || msg.m_change.m_Change.m_sProperty.IsEmpty()) && msg.m_change.m_Change.m_Value.IsA<plUuid>())
     {
       const plUuid& object = msg.m_change.m_Change.m_Value.Get<plUuid>();
-      plRttiConverterObject target = context.GetObjectByGUID(object);
+      plRttiConverterObject target = ref_context.GetObjectByGUID(object);
       if (target.m_pType == plGetStaticRTTI<plGameObject>() && target.m_pObject != nullptr)
       {
         // We do postpone tagging until after the first frame so that prefab references are instantiated and affected as well.
@@ -549,7 +547,7 @@ const plArrayPtr<const plTag> plSceneContext::GetInvisibleLayerTags() const
 
 void plSceneContext::OnInitialize()
 {
-  PLASMA_LOCK(m_pWorld->GetWriteMarker());
+  PL_LOCK(m_pWorld->GetWriteMarker());
   if (!m_ActiveLayer.IsValid())
     m_ActiveLayer = m_DocumentGuid;
   m_Contexts.PushBack(&m_Context);
@@ -574,14 +572,14 @@ void plSceneContext::OnDeinitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plSceneContext::CreateViewContext()
+plEngineProcessViewContext* plSceneContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plSceneViewContext, this);
+  return PL_DEFAULT_NEW(plSceneViewContext, this);
 }
 
-void plSceneContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plSceneContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
 void plSceneContext::HandleSelectionMsg(const plObjectSelectionMsgToEngine* pMsg)
@@ -594,7 +592,7 @@ void plSceneContext::HandleSelectionMsg(const plObjectSelectionMsgToEngine* pMsg
   plStringBuilder sGuid;
 
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetReadMarker());
+  PL_LOCK(pWorld->GetReadMarker());
 
   while (!sSel.IsEmpty())
   {
@@ -669,7 +667,7 @@ void plSceneContext::GameApplicationEventHandler(const plGameApplicationExecutio
   if (e.m_Type == plGameApplicationExecutionEvent::Type::AfterUpdatePlugins && !m_ObjectsToTag.IsEmpty())
   {
     // At this point the world was ticked once and prefab instances are instantiated and will be affected by SetTagRecursive.
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
     for (const TagGameObject& tagObject : m_ObjectsToTag)
     {
       plGameObject* pObject = nullptr;
@@ -684,7 +682,7 @@ void plSceneContext::GameApplicationEventHandler(const plGameApplicationExecutio
 
 void plSceneContext::HandleObjectsForDebugVisMsg(const plObjectsForDebugVisMsgToEngine* pMsg)
 {
-  PLASMA_LOCK(GetWorld()->GetWriteMarker());
+  PL_LOCK(GetWorld()->GetWriteMarker());
 
   const plArrayPtr<const plUuid> guids(reinterpret_cast<const plUuid*>(pMsg->m_Objects.GetData()), pMsg->m_Objects.GetCount() / sizeof(plUuid));
 
@@ -717,8 +715,7 @@ void plSceneContext::HandleGameModeMsg(const plGameModeMsgToEngine* pMsg)
 
     if (pMsg->m_bUseStartPosition)
     {
-      plQuat qRot;
-      qRot.SetShortestRotation(plVec3(1, 0, 0), pMsg->m_vStartDirection);
+      plQuat qRot = plQuat::MakeShortestRotation(plVec3(1, 0, 0), pMsg->m_vStartDirection);
 
       plTransform tStart(pMsg->m_vStartPosition, qRot);
 
@@ -773,7 +770,7 @@ plStatus plSceneContext::ExportDocument(const plExportDocumentMsgToEngine* pMsg)
   // and messages for geometry extraction won't be delivered
   // this is necessary for the scene export modifiers to work
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
     m_pWorld->SetWorldSimulationEnabled(false);
     m_pWorld->Update();
   }
@@ -813,7 +810,7 @@ plStatus plSceneContext::ExportDocument(const plExportDocumentMsgToEngine* pMsg)
   if (file.Close().Failed())
     return plStatus(plFmt("Writing to '{}' failed.", pMsg->m_sOutputFile));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plSceneContext::ExportExposedParameters(const plWorldWriter& ww, plDeferredFileWriter& file) const
@@ -893,8 +890,7 @@ void plSceneContext::ExportExposedParameters(const plWorldWriter& ww, plDeferred
     paramdesc.m_sProperty.Assign(esp.m_sPropertyPath.GetData());
   }
 
-  exposedParams.Sort([](const plExposedPrefabParameterDesc& lhs, const plExposedPrefabParameterDesc& rhs) -> bool
-    { return lhs.m_sExposeName.GetHash() < rhs.m_sExposeName.GetHash(); });
+  exposedParams.Sort([](const plExposedPrefabParameterDesc& lhs, const plExposedPrefabParameterDesc& rhs) -> bool { return lhs.m_sExposeName.GetHash() < rhs.m_sExposeName.GetHash(); });
 
   file << exposedParams.GetCount();
 
@@ -909,14 +905,13 @@ void plSceneContext::OnThumbnailViewContextCreated()
   // make sure there is ambient light in the thumbnails
   // TODO: should check whether this is a prefab (info currently not available in plSceneContext)
   RemoveAmbientLight();
-  AddAmbientLight(false);
+  AddAmbientLight(false, true);
 }
 
 void plSceneContext::OnDestroyThumbnailViewContext()
 {
   RemoveAmbientLight();
 }
-
 
 void plSceneContext::UpdateDocumentContext()
 {
@@ -996,7 +991,7 @@ plGameObjectHandle plSceneContext::ResolveStringToGameObjectHandle(const void* p
   return plGameObjectHandle();
 }
 
-bool plSceneContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plSceneContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   const plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -1006,12 +1001,16 @@ bool plSceneContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* 
   return result;
 }
 
-void plSceneContext::AddAmbientLight(bool bSetEditorTag)
+void plSceneContext::AddAmbientLight(bool bSetEditorTag, bool bForce)
 {
   if (!m_hSkyLight.IsInvalidated() || !m_hDirectionalLight.IsInvalidated())
     return;
 
-  PLASMA_LOCK(GetWorld()->GetWriteMarker());
+  PL_LOCK(GetWorld()->GetWriteMarker());
+
+  // delay adding ambient light until the scene isn't empty, to prevent adding two skylights
+  if (!bForce && GetWorld()->GetObjectCount() == 0)
+    return;
 
   plSkyLightComponentManager* pSkyMan = GetWorld()->GetComponentManager<plSkyLightComponentManager>();
   if (pSkyMan == nullptr || pSkyMan->GetSingletonComponent() == nullptr)
@@ -1041,7 +1040,7 @@ void plSceneContext::AddAmbientLight(bool bSetEditorTag)
     plGameObjectDesc obj;
     obj.m_sName.Assign("Ambient Light");
 
-    obj.m_LocalRotation.SetFromEulerAngles(plAngle::Degree(-14.510815f), plAngle::Degree(43.07951f), plAngle::Degree(93.223808f));
+    obj.m_LocalRotation = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(-14.510815f), plAngle::MakeFromDegree(43.07951f), plAngle::MakeFromDegree(93.223808f));
 
     if (bSetEditorTag)
     {
@@ -1060,7 +1059,7 @@ void plSceneContext::AddAmbientLight(bool bSetEditorTag)
 
 void plSceneContext::RemoveAmbientLight()
 {
-  PLASMA_LOCK(GetWorld()->GetWriteMarker());
+  PL_LOCK(GetWorld()->GetWriteMarker());
 
   if (!m_hSkyLight.IsInvalidated())
   {
@@ -1077,7 +1076,7 @@ void plSceneContext::RemoveAmbientLight()
   }
 }
 
-const PlasmaEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext() const
+const plEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext() const
 {
   if (m_ActiveLayer == GetDocumentGuid())
   {
@@ -1092,13 +1091,13 @@ const PlasmaEngineProcessDocumentContext* plSceneContext::GetActiveDocumentConte
     }
   }
 
-  PLASMA_REPORT_FAILURE("Active layer does not exist.");
+  PL_REPORT_FAILURE("Active layer does not exist.");
   return this;
 }
 
-PlasmaEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext()
+plEngineProcessDocumentContext* plSceneContext::GetActiveDocumentContext()
 {
-  return const_cast<PlasmaEngineProcessDocumentContext*>(const_cast<const plSceneContext*>(this)->GetActiveDocumentContext());
+  return const_cast<plEngineProcessDocumentContext*>(const_cast<const plSceneContext*>(this)->GetActiveDocumentContext());
 }
 
 const plWorldRttiConverterContext& plSceneContext::GetActiveContext() const
@@ -1157,7 +1156,7 @@ void plSceneContext::HandlePullObjectStateMsg(const plPullObjectStateMsgToEngine
     return;
 
   const plWorld* pWorld = GetWorld();
-  PLASMA_LOCK(pWorld->GetReadMarker());
+  PL_LOCK(pWorld->GetReadMarker());
 
   const auto& objectMapper = GetActiveContext().m_GameObjectMap;
 

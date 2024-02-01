@@ -6,7 +6,7 @@
 class plStreamWriter;
 class plChunkStreamWriter;
 
-struct PLASMA_JOLTCOOKING_DLL plJoltCookingMesh
+struct PL_JOLTCOOKING_DLL plJoltCookingMesh
 {
   bool m_bFlipNormals = false;
   plDynamicArray<plVec3> m_Vertices;
@@ -15,7 +15,7 @@ struct PLASMA_JOLTCOOKING_DLL plJoltCookingMesh
   plDynamicArray<plUInt16> m_PolygonSurfaceID;
 };
 
-class PLASMA_JOLTCOOKING_DLL plJoltCooking
+class PL_JOLTCOOKING_DLL plJoltCooking
 {
 public:
   enum class MeshType

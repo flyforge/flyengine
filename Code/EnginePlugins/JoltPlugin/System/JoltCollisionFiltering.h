@@ -30,14 +30,14 @@ enum class plJoltBroadphaseLayer : plUInt8
 namespace plJoltCollisionFiltering
 {
   /// \brief Constructs the JPH::ObjectLayer value from the desired collision group index and the broadphase into which the object shall be sorted
-  PLASMA_JOLTPLUGIN_DLL JPH::ObjectLayer ConstructObjectLayer(plUInt8 uiCollisionGroup, plJoltBroadphaseLayer broadphase);
+  PL_JOLTPLUGIN_DLL JPH::ObjectLayer ConstructObjectLayer(plUInt8 uiCollisionGroup, plJoltBroadphaseLayer broadphase);
 
-  PLASMA_JOLTPLUGIN_DLL void LoadCollisionFilters();
+  PL_JOLTPLUGIN_DLL void LoadCollisionFilters();
 
-  PLASMA_JOLTPLUGIN_DLL plCollisionFilterConfig& GetCollisionFilterConfig();
+  PL_JOLTPLUGIN_DLL plCollisionFilterConfig& GetCollisionFilterConfig();
 
   /// \brief Returns the (hard-coded) collision mask that determines which other broad-phases to collide with.
-  PLASMA_JOLTPLUGIN_DLL plUInt32 GetBroadphaseCollisionMask(plJoltBroadphaseLayer broadphase);
+  PL_JOLTPLUGIN_DLL plUInt32 GetBroadphaseCollisionMask(plJoltBroadphaseLayer broadphase);
 
 }; // namespace plJoltCollisionFiltering
 
@@ -66,7 +66,7 @@ public:
 
   virtual bool ShouldCollide(JPH::BroadPhaseLayer inLayer) const override
   {
-    return (PLASMA_BIT(static_cast<plUInt8>(inLayer)) & m_uiCollisionMask) != 0;
+    return (PL_BIT(static_cast<plUInt8>(inLayer)) & m_uiCollisionMask) != 0;
   }
 };
 

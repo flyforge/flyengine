@@ -3,11 +3,14 @@
 #include <Foundation/CodeUtils/Expression/ExpressionAST.h>
 #include <Foundation/CodeUtils/TokenParseUtils.h>
 
-class PLASMA_FOUNDATION_DLL plExpressionParser
+class PL_FOUNDATION_DLL plExpressionParser
 {
 public:
   plExpressionParser();
   ~plExpressionParser();
+
+  static const plHashTable<plHashedString, plEnum<plExpressionAST::DataType>>& GetKnownTypes();
+  static const plHashTable<plHashedString, plEnum<plExpressionAST::NodeType>>& GetBuiltinFunctions();
 
   void RegisterFunction(const plExpression::FunctionDesc& funcDesc);
   void UnregisterFunction(const plExpression::FunctionDesc& funcDesc);
@@ -22,8 +25,8 @@ public:
 private:
   static constexpr int s_iLowestPrecedence = 20;
 
-  void RegisterKnownTypes();
-  void RegisterBuiltinFunctions();
+  static void RegisterKnownTypes();
+  static void RegisterBuiltinFunctions();
   void SetupInAndOutputs(plArrayPtr<plExpression::StreamDesc> inputs, plArrayPtr<plExpression::StreamDesc> outputs);
 
   plResult ParseStatement();
@@ -58,10 +61,7 @@ private:
   plUInt32 m_uiCurrentToken = 0;
   plExpressionAST* m_pAST = nullptr;
 
-  plHashTable<plHashedString, plEnum<plExpressionAST::DataType>> m_KnownTypes;
-
   plHashTable<plHashedString, plExpressionAST::Node*> m_KnownVariables;
-  plHashTable<plHashedString, plEnum<plExpressionAST::NodeType>> m_BuiltinFunctions;
   plHashTable<plHashedString, plHybridArray<plExpression::FunctionDesc, 1>> m_FunctionDescs;
 };
 

@@ -11,7 +11,7 @@ template <typename T>
 class plBlobPtr
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   static_assert(!std::is_same_v<T, void>, "plBlobPtr<void> is not allowed (anymore)");
   static_assert(!std::is_same_v<T, const void>, "plBlobPtr<void> is not allowed (anymore)");
@@ -39,14 +39,14 @@ public:
 
   /// \brief Initializes the plBlobPtr to encapsulate the given array.
   template <size_t N>
-  PLASMA_ALWAYS_INLINE plBlobPtr(ValueType (&staticArray)[N])
+  PL_ALWAYS_INLINE plBlobPtr(ValueType (&staticArray)[N])
     : m_pPtr(staticArray)
     , m_uiCount(static_cast<plUInt64>(N))
   {
   }
 
   /// \brief Initializes the plBlobPtr to be a copy of \a other. No memory is allocated or copied.
-  PLASMA_ALWAYS_INLINE plBlobPtr(const plBlobPtr<T>& other)
+  PL_ALWAYS_INLINE plBlobPtr(const plBlobPtr<T>& other)
     : m_pPtr(other.m_pPtr)
     , m_uiCount(other.m_uiCount)
   {
@@ -56,71 +56,71 @@ public:
   operator plBlobPtr<const T>() const { return plBlobPtr<const T>(static_cast<const T*>(GetPtr()), GetCount()); }
 
   /// \brief Copies the pointer and size of /a other. Does not allocate any data.
-  PLASMA_ALWAYS_INLINE void operator=(const plBlobPtr<T>& other)
+  PL_ALWAYS_INLINE void operator=(const plBlobPtr<T>& other)
   {
     m_pPtr = other.m_pPtr;
     m_uiCount = other.m_uiCount;
   }
 
   /// \brief Clears the array
-  PLASMA_ALWAYS_INLINE void Clear()
+  PL_ALWAYS_INLINE void Clear()
   {
     m_pPtr = nullptr;
     m_uiCount = 0;
   }
 
-  PLASMA_ALWAYS_INLINE void operator=(std::nullptr_t)
+  PL_ALWAYS_INLINE void operator=(std::nullptr_t)
   {
     m_pPtr = nullptr;
     m_uiCount = 0;
   }
 
   /// \brief Returns the pointer to the array.
-  PLASMA_ALWAYS_INLINE PointerType GetPtr() const { return m_pPtr; }
+  PL_ALWAYS_INLINE PointerType GetPtr() const { return m_pPtr; }
 
   /// \brief Returns the pointer to the array.
-  PLASMA_ALWAYS_INLINE PointerType GetPtr() { return m_pPtr; }
+  PL_ALWAYS_INLINE PointerType GetPtr() { return m_pPtr; }
 
   /// \brief Returns the pointer behind the last element of the array
-  PLASMA_ALWAYS_INLINE PointerType GetEndPtr() { return m_pPtr + m_uiCount; }
+  PL_ALWAYS_INLINE PointerType GetEndPtr() { return m_pPtr + m_uiCount; }
 
   /// \brief Returns the pointer behind the last element of the array
-  PLASMA_ALWAYS_INLINE PointerType GetEndPtr() const { return m_pPtr + m_uiCount; }
+  PL_ALWAYS_INLINE PointerType GetEndPtr() const { return m_pPtr + m_uiCount; }
 
   /// \brief Returns whether the array is empty.
-  PLASMA_ALWAYS_INLINE bool IsEmpty() const { return GetCount() == 0; }
+  PL_ALWAYS_INLINE bool IsEmpty() const { return GetCount() == 0; }
 
   /// \brief Returns the number of elements in the array.
-  PLASMA_ALWAYS_INLINE plUInt64 GetCount() const { return m_uiCount; }
+  PL_ALWAYS_INLINE plUInt64 GetCount() const { return m_uiCount; }
 
   /// \brief Creates a sub-array from this array.
-  PLASMA_FORCE_INLINE plBlobPtr<T> GetSubArray(plUInt64 uiStart, plUInt64 uiCount) const // [tested]
+  PL_FORCE_INLINE plBlobPtr<T> GetSubArray(plUInt64 uiStart, plUInt64 uiCount) const // [tested]
   {
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       uiStart + uiCount <= GetCount(), "uiStart+uiCount ({0}) has to be smaller or equal than the count ({1}).", uiStart + uiCount, GetCount());
     return plBlobPtr<T>(GetPtr() + uiStart, uiCount);
   }
 
   /// \brief Creates a sub-array from this array.
   /// \note \code ap.GetSubArray(i) \endcode is equivalent to \code ap.GetSubArray(i, ap.GetCount() - i) \endcode.
-  PLASMA_FORCE_INLINE plBlobPtr<T> GetSubArray(plUInt64 uiStart) const // [tested]
+  PL_FORCE_INLINE plBlobPtr<T> GetSubArray(plUInt64 uiStart) const // [tested]
   {
-    PLASMA_ASSERT_DEV(uiStart <= GetCount(), "uiStart ({0}) has to be smaller or equal than the count ({1}).", uiStart, GetCount());
+    PL_ASSERT_DEV(uiStart <= GetCount(), "uiStart ({0}) has to be smaller or equal than the count ({1}).", uiStart, GetCount());
     return plBlobPtr<T>(GetPtr() + uiStart, GetCount() - uiStart);
   }
 
   /// \brief Reinterprets this array as a byte array.
-  PLASMA_ALWAYS_INLINE plBlobPtr<const ByteType> ToByteBlob() const
+  PL_ALWAYS_INLINE plBlobPtr<const ByteType> ToByteBlob() const
   {
     return plBlobPtr<const ByteType>(reinterpret_cast<const ByteType*>(GetPtr()), GetCount() * sizeof(T));
   }
 
   /// \brief Reinterprets this array as a byte array.
-  PLASMA_ALWAYS_INLINE plBlobPtr<ByteType> ToByteBlob() { return plBlobPtr<ByteType>(reinterpret_cast<ByteType*>(GetPtr()), GetCount() * sizeof(T)); }
+  PL_ALWAYS_INLINE plBlobPtr<ByteType> ToByteBlob() { return plBlobPtr<ByteType>(reinterpret_cast<ByteType*>(GetPtr()), GetCount() * sizeof(T)); }
 
   /// \brief Cast an BlobPtr to an BlobPtr to a different, but same size, type
   template <typename U>
-  PLASMA_ALWAYS_INLINE plBlobPtr<U> Cast()
+  PL_ALWAYS_INLINE plBlobPtr<U> Cast()
   {
     static_assert(sizeof(T) == sizeof(U), "Can only cast with equivalent element size.");
     return plBlobPtr<U>(reinterpret_cast<U*>(GetPtr()), GetCount());
@@ -128,23 +128,23 @@ public:
 
   /// \brief Cast an BlobPtr to an BlobPtr to a different, but same size, type
   template <typename U>
-  PLASMA_ALWAYS_INLINE plBlobPtr<const U> Cast() const
+  PL_ALWAYS_INLINE plBlobPtr<const U> Cast() const
   {
     static_assert(sizeof(T) == sizeof(U), "Can only cast with equivalent element size.");
     return plBlobPtr<const U>(reinterpret_cast<const U*>(GetPtr()), GetCount());
   }
 
   /// \brief Index access.
-  PLASMA_FORCE_INLINE const ValueType& operator[](plUInt64 uiIndex) const // [tested]
+  PL_FORCE_INLINE const ValueType& operator[](plUInt64 uiIndex) const // [tested]
   {
-    PLASMA_ASSERT_DEBUG(uiIndex < GetCount(), "Cannot access element {0}, the array only holds {1} elements.", uiIndex, GetCount());
+    PL_ASSERT_DEBUG(uiIndex < GetCount(), "Cannot access element {0}, the array only holds {1} elements.", uiIndex, GetCount());
     return *static_cast<const ValueType*>(GetPtr() + uiIndex);
   }
 
   /// \brief Index access.
-  PLASMA_FORCE_INLINE ValueType& operator[](plUInt64 uiIndex) // [tested]
+  PL_FORCE_INLINE ValueType& operator[](plUInt64 uiIndex) // [tested]
   {
-    PLASMA_ASSERT_DEBUG(uiIndex < GetCount(), "Cannot access element {0}, the array only holds {1} elements.", uiIndex, GetCount());
+    PL_ASSERT_DEBUG(uiIndex < GetCount(), "Cannot access element {0}, the array only holds {1} elements.", uiIndex, GetCount());
     return *static_cast<ValueType*>(GetPtr() + uiIndex);
   }
 
@@ -161,7 +161,7 @@ public:
   }
 
   /// \brief Compares the two arrays for inequality.
-  PLASMA_ALWAYS_INLINE bool operator!=(const plBlobPtr<const T>& other) const // [tested]
+  PL_ALWAYS_INLINE bool operator!=(const plBlobPtr<const T>& other) const // [tested]
   {
     return !(*this == other);
   }
@@ -169,12 +169,12 @@ public:
   /// \brief Copies the data from \a other into this array. The arrays must have the exact same size.
   inline void CopyFrom(const plBlobPtr<const T>& other) // [tested]
   {
-    PLASMA_ASSERT_DEV(GetCount() == other.GetCount(), "Count for copy does not match. Target has {0} elements, source {1} elements", GetCount(), other.GetCount());
+    PL_ASSERT_DEV(GetCount() == other.GetCount(), "Count for copy does not match. Target has {0} elements, source {1} elements", GetCount(), other.GetCount());
 
     plMemoryUtils::Copy(static_cast<ValueType*>(GetPtr()), static_cast<const ValueType*>(other.GetPtr()), static_cast<size_t>(GetCount()));
   }
 
-  PLASMA_ALWAYS_INLINE void Swap(plBlobPtr<T>& other)
+  PL_ALWAYS_INLINE void Swap(plBlobPtr<T>& other)
   {
     plMath::Swap(m_pPtr, other.m_pPtr);
     plMath::Swap(m_uiCount, other.m_uiCount);
@@ -199,40 +199,40 @@ using plConstByteBlobPtr = plBlobPtr<const plUInt8>;
 
 /// \brief Helper function to create plBlobPtr from a pointer of some type and a count.
 template <typename T>
-PLASMA_ALWAYS_INLINE plBlobPtr<T> plMakeBlobPtr(T* pPtr, plUInt64 uiCount)
+PL_ALWAYS_INLINE plBlobPtr<T> plMakeBlobPtr(T* pPtr, plUInt64 uiCount)
 {
   return plBlobPtr<T>(pPtr, uiCount);
 }
 
 /// \brief Helper function to create plBlobPtr from a static array the a size known at compile-time.
 template <typename T, plUInt64 N>
-PLASMA_ALWAYS_INLINE plBlobPtr<T> plMakeBlobPtr(T (&staticArray)[N])
+PL_ALWAYS_INLINE plBlobPtr<T> plMakeBlobPtr(T (&staticArray)[N])
 {
   return plBlobPtr<T>(staticArray);
 }
 
 /// \brief Helper function to create plConstByteBlobPtr from a pointer of some type and a count.
 template <typename T>
-PLASMA_ALWAYS_INLINE plConstByteBlobPtr plMakeByteBlobPtr(const T* pPtr, plUInt32 uiCount)
+PL_ALWAYS_INLINE plConstByteBlobPtr plMakeByteBlobPtr(const T* pPtr, plUInt32 uiCount)
 {
   return plConstByteBlobPtr(static_cast<const plUInt8*>(pPtr), uiCount * sizeof(T));
 }
 
 /// \brief Helper function to create plByteBlobPtr from a pointer of some type and a count.
 template <typename T>
-PLASMA_ALWAYS_INLINE plByteBlobPtr plMakeByteBlobPtr(T* pPtr, plUInt32 uiCount)
+PL_ALWAYS_INLINE plByteBlobPtr plMakeByteBlobPtr(T* pPtr, plUInt32 uiCount)
 {
   return plByteBlobPtr(reinterpret_cast<plUInt8*>(pPtr), uiCount * sizeof(T));
 }
 
 /// \brief Helper function to create plByteBlobPtr from a void pointer and a count.
-PLASMA_ALWAYS_INLINE plByteBlobPtr plMakeByteBlobPtr(void* pPtr, plUInt32 uiBytes)
+PL_ALWAYS_INLINE plByteBlobPtr plMakeByteBlobPtr(void* pPtr, plUInt32 uiBytes)
 {
   return plByteBlobPtr(reinterpret_cast<plUInt8*>(pPtr), uiBytes);
 }
 
 /// \brief Helper function to create plConstByteBlobPtr from a const void pointer and a count.
-PLASMA_ALWAYS_INLINE plConstByteBlobPtr plMakeByteBlobPtr(const void* pPtr, plUInt32 uiBytes)
+PL_ALWAYS_INLINE plConstByteBlobPtr plMakeByteBlobPtr(const void* pPtr, plUInt32 uiBytes)
 {
   return plConstByteBlobPtr(static_cast<const plUInt8*>(pPtr), uiBytes);
 }
@@ -314,10 +314,10 @@ typename plBlobPtr<T>::const_reverse_iterator crend(const plBlobPtr<T>& containe
 /// \brief plBlob allows to store simple binary data larger than 4GB.
 /// This storage class is used by plImage to allow processing of large textures for example.
 /// In the current implementation the start of the allocated memory is guaranteed to be 64 byte aligned.
-class PLASMA_FOUNDATION_DLL plBlob
+class PL_FOUNDATION_DLL plBlob
 {
 public:
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   /// \brief Default constructor. Does not allocate any memory.
   plBlob();

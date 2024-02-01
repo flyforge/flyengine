@@ -5,13 +5,13 @@
 
 plResult plRun_Startup(plApplication* pApplicationInstance)
 {
-  PLASMA_ASSERT_ALWAYS(pApplicationInstance != nullptr, "plRun() requires a valid non-null application instance pointer.");
-  PLASMA_ASSERT_ALWAYS(plApplication::s_pApplicationInstance == nullptr, "There can only be one plApplication.");
+  PL_ASSERT_ALWAYS(pApplicationInstance != nullptr, "plRun() requires a valid non-null application instance pointer.");
+  PL_ASSERT_ALWAYS(plApplication::s_pApplicationInstance == nullptr, "There can only be one plApplication.");
 
   // Set application instance pointer to the supplied instance
   plApplication::s_pApplicationInstance = pApplicationInstance;
 
-  PLASMA_SUCCEED_OR_RETURN(pApplicationInstance->BeforeCoreSystemsStartup());
+  PL_SUCCEED_OR_RETURN(pApplicationInstance->BeforeCoreSystemsStartup());
 
   // this will startup all base and core systems
   // 'StartupHighLevelSystems' must not be done before a window is available (if at all)
@@ -19,7 +19,7 @@ plResult plRun_Startup(plApplication* pApplicationInstance)
   plStartup::StartupCoreSystems();
 
   pApplicationInstance->AfterCoreSystemsStartup();
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRun_MainLoop(plApplication* pApplicationInstance)
@@ -67,4 +67,4 @@ void plRun(plApplication* pApplicationInstance)
   plRun_Shutdown(pApplicationInstance);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Application_Implementation_MainLoop);
+

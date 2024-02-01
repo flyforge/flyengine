@@ -23,7 +23,7 @@ class plFixedPoint
 {
 public:
   /// \brief Default constructor does not do any initialization.
-  PLASMA_ALWAYS_INLINE plFixedPoint() = default; // [tested]
+  PL_ALWAYS_INLINE plFixedPoint() = default; // [tested]
 
   /// \brief Construct from an integer.
   /* implicit */ plFixedPoint(plInt32 iIntVal) { *this = iIntVal; } // [tested]

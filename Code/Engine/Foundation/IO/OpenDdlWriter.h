@@ -9,7 +9,7 @@
 /// \brief The base class for OpenDDL writers.
 ///
 /// Declares a common interface for writing OpenDDL files.
-class PLASMA_FOUNDATION_DLL plOpenDdlWriter
+class PL_FOUNDATION_DLL plOpenDdlWriter
 {
 public:
   enum class TypeStringMode
@@ -130,8 +130,8 @@ protected:
     bool m_bPrimitivesWritten = false;
   };
 
-  PLASMA_ALWAYS_INLINE void OutputString(plStringView s) { m_pOutput->WriteBytes(s.GetStartPointer(), s.GetElementCount()).IgnoreResult(); }
-  PLASMA_ALWAYS_INLINE void OutputString(plStringView s, plUInt32 uiElementCount) { m_pOutput->WriteBytes(s.GetStartPointer(), uiElementCount).IgnoreResult(); }
+  PL_ALWAYS_INLINE void OutputString(plStringView s) { m_pOutput->WriteBytes(s.GetStartPointer(), s.GetElementCount()).IgnoreResult(); }
+  PL_ALWAYS_INLINE void OutputString(plStringView s, plUInt32 uiElementCount) { m_pOutput->WriteBytes(s.GetStartPointer(), uiElementCount).IgnoreResult(); }
   void OutputEscapedString(const plStringView& string);
   void OutputIndentation();
   void OutputPrimitiveTypeNameCompliant(plOpenDdlPrimitiveType type);

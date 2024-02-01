@@ -16,19 +16,19 @@ plResult plGALQueryVulkan::InitPlatform(plGALDevice* pDevice)
 
   if (true)
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
     plLog::Error("Creation of native Vulkan query failed!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 plResult plGALQueryVulkan::DeInitPlatform(plGALDevice* pDevice)
 {
   // TODO
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALQueryVulkan::SetDebugNamePlatform(const char* szName) const
@@ -38,4 +38,4 @@ void plGALQueryVulkan::SetDebugNamePlatform(const char* szName) const
   // TODO
 }
 
-PLASMA_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_QueryVulkan);
+PL_STATICLINK_FILE(RendererVulkan, RendererVulkan_Resources_Implementation_QueryVulkan);

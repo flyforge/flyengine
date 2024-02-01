@@ -10,10 +10,10 @@ struct ID3D11RasterizerState;
 struct ID3D11RasterizerState2;
 struct ID3D11SamplerState;
 
-class PLASMA_RENDERERDX11_DLL plGALBlendStateDX11 : public plGALBlendState
+class PL_RENDERERDX11_DLL plGALBlendStateDX11 : public plGALBlendState
 {
 public:
-  PLASMA_ALWAYS_INLINE ID3D11BlendState* GetDXBlendState() const;
+  PL_ALWAYS_INLINE ID3D11BlendState* GetDXBlendState() const;
 
 protected:
   friend class plGALDeviceDX11;
@@ -27,13 +27,13 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11BlendState* m_pDXBlendState;
+  ID3D11BlendState* m_pDXBlendState = nullptr;
 };
 
-class PLASMA_RENDERERDX11_DLL plGALDepthStencilStateDX11 : public plGALDepthStencilState
+class PL_RENDERERDX11_DLL plGALDepthStencilStateDX11 : public plGALDepthStencilState
 {
 public:
-  PLASMA_ALWAYS_INLINE ID3D11DepthStencilState* GetDXDepthStencilState() const;
+  PL_ALWAYS_INLINE ID3D11DepthStencilState* GetDXDepthStencilState() const;
 
 protected:
   friend class plGALDeviceDX11;
@@ -47,13 +47,13 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11DepthStencilState* m_pDXDepthStencilState;
+  ID3D11DepthStencilState* m_pDXDepthStencilState = nullptr;
 };
 
-class PLASMA_RENDERERDX11_DLL plGALRasterizerStateDX11 : public plGALRasterizerState
+class PL_RENDERERDX11_DLL plGALRasterizerStateDX11 : public plGALRasterizerState
 {
 public:
-  PLASMA_ALWAYS_INLINE ID3D11RasterizerState* GetDXRasterizerState() const;
+  PL_ALWAYS_INLINE ID3D11RasterizerState* GetDXRasterizerState() const;
 
 protected:
   friend class plGALDeviceDX11;
@@ -67,13 +67,13 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11RasterizerState* m_pDXRasterizerState;
+  ID3D11RasterizerState* m_pDXRasterizerState = nullptr;
 };
 
-class PLASMA_RENDERERDX11_DLL plGALSamplerStateDX11 : public plGALSamplerState
+class PL_RENDERERDX11_DLL plGALSamplerStateDX11 : public plGALSamplerState
 {
 public:
-  PLASMA_ALWAYS_INLINE ID3D11SamplerState* GetDXSamplerState() const;
+  PL_ALWAYS_INLINE ID3D11SamplerState* GetDXSamplerState() const;
 
 protected:
   friend class plGALDeviceDX11;
@@ -87,7 +87,7 @@ protected:
 
   virtual plResult DeInitPlatform(plGALDevice* pDevice) override;
 
-  ID3D11SamplerState* m_pDXSamplerState;
+  ID3D11SamplerState* m_pDXSamplerState = nullptr;
 };
 
 

@@ -9,8 +9,8 @@
 #include <QTextOption>
 #include <qevent.h>
 
-plQGridBarWidget::plQGridBarWidget(QWidget* parent)
-  : QWidget(parent)
+plQGridBarWidget::plQGridBarWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   m_ViewportSceneRect.setRect(0, 1, 1, 1);
   m_fFineGridStops = 10;
@@ -106,7 +106,7 @@ void plQGridBarWidget::paintEvent(QPaintEvent* e)
       const QPointF pos = m_MapFromSceneFunc(QPointF(x, 0));
 
       textRect.setRect(pos.x() - 50, areaRect.top(), 99, areaRect.height());
-      tmp.Format("{0}", plArgF(x));
+      tmp.SetFormat("{0}", plArgF(x));
 
       painter->drawText(textRect, tmp.GetData(), textOpt);
     }

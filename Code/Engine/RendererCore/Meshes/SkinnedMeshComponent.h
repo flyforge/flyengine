@@ -1,14 +1,14 @@
 #pragma once
 
 #include <RendererCore/Meshes/MeshComponentBase.h>
-#include <RendererCore/Shader/Types.h>
+#include <RendererFoundation/Shader/Types.h>
 #include <memory>
 
 class plShaderTransform;
 
-class PLASMA_RENDERERCORE_DLL plSkinnedMeshRenderData : public plMeshRenderData
+class PL_RENDERERCORE_DLL plSkinnedMeshRenderData : public plMeshRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSkinnedMeshRenderData, plMeshRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plSkinnedMeshRenderData, plMeshRenderData);
 
 public:
   virtual void FillBatchIdAndSortingKey() override;
@@ -17,7 +17,7 @@ public:
   std::shared_ptr<bool> m_bTransformsUpdated;
 };
 
-struct PLASMA_RENDERERCORE_DLL plSkinningState
+struct PL_RENDERERCORE_DLL plSkinningState
 {
   plSkinningState();
   ~plSkinningState();

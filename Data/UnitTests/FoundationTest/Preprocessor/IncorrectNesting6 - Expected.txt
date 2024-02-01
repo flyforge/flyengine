@@ -1,3 +1,0 @@
-Processing failed
-Preprocessor/IncorrectNesting6.txt: Line 35 [2]: Error: Unexpected '#else'
-Log: 'File 'Preprocessor/IncorrectNesting6.txt', Line 35 (2): Unexpected '#else''

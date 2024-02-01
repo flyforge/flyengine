@@ -12,7 +12,7 @@ void plTaskGroup::WaitForFinish(plTaskGroupID group) const
   if (m_uiGroupCounter != group.m_uiGroupCounter)
     return;
 
-  PLASMA_LOCK(m_CondVarGroupFinished);
+  PL_LOCK(m_CondVarGroupFinished);
 
   while (m_uiGroupCounter == group.m_uiGroupCounter)
   {
@@ -32,19 +32,18 @@ void plTaskGroup::Reuse(plTaskPriority::Enum priority, plOnTaskGroupFinishedCall
   m_OnFinishedCallback = callback;
 }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 void plTaskGroup::DebugCheckTaskGroup(plTaskGroupID groupID, plMutex& mutex)
 {
-  PLASMA_LOCK(mutex);
+  PL_LOCK(mutex);
 
   const plTaskGroup* pGroup = groupID.m_pTaskGroup;
 
-  PLASMA_ASSERT_DEV(pGroup != nullptr, "TaskGroupID is invalid.");
-  PLASMA_ASSERT_DEV(pGroup->m_uiGroupCounter == groupID.m_uiGroupCounter, "The given TaskGroupID is not valid anymore.");
-  PLASMA_ASSERT_DEV(!pGroup->m_bStartedByUser, "The given TaskGroupID is already started, you cannot modify it anymore.");
-  PLASMA_ASSERT_DEV(pGroup->m_iNumActiveDependencies == 0, "Invalid active dependenices");
+  PL_ASSERT_DEV(pGroup != nullptr, "TaskGroupID is invalid.");
+  PL_ASSERT_DEV(pGroup->m_uiGroupCounter == groupID.m_uiGroupCounter, "The given TaskGroupID is not valid anymore.");
+  PL_ASSERT_DEV(!pGroup->m_bStartedByUser, "The given TaskGroupID is already started, you cannot modify it anymore.");
+  PL_ASSERT_DEV(pGroup->m_iNumActiveDependencies == 0, "Invalid active dependenices");
 }
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskGroup);

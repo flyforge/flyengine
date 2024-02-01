@@ -14,9 +14,9 @@ struct plAiSteeringInfo
   plVec3 m_vNextWaypoint;
   float m_fDistanceToWaypoint = 0;
   float m_fArrivalDistance = plMath::HighValue<float>();
-  plVec2 m_vDirectionTowardsWaypoint = plVec2::ZeroVector();
-  plAngle m_AbsRotationTowardsWaypoint = plAngle();
-  plAngle m_MaxAbsRotationAfterWaypoint = plAngle();
+  plVec2 m_vDirectionTowardsWaypoint = plVec2::MakeZero();
+  plAngle m_AbsRotationTowardsWaypoint = plAngle::MakeZero();
+  plAngle m_MaxAbsRotationAfterWaypoint = plAngle::MakeZero();
   // float m_fWaypointCorridorWidth = plMath::HighValue<float>();
 };
 
@@ -37,7 +37,7 @@ struct plAiSteeringInfo
 /// If the destination was reached, a completely different path should be computed, or the current
 /// path should be canceled, call CancelNavigation().
 /// To start a new path search, call SetTargetPosition() again (and Update() every frame).
-class PLASMA_AIPLUGIN_DLL plAiNavigation final
+class PL_AIPLUGIN_DLL plAiNavigation final
 {
 public:
   plAiNavigation();
@@ -66,7 +66,6 @@ public:
 
   void SetCurrentPosition(const plVec3& vPosition);
   void SetTargetPosition(const plVec3& vPosition);
-  const plVec3& GetTargetPosition() const;
   void SetNavmesh(plAiNavMesh& ref_navmesh);
   void SetQueryFilter(const dtQueryFilter& filter);
 
@@ -84,7 +83,7 @@ public:
   // otherwise a character that barely left the navmesh area may not know where it is, anymore
   float m_fPolySearchRadius = 0.5f;
   float m_fPolySearchUp = 1.5f;
-  float m_fPolySearchDown = 1.5f;
+  float m_fPolySearchDown = 0.5f;
 
   // when a path search is started, all tiles in a rectangle around the start and end point are loaded first
   // this is the amount to increase that rectangle size, to overestimate which sectors may be needed during the path search
@@ -93,8 +92,8 @@ public:
 private:
   State m_State = State::Idle;
 
-  plVec3 m_vCurrentPosition = plVec3::ZeroVector();
-  plVec3 m_vTargetPosition = plVec3::ZeroVector();
+  plVec3 m_vCurrentPosition = plVec3::MakeZero();
+  plVec3 m_vTargetPosition = plVec3::MakeZero();
 
   plUInt8 m_uiCurrentPositionChangedBit : 1;
   plUInt8 m_uiTargetPositionChangedBit : 1;

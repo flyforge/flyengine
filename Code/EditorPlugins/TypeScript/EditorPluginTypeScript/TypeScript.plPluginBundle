@@ -5,9 +5,9 @@ PluginInfo
 {
 	string %DisplayName{"TypeScript"}
 	string %Description{"Adds support for scripting objects via TypeScript."}
-	string %EditorPlugins{"plasmaEditorPluginTypeScript"}
+	string %EditorPlugins{"plEditorPluginTypeScript"}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaTypeScriptPlugin"}
+	string %RuntimePlugins{"plTypeScriptPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

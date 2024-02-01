@@ -8,29 +8,29 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetProperties, 1, plRTTIDefaultAllocator<plVisualScriptClassAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetProperties, 1, plRTTIDefaultAllocator<plVisualScriptClassAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("BaseClass", m_sBaseClass)->AddAttributes(new plDefaultValueAttribute(plStringView("Component")), new plDynamicStringEnumAttribute("ScriptBaseClasses")),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Variables", m_Variables),
-    PLASMA_MEMBER_PROPERTY("DumpAST", m_bDumpAST),
+    PL_MEMBER_PROPERTY("BaseClass", m_sBaseClass)->AddAttributes(new plDefaultValueAttribute(plStringView("Component")), new plDynamicStringEnumAttribute("ScriptBaseClasses")),
+    PL_ARRAY_MEMBER_PROPERTY("Variables", m_Variables),
+    PL_MEMBER_PROPERTY("DumpAST", m_bDumpAST),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetDocument, 3, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualScriptClassAssetDocument, 5, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plVisualScriptClassAssetDocument::plVisualScriptClassAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plVisualScriptClassAssetProperties>(PLASMA_DEFAULT_NEW(plVisualScriptNodeManager), szDocumentPath, plAssetDocEngineConnection::None)
+plVisualScriptClassAssetDocument::plVisualScriptClassAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plVisualScriptClassAssetProperties>(PL_DEFAULT_NEW(plVisualScriptNodeManager), sDocumentPath, plAssetDocEngineConnection::None)
 {
-  m_pObjectAccessor = PLASMA_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
+  m_pObjectAccessor = PL_DEFAULT_NEW(plNodeCommandAccessor, GetCommandHistory());
 }
 
-plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   auto pManager = static_cast<plVisualScriptNodeManager*>(GetObjectManager());
 
@@ -60,7 +60,7 @@ plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStr
 
     auto pNodeDesc = plVisualScriptNodeRegistry::GetSingleton()->GetNodeDescForType(pObject->GetType());
     if (pNodeDesc == nullptr)
-      return plStatus(PLASMA_FAILURE);
+      return plStatus(PL_FAILURE);
 
     if (pManager->IsFilteredByBaseClass(pObject->GetType(), *pNodeDesc, sBaseClass, true))
       continue;
@@ -75,35 +75,35 @@ plTransformStatus plVisualScriptClassAssetDocument::InternalTransformAsset(plStr
         continue;
 
       plStringView sFunctionName = plVisualScriptNodeManager::GetNiceFunctionName(pObject);
-      PLASMA_SUCCEED_OR_RETURN(compiler.AddFunction(sFunctionName, pObject));
+      PL_SUCCEED_OR_RETURN(compiler.AddFunction(sFunctionName, pObject));
     }
   }
 
   plStringBuilder sDumpPath;
   if (GetProperties()->m_bDumpAST)
   {
-    sDumpPath.Format(":appdata/{}_AST.dgml", sScriptClassName);
+    sDumpPath.SetFormat(":appdata/{}_AST.dgml", sScriptClassName);
   }
-  PLASMA_SUCCEED_OR_RETURN(compiler.Compile(sDumpPath));
+  PL_SUCCEED_OR_RETURN(compiler.Compile(sDumpPath));
 
   auto& compiledModule = compiler.GetCompiledModule();
-  PLASMA_SUCCEED_OR_RETURN(compiledModule.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(compiledModule.Serialize(stream));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plVisualScriptClassAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
 {
   SUPER::UpdateAssetDocumentInfo(pInfo);
 
-  plExposedParameters* pExposedParams = PLASMA_DEFAULT_NEW(plExposedParameters);
+  plExposedParameters* pExposedParams = PL_DEFAULT_NEW(plExposedParameters);
 
   for (const auto& v : GetProperties()->m_Variables)
   {
     if (v.m_bExpose == false)
       continue;
 
-    plExposedParameter* param = PLASMA_DEFAULT_NEW(plExposedParameter);
+    plExposedParameter* param = PL_DEFAULT_NEW(plExposedParameter);
     param->m_sName = v.m_sName.GetString();
     param->m_DefaultValue = v.m_DefaultValue;
 
@@ -147,7 +147,7 @@ bool plVisualScriptClassAssetDocument::CopySelectedObjects(plAbstractObjectGraph
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plVisualScriptClassAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
+bool plVisualScriptClassAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

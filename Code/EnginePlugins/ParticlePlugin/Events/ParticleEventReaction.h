@@ -8,9 +8,9 @@ class plParticleEffectInstance;
 class plParticleEventReaction;
 
 /// \brief Base class for all particle event reactions
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReactionFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleEventReactionFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReactionFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetEventReactionType() const = 0;
@@ -18,16 +18,16 @@ public:
 
   plParticleEventReaction* CreateEventReaction(plParticleEffectInstance* pOwner) const;
 
-  virtual void Save(plStreamWriter& stream) const;
-  virtual void Load(plStreamReader& stream);
+  virtual void Save(plStreamWriter& inout_stream) const;
+  virtual void Load(plStreamReader& inout_stream);
 
   plString m_sEventType;
   plUInt8 m_uiProbability = 100;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEventReaction : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleEventReaction : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEventReaction, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEventReaction, plReflectedClass);
 
   friend class plParticleEventReactionFactory;
   friend class plParticleEffectInstance;

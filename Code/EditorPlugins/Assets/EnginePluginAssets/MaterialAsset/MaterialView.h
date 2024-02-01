@@ -4,7 +4,7 @@
 
 class plMaterialContext;
 
-class plMaterialViewContext : public PlasmaEngineProcessViewContext
+class plMaterialViewContext : public plEngineProcessViewContext
 {
 public:
   plMaterialViewContext(plMaterialContext* pMaterialContext);

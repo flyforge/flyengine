@@ -4,6 +4,6 @@
   </qresource>
   <qresource prefix="TypeIcons">
     <file>plKrautTreeComponent.svg</file>
-  </qresource>
+  </qresource>  
 </RCC>
 

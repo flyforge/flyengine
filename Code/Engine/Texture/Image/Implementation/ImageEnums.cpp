@@ -3,30 +3,30 @@
 #include <Texture/Image/ImageEnums.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plImageAddressMode, 1)
-  PLASMA_ENUM_CONSTANT(plImageAddressMode::Repeat),
-  PLASMA_ENUM_CONSTANT(plImageAddressMode::Clamp),
-  PLASMA_ENUM_CONSTANT(plImageAddressMode::ClampBorder),
-  PLASMA_ENUM_CONSTANT(plImageAddressMode::Mirror),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plImageAddressMode, 1)
+  PL_ENUM_CONSTANT(plImageAddressMode::Repeat),
+  PL_ENUM_CONSTANT(plImageAddressMode::Clamp),
+  PL_ENUM_CONSTANT(plImageAddressMode::ClampBorder),
+  PL_ENUM_CONSTANT(plImageAddressMode::Mirror),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTextureFilterSetting, 1)
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedNearest),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedBilinear),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedTrilinear),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic2x),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic4x),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic8x),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic16x),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::LowestQuality),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::LowQuality),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::DefaultQuality),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::HighQuality),
-  PLASMA_ENUM_CONSTANT(plTextureFilterSetting::HighestQuality),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTextureFilterSetting, 1)
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedNearest),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedBilinear),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedTrilinear),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic2x),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic4x),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic8x),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::FixedAnisotropic16x),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::LowestQuality),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::LowQuality),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::DefaultQuality),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::HighQuality),
+  PL_ENUM_CONSTANT(plTextureFilterSetting::HighestQuality),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageEnums);
+PL_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageEnums);

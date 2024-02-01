@@ -8,26 +8,26 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plOpaqueForwardRenderPass, 1, plRTTIDefaultAllocator<plOpaqueForwardRenderPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plOpaqueForwardRenderPass, 1, plRTTIDefaultAllocator<plOpaqueForwardRenderPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("SSAO", m_PinSSAO),
-    PLASMA_MEMBER_PROPERTY("WriteDepth", m_bWriteDepth)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("SSAO", m_PinSSAO),
+    PL_MEMBER_PROPERTY("WriteDepth", m_bWriteDepth)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plOpaqueForwardRenderPass::plOpaqueForwardRenderPass(const char* szName)
   : plForwardRenderPass(szName)
-  , m_bWriteDepth(true)
+
 {
   m_hWhiteTexture = plResourceManager::LoadResource<plTexture2DResource>("White.color");
 }
 
-plOpaqueForwardRenderPass::~plOpaqueForwardRenderPass() {}
+plOpaqueForwardRenderPass::~plOpaqueForwardRenderPass() = default;
 
 bool plOpaqueForwardRenderPass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
@@ -96,4 +96,4 @@ void plOpaqueForwardRenderPass::RenderObjects(const plRenderViewContext& renderV
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_OpaqueForwardRenderPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_OpaqueForwardRenderPass);

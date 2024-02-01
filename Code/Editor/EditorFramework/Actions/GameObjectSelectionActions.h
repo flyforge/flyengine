@@ -7,15 +7,15 @@
 class plGameObjectDocument;
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectSelectionActions
+class PL_EDITORFRAMEWORK_DLL plGameObjectSelectionActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
-  static void MapContextMenuActions(const char* szMapping, const char* szPath);
-  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
+  static void MapContextMenuActions(plStringView sMapping);
+  static void MapViewContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hSelectionCategory;
   static plActionDescriptorHandle s_hShowInScenegraph;
@@ -27,9 +27,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectSelectionAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plGameObjectSelectionAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectSelectionAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectSelectionAction, plButtonAction);
 
 public:
   enum class ActionType

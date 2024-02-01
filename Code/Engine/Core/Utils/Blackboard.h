@@ -10,26 +10,26 @@ class plStreamReader;
 class plStreamWriter;
 
 /// \brief Flags for entries in plBlackboard.
-struct PLASMA_CORE_DLL plBlackboardEntryFlags
+struct PL_CORE_DLL plBlackboardEntryFlags
 {
   using StorageType = plUInt16;
 
   enum Enum
   {
     None = 0,
-    Save = PLASMA_BIT(0),          ///< Include the entry during serialization
-    OnChangeEvent = PLASMA_BIT(1), ///< Broadcast the 'ValueChanged' event when this entry's value is modified
+    Save = PL_BIT(0),          ///< Include the entry during serialization
+    OnChangeEvent = PL_BIT(1), ///< Broadcast the 'ValueChanged' event when this entry's value is modified
 
-    UserFlag0 = PLASMA_BIT(7),
-    UserFlag1 = PLASMA_BIT(8),
-    UserFlag2 = PLASMA_BIT(9),
-    UserFlag3 = PLASMA_BIT(10),
-    UserFlag4 = PLASMA_BIT(11),
-    UserFlag5 = PLASMA_BIT(12),
-    UserFlag6 = PLASMA_BIT(13),
-    UserFlag7 = PLASMA_BIT(14),
+    UserFlag0 = PL_BIT(7),
+    UserFlag1 = PL_BIT(8),
+    UserFlag2 = PL_BIT(9),
+    UserFlag3 = PL_BIT(10),
+    UserFlag4 = PL_BIT(11),
+    UserFlag5 = PL_BIT(12),
+    UserFlag6 = PL_BIT(13),
+    UserFlag7 = PL_BIT(14),
 
-    Invalid = PLASMA_BIT(15),
+    Invalid = PL_BIT(15),
 
     Default = None
   };
@@ -51,8 +51,8 @@ struct PLASMA_CORE_DLL plBlackboardEntryFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plBlackboardEntryFlags);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plBlackboardEntryFlags);
+PL_DECLARE_FLAGS_OPERATORS(plBlackboardEntryFlags);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plBlackboardEntryFlags);
 
 
 /// \brief A blackboard is a key/value store that provides OnChange events to be informed when a value changes.
@@ -62,13 +62,15 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plBlackboardEntryFlags);
 ///
 /// For example this is commonly used in game AI, where some system gathers interesting pieces of data about the environment,
 /// and then NPCs might use that information to make decisions.
-class PLASMA_CORE_DLL plBlackboard : public plRefCounted
+class PL_CORE_DLL plBlackboard : public plRefCounted
 {
 private:
-  plBlackboard();
+  plBlackboard(bool bIsGlobal);
 
 public:
   ~plBlackboard();
+
+  bool IsGlobalBlackboard() const { return m_bIsGlobal; }
 
   /// \brief Factory method to create a new blackboard.
   ///
@@ -77,7 +79,7 @@ public:
   /// which created the blackboard is already unloaded.
   ///
   /// See https://groups.google.com/g/microsoft.public.vc.language/c/atSh_2VSc2w/m/EgJ3r_7OzVUJ?pli=1
-  static plSharedPtr<plBlackboard> Create(plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator());
+  static plSharedPtr<plBlackboard> Create(plAllocator* pAllocator = plFoundation::GetDefaultAllocator());
 
   /// \brief Factory method to get access to a globally registered blackboard.
   ///
@@ -88,7 +90,7 @@ public:
   ///
   /// If at some point you want to "remove" a global blackboard, instead call UnregisterAllEntries() to
   /// clear all its values.
-  static plSharedPtr<plBlackboard> GetOrCreateGlobal(const plHashedString& sBlackboardName, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator());
+  static plSharedPtr<plBlackboard> GetOrCreateGlobal(const plHashedString& sBlackboardName, plAllocator* pAllocator = plFoundation::GetDefaultAllocator());
 
   /// \brief Finds a global blackboard with the given name.
   static plSharedPtr<plBlackboard> FindGlobal(const plTempHashedString& sBlackboardName);
@@ -118,33 +120,42 @@ public:
     const Entry* m_pEntry;
   };
 
-  /// \brief Registers an entry with a name, value and flags.
-  ///
-  /// If the entry already exists, it will add the entry flags that hadn't been set before, but NOT change the value.
-  /// Thus you can use it to make sure that a value exists with a given start value, but keep it unchanged, if it already existed.
-  void RegisterEntry(const plHashedString& sName, const plVariant& initialValue, plBitflags<plBlackboardEntryFlags> flags = plBlackboardEntryFlags::None);
-
   /// \brief Removes the named entry. Does nothing, if no such entry exists.
-  void UnregisterEntry(const plHashedString& sName);
+  void RemoveEntry(const plHashedString& sName);
 
   ///  \brief Removes all entries.
-  void UnregisterAllEntries();
+  void RemoveAllEntries();
 
-  /// \brief Sets the value of the named entry.
-  ///
-  /// If the entry doesn't exist, PLASMA_FAILURE is returned.
+  /// \brief Returns whether an entry with the given name already exists.
+  bool HasEntry(const plTempHashedString& sName) const;
+
+  /// \brief Sets the value of the named entry. If the entry doesn't exist, yet, it will be created with default flags.
   ///
   /// If the 'OnChangeEvent' flag is set for this entry, OnEntryEvent() will be broadcast.
-  /// However, if the new value is no different to the old, no event will be broadcast, unless 'force' is set to true.
+  /// However, if the new value is no different to the old, no event will be broadcast.
   ///
-  /// Returns PLASMA_FAILURE, if the named entry hasn't been registered before.
-  plResult SetEntryValue(const plTempHashedString& sName, const plVariant& value, bool bForce = false);
+  /// For new entries, no OnEntryEvent() is sent.
+  ///
+  /// For best efficiency, cache the entry name in an plHashedString and use the other overload of this function.
+  /// DO NOT RECREATE the plHashedString every time, though.
+  void SetEntryValue(plStringView sName, const plVariant& value);
+
+  /// \brief Overload of SetEntryValue() that takes an plHashedString rather than an plStringView.
+  ///
+  /// Using this function is more efficient, if you access the blackboard often, but you must ensure
+  /// to only create the plHashedString once and cache it for reuse.
+  /// Assigning a value to an plHashedString is an expensive operation, so if you do not cache the string,
+  /// prefer to use the other overload.
+  void SetEntryValue(const plHashedString& sName, const plVariant& value);
 
   /// \brief Returns a pointer to the named entry, or nullptr if no such entry was registered.
   const Entry* GetEntry(const plTempHashedString& sName) const;
 
   /// \brief Returns the flags of the named entry, or plBlackboardEntryFlags::Invalid, if no such entry was registered.
   plBitflags<plBlackboardEntryFlags> GetEntryFlags(const plTempHashedString& sName) const;
+
+  /// \brief Sets the flags of an existing entry. Returns PL_FAILURE, if it wasn't created via SetEntryValue() or SetEntryValue() before.
+  plResult SetEntryFlags(const plTempHashedString& sName, plBitflags<plBlackboardEntryFlags> flags);
 
   /// \brief Returns the value of the named entry, or the fallback plVariant, if no such entry was registered.
   plVariant GetEntryValue(const plTempHashedString& sName, const plVariant& fallback = plVariant()) const;
@@ -154,7 +165,6 @@ public:
 
   /// \brief Decrements the value of the named entry. Returns the decremented value or an invalid variant if the entry does not exist or is not a number type.
   plVariant DecrementEntryValue(const plTempHashedString& sName);
-
 
   /// \brief Grants read access to the entire map of entries.
   const plHashTable<plHashedString, Entry>& GetAllEntries() const { return m_Entries; }
@@ -182,29 +192,31 @@ public:
   plResult Deserialize(plStreamReader& inout_stream);
 
 private:
-  PLASMA_ALLOW_PRIVATE_PROPERTIES(plBlackboard);
+  PL_ALLOW_PRIVATE_PROPERTIES(plBlackboard);
 
   static plBlackboard* Reflection_GetOrCreateGlobal(const plHashedString& sName);
   static plBlackboard* Reflection_FindGlobal(plTempHashedString sName);
-  void Reflection_RegisterEntry(const plHashedString& sName, const plVariant& initialValue, bool bSave, bool bOnChangeEvent);
-  bool Reflection_SetEntryValue(plTempHashedString sName, const plVariant& value);
+  void Reflection_SetEntryValue(plStringView sName, const plVariant& value);
 
+  void ImplSetEntryValue(const plHashedString& sName, Entry& entry, const plVariant& value);
+
+  bool m_bIsGlobal = false;
   plHashedString m_sName;
   plEvent<EntryEvent> m_EntryEvents;
   plUInt32 m_uiBlackboardChangeCounter = 0;
   plUInt32 m_uiBlackboardEntryChangeCounter = 0;
   plHashTable<plHashedString, Entry> m_Entries;
 
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, Blackboard);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, Blackboard);
   static plMutex s_GlobalBlackboardsMutex;
   static plHashTable<plHashedString, plSharedPtr<plBlackboard>> s_GlobalBlackboards;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plBlackboard);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plBlackboard);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_CORE_DLL plBlackboardCondition
+struct PL_CORE_DLL plBlackboardCondition
 {
   plHashedString m_sEntryName;
   double m_fComparisonValue = 0.0;
@@ -214,9 +226,6 @@ struct PLASMA_CORE_DLL plBlackboardCondition
 
   plResult Serialize(plStreamWriter& inout_stream) const;
   plResult Deserialize(plStreamReader& inout_stream);
-
-  const char* GetEntryName() const { return m_sEntryName; }
-  void SetEntryName(const char* szName) { m_sEntryName.Assign(szName); }
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plBlackboardCondition);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plBlackboardCondition);

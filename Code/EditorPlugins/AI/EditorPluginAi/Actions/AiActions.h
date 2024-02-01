@@ -4,7 +4,7 @@
 #include <GuiFoundation/Action/BaseActions.h>
 #include <GuiFoundation/GuiFoundationDLL.h>
 
-class PLASMA_EDITORPLUGINAI_DLL plAiActions
+class PL_EDITORPLUGINAI_DLL plAiActions
 {
 public:
   static void RegisterActions();
@@ -16,9 +16,9 @@ public:
   static plActionDescriptorHandle s_hProjectSettings;
 };
 
-class PLASMA_EDITORPLUGINAI_DLL plAiAction : public plButtonAction
+class PL_EDITORPLUGINAI_DLL plAiAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAiAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plAiAction, plButtonAction);
 
 public:
   enum class ActionType

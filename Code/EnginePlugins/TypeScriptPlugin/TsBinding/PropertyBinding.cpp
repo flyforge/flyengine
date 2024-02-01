@@ -13,7 +13,7 @@ plResult plTypeScriptBinding::Init_PropertyBinding()
   m_Duk.RegisterGlobalFunction("__CPP_ComponentProperty_get", __CPP_ComponentProperty_get, 2);
   m_Duk.RegisterGlobalFunction("__CPP_ComponentProperty_set", __CPP_ComponentProperty_set, 3);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plTypeScriptBinding::ComputePropertyBindingHash(const plRTTI* pType, const plAbstractMemberProperty* pMember)
@@ -38,7 +38,7 @@ void plTypeScriptBinding::SetupRttiPropertyBindings()
           continue;
 
         const plUInt32 uiHash = ComputePropertyBindingHash(pRtti, static_cast<const plAbstractMemberProperty*>(pProp));
-        PLASMA_ASSERT_DEV(!s_BoundProperties.Contains(uiHash), "Hash collision for bound property name!");
+        PL_ASSERT_DEV(!s_BoundProperties.Contains(uiHash), "Hash collision for bound property name!");
 
         s_BoundProperties[uiHash].m_pMember = static_cast<const plAbstractMemberProperty*>(pProp);
       }
@@ -65,10 +65,10 @@ void plTypeScriptBinding::GeneratePropertiesCode(plStringBuilder& out_Code, cons
     if (sTypeName.IsEmpty())
       continue;
 
-    sProp.Format("  get {0}(): {1} { return __CPP_ComponentProperty_get(this, {2}); }\n", pMember->GetPropertyName(), sTypeName, uiHash);
+    sProp.SetFormat("  get {0}(): {1} { return __CPP_ComponentProperty_get(this, {2}); }\n", pMember->GetPropertyName(), sTypeName, uiHash);
     out_Code.Append(sProp.GetView());
 
-    sProp.Format("  set {0}(value: {1}) { __CPP_ComponentProperty_set(this, {2}, value); }\n", pMember->GetPropertyName(), sTypeName, uiHash);
+    sProp.SetFormat("  set {0}(value: {1}) { __CPP_ComponentProperty_set(this, {2}, value); }\n", pMember->GetPropertyName(), sTypeName, uiHash);
     out_Code.Append(sProp.GetView());
   }
 }

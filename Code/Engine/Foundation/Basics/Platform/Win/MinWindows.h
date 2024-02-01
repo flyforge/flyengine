@@ -14,7 +14,7 @@ namespace plMinWindows
   using HRESULT = long;
   using HANDLE = void*;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
+#if PL_ENABLED(PL_PLATFORM_64BIT)
   using WPARAM = plUInt64;
   using LPARAM = plUInt64;
 #else
@@ -35,7 +35,7 @@ namespace plMinWindows
   /// Helper function to convert plMinWindows types into native windows.h types.
   /// Include IncludeWindows.h before using it.
   template <typename T>
-  PLASMA_ALWAYS_INLINE typename ToNativeImpl<T>::type ToNative(T t)
+  PL_ALWAYS_INLINE typename ToNativeImpl<T>::type ToNative(T t)
   {
     return ToNativeImpl<T>::ToNative(t);
   }
@@ -43,11 +43,11 @@ namespace plMinWindows
   /// Helper function to native windows.h types to plMinWindows types.
   /// Include IncludeWindows.h before using it.
   template <typename T>
-  PLASMA_ALWAYS_INLINE typename FromNativeImpl<T>::type FromNative(T t)
+  PL_ALWAYS_INLINE typename FromNativeImpl<T>::type FromNative(T t)
   {
     return FromNativeImpl<T>::FromNative(t);
   }
 } // namespace plMinWindows
-#define PLASMA_WINDOWS_CALLBACK __stdcall
-#define PLASMA_WINDOWS_WINAPI __stdcall
-#define PLASMA_WINDOWS_INVALID_HANDLE_VALUE ((void*)(long long)-1)
+#define PL_WINDOWS_CALLBACK __stdcall
+#define PL_WINDOWS_WINAPI __stdcall
+#define PL_WINDOWS_INVALID_HANDLE_VALUE ((void*)(long long)-1)

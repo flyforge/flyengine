@@ -8,13 +8,13 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <Foundation/System/Screen.h>
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
 #  include <Core/System/Implementation/glfw/InputDevice_glfw.inl>
 #  include <Core/System/Implementation/glfw/Window_glfw.inl>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 #  include <Core/System/Implementation/Win/InputDevice_win32.inl>
 #  include <Core/System/Implementation/Win/Window_win32.inl>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 #  include <Core/System/Implementation/uwp/InputDevice_uwp.inl>
 #  include <Core/System/Implementation/uwp/Window_uwp.inl>
 #else
@@ -27,11 +27,11 @@ plUInt8 plWindow::s_uiNextUnusedWindowNumber = 0;
 plResult plWindowCreationDesc::AdjustWindowSizeAndPosition()
 {
   if (m_WindowMode == plWindowMode::WindowFixedResolution || m_WindowMode == plWindowMode::WindowResizable)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plHybridArray<plScreenInfo, 2> screens;
   if (plScreen::EnumerateScreens(screens).Failed() || screens.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plInt32 iShowOnMonitor = m_iMonitor;
 
@@ -73,64 +73,63 @@ plResult plWindowCreationDesc::AdjustWindowSizeAndPosition()
     // m_ClientAreaSize.height= plMath::Min<plUInt32>(m_ClientAreaSize.height,pScreen->m_iResolutionY);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-void plWindowCreationDesc::SaveToDDL(plOpenDdlWriter& writer)
+void plWindowCreationDesc::SaveToDDL(plOpenDdlWriter& ref_writer)
 {
-  writer.BeginObject("WindowDesc");
+  ref_writer.BeginObject("WindowDesc");
 
-  plOpenDdlUtils::StoreString(writer, m_Title, "Title");
+  plOpenDdlUtils::StoreString(ref_writer, m_Title, "Title");
 
   switch (m_WindowMode.GetValue())
   {
     case plWindowMode::FullscreenBorderlessNativeResolution:
-      plOpenDdlUtils::StoreString(writer, "Borderless", "Mode");
+      plOpenDdlUtils::StoreString(ref_writer, "Borderless", "Mode");
       break;
     case plWindowMode::FullscreenFixedResolution:
-      plOpenDdlUtils::StoreString(writer, "Fullscreen", "Mode");
+      plOpenDdlUtils::StoreString(ref_writer, "Fullscreen", "Mode");
       break;
     case plWindowMode::WindowFixedResolution:
-      plOpenDdlUtils::StoreString(writer, "Window", "Mode");
+      plOpenDdlUtils::StoreString(ref_writer, "Window", "Mode");
       break;
     case plWindowMode::WindowResizable:
-      plOpenDdlUtils::StoreString(writer, "ResizableWindow", "Mode");
+      plOpenDdlUtils::StoreString(ref_writer, "ResizableWindow", "Mode");
       break;
   }
 
   if (m_uiWindowNumber != 0)
-    plOpenDdlUtils::StoreUInt8(writer, m_uiWindowNumber, "Index");
+    plOpenDdlUtils::StoreUInt8(ref_writer, m_uiWindowNumber, "Index");
 
   if (m_iMonitor >= 0)
-    plOpenDdlUtils::StoreInt8(writer, m_iMonitor, "Monitor");
+    plOpenDdlUtils::StoreInt8(ref_writer, m_iMonitor, "Monitor");
 
   if (m_Position != plVec2I32(0x80000000, 0x80000000))
   {
-    plOpenDdlUtils::StoreVec2I(writer, m_Position, "Position");
+    plOpenDdlUtils::StoreVec2I(ref_writer, m_Position, "Position");
   }
 
-  plOpenDdlUtils::StoreVec2U(writer, plVec2U32(m_Resolution.width, m_Resolution.height), "Resolution");
-  plOpenDdlUtils::StoreVec2U(writer, plVec2U32(m_RenderResolution.width, m_RenderResolution.height), "RenderTargetResolution");
+  plOpenDdlUtils::StoreVec2U(ref_writer, plVec2U32(m_Resolution.width, m_Resolution.height), "Resolution");
 
-  plOpenDdlUtils::StoreBool(writer, m_bClipMouseCursor, "ClipMouseCursor");
-  plOpenDdlUtils::StoreBool(writer, m_bShowMouseCursor, "ShowMouseCursor");
-  plOpenDdlUtils::StoreBool(writer, m_bSetForegroundOnInit, "SetForegroundOnInit");
+  plOpenDdlUtils::StoreBool(ref_writer, m_bClipMouseCursor, "ClipMouseCursor");
+  plOpenDdlUtils::StoreBool(ref_writer, m_bShowMouseCursor, "ShowMouseCursor");
+  plOpenDdlUtils::StoreBool(ref_writer, m_bSetForegroundOnInit, "SetForegroundOnInit");
 
-  writer.EndObject();
+  ref_writer.EndObject();
 }
 
 
 plResult plWindowCreationDesc::SaveToDDL(plStringView sFile)
 {
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plOpenDdlWriter writer;
   writer.SetOutputStream(&file);
 
   SaveToDDL(writer);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plWindowCreationDesc::LoadFromDDL(const plOpenDdlReaderElement* pParentElement)
@@ -177,14 +176,6 @@ void plWindowCreationDesc::LoadFromDDL(const plOpenDdlReaderElement* pParentElem
       m_Resolution.height = res.y;
     }
 
-    if (const plOpenDdlReaderElement* pPosition = pDesc->FindChild("RenderTargetResolution"))
-    {
-      plVec2U32 res;
-      plOpenDdlUtils::ConvertToVec2U(pPosition, res).IgnoreResult();
-      m_RenderResolution.width = res.x;
-      m_RenderResolution.height = res.y;
-    }
-
     if (const plOpenDdlReaderElement* pClipMouseCursor = pDesc->FindChildOfType(plOpenDdlPrimitiveType::Bool, "ClipMouseCursor"))
       m_bClipMouseCursor = pClipMouseCursor->GetPrimitivesBool()[0];
 
@@ -200,14 +191,14 @@ void plWindowCreationDesc::LoadFromDDL(const plOpenDdlReaderElement* pParentElem
 plResult plWindowCreationDesc::LoadFromDDL(plStringView sFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plOpenDdlReader reader;
-  PLASMA_SUCCEED_OR_RETURN(reader.ParseDocument(file));
+  PL_SUCCEED_OR_RETURN(reader.ParseDocument(file));
 
   LoadFromDDL(reader.GetRootElement());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plWindow::plWindow()
@@ -221,11 +212,13 @@ plWindow::~plWindow()
   {
     Destroy().IgnoreResult();
   }
-  PLASMA_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
+  PL_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-void plWindow::OnWindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT Msg, plMinWindows::WPARAM WParam, plMinWindows::LPARAM LParam) {}
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+void plWindow::OnWindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT msg, plMinWindows::WPARAM wparam, plMinWindows::LPARAM lparam)
+{
+}
 #endif
 
 plUInt8 plWindow::GetNextUnusedWindowNumber()
@@ -234,4 +227,3 @@ plUInt8 plWindow::GetNextUnusedWindowNumber()
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_System_Implementation_Window);

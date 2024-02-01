@@ -20,7 +20,7 @@ plSharedPtr<plDefaultStateProvider> plPrefabDefaultStateProvider::CreateProvider
   if (rootObjectGuid.IsValid())
   {
     auto pMeta = pMetaData->BeginReadMetaData(rootObjectGuid);
-    PLASMA_SCOPE_EXIT(pMetaData->EndReadMetaData(););
+    PL_SCOPE_EXIT(pMetaData->EndReadMetaData(););
     plUuid objectPrefabGuid = pObject->GetGuid();
     objectPrefabGuid.RevertCombinationWithSeed(pMeta->m_PrefabSeedGuid);
     const plAbstractObjectGraph* pGraph = plPrefabCache::GetSingleton()->GetCachedPrefabGraph(pMeta->m_CreateFromPrefab);
@@ -29,7 +29,7 @@ plSharedPtr<plDefaultStateProvider> plPrefabDefaultStateProvider::CreateProvider
       if (pGraph->GetNode(objectPrefabGuid) != nullptr)
       {
         // The object was found in the prefab, we can thus use its prefab counterpart to provide a default state.
-        return PLASMA_DEFAULT_NEW(plPrefabDefaultStateProvider, rootObjectGuid, pMeta->m_CreateFromPrefab, pMeta->m_PrefabSeedGuid, iRootDepth);
+        return PL_DEFAULT_NEW(plPrefabDefaultStateProvider, rootObjectGuid, pMeta->m_CreateFromPrefab, pMeta->m_PrefabSeedGuid, iRootDepth);
       }
     }
   }
@@ -160,7 +160,7 @@ plStatus plPrefabDefaultStateProvider::CreateRevertContainerDiff(SuperArray supe
 {
   plVariant defaultValue = GetDefaultValue(superPtr, pAccessor, pObject, pProp);
   plVariant currentValue;
-  PLASMA_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, currentValue));
+  PL_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, currentValue));
 
   const plAbstractObjectGraph* pGraph = plPrefabCache::GetSingleton()->GetCachedPrefabGraph(m_CreateFromPrefab);
   plUuid objectPrefabGuid = pObject->GetGuid();
@@ -170,24 +170,28 @@ plStatus plPrefabDefaultStateProvider::CreateRevertContainerDiff(SuperArray supe
     // We create a sub-graph of only the parent node in both re-mapped prefab as well as from the actually object. We limit the graph to only the container property.
     auto pNode = pGraph->GetNode(objectPrefabGuid);
     plAbstractObjectGraph prefabSubGraph;
-    plAbstractObjectNode* pPrefabSubRoot = pGraph->Clone(prefabSubGraph, pNode, [pRootNode = pNode, pRootProp = pProp](const plAbstractObjectNode* pNode, const plAbstractObjectNode::Property* pProp) {
-      if (pNode == pRootNode && (pProp->m_sPropertyName != pRootProp->GetPropertyName()))
+    pGraph->Clone(prefabSubGraph, pNode, [pRootNode = pNode, pRootProp = pProp](const plAbstractObjectNode* pNode, const plAbstractObjectNode::Property* pProp) {
+      if (pNode == pRootNode && pProp->m_sPropertyName != pRootProp->GetPropertyName())
         return false;
-      return true;
+
+      return true; //
     });
+
     prefabSubGraph.ReMapNodeGuids(m_PrefabSeedGuid);
 
     plAbstractObjectGraph instanceSubGraph;
     plDocumentObjectConverterWriter writer(&instanceSubGraph, pObject->GetDocumentObjectManager(), [pRootObject = pObject, pRootProp = pProp](const plDocumentObject* pObject, const plAbstractProperty* pProp) {
       if (pObject == pRootObject && pProp != pRootProp)
         return false;
-      return true;
+
+      return true; //
     });
-    plAbstractObjectNode* pInstanceSubRoot = writer.AddObjectToGraph(pObject);
+
+    writer.AddObjectToGraph(pObject);
 
     prefabSubGraph.CreateDiffWithBaseGraph(instanceSubGraph, out_diff);
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 
   return plStatus(plFmt("The object was not found in the base prefab graph."));

@@ -1,6 +1,6 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <Foundation/Basics/Platform/Android/AndroidJni.h>
 #  include <Foundation/Basics/Platform/Android/AndroidUtils.h>
 #  include <android_native_app_glue.h>
@@ -24,13 +24,13 @@ plJniAttachment::plJniAttachment()
     if (ownsEnv)
     {
       // Assign name to attachment since ART complains about it not being set.
-      JavaVMAttachArgs args = {JNI_VERSION_1_6, "PLASMA JNI", nullptr};
+      JavaVMAttachArgs args = {JNI_VERSION_1_6, "PL JNI", nullptr};
       plAndroidUtils::GetAndroidJavaVM()->AttachCurrentThread(&env, &args);
     }
     else
     {
       // Assume already existing JNI environment will be alive as long as this object exists.
-      PLASMA_ASSERT_DEV(env != nullptr, "");
+      PL_ASSERT_DEV(env != nullptr, "");
       env->PushLocalFrame(16);
     }
 
@@ -74,11 +74,11 @@ plJniObject plJniAttachment::GetActivity()
 
 JNIEnv* plJniAttachment::GetEnv()
 {
-  PLASMA_ASSERT_DEV(s_env != nullptr, "Thread not attached to the JVM - you forgot to create an instance of plJniAttachment in the current scope.");
+  PL_ASSERT_DEV(s_env != nullptr, "Thread not attached to the JVM - you forgot to create an instance of plJniAttachment in the current scope.");
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   void* unused;
-  PLASMA_ASSERT_DEBUG(plAndroidUtils::GetAndroidJavaVM()->GetEnv(&unused, JNI_VERSION_1_6) == JNI_OK,
+  PL_ASSERT_DEBUG(plAndroidUtils::GetAndroidJavaVM()->GetEnv(&unused, JNI_VERSION_1_6) == JNI_OK,
     "Current thread has lost its attachment to the JVM - some OS calls can cause this to happen. Try to reduce the attachment to a smaller scope.");
 #  endif
 
@@ -550,7 +550,7 @@ plJniString plJniObject::ToString() const
   }
 
   jmethodID method = plJniAttachment::GetEnv()->GetMethodID(jclass(GetClass().m_object), "toString", "()Ljava/lang/String;");
-  PLASMA_ASSERT_DEV(method, "Could not find JNI method toString()");
+  PL_ASSERT_DEV(method, "Could not find JNI method toString()");
 
   return plJniTraits<plJniString>::CallInstanceMethod(m_object, method);
 }
@@ -737,4 +737,3 @@ bool plJniClass::IsPrimitive()
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Platform_Android_AndroidJni);

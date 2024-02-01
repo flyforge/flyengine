@@ -363,7 +363,7 @@ void plColorGradient::Load(plStreamReader& inout_stream)
   plUInt8 uiVersion = 0;
 
   inout_stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= 2, "Incorrect version '{0}' for plColorGradient", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= 2, "Incorrect version '{0}' for plColorGradient", uiVersion);
 
   plUInt32 numColor = 0;
   plUInt32 numAlpha = 0;
@@ -430,5 +430,3 @@ void plColorGradient::Load(plStreamReader& inout_stream)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Tracks_Implementation_ColorGradient);

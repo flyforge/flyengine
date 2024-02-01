@@ -8,7 +8,7 @@
 
 plGALVertexDeclarationDX11::plGALVertexDeclarationDX11(const plGALVertexDeclarationCreationDescription& Description)
   : plGALVertexDeclaration(Description)
-  , m_pDXInputLayout(nullptr)
+
 {
 }
 
@@ -20,12 +20,12 @@ static const char* GALSemanticToDX11[] = {"POSITION", "NORMAL", "TANGENT", "COLO
 
 static UINT GALSemanticToIndexDX11[] = {0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 0, 0, 1, 0, 1};
 
-PLASMA_CHECK_AT_COMPILETIME_MSG(PLASMA_ARRAY_SIZE(GALSemanticToDX11) == plGALVertexAttributeSemantic::ENUM_COUNT,
+PL_CHECK_AT_COMPILETIME_MSG(PL_ARRAY_SIZE(GALSemanticToDX11) == plGALVertexAttributeSemantic::ENUM_COUNT,
   "GALSemanticToDX11 array size does not match vertex attribute semantic count");
-PLASMA_CHECK_AT_COMPILETIME_MSG(PLASMA_ARRAY_SIZE(GALSemanticToIndexDX11) == plGALVertexAttributeSemantic::ENUM_COUNT,
+PL_CHECK_AT_COMPILETIME_MSG(PL_ARRAY_SIZE(GALSemanticToIndexDX11) == plGALVertexAttributeSemantic::ENUM_COUNT,
   "GALSemanticToIndexDX11 array size does not match vertex attribute semantic count");
 
-PLASMA_DEFINE_AS_POD_TYPE(D3D11_INPUT_ELEMENT_DESC);
+PL_DEFINE_AS_POD_TYPE(D3D11_INPUT_ELEMENT_DESC);
 
 plResult plGALVertexDeclarationDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -37,7 +37,7 @@ plResult plGALVertexDeclarationDX11::InitPlatform(plGALDevice* pDevice)
 
   if (pShader == nullptr || !pShader->GetDescription().HasByteCodeForStage(plGALShaderStage::VertexShader))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Copy attribute descriptions
@@ -52,7 +52,7 @@ plResult plGALVertexDeclarationDX11::InitPlatform(plGALDevice* pDevice)
     if (DXDesc.Format == DXGI_FORMAT_UNKNOWN)
     {
       plLog::Error("Vertex attribute format {0} of attribute at index {1} is unknown!", Current.m_eFormat, i);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     DXDesc.InputSlot = Current.m_uiVertexBufferSlot;
@@ -65,25 +65,25 @@ plResult plGALVertexDeclarationDX11::InitPlatform(plGALDevice* pDevice)
   }
 
 
-  const plScopedRefPointer<plGALShaderByteCode>& pByteCode = pShader->GetDescription().m_ByteCodes[plGALShaderStage::VertexShader];
+  const plSharedPtr<const plGALShaderByteCode>& pByteCode = pShader->GetDescription().m_ByteCodes[plGALShaderStage::VertexShader];
 
   if (FAILED(pDXDevice->GetDXDevice()->CreateInputLayout(
         &DXInputElementDescs[0], DXInputElementDescs.GetCount(), pByteCode->GetByteCode(), pByteCode->GetSize(), &m_pDXInputLayout)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 plResult plGALVertexDeclarationDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXInputLayout);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXInputLayout);
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Shader_Implementation_VertexDeclarationDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Shader_Implementation_VertexDeclarationDX11);

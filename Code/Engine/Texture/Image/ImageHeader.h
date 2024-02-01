@@ -11,7 +11,7 @@
 ///
 /// This class has no associated behavior or functionality, and its getters and setters have no effect other than changing
 /// the contained value. It is intended as a container to be modified by image utils and loaders.
-class PLASMA_TEXTURE_DLL plImageHeader
+class PL_TEXTURE_DLL plImageHeader
 {
 public:
   /// \brief Constructs an image using an unknown format and zero size.
@@ -41,7 +41,7 @@ public:
   /// \brief Returns the image width for a given mip level, clamped to 1.
   plUInt32 GetWidth(plUInt32 uiMipLevel = 0) const
   {
-    PLASMA_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
+    PL_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
     return plMath::Max(m_uiWidth >> uiMipLevel, 1U);
   }
 
@@ -51,7 +51,7 @@ public:
   /// \brief Returns the image height for a given mip level, clamped to 1.
   plUInt32 GetHeight(plUInt32 uiMipLevel = 0) const
   {
-    PLASMA_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
+    PL_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
     return plMath::Max(m_uiHeight >> uiMipLevel, 1U);
   }
 
@@ -61,7 +61,7 @@ public:
   /// \brief Returns the image depth for a given mip level, clamped to 1.
   plUInt32 GetDepth(plUInt32 uiMipLevel = 0) const
   {
-    PLASMA_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
+    PL_ASSERT_DEV(uiMipLevel < m_uiNumMipLevels, "Invalid mip level");
     return plMath::Max(m_uiDepth >> uiMipLevel, 1U);
   }
 

@@ -68,7 +68,7 @@ void plQtPluginsWidget::UpdatePlugins()
       pIcon->setAlignment(Qt::AlignHCenter | Qt::AlignVCenter);
       TablePlugins->setCellWidget(iRow, 0, pIcon);
 
-      sTemp.Format("  {0}  ", it.Key());
+      sTemp.SetFormat("  {0}  ", it.Key());
       TablePlugins->setCellWidget(iRow, 1, new QLabel(sTemp.GetData()));
 
       if (it.Value().m_bReloadable)
@@ -94,7 +94,7 @@ void plQtPluginsWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage('PLUG', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('PLUG', Msg) == PL_SUCCESS)
   {
     switch (Msg.GetMessageID())
     {

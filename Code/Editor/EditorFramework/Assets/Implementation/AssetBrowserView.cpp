@@ -6,15 +6,13 @@
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 
 
-plQtAssetBrowserView::plQtAssetBrowserView(QWidget* parent)
-  : plQtItemView<QListView>(parent)
+plQtAssetBrowserView::plQtAssetBrowserView(QWidget* pParent)
+  : plQtItemView<QListView>(pParent)
 {
   m_iIconSizePercentage = 100;
   m_pDelegate = new plQtIconViewDelegate(this);
 
   SetDialogMode(false);
-
-  setSelectionBehavior(QAbstractItemView::SelectionBehavior::SelectItems);
   setViewMode(QListView::ViewMode::IconMode);
   setUniformItemSizes(true);
   setResizeMode(QListView::ResizeMode::Adjust);
@@ -29,12 +27,14 @@ void plQtAssetBrowserView::SetDialogMode(bool bDialogMode)
 
   if (m_bDialogMode)
   {
+    setEditTriggers(QAbstractItemView::NoEditTriggers);
     m_pDelegate->SetDrawTransformState(false);
     setDragDropMode(QAbstractItemView::DragDropMode::NoDragDrop);
     setSelectionMode(QAbstractItemView::SelectionMode::SingleSelection);
   }
   else
   {
+    setEditTriggers(QAbstractItemView::EditKeyPressed);
     m_pDelegate->SetDrawTransformState(true);
     setDragDropMode(QAbstractItemView::DragOnly);
     setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
@@ -71,123 +71,6 @@ plInt32 plQtAssetBrowserView::GetIconScale() const
   return m_iIconSizePercentage;
 }
 
-void plQtAssetBrowserView::dragEnterEvent(QDragEnterEvent* event)
-{
-  if (event->source())
-    event->acceptProposedAction();
-}
-
-void plQtAssetBrowserView::dragMoveEvent(QDragMoveEvent* event)
-{
-  event->acceptProposedAction();
-}
-
-void plQtAssetBrowserView::dragLeaveEvent(QDragLeaveEvent* event)
-{
-  event->accept();
-}
-
-void plQtAssetBrowserView::dropEvent(QDropEvent* event)
-{
-  if (!event->mimeData()->hasUrls())
-    return;
-
-  QList<QUrl> paths = event->mimeData()->urls();
-  plString targetPar = indexAt(event->pos()).data(plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().data();
-  if (targetPar.IsEmpty())
-  {
-    return;
-  }
-
-  for (auto it = paths.begin(); it != paths.end(); it++)
-  {
-    plStringBuilder src = it->path().toUtf8().constData();
-
-    src.Shrink(1, 0); //remove prepending '/' in name that appears for some reason
-
-    plStringBuilder target = targetPar;
-    target.AppendFormat("/{}", it->fileName().toUtf8());
-
-    if (targetPar == src)
-    {
-      plLog::Error("Can't drop a file or folder on itself");
-      continue;
-    }
-
-
-    if (!plOSFile::ExistsDirectory(src) && !plOSFile::ExistsFile(src))
-    {
-      plLog::Error("Cannot find file/folder to move : {}", src);
-      return;
-    }
-    if (plOSFile::ExistsDirectory(src))
-    {
-      if (plOSFile::ExistsDirectory(target))  //ask to overwrite if target already exists
-      {
-        plStringBuilder msg = plStringBuilder();
-        msg.Format("destination {} already exists", target);
-        QMessageBox msgBox;
-        msgBox.setText(msg.GetData());
-        msgBox.setInformativeText("Overwrite existing folder?");
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        if (!msgBox.exec())
-          return;
-
-        if (plOSFile::DeleteFolder(target).Failed())
-        {
-          plLog::Error("Failed to delete folder {}", target);
-          return;
-        }
-      }
-
-      if (plOSFile::CreateDirectoryStructure(target).Succeeded())
-      {
-        if (plOSFile::CopyFolder(src, target).Failed())
-        {
-          plLog::Error("Failed to copy folder {} content", src);
-        }
-        if (plOSFile::DeleteFolder(src).Failed())
-        {
-          plLog::Error("Failed to delete folder {}", src);
-        }
-      }
-      else
-      {
-        plLog::Error("Failed to copy folder {} to {}", src, target);
-      }
-    }
-    else if (plOSFile::ExistsFile(src))
-    {
-      if (plOSFile::ExistsFile(target))   //ask to overwrite if target already exists
-      {
-        plStringBuilder msg = plStringBuilder();
-        msg.Format("destination {} already exists", target);
-        QMessageBox msgBox;
-        msgBox.setText(msg.GetData());
-        msgBox.setInformativeText("Overwrite existing file?");
-        msgBox.setStandardButtons(QMessageBox::Ok | QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        if (!msgBox.exec())
-          continue;
-
-        if (plOSFile::DeleteFile(target).Failed())
-        {
-          plLog::Error("Failed to delete file {}", target);
-          return;
-        }
-      }
-      if (plOSFile::MoveFileOrDirectory(src, target).Failed())
-      {
-        plLog::Error("failed to move file or dir from {} to {}", src, target);
-        return;
-      }
-    }
-  }
-
-  plAssetCurator::GetSingleton()->CheckFileSystem();
-}
-
 
 void plQtAssetBrowserView::wheelEvent(QWheelEvent* pEvent)
 {
@@ -219,25 +102,33 @@ void plQtIconViewDelegate::SetIconScale(plInt32 iIconSizePercentage)
   m_iIconSizePercentage = iIconSizePercentage;
 }
 
-bool plQtIconViewDelegate::mousePressEvent(QMouseEvent* event, const QStyleOptionViewItem& opt, const QModelIndex& index)
+bool plQtIconViewDelegate::mousePressEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& opt, const QModelIndex& index)
 {
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+  if (!itemType.IsSet(plAssetBrowserItemFlags::Asset))
+    return false;
+
   const plUInt32 uiThumbnailSize = ThumbnailSize();
   QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin + uiThumbnailSize - 16 + 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
   thumbnailRect.setSize(QSize(16, 16));
-  if (thumbnailRect.contains(event->localPos().toPoint()))
+  if (thumbnailRect.contains(pEvent->position().toPoint()))
   {
-    event->accept();
+    pEvent->accept();
     return true;
   }
   return false;
 }
 
-bool plQtIconViewDelegate::mouseReleaseEvent(QMouseEvent* event, const QStyleOptionViewItem& opt, const QModelIndex& index)
+bool plQtIconViewDelegate::mouseReleaseEvent(QMouseEvent* pEvent, const QStyleOptionViewItem& opt, const QModelIndex& index)
 {
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
+  if (!itemType.IsSet(plAssetBrowserItemFlags::Asset))
+    return false;
+
   const plUInt32 uiThumbnailSize = ThumbnailSize();
   QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin + uiThumbnailSize - 16 + 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
   thumbnailRect.setSize(QSize(16, 16));
-  if (thumbnailRect.contains(event->localPos().toPoint()))
+  if (thumbnailRect.contains(pEvent->position().toPoint()))
   {
     plUuid guid = index.data(plQtAssetBrowserModel::UserRoles::AssetGuid).value<plUuid>();
 
@@ -245,7 +136,7 @@ bool plQtIconViewDelegate::mouseReleaseEvent(QMouseEvent* event, const QStyleOpt
 
     if (ret.Failed())
     {
-      QString path = index.data(plQtAssetBrowserModel::UserRoles::ParentRelativePath).toString();
+      QString path = index.data(plQtAssetBrowserModel::UserRoles::RelativePath).toString();
       plLog::Error("Transform failed: '{0}' ({1})", ret.m_sMessage, path.toUtf8().data());
     }
     else
@@ -253,29 +144,68 @@ bool plQtIconViewDelegate::mouseReleaseEvent(QMouseEvent* event, const QStyleOpt
       plAssetCurator::GetSingleton()->WriteAssetTables().IgnoreResult();
     }
 
-    event->accept();
+    pEvent->accept();
     return true;
   }
   return false;
 }
 
-void plQtIconViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& opt, const QModelIndex& index) const
+QWidget* plQtIconViewDelegate::createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+  plStringBuilder sAbsPath = index.data(plQtAssetBrowserModel::UserRoles::AbsolutePath).toString().toUtf8().constData();
+
+  QLineEdit* editor = new QLineEdit(pParent);
+  editor->setValidator(new plFileNameValidator(editor, sAbsPath.GetFileDirectory(), sAbsPath.GetFileNameAndExtension()));
+  return editor;
+}
+
+void plQtIconViewDelegate::setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const
+{
+  QString sOldName = index.data(plQtAssetBrowserModel::UserRoles::AbsolutePath).toString();
+  QLineEdit* pLineEdit = qobject_cast<QLineEdit*>(pEditor);
+  pModel->setData(index, pLineEdit->text());
+}
+
+void plQtIconViewDelegate::updateEditorGeometry(QWidget* pEditor, const QStyleOptionViewItem& option, const QModelIndex& index) const
+{
+  if (!pEditor)
+    return;
+
+  const plUInt32 uiThumbnailSize = ThumbnailSize();
+  const QRect textRect = option.rect.adjusted(ItemSideMargin, ItemSideMargin + uiThumbnailSize + TextSpacing, -ItemSideMargin, -ItemSideMargin - TextSpacing);
+  pEditor->setGeometry(textRect);
+}
+
+void plQtIconViewDelegate::paint(QPainter* pPainter, const QStyleOptionViewItem& opt, const QModelIndex& index) const
 {
   if (!IsInIconMode())
   {
-    plQtItemDelegate::paint(painter, opt, index);
+    plQtItemDelegate::paint(pPainter, opt, index);
     return;
   }
 
   const plUInt32 uiThumbnailSize = ThumbnailSize();
+  const plBitflags<plAssetBrowserItemFlags> itemType = (plAssetBrowserItemFlags::Enum)index.data(plQtAssetBrowserModel::UserRoles::ItemFlags).toInt();
 
   // Prepare painter.
   {
-    painter->save();
+    pPainter->save();
     if (hasClipping())
-      painter->setClipRect(opt.rect);
+      pPainter->setClipRect(opt.rect);
 
-    painter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+    pPainter->setRenderHint(QPainter::SmoothPixmapTransform, true);
+  }
+
+  // Draw assets with a background to distinguish them easily from normal files / folders.
+  if (itemType.IsAnySet(plAssetBrowserItemFlags::Asset | plAssetBrowserItemFlags::SubAsset))
+  {
+    QPalette::ColorGroup cg = opt.state & QStyle::State_Enabled ? QPalette::Normal : QPalette::Disabled;
+    if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
+      cg = QPalette::Inactive;
+
+    plInt32 border = ItemSideMargin - HighlightBorderWidth;
+    QRect assetRect = opt.rect.adjusted(border, border, -border, -border);
+    pPainter->fillRect(assetRect, opt.palette.brush(cg, QPalette::AlternateBase));
   }
 
   // Draw highlight background (copy of QItemDelegate::drawBackground)
@@ -290,89 +220,121 @@ void plQtIconViewDelegate::paint(QPainter* painter, const QStyleOptionViewItem& 
       if (cg == QPalette::Normal && !(opt.state & QStyle::State_Active))
         cg = QPalette::Inactive;
 
-      painter->fillRect(highlightRect, opt.palette.brush(cg, QPalette::Highlight));
+      pPainter->fillRect(highlightRect, opt.palette.brush(cg, QPalette::Highlight));
     }
     else
     {
       QVariant value = index.data(Qt::BackgroundRole);
       if (value.canConvert<QBrush>())
       {
-        QPointF oldBO = painter->brushOrigin();
-        painter->setBrushOrigin(highlightRect.topLeft());
-        painter->fillRect(highlightRect, qvariant_cast<QBrush>(value));
-        painter->setBrushOrigin(oldBO);
+        QPointF oldBO = pPainter->brushOrigin();
+        pPainter->setBrushOrigin(highlightRect.topLeft());
+        pPainter->fillRect(highlightRect, qvariant_cast<QBrush>(value));
+        pPainter->setBrushOrigin(oldBO);
       }
     }
   }
 
-  // Draw thumbnail.
+  if (itemType.IsAnySet(plAssetBrowserItemFlags::File) && !itemType.IsAnySet(plAssetBrowserItemFlags::Asset))
   {
-    QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin, 0, 0);
-    thumbnailRect.setSize(QSize(uiThumbnailSize, uiThumbnailSize));
-    QPixmap pixmap = qvariant_cast<QPixmap>(index.data(Qt::DecorationRole));
-    painter->drawPixmap(thumbnailRect, pixmap);
-  }
-
-  // Draw icon.
-  {
-    QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin - 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
-    thumbnailRect.setSize(QSize(16, 16));
-    QIcon icon = qvariant_cast<QIcon>(index.data(plQtAssetBrowserModel::UserRoles::AssetIcon));
-    icon.paint(painter, thumbnailRect);
-  }
-
-  // Draw Transform State Icon
-  if (m_bDrawTransformState)
-  {
-    QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin + uiThumbnailSize - 16 + 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
-    thumbnailRect.setSize(QSize(16, 16));
-
-    plAssetInfo::TransformState state = (plAssetInfo::TransformState)index.data(plQtAssetBrowserModel::UserRoles::TransformState).toInt();
-
-    switch (state)
+    // Draw thumbnail.
     {
-      case plAssetInfo::TransformState::Unknown:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetUnknown.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::NeedsThumbnail:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsThumbnail.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::NeedsTransform:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsTransform.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::UpToDate:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetOk.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::MissingDependency:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetMissingDependency.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::MissingReference:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetMissingReference.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::TransformError:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetFailedTransform.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::NeedsImport:
-        plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsImport.svg").paint(painter, thumbnailRect);
-        break;
-      case plAssetInfo::TransformState::Folder:
-        break;
-      case plAssetInfo::TransformState::COUNT:
-        break;
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin, 0, 0);
+      thumbnailRect.setSize(QSize(uiThumbnailSize, uiThumbnailSize));
+      QIcon icon = qvariant_cast<QIcon>(index.data(Qt::DecorationRole));
+      icon.paint(pPainter, thumbnailRect);
+    }
+
+    // Draw icon.
+    {
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin - 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
+      thumbnailRect.setSize(QSize(16, 16));
+      QIcon icon = qvariant_cast<QIcon>(index.data(plQtAssetBrowserModel::UserRoles::AssetIcon));
+      icon.paint(pPainter, thumbnailRect);
+    }
+  }
+  else if (itemType.IsAnySet(plAssetBrowserItemFlags::Folder | plAssetBrowserItemFlags::DataDirectory))
+  {
+    // Draw icon.
+    {
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin, 0, 0);
+      thumbnailRect.setSize(QSize(uiThumbnailSize, uiThumbnailSize));
+      QIcon icon = qvariant_cast<QIcon>(index.data(plQtAssetBrowserModel::UserRoles::AssetIcon));
+      icon.paint(pPainter, thumbnailRect);
+    }
+  }
+  else // asset
+  {
+    // Draw thumbnail.
+    {
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin, 0, 0);
+      thumbnailRect.setSize(QSize(uiThumbnailSize, uiThumbnailSize));
+      QPixmap pixmap = qvariant_cast<QPixmap>(index.data(Qt::DecorationRole));
+      pPainter->drawPixmap(thumbnailRect, pixmap);
+    }
+
+    // Draw icon.
+    {
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin - 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
+      thumbnailRect.setSize(QSize(16, 16));
+      QIcon icon = qvariant_cast<QIcon>(index.data(plQtAssetBrowserModel::UserRoles::AssetIcon));
+      icon.paint(pPainter, thumbnailRect);
+    }
+
+    // Draw Transform State Icon
+    if (m_bDrawTransformState)
+    {
+      QRect thumbnailRect = opt.rect.adjusted(ItemSideMargin + uiThumbnailSize - 16 + 2, ItemSideMargin + uiThumbnailSize - 16 + 2, 0, 0);
+      thumbnailRect.setSize(QSize(16, 16));
+
+      plAssetInfo::TransformState state = (plAssetInfo::TransformState)index.data(plQtAssetBrowserModel::UserRoles::TransformState).toInt();
+
+      switch (state)
+      {
+        case plAssetInfo::TransformState::Unknown:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetUnknown.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::NeedsThumbnail:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsThumbnail.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::NeedsTransform:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsTransform.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::UpToDate:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetOk.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::MissingTransformDependency:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetMissingDependency.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::MissingThumbnailDependency:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetMissingReference.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::CircularDependency:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetFailedTransform.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::TransformError:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetFailedTransform.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::NeedsImport:
+          plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/AssetNeedsImport.svg").paint(pPainter, thumbnailRect);
+          break;
+        case plAssetInfo::TransformState::COUNT:
+          break;
+      }
     }
   }
 
   // Draw caption.
   {
-    //painter->setFont(GetFont());
-    QRect textRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin + uiThumbnailSize, -ItemSideMargin, -ItemSideMargin-1); //magic -1, otherwise we can see the top of some letters on the third line
+    pPainter->setFont(GetFont());
+    QRect textRect = opt.rect.adjusted(ItemSideMargin, ItemSideMargin + uiThumbnailSize + TextSpacing, -ItemSideMargin, -ItemSideMargin - TextSpacing);
 
     QString caption = qvariant_cast<QString>(index.data(Qt::DisplayRole));
-    painter->drawText(textRect, Qt::AlignHCenter | Qt::AlignTop | Qt::TextWrapAnywhere, caption);
+    pPainter->drawText(textRect, Qt::AlignHCenter | Qt::AlignTop | Qt::TextWrapAnywhere, caption);
   }
 
 
-  painter->restore();
+  pPainter->restore();
 }
 
 QSize plQtIconViewDelegate::sizeHint(const QStyleOptionViewItem& opt, const QModelIndex& index) const
@@ -411,7 +373,7 @@ QFont plQtIconViewDelegate::GetFont() const
 
 plUInt32 plQtIconViewDelegate::ThumbnailSize() const
 {
-  return MaxSize * (float)m_iIconSizePercentage / 100.0f;
+  return static_cast<plUInt32>((float)MaxSize * (float)m_iIconSizePercentage / 100.0f);
 }
 
 bool plQtIconViewDelegate::IsInIconMode() const

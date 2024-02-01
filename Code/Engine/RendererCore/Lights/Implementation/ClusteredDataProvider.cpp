@@ -143,19 +143,19 @@ void plClusteredDataGPU::BindResources(plRenderContext* pRenderContext)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataProvider, 1, plRTTIDefaultAllocator<plClusteredDataProvider>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plClusteredDataProvider, 1, plRTTIDefaultAllocator<plClusteredDataProvider>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plClusteredDataProvider::plClusteredDataProvider() {}
+plClusteredDataProvider::plClusteredDataProvider() = default;
 
-plClusteredDataProvider::~plClusteredDataProvider() {}
+plClusteredDataProvider::~plClusteredDataProvider() = default;
 
 void* plClusteredDataProvider::UpdateData(const plRenderViewContext& renderViewContext, const plExtractedRenderData& extractedData)
 {
   plGALCommandEncoder* pGALCommandEncoder = renderViewContext.m_pRenderContext->GetRenderCommandEncoder();
 
-  PLASMA_PROFILE_AND_MARKER(pGALCommandEncoder, "Update Clustered Data");
+  PL_PROFILE_AND_MARKER(pGALCommandEncoder, "Update Clustered Data");
 
   if (auto pData = extractedData.GetFrameData<plClusteredDataCPU>())
   {
@@ -211,4 +211,4 @@ void* plClusteredDataProvider::UpdateData(const plRenderViewContext& renderViewC
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ClusteredDataProvider);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ClusteredDataProvider);

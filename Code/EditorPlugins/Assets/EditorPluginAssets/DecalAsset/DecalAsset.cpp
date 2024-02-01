@@ -6,29 +6,29 @@
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plDecalMode, 1)
-  PLASMA_ENUM_CONSTANT(plDecalMode::BaseColor),
-  PLASMA_ENUM_CONSTANT(plDecalMode::BaseColorNormal),
-  PLASMA_ENUM_CONSTANT(plDecalMode::BaseColorORM),
-  PLASMA_ENUM_CONSTANT(plDecalMode::BaseColorNormalORM),
-  PLASMA_ENUM_CONSTANT(plDecalMode::BaseColorEmissive)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plDecalMode, 1)
+  PL_ENUM_CONSTANT(plDecalMode::BaseColor),
+  PL_ENUM_CONSTANT(plDecalMode::BaseColorNormal),
+  PL_ENUM_CONSTANT(plDecalMode::BaseColorORM),
+  PL_ENUM_CONSTANT(plDecalMode::BaseColorNormalORM),
+  PL_ENUM_CONSTANT(plDecalMode::BaseColorEmissive)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetProperties, 3, plRTTIDefaultAllocator<plDecalAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetProperties, 3, plRTTIDefaultAllocator<plDecalAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Mode", plDecalMode, m_Mode),
-    PLASMA_MEMBER_PROPERTY("BlendModeColorize", m_bBlendModeColorize),
-    PLASMA_MEMBER_PROPERTY("AlphaMask", m_sAlphaMask)->AddAttributes(new plFileBrowserAttribute("Select Alpha Mask", plFileBrowserAttribute::ImagesLdrOnly)),
-    PLASMA_MEMBER_PROPERTY("BaseColor", m_sBaseColor)->AddAttributes(new plFileBrowserAttribute("Select Base Color Map", plFileBrowserAttribute::ImagesLdrOnly)),
-    PLASMA_MEMBER_PROPERTY("Normal", m_sNormal)->AddAttributes(new plFileBrowserAttribute("Select Normal Map", plFileBrowserAttribute::ImagesLdrOnly), new plDefaultValueAttribute(plStringView("Textures/NeutralNormal.tga"))), // wrap in plStringView to prevent a memory leak report
-    PLASMA_MEMBER_PROPERTY("ORM", m_sORM)->AddAttributes(new plFileBrowserAttribute("Select ORM Map", plFileBrowserAttribute::ImagesLdrOnly)),
-    PLASMA_MEMBER_PROPERTY("Emissive", m_sEmissive)->AddAttributes(new plFileBrowserAttribute("Select Emissive Map", plFileBrowserAttribute::ImagesLdrOnly)),
+    PL_ENUM_MEMBER_PROPERTY("Mode", plDecalMode, m_Mode),
+    PL_MEMBER_PROPERTY("BlendModeColorize", m_bBlendModeColorize),
+    PL_MEMBER_PROPERTY("AlphaMask", m_sAlphaMask)->AddAttributes(new plFileBrowserAttribute("Select Alpha Mask", plFileBrowserAttribute::ImagesLdrOnly)),
+    PL_MEMBER_PROPERTY("BaseColor", m_sBaseColor)->AddAttributes(new plFileBrowserAttribute("Select Base Color Map", plFileBrowserAttribute::ImagesLdrOnly)),
+    PL_MEMBER_PROPERTY("Normal", m_sNormal)->AddAttributes(new plFileBrowserAttribute("Select Normal Map", plFileBrowserAttribute::ImagesLdrOnly), new plDefaultValueAttribute(plStringView("Textures/NeutralNormal.tga"))), // wrap in plStringView to prevent a memory leak report
+    PL_MEMBER_PROPERTY("ORM", m_sORM)->AddAttributes(new plFileBrowserAttribute("Select ORM Map", plFileBrowserAttribute::ImagesLdrOnly)),
+    PL_MEMBER_PROPERTY("Emissive", m_sEmissive)->AddAttributes(new plFileBrowserAttribute("Select Emissive Map", plFileBrowserAttribute::ImagesLdrOnly)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDecalAssetProperties::plDecalAssetProperties() = default;
@@ -66,16 +66,16 @@ void plDecalAssetProperties::PropertyMetaStateEventHandler(plPropertyMetaStateEv
 }
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocument, 5, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocument, 5, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plDecalAssetDocument::plDecalAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plDecalAssetProperties>(szDocumentPath, plAssetDocEngineConnection::Simple, true)
+plDecalAssetDocument::plDecalAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plDecalAssetProperties>(sDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
 }
 
-plTransformStatus plDecalAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plDecalAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   return static_cast<plDecalAssetDocumentManager*>(GetAssetDocumentManager())->GenerateDecalTexture(pAssetProfile);
 }
@@ -95,7 +95,7 @@ plTransformStatus plDecalAssetDocument::InternalCreateThumbnail(const ThumbnailI
   {
     // Thumbnail
     const plStringBuilder sDir = sThumbnail.GetFileDirectory();
-    PLASMA_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sDir));
+    PL_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sDir));
 
     arguments << "-thumbnailOut";
     arguments << QString::fromUtf8(sThumbnail.GetData());
@@ -107,7 +107,7 @@ plTransformStatus plDecalAssetDocument::InternalCreateThumbnail(const ThumbnailI
   {
     plQtEditorApp* pEditorApp = plQtEditorApp::GetSingleton();
 
-    temp.Format("-in0");
+    temp.SetFormat("-in0");
 
     plStringBuilder sAbsPath = pProp->m_sBaseColor;
     if (!pEditorApp->MakeDataDirectoryRelativePathAbsolute(sAbsPath))
@@ -142,11 +142,11 @@ plTransformStatus plDecalAssetDocument::InternalCreateThumbnail(const ThumbnailI
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
+  PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
 
   {
     plUInt64 uiThumbnailHash = plAssetCurator::GetSingleton()->GetAssetReferenceHash(GetGuid());
-    PLASMA_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
+    PL_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
 
     ThumbnailInfo thumbnailInfo;
     thumbnailInfo.SetFileHashAndVersion(uiThumbnailHash, GetAssetTypeVersion());
@@ -154,14 +154,14 @@ plTransformStatus plDecalAssetDocument::InternalCreateThumbnail(const ThumbnailI
     InvalidateAssetThumbnail();
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plDecalAssetDocumentGenerator>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalAssetDocumentGenerator, 1, plRTTIDefaultAllocator<plDecalAssetDocumentGenerator>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDecalAssetDocumentGenerator::plDecalAssetDocumentGenerator()
 {
@@ -172,42 +172,42 @@ plDecalAssetDocumentGenerator::plDecalAssetDocumentGenerator()
   AddSupportedFileType("png");
 }
 
-plDecalAssetDocumentGenerator::~plDecalAssetDocumentGenerator() {}
+plDecalAssetDocumentGenerator::~plDecalAssetDocumentGenerator() = default;
 
-void plDecalAssetDocumentGenerator::GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const
+void plDecalAssetDocumentGenerator::GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const
 {
-  plStringBuilder baseOutputFile = sParentDirRelativePath;
+  const plStringBuilder baseFilename = sAbsInputFile.GetFileName();
 
-  const plStringBuilder baseFilename = baseOutputFile.GetFileName();
-
-  baseOutputFile.ChangeFileExtension(GetDocumentExtension());
-
-  /// \todo Make this configurable
   const bool isDecal = (baseFilename.FindSubString_NoCase("decal") != nullptr);
 
   {
-    plAssetDocumentGenerator::Info& info = out_Modes.ExpandAndGetRef();
+    plAssetDocumentGenerator::ImportMode& info = out_modes.ExpandAndGetRef();
     info.m_Priority = isDecal ? plAssetDocGeneratorPriority::HighPriority : plAssetDocGeneratorPriority::LowPriority;
     info.m_sName = "DecalImport.All";
-    info.m_sOutputFileParentRelative = baseOutputFile;
     info.m_sIcon = ":/AssetIcons/Decal.svg";
   }
 }
 
-plStatus plDecalAssetDocumentGenerator::Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument)
+plStatus plDecalAssetDocumentGenerator::Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument)
 {
+  plStringBuilder sOutFile = sInputFileAbs;
+  sOutFile.ChangeFileExtension(GetDocumentExtension());
+  plOSFile::FindFreeFilename(sOutFile);
+
   auto pApp = plQtEditorApp::GetSingleton();
-  out_pGeneratedDocument = pApp->CreateDocument(info.m_sOutputFileAbsolute, plDocumentFlags::None);
+
+  plStringBuilder sInputFileRel = sInputFileAbs;
+  pApp->MakePathDataDirectoryRelative(sInputFileRel);
+
+  out_pGeneratedDocument = pApp->CreateDocument(sOutFile, plDocumentFlags::None);
 
   if (out_pGeneratedDocument == nullptr)
     return plStatus("Could not create target document");
 
   plDecalAssetDocument* pAssetDoc = plDynamicCast<plDecalAssetDocument*>(out_pGeneratedDocument);
-  if (pAssetDoc == nullptr)
-    return plStatus("Target document is not a valid plDecalAssetDocument");
 
   auto& accessor = pAssetDoc->GetPropertyObject()->GetTypeAccessor();
-  accessor.SetValue("BaseColor", sDataDirRelativePath);
+  accessor.SetValue("BaseColor", sInputFileRel.GetView());
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

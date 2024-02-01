@@ -14,13 +14,13 @@ void plSaveDocumentTask::Execute()
 {
   plAbstractGraphDdlSerializer::WriteDocument(file, &headerGraph, &objectGraph, &typesGraph, false);
 
-  if (file.Close() == PLASMA_FAILURE)
+  if (file.Close() == PL_FAILURE)
   {
     m_document->m_LastSaveResult = plStatus(plFmt("Unable to open file '{0}' for writing!", m_document->m_sDocumentPath));
   }
   else
   {
-    m_document->m_LastSaveResult = plStatus(PLASMA_SUCCESS);
+    m_document->m_LastSaveResult = plStatus(PL_SUCCESS);
   }
 }
 

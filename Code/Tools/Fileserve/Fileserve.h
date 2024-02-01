@@ -7,7 +7,7 @@
 
 /// \brief A stand-alone application for the plFileServer.
 ///
-/// If PLASMA_USE_QT is defined, the GUI from the EditorPluginFileserve is used. Otherwise the server runs as a console application.
+/// If PL_USE_QT is defined, the GUI from the EditorPluginFileserve is used. Otherwise the server runs as a console application.
 ///
 /// If the command line option "-fs_wait_timeout seconds" is specified, the server will wait for a limited time for any client to
 /// connect and close automatically, if no connection is established. Once a client connects, the timeout becomes irrelevant.
@@ -17,7 +17,7 @@
 class plFileserverApp : public plApplication
 {
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   plFileserverApp()
     : plApplication("Fileserve")

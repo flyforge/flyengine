@@ -12,9 +12,9 @@ class plStreamWriter;
 
 /// \brief Serialization Context that de-duplicates objects when writing to a stream. Duplicated objects are identified by their address and
 /// only the first occurrence is written to the stream while all subsequence occurrences are just written as an index.
-class PLASMA_FOUNDATION_DLL plDeduplicationWriteContext : public plSerializationContext<plDeduplicationWriteContext>
+class PL_FOUNDATION_DLL plDeduplicationWriteContext : public plSerializationContext<plDeduplicationWriteContext>
 {
-  PLASMA_DECLARE_SERIALIZATION_CONTEXT(plDeduplicationWriteContext);
+  PL_DECLARE_SERIALIZATION_CONTEXT(plDeduplicationWriteContext);
 
 public:
   plDeduplicationWriteContext();

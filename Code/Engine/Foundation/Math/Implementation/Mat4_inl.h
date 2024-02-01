@@ -5,47 +5,16 @@
 template <typename Type>
 plMat4Template<Type>::plMat4Template()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   // Initialize all data to NaN in debug mode to find problems with uninitialized data easier.
   const Type TypeNaN = plMath::NaN<Type>();
-  SetElements(
-    TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN, TypeNaN);
+  for (plUInt32 i = 0; i < 16; ++i)
+    m_fElementsCM[i] = TypeNaN;
 #endif
 }
 
 template <typename Type>
 plMat4Template<Type>::plMat4Template(const Type* const pData, plMatrixLayout::Enum layout)
-{
-  SetFromArray(pData, layout);
-}
-
-template <typename Type>
-plMat4Template<Type>::plMat4Template(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3,
-  Type c3r3, Type c4r3, Type c1r4, Type c2r4, Type c3r4, Type c4r4)
-{
-  SetElements(c1r1, c2r1, c3r1, c4r1, c1r2, c2r2, c3r2, c4r2, c1r3, c2r3, c3r3, c4r3, c1r4, c2r4, c3r4, c4r4);
-}
-
-template <typename Type>
-plMat4Template<Type>::plMat4Template(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation)
-{
-  SetTransformationMatrix(mRotation, vTranslation);
-}
-
-template <typename Type>
-const plMat4Template<Type> plMat4Template<Type>::IdentityMatrix()
-{
-  return plMat4Template(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-}
-
-template <typename Type>
-const plMat4Template<Type> plMat4Template<Type>::ZeroMatrix()
-{
-  return plMat4Template(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetFromArray(const Type* const pData, plMatrixLayout::Enum layout)
 {
   if (layout == plMatrixLayout::ColumnMajor)
   {
@@ -64,36 +33,7 @@ void plMat4Template<Type>::SetFromArray(const Type* const pData, plMatrixLayout:
 }
 
 template <typename Type>
-void plMat4Template<Type>::SetTransformationMatrix(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation)
-{
-  SetRotationalPart(mRotation);
-  SetTranslationVector(vTranslation);
-  SetRow(3, plVec4Template<Type>(0, 0, 0, 1));
-}
-
-template <typename Type>
-void plMat4Template<Type>::GetAsArray(Type* out_pData, plMatrixLayout::Enum layout) const
-{
-  PLASMA_NAN_ASSERT(this);
-
-  if (layout == plMatrixLayout::ColumnMajor)
-  {
-    plMemoryUtils::Copy(out_pData, m_fElementsCM, 16);
-  }
-  else
-  {
-    for (int i = 0; i < 4; ++i)
-    {
-      out_pData[i * 4 + 0] = Element(0, i);
-      out_pData[i * 4 + 1] = Element(1, i);
-      out_pData[i * 4 + 2] = Element(2, i);
-      out_pData[i * 4 + 3] = Element(3, i);
-    }
-  }
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetElements(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3,
+plMat4Template<Type>::plMat4Template(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3,
   Type c3r3, Type c4r3, Type c1r4, Type c2r4, Type c3r4, Type c4r4)
 {
   Element(0, 0) = c1r1;
@@ -115,55 +55,194 @@ void plMat4Template<Type>::SetElements(Type c1r1, Type c2r1, Type c3r1, Type c4r
 }
 
 template <typename Type>
+plMat4Template<Type>::plMat4Template(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation)
+{
+  SetTransformationMatrix(mRotation, vTranslation);
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeZero()
+{
+  plMat4Template<Type> res;
+
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(res.m_fElementsCM); ++i)
+    res.m_fElementsCM[i] = 0.0f;
+
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeIdentity()
+{
+  plMat4Template<Type> res;
+  res.m_fElementsCM[0] = 1.0f;
+  res.m_fElementsCM[1] = 0.0f;
+  res.m_fElementsCM[2] = 0.0f;
+  res.m_fElementsCM[3] = 0.0f;
+  res.m_fElementsCM[4] = 0.0f;
+  res.m_fElementsCM[5] = 1.0f;
+  res.m_fElementsCM[6] = 0.0f;
+  res.m_fElementsCM[7] = 0.0f;
+  res.m_fElementsCM[8] = 0.0f;
+  res.m_fElementsCM[9] = 0.0f;
+  res.m_fElementsCM[10] = 1.0f;
+  res.m_fElementsCM[11] = 0.0f;
+  res.m_fElementsCM[12] = 0.0f;
+  res.m_fElementsCM[13] = 0.0f;
+  res.m_fElementsCM[14] = 0.0f;
+  res.m_fElementsCM[15] = 1.0f;
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeFromRowMajorArray(const Type* const pData)
+{
+  plMat4Template<Type> res;
+  for (int i = 0; i < 4; ++i)
+  {
+    res.Element(0, i) = pData[i * 4 + 0];
+    res.Element(1, i) = pData[i * 4 + 1];
+    res.Element(2, i) = pData[i * 4 + 2];
+    res.Element(3, i) = pData[i * 4 + 3];
+  }
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeFromColumnMajorArray(const Type* const pData)
+{
+  plMat4Template<Type> res;
+  plMemoryUtils::Copy(res.m_fElementsCM, pData, 16);
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeFromValues(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3, Type c3r3, Type c4r3, Type c1r4, Type c2r4, Type c3r4, Type c4r4)
+{
+  plMat4Template<Type> res;
+  res.Element(0, 0) = c1r1;
+  res.Element(1, 0) = c2r1;
+  res.Element(2, 0) = c3r1;
+  res.Element(3, 0) = c4r1;
+  res.Element(0, 1) = c1r2;
+  res.Element(1, 1) = c2r2;
+  res.Element(2, 1) = c3r2;
+  res.Element(3, 1) = c4r2;
+  res.Element(0, 2) = c1r3;
+  res.Element(1, 2) = c2r3;
+  res.Element(2, 2) = c3r3;
+  res.Element(3, 2) = c4r3;
+  res.Element(0, 3) = c1r4;
+  res.Element(1, 3) = c2r4;
+  res.Element(2, 3) = c3r4;
+  res.Element(3, 3) = c4r4;
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeTranslation(const plVec3Template<Type>& vTranslation)
+{
+  return plMat4Template<Type>::MakeFromValues(1, 0, 0, vTranslation.x, 0, 1, 0, vTranslation.y, 0, 0, 1, vTranslation.z, 0, 0, 0, 1);
+}
+
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeTransformation(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation)
+{
+  plMat4Template<Type> res;
+  res.SetTransformationMatrix(mRotation, vTranslation);
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeScaling(const plVec3Template<Type>& vScale)
+{
+  plMat4Template<Type> res;
+  res.Element(0, 0) = vScale.x;
+  res.Element(1, 0) = 0;
+  res.Element(2, 0) = 0;
+  res.Element(3, 0) = 0;
+  res.Element(0, 1) = 0;
+  res.Element(1, 1) = vScale.y;
+  res.Element(2, 1) = 0;
+  res.Element(3, 1) = 0;
+  res.Element(0, 2) = 0;
+  res.Element(1, 2) = 0;
+  res.Element(2, 2) = vScale.z;
+  res.Element(3, 2) = 0;
+  res.Element(0, 3) = 0;
+  res.Element(1, 3) = 0;
+  res.Element(2, 3) = 0;
+  res.Element(3, 3) = 1;
+  return res;
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeRotationX(plAngle angle)
+{
+  const Type fSin = plMath::Sin(angle);
+  const Type fCos = plMath::Cos(angle);
+
+  return plMat4Template<Type>::MakeFromValues(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeRotationY(plAngle angle)
+{
+  const Type fSin = plMath::Sin(angle);
+  const Type fCos = plMath::Cos(angle);
+
+  return plMat4Template<Type>::MakeFromValues(fCos, 0.0f, fSin, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -fSin, 0.0f, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+template <typename Type>
+plMat4Template<Type> plMat4Template<Type>::MakeRotationZ(plAngle angle)
+{
+  const Type fSin = plMath::Sin(angle);
+  const Type fCos = plMath::Cos(angle);
+
+  return plMat4Template<Type>::MakeFromValues(fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+}
+
+template <typename Type>
+void plMat4Template<Type>::SetTransformationMatrix(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation)
+{
+  SetRotationalPart(mRotation);
+  SetTranslationVector(vTranslation);
+  SetRow(3, plVec4Template<Type>(0, 0, 0, 1));
+}
+
+template <typename Type>
+void plMat4Template<Type>::GetAsArray(Type* out_pData, plMatrixLayout::Enum layout) const
+{
+  PL_NAN_ASSERT(this);
+
+  if (layout == plMatrixLayout::ColumnMajor)
+  {
+    plMemoryUtils::Copy(out_pData, m_fElementsCM, 16);
+  }
+  else
+  {
+    for (int i = 0; i < 4; ++i)
+    {
+      out_pData[i * 4 + 0] = Element(0, i);
+      out_pData[i * 4 + 1] = Element(1, i);
+      out_pData[i * 4 + 2] = Element(2, i);
+      out_pData[i * 4 + 3] = Element(3, i);
+    }
+  }
+}
+
+template <typename Type>
 void plMat4Template<Type>::SetZero()
 {
-  SetElements(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
+  *this = MakeZero();
 }
 
 template <typename Type>
 void plMat4Template<Type>::SetIdentity()
 {
-  SetElements(1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetTranslationMatrix(const plVec3Template<Type>& vTranslation)
-{
-  SetElements(1, 0, 0, vTranslation.x, 0, 1, 0, vTranslation.y, 0, 0, 1, vTranslation.z, 0, 0, 0, 1);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetScalingMatrix(const plVec3Template<Type>& s)
-{
-  SetElements(s.x, 0, 0, 0, 0, s.y, 0, 0, 0, 0, s.z, 0, 0, 0, 0, 1);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetRotationMatrixX(plAngle angle)
-{
-  const Type fSin = plMath::Sin(angle);
-  const Type fCos = plMath::Cos(angle);
-
-  SetElements(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetRotationMatrixY(plAngle angle)
-{
-  const Type fSin = plMath::Sin(angle);
-  const Type fCos = plMath::Cos(angle);
-
-
-  SetElements(fCos, 0.0f, fSin, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -fSin, 0.0f, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-}
-
-template <typename Type>
-void plMat4Template<Type>::SetRotationMatrixZ(plAngle angle)
-{
-  const Type fSin = plMath::Sin(angle);
-  const Type fCos = plMath::Cos(angle);
-
-  SetElements(fCos, -fSin, 0.0f, 0.0f, fSin, fCos, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+  *this = MakeIdentity();
 }
 
 template <typename Type>
@@ -180,9 +259,9 @@ void plMat4Template<Type>::Transpose()
 template <typename Type>
 const plMat4Template<Type> plMat4Template<Type>::GetTranspose() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
-  return plMat4Template(m_fElementsCM, plMatrixLayout::RowMajor);
+  return plMat4Template::MakeFromRowMajorArray(m_fElementsCM);
 }
 
 template <typename Type>
@@ -190,16 +269,16 @@ const plMat4Template<Type> plMat4Template<Type>::GetInverse(Type fEpsilon) const
 {
   plMat4Template<Type> Inverse = *this;
   plResult res = Inverse.Invert(fEpsilon);
-  PLASMA_ASSERT_DEBUG(res.Succeeded(), "Could not invert the given Mat4.");
-  PLASMA_IGNORE_UNUSED(res);
+  PL_ASSERT_DEBUG(res.Succeeded(), "Could not invert the given Mat4.");
+  PL_IGNORE_UNUSED(res);
   return Inverse;
 }
 
 template <typename Type>
 plVec4Template<Type> plMat4Template<Type>::GetRow(plUInt32 uiRow) const
 {
-  PLASMA_NAN_ASSERT(this);
-  PLASMA_ASSERT_DEBUG(uiRow <= 3, "Invalid Row Index {0}", uiRow);
+  PL_NAN_ASSERT(this);
+  PL_ASSERT_DEBUG(uiRow <= 3, "Invalid Row Index {0}", uiRow);
 
   plVec4Template<Type> r;
   r.x = Element(0, uiRow);
@@ -213,7 +292,7 @@ plVec4Template<Type> plMat4Template<Type>::GetRow(plUInt32 uiRow) const
 template <typename Type>
 void plMat4Template<Type>::SetRow(plUInt32 uiRow, const plVec4Template<Type>& vRow)
 {
-  PLASMA_ASSERT_DEBUG(uiRow <= 3, "Invalid Row Index {0}", uiRow);
+  PL_ASSERT_DEBUG(uiRow <= 3, "Invalid Row Index {0}", uiRow);
 
   Element(0, uiRow) = vRow.x;
   Element(1, uiRow) = vRow.y;
@@ -224,8 +303,8 @@ void plMat4Template<Type>::SetRow(plUInt32 uiRow, const plVec4Template<Type>& vR
 template <typename Type>
 plVec4Template<Type> plMat4Template<Type>::GetColumn(plUInt32 uiColumn) const
 {
-  PLASMA_NAN_ASSERT(this);
-  PLASMA_ASSERT_DEBUG(uiColumn <= 3, "Invalid Column Index {0}", uiColumn);
+  PL_NAN_ASSERT(this);
+  PL_ASSERT_DEBUG(uiColumn <= 3, "Invalid Column Index {0}", uiColumn);
 
   plVec4Template<Type> r;
   r.x = Element(uiColumn, 0);
@@ -239,7 +318,7 @@ plVec4Template<Type> plMat4Template<Type>::GetColumn(plUInt32 uiColumn) const
 template <typename Type>
 void plMat4Template<Type>::SetColumn(plUInt32 uiColumn, const plVec4Template<Type>& vColumn)
 {
-  PLASMA_ASSERT_DEBUG(uiColumn <= 3, "Invalid Column Index {0}", uiColumn);
+  PL_ASSERT_DEBUG(uiColumn <= 3, "Invalid Column Index {0}", uiColumn);
 
   Element(uiColumn, 0) = vColumn.x;
   Element(uiColumn, 1) = vColumn.y;
@@ -250,7 +329,7 @@ void plMat4Template<Type>::SetColumn(plUInt32 uiColumn, const plVec4Template<Typ
 template <typename Type>
 plVec4Template<Type> plMat4Template<Type>::GetDiagonal() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   return plVec4Template<Type>(Element(0, 0), Element(1, 1), Element(2, 2), Element(3, 3));
 }
@@ -272,16 +351,15 @@ const plVec3Template<Type> plMat4Template<Type>::TransformPosition(const plVec3T
   r.y = Element(0, 1) * v.x + Element(1, 1) * v.y + Element(2, 1) * v.z + Element(3, 1);
   r.z = Element(0, 2) * v.x + Element(1, 2) * v.y + Element(2, 2) * v.z + Element(3, 2);
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
 template <typename Type>
-void plMat4Template<Type>::TransformPosition(
-  plVec3Template<Type>* pV, plUInt32 uiNumVectors, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
+void plMat4Template<Type>::TransformPosition(plVec3Template<Type>* pV, plUInt32 uiNumVectors, plUInt32 uiStride /* = sizeof(plVec3Template) */) const
 {
-  PLASMA_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
+  PL_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
+  PL_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
 
   plVec3Template<Type>* pCur = pV;
 
@@ -300,7 +378,7 @@ const plVec3Template<Type> plMat4Template<Type>::TransformDirection(const plVec3
   r.y = Element(0, 1) * v.x + Element(1, 1) * v.y + Element(2, 1) * v.z;
   r.z = Element(0, 2) * v.x + Element(1, 2) * v.y + Element(2, 2) * v.z;
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
@@ -308,8 +386,8 @@ template <typename Type>
 void plMat4Template<Type>::TransformDirection(
   plVec3Template<Type>* pV, plUInt32 uiNumVectors, plUInt32 uiStride /* = sizeof(plVec3Template<Type>) */) const
 {
-  PLASMA_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
+  PL_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
+  PL_ASSERT_DEBUG(uiStride >= sizeof(plVec3Template<Type>), "Data must not overlap.");
 
   plVec3Template<Type>* pCur = pV;
 
@@ -329,15 +407,15 @@ const plVec4Template<Type> plMat4Template<Type>::Transform(const plVec4Template<
   r.z = Element(0, 2) * v.x + Element(1, 2) * v.y + Element(2, 2) * v.z + Element(3, 2) * v.w;
   r.w = Element(0, 3) * v.x + Element(1, 3) * v.y + Element(2, 3) * v.z + Element(3, 3) * v.w;
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
 template <typename Type>
 void plMat4Template<Type>::Transform(plVec4Template<Type>* pV, plUInt32 uiNumVectors, plUInt32 uiStride /* = sizeof(plVec4Template) */) const
 {
-  PLASMA_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
-  PLASMA_ASSERT_DEBUG(uiStride >= sizeof(plVec4Template<Type>), "Data must not overlap.");
+  PL_ASSERT_DEBUG(pV != nullptr, "Array must not be nullptr.");
+  PL_ASSERT_DEBUG(uiStride >= sizeof(plVec4Template<Type>), "Data must not overlap.");
 
   plVec4Template<Type>* pCur = pV;
 
@@ -349,15 +427,15 @@ void plMat4Template<Type>::Transform(plVec4Template<Type>* pV, plUInt32 uiNumVec
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE const plVec3Template<Type> plMat4Template<Type>::GetTranslationVector() const
+PL_FORCE_INLINE const plVec3Template<Type> plMat4Template<Type>::GetTranslationVector() const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   return plVec3Template<Type>(Element(3, 0), Element(3, 1), Element(3, 2));
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE void plMat4Template<Type>::SetTranslationVector(const plVec3Template<Type>& v)
+PL_ALWAYS_INLINE void plMat4Template<Type>::SetTranslationVector(const plVec3Template<Type>& v)
 {
   Element(3, 0) = v.x;
   Element(3, 1) = v.y;
@@ -389,7 +467,7 @@ const plMat3Template<Type> plMat4Template<Type>::GetRotationalPart() const
     }
   }
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
@@ -399,7 +477,7 @@ void plMat4Template<Type>::operator*=(Type f)
   for (plInt32 i = 0; i < 16; ++i)
     m_fElementsCM[i] *= f;
 
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 }
 
 template <typename Type>
@@ -426,18 +504,18 @@ const plMat4Template<Type> operator*(const plMat4Template<Type>& m1, const plMat
                       m1.Element(3, i) * m2.Element(3, 3);
   }
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plVec3Template<Type> operator*(const plMat4Template<Type>& m, const plVec3Template<Type>& v)
+PL_ALWAYS_INLINE const plVec3Template<Type> operator*(const plMat4Template<Type>& m, const plVec3Template<Type>& v)
 {
   return m.TransformPosition(v);
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plVec4Template<Type> operator*(const plMat4Template<Type>& m, const plVec4Template<Type>& v)
+PL_ALWAYS_INLINE const plVec4Template<Type> operator*(const plMat4Template<Type>& m, const plVec4Template<Type>& v)
 {
   return m.Transform(v);
 }
@@ -447,7 +525,7 @@ PLASMA_ALWAYS_INLINE const plVec4Template<Type> operator*(const plMat4Template<T
 // *** Stuff needed for matrix inversion ***
 
 template <typename Type>
-PLASMA_FORCE_INLINE Type GetDeterminantOf3x3SubMatrix(const plMat4Template<Type>& m, plInt32 i, plInt32 j)
+PL_FORCE_INLINE Type GetDeterminantOf3x3SubMatrix(const plMat4Template<Type>& m, plInt32 i, plInt32 j)
 {
   const plInt32 si0 = 0 + ((i <= 0) ? 1 : 0);
   const plInt32 si1 = 1 + ((i <= 1) ? 1 : 0);
@@ -466,7 +544,7 @@ PLASMA_FORCE_INLINE Type GetDeterminantOf3x3SubMatrix(const plMat4Template<Type>
 }
 
 template <typename Type>
-PLASMA_FORCE_INLINE Type GetDeterminantOf4x4Matrix(const plMat4Template<Type>& m)
+PL_FORCE_INLINE Type GetDeterminantOf4x4Matrix(const plMat4Template<Type>& m)
 {
   Type det = 0.0;
 
@@ -482,7 +560,7 @@ PLASMA_FORCE_INLINE Type GetDeterminantOf4x4Matrix(const plMat4Template<Type>& m
 // *** free functions ***
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE const plMat4Template<Type> operator*(Type f, const plMat4Template<Type>& m1)
+PL_ALWAYS_INLINE const plMat4Template<Type> operator*(Type f, const plMat4Template<Type>& m1)
 {
   return operator*(m1, f);
 }
@@ -495,7 +573,7 @@ const plMat4Template<Type> operator*(const plMat4Template<Type>& m1, Type f)
   for (plUInt32 i = 0; i < 16; ++i)
     r.m_fElementsCM[i] = m1.m_fElementsCM[i] * f;
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
@@ -513,7 +591,7 @@ const plMat4Template<Type> operator+(const plMat4Template<Type>& m1, const plMat
   for (plUInt32 i = 0; i < 16; ++i)
     r.m_fElementsCM[i] = m1.m_fElementsCM[i] + m2.m_fElementsCM[i];
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
@@ -525,15 +603,15 @@ const plMat4Template<Type> operator-(const plMat4Template<Type>& m1, const plMat
   for (plUInt32 i = 0; i < 16; ++i)
     r.m_fElementsCM[i] = m1.m_fElementsCM[i] - m2.m_fElementsCM[i];
 
-  PLASMA_NAN_ASSERT(&r);
+  PL_NAN_ASSERT(&r);
   return r;
 }
 
 template <typename Type>
 bool plMat4Template<Type>::IsIdentical(const plMat4Template<Type>& rhs) const
 {
-  PLASMA_NAN_ASSERT(this);
-  PLASMA_NAN_ASSERT(&rhs);
+  PL_NAN_ASSERT(this);
+  PL_NAN_ASSERT(&rhs);
 
   for (plUInt32 i = 0; i < 16; ++i)
   {
@@ -547,10 +625,10 @@ bool plMat4Template<Type>::IsIdentical(const plMat4Template<Type>& rhs) const
 template <typename Type>
 bool plMat4Template<Type>::IsEqual(const plMat4Template<Type>& rhs, Type fEpsilon) const
 {
-  PLASMA_NAN_ASSERT(this);
-  PLASMA_NAN_ASSERT(&rhs);
+  PL_NAN_ASSERT(this);
+  PL_NAN_ASSERT(&rhs);
 
-  PLASMA_ASSERT_DEBUG(fEpsilon >= 0.0f, "Epsilon may not be negative.");
+  PL_ASSERT_DEBUG(fEpsilon >= 0.0f, "Epsilon may not be negative.");
 
   for (plUInt32 i = 0; i < 16; ++i)
   {
@@ -562,13 +640,13 @@ bool plMat4Template<Type>::IsEqual(const plMat4Template<Type>& rhs, Type fEpsilo
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator==(const plMat4Template<Type>& lhs, const plMat4Template<Type>& rhs)
+PL_ALWAYS_INLINE bool operator==(const plMat4Template<Type>& lhs, const plMat4Template<Type>& rhs)
 {
   return lhs.IsIdentical(rhs);
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool operator!=(const plMat4Template<Type>& lhs, const plMat4Template<Type>& rhs)
+PL_ALWAYS_INLINE bool operator!=(const plMat4Template<Type>& lhs, const plMat4Template<Type>& rhs)
 {
   return !lhs.IsIdentical(rhs);
 }
@@ -576,7 +654,7 @@ PLASMA_ALWAYS_INLINE bool operator!=(const plMat4Template<Type>& lhs, const plMa
 template <typename Type>
 bool plMat4Template<Type>::IsZero(Type fEpsilon) const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   for (plUInt32 i = 0; i < 16; ++i)
   {
@@ -590,7 +668,7 @@ bool plMat4Template<Type>::IsZero(Type fEpsilon) const
 template <typename Type>
 bool plMat4Template<Type>::IsIdentity(Type fEpsilon) const
 {
-  PLASMA_NAN_ASSERT(this);
+  PL_NAN_ASSERT(this);
 
   if (!plMath::IsEqual(Element(0, 0), (Type)1, fEpsilon))
     return false;
@@ -664,7 +742,7 @@ const plVec3Template<Type> plMat4Template<Type>::GetScalingFactors() const
   v.y = plVec3Template<Type>(Element(1, 0), Element(1, 1), Element(1, 2)).GetLength();
   v.z = plVec3Template<Type>(Element(2, 0), Element(2, 1), Element(2, 2)).GetLength();
 
-  PLASMA_NAN_ASSERT(&v);
+  PL_NAN_ASSERT(&v);
   return v;
 }
 
@@ -675,12 +753,12 @@ plResult plMat4Template<Type>::SetScalingFactors(const plVec3Template<Type>& vXY
   plVec3Template<Type> ty(Element(1, 0), Element(1, 1), Element(1, 2));
   plVec3Template<Type> tz(Element(2, 0), Element(2, 1), Element(2, 2));
 
-  if (tx.SetLength(vXYZ.x, fEpsilon) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
-  if (ty.SetLength(vXYZ.y, fEpsilon) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
-  if (tz.SetLength(vXYZ.z, fEpsilon) == PLASMA_FAILURE)
-    return PLASMA_FAILURE;
+  if (tx.SetLength(vXYZ.x, fEpsilon) == PL_FAILURE)
+    return PL_FAILURE;
+  if (ty.SetLength(vXYZ.y, fEpsilon) == PL_FAILURE)
+    return PL_FAILURE;
+  if (tz.SetLength(vXYZ.z, fEpsilon) == PL_FAILURE)
+    return PL_FAILURE;
 
 
   Element(0, 0) = tx.x;
@@ -693,7 +771,7 @@ plResult plMat4Template<Type>::SetScalingFactors(const plVec3Template<Type>& vXY
   Element(2, 1) = tz.y;
   Element(2, 2) = tz.z;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #include <Foundation/Math/Implementation/AllClasses_inl.h>

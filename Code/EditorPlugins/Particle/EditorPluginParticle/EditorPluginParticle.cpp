@@ -20,26 +20,27 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("ParticleEffectAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plStandardMenus::MapActions("ParticleEffectAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("ParticleEffectAssetMenuBar");
-      plDocumentActions::MapActions("ParticleEffectAssetMenuBar", "Menu.File", false);
-      plCommandHistoryActions::MapActions("ParticleEffectAssetMenuBar", "Menu.Edit");
+      plDocumentActions::MapMenuActions("ParticleEffectAssetMenuBar");
+      plAssetActions::MapMenuActions("ParticleEffectAssetMenuBar");
+      plCommandHistoryActions::MapActions("ParticleEffectAssetMenuBar");
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("ParticleEffectAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("ParticleEffectAssetToolBar");
       plCommandHistoryActions::MapActions("ParticleEffectAssetToolBar", "");
       plAssetActions::MapToolBarActions("ParticleEffectAssetToolBar", true);
-      plParticleActions::MapActions("ParticleEffectAssetToolBar", "");
+      plParticleActions::MapActions("ParticleEffectAssetToolBar");
     }
 
     // View Tool Bar
     {
       plActionMapManager::RegisterActionMap("ParticleEffectAssetViewToolBar").IgnoreResult();
-      plViewActions::MapActions("ParticleEffectAssetViewToolBar", "", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
-      plViewLightActions::MapActions("ParticleEffectAssetViewToolBar", "");
+      plViewActions::MapToolbarActions("ParticleEffectAssetViewToolBar", plViewActions::RenderMode | plViewActions::ActivateRemoteProcess);
+      plViewLightActions::MapToolbarActions("ParticleEffectAssetViewToolBar");
     }
 
     plPropertyMetaState::GetSingleton()->m_Events.AddEventHandler(plParticleEffectAssetDocument::PropertyMetaStateEventHandler);
@@ -52,12 +53,12 @@ void OnUnloadPlugin()
   plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plParticleEffectAssetDocument::PropertyMetaStateEventHandler);
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

@@ -1,6 +1,6 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 #  include <Foundation/Basics/Platform/uwp/UWPUtils.h>
 #  include <Foundation/Types/Uuid.h>
@@ -30,9 +30,9 @@ plQuat plUwpUtils::ConvertQuat(const ABI::Windows::Foundation::Numerics::Quatern
 
 void plUwpUtils::ConvertQuat(const plQuat& in, ABI::Windows::Foundation::Numerics::Quaternion& out)
 {
-  out.X = in.v.x;
-  out.Y = in.v.y;
-  out.Z = in.v.z;
+  out.X = in.x;
+  out.Y = in.y;
+  out.Z = in.z;
   out.W = in.w;
 }
 
@@ -50,5 +50,3 @@ void plUwpUtils::ConvertGuid(const plUuid& in, GUID& out)
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Platform_uwp_UWPUtils);

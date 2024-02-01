@@ -4,10 +4,10 @@
 
 plGALQuery::plGALQuery(const plGALQueryCreationDescription& Description)
   : plGALResource<plGALQueryCreationDescription>(Description)
-  , m_bStarted(false)
+
 {
 }
 
-plGALQuery::~plGALQuery() {}
+plGALQuery::~plGALQuery() = default;
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_Query);
+

@@ -5,7 +5,7 @@
 #include <JoltPlugin/System/JoltCore.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Jolt, JoltPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Jolt, JoltPlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -32,9 +32,9 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Jolt, JoltPlugin)
     plJoltMeshResource::CleanupDynamicPluginReferences();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Startup);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Startup);
 

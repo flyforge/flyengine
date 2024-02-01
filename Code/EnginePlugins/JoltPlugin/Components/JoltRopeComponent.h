@@ -28,11 +28,11 @@ struct plJoltRopeAnchorConstraintMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltRopeAnchorConstraintMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltRopeAnchorConstraintMode);
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltRopeComponentManager : public plComponentManager<class plJoltRopeComponent, plBlockStorageType::Compact>
+class PL_JOLTPLUGIN_DLL plJoltRopeComponentManager : public plComponentManager<class plJoltRopeComponent, plBlockStorageType::Compact>
 {
 public:
   plJoltRopeComponentManager(plWorld* pWorld);
@@ -53,9 +53,9 @@ private:
 ///
 /// If the anchors themselves are physically simulated bodies, the rope will attach to those bodies,
 /// making it possible to constrain physics objects with a rope.
-class PLASMA_JOLTPLUGIN_DLL plJoltRopeComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltRopeComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltRopeComponent, plComponent, plJoltRopeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltRopeComponent, plComponent, plJoltRopeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -101,10 +101,10 @@ public:
   bool m_bCCD = false; // [ property ]
 
   /// How much each rope segment may bend.
-  plAngle m_MaxBend = plAngle::Degree(30); // [ property ]
+  plAngle m_MaxBend = plAngle::MakeFromDegree(30); // [ property ]
 
   /// How much each rope segment may twist.
-  plAngle m_MaxTwist = plAngle::Degree(15); // [ property ]
+  plAngle m_MaxTwist = plAngle::MakeFromDegree(15); // [ property ]
 
   /// \brief Sets the anchor 1 references by object GUID.
   void SetAnchor1Reference(const char* szReference); // [ property ]

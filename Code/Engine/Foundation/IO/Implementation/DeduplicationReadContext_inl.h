@@ -2,36 +2,36 @@
 #include <Foundation/IO/Stream.h>
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plResult plDeduplicationReadContext::ReadObjectInplace(plStreamReader& inout_stream, T& inout_obj)
+PL_ALWAYS_INLINE plResult plDeduplicationReadContext::ReadObjectInplace(plStreamReader& inout_stream, T& inout_obj)
 {
   return ReadObject(inout_stream, inout_obj, nullptr);
 }
 
 template <typename T>
-plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, T& obj, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, T& obj, plAllocator* pAllocator)
 {
   bool bIsRealObject;
   inout_stream >> bIsRealObject;
 
-  PLASMA_ASSERT_DEV(bIsRealObject, "Reading an object inplace only works for the first occurrence");
+  PL_ASSERT_DEV(bIsRealObject, "Reading an object inplace only works for the first occurrence");
 
-  PLASMA_SUCCEED_OR_RETURN(plStreamReaderUtil::Deserialize<T>(inout_stream, obj));
+  PL_SUCCEED_OR_RETURN(plStreamReaderUtil::Deserialize<T>(inout_stream, obj));
 
   m_Objects.PushBack(&obj);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename T>
-plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, T*& ref_pObject, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, T*& ref_pObject, plAllocator* pAllocator)
 {
   bool bIsRealObject;
   inout_stream >> bIsRealObject;
 
   if (bIsRealObject)
   {
-    ref_pObject = PLASMA_NEW(pAllocator, T);
-    PLASMA_SUCCEED_OR_RETURN(plStreamReaderUtil::Deserialize<T>(inout_stream, *ref_pObject));
+    ref_pObject = PL_NEW(pAllocator, T);
+    PL_SUCCEED_OR_RETURN(plStreamReaderUtil::Deserialize<T>(inout_stream, *ref_pObject));
 
     m_Objects.PushBack(ref_pObject);
   }
@@ -50,44 +50,44 @@ plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, T*
     }
     else
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename T>
-plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, plSharedPtr<T>& ref_pObject, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, plSharedPtr<T>& ref_pObject, plAllocator* pAllocator)
 {
   T* ptr = nullptr;
   if (ReadObject(inout_stream, ptr, pAllocator).Succeeded())
   {
     ref_pObject = plSharedPtr<T>(ptr, pAllocator);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 template <typename T>
-plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, plUniquePtr<T>& ref_pObject, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadObject(plStreamReader& inout_stream, plUniquePtr<T>& ref_pObject, plAllocator* pAllocator)
 {
   T* ptr = nullptr;
   if (ReadObject(inout_stream, ptr, pAllocator).Succeeded())
   {
     ref_pObject = std::move(plUniquePtr<T>(ptr, pAllocator));
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 template <typename ArrayType, typename ValueType>
-plResult plDeduplicationReadContext::ReadArray(plStreamReader& inout_stream, plArrayBase<ValueType, ArrayType>& ref_array, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadArray(plStreamReader& inout_stream, plArrayBase<ValueType, ArrayType>& ref_array, plAllocator* pAllocator)
 {
   plUInt64 uiCount = 0;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
 
-  PLASMA_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
+  PL_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
 
   ref_array.Clear();
 
@@ -97,32 +97,32 @@ plResult plDeduplicationReadContext::ReadArray(plStreamReader& inout_stream, plA
 
     for (plUInt32 i = 0; i < static_cast<plUInt32>(uiCount); ++i)
     {
-      PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, ref_array.ExpandAndGetRef(), pAllocator));
+      PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, ref_array.ExpandAndGetRef(), pAllocator));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename KeyType, typename Comparer>
-plResult plDeduplicationReadContext::ReadSet(plStreamReader& inout_stream, plSetBase<KeyType, Comparer>& ref_set, plAllocatorBase* pAllocator)
+plResult plDeduplicationReadContext::ReadSet(plStreamReader& inout_stream, plSetBase<KeyType, Comparer>& ref_set, plAllocator* pAllocator)
 {
   plUInt64 uiCount = 0;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
 
-  PLASMA_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
+  PL_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
 
   ref_set.Clear();
 
   for (plUInt32 i = 0; i < static_cast<plUInt32>(uiCount); ++i)
   {
     KeyType key;
-    PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pAllocator));
+    PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pAllocator));
 
     ref_set.Insert(std::move(key));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 namespace plInternal
@@ -140,19 +140,19 @@ namespace plInternal
     template <typename T>
     static plResult Deserialize(plStreamReader& inout_stream, T& ref_obj, float)
     {
-      PLASMA_REPORT_FAILURE("No deserialize method available");
-      return PLASMA_FAILURE;
+      PL_REPORT_FAILURE("No deserialize method available");
+      return PL_FAILURE;
     }
   };
 } // namespace plInternal
 
 template <typename KeyType, typename ValueType, typename Comparer>
-plResult plDeduplicationReadContext::ReadMap(plStreamReader& inout_stream, plMapBase<KeyType, ValueType, Comparer>& ref_map, ReadMapMode mode, plAllocatorBase* pKeyAllocator, plAllocatorBase* pValueAllocator)
+plResult plDeduplicationReadContext::ReadMap(plStreamReader& inout_stream, plMapBase<KeyType, ValueType, Comparer>& ref_map, ReadMapMode mode, plAllocator* pKeyAllocator, plAllocator* pValueAllocator)
 {
   plUInt64 uiCount = 0;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadQWordValue(&uiCount));
 
-  PLASMA_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
+  PL_ASSERT_DEV(uiCount < std::numeric_limits<plUInt32>::max(), "Containers currently use 32 bit for counts internally. Value from file is too large.");
 
   ref_map.Clear();
 
@@ -162,8 +162,8 @@ plResult plDeduplicationReadContext::ReadMap(plStreamReader& inout_stream, plMap
     {
       KeyType key;
       ValueType value;
-      PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pKeyAllocator));
-      PLASMA_SUCCEED_OR_RETURN(plInternal::DeserializeHelper::Deserialize<ValueType>(inout_stream, value, 0));
+      PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pKeyAllocator));
+      PL_SUCCEED_OR_RETURN(plInternal::DeserializeHelper::Deserialize<ValueType>(inout_stream, value, 0));
 
       ref_map.Insert(std::move(key), std::move(value));
     }
@@ -174,8 +174,8 @@ plResult plDeduplicationReadContext::ReadMap(plStreamReader& inout_stream, plMap
     {
       KeyType key;
       ValueType value;
-      PLASMA_SUCCEED_OR_RETURN(plInternal::DeserializeHelper::Deserialize<KeyType>(inout_stream, key, 0));
-      PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, value, pValueAllocator));
+      PL_SUCCEED_OR_RETURN(plInternal::DeserializeHelper::Deserialize<KeyType>(inout_stream, key, 0));
+      PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, value, pValueAllocator));
 
       ref_map.Insert(std::move(key), std::move(value));
     }
@@ -186,12 +186,12 @@ plResult plDeduplicationReadContext::ReadMap(plStreamReader& inout_stream, plMap
     {
       KeyType key;
       ValueType value;
-      PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pKeyAllocator));
-      PLASMA_SUCCEED_OR_RETURN(ReadObject(inout_stream, value, pValueAllocator));
+      PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, key, pKeyAllocator));
+      PL_SUCCEED_OR_RETURN(ReadObject(inout_stream, value, pValueAllocator));
 
       ref_map.Insert(std::move(key), std::move(value));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

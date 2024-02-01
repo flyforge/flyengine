@@ -3,7 +3,7 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Logging/Log.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 #  include <Unknwn.h> // Required to interop with IUnknown. Must be included before C++/WinRT headers.
 
 #  include <winrt/Windows.Foundation.Collections.h>

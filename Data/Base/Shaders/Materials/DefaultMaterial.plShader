@@ -14,7 +14,6 @@ CAMERA_MODE
 SHADING_QUALITY
 VERTEX_SKINNING
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
-GAMEOBJECT_VELOCITY
 
 [MATERIALPARAMETER]
 
@@ -22,10 +21,7 @@ Permutation BLEND_MODE;
 Permutation SHADING_MODE;
 Permutation TWO_SIDED;
 
-float2 Tiling @Default(1.0);
-
 Color BaseColor @Default(Color(1.0, 1.0, 1.0));
-
 bool UseBaseTexture;
 Texture2D BaseTexture;
 
@@ -34,20 +30,18 @@ float MaskThreshold @Default(0.25);
 bool UseNormalTexture;
 Texture2D NormalTexture;
 
-bool InvertOcclusion;
 bool UseOcclusionTexture;
 Texture2D OcclusionTexture;
 
-float RoughnessValue @Default(0.7) @Clamp(0.0, 2.0);
+float RoughnessValue @Default(0.7) @Clamp(0.0, 1.0);
 bool UseRoughnessTexture;
 Texture2D RoughnessTexture;
 
-float MetallicValue @Default(0.0) @Clamp(0.0, 2.0);
+float MetallicValue @Default(0.0) @Clamp(0.0, 1.0);
 bool UseMetallicTexture;
 Texture2D MetallicTexture;
 
 bool UseOrmTexture;
-bool UseRMA;
 Texture2D OrmTexture;
 
 Color EmissiveColor @Default(Color(0.0, 0.0, 0.0));
@@ -67,10 +61,6 @@ Texture2D EmissiveTexture;
 #define USE_NORMAL
 #define USE_TANGENT
 #define USE_TEXCOORD0
-
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
 
 #if VERTEX_SKINNING
   #define USE_SKINNING
@@ -95,10 +85,6 @@ VS_OUT main(VS_IN Input)
 #define USE_TANGENT
 #define USE_TEXCOORD0
 
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
-
 #if VERTEX_SKINNING
   #define USE_SKINNING
 #endif
@@ -118,14 +104,9 @@ VS_OUT main(VS_IN Input)
 #define USE_SIMPLE_MATERIAL_MODEL
 #define USE_MATERIAL_EMISSIVE
 #define USE_MATERIAL_OCCLUSION
-#define USE_MATERIAL_CAVITY
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
 #define USE_FOG
-
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
@@ -160,8 +141,8 @@ float3 GetNormal()
   [branch]
   if (UseNormalTexture)
   {
-    float3 normalTS = DecodeNormalTexture(NormalTexture.Sample(NormalTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling));
-    return normalize(TangentToWorldSpace(normalTS));
+    float3 normalTS = DecodeNormalTexture(NormalTexture.Sample(NormalTexture_AutoSampler, G.Input.TexCoord0.xy));
+    return TangentToWorldSpace(normalTS);
   }
   else
   {
@@ -181,7 +162,7 @@ float3 GetBaseColor()
   [branch]
   if (UseBaseTexture)
   {
-    baseColor *= BaseTexture.Sample(BaseTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling).rgb;
+    baseColor *= BaseTexture.Sample(BaseTexture_AutoSampler, G.Input.TexCoord0.xy).rgb;
   }
 
   return baseColor;
@@ -190,17 +171,13 @@ float3 GetBaseColor()
 float GetMetallic()
 {
   [branch]
-  if (UseRMA)
+  if (UseOrmTexture)
   {
-      return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).g * MetallicValue;
-  }
-  else if (UseOrmTexture)
-  {
-    return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b * MetallicValue;
+    return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b;
   }
   else if (UseMetallicTexture)
   {
-    return MetallicTexture.Sample(MetallicTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling).r * MetallicValue;
+    return MetallicTexture.Sample(MetallicTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else
   {
@@ -216,11 +193,7 @@ float GetReflectance()
 float GetRoughness()
 {
   [branch]
-  if (UseRMA)
-  {
-    return RoughnessValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r;
-  }
-  else if (UseOrmTexture)
+  if (UseOrmTexture)
   {
     return RoughnessValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).g;
   }
@@ -241,7 +214,7 @@ float GetOpacity()
   [branch]
   if (UseBaseTexture)
   {
-    opacity *= BaseTexture.Sample(BaseTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling).a;
+    opacity *= BaseTexture.Sample(BaseTexture_AutoSampler, G.Input.TexCoord0.xy).a;
   }
 
   #if BLEND_MODE == BLEND_MODE_MASKED
@@ -256,7 +229,7 @@ float3 GetEmissiveColor()
   [branch]
   if (UseEmissiveTexture)
   {
-    return EmissiveTexture.Sample(EmissiveTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling).rgb * EmissiveColor.rgb;
+    return EmissiveTexture.Sample(EmissiveTexture_AutoSampler, G.Input.TexCoord0.xy).rgb * EmissiveColor.rgb;
   }
   else
   {
@@ -267,25 +240,16 @@ float3 GetEmissiveColor()
 float GetOcclusion()
 {
   [branch]
-  if (UseRMA)
+  if (UseOrmTexture)
   {
-    return abs(float(InvertOcclusion) - OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b);
-  }
-  else if (UseOrmTexture)
-  {
-    return abs(float(InvertOcclusion) - OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r);
+    return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else if (UseOcclusionTexture)
   {
-    return abs(float(InvertOcclusion) - OcclusionTexture.Sample(OcclusionTexture_AutoSampler, G.Input.TexCoord0.xy * Tiling).r);
+    return OcclusionTexture.Sample(OcclusionTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else
   {
     return 1.0f;
   }
-}
-
-float GetCavity()
-{
-    return 1.0f;
 }

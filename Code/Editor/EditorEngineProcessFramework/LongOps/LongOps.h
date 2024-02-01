@@ -15,9 +15,9 @@ class plProgress;
 /// in the engine process and to feed it with the necessary parameters.
 /// Since the proxy long op runs in the editor process, it may access plDocumentObject's
 /// and extract data from them.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpProxy : public plReflectedClass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpProxy : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpProxy, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plLongOpProxy, plReflectedClass);
 
 public:
   /// \brief Called once by plLongOpControllerManager::RegisterLongOp() to inform the proxy
@@ -31,7 +31,7 @@ public:
   /// \param out_sReplicationOpType must name the plLongOpWorker that shall be executed in the engine process.
   /// \param config can be optionally written to. The data is transmitted to the plLongOpWorker on the other side
   /// and fed to it in plLongOpWorker::InitializeExecution().
-  virtual void GetReplicationInfo(plStringBuilder& out_sReplicationOpType, plStreamWriter& config) = 0;
+  virtual void GetReplicationInfo(plStringBuilder& out_sReplicationOpType, plStreamWriter& inout_config) = 0;
 
   /// \brief Called once the corresponding plLongOpWorker has finished.
   /// \param result Whether the operation succeeded or failed (e.g. via user cancellation).
@@ -48,16 +48,16 @@ public:
 ///
 /// plLongOpWorker instances are automatically instantiated by plLongOpWorkerManager when they have
 /// been named by a plLongOpProxy's GetReplicationInfo() function.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpWorker : public plReflectedClass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpWorker : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpWorker, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plLongOpWorker, plReflectedClass);
 
 public:
   /// \brief Called within the engine processes main thread.
   /// The function may lock the plWorld from the given scene document and extract vital information.
   /// It should try to be as quick as possible and leave the heavy lifting to Execute(), which will run on a background thread.
   /// If this function return failure, the long op is canceled right away.
-  virtual plResult InitializeExecution(plStreamReader& config, const plUuid& DocumentGuid) { return PLASMA_SUCCESS; }
+  virtual plResult InitializeExecution(plStreamReader& ref_config, const plUuid& documentGuid) { return PL_SUCCESS; }
 
   /// \brief Executed in a separete thread after InitializeExecution(). This should do the work that takes a while.
   ///
@@ -68,5 +68,5 @@ public:
   /// All updates to \a progress will be automatically synchronized back to the editor process and become visible through
   /// the plLongOpControllerManager via the plLongOpControllerEvent.
   /// Use plProgressRange for convenient progress updates.
-  virtual plResult Execute(plProgress& progress, plStreamWriter& proxydata) = 0;
+  virtual plResult Execute(plProgress& ref_progress, plStreamWriter& ref_proxydata) = 0;
 };

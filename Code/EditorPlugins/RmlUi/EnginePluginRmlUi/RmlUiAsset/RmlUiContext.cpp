@@ -5,19 +5,19 @@
 #include <RmlUiPlugin/Resources/RmlUiResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiDocumentContext, 1, plRTTIDefaultAllocator<plRmlUiDocumentContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiDocumentContext, 1, plRTTIDefaultAllocator<plRmlUiDocumentContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "RmlUi"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "RmlUi"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRmlUiDocumentContext::plRmlUiDocumentContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
@@ -26,7 +26,7 @@ plRmlUiDocumentContext::~plRmlUiDocumentContext() = default;
 void plRmlUiDocumentContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   // Preview object
   {
@@ -46,19 +46,19 @@ void plRmlUiDocumentContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plRmlUiDocumentContext::CreateViewContext()
+plEngineProcessViewContext* plRmlUiDocumentContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plRmlUiViewContext, this);
+  return PL_DEFAULT_NEW(plRmlUiViewContext, this);
 }
 
-void plRmlUiDocumentContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plRmlUiDocumentContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plRmlUiDocumentContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plRmlUiDocumentContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
-  PLASMA_LOCK(m_pMainObject->GetWorld()->GetWriteMarker());
+  PL_LOCK(m_pMainObject->GetWorld()->GetWriteMarker());
 
   m_pMainObject->UpdateLocalBounds();
   plBoundingBoxSphere bounds = m_pMainObject->GetGlobalBounds();

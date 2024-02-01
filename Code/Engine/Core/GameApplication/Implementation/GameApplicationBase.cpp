@@ -34,11 +34,11 @@ plGameApplicationBase::~plGameApplicationBase()
   s_pGameApplicationBaseInstance = nullptr;
 }
 
-void AppendCurrentTimestamp(plStringBuilder& out_String)
+void AppendCurrentTimestamp(plStringBuilder& out_sString)
 {
-  const plDateTime dt = plTimestamp::CurrentTimestamp();
+  const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
 
-  out_String.AppendFormat("_{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
+  out_sString.AppendFormat("_{0}-{1}-{2}_{3}-{4}-{5}-{6}", dt.GetYear(), plArgU(dt.GetMonth(), 2, true), plArgU(dt.GetDay(), 2, true), plArgU(dt.GetHour(), 2, true), plArgU(dt.GetMinute(), 2, true), plArgU(dt.GetSecond(), 2, true), plArgU(dt.GetMicroseconds() / 1000, 3, true));
 }
 
 void plGameApplicationBase::TakeProfilingCapture()
@@ -59,7 +59,7 @@ void plGameApplicationBase::TakeProfilingCapture()
       sPath.Append(".json");
 
       plFileWriter fileWriter;
-      if (fileWriter.Open(sPath) == PLASMA_SUCCESS)
+      if (fileWriter.Open(sPath) == PL_SUCCESS)
       {
         m_profilingData.Write(fileWriter).IgnoreResult();
         plLog::Info("Profiling capture saved to '{0}'.", fileWriter.GetFilePathAbsolute().GetData());
@@ -71,7 +71,7 @@ void plGameApplicationBase::TakeProfilingCapture()
     }
   };
 
-  plSharedPtr<WriteProfilingDataTask> pWriteProfilingDataTask = PLASMA_DEFAULT_NEW(WriteProfilingDataTask);
+  plSharedPtr<WriteProfilingDataTask> pWriteProfilingDataTask = PL_DEFAULT_NEW(WriteProfilingDataTask);
   pWriteProfilingDataTask->ConfigureTask("Write Profiling Data", plTaskNesting::Never);
   plProfilingSystem::Capture(pWriteProfilingDataTask->m_profilingData);
 
@@ -85,7 +85,7 @@ void plGameApplicationBase::TakeScreenshot()
   m_bTakeScreenshot = true;
 }
 
-void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sContext /*= nullptr*/)
+void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sContext /*= {} */)
 {
   class WriteFileTask final : public plTask
   {
@@ -109,11 +109,11 @@ void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sConte
     }
   };
 
-  plSharedPtr<WriteFileTask> pWriteTask = PLASMA_DEFAULT_NEW(WriteFileTask);
+  plSharedPtr<WriteFileTask> pWriteTask = PL_DEFAULT_NEW(WriteFileTask);
   pWriteTask->ConfigureTask("Write Screenshot", plTaskNesting::Never);
   pWriteTask->m_Image.ResetAndMove(std::move(image));
 
-  pWriteTask->m_sPath.Format(":appdata/Screenshots/{0}", plApplication::GetApplicationInstance()->GetApplicationName());
+  pWriteTask->m_sPath.SetFormat(":appdata/Screenshots/{0}", plApplication::GetApplicationInstance()->GetApplicationName());
   AppendCurrentTimestamp(pWriteTask->m_sPath);
   pWriteTask->m_sPath.Append(sContext);
   pWriteTask->m_sPath.Append(".png");
@@ -124,11 +124,11 @@ void plGameApplicationBase::StoreScreenshot(plImage&& image, plStringView sConte
   plTaskSystem::StartSingleTask(pWriteTask, plTaskPriority::LongRunning);
 }
 
-void plGameApplicationBase::ExecuteTakeScreenshot(plWindowOutputTargetBase* pOutputTarget, plStringView sContext /* = nullptr*/)
+void plGameApplicationBase::ExecuteTakeScreenshot(plWindowOutputTargetBase* pOutputTarget, plStringView sContext /* = {} */)
 {
   if (m_bTakeScreenshot)
   {
-    PLASMA_PROFILE_SCOPE("ExecuteTakeScreenshot");
+    PL_PROFILE_SCOPE("ExecuteTakeScreenshot");
     plImage img;
     if (pOutputTarget->CaptureImage(img).Succeeded())
     {
@@ -144,9 +144,9 @@ void plGameApplicationBase::CaptureFrame()
   m_bCaptureFrame = true;
 }
 
-void plGameApplicationBase::SetContinuousFrameCapture(bool enable)
+void plGameApplicationBase::SetContinuousFrameCapture(bool bEnable)
 {
-  m_bContinuousFrameCapture = enable;
+  m_bContinuousFrameCapture = bEnable;
 }
 
 bool plGameApplicationBase::GetContinousFrameCapture() const
@@ -155,14 +155,14 @@ bool plGameApplicationBase::GetContinousFrameCapture() const
 }
 
 
-plResult plGameApplicationBase::GetAbsFrameCaptureOutputPath(plStringBuilder& sOutputPath)
+plResult plGameApplicationBase::GetAbsFrameCaptureOutputPath(plStringBuilder& ref_sOutputPath)
 {
   plStringBuilder sPath = ":appdata/FrameCaptures/Capture_";
   AppendCurrentTimestamp(sPath);
-  return plFileSystem::ResolvePath(sPath, &sOutputPath, nullptr);
+  return plFileSystem::ResolvePath(sPath, &ref_sOutputPath, nullptr);
 }
 
-void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandle, plStringView sContext /*= nullptr*/)
+void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandle, plStringView sContext /*= {} */)
 {
   plFrameCaptureInterface* pCaptureInterface = plSingletonRegistry::GetSingletonInstance<plFrameCaptureInterface>();
   if (!pCaptureInterface)
@@ -170,7 +170,7 @@ void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandl
     return;
   }
 
-  PLASMA_PROFILE_SCOPE("ExecuteFrameCapture");
+  PL_PROFILE_SCOPE("ExecuteFrameCapture");
   // If we still have a running capture (i.e., if no one else has taken the capture so far), finish it
   if (pCaptureInterface->IsFrameCapturing())
   {
@@ -215,12 +215,12 @@ void plGameApplicationBase::ExecuteFrameCapture(plWindowHandle targetWindowHandl
 
 plResult plGameApplicationBase::ActivateGameState(plWorld* pWorld /*= nullptr*/, const plTransform* pStartPosition /*= nullptr*/)
 {
-  PLASMA_ASSERT_DEBUG(m_pGameState == nullptr, "ActivateGameState cannot be called when another GameState is already active");
+  PL_ASSERT_DEBUG(m_pGameState == nullptr, "ActivateGameState cannot be called when another GameState is already active");
 
   m_pGameState = CreateGameState(pWorld);
 
   if (m_pGameState == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_pWorldLinkedWithGameState = pWorld;
   m_pGameState->OnActivation(pWorld, pStartPosition);
@@ -229,9 +229,9 @@ plResult plGameApplicationBase::ActivateGameState(plWorld* pWorld /*= nullptr*/,
   e.m_Type = plGameApplicationStaticEvent::Type::AfterGameStateActivated;
   m_StaticEvents.Broadcast(e);
 
-  PLASMA_BROADCAST_EVENT(AfterGameStateActivation, m_pGameState.Borrow());
+  PL_BROADCAST_EVENT(AfterGameStateActivation, m_pGameState.Borrow());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGameApplicationBase::DeactivateGameState()
@@ -239,7 +239,7 @@ void plGameApplicationBase::DeactivateGameState()
   if (m_pGameState == nullptr)
     return;
 
-  PLASMA_BROADCAST_EVENT(BeforeGameStateDeactivation, m_pGameState.Borrow());
+  PL_BROADCAST_EVENT(BeforeGameStateDeactivation, m_pGameState.Borrow());
 
   plGameApplicationStaticEvent e;
   e.m_Type = plGameApplicationStaticEvent::Type::BeforeGameStateDeactivated;
@@ -262,7 +262,7 @@ plGameStateBase* plGameApplicationBase::GetActiveGameStateLinkedToWorld(const pl
 
 plUniquePtr<plGameStateBase> plGameApplicationBase::CreateGameState(plWorld* pWorld)
 {
-  PLASMA_LOG_BLOCK("Create Game State");
+  PL_LOG_BLOCK("Create Game State");
 
   plUniquePtr<plGameStateBase> pCurState;
 
@@ -369,28 +369,34 @@ void plGameApplicationBase::BeforeCoreSystemsShutdown()
 
 static bool s_bUpdatePluginsExecuted = false;
 
-PLASMA_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
+PL_ON_GLOBAL_EVENT(GameApp_UpdatePlugins)
 {
   s_bUpdatePluginsExecuted = true;
 }
 
 plApplication::Execution plGameApplicationBase::Run()
 {
-  PLASMA_PROFILE_SCOPE("Run");
   if (m_bWasQuitRequested)
     return plApplication::Execution::Quit;
 
+  RunOneFrame();
+  return plApplication::Execution::Continue;
+}
+
+void plGameApplicationBase::RunOneFrame()
+{
+  PL_PROFILE_SCOPE("Run");
   s_bUpdatePluginsExecuted = false;
 
   plActorManager::GetSingleton()->Update();
 
   if (!IsGameUpdateEnabled())
-    return plApplication::Execution::Continue;
+    return;
 
   {
     // for plugins that need to hook into this without a link dependency on this lib
-    PLASMA_PROFILE_SCOPE("GameApp_BeginAppTick");
-    PLASMA_BROADCAST_EVENT(GameApp_BeginAppTick);
+    PL_PROFILE_SCOPE("GameApp_BeginAppTick");
+    PL_BROADCAST_EVENT(GameApp_BeginAppTick);
     plGameApplicationExecutionEvent e;
     e.m_Type = plGameApplicationExecutionEvent::Type::BeginAppTick;
     m_ExecutionEvents.Broadcast(e);
@@ -404,14 +410,14 @@ plApplication::Execution plGameApplicationBase::Run()
   {
     Run_UpdatePlugins();
 
-    PLASMA_ASSERT_DEV(s_bUpdatePluginsExecuted, "plGameApplicationBase::Run_UpdatePlugins has been overridden, but it does not broadcast the "
+    PL_ASSERT_DEV(s_bUpdatePluginsExecuted, "plGameApplicationBase::Run_UpdatePlugins has been overridden, but it does not broadcast the "
                                             "global event 'GameApp_UpdatePlugins' anymore.");
   }
 
   {
     // for plugins that need to hook into this without a link dependency on this lib
-    PLASMA_PROFILE_SCOPE("GameApp_EndAppTick");
-    PLASMA_BROADCAST_EVENT(GameApp_EndAppTick);
+    PL_PROFILE_SCOPE("GameApp_EndAppTick");
+    PL_BROADCAST_EVENT(GameApp_EndAppTick);
 
     plGameApplicationExecutionEvent e;
     e.m_Type = plGameApplicationExecutionEvent::Type::EndAppTick;
@@ -419,36 +425,35 @@ plApplication::Execution plGameApplicationBase::Run()
   }
 
   {
-    PLASMA_PROFILE_SCOPE("BeforePresent");
+    PL_PROFILE_SCOPE("BeforePresent");
     plGameApplicationExecutionEvent e;
     e.m_Type = plGameApplicationExecutionEvent::Type::BeforePresent;
     m_ExecutionEvents.Broadcast(e);
   }
 
   {
-    PLASMA_PROFILE_SCOPE("Run_Present");
+    PL_PROFILE_SCOPE("Run_Present");
     Run_Present();
   }
   plClock::GetGlobalClock()->Update();
   UpdateFrameTime();
 
   {
-    PLASMA_PROFILE_SCOPE("AfterPresent");
+    PL_PROFILE_SCOPE("AfterPresent");
     plGameApplicationExecutionEvent e;
     e.m_Type = plGameApplicationExecutionEvent::Type::AfterPresent;
     m_ExecutionEvents.Broadcast(e);
   }
 
   {
-    PLASMA_PROFILE_SCOPE("Run_FinishFrame");
+    PL_PROFILE_SCOPE("Run_FinishFrame");
     Run_FinishFrame();
   }
-  return plApplication::Execution::Continue;
 }
 
 void plGameApplicationBase::Run_InputUpdate()
 {
-  PLASMA_PROFILE_SCOPE("Run_InputUpdate");
+  PL_PROFILE_SCOPE("Run_InputUpdate");
   plInputManager::Update(plClock::GetGlobalClock()->GetTimeDiff());
 
   if (!Run_ProcessApplicationInput())
@@ -467,7 +472,7 @@ bool plGameApplicationBase::Run_ProcessApplicationInput()
 
 void plGameApplicationBase::Run_BeforeWorldUpdate()
 {
-  PLASMA_PROFILE_SCOPE("GameApplication.BeforeWorldUpdate");
+  PL_PROFILE_SCOPE("GameApplication.BeforeWorldUpdate");
 
   if (m_pGameState)
   {
@@ -483,7 +488,7 @@ void plGameApplicationBase::Run_BeforeWorldUpdate()
 
 void plGameApplicationBase::Run_AfterWorldUpdate()
 {
-  PLASMA_PROFILE_SCOPE("GameApplication.AfterWorldUpdate");
+  PL_PROFILE_SCOPE("GameApplication.AfterWorldUpdate");
 
   if (m_pGameState)
   {
@@ -499,7 +504,7 @@ void plGameApplicationBase::Run_AfterWorldUpdate()
 
 void plGameApplicationBase::Run_UpdatePlugins()
 {
-  PLASMA_PROFILE_SCOPE("Run_UpdatePlugins");
+  PL_PROFILE_SCOPE("Run_UpdatePlugins");
   {
     plGameApplicationExecutionEvent e;
     e.m_Type = plGameApplicationExecutionEvent::Type::BeforeUpdatePlugins;
@@ -507,7 +512,7 @@ void plGameApplicationBase::Run_UpdatePlugins()
   }
 
   // for plugins that need to hook into this without a link dependency on this lib
-  PLASMA_BROADCAST_EVENT(GameApp_UpdatePlugins);
+  PL_BROADCAST_EVENT(GameApp_UpdatePlugins);
 
   {
     plGameApplicationExecutionEvent e;
@@ -527,7 +532,7 @@ void plGameApplicationBase::Run_FinishFrame()
   plProfilingSystem::StartNewFrame();
 
   // if many messages have been logged, make sure they get written to disk
-  plLog::Flush(100, plTime::Seconds(10));
+  plLog::Flush(100, plTime::MakeFromSeconds(10));
 
   // reset this state
   m_bTakeScreenshot = false;
@@ -543,4 +548,8 @@ void plGameApplicationBase::UpdateFrameTime()
   tLast = tNow;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_GameApplication_Implementation_GameApplicationBase);
+
+
+
+PL_STATICLINK_FILE(Core, Core_GameApplication_Implementation_GameApplicationBase);
+

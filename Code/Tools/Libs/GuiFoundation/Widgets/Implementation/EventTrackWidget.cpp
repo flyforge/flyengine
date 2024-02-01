@@ -9,8 +9,8 @@
 #include <QRubberBand>
 #include <qevent.h>
 
-plQtEventTrackWidget::plQtEventTrackWidget(QWidget* parent)
-  : QWidget(parent)
+plQtEventTrackWidget::plQtEventTrackWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   setFocusPolicy(Qt::FocusPolicy::ClickFocus);
   setMouseTracking(true);
@@ -189,13 +189,13 @@ void plQtEventTrackWidget::ClearSelection()
 }
 
 
-void plQtEventTrackWidget::GetSelection(plHybridArray<plUInt32, 32>& out_Selection) const
+void plQtEventTrackWidget::GetSelection(plHybridArray<plUInt32, 32>& out_selection) const
 {
-  out_Selection.Clear();
+  out_selection.Clear();
 
   for (const auto& pt : m_SelectedPoints)
   {
-    out_Selection.PushBack(m_Categories[pt.m_uiCategory].m_SortedPoints[pt.m_uiSortedIdx].m_uiOrgIndex);
+    out_selection.PushBack(m_Categories[pt.m_uiCategory].m_SortedPoints[pt.m_uiSortedIdx].m_uiOrgIndex);
   }
 }
 
@@ -419,7 +419,7 @@ void plQtEventTrackWidget::mousePressEvent(QMouseEvent* e)
         m_State = EditState::MultiSelect;
       }
 
-      PLASMA_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
+      PL_ASSERT_DEBUG(!m_bBegunChanges, "Invalid State");
 
       if (m_State == EditState::DraggingPoints)
       {
@@ -658,7 +658,6 @@ void plQtEventTrackWidget::wheelEvent(QWheelEvent* e)
   ClampZoomPan();
 
   changeX = m_SceneToPixelScale.x() / oldScaleX;
-  changeY = m_SceneToPixelScale.y() / oldScaleY;
 
   posDiff = posDiff * (1.0 / changeX);
 
@@ -760,7 +759,7 @@ void plQtEventTrackWidget::PaintControlPoints(QPainter* painter) const
 
     if (!rects.IsEmpty())
     {
-      const plColorGammaUB& col = g_EventColors[catIdx % PLASMA_ARRAY_SIZE(g_EventColors)];
+      const plColorGammaUB& col = g_EventColors[catIdx % PL_ARRAY_SIZE(g_EventColors)];
 
       brush.setColor(qRgb(col.r, col.g, col.b));
       pen.setColor(qRgb(col.r, col.g, col.b));
@@ -1011,7 +1010,7 @@ void plQtEventTrackWidget::ComputeSelectionRect()
     return;
 
   plBoundingBox bbox;
-  bbox.SetInvalid();
+  bbox = plBoundingBox::MakeInvalid();
 
   // TODO: properly implement the Y value
   // for (const auto& cpSel : m_SelectedPoints)

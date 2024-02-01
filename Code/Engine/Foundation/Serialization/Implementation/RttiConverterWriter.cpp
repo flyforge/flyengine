@@ -21,18 +21,18 @@ void plRttiConverterContext::OnUnknownTypeError(plStringView sTypeName)
 plUuid plRttiConverterContext::GenerateObjectGuid(const plUuid& parentGuid, const plAbstractProperty* pProp, plVariant index, void* pObject) const
 {
   plUuid guid = parentGuid;
-  guid.HashCombine(plUuid::StableUuidForString(pProp->GetPropertyName()));
+  guid.HashCombine(plUuid::MakeStableUuidFromString(pProp->GetPropertyName()));
   if (index.IsA<plString>())
   {
-    guid.HashCombine(plUuid::StableUuidForString(index.Get<plString>()));
+    guid.HashCombine(plUuid::MakeStableUuidFromString(index.Get<plString>()));
   }
   else if (index.CanConvertTo<plUInt32>())
   {
-    guid.HashCombine(plUuid::StableUuidForInt(index.ConvertTo<plUInt32>()));
+    guid.HashCombine(plUuid::MakeStableUuidFromInt(index.ConvertTo<plUInt32>()));
   }
   else if (index.IsValid())
   {
-    PLASMA_REPORT_FAILURE("Index type must be plUInt32 or plString.");
+    PL_REPORT_FAILURE("Index type must be plUInt32 or plString.");
   }
   // plLog::Warning("{0},{1},{2} -> {3}", parentGuid, pProp->GetPropertyName(), index, guid);
   return guid;
@@ -40,7 +40,7 @@ plUuid plRttiConverterContext::GenerateObjectGuid(const plUuid& parentGuid, cons
 
 plInternal::NewInstance<void> plRttiConverterContext::CreateObject(const plUuid& guid, const plRTTI* pRtti)
 {
-  PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Cannot create object, RTTI type is unknown");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "Cannot create object, RTTI type is unknown");
   if (!pRtti->GetAllocator() || !pRtti->GetAllocator()->CanAllocate())
     return nullptr;
 
@@ -61,7 +61,7 @@ void plRttiConverterContext::DeleteObject(const plUuid& guid)
 
 void plRttiConverterContext::RegisterObject(const plUuid& guid, const plRTTI* pRtti, void* pObject)
 {
-  PLASMA_ASSERT_DEV(pObject != nullptr, "cannot register null object!");
+  PL_ASSERT_DEV(pObject != nullptr, "cannot register null object!");
   plRttiConverterObject& co = m_GuidToObject[guid];
 
   if (pRtti->IsDerivedFrom<plReflectedClass>())
@@ -70,7 +70,7 @@ void plRttiConverterContext::RegisterObject(const plUuid& guid, const plRTTI* pR
   }
 
   // TODO: Actually remove child owner ptr from register when deleting an object
-  // PLASMA_ASSERT_DEV(co.m_pObject == nullptr || (co.m_pObject == pObject && co.m_pType == pRtti), "Registered same guid twice with different
+  // PL_ASSERT_DEV(co.m_pObject == nullptr || (co.m_pObject == pObject && co.m_pType == pRtti), "Registered same guid twice with different
   // values");
 
   co.m_pObject = pObject;
@@ -113,7 +113,7 @@ const plRTTI* plRttiConverterContext::FindTypeByName(plStringView sName) const
 
 plUuid plRttiConverterContext::EnqueObject(const plUuid& guid, const plRTTI* pRtti, void* pObject)
 {
-  PLASMA_ASSERT_DEBUG(guid.IsValid(), "For stable serialization, guid must be well defined");
+  PL_ASSERT_DEBUG(guid.IsValid(), "For stable serialization, guid must be well defined");
   plUuid res = guid;
 
   if (pObject != nullptr)
@@ -141,7 +141,7 @@ plRttiConverterObject plRttiConverterContext::DequeueObject()
   {
     auto it = m_QueuedObjects.GetIterator();
     auto object = GetObjectByGUID(it.Key());
-    PLASMA_ASSERT_DEV(object.m_pObject != nullptr, "Enqueued object was never registered!");
+    PL_ASSERT_DEV(object.m_pObject != nullptr, "Enqueued object was never registered!");
 
     m_QueuedObjects.Remove(it);
 
@@ -173,13 +173,13 @@ plRttiConverterWriter::plRttiConverterWriter(plAbstractObjectGraph* pGraph, plRt
   , m_pGraph(pGraph)
   , m_Filter(filter)
 {
-  PLASMA_ASSERT_DEBUG(filter.IsValid(), "Either filter function must be valid or a different ctor must be chosen.");
+  PL_ASSERT_DEBUG(filter.IsValid(), "Either filter function must be valid or a different ctor must be chosen.");
 }
 
 plAbstractObjectNode* plRttiConverterWriter::AddObjectToGraph(const plRTTI* pRtti, const void* pObject, const char* szNodeName)
 {
   const plUuid guid = m_pContext->GetObjectGUID(pRtti, pObject);
-  PLASMA_ASSERT_DEV(guid.IsValid(), "The object was not registered. Call plRttiConverterContext::RegisterObject before adding.");
+  PL_ASSERT_DEV(guid.IsValid(), "The object was not registered. Call plRttiConverterContext::RegisterObject before adding.");
   plAbstractObjectNode* pNode = AddSubObjectToGraph(pRtti, pObject, guid, szNodeName);
 
   plRttiConverterObject obj = m_pContext->DequeueObject();
@@ -419,8 +419,8 @@ void plRttiConverterWriter::AddProperty(plAbstractObjectNode* pNode, const plAbs
           for (plUInt32 i = 0; i < keys.GetCount(); ++i)
           {
             void* pSubObject = pPropType->GetAllocator()->Allocate<void>();
-            PLASMA_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(pSubObject););
-            PLASMA_VERIFY(pSpecific->GetValue(pObject, keys[i], pSubObject), "Key should be valid.");
+            PL_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(pSubObject););
+            PL_VERIFY(pSpecific->GetValue(pObject, keys[i], pSubObject), "Key should be valid.");
 
             const plUuid SubObjectGuid = m_pContext->GenerateObjectGuid(pNode->GetGuid(), pProp, plVariant(keys[i]), pSubObject);
             AddSubObjectToGraph(pPropType, pSubObject, SubObjectGuid, nullptr);
@@ -451,5 +451,3 @@ void plRttiConverterWriter::AddProperties(plAbstractObjectNode* pNode, const plR
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_RttiConverterWriter);

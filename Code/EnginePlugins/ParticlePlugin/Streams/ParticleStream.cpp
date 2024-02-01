@@ -6,11 +6,11 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleStreamFactory::plParticleStreamFactory(const char* szStreamName, plProcessingStream::DataType dataType, const plRTTI* pStreamTypeToCreate)
@@ -35,16 +35,16 @@ const char* plParticleStreamFactory::GetStreamName() const
   return m_szStreamName;
 }
 
-void plParticleStreamFactory::GetFullStreamName(const char* szName, plProcessingStream::DataType type, plStringBuilder& out_Result)
+void plParticleStreamFactory::GetFullStreamName(const char* szName, plProcessingStream::DataType type, plStringBuilder& out_sResult)
 {
-  out_Result = szName;
-  out_Result.AppendFormat("({0})", (int)type);
+  out_sResult = szName;
+  out_sResult.AppendFormat("({0})", (int)type);
 }
 
 plParticleStream* plParticleStreamFactory::CreateParticleStream(plParticleSystemInstance* pOwner) const
 {
   const plRTTI* pRtti = GetParticleStreamType();
-  PLASMA_ASSERT_DEBUG(pRtti->IsDerivedFrom<plParticleStream>(), "Particle stream factory does not create a valid stream type");
+  PL_ASSERT_DEBUG(pRtti->IsDerivedFrom<plParticleStream>(), "Particle stream factory does not create a valid stream type");
 
   plParticleStream* pStream = pRtti->GetAllocator()->Allocate<plParticleStream>();
 
@@ -65,7 +65,7 @@ plParticleStream::plParticleStream()
 plResult plParticleStream::UpdateStreamBindings()
 {
   m_StreamBinding.UpdateBindings(m_pStreamGroup);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plParticleStream::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
@@ -83,4 +83,4 @@ void plParticleStream::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumE
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Streams_ParticleStream);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Streams_ParticleStream);

@@ -12,18 +12,18 @@ class QAction;
 class plQtProxy;
 
 
-class PLASMA_GUIFOUNDATION_DLL plQtMenuActionMapView : public QMenu
+class PL_GUIFOUNDATION_DLL plQtMenuActionMapView : public QMenu
 {
   Q_OBJECT
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtMenuActionMapView);
+  PL_DISALLOW_COPY_AND_ASSIGN(plQtMenuActionMapView);
 
 public:
-  explicit plQtMenuActionMapView(QWidget* parent);
+  explicit plQtMenuActionMapView(QWidget* pParent);
   ~plQtMenuActionMapView();
 
   void SetActionContext(const plActionContext& context);
 
-  static void AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& Proxies, plActionContext& Context, plActionMap* pActionMap,
+  static void AddDocumentObjectToMenu(plHashTable<plUuid, QSharedPointer<plQtProxy>>& ref_proxies, plActionContext& ref_context, plActionMap* pActionMap,
     QMenu* pCurrentRoot, const plActionMap::TreeNode* pObject);
 
 private:

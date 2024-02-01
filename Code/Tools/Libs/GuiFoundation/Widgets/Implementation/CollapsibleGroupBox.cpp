@@ -1,6 +1,3 @@
-#include "Foundation/Math/ColorScheme.h"
-
-
 #include <GuiFoundation/GuiFoundationPCH.h>
 
 #include <GuiFoundation/UIServices/UIServices.moc.h>
@@ -11,16 +8,16 @@
 
 plQtCollapsibleGroupBox::plQtCollapsibleGroupBox(QWidget* pParent)
   : plQtGroupBoxBase(pParent, true)
-  , m_bCollapsed(false)
+
 {
   setupUi(this);
 
   Header->installEventFilter(this);
 }
 
-void plQtCollapsibleGroupBox::SetTitle(const char* szTitle)
+void plQtCollapsibleGroupBox::SetTitle(plStringView sTitle)
 {
-  plQtGroupBoxBase::SetTitle(szTitle);
+  plQtGroupBoxBase::SetTitle(sTitle);
   update();
 }
 
@@ -104,7 +101,7 @@ void plQtCollapsibleGroupBox::paintEvent(QPaintEvent* event)
 
   QRect cr = wr;
   cr.setTop(hr.height());
-  cr.adjust(Rounding / 2, 0, 0, -Rounding / 2 - 5);
+  cr.adjust(Rounding / 2, 0, 0, -Rounding / 2);
 
   if (m_FillColor.isValid())
   {

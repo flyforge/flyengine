@@ -409,7 +409,7 @@ void plQtAiProjectSettingsDlg::RetrieveNavmeshConfig(int index)
   cfg.m_fAgentRadius = NavAgentRadius->value();
   cfg.m_fAgentHeight = NavAgentHeight->value();
   cfg.m_fAgentStepHeight = NavAgentStep->value();
-  cfg.m_WalkableSlope = plAngle::Degree(NavAgentSlope->value());
+  cfg.m_WalkableSlope = plAngle::MakeFromDegree(NavAgentSlope->value());
 
   cfg.m_fMaxEdgeLength = NavMaxEdgeLength->value();
   cfg.m_fMaxSimplificationError = NavSimplificationError->value();

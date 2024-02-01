@@ -10,7 +10,7 @@ plResult plTypeScriptBinding::Init_FunctionBinding()
 {
   m_Duk.RegisterGlobalFunctionWithVarArgs("__CPP_ComponentFunction_Call", __CPP_ComponentFunction_Call);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plTypeScriptBinding::ComputeFunctionBindingHash(const plRTTI* pType, const plAbstractFunctionProperty* pFunc)
@@ -38,7 +38,7 @@ void plTypeScriptBinding::SetupRttiFunctionBindings()
         const plUInt32 uiHash = ComputeFunctionBindingHash(pRtti, pFunc);
         if (auto pExistingBinding = s_BoundFunctions.GetValue(uiHash))
         {
-          PLASMA_ASSERT_DEV(plStringUtils::IsEqual(pExistingBinding->m_pFunc->GetPropertyName(), pFunc->GetPropertyName()), "Hash collision for bound function name!");
+          PL_ASSERT_DEV(plStringUtils::IsEqual(pExistingBinding->m_pFunc->GetPropertyName(), pFunc->GetPropertyName()), "Hash collision for bound function name!");
         }
 
         s_BoundFunctions[uiHash].m_pFunc = pFunc;
@@ -238,7 +238,7 @@ int __CPP_ComponentFunction_Call(duk_context* pDuk)
   if (pBinding == nullptr)
   {
     plLog::Error("Bound function with hash {} not found.", uiFuncHash);
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), +1);
   }
 
   const plUInt32 uiNumArgs = pBinding->m_pFunc->GetArgumentCount();
@@ -257,10 +257,10 @@ int __CPP_ComponentFunction_Call(duk_context* pDuk)
   if (pBinding->m_pFunc->GetReturnType() != nullptr)
   {
     plTypeScriptBinding::PushVariant(duk, ret0);
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
   }
   else
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
   }
 }

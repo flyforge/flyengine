@@ -6,12 +6,14 @@
 class plComponent;
 class plTypeScriptBinding;
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plTypeScriptInstance : public plScriptInstance
+class PL_TYPESCRIPTPLUGIN_DLL plTypeScriptInstance : public plScriptInstance
 {
 public:
   plTypeScriptInstance(plComponent& inout_owner, plWorld* pWorld, plTypeScriptBinding& inout_binding);
 
-  virtual void ApplyParameters(const plArrayMap<plHashedString, plVariant>& parameters) override;
+  virtual void SetInstanceVariables(const plArrayMap<plHashedString, plVariant>& parameters) override;
+  virtual void SetInstanceVariable(const plHashedString& sName, const plVariant& value) override;
+  virtual plVariant GetInstanceVariable(const plHashedString& sName) override;
 
   plTypeScriptBinding& GetBinding() { return m_Binding; }
 
@@ -21,10 +23,10 @@ private:
   plTypeScriptBinding& m_Binding;
 };
 
-class PLASMA_TYPESCRIPTPLUGIN_DLL plTypeScriptClassResource : public plScriptClassResource
+class PL_TYPESCRIPTPLUGIN_DLL plTypeScriptClassResource : public plScriptClassResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeScriptClassResource, plScriptClassResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plTypeScriptClassResource);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeScriptClassResource, plScriptClassResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plTypeScriptClassResource);
 
 public:
   plTypeScriptClassResource();

@@ -6,9 +6,9 @@
 
 using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResource>;
 
-struct PLASMA_PARTICLEPLUGIN_DLL plQuadParticleOrientation
+struct PL_PARTICLEPLUGIN_DLL plQuadParticleOrientation
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -28,20 +28,20 @@ struct PLASMA_PARTICLEPLUGIN_DLL plQuadParticleOrientation
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plQuadParticleOrientation);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plQuadParticleOrientation);
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeQuadFactory final : public plParticleTypeFactory
+class PL_PARTICLEPLUGIN_DLL plParticleTypeQuadFactory final : public plParticleTypeFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeQuadFactory, plParticleTypeFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeQuadFactory, plParticleTypeFactory);
 
 public:
   virtual const plRTTI* GetTypeType() const override;
   virtual void CopyTypeProperties(plParticleType* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
   plEnum<plQuadParticleOrientation> m_Orientation;
   plAngle m_MaxDeviation;
@@ -56,9 +56,9 @@ public:
   float m_fStretch = 1;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeQuad final : public plParticleType
+class PL_PARTICLEPLUGIN_DLL plParticleTypeQuad final : public plParticleType
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeQuad, plParticleType);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeQuad, plParticleType);
 
 public:
   plParticleTypeQuad();
@@ -78,11 +78,11 @@ public:
   float m_fDistortionStrength = 0;
   float m_fStretch = 1;
 
-  virtual void ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const override;
+  virtual void ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const override;
 
   struct sod
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     float dist;
     plUInt32 index;

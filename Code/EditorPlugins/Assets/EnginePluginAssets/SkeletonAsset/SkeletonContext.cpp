@@ -8,23 +8,23 @@
 #include <RendererCore/AnimationSystem/SkeletonPoseComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonContext, 1, plRTTIDefaultAllocator<plSkeletonContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonContext, 1, plRTTIDefaultAllocator<plSkeletonContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Skeleton"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Skeleton"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSkeletonContext::plSkeletonContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
 }
 
-void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocMsg)
+void plSkeletonContext::HandleMessage(const plEditorEngineDocumentMsg* pDocMsg)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pDocMsg))
   {
@@ -44,7 +44,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "HighlightBones")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -54,7 +54,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "RenderBones")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -73,7 +73,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "RenderColliders")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -83,7 +83,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "RenderJoints")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -93,7 +93,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "RenderSwingLimits")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -103,7 +103,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
     else if (pMsg->m_sWhatToDo == "RenderTwistLimits")
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plSkeletonComponent* pSkeleton = nullptr;
       if (m_pWorld->TryGetComponent(m_hSkeletonComponent, pSkeleton))
@@ -116,7 +116,7 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
       m_sAnimatedMeshToUse = pMsg->m_sPayload;
 
       auto pWorld = m_pWorld;
-      PLASMA_LOCK(pWorld->GetWriteMarker());
+      PL_LOCK(pWorld->GetWriteMarker());
 
       plAnimatedMeshComponent* pAnimMesh;
       if (pWorld->TryGetComponent(m_hAnimMeshComponent, pAnimMesh))
@@ -140,13 +140,13 @@ void plSkeletonContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pDocM
     }
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pDocMsg);
+  plEngineProcessDocumentContext::HandleMessage(pDocMsg);
 }
 
 void plSkeletonContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
   plGameObjectDesc obj;
   plSkeletonComponent* pVisSkeleton;
@@ -171,17 +171,17 @@ void plSkeletonContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plSkeletonContext::CreateViewContext()
+plEngineProcessViewContext* plSkeletonContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plSkeletonViewContext, this);
+  return PL_DEFAULT_NEW(plSkeletonViewContext, this);
 }
 
-void plSkeletonContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plSkeletonContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plSkeletonContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plSkeletonContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   plBoundingBoxSphere bounds = GetWorldBounds(m_pWorld);
 
@@ -190,16 +190,15 @@ bool plSkeletonContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContex
 }
 
 
-void plSkeletonContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plSkeletonContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_pGameObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pGameObject->UpdateLocalBounds();
     m_pGameObject->UpdateGlobalTransformAndBounds();

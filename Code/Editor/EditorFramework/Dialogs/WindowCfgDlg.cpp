@@ -37,9 +37,6 @@ void plQtWindowCfgDlg::FillUI(const plWindowCreationDesc& desc)
   m_ComboMonitor->setCurrentIndex(plMath::Clamp<plInt32>(desc.m_iMonitor, -1, 5) + 1);
   m_ComboMode->setCurrentIndex(plMath::Clamp<plInt32>(desc.m_WindowMode, 0, 3));
 
-  m_SpinRenderResX->setValue(desc.m_RenderResolution.width);
-  m_SpinRenderResY->setValue(desc.m_RenderResolution.height);
-
   m_SpinResX->setValue(desc.m_Resolution.width);
   m_SpinResY->setValue(desc.m_Resolution.height);
 
@@ -58,8 +55,6 @@ void plQtWindowCfgDlg::GrabUI(plWindowCreationDesc& desc)
   desc.m_WindowMode = (plWindowMode::Enum)(m_ComboMode->currentIndex());
   desc.m_Resolution.width = m_SpinResX->value();
   desc.m_Resolution.height = m_SpinResY->value();
-  desc.m_RenderResolution.width = m_SpinRenderResX->value();
-  desc.m_RenderResolution.height = m_SpinRenderResY->value();
   desc.m_bClipMouseCursor = m_ClipMouseCursor->isChecked();
   desc.m_bShowMouseCursor = m_ShowMouseCursor->isChecked();
 }
@@ -71,8 +66,6 @@ void plQtWindowCfgDlg::UpdateUI()
   m_LineEditTitle->setEnabled(bEnable);
   m_ComboMonitor->setEnabled(bEnable);
   m_ComboMode->setEnabled(bEnable);
-  m_SpinRenderResX->setEnabled(bEnable);
-  m_SpinRenderResY->setEnabled(bEnable);
   m_SpinResX->setEnabled(bEnable);
   m_SpinResY->setEnabled(bEnable);
   m_ClipMouseCursor->setEnabled(bEnable);
@@ -88,7 +81,7 @@ void plQtWindowCfgDlg::LoadDescs()
     sPath = plToolsProject::GetSingleton()->GetProjectDirectory();
     sPath.AppendPath("RuntimeConfigs/Window.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
     plStringBuilder sOldPath = plToolsProject::GetSingleton()->GetProjectDirectory();
     sOldPath.AppendPath("Window.ddl");
     sPath = plFileSystem::MigrateFileLocation(sOldPath, sPath);
@@ -106,7 +99,7 @@ void plQtWindowCfgDlg::LoadDescs()
     sPath = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder();
     sPath.AppendPath("RuntimeConfigs/Window.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
     plStringBuilder sOldPath = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder();
     sOldPath.AppendPath("Window.ddl");
     sPath = plFileSystem::MigrateFileLocation(sOldPath, sPath);

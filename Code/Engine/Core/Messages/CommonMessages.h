@@ -5,17 +5,17 @@
 #include <Foundation/Communication/Message.h>
 
 /// \brief Common message for components that can be toggled between playing and paused states
-struct PLASMA_CORE_DLL plMsgSetPlaying : public plMessage
+struct PL_CORE_DLL plMsgSetPlaying : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgSetPlaying, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgSetPlaying, plMessage);
 
   bool m_bPlay = true;
 };
 
 /// \brief Basic message to set some generic parameter to a float value.
-struct PLASMA_CORE_DLL plMsgSetFloatParameter : public plMessage
+struct PL_CORE_DLL plMsgSetFloatParameter : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgSetFloatParameter, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgSetFloatParameter, plMessage);
 
   plString m_sParameterName;
   float m_fValue = 0;
@@ -25,9 +25,9 @@ struct PLASMA_CORE_DLL plMsgSetFloatParameter : public plMessage
 ///
 /// This is a simple message for simple use cases. Create custom messages for more elaborate cases where a string is not sufficient
 /// information.
-struct PLASMA_CORE_DLL plMsgGenericEvent : public plEventMessage
+struct PL_CORE_DLL plMsgGenericEvent : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgGenericEvent, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgGenericEvent, plEventMessage);
 
   /// A custom string to identify the intent.
   plHashedString m_sMessage;
@@ -38,7 +38,7 @@ struct PLASMA_CORE_DLL plMsgGenericEvent : public plEventMessage
 ///
 /// This is sent regardless of whether the animation is played once, looped or back and forth,
 /// ie. it should be sent at each 'end' point, even when it then starts another cycle.
-struct PLASMA_CORE_DLL plMsgAnimationReachedEnd : public plEventMessage
+struct PL_CORE_DLL plMsgAnimationReachedEnd : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgAnimationReachedEnd, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgAnimationReachedEnd, plEventMessage);
 };

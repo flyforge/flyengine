@@ -14,10 +14,14 @@ o
 			s{"LUTs/SmallHD Collection/SmallHD_MovieLook_LifeGivingTree.cube"}
 		}
 		Uuid %DocumentID{u4{13750660152849681054,5676041582293414866}}
-		u4 %Hash{17194131468663682503}
+		u4 %Hash{14540643014764333228}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %References{}
+		VarArray %PackageDeps{}
+		VarArray %References
+		{
+			s{"LUTs/SmallHD Collection/SmallHD_MovieLook_LifeGivingTree.cube"}
+		}
 	}
 }
 }
@@ -52,7 +56,7 @@ Types
 {
 o
 {
-	Uuid %id{u4{4367602513320318828,8214928659435322834}}
+	Uuid %id{u4{456227653629616071,1419043693188418745}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -61,16 +65,15 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plLUTAssetProperties"}
-		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -82,13 +85,12 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDocumentRoot"}
-		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -100,7 +102,6 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
-		u3 %TypeSize{8}
 		u3 %TypeVersion{1}
 	}
 }

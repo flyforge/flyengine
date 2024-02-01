@@ -1,6 +1,6 @@
 <RCC>
   <qresource prefix="GuiFoundation">
-    <file>PLASMA-logo.svg</file>
+    <file>PL-logo.svg</file>
     <file>Icons/Add.svg</file>
     <file>Icons/NoEntry.svg</file>
     <file>Icons/CVar.svg</file>

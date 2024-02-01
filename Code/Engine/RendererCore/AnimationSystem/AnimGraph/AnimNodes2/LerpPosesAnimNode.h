@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plLerpPosesAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLerpPosesAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLerpPosesAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLerpPosesAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

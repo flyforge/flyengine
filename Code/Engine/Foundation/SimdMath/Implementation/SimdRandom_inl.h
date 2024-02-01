@@ -1,7 +1,7 @@
 #pragma once
 
 // static
-PLASMA_FORCE_INLINE plSimdVec4u plSimdRandom::UInt(const plSimdVec4i& vPosition, const plSimdVec4u& vSeed /*= plSimdVec4u::ZeroVector()*/)
+PL_FORCE_INLINE plSimdVec4u plSimdRandom::UInt(const plSimdVec4i& vPosition, const plSimdVec4u& vSeed /*= plSimdVec4u::MakeZero()*/)
 {
   // Based on Squirrel3 which was introduced by Squirrel Eiserloh at 'Math for Game Programmers: Noise-Based RNG', GDC17.
   const plSimdVec4u BIT_NOISE1 = plSimdVec4u(0xb5297a4d);
@@ -21,13 +21,13 @@ PLASMA_FORCE_INLINE plSimdVec4u plSimdRandom::UInt(const plSimdVec4i& vPosition,
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdRandom::FloatZeroToOne(const plSimdVec4i& vPosition, const plSimdVec4u& vSeed /*= plSimdVec4u::ZeroVector()*/)
+PL_ALWAYS_INLINE plSimdVec4f plSimdRandom::FloatZeroToOne(const plSimdVec4i& vPosition, const plSimdVec4u& vSeed /*= plSimdVec4u::MakeZero()*/)
 {
   return UInt(vPosition, vSeed).ToFloat() * (1.0f / 4294967296.0f);
 }
 
 // static
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdRandom::FloatMinMax(const plSimdVec4i& vPosition, const plSimdVec4f& vMinValue, const plSimdVec4f& vMaxValue, const plSimdVec4u& vSeed /*= plSimdVec4u::ZeroVector()*/)
+PL_ALWAYS_INLINE plSimdVec4f plSimdRandom::FloatMinMax(const plSimdVec4i& vPosition, const plSimdVec4f& vMinValue, const plSimdVec4f& vMaxValue, const plSimdVec4u& vSeed /*= plSimdVec4u::MakeZero()*/)
 {
   return plSimdVec4f::Lerp(vMinValue, vMaxValue, FloatZeroToOne(vPosition, vSeed));
 }

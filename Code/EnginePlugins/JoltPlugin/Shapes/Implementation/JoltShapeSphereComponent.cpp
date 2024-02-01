@@ -9,26 +9,26 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltShapeSphereComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltShapeSphereComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plSphereManipulatorAttribute("Radius"),
     new plSphereVisualizerAttribute("Radius"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltShapeSphereComponent::plJoltShapeSphereComponent() = default;
@@ -54,7 +54,7 @@ void plJoltShapeSphereComponent::DeserializeComponent(plWorldReader& inout_strea
 
 void plJoltShapeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeSphereComponent::SetRadius(float f)
@@ -77,9 +77,9 @@ void plJoltShapeSphereComponent::CreateShapes(plDynamicArray<plJoltSubShape>& ou
 
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pNewShape;
-  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeSphereComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeSphereComponent);
 

@@ -4,7 +4,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Texture/Image/Formats/ImageFileFormat.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plImageFileFormat);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plImageFileFormat);
 
 plImageFileFormat* plImageFileFormat::GetReaderFormat(plStringView sExtension)
 {
@@ -34,32 +34,32 @@ plImageFileFormat* plImageFileFormat::GetWriterFormat(plStringView sExtension)
 
 plResult plImageFileFormat::ReadImageHeader(plStringView sFileName, plImageHeader& ref_header)
 {
-  PLASMA_LOG_BLOCK("Read Image Header", sFileName);
+  PL_LOG_BLOCK("Read Image Header", sFileName);
 
-  PLASMA_PROFILE_SCOPE(plPathUtils::GetFileNameAndExtension(sFileName).GetStartPointer());
+  PL_PROFILE_SCOPE(plPathUtils::GetFileNameAndExtension(sFileName).GetStartPointer());
 
   plFileReader reader;
-  if (reader.Open(sFileName) == PLASMA_FAILURE)
+  if (reader.Open(sFileName) == PL_FAILURE)
   {
     plLog::Warning("Failed to open image file '{0}'", plArgSensitive(sFileName, "File"));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringView it = plPathUtils::GetFileExtension(sFileName);
 
   if (plImageFileFormat* pFormat = plImageFileFormat::GetReaderFormat(it.GetStartPointer()))
   {
-    if (pFormat->ReadImageHeader(reader, ref_header, it.GetStartPointer()) != PLASMA_SUCCESS)
+    if (pFormat->ReadImageHeader(reader, ref_header, it.GetStartPointer()) != PL_SUCCESS)
     {
       plLog::Warning("Failed to read image file '{0}'", plArgSensitive(sFileName, "File"));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plLog::Warning("No known image file format for extension '{0}'", it);
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageFileFormat);
+

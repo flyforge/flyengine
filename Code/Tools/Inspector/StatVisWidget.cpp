@@ -72,7 +72,7 @@ plQtStatVisWidget::plQtStatVisWidget(QWidget* pParent, plInt32 iWindowNumber)
   m_ShowWindowAction.setCheckable(true);
 
   plStringBuilder sStatHistory;
-  sStatHistory.Format("StatHistory{0}", m_iWindowNumber);
+  sStatHistory.SetFormat("StatHistory{0}", m_iWindowNumber);
 
   QSettings Settings;
   Settings.beginGroup(sStatHistory.GetData());
@@ -81,7 +81,7 @@ plQtStatVisWidget::plQtStatVisWidget(QWidget* pParent, plInt32 iWindowNumber)
   SpinMax->setValue(Settings.value(QLatin1String("Max"), 1.0).toDouble());
   Settings.endGroup();
 
-  PLASMA_VERIFY(nullptr != QWidget::connect(&m_ShowWindowAction, SIGNAL(triggered()), this, SLOT(on_ToggleVisible())), "");
+  PL_VERIFY(nullptr != QWidget::connect(&m_ShowWindowAction, SIGNAL(triggered()), this, SLOT(on_ToggleVisible())), "");
 }
 
 
@@ -104,7 +104,7 @@ void plQtStatVisWidget::on_ComboTimeframe_currentIndexChanged(int index)
 void plQtStatVisWidget::on_LineName_textChanged(const QString& text)
 {
   plStringBuilder sStatHistory;
-  sStatHistory.Format("StatHistory{0}", m_iWindowNumber);
+  sStatHistory.SetFormat("StatHistory{0}", m_iWindowNumber);
 
   QSettings Settings;
   Settings.beginGroup(sStatHistory.GetData());
@@ -118,7 +118,7 @@ void plQtStatVisWidget::on_LineName_textChanged(const QString& text)
 void plQtStatVisWidget::on_SpinMin_valueChanged(double val)
 {
   plStringBuilder sStatHistory;
-  sStatHistory.Format("StatHistory{0}", m_iWindowNumber);
+  sStatHistory.SetFormat("StatHistory{0}", m_iWindowNumber);
 
   QSettings Settings;
   Settings.beginGroup(sStatHistory.GetData());
@@ -129,7 +129,7 @@ void plQtStatVisWidget::on_SpinMin_valueChanged(double val)
 void plQtStatVisWidget::on_SpinMax_valueChanged(double val)
 {
   plStringBuilder sStatHistory;
-  sStatHistory.Format("StatHistory{0}", m_iWindowNumber);
+  sStatHistory.SetFormat("StatHistory{0}", m_iWindowNumber);
 
   QSettings Settings;
   Settings.beginGroup(sStatHistory.GetData());
@@ -169,7 +169,7 @@ void plQtStatVisWidget::on_ButtonRemove_clicked()
 void plQtStatVisWidget::Save()
 {
   plStringBuilder sStatHistory;
-  sStatHistory.Format("/StatWindow{0}.stats", m_iWindowNumber);
+  sStatHistory.SetFormat("/StatWindow{0}.stats", m_iWindowNumber);
 
   QString sFile = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QDir dir;
@@ -199,7 +199,7 @@ void plQtStatVisWidget::Save()
 void plQtStatVisWidget::Load()
 {
   plStringBuilder sStatHistory;
-  sStatHistory.Format("/StatWindow{0}.stats", m_iWindowNumber);
+  sStatHistory.SetFormat("/StatWindow{0}.stats", m_iWindowNumber);
 
   QString sFile = QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation);
   QDir dir;

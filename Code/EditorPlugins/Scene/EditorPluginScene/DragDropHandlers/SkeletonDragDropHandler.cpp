@@ -5,8 +5,8 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonComponentDragDropHandler, 1, plRTTIDefaultAllocator<plSkeletonComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonComponentDragDropHandler, 1, plRTTIDefaultAllocator<plSkeletonComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plSkeletonComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
 {

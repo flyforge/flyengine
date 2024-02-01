@@ -12,11 +12,11 @@ class plVariantTypeInfo;
 
 /// \brief Variant type registry allows for custom variant type infos to be accessed.
 ///
-/// Custom variant types are defined via the PLASMA_DECLARE_CUSTOM_VARIANT_TYPE and PLASMA_DEFINE_CUSTOM_VARIANT_TYPE macros.
-/// \sa PLASMA_DECLARE_CUSTOM_VARIANT_TYPE, PLASMA_DEFINE_CUSTOM_VARIANT_TYPE
-class PLASMA_FOUNDATION_DLL plVariantTypeRegistry
+/// Custom variant types are defined via the PL_DECLARE_CUSTOM_VARIANT_TYPE and PL_DEFINE_CUSTOM_VARIANT_TYPE macros.
+/// \sa PL_DECLARE_CUSTOM_VARIANT_TYPE, PL_DEFINE_CUSTOM_VARIANT_TYPE
+class PL_FOUNDATION_DLL plVariantTypeRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plVariantTypeRegistry);
+  PL_DECLARE_SINGLETON(plVariantTypeRegistry);
 
 public:
   /// \brief Find the variant type info for the given plRTTI type.
@@ -25,7 +25,7 @@ public:
   ~plVariantTypeRegistry();
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, VariantTypeRegistry);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, VariantTypeRegistry);
   plVariantTypeRegistry();
 
   void PluginEventHandler(const plPluginEvent& EventData);
@@ -35,8 +35,8 @@ private:
 };
 
 /// \brief Defines functions to allow the full feature set of plVariant to be used.
-/// \sa PLASMA_DEFINE_CUSTOM_VARIANT_TYPE, plVariantTypeRegistry
-class PLASMA_FOUNDATION_DLL plVariantTypeInfo : public plEnumerable<plVariantTypeInfo>
+/// \sa PL_DEFINE_CUSTOM_VARIANT_TYPE, plVariantTypeRegistry
+class PL_FOUNDATION_DLL plVariantTypeInfo : public plEnumerable<plVariantTypeInfo>
 {
 public:
   plVariantTypeInfo();
@@ -46,11 +46,11 @@ public:
   virtual void Serialize(plStreamWriter& ref_writer, const void* pObject) const = 0;
   virtual void Deserialize(plStreamReader& ref_reader, void* pObject) const = 0;
 
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plVariantTypeInfo);
+  PL_DECLARE_ENUMERABLE_CLASS(plVariantTypeInfo);
 };
 
-/// \brief Helper template used by PLASMA_DEFINE_CUSTOM_VARIANT_TYPE.
-/// \sa PLASMA_DEFINE_CUSTOM_VARIANT_TYPE
+/// \brief Helper template used by PL_DEFINE_CUSTOM_VARIANT_TYPE.
+/// \sa PL_DEFINE_CUSTOM_VARIANT_TYPE
 template <typename T>
 class plVariantTypeInfoT : public plVariantTypeInfo
 {
@@ -81,7 +81,7 @@ class plVariantTypeInfoT : public plVariantTypeInfo
 /// The given type must implement plHashHelper and plStreamWriter / plStreamReader operators.
 /// Macros should be placed in any cpp. Note that once a custom type is defined, it is considered a value type and will be passed by value. It must be linked into every editor and engine dll to allow serialization. Thus it should only be used for common types in base libraries.
 /// Limitations: Currently only member variables are supported on custom types, no arrays, set, maps etc. For best performance, any custom type smaller than 16 bytes should be POD so it can be inlined into the plVariant.
-/// \sa PLASMA_DECLARE_CUSTOM_VARIANT_TYPE, plVariantTypeRegistry, plVariant
-#define PLASMA_DEFINE_CUSTOM_VARIANT_TYPE(TYPE)                                                                                                                                       \
-  PLASMA_CHECK_AT_COMPILETIME_MSG(plVariantTypeDeduction<TYPE>::value == plVariantType::TypedObject, "PLASMA_DECLARE_CUSTOM_VARIANT_TYPE needs to be added to the header defining TYPE"); \
+/// \sa PL_DECLARE_CUSTOM_VARIANT_TYPE, plVariantTypeRegistry, plVariant
+#define PL_DEFINE_CUSTOM_VARIANT_TYPE(TYPE)                                                                                                                                       \
+  PL_CHECK_AT_COMPILETIME_MSG(plVariantTypeDeduction<TYPE>::value == plVariantType::TypedObject, "PL_DECLARE_CUSTOM_VARIANT_TYPE needs to be added to the header defining TYPE"); \
   plVariantTypeInfoT<TYPE> g_plVariantTypeInfoT_##TYPE;

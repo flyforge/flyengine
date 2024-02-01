@@ -20,18 +20,18 @@ public:
     KEY key;
     VALUE value;
 
-    PLASMA_DETECT_TYPE_CLASS(KEY, VALUE);
+    PL_DETECT_TYPE_CLASS(KEY, VALUE);
 
-    PLASMA_ALWAYS_INLINE bool operator<(const Pair& rhs) const { return key < rhs.key; }
+    PL_ALWAYS_INLINE bool operator<(const Pair& rhs) const { return key < rhs.key; }
 
-    PLASMA_ALWAYS_INLINE bool operator==(const Pair& rhs) const { return key == rhs.key; }
+    PL_ALWAYS_INLINE bool operator==(const Pair& rhs) const { return key == rhs.key; }
   };
 
   /// \brief Constructor.
-  explicit plArrayMapBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plArrayMapBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Copy-Constructor.
-  plArrayMapBase(const plArrayMapBase& rhs, plAllocatorBase* pAllocator); // [tested]
+  plArrayMapBase(const plArrayMapBase& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Copy assignment operator.
   void operator=(const plArrayMapBase& rhs); // [tested]
@@ -128,9 +128,7 @@ public:
 
   /// \brief Compares the two containers for equality.
   bool operator==(const plArrayMapBase<KEY, VALUE>& rhs) const; // [tested]
-
-  /// \brief Compares the two containers for equality.
-  bool operator!=(const plArrayMapBase<KEY, VALUE>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plArrayMapBase<KEY, VALUE>&);
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const { return m_Data.GetHeapMemoryUsage(); } // [tested]
@@ -149,11 +147,11 @@ private:
 template <typename KEY, typename VALUE, typename AllocatorWrapper = plDefaultAllocatorWrapper>
 class plArrayMap : public plArrayMapBase<KEY, VALUE>
 {
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
 public:
   plArrayMap();
-  explicit plArrayMap(plAllocatorBase* pAllocator);
+  explicit plArrayMap(plAllocator* pAllocator);
 
   plArrayMap(const plArrayMap<KEY, VALUE, AllocatorWrapper>& rhs);
   plArrayMap(const plArrayMapBase<KEY, VALUE>& rhs);

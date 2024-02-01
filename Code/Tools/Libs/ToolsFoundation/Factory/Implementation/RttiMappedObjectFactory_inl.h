@@ -1,19 +1,15 @@
 
 
 template <typename Object>
-plRttiMappedObjectFactory<Object>::plRttiMappedObjectFactory()
-{
-}
+plRttiMappedObjectFactory<Object>::plRttiMappedObjectFactory() = default;
 
 template <typename Object>
-plRttiMappedObjectFactory<Object>::~plRttiMappedObjectFactory()
-{
-}
+plRttiMappedObjectFactory<Object>::~plRttiMappedObjectFactory() = default;
 
 template <typename Object>
 void plRttiMappedObjectFactory<Object>::RegisterCreator(const plRTTI* pType, CreateObjectFunc creator)
 {
-  PLASMA_ASSERT_DEV(!m_Creators.Contains(pType), "Type already registered.");
+  PL_ASSERT_DEV(!m_Creators.Contains(pType), "Type already registered.");
 
   m_Creators.Insert(pType, creator);
   Event e;
@@ -25,7 +21,7 @@ void plRttiMappedObjectFactory<Object>::RegisterCreator(const plRTTI* pType, Cre
 template <typename Object>
 void plRttiMappedObjectFactory<Object>::UnregisterCreator(const plRTTI* pType)
 {
-  PLASMA_ASSERT_DEV(m_Creators.Contains(pType), "Type was never registered.");
+  PL_ASSERT_DEV(m_Creators.Contains(pType), "Type was never registered.");
   m_Creators.Remove(pType);
 
   Event e;

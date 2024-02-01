@@ -10,7 +10,7 @@ struct const_iterator_base
 public:
   using iterator_category = std::random_access_iterator_tag;
   using value_type = T;
-  using difference_type = ptrdiff_t;
+  using difference_type = std::ptrdiff_t;
   using pointer = const T*;
   using reference = const T&;
 
@@ -25,38 +25,38 @@ public:
     m_uiIndex = uiIndex;
   }
 
-  PLASMA_ALWAYS_INLINE const_iterator_base& operator++()
+  PL_ALWAYS_INLINE const_iterator_base& operator++()
   {
     m_uiIndex += 1;
     return *this;
   }
-  PLASMA_ALWAYS_INLINE const_iterator_base& operator--()
+  PL_ALWAYS_INLINE const_iterator_base& operator--()
   {
     m_uiIndex -= 1;
     return *this;
   }
 
-  PLASMA_ALWAYS_INLINE const_iterator_base operator++(int)
+  PL_ALWAYS_INLINE const_iterator_base operator++(int)
   {
     m_uiIndex += 1;
     return const_iterator_base(*m_pArray, m_uiIndex - 1);
   }
-  PLASMA_ALWAYS_INLINE const_iterator_base operator--(int)
+  PL_ALWAYS_INLINE const_iterator_base operator--(int)
   {
     m_uiIndex -= 1;
     return const_iterator_base(*m_pArray, m_uiIndex + 1);
   }
 
-  PLASMA_ALWAYS_INLINE bool operator==(const const_iterator_base& rhs) const { return m_pArray == rhs.m_pArray && m_uiIndex == rhs.m_uiIndex; }
-  PLASMA_ALWAYS_INLINE bool operator!=(const const_iterator_base& rhs) const { return !(*this == rhs); }
+  PL_ALWAYS_INLINE bool operator==(const const_iterator_base& rhs) const { return m_pArray == rhs.m_pArray && m_uiIndex == rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE bool operator!=(const const_iterator_base& rhs) const { return !(*this == rhs); }
 
-  PLASMA_ALWAYS_INLINE ptrdiff_t operator-(const const_iterator_base& rhs) const { return m_uiIndex - rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE std::ptrdiff_t operator-(const const_iterator_base& rhs) const { return m_uiIndex - rhs.m_uiIndex; }
 
-  PLASMA_ALWAYS_INLINE const_iterator_base operator+(ptrdiff_t rhs) const { return const_iterator_base(*m_pArray, m_uiIndex + rhs); }
-  PLASMA_ALWAYS_INLINE const_iterator_base operator-(ptrdiff_t rhs) const { return const_iterator_base(*m_pArray, m_uiIndex - rhs); }
+  PL_ALWAYS_INLINE const_iterator_base operator+(std::ptrdiff_t rhs) const { return const_iterator_base(*m_pArray, m_uiIndex + rhs); }
+  PL_ALWAYS_INLINE const_iterator_base operator-(std::ptrdiff_t rhs) const { return const_iterator_base(*m_pArray, m_uiIndex - rhs); }
 
-  PLASMA_ALWAYS_INLINE void operator+=(ptrdiff_t rhs) { m_uiIndex += rhs; }
-  PLASMA_ALWAYS_INLINE void operator-=(ptrdiff_t rhs) { m_uiIndex -= rhs; }
+  PL_ALWAYS_INLINE void operator+=(std::ptrdiff_t rhs) { m_uiIndex += rhs; }
+  PL_ALWAYS_INLINE void operator-=(std::ptrdiff_t rhs) { m_uiIndex -= rhs; }
 
   inline const T& operator*() const
   {
@@ -65,14 +65,14 @@ public:
     else
       return (*m_pArray)[(plUInt32)m_uiIndex];
   }
-  PLASMA_ALWAYS_INLINE const T* operator->() const { return &(**this); }
+  PL_ALWAYS_INLINE const T* operator->() const { return &(**this); }
 
-  PLASMA_ALWAYS_INLINE bool operator<(const const_iterator_base& rhs) const { return m_uiIndex < rhs.m_uiIndex; }
-  PLASMA_ALWAYS_INLINE bool operator>(const const_iterator_base& rhs) const { return m_uiIndex > rhs.m_uiIndex; }
-  PLASMA_ALWAYS_INLINE bool operator<=(const const_iterator_base& rhs) const { return m_uiIndex <= rhs.m_uiIndex; }
-  PLASMA_ALWAYS_INLINE bool operator>=(const const_iterator_base& rhs) const { return m_uiIndex >= rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE bool operator<(const const_iterator_base& rhs) const { return m_uiIndex < rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE bool operator>(const const_iterator_base& rhs) const { return m_uiIndex > rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE bool operator<=(const const_iterator_base& rhs) const { return m_uiIndex <= rhs.m_uiIndex; }
+  PL_ALWAYS_INLINE bool operator>=(const const_iterator_base& rhs) const { return m_uiIndex >= rhs.m_uiIndex; }
 
-  PLASMA_ALWAYS_INLINE const T& operator[](size_t uiIndex) const
+  PL_ALWAYS_INLINE const T& operator[](size_t uiIndex) const
   {
     if (reverse)
       return (*m_pArray)[m_pArray->GetCount() - static_cast<plUInt32>(m_uiIndex + uiIndex) - 1];
@@ -99,23 +99,23 @@ public:
   {
   }
 
-  PLASMA_ALWAYS_INLINE iterator_base& operator++()
+  PL_ALWAYS_INLINE iterator_base& operator++()
   {
     this->m_uiIndex += 1;
     return *this;
   }
-  PLASMA_ALWAYS_INLINE iterator_base& operator--()
+  PL_ALWAYS_INLINE iterator_base& operator--()
   {
     this->m_uiIndex -= 1;
     return *this;
   }
 
-  PLASMA_ALWAYS_INLINE iterator_base operator++(int)
+  PL_ALWAYS_INLINE iterator_base operator++(int)
   {
     this->m_uiIndex += 1;
     return iterator_base(*this->m_pArray, this->m_uiIndex - 1);
   }
-  PLASMA_ALWAYS_INLINE iterator_base operator--(int)
+  PL_ALWAYS_INLINE iterator_base operator--(int)
   {
     this->m_uiIndex -= 1;
     return iterator_base(*this->m_pArray, this->m_uiIndex + 1);
@@ -124,8 +124,8 @@ public:
   using const_iterator_base<ARRAY, T, reverse>::operator+;
   using const_iterator_base<ARRAY, T, reverse>::operator-;
 
-  PLASMA_ALWAYS_INLINE iterator_base operator+(ptrdiff_t rhs) const { return iterator_base(*this->m_pArray, this->m_uiIndex + rhs); }
-  PLASMA_ALWAYS_INLINE iterator_base operator-(ptrdiff_t rhs) const { return iterator_base(*this->m_pArray, this->m_uiIndex - rhs); }
+  PL_ALWAYS_INLINE iterator_base operator+(std::ptrdiff_t rhs) const { return iterator_base(*this->m_pArray, this->m_uiIndex + rhs); }
+  PL_ALWAYS_INLINE iterator_base operator-(std::ptrdiff_t rhs) const { return iterator_base(*this->m_pArray, this->m_uiIndex - rhs); }
 
   inline T& operator*() const
   {
@@ -135,9 +135,9 @@ public:
       return (*this->m_pArray)[(plUInt32)this->m_uiIndex];
   }
 
-  PLASMA_ALWAYS_INLINE T* operator->() const { return &(**this); }
+  PL_ALWAYS_INLINE T* operator->() const { return &(**this); }
 
-  PLASMA_ALWAYS_INLINE T& operator[](size_t uiIndex) const
+  PL_ALWAYS_INLINE T& operator[](size_t uiIndex) const
   {
     if (reverse)
       return (*this->m_pArray)[this->m_pArray->GetCount() - static_cast<plUInt32>(this->m_uiIndex + uiIndex) - 1];
@@ -153,7 +153,7 @@ struct const_reverse_pointer_iterator
 public:
   using iterator_category = std::random_access_iterator_tag;
   using value_type = T;
-  using difference_type = ptrdiff_t;
+  using difference_type = std::ptrdiff_t;
   using pointer = T*;
   using reference = T&;
 
@@ -163,48 +163,48 @@ public:
   {
   }
 
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator& operator++()
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator& operator++()
   {
     m_pPtr--;
     return *this;
   }
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator& operator--()
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator& operator--()
   {
     m_pPtr++;
     return *this;
   }
 
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator operator++(int)
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator operator++(int)
   {
     m_pPtr--;
     return const_reverse_pointer_iterator(m_pPtr + 1);
   }
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator operator--(int)
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator operator--(int)
   {
     m_pPtr++;
     return const_reverse_pointer_iterator(m_pPtr - 1);
   }
 
-  PLASMA_ALWAYS_INLINE bool operator==(const const_reverse_pointer_iterator& rhs) const { return m_pPtr == rhs.m_pPtr; }
-  PLASMA_ALWAYS_INLINE bool operator!=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr != rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator==(const const_reverse_pointer_iterator& rhs) const { return m_pPtr == rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator!=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr != rhs.m_pPtr; }
 
-  PLASMA_ALWAYS_INLINE ptrdiff_t operator-(const const_reverse_pointer_iterator& rhs) const { return rhs.m_pPtr - m_pPtr; }
+  PL_ALWAYS_INLINE std::ptrdiff_t operator-(const const_reverse_pointer_iterator& rhs) const { return rhs.m_pPtr - m_pPtr; }
 
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator operator+(ptrdiff_t rhs) const { return const_reverse_pointer_iterator(m_pPtr - rhs); }
-  PLASMA_ALWAYS_INLINE const_reverse_pointer_iterator operator-(ptrdiff_t rhs) const { return const_reverse_pointer_iterator(m_pPtr + rhs); }
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator operator+(std::ptrdiff_t rhs) const { return const_reverse_pointer_iterator(m_pPtr - rhs); }
+  PL_ALWAYS_INLINE const_reverse_pointer_iterator operator-(std::ptrdiff_t rhs) const { return const_reverse_pointer_iterator(m_pPtr + rhs); }
 
-  PLASMA_ALWAYS_INLINE void operator+=(ptrdiff_t rhs) { m_pPtr -= rhs; }
-  PLASMA_ALWAYS_INLINE void operator-=(ptrdiff_t rhs) { m_pPtr += rhs; }
+  PL_ALWAYS_INLINE void operator+=(std::ptrdiff_t rhs) { m_pPtr -= rhs; }
+  PL_ALWAYS_INLINE void operator-=(std::ptrdiff_t rhs) { m_pPtr += rhs; }
 
-  PLASMA_ALWAYS_INLINE const T& operator*() const { return *m_pPtr; }
-  PLASMA_ALWAYS_INLINE const T* operator->() const { return m_pPtr; }
+  PL_ALWAYS_INLINE const T& operator*() const { return *m_pPtr; }
+  PL_ALWAYS_INLINE const T* operator->() const { return m_pPtr; }
 
-  PLASMA_ALWAYS_INLINE bool operator<(const const_reverse_pointer_iterator& rhs) const { return m_pPtr > rhs.m_pPtr; }
-  PLASMA_ALWAYS_INLINE bool operator>(const const_reverse_pointer_iterator& rhs) const { return m_pPtr < rhs.m_pPtr; }
-  PLASMA_ALWAYS_INLINE bool operator<=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr >= rhs.m_pPtr; }
-  PLASMA_ALWAYS_INLINE bool operator>=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr <= rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator<(const const_reverse_pointer_iterator& rhs) const { return m_pPtr > rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator>(const const_reverse_pointer_iterator& rhs) const { return m_pPtr < rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator<=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr >= rhs.m_pPtr; }
+  PL_ALWAYS_INLINE bool operator>=(const const_reverse_pointer_iterator& rhs) const { return m_pPtr <= rhs.m_pPtr; }
 
-  PLASMA_ALWAYS_INLINE const T& operator[](ptrdiff_t iIndex) const { return *(m_pPtr - iIndex); }
+  PL_ALWAYS_INLINE const T& operator[](std::ptrdiff_t index) const { return *(m_pPtr - index); }
 
 protected:
   T* m_pPtr;
@@ -224,23 +224,23 @@ public:
   {
   }
 
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator& operator++()
+  PL_ALWAYS_INLINE reverse_pointer_iterator& operator++()
   {
     this->m_pPtr--;
     return *this;
   }
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator& operator--()
+  PL_ALWAYS_INLINE reverse_pointer_iterator& operator--()
   {
     this->m_pPtr++;
     return *this;
   }
 
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator operator++(int)
+  PL_ALWAYS_INLINE reverse_pointer_iterator operator++(int)
   {
     this->m_pPtr--;
     return reverse_pointer_iterator(this->m_pPtr + 1);
   }
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator operator--(int)
+  PL_ALWAYS_INLINE reverse_pointer_iterator operator--(int)
   {
     this->m_pPtr++;
     return reverse_pointer_iterator(this->m_pPtr - 1);
@@ -249,10 +249,10 @@ public:
   using const_reverse_pointer_iterator<T>::operator+;
   using const_reverse_pointer_iterator<T>::operator-;
 
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator operator+(ptrdiff_t rhs) const { return reverse_pointer_iterator(this->m_pPtr - rhs); }
-  PLASMA_ALWAYS_INLINE reverse_pointer_iterator operator-(ptrdiff_t rhs) const { return reverse_pointer_iterator(this->m_pPtr + rhs); }
+  PL_ALWAYS_INLINE reverse_pointer_iterator operator+(std::ptrdiff_t rhs) const { return reverse_pointer_iterator(this->m_pPtr - rhs); }
+  PL_ALWAYS_INLINE reverse_pointer_iterator operator-(std::ptrdiff_t rhs) const { return reverse_pointer_iterator(this->m_pPtr + rhs); }
 
-  PLASMA_ALWAYS_INLINE T& operator*() const { return *(this->m_pPtr); }
-  PLASMA_ALWAYS_INLINE T* operator->() const { return this->m_pPtr; }
-  PLASMA_ALWAYS_INLINE T& operator[](ptrdiff_t iIndex) const { return *(this->m_pPtr - iIndex); }
+  PL_ALWAYS_INLINE T& operator*() const { return *(this->m_pPtr); }
+  PL_ALWAYS_INLINE T* operator->() const { return this->m_pPtr; }
+  PL_ALWAYS_INLINE T& operator[](std::ptrdiff_t index) const { return *(this->m_pPtr - index); }
 };

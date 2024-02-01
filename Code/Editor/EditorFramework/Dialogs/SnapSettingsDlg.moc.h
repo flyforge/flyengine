@@ -10,7 +10,7 @@ class plQtSnapSettingsDlg : public QDialog, public Ui_SnapSettingsDlg
   Q_OBJECT
 
 public:
-  plQtSnapSettingsDlg(QWidget* parent);
+  plQtSnapSettingsDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_ButtonBox_clicked(QAbstractButton* button);
@@ -18,7 +18,7 @@ private Q_SLOTS:
 private:
   struct KeyValue
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const char* m_szKey;
     float m_fValue;

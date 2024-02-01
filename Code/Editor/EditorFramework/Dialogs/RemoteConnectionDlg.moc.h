@@ -5,7 +5,7 @@
 #include <Foundation/Strings/String.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtRemoteConnectionDlg : public QDialog, public Ui_plQtRemoteConnectionDlg
+class PL_EDITORFRAMEWORK_DLL plQtRemoteConnectionDlg : public QDialog, public Ui_plQtRemoteConnectionDlg
 {
 public:
   Q_OBJECT
@@ -21,7 +21,7 @@ public:
   };
 
 public:
-  plQtRemoteConnectionDlg(QWidget* parent);
+  plQtRemoteConnectionDlg(QWidget* pParent);
   ~plQtRemoteConnectionDlg();
 
   Address m_UsedAddress;

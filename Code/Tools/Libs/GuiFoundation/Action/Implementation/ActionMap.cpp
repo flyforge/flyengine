@@ -6,41 +6,57 @@
 #include <ToolsFoundation/Reflection/PhantomRttiManager.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plActionMapDescriptor, plNoBase, 0, plRTTINoAllocator);
-//  PLASMA_BEGIN_PROPERTIES
-//  PLASMA_END_PROPERTIES;
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plActionMapDescriptor, plNoBase, 0, plRTTINoAllocator);
+//  PL_BEGIN_PROPERTIES
+//  PL_END_PROPERTIES;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
 // plActionMap public functions
 ////////////////////////////////////////////////////////////////////////
 
-plActionMap::plActionMap()
+plActionMap::plActionMap() = default;
+
+plActionMap::~plActionMap() = default;
+
+void plActionMap::MapAction(plActionDescriptorHandle hAction, plStringView sPath, plStringView sSubPath, float fOrder)
 {
-  // plReflectedTypeDescriptor desc;
-  // plToolsReflectionUtils::GetReflectedTypeDescriptorFromRtti(plGetStaticRTTI<plActionMapDescriptor>(), desc);
-  // m_pRtti = plPhantomRttiManager::RegisterType(desc);
+  plStringBuilder sFullPath = sPath;
+
+  if (!sPath.IsEmpty() && sPath.FindSubString("/") == nullptr)
+  {
+    if (SearchPathForAction(sPath, sFullPath).Failed())
+    {
+      sFullPath = sPath;
+    }
+  }
+
+  sFullPath.AppendPath(sSubPath);
+
+  MapAction(hAction, sFullPath, fOrder);
 }
 
-plActionMap::~plActionMap()
+void plActionMap::MapAction(plActionDescriptorHandle hAction, plStringView sPath, float fOrder)
 {
-  // DestroyAllObjects();
-}
-
-void plActionMap::MapAction(plActionDescriptorHandle hAction, const char* szPath, float fOrder)
-{
-  plStringBuilder sPath = szPath;
-  sPath.MakeCleanPath();
-  sPath.Trim("/");
+  plStringBuilder sCleanPath = sPath;
+  sCleanPath.MakeCleanPath();
+  sCleanPath.Trim("/");
   plActionMapDescriptor d;
   d.m_hAction = hAction;
-  d.m_sPath = sPath;
+  d.m_sPath = sCleanPath;
   d.m_fOrder = fOrder;
 
-  // Ignore for now as this will be resolved when new menu setup in finished
-  //PLASMA_VERIFY(MapAction(d).IsValid(), "Mapping Failed");
-  MapAction(d);
+  if (!d.m_sPath.IsEmpty() && d.m_sPath.FindSubString("/") == nullptr)
+  {
+    plStringBuilder sFullPath;
+    if (SearchPathForAction(d.m_sPath, sFullPath).Succeeded())
+    {
+      d.m_sPath = sFullPath;
+    }
+  }
+
+  PL_VERIFY(MapAction(d).IsValid(), "Mapping Failed");
 }
 
 plUuid plActionMap::MapAction(const plActionMapDescriptor& desc)
@@ -97,11 +113,12 @@ plUuid plActionMap::MapAction(const plActionMapDescriptor& desc)
   return pChild->GetGuid();
 }
 
+
 plResult plActionMap::UnmapAction(const plUuid& guid)
 {
   auto it = m_Descriptors.Find(guid);
   if (!it.IsValid())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plTreeNode<plActionMapDescriptor>* pNode = it.Value();
   if (plTreeNode<plActionMapDescriptor>* pParent = pNode->GetParent())
@@ -109,18 +126,28 @@ plResult plActionMap::UnmapAction(const plUuid& guid)
     pParent->RemoveChild(pNode->GetParentIndex());
   }
   m_Descriptors.Remove(it);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plActionMap::UnmapAction(plActionDescriptorHandle hAction, const char* szPath)
+plResult plActionMap::UnmapAction(plActionDescriptorHandle hAction, plStringView sPath)
 {
-  plStringBuilder sPath = szPath;
-  sPath.MakeCleanPath();
-  sPath.Trim("/");
+  plStringBuilder sCleanPath = sPath;
+  sCleanPath.MakeCleanPath();
+  sCleanPath.Trim("/");
   plActionMapDescriptor d;
   d.m_hAction = hAction;
-  d.m_sPath = sPath;
+  d.m_sPath = sCleanPath;
   d.m_fOrder = 0.0f; // unused.
+
+  if (!d.m_sPath.IsEmpty() && d.m_sPath.FindSubString("/") == nullptr)
+  {
+    plStringBuilder sFullPath;
+    if (SearchPathForAction(d.m_sPath, sFullPath).Succeeded())
+    {
+      d.m_sPath = sFullPath;
+    }
+  }
+
   return UnmapAction(d);
 }
 
@@ -135,11 +162,11 @@ plResult plActionMap::UnmapAction(const plActionMapDescriptor& desc)
   {
     plUuid ParentGUID;
     if (!FindObjectByPath(desc.m_sPath, ParentGUID))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     auto it = m_Descriptors.Find(ParentGUID);
     if (!it.IsValid())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     pParent = it.Value();
   }
@@ -148,10 +175,10 @@ plResult plActionMap::UnmapAction(const plActionMapDescriptor& desc)
   {
     return UnmapAction(pChild->GetGuid());
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-bool plActionMap::FindObjectByPath(const plStringView& sPath, plUuid& out_guid) const
+bool plActionMap::FindObjectByPath(plStringView sPath, plUuid& out_guid) const
 {
   out_guid = plUuid();
   if (sPath.IsEmpty())
@@ -173,6 +200,44 @@ bool plActionMap::FindObjectByPath(const plStringView& sPath, plUuid& out_guid) 
   return true;
 }
 
+plResult plActionMap::SearchPathForAction(plStringView sUniqueName, plStringBuilder& out_sPath) const
+{
+  out_sPath.Clear();
+
+  if (FindObjectPathByName(&m_Root, sUniqueName, out_sPath))
+  {
+    return PL_SUCCESS;
+  }
+
+  return PL_FAILURE;
+}
+
+bool plActionMap::FindObjectPathByName(const plTreeNode<plActionMapDescriptor>* pObject, plStringView sName, plStringBuilder& out_sPath) const
+{
+  plStringView sObjectName;
+
+  if (!pObject->m_Data.m_hAction.IsInvalidated())
+  {
+    sObjectName = pObject->m_Data.m_hAction.GetDescriptor()->m_sActionName;
+  }
+
+  out_sPath.AppendPath(sObjectName);
+
+  if (sObjectName == sName)
+    return true;
+
+  for (const plTreeNode<plActionMapDescriptor>* pChild : pObject->GetChildren())
+  {
+    const plActionMapDescriptor& pDesc = pChild->m_Data;
+
+    if (FindObjectPathByName(pChild, sName, out_sPath))
+      return true;
+  }
+
+  out_sPath.PathParentDirectory();
+  return false;
+}
+
 const plActionMapDescriptor* plActionMap::GetDescriptor(const plUuid& guid) const
 {
   auto it = m_Descriptors.Find(guid);
@@ -189,8 +254,7 @@ const plActionMapDescriptor* plActionMap::GetDescriptor(const plTreeNode<plActio
   return &pObject->m_Data;
 }
 
-const plTreeNode<plActionMapDescriptor>* plActionMap::GetChildByName(
-  const plTreeNode<plActionMapDescriptor>* pObject, const plStringView& sName) const
+const plTreeNode<plActionMapDescriptor>* plActionMap::GetChildByName(const plTreeNode<plActionMapDescriptor>* pObject, plStringView sName) const
 {
   for (const plTreeNode<plActionMapDescriptor>* pChild : pObject->GetChildren())
   {

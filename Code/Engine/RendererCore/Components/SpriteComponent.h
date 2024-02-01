@@ -10,7 +10,7 @@ using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResourc
 
 struct plSpriteBlendMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -25,11 +25,11 @@ struct plSpriteBlendMode
   static plTempHashedString GetPermutationValue(Enum blendMode);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plSpriteBlendMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plSpriteBlendMode);
 
-class PLASMA_RENDERERCORE_DLL plSpriteRenderData : public plRenderData
+class PL_RENDERERCORE_DLL plSpriteRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSpriteRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plSpriteRenderData, plRenderData);
 
 public:
   void FillBatchIdAndSortingKey();
@@ -49,11 +49,19 @@ public:
   plUInt32 m_uiUniqueID;
 };
 
-typedef plComponentManager<class plSpriteComponent, plBlockStorageType::Compact> plSpriteComponentManager;
+using plSpriteComponentManager = plComponentManager<class plSpriteComponent, plBlockStorageType::Compact>;
 
-class PLASMA_RENDERERCORE_DLL plSpriteComponent : public plRenderComponent
+/// \brief Renders a screen-oriented quad (billboard) with a maximum screen size.
+///
+/// This component is typically used to attach an icon to a game object.
+/// The sprite becomes smaller the farther away it is, but when you come closer, its screen size gets clamped to a fixed maximum.
+///
+/// It can also be used to render simple projectiles.
+///
+/// If you want to render a glow effect for a lightsource, use the plLensFlareComponent instead.
+class PL_RENDERERCORE_DLL plSpriteComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSpriteComponent, plRenderComponent, plSpriteComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSpriteComponent, plRenderComponent, plSpriteComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -62,13 +70,11 @@ public:
   virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
   virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-
   //////////////////////////////////////////////////////////////////////////
   // plRenderComponent
 
 public:
   virtual plResult GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg) override;
-
 
   //////////////////////////////////////////////////////////////////////////
   // plSpriteComponent
@@ -86,9 +92,11 @@ public:
   void SetColor(plColor color); // [ property ]
   plColor GetColor() const;     // [ property ]
 
+  /// \brief Sets the size of the sprite in world-space units. This determines how large the sprite will be at certain distances.
   void SetSize(float fSize); // [ property ]
   float GetSize() const;     // [ property ]
 
+  /// \brief Sets the maximum screen-space size in pixels. Once a sprite is close enough to have reached this size, it will not grow larger.
   void SetMaxScreenSize(float fSize); // [ property ]
   float GetMaxScreenSize() const;     // [ property ]
 

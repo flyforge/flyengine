@@ -6,7 +6,7 @@
 #include <Foundation/Containers/Map.h>
 
 /// \brief A struct that defines how to register an input action.
-struct PLASMA_CORE_DLL plInputActionConfig
+struct PL_CORE_DLL plInputActionConfig
 {
   /// \brief Change this value to adjust how many input slots may trigger the same action.
   enum
@@ -87,7 +87,7 @@ struct PLASMA_CORE_DLL plInputActionConfig
 /// changed. Although the input manager allows to query the state of each key, button, axis, etc. directly, this is not advised. Instead the
 /// user should set up 'actions' and define which keys will trigger those actions. At runtime the user should only query the state of
 /// actions. In the best case, an application allows the player to change the mapping which keys are used to trigger which actions.
-class PLASMA_CORE_DLL plInputManager
+class PL_CORE_DLL plInputManager
 {
 public:
   /// \brief Updates the state of the input manager. This should be called exactly once each frame.
@@ -342,7 +342,7 @@ private:
   static plActionMap::Iterator GetBestAction(plActionMap& Actions, const plString& sSlot, const plActionMap::Iterator& itFirst);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, InputManager);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, InputManager);
 
   static void DeallocateInternals();
   static InternalData& GetInternals();

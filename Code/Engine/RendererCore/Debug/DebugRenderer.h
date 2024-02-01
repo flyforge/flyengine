@@ -30,7 +30,7 @@ struct plDebugTextHAlign
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plDebugTextHAlign);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plDebugTextHAlign);
 
 /// \brief Vertical alignment of debug text
 struct plDebugTextVAlign
@@ -47,7 +47,7 @@ struct plDebugTextVAlign
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plDebugTextVAlign);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plDebugTextVAlign);
 
 /// \brief Screen placement of debug text
 struct plDebugTextPlacement
@@ -69,7 +69,7 @@ struct plDebugTextPlacement
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plDebugTextPlacement);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plDebugTextPlacement);
 
 /// \brief Draws simple shapes into the scene or view.
 ///
@@ -77,12 +77,12 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plDebugTextPlacement);
 /// The 'context' specifies whether shapes are generally visible in a scene, from all views,
 /// or specific to a single view. See the plDebugRendererContext constructors for what can be implicitly
 /// used as a context.
-class PLASMA_RENDERERCORE_DLL plDebugRenderer
+class PL_RENDERERCORE_DLL plDebugRenderer
 {
 public:
   struct Line
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     Line();
     Line(const plVec3& vStart, const plVec3& vEnd);
@@ -97,7 +97,7 @@ public:
 
   struct Triangle
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     Triangle();
     Triangle(const plVec3& v0, const plVec3& v1, const plVec3& v2);
@@ -108,7 +108,7 @@ public:
 
   struct TexturedTriangle
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_position[3];
     plVec2 m_texcoord[3];
@@ -116,31 +116,34 @@ public:
   };
 
   /// \brief Renders the given set of lines for one frame.
-  static void DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders the given set of lines in 2D (screen-space) for one frame.
   static void Draw2DLines(const plDebugRendererContext& context, plArrayPtr<const Line> lines, const plColor& color);
 
   /// \brief Renders a cross for one frame.
-  static void DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawCross(const plDebugRendererContext& context, const plVec3& vGlobalPosition, float fLineLength, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders a wireframe box for one frame.
-  static void DrawLineBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawLineBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders the corners of a wireframe box for one frame.
-  static void DrawLineBoxCorners(const plDebugRendererContext& context, const plBoundingBox& box, float fCornerFraction, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawLineBoxCorners(const plDebugRendererContext& context, const plBoundingBox& box, float fCornerFraction, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders a wireframe sphere for one frame.
-  static void DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawLineSphere(const plDebugRendererContext& context, const plBoundingSphere& sphere, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders an upright wireframe capsule for one frame.
-  static void DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawLineCapsuleZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
+
+  /// \brief Renders an upright wireframe cylinder for one frame.
+  static void DrawLineCylinderZ(const plDebugRendererContext& context, float fLength, float fRadius, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders a wireframe frustum for one frame.
   static void DrawLineFrustum(const plDebugRendererContext& context, const plFrustum& frustum, const plColor& color, bool bDrawPlaneNormals = false);
 
   /// \brief Renders a solid box for one frame.
-  static void DrawSolidBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::IdentityTransform());
+  static void DrawSolidBox(const plDebugRendererContext& context, const plBoundingBox& box, const plColor& color, const plTransform& transform = plTransform::MakeIdentity());
 
   /// \brief Renders the set of filled triangles for one frame.
   static void DrawSolidTriangles(const plDebugRendererContext& context, plArrayPtr<Triangle> triangles, const plColor& color);
@@ -199,10 +202,10 @@ public:
   /// The rotation goes around the given \a rotationAxis.
   /// An angle of zero is pointing into forwardAxis direction.
   /// Both angles may be negative.
-  static void DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis = plVec3::UnitXAxis(), plVec3 vRotationAxis = plVec3::UnitZAxis());
+  static void DrawAngle(const plDebugRendererContext& context, plAngle startAngle, plAngle endAngle, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, plVec3 vForwardAxis = plVec3::MakeAxisX(), plVec3 vRotationAxis = plVec3::MakeAxisZ());
 
   /// \brief Renders a cone with the tip at the center position, opening up with the given angle.
-  static void DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis = plVec3::UnitXAxis());
+  static void DrawOpeningCone(const plDebugRendererContext& context, plAngle halfAngle, const plColor& colorInside, const plColor& colorOutside, const plTransform& transform, plVec3 vForwardAxis = plVec3::MakeAxisX());
 
   /// \brief Renders a bent cone with the tip at the center position, pointing into the +X direction opening up with halfAngle1 and halfAngle2 along the Y and Z axis.
   ///
@@ -216,6 +219,9 @@ public:
   /// If the start and end radius are different, a cone or arrow can be created.
   static void DrawCylinder(const plDebugRendererContext& context, float fRadiusStart, float fRadiusEnd, float fLength, const plColor& solidColor, const plColor& lineColor, const plTransform& transform, bool bCapStart = false, bool bCapEnd = false);
 
+  /// \brief Renders a line arrow.
+  static void DrawArrow(const plDebugRendererContext& context, float fSize, const plColor& color, const plTransform& transform, plVec3 vForwardAxis = plVec3::MakeAxisX());
+
 private:
   friend class plSimpleRenderPass;
 
@@ -225,11 +231,11 @@ private:
   static void OnEngineStartup();
   static void OnEngineShutdown();
 
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, DebugRenderer);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, DebugRenderer);
 };
 
 /// \brief Helper class to expose debug rendering to scripting
-class PLASMA_RENDERERCORE_DLL plScriptExtensionClass_Debug
+class PL_RENDERERCORE_DLL plScriptExtensionClass_Debug
 {
 public:
   static void DrawCross(const plWorld* pWorld, const plVec3& vPosition, float fSize, const plColor& color, const plTransform& transform);
@@ -247,6 +253,6 @@ public:
   static void AddPersistentLineSphere(const plWorld* pWorld, const plVec3& vPosition, float fRadius, const plColor& color, const plTransform& transform, plTime duration);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plScriptExtensionClass_Debug);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plScriptExtensionClass_Debug);
 
 #include <RendererCore/Debug/Implementation/DebugRenderer_inl.h>

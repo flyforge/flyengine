@@ -9,9 +9,9 @@ class plWorld;
 class plGizmoComponent;
 class plGizmo;
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoHandle : public PlasmaEditorEngineSyncObject
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoHandle : public plEditorEngineSyncObject
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmoHandle, PlasmaEditorEngineSyncObject);
+  PL_ADD_DYNAMIC_REFLECTION(plGizmoHandle, plEditorEngineSyncObject);
 
 public:
   plGizmoHandle();
@@ -36,7 +36,7 @@ private:
 };
 
 
-enum PlasmaEngineGizmoHandleType
+enum plEngineGizmoHandleType
 {
   Arrow,
   Ring,
@@ -65,12 +65,12 @@ struct plGizmoFlags
   {
     Default = 0,
 
-    ConstantSize = PLASMA_BIT(0),
-    OnTop = PLASMA_BIT(1),
-    Visualizer = PLASMA_BIT(2),
-    ShowInOrtho = PLASMA_BIT(3),
-    Pickable = PLASMA_BIT(4),
-    FaceCamera = PLASMA_BIT(5),
+    ConstantSize = PL_BIT(0),
+    OnTop = PL_BIT(1),
+    Visualizer = PL_BIT(2),
+    ShowInOrtho = PL_BIT(3),
+    Pickable = PL_BIT(4),
+    FaceCamera = PL_BIT(5),
   };
 
   struct Bits
@@ -84,17 +84,17 @@ struct plGizmoFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plGizmoFlags);
+PL_DECLARE_FLAGS_OPERATORS(plGizmoFlags);
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineGizmoHandle : public plGizmoHandle
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineGizmoHandle : public plGizmoHandle
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEngineGizmoHandle, plGizmoHandle);
+  PL_ADD_DYNAMIC_REFLECTION(plEngineGizmoHandle, plGizmoHandle);
 
 public:
-  PlasmaEngineGizmoHandle();
-  ~PlasmaEngineGizmoHandle();
+  plEngineGizmoHandle();
+  ~plEngineGizmoHandle();
 
-  void ConfigureHandle(plGizmo* pParentGizmo, PlasmaEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh = nullptr);
+  void ConfigureHandle(plGizmo* pParentGizmo, plEngineGizmoHandleType type, const plColor& col, plBitflags<plGizmoFlags> flags, const char* szCustomMesh = nullptr);
 
   virtual bool SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID) override;
   virtual void UpdateForEngine(plWorld* pWorld) override;

@@ -1,21 +1,21 @@
 #pragma once
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plAmbientCube<T>::plAmbientCube()
+PL_ALWAYS_INLINE plAmbientCube<T>::plAmbientCube()
 {
   plMemoryUtils::ZeroFillArray(m_Values);
 }
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plAmbientCube<T>::plAmbientCube(const plAmbientCube<U>& other)
+PL_ALWAYS_INLINE plAmbientCube<T>::plAmbientCube(const plAmbientCube<U>& other)
 {
   *this = other;
 }
 
 template <typename T>
 template <typename U>
-PLASMA_FORCE_INLINE void plAmbientCube<T>::operator=(const plAmbientCube<U>& other)
+PL_FORCE_INLINE void plAmbientCube<T>::operator=(const plAmbientCube<U>& other)
 {
   for (plUInt32 i = 0; i < plAmbientCubeBasis::NumDirs; ++i)
   {
@@ -24,13 +24,13 @@ PLASMA_FORCE_INLINE void plAmbientCube<T>::operator=(const plAmbientCube<U>& oth
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE bool plAmbientCube<T>::operator==(const plAmbientCube& other) const
+PL_FORCE_INLINE bool plAmbientCube<T>::operator==(const plAmbientCube& other) const
 {
   return plMemoryUtils::IsEqual(m_Values, other.m_Values);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plAmbientCube<T>::operator!=(const plAmbientCube& other) const
+PL_ALWAYS_INLINE bool plAmbientCube<T>::operator!=(const plAmbientCube& other) const
 {
   return !(*this == other);
 }
@@ -52,13 +52,13 @@ T plAmbientCube<T>::Evaluate(const plVec3& vNormal) const
 }
 
 template <typename T>
-plResult plAmbientCube<T>::Serialize(plStreamWriter& stream) const
+plResult plAmbientCube<T>::Serialize(plStreamWriter& inout_stream) const
 {
-  return stream.WriteArray(m_Values);
+  return inout_stream.WriteArray(m_Values);
 }
 
 template <typename T>
-plResult plAmbientCube<T>::Deserialize(plStreamReader& stream)
+plResult plAmbientCube<T>::Deserialize(plStreamReader& inout_stream)
 {
-  return stream.ReadArray(m_Values);
+  return inout_stream.ReadArray(m_Values);
 }

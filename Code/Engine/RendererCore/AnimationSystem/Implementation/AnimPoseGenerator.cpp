@@ -34,17 +34,17 @@ void plAnimPoseGenerator::Reset(const plSkeletonResource* pSkeleton)
   // m_SamplingCaches.Clear();
 }
 
-static PLASMA_ALWAYS_INLINE plAnimPoseGeneratorCommandID CreateCommandID(plAnimPoseGeneratorCommandType type, plUInt32 uiIndex)
+static PL_ALWAYS_INLINE plAnimPoseGeneratorCommandID CreateCommandID(plAnimPoseGeneratorCommandType type, plUInt32 uiIndex)
 {
   return (static_cast<plUInt32>(type) << 24u) | uiIndex;
 }
 
-static PLASMA_ALWAYS_INLINE plUInt32 GetCommandIndex(plAnimPoseGeneratorCommandID id)
+static PL_ALWAYS_INLINE plUInt32 GetCommandIndex(plAnimPoseGeneratorCommandID id)
 {
   return static_cast<plUInt32>(id) & 0x00FFFFFFu;
 }
 
-static PLASMA_ALWAYS_INLINE plAnimPoseGeneratorCommandType GetCommandType(plAnimPoseGeneratorCommandID id)
+static PL_ALWAYS_INLINE plAnimPoseGeneratorCommandType GetCommandType(plAnimPoseGeneratorCommandID id)
 {
   return static_cast<plAnimPoseGeneratorCommandType>(static_cast<plUInt32>(id) >> 24u);
 }
@@ -114,61 +114,61 @@ plAnimPoseGenerator::~plAnimPoseGenerator()
 {
   for (plUInt32 i = 0; i < m_SamplingCaches.GetCount(); ++i)
   {
-    PLASMA_DEFAULT_DELETE(m_SamplingCaches.GetValue(i));
+    PL_DEFAULT_DELETE(m_SamplingCaches.GetValue(i));
   }
   m_SamplingCaches.Clear();
 }
 
 void plAnimPoseGenerator::Validate() const
 {
-  PLASMA_ASSERT_DEV(m_CommandsModelPoseToOutput.GetCount() <= 1, "Only one output node may exist");
+  PL_ASSERT_DEV(m_CommandsModelPoseToOutput.GetCount() <= 1, "Only one output node may exist");
 
   for (auto& cmd : m_CommandsSampleTrack)
   {
-    PLASMA_ASSERT_DEV(cmd.m_hAnimationClip.IsValid(), "Invalid animation clips are not allowed.");
-    // PLASMA_ASSERT_DEV(cmd.m_Inputs.IsEmpty(), "Track samplers can't have inputs.");
-    PLASMA_ASSERT_DEV(cmd.m_LocalPoseOutput != plInvalidIndex, "Output pose not allocated.");
+    PL_ASSERT_DEV(cmd.m_hAnimationClip.IsValid(), "Invalid animation clips are not allowed.");
+    // PL_ASSERT_DEV(cmd.m_Inputs.IsEmpty(), "Track samplers can't have inputs.");
+    PL_ASSERT_DEV(cmd.m_LocalPoseOutput != plInvalidIndex, "Output pose not allocated.");
   }
 
   for (auto& cmd : m_CommandsCombinePoses)
   {
-    // PLASMA_ASSERT_DEV(cmd.m_Inputs.GetCount() >= 1, "Must combine at least one pose.");
-    PLASMA_ASSERT_DEV(cmd.m_LocalPoseOutput != plInvalidIndex, "Output pose not allocated.");
-    PLASMA_ASSERT_DEV(cmd.m_Inputs.GetCount() == cmd.m_InputWeights.GetCount(), "Number of inputs and weights must match.");
+    // PL_ASSERT_DEV(cmd.m_Inputs.GetCount() >= 1, "Must combine at least one pose.");
+    PL_ASSERT_DEV(cmd.m_LocalPoseOutput != plInvalidIndex, "Output pose not allocated.");
+    PL_ASSERT_DEV(cmd.m_Inputs.GetCount() == cmd.m_InputWeights.GetCount(), "Number of inputs and weights must match.");
 
     for (auto id : cmd.m_Inputs)
     {
       auto type = GetCommand(id).GetType();
-      PLASMA_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::SampleTrack || type == plAnimPoseGeneratorCommandType::CombinePoses || type == plAnimPoseGeneratorCommandType::RestPose, "Unsupported input type");
+      PL_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::SampleTrack || type == plAnimPoseGeneratorCommandType::CombinePoses || type == plAnimPoseGeneratorCommandType::RestPose, "Unsupported input type");
     }
   }
 
   for (auto& cmd : m_CommandsLocalToModelPose)
   {
-    PLASMA_ASSERT_DEV(cmd.m_Inputs.GetCount() == 1, "Exactly one input must be provided.");
-    PLASMA_ASSERT_DEV(cmd.m_ModelPoseOutput != plInvalidIndex, "Output pose not allocated.");
+    PL_ASSERT_DEV(cmd.m_Inputs.GetCount() == 1, "Exactly one input must be provided.");
+    PL_ASSERT_DEV(cmd.m_ModelPoseOutput != plInvalidIndex, "Output pose not allocated.");
 
     for (auto id : cmd.m_Inputs)
     {
       auto type = GetCommand(id).GetType();
-      PLASMA_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::SampleTrack || type == plAnimPoseGeneratorCommandType::CombinePoses || type == plAnimPoseGeneratorCommandType::RestPose, "Unsupported input type");
+      PL_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::SampleTrack || type == plAnimPoseGeneratorCommandType::CombinePoses || type == plAnimPoseGeneratorCommandType::RestPose, "Unsupported input type");
     }
   }
 
   for (auto& cmd : m_CommandsModelPoseToOutput)
   {
-    PLASMA_ASSERT_DEV(cmd.m_Inputs.GetCount() == 1, "Exactly one input must be provided.");
+    PL_ASSERT_DEV(cmd.m_Inputs.GetCount() == 1, "Exactly one input must be provided.");
 
     for (auto id : cmd.m_Inputs)
     {
       auto type = GetCommand(id).GetType();
-      PLASMA_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::LocalToModelPose, "Unsupported input type");
+      PL_ASSERT_DEV(type == plAnimPoseGeneratorCommandType::LocalToModelPose, "Unsupported input type");
     }
   }
 
   for (auto& cmd : m_CommandsSampleEventTrack)
   {
-    PLASMA_ASSERT_DEV(cmd.m_hAnimationClip.IsValid(), "Invalid animation clips are not allowed.");
+    PL_ASSERT_DEV(cmd.m_hAnimationClip.IsValid(), "Invalid animation clips are not allowed.");
   }
 }
 
@@ -179,7 +179,7 @@ const plAnimPoseGeneratorCommand& plAnimPoseGenerator::GetCommand(plAnimPoseGene
 
 plAnimPoseGeneratorCommand& plAnimPoseGenerator::GetCommand(plAnimPoseGeneratorCommandID id)
 {
-  PLASMA_ASSERT_DEV(id != plInvalidIndex, "Invalid command ID");
+  PL_ASSERT_DEV(id != plInvalidIndex, "Invalid command ID");
 
   switch (GetCommandType(id))
   {
@@ -201,10 +201,10 @@ plAnimPoseGeneratorCommand& plAnimPoseGenerator::GetCommand(plAnimPoseGeneratorC
     case plAnimPoseGeneratorCommandType::SampleEventTrack:
       return m_CommandsSampleEventTrack[GetCommandIndex(id)];
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
-  PLASMA_REPORT_FAILURE("Invalid command ID");
+  PL_REPORT_FAILURE("Invalid command ID");
   return m_CommandsSampleTrack[0];
 }
 
@@ -265,7 +265,7 @@ void plAnimPoseGenerator::Execute(plAnimPoseGeneratorCommand& cmd, const plGameO
       ExecuteCmd(static_cast<plAnimPoseGeneratorCommandSampleEventTrack&>(cmd), pSendAnimationEventsTo);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }
 
@@ -283,7 +283,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandSampleTrack& cmd,
 
   if (pSampler == nullptr)
   {
-    pSampler = PLASMA_DEFAULT_NEW(ozz::animation::SamplingJob::Context);
+    pSampler = PL_DEFAULT_NEW(ozz::animation::SamplingJob::Context);
   }
 
   if (pSampler->max_tracks() != ozzAnim.num_tracks())
@@ -300,7 +300,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandSampleTrack& cmd,
   if (!job.Validate())
     return;
 
-  PLASMA_ASSERT_DEBUG(job.Validate(), "");
+  PL_ASSERT_DEBUG(job.Validate(), "");
   job.Run();
 
   SampleEventTrack(pResource.GetPointer(), cmd.m_EventSampling, pSendAnimationEventsTo, cmd.m_fPreviousNormalizedSamplePos, cmd.m_fNormalizedSamplePos);
@@ -367,7 +367,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandCombinePoses& cmd
       }
       break;
 
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     layer->weight = cmd.m_InputWeights[i];
@@ -384,7 +384,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandCombinePoses& cmd
   job.additive_layers = ozz::span<const ozz::animation::BlendingJob::Layer>(begin(blAdd), end(blAdd));
   job.rest_pose = m_pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton().joint_rest_poses();
   job.output = ozz::span<ozz::math::SoaTransform>(transforms.GetPtr(), transforms.GetCount());
-  PLASMA_ASSERT_DEBUG(job.Validate(), "");
+  PL_ASSERT_DEBUG(job.Validate(), "");
   job.Run();
 }
 
@@ -417,7 +417,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandLocalToModelPose&
     }
     break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   if (cmd.m_pSendLocalPoseMsgTo || pSendAnimationEventsTo)
@@ -436,7 +436,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandLocalToModelPose&
 
   job.output = ozz::span<ozz::math::Float4x4>(reinterpret_cast<ozz::math::Float4x4*>(transforms.GetPtr()), transforms.GetCount());
   job.skeleton = &m_pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton();
-  PLASMA_ASSERT_DEBUG(job.Validate(), "");
+  PL_ASSERT_DEBUG(job.Validate(), "");
   job.Run();
 }
 
@@ -450,7 +450,7 @@ void plAnimPoseGenerator::ExecuteCmd(plAnimPoseGeneratorCommandModelPoseToOutput
       m_OutputPose = AcquireModelPoseTransforms(static_cast<const plAnimPoseGeneratorCommandLocalToModelPose&>(cmdIn).m_ModelPoseOutput);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }
 
@@ -472,8 +472,8 @@ void plAnimPoseGenerator::SampleEventTrack(const plAnimationClipResource* pResou
 
   const plTime tPrev = fPrevPos * duration;
   const plTime tNow = fCurPos * duration;
-  const plTime tStart = plTime::Zero();
-  const plTime tEnd = duration + plTime::Seconds(1.0); // sampling position is EXCLUSIVE
+  const plTime tStart = plTime::MakeZero();
+  const plTime tEnd = duration + plTime::MakeFromSeconds(1.0); // sampling position is EXCLUSIVE
 
   plHybridArray<plHashedString, 16> events;
 
@@ -503,7 +503,7 @@ void plAnimPoseGenerator::SampleEventTrack(const plAnimationClipResource* pResou
       et.Sample(tStart, tNow, events);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   plMsgGenericEvent msg;
@@ -524,7 +524,7 @@ plArrayPtr<ozz::math::SoaTransform> plAnimPoseGenerator::AcquireLocalPoseTransfo
   {
     using T = ozz::math::SoaTransform;
     const plUInt32 num = m_pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton().num_soa_joints();
-    m_UsedLocalTransforms[id] = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), T, num);
+    m_UsedLocalTransforms[id] = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), T, num);
   }
 
   return m_UsedLocalTransforms[id];
@@ -540,4 +540,3 @@ plArrayPtr<plMat4> plAnimPoseGenerator::AcquireModelPoseTransforms(plAnimPoseGen
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_AnimPoseGenerator);

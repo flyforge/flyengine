@@ -5,56 +5,63 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plCollectionComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plCollectionComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Collection", GetCollectionFile, SetCollectionFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_AssetCollection")),
+    PL_ACCESSOR_PROPERTY("Collection", GetCollectionFile, SetCollectionFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_AssetCollection", plDependencyFlags::Package)),
+    PL_MEMBER_PROPERTY("RegisterNames", m_bRegisterNames),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Utilities"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCollectionComponent::plCollectionComponent() = default;
 plCollectionComponent::~plCollectionComponent() = default;
 
-void plCollectionComponent::SerializeComponent(plWorldWriter& stream) const
+void plCollectionComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_hCollection;
+  s << m_bRegisterNames;
 }
 
-void plCollectionComponent::DeserializeComponent(plWorldReader& stream)
+void plCollectionComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_hCollection;
+
+  if (uiVersion >= 2)
+  {
+    s >> m_bRegisterNames;
+  }
 }
 
-void plCollectionComponent::SetCollectionFile(plStringView sFile)
+void plCollectionComponent::SetCollectionFile(const char* szFile)
 {
   plCollectionResourceHandle hResource;
 
-  if (!sFile.IsEmpty())
+  if (!plStringUtils::IsNullOrEmpty(szFile))
   {
-    hResource = plResourceManager::LoadResource<plCollectionResource>(sFile);
+    hResource = plResourceManager::LoadResource<plCollectionResource>(szFile);
     plResourceManager::PreloadResource(hResource);
   }
 
   SetCollection(hResource);
 }
 
-plStringView plCollectionComponent::GetCollectionFile() const
+const char* plCollectionComponent::GetCollectionFile() const
 {
   if (!m_hCollection.IsValid())
     return {};
@@ -86,8 +93,13 @@ void plCollectionComponent::InitiatePreload()
     if (pCollection.GetAcquireResult() == plResourceAcquireResult::Final)
     {
       pCollection->PreloadResources();
+
+      if (m_bRegisterNames)
+      {
+        pCollection->RegisterNames();
+      }
     }
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Collection_Implementation_CollectionComponent);
+PL_STATICLINK_FILE(Core, Core_Collection_Implementation_CollectionComponent);

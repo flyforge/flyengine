@@ -102,7 +102,7 @@ plInt32 plCurve1D::FindApproxControlPoint(double x) const
 
 double plCurve1D::Evaluate(double x) const
 {
-  PLASMA_ASSERT_DEBUG(!m_LinearApproximation.IsEmpty(), "Cannot evaluate curve without precomputing curve approximation data first. Call CreateLinearApproximation() on curve before calling Evaluate().");
+  PL_ASSERT_DEBUG(!m_LinearApproximation.IsEmpty(), "Cannot evaluate curve without precomputing curve approximation data first. Call CreateLinearApproximation() on curve before calling Evaluate().");
 
   if (m_LinearApproximation.GetCount() >= 2)
   {
@@ -194,7 +194,7 @@ void plCurve1D::Load(plStreamReader& inout_stream)
   plUInt8 uiVersion = 0;
 
   inout_stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= 4, "Incorrect version '{0}' for plCurve1D", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= 4, "Incorrect version '{0}' for plCurve1D", uiVersion);
 
   plUInt32 numCp = 0;
 
@@ -245,13 +245,13 @@ void plCurve1D::CreateLinearApproximation(double fMaxError /*= 0.01f*/, plUInt8 
 
   if (m_ControlPoints.IsEmpty())
   {
-    m_LinearApproximation.PushBack(plVec2d::ZeroVector());
+    m_LinearApproximation.PushBack(plVec2d::MakeZero());
     return;
   }
 
   for (plUInt32 i = 1; i < m_ControlPoints.GetCount(); ++i)
   {
-    PLASMA_ASSERT_DEBUG(m_ControlPoints[i - 1].m_Position.x <= m_ControlPoints[i].m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
+    PL_ASSERT_DEBUG(m_ControlPoints[i - 1].m_Position.x <= m_ControlPoints[i].m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
 
     double fMinY, fMaxY;
     ApproximateMinMaxValues(m_ControlPoints[i - 1], m_ControlPoints[i], fMinY, fMaxY);
@@ -323,7 +323,7 @@ void plCurve1D::ApproximateMinMaxValues(const ControlPoint& lhs, const ControlPo
 void plCurve1D::ApproximateCurve(
   const plVec2d& p0, const plVec2d& p1, const plVec2d& p2, const plVec2d& p3, double fMaxErrorX, double fMaxErrorY, plInt32 iSubDivLeft)
 {
-  const plVec2d cubicCenter = plMath::EvaluateBezierCurve(0.5, p0, p1, p2, p3);
+  const plVec2d cubicCenter = plMath::EvaluateBplierCurve(0.5, p0, p1, p2, p3);
 
   ApproximateCurvePiece(p0, p1, p2, p3, 0.0f, p0, 0.5, cubicCenter, fMaxErrorX, fMaxErrorY, iSubDivLeft);
 
@@ -343,7 +343,7 @@ void plCurve1D::ApproximateCurvePiece(const plVec2d& p0, const plVec2d& p1, cons
 
   const double tCenter = plMath::Lerp(tLeft, tRight, 0.5);
 
-  const plVec2d cubicCenter = plMath::EvaluateBezierCurve(tCenter, p0, p1, p2, p3);
+  const plVec2d cubicCenter = plMath::EvaluateBplierCurve(tCenter, p0, p1, p2, p3);
   const plVec2d linearCenter = plMath::Lerp(pLeft, pRight, 0.5);
 
   // check whether the linear interpolation between pLeft and pRight would already result in a good enough approximation
@@ -420,8 +420,8 @@ void plCurve1D::ApplyTangentModes()
   {
     const auto& cp = m_ControlPoints[i];
 
-    PLASMA_ASSERT_DEBUG(cp.m_Position.x >= m_ControlPoints[i - 1].m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
-    PLASMA_ASSERT_DEBUG(m_ControlPoints[i + 1].m_Position.x >= cp.m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
+    PL_ASSERT_DEBUG(cp.m_Position.x >= m_ControlPoints[i - 1].m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
+    PL_ASSERT_DEBUG(m_ControlPoints[i + 1].m_Position.x >= cp.m_Position.x, "Curve control points are not sorted. Call SortControlPoints() before CreateLinearApproximation().");
 
     if (cp.m_TangentModeLeft == plCurveTangentMode::FixedLength)
       MakeFixedLengthTangentLeft(i);
@@ -565,4 +565,4 @@ void plCurve1D::MakeAutoTangentRight(plUInt32 uiCpIdx)
   tCP.m_RightTangent.Set((float)tangent.x, (float)tangent.y);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Tracks_Implementation_Curve1D);
+

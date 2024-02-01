@@ -9,20 +9,20 @@ using namespace plTokenParseUtils;
 
 plMap<plString, plTokenizedFileCache::FileData>::ConstIterator plTokenizedFileCache::Lookup(const plString& sFileName) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   auto it = m_Cache.Find(sFileName);
   return it;
 }
 
 void plTokenizedFileCache::Remove(const plString& sFileName)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   m_Cache.Remove(sFileName);
 }
 
 void plTokenizedFileCache::Clear()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   m_Cache.Clear();
 }
 
@@ -34,7 +34,7 @@ void plTokenizedFileCache::SkipWhitespace(plDeque<plToken>& Tokens, plUInt32& ui
 
 const plTokenizer* plTokenizedFileCache::Tokenize(const plString& sFileName, plArrayPtr<const plUInt8> fileContent, const plTimestamp& fileTimeStamp, plLogInterface* pLog)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   bool bExisted = false;
   auto it = m_Cache.FindOrAdd(sFileName, &bExisted);
@@ -138,16 +138,16 @@ plResult plPreprocessor::DefaultFileLocator(plStringView sCurAbsoluteFile, plStr
     s.MakeCleanPath();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::DefaultFileOpen(plStringView sAbsoluteFile, plDynamicArray<plUInt8>& ref_fileContent, plTimestamp& out_fileModification)
 {
   plFileReader r;
   if (r.Open(sAbsoluteFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   plFileStats stats;
   if (plFileSystem::GetFileStats(sAbsoluteFile, stats).Succeeded())
     out_fileModification = stats.m_LastModificationTime;
@@ -160,13 +160,13 @@ plResult plPreprocessor::DefaultFileOpen(plStringView sAbsoluteFile, plDynamicAr
     ref_fileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::OpenFile(plStringView sFile, const plTokenizer** pTokenizer)
 {
-  PLASMA_ASSERT_DEV(m_FileOpenCallback.IsValid(), "OpenFile callback has not been set");
-  PLASMA_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "File locator callback has not been set");
+  PL_ASSERT_DEV(m_FileOpenCallback.IsValid(), "OpenFile callback has not been set");
+  PL_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "File locator callback has not been set");
 
   *pTokenizer = nullptr;
 
@@ -175,7 +175,7 @@ plResult plPreprocessor::OpenFile(plStringView sFile, const plTokenizer** pToken
   if (it.IsValid())
   {
     *pTokenizer = &it.Value().m_Tokens;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plTimestamp stamp;
@@ -184,7 +184,7 @@ plResult plPreprocessor::OpenFile(plStringView sFile, const plTokenizer** pToken
   if (m_FileOpenCallback(sFile, Content, stamp).Failed())
   {
     plLog::Error(m_pLog, "Could not open file '{0}'", sFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plArrayPtr<const plUInt8> ContentView = Content;
@@ -203,17 +203,17 @@ plResult plPreprocessor::OpenFile(plStringView sFile, const plTokenizer** pToken
 
   *pTokenizer = m_pUsedFileCache->Tokenize(sFile, ContentView, stamp, m_pLog);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 plResult plPreprocessor::HandleInclude(const TokenStream& Tokens0, plUInt32 uiCurToken, plUInt32 uiDirectiveToken, TokenStream& TokenOutput)
 {
-  PLASMA_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "File locator callback has not been set");
+  PL_ASSERT_DEV(m_FileLocatorCallback.IsValid(), "File locator callback has not been set");
 
   TokenStream Tokens;
   if (Expand(Tokens0, Tokens).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   SkipWhitespace(Tokens, uiCurToken);
 
@@ -236,7 +236,7 @@ plResult plPreprocessor::HandleInclude(const TokenStream& Tokens0, plUInt32 uiCu
     // so we concatenate just everything and then make sure it ends with a >
 
     if (Expect(Tokens, uiCurToken, "<", &uiAccepted).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     TokenStream PathTokens;
 
@@ -264,41 +264,39 @@ plResult plPreprocessor::HandleInclude(const TokenStream& Tokens0, plUInt32 uiCu
     else
     {
       PP_LOG(Error, "Invalid include path '{0}'", Tokens[uiAccepted], sPath);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
   if (ExpectEndOfLine(Tokens, uiCurToken).Failed())
   {
     PP_LOG0(Error, "Expected end-of-line", Tokens[uiCurToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  PLASMA_ASSERT_DEV(!m_CurrentFileStack.IsEmpty(), "Implementation error.");
+  PL_ASSERT_DEV(!m_CurrentFileStack.IsEmpty(), "Implementation error.");
 
   plStringBuilder sOtherFile;
 
   if (m_FileLocatorCallback(m_CurrentFileStack.PeekBack().m_sFileName.GetData(), sPath, IncType, sOtherFile).Failed())
   {
     PP_LOG(Error, "#include file '{0}' could not be located", Tokens[uiAccepted], sPath);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plTempHashedString sOtherFileHashed(sOtherFile);
 
   // if this has been included before, and contains a #pragma once, do not include it again
   if (m_PragmaOnce.Find(sOtherFileHashed).IsValid())
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   if (ProcessFile(sOtherFile, TokenOutput).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (uiCurToken < Tokens.GetCount() && (Tokens[uiCurToken]->m_iType == plTokenType::Newline || Tokens[uiCurToken]->m_iType == plTokenType::EndOfFile))
     TokenOutput.PushBack(Tokens[uiCurToken]);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_FileHandling);

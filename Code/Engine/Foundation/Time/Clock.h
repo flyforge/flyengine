@@ -11,7 +11,7 @@
 class plTimeStepSmoothing;
 
 /// \brief A clock that can be speed up, slowed down, paused, etc. Useful for updating game logic, rendering, etc.
-class PLASMA_FOUNDATION_DLL plClock
+class PL_FOUNDATION_DLL plClock
 {
 public:
   /// \brief Returns the global clock.
@@ -146,7 +146,7 @@ public:
 
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, Clock);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, Clock);
 
   static Event s_TimeEvents;
   static plClock* s_pGlobalClock;
@@ -171,7 +171,7 @@ private:
 ///
 /// By deriving from this class you can implement your own algorithms for time step smoothing.
 /// Then just set an instance of that class on one of the clocks and it will be applied to the time step.
-class PLASMA_FOUNDATION_DLL plTimeStepSmoothing
+class PL_FOUNDATION_DLL plTimeStepSmoothing
 {
 public:
   virtual ~plTimeStepSmoothing() = default;
@@ -196,6 +196,6 @@ public:
   virtual void Reset(const plClock* pClock) = 0;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plClock);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plClock);
 
 #include <Foundation/Time/Implementation/Clock_inl.h>

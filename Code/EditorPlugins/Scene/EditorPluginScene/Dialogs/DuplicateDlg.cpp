@@ -15,8 +15,8 @@ int plQtDuplicateDlg::s_iRevolveAngleStep = 0;
 float plQtDuplicateDlg::s_fRevolveRadius = 1.0f;
 
 
-plQtDuplicateDlg::plQtDuplicateDlg(QWidget* parent)
-  : QDialog(parent)
+plQtDuplicateDlg::plQtDuplicateDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -72,14 +72,14 @@ plQtDuplicateDlg::plQtDuplicateDlg(QWidget* parent)
   RevolveZ->setChecked(s_iRevolveAxis == 3);
 }
 
-void plQtDuplicateDlg::on_DefaultButtons_clicked(QAbstractButton* button)
+void plQtDuplicateDlg::on_DefaultButtons_clicked(QAbstractButton* pButton)
 {
-  if (button == DefaultButtons->button(QDialogButtonBox::Cancel))
+  if (pButton == DefaultButtons->button(QDialogButtonBox::Cancel))
   {
     reject();
   }
 
-  if (button == DefaultButtons->button(QDialogButtonBox::Reset))
+  if (pButton == DefaultButtons->button(QDialogButtonBox::Reset))
   {
     spinBoxCopies->setValue(1);
 
@@ -95,7 +95,7 @@ void plQtDuplicateDlg::on_DefaultButtons_clicked(QAbstractButton* button)
     SpinBoxAngle->setValue(0);
   }
 
-  if (button == DefaultButtons->button(QDialogButtonBox::Ok))
+  if (pButton == DefaultButtons->button(QDialogButtonBox::Ok))
   {
     s_bGroupCopies = CheckBoxGroupCopies->isChecked();
 

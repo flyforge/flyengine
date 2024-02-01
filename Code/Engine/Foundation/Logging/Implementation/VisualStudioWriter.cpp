@@ -3,7 +3,7 @@
 #include <Foundation/Logging/VisualStudioWriter.h>
 #include <Foundation/Strings/StringConversion.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 
 void plLogWriter::VisualStudio::LogMessageHandler(const plLoggingEventData& eventData)
@@ -12,7 +12,7 @@ void plLogWriter::VisualStudio::LogMessageHandler(const plLoggingEventData& even
     return;
 
   static plMutex WriterLock; // will only be created if this writer is used at all
-  PLASMA_LOCK(WriterLock);
+  PL_LOCK(WriterLock);
 
   if (eventData.m_EventType == plLogMsgType::BeginGroup)
     OutputDebugStringA("\n");
@@ -25,56 +25,56 @@ void plLogWriter::VisualStudio::LogMessageHandler(const plLoggingEventData& even
   switch (eventData.m_EventType)
   {
     case plLogMsgType::BeginGroup:
-      s.Format("+++++ {} ({}) +++++\n", eventData.m_sText, eventData.m_sTag);
+      s.SetFormat("+++++ {} ({}) +++++\n", eventData.m_sText, eventData.m_sTag);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::EndGroup:
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-      s.Format("----- {} ({} sec) -----\n\n", eventData.m_sText, eventData.m_fSeconds);
+#  if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+      s.SetFormat("----- {} ({} sec) -----\n\n", eventData.m_sText, eventData.m_fSeconds);
 #  else
-      s.Format("----- {} (timing info not available) -----\n\n", eventData.m_sText);
+      s.SetFormat("----- {} (timing info not available) -----\n\n", eventData.m_sText);
 #  endif
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::ErrorMsg:
-      s.Format("Error: {}\n", eventData.m_sText);
+      s.SetFormat("Error: {}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::SeriousWarningMsg:
-      s.Format("Seriously: {}\n", eventData.m_sText);
+      s.SetFormat("Seriously: {}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::WarningMsg:
-      s.Format("Warning: {}\n", eventData.m_sText);
+      s.SetFormat("Warning: {}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::SuccessMsg:
-      s.Format("{}\n", eventData.m_sText);
+      s.SetFormat("{}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::InfoMsg:
-      s.Format("{}\n", eventData.m_sText);
+      s.SetFormat("{}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::DevMsg:
-      s.Format("{}\n", eventData.m_sText);
+      s.SetFormat("{}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     case plLogMsgType::DebugMsg:
-      s.Format("{}\n", eventData.m_sText);
+      s.SetFormat("{}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
       break;
 
     default:
-      s.Format("{}\n", eventData.m_sText);
+      s.SetFormat("{}\n", eventData.m_sText);
       OutputDebugStringW(plStringWChar(s));
 
       plLog::Warning("Unknown Message Type {0}", eventData.m_EventType);
@@ -89,5 +89,3 @@ void plLogWriter::VisualStudio::LogMessageHandler(const plLoggingEventData& even
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Logging_Implementation_VisualStudioWriter);

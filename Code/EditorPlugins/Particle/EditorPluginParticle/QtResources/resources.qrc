@@ -11,6 +11,6 @@
   </qresource>
   <qresource prefix="TypeIcons">
 	<file>plParticleComponent.svg</file>
-  </qresource>
+  </qresource>  
 </RCC>
 

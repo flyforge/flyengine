@@ -1,8 +1,0 @@
-
-
-#\
- define\
-  defined 1
-  
-  #define error 2
-  

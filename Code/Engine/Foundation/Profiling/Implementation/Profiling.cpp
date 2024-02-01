@@ -11,7 +11,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Foundation/Threading/ThreadUtils.h>
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
 
 class plProfileCaptureDataTransfer : public plDataTransfer
 {
@@ -31,7 +31,7 @@ private:
 static plProfileCaptureDataTransfer s_ProfileCaptureDataTransfer;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ProfilingSystem)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ProfilingSystem)
 
   // no dependencies
 
@@ -46,7 +46,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ProfilingSystem)
     plProfilingSystem::Reset();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace
@@ -82,13 +82,13 @@ namespace
 
   CpuScopesBuffer<BUFFER_SIZE_MAIN_THREAD>* CastToMainThreadEventBuffer(CpuScopesBufferBase* pEventBuffer)
   {
-    PLASMA_ASSERT_DEV(pEventBuffer->IsMainThread(), "Implementation error");
+    PL_ASSERT_DEV(pEventBuffer->IsMainThread(), "Implementation error");
     return static_cast<CpuScopesBuffer<BUFFER_SIZE_MAIN_THREAD>*>(pEventBuffer);
   }
 
   CpuScopesBuffer<BUFFER_SIZE_OTHER_THREAD>* CastToOtherThreadEventBuffer(CpuScopesBufferBase* pEventBuffer)
   {
-    PLASMA_ASSERT_DEV(!pEventBuffer->IsMainThread(), "Implementation error");
+    PL_ASSERT_DEV(!pEventBuffer->IsMainThread(), "Implementation error");
     return static_cast<CpuScopesBuffer<BUFFER_SIZE_OTHER_THREAD>*>(pEventBuffer);
   }
 
@@ -101,9 +101,9 @@ namespace
   static plHybridArray<plUInt64, 16> s_DeadThreadIDs;
   static plMutex s_ThreadInfosMutex;
 
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plProfilingSystem::CPUScope) == 64);
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plProfilingSystem::GPUScope) == 64);
+#  if PL_ENABLED(PL_PLATFORM_64BIT)
+  PL_CHECK_AT_COMPILETIME(sizeof(plProfilingSystem::CPUScope) == 64);
+  PL_CHECK_AT_COMPILETIME(sizeof(plProfilingSystem::GPUScope) == 64);
 #  endif
 
   static thread_local CpuScopesBufferBase* s_CpuScopes = nullptr;
@@ -314,7 +314,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
 
       if (writer.HadWriteError())
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
@@ -355,7 +355,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
       writer.EndObject();
       if (writer.HadWriteError())
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
@@ -394,7 +394,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
 
         if (writer.HadWriteError())
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
@@ -416,7 +416,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
       for (const CPUScope& e : sortedScopes)
       {
         writer.BeginObject();
-        writer.AddVariableString("name", e.m_szName);
+        writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
         writer.AddVariableUInt32("pid", m_uiProcessID);
         writer.AddVariableUInt64("tid", uiThreadId);
         writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_BeginTime.GetMicroseconds()));
@@ -434,7 +434,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
         if (e.m_EndTime.IsPositive())
         {
           writer.BeginObject();
-          writer.AddVariableString("name", e.m_szName);
+          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", uiThreadId);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_EndTime.GetMicroseconds()));
@@ -444,7 +444,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
 
         if (writer.HadWriteError())
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
@@ -460,7 +460,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
         const plTime t1 = m_FrameStartTimes[i];
 
         const plUInt64 localFrameID = uiNumFrames - i - 1;
-        sFrameName.Format("Frame {}", m_uiFrameCount - localFrameID);
+        sFrameName.SetFormat("Frame {}", m_uiFrameCount - localFrameID);
 
         writer.BeginObject();
         writer.AddVariableString("name", sFrameName);
@@ -479,7 +479,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
         writer.EndObject();
         if (writer.HadWriteError())
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
@@ -499,7 +499,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
           const auto& e = sortedGpuScopes[i];
 
           writer.BeginObject();
-          writer.AddVariableString("name", e.m_szName);
+          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", gpuIndex);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_BeginTime.GetMicroseconds()));
@@ -507,7 +507,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
           writer.EndObject();
 
           writer.BeginObject();
-          writer.AddVariableString("name", e.m_szName);
+          writer.AddVariableString("name", static_cast<const char*>(e.m_szName));
           writer.AddVariableUInt32("pid", m_uiProcessID);
           writer.AddVariableUInt64("tid", gpuIndex);
           writer.AddVariableUInt64("ts", static_cast<plUInt64>(e.m_EndTime.GetMicroseconds()));
@@ -515,7 +515,7 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
           writer.EndObject();
           if (writer.HadWriteError())
           {
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
         }
       }
@@ -526,14 +526,14 @@ plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& ref_outputStrea
 
   writer.EndObject();
 
-  return writer.HadWriteError() ? PLASMA_FAILURE : PLASMA_SUCCESS;
+  return writer.HadWriteError() ? PL_FAILURE : PL_SUCCESS;
 }
 
 // static
 void plProfilingSystem::Clear()
 {
   {
-    PLASMA_LOCK(s_AllCpuScopesMutex);
+    PL_LOCK(s_AllCpuScopesMutex);
     for (auto pEventBuffer : s_AllCpuScopes)
     {
       if (pEventBuffer->IsMainThread())
@@ -564,14 +564,14 @@ void plProfilingSystem::Capture(plProfilingSystem::ProfilingData& ref_profilingD
   ref_profilingData.Clear();
 
   ref_profilingData.m_uiFramesThreadID = 0;
-#  if PLASMA_ENABLED(PLASMA_SUPPORTS_PROCESSES)
+#  if PL_ENABLED(PL_SUPPORTS_PROCESSES)
   ref_profilingData.m_uiProcessID = plProcess::GetCurrentProcessID();
 #  else
   ref_profilingData.m_uiProcessID = 0;
 #  endif
 
   {
-    PLASMA_LOCK(s_ThreadInfosMutex);
+    PL_LOCK(s_ThreadInfosMutex);
 
     if (bClearAfterCapture)
     {
@@ -584,7 +584,7 @@ void plProfilingSystem::Capture(plProfilingSystem::ProfilingData& ref_profilingD
   }
 
   {
-    PLASMA_LOCK(s_AllCpuScopesMutex);
+    PL_LOCK(s_AllCpuScopesMutex);
 
     ref_profilingData.m_AllEventBuffers.Reserve(s_AllCpuScopes.GetCount());
     for (plUInt32 i = 0; i < s_AllCpuScopes.GetCount(); ++i)
@@ -680,7 +680,7 @@ void plProfilingSystem::AddCPUScope(plStringView sName, const char* szFunctionNa
   const plTime duration = endTime - beginTime;
 
   // discard?
-  if (duration < plTime::Milliseconds(cvar_ProfilingDiscardThresholdMS))
+  if (duration < plTime::MakeFromMilliseconds(cvar_ProfilingDiscardThresholdMS))
     return;
 
   ::CpuScopesBufferBase* pScopes = s_CpuScopes;
@@ -689,18 +689,18 @@ void plProfilingSystem::AddCPUScope(plStringView sName, const char* szFunctionNa
   {
     if (plThreadUtils::IsMainThread())
     {
-      pScopes = PLASMA_DEFAULT_NEW(::CpuScopesBuffer<BUFFER_SIZE_MAIN_THREAD>);
+      pScopes = PL_DEFAULT_NEW(::CpuScopesBuffer<BUFFER_SIZE_MAIN_THREAD>);
     }
     else
     {
-      pScopes = PLASMA_DEFAULT_NEW(::CpuScopesBuffer<BUFFER_SIZE_OTHER_THREAD>);
+      pScopes = PL_DEFAULT_NEW(::CpuScopesBuffer<BUFFER_SIZE_OTHER_THREAD>);
     }
 
     pScopes->m_uiThreadId = (plUInt64)plThreadUtils::GetCurrentThreadID();
     s_CpuScopes = pScopes;
 
     {
-      PLASMA_LOCK(s_AllCpuScopesMutex);
+      PL_LOCK(s_AllCpuScopesMutex);
       s_AllCpuScopes.PushBack(pScopes);
     }
   }
@@ -709,7 +709,7 @@ void plProfilingSystem::AddCPUScope(plStringView sName, const char* szFunctionNa
   scope.m_szFunctionName = szFunctionName;
   scope.m_BeginTime = beginTime;
   scope.m_EndTime = endTime;
-  plStringUtils::Copy(scope.m_szName, PLASMA_ARRAY_SIZE(scope.m_szName), sName.GetStartPointer(), sName.GetEndPointer());
+  plStringUtils::Copy(scope.m_szName, PL_ARRAY_SIZE(scope.m_szName), sName.GetStartPointer(), sName.GetEndPointer());
 
   if (plThreadUtils::IsMainThread())
   {
@@ -751,8 +751,8 @@ void plProfilingSystem::Initialize()
 // static
 void plProfilingSystem::Reset()
 {
-  PLASMA_LOCK(s_ThreadInfosMutex);
-  PLASMA_LOCK(s_AllCpuScopesMutex);
+  PL_LOCK(s_ThreadInfosMutex);
+  PL_LOCK(s_AllCpuScopesMutex);
   for (plUInt32 i = 0; i < s_DeadThreadIDs.GetCount(); i++)
   {
     plUInt64 uiThreadId = s_DeadThreadIDs[i];
@@ -772,7 +772,7 @@ void plProfilingSystem::Reset()
       CpuScopesBufferBase* pEventBuffer = s_AllCpuScopes[k];
       if (pEventBuffer->m_uiThreadId == uiThreadId)
       {
-        PLASMA_DEFAULT_DELETE(pEventBuffer);
+        PL_DEFAULT_DELETE(pEventBuffer);
         // Forward order and no swap important, see comment above.
         s_AllCpuScopes.RemoveAtAndCopy(k);
       }
@@ -786,7 +786,7 @@ void plProfilingSystem::Reset()
 // static
 void plProfilingSystem::SetThreadName(plStringView sThreadName)
 {
-  PLASMA_LOCK(s_ThreadInfosMutex);
+  PL_LOCK(s_ThreadInfosMutex);
 
   ThreadInfo& info = s_ThreadInfos.ExpandAndGetRef();
   info.m_uiThreadId = (plUInt64)plThreadUtils::GetCurrentThreadID();
@@ -796,7 +796,7 @@ void plProfilingSystem::SetThreadName(plStringView sThreadName)
 // static
 void plProfilingSystem::RemoveThread()
 {
-  PLASMA_LOCK(s_ThreadInfosMutex);
+  PL_LOCK(s_ThreadInfosMutex);
 
   s_DeadThreadIDs.PushBack((plUInt64)plThreadUtils::GetCurrentThreadID());
 }
@@ -813,7 +813,7 @@ void plProfilingSystem::InitializeGPUData(plUInt32 uiGpuCount)
   {
     if (gpuScopes == nullptr)
     {
-      gpuScopes = PLASMA_DEFAULT_NEW(GPUScopesBuffer);
+      gpuScopes = PL_DEFAULT_NEW(GPUScopesBuffer);
     }
   }
 }
@@ -821,7 +821,7 @@ void plProfilingSystem::InitializeGPUData(plUInt32 uiGpuCount)
 void plProfilingSystem::AddGPUScope(plStringView sName, plTime beginTime, plTime endTime, plUInt32 uiGpuIndex)
 {
   // discard?
-  if (endTime - beginTime < plTime::Milliseconds(cvar_ProfilingDiscardThresholdMS))
+  if (endTime - beginTime < plTime::MakeFromMilliseconds(cvar_ProfilingDiscardThresholdMS))
     return;
 
   if (!s_GPUScopes[uiGpuIndex]->CanAppend())
@@ -832,7 +832,7 @@ void plProfilingSystem::AddGPUScope(plStringView sName, plTime beginTime, plTime
   GPUScope scope;
   scope.m_BeginTime = beginTime;
   scope.m_EndTime = endTime;
-  plStringUtils::Copy(scope.m_szName, PLASMA_ARRAY_SIZE(scope.m_szName), sName.GetStartPointer(), sName.GetEndPointer());
+  plStringUtils::Copy(scope.m_szName, PL_ARRAY_SIZE(scope.m_szName), sName.GetStartPointer(), sName.GetEndPointer());
 
   s_GPUScopes[uiGpuIndex]->PushBack(scope);
 }
@@ -870,8 +870,8 @@ plProfilingListScope::plProfilingListScope(plStringView sListName, plStringView 
 plProfilingListScope::~plProfilingListScope()
 {
   plTime now = plTime::Now();
-  plProfilingSystem::AddCPUScope(m_sCurSectionName, nullptr, m_CurSectionBeginTime, now, plTime::Zero());
-  plProfilingSystem::AddCPUScope(m_sListName, m_szListFunction, m_ListBeginTime, now, plTime::Zero());
+  plProfilingSystem::AddCPUScope(m_sCurSectionName, nullptr, m_CurSectionBeginTime, now, plTime::MakeZero());
+  plProfilingSystem::AddCPUScope(m_sListName, m_szListFunction, m_ListBeginTime, now, plTime::MakeZero());
 
   s_pCurrentList = m_pPreviousList;
 }
@@ -882,7 +882,7 @@ void plProfilingListScope::StartNextSection(plStringView sNextSectionName)
   plProfilingListScope* pCurScope = s_pCurrentList;
 
   plTime now = plTime::Now();
-  plProfilingSystem::AddCPUScope(pCurScope->m_sCurSectionName, nullptr, pCurScope->m_CurSectionBeginTime, now, plTime::Zero());
+  plProfilingSystem::AddCPUScope(pCurScope->m_sCurSectionName, nullptr, pCurScope->m_CurSectionBeginTime, now, plTime::MakeZero());
 
   pCurScope->m_sCurSectionName = sNextSectionName;
   pCurScope->m_CurSectionBeginTime = now;
@@ -892,7 +892,7 @@ void plProfilingListScope::StartNextSection(plStringView sNextSectionName)
 
 plResult plProfilingSystem::ProfilingData::Write(plStreamWriter& outputStream) const
 {
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plProfilingSystem::Clear() {}
@@ -921,4 +921,4 @@ void plProfilingSystem::ProfilingData::Merge(ProfilingData& out_Merged, plArrayP
 
 #endif
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Profiling_Implementation_Profiling);
+PL_STATICLINK_FILE(Foundation, Foundation_Profiling_Implementation_Profiling);

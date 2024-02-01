@@ -6,19 +6,19 @@
 
 using plParticleEffectResourceHandle = plTypedResourceHandle<class plParticleEffectResource>;
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleEffectResourceDescriptor
+struct PL_PARTICLEPLUGIN_DLL plParticleEffectResourceDescriptor
 {
-  virtual void Save(plStreamWriter& stream) const;
-  virtual void Load(plStreamReader& stream);
+  virtual void Save(plStreamWriter& inout_stream) const;
+  virtual void Load(plStreamReader& inout_stream);
 
   plParticleEffectDescriptor m_Effect;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEffectResource final : public plResource
+class PL_PARTICLEPLUGIN_DLL plParticleEffectResource final : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEffectResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plParticleEffectResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plParticleEffectResource, plParticleEffectResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEffectResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plParticleEffectResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plParticleEffectResource, plParticleEffectResourceDescriptor);
 
 public:
   plParticleEffectResource();

@@ -16,7 +16,7 @@ plSharedPtr<plDefaultStateProvider> plDynamicDefaultStateProvider::CreateProvide
     auto* pAttrib = pProp->GetAttributeByType<plDynamicDefaultValueAttribute>();
     if (pAttrib && !plStringUtils::IsNullOrEmpty(pAttrib->GetClassProperty()))
     {
-      return PLASMA_DEFAULT_NEW(plDynamicDefaultStateProvider, pAccessor, pObject, pObject, pObject, pProp, 0);
+      return PL_DEFAULT_NEW(plDynamicDefaultStateProvider, pAccessor, pObject, pObject, pObject, pProp, 0);
     }
   }
 
@@ -35,7 +35,7 @@ plSharedPtr<plDefaultStateProvider> plDynamicDefaultStateProvider::CreateProvide
     if (pAttrib)
     {
       iRootDepth += 1;
-      return PLASMA_DEFAULT_NEW(plDynamicDefaultStateProvider, pAccessor, pObject, pCurrentObject, pCurrentObject->GetParent(), pParentProp, iRootDepth);
+      return PL_DEFAULT_NEW(plDynamicDefaultStateProvider, pAccessor, pObject, pCurrentObject, pCurrentObject->GetParent(), pParentProp, iRootDepth);
     }
     iRootDepth += 2;
     pCurrentObject = pCurrentObject->GetParent();
@@ -51,24 +51,24 @@ plDynamicDefaultStateProvider::plDynamicDefaultStateProvider(plObjectAccessorBas
   , m_iRootDepth(iRootDepth)
 {
   m_pAttrib = m_pRootProp->GetAttributeByType<plDynamicDefaultValueAttribute>();
-  PLASMA_ASSERT_DEBUG(m_pAttrib, "plDynamicDefaultStateProvider was created for a property that does not have the plDynamicDefaultValueAttribute.");
+  PL_ASSERT_DEBUG(m_pAttrib, "plDynamicDefaultStateProvider was created for a property that does not have the plDynamicDefaultValueAttribute.");
 
   m_pClassType = plRTTI::FindTypeByName(m_pAttrib->GetClassType());
-  PLASMA_ASSERT_DEBUG(m_pClassType, "The dynamic meta data class type '{0}' does not exist", m_pAttrib->GetClassType());
+  PL_ASSERT_DEBUG(m_pClassType, "The dynamic meta data class type '{0}' does not exist", m_pAttrib->GetClassType());
 
   m_pClassSourceProp = m_pRootObject->GetType()->FindPropertyByName(m_pAttrib->GetClassSource());
-  PLASMA_ASSERT_DEBUG(m_pClassSourceProp, "The dynamic meta data class source '{0}' does not exist on type '{1}'", m_pAttrib->GetClassSource(), m_pRootObject->GetType()->GetTypeName());
+  PL_ASSERT_DEBUG(m_pClassSourceProp, "The dynamic meta data class source '{0}' does not exist on type '{1}'", m_pAttrib->GetClassSource(), m_pRootObject->GetType()->GetTypeName());
 
   const bool bHasProperty = !plStringUtils::IsNullOrEmpty(m_pAttrib->GetClassProperty());
   if (!bHasProperty)
   {
-    PLASMA_ASSERT_DEBUG(m_pRootProp->GetCategory() == plPropertyCategory::Member, "plDynamicDefaultValueAttribute must be on a member property if no ClassProperty is given.");
+    PL_ASSERT_DEBUG(m_pRootProp->GetCategory() == plPropertyCategory::Member, "plDynamicDefaultValueAttribute must be on a member property if no ClassProperty is given.");
   }
   else
   {
     m_pClassProperty = m_pClassType->FindPropertyByName(m_pAttrib->GetClassProperty());
 
-    PLASMA_ASSERT_DEBUG(m_pClassProperty, "The dynamic meta data class type '{0}' does not have a property named '{1}'", m_pAttrib->GetClassType(), m_pAttrib->GetClassProperty());
+    PL_ASSERT_DEBUG(m_pClassProperty, "The dynamic meta data class type '{0}' does not have a property named '{1}'", m_pAttrib->GetClassType(), m_pAttrib->GetClassProperty());
   }
 }
 
@@ -96,8 +96,8 @@ plVariant plDynamicDefaultStateProvider::GetDefaultValue(SuperArray superPtr, pl
     }
 
     plVariant defaultValue;
-    plResult res = propertyPath.ReadProperty(const_cast<plReflectedClass*>(pMeta), *pMeta->GetDynamicRTTI(), [&](void* pLeaf, const plRTTI& pType, const plAbstractProperty* pNativeProp, const plVariant& index) {
-      PLASMA_ASSERT_DEBUG(pProp->GetCategory() == pNativeProp->GetCategory(), "While properties don't need to match exactly, they need to be of the same category and type.");
+    plResult res = propertyPath.ReadProperty(const_cast<plReflectedClass*>(pMeta), *pMeta->GetDynamicRTTI(), [&](void* pLeaf, const plRTTI& type, const plAbstractProperty* pNativeProp, const plVariant& index) {
+      PL_ASSERT_DEBUG(pProp->GetCategory() == pNativeProp->GetCategory(), "While properties don't need to match exactly, they need to be of the same category and type.");
 
       switch (pNativeProp->GetCategory())
       {
@@ -212,7 +212,7 @@ plVariant plDynamicDefaultStateProvider::GetDefaultValue(SuperArray superPtr, pl
         }
         break;
         default:
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
           break;
       }
     });
@@ -298,10 +298,10 @@ plStatus plDynamicDefaultStateProvider::CreateRevertContainerDiff(SuperArray sup
         return true;
       });
 
-      auto WriteObject = [&](void* pLeafObject, const plRTTI& pLeafType, const plAbstractProperty* pLeafProp, const plVariant& index) {
+      auto WriteObject = [&](void* pLeafObject, const plRTTI& leafType, const plAbstractProperty* pLeafProp, const plVariant& index) {
         pNativeRootObject = pLeafObject;
-        context.RegisterObject(pObject->GetGuid(), &pLeafType, pLeafObject);
-        pPrefabSubRoot = rttiConverter.AddObjectToGraph(&pLeafType, pLeafObject);
+        context.RegisterObject(pObject->GetGuid(), &leafType, pLeafObject);
+        pPrefabSubRoot = rttiConverter.AddObjectToGraph(&leafType, pLeafObject);
         pPrefabSubRoot->RenameProperty(sRootPropertyName, pProp->GetPropertyName());
       };
 
@@ -329,7 +329,7 @@ plStatus plDynamicDefaultStateProvider::CreateRevertContainerDiff(SuperArray sup
     pPrefabSubRoot->SetType(pInstanceSubRoot->GetType());
     prefabSubGraph.ReMapNodeGuidsToMatchGraph(pPrefabSubRoot, instanceSubGraph, pInstanceSubRoot);
     prefabSubGraph.CreateDiffWithBaseGraph(instanceSubGraph, out_diff);
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   return superPtr[0]->CreateRevertContainerDiff(superPtr.GetSubArray(1), pAccessor, pObject, pProp, out_diff);
 }

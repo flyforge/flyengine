@@ -29,7 +29,7 @@ void plProcessingStreamGroup::Clear()
 
   for (plProcessingStream* pStream : m_DataStreams)
   {
-    PLASMA_DEFAULT_DELETE(pStream);
+    PL_DEFAULT_DELETE(pStream);
   }
 
   m_DataStreams.Clear();
@@ -37,7 +37,7 @@ void plProcessingStreamGroup::Clear()
 
 void plProcessingStreamGroup::AddProcessor(plProcessingStreamProcessor* pProcessor)
 {
-  PLASMA_ASSERT_DEV(pProcessor != nullptr, "Stream processor may not be null!");
+  PL_ASSERT_DEV(pProcessor != nullptr, "Stream processor may not be null!");
 
   if (pProcessor->m_pStreamGroup != nullptr)
   {
@@ -78,7 +78,7 @@ plProcessingStream* plProcessingStreamGroup::AddStream(plStringView sName, plPro
 
   plHashedString Name;
   Name.Assign(sName);
-  plProcessingStream* pStream = PLASMA_DEFAULT_NEW(plProcessingStream, Name, type, plProcessingStream::GetDataTypeSize(type), 16);
+  plProcessingStream* pStream = PL_DEFAULT_NEW(plProcessingStream, Name, type, plProcessingStream::GetDataTypeSize(type), 16);
 
   m_DataStreams.PushBack(pStream);
 
@@ -96,7 +96,7 @@ void plProcessingStreamGroup::RemoveStreamByName(plStringView sName)
   {
     if (m_DataStreams[i]->GetName() == Name)
     {
-      PLASMA_DEFAULT_DELETE(m_DataStreams[i]);
+      PL_DEFAULT_DELETE(m_DataStreams[i]);
       m_DataStreams.RemoveAtAndSwap(i);
 
       m_bStreamAssignmentDirty = true;
@@ -145,7 +145,7 @@ void plProcessingStreamGroup::RemoveElement(plUInt64 uiElementIndex)
   if (m_PendingRemoveIndices.Contains(uiElementIndex))
     return;
 
-  PLASMA_ASSERT_DEBUG(uiElementIndex < m_uiNumActiveElements, "Element which should be removed is outside of active element range!");
+  PL_ASSERT_DEBUG(uiElementIndex < m_uiNumActiveElements, "Element which should be removed is outside of active element range!");
 
   m_PendingRemoveIndices.PushBack(uiElementIndex);
 }
@@ -192,7 +192,7 @@ void plProcessingStreamGroup::RunPendingDeletions()
     const plUInt64 uiElementToRemove = m_PendingRemoveIndices.PeekBack();
     m_PendingRemoveIndices.PopBack();
 
-    PLASMA_ASSERT_DEBUG(uiElementToRemove < m_uiNumActiveElements, "Invalid index to remove");
+    PL_ASSERT_DEBUG(uiElementToRemove < m_uiNumActiveElements, "Invalid index to remove");
 
     // inform any interested party about the tragic death
     e.m_uiElementIndex = uiElementToRemove;
@@ -226,8 +226,8 @@ void plProcessingStreamGroup::RunPendingDeletions()
     {
       const plUInt64 uiStreamElementStride = pStream->GetElementStride();
       const plUInt64 uiStreamElementSize = pStream->GetElementSize();
-      const void* pSourceData = plMemoryUtils::AddByteOffset(pStream->GetData(), static_cast<ptrdiff_t>(uiLastActiveElementIndex * uiStreamElementStride));
-      void* pTargetData = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<ptrdiff_t>(uiElementToRemove * uiStreamElementStride));
+      const void* pSourceData = plMemoryUtils::AddByteOffset(pStream->GetData(), static_cast<std::ptrdiff_t>(uiLastActiveElementIndex * uiStreamElementStride));
+      void* pTargetData = plMemoryUtils::AddByteOffset(pStream->GetWritableData(), static_cast<std::ptrdiff_t>(uiElementToRemove * uiStreamElementStride));
 
       plMemoryUtils::Copy<plUInt8>(static_cast<plUInt8*>(pTargetData), static_cast<const plUInt8*>(pSourceData), static_cast<size_t>(uiStreamElementSize));
     }
@@ -286,7 +286,7 @@ void plProcessingStreamGroup::RunPendingSpawns()
 
 struct ProcessorComparer
 {
-  PLASMA_ALWAYS_INLINE bool Less(const plProcessingStreamProcessor* a, const plProcessingStreamProcessor* b) const { return a->m_fPriority < b->m_fPriority; }
+  PL_ALWAYS_INLINE bool Less(const plProcessingStreamProcessor* a, const plProcessingStreamProcessor* b) const { return a->m_fPriority < b->m_fPriority; }
 };
 
 void plProcessingStreamGroup::SortProcessorsByPriority()
@@ -295,4 +295,4 @@ void plProcessingStreamGroup::SortProcessorsByPriority()
   m_Processors.Sort(cmp);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_DataProcessing_Stream_Implementation_ProcessingStreamGroup);
+

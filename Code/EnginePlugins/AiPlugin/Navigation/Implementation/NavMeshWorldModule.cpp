@@ -8,9 +8,9 @@
 plCVarInt cvar_NavMeshVisualize("AI.Navmesh.Visualize", -1, plCVarFlags::None, "Visualize the n-th navmesh.");
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plAiNavMeshWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAiNavMeshWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_WORLD_MODULE(plAiNavMeshWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAiNavMeshWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAiNavMeshWorldModule::plAiNavMeshWorldModule(plWorld* pWorld)
@@ -50,7 +50,7 @@ plAiNavMeshWorldModule::~plAiNavMeshWorldModule()
 {
   for (const auto& cfg : m_Config.m_NavmeshConfigs)
   {
-    PLASMA_DEFAULT_DELETE(m_WorldNavMeshes[cfg.m_sName]);
+    PL_DEFAULT_DELETE(m_WorldNavMeshes[cfg.m_sName]);
   }
 }
 
@@ -59,7 +59,7 @@ void plAiNavMeshWorldModule::Initialize()
   SUPER::Initialize();
 
   {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plAiNavMeshWorldModule::Update, this);
+    auto updateDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plAiNavMeshWorldModule::Update, this);
     updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PostTransform;
     updateDesc.m_bOnlyUpdateWhenSimulating = true;
 
@@ -70,10 +70,10 @@ void plAiNavMeshWorldModule::Initialize()
 
   for (const auto& cfg : m_Config.m_NavmeshConfigs)
   {
-    m_WorldNavMeshes[cfg.m_sName] = PLASMA_DEFAULT_NEW(plAiNavMesh, 64, 64, 16.0f, cfg);
+    m_WorldNavMeshes[cfg.m_sName] = PL_DEFAULT_NEW(plAiNavMesh, 64, 64, 16.0f, cfg);
   }
 
-  m_pGenerateSectorTask = PLASMA_DEFAULT_NEW(plNavMeshSectorGenerationTask);
+  m_pGenerateSectorTask = PL_DEFAULT_NEW(plNavMeshSectorGenerationTask);
   m_pGenerateSectorTask->ConfigureTask("Generate Navmesh Sector", plTaskNesting::Maybe);
 }
 

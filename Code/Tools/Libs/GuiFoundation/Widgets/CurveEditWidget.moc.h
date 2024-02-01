@@ -13,12 +13,12 @@
 class plQGridBarWidget;
 class QRubberBand;
 
-class PLASMA_GUIFOUNDATION_DLL plQtCurveEditWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtCurveEditWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  plQtCurveEditWidget(QWidget* parent);
+  plQtCurveEditWidget(QWidget* pParent);
 
   double m_fLowerRange = -plMath::HighValue<double>();
   double m_fUpperRange = plMath::HighValue<double>();
@@ -37,12 +37,12 @@ public:
 
   void FrameCurve();
   void FrameSelection();
-  void Frame(double offsetX, double offsetY, double width, double height);
+  void Frame(double fOffsetX, double fOffsetY, double fWidth, double fHeight);
 
   QPoint MapFromScene(const QPointF& pos) const;
-  QPoint MapFromScene(const plVec2d& pos) const { return MapFromScene(QPointF(pos.x, pos.y)); }
+  QPoint MapFromScene(const plVec2d& vPos) const { return MapFromScene(QPointF(vPos.x, vPos.y)); }
   QPointF MapToScene(const QPoint& pos) const;
-  plVec2 MapDirFromScene(const plVec2& pos) const;
+  plVec2 MapDirFromScene(const plVec2& vPos) const;
 
   void ClearSelection();
   void SelectAll();
@@ -50,21 +50,21 @@ public:
   bool IsSelected(const plSelectedCurveCP& cp) const;
   void SetSelection(const plSelectedCurveCP& cp);
   void ToggleSelected(const plSelectedCurveCP& cp);
-  void SetSelected(const plSelectedCurveCP& cp, bool set);
+  void SetSelected(const plSelectedCurveCP& cp, bool bSet);
 
   bool GetSelectedTangent(plInt32& out_iCurve, plInt32& out_iPoint, bool& out_bLeftTangent) const;
 
 Q_SIGNALS:
   void DoubleClickEvent(const QPointF& scenePos, const QPointF& epsilon);
   void DeleteControlPointsEvent();
-  void MoveControlPointsEvent(double moveX, double moveY);
-  void MoveTangentsEvent(double moveX, double moveY);
-  void BeginOperationEvent(QString name);
+  void MoveControlPointsEvent(double fMoveX, double fMoveY);
+  void MoveTangentsEvent(double fMoveX, double fMoveY);
+  void BeginOperationEvent(QString sName);
   void EndOperationEvent(bool bCommit);
-  void ScaleControlPointsEvent(const QPointF& centerPos, double scaleX, double scaleY);
+  void ScaleControlPointsEvent(const QPointF& centerPos, double fScaleX, double fScaleY);
   void ContextMenuEvent(QPoint pos, QPointF scenePos);
   void SelectionChangedEvent();
-  void MoveCurveEvent(plInt32 iCurve, double moveY);
+  void MoveCurveEvent(plInt32 iCurve, double fMoveY);
 
 protected:
   virtual void paintEvent(QPaintEvent* e) override;

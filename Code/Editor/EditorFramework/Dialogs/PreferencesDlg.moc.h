@@ -9,13 +9,13 @@ class plPreferencesDocument;
 class plPreferences;
 class plQtDocumentTreeView;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtPreferencesDlg : public QDialog, public Ui_plQtPreferencesDlg
+class PL_EDITORFRAMEWORK_DLL plQtPreferencesDlg : public QDialog, public Ui_plQtPreferencesDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtPreferencesDlg(QWidget* parent);
+  plQtPreferencesDlg(QWidget* pParent);
   ~plQtPreferencesDlg();
 
   plUuid NativeToObject(plPreferences* pPreferences);

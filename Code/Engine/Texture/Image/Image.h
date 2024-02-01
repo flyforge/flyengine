@@ -9,7 +9,7 @@
 #include <Texture/Image/ImageHeader.h>
 
 /// \brief A class referencing image data and holding metadata about the image.
-class PLASMA_TEXTURE_DLL plImageView : protected plImageHeader
+class PL_TEXTURE_DLL plImageView : protected plImageHeader
 {
 public:
   /// \brief Constructs an empty image view.
@@ -87,8 +87,8 @@ protected:
 
   const plUInt64& GetSubImageOffset(plUInt32 uiMipLevel, plUInt32 uiFace, plUInt32 uiArrayIndex, plUInt32 uiPlaneIndex) const;
 
-  plHybridArray<plUInt64, 16> m_subImageOffsets;
-  plBlobPtr<plUInt8> m_dataPtr;
+  plHybridArray<plUInt64, 16> m_SubImageOffsets;
+  plBlobPtr<plUInt8> m_DataPtr;
 };
 
 /// \brief A class containing image data and associated meta data.
@@ -99,7 +99,7 @@ protected:
 ///
 /// The sub-images are stored in a predefined order compatible with the layout of DDS files, that is, it first stores
 /// the mip chain for each image, then all faces in a case of a cubemap, then the individual images of an image array.
-class PLASMA_TEXTURE_DLL plImage : public plImageView
+class PL_TEXTURE_DLL plImage : public plImageView
 {
   /// Use Reset() instead
   void operator=(const plImage& rhs) = delete;
@@ -117,7 +117,7 @@ class PLASMA_TEXTURE_DLL plImage : public plImageView
   explicit plImage(const plImageView& other);
 
 public:
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
   /// \brief Constructs an empty image.
   plImage();
@@ -196,7 +196,7 @@ public:
 private:
   bool UsesExternalStorage() const;
 
-  plBlob m_internalStorage;
+  plBlob m_InternalStorage;
 };
 
 #include <Texture/Image/Implementation/Image_inl.h>

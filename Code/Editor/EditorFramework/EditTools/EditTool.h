@@ -6,9 +6,9 @@
 class plGameObjectDocument;
 class plQtGameObjectDocumentWindow;
 class plObjectAccessorBase;
-class PlasmaEditorInputContext;
+class plEditorInputContext;
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectGizmoInterface
+class PL_EDITORFRAMEWORK_DLL plGameObjectGizmoInterface
 {
 public:
   virtual plObjectAccessorBase* GetObjectAccessor() = 0;
@@ -25,9 +25,9 @@ enum class plEditToolSupportedSpaces
   LocalAndWorldSpace,
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectEditTool : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plGameObjectEditTool : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectEditTool, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectEditTool, plReflectedClass);
 
 public:
   plGameObjectEditTool();
@@ -38,12 +38,12 @@ public:
   plQtGameObjectDocumentWindow* GetWindow() const { return m_pWindow; }
   plGameObjectGizmoInterface* GetGizmoInterface() const { return m_pInterface; }
   bool IsActive() const { return m_bIsActive; }
-  void SetActive(bool active);
+  void SetActive(bool bActive);
 
-  virtual PlasmaEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
+  virtual plEditorInputContext* GetEditorInputContextOverride() { return nullptr; }
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const { return plEditToolSupportedSpaces::WorldSpaceOnly; }
   virtual bool GetSupportsMoveParentOnly() const { return false; }
-  virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) {}
+  virtual void GetGridSettings(plGridSettingsMsgToEngine& out_gridSettings) {}
 
 protected:
   virtual void OnConfigured() = 0;

@@ -5,15 +5,15 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransparentForwardRenderPass, 1, plRTTIDefaultAllocator<plTransparentForwardRenderPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTransparentForwardRenderPass, 1, plRTTIDefaultAllocator<plTransparentForwardRenderPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ResolvedDepth", m_PinResolvedDepth),
+    PL_MEMBER_PROPERTY("ResolvedDepth", m_PinResolvedDepth),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTransparentForwardRenderPass::plTransparentForwardRenderPass(const char* szName)
@@ -95,6 +95,8 @@ void plTransparentForwardRenderPass::RenderObjects(const plRenderViewContext& re
 
   renderViewContext.m_pRenderContext->SetShaderPermutationVariable("PREPARE_DEPTH", "FALSE");
   RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::LitForeground);
+
+  RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::LitScreenFX);
 }
 
 void plTransparentForwardRenderPass::UpdateSceneColorTexture(
@@ -125,4 +127,4 @@ void plTransparentForwardRenderPass::CreateSamplerState()
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_TransparentForwardRenderPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_TransparentForwardRenderPass);

@@ -18,7 +18,7 @@ struct plMsgSetPlaying;
 
 using plParticleEffectResourceHandle = plTypedResourceHandle<class plParticleEffectResource>;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleComponentManager final : public plComponentManager<class plParticleComponent, plBlockStorageType::Compact>
+class PL_PARTICLEPLUGIN_DLL plParticleComponentManager final : public plComponentManager<class plParticleComponent, plBlockStorageType::Compact>
 {
   using SUPER = plComponentManager<class plParticleComponent, plBlockStorageType::Compact>;
 
@@ -32,24 +32,26 @@ public:
   void UpdatePfxTransformsAndBounds();
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleComponent final : public plRenderComponent
+/// \brief Plays a particle effect at the location of the game object.
+class PL_PARTICLEPLUGIN_DLL plParticleComponent final : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plParticleComponent, plRenderComponent, plParticleComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plParticleComponent, plRenderComponent, plParticleComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
+protected:
+  virtual void OnDeactivated() override;
 
   //////////////////////////////////////////////////////////////////////////
   // plRenderComponent
 
 public:
-  virtual plResult GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg) override;
-
+  virtual plResult GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plParticleComponent
@@ -73,10 +75,12 @@ public:
   /// \brief Returns true, if an effect is currently in a state where it might emit new particles
   bool IsEffectActive() const; // [ scriptable ]
 
-  void OnMsgSetPlaying(plMsgSetPlaying& msg); // [ msg handler ]
+  /// \brief Forwards to StartEffect() or StopEffect().
+  void OnMsgSetPlaying(plMsgSetPlaying& ref_msg); // [ msg handler ]
 
+  /// \brief Replaces the effect to be played.
   void SetParticleEffect(const plParticleEffectResourceHandle& hEffect);
-  PLASMA_ALWAYS_INLINE const plParticleEffectResourceHandle& GetParticleEffect() const { return m_hEffectResource; }
+  PL_ALWAYS_INLINE const plParticleEffectResourceHandle& GetParticleEffect() const { return m_hEffectResource; }
 
   void SetParticleEffectFile(const char* szFile); // [ property ]
   const char* GetParticleEffectFile() const;      // [ property ]
@@ -87,17 +91,35 @@ public:
   void RemoveParameter(const char* szKey);                          // [ property ]
   bool GetParameter(const char* szKey, plVariant& out_value) const; // [ property ]
 
-  plUInt64 m_uiRandomSeed = 0;    // [ property ]
+  /// \brief If zero, the played effect is randomized each time. Use a fixed seed when the result should be deterministic.
+  plUInt64 m_uiRandomSeed = 0; // [ property ]
+
+  /// \brief If set, the component reuses the simulation state of another particle component with the same name.
+  ///
+  /// This can be used to reuse similar effects, for example smoke on chimneys doesn't need to be unique.
+  /// Each instance renders the effect from its own perspective, but the simulation is only done once.
+  /// This only makes sense for infinite, ambient effects.
   plString m_sSharedInstanceName; // [ property ]
 
-  bool m_bSpawnAtStart = true;                                   // [ property ]
-  bool m_bIfContinuousStopRightAway = false;                     // [ property ]
-  bool m_bIgnoreOwnerRotation = false;                           // [ property ]
-  plEnum<plOnComponentFinishedAction2> m_OnFinishedAction;       // [ property ]
-  plTime m_MinRestartDelay;                                      // [ property ]
-  plTime m_RestartDelayRange;                                    // [ property ]
+  /// \brief If false, the effect starts in a paused state.
+  bool m_bSpawnAtStart = true; // [ property ]
+
+  /// \brief If true, the owner rotation is assumed to be identity. Useful for effects that need to always point in one direction (e.g. up).
+  bool m_bIgnoreOwnerRotation = false; // [ property ]
+
+  /// \brief What to do when the effect is finished playing.
+  plEnum<plOnComponentFinishedAction2> m_OnFinishedAction; // [ property ]
+
+  /// \brief Minimum delay between finishing and restarting.
+  plTime m_MinRestartDelay; // [ property ]
+
+  /// \brief Random additional delay between finishing and restarting.
+  plTime m_RestartDelayRange; // [ property ]
+
+  /// \brief The local direction into which to spawn the effect.
   plEnum<plBasisAxis> m_SpawnDirection = plBasisAxis::PositiveZ; // [ property ]
 
+  /// \brief Allows more fine grain control over the effect execution.
   plParticleEffectController m_EffectController;
 
 protected:
@@ -108,13 +130,13 @@ protected:
   void OnMsgExtractRenderData(plMsgExtractRenderData& msg) const;
   void OnMsgDeleteGameObject(plMsgDeleteGameObject& msg);
 
-  virtual void OnDeactivated() override;
-
   plParticleEffectResourceHandle m_hEffectResource;
+
   plTime m_RestartTime;
 
   // Exposed Parameters
   friend class plParticleEventReaction_Effect;
+  bool m_bIfContinuousStopRightAway = false;
   bool m_bFloatParamsChanged = false;
   bool m_bColorParamsChanged = false;
   plHybridArray<plParticleEffectFloatParam, 2> m_FloatParams;

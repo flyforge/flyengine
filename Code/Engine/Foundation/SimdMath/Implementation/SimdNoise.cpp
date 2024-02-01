@@ -5,7 +5,7 @@
 
 plSimdPerlinNoise::plSimdPerlinNoise(plUInt32 uiSeed)
 {
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_Permutations); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_Permutations); ++i)
   {
     m_Permutations[i] = static_cast<plUInt8>(i);
   }
@@ -13,23 +13,23 @@ plSimdPerlinNoise::plSimdPerlinNoise(plUInt32 uiSeed)
   plRandom rnd;
   rnd.Initialize(uiSeed);
 
-  for (plUInt32 i = PLASMA_ARRAY_SIZE(m_Permutations) - 1; i > 0; --i)
+  for (plUInt32 i = PL_ARRAY_SIZE(m_Permutations) - 1; i > 0; --i)
   {
-    plUInt32 uiRandomIndex = rnd.UIntInRange(PLASMA_ARRAY_SIZE(m_Permutations));
+    plUInt32 uiRandomIndex = rnd.UIntInRange(PL_ARRAY_SIZE(m_Permutations));
     plMath::Swap(m_Permutations[i], m_Permutations[uiRandomIndex]);
   }
 }
 
 plSimdVec4f plSimdPerlinNoise::NoiseZeroToOne(const plSimdVec4f& vX, const plSimdVec4f& vY, const plSimdVec4f& vZ, plUInt32 uiNumOctaves /*= 1*/)
 {
-  plSimdVec4f result = plSimdVec4f::ZeroVector();
+  plSimdVec4f result = plSimdVec4f::MakeZero();
   plSimdFloat amplitude = 1.0f;
   plUInt32 uiOffset = 0;
 
   uiNumOctaves = plMath::Max(uiNumOctaves, 1u);
   for (plUInt32 i = 0; i < uiNumOctaves; ++i)
   {
-    plSimdFloat scale = static_cast<float>(PLASMA_BIT(i));
+    plSimdFloat scale = static_cast<float>(PL_BIT(i));
     plSimdVec4f offset = Permute(plSimdVec4i(uiOffset) + plSimdVec4i(0, 1, 2, 3)).ToFloat();
     plSimdVec4f x = vX * scale + offset.Get<plSwizzle::XXXX>();
     plSimdVec4f y = vY * scale + offset.Get<plSwizzle::YYYY>();
@@ -46,22 +46,22 @@ plSimdVec4f plSimdPerlinNoise::NoiseZeroToOne(const plSimdVec4f& vX, const plSim
 
 namespace
 {
-  PLASMA_FORCE_INLINE plSimdVec4f Fade(const plSimdVec4f& t)
+  PL_FORCE_INLINE plSimdVec4f Fade(const plSimdVec4f& t)
   {
     return t.CompMul(t).CompMul(t).CompMul(t.CompMul(t * 6.0f - plSimdVec4f(15.0f)) + plSimdVec4f(10.0f));
   }
 
-  PLASMA_FORCE_INLINE plSimdVec4f Grad(plSimdVec4i vHash, const plSimdVec4f& x, const plSimdVec4f& y, const plSimdVec4f& z)
+  PL_FORCE_INLINE plSimdVec4f Grad(plSimdVec4i vHash, const plSimdVec4f& x, const plSimdVec4f& y, const plSimdVec4f& z)
   {
     // convert low 4 bits of hash code into 12 gradient directions.
     const plSimdVec4i h = vHash & plSimdVec4i(15);
     const plSimdVec4f u = plSimdVec4f::Select(h < plSimdVec4i(8), x, y);
     const plSimdVec4f v = plSimdVec4f::Select(h < plSimdVec4i(4), y, plSimdVec4f::Select(h == plSimdVec4i(12) || h == plSimdVec4i(14), x, z));
-    return plSimdVec4f::Select((h & plSimdVec4i(1)) == plSimdVec4i::ZeroVector(), u, -u) +
-           plSimdVec4f::Select((h & plSimdVec4i(2)) == plSimdVec4i::ZeroVector(), v, -v);
+    return plSimdVec4f::Select((h & plSimdVec4i(1)) == plSimdVec4i::MakeZero(), u, -u) +
+           plSimdVec4f::Select((h & plSimdVec4i(2)) == plSimdVec4i::MakeZero(), v, -v);
   }
 
-  PLASMA_ALWAYS_INLINE plSimdVec4f Lerp(const plSimdVec4f& t, const plSimdVec4f& a, const plSimdVec4f& b) { return plSimdVec4f::Lerp(a, b, t); }
+  PL_ALWAYS_INLINE plSimdVec4f Lerp(const plSimdVec4f& t, const plSimdVec4f& a, const plSimdVec4f& b) { return plSimdVec4f::Lerp(a, b, t); }
 
 } // namespace
 
@@ -122,4 +122,3 @@ plSimdVec4f plSimdPerlinNoise::Noise(const plSimdVec4f& inX, const plSimdVec4f& 
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_SimdMath_Implementation_SimdNoise);

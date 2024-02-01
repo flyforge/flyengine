@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Foundation/CodeUtils/Expression/ExpressionByteCode.h>
 #include <Foundation/Reflection/ReflectionUtils.h>
 #include <VisualScriptPlugin/Runtime/VisualScript.h>
 
@@ -24,7 +25,7 @@ namespace
   {
     const plRTTI* m_pType = nullptr;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt32 m_uiPadding;
 #endif
 
@@ -33,8 +34,8 @@ namespace
       inout_stream << nodeDesc.m_sTargetTypeName;
 
       out_uiSize = sizeof(NodeUserData_Type);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_Type);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_Type);
+      return PL_SUCCESS;
     }
 
     static plResult ReadType(plStreamReader& inout_stream, const plRTTI*& out_pType)
@@ -46,17 +47,17 @@ namespace
       if (out_pType == nullptr)
       {
         plLog::Error("Unknown type '{}'", sTypeName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
     {
       auto& userData = ref_node.InitUserData<NodeUserData_Type>(inout_pAdditionalData);
-      PLASMA_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
-      return PLASMA_SUCCESS;
+      PL_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -76,22 +77,22 @@ namespace
   {
     const plAbstractProperty* m_pProperty = nullptr;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt32 m_uiPadding;
 #endif
 
     static plResult Serialize(const plVisualScriptNodeDescription& nodeDesc, plStreamWriter& inout_stream, plUInt32& out_uiSize, plUInt32& out_uiAlignment)
     {
-      PLASMA_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
+      PL_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
 
       const plVariantArray& propertiesVar = nodeDesc.m_Value.Get<plVariantArray>();
-      PLASMA_ASSERT_DEBUG(propertiesVar.GetCount() == 1, "Invalid number of properties");
+      PL_ASSERT_DEBUG(propertiesVar.GetCount() == 1, "Invalid number of properties");
 
       inout_stream << propertiesVar[0].Get<plHashedString>();
 
       out_uiSize = sizeof(NodeUserData_TypeAndProperty);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_TypeAndProperty);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_TypeAndProperty);
+      return PL_SUCCESS;
     }
 
     template <typename T>
@@ -114,28 +115,28 @@ namespace
       {
         constexpr bool isFunction = std::is_same_v<T, const plAbstractFunctionProperty* const>;
         plLog::Error("{} '{}' not found on type '{}'", isFunction ? "Function" : "Property", sPropName, pType->GetTypeName());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     template <bool PropIsFunction>
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
     {
       auto& userData = ref_node.InitUserData<NodeUserData_TypeAndProperty>(inout_pAdditionalData);
-      PLASMA_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
+      PL_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
 
       if constexpr (PropIsFunction)
       {
-        PLASMA_SUCCEED_OR_RETURN(ReadProperty(inout_stream, userData.m_pType, userData.m_pType->GetFunctions(), userData.m_pProperty));
+        PL_SUCCEED_OR_RETURN(ReadProperty(inout_stream, userData.m_pType, userData.m_pType->GetFunctions(), userData.m_pProperty));
       }
       else
       {
-        PLASMA_SUCCEED_OR_RETURN(ReadProperty(inout_stream, userData.m_pType, userData.m_pType->GetProperties(), userData.m_pProperty));
+        PL_SUCCEED_OR_RETURN(ReadProperty(inout_stream, userData.m_pType, userData.m_pType->GetProperties(), userData.m_pProperty));
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -161,20 +162,20 @@ namespace
   {
     plUInt32 m_uiNumProperties = 0;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt32 m_uiPadding0;
 #endif
 
     // This struct is allocated with enough space behind it to hold an array with m_uiNumProperties size.
     const plAbstractProperty* m_Properties[1];
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
     plUInt32 m_uiPadding1;
 #endif
 
     static plResult Serialize(const plVisualScriptNodeDescription& nodeDesc, plStreamWriter& inout_stream, plUInt32& out_uiSize, plUInt32& out_uiAlignment)
     {
-      PLASMA_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
+      PL_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
 
       const plVariantArray& propertiesVar = nodeDesc.m_Value.Get<plVariantArray>();
 
@@ -189,14 +190,14 @@ namespace
 
       static_assert(sizeof(void*) <= sizeof(plUInt64));
       out_uiSize = GetDynamicSize<NodeUserData_TypeAndProperties, plUInt64>(uiCount);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_TypeAndProperties);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_TypeAndProperties);
+      return PL_SUCCESS;
     }
 
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
     {
       const plRTTI* pType = nullptr;
-      PLASMA_SUCCEED_OR_RETURN(ReadType(inout_stream, pType));
+      PL_SUCCEED_OR_RETURN(ReadType(inout_stream, pType));
 
       plUInt32 uiCount = 0;
       inout_stream >> uiCount;
@@ -212,11 +213,11 @@ namespace
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
         const plAbstractProperty* pProperty = nullptr;
-        PLASMA_SUCCEED_OR_RETURN(NodeUserData_TypeAndProperty::ReadProperty(inout_stream, userData.m_pType, properties.GetArrayPtr(), pProperty));
+        PL_SUCCEED_OR_RETURN(NodeUserData_TypeAndProperty::ReadProperty(inout_stream, userData.m_pType, properties.GetArrayPtr(), pProperty));
         userData.m_Properties[i] = pProperty;
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -250,8 +251,8 @@ namespace
       }
 
       out_uiSize = GetDynamicSize<NodeUserData_Switch, plInt64>(uiCount);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_Switch);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_Switch);
+      return PL_SUCCESS;
     }
 
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
@@ -268,7 +269,7 @@ namespace
         inout_stream >> userData.m_Cases[i];
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -289,8 +290,8 @@ namespace
       inout_stream << compOp;
 
       out_uiSize = sizeof(NodeUserData_Comparison);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_Comparison);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_Comparison);
+      return PL_SUCCESS;
     }
 
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
@@ -298,7 +299,7 @@ namespace
       auto& userData = ref_node.InitUserData<NodeUserData_Comparison>(inout_pAdditionalData);
       inout_stream >> userData.m_ComparisonOperator;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -312,30 +313,71 @@ namespace
 
   //////////////////////////////////////////////////////////////////////////
 
+  struct NodeUserData_Expression
+  {
+    plExpressionByteCode m_ByteCode;
+
+    static plResult Serialize(const plVisualScriptNodeDescription& nodeDesc, plStreamWriter& inout_stream, plUInt32& out_uiSize, plUInt32& out_uiAlignment)
+    {
+      const plExpressionByteCode& byteCode = nodeDesc.m_Value.Get<plExpressionByteCode>();
+
+      plUInt32 uiDataSize = static_cast<plUInt32>(byteCode.GetDataBlob().GetCount());
+      inout_stream << uiDataSize;
+
+      PL_SUCCEED_OR_RETURN(byteCode.Save(inout_stream));
+
+      out_uiSize = sizeof(NodeUserData_Expression) + uiDataSize;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_Expression);
+      return PL_SUCCESS;
+    }
+
+    static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
+    {
+      auto& userData = ref_node.InitUserData<NodeUserData_Expression>(inout_pAdditionalData);
+
+      plUInt32 uiDataSize = 0;
+      inout_stream >> uiDataSize;
+
+      auto externalMemory = plMakeArrayPtr(inout_pAdditionalData, uiDataSize);
+      inout_pAdditionalData += uiDataSize;
+
+      PL_SUCCEED_OR_RETURN(userData.m_ByteCode.Load(inout_stream, externalMemory));
+
+      return PL_SUCCESS;
+    }
+
+    static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
+    {
+      // Nothing to add here
+    }
+  };
+
+  //////////////////////////////////////////////////////////////////////////
+
   struct NodeUserData_StartCoroutine : public NodeUserData_Type
   {
     plEnum<plScriptCoroutineCreationMode> m_CreationMode;
 
     static plResult Serialize(const plVisualScriptNodeDescription& nodeDesc, plStreamWriter& inout_stream, plUInt32& out_uiSize, plUInt32& out_uiAlignment)
     {
-      PLASMA_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
+      PL_SUCCEED_OR_RETURN(NodeUserData_Type::Serialize(nodeDesc, inout_stream, out_uiSize, out_uiAlignment));
 
       plEnum<plScriptCoroutineCreationMode> creationMode = static_cast<plScriptCoroutineCreationMode::Enum>(nodeDesc.m_Value.Get<plInt64>());
       inout_stream << creationMode;
 
       out_uiSize = sizeof(NodeUserData_StartCoroutine);
-      out_uiAlignment = PLASMA_ALIGNMENT_OF(NodeUserData_StartCoroutine);
-      return PLASMA_SUCCESS;
+      out_uiAlignment = PL_ALIGNMENT_OF(NodeUserData_StartCoroutine);
+      return PL_SUCCESS;
     }
 
     static plResult Deserialize(plVisualScriptGraphDescription::Node& ref_node, plStreamReader& inout_stream, plUInt8*& inout_pAdditionalData)
     {
       auto& userData = ref_node.InitUserData<NodeUserData_StartCoroutine>(inout_pAdditionalData);
-      PLASMA_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
+      PL_SUCCEED_OR_RETURN(ReadType(inout_stream, userData.m_pType));
 
       inout_stream >> userData.m_CreationMode;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     static void ToString(const plVisualScriptNodeDescription& nodeDesc, plStringBuilder& out_sResult)
@@ -360,8 +402,7 @@ namespace
     ToStringFunction m_ToStringFunc = nullptr;
   };
 
-   inline UserDataContext s_TypeToUserDataContexts[] =
-   {
+  inline UserDataContext s_TypeToUserDataContexts[] = {
     {}, // Invalid,
     {}, // EntryCall,
     {}, // EntryCall_Coroutine,
@@ -421,7 +462,9 @@ namespace
     {}, // Builtin_Subtract,
     {}, // Builtin_Multiply,
     {}, // Builtin_Divide,
-    {}, // Builtin_Expression,
+    {&NodeUserData_Expression::Serialize,
+      &NodeUserData_Expression::Deserialize,
+      &NodeUserData_Expression::ToString}, // Builtin_Expression,
 
     {}, // Builtin_ToBool,
     {}, // Builtin_ToByte,
@@ -464,11 +507,11 @@ namespace
     {}, // LastBuiltin,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_TypeToUserDataContexts) == plVisualScriptNodeDescription::Type::Count);
+  static_assert(PL_ARRAY_SIZE(s_TypeToUserDataContexts) == plVisualScriptNodeDescription::Type::Count);
 } // namespace
 
 const UserDataContext& GetUserDataContext(plVisualScriptNodeDescription::Type::Enum nodeType)
 {
-  PLASMA_ASSERT_DEBUG(nodeType >= 0 && nodeType < PLASMA_ARRAY_SIZE(s_TypeToUserDataContexts), "Out of bounds access");
+  PL_ASSERT_DEBUG(nodeType >= 0 && nodeType < PL_ARRAY_SIZE(s_TypeToUserDataContexts), "Out of bounds access");
   return s_TypeToUserDataContexts[nodeType];
 }

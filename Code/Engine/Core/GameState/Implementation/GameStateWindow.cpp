@@ -38,5 +38,3 @@ void plGameStateWindow::OnResize(const plSizeU32& newWindowSize)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_GameState_Implementation_GameStateWindow);

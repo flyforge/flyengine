@@ -7,19 +7,19 @@
 #include <ParticlePlugin/Effect/ParticleEffectInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_FadeOut, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_FadeOut>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_FadeOut, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_FadeOut>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("StartAlpha", m_fStartAlpha)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_MEMBER_PROPERTY("Exponent", m_fExponent)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("StartAlpha", m_fStartAlpha)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_MEMBER_PROPERTY("Exponent", m_fExponent)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_FadeOut, 1, plRTTIDefaultAllocator<plParticleBehavior_FadeOut>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_FadeOut, 1, plRTTIDefaultAllocator<plParticleBehavior_FadeOut>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleBehaviorFactory_FadeOut::GetBehaviorType() const
@@ -35,22 +35,22 @@ void plParticleBehaviorFactory_FadeOut::CopyBehaviorProperties(plParticleBehavio
   pBehavior->m_fExponent = m_fExponent;
 }
 
-void plParticleBehaviorFactory_FadeOut::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_FadeOut::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fStartAlpha;
-  stream << m_fExponent;
+  inout_stream << m_fStartAlpha;
+  inout_stream << m_fExponent;
 }
 
-void plParticleBehaviorFactory_FadeOut::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_FadeOut::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_fStartAlpha;
-  stream >> m_fExponent;
+  inout_stream >> m_fStartAlpha;
+  inout_stream >> m_fExponent;
 }
 
 void plParticleBehavior_FadeOut::CreateRequiredStreams()
@@ -70,7 +70,7 @@ void plParticleBehavior_FadeOut::Process(plUInt64 uiNumElements)
     return;
   }
 
-  PLASMA_PROFILE_SCOPE("PFX: Fade Out");
+  PL_PROFILE_SCOPE("PFX: Fade Out");
 
   plProcessingStreamIterator<plFloat16Vec2> itLifeTime(m_pStreamLifeTime, uiNumElements, 0);
   plProcessingStreamIterator<plColorLinear16f> itColor(m_pStreamColor, uiNumElements, 0);
@@ -127,4 +127,4 @@ void plParticleBehavior_FadeOut::Process(plUInt64 uiNumElements)
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_FadeOut);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_FadeOut);

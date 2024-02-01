@@ -12,18 +12,18 @@ class QAction;
 class plQtProxy;
 class QMenu;
 
-class PLASMA_GUIFOUNDATION_DLL plQtToolBarActionMapView : public QToolBar
+class PL_GUIFOUNDATION_DLL plQtToolBarActionMapView : public QToolBar
 {
   Q_OBJECT
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plQtToolBarActionMapView);
+  PL_DISALLOW_COPY_AND_ASSIGN(plQtToolBarActionMapView);
 
 public:
-  explicit plQtToolBarActionMapView(QString title, QWidget* parent);
+  explicit plQtToolBarActionMapView(QString sTitle, QWidget* pParent);
   ~plQtToolBarActionMapView();
 
   void SetActionContext(const plActionContext& context);
 
-  virtual void setVisible(bool visible) override;
+  virtual void setVisible(bool bVisible) override;
 
 private:
   void TreeEventHandler(const plDocumentObjectStructureEvent& e);

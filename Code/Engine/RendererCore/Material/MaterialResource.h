@@ -11,7 +11,6 @@
 using plMaterialResourceHandle = plTypedResourceHandle<class plMaterialResource>;
 using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResource>;
 using plTextureCubeResourceHandle = plTypedResourceHandle<class plTextureCubeResource>;
-using plTexture3DResourceHandle = plTypedResourceHandle<class plTexture3DResource>;
 
 struct plMaterialResourceDescriptor
 {
@@ -20,7 +19,7 @@ struct plMaterialResourceDescriptor
     plHashedString m_Name;
     plVariant m_Value;
 
-    PLASMA_FORCE_INLINE bool operator==(const Parameter& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
+    PL_FORCE_INLINE bool operator==(const Parameter& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
   };
 
   struct Texture2DBinding
@@ -28,15 +27,7 @@ struct plMaterialResourceDescriptor
     plHashedString m_Name;
     plTexture2DResourceHandle m_Value;
 
-    PLASMA_FORCE_INLINE bool operator==(const Texture2DBinding& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
-  };
-
-  struct Texture3DBinding
-  {
-    plHashedString m_Name;
-    plTexture3DResourceHandle m_Value;
-
-    PLASMA_FORCE_INLINE bool operator==(const Texture3DBinding& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
+    PL_FORCE_INLINE bool operator==(const Texture2DBinding& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
   };
 
   struct TextureCubeBinding
@@ -44,13 +35,13 @@ struct plMaterialResourceDescriptor
     plHashedString m_Name;
     plTextureCubeResourceHandle m_Value;
 
-    PLASMA_FORCE_INLINE bool operator==(const TextureCubeBinding& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
+    PL_FORCE_INLINE bool operator==(const TextureCubeBinding& other) const { return m_Name == other.m_Name && m_Value == other.m_Value; }
   };
 
   void Clear();
 
   bool operator==(const plMaterialResourceDescriptor& other) const;
-  PLASMA_FORCE_INLINE bool operator!=(const plMaterialResourceDescriptor& other) const { return !(*this == other); }
+  PL_FORCE_INLINE bool operator!=(const plMaterialResourceDescriptor& other) const { return !(*this == other); }
 
   plMaterialResourceHandle m_hBaseMaterial;
   // plSurfaceResource is not linked into this project (not true anymore -> could be changed)
@@ -61,15 +52,14 @@ struct plMaterialResourceDescriptor
   plDynamicArray<Parameter> m_Parameters;
   plDynamicArray<Texture2DBinding> m_Texture2DBindings;
   plDynamicArray<TextureCubeBinding> m_TextureCubeBindings;
-  plDynamicArray<Texture3DBinding> m_Texture3DBindings;
   plRenderData::Category m_RenderDataCategory;
 };
 
-class PLASMA_RENDERERCORE_DLL plMaterialResource final : public plResource
+class PL_RENDERERCORE_DLL plMaterialResource final : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plMaterialResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plMaterialResource, plMaterialResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plMaterialResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plMaterialResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plMaterialResource, plMaterialResourceDescriptor);
 
 public:
   plMaterialResource();
@@ -89,10 +79,6 @@ public:
   void SetTextureCubeBinding(const plHashedString& sName, const plTextureCubeResourceHandle& value);
   void SetTextureCubeBinding(const char* szName, const plTextureCubeResourceHandle& value);
   plTextureCubeResourceHandle GetTextureCubeBinding(const plTempHashedString& sName);
-
-  void SetTexture3DBinding(const plHashedString& sName, const plTexture3DResourceHandle& value);
-  void SetTexture3DBinding(const char* szName, const plTexture3DResourceHandle& value);
-  plTexture3DResourceHandle GetTexture3DBinding(const plTempHashedString& sName);
 
   plRenderData::Category GetRenderDataCategory();
 
@@ -126,7 +112,7 @@ private:
   plMaterialResourceDescriptor m_mDesc;
 
   friend class plRenderContext;
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, MaterialResource);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, MaterialResource);
 
   plEvent<const plMaterialResource*, plMutex> m_ModifiedEvent;
   void OnBaseMaterialModified(const plMaterialResource* pModifiedMaterial);
@@ -153,7 +139,6 @@ private:
     plHashTable<plHashedString, plVariant> m_Parameters;
     plHashTable<plHashedString, plTexture2DResourceHandle> m_Texture2DBindings;
     plHashTable<plHashedString, plTextureCubeResourceHandle> m_TextureCubeBindings;
-    plHashTable<plHashedString, plTexture3DResourceHandle> m_Texture3DBindings;
     plRenderData::Category m_RenderDataCategory;
 
     void Reset();

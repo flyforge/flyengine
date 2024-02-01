@@ -7,39 +7,39 @@
 #include <RendererCore/AnimationSystem/Skeleton.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJointOverrideComponent, 1, plComponentMode::Dynamic);
+PL_BEGIN_COMPONENT_TYPE(plJointOverrideComponent, 1, plComponentMode::Dynamic);
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("JointName", GetJointName, SetJointName),
-    PLASMA_MEMBER_PROPERTY("OverridePosition", m_bOverridePosition)->AddAttributes(new plDefaultValueAttribute(false)),
-    PLASMA_MEMBER_PROPERTY("OverrideRotation", m_bOverrideRotation)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("OverrideScale", m_bOverrideScale)->AddAttributes(new plDefaultValueAttribute(false)),
+    PL_ACCESSOR_PROPERTY("JointName", GetJointName, SetJointName),
+    PL_MEMBER_PROPERTY("OverridePosition", m_bOverridePosition)->AddAttributes(new plDefaultValueAttribute(false)),
+    PL_MEMBER_PROPERTY("OverrideRotation", m_bOverrideRotation)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("OverrideScale", m_bOverrideScale)->AddAttributes(new plDefaultValueAttribute(false)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
+      new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPosePreparing, OnAnimationPosePreparing)
+    PL_MESSAGE_HANDLER(plMsgAnimationPosePreparing, OnAnimationPosePreparing)
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plJointOverrideComponent::plJointOverrideComponent() = default;
 plJointOverrideComponent::~plJointOverrideComponent() = default;
 
-void plJointOverrideComponent::SerializeComponent(plWorldWriter& stream) const
+void plJointOverrideComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_sJointToOverride;
   s << m_bOverridePosition;
@@ -47,11 +47,11 @@ void plJointOverrideComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_bOverrideScale;
 }
 
-void plJointOverrideComponent::DeserializeComponent(plWorldReader& stream)
+void plJointOverrideComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_sJointToOverride;
   s >> m_bOverridePosition;
@@ -106,9 +106,9 @@ void plJointOverrideComponent::OnAnimationPosePreparing(plMsgAnimationPosePrepar
 
   if (m_bOverrideRotation)
   {
-    SimdFloat4 vx = ozz::math::simd_float4::Load1(t.m_qRotation.v.x);
-    SimdFloat4 vy = ozz::math::simd_float4::Load1(t.m_qRotation.v.y);
-    SimdFloat4 vz = ozz::math::simd_float4::Load1(t.m_qRotation.v.z);
+    SimdFloat4 vx = ozz::math::simd_float4::Load1(t.m_qRotation.x);
+    SimdFloat4 vy = ozz::math::simd_float4::Load1(t.m_qRotation.y);
+    SimdFloat4 vz = ozz::math::simd_float4::Load1(t.m_qRotation.z);
     SimdFloat4 vw = ozz::math::simd_float4::Load1(t.m_qRotation.w);
 
     SoaQuaternion val = msg.m_LocalTransforms[soaIdx].rotation;
@@ -136,3 +136,6 @@ void plJointOverrideComponent::OnAnimationPosePreparing(plMsgAnimationPosePrepar
     msg.m_LocalTransforms[soaIdx].scale = val;
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_JointOverrideComponent);

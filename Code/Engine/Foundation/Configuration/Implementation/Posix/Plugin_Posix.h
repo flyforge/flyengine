@@ -1,14 +1,20 @@
 #include <Foundation/FoundationInternal.h>
-PLASMA_FOUNDATION_INTERNAL_HEADER
+PL_FOUNDATION_INTERNAL_HEADER
 
 #include <dlfcn.h>
 
+#include <Foundation/System/Process.h>
 #include <Foundation/Configuration/Plugin.h>
 #include <Foundation/IO/OSFile.h>
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Strings/StringBuilder.h>
 
 using plPluginModule = void*;
+
+bool plPlugin::PlatformNeedsPluginCopy()
+{
+  return false;
+}
 
 void plPlugin::GetPluginPaths(plStringView sPluginName, plStringBuilder& sOriginalFile, plStringBuilder& sCopiedFile, plUInt8 uiFileCopyNumber)
 {
@@ -31,10 +37,10 @@ plResult UnloadPluginModule(plPluginModule& Module, plStringView sPluginFile)
   {
     plStringBuilder tmp;
     plLog::Error("Could not unload plugin '{0}'. Error {1}", sPluginFile.GetData(tmp), static_cast<const char*>(dlerror()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult LoadPluginModule(plStringView sFileToLoad, plPluginModule& Module, plStringView sPluginFile)
@@ -44,7 +50,7 @@ plResult LoadPluginModule(plStringView sFileToLoad, plPluginModule& Module, plSt
   if (Module == nullptr)
   {
     plLog::Error("Could not load plugin '{0}'. Error {1}.\nSet the environment variable LD_DEBUG=all to get more information.", sPluginFile.GetData(tmp), static_cast<const char*>(dlerror()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

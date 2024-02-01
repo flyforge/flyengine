@@ -8,7 +8,7 @@
 class plStreamWriter;
 class plStreamReader;
 
-struct PLASMA_TEXTURE_DLL plTexFormat
+struct PL_TEXTURE_DLL plTexFormat
 {
   bool m_bSRGB = false;
   plEnum<plImageAddressMode> m_AddressModeU;
@@ -28,7 +28,7 @@ struct PLASMA_TEXTURE_DLL plTexFormat
   // version 5
   int m_GalRenderTargetFormat = 0;
 
-  void WriteTextureHeader(plStreamWriter& stream) const;
-  void WriteRenderTargetHeader(plStreamWriter& stream) const;
-  void ReadHeader(plStreamReader& stream);
+  void WriteTextureHeader(plStreamWriter& inout_stream) const;
+  void WriteRenderTargetHeader(plStreamWriter& inout_stream) const;
+  void ReadHeader(plStreamReader& inout_stream);
 };

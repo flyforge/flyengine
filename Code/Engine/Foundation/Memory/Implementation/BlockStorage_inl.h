@@ -1,6 +1,6 @@
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::ConstIterator::ConstIterator(
+PL_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::ConstIterator::ConstIterator(
   const plBlockStorage<T, BlockSize, StorageType>& storage, plUInt32 uiStartIndex, plUInt32 uiCount)
   : m_Storage(storage)
 {
@@ -18,7 +18,7 @@ PLASMA_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::ConstIterator::Co
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE T& plBlockStorage<T, BlockSize, StorageType>::ConstIterator::CurrentElement() const
+PL_FORCE_INLINE T& plBlockStorage<T, BlockSize, StorageType>::ConstIterator::CurrentElement() const
 {
   const plUInt32 uiBlockIndex = m_uiCurrentIndex / plDataBlock<T, BlockSize>::CAPACITY;
   const plUInt32 uiInnerIndex = m_uiCurrentIndex - uiBlockIndex * plDataBlock<T, BlockSize>::CAPACITY;
@@ -26,25 +26,25 @@ PLASMA_FORCE_INLINE T& plBlockStorage<T, BlockSize, StorageType>::ConstIterator:
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE const T& plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator*() const
+PL_ALWAYS_INLINE const T& plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator*() const
 {
   return CurrentElement();
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE const T* plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator->() const
+PL_ALWAYS_INLINE const T* plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator->() const
 {
   return &CurrentElement();
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator const T*() const
+PL_ALWAYS_INLINE plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator const T*() const
 {
   return &CurrentElement();
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterator::Next()
+PL_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterator::Next()
 {
   ++m_uiCurrentIndex;
 
@@ -59,13 +59,13 @@ PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterato
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE bool plBlockStorage<T, BlockSize, StorageType>::ConstIterator::IsValid() const
+PL_FORCE_INLINE bool plBlockStorage<T, BlockSize, StorageType>::ConstIterator::IsValid() const
 {
   return m_uiCurrentIndex < plMath::Min(m_uiEndIndex, m_Storage.m_uiCount);
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator++()
+PL_ALWAYS_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterator::operator++()
 {
   Next();
 }
@@ -73,26 +73,26 @@ PLASMA_ALWAYS_INLINE void plBlockStorage<T, BlockSize, StorageType>::ConstIterat
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::Iterator::Iterator(
+PL_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::Iterator::Iterator(
   const plBlockStorage<T, BlockSize, StorageType>& storage, plUInt32 uiStartIndex, plUInt32 uiCount)
   : ConstIterator(storage, uiStartIndex, uiCount)
 {
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE T& plBlockStorage<T, BlockSize, StorageType>::Iterator::operator*()
+PL_ALWAYS_INLINE T& plBlockStorage<T, BlockSize, StorageType>::Iterator::operator*()
 {
   return this->CurrentElement();
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE T* plBlockStorage<T, BlockSize, StorageType>::Iterator::operator->()
+PL_ALWAYS_INLINE T* plBlockStorage<T, BlockSize, StorageType>::Iterator::operator->()
 {
   return &(this->CurrentElement());
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE plBlockStorage<T, BlockSize, StorageType>::Iterator::operator T*()
+PL_ALWAYS_INLINE plBlockStorage<T, BlockSize, StorageType>::Iterator::operator T*()
 {
   return &(this->CurrentElement());
 }
@@ -100,8 +100,8 @@ PLASMA_ALWAYS_INLINE plBlockStorage<T, BlockSize, StorageType>::Iterator::operat
 ///////////////////////////////////////////////////////////////////////////////////////////////////
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::plBlockStorage(
-  plLargeBlockAllocator<BlockSize>* pBlockAllocator, plAllocatorBase* pAllocator)
+PL_FORCE_INLINE plBlockStorage<T, BlockSize, StorageType>::plBlockStorage(
+  plLargeBlockAllocator<BlockSize>* pBlockAllocator, plAllocator* pAllocator)
   : m_pBlockAllocator(pBlockAllocator)
   , m_Blocks(pAllocator)
 
@@ -181,7 +181,7 @@ T* plBlockStorage<T, BlockSize, StorageType>::Create()
     ++m_uiCount;
   }
 
-  plMemoryUtils::Construct(pNewObject, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes>(pNewObject, 1);
 
   if (StorageType == plBlockStorageType::FreeList)
   {
@@ -193,7 +193,7 @@ T* plBlockStorage<T, BlockSize, StorageType>::Create()
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject)
+PL_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject)
 {
   T* pDummy;
   Delete(pObject, pDummy);
@@ -206,27 +206,27 @@ void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject, T*& out_pMove
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE plUInt32 plBlockStorage<T, BlockSize, StorageType>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plBlockStorage<T, BlockSize, StorageType>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE typename plBlockStorage<T, BlockSize, StorageType>::Iterator plBlockStorage<T, BlockSize, StorageType>::GetIterator(
+PL_ALWAYS_INLINE typename plBlockStorage<T, BlockSize, StorageType>::Iterator plBlockStorage<T, BlockSize, StorageType>::GetIterator(
   plUInt32 uiStartIndex /*= 0*/, plUInt32 uiCount /*= plInvalidIndex*/)
 {
   return Iterator(*this, uiStartIndex, uiCount);
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_ALWAYS_INLINE typename plBlockStorage<T, BlockSize, StorageType>::ConstIterator plBlockStorage<T, BlockSize, StorageType>::GetIterator(
+PL_ALWAYS_INLINE typename plBlockStorage<T, BlockSize, StorageType>::ConstIterator plBlockStorage<T, BlockSize, StorageType>::GetIterator(
   plUInt32 uiStartIndex /*= 0*/, plUInt32 uiCount /*= plInvalidIndex*/) const
 {
   return ConstIterator(*this, uiStartIndex, uiCount);
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject, T*& out_pMovedObject, plTraitInt<plBlockStorageType::Compact>)
+PL_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject, T*& out_pMovedObject, plTraitInt<plBlockStorageType::Compact>)
 {
   plDataBlock<T, BlockSize>& lastBlock = m_Blocks.PeekBack();
   T* pLast = lastBlock.PopBack();
@@ -251,12 +251,12 @@ PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pO
 }
 
 template <typename T, plUInt32 BlockSize, plBlockStorageType::Enum StorageType>
-PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject, T*& out_pMovedObject, plTraitInt<plBlockStorageType::FreeList>)
+PL_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pObject, T*& out_pMovedObject, plTraitInt<plBlockStorageType::FreeList>)
 {
   plUInt32 uiIndex = plInvalidIndex;
   for (plUInt32 uiBlockIndex = 0; uiBlockIndex < m_Blocks.GetCount(); ++uiBlockIndex)
   {
-    ptrdiff_t diff = pObject - m_Blocks[uiBlockIndex].m_pData;
+    std::ptrdiff_t diff = pObject - m_Blocks[uiBlockIndex].m_pData;
     if (diff >= 0 && diff < plDataBlock<T, BlockSize>::CAPACITY)
     {
       uiIndex = uiBlockIndex * plDataBlock<T, BlockSize>::CAPACITY + (plInt32)diff;
@@ -264,7 +264,7 @@ PLASMA_FORCE_INLINE void plBlockStorage<T, BlockSize, StorageType>::Delete(T* pO
     }
   }
 
-  PLASMA_ASSERT_DEV(uiIndex != plInvalidIndex, "Invalid object {0} was not found in block storage.", plArgP(pObject));
+  PL_ASSERT_DEV(uiIndex != plInvalidIndex, "Invalid object {0} was not found in block storage.", plArgP(pObject));
 
   m_UsedEntries.ClearBit(uiIndex);
 

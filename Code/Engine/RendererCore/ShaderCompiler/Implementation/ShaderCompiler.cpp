@@ -8,8 +8,8 @@
 #include <RendererCore/ShaderCompiler/ShaderManager.h>
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderProgramCompiler, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plShaderProgramCompiler, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 namespace
 {
@@ -73,7 +73,7 @@ namespace
 
         for (const auto& ev : enumValues)
         {
-          sTemp.Format("{1} {2}", szName, ev.m_sValueName, ev.m_iValueValue);
+          sTemp.SetFormat("{1} {2}", szName, ev.m_sValueName, ev.m_iValueValue);
           out_defines.PushBack(sTemp);
         }
 
@@ -108,7 +108,7 @@ plResult plShaderCompiler::FileOpen(plStringView sAbsoluteFile, plDynamicArray<p
       plMemoryUtils::Copy<plUInt8>(FileContent.GetData(), (const plUInt8*)sString.GetStartPointer(), uiCount);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   for (plUInt32 stage = 0; stage < plGALShaderStage::ENUM_COUNT; ++stage)
@@ -126,7 +126,7 @@ plResult plShaderCompiler::FileOpen(plStringView sAbsoluteFile, plDynamicArray<p
         plMemoryUtils::Copy<plUInt8>(FileContent.GetData(), (const plUInt8*)szString, uiCount);
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
@@ -136,10 +136,10 @@ plResult plShaderCompiler::FileOpen(plStringView sAbsoluteFile, plDynamicArray<p
   if (r.Open(sAbsoluteFile).Failed())
   {
     plLog::Error("Could not find include file '{0}'", sAbsoluteFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   plFileStats stats;
   if (plFileSystem::GetFileStats(sAbsoluteFile, stats).Succeeded())
   {
@@ -154,7 +154,7 @@ plResult plShaderCompiler::FileOpen(plStringView sAbsoluteFile, plDynamicArray<p
     FileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plShaderCompiler::CompileShaderPermutationForPlatforms(plStringView sFile, const plArrayPtr<const plPermutationVar>& permutationVars, plLogInterface* pLog, plStringView sPlatform)
@@ -164,7 +164,7 @@ plResult plShaderCompiler::CompileShaderPermutationForPlatforms(plStringView sFi
   {
     plFileReader File;
     if (File.Open(sFile).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     sFileContent.ReadAll(File);
   }
@@ -259,13 +259,14 @@ plResult plShaderCompiler::CompileShaderPermutationForPlatforms(plStringView sFi
   m_StageSourceFile[plGALShaderStage::ComputeShader].ChangeFileExtension("cs");
 
   // try out every compiler that we can find
-  plResult result = PLASMA_SUCCESS;
+  plResult result = PL_SUCCESS;
   plRTTI::ForEachDerivedType<plShaderProgramCompiler>(
-    [&](const plRTTI* pRtti) {
+    [&](const plRTTI* pRtti)
+    {
       plUniquePtr<plShaderProgramCompiler> pCompiler = pRtti->GetAllocator()->Allocate<plShaderProgramCompiler>();
 
       if (RunShaderCompiler(sFile, sPlatform, pCompiler.Borrow(), pLog).Failed())
-        result = PLASMA_FAILURE;
+        result = PL_FAILURE;
     },
     plRTTI::ForEachOptions::ExcludeNonAllocatable);
 
@@ -274,7 +275,7 @@ plResult plShaderCompiler::CompileShaderPermutationForPlatforms(plStringView sFi
 
 plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sPlatform, plShaderProgramCompiler* pCompiler, plLogInterface* pLog)
 {
-  PLASMA_LOG_BLOCK(pLog, "Compiling Shader", sFile);
+  PL_LOG_BLOCK(pLog, "Compiling Shader", sFile);
 
   plStringBuilder sProcessed[plGALShaderStage::ENUM_COUNT];
 
@@ -290,13 +291,13 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
     if (!PlatformEnabled(m_ShaderData.m_Platforms, Platforms[p]))
       continue;
 
-    PLASMA_LOG_BLOCK(pLog, "Platform", Platforms[p]);
+    PL_LOG_BLOCK(pLog, "Platform", Platforms[p]);
 
-    plShaderProgramCompiler::plShaderProgramData spd;
+    plShaderProgramData spd;
     spd.m_sSourceFile = sFile;
     spd.m_sPlatform = Platforms[p];
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     // 'DEBUG' is a platform tag that enables additional compiler flags
     if (PlatformEnabled(m_ShaderData.m_Platforms, "DEBUG"))
     {
@@ -315,7 +316,7 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
 
     // Generate Shader State Source
     {
-      PLASMA_LOG_BLOCK(pLog, "Preprocessing Shader State Source");
+      PL_LOG_BLOCK(pLog, "Preprocessing Shader State Source");
 
       plPreprocessor pp;
       pp.SetCustomFileCache(&m_FileCache);
@@ -326,38 +327,39 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
 
       for (auto& define : defines)
       {
-        PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine(define));
+        PL_SUCCEED_OR_RETURN(pp.AddCustomDefine(define));
       }
 
       bool bFoundUndefinedVars = false;
-      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e) {
-          if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
-          {
-            bFoundUndefinedVars = true;
+      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e)
+        {
+        if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
+        {
+          bFoundUndefinedVars = true;
 
-            plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
-          } });
+          plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
+        } });
 
       plStringBuilder sOutput;
       if (pp.Process("ShaderRenderState", sOutput, false).Failed() || bFoundUndefinedVars)
       {
         plLog::Error(pLog, "Preprocessing the Shader State block failed");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       else
       {
         if (shaderPermutationBinary.m_StateDescriptor.Parse(sOutput).Failed())
         {
           plLog::Error(pLog, "Failed to interpret the shader state block");
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
 
+    // Shader Preprocessing
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      spd.m_StageBinary[stage].m_Stage = (plGALShaderStage::Enum)stage;
-      spd.m_StageBinary[stage].m_uiSourceHash = 0;
+      spd.m_uiSourceHash[stage] = 0;
 
       if (m_ShaderData.m_ShaderStageSource[stage].IsEmpty())
         continue;
@@ -371,45 +373,63 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
       pp.SetPassThroughPragma(true);
       pp.SetPassThroughUnknownCmdsCB(plMakeDelegate(&plShaderCompiler::PassThroughUnknownCommandCB, this));
       pp.SetPassThroughLine(false);
-      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e) {
-          if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
-          {
-            bFoundUndefinedVars = true;
+      pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e)
+        {
+        if (e.m_Type == plPreprocessor::ProcessingEvent::EvaluateUnknown)
+        {
+          bFoundUndefinedVars = true;
 
-            plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
-          } });
+          plLog::Error("Undefined variable is evaluated: '{0}' (File: '{1}', Line: {2}", e.m_pToken->m_DataView, e.m_pToken->m_File, e.m_pToken->m_uiLine);
+        } });
 
-      PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine(s_szStageDefines[stage]));
+      PL_SUCCEED_OR_RETURN(pp.AddCustomDefine(s_szStageDefines[stage]));
       for (auto& define : defines)
       {
-        PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine(define));
+        PL_SUCCEED_OR_RETURN(pp.AddCustomDefine(define));
       }
 
-      plUInt32 uiSourceStringLen = 0;
       if (pp.Process(m_StageSourceFile[stage], sProcessed[stage], true, true, true).Failed() || bFoundUndefinedVars)
       {
         sProcessed[stage].Clear();
         spd.m_sShaderSource[stage] = m_StageSourceFile[stage];
 
         plLog::Error(pLog, "Shader preprocessing failed");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       else
       {
         spd.m_sShaderSource[stage] = sProcessed[stage];
-        uiSourceStringLen = sProcessed[stage].GetElementCount();
       }
+    }
 
-      spd.m_StageBinary[stage].m_uiSourceHash = plHashingUtils::xxHash32(spd.m_sShaderSource[stage].GetStartPointer(), uiSourceStringLen);
+    // Let the shader compiler make any modifications to the source code before we hash and compile the shader.
+    if (pCompiler->ModifyShaderSource(spd, pLog).Failed())
+    {
+      WriteFailedShaderSource(spd, pLog);
+      return PL_FAILURE;
+    }
 
-      if (spd.m_StageBinary[stage].m_uiSourceHash != 0)
+    // Load shader cache
+    for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
+    {
+      plUInt32 uiSourceStringLen = spd.m_sShaderSource[stage].GetElementCount();
+      spd.m_uiSourceHash[stage] = uiSourceStringLen == 0 ? 0u : plHashingUtils::xxHash32(spd.m_sShaderSource[stage].GetData(), uiSourceStringLen);
+
+      if (spd.m_uiSourceHash[stage] != 0)
       {
-        plShaderStageBinary* pBinary = plShaderStageBinary::LoadStageBinary((plGALShaderStage::Enum)stage, spd.m_StageBinary[stage].m_uiSourceHash);
+        plShaderStageBinary* pBinary = plShaderStageBinary::LoadStageBinary((plGALShaderStage::Enum)stage, spd.m_uiSourceHash[stage]);
 
         if (pBinary)
         {
-          spd.m_StageBinary[stage] = *pBinary;
-          spd.m_bWriteToDisk[stage] = pBinary->GetByteCode().IsEmpty();
+          spd.m_ByteCode[stage] = pBinary->m_pGALByteCode;
+          spd.m_bWriteToDisk[stage] = false;
+        }
+        else
+        {
+          // Can't find shader with given hash on disk, create a new plGALShaderByteCode and let the compiler build it.
+          spd.m_ByteCode[stage] = PL_DEFAULT_NEW(plGALShaderByteCode);
+          spd.m_ByteCode[stage]->m_Stage = (plGALShaderStage::Enum)stage;
+          spd.m_ByteCode[stage]->m_bWasCompiledWithDebug = spd.m_Flags.IsSet(plShaderCompilerFlags::Debug);
         }
       }
     }
@@ -417,7 +437,7 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
     // copy the source hashes
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      shaderPermutationBinary.m_uiShaderStageHashes[stage] = spd.m_StageBinary[stage].m_uiSourceHash;
+      shaderPermutationBinary.m_uiShaderStageHashes[stage] = spd.m_uiSourceHash[stage];
     }
 
     // if compilation failed, the stage binary for the source hash will simply not exist and therefore cannot be loaded
@@ -425,20 +445,23 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
     if (pCompiler->Compile(spd, plLog::GetThreadLocalLogSystem()).Failed())
     {
       WriteFailedShaderSource(spd, pLog);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
     {
-      if (spd.m_StageBinary[stage].m_uiSourceHash != 0 && spd.m_bWriteToDisk[stage])
+      if (spd.m_uiSourceHash[stage] != 0 && spd.m_bWriteToDisk[stage])
       {
-        spd.m_StageBinary[stage].m_bWasCompiledWithDebug = spd.m_Flags.IsSet(plShaderCompilerFlags::Debug);
+        plShaderStageBinary bin;
+        bin.m_uiSourceHash = spd.m_uiSourceHash[stage];
+        bin.m_pGALByteCode = spd.m_ByteCode[stage];
 
-        if (spd.m_StageBinary[stage].WriteStageBinary(pLog).Failed())
+        if (bin.WriteStageBinary(pLog).Failed())
         {
           plLog::Error(pLog, "Writing stage {0} binary failed", stage);
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
+        plShaderStageBinary::s_ShaderStageBinaries[stage].Insert(bin.m_uiSourceHash, bin);
       }
     }
 
@@ -464,38 +487,38 @@ plResult plShaderCompiler::RunShaderCompiler(plStringView sFile, plStringView sP
 
     plDeferredFileWriter PermutationFileOut;
     PermutationFileOut.SetOutput(sTemp);
-    PLASMA_SUCCEED_OR_RETURN(shaderPermutationBinary.Write(PermutationFileOut));
+    PL_SUCCEED_OR_RETURN(shaderPermutationBinary.Write(PermutationFileOut));
 
     if (PermutationFileOut.Close().Failed())
     {
       plLog::Error(pLog, "Could not open file for writing: '{0}'", sTemp);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-void plShaderCompiler::WriteFailedShaderSource(plShaderProgramCompiler::plShaderProgramData& spd, plLogInterface* pLog)
+void plShaderCompiler::WriteFailedShaderSource(plShaderProgramData& spd, plLogInterface* pLog)
 {
   for (plUInt32 stage = plGALShaderStage::VertexShader; stage < plGALShaderStage::ENUM_COUNT; ++stage)
   {
-    if (spd.m_StageBinary[stage].m_uiSourceHash != 0 && spd.m_bWriteToDisk[stage])
+    if (spd.m_uiSourceHash[stage] != 0 && spd.m_bWriteToDisk[stage])
     {
       plStringBuilder sShaderStageFile = plShaderManager::GetCacheDirectory();
 
       sShaderStageFile.AppendPath(plShaderManager::GetActivePlatform());
-      sShaderStageFile.AppendFormat("/_Failed_{0}_{1}.plShaderSource", plGALShaderStage::Names[stage], plArgU(spd.m_StageBinary[stage].m_uiSourceHash, 8, true, 16, true));
+      sShaderStageFile.AppendFormat("/_Failed_{0}_{1}.plShaderSource", plGALShaderStage::Names[stage], plArgU(spd.m_uiSourceHash[stage], 8, true, 16, true));
 
       plFileWriter StageFileOut;
       if (StageFileOut.Open(sShaderStageFile).Succeeded())
       {
-        StageFileOut.WriteBytes(spd.m_sShaderSource[stage].GetStartPointer(), spd.m_sShaderSource[stage].GetElementCount()).AssertSuccess();
+        StageFileOut.WriteBytes(spd.m_sShaderSource[stage].GetData(), spd.m_sShaderSource[stage].GetElementCount()).AssertSuccess();
         plLog::Info(pLog, "Failed shader source written to '{0}'", sShaderStageFile);
       }
     }
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_ShaderCompiler_Implementation_ShaderCompiler);
+PL_STATICLINK_FILE(RendererCore, RendererCore_ShaderCompiler_Implementation_ShaderCompiler);

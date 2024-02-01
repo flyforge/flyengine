@@ -11,7 +11,7 @@ class plStringBuilder;
 /// All functions that require to modify the path are provided by plStringBuilder.
 /// Many functions return plStringView's, which will always be strict sub-strings of their input data.
 /// That allows that these functions can work without any additional memory allocations.
-class PLASMA_FOUNDATION_DLL plPathUtils
+class PL_FOUNDATION_DLL plPathUtils
 {
 public:
   /// \brief The path separator used by this operating system.
@@ -91,7 +91,9 @@ public:
   static void MakeValidFilename(plStringView sFilename, plUInt32 uiReplacementCharacter, plStringBuilder& out_sFilename);
 
   /// \brief Checks whether \a sFullPath starts with \a sPrefixPath.
-  static bool IsSubPath(plStringView sPrefixPath, plStringView sFullPath);
+  static bool IsSubPath(plStringView sPrefixPath, plStringView sFullPath); // [tested]
+  /// \brief Checks whether \a sFullPath starts with \a sPrefixPath. Case insensitive.
+  static bool IsSubPath_NoCase(plStringView sPrefixPath, plStringView sFullPath); // [tested]
 };
 
 #include <Foundation/Strings/Implementation/PathUtils_inl.h>

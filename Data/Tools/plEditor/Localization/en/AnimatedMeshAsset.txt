@@ -1,0 +1,14 @@
+# Asset Types
+
+Animated Mesh;Animated Mesh
+
+# Component Types
+
+plAnimatedMeshComponent;Animated Mesh
+
+# UI
+
+AnimatedMeshImport.NoMaterials;Animated Mesh
+AnimatedMeshImport.WithMaterials;Animated Mesh with Materials
+
+# Properties

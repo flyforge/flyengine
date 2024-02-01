@@ -2,9 +2,9 @@
 
 #include <ParticlePlugin/Finalizer/ParticleFinalizer.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_LastPosition final : public plParticleFinalizerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_LastPosition final : public plParticleFinalizerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_LastPosition, plParticleFinalizerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_LastPosition, plParticleFinalizerFactory);
 
 public:
   plParticleFinalizerFactory_LastPosition();
@@ -14,9 +14,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizer_LastPosition final : public plParticleFinalizer
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizer_LastPosition final : public plParticleFinalizer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_LastPosition, plParticleFinalizer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_LastPosition, plParticleFinalizer);
 
 public:
   plParticleFinalizer_LastPosition();

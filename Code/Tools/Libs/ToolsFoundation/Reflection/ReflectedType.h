@@ -14,12 +14,12 @@ class plPhantomRttiManager;
 class plReflectedTypeStorageManager;
 
 /// \brief Event message used by the plPhantomRttiManager.
-struct PLASMA_TOOLSFOUNDATION_DLL plPhantomTypeChange
+struct PL_TOOLSFOUNDATION_DLL plPhantomTypeChange
 {
   const plRTTI* m_pChangedType = nullptr;
 };
 
-struct PLASMA_TOOLSFOUNDATION_DLL plAttributeHolder
+struct PL_TOOLSFOUNDATION_DLL plAttributeHolder
 {
   plAttributeHolder();
   plAttributeHolder(const plAttributeHolder& rhs);
@@ -36,10 +36,10 @@ struct PLASMA_TOOLSFOUNDATION_DLL plAttributeHolder
   mutable plHybridArray<const plPropertyAttribute*, 2> m_Attributes;
   plArrayPtr<const plPropertyAttribute* const> m_ReferenceAttributes;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TOOLSFOUNDATION_DLL, plAttributeHolder);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TOOLSFOUNDATION_DLL, plAttributeHolder);
 
 /// \brief Stores the description of a reflected property in a serializable form, used by plReflectedTypeDescriptor.
-struct PLASMA_TOOLSFOUNDATION_DLL plReflectedPropertyDescriptor : public plAttributeHolder
+struct PL_TOOLSFOUNDATION_DLL plReflectedPropertyDescriptor : public plAttributeHolder
 {
   plReflectedPropertyDescriptor() = default;
   plReflectedPropertyDescriptor(plPropertyCategory::Enum category, plStringView sName, plStringView sType, plBitflags<plPropertyFlags> flags);
@@ -59,19 +59,19 @@ struct PLASMA_TOOLSFOUNDATION_DLL plReflectedPropertyDescriptor : public plAttri
   plBitflags<plPropertyFlags> m_Flags;
   plVariant m_ConstantValue;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TOOLSFOUNDATION_DLL, plReflectedPropertyDescriptor);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TOOLSFOUNDATION_DLL, plReflectedPropertyDescriptor);
 
-struct PLASMA_TOOLSFOUNDATION_DLL plFunctionArgumentDescriptor
+struct PL_TOOLSFOUNDATION_DLL plFunctionArgumentDescriptor
 {
   plFunctionArgumentDescriptor();
   plFunctionArgumentDescriptor(plStringView sType, plBitflags<plPropertyFlags> flags);
   plString m_sType;
   plBitflags<plPropertyFlags> m_Flags;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TOOLSFOUNDATION_DLL, plFunctionArgumentDescriptor);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TOOLSFOUNDATION_DLL, plFunctionArgumentDescriptor);
 
 /// \brief Stores the description of a reflected function in a serializable form, used by plReflectedTypeDescriptor.
-struct PLASMA_TOOLSFOUNDATION_DLL plReflectedFunctionDescriptor : public plAttributeHolder
+struct PL_TOOLSFOUNDATION_DLL plReflectedFunctionDescriptor : public plAttributeHolder
 {
   plReflectedFunctionDescriptor();
   plReflectedFunctionDescriptor(plStringView sName, plBitflags<plPropertyFlags> flags, plEnum<plFunctionType> type, plArrayPtr<const plPropertyAttribute* const> attributes);
@@ -87,11 +87,11 @@ struct PLASMA_TOOLSFOUNDATION_DLL plReflectedFunctionDescriptor : public plAttri
   plFunctionArgumentDescriptor m_ReturnValue;
   plDynamicArray<plFunctionArgumentDescriptor> m_Arguments;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TOOLSFOUNDATION_DLL, plReflectedFunctionDescriptor);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TOOLSFOUNDATION_DLL, plReflectedFunctionDescriptor);
 
 
 /// \brief Stores the description of a reflected type in a serializable form. Used by plPhantomRttiManager to add new types.
-struct PLASMA_TOOLSFOUNDATION_DLL plReflectedTypeDescriptor : public plAttributeHolder
+struct PL_TOOLSFOUNDATION_DLL plReflectedTypeDescriptor : public plAttributeHolder
 {
   ~plReflectedTypeDescriptor();
 
@@ -104,4 +104,4 @@ struct PLASMA_TOOLSFOUNDATION_DLL plReflectedTypeDescriptor : public plAttribute
   plDynamicArray<plReflectedFunctionDescriptor> m_Functions;
   plUInt32 m_uiTypeVersion = 1;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_TOOLSFOUNDATION_DLL, plReflectedTypeDescriptor);
+PL_DECLARE_REFLECTABLE_TYPE(PL_TOOLSFOUNDATION_DLL, plReflectedTypeDescriptor);

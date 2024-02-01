@@ -5,13 +5,13 @@ template <typename T>
 class plLock
 {
 public:
-  PLASMA_ALWAYS_INLINE explicit plLock(T& ref_lock)
+  PL_ALWAYS_INLINE explicit plLock(T& ref_lock)
     : m_Lock(ref_lock)
   {
     m_Lock.Lock();
   }
 
-  PLASMA_ALWAYS_INLINE ~plLock() { m_Lock.Unlock(); }
+  PL_ALWAYS_INLINE ~plLock() { m_Lock.Unlock(); }
 
 private:
   plLock();
@@ -22,4 +22,4 @@ private:
 };
 
 /// \brief Shortcut for plLock<Type> l(lock)
-#define PLASMA_LOCK(lock) plLock<decltype(lock)> PLASMA_CONCAT(l_, PLASMA_SOURCE_LINE)(lock)
+#define PL_LOCK(lock) plLock<decltype(lock)> PL_CONCAT(l_, PL_SOURCE_LINE)(lock)

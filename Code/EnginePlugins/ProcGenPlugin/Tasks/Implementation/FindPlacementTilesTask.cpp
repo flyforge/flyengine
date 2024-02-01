@@ -15,7 +15,7 @@ FindPlacementTilesTask::FindPlacementTilesTask(plProcPlacementComponent* pCompon
   , m_uiOutputIndex(uiOutputIndex)
 {
   plStringBuilder sName;
-  sName.Format("UpdateTiles {}", m_pComponent->m_OutputContexts[m_uiOutputIndex].m_pOutput->m_sName);
+  sName.SetFormat("UpdateTiles {}", m_pComponent->m_OutputContexts[m_uiOutputIndex].m_pOutput->m_sName);
 
   ConfigureTask(sName, plTaskNesting::Never);
 }
@@ -32,7 +32,6 @@ void FindPlacementTilesTask::Execute()
   auto& outputContext = m_pComponent->m_OutputContexts[m_uiOutputIndex];
 
   const float fTileSize = outputContext.m_pOutput->GetTileSize();
-  const float fPatternSize = outputContext.m_pOutput->m_pPattern->m_fSize;
   const float fCullDistance = outputContext.m_pOutput->m_fCullDistance * cvar_ProcGenCullingDistanceScale;
 
   float fRadius = plMath::Min(plMath::Ceil(fCullDistance / fTileSize + 1.0f), static_cast<float>(cvar_ProcGenCullingMaxRadius));
@@ -146,7 +145,7 @@ void FindPlacementTilesTask::Execute()
 
     if (m_TilesByAge.GetCount() > uiMaxOldTiles)
     {
-      m_TilesByAge.Sort([](auto& tileA, auto& tileB) { return tileA.m_uiLastSeenFrame < tileB.m_uiLastSeenFrame; });
+      m_TilesByAge.Sort([](auto& ref_tileA, auto& ref_tileB) { return ref_tileA.m_uiLastSeenFrame < ref_tileB.m_uiLastSeenFrame; });
 
       plUInt32 uiOldTileCount = m_TilesByAge.GetCount() - uiMaxOldTiles;
       for (plUInt32 i = 0; i < uiOldTileCount; ++i)

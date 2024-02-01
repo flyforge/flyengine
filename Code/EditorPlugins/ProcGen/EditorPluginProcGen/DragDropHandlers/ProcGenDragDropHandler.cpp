@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginProcGen/DragDropHandlers/ProcGenDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcPlacementComponentDragDropHandler, 1, plRTTIDefaultAllocator<plProcPlacementComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcPlacementComponentDragDropHandler, 1, plRTTIDefaultAllocator<plProcPlacementComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plProcPlacementComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const

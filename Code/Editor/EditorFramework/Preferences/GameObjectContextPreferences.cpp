@@ -3,16 +3,16 @@
 #include <EditorFramework/Preferences/GameObjectContextPreferences.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextPreferencesUser, 1, plRTTIDefaultAllocator<plGameObjectContextPreferencesUser>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextPreferencesUser, 1, plRTTIDefaultAllocator<plGameObjectContextPreferencesUser>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ContextDocument", m_ContextDocument)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("ContextObject", m_ContextObject)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("ContextDocument", m_ContextDocument)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("ContextObject", m_ContextObject)->AddAttributes(new plHiddenAttribute),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plGameObjectContextPreferencesUser::plGameObjectContextPreferencesUser()

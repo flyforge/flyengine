@@ -18,11 +18,11 @@ plResult plLuaWrapper::OpenTable(const char* szName)
   if (lua_istable(m_pState, -1) == 0)
   {
     lua_pop(m_pState, 1);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_States.m_iOpenTables++;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plLuaWrapper::OpenTableFromParameter(plUInt32 uiFunctionParameter)
@@ -33,11 +33,11 @@ plResult plLuaWrapper::OpenTableFromParameter(plUInt32 uiFunctionParameter)
   if (lua_istable(m_pState, -1) == 0)
   {
     lua_pop(m_pState, 1);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_States.m_iOpenTables++;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plLuaWrapper::CloseTable()
@@ -66,4 +66,3 @@ void plLuaWrapper::CloseAllTables()
 #endif // BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Scripting_LuaWrapper_Tables);

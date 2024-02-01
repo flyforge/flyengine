@@ -6,7 +6,7 @@
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Threading/ThreadUtils.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plSubSystem);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plSubSystem);
 
 bool plStartup::s_bPrintAllSubSystems = true;
 plStartupStage::Enum plStartup::s_CurrentState = plStartupStage::None;
@@ -31,7 +31,7 @@ bool plStartup::HasApplicationTag(const char* szTag)
 
 void plStartup::PrintAllSubsystems()
 {
-  PLASMA_LOG_BLOCK("Available Subsystems");
+  PL_LOG_BLOCK("Available Subsystems");
 
   plSubSystem* pSub = plSubSystem::GetFirstInstance();
 
@@ -122,7 +122,7 @@ static bool IsGroupName(plStringView sName)
     pSub = pSub->GetNextInstance();
   }
 
-  PLASMA_ASSERT_ALWAYS(!bGroup || !bSubSystem, "There cannot be a SubSystem AND a Group called '{0}'.", sName);
+  PL_ASSERT_ALWAYS(!bGroup || !bSubSystem, "There cannot be a SubSystem AND a Group called '{0}'.", sName);
 
   return bGroup;
 }
@@ -223,7 +223,7 @@ void plStartup::Startup(plStartupStage::Enum stage)
   {
     Startup(plStartupStage::BaseSystems);
 
-    plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN);
+    plGlobalEvent::Broadcast(PL_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN);
 
     if (s_bPrintAllSubSystems)
     {
@@ -236,10 +236,10 @@ void plStartup::Startup(plStartupStage::Enum stage)
   {
     Startup(plStartupStage::CoreSystems);
 
-    plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN);
+    plGlobalEvent::Broadcast(PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN);
   }
 
-  PLASMA_LOG_BLOCK(szStartup[stage]);
+  PL_LOG_BLOCK(szStartup[stage]);
 
   plDeque<plSubSystem*> Order;
   ComputeOrder(Order);
@@ -273,7 +273,7 @@ void plStartup::Startup(plStartupStage::Enum stage)
 
   // now everything should be started
   {
-    PLASMA_LOG_BLOCK("Failed SubSystems");
+    PL_LOG_BLOCK("Failed SubSystems");
 
     plSet<plString> sSystemsFound;
 
@@ -319,10 +319,10 @@ void plStartup::Startup(plStartupStage::Enum stage)
     case plStartupStage::BaseSystems:
       break;
     case plStartupStage::CoreSystems:
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_END);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_STARTUP_CORESYSTEMS_END);
       break;
     case plStartupStage::HighLevelSystems:
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END);
       break;
 
     default:
@@ -355,15 +355,15 @@ void plStartup::Shutdown(plStartupStage::Enum stage)
       Shutdown(plStartupStage::HighLevelSystems);
       s_bPrintAllSubSystems = true;
 
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN);
     }
 
     if (stage == plStartupStage::HighLevelSystems)
     {
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN);
     }
 
-    PLASMA_LOG_BLOCK(szStartup[stage]);
+    PL_LOG_BLOCK(szStartup[stage]);
 
     plDeque<plSubSystem*> Order;
     ComputeOrder(Order);
@@ -396,11 +396,11 @@ void plStartup::Shutdown(plStartupStage::Enum stage)
   switch (stage)
   {
     case plStartupStage::CoreSystems:
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END);
       break;
 
     case plStartupStage::HighLevelSystems:
-      plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END);
+      plGlobalEvent::Broadcast(PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END);
       break;
 
     default:
@@ -445,10 +445,10 @@ bool plStartup::HasDependencyOnPlugin(plSubSystem* pSubSystem, plStringView sMod
 
 void plStartup::UnloadPluginSubSystems(plStringView sPluginName)
 {
-  PLASMA_LOG_BLOCK("Unloading Plugin SubSystems", sPluginName);
+  PL_LOG_BLOCK("Unloading Plugin SubSystems", sPluginName);
   plLog::Dev("Plugin to unload: '{0}'", sPluginName);
 
-  plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN, plVariant(sPluginName));
+  plGlobalEvent::Broadcast(PL_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN, plVariant(sPluginName));
 
   plDeque<plSubSystem*> Order;
   ComputeOrder(Order);
@@ -474,7 +474,7 @@ void plStartup::UnloadPluginSubSystems(plStringView sPluginName)
   }
 
 
-  plGlobalEvent::Broadcast(PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_END, plVariant(sPluginName));
+  plGlobalEvent::Broadcast(PL_GLOBALEVENT_UNLOAD_PLUGIN_END, plVariant(sPluginName));
 }
 
 void plStartup::ReinitToCurrentState()
@@ -484,5 +484,3 @@ void plStartup::ReinitToCurrentState()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Configuration_Implementation_Startup);

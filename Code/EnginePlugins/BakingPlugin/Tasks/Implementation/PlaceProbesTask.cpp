@@ -39,5 +39,5 @@ void PlaceProbesTask::Execute()
     }
   }
 
-  PLASMA_ASSERT_DEBUG(m_ProbePositions.GetCount() == m_vProbeCount.x * m_vProbeCount.y * m_vProbeCount.z, "Implementation error");
+  PL_ASSERT_DEBUG(m_ProbePositions.GetCount() == m_vProbeCount.x * m_vProbeCount.y * m_vProbeCount.z, "Implementation error");
 }

@@ -11,13 +11,11 @@ plResult plSimdMat4f::Invert(const plSimdFloat& fEpsilon)
   GetAsArray(tmp.m_fElementsCM, plMatrixLayout::ColumnMajor);
 
   if (tmp.Invert(fEpsilon).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  SetFromArray(tmp.m_fElementsCM, plMatrixLayout::ColumnMajor);
+  *this = plSimdMat4f::MakeFromColumnMajorArray(tmp.m_fElementsCM);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_SimdMath_Implementation_SimdMat4f);

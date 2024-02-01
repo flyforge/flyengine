@@ -17,7 +17,7 @@
 /// register which instance to use.
 ///
 /// For typical use-cases use plCrashHandler_WriteMiniDump::g_Instance.
-class PLASMA_FOUNDATION_DLL plCrashHandler
+class PL_FOUNDATION_DLL plCrashHandler
 {
 public:
   plCrashHandler();
@@ -36,7 +36,7 @@ private:
 ///
 /// To use it, call plCrashHandler::SetCrashHandler(&plCrashHandler_WriteMiniDump::g_Instance);
 /// Do not forget to also specify the dump-file path, otherwise writing dump-files is skipped.
-class PLASMA_FOUNDATION_DLL plCrashHandler_WriteMiniDump : public plCrashHandler
+class PL_FOUNDATION_DLL plCrashHandler_WriteMiniDump : public plCrashHandler
 {
 public:
   static plCrashHandler_WriteMiniDump g_Instance;
@@ -47,9 +47,9 @@ public:
 
     enum Enum
     {
-      AppendDate = PLASMA_BIT(0),      ///< Whether to append the current date to the crash-dump file (YYYY-MM-DD_HH-MM-SS)
-      AppendSubFolder = PLASMA_BIT(1), ///< Whether to append "CrashDump" as a sub-folder
-      AppendPID = PLASMA_BIT(2),       ///< Whether to append the process ID to the crash-dump file
+      AppendDate = PL_BIT(0),      ///< Whether to append the current date to the crash-dump file (YYYY-MM-DD_HH-MM-SS)
+      AppendSubFolder = PL_BIT(1), ///< Whether to append "CrashDump" as a sub-folder
+      AppendPID = PL_BIT(2),       ///< Whether to append the process ID to the crash-dump file
 
       Default = AppendDate | AppendSubFolder | AppendPID
     };
@@ -83,4 +83,4 @@ protected:
   plString m_sDumpFilePath;
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plCrashHandler_WriteMiniDump::PathFlags);
+PL_DECLARE_FLAGS_OPERATORS(plCrashHandler_WriteMiniDump::PathFlags);

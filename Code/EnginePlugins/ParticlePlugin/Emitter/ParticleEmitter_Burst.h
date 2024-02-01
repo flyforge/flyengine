@@ -3,9 +3,9 @@
 #include <Foundation/Types/VarianceTypes.h>
 #include <ParticlePlugin/Emitter/ParticleEmitter.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Burst final : public plParticleEmitterFactory
+class PL_PARTICLEPLUGIN_DLL plParticleEmitterFactory_Burst final : public plParticleEmitterFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Burst, plParticleEmitterFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitterFactory_Burst, plParticleEmitterFactory);
 
 public:
   plParticleEmitterFactory_Burst();
@@ -14,8 +14,8 @@ public:
   virtual void CopyEmitterProperties(plParticleEmitter* pEmitter, bool bFirstTime) const override;
   virtual void QueryMaxParticleCount(plUInt32& out_uiMaxParticlesAbs, plUInt32& out_uiMaxParticlesPerSecond) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
 public:
   plTime m_Duration;
@@ -27,9 +27,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEmitter_Burst final : public plParticleEmitter
+class PL_PARTICLEPLUGIN_DLL plParticleEmitter_Burst final : public plParticleEmitter
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Burst, plParticleEmitter);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEmitter_Burst, plParticleEmitter);
 
 public:
   plTime m_Duration;   // overall duration in which the emitter is considered active, 0 for single frame

@@ -17,9 +17,9 @@ class plLogInterface;
 /// Consequently, their main purpose is to make options discoverable and to document them in a consistent manner.
 ///
 /// Additionally, classes like plCommandLineOptionEnum add functionality that makes some options easier to setup.
-class PLASMA_FOUNDATION_DLL plCommandLineOption : public plEnumerable<plCommandLineOption>
+class PL_FOUNDATION_DLL plCommandLineOption : public plEnumerable<plCommandLineOption>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plCommandLineOption);
+  PL_DECLARE_ENUMERABLE_CLASS(plCommandLineOption);
 
 public:
   enum class LogAvailableModes
@@ -99,7 +99,7 @@ protected:
 /// This class is meant to be used for options that are actually queried directly through plCommandLineUtils,
 /// but should still show up in the command line option documentation, such that the user can discover them.
 ///
-class PLASMA_FOUNDATION_DLL plCommandLineOptionDoc : public plCommandLineOption
+class PL_FOUNDATION_DLL plCommandLineOptionDoc : public plCommandLineOption
 {
 public:
   plCommandLineOptionDoc(plStringView sSortingGroup, plStringView sArgument, plStringView sParamShortDesc, plStringView sLongDesc, plStringView sDefaultValue, bool bCaseSensitive = false);
@@ -135,7 +135,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief This command line option exposes simple on/off switches.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionBool : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionBool : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionBool(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, bool bDefaultValue, bool bCaseSensitive = false);
@@ -167,7 +167,7 @@ protected:
 ///
 /// If the user specified a value outside the allowed range, a warning is printed, and the default value is used instead.
 /// It is valid for the default value to be outside the min/max range, which can be used to detect whether the user provided any value at all.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionInt : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionInt : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionInt(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, int iDefaultValue, int iMinValue = plMath::MinValue<int>(), int iMaxValue = plMath::MaxValue<int>(), bool bCaseSensitive = false);
@@ -211,7 +211,7 @@ protected:
 ///
 /// If the user specified a value outside the allowed range, a warning is printed, and the default value is used instead.
 /// It is valid for the default value to be outside the min/max range, which can be used to detect whether the user provided any value at all.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionFloat : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionFloat : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionFloat(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, float fDefaultValue, float fMinValue = plMath::MinValue<float>(), float fMaxValue = plMath::MaxValue<float>(), bool bCaseSensitive = false);
@@ -252,7 +252,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief This command line option exposes simple string values.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionString : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionString : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionString(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, plStringView sDefaultValue, bool bCaseSensitive = false);
@@ -281,7 +281,7 @@ protected:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief This command line option exposes absolute paths. If the user provides a relative path, it will be concatenated with the current working directory.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionPath : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionPath : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionPath(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, plStringView sDefaultValue, bool bCaseSensitive = false);
@@ -318,7 +318,7 @@ protected:
 /// The allowed values are passed in as a single string, in the form "OptA = 0 | OptB = 1 | ..."
 /// Phrase values ("= 0" etc) are optional, and if not given are automatically assigned starting at zero.
 /// Multiple phrases may share the same value.
-class PLASMA_FOUNDATION_DLL plCommandLineOptionEnum : public plCommandLineOptionDoc
+class PL_FOUNDATION_DLL plCommandLineOptionEnum : public plCommandLineOptionDoc
 {
 public:
   plCommandLineOptionEnum(plStringView sSortingGroup, plStringView sArgument, plStringView sLongDesc, plStringView sEnumKeysAndValues, plInt32 iDefaultValue, bool bCaseSensitive = false);

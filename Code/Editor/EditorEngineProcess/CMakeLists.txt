@@ -16,15 +16,32 @@ target_link_libraries(${PROJECT_NAME}
   EditorEngineProcessFramework
 )
 
+# For SetProcessDpiAwareness
+if (PL_CMAKE_PLATFORM_WINDOWS_DESKTOP)
+  target_link_libraries(${PROJECT_NAME}
+    PRIVATE
+    Shcore.lib
+  )
+endif()
+
 # For plugins to work in UWP builds, they must be direct link dependencies, otherwise they are not packaged with the app.
-if (PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
+if (PL_CMAKE_PLATFORM_WINDOWS_UWP)
 
   target_link_libraries(${PROJECT_NAME}
     PRIVATE
     InspectorPlugin
   )
 
-  if (PLASMA_BUILD_PHYSX)
+  if (PL_BUILD_FMOD)
+
+    target_link_libraries(${PROJECT_NAME}
+      PRIVATE
+      FmodPlugin
+    )
+
+  endif()
+
+  if (PL_BUILD_PHYSX)
 
     target_link_libraries(${PROJECT_NAME}
       PRIVATE

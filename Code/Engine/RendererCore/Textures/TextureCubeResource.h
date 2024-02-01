@@ -35,17 +35,17 @@ struct plTextureCubeResourceDescriptor
   plArrayPtr<plGALSystemMemoryDescription> m_InitialContent;
 };
 
-class PLASMA_RENDERERCORE_DLL plTextureCubeResource : public plResource
+class PL_RENDERERCORE_DLL plTextureCubeResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plTextureCubeResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plTextureCubeResource, plTextureCubeResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureCubeResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plTextureCubeResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plTextureCubeResource, plTextureCubeResourceDescriptor);
 
 public:
   plTextureCubeResource();
 
-  PLASMA_ALWAYS_INLINE plGALResourceFormat::Enum GetFormat() const { return m_Format; }
-  PLASMA_ALWAYS_INLINE plUInt32 GetWidthAndHeight() const { return m_uiWidthAndHeight; }
+  PL_ALWAYS_INLINE plGALResourceFormat::Enum GetFormat() const { return m_Format; }
+  PL_ALWAYS_INLINE plUInt32 GetWidthAndHeight() const { return m_uiWidthAndHeight; }
 
   const plGALTextureHandle& GetGALTexture() const { return m_hGALTexture[m_uiLoadedTextures - 1]; }
   const plGALSamplerStateHandle& GetGALSamplerState() const { return m_hSamplerState; }

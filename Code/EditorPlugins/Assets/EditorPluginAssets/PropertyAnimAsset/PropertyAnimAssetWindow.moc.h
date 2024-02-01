@@ -28,7 +28,7 @@ class plQtPropertyAnimAssetTreeView : public QTreeView
   Q_OBJECT
 
 public:
-  plQtPropertyAnimAssetTreeView(QWidget* parent);
+  plQtPropertyAnimAssetTreeView(QWidget* pParent);
   void initialize();
 
 Q_SIGNALS:

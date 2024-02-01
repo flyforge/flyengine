@@ -12,14 +12,10 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 #include <RendererFoundation/Device/Device.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plDummyXR);
+PL_IMPLEMENT_SINGLETON(plDummyXR);
 
 plDummyXR::plDummyXR()
   : m_SingletonRegistrar(this)
-{
-}
-
-plDummyXR::~plDummyXR()
 {
 }
 
@@ -31,16 +27,16 @@ bool plDummyXR::IsHmdPresent() const
 plResult plDummyXR::Initialize()
 {
   if (m_bInitialized)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Info.m_sDeviceName = "Dummy VR device";
   m_Info.m_vEyeRenderTargetSize = plSizeU32(640, 720);
 
-  m_GALdeviceEventsId = plGALDevice::GetDefaultDevice()->m_Events.AddEventHandler(plMakeDelegate(&plDummyXR::GALDeviceEventHandler, this));
+  m_GALdeviceEventsId = plGALDevice::s_Events.AddEventHandler(plMakeDelegate(&plDummyXR::GALDeviceEventHandler, this));
   m_ExecutionEventsId = plGameApplicationBase::GetGameApplicationBaseInstance()->m_ExecutionEvents.AddEventHandler(plMakeDelegate(&plDummyXR::GameApplicationEventHandler, this));
 
   m_bInitialized = true;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plDummyXR::Deinitialize()
@@ -48,7 +44,7 @@ void plDummyXR::Deinitialize()
   m_bInitialized = false;
   if (m_GALdeviceEventsId != 0)
   {
-    plGALDevice::GetDefaultDevice()->m_Events.RemoveEventHandler(m_GALdeviceEventsId);
+    plGALDevice::s_Events.RemoveEventHandler(m_GALdeviceEventsId);
   }
   if (m_ExecutionEventsId != 0)
   {
@@ -76,9 +72,9 @@ bool plDummyXR::SupportsCompanionView()
   return true;
 }
 
-plUniquePtr<plActor> plDummyXR::CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount, plUniquePtr<plWindowBase> companionWindow, plUniquePtr<plWindowOutputTargetGAL> companionWindowOutput)
+plUniquePtr<plActor> plDummyXR::CreateActor(plView* pView, plGALMSAASampleCount::Enum msaaCount, plUniquePtr<plWindowBase> pCompanionWindow, plUniquePtr<plWindowOutputTargetGAL> pCompanionWindowOutput)
 {
-  PLASMA_ASSERT_DEV(IsInitialized(), "Need to call 'Initialize' first.");
+  PL_ASSERT_DEV(IsInitialized(), "Need to call 'Initialize' first.");
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
 
   // Create dummy swap chain
@@ -100,17 +96,17 @@ plUniquePtr<plActor> plDummyXR::CreateActor(plView* pView, plGALMSAASampleCount:
     m_pCameraToSynchronize->SetCameraMode(plCameraMode::Stereo, m_pCameraToSynchronize->GetFovOrDim(), m_pCameraToSynchronize->GetNearPlane(), m_pCameraToSynchronize->GetFarPlane());
   }
 
-  plUniquePtr<plActor> pActor = PLASMA_DEFAULT_NEW(plActor, "DummyXR", this);
-  PLASMA_ASSERT_DEV((companionWindow != nullptr) == (companionWindowOutput != nullptr), "Both companionWindow and companionWindowOutput must either be null or valid.");
+  plUniquePtr<plActor> pActor = PL_DEFAULT_NEW(plActor, "DummyXR", this);
+  PL_ASSERT_DEV((pCompanionWindow != nullptr) == (pCompanionWindowOutput != nullptr), "Both companionWindow and companionWindowOutput must either be null or valid.");
 
-  plUniquePtr<plActorPluginWindowXR> pActorPlugin = PLASMA_DEFAULT_NEW(plActorPluginWindowXR, this, std::move(companionWindow), std::move(companionWindowOutput));
+  plUniquePtr<plActorPluginWindowXR> pActorPlugin = PL_DEFAULT_NEW(plActorPluginWindowXR, this, std::move(pCompanionWindow), std::move(pCompanionWindowOutput));
   m_pCompanion = static_cast<plWindowOutputTargetXR*>(pActorPlugin->GetOutputTarget());
 
   pActor->AddPlugin(std::move(pActorPlugin));
 
   m_hView = pView->GetHandle();
   m_pWorld = pView->GetWorld();
-  PLASMA_ASSERT_DEV(m_pWorld != nullptr, "");
+  PL_ASSERT_DEV(m_pWorld != nullptr, "");
 
 
   plGALRenderTargets renderTargets;
@@ -184,7 +180,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
     {
       if (plWorld* pWorld0 = pView0->GetWorld())
       {
-        PLASMA_LOCK(pWorld0->GetWriteMarker());
+        PL_LOCK(pWorld0->GetWriteMarker());
         plCameraComponent* pCameraComponent = pWorld0->GetComponentManager<plCameraComponentManager>()->GetCameraByUsageHint(plCameraUsageHint::MainView);
         if (!pCameraComponent)
           return;
@@ -195,7 +191,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
         {
           const float fAspectRatio = (float)m_Info.m_vEyeRenderTargetSize.width / (float)m_Info.m_vEyeRenderTargetSize.height;
 
-          plMat4 mProj = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::Degree(pCameraComponent->GetFieldOfView()), fAspectRatio,
+          plMat4 mProj = plGraphicsUtils::CreatePerspectiveProjectionMatrixFromFovX(plAngle::MakeFromDegree(pCameraComponent->GetFieldOfView()), fAspectRatio,
             pCameraComponent->GetNearPlane(), plMath::Max(pCameraComponent->GetNearPlane() + 0.00001f, pCameraComponent->GetFarPlane()));
 
           m_pCameraToSynchronize->SetStereoProjection(mProj, mProj, fAspectRatio);
@@ -210,7 +206,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
           {
             if (const plWorld* pWorld = pView->GetWorld())
             {
-              PLASMA_LOCK(pWorld->GetReadMarker());
+              PL_LOCK(pWorld->GetReadMarker());
               if (const plStageSpaceComponentManager* pStageMan = pWorld->GetComponentManager<plStageSpaceComponentManager>())
               {
                 if (const plStageSpaceComponent* pStage = pStageMan->GetSingletonComponent())
@@ -228,7 +224,7 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
             // Update device state
             plQuat rot;
             rot.SetIdentity();
-            plVec3 pos = plVec3::ZeroVector();
+            plVec3 pos = plVec3::MakeZero();
             if (m_StageSpace == plXRStageSpace::Standing)
             {
               pos.z = m_fHeadHeight;
@@ -248,13 +244,11 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
           {
             const float fHeight = m_StageSpace == plXRStageSpace::Standing ? m_fHeadHeight : 0.0f;
             const plMat4 mStageTransform = add.GetInverse().GetAsMat4();
-            plMat4 poseLeft;
-            poseLeft.SetTranslationMatrix(plVec3(0, -m_fEyeOffset, fHeight));
-            plMat4 poseRight;
-            poseRight.SetTranslationMatrix(plVec3(0, m_fEyeOffset, fHeight));
+            plMat4 poseLeft = plMat4::MakeTranslation(plVec3(0, -m_fEyeOffset, fHeight));
+            plMat4 poseRight = plMat4::MakeTranslation(plVec3(0, m_fEyeOffset, fHeight));
 
-            // PLASMA Forward is +X, need to add this to align the forward projection
-            const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::ZeroVector(), plVec3(1, 0, 0), plVec3(0, 0, 1));
+            // PL Forward is +X, need to add this to align the forward projection
+            const plMat4 viewMatrix = plGraphicsUtils::CreateLookAtViewMatrix(plVec3::MakeZero(), plVec3(1, 0, 0), plVec3(0, 0, 1));
             const plMat4 mViewTransformLeft = viewMatrix * mStageTransform * poseLeft.GetInverse();
             const plMat4 mViewTransformRight = viewMatrix * mStageTransform * poseRight.GetInverse();
 
@@ -270,9 +264,9 @@ void plDummyXR::GameApplicationEventHandler(const plGameApplicationExecutionEven
 
 //////////////////////////////////////////////////////////////////////////
 
-void plDummyXRInput::GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_Devices) const
+void plDummyXRInput::GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_devices) const
 {
-  out_Devices.PushBack(0);
+  out_devices.PushBack(0);
 }
 
 plXRDeviceID plDummyXRInput::GetDeviceIDByType(plXRDeviceType::Enum type) const
@@ -290,21 +284,21 @@ plXRDeviceID plDummyXRInput::GetDeviceIDByType(plXRDeviceType::Enum type) const
   return deviceID;
 }
 
-const plXRDeviceState& plDummyXRInput::GetDeviceState(plXRDeviceID iDeviceID) const
+const plXRDeviceState& plDummyXRInput::GetDeviceState(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(iDeviceID < 1 && iDeviceID >= 0, "Invalid device ID.");
-  return m_DeviceState[iDeviceID];
+  PL_ASSERT_DEV(deviceID < 1 && deviceID >= 0, "Invalid device ID.");
+  return m_DeviceState[deviceID];
 }
 
-plString plDummyXRInput::GetDeviceName(plXRDeviceID iDeviceID) const
+plString plDummyXRInput::GetDeviceName(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(iDeviceID < 1 && iDeviceID >= 0, "Invalid device ID.");
+  PL_ASSERT_DEV(deviceID < 1 && deviceID >= 0, "Invalid device ID.");
   return "Dummy HMD";
 }
 
-plBitflags<plXRDeviceFeatures> plDummyXRInput::GetDeviceFeatures(plXRDeviceID iDeviceID) const
+plBitflags<plXRDeviceFeatures> plDummyXRInput::GetDeviceFeatures(plXRDeviceID deviceID) const
 {
-  PLASMA_ASSERT_DEV(iDeviceID < 1 && iDeviceID >= 0, "Invalid device ID.");
+  PL_ASSERT_DEV(deviceID < 1 && deviceID >= 0, "Invalid device ID.");
   return plXRDeviceFeatures::AimPose | plXRDeviceFeatures::GripPose;
 }
 
@@ -319,3 +313,5 @@ void plDummyXRInput::UpdateInputSlotValues()
 void plDummyXRInput::RegisterInputSlots()
 {
 }
+
+

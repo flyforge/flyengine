@@ -1,9 +1,9 @@
 ###################
-## PlasmaEngine specific additions
+## plEngine specific additions
 ###################
 pl_cmake_init()
 
-if(NOT PLASMA_3RDPARTY_GLFW_SUPPORT)
+if(NOT PL_3RDPARTY_GLFW_SUPPORT)
   return()
 endif()
 
@@ -12,14 +12,14 @@ set(GLFW_VERSION_MINOR "3.7")
 set(GLFW_SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR})
 set(GLFW_BINARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
 
-if(PLASMA_COMPILE_ENGINE_AS_DLL)
+if(PL_COMPILE_ENGINE_AS_DLL)
   option(GLFW_BUILD_SHARED_LIBS "Build shared libraries" ON)
 else()
   option(GLFW_BUILD_SHARED_LIBS "Build shared libraries" OFF)
 endif()
 
 ###################
-## PlasmaEngine specific additions end
+## plEngine specific additions end
 ###################
 
 

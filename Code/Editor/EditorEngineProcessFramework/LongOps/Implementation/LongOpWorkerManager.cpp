@@ -4,7 +4,7 @@
 #include <EditorEngineProcessFramework/LongOps/LongOpWorkerManager.h>
 #include <EditorEngineProcessFramework/LongOps/LongOps.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plLongOpWorkerManager);
+PL_IMPLEMENT_SINGLETON(plLongOpWorkerManager);
 
 plLongOpWorkerManager::plLongOpWorkerManager()
   : m_SingletonRegistrar(this)
@@ -23,7 +23,7 @@ public:
   plLongOpTask()
   {
     plStringBuilder name;
-    name.Format("Long Op: '{}'", "TODO: NAME"); // TODO
+    name.SetFormat("Long Op: '{}'", "TODO: NAME"); // TODO
     ConfigureTask(name, plTaskNesting::Maybe);
   }
 
@@ -48,13 +48,13 @@ void plLongOpWorkerManager::ProcessCommunicationChannelEventHandler(const plProc
 {
   if (auto pMsg = plDynamicCast<const plLongOpReplicationMsg*>(e.m_pMessage))
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     plRawMemoryStreamReader reader(pMsg->m_ReplicationData);
     const plRTTI* pRtti = plRTTI::FindTypeByName(pMsg->m_sReplicationType);
 
     auto& opInfoPtr = m_WorkerOps.ExpandAndGetRef();
-    opInfoPtr = PLASMA_DEFAULT_NEW(WorkerOpInfo);
+    opInfoPtr = PL_DEFAULT_NEW(WorkerOpInfo);
 
     auto& opInfo = *opInfoPtr;
     opInfo.m_DocumentGuid = pMsg->m_DocumentGuid;
@@ -67,11 +67,11 @@ void plLongOpWorkerManager::ProcessCommunicationChannelEventHandler(const plProc
 
   if (auto pMsg = plDynamicCast<const plLongOpResultMsg*>(e.m_pMessage))
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     if (auto pOpInfo = GetOperation(pMsg->m_OperationGuid))
     {
-      PLASMA_ASSERT_DEBUG(pMsg->m_bSuccess == false, "Only Cancel messages are allowed to send to the processor");
+      PL_ASSERT_DEBUG(pMsg->m_bSuccess == false, "Only Cancel messages are allowed to send to the processor");
 
       pOpInfo->m_Progress.UserClickedCancel();
     }
@@ -91,11 +91,11 @@ void plLongOpWorkerManager::LaunchWorkerOperation(WorkerOpInfo& opInfo, plStream
 
   if (opInfo.m_pWorkerOp->InitializeExecution(config, opInfo.m_DocumentGuid).Failed())
   {
-    WorkerOperationFinished(opInfo.m_OperationGuid, PLASMA_FAILURE, plDataBuffer());
+    WorkerOperationFinished(opInfo.m_OperationGuid, PL_FAILURE, plDataBuffer());
   }
   else
   {
-    plSharedPtr<plLongOpTask> pTask = PLASMA_DEFAULT_NEW(plLongOpTask);
+    plSharedPtr<plLongOpTask> pTask = PL_DEFAULT_NEW(plLongOpTask);
     pTask->m_OperationGuid = opInfo.m_OperationGuid;
     pTask->m_pWorkerOp = opInfo.m_pWorkerOp.Borrow();
     pTask->m_pProgress = &opInfo.m_Progress;
@@ -105,7 +105,7 @@ void plLongOpWorkerManager::LaunchWorkerOperation(WorkerOpInfo& opInfo, plStream
 
 void plLongOpWorkerManager::WorkerOperationFinished(plUuid operationGuid, plResult result, plDataBuffer&& resultData)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   auto pOpInfo = GetOperation(operationGuid);
 
@@ -137,7 +137,7 @@ void plLongOpWorkerManager::WorkerProgressBarEventHandler(const plProgressEvent&
 
 void plLongOpWorkerManager::RemoveOperation(plUuid opGuid)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (plUInt32 i = 0; i < m_WorkerOps.GetCount(); ++i)
   {
@@ -149,13 +149,13 @@ void plLongOpWorkerManager::RemoveOperation(plUuid opGuid)
   }
 }
 
-plLongOpWorkerManager::WorkerOpInfo* plLongOpWorkerManager::GetOperation(const plUuid& guid) const
+plLongOpWorkerManager::WorkerOpInfo* plLongOpWorkerManager::GetOperation(const plUuid& opGuid) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto& opInfoPtr : m_WorkerOps)
   {
-    if (opInfoPtr->m_OperationGuid == guid)
+    if (opInfoPtr->m_OperationGuid == opGuid)
       return opInfoPtr.Borrow();
   }
 

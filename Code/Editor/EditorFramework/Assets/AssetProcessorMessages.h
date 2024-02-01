@@ -6,9 +6,9 @@
 #include <Foundation/Communication/RemoteMessage.h>
 #include <Foundation/Logging/LogEntry.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plProcessAssetMsg : public plProcessMessage
+class PL_EDITORFRAMEWORK_DLL plProcessAssetMsg : public plProcessMessage
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcessAssetMsg, plProcessMessage);
+  PL_ADD_DYNAMIC_REFLECTION(plProcessAssetMsg, plProcessMessage);
 
 public:
   plUuid m_AssetGuid;
@@ -19,9 +19,9 @@ public:
   plDynamicArray<plString> m_DepRefHull;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plProcessAssetResponseMsg : public plProcessMessage
+class PL_EDITORFRAMEWORK_DLL plProcessAssetResponseMsg : public plProcessMessage
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcessAssetResponseMsg, plProcessMessage);
+  PL_ADD_DYNAMIC_REFLECTION(plProcessAssetResponseMsg, plProcessMessage);
 
 public:
   plTransformStatus m_Status;

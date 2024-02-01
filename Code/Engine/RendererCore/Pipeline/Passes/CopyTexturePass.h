@@ -3,9 +3,9 @@
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
-class PLASMA_RENDERERCORE_DLL plCopyTexturePass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plCopyTexturePass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCopyTexturePass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plCopyTexturePass, plRenderPipelinePass);
 
 public:
   plCopyTexturePass();

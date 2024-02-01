@@ -12,9 +12,9 @@ class plTimeStepSmoothing;
 /// \brief Describes the initial state of a world.
 struct plWorldDesc
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
-  plWorldDesc(plStringView szWorldName) { m_sName.Assign(szWorldName); }
+  plWorldDesc(plStringView sWorldName) { m_sName.Assign(sWorldName); }
 
   plHashedString m_sName;
   plUInt64 m_uiRandomNumberGeneratorSeed = 0;
@@ -27,5 +27,5 @@ struct plWorldDesc
 
   bool m_bReportErrorWhenStaticObjectMoves = true;
 
-  plTime m_MaxComponentInitializationTimePerFrame = plTime::Hours(10000); // max time to spend on component initialization per frame
+  plTime m_MaxComponentInitializationTimePerFrame = plTime::MakeFromHours(10000); // max time to spend on component initialization per frame
 };

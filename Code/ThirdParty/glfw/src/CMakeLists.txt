@@ -88,13 +88,13 @@ if (CMAKE_VERSION VERSION_LESS "3.16" AND APPLE)
                                 LANGUAGE C)
 endif()
 
-#PlasmaEngine change
+#ezEngine change
 if(GLFW_BUILD_SHARED_LIBS)
   add_library(glfw SHARED ${glfw_SOURCES} ${glfw_HEADERS})
 else()
   add_library(glfw ${glfw_SOURCES} ${glfw_HEADERS})
 endif()
-#PlasmaEngine change end
+#ezEngine change end
 
 message(STATUS "GLFW_LIB_NAME ${GLFW_LIB_NAME}")
 message(STATUS "GLFW_VERSION_MAJOR ${GLFW_VERSION_MAJOR}")

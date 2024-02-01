@@ -5,16 +5,18 @@
 
 class plSceneContext;
 
-class PlasmaEditorShapeIconsExtractor : public plExtractor
+class plEditorShapeIconsExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorShapeIconsExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plEditorShapeIconsExtractor, plExtractor);
 
 public:
-  PlasmaEditorShapeIconsExtractor(const char* szName = "EditorShapeIconsExtractor");
-  ~PlasmaEditorShapeIconsExtractor();
+  plEditorShapeIconsExtractor(const char* szName = "EditorShapeIconsExtractor");
+  ~plEditorShapeIconsExtractor();
 
   virtual void Extract(
-    const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData) override;
+    const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   void SetSceneContext(plSceneContext* pSceneContext) { m_pSceneContext = pSceneContext; }
   plSceneContext* GetSceneContext() const { return m_pSceneContext; }

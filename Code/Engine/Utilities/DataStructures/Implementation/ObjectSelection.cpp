@@ -9,14 +9,14 @@ plObjectSelection::plObjectSelection()
 
 void plObjectSelection::SetWorld(plWorld* pWorld)
 {
-  PLASMA_ASSERT_DEV((m_pWorld == nullptr) || (m_pWorld == pWorld) || m_Objects.IsEmpty(), "You cannot change the world for this selection.");
+  PL_ASSERT_DEV((m_pWorld == nullptr) || (m_pWorld == pWorld) || m_Objects.IsEmpty(), "You cannot change the world for this selection.");
 
   m_pWorld = pWorld;
 }
 
 void plObjectSelection::RemoveDeadObjects()
 {
-  PLASMA_ASSERT_DEV(m_pWorld != nullptr, "The world has not been set.");
+  PL_ASSERT_DEV(m_pWorld != nullptr, "The world has not been set.");
 
   for (plUInt32 i = m_Objects.GetCount(); i > 0; --i)
   {
@@ -30,7 +30,7 @@ void plObjectSelection::RemoveDeadObjects()
 
 void plObjectSelection::AddObject(plGameObjectHandle hObject, bool bDontAddTwice)
 {
-  PLASMA_ASSERT_DEV(m_pWorld != nullptr, "The world has not been set.");
+  PL_ASSERT_DEV(m_pWorld != nullptr, "The world has not been set.");
 
   // only insert valid objects
   plGameObject* pObject;
@@ -64,5 +64,3 @@ void plObjectSelection::ToggleSelection(plGameObjectHandle hObject)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Utilities, Utilities_DataStructures_Implementation_ObjectSelection);

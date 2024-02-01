@@ -12,7 +12,7 @@ class plQtExportAndRunDlg : public QDialog, public Ui_ExportAndRunDlg
   Q_OBJECT
 
 public:
-  plQtExportAndRunDlg(QWidget* parent);
+  plQtExportAndRunDlg(QWidget* pParent);
 
   static bool s_bTransformAll;
   static bool s_bUpdateThumbnail;
@@ -36,4 +36,3 @@ private:
 protected:
   virtual void showEvent(QShowEvent* e) override;
 };
-

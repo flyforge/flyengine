@@ -13,13 +13,13 @@
 /// This class provides simple functions to create frequently used basic shapes. It allows to transform the shapes, merge them
 /// into a single mesh, compute normals, etc.
 /// It is meant for debug and editor geometry (gizmos, etc.). Vertices can have position, normal, color and 'shape index'.
-class PLASMA_CORE_DLL plGeometry
+class PL_CORE_DLL plGeometry
 {
 public:
   /// \brief The data that is stored per vertex.
   struct Vertex
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_vPosition;
     plVec3 m_vNormal;
@@ -47,7 +47,7 @@ public:
   /// \brief A line only references two vertices.
   struct Line
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiStartVertex;
     plUInt32 m_uiEndVertex;
@@ -56,11 +56,12 @@ public:
   /// \brief Options shared among all geometry creation functions
   struct GeoOptions
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
-    GeoOptions() {}
+    GeoOptions(){}; // NOLINT: This struct is used before the sourrounding class ends, so it needs a default constructor. = default doesn't work here.
+
     plColor m_Color = plColor(1, 1, 1, 1);         ///< The color of the entire geometric object
-    plMat4 m_Transform = plMat4::IdentityMatrix(); ///< An additional transform to apply to the geometry while adding it
+    plMat4 m_Transform = plMat4::MakeIdentity();   ///< An additional transform to apply to the geometry while adding it
     plUInt16 m_uiBoneIndex = 0;                    ///< Which bone should influence this geometry, for single-bone skinning.
 
     bool IsFlipWindingNecessary() const;
@@ -88,18 +89,18 @@ public:
   void Clear();
 
   /// \brief Adds a vertex, returns the index to the added vertex.
-  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices = plVec4U16::ZeroVector(), const plColorLinearUB& boneWeights = plColorLinearUB(255, 0, 0, 0));
+  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& vBoneIndices = plVec4U16::MakeZero(), const plColorLinearUB& boneWeights = plColorLinearUB(255, 0, 0, 0));
 
   /// \brief Adds a vertex, returns the index to the added vertex. Position and normal are transformed with the given matrix.
-  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices, const plColorLinearUB& boneWeights, const plMat4& mTransform)
+  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& vBoneIndices, const plColorLinearUB& boneWeights, const plMat4& mTransform)
   {
-    return AddVertex(mTransform.TransformPosition(vPos), mTransform.TransformDirection(vNormal).GetNormalized(), vTexCoord, color, boneIndices, boneWeights);
+    return AddVertex(mTransform.TransformPosition(vPos), mTransform.TransformDirection(vNormal).GetNormalized(), vTexCoord, color, vBoneIndices, boneWeights);
   }
 
   /// \brief Adds a vertex with a single bone index, returns the index to the added vertex. Position and normal are transformed with the given matrix.
-  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plUInt16 boneIndex, const plMat4& mTransform)
+  plUInt32 AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plUInt16 uiBoneIndex, const plMat4& mTransform)
   {
-    return AddVertex(mTransform.TransformPosition(vPos), mTransform.TransformDirection(vNormal).GetNormalized(), vTexCoord, color, plVec4U16(boneIndex, 0, 0, 0), plColorLinearUB(255, 0, 0, 0));
+    return AddVertex(mTransform.TransformPosition(vPos), mTransform.TransformDirection(vNormal).GetNormalized(), vTexCoord, color, plVec4U16(uiBoneIndex, 0, 0, 0), plColorLinearUB(255, 0, 0, 0));
   }
 
   /// \brief Adds a vertex with a single bone index, returns the index to the added vertex. Position and normal are transformed with the given matrix.
@@ -109,7 +110,7 @@ public:
   }
 
   /// \brief Adds a polygon that consists of all the referenced vertices. No face normal is computed at this point.
-  void AddPolygon(const plArrayPtr<plUInt32>& Vertices, bool bFlipWinding);
+  void AddPolygon(const plArrayPtr<plUInt32>& vertices, bool bFlipWinding);
 
   /// \brief Adds a line.
   void AddLine(plUInt32 uiStartVertex, plUInt32 uiEndVertex);
@@ -139,19 +140,19 @@ public:
   /// Checks if the tangents are approximately orthogonal to the vertex normal and
   /// of unit length. If this is not the case the respective tangent will be zeroed.
   /// The caller can provide a custom floating point comparison epsilon
-  void ValidateTangents(float epsilon = 0.01f);
+  void ValidateTangents(float fEpsilon = 0.01f);
 
   /// \brief Returns the number of triangles that the polygons are made up of
   plUInt32 CalculateTriangleCount() const;
 
   /// \brief Changes the bone indices for all vertices (starting at vertex \a uiFirstVertex).
-  void SetAllVertexBoneIndices(const plVec4U16& boneIndices, plUInt32 uiFirstVertex = 0);
+  void SetAllVertexBoneIndices(const plVec4U16& vBoneIndices, plUInt32 uiFirstVertex = 0);
 
   /// \brief Changes the color for all vertices (starting at vertex \a uiFirstVertex).
   void SetAllVertexColor(const plColor& color, plUInt32 uiFirstVertex = 0);
 
   /// \brief Changes the texture coordinates for all vertices (starting at vertex \a uiFirstVertex).
-  void SetAllVertexTexCoord(const plVec2& texCoord, plUInt32 uiFirstVertex = 0);
+  void SetAllVertexTexCoord(const plVec2& vTexCoord, plUInt32 uiFirstVertex = 0);
 
   /// \brief Transforms all vertices by the given transform.
   ///
@@ -165,7 +166,7 @@ public:
   /// \brief Adds a rectangle shape in the XY plane, with the front in positive Z direction.
   /// It is centered at the origin, extending half size.x and half size.y into direction +X, -X, +Y and -Y.
   /// Optionally tessellates the rectangle for more detail.
-  void AddRectXY(const plVec2& size, plUInt32 uiTesselationX = 1, plUInt32 uiTesselationY = 1, const GeoOptions& options = GeoOptions());
+  void AddRectXY(const plVec2& vSize, plUInt32 uiTesselationX = 1, plUInt32 uiTesselationY = 1, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds a box.
   /// If bExtraVerticesForTexturing is false, 8 shared vertices are added.
@@ -173,17 +174,17 @@ public:
   void AddBox(const plVec3& vFullExtents, bool bExtraVerticesForTexturing, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds box out of lines (8 vertices).
-  void AddLineBox(const plVec3& size, const GeoOptions& options = GeoOptions());
+  void AddLineBox(const plVec3& vSize, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds the 8 corners of a box as lines.
   ///
   /// fCornerFraction must be between 1.0 and 0.0, with 1 making it a completely closed box and 0 no lines at all.
-  void AddLineBoxCorners(const plVec3& size, float fCornerFraction, const GeoOptions& options = GeoOptions());
+  void AddLineBoxCorners(const plVec3& vSize, float fCornerFraction, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds a pyramid. This is different to a low-res cone in that the corners are placed differently (like on a box).
   ///
   /// The origin is at the center of the base quad.size.z is the height of the pyramid.
-  void AddPyramid(const plVec3& size, bool bCap, const GeoOptions& options = GeoOptions());
+  void AddPyramid(const plVec3& vSize, bool bCap, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds a geodesic sphere with radius 1 at the origin.
   ///
@@ -205,7 +206,7 @@ public:
   /// uiSegments is the detail around the up axis, must be at least 3.
   /// The top or bottom caps can be removed using \a bCapTop and \a bCapBottom.
   /// When \a fraction is set to any value below 360 degree, a pie / pacman shaped cylinder is created.
-  void AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options = GeoOptions(), plAngle fraction = plAngle::Degree(360.0f));
+  void AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options = GeoOptions(), plAngle fraction = plAngle::MakeFromDegree(360.0f));
 
   /// \brief Same as AddCylinder(), but always adds caps and does not generate separate vertices for the caps.
   ///
@@ -249,12 +250,12 @@ public:
   void AddTorus(float fInnerRadius, float fOuterRadius, plUInt16 uiSegments, plUInt16 uiSegmentDetail, bool bExtraVerticesForTexturing, const GeoOptions& options = GeoOptions());
 
   /// \brief Adds a ramp that has UV coordinates set.
-  void AddTexturedRamp(const plVec3& size, const GeoOptions& options = GeoOptions());
+  void AddTexturedRamp(const plVec3& vSize, const GeoOptions& options = GeoOptions());
 
   /// \brief Generates a straight stair mesh along the X axis. The number of steps determines the step height and depth.
-  void AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curvature, bool bSmoothSloped, const GeoOptions& options = GeoOptions());
+  void AddStairs(const plVec3& vSize, plUInt32 uiNumSteps, plAngle curvature, bool bSmoothSloped, const GeoOptions& options = GeoOptions());
 
-  void AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThickness, plAngle angle, bool bMakeSteps, bool bSmoothBottom, bool bSmoothTop, bool bCapTopAndBottom, const GeoOptions& options = GeoOptions());
+  void AddArch(const plVec3& vSize, plUInt32 uiNumSegments, float fThickness, plAngle angle, bool bMakeSteps, bool bSmoothBottom, bool bSmoothTop, bool bCapTopAndBottom, const GeoOptions& options = GeoOptions());
 
   /// \todo GeomUtils improvements:
   // ThickLine

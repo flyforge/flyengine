@@ -10,9 +10,9 @@ class plParticleStream;
 class plParticleSystemInstance;
 
 /// \brief Base class for all particle stream factories
-class PLASMA_PARTICLEPLUGIN_DLL plParticleStreamFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleStreamFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleStreamFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleStreamFactory, plReflectedClass);
 
 public:
   plParticleStreamFactory(const char* szStreamName, plProcessingStream::DataType dataType, const plRTTI* pStreamTypeToCreate);
@@ -21,7 +21,7 @@ public:
   plProcessingStream::DataType GetStreamDataType() const;
   const char* GetStreamName() const;
 
-  static void GetFullStreamName(const char* szName, plProcessingStream::DataType type, plStringBuilder& out_Result);
+  static void GetFullStreamName(const char* szName, plProcessingStream::DataType type, plStringBuilder& out_sResult);
 
   plParticleStream* CreateParticleStream(plParticleSystemInstance* pOwner) const;
 
@@ -32,9 +32,9 @@ private:
 };
 
 /// \brief Base class for all particle streams
-class PLASMA_PARTICLEPLUGIN_DLL plParticleStream : public plProcessingStreamProcessor
+class PL_PARTICLEPLUGIN_DLL plParticleStream : public plProcessingStreamProcessor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleStream, plProcessingStreamProcessor);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleStream, plProcessingStreamProcessor);
 
   friend class plParticleSystemInstance;
   friend class plParticleStreamFactory;

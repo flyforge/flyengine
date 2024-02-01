@@ -11,7 +11,7 @@ class QMouseEvent;
 class QPushButton;
 class QLineEdit;
 
-class PLASMA_GUIFOUNDATION_DLL plQtTimeScrubberWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtTimeScrubberWidget : public QWidget
 {
   Q_OBJECT
 
@@ -48,26 +48,26 @@ private:
   bool m_bDragging = false;
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtTimeScrubberToolbar : public QToolBar
+class PL_GUIFOUNDATION_DLL plQtTimeScrubberToolbar : public QToolBar
 {
   Q_OBJECT
 
 public:
-  explicit plQtTimeScrubberToolbar(QWidget* parent);
+  explicit plQtTimeScrubberToolbar(QWidget* pParent);
 
   /// \brief Sets the duration in 'ticks'. There are 4800 ticks per second.
-  void SetDuration(plUInt64 iNumTicks);
+  void SetDuration(plUInt64 uiNumTicks);
 
   /// \brief Sets the current position in 'ticks'. There are 4800 ticks per second.
   void SetScrubberPosition(plUInt64 uiTick);
 
-  void SetButtonState(bool playing, bool repeatEnabled);
+  void SetButtonState(bool bPlaying, bool bRepeatEnabled);
 
 Q_SIGNALS:
   void ScrubberPosChangedEvent(plUInt64 uiNewScrubberTickPos);
   void PlayPauseEvent();
   void RepeatEvent();
-  void DurationChangedEvent(double duration);
+  void DurationChangedEvent(double fDuration);
   void AdjustDurationEvent();
 
 private:

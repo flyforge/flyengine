@@ -1,7 +1,0 @@
-RemoteProject
-{
-	string %Name{"Sponza Demo Scene"}
-	string %Type{"git"}
-	string %Url{"https://github.com/PlasmaEngine/Sponza_Plasma2.git"}
-	string %ProjectFile{"Project/plProject"}
-}

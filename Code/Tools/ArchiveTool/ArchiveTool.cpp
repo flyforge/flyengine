@@ -141,7 +141,7 @@ protected:
 class plArchiveTool : public plApplication
 {
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   enum class ArchiveMode
   {
@@ -165,7 +165,7 @@ public:
     if (GetArgumentCount() <= 1)
     {
       plLog::Error("No arguments given");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plCommandLineUtils& cmd = *plCommandLineUtils::GetGlobalInstance();
@@ -182,7 +182,7 @@ public:
       if (args == 0)
       {
         plLog::Error("-pack option expects at least one argument");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       for (plUInt32 a = 0; a < args; ++a)
@@ -192,7 +192,7 @@ public:
         if (!plOSFile::ExistsDirectory(m_sInputs.PeekBack()))
         {
           plLog::Error("-pack input path is not a valid directory: '{}'", m_sInputs.PeekBack());
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
@@ -204,7 +204,7 @@ public:
       if (args == 0)
       {
         plLog::Error("-unpack option expects at least one argument");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       for (plUInt32 a = 0; a < args; ++a)
@@ -214,7 +214,7 @@ public:
         if (!plOSFile::ExistsFile(m_sInputs.PeekBack()))
         {
           plLog::Error("-unpack input file does not exist: '{}'", m_sInputs.PeekBack());
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
@@ -231,7 +231,6 @@ public:
           break;
 
         m_sInputs.PushBack(plOSFile::MakePathAbsoluteWithCWD(sArg));
-
 
         if (!plOSFile::ExistsDirectory(m_sInputs.PeekBack()))
           bInputsFolders = false;
@@ -251,7 +250,7 @@ public:
       {
         plLog::Error("Inputs are ambiguous. Specify only folders for packing or only files for unpacking. Use -out as last argument to "
                      "specify a target.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
@@ -265,7 +264,7 @@ public:
 
     plLog::Info("Output: '{}'", m_sOutput);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   virtual void AfterCoreSystemsStartup() override
@@ -329,10 +328,10 @@ public:
     {
       plLog::Error("Failed to write the plArchive");
 
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult Unpack()
@@ -349,7 +348,7 @@ public:
       }
 
       plArchiveReaderImpl reader;
-      PLASMA_SUCCEED_OR_RETURN(reader.OpenArchive(file));
+      PL_SUCCEED_OR_RETURN(reader.OpenArchive(file));
 
       plStringBuilder sOutput = m_sOutput;
 
@@ -362,11 +361,11 @@ public:
       if (reader.ExtractAllFiles(sOutput).Failed())
       {
         plLog::Error("File extraction failed.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   virtual Execution Run() override
@@ -417,4 +416,4 @@ public:
   }
 };
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plArchiveTool);
+PL_CONSOLEAPP_ENTRY_POINT(plArchiveTool);

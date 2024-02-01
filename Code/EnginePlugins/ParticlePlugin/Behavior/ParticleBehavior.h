@@ -10,9 +10,9 @@ class plParticleSystemInstance;
 class plParticleBehavior;
 
 /// \brief Base class for all particle behaviors
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetBehaviorType() const = 0;
@@ -20,15 +20,15 @@ public:
 
   plParticleBehavior* CreateBehavior(plParticleSystemInstance* pOwner) const;
 
-  virtual void Save(plStreamWriter& stream) const = 0;
-  virtual void Load(plStreamReader& stream) = 0;
+  virtual void Save(plStreamWriter& inout_stream) const = 0;
+  virtual void Load(plStreamReader& inout_stream) = 0;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const {}
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const {}
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior : public plParticleModule
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior : public plParticleModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior, plParticleModule);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior, plParticleModule);
 
   friend class plParticleSystemInstance;
 

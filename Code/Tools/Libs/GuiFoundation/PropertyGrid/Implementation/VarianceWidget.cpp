@@ -42,7 +42,7 @@ plQtVarianceTypeWidget::plQtVarianceTypeWidget()
 void plQtVarianceTypeWidget::SetSelection(const plHybridArray<plPropertySelection, 8>& items)
 {
   plQtStandardPropertyWidget::SetSelection(items);
-  PLASMA_ASSERT_DEBUG(m_pProp->GetSpecificType()->IsDerivedFrom<plVarianceTypeBase>(), "Selection does not match plVarianceType.");
+  PL_ASSERT_DEBUG(m_pProp->GetSpecificType()->IsDerivedFrom<plVarianceTypeBase>(), "Selection does not match plVarianceType.");
 }
 
 void plQtVarianceTypeWidget::onBeginTemporary()

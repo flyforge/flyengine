@@ -25,7 +25,7 @@ namespace JPH
 using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 using plSurfaceResourceHandle = plTypedResourceHandle<class plSurfaceResource>;
 
-class PLASMA_JOLTPLUGIN_DLL plJoltRagdollComponentManager : public plComponentManager<class plJoltRagdollComponent, plBlockStorageType::FreeList>
+class PL_JOLTPLUGIN_DLL plJoltRagdollComponentManager : public plComponentManager<class plJoltRagdollComponent, plBlockStorageType::FreeList>
 {
 public:
   plJoltRagdollComponentManager(plWorld* pWorld);
@@ -54,7 +54,7 @@ struct plJoltRagdollStartMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltRagdollStartMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltRagdollStartMode);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -71,9 +71,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltRagdollStartMode);
 ///
 /// Ragdolls are also used to create fake "breakable" objects. This is achieved by building a skinned object out of several pieces
 /// and giving every piece a bone that has no constraint (joint), so that the object just breaks apart.
-class PLASMA_JOLTPLUGIN_DLL plJoltRagdollComponent : public plComponent
+class PL_JOLTPLUGIN_DLL plJoltRagdollComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltRagdollComponent, plComponent, plJoltRagdollComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltRagdollComponent, plComponent, plJoltRagdollComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -155,7 +155,7 @@ public:
   float m_fCenterAngularVelocity = 0.0f; // [ property ]
 
   /// If center velocity is used, this adds an offset to the object's position to define where the center position should be.
-  plVec3 m_vCenterPosition = plVec3::ZeroVector(); // [ property ]
+  plVec3 m_vCenterPosition = plVec3::MakeZero(); // [ property ]
 
   /// \brief Allows to override the type of joint to be used for a bone.
   ///
@@ -221,10 +221,10 @@ protected:
   JPH::RagdollSettings* m_pRagdollSettings = nullptr;
   plDynamicArray<Limb> m_Limbs;
   plTransform m_RootBodyLocalTransform;
-  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
-  plVec3 m_vInitialImpulsePosition = plVec3::ZeroVector();
-  plVec3 m_vInitialImpulseDirection = plVec3::ZeroVector();
+  plVec3 m_vInitialImpulsePosition = plVec3::MakeZero();
+  plVec3 m_vInitialImpulseDirection = plVec3::MakeZero();
   plUInt8 m_uiNumInitialImpulses = 0;
 
   struct JointOverride

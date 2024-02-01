@@ -26,7 +26,7 @@ struct plXRStageSpace
     Default = Standing,
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRStageSpace);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRStageSpace);
 
 struct plXRTransformSpace
 {
@@ -38,7 +38,7 @@ struct plXRTransformSpace
     Default = Local,
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRTransformSpace);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRTransformSpace);
 
 struct plXRDeviceType
 {
@@ -67,16 +67,16 @@ struct plXRDeviceType
     Default = HMD,
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plXRDeviceType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plXRDeviceType);
 
-typedef plInt8 plXRDeviceID;
+using plXRDeviceID = plInt8;
 
 /// \brief A device's pose state.
 ///
 /// All values are relative to the stage space of the device,
 /// which is controlled by the plStageSpaceComponent singleton and
 /// has to be taken into account by the XR implementation.
-struct PLASMA_GAMEENGINE_DLL plXRDeviceState
+struct PL_GAMEENGINE_DLL plXRDeviceState
 {
   plXRDeviceState();
 
@@ -99,18 +99,18 @@ struct plXRDeviceFeatures
   enum Enum : plUInt32
   {
     None = 0,
-    Trigger = PLASMA_BIT(0),                   ///< Float input. If fully pressed, will also trigger 'Select'.
-    Select = PLASMA_BIT(1),                    ///< Bool input.
-    Menu = PLASMA_BIT(2),                      ///< Bool input.
-    Squeple = PLASMA_BIT(3),                   ///< Bool input.
-    PrimaryAnalogStick = PLASMA_BIT(4),        ///< 2D axis input.
-    PrimaryAnalogStickClick = PLASMA_BIT(5),   ///< Bool input.
-    PrimaryAnalogStickTouch = PLASMA_BIT(6),   ///< Bool input.
-    SecondaryAnalogStick = PLASMA_BIT(7),      ///< 2D axis input.
-    SecondaryAnalogStickClick = PLASMA_BIT(8), ///< Bool input.
-    SecondaryAnalogStickTouch = PLASMA_BIT(9), ///< Bool input.
-    GripPose = PLASMA_BIT(10),                 ///< 3D Pose input.
-    AimPose = PLASMA_BIT(11),                  ///< 3D Pose input.
+    Trigger = PL_BIT(0),                   ///< Float input. If fully pressed, will also trigger 'Select'.
+    Select = PL_BIT(1),                    ///< Bool input.
+    Menu = PL_BIT(2),                      ///< Bool input.
+    Squeple = PL_BIT(3),                   ///< Bool input.
+    PrimaryAnalogStick = PL_BIT(4),        ///< 2D axis input.
+    PrimaryAnalogStickClick = PL_BIT(5),   ///< Bool input.
+    PrimaryAnalogStickTouch = PL_BIT(6),   ///< Bool input.
+    SecondaryAnalogStick = PL_BIT(7),      ///< 2D axis input.
+    SecondaryAnalogStickClick = PL_BIT(8), ///< Bool input.
+    SecondaryAnalogStickTouch = PL_BIT(9), ///< Bool input.
+    GripPose = PL_BIT(10),                 ///< 3D Pose input.
+    AimPose = PL_BIT(11),                  ///< 3D Pose input.
     Default = None
   };
 
@@ -130,7 +130,7 @@ struct plXRDeviceFeatures
     StorageType AimPose : 1;
   };
 };
-PLASMA_DECLARE_FLAGS_OPERATORS(plXRDeviceFeatures);
+PL_DECLARE_FLAGS_OPERATORS(plXRDeviceFeatures);
 
 
 struct plXRDeviceEventData
@@ -145,4 +145,4 @@ struct plXRDeviceEventData
   plXRDeviceID uiDeviceID = 0;
 };
 
-typedef plEvent<const plXRDeviceEventData&> plXRDeviceEvent;
+using plXRDeviceEvent = plEvent<const plXRDeviceEventData&>;

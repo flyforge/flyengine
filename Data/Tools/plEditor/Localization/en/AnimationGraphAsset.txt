@@ -1,0 +1,53 @@
+# Asset Types
+
+Animation Controller;Animation Controller
+
+# Component Types
+
+plAnimationControllerComponent;Animation Controller
+
+# Properties
+
+plBoneWeightsAnimNode;Bone Weights
+
+plControllerInputAnimNode;Controller Input
+
+plCompareNumberAnimNode;Compare Number
+
+plLogicNotAnimNode;NOT
+plLogicAndAnimNode;AND
+plLogicOrAnimNode;OR
+plLogicEventAndAnimNode;Event AND
+
+plAnimClip2D;Clip 2D
+
+plGetBlackboardNumberAnimNode;Blackboard: Get Number
+plSetBlackboardNumberAnimNode;Blackboard: Set Number
+plCompareBlackboardNumberAnimNode;Blackboard: Check Number
+plCheckBlackboardBoolAnimNode;Blackboard: Check Bool
+plGetBlackboardBoolAnimNode;Blackboard: Get Bool
+plSetBlackboardBoolAnimNode;Blackboard: Set Bool
+plOnBlackboardValueChangedAnimNode;Blackboard: On Value Changed
+
+plLogInfoAnimNode;Log Info
+plLogErrorAnimNode;Log Error
+
+plSendEventAnimNode;Send Event
+
+plMathExpressionAnimNode;Expression
+
+plLerpPosesAnimNode;Lerp Poses
+
+plSampleFrameAnimNode;Sample Frame
+plSampleAnimClipAnimNode; Sample Clip
+plPoseResultAnimNode; Pose Result
+plSwitchPoseAnimNode; Switch Pose
+plSampleBlendSpace1DAnimNode;Sample BlendSpace 1D
+plSampleBlendSpace2DAnimNode;Sample BlendSpace 2D
+plSwitchBoneWeightsAnimNode;Bone Weights Switch
+plSampleAnimClipSequenceAnimNode;Sample Clip Sequence
+plRestPoseAnimNode;Rest Pose
+
+plBoolToNumberAnimNode;Bool To Number
+
+plRootRotationAnimNode;Root Rotation

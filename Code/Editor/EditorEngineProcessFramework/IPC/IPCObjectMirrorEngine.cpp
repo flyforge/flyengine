@@ -7,16 +7,16 @@ plIPCObjectMirrorEngine::plIPCObjectMirrorEngine()
 {
 }
 
-plIPCObjectMirrorEngine::~plIPCObjectMirrorEngine() {}
+plIPCObjectMirrorEngine::~plIPCObjectMirrorEngine() = default;
 
-void plIPCObjectMirrorEngine::ApplyOp(plObjectChange& change)
+void plIPCObjectMirrorEngine::ApplyOp(plObjectChange& inout_change)
 {
   if (m_pContext)
   {
-    plDocumentObjectMirror::ApplyOp(change);
+    plDocumentObjectMirror::ApplyOp(inout_change);
   }
   else
   {
-    PLASMA_REPORT_FAILURE("plIPCObjectMirrorEngine not set up for sender nor receiver!");
+    PL_REPORT_FAILURE("plIPCObjectMirrorEngine not set up for sender nor receiver!");
   }
 }

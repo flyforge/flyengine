@@ -9,26 +9,26 @@
 #include <ozz/animation/runtime/skeleton_utils.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoneWeightsAnimNode, 1, plRTTIDefaultAllocator<plBoneWeightsAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoneWeightsAnimNode, 1, plRTTIDefaultAllocator<plBoneWeightsAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Weight", m_fWeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("RootBones", RootBones_GetCount, RootBones_GetValue, RootBones_SetValue, RootBones_Insert, RootBones_Remove),
+    PL_MEMBER_PROPERTY("Weight", m_fWeight)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_ARRAY_ACCESSOR_PROPERTY("RootBones", RootBones_GetCount, RootBones_GetValue, RootBones_SetValue, RootBones_Insert, RootBones_Remove),
 
-    PLASMA_MEMBER_PROPERTY("Weights", m_WeightsPin)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("InverseWeights", m_InverseWeightsPin)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("Weights", m_WeightsPin)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("InverseWeights", m_InverseWeightsPin)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Weights"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Teal)),
     new plTitleAttribute("Bone Weights '{RootBones[0]}' '{RootBones[1]}' '{RootBones[2]}'"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBoneWeightsAnimNode::plBoneWeightsAnimNode() = default;
@@ -65,32 +65,32 @@ plResult plBoneWeightsAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteArray(m_RootBones));
+  PL_SUCCEED_OR_RETURN(stream.WriteArray(m_RootBones));
 
   stream << m_fWeight;
 
-  PLASMA_SUCCEED_OR_RETURN(m_WeightsPin.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InverseWeightsPin.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_WeightsPin.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InverseWeightsPin.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plBoneWeightsAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadArray(m_RootBones));
+  PL_SUCCEED_OR_RETURN(stream.ReadArray(m_RootBones));
 
   stream >> m_fWeight;
 
-  PLASMA_SUCCEED_OR_RETURN(m_WeightsPin.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InverseWeightsPin.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_WeightsPin.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InverseWeightsPin.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plBoneWeightsAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
@@ -111,7 +111,7 @@ void plBoneWeightsAnimNode::Step(plAnimController& ref_controller, plAnimGraphIn
     const auto pOzzSkeleton = &pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton();
 
     plStringBuilder name;
-    name.Format("{}", pSkeleton->GetResourceIDHash());
+    name.SetFormat("{}", pSkeleton->GetResourceIDHash());
 
     for (const auto& rootBone : m_RootBones)
     {
@@ -188,4 +188,4 @@ bool plBoneWeightsAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_desc) co
   return true;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_BoneWeightsAnimNode);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_BoneWeightsAnimNode);

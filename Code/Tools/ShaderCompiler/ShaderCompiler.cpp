@@ -53,7 +53,7 @@ plResult plShaderCompilerApplication::BeforeCoreSystemsStartup()
     if (plCommandLineOption::LogAvailableOptionsToBuffer(cmdHelp, plCommandLineOption::LogAvailableModes::IfHelpRequested, "_ShaderCompiler"))
     {
       plLog::Print(cmdHelp);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -63,15 +63,15 @@ plResult plShaderCompilerApplication::BeforeCoreSystemsStartup()
   // only print important messages
   plLog::SetDefaultLogLevel(plLogMsgType::InfoMsg);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::BeforeCoreSystemsStartup());
+  PL_SUCCEED_OR_RETURN(SUPER::BeforeCoreSystemsStartup());
 
   auto cmd = plCommandLineUtils::GetGlobalInstance();
 
   m_sShaderFiles = opt_Shader.GetOptionValue(plCommandLineOption::LogMode::Always);
-  PLASMA_ASSERT_ALWAYS(!m_sShaderFiles.IsEmpty(), "Shader file has not been specified. Use the -shader command followed by a path");
+  PL_ASSERT_ALWAYS(!m_sShaderFiles.IsEmpty(), "Shader file has not been specified. Use the -shader command followed by a path");
 
   m_sAppProjectPath = opt_Project.GetOptionValue(plCommandLineOption::LogMode::Always);
-  PLASMA_ASSERT_ALWAYS(!m_sAppProjectPath.IsEmpty(), "Project directory has not been specified. Use the -project command followed by a path");
+  PL_ASSERT_ALWAYS(!m_sAppProjectPath.IsEmpty(), "Project directory has not been specified. Use the -project command followed by a path");
 
   m_sPlatforms = opt_Platform.GetOptionValue(plCommandLineOption::LogMode::Always);
 
@@ -101,7 +101,7 @@ plResult plShaderCompilerApplication::BeforeCoreSystemsStartup()
     m_FixedPermVars[var].PushBack(val);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -114,10 +114,10 @@ void plShaderCompilerApplication::AfterCoreSystemsStartup()
 
 plResult plShaderCompilerApplication::CompileShader(plStringView sShaderFile)
 {
-  PLASMA_LOG_BLOCK("Compiling Shader", sShaderFile);
+  PL_LOG_BLOCK("Compiling Shader", sShaderFile);
 
   if (ExtractPermutationVarValues(sShaderFile).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plHybridArray<plPermutationVar, 16> PermVars;
 
@@ -127,16 +127,16 @@ plResult plShaderCompilerApplication::CompileShader(plStringView sShaderFile)
 
   for (plUInt32 perm = 0; perm < uiMaxPerms; ++perm)
   {
-    PLASMA_LOG_BLOCK("Compiling Permutation");
+    PL_LOG_BLOCK("Compiling Permutation");
 
     m_PermutationGenerator.GetPermutation(perm, PermVars);
     plShaderCompiler sc;
     if (sc.CompileShaderPermutationForPlatforms(sShaderFile, PermVars, plLog::GetThreadLocalLogSystem(), m_sPlatforms).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plLog::Success("Compiled Shader '{0}'", sShaderFile);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plShaderCompilerApplication::ExtractPermutationVarValues(plStringView sShaderFile)
@@ -147,7 +147,7 @@ plResult plShaderCompilerApplication::ExtractPermutationVarValues(plStringView s
   if (shaderFile.Open(sShaderFile).Failed())
   {
     plLog::Error("Could not open file '{0}'", sShaderFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plHybridArray<plHashedString, 16> permVars;
@@ -155,7 +155,7 @@ plResult plShaderCompilerApplication::ExtractPermutationVarValues(plStringView s
   plShaderParser::ParsePermutationSection(shaderFile, permVars, fixedPermVars);
 
   {
-    PLASMA_LOG_BLOCK("Permutation Vars");
+    PL_LOG_BLOCK("Permutation Vars");
     for (const auto& s : permVars)
     {
       plLog::Dev(s.GetData());
@@ -200,12 +200,12 @@ plResult plShaderCompilerApplication::ExtractPermutationVarValues(plStringView s
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plShaderCompilerApplication::PrintConfig()
 {
-  PLASMA_LOG_BLOCK("ShaderCompiler Config");
+  PL_LOG_BLOCK("ShaderCompiler Config");
 
   plLog::Info("Project: '{0}'", m_sAppProjectPath);
   plLog::Info("Shader: '{0}'", m_sShaderFiles);
@@ -279,4 +279,4 @@ plApplication::Execution plShaderCompilerApplication::Run()
   return plApplication::Execution::Quit;
 }
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plShaderCompilerApplication);
+PL_CONSOLEAPP_ENTRY_POINT(plShaderCompilerApplication);

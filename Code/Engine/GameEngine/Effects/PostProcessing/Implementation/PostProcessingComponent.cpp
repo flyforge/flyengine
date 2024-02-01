@@ -14,7 +14,7 @@ plPostProcessingComponentManager::plPostProcessingComponentManager(plWorld* pWor
 
 void plPostProcessingComponentManager::Initialize()
 {
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plPostProcessingComponentManager::UpdateComponents, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plPostProcessingComponentManager::UpdateComponents, this);
   desc.m_Phase = UpdateFunctionDesc::Phase::PostTransform;
 
   RegisterUpdateFunction(desc);
@@ -35,19 +35,19 @@ void plPostProcessingComponentManager::UpdateComponents(const UpdateContext& con
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plPostProcessingValueMapping, plNoBase, 1, plRTTIDefaultAllocator<plPostProcessingValueMapping>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plPostProcessingValueMapping, plNoBase, 1, plRTTIDefaultAllocator<plPostProcessingValueMapping>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("RenderPass", m_sRenderPassName),
-    PLASMA_MEMBER_PROPERTY("Property", m_sPropertyName),
-    PLASMA_MEMBER_PROPERTY("VolumeValue", m_sVolumeValueName),
-    PLASMA_MEMBER_PROPERTY("DefaultValue", m_DefaultValue)->AddAttributes(new plDefaultValueAttribute(1.0)),
-    PLASMA_MEMBER_PROPERTY("InterpolationDuration", m_InterpolationDuration),
+    PL_MEMBER_PROPERTY("RenderPass", m_sRenderPassName),
+    PL_MEMBER_PROPERTY("Property", m_sPropertyName),
+    PL_MEMBER_PROPERTY("VolumeValue", m_sVolumeValueName),
+    PL_MEMBER_PROPERTY("DefaultValue", m_DefaultValue)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("InterpolationDuration", m_InterpolationDuration),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plPostProcessingValueMapping::Serialize(plStreamWriter& inout_stream) const
@@ -58,7 +58,7 @@ plResult plPostProcessingValueMapping::Serialize(plStreamWriter& inout_stream) c
   inout_stream << m_DefaultValue;
   inout_stream << m_InterpolationDuration;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPostProcessingValueMapping::Deserialize(plStreamReader& inout_stream)
@@ -69,38 +69,43 @@ plResult plPostProcessingValueMapping::Deserialize(plStreamReader& inout_stream)
   inout_stream >> m_DefaultValue;
   inout_stream >> m_InterpolationDuration;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plPostProcessingComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plPostProcessingComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Mappings", Mappings_GetCount, Mappings_GetMapping, Mappings_SetMapping, Mappings_Insert, Mappings_Remove),
+    PL_ACCESSOR_PROPERTY("VolumeType", GetVolumeType, SetVolumeType)->AddAttributes(new plDynamicStringEnumAttribute("SpatialDataCategoryEnum"), new plDefaultValueAttribute("GenericVolume")),
+    PL_ARRAY_ACCESSOR_PROPERTY("Mappings", Mappings_GetCount, Mappings_GetMapping, Mappings_SetMapping, Mappings_Insert, Mappings_Remove),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plPostProcessingComponent::plPostProcessingComponent() = default;
 plPostProcessingComponent::plPostProcessingComponent(plPostProcessingComponent&& other) = default;
 plPostProcessingComponent::~plPostProcessingComponent() = default;
+plPostProcessingComponent& plPostProcessingComponent::operator=(plPostProcessingComponent&& other) = default;
 
 void plPostProcessingComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
   SUPER::SerializeComponent(inout_stream);
 
   plStreamWriter& s = inout_stream.GetStream();
+
+  auto& sCategory = plSpatialData::GetCategoryName(m_SpatialCategory);
+  s << sCategory;
 
   s.WriteArray(m_Mappings).IgnoreResult();
 }
@@ -111,14 +116,26 @@ void plPostProcessingComponent::DeserializeComponent(plWorldReader& inout_stream
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
   plStreamReader& s = inout_stream.GetStream();
 
+  plHashedString sCategory;
+  s >> sCategory;
+  m_SpatialCategory = plSpatialData::RegisterCategory(sCategory, plSpatialData::Flags::None);
+
   s.ReadArray(m_Mappings).IgnoreResult();
 }
 
-plPostProcessingComponent& plPostProcessingComponent::operator=(plPostProcessingComponent&& other) = default;
+void plPostProcessingComponent::SetVolumeType(const char* szType)
+{
+  m_SpatialCategory = plSpatialData::RegisterCategory(szType, plSpatialData::Flags::None);
+}
+
+const char* plPostProcessingComponent::GetVolumeType() const
+{
+  return plSpatialData::GetCategoryName(m_SpatialCategory);
+}
 
 void plPostProcessingComponent::Initialize()
 {
-  m_pSampler = PLASMA_DEFAULT_NEW(plVolumeSampler);
+  m_pSampler = PL_DEFAULT_NEW(plVolumeSampler);
 
   RegisterSamplerValues();
 }
@@ -130,6 +147,8 @@ void plPostProcessingComponent::Deinitialize()
 
 void plPostProcessingComponent::OnActivated()
 {
+  SUPER::OnActivated();
+
   plCameraComponent* pCameraComponent = nullptr;
   if (GetOwner()->TryGetComponentOfBaseType(pCameraComponent))
   {
@@ -139,7 +158,11 @@ void plPostProcessingComponent::OnActivated()
 
 void plPostProcessingComponent::OnDeactivated()
 {
+  ResetViewProperties();
+
   m_hCameraComponent.Invalidate();
+
+  SUPER::OnDeactivated();
 }
 
 void plPostProcessingComponent::Mappings_SetMapping(plUInt32 i, const plPostProcessingValueMapping& mapping)
@@ -161,13 +184,33 @@ void plPostProcessingComponent::Mappings_Remove(plUInt32 uiIndex)
 {
   m_Mappings.RemoveAtAndCopy(uiIndex);
 
+  ResetViewProperties();
   RegisterSamplerValues();
+}
+
+plView* plPostProcessingComponent::FindView() const
+{
+  const plWorld* pWorld = GetWorld();
+  plView* pView = nullptr;
+
+  const plCameraComponent* pCameraComponent = nullptr;
+  if (pWorld->TryGetComponent(m_hCameraComponent, pCameraComponent) && pCameraComponent->GetUsageHint() == plCameraUsageHint::RenderTarget)
+  {
+    plRenderWorld::TryGetView(pCameraComponent->GetRenderTargetView(), pView);
+  }
+
+  if (pView == nullptr)
+  {
+    pView = plRenderWorld::GetViewByUsageHint(plCameraUsageHint::MainView, plCameraUsageHint::EditorView, pWorld);
+  }
+
+  return pView;
 }
 
 void plPostProcessingComponent::RegisterSamplerValues()
 {
   if (m_pSampler == nullptr)
-  return;
+    return;
 
   m_pSampler->DeregisterAllValues();
 
@@ -180,28 +223,23 @@ void plPostProcessingComponent::RegisterSamplerValues()
   }
 }
 
+void plPostProcessingComponent::ResetViewProperties()
+{
+  if (plView* pView = FindView())
+  {
+    pView->ResetRenderPassProperties();
+  }
+}
+
 void plPostProcessingComponent::SampleAndSetViewProperties()
 {
-  plWorld* pWorld = GetWorld();
-
-  plView* pView = nullptr;
-  {
-    plCameraComponent* pCameraComponent = nullptr;
-    if (pWorld->TryGetComponent(m_hCameraComponent, pCameraComponent) && pCameraComponent->GetUsageHint() == plCameraUsageHint::RenderTarget)
-    {
-      plRenderWorld::TryGetView(pCameraComponent->GetRenderTargetView(), pView);
-    }
-
-    if (pView == nullptr)
-    {
-      pView = plRenderWorld::GetViewByUsageHint(plCameraUsageHint::MainView, plCameraUsageHint::EditorView, pWorld);
-    }
-  }
+  plView* pView = FindView();
   if (pView == nullptr)
     return;
 
-  const plVec3 vSamplePos =  pView->GetCullingCamera()->GetCenterPosition();
+  const plVec3 vSamplePos = pView->GetCullingCamera()->GetCenterPosition();
 
+  plWorld* pWorld = GetWorld();
   plTime deltaTime;
   if (pWorld->GetWorldSimulationEnabled())
   {
@@ -212,7 +250,7 @@ void plPostProcessingComponent::SampleAndSetViewProperties()
     deltaTime = plClock::GetGlobalClock()->GetTimeDiff();
   }
 
-  m_pSampler->SampleAtPosition(*pWorld, vSamplePos, deltaTime);
+  m_pSampler->SampleAtPosition(*pWorld, m_SpatialCategory, vSamplePos, deltaTime);
 
   for (auto& mapping : m_Mappings)
   {
@@ -228,6 +266,11 @@ void plPostProcessingComponent::SampleAndSetViewProperties()
     {
       value = m_pSampler->GetValue(mapping.m_sVolumeValueName);
     }
+
     pView->SetRenderPassProperty(mapping.m_sRenderPassName, mapping.m_sPropertyName, value);
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Effects_PostProcessing_Implementation_PostProcessingComponent);
+

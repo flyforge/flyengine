@@ -18,16 +18,16 @@ namespace JPH
   class Shape;
 } // namespace JPH
 
-struct PLASMA_JOLTPLUGIN_DLL plJoltMeshResourceDescriptor
+struct PL_JOLTPLUGIN_DLL plJoltMeshResourceDescriptor
 {
   // empty, these types of resources must be loaded from file
 };
 
-class PLASMA_JOLTPLUGIN_DLL plJoltMeshResource : public plResource
+class PL_JOLTPLUGIN_DLL plJoltMeshResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plJoltMeshResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plJoltMeshResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plJoltMeshResource, plJoltMeshResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plJoltMeshResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plJoltMeshResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plJoltMeshResource, plJoltMeshResourceDescriptor);
 
 public:
   plJoltMeshResource();

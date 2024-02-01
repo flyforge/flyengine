@@ -10,7 +10,7 @@ struct plGALDeviceEvent;
 
 /// \brief This class serves as a pool for GPU related resources (e.g. buffers and textures required for rendering).
 /// Note that the functions creating and returning render targets are thread safe (by using a mutex).
-class PLASMA_RENDERERCORE_DLL plGPUResourcePool
+class PL_RENDERERCORE_DLL plGPUResourcePool
 {
 public:
   plGPUResourcePool();

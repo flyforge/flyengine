@@ -8,7 +8,7 @@
 /// \internal Represents the state of a group of tasks that can be waited on
 class plTaskGroup
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plTaskGroup);
+  PL_DISALLOW_COPY_AND_ASSIGN(plTaskGroup);
 
 public:
   plTaskGroup();
@@ -17,10 +17,10 @@ public:
 private:
   friend class plTaskSystem;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   static void DebugCheckTaskGroup(plTaskGroupID groupID, plMutex& mutex);
 #else
-  PLASMA_ALWAYS_INLINE static void DebugCheckTaskGroup(plTaskGroupID groupID, plMutex& mutex) {}
+  PL_ALWAYS_INLINE static void DebugCheckTaskGroup(plTaskGroupID groupID, plMutex& mutex) {}
 #endif
 
   /// \brief Puts the calling thread to sleep until this group is fully finished.

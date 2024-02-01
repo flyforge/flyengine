@@ -27,17 +27,17 @@ namespace plInternal
 
   struct RenderDataCacheEntry
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const plRenderData* m_pRenderData = nullptr;
     plUInt16 m_uiCategory = 0;
     plUInt16 m_uiComponentIndex = 0;
     plUInt16 m_uiPartIndex = 0;
 
-    PLASMA_ALWAYS_INLINE bool operator==(const RenderDataCacheEntry& other) const { return m_pRenderData == other.m_pRenderData && m_uiCategory == other.m_uiCategory && m_uiComponentIndex == other.m_uiComponentIndex && m_uiPartIndex == other.m_uiPartIndex; }
+    PL_ALWAYS_INLINE bool operator==(const RenderDataCacheEntry& other) const { return m_pRenderData == other.m_pRenderData && m_uiCategory == other.m_uiCategory && m_uiComponentIndex == other.m_uiComponentIndex && m_uiPartIndex == other.m_uiPartIndex; }
 
     // Cache entries need to be sorted by component index and then by part index
-    PLASMA_ALWAYS_INLINE bool operator<(const RenderDataCacheEntry& other) const
+    PL_ALWAYS_INLINE bool operator<(const RenderDataCacheEntry& other) const
     {
       if (m_uiComponentIndex == other.m_uiComponentIndex)
         return m_uiPartIndex < other.m_uiPartIndex;
@@ -58,11 +58,11 @@ struct plRenderViewContext
   const plDebugRendererContext* m_pViewDebugContext;
 };
 
-typedef plGenericId<24, 8> plViewId;
+using plViewId = plGenericId<24, 8>;
 
 class plViewHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plViewHandle, plViewId);
+  PL_DECLARE_HANDLE_TYPE(plViewHandle, plViewId);
 
   friend class plRenderWorld;
 };
@@ -71,26 +71,26 @@ class plViewHandle
 template <>
 struct plHashHelper<plViewHandle>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plViewHandle value) { return value.GetInternalID().m_Data * 2654435761U; }
+  PL_ALWAYS_INLINE static plUInt32 Hash(plViewHandle value) { return value.GetInternalID().m_Data * 2654435761U; }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plViewHandle a, plViewHandle b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plViewHandle a, plViewHandle b) { return a == b; }
 };
 
 /// \brief Usage hint of a camera/view.
-struct PLASMA_RENDERERCORE_DLL plCameraUsageHint
+struct PL_RENDERERCORE_DLL plCameraUsageHint
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
-    None,
-    MainView,
-    EditorView,
-    RenderTarget,
-    Culling,
-    Shadow,
-    Reflection,
-    Thumbnail,
+    None,         ///< No hint, camera may not be used, at all.
+    MainView,     ///< The main camera from which the scene gets rendered. There should only be one camera with this hint.
+    EditorView,   ///< The editor view shall be rendered from this camera.
+    RenderTarget, ///< The camera is used to render to a render target.
+    Culling,      ///< This camera should be used for culling only. Usually culling is done from the main view, but with a dedicated culling camera, one can debug the culling system.
+    Shadow,       ///< This camera is used for rendering shadow maps.
+    Reflection,   ///< This camera is used for rendering reflections.
+    Thumbnail,    ///< This camera should be used for rendering a scene thumbnail when exporting from the editor.
 
     ENUM_COUNT,
 
@@ -98,44 +98,4 @@ struct PLASMA_RENDERERCORE_DLL plCameraUsageHint
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plCameraUsageHint);
-
-struct PLASMA_RENDERERCORE_DLL plTonemapMode
-{
-  using StorageType = plUInt8;
-
-  enum Enum
-  {
-    AMD = 0,
-    ACES,
-    Reinhard,
-    Uncharted2,
-    None,
-
-    Default = AMD
-  };
-};
-
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plTonemapMode);
-
-struct plMotionBlurMode
-{
-  using StorageType = plUInt8;
-
-  enum Enum
-  {
-    /// @brief Applies motion blur on objects when they are moving and on camera movements.
-    /// This won't affect the skybox since it's always static in the scene.
-    /// @note This mode requires the Velocity texture as input.
-    ObjectBased,
-
-    /// @brief Applies motion blur on the whole screen only on camera movements.
-    /// This will affect the skybox too.
-    /// @note This mode requires the Depth texture as input.
-    ScreenBased,
-
-    Default = ObjectBased,
-  };
-};
-
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plMotionBlurMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plCameraUsageHint);

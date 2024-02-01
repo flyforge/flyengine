@@ -14,11 +14,11 @@ using plScriptCoroutineId = plGenericId<20, 12>;
 /// \sa plScriptWorldModule::CreateCoroutine, plScriptWorldModule::IsCoroutineFinished
 struct plScriptCoroutineHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plScriptCoroutineHandle, plScriptCoroutineId);
+  PL_DECLARE_HANDLE_TYPE(plScriptCoroutineHandle, plScriptCoroutineId);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutineHandle);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plScriptCoroutineHandle);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutineHandle);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plScriptCoroutineHandle);
 
 /// \brief Base class of script coroutines.
 ///
@@ -31,7 +31,7 @@ PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plScriptCoroutineHandle);
 /// The plScriptWorldModule is used to create and manage coroutine objects. The coroutine can then either be started and
 /// scheduled automatically by calling plScriptWorldModule::StartCoroutine or the
 /// Start/Stop/Update function is called manually if the coroutine is embedded as a subroutine in another coroutine.
-class PLASMA_CORE_DLL plScriptCoroutine
+class PL_CORE_DLL plScriptCoroutine
 {
 public:
   plScriptCoroutine();
@@ -64,19 +64,19 @@ public:
       };
     };
 
-    static PLASMA_ALWAYS_INLINE Result Running(plTime maxDelay = plTime::Zero()) { return {State::Running, maxDelay}; }
-    static PLASMA_ALWAYS_INLINE Result Completed() { return {State::Completed}; }
-    static PLASMA_ALWAYS_INLINE Result Failed() { return {State::Failed}; }
+    static PL_ALWAYS_INLINE Result Running(plTime maxDelay = plTime::MakeZero()) { return {State::Running, maxDelay}; }
+    static PL_ALWAYS_INLINE Result Completed() { return {State::Completed}; }
+    static PL_ALWAYS_INLINE Result Failed() { return {State::Failed}; }
 
     plEnum<State> m_State;
-    plTime m_MaxDelay = plTime::Zero();
+    plTime m_MaxDelay = plTime::MakeZero();
   };
 
-  virtual void Start(plArrayPtr<plVariant> arguments) = 0;
+  virtual void StartWithVarargs(plArrayPtr<plVariant> arguments) = 0;
   virtual void Stop() {}
   virtual Result Update(plTime deltaTimeSinceLastUpdate) = 0;
 
-  void UpdateAndSchedule(plTime deltaTimeSinceLastUpdate = plTime::Zero());
+  void UpdateAndSchedule(plTime deltaTimeSinceLastUpdate = plTime::MakeZero());
 
 private:
   friend class plScriptWorldModule;
@@ -91,7 +91,7 @@ private:
   plScriptWorldModule* m_pOwnerModule = nullptr;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutine);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutine);
 
 /// \brief Base class of coroutines which are implemented in C++ to allow automatic unpacking of the arguments from variants
 template <typename Derived, class... Args>
@@ -99,12 +99,12 @@ class plTypedScriptCoroutine : public plScriptCoroutine
 {
 private:
   template <std::size_t... I>
-  PLASMA_ALWAYS_INLINE void StartImpl(plArrayPtr<plVariant> arguments, std::index_sequence<I...>)
+  PL_ALWAYS_INLINE void StartImpl(plArrayPtr<plVariant> arguments, std::index_sequence<I...>)
   {
     static_cast<Derived*>(this)->Start(plVariantAdapter<typename getArgument<I, Args...>::Type>(arguments[I])...);
   }
 
-  virtual void Start(plArrayPtr<plVariant> arguments) override
+  virtual void StartWithVarargs(plArrayPtr<plVariant> arguments) override
   {
     StartImpl(arguments, std::make_index_sequence<sizeof...(Args)>{});
   }
@@ -128,14 +128,14 @@ struct plScriptCoroutineCreationMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutineCreationMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutineCreationMode);
 
 /// \brief A coroutine type that stores a custom allocator.
 ///
 /// The custom allocator allows to pass more data to the created coroutine object than the default allocator.
 /// E.g. this is used to pass the visual script graph to a visual script coroutine without the user needing to know
 /// that the coroutine is actually implemented in visual script.
-class PLASMA_CORE_DLL plScriptCoroutineRTTI : public plRTTI, public plRefCountingImpl
+class PL_CORE_DLL plScriptCoroutineRTTI : public plRTTI, public plRefCountingImpl
 {
 public:
   plScriptCoroutineRTTI(plStringView sName, plUniquePtr<plRTTIAllocator>&& pAllocator);
@@ -147,7 +147,7 @@ private:
 };
 
 /// \brief A function property that creates an instance of the given coroutine type and starts it immediately.
-class PLASMA_CORE_DLL plScriptCoroutineFunctionProperty : public plScriptFunctionProperty
+class PL_CORE_DLL plScriptCoroutineFunctionProperty : public plScriptFunctionProperty
 {
 public:
   plScriptCoroutineFunctionProperty(plStringView sName, const plSharedPtr<plScriptCoroutineRTTI>& pType, plScriptCoroutineCreationMode::Enum creationMode);
@@ -168,7 +168,7 @@ protected:
 };
 
 /// \brief A message handler that creates an instance of the given coroutine type and starts it immediately.
-class PLASMA_CORE_DLL plScriptCoroutineMessageHandler : public plScriptMessageHandler
+class PL_CORE_DLL plScriptCoroutineMessageHandler : public plScriptMessageHandler
 {
 public:
   plScriptCoroutineMessageHandler(plStringView sName, const plScriptMessageDesc& desc, const plSharedPtr<plScriptCoroutineRTTI>& pType, plScriptCoroutineCreationMode::Enum creationMode);
@@ -186,11 +186,11 @@ protected:
 template <>
 struct plHashHelper<plScriptCoroutineHandle>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plScriptCoroutineHandle value) { return plHashHelper<plUInt32>::Hash(value.GetInternalID().m_Data); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(plScriptCoroutineHandle value) { return plHashHelper<plUInt32>::Hash(value.GetInternalID().m_Data); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plScriptCoroutineHandle a, plScriptCoroutineHandle b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plScriptCoroutineHandle a, plScriptCoroutineHandle b) { return a == b; }
 };
 
 /// \brief Currently not implemented as it is not needed for coroutine handles.
-PLASMA_ALWAYS_INLINE void operator<<(plStreamWriter& inout_stream, const plScriptCoroutineHandle& hValue) {}
-PLASMA_ALWAYS_INLINE void operator>>(plStreamReader& inout_stream, plScriptCoroutineHandle& ref_hValue) {}
+PL_ALWAYS_INLINE void operator<<(plStreamWriter& inout_stream, const plScriptCoroutineHandle& hValue) {}
+PL_ALWAYS_INLINE void operator>>(plStreamReader& inout_stream, plScriptCoroutineHandle& ref_hValue) {}

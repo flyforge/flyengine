@@ -10,14 +10,14 @@ plResourceManagerWorkerDataLoad::~plResourceManagerWorkerDataLoad() = default;
 
 void plResourceManagerWorkerDataLoad::Execute()
 {
-  PLASMA_PROFILE_SCOPE("LoadResourceFromDisk");
+  PL_PROFILE_SCOPE("LoadResourceFromDisk");
 
   plResource* pResourceToLoad = nullptr;
   plResourceTypeLoader* pLoader = nullptr;
   plUniquePtr<plResourceTypeLoader> pCustomLoader;
 
   {
-    PLASMA_LOCK(plResourceManager::s_ResourceMutex);
+    PL_LOCK(plResourceManager::s_ResourceMutex);
 
     if (plResourceManager::s_pState->m_LoadingQueue.IsEmpty())
     {
@@ -46,7 +46,7 @@ void plResourceManagerWorkerDataLoad::Execute()
   if (pLoader == nullptr)
     pLoader = pResourceToLoad->GetDefaultResourceTypeLoader();
 
-  PLASMA_ASSERT_DEV(pLoader != nullptr, "No Loader function available for Resource Type '{0}'", pResourceToLoad->GetDynamicRTTI()->GetTypeName());
+  PL_ASSERT_DEV(pLoader != nullptr, "No Loader function available for Resource Type '{0}'", pResourceToLoad->GetDynamicRTTI()->GetTypeName());
 
   plResourceLoadData LoaderData = pLoader->OpenDataStream(pResourceToLoad);
 
@@ -56,7 +56,7 @@ void plResourceManagerWorkerDataLoad::Execute()
   plSharedPtr<plResourceManagerWorkerUpdateContent> pUpdateContentTask;
   plTaskGroupID* pUpdateContentGroup = nullptr;
 
-  PLASMA_LOCK(plResourceManager::s_ResourceMutex);
+  PL_LOCK(plResourceManager::s_ResourceMutex);
 
   // try to find an update content task that has finished and can be reused
   for (plUInt32 i = 0; i < plResourceManager::s_pState->m_WorkerTasksUpdateContent.GetCount(); ++i)
@@ -75,10 +75,10 @@ void plResourceManagerWorkerDataLoad::Execute()
   if (pUpdateContentTask == nullptr)
   {
     plStringBuilder s;
-    s.Format("Resource Content Updater {0}", plResourceManager::s_pState->m_WorkerTasksUpdateContent.GetCount());
+    s.SetFormat("Resource Content Updater {0}", plResourceManager::s_pState->m_WorkerTasksUpdateContent.GetCount());
 
     auto& td = plResourceManager::s_pState->m_WorkerTasksUpdateContent.ExpandAndGetRef();
-    td.m_pTask = PLASMA_DEFAULT_NEW(plResourceManagerWorkerUpdateContent);
+    td.m_pTask = PL_DEFAULT_NEW(plResourceManagerWorkerUpdateContent);
     td.m_pTask->ConfigureTask(s, plTaskNesting::Maybe);
 
     pUpdateContentTask = td.m_pTask;
@@ -86,7 +86,7 @@ void plResourceManagerWorkerDataLoad::Execute()
   }
 
   // always updated together with pUpdateContentTask
-  PLASMA_MSVC_ANALYSIS_ASSUME(pUpdateContentGroup != nullptr);
+  PL_MSVC_ANALYSIS_ASSUME(pUpdateContentGroup != nullptr);
 
   // set up the data load task and launch it
   {
@@ -130,7 +130,7 @@ void plResourceManagerWorkerUpdateContent::Execute()
   if (m_LoaderData.m_LoadedFileModificationDate.IsValid())
     m_pResourceToLoad->m_LoadedFileModificationTime = m_LoaderData.m_LoadedFileModificationDate;
 
-  PLASMA_ASSERT_DEV(m_pResourceToLoad->GetLoadingState() != plResourceState::Unloaded, "The resource should have changed its loading state.");
+  PL_ASSERT_DEV(m_pResourceToLoad->GetLoadingState() != plResourceState::Unloaded, "The resource should have changed its loading state.");
 
   // Update Memory Usage
   {
@@ -139,9 +139,9 @@ void plResourceManagerWorkerUpdateContent::Execute()
     MemUsage.m_uiMemoryGPU = 0xFFFFFFFF;
     m_pResourceToLoad->UpdateMemoryUsage(MemUsage);
 
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       MemUsage.m_uiMemoryCPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its CPU memory usage", m_pResourceToLoad->GetResourceID());
-    PLASMA_ASSERT_DEV(
+    PL_ASSERT_DEV(
       MemUsage.m_uiMemoryGPU != 0xFFFFFFFF, "Resource '{0}' did not properly update its GPU memory usage", m_pResourceToLoad->GetResourceID());
 
     m_pResourceToLoad->m_MemoryUsage = MemUsage;
@@ -150,8 +150,8 @@ void plResourceManagerWorkerUpdateContent::Execute()
   m_pLoader->CloseDataStream(m_pResourceToLoad, m_LoaderData);
 
   {
-    PLASMA_LOCK(plResourceManager::s_ResourceMutex);
-    PLASMA_ASSERT_DEV(plResourceManager::IsQueuedForLoading(m_pResourceToLoad), "Multi-threaded access detected");
+    PL_LOCK(plResourceManager::s_ResourceMutex);
+    PL_ASSERT_DEV(plResourceManager::IsQueuedForLoading(m_pResourceToLoad), "Multi-threaded access detected");
     m_pResourceToLoad->m_Flags.Remove(plResourceFlags::IsQueuedForLoading);
     m_pResourceToLoad->m_LastAcquire = plResourceManager::GetLastFrameUpdate();
   }
@@ -161,4 +161,3 @@ void plResourceManagerWorkerUpdateContent::Execute()
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_WorkerTasks);

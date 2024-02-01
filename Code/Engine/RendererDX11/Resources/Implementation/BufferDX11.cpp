@@ -8,12 +8,11 @@
 
 plGALBufferDX11::plGALBufferDX11(const plGALBufferCreationDescription& Description)
   : plGALBuffer(Description)
-  , m_pDXBuffer(nullptr)
-  , m_IndexFormat(DXGI_FORMAT_UNKNOWN)
+
 {
 }
 
-plGALBufferDX11::~plGALBufferDX11() {}
+plGALBufferDX11::~plGALBufferDX11() = default;
 
 plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const plUInt8> pInitialData)
 {
@@ -40,7 +39,7 @@ plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const pl
       break;
     default:
       plLog::Error("Unknown buffer type supplied to CreateBuffer()!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   if (m_Description.m_bAllowShaderResourceView)
@@ -48,9 +47,6 @@ plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const pl
 
   if (m_Description.m_bAllowUAV)
     BufferDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
-
-  if (m_Description.m_bStreamOutputTarget)
-    BufferDesc.BindFlags |= D3D11_BIND_STREAM_OUTPUT;
 
   BufferDesc.ByteWidth = m_Description.m_uiTotalSize;
   BufferDesc.CPUAccessFlags = 0;
@@ -101,20 +97,20 @@ plResult plGALBufferDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<const pl
 
   if (SUCCEEDED(pDXDevice->GetDXDevice()->CreateBuffer(&BufferDesc, pInitialData.IsEmpty() ? nullptr : &DXInitialData, &m_pDXBuffer)))
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
     plLog::Error("Creation of native DirectX buffer failed!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 plResult plGALBufferDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXBuffer);
+  PL_GAL_DX11_RELEASE(m_pDXBuffer);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALBufferDX11::SetDebugNamePlatform(const char* szName) const
@@ -127,4 +123,4 @@ void plGALBufferDX11::SetDebugNamePlatform(const char* szName) const
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_BufferDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_BufferDX11);

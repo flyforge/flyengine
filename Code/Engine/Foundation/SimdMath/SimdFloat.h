@@ -3,10 +3,10 @@
 #include <Foundation/Math/Angle.h>
 #include <Foundation/SimdMath/SimdTypes.h>
 
-class PLASMA_FOUNDATION_DLL plSimdFloat
+class PL_FOUNDATION_DLL plSimdFloat
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Default constructor, leaves the data uninitialized.
   plSimdFloat(); // [tested]
@@ -29,7 +29,11 @@ public:
   /// \brief Returns the stored number as a standard float.
   operator float() const; // [tested]
 
-  static plSimdFloat Zero(); // [tested]
+  /// \brief Creates an plSimdFloat that is initialized to zero.
+  [[nodiscard]] static plSimdFloat MakeZero(); // [tested]
+
+  /// \brief Creates an plSimdFloat that is initialized to Not-A-Number (NaN).
+  [[nodiscard]] static plSimdFloat MakeNaN(); // [tested]
 
 public:
   plSimdFloat operator+(const plSimdFloat& f) const; // [tested]
@@ -67,19 +71,19 @@ public:
   template <plMathAcc::Enum acc = plMathAcc::FULL>
   plSimdFloat GetInvSqrt() const; // [tested]
 
-  plSimdFloat Max(const plSimdFloat& f) const; // [tested]
-  plSimdFloat Min(const plSimdFloat& f) const; // [tested]
-  plSimdFloat Abs() const;                     // [tested]
+  [[nodiscard]] plSimdFloat Max(const plSimdFloat& f) const; // [tested]
+  [[nodiscard]] plSimdFloat Min(const plSimdFloat& f) const; // [tested]
+  [[nodiscard]] plSimdFloat Abs() const;                     // [tested]
 
 public:
   plInternal::QuadFloat m_v;
 };
 
-#if PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
+#if PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
 #  include <Foundation/SimdMath/Implementation/SSE/SSEFloat_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_FPU
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_FPU
 #  include <Foundation/SimdMath/Implementation/FPU/FPUFloat_inl.h>
-#elif PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_NEON
+#elif PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_NEON
 #  include <Foundation/SimdMath/Implementation/NEON/NEONFloat_inl.h>
 #else
 #  error "Unknown SIMD implementation."

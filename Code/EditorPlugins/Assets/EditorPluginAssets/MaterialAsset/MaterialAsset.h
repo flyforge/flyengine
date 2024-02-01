@@ -5,11 +5,11 @@
 
 class plMaterialAssetDocument;
 struct plPropertyMetaStateEvent;
-struct PlasmaEditorAppEvent;
+struct plEditorAppEvent;
 
 struct plMaterialShaderMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -34,11 +34,11 @@ struct plMaterialVisualShaderEvent
   plString m_sTransformError;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plMaterialShaderMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plMaterialShaderMode);
 
 struct plMaterialAssetPreview
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -50,17 +50,16 @@ struct plMaterialAssetPreview
     Default = Ball
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plMaterialAssetPreview);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plMaterialAssetPreview);
 
 class plMaterialAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plMaterialAssetProperties, plReflectedClass);
 
 public:
   plMaterialAssetProperties()
-    : m_pDocument(nullptr)
-  {
-  }
+
+    = default;
 
   void SetBaseMaterial(const char* szBaseMaterial);
   const char* GetBaseMaterial() const;
@@ -95,16 +94,16 @@ public:
   plString m_sShader;
 
   plMap<plString, plVariant> m_CachedProperties;
-  plMaterialAssetDocument* m_pDocument;
+  plMaterialAssetDocument* m_pDocument = nullptr;
   plEnum<plMaterialShaderMode> m_ShaderMode;
 };
 
 class plMaterialAssetDocument : public plSimpleAssetDocument<plMaterialAssetProperties>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaterialAssetDocument, plSimpleAssetDocument<plMaterialAssetProperties>);
+  PL_ADD_DYNAMIC_REFLECTION(plMaterialAssetDocument, plSimpleAssetDocument<plMaterialAssetProperties>);
 
 public:
-  plMaterialAssetDocument(const char* szDocumentPath);
+  plMaterialAssetDocument(plStringView sDocumentPath);
   ~plMaterialAssetDocument();
 
   plDocumentObject* GetShaderPropertyObject();
@@ -112,11 +111,11 @@ public:
 
   void SetBaseMaterial(const char* szBaseMaterial);
 
-  plStatus WriteMaterialAsset(plStreamWriter& stream, const plPlatformProfile* pAssetProfile, bool bEmbedLowResData) const;
+  plStatus WriteMaterialAsset(plStreamWriter& inout_stream, const plPlatformProfile* pAssetProfile, bool bEmbedLowResData) const;
 
   /// \brief Will make sure that the visual shader is rebuilt.
   /// Typically called during asset transformation, but can be triggered manually to enforce getting visual shader node changes in.
-  plStatus RecreateVisualShaderFile(const plAssetFileHeader& AssetHeader);
+  plStatus RecreateVisualShaderFile(const plAssetFileHeader& assetHeader);
 
   /// \brief If shader compilation failed this will modify the output shader file such that transforming it again, will trigger a full
   /// regeneration Otherwise the AssetCurator would early out
@@ -129,9 +128,9 @@ public:
   static plUuid GetLitAlphaTestBaseMaterial();
   static plUuid GetNeutralNormalMap();
 
-  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const override;
-  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const override;
-  virtual bool Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType) override;
+  virtual void GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_mimeTypes) const override;
+  virtual bool CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_sMimeType) const override;
+  virtual bool Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType) override;
 
   plEvent<const plMaterialVisualShaderEvent&> m_VisualShaderEvents;
   plEnum<plMaterialAssetPreview> m_PreviewModel;
@@ -139,11 +138,11 @@ public:
 protected:
   plUuid GetSeedFromBaseMaterial(const plAbstractObjectGraph* pBaseGraph);
   static plUuid GetMaterialNodeGuid(const plAbstractObjectGraph& graph);
-  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab) override;
+  virtual void UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab) override;
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
 
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 
   virtual void InternalGetMetaDataHash(const plDocumentObject* pObject, plUInt64& inout_uiHash) const override;
@@ -153,7 +152,7 @@ protected:
   virtual void UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const override;
 
   void InvalidateCachedShader();
-  void EditorEventHandler(const PlasmaEditorAppEvent& e);
+  void EditorEventHandler(const plEditorAppEvent& e);
 
 private:
   plStringBuilder m_sCheckPermutations;

@@ -3,7 +3,7 @@
 #include <EditorFramework/EditorFrameworkDLL.h>
 #include <Foundation/Reflection/Reflection.h>
 
-struct PLASMA_EDITORFRAMEWORK_DLL plExposedParameter
+struct PL_EDITORFRAMEWORK_DLL plExposedParameter
 {
   plExposedParameter();
   virtual ~plExposedParameter();
@@ -13,11 +13,11 @@ struct PLASMA_EDITORFRAMEWORK_DLL plExposedParameter
   plVariant m_DefaultValue;
   plHybridArray<plPropertyAttribute*, 2> m_Attributes;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORFRAMEWORK_DLL, plExposedParameter)
+PL_DECLARE_REFLECTABLE_TYPE(PL_EDITORFRAMEWORK_DLL, plExposedParameter)
 
-class PLASMA_EDITORFRAMEWORK_DLL plExposedParameters : public plReflectedClass
+class PL_EDITORFRAMEWORK_DLL plExposedParameters : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExposedParameters, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plExposedParameters, plReflectedClass);
 
 public:
   plExposedParameters();

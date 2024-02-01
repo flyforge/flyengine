@@ -12,12 +12,12 @@
 ///
 /// Currently there is an upper limit of 16384 vertices to accept meshes.
 /// Everything larger than that will not be processed.
-class PLASMA_CORE_DLL plConvexHullGenerator
+class PL_CORE_DLL plConvexHullGenerator
 {
 public:
   struct Face
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt16 m_uiVertexIdx[3];
   };
@@ -40,16 +40,16 @@ public:
   /// \note The length is not in 'mesh space' coordinates, but instead in 'unit cube space'.
   /// That means, every mesh is scaled to fit into a cube of size [-1; +1] for each axis. Thus the exact scale of the mesh does not matter
   /// when setting this value. Default is 0.05.
-  void SetSimplificationMinTriangleEdgeLength(double len) { m_fMinTriangleEdgeLength = len; }
+  void SetSimplificationMinTriangleEdgeLength(double fLen) { m_fMinTriangleEdgeLength = fLen; }
 
   /// \brief Generates the convex hull. Simplifies the mesh according to the previously specified parameters.
   plResult Build(const plArrayPtr<const plVec3> vertices);
 
   /// \brief When Build() was successful this can be called to retrieve the resulting vertices and triangles.
-  void Retrieve(plDynamicArray<plVec3>& out_Vertices, plDynamicArray<Face>& out_Faces);
+  void Retrieve(plDynamicArray<plVec3>& out_vertices, plDynamicArray<Face>& out_faces);
 
   /// \brief Same as Retrieve() but only returns the vertices.
-  void RetrieveVertices(plDynamicArray<plVec3>& out_Vertices);
+  void RetrieveVertices(plDynamicArray<plVec3>& out_vertices);
 
 private:
   plResult ComputeCenterAndScale(const plArrayPtr<const plVec3> vertices);
@@ -67,15 +67,15 @@ private:
 
   struct TwoSet
   {
-    PLASMA_ALWAYS_INLINE TwoSet()
+    PL_ALWAYS_INLINE TwoSet()
     {
       a = 0xFFFF;
       b = 0xFFFF;
     }
-    PLASMA_ALWAYS_INLINE void Add(plUInt16 x) { (a == 0xFFFF ? a : b) = x; }
-    PLASMA_ALWAYS_INLINE bool Contains(plUInt16 x) { return a == x || b == x; }
-    PLASMA_ALWAYS_INLINE void Remove(plUInt16 x) { (a == x ? a : b) = 0xFFFF; }
-    PLASMA_ALWAYS_INLINE int GetSize() { return (a != 0xFFFF) + (b != 0xFFFF); }
+    PL_ALWAYS_INLINE void Add(plUInt16 x) { (a == 0xFFFF ? a : b) = x; }
+    PL_ALWAYS_INLINE bool Contains(plUInt16 x) { return a == x || b == x; }
+    PL_ALWAYS_INLINE void Remove(plUInt16 x) { (a == x ? a : b) = 0xFFFF; }
+    PL_ALWAYS_INLINE int GetSize() { return (a != 0xFFFF) + (b != 0xFFFF); }
 
     plUInt16 a, b;
   };
@@ -90,8 +90,8 @@ private:
   };
 
   // used for mesh simplification
-  plAngle m_MinTriangleAngle = plAngle::Degree(22.0f);
-  plAngle m_FlatVertexNormalThreshold = plAngle::Degree(5);
+  plAngle m_MinTriangleAngle = plAngle::MakeFromDegree(22.0f);
+  plAngle m_FlatVertexNormalThreshold = plAngle::MakeFromDegree(5);
   double m_fMinTriangleEdgeLength = 0.05;
 
   plVec3d m_vCenter;

@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/Passes/BlurPass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -8,27 +9,27 @@
 #include <RendererCore/../../../Data/Base/Shaders/Pipeline/BlurConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlurPass, 1, plRTTIDefaultAllocator<plBlurPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlurPass, 1, plRTTIDefaultAllocator<plBlurPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput),
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(15)),
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(15)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBlurPass::plBlurPass()
   : plRenderPipelinePass("BlurPass")
-  , m_iRadius(15)
+
 {
   {
     // Load shader.
     m_hShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/Blur.plShader");
-    PLASMA_ASSERT_DEV(m_hShader.IsValid(), "Could not load blur shader!");
+    PL_ASSERT_DEV(m_hShader.IsValid(), "Could not load blur shader!");
   }
 
   {
@@ -94,6 +95,22 @@ void plBlurPass::Execute(const plRenderViewContext& renderViewContext, const plA
   }
 }
 
+plResult plBlurPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_iRadius;
+  return PL_SUCCESS;
+}
+
+plResult plBlurPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_iRadius;
+  return PL_SUCCESS;
+}
+
 void plBlurPass::SetRadius(plInt32 iRadius)
 {
   m_iRadius = iRadius;
@@ -109,4 +126,4 @@ plInt32 plBlurPass::GetRadius() const
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_BlurPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_BlurPass);

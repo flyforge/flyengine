@@ -4,8 +4,8 @@
 #include <EditorFramework/DocumentWindow/EngineDocumentWindow.moc.h>
 #include <EditorFramework/Gizmos/SphereGizmo.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereGizmo, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSphereGizmo, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSphereGizmo::plSphereGizmo()
 {
@@ -16,11 +16,11 @@ plSphereGizmo::plSphereGizmo()
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hInnerSphere.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Sphere, plColorLinearUB(200, 200, 0, 128), plGizmoFlags::OnTop | plGizmoFlags::Pickable); // this gizmo should be rendered very last so it is always on top
-  m_hOuterSphere.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Sphere, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hInnerSphere.ConfigureHandle(this, plEngineGizmoHandleType::Sphere, plColorLinearUB(200, 200, 0, 128), plGizmoFlags::OnTop | plGizmoFlags::Pickable); // this gizmo should be rendered very last so it is always on top
+  m_hOuterSphere.ConfigureHandle(this, plEngineGizmoHandleType::Sphere, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
 
   SetVisible(false);
-  SetTransformation(plTransform::IdentityTransform());
+  SetTransformation(plTransform::MakeIdentity());
 }
 
 void plSphereGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -63,15 +63,15 @@ void plSphereGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-PlasmaEditorInput plSphereGizmo::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plSphereGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hInnerSphere)
   {
@@ -82,7 +82,7 @@ PlasmaEditorInput plSphereGizmo::DoMousePressEvent(QMouseEvent* e)
     m_ManipulateMode = ManipulateMode::OuterSphere;
   }
   else
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -95,7 +95,7 @@ PlasmaEditorInput plSphereGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   SetActiveInputContext(this);
 
@@ -104,36 +104,38 @@ PlasmaEditorInput plSphereGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plSphereGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plSphereGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plSphereGizmo::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plSphereGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
-    return PlasmaEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
+    return plEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
+  const QPoint mousePosition = e->globalPosition().toPoint();
+
+  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
   const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vLastMousePos = UpdateMouseMode(e);
@@ -167,7 +169,7 @@ PlasmaEditorInput plSphereGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
 void plSphereGizmo::SetInnerSphere(bool bEnabled, float fRadius)

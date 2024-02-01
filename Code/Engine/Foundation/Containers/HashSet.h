@@ -28,14 +28,13 @@ public:
     /// \brief Checks whether the two iterators point to the same element.
     bool operator==(const typename plHashSetBase<KeyType, Hasher>::ConstIterator& rhs) const;
 
-    /// \brief Checks whether the two iterators point to the same element.
-    bool operator!=(const typename plHashSetBase<KeyType, Hasher>::ConstIterator& rhs) const;
+    PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const typename plHashSetBase<KeyType, Hasher>::ConstIterator&);
 
     /// \brief Returns the 'key' of the element that this iterator points to.
     const KeyType& Key() const; // [tested]
 
     /// \brief Returns the 'key' of the element that this iterator points to.
-    PLASMA_ALWAYS_INLINE const KeyType& operator*() { return Key(); } // [tested]
+    PL_ALWAYS_INLINE const KeyType& operator*() { return Key(); } // [tested]
 
     /// \brief Advances the iterator to the next element in the map. The iterator will not be valid anymore, if the end is reached.
     void Next(); // [tested]
@@ -57,13 +56,13 @@ public:
 
 protected:
   /// \brief Creates an empty hashset. Does not allocate any data yet.
-  explicit plHashSetBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plHashSetBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given hashset.
-  plHashSetBase(const plHashSetBase<KeyType, Hasher>& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHashSetBase(const plHashSetBase<KeyType, Hasher>& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves data from an existing hashtable into this one.
-  plHashSetBase(plHashSetBase<KeyType, Hasher>&& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHashSetBase(plHashSetBase<KeyType, Hasher>&& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plHashSetBase(); // [tested]
@@ -77,9 +76,7 @@ protected:
 public:
   /// \brief Compares this table to another table.
   bool operator==(const plHashSetBase<KeyType, Hasher>& rhs) const; // [tested]
-
-  /// \brief Compares this table to another table.
-  bool operator!=(const plHashSetBase<KeyType, Hasher>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plHashSetBase<KeyType, Hasher>&);
 
   /// \brief Expands the hashset by over-allocating the internal storage so that the load factor is lower or equal to 60% when inserting the
   /// given number of entries.
@@ -135,7 +132,7 @@ public:
   ConstIterator GetEndIterator() const;
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const;
+  plAllocator* GetAllocator() const;
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const; // [tested]
@@ -150,7 +147,7 @@ private:
   plUInt32 m_uiCount;
   plUInt32 m_uiCapacity;
 
-  plAllocatorBase* m_pAllocator;
+  plAllocator* m_pAllocator;
 
   enum
   {
@@ -190,7 +187,7 @@ class plHashSet : public plHashSetBase<KeyType, Hasher>
 {
 public:
   plHashSet();
-  explicit plHashSet(plAllocatorBase* pAllocator);
+  explicit plHashSet(plAllocator* pAllocator);
 
   plHashSet(const plHashSet<KeyType, Hasher, AllocatorWrapper>& other);
   plHashSet(const plHashSetBase<KeyType, Hasher>& other);

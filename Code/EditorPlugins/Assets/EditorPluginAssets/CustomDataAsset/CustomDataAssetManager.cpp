@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/CustomDataAsset/CustomDataAssetManager.h>
 #include <EditorPluginAssets/CustomDataAsset/CustomDataAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetDocumentManager, 1, plRTTIDefaultAllocator<plCustomDataAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCustomDataAssetDocumentManager, 1, plRTTIDefaultAllocator<plCustomDataAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plCustomDataAssetDocumentManager::plCustomDataAssetDocumentManager()
 {
@@ -38,7 +38,7 @@ void plCustomDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plCustomDataAssetDocument>())
       {
-        plQtCustomDataAssetDocumentWindow* pDocWnd = new plQtCustomDataAssetDocumentWindow(e.m_pDocument);
+        new plQtCustomDataAssetDocumentWindow(e.m_pDocument); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -48,9 +48,9 @@ void plCustomDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMa
   }
 }
 
-void plCustomDataAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plCustomDataAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plCustomDataAssetDocument(szPath);
+  out_pDocument = new plCustomDataAssetDocument(sPath);
 }
 
 void plCustomDataAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

@@ -14,10 +14,14 @@ o
 			s{"Shaders/Materials/IrradianceProbeVisualization.plShader"}
 		}
 		Uuid %DocumentID{u4{10735177727750644884,4887717215577949974}}
-		u4 %Hash{4099601167259747894}
+		u4 %Hash{16020794930718866227}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
-		VarArray %References{}
+		VarArray %PackageDeps{}
+		VarArray %References
+		{
+			s{"Shaders/Materials/IrradianceProbeVisualization.plShader"}
+		}
 	}
 }
 }
@@ -63,58 +67,24 @@ Types
 {
 o
 {
-	Uuid %id{u4{14831359824912569370,1828982774811006507}}
+	Uuid %id{u4{11972112915775852071,3921050886574945540}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
 		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
 		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plMaterialAssetProperties"}
-		u3 %TypeVersion{4}
-	}
-}
-o
-{
-	Uuid %id{u4{18200256455121510126,5460019644832151135}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
+		s %ParentTypeName{"plShaderTypeBase"}
 		s %PluginName{"ShaderTypes"}
 		VarArray %Properties{}
-		s %TypeName{"plShaderTypeBase"}
+		s %TypeName{"Shaders/Materials/IrradianceProbeVisualization.plShader"}
 		u3 %TypeVersion{2}
 	}
 }
 o
 {
-	Uuid %id{u4{12123694589359637393,6797358509465135799}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plMaterialShaderMode"}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -131,7 +101,24 @@ o
 }
 o
 {
-	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	Uuid %id{u4{17717897218099796308,9033184167245688007}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plShaderTypeBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{2947336711354777548,15013008608905564043}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -148,7 +135,24 @@ o
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{8721322561248882817,17579066505604714242}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialShaderMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -165,19 +169,19 @@ o
 }
 o
 {
-	Uuid %id{u4{5044832314168722604,17955927660944316986}}
+	Uuid %id{u4{5030680158680079231,18410952876772242771}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
 		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
-		s %ParentTypeName{"plShaderTypeBase"}
-		s %PluginName{"ShaderTypes"}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
-		s %TypeName{"Shaders/Materials/IrradianceProbeVisualization.plShader"}
-		u3 %TypeVersion{2}
+		s %TypeName{"plMaterialAssetProperties"}
+		u3 %TypeVersion{4}
 	}
 }
 }

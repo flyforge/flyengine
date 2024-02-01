@@ -12,9 +12,9 @@ using plCustomMeshComponentManager = plComponentManager<class plCustomMeshCompon
 /// The plDynamicMeshBufferResource is an easy to use resource to build geometry and change it frequently.
 /// This component takes such a resource and takes care of rendering it.
 /// The same resource can be set on multiple components to instantiate it in different locations.
-class PLASMA_RENDERERCORE_DLL plCustomMeshComponent : public plRenderComponent
+class PL_RENDERERCORE_DLL plCustomMeshComponent : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plCustomMeshComponent, plRenderComponent, plCustomMeshComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plCustomMeshComponent, plRenderComponent, plCustomMeshComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -92,9 +92,9 @@ protected:
 };
 
 /// \brief Temporary data used to feed the plCustomMeshRenderer.
-class PLASMA_RENDERERCORE_DLL plCustomMeshRenderData : public plRenderData
+class PL_RENDERERCORE_DLL plCustomMeshRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCustomMeshRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plCustomMeshRenderData, plRenderData);
 
 public:
   virtual void FillBatchIdAndSortingKey();
@@ -113,10 +113,10 @@ public:
 };
 
 /// \brief A renderer that handles all plCustomMeshRenderData.
-class PLASMA_RENDERERCORE_DLL plCustomMeshRenderer : public plRenderer
+class PL_RENDERERCORE_DLL plCustomMeshRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCustomMeshRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plCustomMeshRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plCustomMeshRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plCustomMeshRenderer);
 
 public:
   plCustomMeshRenderer();

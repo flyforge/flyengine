@@ -23,7 +23,7 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, ReflectionPool)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, ReflectionPool)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -41,7 +41,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, ReflectionPool)
     plReflectionPool::OnEngineShutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -49,7 +49,7 @@ PLASMA_END_SUBSYSTEM_DECLARATION;
 
 plReflectionProbeId plReflectionPool::RegisterReflectionProbe(const plWorld* pWorld, const plReflectionProbeDesc& desc, const plReflectionProbeComponentBase* pComponent)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
 
   Data::ProbeData probe;
   s_pData->UpdateProbeData(probe, desc, pComponent);
@@ -58,13 +58,13 @@ plReflectionProbeId plReflectionPool::RegisterReflectionProbe(const plWorld* pWo
 
 void plReflectionPool::DeregisterReflectionProbe(const plWorld* pWorld, plReflectionProbeId id)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   s_pData->RemoveProbe(pWorld, id);
 }
 
 void plReflectionPool::UpdateReflectionProbe(const plWorld* pWorld, plReflectionProbeId id, const plReflectionProbeDesc& desc, const plReflectionProbeComponentBase* pComponent)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   plReflectionPool::Data::WorldReflectionData& data = s_pData->GetWorldData(pWorld);
   Data::ProbeData& probeData = data.m_Probes.GetValueUnchecked(id.m_InstanceIndex);
   s_pData->UpdateProbeData(probeData, desc, pComponent);
@@ -73,7 +73,7 @@ void plReflectionPool::UpdateReflectionProbe(const plWorld* pWorld, plReflection
 
 void plReflectionPool::ExtractReflectionProbe(const plComponent* pComponent, plMsgExtractRenderData& ref_msg, plReflectionProbeRenderData* pRenderData0, const plWorld* pWorld, plReflectionProbeId id, float fPriority)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   s_pData->m_ReflectionProbeUpdater.ScheduleUpdateSteps();
 
   const plUInt32 uiWorldIndex = pWorld->GetIndex();
@@ -101,7 +101,7 @@ void plReflectionPool::ExtractReflectionProbe(const plComponent* pComponent, plM
     ref_msg.AddRenderData(pRenderData0, plDefaultRenderDataCategories::ReflectionProbe, plRenderData::Caching::Never);
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   const plUInt32 uiMipLevels = GetMipLevels();
   if (probeData.m_desc.m_bShowDebugInfo && s_pData->m_hDebugMaterial.GetCount() == uiMipLevels * s_uiNumReflectionProbeCubeMaps)
   {
@@ -116,7 +116,7 @@ void plReflectionPool::ExtractReflectionProbe(const plComponent* pComponent, plM
       plStringBuilder sEnum;
       plReflectionUtils::BitflagsToString(probeData.m_Flags, sEnum, plReflectionUtils::EnumConversionMode::ValueNameOnly);
       plStringBuilder s;
-      s.Format("\n RefIdx: {}\nUpdating: {}\nFlags: {}\n", iMappedIndex, activeIndex, sEnum);
+      s.SetFormat("\n RefIdx: {}\nUpdating: {}\nFlags: {}\n", iMappedIndex, activeIndex, sEnum);
       plDebugRenderer::Draw3DText(pWorld, s, pComponent->GetOwner()->GetGlobalPosition(), plColorScheme::LightUI(plColorScheme::Violet));
     }
 
@@ -143,7 +143,7 @@ void plReflectionPool::ExtractReflectionProbe(const plComponent* pComponent, plM
       pRenderData->m_hMaterial = s_pData->m_hDebugMaterial[iMappedIndex * uiMipLevels + i];
       pRenderData->m_Color = plColor::White;
       pRenderData->m_uiSubMeshIndex = 0;
-      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(pComponent, 0);
+      pRenderData->m_uiUniqueID = plRenderComponent::GetUniqueIdForRendering(*pComponent, 0);
 
       pRenderData->FillBatchIdAndSortingKey();
       ref_msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::LitOpaque, plRenderData::Caching::Never);
@@ -157,10 +157,10 @@ void plReflectionPool::ExtractReflectionProbe(const plComponent* pComponent, plM
 
 plReflectionProbeId plReflectionPool::RegisterSkyLight(const plWorld* pWorld, plReflectionProbeDesc& ref_desc, const plSkyLightComponent* pComponent)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   const plUInt32 uiWorldIndex = pWorld->GetIndex();
-  s_pData->m_uiWorldHasSkyLight |= PLASMA_BIT(uiWorldIndex);
-  s_pData->m_uiSkyIrradianceChanged |= PLASMA_BIT(uiWorldIndex);
+  s_pData->m_uiWorldHasSkyLight |= PL_BIT(uiWorldIndex);
+  s_pData->m_uiSkyIrradianceChanged |= PL_BIT(uiWorldIndex);
 
   Data::ProbeData probe;
   s_pData->UpdateSkyLightData(probe, ref_desc, pComponent);
@@ -171,18 +171,18 @@ plReflectionProbeId plReflectionPool::RegisterSkyLight(const plWorld* pWorld, pl
 
 void plReflectionPool::DeregisterSkyLight(const plWorld* pWorld, plReflectionProbeId id)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
 
   s_pData->RemoveProbe(pWorld, id);
 
   const plUInt32 uiWorldIndex = pWorld->GetIndex();
-  s_pData->m_uiWorldHasSkyLight &= ~PLASMA_BIT(uiWorldIndex);
-  s_pData->m_uiSkyIrradianceChanged |= PLASMA_BIT(uiWorldIndex);
+  s_pData->m_uiWorldHasSkyLight &= ~PL_BIT(uiWorldIndex);
+  s_pData->m_uiSkyIrradianceChanged |= PL_BIT(uiWorldIndex);
 }
 
 void plReflectionPool::UpdateSkyLight(const plWorld* pWorld, plReflectionProbeId id, const plReflectionProbeDesc& desc, const plSkyLightComponent* pComponent)
 {
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
   plReflectionPool::Data::WorldReflectionData& data = s_pData->GetWorldData(pWorld);
   Data::ProbeData& probeData = data.m_Probes.GetValueUnchecked(id.m_InstanceIndex);
   if (s_pData->UpdateSkyLightData(probeData, desc, pComponent))
@@ -206,7 +206,7 @@ void plReflectionPool::SetConstantSkyIrradiance(const plWorld* pWorld, const plA
   {
     skyIrradianceStorage[uiWorldIndex] = skyIrradiance16f;
 
-    s_pData->m_uiSkyIrradianceChanged |= PLASMA_BIT(uiWorldIndex);
+    s_pData->m_uiSkyIrradianceChanged |= PL_BIT(uiWorldIndex);
   }
 }
 
@@ -219,7 +219,7 @@ void plReflectionPool::ResetConstantSkyIrradiance(const plWorld* pWorld)
   {
     skyIrradianceStorage[uiWorldIndex] = plAmbientCube<plColorLinear16f>();
 
-    s_pData->m_uiSkyIrradianceChanged |= PLASMA_BIT(uiWorldIndex);
+    s_pData->m_uiSkyIrradianceChanged |= PL_BIT(uiWorldIndex);
   }
 }
 
@@ -253,7 +253,7 @@ plGALTextureHandle plReflectionPool::GetSkyIrradianceTexture()
 // static
 void plReflectionPool::OnEngineStartup()
 {
-  s_pData = PLASMA_DEFAULT_NEW(plReflectionPool::Data);
+  s_pData = PL_DEFAULT_NEW(plReflectionPool::Data);
 
   plRenderWorld::GetExtractionEvent().AddEventHandler(OnExtractionEvent);
   plRenderWorld::GetRenderEvent().AddEventHandler(OnRenderEvent);
@@ -265,7 +265,7 @@ void plReflectionPool::OnEngineShutdown()
   plRenderWorld::GetExtractionEvent().RemoveEventHandler(OnExtractionEvent);
   plRenderWorld::GetRenderEvent().RemoveEventHandler(OnRenderEvent);
 
-  PLASMA_DEFAULT_DELETE(s_pData);
+  PL_DEFAULT_DELETE(s_pData);
 }
 
 // static
@@ -273,7 +273,7 @@ void plReflectionPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
 {
   if (e.m_Type == plRenderWorldExtractionEvent::Type::BeginExtraction)
   {
-    PLASMA_PROFILE_SCOPE("Reflection Pool BeginExtraction");
+    PL_PROFILE_SCOPE("Reflection Pool BeginExtraction");
     s_pData->CreateSkyIrradianceTexture();
     s_pData->CreateReflectionViewsAndResources();
     s_pData->PreExtraction();
@@ -281,7 +281,7 @@ void plReflectionPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
 
   if (e.m_Type == plRenderWorldExtractionEvent::Type::EndExtraction)
   {
-    PLASMA_PROFILE_SCOPE("Reflection Pool EndExtraction");
+    PL_PROFILE_SCOPE("Reflection Pool EndExtraction");
     s_pData->PostExtraction();
   }
 }
@@ -295,7 +295,7 @@ void plReflectionPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
   if (s_pData->m_hSkyIrradianceTexture.IsInvalidated())
     return;
 
-  PLASMA_LOCK(s_pData->m_Mutex);
+  PL_LOCK(s_pData->m_Mutex);
 
   plUInt64 uiWorldHasSkyLight = s_pData->m_uiWorldHasSkyLight;
   plUInt64 uiSkyIrradianceChanged = s_pData->m_uiSkyIrradianceChanged;
@@ -313,7 +313,7 @@ void plReflectionPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
     auto pGALCommandEncoder = pGALPass->BeginCompute();
     for (plUInt32 i = 0; i < skyIrradianceStorage.GetCount(); ++i)
     {
-      if ((uiWorldHasSkyLight & PLASMA_BIT(i)) == 0 && (uiSkyIrradianceChanged & PLASMA_BIT(i)) != 0)
+      if ((uiWorldHasSkyLight & PL_BIT(i)) == 0 && (uiSkyIrradianceChanged & PL_BIT(i)) != 0)
       {
         plBoundingBoxu32 destBox;
         destBox.m_vMin.Set(0, i, 0);
@@ -323,7 +323,7 @@ void plReflectionPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
         memDesc.m_uiRowPitch = sizeof(plAmbientCube<plColorLinear16f>);
         pGALCommandEncoder->UpdateTexture(s_pData->m_hSkyIrradianceTexture, plGALTextureSubresource(), destBox, memDesc);
 
-        uiSkyIrradianceChanged &= ~PLASMA_BIT(i);
+        uiSkyIrradianceChanged &= ~PL_BIT(i);
 
         if (i < s_pData->m_WorldReflectionData.GetCount() && s_pData->m_WorldReflectionData[i] != nullptr)
         {
@@ -366,4 +366,4 @@ void plReflectionPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionPool);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionPool);

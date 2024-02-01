@@ -12,7 +12,7 @@ public:
   plNonUniformBoxManipulatorAdapter();
   ~plNonUniformBoxManipulatorAdapter();
 
-  virtual void QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;
+  virtual void QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings) override;
 
 protected:
   virtual void Finalize() override;

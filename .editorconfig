@@ -12,10 +12,10 @@ indent_style = space
 trim_trailing_whitespace = true
 
 # MSVC specific
-cpp_generate_documentation_comments = doxygen_triple_slash
+cpp_generate_documentation_comments = none
 
 # additional settings for code files
-[*.{cpp,h,inl,c,d,qrc,lua,cs}]
+[*.{cpp,h,inl,c,d,qrc,lua,cs,ps1,sh}]
 indent_size = 2
 end_of_line = lf
 insert_final_newline = true
@@ -29,3 +29,5 @@ insert_final_newline = true
 # .ui files use a different indentation
 [*.{ui}]
 indent_size = 1
+end_of_line = lf
+

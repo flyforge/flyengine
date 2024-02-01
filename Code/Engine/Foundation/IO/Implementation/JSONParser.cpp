@@ -68,18 +68,34 @@ void plJSONParser::StartParsing()
 
       if (!m_bSkippingMode)
         OnBeginObject();
-    }
+
       return;
+    }
+
+    case '[':
+    {
+      JSONState s;
+      s.m_State = ReadingArray;
+      m_StateStack.PushBack(s);
+
+      SkipWhitespace();
+
+      if (!m_bSkippingMode)
+        OnBeginArray();
+
+      return;
+    }
 
     default:
     {
       // document is malformed
 
       plStringBuilder s;
-      s.Format("Start of document: Expected a { or an empty document. Got '{0}' instead.", plArgC(m_uiCurByte));
+      s.SetFormat("Start of document: Expected a { or [ or an empty document. Got '{0}' instead.", plArgC(m_uiCurByte));
       ParsingError(s.GetData(), true);
-    }
+
       return;
+    }
   }
 }
 
@@ -181,7 +197,7 @@ bool plJSONParser::ContinueParsing()
       break;
 
     default:
-      PLASMA_REPORT_FAILURE("Unknown State in JSON parser state machine.");
+      PL_REPORT_FAILURE("Unknown State in JSON parser state machine.");
       break;
   }
 
@@ -216,7 +232,7 @@ void plJSONParser::ContinueObject()
     default:
     {
       plStringBuilder s;
-      s.Format("While parsing object: Expected \" to begin a new variable, or } to close the object. Got '{0}' instead.", plArgC(m_uiCurByte));
+      s.SetFormat("While parsing object: Expected \" to begin a new variable, or } to close the object. Got '{0}' instead.", plArgC(m_uiCurByte));
       ParsingError(s.GetData(), true);
     }
       return;
@@ -264,7 +280,7 @@ void plJSONParser::ContinueVariable()
   if (m_uiCurByte != ':')
   {
     plStringBuilder s;
-    s.Format("After parsing variable name: Expected : to separate variable and value, Got '{0}' instead.", plArgC(m_uiCurByte));
+    s.SetFormat("After parsing variable name: Expected : to separate variable and value, Got '{0}' instead.", plArgC(m_uiCurByte));
     ParsingError(s.GetData(), false);
   }
   else
@@ -346,10 +362,10 @@ void plJSONParser::ContinueValue()
       ReadWord();
 
       bool bRes = false;
-      if (plConversionUtils::StringToBool((const char*)&m_TempString[0], bRes) == PLASMA_FAILURE)
+      if (plConversionUtils::StringToBool((const char*)&m_TempString[0], bRes) == PL_FAILURE)
       {
         plStringBuilder s;
-        s.Format("Parsing value: Expected 'true' or 'false', Got '{0}' instead.", (const char*)&m_TempString[0]);
+        s.SetFormat("Parsing value: Expected 'true' or 'false', Got '{0}' instead.", (const char*)&m_TempString[0]);
         ParsingError(s.GetData(), false);
       }
 
@@ -375,7 +391,7 @@ void plJSONParser::ContinueValue()
       if (!plStringUtils::IsEqual((const char*)&m_TempString[0], "null"))
       {
         plStringBuilder s;
-        s.Format("Parsing value: Expected 'null', Got '{0}' instead.", (const char*)&m_TempString[0]);
+        s.SetFormat("Parsing value: Expected 'null', Got '{0}' instead.", (const char*)&m_TempString[0]);
         ParsingError(s.GetData(), !bIsNull);
       }
 
@@ -419,7 +435,7 @@ void plJSONParser::ContinueValue()
     default:
     {
       plStringBuilder s;
-      s.Format("Parsing value: Expected [, {, f, t, \", 0-1, ., +, -, or even 'e'. Got '{0}' instead", plArgC(m_uiCurByte));
+      s.SetFormat("Parsing value: Expected [, {, f, t, \", 0-1, ., +, -, or even 'e'. Got '{0}' instead", plArgC(m_uiCurByte));
       ParsingError(s.GetData(), true);
     }
       return;
@@ -450,7 +466,7 @@ void plJSONParser::ContinueSeparator()
     default:
     {
       plStringBuilder s;
-      s.Format("After parsing value: Expected a comma or closing brackets/braces (], }). Got '{0}' instead.", plArgC(m_uiCurByte));
+      s.SetFormat("After parsing value: Expected a comma or closing brackets/braces (], }). Got '{0}' instead.", plArgC(m_uiCurByte));
       ParsingError(s.GetData(), true);
     }
       return;
@@ -517,7 +533,7 @@ bool plJSONParser::ReadCharacter(bool bSkipComments)
 
 void plJSONParser::SkipWhitespace()
 {
-  PLASMA_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
+  PL_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
 
   do
   {
@@ -530,7 +546,7 @@ void plJSONParser::SkipWhitespace()
 
 void plJSONParser::SkipString()
 {
-  PLASMA_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
+  PL_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
 
   m_TempString.Clear();
   m_TempString.PushBack('\0');
@@ -554,7 +570,7 @@ void plJSONParser::SkipString()
 
 void plJSONParser::ReadString()
 {
-  PLASMA_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
+  PL_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
 
   m_TempString.Clear();
 
@@ -672,7 +688,7 @@ void plJSONParser::ReadString()
         default:
         {
           plStringBuilder s;
-          s.Format("Unknown escape-sequence '\\{0}'", plArgC(m_uiCurByte));
+          s.SetFormat("Unknown escape-sequence '\\{0}'", plArgC(m_uiCurByte));
           ParsingError(s, false);
         }
         break;
@@ -689,7 +705,7 @@ void plJSONParser::ReadString()
 
 void plJSONParser::ReadWord()
 {
-  PLASMA_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
+  PL_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
 
   m_TempString.Clear();
 
@@ -708,7 +724,7 @@ void plJSONParser::ReadWord()
 
 double plJSONParser::ReadNumber()
 {
-  PLASMA_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
+  PL_ASSERT_DEBUG(m_pInput != nullptr, "Input Stream is not set up.");
 
   m_TempString.Clear();
 
@@ -726,10 +742,10 @@ double plJSONParser::ReadNumber()
   m_TempString.PushBack('\0');
 
   double fResult = 0;
-  if (plConversionUtils::StringToFloat((const char*)&m_TempString[0], fResult) == PLASMA_FAILURE)
+  if (plConversionUtils::StringToFloat((const char*)&m_TempString[0], fResult) == PL_FAILURE)
   {
     plStringBuilder s;
-    s.Format("Reading number failed: Could not convert '{0}' to a floating point value.", (const char*)&m_TempString[0]);
+    s.SetFormat("Reading number failed: Could not convert '{0}' to a floating point value.", (const char*)&m_TempString[0]);
     ParsingError(s.GetData(), true);
   }
 
@@ -737,5 +753,3 @@ double plJSONParser::ReadNumber()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_JSONParser);

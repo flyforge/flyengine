@@ -3,8 +3,8 @@
 #include <Core/ActorSystem/Actor.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plActor, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plActor, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 struct plActorImpl
@@ -16,14 +16,14 @@ struct plActorImpl
 };
 
 
-plActor::plActor(plStringView szActorName, const void* pCreatedBy)
+plActor::plActor(plStringView sActorName, const void* pCreatedBy)
 {
-  m_pImpl = PLASMA_DEFAULT_NEW(plActorImpl);
+  m_pImpl = PL_DEFAULT_NEW(plActorImpl);
 
-  m_pImpl->m_sName = szActorName;
+  m_pImpl->m_sName = sActorName;
   m_pImpl->m_pCreatedBy = pCreatedBy;
 
-  PLASMA_ASSERT_DEV(!m_pImpl->m_sName.IsEmpty(), "Actor name must not be empty");
+  PL_ASSERT_DEV(!m_pImpl->m_sName.IsEmpty(), "Actor name must not be empty");
 }
 
 plActor::~plActor() = default;
@@ -40,8 +40,8 @@ const void* plActor::GetCreatedBy() const
 
 void plActor::AddPlugin(plUniquePtr<plActorPlugin>&& pPlugin)
 {
-  PLASMA_ASSERT_DEV(pPlugin != nullptr, "Invalid actor plugin");
-  PLASMA_ASSERT_DEV(pPlugin->m_pOwningActor == nullptr, "Actor plugin already in use");
+  PL_ASSERT_DEV(pPlugin != nullptr, "Invalid actor plugin");
+  PL_ASSERT_DEV(pPlugin->m_pOwningActor == nullptr, "Actor plugin already in use");
 
   pPlugin->m_pOwningActor = this;
 
@@ -56,7 +56,7 @@ void plActor::AddPlugin(plUniquePtr<plActorPlugin>&& pPlugin)
 
 plActorPlugin* plActor::GetPlugin(const plRTTI* pPluginType) const
 {
-  PLASMA_ASSERT_DEV(pPluginType->IsDerivedFrom<plActorPlugin>(), "The queried type has to derive from plActorPlugin");
+  PL_ASSERT_DEV(pPluginType->IsDerivedFrom<plActorPlugin>(), "The queried type has to derive from plActorPlugin");
 
   return m_pImpl->m_PluginLookupCache.GetValueOrDefault(pPluginType, nullptr);
 }
@@ -73,13 +73,13 @@ void plActor::DestroyPlugin(plActorPlugin* pPlugin)
   }
 }
 
-void plActor::GetAllPlugins(plHybridArray<plActorPlugin*, 8>& out_AllPlugins)
+void plActor::GetAllPlugins(plHybridArray<plActorPlugin*, 8>& out_allPlugins)
 {
-  out_AllPlugins.Clear();
+  out_allPlugins.Clear();
 
   for (auto& pPlugin : m_pImpl->m_AllPlugins)
   {
-    out_AllPlugins.PushBack(pPlugin.Borrow());
+    out_allPlugins.PushBack(pPlugin.Borrow());
   }
 }
 
@@ -99,4 +99,4 @@ void plActor::Update()
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_Actor);
+PL_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_Actor);

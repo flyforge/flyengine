@@ -16,14 +16,14 @@ class plWorldReader;
 
 /// \brief Base class of all component types.
 ///
-/// Derive from this class to implement custom component types. Also add the PLASMA_DECLARE_COMPONENT_TYPE macro to your class declaration.
-/// Also add a PLASMA_BEGIN_COMPONENT_TYPE/PLASMA_END_COMPONENT_TYPE block to a cpp file. In that block you can add reflected members or message
+/// Derive from this class to implement custom component types. Also add the PL_DECLARE_COMPONENT_TYPE macro to your class declaration.
+/// Also add a PL_BEGIN_COMPONENT_TYPE/PL_END_COMPONENT_TYPE block to a cpp file. In that block you can add reflected members or message
 /// handlers. Note that every component type needs a corresponding manager type. Take a look at plComponentManagerSimple for a simple
 /// manager implementation that calls an update method on its components every frame. To create a component instance call CreateComponent on
 /// the corresponding manager. Never store a direct pointer to a component but store an plComponentHandle instead.
-class PLASMA_CORE_DLL plComponent : public plReflectedClass
+class PL_CORE_DLL plComponent : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plComponent, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plComponent, plReflectedClass);
 
 protected:
   /// \brief Keep the constructor private or protected in derived classes, so it cannot be called manually.
@@ -114,11 +114,11 @@ public:
 
 
   /// \brief Sends a message to this component.
-  PLASMA_ALWAYS_INLINE bool SendMessage(plMessage& ref_msg) { return SendMessageInternal(ref_msg, false); }
-  PLASMA_ALWAYS_INLINE bool SendMessage(plMessage& ref_msg) const { return SendMessageInternal(ref_msg, false); }
+  PL_ALWAYS_INLINE bool SendMessage(plMessage& ref_msg) { return SendMessageInternal(ref_msg, false); }
+  PL_ALWAYS_INLINE bool SendMessage(plMessage& ref_msg) const { return SendMessageInternal(ref_msg, false); }
 
   /// \brief Queues the message for the given phase. The message is processed after the given delay in the corresponding phase.
-  void PostMessage(const plMessage& msg, plTime delay = plTime::Zero(), plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
+  void PostMessage(const plMessage& msg, plTime delay = plTime::MakeZero(), plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const;
 
   /// \brief Returns whether the given Message is handled by this component.
   virtual bool HandlesMessage(const plMessage& msg) const;
@@ -220,6 +220,7 @@ protected:
 protected:
   /// Messages will be dispatched to this type. Default is what GetDynamicRTTI() returns, can be redirected if necessary.
   const plRTTI* m_pMessageDispatchType = nullptr;
+
   bool IsInitialized() const;
   bool IsInitializing() const;
   bool IsSimulationStarted() const;
@@ -230,7 +231,7 @@ private:
 
   plGameObject* Reflection_GetOwner() const;
   plWorld* Reflection_GetWorld() const;
-  void Reflection_Update();
+  void Reflection_Update(plTime deltaTime);
 
   bool SendMessageInternal(plMessage& msg, bool bWasPostedMsg);
   bool SendMessageInternal(plMessage& msg, bool bWasPostedMsg) const;

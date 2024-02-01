@@ -10,8 +10,8 @@ class plQtManipulatorLabel : public QLabel
 {
   Q_OBJECT
 public:
-  explicit plQtManipulatorLabel(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-  explicit plQtManipulatorLabel(const QString& text, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+  explicit plQtManipulatorLabel(QWidget* pParent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
+  explicit plQtManipulatorLabel(const QString& sText, QWidget* pParent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
 
   const plManipulatorAttribute* GetManipulator() const;
   void SetManipulator(const plManipulatorAttribute* pManipulator);

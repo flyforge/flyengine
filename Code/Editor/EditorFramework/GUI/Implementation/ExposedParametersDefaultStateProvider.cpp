@@ -13,7 +13,7 @@ plSharedPtr<plDefaultStateProvider> plExposedParametersDefaultStateProvider::Cre
     const auto* pAttrib = pProp->GetAttributeByType<plExposedParametersAttribute>();
     if (pAttrib)
     {
-      return PLASMA_DEFAULT_NEW(plExposedParametersDefaultStateProvider, pAccessor, pObject, pProp);
+      return PL_DEFAULT_NEW(plExposedParametersDefaultStateProvider, pAccessor, pObject, pProp);
     }
   }
   return nullptr;
@@ -23,11 +23,11 @@ plExposedParametersDefaultStateProvider::plExposedParametersDefaultStateProvider
   : m_pObject(pObject)
   , m_pProp(pProp)
 {
-  PLASMA_ASSERT_DEBUG(pProp->GetCategory() == plPropertyCategory::Map, "plExposedParametersAttribute must be on a map property");
+  PL_ASSERT_DEBUG(pProp->GetCategory() == plPropertyCategory::Map, "plExposedParametersAttribute must be on a map property");
   m_pAttrib = pProp->GetAttributeByType<plExposedParametersAttribute>();
-  PLASMA_ASSERT_DEBUG(m_pAttrib, "plExposedParametersDefaultStateProvider was created for a property that does not have the plExposedParametersAttribute.");
+  PL_ASSERT_DEBUG(m_pAttrib, "plExposedParametersDefaultStateProvider was created for a property that does not have the plExposedParametersAttribute.");
   m_pParameterSourceProp = pObject->GetType()->FindPropertyByName(m_pAttrib->GetParametersSource());
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     m_pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", m_pAttrib->GetParametersSource(), pObject->GetType()->GetTypeName());
 }
 
@@ -44,7 +44,7 @@ plColorGammaUB plExposedParametersDefaultStateProvider::GetBackgroundColor() con
 
 plVariant plExposedParametersDefaultStateProvider::GetDefaultValue(SuperArray superPtr, plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index)
 {
-  PLASMA_ASSERT_DEBUG(pObject == m_pObject && pProp == m_pProp, "plDefaultContainerState is only valid on the object and container it was created on.");
+  PL_ASSERT_DEBUG(pObject == m_pObject && pProp == m_pProp, "plDefaultContainerState is only valid on the object and container it was created on.");
   plExposedParameterCommandAccessor accessor(pAccessor, pProp, m_pParameterSourceProp);
   if (index.IsValid())
   {
@@ -71,13 +71,13 @@ plVariant plExposedParametersDefaultStateProvider::GetDefaultValue(SuperArray su
 
 plStatus plExposedParametersDefaultStateProvider::CreateRevertContainerDiff(SuperArray superPtr, plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp, plDeque<plAbstractGraphDiffOperation>& out_diff)
 {
-  PLASMA_REPORT_FAILURE("Unreachable code");
-  return plStatus(PLASMA_SUCCESS);
+  PL_REPORT_FAILURE("Unreachable code");
+  return plStatus(PL_SUCCESS);
 }
 
 bool plExposedParametersDefaultStateProvider::IsDefaultValue(SuperArray superPtr, plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index)
 {
-  PLASMA_ASSERT_DEBUG(pObject == m_pObject && pProp == m_pProp, "plDefaultContainerState is only valid on the object and container it was created on.");
+  PL_ASSERT_DEBUG(pObject == m_pObject && pProp == m_pProp, "plDefaultContainerState is only valid on the object and container it was created on.");
   plExposedParameterCommandAccessor accessor(pAccessor, pProp, m_pParameterSourceProp);
 
   const plVariant def = GetDefaultValue(superPtr, pAccessor, pObject, pProp, index);
@@ -111,7 +111,7 @@ plStatus plExposedParametersDefaultStateProvider::RevertProperty(SuperArray supe
     op.m_uiTypeVersion = 0;
     op.m_Value = plVariantDictionary();
     plDocumentObjectConverterReader::ApplyDiffToObject(pAccessor, pObject, diff);
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   return plDefaultStateProvider::RevertProperty(superPtr, pAccessor, pObject, pProp, index);
 }

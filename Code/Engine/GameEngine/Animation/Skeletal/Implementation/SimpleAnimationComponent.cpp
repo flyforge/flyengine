@@ -17,25 +17,25 @@ using namespace ozz::animation;
 using namespace ozz::math;
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSimpleAnimationComponent, 2, plComponentMode::Static);
+PL_BEGIN_COMPONENT_TYPE(plSimpleAnimationComponent, 2, plComponentMode::Static);
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("AnimationClip", GetAnimationClipFile, SetAnimationClipFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
-    PLASMA_ENUM_MEMBER_PROPERTY("AnimationMode", plPropertyAnimMode, m_AnimationMode),
-    PLASMA_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_ENUM_MEMBER_PROPERTY("RootMotionMode", plRootMotionMode, m_RootMotionMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("InvisibleUpdateRate", plAnimationInvisibleUpdateRate, m_InvisibleUpdateRate),
+    PL_ACCESSOR_PROPERTY("AnimationClip", GetAnimationClipFile, SetAnimationClipFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
+    PL_ENUM_MEMBER_PROPERTY("AnimationMode", plPropertyAnimMode, m_AnimationMode),
+    PL_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_ENUM_MEMBER_PROPERTY("RootMotionMode", plRootMotionMode, m_RootMotionMode),
+    PL_ENUM_MEMBER_PROPERTY("InvisibleUpdateRate", plAnimationInvisibleUpdateRate, m_InvisibleUpdateRate),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
+      new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSimpleAnimationComponent::plSimpleAnimationComponent() = default;
@@ -126,7 +126,7 @@ void plSimpleAnimationComponent::Update()
   if (m_fSpeed == 0.0f && !GetUserFlag(1))
     return;
 
-  plTime tMinStep = plTime::Seconds(0);
+  plTime tMinStep = plTime::MakeFromSeconds(0);
   plVisibilityState visType = GetOwner()->GetVisibilityState();
 
   if (visType != plVisibilityState::Direct)
@@ -149,7 +149,7 @@ void plSimpleAnimationComponent::Update()
     return;
 
   const plTime tDiff = m_ElapsedTimeSinceUpdate;
-  m_ElapsedTimeSinceUpdate.SetZero();
+  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
   const plAnimationClipResourceDescriptor& animDesc = pAnimation->GetDescriptor();
 
@@ -227,28 +227,18 @@ void plSimpleAnimationComponent::Update()
 
   // inform child nodes/components that a new pose is available
   {
-    plMsgAnimationPoseProposal msg1;
-    msg1.m_pRootTransform = &pSkeleton->GetDescriptor().m_RootTransform;
-    msg1.m_pSkeleton = &pSkeleton->GetDescriptor().m_Skeleton;
-    msg1.m_ModelTransforms = pose;
+    plMsgAnimationPoseUpdated msg2;
+    msg2.m_pRootTransform = &pSkeleton->GetDescriptor().m_RootTransform;
+    msg2.m_pSkeleton = &pSkeleton->GetDescriptor().m_Skeleton;
+    msg2.m_ModelTransforms = pose;
 
-    GetOwner()->SendMessage(msg1);
+    // recursive, so that objects below the mesh can also listen in on these changes
+    // for example bone attachments
+    GetOwner()->SendMessageRecursive(msg2);
 
-    if (msg1.m_bContinueAnimating)
+    if (msg2.m_bContinueAnimating == false)
     {
-      plMsgAnimationPoseUpdated msg2;
-      msg2.m_pRootTransform = &pSkeleton->GetDescriptor().m_RootTransform;
-      msg2.m_pSkeleton = &pSkeleton->GetDescriptor().m_Skeleton;
-      msg2.m_ModelTransforms = pose;
-
-      // recursive, so that objects below the mesh can also listen in on these changes
-      // for example bone attachments
-      GetOwner()->SendMessageRecursive(msg2);
-
-      if (msg2.m_bContinueAnimating == false)
-      {
-        SetActiveFlag(false);
-      }
+      SetActiveFlag(false);
     }
   }
 }
@@ -334,4 +324,4 @@ bool plSimpleAnimationComponent::UpdatePlaybackTime(plTime tDiff, const plEventT
 }
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_SimpleAnimationComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_SimpleAnimationComponent);

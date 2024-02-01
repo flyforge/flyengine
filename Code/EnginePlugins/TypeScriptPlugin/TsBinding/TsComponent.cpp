@@ -31,29 +31,29 @@ plResult plTypeScriptBinding::Init_Component()
   m_Duk.RegisterGlobalFunction("__CPP_TsComponent_BroadcastEvent", __CPP_TsComponent_BroadcastEvent, 4);
   m_Duk.RegisterGlobalFunction("__CPP_TsComponent_SetTickInterval", __CPP_TsComponent_SetTickInterval, 2);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTypeScriptBinding::RegisterComponent(plStringView sTypeName0, plComponentHandle hHandle, plUInt32& out_uiStashIdx, bool bIsNativeComponent)
 {
   if (hHandle.IsInvalidated())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt32& uiStashIdx = m_ComponentToStashIdx[hHandle];
 
   if (uiStashIdx != 0)
   {
     out_uiStashIdx = uiStashIdx;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   uiStashIdx = AcquireStashObjIndex();
 
   plDuktapeHelper duk(m_Duk);
-  PLASMA_DUK_VERIFY_STACK(duk, 0);
+  PL_DUK_VERIFY_STACK(duk, 0);
 
   duk.PushGlobalObject(); // [ global ]
-  PLASMA_DUK_VERIFY_STACK(duk, +1);
+  PL_DUK_VERIFY_STACK(duk, +1);
 
   plStringBuilder sTypeName = sTypeName0;
 
@@ -61,25 +61,25 @@ plResult plTypeScriptBinding::RegisterComponent(plStringView sTypeName0, plCompo
   {
     sTypeName.TrimWordStart("pl");
 
-    PLASMA_SUCCEED_OR_RETURN(duk.PushLocalObject("__AllComponents")); // [ global __AllComponents ]
-    PLASMA_DUK_VERIFY_STACK(duk, +2);
+    PL_SUCCEED_OR_RETURN(duk.PushLocalObject("__AllComponents")); // [ global __AllComponents ]
+    PL_DUK_VERIFY_STACK(duk, +2);
   }
   else
   {
     const plStringBuilder sCompModule("__", sTypeName);
 
-    PLASMA_SUCCEED_OR_RETURN(duk.PushLocalObject(sCompModule)); // [ global __CompModule ]
-    PLASMA_DUK_VERIFY_STACK(duk, +2);
+    PL_SUCCEED_OR_RETURN(duk.PushLocalObject(sCompModule)); // [ global __CompModule ]
+    PL_DUK_VERIFY_STACK(duk, +2);
   }
 
   if (!duk_get_prop_string(duk, -1, sTypeName)) // [ global __CompModule sTypeName ]
   {
     duk.PopStack(3); // [ ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_FAILURE, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_FAILURE, 0);
   }
 
   duk_new(duk, 0); // [ global __CompModule object ]
-  PLASMA_DUK_VERIFY_STACK(duk, +3);
+  PL_DUK_VERIFY_STACK(duk, +3);
 
   // store C++ side component handle in obj as property
   {
@@ -89,17 +89,17 @@ plResult plTypeScriptBinding::RegisterComponent(plStringView sTypeName0, plCompo
     duk_put_prop_index(duk, -2, plTypeScriptBindingIndexProperty::ComponentHandle); // [ global __CompModule object ]
   }
 
-  PLASMA_DUK_VERIFY_STACK(duk, +3);
+  PL_DUK_VERIFY_STACK(duk, +3);
 
   StoreReferenceInStash(duk, uiStashIdx); // [ global __CompModule object ]
-  PLASMA_DUK_VERIFY_STACK(duk, +3);
+  PL_DUK_VERIFY_STACK(duk, +3);
 
   duk.PopStack(3); // [ ]
-  PLASMA_DUK_VERIFY_STACK(duk, 0);
+  PL_DUK_VERIFY_STACK(duk, 0);
 
   out_uiStashIdx = uiStashIdx;
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_SUCCESS, 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_SUCCESS, 0);
 }
 
 void plTypeScriptBinding::DukPutComponentObject(plComponent* pComponent)
@@ -132,10 +132,10 @@ plComponentHandle plTypeScriptBinding::RetrieveComponentHandle(duk_context* pDuk
   {
     plComponentHandle hComponent = *reinterpret_cast<plComponentHandle*>(duk_get_buffer(pDuk, -1, nullptr));
     duk_pop(pDuk);
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, hComponent, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, hComponent, 0);
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, plComponentHandle(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, plComponentHandle(), 0);
 }
 
 static int __CPP_Component_IsValid(duk_context* pDuk)
@@ -144,7 +144,7 @@ static int __CPP_Component_IsValid(duk_context* pDuk)
 
   if (!duk_get_prop_index(pDuk, 0, plTypeScriptBindingIndexProperty::ComponentHandle))
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), 1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), 1);
   }
 
   plComponentHandle hComponent = *reinterpret_cast<plComponentHandle*>(duk_get_buffer(pDuk, -1, nullptr));
@@ -153,7 +153,7 @@ static int __CPP_Component_IsValid(duk_context* pDuk)
   plComponent* pComponent = nullptr;
   plWorld* pWorld = plTypeScriptBinding::RetrieveWorld(pDuk);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pWorld->TryGetComponent(hComponent, pComponent)), 1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pWorld->TryGetComponent(hComponent, pComponent)), 1);
 }
 
 static int __CPP_Component_GetUniqueID(duk_context* pDuk)
@@ -162,7 +162,7 @@ static int __CPP_Component_GetUniqueID(duk_context* pDuk)
 
   plComponent* pComponent = plTypeScriptBinding::ExpectComponent<plComponent>(pDuk);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnUInt(pComponent->GetUniqueID()), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnUInt(pComponent->GetUniqueID()), +1);
 }
 
 static int __CPP_Component_GetOwner(duk_context* pDuk)
@@ -174,7 +174,7 @@ static int __CPP_Component_GetOwner(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pComponent->GetOwner()->GetHandle());
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_Component_SetActiveFlag(duk_context* pDuk)
@@ -185,7 +185,7 @@ static int __CPP_Component_SetActiveFlag(duk_context* pDuk)
 
   pComponent->SetActiveFlag(duk.GetBoolValue(1, true));
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_Component_IsActive(duk_context* pDuk)
@@ -197,20 +197,20 @@ static int __CPP_Component_IsActive(duk_context* pDuk)
   switch (duk.GetFunctionMagicValue())
   {
     case -1:
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->GetActiveFlag()), +1);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->GetActiveFlag()), +1);
 
     case 0:
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActive()), +1);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActive()), +1);
 
     case 1:
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActiveAndInitialized()), +1);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActiveAndInitialized()), +1);
 
     case 2:
-      PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActiveAndSimulating()), +1);
+      PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pComponent->IsActiveAndSimulating()), +1);
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), +1);
+  PL_ASSERT_NOT_IMPLEMENTED;
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), +1);
 }
 
 static int __CPP_Component_SendMessage(duk_context* pDuk)
@@ -223,24 +223,24 @@ static int __CPP_Component_SendMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
     pComponent->SendMessage(*pMsg);
 
     if (duk.GetBoolValue(3)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncPlObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostMessage
   {
-    const plTime delay = plTime::Seconds(duk.GetNumberValue(3));
+    const plTime delay = plTime::MakeFromSeconds(duk.GetNumberValue(3));
 
     plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, delay);
     pComponent->PostMessage(*pMsg, delay);
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_TsComponent_BroadcastEvent(duk_context* pDuk)
@@ -251,10 +251,10 @@ static int __CPP_TsComponent_BroadcastEvent(duk_context* pDuk)
 
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
 
-  plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
+  plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
   pComponent->BroadcastEventMsg(plStaticCast<plEventMessage&>(*pMsg));
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_TsComponent_SetTickInterval(duk_context* pDuk)
@@ -263,8 +263,8 @@ static int __CPP_TsComponent_SetTickInterval(duk_context* pDuk)
 
   plTypeScriptComponent* pComponent = plTypeScriptBinding::ExpectComponent<plTypeScriptComponent>(duk, 0 /*this*/);
 
-  const plTime interval = plTime::Seconds(duk.GetFloatValue(1, 0.0f));
+  const plTime interval = plTime::MakeFromSeconds(duk.GetFloatValue(1, 0.0f));
   pComponent->SetUpdateInterval(interval);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }

@@ -7,11 +7,11 @@
 
 using plPrefabResourceHandle = plTypedResourceHandle<class plPrefabResource>;
 
-struct PLASMA_CORE_DLL plPrefabResourceDescriptor
+struct PL_CORE_DLL plPrefabResourceDescriptor
 {
 };
 
-struct PLASMA_CORE_DLL plExposedPrefabParameterDesc
+struct PL_CORE_DLL plExposedPrefabParameterDesc
 {
   plHashedString m_sExposeName;
   plUInt32 m_uiWorldReaderChildObject : 1; // 0 -> use root object array, 1 -> use child object array
@@ -24,11 +24,11 @@ struct PLASMA_CORE_DLL plExposedPrefabParameterDesc
   void Load(plStreamReader& inout_stream);
 };
 
-class PLASMA_CORE_DLL plPrefabResource : public plResource
+class PL_CORE_DLL plPrefabResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPrefabResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plPrefabResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plPrefabResource, plPrefabResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plPrefabResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plPrefabResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plPrefabResource, plPrefabResourceDescriptor);
 
 public:
   plPrefabResource();

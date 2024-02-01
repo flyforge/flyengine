@@ -22,7 +22,7 @@ struct plSelectionManagerEvent
 };
 
 /// \brief Selection Manager stores a set of selected document objects.
-class PLASMA_TOOLSFOUNDATION_DLL plSelectionManager
+class PL_TOOLSFOUNDATION_DLL plSelectionManager
 {
 public:
   plCopyOnBroadcastEvent<const plSelectionManagerEvent&> m_Events;
@@ -45,7 +45,7 @@ public:
   void AddObject(const plDocumentObject* pObject);
   void RemoveObject(const plDocumentObject* pObject, bool bRecurseChildren = false);
   void SetSelection(const plDocumentObject* pSingleObject);
-  void SetSelection(const plDeque<const plDocumentObject*>& Selection);
+  void SetSelection(const plDeque<const plDocumentObject*>& selection);
   void ToggleObject(const plDocumentObject* pObject);
 
   /// \brief Returns the last selected object in the selection or null if empty.

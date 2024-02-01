@@ -8,7 +8,7 @@ plStats::plEventStats plStats::s_StatsEvents;
 
 void plStats::RemoveStat(plStringView sStatName)
 {
-  PLASMA_LOCK(s_Mutex);
+  PL_LOCK(s_Mutex);
 
   MapType::Iterator it = s_Stats.Find(sStatName);
 
@@ -26,7 +26,7 @@ void plStats::RemoveStat(plStringView sStatName)
 
 void plStats::SetStat(plStringView sStatName, const plVariant& value)
 {
-  PLASMA_LOCK(s_Mutex);
+  PL_LOCK(s_Mutex);
 
   bool bExisted = false;
   auto it = s_Stats.FindOrAdd(sStatName, &bExisted);
@@ -45,4 +45,3 @@ void plStats::SetStat(plStringView sStatName, const plVariant& value)
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_Stats);

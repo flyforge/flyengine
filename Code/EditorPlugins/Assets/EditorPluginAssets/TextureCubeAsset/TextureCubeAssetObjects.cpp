@@ -4,36 +4,36 @@
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plTextureCubeChannelMappingEnum, 1)
-  PLASMA_ENUM_CONSTANTS(plTextureCubeChannelMappingEnum::RGB1, plTextureCubeChannelMappingEnum::RGBA1, plTextureCubeChannelMappingEnum::RGB1TO6, plTextureCubeChannelMappingEnum::RGBA1TO6)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plTextureCubeChannelMappingEnum, 1)
+  PL_ENUM_CONSTANTS(plTextureCubeChannelMappingEnum::RGB1, plTextureCubeChannelMappingEnum::RGBA1, plTextureCubeChannelMappingEnum::RGB1TO6, plTextureCubeChannelMappingEnum::RGBA1TO6)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetProperties, 3, plRTTIDefaultAllocator<plTextureCubeAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetProperties, 3, plRTTIDefaultAllocator<plTextureCubeAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Usage", plTexConvUsage, m_TextureUsage),
+    PL_ENUM_MEMBER_PROPERTY("Usage", plTexConvUsage, m_TextureUsage),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("MipmapMode", plTexConvMipmapMode, m_MipmapMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode),
+    PL_ENUM_MEMBER_PROPERTY("MipmapMode", plTexConvMipmapMode, m_MipmapMode),
+    PL_ENUM_MEMBER_PROPERTY("CompressionMode", plTexConvCompressionMode, m_CompressionMode),
 
-    PLASMA_MEMBER_PROPERTY("HdrExposureBias", m_fHdrExposureBias)->AddAttributes(new plClampValueAttribute(-20.0f, 20.0f)),
+    PL_MEMBER_PROPERTY("HdrExposureBias", m_fHdrExposureBias)->AddAttributes(new plClampValueAttribute(-20.0f, 20.0f)),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("TextureFilter", plTextureFilterSetting, m_TextureFilter),
+    PL_ENUM_MEMBER_PROPERTY("TextureFilter", plTextureFilterSetting, m_TextureFilter),
 
-    PLASMA_ENUM_MEMBER_PROPERTY("ChannelMapping", plTextureCubeChannelMappingEnum, m_ChannelMapping),
+    PL_ENUM_MEMBER_PROPERTY("ChannelMapping", plTextureCubeChannelMappingEnum, m_ChannelMapping),
 
-    PLASMA_ACCESSOR_PROPERTY("Input1", GetInputFile0, SetInputFile0)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input2", GetInputFile1, SetInputFile1)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input3", GetInputFile2, SetInputFile2)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input4", GetInputFile3, SetInputFile3)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input5", GetInputFile4, SetInputFile4)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
-    PLASMA_ACCESSOR_PROPERTY("Input6", GetInputFile5, SetInputFile5)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input1", GetInputFile0, SetInputFile0)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input2", GetInputFile1, SetInputFile1)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input3", GetInputFile2, SetInputFile2)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input4", GetInputFile3, SetInputFile3)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input5", GetInputFile4, SetInputFile4)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
+    PL_ACCESSOR_PROPERTY("Input6", GetInputFile5, SetInputFile5)->AddAttributes(new plFileBrowserAttribute("Select Texture", plFileBrowserAttribute::ImagesLdrAndHdr)),
 
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plTextureCubeAssetProperties::PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e)
@@ -118,7 +118,7 @@ plInt32 plTextureCubeAssetProperties::GetNumInputFiles() const
       return 6;
   }
 
-  PLASMA_REPORT_FAILURE("Invalid Code Path");
+  PL_REPORT_FAILURE("Invalid Code Path");
   return 1;
 }
 
@@ -134,7 +134,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pUsage = pNode->FindProperty("Usage");
     if (pUsage && pUsage->m_Value.IsA<plString>())

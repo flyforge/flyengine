@@ -9,26 +9,26 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plApplicationPluginConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationPluginConfig>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plApplicationPluginConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationPluginConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("Plugins", m_Plugins),
+    PL_ARRAY_MEMBER_PROPERTY("Plugins", m_Plugins),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plApplicationPluginConfig_PluginConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationPluginConfig_PluginConfig>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plApplicationPluginConfig_PluginConfig, plNoBase, 1, plRTTIDefaultAllocator<plApplicationPluginConfig_PluginConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("RelativePath", m_sAppDirRelativePath),
-    PLASMA_MEMBER_PROPERTY("LoadCopy", m_bLoadCopy),
+    PL_MEMBER_PROPERTY("RelativePath", m_sAppDirRelativePath),
+    PL_MEMBER_PROPERTY("LoadCopy", m_bLoadCopy),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 bool plApplicationPluginConfig::PluginConfig::operator<(const PluginConfig& rhs) const
@@ -97,11 +97,11 @@ plResult plApplicationPluginConfig::Save(plStringView sPath) const
 
 void plApplicationPluginConfig::Load(plStringView sPath)
 {
-  PLASMA_LOG_BLOCK("plApplicationPluginConfig::Load()");
+  PL_LOG_BLOCK("plApplicationPluginConfig::Load()");
 
   m_Plugins.Clear();
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sOldLoc;
   if (sPath.FindSubString("RuntimeConfigs/"))
   {
@@ -154,7 +154,7 @@ void plApplicationPluginConfig::Load(plStringView sPath)
 
 void plApplicationPluginConfig::Apply()
 {
-  PLASMA_LOG_BLOCK("plApplicationPluginConfig::Apply");
+  PL_LOG_BLOCK("plApplicationPluginConfig::Apply");
 
   for (const auto& var : m_Plugins)
   {
@@ -168,4 +168,4 @@ void plApplicationPluginConfig::Apply()
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Application_Config_Implementation_PluginConfig);
+PL_STATICLINK_FILE(Foundation, Foundation_Application_Config_Implementation_PluginConfig);

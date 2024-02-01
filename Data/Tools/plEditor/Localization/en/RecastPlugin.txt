@@ -1,0 +1,15 @@
+# Asset Types
+
+# UI
+
+NavMesh.Generate;Generate NavMesh
+
+# Component Types
+
+plRcAgentComponent;Recast Agent
+plRcNavMeshComponent;Recast Navmesh
+plRcMarkPoiVisibleComponent;Recast Mark POI Visible
+
+# Properties
+
+NavMeshConfig;Navmesh Config

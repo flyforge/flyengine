@@ -4,9 +4,9 @@
 
 class plDocument;
 
-class PLASMA_EDITORFRAMEWORK_DLL plAssetDragDropHandler : public plDragDropHandler
+class PL_EDITORFRAMEWORK_DLL plAssetDragDropHandler : public plDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetDragDropHandler, plDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetDragDropHandler, plDragDropHandler);
 
 public:
 protected:

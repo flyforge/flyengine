@@ -15,11 +15,11 @@
 
 plGALBlendStateDX11::plGALBlendStateDX11(const plGALBlendStateCreationDescription& Description)
   : plGALBlendState(Description)
-  , m_pDXBlendState(nullptr)
+
 {
 }
 
-plGALBlendStateDX11::~plGALBlendStateDX11() {}
+plGALBlendStateDX11::~plGALBlendStateDX11() = default;
 
 static D3D11_BLEND_OP ToD3DBlendOp(plGALBlendOp::Enum e)
 {
@@ -36,7 +36,7 @@ static D3D11_BLEND_OP ToD3DBlendOp(plGALBlendOp::Enum e)
     case plGALBlendOp::Subtract:
       return D3D11_BLEND_OP_SUBTRACT;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return D3D11_BLEND_OP_ADD;
@@ -47,7 +47,7 @@ static D3D11_BLEND ToD3DBlend(plGALBlend::Enum e)
   switch (e)
   {
     case plGALBlend::BlendFactor:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       // if this is used, it also must be implemented in plGALContextDX11::SetBlendStatePlatform
       return D3D11_BLEND_BLEND_FACTOR;
     case plGALBlend::DestAlpha:
@@ -55,7 +55,7 @@ static D3D11_BLEND ToD3DBlend(plGALBlend::Enum e)
     case plGALBlend::DestColor:
       return D3D11_BLEND_DEST_COLOR;
     case plGALBlend::InvBlendFactor:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       // if this is used, it also must be implemented in plGALContextDX11::SetBlendStatePlatform
       return D3D11_BLEND_INV_BLEND_FACTOR;
     case plGALBlend::InvDestAlpha:
@@ -78,7 +78,7 @@ static D3D11_BLEND ToD3DBlend(plGALBlend::Enum e)
       return D3D11_BLEND_ZERO;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return D3D11_BLEND_ONE;
@@ -105,27 +105,27 @@ plResult plGALBlendStateDX11::InitPlatform(plGALDevice* pDevice)
 
   if (FAILED(static_cast<plGALDeviceDX11*>(pDevice)->GetDXDevice()->CreateBlendState(&DXDesc, &m_pDXBlendState)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALBlendStateDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXBlendState);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXBlendState);
+  return PL_SUCCESS;
 }
 
 // Depth Stencil state
 
 plGALDepthStencilStateDX11::plGALDepthStencilStateDX11(const plGALDepthStencilStateCreationDescription& Description)
   : plGALDepthStencilState(Description)
-  , m_pDXDepthStencilState(nullptr)
+
 {
 }
 
-plGALDepthStencilStateDX11::~plGALDepthStencilStateDX11() {}
+plGALDepthStencilStateDX11::~plGALDepthStencilStateDX11() = default;
 
 plResult plGALDepthStencilStateDX11::InitPlatform(plGALDevice* pDevice)
 {
@@ -152,18 +152,18 @@ plResult plGALDepthStencilStateDX11::InitPlatform(plGALDevice* pDevice)
 
   if (FAILED(static_cast<plGALDeviceDX11*>(pDevice)->GetDXDevice()->CreateDepthStencilState(&DXDesc, &m_pDXDepthStencilState)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 plResult plGALDepthStencilStateDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXDepthStencilState);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXDepthStencilState);
+  return PL_SUCCESS;
 }
 
 
@@ -171,11 +171,11 @@ plResult plGALDepthStencilStateDX11::DeInitPlatform(plGALDevice* pDevice)
 
 plGALRasterizerStateDX11::plGALRasterizerStateDX11(const plGALRasterizerStateCreationDescription& Description)
   : plGALRasterizerState(Description)
-  , m_pDXRasterizerState(nullptr)
+
 {
 }
 
-plGALRasterizerStateDX11::~plGALRasterizerStateDX11() {}
+plGALRasterizerStateDX11::~plGALRasterizerStateDX11() = default;
 
 
 
@@ -203,19 +203,19 @@ plResult plGALRasterizerStateDX11::InitPlatform(plGALDevice* pDevice)
     if (!pDevice->GetCapabilities().m_bConservativeRasterization && m_Description.m_bConservativeRasterization)
     {
       plLog::Error("Rasterizer state description enables conservative rasterization which is not available!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     ID3D11RasterizerState2* pDXRasterizerState2 = nullptr;
 
     if (FAILED(static_cast<plGALDeviceDX11*>(pDevice)->GetDXDevice3()->CreateRasterizerState2(&DXDesc2, &pDXRasterizerState2)))
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
       m_pDXRasterizerState = pDXRasterizerState2;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
   else
@@ -234,11 +234,11 @@ plResult plGALRasterizerStateDX11::InitPlatform(plGALDevice* pDevice)
 
     if (FAILED(static_cast<plGALDeviceDX11*>(pDevice)->GetDXDevice()->CreateRasterizerState(&DXDesc, &m_pDXRasterizerState)))
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 }
@@ -246,8 +246,8 @@ plResult plGALRasterizerStateDX11::InitPlatform(plGALDevice* pDevice)
 
 plResult plGALRasterizerStateDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXRasterizerState);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXRasterizerState);
+  return PL_SUCCESS;
 }
 
 
@@ -255,11 +255,11 @@ plResult plGALRasterizerStateDX11::DeInitPlatform(plGALDevice* pDevice)
 
 plGALSamplerStateDX11::plGALSamplerStateDX11(const plGALSamplerStateCreationDescription& Description)
   : plGALSamplerState(Description)
-  , m_pDXSamplerState(nullptr)
+
 {
 }
 
-plGALSamplerStateDX11::~plGALSamplerStateDX11() {}
+plGALSamplerStateDX11::~plGALSamplerStateDX11() = default;
 
 /*
  */
@@ -310,21 +310,21 @@ plResult plGALSamplerStateDX11::InitPlatform(plGALDevice* pDevice)
 
   if (FAILED(static_cast<plGALDeviceDX11*>(pDevice)->GetDXDevice()->CreateSamplerState(&DXDesc, &m_pDXSamplerState)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 }
 
 
 plResult plGALSamplerStateDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXSamplerState);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXSamplerState);
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_State_Implementation_StateDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_State_Implementation_StateDX11);

@@ -1,12 +1,12 @@
 
 template <typename MetaDataType>
-plMessageQueueBase<MetaDataType>::plMessageQueueBase(plAllocatorBase* pAllocator)
+plMessageQueueBase<MetaDataType>::plMessageQueueBase(plAllocator* pAllocator)
   : m_Queue(pAllocator)
 {
 }
 
 template <typename MetaDataType>
-plMessageQueueBase<MetaDataType>::plMessageQueueBase(const plMessageQueueBase& rhs, plAllocatorBase* pAllocator)
+plMessageQueueBase<MetaDataType>::plMessageQueueBase(const plMessageQueueBase& rhs, plAllocator* pAllocator)
   : m_Queue(pAllocator)
 {
   m_Queue = rhs.m_Queue;
@@ -25,25 +25,25 @@ void plMessageQueueBase<MetaDataType>::operator=(const plMessageQueueBase& rhs)
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::operator[](plUInt32 uiIndex)
+PL_ALWAYS_INLINE typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::operator[](plUInt32 uiIndex)
 {
   return m_Queue[uiIndex];
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE const typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::operator[](plUInt32 uiIndex) const
+PL_ALWAYS_INLINE const typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::operator[](plUInt32 uiIndex) const
 {
   return m_Queue[uiIndex];
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE plUInt32 plMessageQueueBase<MetaDataType>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plMessageQueueBase<MetaDataType>::GetCount() const
 {
   return m_Queue.GetCount();
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE bool plMessageQueueBase<MetaDataType>::IsEmpty() const
+PL_ALWAYS_INLINE bool plMessageQueueBase<MetaDataType>::IsEmpty() const
 {
   return m_Queue.IsEmpty();
 }
@@ -55,13 +55,13 @@ void plMessageQueueBase<MetaDataType>::Clear()
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Reserve(plUInt32 uiCount)
+PL_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Reserve(plUInt32 uiCount)
 {
   m_Queue.Reserve(uiCount);
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Compact()
+PL_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Compact()
 {
   m_Queue.Compact();
 }
@@ -74,7 +74,7 @@ void plMessageQueueBase<MetaDataType>::Enqueue(plMessage* pMessage, const MetaDa
   entry.m_MetaData = metaData;
 
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     m_Queue.PushBack(entry);
   }
@@ -83,7 +83,7 @@ void plMessageQueueBase<MetaDataType>::Enqueue(plMessage* pMessage, const MetaDa
 template <typename MetaDataType>
 bool plMessageQueueBase<MetaDataType>::TryDequeue(plMessage*& out_pMessage, MetaDataType& out_metaData)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (!m_Queue.IsEmpty())
   {
@@ -101,7 +101,7 @@ bool plMessageQueueBase<MetaDataType>::TryDequeue(plMessage*& out_pMessage, Meta
 template <typename MetaDataType>
 bool plMessageQueueBase<MetaDataType>::TryPeek(plMessage*& out_pMessage, MetaDataType& out_metaData)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (!m_Queue.IsEmpty())
   {
@@ -116,20 +116,20 @@ bool plMessageQueueBase<MetaDataType>::TryPeek(plMessage*& out_pMessage, MetaDat
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::Peek()
+PL_ALWAYS_INLINE typename plMessageQueueBase<MetaDataType>::Entry& plMessageQueueBase<MetaDataType>::Peek()
 {
   return m_Queue.PeekFront();
 }
 
 template <typename MetaDataType>
-PLASMA_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Dequeue()
+PL_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Dequeue()
 {
   m_Queue.PopFront();
 }
 
 template <typename MetaDataType>
 template <typename Comparer>
-PLASMA_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Sort(const Comparer& comparer)
+PL_ALWAYS_INLINE void plMessageQueueBase<MetaDataType>::Sort(const Comparer& comparer)
 {
   m_Queue.Sort(comparer);
 }
@@ -154,7 +154,7 @@ plMessageQueue<MD, A>::plMessageQueue()
 }
 
 template <typename MD, typename A>
-plMessageQueue<MD, A>::plMessageQueue(plAllocatorBase* pQueueAllocator)
+plMessageQueue<MD, A>::plMessageQueue(plAllocator* pQueueAllocator)
   : plMessageQueueBase<MD>(pQueueAllocator)
 {
 }

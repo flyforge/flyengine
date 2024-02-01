@@ -9,49 +9,48 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRestPoseAnimNode, 1, plRTTIDefaultAllocator<plRestPoseAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRestPoseAnimNode, 1, plRTTIDefaultAllocator<plRestPoseAnimNode>)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Pose Generation"),
       new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue)),
       new plTitleAttribute("Rest Pose"),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plRestPoseAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plRestPoseAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRestPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_ResetPose");
   if (!m_OutPose.IsConnected())
     return;
 
@@ -69,3 +68,7 @@ void plRestPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphInsta
     m_OutPose.SetPose(ref_graph, pLocalTransforms);
   }
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_RestPoseAnimNode);
+

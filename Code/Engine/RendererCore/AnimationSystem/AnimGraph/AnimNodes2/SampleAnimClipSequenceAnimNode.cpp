@@ -10,37 +10,37 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleAnimClipSequenceAnimNode, 1, plRTTIDefaultAllocator<plSampleAnimClipSequenceAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleAnimClipSequenceAnimNode, 1, plRTTIDefaultAllocator<plSampleAnimClipSequenceAnimNode>)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, {})),
-      PLASMA_MEMBER_PROPERTY("Loop", m_bLoop),
-      //PLASMA_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
-      PLASMA_ACCESSOR_PROPERTY("StartClip", GetStartClip, SetStartClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
-      PLASMA_ARRAY_ACCESSOR_PROPERTY("MiddleClips", Clips_GetCount, Clips_GetValue, Clips_SetValue, Clips_Insert, Clips_Remove)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
-      PLASMA_ACCESSOR_PROPERTY("EndClip", GetEndClip, SetEndClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+      PL_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, {})),
+      PL_MEMBER_PROPERTY("Loop", m_bLoop),
+      //PL_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
+      PL_ACCESSOR_PROPERTY("StartClip", GetStartClip, SetStartClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+      PL_ARRAY_ACCESSOR_PROPERTY("MiddleClips", Clips_GetCount, Clips_GetValue, Clips_SetValue, Clips_Insert, Clips_Remove)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+      PL_ACCESSOR_PROPERTY("EndClip", GetEndClip, SetEndClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
 
-      PLASMA_MEMBER_PROPERTY("InStart", m_InStart)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InLoop", m_InLoop)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InSpeed", m_InSpeed)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("ClipIndex", m_ClipIndexPin)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InStart", m_InStart)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InLoop", m_InLoop)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InSpeed", m_InSpeed)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("ClipIndex", m_ClipIndexPin)->AddAttributes(new plHiddenAttribute()),
 
-      PLASMA_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("OutOnMiddleStarted", m_OutOnMiddleStarted)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("OutOnEndStarted", m_OutOnEndStarted)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("OutOnFinished", m_OutOnFinished)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutOnMiddleStarted", m_OutOnMiddleStarted)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutOnEndStarted", m_OutOnEndStarted)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutOnFinished", m_OutOnFinished)->AddAttributes(new plHiddenAttribute()),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Pose Generation"),
       new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue)),
       new plTitleAttribute("Sample Sequence: '{StartClip}' '{Clip}' '{EndClip}'"),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSampleAnimClipSequenceAnimNode::plSampleAnimClipSequenceAnimNode() = default;
@@ -50,50 +50,50 @@ plResult plSampleAnimClipSequenceAnimNode::SerializeNode(plStreamWriter& stream)
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sStartClip;
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteArray(m_Clips));
+  PL_SUCCEED_OR_RETURN(stream.WriteArray(m_Clips));
   stream << m_sEndClip;
   stream << m_bApplyRootMotion;
   stream << m_bLoop;
   stream << m_fPlaybackSpeed;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InStart.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLoop.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InSpeed.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_ClipIndexPin.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnMiddleStarted.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnEndStarted.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFinished.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InStart.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLoop.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InSpeed.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_ClipIndexPin.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnMiddleStarted.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnEndStarted.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFinished.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSampleAnimClipSequenceAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sStartClip;
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadArray(m_Clips));
+  PL_SUCCEED_OR_RETURN(stream.ReadArray(m_Clips));
   stream >> m_sEndClip;
   stream >> m_bApplyRootMotion;
   stream >> m_bLoop;
   stream >> m_fPlaybackSpeed;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InStart.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLoop.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InSpeed.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_ClipIndexPin.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnMiddleStarted.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnEndStarted.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFinished.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InStart.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLoop.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InSpeed.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_ClipIndexPin.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnMiddleStarted.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnEndStarted.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFinished.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plSampleAnimClipSequenceAnimNode::Clips_GetCount() const
@@ -125,7 +125,6 @@ void plSampleAnimClipSequenceAnimNode::Clips_Remove(plUInt32 uiIndex)
 
 void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_Sequence");
   if (!m_OutPose.IsConnected())
     return;
 
@@ -133,7 +132,7 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
 
   if ((!m_InStart.IsConnected() && pState->m_uiState == 0) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_PlaybackTime = plTime::Zero();
+    pState->m_PlaybackTime = plTime::MakeZero();
     pState->m_uiState = 1;
   }
 
@@ -191,13 +190,13 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
+      PL_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {
         // TODO: sample anim events of previous clip
         m_OutOnMiddleStarted.SetTriggered(ref_graph);
-        tPrevSamplePos = plTime::Zero();
+        tPrevSamplePos = plTime::MakeZero();
         pState->m_PlaybackTime -= tCurDuration;
         pState->m_uiState = 2;
 
@@ -236,12 +235,12 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
+      PL_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {
         // TODO: sample anim events of previous clip
-        tPrevSamplePos = plTime::Zero();
+        tPrevSamplePos = plTime::MakeZero();
         pState->m_PlaybackTime -= tCurDuration;
 
         if (bLoop)
@@ -287,7 +286,7 @@ void plSampleAnimClipSequenceAnimNode::Step(plAnimController& ref_controller, pl
       }
 
       tCurDuration = pAnimClip->GetDescriptor().GetDuration();
-      PLASMA_ASSERT_DEBUG(tCurDuration >= plTime::Milliseconds(5), "Too short clip");
+      PL_ASSERT_DEBUG(tCurDuration >= plTime::MakeFromMilliseconds(5), "Too short clip");
 
       if (pState->m_PlaybackTime >= tCurDuration)
       {
@@ -353,3 +352,7 @@ bool plSampleAnimClipSequenceAnimNode::GetInstanceDataDesc(plInstanceDataDesc& o
   out_desc.FillFromType<InstanceState>();
   return true;
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_SampleAnimClipSequenceAnimNode);
+

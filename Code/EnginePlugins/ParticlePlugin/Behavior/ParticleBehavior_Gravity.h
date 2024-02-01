@@ -4,9 +4,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Gravity final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Gravity final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Gravity, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Gravity, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_Gravity();
@@ -14,19 +14,19 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
 public:
   float m_fGravityFactor;
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_Gravity final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_Gravity final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Gravity, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Gravity, plParticleBehavior);
 
 public:
   float m_fGravityFactor;

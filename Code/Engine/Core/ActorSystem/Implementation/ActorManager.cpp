@@ -12,7 +12,7 @@
 static plUniquePtr<plActorManager> s_pActorManager;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, plActorManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, plActorManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -20,7 +20,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, plActorManager)
 
   ON_CORESYSTEMS_STARTUP
   {
-    s_pActorManager = PLASMA_DEFAULT_NEW(plActorManager);
+    s_pActorManager = PL_DEFAULT_NEW(plActorManager);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -36,7 +36,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, plActorManager)
     }
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
@@ -51,14 +51,14 @@ struct plActorManagerImpl
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_SINGLETON(plActorManager);
+PL_IMPLEMENT_SINGLETON(plActorManager);
 
 plCopyOnBroadcastEvent<const plActorEvent&> plActorManager::s_ActorEvents;
 
 plActorManager::plActorManager()
   : m_SingletonRegistrar(this)
 {
-  m_pImpl = PLASMA_DEFAULT_NEW(plActorManagerImpl);
+  m_pImpl = PL_DEFAULT_NEW(plActorManagerImpl);
 }
 
 plActorManager::~plActorManager()
@@ -68,7 +68,7 @@ plActorManager::~plActorManager()
 
 void plActorManager::Shutdown()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   DestroyAllActors(nullptr, DestructionMode::Immediate);
   DestroyAllApiServices();
@@ -78,9 +78,9 @@ void plActorManager::Shutdown()
 
 void plActorManager::AddActor(plUniquePtr<plActor>&& pActor)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  PLASMA_ASSERT_DEV(pActor != nullptr, "Actor must exist to be added.");
+  PL_ASSERT_DEV(pActor != nullptr, "Actor must exist to be added.");
   m_pImpl->m_AllActors.PushBack(std::move(pActor));
 
   plActorEvent e;
@@ -91,7 +91,7 @@ void plActorManager::AddActor(plUniquePtr<plActor>&& pActor)
 
 void plActorManager::DestroyActor(plActor* pActor, DestructionMode mode)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   pActor->m_State = plActor::State::QueuedForDestruction;
 
@@ -115,7 +115,7 @@ void plActorManager::DestroyActor(plActor* pActor, DestructionMode mode)
 
 void plActorManager::DestroyAllActors(const void* pCreatedBy, DestructionMode mode)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   for (plUInt32 i0 = m_pImpl->m_AllActors.GetCount(); i0 > 0; --i0)
   {
@@ -139,28 +139,28 @@ void plActorManager::DestroyAllActors(const void* pCreatedBy, DestructionMode mo
   }
 }
 
-void plActorManager::GetAllActors(plHybridArray<plActor*, 8>& out_AllActors)
+void plActorManager::GetAllActors(plHybridArray<plActor*, 8>& out_allActors)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  out_AllActors.Clear();
+  out_allActors.Clear();
 
   for (auto& pActor : m_pImpl->m_AllActors)
   {
-    out_AllActors.PushBack(pActor.Borrow());
+    out_allActors.PushBack(pActor.Borrow());
   }
 }
 
 void plActorManager::AddApiService(plUniquePtr<plActorApiService>&& pApiService)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  PLASMA_ASSERT_DEV(pApiService != nullptr, "Invalid API service");
-  PLASMA_ASSERT_DEV(pApiService->m_State == plActorApiService::State::New, "Actor API service already in use");
+  PL_ASSERT_DEV(pApiService != nullptr, "Invalid API service");
+  PL_ASSERT_DEV(pApiService->m_State == plActorApiService::State::New, "Actor API service already in use");
 
   for (auto& pExisting : m_pImpl->m_AllApiServices)
   {
-    PLASMA_ASSERT_ALWAYS(pApiService->GetDynamicRTTI() != pExisting->GetDynamicRTTI() || pExisting->m_State == plActorApiService::State::QueuedForDestruction, "An actor API service of this type has already been added");
+    PL_ASSERT_ALWAYS(pApiService->GetDynamicRTTI() != pExisting->GetDynamicRTTI() || pExisting->m_State == plActorApiService::State::QueuedForDestruction, "An actor API service of this type has already been added");
   }
 
   m_pImpl->m_AllApiServices.PushBack(std::move(pApiService));
@@ -168,9 +168,9 @@ void plActorManager::AddApiService(plUniquePtr<plActorApiService>&& pApiService)
 
 void plActorManager::DestroyApiService(plActorApiService* pApiService, DestructionMode mode /*= DestructionMode::Immediate*/)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  PLASMA_ASSERT_DEV(pApiService != nullptr, "Invalid API service");
+  PL_ASSERT_DEV(pApiService != nullptr, "Invalid API service");
 
   pApiService->m_State = plActorApiService::State::QueuedForDestruction;
 
@@ -189,7 +189,7 @@ void plActorManager::DestroyApiService(plActorApiService* pApiService, Destructi
 
 void plActorManager::DestroyAllApiServices(DestructionMode mode /*= DestructionMode::Immediate*/)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   for (plUInt32 i0 = m_pImpl->m_AllApiServices.GetCount(); i0 > 0; --i0)
   {
@@ -207,7 +207,7 @@ void plActorManager::DestroyAllApiServices(DestructionMode mode /*= DestructionM
 
 void plActorManager::ActivateQueuedApiServices()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   for (auto& pManager : m_pImpl->m_AllApiServices)
   {
@@ -221,9 +221,9 @@ void plActorManager::ActivateQueuedApiServices()
 
 plActorApiService* plActorManager::GetApiService(const plRTTI* pType)
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  PLASMA_ASSERT_DEV(pType->IsDerivedFrom<plActorApiService>(), "The queried type has to derive from plActorApiService");
+  PL_ASSERT_DEV(pType->IsDerivedFrom<plActorApiService>(), "The queried type has to derive from plActorApiService");
 
   for (auto& pApiService : m_pImpl->m_AllApiServices)
   {
@@ -236,7 +236,7 @@ plActorApiService* plActorManager::GetApiService(const plRTTI* pType)
 
 void plActorManager::UpdateAllApiServices()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   for (auto& pApiService : m_pImpl->m_AllApiServices)
   {
@@ -249,10 +249,10 @@ void plActorManager::UpdateAllApiServices()
 
 void plActorManager::UpdateAllActors()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   m_bForceQueueActorDestruction = true;
-  PLASMA_SCOPE_EXIT(m_bForceQueueActorDestruction = false);
+  PL_SCOPE_EXIT(m_bForceQueueActorDestruction = false);
 
   for (plUInt32 i0 = m_pImpl->m_AllActors.GetCount(); i0 > 0; --i0)
   {
@@ -280,9 +280,9 @@ void plActorManager::UpdateAllActors()
 
 void plActorManager::DestroyQueuedActors()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
-  PLASMA_ASSERT_DEV(!m_bForceQueueActorDestruction, "Cannot execute this function right now");
+  PL_ASSERT_DEV(!m_bForceQueueActorDestruction, "Cannot execute this function right now");
 
   for (plUInt32 i0 = m_pImpl->m_AllActors.GetCount(); i0 > 0; --i0)
   {
@@ -303,7 +303,7 @@ void plActorManager::DestroyQueuedActors()
 
 void plActorManager::DestroyQueuedActorApiServices()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   for (plUInt32 i0 = m_pImpl->m_AllApiServices.GetCount(); i0 > 0; --i0)
   {
@@ -319,7 +319,7 @@ void plActorManager::DestroyQueuedActorApiServices()
 
 void plActorManager::Update()
 {
-  PLASMA_LOCK(m_pImpl->m_Mutex);
+  PL_LOCK(m_pImpl->m_Mutex);
 
   DestroyQueuedActorApiServices();
   DestroyQueuedActors();
@@ -329,4 +329,4 @@ void plActorManager::Update()
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_ActorManager);
+PL_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_ActorManager);

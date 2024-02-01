@@ -12,7 +12,7 @@
 class plQtTreeSearchFilterModel;
 class plSelectionManager;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtDocumentTreeView : public plQtItemView<QTreeView>
+class PL_EDITORFRAMEWORK_DLL plQtDocumentTreeView : public plQtItemView<QTreeView>
 {
   Q_OBJECT
 
@@ -31,7 +31,7 @@ public:
   plQtTreeSearchFilterModel* GetProxyFilterModel() const { return m_pFilterModel.get(); }
 
 protected:
-  virtual void keyPressEvent(QKeyEvent* e) override;
+  virtual bool event(QEvent* pEvent) override;
 
 private Q_SLOTS:
   void on_selectionChanged_triggered(const QItemSelection& selected, const QItemSelection& deselected);

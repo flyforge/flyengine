@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/Pipeline/Implementation/RenderPipelineResourceLoader.h>
 #include <RendererCore/Pipeline/Passes/SimpleRenderPass.h>
 #include <RendererCore/Pipeline/Passes/SourcePass.h>
@@ -14,10 +14,10 @@ void plRenderPipelineResourceDescriptor::CreateFromRenderPipeline(const plRender
 }
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineResource, 1, plRTTIDefaultAllocator<plRenderPipelineResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelineResource, 1, plRTTIDefaultAllocator<plRenderPipelineResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plRenderPipelineResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plRenderPipelineResource);
 // clang-format on
 
 plRenderPipelineResource::plRenderPipelineResource()
@@ -39,18 +39,18 @@ plInternal::NewInstance<plRenderPipeline> plRenderPipelineResource::CreateRender
 // static
 plRenderPipelineResourceHandle plRenderPipelineResource::CreateMissingPipeline()
 {
-  plUniquePtr<plRenderPipeline> pRenderPipeline = PLASMA_DEFAULT_NEW(plRenderPipeline);
+  plUniquePtr<plRenderPipeline> pRenderPipeline = PL_DEFAULT_NEW(plRenderPipeline);
 
   plSourcePass* pColorSourcePass = nullptr;
   {
-    plUniquePtr<plSourcePass> pPass = PLASMA_DEFAULT_NEW(plSourcePass, "ColorSource");
+    plUniquePtr<plSourcePass> pPass = PL_DEFAULT_NEW(plSourcePass, "ColorSource");
     pColorSourcePass = pPass.Borrow();
     pRenderPipeline->AddPass(std::move(pPass));
   }
 
   plSimpleRenderPass* pSimplePass = nullptr;
   {
-    plUniquePtr<plSimpleRenderPass> pPass = PLASMA_DEFAULT_NEW(plSimpleRenderPass);
+    plUniquePtr<plSimpleRenderPass> pPass = PL_DEFAULT_NEW(plSimpleRenderPass);
     pSimplePass = pPass.Borrow();
     pSimplePass->SetMessage("Render pipeline resource is missing. Ensure that the corresponding asset has been transformed.");
     pRenderPipeline->AddPass(std::move(pPass));
@@ -58,13 +58,13 @@ plRenderPipelineResourceHandle plRenderPipelineResource::CreateMissingPipeline()
 
   plTargetPass* pTargetPass = nullptr;
   {
-    plUniquePtr<plTargetPass> pPass = PLASMA_DEFAULT_NEW(plTargetPass);
+    plUniquePtr<plTargetPass> pPass = PL_DEFAULT_NEW(plTargetPass);
     pTargetPass = pPass.Borrow();
     pRenderPipeline->AddPass(std::move(pPass));
   }
 
-  PLASMA_VERIFY(pRenderPipeline->Connect(pColorSourcePass, "Output", pSimplePass, "Color"), "Connect failed!");
-  PLASMA_VERIFY(pRenderPipeline->Connect(pSimplePass, "Color", pTargetPass, "Color0"), "Connect failed!");
+  PL_VERIFY(pRenderPipeline->Connect(pColorSourcePass, "Output", pSimplePass, "Color"), "Connect failed!");
+  PL_VERIFY(pRenderPipeline->Connect(pSimplePass, "Color", pTargetPass, "Color0"), "Connect failed!");
 
   plRenderPipelineResourceDescriptor desc;
   plRenderPipelineResourceLoader::CreateRenderPipelineResourceDescriptor(pRenderPipeline.Borrow(), desc);
@@ -111,7 +111,15 @@ plResourceLoadDesc plRenderPipelineResource::UpdateContent(plStreamReader* Strea
 
     plUInt8 uiVersion = 0;
     (*Stream) >> uiVersion;
-    PLASMA_ASSERT_DEV(uiVersion == 1, "Unknown plRenderPipelineBin version {0}", uiVersion);
+
+    // Version 1 was using old tooling serialization. Code path removed.
+    if (uiVersion == 1)
+    {
+      res.m_State = plResourceState::LoadedResourceMissing;
+      plLog::Error("Failed to load old plRenderPipelineResource '{}'. Needs re-transform.", sAbsFilePath);
+      return res;
+    }
+    PL_ASSERT_DEV(uiVersion == 2, "Unknown plRenderPipelineBin version {0}", uiVersion);
 
     plUInt32 uiSize = 0;
     (*Stream) >> uiSize;
@@ -119,11 +127,11 @@ plResourceLoadDesc plRenderPipelineResource::UpdateContent(plStreamReader* Strea
     m_Desc.m_SerializedPipeline.SetCountUninitialized(uiSize);
     Stream->ReadBytes(m_Desc.m_SerializedPipeline.GetData(), uiSize);
 
-    PLASMA_ASSERT_DEV(uiSize > 0, "RenderPipeline resourse contains no pipeline data!");
+    PL_ASSERT_DEV(uiSize > 0, "RenderPipeline resourse contains no pipeline data!");
   }
   else
   {
-    PLASMA_REPORT_FAILURE("The file '{0}' is unsupported, only '.plRenderPipelineBin' files can be loaded as plRenderPipelineResource", sAbsFilePath);
+    PL_REPORT_FAILURE("The file '{0}' is unsupported, only '.plRenderPipelineBin' files can be loaded as plRenderPipelineResource", sAbsFilePath);
   }
 
   return res;
@@ -136,7 +144,7 @@ void plRenderPipelineResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plRenderPipelineResource, plRenderPipelineResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plRenderPipelineResource, plRenderPipelineResourceDescriptor)
 {
   m_Desc = descriptor;
 
@@ -150,4 +158,4 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plRenderPipelineResource, plRenderPipelineR
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelineResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelineResource);

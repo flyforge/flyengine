@@ -20,7 +20,7 @@ plStagingBufferVulkan plStagingBufferPoolVulkan::AllocateBuffer(vk::DeviceSize a
   //#TODO_VULKAN alignment
   plStagingBufferVulkan buffer;
 
-  PLASMA_ASSERT_DEBUG(m_device, "plStagingBufferPoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(m_device, "plStagingBufferPoolVulkan::Initialize not called");
   vk::BufferCreateInfo bufferCreateInfo = {};
   bufferCreateInfo.size = size;
   bufferCreateInfo.usage = vk::BufferUsageFlagBits::eTransferSrc;
@@ -43,6 +43,6 @@ void plStagingBufferPoolVulkan::ReclaimBuffer(plStagingBufferVulkan& buffer)
 {
   m_pDevice->DeleteLater(buffer.m_buffer, buffer.m_alloc);
 
-  //PLASMA_ASSERT_DEBUG(m_device, "plStagingBufferPoolVulkan::Initialize not called");
+  //PL_ASSERT_DEBUG(m_device, "plStagingBufferPoolVulkan::Initialize not called");
   //plMemoryAllocatorVulkan::DestroyBuffer(buffer.m_buffer, buffer.m_alloc);
 }

@@ -15,7 +15,7 @@ namespace plProcGenInternal
     VertexColorTask();
     ~VertexColorTask();
 
-    void Prepare(const plWorld& world, const plMeshBufferResourceDescriptor& mbDesc, const plTransform& transform,
+    void Prepare(const plWorld& world, const plMeshBufferResourceDescriptor& desc, const plTransform& transform,
       plArrayPtr<plSharedPtr<const VertexColorOutput>> outputs, plArrayPtr<plProcVertexColorMapping> outputMappings,
       plArrayPtr<plUInt32> outputVertexColors);
 
@@ -27,7 +27,7 @@ namespace plProcGenInternal
 
     struct InputVertex
     {
-      PLASMA_DECLARE_POD_TYPE();
+      PL_DECLARE_POD_TYPE();
 
       plVec3 m_vPosition;
       plVec3 m_vNormal;

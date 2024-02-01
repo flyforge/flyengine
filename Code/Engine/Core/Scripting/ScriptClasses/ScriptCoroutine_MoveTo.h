@@ -4,7 +4,7 @@
 #include <Core/World/Declarations.h>
 #include <Foundation/Math/CurveFunctions.h>
 
-class PLASMA_CORE_DLL plScriptCoroutine_MoveTo : public plTypedScriptCoroutine<plScriptCoroutine_MoveTo, plGameObjectHandle, plVec3, plTime, plEnum<plCurveFunction>>
+class PL_CORE_DLL plScriptCoroutine_MoveTo : public plTypedScriptCoroutine<plScriptCoroutine_MoveTo, plGameObjectHandle, plVec3, plTime, plEnum<plCurveFunction>>
 {
 public:
   void Start(plGameObjectHandle hObject, const plVec3& vTargetPos, plTime duration, plEnum<plCurveFunction> easing);
@@ -20,4 +20,4 @@ private:
   plTime m_TimePassed;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plScriptCoroutine_MoveTo);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plScriptCoroutine_MoveTo);

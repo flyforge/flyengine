@@ -12,32 +12,32 @@
 #include <ozz/base/maths/simd_math.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSkeletonComponent, 5, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSkeletonComponent, 5, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skeleton")),
-    PLASMA_MEMBER_PROPERTY("VisualizeSkeleton", m_bVisualizeBones)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("VisualizeColliders", m_bVisualizeColliders),
-    PLASMA_MEMBER_PROPERTY("VisualizeJoints", m_bVisualizeJoints),
-    PLASMA_MEMBER_PROPERTY("VisualizeSwingLimits", m_bVisualizeSwingLimits),
-    PLASMA_MEMBER_PROPERTY("VisualizeTwistLimits", m_bVisualizeTwistLimits),
-    PLASMA_ACCESSOR_PROPERTY("BonesToHighlight", GetBonesToHighlight, SetBonesToHighlight),
+    PL_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skeleton")),
+    PL_MEMBER_PROPERTY("VisualizeSkeleton", m_bVisualizeBones)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("VisualizeColliders", m_bVisualizeColliders),
+    PL_MEMBER_PROPERTY("VisualizeJoints", m_bVisualizeJoints),
+    PL_MEMBER_PROPERTY("VisualizeSwingLimits", m_bVisualizeSwingLimits),
+    PL_MEMBER_PROPERTY("VisualizeTwistLimits", m_bVisualizeTwistLimits),
+    PL_ACCESSOR_PROPERTY("BonesToHighlight", GetBonesToHighlight, SetBonesToHighlight),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
-    PLASMA_MESSAGE_HANDLER(plMsgQueryAnimationSkeleton, OnQueryAnimationSkeleton)
+    PL_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
+    PL_MESSAGE_HANDLER(plMsgQueryAnimationSkeleton, OnQueryAnimationSkeleton)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSkeletonComponent::plSkeletonComponent() = default;
@@ -48,12 +48,12 @@ plResult plSkeletonComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bo
   if (m_MaxBounds.IsValid())
   {
     plBoundingBox bbox = m_MaxBounds;
-    ref_bounds = bbox;
+    ref_bounds = plBoundingBoxSphere::MakeFromBox(bbox);
     ref_bounds.Transform(m_RootTransform.GetAsMat4());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plSkeletonComponent::Update()
@@ -93,17 +93,17 @@ void plSkeletonComponent::Update()
 
     for (const auto& shape : m_AngleShapes)
     {
-      plDebugRenderer::DrawAngle(GetWorld(), shape.m_StartAngle, shape.m_EndAngle, plColor::ZeroColor(), shape.m_Color, GetOwner()->GetGlobalTransform() * shape.m_Transform, vBoneTangent, vBoneDir);
+      plDebugRenderer::DrawAngle(GetWorld(), shape.m_StartAngle, shape.m_EndAngle, plColor::MakeZero(), shape.m_Color, GetOwner()->GetGlobalTransform() * shape.m_Transform, vBoneTangent, vBoneDir);
     }
 
     for (const auto& shape : m_ConeLimitShapes)
     {
-      plDebugRenderer::DrawLimitCone(GetWorld(), shape.m_Angle1, shape.m_Angle2, plColor::ZeroColor(), shape.m_Color, GetOwner()->GetGlobalTransform() * shape.m_Transform);
+      plDebugRenderer::DrawLimitCone(GetWorld(), shape.m_Angle1, shape.m_Angle2, plColor::MakeZero(), shape.m_Color, GetOwner()->GetGlobalTransform() * shape.m_Transform);
     }
 
     for (const auto& shape : m_CylinderShapes)
     {
-      plDebugRenderer::DrawCylinder(GetWorld(), shape.m_fRadius1, shape.m_fRadius2, shape.m_fLength, shape.m_Color, plColor::ZeroColor(), GetOwner()->GetGlobalTransform() * shape.m_Transform, false, false);
+      plDebugRenderer::DrawCylinder(GetWorld(), shape.m_fRadius1, shape.m_fRadius2, shape.m_fLength, shape.m_Color, plColor::MakeZero(), GetOwner()->GetGlobalTransform() * shape.m_Transform, false, false);
     }
   }
 }
@@ -146,7 +146,7 @@ void plSkeletonComponent::OnActivated()
 {
   SUPER::OnActivated();
 
-  m_MaxBounds.SetInvalid();
+  m_MaxBounds = plBoundingBox::MakeInvalid();
   VisualizeSkeletonDefaultState();
 }
 
@@ -177,7 +177,7 @@ void plSkeletonComponent::SetSkeleton(const plSkeletonResourceHandle& hResource)
   {
     m_hSkeleton = hResource;
 
-    m_MaxBounds.SetInvalid();
+    m_MaxBounds = plBoundingBox::MakeInvalid();
     VisualizeSkeletonDefaultState();
   }
 }
@@ -216,7 +216,7 @@ void plSkeletonComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& msg)
   BuildJointVisualization(msg);
 
   plBoundingBox poseBounds;
-  poseBounds.SetInvalid();
+  poseBounds = plBoundingBox::MakeInvalid();
 
   for (const auto& bone : msg.m_ModelTransforms)
   {
@@ -228,7 +228,7 @@ void plSkeletonComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& msg)
     m_MaxBounds.ExpandToInclude(poseBounds);
     TriggerLocalBoundsUpdate();
   }
-  else if (((plRenderWorld::GetFrameCounter() + GetUniqueIdForRendering()) & (PLASMA_BIT(10) - 1)) == 0) // reset the bbox every once in a while
+  else if (((plRenderWorld::GetFrameCounter() + GetUniqueIdForRendering()) & (PL_BIT(10) - 1)) == 0) // reset the bbox every once in a while
   {
     m_MaxBounds = poseBounds;
     TriggerLocalBoundsUpdate();
@@ -244,8 +244,8 @@ void plSkeletonComponent::BuildSkeletonVisualization(plMsgAnimationPoseUpdated& 
 
   struct Bone
   {
-    plVec3 pos = plVec3::ZeroVector();
-    plVec3 dir = plVec3::ZeroVector();
+    plVec3 pos = plVec3::MakeZero();
+    plVec3 dir = plVec3::MakeZero();
     float distToParent = 0.0f;
     float minDistToChild = 10.0f;
     bool highlight = false;
@@ -271,16 +271,16 @@ void plSkeletonComponent::BuildSkeletonVisualization(plMsgAnimationPoseUpdated& 
     bone.pos = v1;
     bone.distToParent = dirToBone.GetLength();
     bone.dir = *msg.m_pRootTransform * msg.m_ModelTransforms[iCurrentBone].TransformDirection(vBoneDir);
-    bone.dir.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+    bone.dir.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 
     auto& pb = bones[iParentBone];
 
-    if (!pb.dir.IsZero() && dirToBone.NormalizeIfNotZero(plVec3::ZeroVector()).Succeeded())
+    if (!pb.dir.IsZero() && dirToBone.NormalizeIfNotZero(plVec3::MakeZero()).Succeeded())
     {
-      if (pb.dir.GetAngleBetween(dirToBone) < plAngle::Degree(45))
+      if (pb.dir.GetAngleBetween(dirToBone) < plAngle::MakeFromDegree(45))
       {
         plPlane plane;
-        plane.SetFromNormalAndPoint(pb.dir, pb.pos);
+        plane = plPlane::MakeFromNormalAndPoint(pb.dir, pb.pos);
         pb.minDistToChild = plMath::Min(pb.minDistToChild, plane.GetDistanceTo(v1));
       }
     }
@@ -409,7 +409,7 @@ void plSkeletonComponent::BuildColliderVisualization(plMsgAnimationPoseUpdated& 
     bonesToHighlight.Clear();
 
   plQuat qRotZtoX; // the capsule should extend along X, but the debug renderer draws them along Z
-  qRotZtoX.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+  qRotZtoX = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
 
   for (const auto& geo : pSkeleton->GetDescriptor().m_Geometry)
   {
@@ -435,7 +435,7 @@ void plSkeletonComponent::BuildColliderVisualization(plMsgAnimationPoseUpdated& 
     {
       auto& shape = m_SpheresShapes.ExpandAndGetRef();
       shape.m_Transform = st;
-      shape.m_Shape.SetElements(plVec3::ZeroVector(), geo.m_Transform.m_vScale.z);
+      shape.m_Shape = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), geo.m_Transform.m_vScale.z);
       shape.m_Color = hlS;
     }
 
@@ -452,7 +452,7 @@ void plSkeletonComponent::BuildColliderVisualization(plMsgAnimationPoseUpdated& 
       st.m_vPosition += qFinalBoneRot * plVec3(geo.m_Transform.m_vScale.x * 0.5f, 0, 0);
 
       shape.m_Transform = st;
-      shape.m_Shape.SetCenterAndHalfExtents(plVec3::ZeroVector(), ext);
+      shape.m_Shape = plBoundingBox::MakeFromCenterAndHalfExtents(plVec3::MakeZero(), ext);
       shape.m_Color = hlS;
     }
 
@@ -612,7 +612,7 @@ void plSkeletonComponent::BuildJointVisualization(plMsgAnimationPoseUpdated& msg
     }
 
     // twist limit
-    if (m_bVisualizeTwistLimits && thisJoint.GetTwistLimitHalfAngle() > plAngle::Degree(0))
+    if (m_bVisualizeTwistLimits && thisJoint.GetTwistLimitHalfAngle() > plAngle::MakeFromDegree(0))
     {
       auto& shape = m_AngleShapes.ExpandAndGetRef();
       shape.m_StartAngle = thisJoint.GetTwistLimitLow();
@@ -641,8 +641,7 @@ void plSkeletonComponent::BuildJointVisualization(plMsgAnimationPoseUpdated& msg
         vDirRef.Normalize();
 
         const plVec3 vRotDir = shape.m_Transform.m_qRotation * qBoneDir * plVec3(1, 0, 0);
-        plQuat qRotRef;
-        qRotRef.SetFromAxisAndAngle(vRotDir, thisJoint.GetTwistLimitCenterAngle());
+        plQuat qRotRef = plQuat::MakeFromAxisAndAngle(vRotDir, thisJoint.GetTwistLimitCenterAngle());
         vDirRef = qRotRef * vDirRef;
 
         // if the current twist is outside the twist limit range, highlight the bone
@@ -714,4 +713,4 @@ void plSkeletonComponent::OnQueryAnimationSkeleton(plMsgQueryAnimationSkeleton& 
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonComponent);

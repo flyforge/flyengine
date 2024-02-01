@@ -4,20 +4,20 @@
 #include <GameEngine/StateMachine/StateMachineResource.h>
 
 /// \brief A state machine state implementation that represents another state machine nested within this state. This can be used to build hierarchical state machines.
-class PLASMA_GAMEENGINE_DLL plStateMachineState_NestedStateMachine : public plStateMachineState
+class PL_GAMEENGINE_DLL plStateMachineState_NestedStateMachine : public plStateMachineState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState_NestedStateMachine, plStateMachineState);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_NestedStateMachine, plStateMachineState);
 
 public:
   plStateMachineState_NestedStateMachine(plStringView sName = plStringView());
   ~plStateMachineState_NestedStateMachine();
 
-  virtual void OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
-  virtual void OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const override;
-  virtual void Update(plStateMachineInstance& instance, void* pInstanceData, plTime deltaTime) const override;
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
+  virtual void OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const override;
+  virtual void Update(plStateMachineInstance& ref_instance, void* pInstanceData, plTime deltaTime) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   virtual bool GetInstanceDataDesc(plInstanceDataDesc& out_desc) override;
 
@@ -51,20 +51,20 @@ private:
 ///
 /// Can be used to build states in a more modular way. All calls are simply redirected to all sub states,
 /// e.g. when entered it calls OnEnter on all its sub states.
-class PLASMA_GAMEENGINE_DLL plStateMachineState_Compound : public plStateMachineState
+class PL_GAMEENGINE_DLL plStateMachineState_Compound : public plStateMachineState
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState_Compound, plStateMachineState);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_Compound, plStateMachineState);
 
 public:
   plStateMachineState_Compound(plStringView sName = plStringView());
   ~plStateMachineState_Compound();
 
-  virtual void OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
-  virtual void OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const override;
-  virtual void Update(plStateMachineInstance& instance, void* pInstanceData, plTime deltaTime) const override;
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const override;
+  virtual void OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const override;
+  virtual void Update(plStateMachineInstance& ref_instance, void* pInstanceData, plTime deltaTime) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   virtual bool GetInstanceDataDesc(plInstanceDataDesc& out_desc) override;
 
@@ -77,7 +77,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief An enum that represents the operator of a comparison
-struct PLASMA_GAMEENGINE_DLL plStateMachineLogicOperator
+struct PL_GAMEENGINE_DLL plStateMachineLogicOperator
 {
   using StorageType = plUInt8;
 
@@ -90,23 +90,23 @@ struct PLASMA_GAMEENGINE_DLL plStateMachineLogicOperator
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plStateMachineLogicOperator);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plStateMachineLogicOperator);
 
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief A state machine transition implementation that checks the instance's blackboard for the given conditions.
-class PLASMA_GAMEENGINE_DLL plStateMachineTransition_BlackboardConditions : public plStateMachineTransition
+class PL_GAMEENGINE_DLL plStateMachineTransition_BlackboardConditions : public plStateMachineTransition
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_BlackboardConditions, plStateMachineTransition);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_BlackboardConditions, plStateMachineTransition);
 
 public:
   plStateMachineTransition_BlackboardConditions();
   ~plStateMachineTransition_BlackboardConditions();
 
-  virtual bool IsConditionMet(plStateMachineInstance& instance, void* pInstanceData) const override;
+  virtual bool IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plEnum<plStateMachineLogicOperator> m_Operator;
   plHybridArray<plBlackboardCondition, 2> m_Conditions;
@@ -115,18 +115,18 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief A state machine transition implementation that triggers after the given time
-class PLASMA_GAMEENGINE_DLL plStateMachineTransition_Timeout : public plStateMachineTransition
+class PL_GAMEENGINE_DLL plStateMachineTransition_Timeout : public plStateMachineTransition
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_Timeout, plStateMachineTransition);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_Timeout, plStateMachineTransition);
 
 public:
   plStateMachineTransition_Timeout();
   ~plStateMachineTransition_Timeout();
 
-  virtual bool IsConditionMet(plStateMachineInstance& instance, void* pInstanceData) const override;
+  virtual bool IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plTime m_Timeout;
 };
@@ -137,18 +137,18 @@ public:
 ///
 /// Can be used to build transitions in a more modular way. All calls are simply redirected to all sub transitions
 /// and then combined with the given logic operator (AND, OR).
-class PLASMA_GAMEENGINE_DLL plStateMachineTransition_Compound : public plStateMachineTransition
+class PL_GAMEENGINE_DLL plStateMachineTransition_Compound : public plStateMachineTransition
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_Compound, plStateMachineTransition);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_Compound, plStateMachineTransition);
 
 public:
   plStateMachineTransition_Compound();
   ~plStateMachineTransition_Compound();
 
-  virtual bool IsConditionMet(plStateMachineInstance& instance, void* pInstanceData) const override;
+  virtual bool IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const override;
 
-  virtual plResult Serialize(plStreamWriter& stream) const override;
-  virtual plResult Deserialize(plStreamReader& stream) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   virtual bool GetInstanceDataDesc(plInstanceDataDesc& out_desc) override;
 
@@ -157,4 +157,23 @@ public:
 
 private:
   plStateMachineInternal::Compound m_Compound;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
+/// \brief A state machine transition implementation that triggers when a 'transition event' is sent.
+class PL_GAMEENGINE_DLL plStateMachineTransition_TransitionEvent : public plStateMachineTransition
+{
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineTransition_TransitionEvent, plStateMachineTransition);
+
+public:
+  plStateMachineTransition_TransitionEvent();
+  ~plStateMachineTransition_TransitionEvent();
+
+  virtual bool IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const override;
+
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
+
+  plHashedString m_sEventName;
 };

@@ -13,22 +13,24 @@ plInitContextVulkan::plInitContextVulkan(plGALDeviceVulkan* pDevice)
   : m_pDevice(pDevice)
 {
   plProxyAllocator& allocator = m_pDevice->GetAllocator();
-  m_pPipelineBarrier = PLASMA_NEW(&allocator, plPipelineBarrierVulkan);
-  m_pCommandBufferPool = PLASMA_NEW(&allocator, plCommandBufferPoolVulkan);
+  m_pPipelineBarrier = PL_NEW(&allocator, plPipelineBarrierVulkan);
+  m_pCommandBufferPool = PL_NEW(&allocator, plCommandBufferPoolVulkan);
   m_pCommandBufferPool->Initialize(m_pDevice->GetVulkanDevice(), m_pDevice->GetGraphicsQueue().m_uiQueueFamily);
-  m_pStagingBufferPool = PLASMA_NEW(&allocator, plStagingBufferPoolVulkan);
+  m_pStagingBufferPool = PL_NEW(&allocator, plStagingBufferPoolVulkan);
   m_pStagingBufferPool->Initialize(m_pDevice);
 }
 
 plInitContextVulkan::~plInitContextVulkan()
 {
+  PL_ASSERT_DEBUG(!m_currentCommandBuffer, "GetFinishedCommandBuffer should have been called before destruction.");
+
   m_pCommandBufferPool->DeInitialize();
   m_pStagingBufferPool->DeInitialize();
 }
 
 vk::CommandBuffer plInitContextVulkan::GetFinishedCommandBuffer()
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
   if (m_currentCommandBuffer)
   {
     m_pPipelineBarrier->Submit();
@@ -55,13 +57,13 @@ void plInitContextVulkan::EnsureCommandBufferExists()
 
 void plInitContextVulkan::TextureDestroyed(const plGALTextureVulkan* pTexture)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
   m_pPipelineBarrier->TextureDestroyed(pTexture);
 }
 
 void plInitContextVulkan::InitTexture(const plGALTextureVulkan* pTexture, vk::ImageCreateInfo& createInfo, plArrayPtr<plGALSystemMemoryDescription> pInitialData)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
   EnsureCommandBufferExists();
   if (pTexture->GetDescription().m_pExisitingNativeObject == nullptr)
@@ -100,7 +102,7 @@ void plInitContextVulkan::InitTexture(const plGALTextureVulkan* pTexture, vk::Im
         for (plUInt32 uiMipLevel = 0; uiMipLevel < createInfo.mipLevels; uiMipLevel++)
         {
           const plUInt32 uiSubresourceIndex = uiMipLevel + uiLayer * createInfo.mipLevels;
-          PLASMA_ASSERT_DEBUG(initialData.GetCount() == uiSubresourceIndex, "");
+          PL_ASSERT_DEBUG(initialData.GetCount() == uiSubresourceIndex, "");
 
           const vk::Extent3D imageExtent = pTexture->GetMipLevelSize(uiMipLevel);
           const VkExtent3D blockCount = {
@@ -126,7 +128,7 @@ void plInitContextVulkan::InitTexture(const plGALTextureVulkan* pTexture, vk::Im
       for (plUInt32 uiMipLevel = 0; uiMipLevel < createInfo.mipLevels; uiMipLevel++)
       {
         const plUInt32 uiSubresourceIndex = uiMipLevel + uiLayer * createInfo.mipLevels;
-        PLASMA_ASSERT_DEBUG(uiSubresourceIndex < pInitialData.GetCount(), "Not all data provided in the intial texture data.");
+        PL_ASSERT_DEBUG(uiSubresourceIndex < pInitialData.GetCount(), "Not all data provided in the intial texture data.");
         const plGALSystemMemoryDescription& subResourceData = pInitialData[uiSubresourceIndex];
 
         vk::ImageSubresourceLayers subresourceLayers;

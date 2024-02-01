@@ -6,8 +6,8 @@
 #include <GuiFoundation/ActionViews/MenuBarActionMapView.moc.h>
 #include <GuiFoundation/ActionViews/QtProxy.moc.h>
 
-plQtMenuBarActionMapView::plQtMenuBarActionMapView(QWidget* parent)
-  : QMenuBar(parent)
+plQtMenuBarActionMapView::plQtMenuBarActionMapView(QWidget* pParent)
+  : QMenuBar(pParent)
 {
 }
 
@@ -20,7 +20,7 @@ void plQtMenuBarActionMapView::SetActionContext(const plActionContext& context)
 {
   auto pMap = plActionMapManager::GetActionMap(context.m_sMapping);
 
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping '{0}' does not exist", context.m_sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping '{0}' does not exist", context.m_sMapping);
 
   m_pActionMap = pMap;
   m_Context = context;
@@ -50,13 +50,13 @@ void plQtMenuBarActionMapView::CreateView()
     {
       case plActionType::Action:
       {
-        PLASMA_REPORT_FAILURE("Cannot map actions in a menubar view!");
+        PL_REPORT_FAILURE("Cannot map actions in a menubar view!");
       }
       break;
 
       case plActionType::Category:
       {
-        PLASMA_REPORT_FAILURE("Cannot map category in a menubar view!");
+        PL_REPORT_FAILURE("Cannot map category in a menubar view!");
       }
       break;
 
@@ -70,7 +70,7 @@ void plQtMenuBarActionMapView::CreateView()
 
       case plActionType::ActionAndMenu:
       {
-        PLASMA_REPORT_FAILURE("Cannot map ActionAndMenu in a menubar view!");
+        PL_REPORT_FAILURE("Cannot map ActionAndMenu in a menubar view!");
       }
       break;
     }

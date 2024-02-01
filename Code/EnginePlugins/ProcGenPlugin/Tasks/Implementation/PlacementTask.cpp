@@ -12,8 +12,8 @@
 
 using namespace plProcGenInternal;
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(PlacementPoint) == 32);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(PlacementTransform) == 64);
+PL_CHECK_AT_COMPILETIME(sizeof(PlacementPoint) == 32);
+PL_CHECK_AT_COMPILETIME(sizeof(PlacementTransform) == 64);
 
 PlacementTask::PlacementTask(PlacementData* pData, const char* szName)
   : m_pData(pData)
@@ -46,7 +46,7 @@ void PlacementTask::Execute()
 
 void PlacementTask::FindPlacementPoints()
 {
-  PLASMA_PROFILE_SCOPE("FindPlacementPoints");
+  PL_PROFILE_SCOPE("FindPlacementPoints");
 
   auto pOutput = m_pData->m_pOutput;
 
@@ -69,7 +69,7 @@ void PlacementTask::FindPlacementPoints()
   for (plUInt32 i = 0; i < patternPoints.GetCount(); ++i)
   {
     auto& patternPoint = patternPoints[i];
-    plSimdVec4f patternCoords = plSimdConversion::ToVec3(patternPoint.m_Coordinates.GetAsVec3(0.0f));
+    plSimdVec4f patternCoords = plSimdVec4f(patternPoint.x, patternPoint.y, 0.0f);
 
     plPhysicsCastResult hitResult;
 
@@ -138,7 +138,7 @@ void PlacementTask::ExecuteVM()
   // Execute bytecode
   if (pOutput->m_pByteCode != nullptr)
   {
-    PLASMA_PROFILE_SCOPE("ExecuteVM");
+    PL_PROFILE_SCOPE("ExecuteVM");
 
     plUInt32 uiNumInstances = m_InputPoints.GetCount();
     m_Density.SetCountUninitialized(uiNumInstances);
@@ -165,19 +165,18 @@ void PlacementTask::ExecuteVM()
     }
 
     // Execute expression bytecode
-    if (m_VM.Execute(*(pOutput->m_pByteCode), inputs, outputs, uiNumInstances, m_pData->m_GlobalData).Failed())
+    if (m_VM.Execute(*(pOutput->m_pByteCode), inputs, outputs, uiNumInstances, m_pData->m_GlobalData, plExpressionVM::Flags::BestPerformance).Failed())
     {
       return;
     }
 
     // Test density against point threshold and fill remaining input point data from expression
-    float fObjectCount = static_cast<float>(pOutput->m_ObjectsToPlace.GetCount());
     const Pattern* pPattern = pOutput->m_pPattern;
     for (plUInt32 i = 0; i < uiNumInstances; ++i)
     {
       auto& inputPoint = m_InputPoints[i];
       const plUInt32 uiPointIndex = inputPoint.m_uiPointIndex;
-      const float fThreshold = pPattern->m_Points[uiPointIndex].m_fThreshold;
+      const float fThreshold = pPattern->m_Points[uiPointIndex].threshold;
 
       if (m_Density[i] >= fThreshold)
       {
@@ -191,7 +190,7 @@ void PlacementTask::ExecuteVM()
     return;
   }
 
-  PLASMA_PROFILE_SCOPE("Construct final transforms");
+  PL_PROFILE_SCOPE("Construct final transforms");
 
   m_OutputTransforms.SetCountUninitialized(m_ValidPoints.GetCount());
 
@@ -224,25 +223,23 @@ void PlacementTask::ExecuteVM()
 
     plSimdVec4f random = plSimdRandom::FloatMinMax(plSimdVec4i(placementPoint.m_uiPointIndex), vMinValue, vMaxValue, seed);
 
-    plSimdVec4f offset = plSimdVec4f::ZeroVector();
+    plSimdVec4f offset = plSimdVec4f::MakeZero();
     offset.SetZ(random.y());
     placementTransform.m_Transform.m_Position = plSimdConversion::ToVec3(placementPoint.m_vPosition) + offset;
 
     plSimdVec4f yaw = plSimdVec4f(random.x());
     plSimdVec4f roundedYaw = (yaw.CompDiv(vYawRotationSnap) + vHalf).Floor().CompMul(vYawRotationSnap);
-    yaw = plSimdVec4f::Select(vYawRotationSnap == plSimdVec4f::ZeroVector(), yaw, roundedYaw);
+    yaw = plSimdVec4f::Select(vYawRotationSnap == plSimdVec4f::MakeZero(), yaw, roundedYaw);
 
-    plSimdQuat qYawRot;
-    qYawRot.SetFromAxisAndAngle(vUp, yaw.x());
+    plSimdQuat qYawRot = plSimdQuat::MakeFromAxisAndAngle(vUp, yaw.x());
     plSimdVec4f vNormal = plSimdConversion::ToVec3(placementPoint.m_vNormal);
-    plSimdQuat qToNormalRot;
-    qToNormalRot.SetShortestRotation(vUp, plSimdVec4f::Lerp(vUp, vNormal, vAlignToNormal));
+    plSimdQuat qToNormalRot = plSimdQuat::MakeShortestRotation(vUp, plSimdVec4f::Lerp(vUp, vNormal, vAlignToNormal));
     placementTransform.m_Transform.m_Rotation = qToNormalRot * qYawRot;
 
     plSimdVec4f scale = plSimdVec4f(plMath::Clamp(placementPoint.m_fScale, 0.0f, 1.0f));
     placementTransform.m_Transform.m_Scale = plSimdVec4f::Lerp(vMinScale, vMaxScale, scale);
 
-    placementTransform.m_ObjectColor = plColor::ZeroColor();
+    placementTransform.m_ObjectColor = plColor::MakeZero();
     placementTransform.m_uiPointIndex = placementPoint.m_uiPointIndex;
     placementTransform.m_uiObjectIndex = placementPoint.m_uiObjectIndex;
     placementTransform.m_bHasValidColor = false;

@@ -22,7 +22,7 @@ plResult plTypeScriptBinding::Init_Random()
   m_Duk.RegisterGlobalFunction("__CPP_RNG_DoubleMinMax", __CPP_RNG_Get2, 2, 3);
   m_Duk.RegisterGlobalFunction("__CPP_RNG_DoubleVariance", __CPP_RNG_Get2, 2, 4);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static int __CPP_RNG_Get0(duk_context* pDuk)
@@ -45,10 +45,10 @@ static int __CPP_RNG_Get0(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
 }
 
 static int __CPP_RNG_Get1(duk_context* pDuk)
@@ -67,10 +67,10 @@ static int __CPP_RNG_Get1(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
 }
 
 static int __CPP_RNG_Get2(duk_context* pDuk)
@@ -101,8 +101,8 @@ static int __CPP_RNG_Get2(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
 }

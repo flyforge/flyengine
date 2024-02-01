@@ -9,11 +9,9 @@
 ///
 /// Components of this type should be managed by an plSettingsComponentManager, which makes it easy to query for the one instance
 /// in the world.
-///
-///
-class PLASMA_CORE_DLL plSettingsComponent : public plComponent
+class PL_CORE_DLL plSettingsComponent : public plComponent
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSettingsComponent, plComponent);
+  PL_ADD_DYNAMIC_REFLECTION(plSettingsComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plSettingsComponent

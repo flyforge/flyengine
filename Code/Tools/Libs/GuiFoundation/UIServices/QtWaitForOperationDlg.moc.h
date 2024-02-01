@@ -8,12 +8,12 @@
 class QWinTaskbarProgress;
 class QWinTaskbarButton;
 
-class PLASMA_GUIFOUNDATION_DLL plQtWaitForOperationDlg : public QDialog, public Ui_QtWaitForOperationDlg
+class PL_GUIFOUNDATION_DLL plQtWaitForOperationDlg : public QDialog, public Ui_QtWaitForOperationDlg
 {
   Q_OBJECT
 
 public:
-  plQtWaitForOperationDlg(QWidget* parent);
+  plQtWaitForOperationDlg(QWidget* pParent);
   ~plQtWaitForOperationDlg();
 
   plDelegate<bool()> m_OnIdle;

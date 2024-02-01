@@ -9,16 +9,16 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSpatialAnchorComponent, 2, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plSpatialAnchorComponent, 2, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSpatialAnchorComponent::plSpatialAnchorComponent() = default;
@@ -34,17 +34,17 @@ plSpatialAnchorComponent::~plSpatialAnchorComponent()
   }
 }
 
-void plSpatialAnchorComponent::SerializeComponent(plWorldWriter& stream) const
+void plSpatialAnchorComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  plStreamWriter& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  plStreamWriter& s = inout_stream.GetStream();
 }
 
-void plSpatialAnchorComponent::DeserializeComponent(plWorldReader& stream)
+void plSpatialAnchorComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
   if (uiVersion == 1)
   {
     plString sAnchorName;
@@ -63,10 +63,10 @@ plResult plSpatialAnchorComponent::RecreateAnchorAt(const plTransform& position)
     }
 
     m_AnchorID = pXR->CreateAnchor(position);
-    return m_AnchorID.IsInvalidated() ? PLASMA_FAILURE : PLASMA_SUCCESS;
+    return m_AnchorID.IsInvalidated() ? PL_FAILURE : PL_SUCCESS;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSpatialAnchorComponent::Update()
@@ -100,4 +100,4 @@ void plSpatialAnchorComponent::OnSimulationStarted()
   }
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_SpatialAnchorComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_SpatialAnchorComponent);

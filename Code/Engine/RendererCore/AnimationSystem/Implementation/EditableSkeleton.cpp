@@ -12,107 +12,107 @@
 #include <ozz/animation/runtime/skeleton.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonJointGeometryType, 1)
-PLASMA_ENUM_CONSTANTS(plSkeletonJointGeometryType::None, plSkeletonJointGeometryType::Capsule, plSkeletonJointGeometryType::Sphere, plSkeletonJointGeometryType::Box)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonJointGeometryType, 1)
+PL_ENUM_CONSTANTS(plSkeletonJointGeometryType::None, plSkeletonJointGeometryType::Capsule, plSkeletonJointGeometryType::Sphere, plSkeletonJointGeometryType::Box)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonBoneShape, 1, plRTTIDefaultAllocator<plEditableSkeletonBoneShape>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonBoneShape, 1, plRTTIDefaultAllocator<plEditableSkeletonBoneShape>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Geometry", plSkeletonJointGeometryType, m_Geometry),
-    PLASMA_MEMBER_PROPERTY("Offset", m_vOffset),
-    PLASMA_MEMBER_PROPERTY("Rotation", m_qRotation),
-    PLASMA_MEMBER_PROPERTY("Length", m_fLength)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.01f, 10.0f)),
-    PLASMA_MEMBER_PROPERTY("Width", m_fWidth)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 10.0f)),
-    PLASMA_MEMBER_PROPERTY("Thickness", m_fThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 10.0f)),
+    PL_ENUM_MEMBER_PROPERTY("Geometry", plSkeletonJointGeometryType, m_Geometry),
+    PL_MEMBER_PROPERTY("Offset", m_vOffset),
+    PL_MEMBER_PROPERTY("Rotation", m_qRotation),
+    PL_MEMBER_PROPERTY("Length", m_fLength)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.01f, 10.0f)),
+    PL_MEMBER_PROPERTY("Width", m_fWidth)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 10.0f)),
+    PL_MEMBER_PROPERTY("Thickness", m_fThickness)->AddAttributes(new plDefaultValueAttribute(0.05f), new plClampValueAttribute(0.01f, 10.0f)),
 
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonBoneCollider, 1, plRTTIDefaultAllocator<plEditableSkeletonBoneCollider>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonBoneCollider, 1, plRTTIDefaultAllocator<plEditableSkeletonBoneCollider>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Identifier", m_sIdentifier)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_ARRAY_MEMBER_PROPERTY("VertexPositions", m_VertexPositions)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_ARRAY_MEMBER_PROPERTY("TriangleIndices", m_TriangleIndices)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("Identifier", m_sIdentifier)->AddAttributes(new plHiddenAttribute()),
+    PL_ARRAY_MEMBER_PROPERTY("VertexPositions", m_VertexPositions)->AddAttributes(new plHiddenAttribute()),
+    PL_ARRAY_MEMBER_PROPERTY("TriangleIndices", m_TriangleIndices)->AddAttributes(new plHiddenAttribute()),
 
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonJoint, 2, plRTTIDefaultAllocator<plEditableSkeletonJoint>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeletonJoint, 2, plRTTIDefaultAllocator<plEditableSkeletonJoint>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Name", GetName, SetName)->AddAttributes(new plReadOnlyAttribute()),
-    PLASMA_MEMBER_PROPERTY("Transform", m_LocalTransform)->AddFlags(plPropertyFlags::Hidden)->AddAttributes(new plDefaultValueAttribute(plTransform::IdentityTransform())),
-    PLASMA_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetTranslationRO", m_vGizmoOffsetPositionRO)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetRotationRO", m_qGizmoOffsetRotationRO)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("LocalRotation", m_qLocalJointRotation),
-    PLASMA_ENUM_MEMBER_PROPERTY("JointType", plSkeletonJointType, m_JointType),
-    PLASMA_MEMBER_PROPERTY("Stiffness", m_fStiffness)->AddAttributes(new plDefaultValueAttribute(10.0f)),
-    PLASMA_MEMBER_PROPERTY("SwingLimitY", m_SwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
-    PLASMA_MEMBER_PROPERTY("SwingLimitZ", m_SwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
-    PLASMA_MEMBER_PROPERTY("TwistLimitHalfAngle", m_TwistLimitHalfAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(10), plAngle::Degree(170)), new plDefaultValueAttribute(plAngle::Degree(30))),
-    PLASMA_MEMBER_PROPERTY("TwistLimitCenterAngle", m_TwistLimitCenterAngle)->AddAttributes(new plClampValueAttribute(-plAngle::Degree(170), plAngle::Degree(170))),
+    PL_ACCESSOR_PROPERTY("Name", GetName, SetName)->AddAttributes(new plReadOnlyAttribute()),
+    PL_MEMBER_PROPERTY("Transform", m_LocalTransform)->AddFlags(plPropertyFlags::Hidden)->AddAttributes(new plDefaultValueAttribute(plTransform::MakeIdentity())),
+    PL_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetTranslationRO", m_vGizmoOffsetPositionRO)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY_READ_ONLY("GizmoOffsetRotationRO", m_qGizmoOffsetRotationRO)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("LocalRotation", m_qLocalJointRotation),
+    PL_ENUM_MEMBER_PROPERTY("JointType", plSkeletonJointType, m_JointType),
+    PL_MEMBER_PROPERTY("Stiffness", m_fStiffness)->AddAttributes(new plDefaultValueAttribute(10.0f)),
+    PL_MEMBER_PROPERTY("SwingLimitY", m_SwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
+    PL_MEMBER_PROPERTY("SwingLimitZ", m_SwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
+    PL_MEMBER_PROPERTY("TwistLimitHalfAngle", m_TwistLimitHalfAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(10), plAngle::MakeFromDegree(170)), new plDefaultValueAttribute(plAngle::MakeFromDegree(30))),
+    PL_MEMBER_PROPERTY("TwistLimitCenterAngle", m_TwistLimitCenterAngle)->AddAttributes(new plClampValueAttribute(-plAngle::MakeFromDegree(170), plAngle::MakeFromDegree(170))),
 
-    PLASMA_MEMBER_PROPERTY("OverrideSurface", m_bOverrideSurface),
-    PLASMA_MEMBER_PROPERTY("Surface", m_sSurfaceOverride)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
-    PLASMA_MEMBER_PROPERTY("OverrideCollisionLayer", m_bOverrideCollisionLayer),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayerOverride)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("OverrideSurface", m_bOverrideSurface),
+    PL_MEMBER_PROPERTY("Surface", m_sSurfaceOverride)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PL_MEMBER_PROPERTY("OverrideCollisionLayer", m_bOverrideCollisionLayer),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayerOverride)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
 
-    PLASMA_ARRAY_MEMBER_PROPERTY("Children", m_Children)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
-    PLASMA_ARRAY_MEMBER_PROPERTY("BoneShapes", m_BoneShapes),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Colliders", m_BoneColliders)->AddAttributes(new plContainerAttribute(false, false, false)),
+    PL_ARRAY_MEMBER_PROPERTY("Children", m_Children)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
+    PL_ARRAY_MEMBER_PROPERTY("BoneShapes", m_BoneShapes),
+    PL_ARRAY_MEMBER_PROPERTY("Colliders", m_BoneColliders)->AddAttributes(new plContainerAttribute(false, false, false)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plTransformManipulatorAttribute(nullptr, "LocalRotation", nullptr, "GizmoOffsetTranslationRO", "GizmoOffsetRotationRO"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeleton, 1, plRTTIDefaultAllocator<plEditableSkeleton>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditableSkeleton, 1, plRTTIDefaultAllocator<plEditableSkeleton>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("File", m_sSourceFile)->AddAttributes(new plFileBrowserAttribute("Select Mesh", plFileBrowserAttribute::MeshesWithAnimations)),
-    PLASMA_ENUM_MEMBER_PROPERTY("RightDir", plBasisAxis, m_RightDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveX)),
-    PLASMA_ENUM_MEMBER_PROPERTY("UpDir", plBasisAxis, m_UpDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
-    PLASMA_MEMBER_PROPERTY("FlipForwardDir", m_bFlipForwardDir),
-    PLASMA_MEMBER_PROPERTY("UniformScaling", m_fUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0001f, 10000.0f)),
-    PLASMA_ENUM_MEMBER_PROPERTY("BoneDirection", plBasisAxis, m_BoneDirection)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
-    PLASMA_MEMBER_PROPERTY("PreviewMesh", m_sPreviewMesh)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skinned", plDependencyFlags::None)),
-    PLASMA_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
-    PLASMA_MEMBER_PROPERTY("Surface", m_sSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
-    PLASMA_MEMBER_PROPERTY("MaxImpulse", m_fMaxImpulse)->AddAttributes(new plDefaultValueAttribute(100.f)),
+    PL_MEMBER_PROPERTY("File", m_sSourceFile)->AddAttributes(new plFileBrowserAttribute("Select Mesh", plFileBrowserAttribute::MeshesWithAnimations)),
+    PL_ENUM_MEMBER_PROPERTY("RightDir", plBasisAxis, m_RightDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveX)),
+    PL_ENUM_MEMBER_PROPERTY("UpDir", plBasisAxis, m_UpDir)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
+    PL_MEMBER_PROPERTY("FlipForwardDir", m_bFlipForwardDir),
+    PL_MEMBER_PROPERTY("UniformScaling", m_fUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0001f, 10000.0f)),
+    PL_ENUM_MEMBER_PROPERTY("BoneDirection", plBasisAxis, m_BoneDirection)->AddAttributes(new plDefaultValueAttribute((int)plBasisAxis::PositiveY)),
+    PL_MEMBER_PROPERTY("PreviewMesh", m_sPreviewMesh)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skinned", plDependencyFlags::None)),
+    PL_MEMBER_PROPERTY("CollisionLayer", m_uiCollisionLayer)->AddAttributes(new plDynamicEnumAttribute("PhysicsCollisionLayer")),
+    PL_MEMBER_PROPERTY("Surface", m_sSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PL_MEMBER_PROPERTY("MaxImpulse", m_fMaxImpulse)->AddAttributes(new plDefaultValueAttribute(100.f)),
 
-    PLASMA_ARRAY_MEMBER_PROPERTY("Children", m_Children)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
+    PL_ARRAY_MEMBER_PROPERTY("Children", m_Children)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plExposedBone, plNoBase, 1, plRTTIDefaultAllocator<plExposedBone>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plExposedBone, plNoBase, 1, plRTTIDefaultAllocator<plExposedBone>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sName),
-    PLASMA_MEMBER_PROPERTY("Parent", m_sParent),
-    PLASMA_MEMBER_PROPERTY("Transform", m_Transform),
+    PL_MEMBER_PROPERTY("Name", m_sName),
+    PL_MEMBER_PROPERTY("Parent", m_sParent),
+    PL_MEMBER_PROPERTY("Transform", m_Transform),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_DEFINE_CUSTOM_VARIANT_TYPE(plExposedBone);
+PL_DEFINE_CUSTOM_VARIANT_TYPE(plExposedBone);
 // clang-format on
 
 
@@ -151,7 +151,7 @@ void plEditableSkeleton::ClearJoints()
 {
   for (plEditableSkeletonJoint* pChild : m_Children)
   {
-    PLASMA_DEFAULT_DELETE(pChild);
+    PL_DEFAULT_DELETE(pChild);
   }
 
   m_Children.Clear();
@@ -222,7 +222,7 @@ void plEditableSkeleton::FillResourceDescriptor(plSkeletonResourceDescriptor& re
   {
     const plUInt16 idx = sb.AddJoint(pJoint->GetName(), pJoint->m_LocalTransform);
 
-    CreateJointsRecursive(sb, ref_desc, nullptr, pJoint, idx, plQuat::IdentityQuaternion(), ref_desc.m_RootTransform.GetAsMat4());
+    CreateJointsRecursive(sb, ref_desc, nullptr, pJoint, idx, plQuat::MakeIdentity(), ref_desc.m_RootTransform.GetAsMat4());
   }
 
   sb.BuildSkeleton(ref_desc.m_Skeleton);
@@ -235,9 +235,9 @@ static void BuildOzzRawSkeleton(const plEditableSkeletonJoint& srcJoint, ozz::an
   ref_dstJoint.transform.translation.x = srcJoint.m_LocalTransform.m_vPosition.x;
   ref_dstJoint.transform.translation.y = srcJoint.m_LocalTransform.m_vPosition.y;
   ref_dstJoint.transform.translation.z = srcJoint.m_LocalTransform.m_vPosition.z;
-  ref_dstJoint.transform.rotation.x = srcJoint.m_LocalTransform.m_qRotation.v.x;
-  ref_dstJoint.transform.rotation.y = srcJoint.m_LocalTransform.m_qRotation.v.y;
-  ref_dstJoint.transform.rotation.z = srcJoint.m_LocalTransform.m_qRotation.v.z;
+  ref_dstJoint.transform.rotation.x = srcJoint.m_LocalTransform.m_qRotation.x;
+  ref_dstJoint.transform.rotation.y = srcJoint.m_LocalTransform.m_qRotation.y;
+  ref_dstJoint.transform.rotation.z = srcJoint.m_LocalTransform.m_qRotation.z;
   ref_dstJoint.transform.rotation.w = srcJoint.m_LocalTransform.m_qRotation.w;
   ref_dstJoint.transform.scale.x = srcJoint.m_LocalTransform.m_vScale.x;
   ref_dstJoint.transform.scale.y = srcJoint.m_LocalTransform.m_vScale.y;
@@ -293,7 +293,7 @@ void plEditableSkeletonJoint::ClearJoints()
 {
   for (plEditableSkeletonJoint* pChild : m_Children)
   {
-    PLASMA_DEFAULT_DELETE(pChild);
+    PL_DEFAULT_DELETE(pChild);
   }
   m_Children.Clear();
 }
@@ -344,4 +344,4 @@ void plEditableSkeletonJoint::CopyPropertiesFrom(const plEditableSkeletonJoint* 
   m_uiCollisionLayerOverride = pJoint->m_uiCollisionLayerOverride;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_EditableSkeleton);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_EditableSkeleton);

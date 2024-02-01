@@ -13,7 +13,7 @@ class plWorld;
 class plProgress;
 class plTracerInterface;
 
-class PLASMA_BAKINGPLUGIN_DLL plBakingScene
+class PL_BAKINGPLUGIN_DLL plBakingScene
 {
 public:
   plResult Extract();
@@ -47,9 +47,9 @@ private:
   bool m_bIsBaked = false;
 };
 
-class PLASMA_BAKINGPLUGIN_DLL plBaking : public plBakingInterface
+class PL_BAKINGPLUGIN_DLL plBaking : public plBakingInterface
 {
-  PLASMA_DECLARE_SINGLETON_OF_INTERFACE(plBaking, plBakingInterface);
+  PL_DECLARE_SINGLETON_OF_INTERFACE(plBaking, plBakingInterface);
 
 public:
   plBaking();

@@ -13,7 +13,7 @@
 ///
 /// All shared information (positions, normals, texcoords) is stored using indices, so the information what is shared
 /// is preserved in the plOBJLoader object. For upload into a GPU the vertex information must be duplicated manually.
-class PLASMA_UTILITIES_DLL plOBJLoader
+class PL_UTILITIES_DLL plOBJLoader
 {
 public:
   /// \brief Stores the information for a vertex in a face.
@@ -59,7 +59,7 @@ public:
     plHybridArray<FaceVertex, 4> m_Vertices;
 
     /// Less-than operator is needed for sorting faces by material.
-    PLASMA_ALWAYS_INLINE bool operator<(const Face& rhs) const { return (m_uiMaterialID < rhs.m_uiMaterialID); }
+    PL_ALWAYS_INLINE bool operator<(const Face& rhs) const { return (m_uiMaterialID < rhs.m_uiMaterialID); }
   };
 
   /// \brief Clears all data. Call this before LoadOBJ() / LoadMTL(), if you want to reuse the loader object to load another OBJ file,
@@ -80,7 +80,7 @@ public:
 
   /// \brief Loads an OBJ file into this object. Adds all information to the existing data, so multiple OBJ files can be merged.
   ///
-  /// Returns PLASMA_FAILURE if the given file could not be found.
+  /// Returns PL_FAILURE if the given file could not be found.
   plResult LoadOBJ(const char* szFile, bool bIgnoreMaterials = false);
 
   /// \brief Loads and MTL file for material information.
@@ -88,7 +88,7 @@ public:
   /// You can load multiple MTL files to merge them into one object. You can load an MTL file before or after loading OBJ files
   /// the missing information will be filled out whenever it is available.
   ///
-  /// Returns PLASMA_FAILURE when the given file could not be found.
+  /// Returns PL_FAILURE when the given file could not be found.
   plResult LoadMTL(const char* szFile, const char* szMaterialBasePath = "");
 
 

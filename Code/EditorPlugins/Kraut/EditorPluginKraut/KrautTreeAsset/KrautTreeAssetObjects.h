@@ -9,11 +9,11 @@ struct plKrautAssetMaterial
   plString m_sMaterial;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plKrautAssetMaterial);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plKrautAssetMaterial);
 
 class plKrautTreeAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautTreeAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautTreeAssetProperties, plReflectedClass);
 
 public:
   plKrautTreeAssetProperties();

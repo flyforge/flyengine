@@ -8,7 +8,7 @@
 plParticleEffectHandle plParticleWorldModule::InternalCreateEffectInstance(const plParticleEffectResourceHandle& hResource, plUInt64 uiRandomSeed,
   bool bIsShared, plArrayPtr<plParticleEffectFloatParam> floatParams, plArrayPtr<plParticleEffectColorParam> colorParams)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plParticleEffectInstance* pInstance = nullptr;
 
@@ -31,10 +31,10 @@ plParticleEffectHandle plParticleWorldModule::InternalCreateEffectInstance(const
 plParticleEffectHandle plParticleWorldModule::InternalCreateSharedEffectInstance(
   const char* szSharedName, const plParticleEffectResourceHandle& hResource, plUInt64 uiRandomSeed, const void* pSharedInstanceOwner)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plStringBuilder fullName;
-  fullName.Format("{{0}}-{{1}}[{2}]", szSharedName, hResource.GetResourceID(), uiRandomSeed);
+  fullName.SetFormat("{{0}}-{{1}}[{2}]", szSharedName, hResource.GetResourceID(), uiRandomSeed);
 
   bool bExisted = false;
   auto it = m_SharedEffects.FindOrAdd(fullName, &bExisted);
@@ -52,7 +52,7 @@ plParticleEffectHandle plParticleWorldModule::InternalCreateSharedEffectInstance
     TryGetEffectInstance(it.Value(), pEffect);
   }
 
-  PLASMA_ASSERT_DEBUG(pEffect != nullptr, "Invalid effect pointer");
+  PL_ASSERT_DEBUG(pEffect != nullptr, "Invalid effect pointer");
   pEffect->AddSharedInstance(pSharedInstanceOwner);
 
   return it.Value();
@@ -63,7 +63,7 @@ plParticleEffectHandle plParticleWorldModule::CreateEffectInstance(const plParti
   const char* szSharedName, const void*& inout_pSharedInstanceOwner, plArrayPtr<plParticleEffectFloatParam> floatParams,
   plArrayPtr<plParticleEffectColorParam> colorParams)
 {
-  PLASMA_ASSERT_DEBUG(hResource.IsValid(), "Invalid Particle Effect resource handle");
+  PL_ASSERT_DEBUG(hResource.IsValid(), "Invalid Particle Effect resource handle");
 
   bool bIsShared = !plStringUtils::IsNullOrEmpty(szSharedName) && (inout_pSharedInstanceOwner != nullptr);
 
@@ -86,7 +86,7 @@ plParticleEffectHandle plParticleWorldModule::CreateEffectInstance(const plParti
 
 void plParticleWorldModule::DestroyEffectInstance(const plParticleEffectHandle& hEffect, bool bInterruptImmediately, const void* pSharedInstanceOwner)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plParticleEffectInstance* pInstance = nullptr;
   if (TryGetEffectInstance(hEffect, pInstance))
@@ -132,7 +132,7 @@ bool plParticleWorldModule::TryGetEffectInstance(const plParticleEffectHandle& h
 
 void plParticleWorldModule::UpdateEffects(const plWorldModule::UpdateContext& context)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   DestroyFinishedEffects();
   ReconfigureEffects();
@@ -158,7 +158,7 @@ void plParticleWorldModule::UpdateEffects(const plWorldModule::UpdateContext& co
 
 void plParticleWorldModule::DestroyFinishedEffects()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (plUInt32 i = 0; i < m_FinishingEffects.GetCount();)
   {
@@ -193,7 +193,7 @@ void plParticleWorldModule::DestroyFinishedEffects()
 
 void plParticleWorldModule::ReconfigureEffects()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto pEffect : m_EffectsToReconfigure)
   {
@@ -205,4 +205,4 @@ void plParticleWorldModule::ReconfigureEffects()
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleEffects);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleEffects);

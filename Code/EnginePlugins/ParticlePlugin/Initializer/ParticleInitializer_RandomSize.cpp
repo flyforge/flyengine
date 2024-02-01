@@ -11,19 +11,19 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomSize, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomSize>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomSize, 2, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomSize>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Size", m_Size)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizeCurve", GetSizeCurveFile, SetSizeCurveFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Curve")),
+    PL_MEMBER_PROPERTY("Size", m_Size)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizeCurve", GetSizeCurveFile, SetSizeCurveFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Curve")),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomSize, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomSize>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomSize, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomSize>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleInitializerFactory_RandomSize::GetInitializerType() const
@@ -60,24 +60,24 @@ const char* plParticleInitializerFactory_RandomSize::GetSizeCurveFile() const
   return m_hCurve.GetResourceID();
 }
 
-void plParticleInitializerFactory_RandomSize::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_RandomSize::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 2;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_hCurve;
-  stream << m_Size.m_Value;
-  stream << m_Size.m_fVariance;
+  inout_stream << m_hCurve;
+  inout_stream << m_Size.m_Value;
+  inout_stream << m_Size.m_fVariance;
 }
 
-void plParticleInitializerFactory_RandomSize::Load(plStreamReader& stream)
+void plParticleInitializerFactory_RandomSize::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_hCurve;
-  stream >> m_Size.m_Value;
-  stream >> m_Size.m_fVariance;
+  inout_stream >> m_hCurve;
+  inout_stream >> m_Size.m_Value;
+  inout_stream >> m_Size.m_fVariance;
 }
 
 
@@ -88,7 +88,7 @@ void plParticleInitializer_RandomSize::CreateRequiredStreams()
 
 void plParticleInitializer_RandomSize::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Random Size");
+  PL_PROFILE_SCOPE("PFX: Random Size");
 
   plFloat16* pSize = m_pStreamSize->GetWritableData<plFloat16>();
 
@@ -142,7 +142,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->InlineProperty("Size").IgnoreResult();
   }
@@ -150,4 +150,4 @@ public:
 
 plParticleInitializerFactory_RandomSize_1_2 g_plParticleInitializerFactory_RandomSize_1_2;
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomSize);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomSize);

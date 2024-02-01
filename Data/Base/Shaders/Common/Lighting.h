@@ -4,13 +4,11 @@
 #error "Functions in Lighting.h are only for QUALITY_NORMAL shading quality. Todo: Split up file"
 #endif
 
-#include <Shaders/Common/Common.h>
 #include <Shaders/Common/GlobalConstants.h>
 #include <Shaders/Common/LightData.h>
 #include <Shaders/Common/AmbientCubeBasis.h>
 #include <Shaders/Common/BRDF.h>
-#include <Shaders/Common/Utils.h>
-#include <Shaders/Common/AreaLight.h>
+#include <Shaders/Common/AdvancedBRDF.h>
 
 Texture2DArray SSAOTexture;
 
@@ -43,16 +41,14 @@ plPerClusterData GetClusterData(float3 screenPosition)
   return perClusterDataBuffer[clusterIndex];
 }
 
-float DistanceAttenuation(float sqrDistance, float invSqrAttRadius , float falloffExponent)
+float DistanceAttenuation(float sqrDistance, float invSqrAttRadius)
 {
+  float attenuation = (1.0 / max(sqrDistance, 0.01 * 0.01)); // min distance is 1 cm;
+
   float factor = sqrDistance * invSqrAttRadius;
-
   float smoothFactor = saturate(1.0 - factor * factor);
-  smoothFactor *= smoothFactor;
 
-  float attenuation = 1.0 / (max(sqrDistance, 0.01*0.01));
-  attenuation *= smoothFactor;
-  return pow(attenuation, falloffExponent);
+  return attenuation * smoothFactor * smoothFactor;
 }
 
 float SpotAttenuation(float3 normalizedLightVector, float3 lightDir, float2 spotParams)
@@ -83,40 +79,6 @@ float SampleSceneDepth(float2 screenPosition)
   return LinearizeZBufferDepth(depthFromZBuffer);
 }
 
-float GetDepth(uint2 position)
-{
-  position = clamp(position, uint2(0, 0), uint2(ViewportSize.xy) - uint2(1, 1));
-  return SceneDepth.SampleLevel(PointClampSampler, float3(position.xy * ViewportSize.zw, s_ActiveCameraEyeIndex), 0.0f).r;
-}
-
-float GetDepth(float2 uv)
-{
-  // effects like screen space shadows, can get artefacts if a point sampler is used
-  return SceneDepth.SampleLevel(LinearClampSampler, float3(uv * ViewportSize.zw, s_ActiveCameraEyeIndex), 0.0f).r;
-}
-
-float GetLinearDepth(float z, float near, float far)
-{
-  float z_b = z;
-  float z_n = 2.0f * z_b - 1.0f;
-  return 2.0f * far * near / (near + far - z_n * (near - far));
-}
-
-float GetLinearDepth(float z)
-{
-  return GetLinearDepth(z, ClipPlanes.x, ClipPlanes.y);
-}
-
-float GetLinearDepth(uint2 pos)
-{
-  return GetLinearDepth(GetDepth(pos));
-}
-
-float GetLinearDepth(float2 uv)
-{
-  return GetLinearDepth(GetDepth(uv));
-}
-
 float3 SampleScenePosition(float2 screenPosition)
 {
   float2 normalizedScreenPosition = screenPosition.xy * ViewportSize.zw;
@@ -136,13 +98,12 @@ float DepthFade(float3 screenPosition, float fadeDistance)
 
 float SampleSSAO(float3 screenPosition)
 {
-  const float2 offsets[] =
-  {
+  const float2 offsets[] = {
     float2(0, 0),
     float2(0, 1),
     float2(1, 0),
     float2(0, -1),
-    float2(-1, 0)
+    float2(-1, 0),
   };
 
 #if 0
@@ -182,16 +143,17 @@ uint GetPointShadowFaceIndex(float3 dir)
 
 float SampleShadow(float3 shadowPosition, float2x2 randomRotation, float penumbraSize)
 {
-  const float2 offsets[] =
-  {
-    float2(-0.7071,  0.7071),
-    float2(-0.0000, -0.8750),
-    float2( 0.5303,  0.5303),
-    float2(-0.6250, -0.0000),
-    float2( 0.3536, -0.3536),
-    float2(-0.0000,  0.3750),
-    float2(-0.1768, -0.1768),
-    float2( 0.1250,  0.0000),
+  // Simple spiral pattern with every other sample flipped around the origin,
+  // source: https://c-core-games.com/Generator/SpiralPatterns.html?p=O&n=8
+  const float2 offsets[] = {
+    {0.1250f, 0.0000f},
+    {-0.1768f, -0.1768f},
+    {0.0000f, 0.3750f},
+    {0.3536f, -0.3536f},
+    {-0.6250f, 0.0000f},
+    {0.5303f, 0.5303f},
+    {-0.0000f, -0.8750f},
+    {-0.7071f, 0.7071f},
   };
 
 #if 0
@@ -214,14 +176,13 @@ float SampleShadow(float3 shadowPosition, float2x2 randomRotation, float penumbr
 float CalculateShadowTerm(plMaterialData matData, float3 lightVector, float distanceToLight, uint type,
   uint shadowDataOffset, float noise, float2x2 randomRotation, out float subsurfaceShadow, out float3 debugColor)
 {
-  float3 debugColors[] =
-  {
+  float3 debugColors[] = {
     float3(1, 0, 0),
     float3(1, 1, 0),
     float3(0, 1, 0),
     float3(0, 1, 1),
     float3(0, 0, 1),
-    float3(1, 0, 1)
+    float3(1, 0, 1),
   };
 
   float4 shadowParams = shadowDataBuffer[GET_SHADOW_PARAMS_INDEX(shadowDataOffset)];
@@ -310,9 +271,6 @@ float CalculateShadowTerm(plMaterialData matData, float3 lightVector, float dist
     debugColor = debugColors[matrixIndex];
   }
 
-  float shadowTerm = 1.0f;
-  subsurfaceShadow = 1.0f;
-
   [branch]
   if (fadeOut > 0.0f)
   {
@@ -321,75 +279,19 @@ float CalculateShadowTerm(plMaterialData matData, float3 lightVector, float dist
 
     shadowPosition.xyz /= shadowPosition.w;
 
-    shadowTerm = SampleShadow(shadowPosition.xyz, randomRotation, penumbraSize);
+    float shadowTerm = SampleShadow(shadowPosition.xyz, randomRotation, penumbraSize);
 
     // fade out
     shadowTerm = lerp(1.0f, shadowTerm, fadeOut);
 
     subsurfaceShadow = shadowTerm;
+
+    return shadowTerm;
   }
 
-  return shadowTerm;
+  subsurfaceShadow = 0.0f;
+  return 1.0f;
 }
-
-static const uint g_sss_max_steps = 12;                          // Max ray steps, affects quality and performance.
-static const float g_sss_ray_max_distance = 0.1f;               // Max shadow length, longer shadows are less accurate.
-static const float g_sss_thickness = 0.05f;                      // Depth testing thickness.
-static const float g_sss_max_delta_from_original_depth = 0.005f; // The maximum allowed depth deviation from the original pixel (a big deviation decreased the probabilty that the pixel is the occluder).
-static const float g_sss_step_length = g_sss_ray_max_distance / (float)g_sss_max_steps;
-
-
-float ScreenSpaceShadows(plMaterialData matData, float3 lightVector, float3 screenPos)
-{
-  // Compute ray position and direction (in view-space)
-  float3 ray_pos = WorldToView(matData.worldPosition);
-  float3 ray_dir = WorldToView(lightVector, false);
-                                                                     
-  // Compute ray step
-  float3 ray_step = ray_dir * g_sss_step_length;
-
-  // Offset starting position with temporal interleaved gradient noise
-  float offset = InterleavedGradientNoise(screenPos.xy * ViewportSize.xy);
-  ray_pos += ray_step * offset;
-
-  // Save the original depth
-  float depth_original = screenPos.z;
-
-  // Ray march towards the light
-  float occlusion = 0.0;
-  float2 ray_uv = 0.0f;
-  for (uint i = 0; i < g_sss_max_steps; i++)
-  {
-    // Step the ray
-    ray_pos += ray_step;
-    ray_uv = ViewToUv(ray_pos);
-
-    // Ensure the UV coordinates are inside the screen
-    if (!is_saturated(ray_uv))
-      return 1.0f;
-
-    // Compute the difference between the ray's and the camera's depth
-    float depth_z = GetLinearDepth(ray_uv);
-    float depth_delta = ray_pos.z - depth_z;
-
-    bool can_the_camera_see_the_ray = (depth_delta > 0.0f) && (depth_delta < g_sss_thickness);
-    bool occluded_by_the_original_pixel = abs(ray_pos.z - depth_original) < g_sss_max_delta_from_original_depth;
-    if (can_the_camera_see_the_ray && occluded_by_the_original_pixel)
-    {
-      // Mark as occluded
-      occlusion = 1.0f;
-
-      // Fade out as we approach the edges of the screen
-      occlusion *= ScreenFade(ray_uv);
-
-      return 0.0f;
-    }
-  }
-
-  // Convert to visibility
-  return 1.0f - occlusion;
-}
-
 
 // Frostbite course notes
 float computeDistanceBaseRoughness(float distIntersectionToShadedPoint, float distIntersectionToProbeCenter, float linearRoughness)
@@ -402,7 +304,7 @@ float computeDistanceBaseRoughness(float distIntersectionToShadedPoint, float di
   return lerp(newLinearRoughness, linearRoughness, linearRoughness);
 }
 
-float3 ComputeReflection(in float3 worldPosition, in float3 worldNormal, in float roughnessLinear,float3 viewVector, plPerClusterData clusterData, bool diffuse = false)
+float3 ComputeReflection(float3 worldPosition, float3 worldNormal, float roughnessLinear, float3 viewVector, plPerClusterData clusterData)
 {
   uint firstItemIndex = clusterData.offset;
   uint lastItemIndex = firstItemIndex + GET_PROBE_INDEX(clusterData.counts);
@@ -532,18 +434,7 @@ float3 ComputeReflection(in float3 worldPosition, in float3 worldNormal, in floa
     // Sample the cube map
     const float4 coord = float4(reflectionDir, index);
     const float mipLevel = MipLevelFromRoughness(roughness, NUM_REFLECTION_MIPS);
-    float4 indirectLight = ReflectionSpecularTexture.SampleLevel(LinearSampler, coord, mipLevel);
-
-    if (diffuse)
-    {
-      float3 dirToProbe = cubemapPositionWS - worldPosition;
-      float pDotN = dot(dirToProbe, worldNormal);
-   
-      indirectLight *= pDotN;
-      indirectLight = saturate(indirectLight);
-    }
-
-    indirectLight *= alpha;
+    float4 indirectLight = ReflectionSpecularTexture.SampleLevel(LinearSampler, coord, mipLevel) * alpha;
 
     // Accumulate contribution.
     const float remainingWeight = 1.0f - ref.w;
@@ -563,10 +454,15 @@ float3 ComputeReflection(in float3 worldPosition, in float3 worldNormal, in floa
   return ref.rgb;
 }
 
+float3 ComputeReflection(plMaterialData matData, float3 viewVector, plPerClusterData clusterData)
+{
+  return ComputeReflection(matData.worldPosition, matData.worldNormal, matData.roughness, viewVector, clusterData);
+}
+
+
 AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clusterData, float3 screenPosition, bool applySSAO)
 {
   float3 viewVector = normalize(GetCameraPosition() - matData.worldPosition);
-  float3 reflectionVector = reflect(viewVector, matData.worldNormal);
 
   AccumulatedLight totalLight = InitializeLight(0.0f, 0.0f);
 
@@ -586,7 +482,7 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
     plPerLightData lightData = perLightDataBuffer[lightIndex];
     uint type = (lightData.colorAndType >> 24) & 0xFF;
 
-    float3 lightDir = normalize(unpack(RGB10ToFloat3(lightData.direction)));
+    float3 lightDir = normalize(RGB10ToFloat3(lightData.direction) * 2.0f - 1.0f);
     float3 lightVector = lightDir;
     float attenuation = 1.0f;
     float distanceToLight = 1.0f;
@@ -595,9 +491,10 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
     if (type != LIGHT_TYPE_DIR)
     {
       lightVector = lightData.position - matData.worldPosition;
-      float sqrDistance = dot(lightData.position - matData.worldPosition, lightVector);
+      float sqrDistance = dot(lightVector, lightVector);
 
-      attenuation = DistanceAttenuation(sqrDistance, lightData.invSqrAttRadius, lightData.falloff);
+      attenuation = DistanceAttenuation(sqrDistance, lightData.invSqrAttRadius);
+
       distanceToLight = sqrDistance * lightData.invSqrAttRadius;
       lightVector *= rsqrt(sqrDistance);
 
@@ -631,54 +528,27 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
           shadowDataOffset, noise, randomRotation, subsurfaceShadow, debugColor);
       }
 
-      // TODO: FIX ME
-      //attenuation *= ScreenSpaceShadows(matData, lightVector, screenPosition);
-
-      float3 lightColor = RGB8ToFloat3(lightData.colorAndType) * lightData.intensity;
+      attenuation *= lightData.intensity;
+      float3 lightColor = RGB8ToFloat3(lightData.colorAndType);
 
       // debug cascade or point face selection
       #if 0
         lightColor = lerp(1.0f, debugColor, 0.5f);
       #endif
 
-      [branch]
-      if (type != LIGHT_TYPE_DIR)
-      {
-        [branch]
-        if (lightData.length > 0)
-        {
-          float luminanceMultiplier = 1.0;
-          float luminanceModifier = 0.0f;
-          AccumulateLight(totalLight, TubeLightShading(lightData, matData, lightVector, viewVector, lightData.specularIntensity, attenuation, luminanceMultiplier, luminanceModifier), lightColor * attenuation * shadowTerm + luminanceMultiplier * luminanceModifier);
-        }
-        else if(lightData.size > 0)
-        {
-          float luminance = 0.0f;
-          AccumulateLight(totalLight, SphereLightShading(lightData, matData, lightVector, viewVector, lightData.specularIntensity, attenuation, luminance), lightColor * attenuation * shadowTerm + luminance);
+
+      AccumulateLight(totalLight, DefaultShadingNew(matData, lightVector, viewVector), lightColor * (attenuation * shadowTerm), lightData.specularMultiplier);
 
 
-        }
-        else
-        {
-          AccumulateLight(totalLight, DefaultShading(matData, lightVector, viewVector, lightData.specularIntensity), lightColor * attenuation * shadowTerm);
-
-
-        }
-      }
-      else
-      {
-        AccumulateLight(totalLight, DefaultShading(matData, lightVector, viewVector, lightData.specularIntensity), lightColor  * shadowTerm);
-
-//        #if defined(USE_MATERIAL_SUBSURFACE_COLOR)
-//          AccumulateLight(totalLight, SubsurfaceShading(matData, lightVector, viewVector), lightColor);
-//        #endif
-      }
-#if defined(USE_MATERIAL_SUBSURFACE_COLOR)
-      AccumulateLight(totalLight, SubsurfaceShading(matData, lightVector, viewVector), lightColor * attenuation * shadowTerm);
-#endif
-
+      #if defined(USE_MATERIAL_SUBSURFACE_COLOR)
+        AccumulateLight(totalLight, SubsurfaceShading(matData, lightVector, viewVector), lightColor * (attenuation * subsurfaceShadow));        
+      #endif
     }
   }
+  
+  // normalize brdf
+  totalLight.diffuseLight *= (1.0f / PI);
+  totalLight.specularLight *= (1.0f / PI);
 
   float occlusion = matData.occlusion;
 
@@ -688,56 +558,43 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
     occlusion *= ssao;
   }
 
-  float NdotV = saturate(dot(matData.worldNormal, viewVector));
-
-  // Calculate Fresnel term for ambient lighting.
-  // Since we use pre-filtered cubemap(s) and irradiance is coming from many directions
-  // use NdotV instead of angle with light's half-vector.
-  // See: https://seblagarde.wordpress.com/2011/08/17/hello-world/
-  float3 F = F_Schlick_Roughness(matData.specularColor, NdotV, matData.roughness);
-
-  // Get diffuse contribution factor (as with direct lighting).
-  float3 kD = ComputeDiffuseEnergy(F, matData.metalness);
-  float3 kS =  F;
-
-  // Calculate specular contribution.
-
-#if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
-  float3 kN = 1.0f;
-
-  if (matData.clearcoat != 0)
-  {
-    // Clear coat layer has fixed IOR = 1.5 and transparent => F0 = (1.5 - 1)^2 / (1.5 + 1)^2 = 0.04
-    kN *= F_Schlick_Roughness(0.04f, saturate(dot(matData.clearcoatNormal, viewVector)), matData.clearcoatRoughness) * matData.clearcoat;
-    kD *= 1.0f - kN;
-  }
-#endif
-
-  float3 indirectDiffuse;
-  if (DiffuseFromProbes)
-  {
-    indirectDiffuse = (ComputeReflection(matData.worldPosition, matData.worldNormal, 1.0, viewVector, clusterData, true) + EvaluateAmbientCube(SkyIrradianceTexture, SkyIrradianceIndex, matData.worldNormal).rgb) /2.0f;
-  }
-  else
-  {
-    indirectDiffuse = EvaluateAmbientCube(SkyIrradianceTexture, SkyIrradianceIndex, matData.worldNormal).rgb;
-  }
   // sky light in ambient cube basis
-  indirectDiffuse *= kD;
-  totalLight.diffuseLight += matData.diffuseColor * indirectDiffuse;
+  float3 skyLight = EvaluateAmbientCube(SkyIrradianceTexture, SkyIrradianceIndex, matData.worldNormal).rgb;
+
+
+  float3 kD = 1.0;
+
+  #if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
+    float3 kN = 1.0f;
+
+    if (matData.clearcoat != 0)
+    {
+      // Clear coat layer has fixed IOR = 1.5 and transparent => F0 = (1.5 - 1)^2 / (1.5 + 1)^2 = 0.04
+      kN *= F_SchlickRoughness(0.04f, saturate(dot(matData.clearcoatNormal, viewVector)), matData.clearcoatRoughness) * matData.clearcoat;
+      kD *= 1.0f - kN;
+    }
+  #endif
+
+  totalLight.diffuseLight += matData.diffuseColor * (skyLight * kD) * occlusion;
 
   // indirect specular
-  totalLight.specularLight +=  F *  ComputeReflection(matData.worldPosition, matData.worldNormal, matData.roughness, viewVector, clusterData);
+  totalLight.specularLight += matData.specularColor * ComputeReflection(matData, viewVector, clusterData) ;
 
-#if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
-  if (matData.clearcoat != 0)
-  {
-    totalLight.specularLight += kN * ComputeReflection(matData.worldPosition, matData.clearcoatNormal, matData.clearcoatRoughness, viewVector, clusterData);
-  }
-#endif
+  #if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
+    if (matData.clearcoat != 0)
+    {
+      totalLight.specularLight += kN * ComputeReflection(matData.worldPosition, matData.clearcoatNormal, matData.clearcoatRoughness, viewVector, clusterData);
+    }
+  #endif
 
-  totalLight.diffuseLight *= occlusion;
   totalLight.specularLight *= occlusion;
+  //totalLight.specularLight += ComputeReflection(matData, viewVector, clusterData);
+
+  // enable once we have proper sky visibility
+  /*#if defined(USE_MATERIAL_SUBSURFACE_COLOR)
+    skyLight = EvaluateAmbientCube(SkyIrradianceTexture, SkyIrradianceIndex, -matData.worldNormal).rgb;
+    totalLight.diffuseLight += matData.subsurfaceColor * skyLight * occlusion;
+  #endif*/
 
   return totalLight;
 }
@@ -790,12 +647,10 @@ void ApplyDecals(inout plMaterialData matData, plPerClusterData clusterData, uin
       
       float2 decalPositionDdx = mul((float3x3)worldToDecalMatrix, worldPosDdx).xy;
       float2 decalPositionDdy = mul((float3x3)worldToDecalMatrix, worldPosDdy).xy;
-
-
+      
+      float3 decalWorldNormal;
       if (decalFlags & DECAL_USE_NORMAL)
       {
-        float3 decalWorldNormal = float3(0,0,0);
-
         float2 normalAtlasScale = RG16FToFloat2(decalData.normalAtlasScale);
         float2 normalAtlasOffset = RG16FToFloat2(decalData.normalAtlasOffset);
         float2 normalAtlasUv = decalPosition.xy * normalAtlasScale + normalAtlasOffset;
@@ -818,8 +673,6 @@ void ApplyDecals(inout plMaterialData matData, plPerClusterData clusterData, uin
           decalWorldNormal += decalTangentNormal.y * normalize(worldToDecalMatrix._m10_m11_m12);
           decalWorldNormal -= decalTangentNormal.z * normalize(worldToDecalMatrix._m20_m21_m22);
         }
-
-        matData.worldNormal = lerp(matData.worldNormal, decalWorldNormal, fade);
       }
       
       float2 baseAtlasScale = RG16FToFloat2(decalData.baseColorAtlasScale);
@@ -831,6 +684,11 @@ void ApplyDecals(inout plMaterialData matData, plPerClusterData clusterData, uin
       float4 decalBaseColor = RGBA8ToFloat4(decalData.baseColor);
       decalBaseColor *= DecalAtlasBaseColorTexture.SampleGrad(DecalAtlasSampler, baseAtlasUv, baseAtlasDdx, baseAtlasDdy);
       fade *= decalBaseColor.a;
+      
+      if (decalFlags & DECAL_USE_NORMAL)
+      {
+        matData.worldNormal = lerp(matData.worldNormal, decalWorldNormal, fade);
+      }
       
       float decalMetallic = 0.0f;
       if (decalFlags & DECAL_USE_ORM)
@@ -880,40 +738,6 @@ void ApplyDecals(inout plMaterialData matData, plPerClusterData clusterData, uin
   }
   
   matData.worldNormal = normalize(matData.worldNormal);
-}
-
-float4 Blur(float3 worldPosition, float radius, float strength) 
-{
-
-  float4 screenPosition = mul(GetWorldToScreenMatrix(), float4(worldPosition, 1.0f));
-  screenPosition.xy /= screenPosition.w;
-  
-  float2 samplePosition = screenPosition.xy * float2(0.5f, -0.5f) + 0.5f;
-
-  float width, height, elements, levels;
-  SceneColor.GetDimensions(0, width, height, elements, levels);
-
-  float2 vPixelSize = float2(1.0f / width, 1.0f / height);
-  
-  float4 color = 0;
-  float weightSum = 0;
-  [loop]
-  for (int i = -radius; i <= radius; i++)
-  {
-      [loop]
-      for (int j = -radius; j <= radius; j++)
-      {
-        float2 offset = float2(i, j) * vPixelSize;
-        color += SceneColor.Sample(SceneColorSampler, float3(samplePosition + offset, s_ActiveCameraEyeIndex));
-        weightSum += 1;
-      }
-  }
-
-  float4 originalColor = SceneColor.Sample(SceneColorSampler, float3(samplePosition, s_ActiveCameraEyeIndex));
-
-  color /= weightSum;
-  color = lerp(originalColor, color, saturate(strength));
-  return color;
 }
 
 float4 CalculateRefraction(float3 worldPosition, float3 worldNormal, float IoR, float thickness, float3 tintColor, float newOpacity = 1.0f)
@@ -979,131 +803,4 @@ float3 ApplyFog(float3 color, float3 worldPosition)
   }
 
   return color;
-}
-
-#define G_SCATTERING 0.66
-float ComputeScattering(float lightDotView)
-{
-	float result = 1.0f - G_SCATTERING * G_SCATTERING;
-	result /= (4.0f * PI * pow(1.0f + G_SCATTERING * G_SCATTERING - (2.0f * G_SCATTERING) * lightDotView, 1.5f));
-	return result;
-}
-
-// TODO:
-// - Expose the scattering parameters
-// - Add point light support
-// - add spot light support
-// - effect the skybox
-
-float3 ApplyFogVolumetric(plPerClusterData clusterData, float3 color, float3 worldPosition, float2 uv)
-{
-  uint firstItemIndex = clusterData.offset;
-  uint lastItemIndex = firstItemIndex + GET_LIGHT_INDEX(clusterData.counts);
-  float3 volumeticFog = 0;
-
-  [loop]
-  for (uint i = firstItemIndex; i < lastItemIndex; ++i)
-  {
-    uint itemIndex = clusterItemBuffer[i];
-    uint lightIndex = GET_LIGHT_INDEX(itemIndex);
-    plPerLightData lightData = perLightDataBuffer[lightIndex];
-    uint type = (lightData.colorAndType >> 24) & 0xFF;
-
-    float noise = InterleavedGradientNoise(uv);
-    float2 randomAngle; sincos(noise * 2.0f * PI, randomAngle.x, randomAngle.y);
-    float2x2 randomRotation = {randomAngle.x, -randomAngle.y, randomAngle.y, randomAngle.x};
-
-    [branch]
-    if (type == LIGHT_TYPE_DIR)
-    {
-      //Direction lights only make sense when shadows are enabled
-      [branch]
-      if (lightData.shadowDataOffset == 0xFFFFFFFF)
-      {
-        continue;
-      }
-      
-      float distance = 0;
-      float3 viewVector = -NormalizeAndGetLength(worldPosition - GetCameraPosition(), distance);
-
-      float marchedDistance = 0;
-	    float3 accumulation = 0;
-
-      const float3 lightDir = normalize(unpack(RGB10ToFloat3(lightData.direction)));
-      const float scattering = ComputeScattering(saturate(dot(lightDir, -viewVector)));
-
-      float3 rayEnd = GetCameraPosition();
-
-      const uint sampleCount = 16;
-	    const float stepSize = length(worldPosition - rayEnd) / sampleCount;
-      worldPosition = worldPosition + viewVector * min(stepSize * dither(uv), 10);
-
-      [loop]
-      for (uint i = 0; i < sampleCount; ++i)
-      {
-        bool valid = false;
-        uint matrixIndex = GET_WORLD_TO_LIGHT_MATRIX_INDEX(lightData.shadowDataOffset, 0);
-
-		    float3 shadow = 1;
-        float4 shadowParams = shadowDataBuffer[GET_SHADOW_PARAMS_INDEX(lightData.shadowDataOffset)];
-        float4 shadowPosition;
-
-        //float constantBias = shadowParams.y;
-        float penumbraSize = 0.01;//shadowParams.z;
-
-        // manual matrix multiplication because d3d compiler generates very inefficient code otherwise
-        shadowPosition.xyz = shadowDataBuffer[matrixIndex + 0].xyz * worldPosition.x + shadowDataBuffer[matrixIndex + 3].xyz;
-        shadowPosition.xyz += shadowDataBuffer[matrixIndex + 1].xyz * worldPosition.y;
-        shadowPosition.xyz += shadowDataBuffer[matrixIndex + 2].xyz * worldPosition.z;
-        shadowPosition.w = 1.0f;
-
-        float4 firstCascadePosition = shadowPosition;
-        float penumbraSizeScale = 1.0f;
-
-        float4 shadowParams2 = shadowDataBuffer[GET_SHADOW_PARAMS2_INDEX(lightData.shadowDataOffset)];
-        float2 threshold = float2(shadowParams2.x, 1.0f) - shadowParams2.yz;
-      
-        uint cascadeIndex = 0;
-        uint lastCascadeIndex = asuint(shadowParams.w);
-        while (cascadeIndex < lastCascadeIndex)
-        {
-          float4 cascadeScale = shadowDataBuffer[GET_CASCADE_SCALE_INDEX(lightData.shadowDataOffset, cascadeIndex)];
-          float4 cascadeOffset = shadowDataBuffer[GET_CASCADE_OFFSET_INDEX(lightData.shadowDataOffset, cascadeIndex)];
-          shadowPosition.xyz = firstCascadePosition.xyz * cascadeScale.xyz + cascadeOffset.xyz;
-          penumbraSizeScale = cascadeScale.x;
-
-          ++cascadeIndex;
-
-        }
-        //constantBias /= penumbraSizeScale;
-        float viewDistance = length(GetCameraPosition() - worldPosition);
-        penumbraSize = (penumbraSize + shadowParams2.w * viewDistance) * penumbraSizeScale;
-
-        float4 atlasScaleOffset = shadowDataBuffer[GET_ATLAS_SCALE_OFFSET_INDEX(lightData.shadowDataOffset, cascadeIndex)];
-        shadowPosition.xy = shadowPosition.xy * atlasScaleOffset.xy + atlasScaleOffset.zw;
-
-        //shadowPosition.z -= constantBias;
-        shadowPosition.xyz /= shadowPosition.w;
-
-        shadow *= SampleShadow(shadowPosition.xyz, randomRotation, penumbraSize);
-
-        shadow *= lightData.volumetricIntensity;
-        shadow *= scattering;
-
-        accumulation += shadow * RGB8ToFloat3(lightData.colorAndType) * lightData.intensity;
-
-        accumulation += FogDensity * FogColor.rgb;
-
-        marchedDistance += stepSize;
-        worldPosition = worldPosition + viewVector * stepSize;
-      }
-
-      accumulation /= sampleCount;
-
-      volumeticFog += max(0,  accumulation);
-    }
-  }
-
-
-  return color + volumeticFog;
 }

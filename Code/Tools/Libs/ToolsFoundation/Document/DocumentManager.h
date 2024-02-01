@@ -4,18 +4,18 @@
 #include <ToolsFoundation/Document/Document.h>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentManager : public plReflectedClass
+class PL_TOOLSFOUNDATION_DLL plDocumentManager : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentManager, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDocumentManager, plReflectedClass);
 
 public:
-  virtual ~plDocumentManager() {}
+  virtual ~plDocumentManager() = default;
 
   static const plHybridArray<plDocumentManager*, 16>& GetAllDocumentManagers() { return s_AllDocumentManagers; }
 
-  static plResult FindDocumentTypeFromPath(const char* szPath, bool bForCreation, const plDocumentTypeDescriptor*& out_pTypeDesc);
+  static plResult FindDocumentTypeFromPath(plStringView sPath, bool bForCreation, const plDocumentTypeDescriptor*& out_pTypeDesc);
 
-  plStatus CanOpenDocument(const char* szFilePath) const;
+  plStatus CanOpenDocument(plStringView sFilePath) const;
 
   /// \brief Creates a new document.
   /// \param szDocumentTypeName Document type to create. See plDocumentTypeDescriptor.
@@ -25,7 +25,7 @@ public:
   /// \param pOpenContext An generic context object. Allows for custom data to be passed along into the construction. E.g. inform a sub-document which main document it belongs to.
   /// \return Returns the error in case the operations failed.
   plStatus CreateDocument(
-    const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument, plBitflags<plDocumentFlags> flags = plDocumentFlags::None, const plDocumentObject* pOpenContext = nullptr);
+    plStringView sDocumentTypeName, plStringView sPath, plDocument*& out_pDocument, plBitflags<plDocumentFlags> flags = plDocumentFlags::None, const plDocumentObject* pOpenContext = nullptr);
 
   /// \brief Opens an existing document.
   /// \param szDocumentTypeName Document type to open. See plDocumentTypeDescriptor.
@@ -35,28 +35,28 @@ public:
   /// \param pOpenContext  An generic context object. Allows for custom data to be passed along into the construction. E.g. inform a sub-document which main document it belongs to.
   /// \return Returns the error in case the operations failed.
   /// \return Returns the error in case the operations failed.
-  plStatus OpenDocument(const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument,
+  plStatus OpenDocument(plStringView sDocumentTypeName, plStringView sPath, plDocument*& out_pDocument,
     plBitflags<plDocumentFlags> flags = plDocumentFlags::AddToRecentFilesList | plDocumentFlags::RequestWindow,
     const plDocumentObject* pOpenContext = nullptr);
-  virtual plStatus CloneDocument(const char* szPath, const char* szClonePath, plUuid& inout_cloneGuid);
+  virtual plStatus CloneDocument(plStringView sPath, plStringView sClonePath, plUuid& inout_cloneGuid);
   void CloseDocument(plDocument* pDocument);
   void EnsureWindowRequested(plDocument* pDocument, const plDocumentObject* pOpenContext = nullptr);
 
   /// \brief Returns a list of all currently open documents that are managed by this document manager
   const plDynamicArray<plDocument*>& GetAllOpenDocuments() const { return m_AllOpenDocuments; }
 
-  plDocument* GetDocumentByPath(const char* szPath) const;
+  plDocument* GetDocumentByPath(plStringView sPath) const;
 
   static plDocument* GetDocumentByGuid(const plUuid& guid);
 
   /// \brief If the given document is open, it will be closed. User is not asked about it, unsaved changes are discarded. Returns true if the document
   /// was open and needed to be closed.
-  static bool EnsureDocumentIsClosedInAllManagers(const char* szPath);
+  static bool EnsureDocumentIsClosedInAllManagers(plStringView sPath);
 
   /// \brief If the given document is open, it will be closed. User is not asked about it, unsaved changes are discarded. Returns true if the document
   /// was open and needed to be closed. This function only operates on documents opened by this manager. Use EnsureDocumentIsClosedInAllManagers() to
   /// close documents of any type.
-  bool EnsureDocumentIsClosed(const char* szPath);
+  bool EnsureDocumentIsClosed(plStringView sPath);
 
   void CloseAllDocumentsOfManager();
   static void CloseAllDocuments();
@@ -99,27 +99,27 @@ public:
   static plCopyOnBroadcastEvent<const Event&> s_Events;
   static plEvent<Request&> s_Requests;
 
-  static const plDocumentTypeDescriptor* GetDescriptorForDocumentType(const char* szDocumentType);
+  static const plDocumentTypeDescriptor* GetDescriptorForDocumentType(plStringView sDocumentType);
   static const plMap<plString, const plDocumentTypeDescriptor*>& GetAllDocumentDescriptors();
 
-  void GetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const;
+  void GetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_documentTypes) const;
 
   using CustomAction = plVariant (*)(const plDocument*);
   static plMap<plString, CustomAction> s_CustomActions;
 
 protected:
-  virtual void InternalCloneDocument(const char* szPath, const char* szClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes);
+  virtual void InternalCloneDocument(plStringView sPath, plStringView sClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes);
 
 private:
-  virtual void InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) = 0;
+  virtual void InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) = 0;
   virtual void InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const = 0;
 
 private:
-  plStatus CreateOrOpenDocument(bool bCreate, const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument,
+  plStatus CreateOrOpenDocument(bool bCreate, plStringView sDocumentTypeName, plStringView sPath, plDocument*& out_pDocument,
     plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext = nullptr);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, DocumentManager);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(ToolsFoundation, DocumentManager);
 
   static void OnPluginEvent(const plPluginEvent& e);
 

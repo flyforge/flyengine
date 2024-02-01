@@ -1,6 +1,7 @@
 #include <Foundation/FoundationPCH.h>
 
 #include <Foundation/Strings/StringUtils.h>
+#include <stdarg.h>
 
 // This is an implementation of the sprintf function, with an additional buffer size
 // On some systems this is implemented under the name 'snprintf'
@@ -31,12 +32,12 @@ struct sprintfFlags
   enum Enum
   {
     None,
-    LeftJustify = PLASMA_BIT(0),   // -
-    ForceSign = PLASMA_BIT(1),     // +
-    BlankSign = PLASMA_BIT(2),     // (space)
-    Hash = PLASMA_BIT(3),          // #
-    PadZeros = PLASMA_BIT(4),      // 0
-    ForceZeroSign = PLASMA_BIT(5), // [internal] Prints a '+' even for zero
+    LeftJustify = PL_BIT(0),   // -
+    ForceSign = PL_BIT(1),     // +
+    BlankSign = PL_BIT(2),     // (space)
+    Hash = PL_BIT(3),          // #
+    PadZeros = PL_BIT(4),      // 0
+    ForceZeroSign = PL_BIT(5), // [internal] Prints a '+' even for zero
   };
 };
 
@@ -873,7 +874,7 @@ int plStringUtils::vsnprintf(char* szOutputBuffer, unsigned int uiBufferSize, co
   va_list args;
   va_copy(args, szArgs0);
 
-  PLASMA_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szFormat), "The sprintf format string must be valid Utf8.");
+  PL_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(szFormat), "The sprintf format string must be valid Utf8.");
 
   // make sure the last character is a \0
   if ((szOutputBuffer) && (uiBufferSize > 0))
@@ -1090,4 +1091,3 @@ void plStringUtils::OutputFormattedFloat(char* szOutputBuffer, plUInt32 uiBuffer
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_snprintf);

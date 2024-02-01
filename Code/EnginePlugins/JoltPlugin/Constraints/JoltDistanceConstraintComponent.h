@@ -10,9 +10,9 @@ using plJoltDistanceConstraintComponentManager = plComponentManager<class plJolt
 /// They are pushed apart if they come too close, and pulled together if they separate too much.
 ///
 /// To push and pull may be very abrupt, like pieces of a chain, or elastic, like in a rubber band.
-class PLASMA_JOLTPLUGIN_DLL plJoltDistanceConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltDistanceConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltDistanceConstraintComponent, plJoltConstraintComponent, plJoltDistanceConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltDistanceConstraintComponent, plJoltConstraintComponent, plJoltDistanceConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

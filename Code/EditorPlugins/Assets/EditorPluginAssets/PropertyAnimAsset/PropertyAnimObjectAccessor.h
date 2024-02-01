@@ -29,7 +29,7 @@ public:
 private:
   bool IsTemporary(const plDocumentObject* pObject) const;
   bool IsTemporary(const plDocumentObject* pParent, const plAbstractProperty* pParentProp) const;
-  typedef plDelegate<void(const plUuid&)> OnAddTrack;
+  using OnAddTrack = plDelegate<void(const plUuid&)>;
   plUuid FindOrAddTrack(
     const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index, plPropertyAnimTarget::Enum target, OnAddTrack onAddTrack);
 

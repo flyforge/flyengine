@@ -9,7 +9,7 @@ using ExecResult = plVisualScriptGraphDescription::ExecResult;
 using ExecuteFunctionGetter = plVisualScriptGraphDescription::ExecuteFunction (*)(plVisualScriptDataType::Enum dataType);
 
 #define MAKE_EXEC_FUNC_GETTER(funcName)                                                                               \
-  plVisualScriptGraphDescription::ExecuteFunction PLASMA_CONCAT(funcName, _Getter)(plVisualScriptDataType::Enum dataType) \
+  plVisualScriptGraphDescription::ExecuteFunction PL_CONCAT(funcName, _Getter)(plVisualScriptDataType::Enum dataType) \
   {                                                                                                                   \
     static plVisualScriptGraphDescription::ExecuteFunction functionTable[] = {                                        \
       nullptr, /* Invalid*/                                                                                           \
@@ -36,8 +36,8 @@ using ExecuteFunctionGetter = plVisualScriptGraphDescription::ExecuteFunction (*
       &funcName<plScriptCoroutineHandle>,                                                                             \
     };                                                                                                                \
                                                                                                                       \
-    static_assert(PLASMA_ARRAY_SIZE(functionTable) == plVisualScriptDataType::Count);                                     \
-    if (dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(functionTable))                                                     \
+    static_assert(PL_ARRAY_SIZE(functionTable) == plVisualScriptDataType::Count);                                     \
+    if (dataType >= 0 && dataType < PL_ARRAY_SIZE(functionTable))                                                     \
       return functionTable[dataType];                                                                                 \
                                                                                                                       \
     plLog::Error("Invalid data type for deducted type {}. Script needs re-transform.", dataType);                     \
@@ -59,13 +59,13 @@ plStringView GetTypeName()
 
 namespace
 {
-  static PLASMA_FORCE_INLINE plResult FillFunctionArgs(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node, const plAbstractFunctionProperty* pFunction, plUInt32 uiStartSlot, plDynamicArray<plVariant>& out_args)
+  static PL_FORCE_INLINE plResult FillFunctionArgs(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node, const plAbstractFunctionProperty* pFunction, plUInt32 uiStartSlot, plDynamicArray<plVariant>& out_args)
   {
     const plUInt32 uiArgCount = pFunction->GetArgumentCount();
     if (uiArgCount != node.m_NumInputDataOffsets - uiStartSlot)
     {
       plLog::Error("Visual script {} '{}': Argument count mismatch. Script needs re-transform.", plVisualScriptNodeDescription::Type::GetName(node.m_Type), pFunction->GetPropertyName());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     for (plUInt32 i = 0; i < uiArgCount; ++i)
@@ -74,10 +74,10 @@ namespace
       out_args.PushBack(inout_context.GetDataAsVariant(node.GetInputDataOffset(uiStartSlot + i), pArgType));
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  static PLASMA_FORCE_INLINE plScriptWorldModule* GetScriptModule(plVisualScriptExecutionContext& inout_context)
+  static PL_FORCE_INLINE plScriptWorldModule* GetScriptModule(plVisualScriptExecutionContext& inout_context)
   {
     plWorld* pWorld = inout_context.GetInstance().GetWorld();
     if (pWorld == nullptr)
@@ -92,7 +92,7 @@ namespace
   static ExecResult NodeFunction_ReflectedFunction(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
   {
     auto& userData = node.GetUserData<NodeUserData_TypeAndProperty>();
-    PLASMA_ASSERT_DEBUG(userData.m_pProperty->GetCategory() == plPropertyCategory::Function, "Property '{}' is not a function", userData.m_pProperty->GetPropertyName());
+    PL_ASSERT_DEBUG(userData.m_pProperty->GetCategory() == plPropertyCategory::Function, "Property '{}' is not a function", userData.m_pProperty->GetPropertyName());
     auto pFunction = static_cast<const plAbstractFunctionProperty*>(userData.m_pProperty);
 
     plTypedPointer pInstance;
@@ -143,6 +143,12 @@ namespace
     plTypedPointer pInstance;
     pInstance = inout_context.GetPointerData(node.GetInputDataOffset(0));
 
+    if (pInstance.m_pObject == nullptr)
+    {
+      plLog::Error("Visual script get property '{}': Target object is invalid (nullptr)", pProperty->GetPropertyName());
+      return ExecResult::Error();
+    }
+
     if (pInstance.m_pType->IsDerivedFrom(userData.m_pType) == false)
     {
       plLog::Error("Visual script get property '{}': Target object is not of expected type '{}'", pProperty->GetPropertyName(), userData.m_pType->GetTypeName());
@@ -157,11 +163,11 @@ namespace
                     std::is_same_v<T, plComponentHandle> ||
                     std::is_same_v<T, plTypedPointer>)
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
       else
       {
-        PLASMA_ASSERT_DEBUG(pProperty->GetSpecificType() == plGetStaticRTTI<T>(), "");
+        PL_ASSERT_DEBUG(pProperty->GetSpecificType() == plGetStaticRTTI<T>(), "");
 
         T value;
         pMemberProperty->GetValuePtr(pInstance.m_pObject, &value);
@@ -170,7 +176,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
 
     return ExecResult::RunNext(0);
@@ -187,9 +193,15 @@ namespace
     plTypedPointer pInstance;
     pInstance = inout_context.GetPointerData(node.GetInputDataOffset(0));
 
+    if (pInstance.m_pObject == nullptr)
+    {
+      plLog::Error("Visual script set property '{}': Target object is invalid (nullptr)", pProperty->GetPropertyName());
+      return ExecResult::Error();
+    }
+
     if (pInstance.m_pType->IsDerivedFrom(userData.m_pType) == false)
     {
-      plLog::Error("Visual script get property '{}': Target object is not of expected type '{}'", pProperty->GetPropertyName(), userData.m_pType->GetTypeName());
+      plLog::Error("Visual script set property '{}': Target object is not of expected type '{}'", pProperty->GetPropertyName(), userData.m_pType->GetTypeName());
       return ExecResult::Error();
     }
 
@@ -201,11 +213,11 @@ namespace
                     std::is_same_v<T, plComponentHandle> ||
                     std::is_same_v<T, plTypedPointer>)
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
       else
       {
-        PLASMA_ASSERT_DEBUG(pProperty->GetSpecificType() == plGetStaticRTTI<T>(), "");
+        PL_ASSERT_DEBUG(pProperty->GetSpecificType() == plGetStaticRTTI<T>(), "");
 
         const T& value = inout_context.GetData<T>(node.GetInputDataOffset(1));
         pMemberProperty->SetValuePtr(pInstance.m_pObject, &value);
@@ -213,7 +225,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
 
     return ExecResult::RunNext(0);
@@ -233,7 +245,7 @@ namespace
       auto& userData = node.GetUserData<NodeUserData_TypeAndProperty>();
       pModule->CreateCoroutine(userData.m_pType, userData.m_pType->GetTypeName(), inout_context.GetInstance(), plScriptCoroutineCreationMode::AllowOverlap, pCoroutine);
 
-      PLASMA_ASSERT_DEBUG(userData.m_pProperty->GetCategory() == plPropertyCategory::Function, "Property '{}' is not a function", userData.m_pProperty->GetPropertyName());
+      PL_ASSERT_DEBUG(userData.m_pProperty->GetCategory() == plPropertyCategory::Function, "Property '{}' is not a function", userData.m_pProperty->GetPropertyName());
       auto pFunction = static_cast<const plAbstractFunctionProperty*>(userData.m_pProperty);
 
       plHybridArray<plVariant, 8> args;
@@ -242,7 +254,7 @@ namespace
         return ExecResult::Error();
       }
 
-      pCoroutine->Start(args);
+      pCoroutine->StartWithVarargs(args);
 
       inout_context.SetCurrentCoroutine(pCoroutine);
     }
@@ -318,7 +330,7 @@ namespace
       }
       else
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
     }
 
@@ -373,7 +385,7 @@ namespace
         }
         else
         {
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
         }
 
         inout_context.SetDataFromVariant(dataOffset, value);
@@ -468,7 +480,7 @@ namespace
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
 
     auto& userData = node.GetUserData<NodeUserData_Switch>();
@@ -646,6 +658,29 @@ namespace
 
   MAKE_EXEC_FUNC_GETTER(NodeFunction_Builtin_IsValid);
 
+  template <typename T>
+  static ExecResult NodeFunction_Builtin_Select(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    bool bCondition = inout_context.GetData<bool>(node.GetInputDataOffset(0));
+
+    if constexpr (std::is_same_v<T, plTypedPointer>)
+    {
+      plTypedPointer a = inout_context.GetPointerData(node.GetInputDataOffset(1));
+      plTypedPointer b = inout_context.GetPointerData(node.GetInputDataOffset(2));
+      plTypedPointer res = bCondition ? a : b;
+      inout_context.SetPointerData(node.GetOutputDataOffset(0), res.m_pObject, res.m_pType);
+    }
+    else
+    {
+      const T& a = inout_context.GetData<T>(node.GetInputDataOffset(1));
+      const T& b = inout_context.GetData<T>(node.GetInputDataOffset(2));
+      inout_context.SetData(node.GetOutputDataOffset(0), bCondition ? a : b);
+    }
+    return ExecResult::RunNext(0);
+  }
+
+  MAKE_EXEC_FUNC_GETTER(NodeFunction_Builtin_Select);
+
   //////////////////////////////////////////////////////////////////////////
 
   template <typename T>
@@ -821,6 +856,58 @@ namespace
 
   MAKE_EXEC_FUNC_GETTER(NodeFunction_Builtin_Div);
 
+  static ExecResult NodeFunction_Builtin_Expression(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    auto pModule = GetScriptModule(inout_context);
+    if (pModule == nullptr)
+      return ExecResult::Error();
+
+    static plHashedString sStream = plMakeHashedString("VsStream");
+
+    int iDummy = 0;
+    plHybridArray<plProcessingStream, 8> inputStreams;
+    for (plUInt32 i = 0; i < node.m_NumInputDataOffsets; ++i)
+    {
+      auto dataOffset = node.GetInputDataOffset(i);
+
+      plTypedPointer ptr;
+      if (dataOffset.IsConstant())
+      {
+        ptr.m_pObject = &iDummy;
+      }
+      else
+      {
+        ptr = inout_context.GetPointerData(dataOffset);
+      }
+
+      const plUInt32 uiDataSize = plVisualScriptDataType::GetStorageSize(dataOffset.GetType());
+      auto streamDataType = plVisualScriptDataType::GetStreamDataType(dataOffset.GetType());
+
+      inputStreams.PushBack(plProcessingStream(sStream, plMakeArrayPtr(static_cast<plUInt8*>(ptr.m_pObject),uiDataSize), streamDataType));
+    }
+
+    plHybridArray<plProcessingStream, 8> outputStreams;
+    for (plUInt32 i = 0; i < node.m_NumOutputDataOffsets; ++i)
+    {
+      auto dataOffset = node.GetOutputDataOffset(i);
+      plTypedPointer ptr = inout_context.GetPointerData(dataOffset);
+
+      const plUInt32 uiDataSize = plVisualScriptDataType::GetStorageSize(dataOffset.GetType());
+      auto streamDataType = plVisualScriptDataType::GetStreamDataType(dataOffset.GetType());
+
+      outputStreams.PushBack(plProcessingStream(sStream, plMakeArrayPtr(static_cast<plUInt8*>(ptr.m_pObject), uiDataSize), streamDataType));
+    }
+
+    auto& userData = node.GetUserData<NodeUserData_Expression>();
+    if (pModule->GetSharedExpressionVM().Execute(userData.m_ByteCode, inputStreams, outputStreams, 1, plExpression::GlobalData(), plExpressionVM::Flags::ScalarizeStreams).Failed())
+    {
+      plLog::Error("Visual script expression execution failed");
+      return ExecResult::Error();
+    }
+
+    return ExecResult::RunNext(0);
+  }
+
   //////////////////////////////////////////////////////////////////////////
 
   template <typename T>
@@ -863,7 +950,7 @@ namespace
   MAKE_EXEC_FUNC_GETTER(NodeFunction_Builtin_ToBool);
 
   template <typename NumberType, typename T>
-  PLASMA_FORCE_INLINE static ExecResult NodeFunction_Builtin_ToNumber(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node, const char* szName)
+  PL_FORCE_INLINE static ExecResult NodeFunction_Builtin_ToNumber(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node, const char* szName)
   {
     auto dataOffset = node.GetInputDataOffset(0);
 
@@ -895,7 +982,7 @@ namespace
 
 #define MAKE_TONUMBER_EXEC_FUNC(NumberType, Name)                                                                                                              \
   template <typename T>                                                                                                                                        \
-  static ExecResult PLASMA_CONCAT(NodeFunction_Builtin_To, Name)(plVisualScriptExecutionContext & inout_context, const plVisualScriptGraphDescription::Node& node) \
+  static ExecResult PL_CONCAT(NodeFunction_Builtin_To, Name)(plVisualScriptExecutionContext & inout_context, const plVisualScriptGraphDescription::Node& node) \
   {                                                                                                                                                            \
     return NodeFunction_Builtin_ToNumber<NumberType, T>(inout_context, node, #Name);                                                                           \
   }
@@ -922,7 +1009,7 @@ namespace
                   std::is_same_v<T, plTypedPointer>)
     {
       plTypedPointer p = inout_context.GetPointerData(node.GetInputDataOffset(0));
-      sb.Format("{} {}", p.m_pType->GetTypeName(), plArgP(p.m_pObject));
+      sb.SetFormat("{} {}", p.m_pType->GetTypeName(), plArgP(p.m_pObject));
       s = sb;
     }
     else if constexpr (std::is_same_v<T, plString>)
@@ -943,13 +1030,12 @@ namespace
   static ExecResult NodeFunction_Builtin_String_Format(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
   {
     auto& sText = inout_context.GetData<plString>(node.GetInputDataOffset(0));
-    auto& params = inout_context.GetData<plVariantArray>(node.GetInputDataOffset(1));
 
     plHybridArray<plString, 12> stringStorage;
-    stringStorage.Reserve(params.GetCount());
-    for (auto& param : params)
+    stringStorage.Reserve(node.m_NumInputDataOffsets - 1);
+    for (plUInt32 i = 1; i < node.m_NumInputDataOffsets; ++i)
     {
-      stringStorage.PushBack(param.ConvertTo<plString>());
+      stringStorage.PushBack(inout_context.GetDataAsVariant(node.GetInputDataOffset(i), nullptr).ConvertTo<plString>());
     }
 
     plHybridArray<plStringView, 12> stringViews;
@@ -977,7 +1063,7 @@ namespace
                   std::is_same_v<T, plTypedPointer>)
     {
       plTypedPointer p = inout_context.GetPointerData(node.GetInputDataOffset(0));
-      sb.Format("{} {}", p.m_pType->GetTypeName(), plArgP(p.m_pObject));
+      sb.SetFormat("{} {}", p.m_pType->GetTypeName(), plArgP(p.m_pObject));
       s = sb;
     }
     else if constexpr (std::is_same_v<T, plString>)
@@ -1044,7 +1130,7 @@ namespace
     }
     else
     {
-      plResult conversionResult = PLASMA_SUCCESS;
+      plResult conversionResult = PL_SUCCESS;
       inout_context.SetData(node.GetOutputDataOffset(0), v.ConvertTo<T>(&conversionResult));
       return ExecResult::RunNext(conversionResult.Succeeded() ? 0 : 1);
     }
@@ -1080,10 +1166,31 @@ namespace
   static ExecResult NodeFunction_Builtin_Array_GetElement(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
   {
     const plVariantArray& a = inout_context.GetData<plVariantArray>(node.GetInputDataOffset(0));
-    plUInt32 uiIndex = inout_context.GetData<int>(node.GetInputDataOffset(1));
-    inout_context.SetData(node.GetOutputDataOffset(0), a[uiIndex]);
+    int iIndex = inout_context.GetData<int>(node.GetInputDataOffset(1));
+    if (iIndex >= 0 && iIndex < int(a.GetCount()))
+    {
+      inout_context.SetData(node.GetOutputDataOffset(0), a[iIndex]);
+    }
+    else
+    {
+      inout_context.SetData(node.GetOutputDataOffset(0), plVariant());
+    }
 
     return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_SetElement(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    int iIndex = inout_context.GetData<int>(node.GetInputDataOffset(1));
+    if (iIndex >= 0 && iIndex < int(a.GetCount()))
+    {
+      a[iIndex] = inout_context.GetDataAsVariant(node.GetInputDataOffset(2), nullptr);
+      return ExecResult::RunNext(0);
+    }
+
+    plLog::Error("Visual script Array::SetElement: Index '{}' is out of bounds. Valid range is [0, {}).", iIndex, a.GetCount());
+    return ExecResult::Error();
   }
 
   static ExecResult NodeFunction_Builtin_Array_GetCount(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
@@ -1092,6 +1199,90 @@ namespace
     inout_context.SetData<int>(node.GetOutputDataOffset(0), a.GetCount());
 
     return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_Clear(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    a.Clear();
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_IsEmpty(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    const plVariantArray& a = inout_context.GetData<plVariantArray>(node.GetInputDataOffset(0));
+    inout_context.SetData<bool>(node.GetOutputDataOffset(0), a.IsEmpty());
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_Contains(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    const plVariantArray& a = inout_context.GetData<plVariantArray>(node.GetInputDataOffset(0));
+    const plVariant& element = inout_context.GetDataAsVariant(node.GetInputDataOffset(1), nullptr);
+    inout_context.SetData<bool>(node.GetOutputDataOffset(0), a.Contains(element));
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_IndexOf(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    const plVariantArray& a = inout_context.GetData<plVariantArray>(node.GetInputDataOffset(0));
+    const plVariant& element = inout_context.GetDataAsVariant(node.GetInputDataOffset(1), nullptr);
+    plUInt32 uiStartIndex = inout_context.GetData<int>(node.GetInputDataOffset(2));
+
+    plUInt32 uiIndex = a.IndexOf(element, uiStartIndex);
+    inout_context.SetData<int>(node.GetOutputDataOffset(0), uiIndex == plInvalidIndex ? -1 : int(uiIndex));
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_Insert(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    const plVariant& element = inout_context.GetDataAsVariant(node.GetInputDataOffset(1), nullptr);
+    int iIndex = inout_context.GetData<int>(node.GetInputDataOffset(2));
+    if (iIndex >= 0 && iIndex <= int(a.GetCount()))
+    {
+      a.Insert(element, iIndex);
+      return ExecResult::RunNext(0);
+    }
+
+    plLog::Error("Visual script Array::Insert: Index '{}' is out of bounds. Valid range is [0, {}].", iIndex, a.GetCount());
+    return ExecResult::Error();
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_PushBack(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    const plVariant& element = inout_context.GetDataAsVariant(node.GetInputDataOffset(1), nullptr);
+    a.PushBack(element);
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_Remove(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    const plVariant& element = inout_context.GetDataAsVariant(node.GetInputDataOffset(1), nullptr);
+    a.RemoveAndCopy(element);
+
+    return ExecResult::RunNext(0);
+  }
+
+  static ExecResult NodeFunction_Builtin_Array_RemoveAt(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
+  {
+    plVariantArray& a = inout_context.GetWritableData<plVariantArray>(node.GetInputDataOffset(0));
+    int iIndex = inout_context.GetData<int>(node.GetInputDataOffset(1));
+    if (iIndex >= 0 && iIndex < int(a.GetCount()))
+    {
+      a.RemoveAtAndCopy(iIndex);
+      return ExecResult::RunNext(0);
+    }
+
+    plLog::Error("Visual script Array::RemoveAt: Index '{}' is out of bounds. Valid range is [0, {}).", iIndex, a.GetCount());
+    return ExecResult::Error();
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -1104,7 +1295,13 @@ namespace
     if (p.m_pType != plGetStaticRTTI<plGameObject>())
     {
       plLog::Error("Visual script call TryGetComponentOfBaseType: Game object is not of type 'plGameObject'");
-      return ExecResult::RunNext(0);
+      return ExecResult::Error();
+    }
+
+    if (p.m_pObject == nullptr)
+    {
+      plLog::Error("Visual script call TryGetComponentOfBaseType: Game object is null");
+      return ExecResult::Error();
     }
 
     plComponent* pComponent = nullptr;
@@ -1200,7 +1397,7 @@ namespace
       }
     }
 
-    return ExecResult::ContinueLater(plTime::Zero());
+    return ExecResult::ContinueLater(plTime::MakeZero());
   }
 
   static ExecResult NodeFunction_Builtin_Yield(plVisualScriptExecutionContext& inout_context, const plVisualScriptGraphDescription::Node& node)
@@ -1211,7 +1408,7 @@ namespace
       // set marker value of 0x1 to indicate we are in a yield
       inout_context.SetCurrentCoroutine(reinterpret_cast<plScriptCoroutine*>(0x1));
 
-      return ExecResult::ContinueLater(plTime::Zero());
+      return ExecResult::ContinueLater(plTime::MakeZero());
     }
 
     inout_context.SetCurrentCoroutine(nullptr);
@@ -1261,15 +1458,15 @@ namespace
     {&NodeFunction_Builtin_Or},                      // Builtin_Or,
     {&NodeFunction_Builtin_Not},                     // Builtin_Not,
     {nullptr, &NodeFunction_Builtin_Compare_Getter}, // Builtin_Compare,
-    {}, // Builtin_CompareExec,
+    {},                                              // Builtin_CompareExec,
     {nullptr, &NodeFunction_Builtin_IsValid_Getter}, // Builtin_IsValid,
-    {},                                              // Builtin_Select,
+    {nullptr, &NodeFunction_Builtin_Select_Getter},  // Builtin_Select,
 
     {nullptr, &NodeFunction_Builtin_Add_Getter}, // Builtin_Add,
     {nullptr, &NodeFunction_Builtin_Sub_Getter}, // Builtin_Subtract,
     {nullptr, &NodeFunction_Builtin_Mul_Getter}, // Builtin_Multiply,
     {nullptr, &NodeFunction_Builtin_Div_Getter}, // Builtin_Divide,
-    {}, // Builtin_Expression,
+    {&NodeFunction_Builtin_Expression},          // Builtin_Expression,
 
     {nullptr, &NodeFunction_Builtin_ToBool_Getter},            // Builtin_ToBool,
     {nullptr, &NodeFunction_Builtin_ToByte_Getter},            // Builtin_ToByte,
@@ -1285,16 +1482,16 @@ namespace
 
     {&NodeFunction_Builtin_MakeArray},        // Builtin_MakeArray
     {&NodeFunction_Builtin_Array_GetElement}, // Builtin_Array_GetElement,
-    {},                                       // Builtin_Array_SetElement,
+    {&NodeFunction_Builtin_Array_SetElement}, // Builtin_Array_SetElement,
     {&NodeFunction_Builtin_Array_GetCount},   // Builtin_Array_GetCount,
-    {},                                       // Builtin_Array_IsEmpty,
-    {},                                       // Builtin_Array_Clear,
-    {},                                       // Builtin_Array_Contains,
-    {},                                       // Builtin_Array_IndexOf,
-    {},                                       // Builtin_Array_Insert,
-    {},                                       // Builtin_Array_PushBack,
-    {},                                       // Builtin_Array_Remove,
-    {},                                       // Builtin_Array_RemoveAt,
+    {&NodeFunction_Builtin_Array_IsEmpty},    // Builtin_Array_IsEmpty,
+    {&NodeFunction_Builtin_Array_Clear},      // Builtin_Array_Clear,
+    {&NodeFunction_Builtin_Array_Contains},   // Builtin_Array_Contains,
+    {&NodeFunction_Builtin_Array_IndexOf},    // Builtin_Array_IndexOf,
+    {&NodeFunction_Builtin_Array_Insert},     // Builtin_Array_Insert,
+    {&NodeFunction_Builtin_Array_PushBack},   // Builtin_Array_PushBack,
+    {&NodeFunction_Builtin_Array_Remove},     // Builtin_Array_Remove,
+    {&NodeFunction_Builtin_Array_RemoveAt},   // Builtin_Array_RemoveAt,
 
     {&NodeFunction_Builtin_TryGetComponentOfBaseType}, // Builtin_TryGetComponentOfBaseType
 
@@ -1308,12 +1505,12 @@ namespace
     {}, // LastBuiltin,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_TypeToExecuteFunctions) == plVisualScriptNodeDescription::Type::Count);
+  static_assert(PL_ARRAY_SIZE(s_TypeToExecuteFunctions) == plVisualScriptNodeDescription::Type::Count);
 } // namespace
 
 plVisualScriptGraphDescription::ExecuteFunction GetExecuteFunction(plVisualScriptNodeDescription::Type::Enum nodeType, plVisualScriptDataType::Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(nodeType >= 0 && nodeType < PLASMA_ARRAY_SIZE(s_TypeToExecuteFunctions), "Out of bounds access");
+  PL_ASSERT_DEBUG(nodeType >= 0 && nodeType < PL_ARRAY_SIZE(s_TypeToExecuteFunctions), "Out of bounds access");
   auto& context = s_TypeToExecuteFunctions[nodeType];
   if (context.m_Func != nullptr)
   {

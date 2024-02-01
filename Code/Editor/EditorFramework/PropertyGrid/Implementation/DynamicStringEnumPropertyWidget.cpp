@@ -12,20 +12,27 @@ plQtDynamicStringEnumPropertyWidget::plQtDynamicStringEnumPropertyWidget()
   setLayout(m_pLayout);
 
   m_pWidget = new QComboBox(this);
+  m_pWidget->installEventFilter(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   m_pLayout->addWidget(m_pWidget);
 
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(on_CurrentEnum_changed(int))) != nullptr, "connection failed");
+  PL_VERIFY(connect(m_pWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(on_CurrentEnum_changed(int))) != nullptr, "connection failed");
 }
 
 void plQtDynamicStringEnumPropertyWidget::OnInit()
 {
-  PLASMA_ASSERT_DEV(m_pProp->GetAttributeByType<plDynamicStringEnumAttribute>() != nullptr,
+  PL_ASSERT_DEV(m_pProp->GetAttributeByType<plDynamicStringEnumAttribute>() != nullptr,
     "plQtDynamicStringEnumPropertyWidget was created without a plDynamicStringEnumAttribute!");
 
   const plDynamicStringEnumAttribute* pAttr = m_pProp->GetAttributeByType<plDynamicStringEnumAttribute>();
 
   m_pEnum = &plDynamicStringEnum::GetDynamicEnum(pAttr->GetDynamicEnumName());
+
+  if (auto pDefaultValueAttr = m_pProp->GetAttributeByType<plDefaultValueAttribute>())
+  {
+    m_pEnum->AddValidValue(pDefaultValueAttr->GetValue().ConvertTo<plString>(), true);
+  }
+
   const auto& AllValues = m_pEnum->GetAllValidValues();
 
   plQtScopedBlockSignals bs(m_pWidget);

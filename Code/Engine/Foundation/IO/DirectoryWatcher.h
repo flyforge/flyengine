@@ -2,7 +2,7 @@
 
 #include <Foundation/Basics.h>
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_DIRECTORY_WATCHER)
+#if PL_ENABLED(PL_SUPPORTS_DIRECTORY_WATCHER)
 
 #  include <Foundation/Basics.h>
 #  include <Foundation/Strings/String.h>
@@ -30,7 +30,7 @@ enum class plDirectoryWatcherType
 
 /// \brief
 ///   Watches file actions in a directory. Changes need to be polled.
-class PLASMA_FOUNDATION_DLL plDirectoryWatcher
+class PL_FOUNDATION_DLL plDirectoryWatcher
 {
 public:
   /// \brief What to watch out for.
@@ -42,11 +42,11 @@ public:
     /// \brief Enum values
     enum Enum
     {
-      Writes = PLASMA_BIT(0),         ///< Watch for writes.
-      Creates = PLASMA_BIT(1),        ///< Watch for newly created files.
-      Deletes = PLASMA_BIT(2),        ///< Watch for deleted files.
-      Renames = PLASMA_BIT(3),        ///< Watch for renames.
-      Subdirectories = PLASMA_BIT(4), ///< Watch files in subdirectories recursively.
+      Writes = PL_BIT(0),         ///< Watch for writes.
+      Creates = PL_BIT(1),        ///< Watch for newly created files.
+      Deletes = PL_BIT(2),        ///< Watch for deleted files.
+      Renames = PL_BIT(3),        ///< Watch for renames.
+      Subdirectories = PL_BIT(4), ///< Watch files in subdirectories recursively.
     };
 
     struct Bits
@@ -84,17 +84,17 @@ public:
   ///   If waitUpToMilliseconds is greater than 0, blocks until either a change was observed or the timelimit is reached.
   ///
   /// \note There might be multiple changes on the same file reported.
-  void EnumerateChanges(EnumerateChangesFunction func, plTime waitUpTo = plTime::Zero());
+  void EnumerateChanges(EnumerateChangesFunction func, plTime waitUpTo = plTime::MakeZero());
 
   /// \brief
   ///   Same as the other EnumerateChanges function, but enumerates multiple watchers.
-  static void EnumerateChanges(plArrayPtr<plDirectoryWatcher*> watchers, EnumerateChangesFunction func, plTime waitUpTo = plTime::Zero());
+  static void EnumerateChanges(plArrayPtr<plDirectoryWatcher*> watchers, EnumerateChangesFunction func, plTime waitUpTo = plTime::MakeZero());
 
 private:
   plString m_sDirectoryPath;
   plDirectoryWatcherImpl* m_pImpl = nullptr;
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plDirectoryWatcher::Watch);
+PL_DECLARE_FLAGS_OPERATORS(plDirectoryWatcher::Watch);
 
 #endif

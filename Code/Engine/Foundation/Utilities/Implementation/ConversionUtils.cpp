@@ -57,12 +57,12 @@ namespace plConversionUtils
         continue;
       }
 
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // not a single digit found
     if (inout_sText.IsEmpty())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // remove all leading zeros
     while (inout_sText.StartsWith("00"))
@@ -81,42 +81,42 @@ namespace plConversionUtils
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult StringToInt(plStringView sText, plInt32& out_iRes, const char** out_pLastParsePosition)
   {
     plInt64 tmp = out_iRes;
-    if (StringToInt64(sText, tmp, out_pLastParsePosition) == PLASMA_SUCCESS && tmp <= (plInt32)0x7FFFFFFF && tmp >= (plInt32)0x80000000)
+    if (StringToInt64(sText, tmp, out_pLastParsePosition) == PL_SUCCESS && tmp <= (plInt32)0x7FFFFFFF && tmp >= (plInt32)0x80000000)
     {
       out_iRes = (plInt32)tmp;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plResult StringToUInt(plStringView sText, plUInt32& out_uiRes, const char** out_pLastParsePosition)
   {
     plInt64 tmp = out_uiRes;
-    if (StringToInt64(sText, tmp, out_pLastParsePosition) == PLASMA_SUCCESS && tmp <= (plUInt32)0xFFFFFFFF && tmp >= 0)
+    if (StringToInt64(sText, tmp, out_pLastParsePosition) == PL_SUCCESS && tmp <= (plUInt32)0xFFFFFFFF && tmp >= 0)
     {
       out_uiRes = (plUInt32)tmp;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plResult StringToInt64(plStringView sText, plInt64& out_iRes, const char** out_pLastParsePosition)
   {
     if (sText.IsEmpty())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     bool bSignIsPos = true;
 
-    if (FindFirstDigit(sText, bSignIsPos) == PLASMA_FAILURE)
-      return PLASMA_FAILURE;
+    if (FindFirstDigit(sText, bSignIsPos) == PL_FAILURE)
+      return PL_FAILURE;
 
     plInt64 iCurRes = 0;
     plInt64 iSign = bSignIsPos ? 1 : -1;
@@ -127,6 +127,13 @@ namespace plConversionUtils
     {
       const char c = *sText.GetStartPointer();
 
+      // c++ ' seperator can appear starting with the second digit
+      if (iCurRes > 0 && c == '\'')
+      {
+        sText.ChopAwayFirstCharacterAscii();
+        continue;
+      }
+
       // end of digits reached -> return success (allows to write something like "239*4" -> parses first part as 239)
       if (c < '0' || c > '9')
         break;
@@ -134,10 +141,10 @@ namespace plConversionUtils
       const plInt64 iLastDigit = c - '0';
 
       if ((iCurRes > iMax / 10) || (iCurRes == iMax / 10 && iLastDigit > 7)) // going to overflow
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if ((iCurRes < iMin / 10) || (iCurRes == iMin / 10 && iLastDigit > 8)) // going to underflow
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iCurRes = iCurRes * 10 + iLastDigit * iSign; // shift all previously read digits to the left and add the last digit
 
@@ -149,21 +156,21 @@ namespace plConversionUtils
     if (out_pLastParsePosition != nullptr)
       *out_pLastParsePosition = sText.GetStartPointer();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult StringToFloat(plStringView sText, double& out_fRes, const char** out_pLastParsePosition)
   {
     if (sText.IsEmpty())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     bool bSignIsPos = true;
 
-    if (FindFirstDigit(sText, bSignIsPos) == PLASMA_FAILURE)
+    if (FindFirstDigit(sText, bSignIsPos) == PL_FAILURE)
     {
       // if it is a '.' continue (this is valid)
       if (!sText.StartsWith("."))
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
 
     enum NumberPart
@@ -197,6 +204,13 @@ namespace plConversionUtils
         if (c == '.')
         {
           Part = Fraction;
+          sText.ChopAwayFirstCharacterAscii();
+          continue;
+        }
+
+        // c++ ' separator can appear starting with the second digit
+        if (uiIntegerPart > 0 && c == '\'')
+        {
           sText.ChopAwayFirstCharacterAscii();
           continue;
         }
@@ -290,7 +304,7 @@ namespace plConversionUtils
         out_fRes /= plMath::Pow(10.0, (double)uiExponentPart);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult StringToBool(plStringView sText, bool& out_bRes, const char** out_pLastParsePosition)
@@ -298,7 +312,7 @@ namespace plConversionUtils
     SkipWhitespace(sText);
 
     if (sText.IsEmpty())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // we are only looking at ASCII characters here, so no need to decode Utf8 sequences
 
@@ -309,7 +323,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 1;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith("0"))
@@ -319,7 +333,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 1;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("true"))
@@ -329,7 +343,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 4;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("false"))
@@ -339,7 +353,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 5;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("on"))
@@ -349,7 +363,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 2;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("off"))
@@ -359,7 +373,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 3;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("yes"))
@@ -369,7 +383,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 3;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("no"))
@@ -379,7 +393,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 2;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("enable"))
@@ -389,7 +403,7 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 6;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     if (sText.StartsWith_NoCase("disable"))
@@ -399,10 +413,10 @@ namespace plConversionUtils
       if (out_pLastParsePosition)
         *out_pLastParsePosition = sText.GetStartPointer() + 7;
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt32 ExtractFloatsFromString(plStringView sText, plUInt32 uiNumFloats, float* out_pFloats, const char** out_pLastParsePosition)
@@ -418,7 +432,7 @@ namespace plConversionUtils
       const char* szPos;
 
       // if successful, store the float, otherwise advance the string by one, to skip invalid characters
-      if (StringToFloat(sText, res, &szPos) == PLASMA_SUCCESS)
+      if (StringToFloat(sText, res, &szPos) == PL_SUCCESS)
       {
         out_pFloats[uiFloatsFound] = (float)res;
         ++uiFloatsFound;
@@ -467,7 +481,7 @@ namespace plConversionUtils
 
   plResult ConvertHexStringToUInt(plStringView sHex, plUInt64& out_uiResult, plUInt32 uiMaxHexCharacters, plUInt32* pTotalCharactersParsed)
   {
-    PLASMA_ASSERT_DEBUG(uiMaxHexCharacters <= 16, "Only HEX strings of up to 16 character can be parsed into a 64-bit integer");
+    PL_ASSERT_DEBUG(uiMaxHexCharacters <= 16, "Only HEX strings of up to 16 character can be parsed into a 64-bit integer");
     const plUInt32 origStringElementsCount = sHex.GetElementCount();
 
     out_uiResult = 0;
@@ -495,7 +509,7 @@ namespace plConversionUtils
         {
           *pTotalCharactersParsed = 0;
         }
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       out_uiResult <<= 4; // 4 Bits, ie. half a byte
@@ -506,11 +520,11 @@ namespace plConversionUtils
 
     if (pTotalCharactersParsed)
     {
-      PLASMA_ASSERT_DEBUG(sHex.GetElementCount() <= origStringElementsCount, "");
+      PL_ASSERT_DEBUG(sHex.GetElementCount() <= origStringElementsCount, "");
       *pTotalCharactersParsed = origStringElementsCount - sHex.GetElementCount();
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   void ConvertHexToBinary(plStringView sHex, plUInt8* pBinary, plUInt32 uiBinaryBuffer)
@@ -540,121 +554,121 @@ namespace plConversionUtils
 
   const plStringBuilder& ToString(plInt8 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", (plInt32)value);
+    out_sResult.SetFormat("{0}", (plInt32)value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plUInt8 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", (plUInt32)value);
+    out_sResult.SetFormat("{0}", (plUInt32)value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plInt16 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", (plInt32)value);
+    out_sResult.SetFormat("{0}", (plInt32)value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plUInt16 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", (plUInt32)value);
+    out_sResult.SetFormat("{0}", (plUInt32)value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plInt32 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plUInt32 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plInt64 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(plUInt64 value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(float value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(double value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plColor& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ r={0}, g={1}, b={2}, a={3} }", value.r, value.g, value.b, value.a);
+    out_sResult.SetFormat("{ r={0}, g={1}, b={2}, a={3} }", value.r, value.g, value.b, value.a);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plColorGammaUB& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ r={0}, g={1}, b={2}, a={3} }", value.r, value.g, value.b, value.a);
+    out_sResult.SetFormat("{ r={0}, g={1}, b={2}, a={3} }", value.r, value.g, value.b, value.a);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec2& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1} }", value.x, value.y);
+    out_sResult.SetFormat("{ x={0}, y={1} }", value.x, value.y);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec3& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2} }", value.x, value.y, value.z);
+    out_sResult.SetFormat("{ x={0}, y={1}, z={2} }", value.x, value.y, value.z);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec4& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
+    out_sResult.SetFormat("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec2I32& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1} }", value.x, value.y);
+    out_sResult.SetFormat("{ x={0}, y={1} }", value.x, value.y);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec3I32& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2} }", value.x, value.y, value.z);
+    out_sResult.SetFormat("{ x={0}, y={1}, z={2} }", value.x, value.y, value.z);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plVec4I32& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
+    out_sResult.SetFormat("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plQuat& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{ x={0}, y={1}, z={2}, w={3} }", value.v.x, value.v.y, value.v.z, value.w);
+    out_sResult.SetFormat("{ x={0}, y={1}, z={2}, w={3} }", value.x, value.y, value.z, value.w);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plMat3& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Printf("{ c1r1=%f, c2r1=%f, c3r1=%f, "
+    out_sResult.SetPrintf("{ c1r1=%f, c2r1=%f, c3r1=%f, "
                        "c1r2=%f, c2r2=%f, c3r2=%f, "
                        "c1r3=%f, c2r3=%f, c3r3=%f }",
       value.Element(0, 0), value.Element(1, 0), value.Element(2, 0), value.Element(0, 1), value.Element(1, 1), value.Element(2, 1),
@@ -664,7 +678,7 @@ namespace plConversionUtils
 
   const plStringBuilder& ToString(const plMat4& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Printf("{ c1r1=%f, c2r1=%f, c3r1=%f, c4r1=%f, "
+    out_sResult.SetPrintf("{ c1r1=%f, c2r1=%f, c3r1=%f, c4r1=%f, "
                        "c1r2=%f, c2r2=%f, c3r2=%f, c4r2=%f, "
                        "c1r3=%f, c2r3=%f, c3r3=%f, c4r3=%f, "
                        "c1r4=%f, c2r4=%f, c3r4=%f, c4r4=%f }",
@@ -677,20 +691,20 @@ namespace plConversionUtils
   const plStringBuilder& ToString(const plTransform& value, plStringBuilder& out_sResult)
   {
     plStringBuilder tmp1, tmp2, tmp3;
-    out_sResult.Format("{ position={0}, rotation={1}, scale={2} }", ToString(value.m_vPosition, tmp1), ToString(value.m_qRotation, tmp2),
+    out_sResult.SetFormat("{ position={0}, rotation={1}, scale={2} }", ToString(value.m_vPosition, tmp1), ToString(value.m_qRotation, tmp2),
       ToString(value.m_vScale, tmp3));
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plAngle& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
   const plStringBuilder& ToString(const plTime& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("{0}", value);
+    out_sResult.SetFormat("{0}", value);
     return out_sResult;
   }
 
@@ -702,10 +716,9 @@ namespace plConversionUtils
 
   const plStringBuilder& ToString(const plTempHashedString& value, plStringBuilder& out_sResult)
   {
-    out_sResult.Format("0x{}", plArgU(value.GetHash(), 16, true, 16));
+    out_sResult.SetFormat("0x{}", plArgU(value.GetHash(), 16, true, 16));
     return out_sResult;
   }
-
 
   const plStringBuilder& ToString(const plDynamicArray<plVariant>& value, plStringBuilder& out_sResult)
   {
@@ -748,7 +761,7 @@ namespace plConversionUtils
 
     const GUID* pGuid = reinterpret_cast<const GUID*>(&value);
 
-    out_sResult.Printf("{ %08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x }", pGuid->Data1, pGuid->Data2, pGuid->Data3, pGuid->Data4[0],
+    out_sResult.SetPrintf("{ %08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x }", pGuid->Data1, pGuid->Data2, pGuid->Data3, pGuid->Data4[0],
       pGuid->Data4[1], pGuid->Data4[2], pGuid->Data4[3], pGuid->Data4[4], pGuid->Data4[5], pGuid->Data4[6], pGuid->Data4[7]);
 
     return out_sResult;
@@ -780,7 +793,7 @@ namespace plConversionUtils
 
   plUuid ConvertStringToUuid(plStringView sText)
   {
-    PLASMA_ASSERT_DEBUG(IsStringUuid(sText), "The given string is not in the correct Uuid format: '{0}'", sText);
+    PL_ASSERT_DEBUG(IsStringUuid(sText), "The given string is not in the correct Uuid format: '{0}'", sText);
 
     const char* szText = sText.GetStartPointer();
 
@@ -852,7 +865,7 @@ namespace plConversionUtils
   }
 
 #define Check(name)                                  \
-  if (sColorName.IsEqual_NoCase(PLASMA_STRINGIZE(name))) \
+  if (sColorName.IsEqual_NoCase(PL_STRINGIZE(name))) \
   return plColor::name
 
   plColor GetColorByName(plStringView sColorName, bool* out_pValidColorName)
@@ -870,10 +883,10 @@ namespace plConversionUtils
       plInt8 secondChar = HexCharacterToIntValue(szColorChars[1]);
       if (firstChar < 0 || secondChar < 0)
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       out_uiByte = (static_cast<plUInt8>(firstChar) << 4) | static_cast<plUInt8>(secondChar);
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     };
 
     if (sColorName.StartsWith("#"))
@@ -1222,11 +1235,11 @@ namespace plConversionUtils
 
     if (cg.a == 255)
     {
-      s.Format("#{0}{1}{2}", plArgU(cg.r, 2, true, 16, true), plArgU(cg.g, 2, true, 16, true), plArgU(cg.b, 2, true, 16, true));
+      s.SetFormat("#{0}{1}{2}", plArgU(cg.r, 2, true, 16, true), plArgU(cg.g, 2, true, 16, true), plArgU(cg.b, 2, true, 16, true));
     }
     else
     {
-      s.Format("#{0}{1}{2}{3}", plArgU(cg.r, 2, true, 16, true), plArgU(cg.g, 2, true, 16, true), plArgU(cg.b, 2, true, 16, true),
+      s.SetFormat("#{0}{1}{2}{3}", plArgU(cg.r, 2, true, 16, true), plArgU(cg.g, 2, true, 16, true), plArgU(cg.b, 2, true, 16, true),
         plArgU(cg.a, 2, true, 16, true));
     }
 
@@ -1238,4 +1251,3 @@ namespace plConversionUtils
 } // namespace plConversionUtils
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_ConversionUtils);

@@ -19,12 +19,12 @@ plDataTransferObject::plDataTransferObject(plDataTransfer& ref_belongsTo, plStri
 
 plDataTransferObject::~plDataTransferObject()
 {
-  PLASMA_ASSERT_DEV(m_bHasBeenTransferred, "The data transfer object has never been transmitted.");
+  PL_ASSERT_DEV(m_bHasBeenTransferred, "The data transfer object has never been transmitted.");
 }
 
 void plDataTransferObject::Transmit()
 {
-  PLASMA_ASSERT_DEV(!m_bHasBeenTransferred, "The data transfer object has been transmitted already.");
+  PL_ASSERT_DEV(!m_bHasBeenTransferred, "The data transfer object has been transmitted already.");
 
   if (m_bHasBeenTransferred)
     return;
@@ -92,7 +92,7 @@ void plDataTransfer::EnableDataTransfer(plStringView sDataName)
 
   m_sDataName = sDataName;
 
-  PLASMA_ASSERT_DEV(!m_sDataName.IsEmpty(), "The name for the data transfer must not be empty.");
+  PL_ASSERT_DEV(!m_sDataName.IsEmpty(), "The name for the data transfer must not be empty.");
 
   m_bEnabled = true;
   SendStatus();
@@ -146,9 +146,9 @@ void plDataTransfer::TelemetryMessage(void* pPassThrough)
 {
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage('DTRA', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('DTRA', Msg) == PL_SUCCESS)
   {
-    if (Msg.GetMessageID() == 'REQ')
+    if (Msg.GetMessageID() == ' REQ')
     {
       plStringBuilder sName;
       Msg.GetReader() >> sName;
@@ -196,5 +196,3 @@ void plDataTransfer::SendAllDataTransfers()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_DataTransfer);

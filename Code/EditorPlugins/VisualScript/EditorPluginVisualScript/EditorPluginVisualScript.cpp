@@ -17,16 +17,16 @@ void OnLoadPlugin()
       plActionMapManager::RegisterActionMap("VisualScriptAssetMenuBar").IgnoreResult();
       plStandardMenus::MapActions("VisualScriptAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("VisualScriptAssetMenuBar");
-      plDocumentActions::MapActions("VisualScriptAssetMenuBar", "Menu.File", false);
-      plAssetActions::MapMenuActions("VisualScriptAssetMenuBar", "Menu.File");
-      plCommandHistoryActions::MapActions("VisualScriptAssetMenuBar", "Menu.Edit");
-      plEditActions::MapActions("VisualScriptAssetMenuBar", "Menu.Edit", false, false);
+      plDocumentActions::MapMenuActions("VisualScriptAssetMenuBar");
+      plAssetActions::MapMenuActions("VisualScriptAssetMenuBar");
+      plCommandHistoryActions::MapActions("VisualScriptAssetMenuBar");
+      plEditActions::MapActions("VisualScriptAssetMenuBar", false, false);
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("VisualScriptAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("VisualScriptAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("VisualScriptAssetToolBar");
       plCommandHistoryActions::MapActions("VisualScriptAssetToolBar", "");
       plAssetActions::MapToolBarActions("VisualScriptAssetToolBar", true);
     }
@@ -37,12 +37,12 @@ void OnUnloadPlugin()
 {
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

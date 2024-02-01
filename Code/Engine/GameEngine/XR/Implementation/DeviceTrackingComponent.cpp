@@ -10,29 +10,29 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plXRPoseLocation, 1)
-PLASMA_BITFLAGS_CONSTANTS(plXRPoseLocation::Grip, plXRPoseLocation::Aim)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plXRPoseLocation, 1)
+PL_BITFLAGS_CONSTANTS(plXRPoseLocation::Grip, plXRPoseLocation::Aim)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plDeviceTrackingComponent, 3, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plDeviceTrackingComponent, 3, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("DeviceType", plXRDeviceType, GetDeviceType, SetDeviceType),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("PoseLocation", plXRPoseLocation, GetPoseLocation, SetPoseLocation),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("TransformSpace", plXRTransformSpace, GetTransformSpace, SetTransformSpace),
-    PLASMA_MEMBER_PROPERTY("Rotation", m_bRotation)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("Scale", m_bScale)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ENUM_ACCESSOR_PROPERTY("DeviceType", plXRDeviceType, GetDeviceType, SetDeviceType),
+    PL_ENUM_ACCESSOR_PROPERTY("PoseLocation", plXRPoseLocation, GetPoseLocation, SetPoseLocation),
+    PL_ENUM_ACCESSOR_PROPERTY("TransformSpace", plXRTransformSpace, GetTransformSpace, SetTransformSpace),
+    PL_MEMBER_PROPERTY("Rotation", m_bRotation)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("Scale", m_bScale)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Alpha),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plDeviceTrackingComponent::plDeviceTrackingComponent() = default;
@@ -151,7 +151,7 @@ void plDeviceTrackingComponent::Update()
         plTransform local;
         if (GetOwner()->GetParent() != nullptr)
         {
-          local.SetLocalTransform(GetOwner()->GetParent()->GetGlobalTransform(), global);
+          local = plTransform::MakeLocalTransform(GetOwner()->GetParent()->GetGlobalTransform(), global);
         }
         else
         {
@@ -167,4 +167,4 @@ void plDeviceTrackingComponent::Update()
   }
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_DeviceTrackingComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_DeviceTrackingComponent);

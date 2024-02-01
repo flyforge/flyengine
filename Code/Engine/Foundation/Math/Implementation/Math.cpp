@@ -31,6 +31,11 @@ bool plMath::IsPowerOf(plInt32 value, plInt32 iBase)
 
 plUInt32 plMath::PowerOfTwo_Floor(plUInt32 uiNpot)
 {
+  return static_cast<plUInt32>(PowerOfTwo_Floor(static_cast<plUInt64>(uiNpot)));
+}
+
+plUInt64 plMath::PowerOfTwo_Floor(plUInt64 uiNpot)
+{
   if (IsPowerOf2(uiNpot))
     return (uiNpot);
 
@@ -46,6 +51,11 @@ plUInt32 plMath::PowerOfTwo_Floor(plUInt32 uiNpot)
 }
 
 plUInt32 plMath::PowerOfTwo_Ceil(plUInt32 uiNpot)
+{
+  return static_cast<plUInt32>(PowerOfTwo_Ceil(static_cast<plUInt64>(uiNpot)));
+}
+
+plUInt64 plMath::PowerOfTwo_Ceil(plUInt64 uiNpot)
 {
   if (IsPowerOf2(uiNpot))
     return (uiNpot);
@@ -98,25 +108,25 @@ plResult plMath::TryMultiply32(plUInt32& out_uiResult, plUInt32 a, plUInt32 b, p
 
   if (result > 0xFFFFFFFFllu)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   result *= static_cast<plUInt64>(c);
 
   if (result > 0xFFFFFFFFllu)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   result *= static_cast<plUInt64>(d);
 
   if (result > 0xFFFFFFFFllu)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   out_uiResult = static_cast<plUInt32>(result & 0xFFFFFFFFllu);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt32 plMath::SafeMultiply32(plUInt32 a, plUInt32 b, plUInt32 c, plUInt32 d)
@@ -127,9 +137,8 @@ plUInt32 plMath::SafeMultiply32(plUInt32 a, plUInt32 b, plUInt32 c, plUInt32 d)
     return result;
   }
 
-  PLASMA_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds UInt32 range.", a, b, c, d);
+  PL_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds UInt32 range.", a, b, c, d);
   std::terminate();
-  return 0;
 }
 
 plResult plMath::TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d)
@@ -137,29 +146,29 @@ plResult plMath::TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, p
   if (a == 0 || b == 0 || c == 0 || d == 0)
   {
     out_uiResult = 0;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_X86) && PLASMA_ENABLED(PLASMA_PLATFORM_64BIT) && PLASMA_ENABLED(PLASMA_COMPILER_MSVC)
+#if PL_ENABLED(PL_PLATFORM_ARCH_X86) && PL_ENABLED(PL_PLATFORM_64BIT) && PL_ENABLED(PL_COMPILER_MSVC)
 
   plUInt64 uiHighBits = 0;
 
   const plUInt64 ab = _umul128(a, b, &uiHighBits);
   if (uiHighBits != 0)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plUInt64 abc = _umul128(ab, c, &uiHighBits);
   if (uiHighBits != 0)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   const plUInt64 abcd = _umul128(abc, d, &uiHighBits);
   if (uiHighBits != 0)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 #else
@@ -169,23 +178,23 @@ plResult plMath::TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, p
 
   if (a > 1 && b > 1 && (ab / a != b))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (c > 1 && (abc / c != ab))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (d > 1 && (abcd / d != abc))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 #endif
 
   out_uiResult = abcd;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plUInt64 plMath::SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d)
@@ -196,12 +205,11 @@ plUInt64 plMath::SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d)
     return result;
   }
 
-  PLASMA_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds plUInt64 range.", a, b, c, d);
+  PL_REPORT_FAILURE("Safe multiplication failed: {0} * {1} * {2} * {3} exceeds plUInt64 range.", a, b, c, d);
   std::terminate();
-  return 0;
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
+#if PL_ENABLED(PL_PLATFORM_32BIT)
 size_t plMath::SafeConvertToSizeT(plUInt64 uiValue)
 {
   size_t result = 0;
@@ -210,9 +218,8 @@ size_t plMath::SafeConvertToSizeT(plUInt64 uiValue)
     return result;
   }
 
-  PLASMA_REPORT_FAILURE("Given value ({}) can't be converted to size_t because it is too big.", uiValue);
+  PL_REPORT_FAILURE("Given value ({}) can't be converted to size_t because it is too big.", uiValue);
   std::terminate();
-  return 0;
 }
 #endif
 
@@ -285,8 +292,8 @@ plVec3 plBasisAxis::GetBasisVector(Enum basisAxis)
       return plVec3(0.0f, 0.0f, -1.0f);
 
     default:
-      PLASMA_REPORT_FAILURE("Invalid basis dir {0}", basisAxis);
-      return plVec3::ZeroVector();
+      PL_REPORT_FAILURE("Invalid basis dir {0}", basisAxis);
+      return plVec3::MakeZero();
   }
 }
 
@@ -310,19 +317,19 @@ plQuat plBasisAxis::GetBasisRotation_PosX(Enum axis)
       rotAxis.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
       break;
     case plBasisAxis::PositiveZ:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
       break;
     case plBasisAxis::NegativeX:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
       break;
     case plBasisAxis::NegativeZ:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
       break;
   }
 
@@ -338,19 +345,19 @@ plQuat plBasisAxis::GetBasisRotation(Enum identity, Enum axis)
       rotId.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotId.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
+      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
       break;
     case plBasisAxis::PositiveZ:
-      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
+      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
       break;
     case plBasisAxis::NegativeX:
-      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
+      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotId.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
       break;
     case plBasisAxis::NegativeZ:
-      rotId.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
+      rotId = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
       break;
   }
 
@@ -361,19 +368,19 @@ plQuat plBasisAxis::GetBasisRotation(Enum identity, Enum axis)
       rotAxis.SetIdentity();
       break;
     case plBasisAxis::PositiveY:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(90));
       break;
     case plBasisAxis::PositiveZ:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
       break;
     case plBasisAxis::NegativeX:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(180));
       break;
     case plBasisAxis::NegativeY:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(-90));
       break;
     case plBasisAxis::NegativeZ:
-      rotAxis.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(90));
+      rotAxis = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(90));
       break;
   }
 
@@ -390,19 +397,19 @@ plBasisAxis::Enum plBasisAxis::GetOrthogonalAxis(Enum axis1, Enum axis2, bool bF
   if (bFlip)
     c = -c;
 
-  if (c.IsEqual(plVec3::UnitXAxis(), 0.01f))
+  if (c.IsEqual(plVec3::MakeAxisX(), 0.01f))
     return plBasisAxis::PositiveX;
-  if (c.IsEqual(-plVec3::UnitXAxis(), 0.01f))
+  if (c.IsEqual(-plVec3::MakeAxisX(), 0.01f))
     return plBasisAxis::NegativeX;
 
-  if (c.IsEqual(plVec3::UnitYAxis(), 0.01f))
+  if (c.IsEqual(plVec3::MakeAxisY(), 0.01f))
     return plBasisAxis::PositiveY;
-  if (c.IsEqual(-plVec3::UnitYAxis(), 0.01f))
+  if (c.IsEqual(-plVec3::MakeAxisY(), 0.01f))
     return plBasisAxis::NegativeY;
 
-  if (c.IsEqual(plVec3::UnitZAxis(), 0.01f))
+  if (c.IsEqual(plVec3::MakeAxisZ(), 0.01f))
     return plBasisAxis::PositiveZ;
-  if (c.IsEqual(-plVec3::UnitZAxis(), 0.01f))
+  if (c.IsEqual(-plVec3::MakeAxisZ(), 0.01f))
     return plBasisAxis::NegativeZ;
 
   return axis1;
@@ -411,51 +418,51 @@ plBasisAxis::Enum plBasisAxis::GetOrthogonalAxis(Enum axis1, Enum axis2, bool bF
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plComparisonOperator, 1)
-  PLASMA_ENUM_CONSTANTS(plComparisonOperator::Equal, plComparisonOperator::NotEqual)
-  PLASMA_ENUM_CONSTANTS(plComparisonOperator::Less, plComparisonOperator::LessEqual)
-  PLASMA_ENUM_CONSTANTS(plComparisonOperator::Greater, plComparisonOperator::GreaterEqual)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plComparisonOperator, 1)
+  PL_ENUM_CONSTANTS(plComparisonOperator::Equal, plComparisonOperator::NotEqual)
+  PL_ENUM_CONSTANTS(plComparisonOperator::Less, plComparisonOperator::LessEqual)
+  PL_ENUM_CONSTANTS(plComparisonOperator::Greater, plComparisonOperator::GreaterEqual)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plCurveFunction, 1)
- PLASMA_ENUM_CONSTANT(plCurveFunction::Linear),
- PLASMA_ENUM_CONSTANT(plCurveFunction::ConstantZero),
- PLASMA_ENUM_CONSTANT(plCurveFunction::ConstantOne),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInSine),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutSine),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutSine),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInQuad),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutQuad),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutQuad),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInCubic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutCubic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutCubic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInQuartic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutQuartic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutQuartic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInQuintic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutQuintic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutQuintic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInExpo),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutExpo),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutExpo),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInCirc),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutCirc),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutCirc),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInBack),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutBack),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutBack), 
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInElastic), 
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutElastic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutElastic),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInBounce),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseOutBounce),
- PLASMA_ENUM_CONSTANT(plCurveFunction::EaseInOutBounce),
- PLASMA_ENUM_CONSTANT(plCurveFunction::Conical),
- PLASMA_ENUM_CONSTANT(plCurveFunction::FadeInHoldFadeOut),
- PLASMA_ENUM_CONSTANT(plCurveFunction::FadeInFadeOut),
- PLASMA_ENUM_CONSTANT(plCurveFunction::Bell),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plCurveFunction, 1)
+ PL_ENUM_CONSTANT(plCurveFunction::Linear),
+ PL_ENUM_CONSTANT(plCurveFunction::ConstantZero),
+ PL_ENUM_CONSTANT(plCurveFunction::ConstantOne),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInSine),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutSine),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutSine),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInQuad),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutQuad),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutQuad),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInCubic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutCubic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutCubic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInQuartic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutQuartic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutQuartic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInQuintic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutQuintic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutQuintic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInExpo),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutExpo),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutExpo),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInCirc),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutCirc),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutCirc),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInBack),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutBack),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutBack),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInElastic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutElastic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutElastic),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInBounce),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseOutBounce),
+ PL_ENUM_CONSTANT(plCurveFunction::EaseInOutBounce),
+ PL_ENUM_CONSTANT(plCurveFunction::Conical),
+ PL_ENUM_CONSTANT(plCurveFunction::FadeInHoldFadeOut),
+ PL_ENUM_CONSTANT(plCurveFunction::FadeInFadeOut),
+ PL_ENUM_CONSTANT(plCurveFunction::Bell),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Math);
+PL_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Math);

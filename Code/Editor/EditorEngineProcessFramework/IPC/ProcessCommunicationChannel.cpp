@@ -2,18 +2,17 @@
 
 #include <EditorEngineProcessFramework/IPC/ProcessCommunicationChannel.h>
 #include <Foundation/Communication/IpcChannel.h>
+#include <Foundation/Communication/IpcProcessMessageProtocol.h>
 
-plProcessCommunicationChannel::plProcessCommunicationChannel() {}
+plProcessCommunicationChannel::plProcessCommunicationChannel() = default;
 
 plProcessCommunicationChannel::~plProcessCommunicationChannel()
 {
-  if (m_pChannel)
-  {
-    PLASMA_DEFAULT_DELETE(m_pChannel);
-  }
+  m_pProtocol.Clear();
+  m_pChannel.Clear();
 }
 
-void plProcessCommunicationChannel::SendMessage(plProcessMessage* pMessage)
+bool plProcessCommunicationChannel::SendMessage(plProcessMessage* pMessage)
 {
   if (m_pFirstAllowedMessageType != nullptr)
   {
@@ -21,45 +20,48 @@ void plProcessCommunicationChannel::SendMessage(plProcessMessage* pMessage)
     // this is necessary to make sure that during an engine restart we don't accidentally send stray messages while
     // the engine is not yet correctly set up
     if (!pMessage->GetDynamicRTTI()->IsDerivedFrom(m_pFirstAllowedMessageType))
-      return;
+    {
+      plLog::Warning("[IPC]Ignored send message of type {} because it is not a {}", pMessage->GetDynamicRTTI()->GetTypeName(), m_pFirstAllowedMessageType->GetTypeName());
+      return false;
+    }
 
     m_pFirstAllowedMessageType = nullptr;
   }
 
   {
-    if (m_pChannel == nullptr)
-      return;
+    if (m_pProtocol == nullptr)
+      return false;
 
-    m_pChannel->Send(pMessage);
+    return m_pProtocol->Send(pMessage);
   }
 }
 
 bool plProcessCommunicationChannel::ProcessMessages()
 {
-  if (!m_pChannel)
+  if (!m_pProtocol)
     return false;
 
-  return m_pChannel->ProcessMessages();
+  return m_pProtocol->ProcessMessages();
 }
 
 
 void plProcessCommunicationChannel::WaitForMessages()
 {
-  if (!m_pChannel)
+  if (!m_pProtocol)
     return;
 
-  m_pChannel->WaitForMessages();
+  m_pProtocol->WaitForMessages().IgnoreResult();
 }
 
-void plProcessCommunicationChannel::MessageFunc(const plProcessMessage* msg)
+void plProcessCommunicationChannel::MessageFunc(const plProcessMessage* pMsg)
 {
-  const plRTTI* pRtti = msg->GetDynamicRTTI();
+  const plRTTI* pRtti = pMsg->GetDynamicRTTI();
 
-  if (m_pWaitForMessageType != nullptr && msg->GetDynamicRTTI()->IsDerivedFrom(m_pWaitForMessageType))
+  if (m_pWaitForMessageType != nullptr && pMsg->GetDynamicRTTI()->IsDerivedFrom(m_pWaitForMessageType))
   {
     if (m_WaitForMessageCallback.IsValid())
     {
-      if (m_WaitForMessageCallback(const_cast<plProcessMessage*>(msg)))
+      if (m_WaitForMessageCallback(const_cast<plProcessMessage*>(pMsg)))
       {
         m_WaitForMessageCallback = WaitForMessageCallback();
         m_pWaitForMessageType = nullptr;
@@ -71,20 +73,20 @@ void plProcessCommunicationChannel::MessageFunc(const plProcessMessage* msg)
     }
   }
 
-  PLASMA_ASSERT_DEV(pRtti != nullptr, "Message Type unknown");
-  PLASMA_ASSERT_DEV(msg != nullptr, "Object could not be allocated");
-  PLASMA_ASSERT_DEV(pRtti->IsDerivedFrom<plProcessMessage>(), "Msg base type is invalid");
+  PL_ASSERT_DEV(pRtti != nullptr, "Message Type unknown");
+  PL_ASSERT_DEV(pMsg != nullptr, "Object could not be allocated");
+  PL_ASSERT_DEV(pRtti->IsDerivedFrom<plProcessMessage>(), "Msg base type is invalid");
 
   Event e;
-  e.m_pMessage = msg;
+  e.m_pMessage = pMsg;
   m_Events.Broadcast(e);
 }
 
-plResult plProcessCommunicationChannel::WaitForMessage(const plRTTI* pMessageType, plTime tTimeout, WaitForMessageCallback* pMessageCallack)
+plResult plProcessCommunicationChannel::WaitForMessage(const plRTTI* pMessageType, plTime timeout, WaitForMessageCallback* pMessageCallack)
 {
-  PLASMA_ASSERT_DEV(m_pChannel != nullptr, "Need to connect first before waiting for a message.");
-  // PLASMA_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function is not thread safe");
-  PLASMA_ASSERT_DEV(m_pWaitForMessageType == nullptr, "Already waiting for another message!");
+  PL_ASSERT_DEV(m_pProtocol != nullptr && m_pChannel != nullptr, "Need to connect first before waiting for a message.");
+  // PL_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function is not thread safe");
+  PL_ASSERT_DEV(m_pWaitForMessageType == nullptr, "Already waiting for another message!");
 
   m_pWaitForMessageType = pMessageType;
   if (pMessageCallack)
@@ -96,46 +98,46 @@ plResult plProcessCommunicationChannel::WaitForMessage(const plRTTI* pMessageTyp
     m_WaitForMessageCallback = WaitForMessageCallback();
   }
 
-  PLASMA_SCOPE_EXIT(m_WaitForMessageCallback = WaitForMessageCallback(););
+  PL_SCOPE_EXIT(m_WaitForMessageCallback = WaitForMessageCallback(););
 
   const plTime tStart = plTime::Now();
 
   while (m_pWaitForMessageType != nullptr)
   {
-    if (tTimeout == plTime())
+    if (timeout == plTime())
     {
-      m_pChannel->WaitForMessages();
+      m_pProtocol->WaitForMessages().IgnoreResult();
     }
     else
     {
-      plTime tTimeLeft = tTimeout - (plTime::Now() - tStart);
+      plTime tTimeLeft = timeout - (plTime::Now() - tStart);
 
-      if (tTimeLeft < plTime::Zero())
+      if (tTimeLeft < plTime::MakeZero())
       {
         m_pWaitForMessageType = nullptr;
-        plLog::Dev("Reached time-out of {0} seconds while waiting for {1}", plArgF(tTimeout.GetSeconds(), 1), pMessageType->GetTypeName());
-        return PLASMA_FAILURE;
+        plLog::Dev("Reached time-out of {0} seconds while waiting for {1}", plArgF(timeout.GetSeconds(), 1), pMessageType->GetTypeName());
+        return PL_FAILURE;
       }
 
-      m_pChannel->WaitForMessages(tTimeLeft).IgnoreResult();
+      m_pProtocol->WaitForMessages(tTimeLeft).IgnoreResult();
     }
 
     if (!m_pChannel->IsConnected())
     {
       m_pWaitForMessageType = nullptr;
       plLog::Dev("Lost connection while waiting for {}", pMessageType->GetTypeName());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plProcessCommunicationChannel::WaitForConnection(plTime tTimeout)
+plResult plProcessCommunicationChannel::WaitForConnection(plTime timeout)
 {
   if (m_pChannel->IsConnected())
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plThreadSignal waitForConnectionSignal;
@@ -143,35 +145,37 @@ plResult plProcessCommunicationChannel::WaitForConnection(plTime tTimeout)
   plEventSubscriptionID eventSubscriptionId = m_pChannel->m_Events.AddEventHandler([&](const plIpcChannelEvent& event) {
     switch (event.m_Type)
     {
-      case plIpcChannelEvent::ConnectedToClient:
-      case plIpcChannelEvent::ConnectedToServer:
-      case plIpcChannelEvent::DisconnectedFromClient:
-      case plIpcChannelEvent::DisconnectedFromServer:
+      case plIpcChannelEvent::Connected:
+      case plIpcChannelEvent::Disconnected:
         waitForConnectionSignal.RaiseSignal();
         break;
       default:
         break;
-    }
-  });
+    } });
 
-  PLASMA_SCOPE_EXIT(m_pChannel->m_Events.RemoveEventHandler(eventSubscriptionId));
+  PL_SCOPE_EXIT(m_pChannel->m_Events.RemoveEventHandler(eventSubscriptionId));
 
   if (m_pChannel->IsConnected())
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  if (tTimeout == plTime())
+  if (timeout == plTime())
   {
     waitForConnectionSignal.WaitForSignal();
   }
   else
   {
-    if (waitForConnectionSignal.WaitForSignal(tTimeout) == plThreadSignal::WaitResult::Timeout)
+    if (waitForConnectionSignal.WaitForSignal(timeout) == plThreadSignal::WaitResult::Timeout)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return m_pChannel->IsConnected() ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return m_pChannel->IsConnected() ? PL_SUCCESS : PL_FAILURE;
+}
+
+bool plProcessCommunicationChannel::IsConnected() const
+{
+  return m_pChannel->IsConnected();
 }

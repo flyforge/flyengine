@@ -3,15 +3,15 @@
 #include <Core/Console/QuakeConsole.h>
 #include <Foundation/Configuration/CVar.h>
 
-void plQuakeConsole::ExecuteCommand(plStringView input)
+void plQuakeConsole::ExecuteCommand(plStringView sInput)
 {
-  const bool bBind = input.StartsWith_NoCase("bind ");
-  const bool bUnbind = input.StartsWith_NoCase("unbind ");
+  const bool bBind = sInput.StartsWith_NoCase("bind ");
+  const bool bUnbind = sInput.StartsWith_NoCase("unbind ");
 
   if (bBind || bUnbind)
   {
     plStringBuilder tmp;
-    const char* szAfterCmd = plStringUtils::FindWordEnd(input.GetData(tmp), plStringUtils::IsWhiteSpace); // skip the word 'bind' or 'unbind'
+    const char* szAfterCmd = plStringUtils::FindWordEnd(sInput.GetData(tmp), plStringUtils::IsWhiteSpace); // skip the word 'bind' or 'unbind'
 
     const char* szKeyNameStart = plStringUtils::SkipCharacters(szAfterCmd, plStringUtils::IsWhiteSpace);                // go to the next word
     const char* szKeyNameEnd = plStringUtils::FindWordEnd(szKeyNameStart, plStringUtils::IsIdentifierDelimiter_C_Code); // find its end
@@ -31,13 +31,13 @@ void plQuakeConsole::ExecuteCommand(plStringView input)
     return;
   }
 
-  plConsole::ExecuteCommand(input);
+  plConsole::ExecuteCommand(sInput);
 }
 
 void plQuakeConsole::BindKey(plStringView sKey, plStringView sCommand)
 {
   plStringBuilder s;
-  s.Format("Binding key '{0}' to command '{1}'", sKey, sCommand);
+  s.SetFormat("Binding key '{0}' to command '{1}'", sKey, sCommand);
   AddConsoleString(s, plConsoleString::Type::Success);
 
   m_BoundKeys[sKey] = sCommand;
@@ -46,7 +46,7 @@ void plQuakeConsole::BindKey(plStringView sKey, plStringView sCommand)
 void plQuakeConsole::UnbindKey(plStringView sKey)
 {
   plStringBuilder s;
-  s.Format("Unbinding key '{0}'", sKey);
+  s.SetFormat("Unbinding key '{0}'", sKey);
   AddConsoleString(s, plConsoleString::Type::Success);
 
   m_BoundKeys.Remove(sKey);
@@ -58,10 +58,8 @@ void plQuakeConsole::ExecuteBoundKey(plStringView sKey)
 
   if (it.IsValid())
   {
-    ExecuteCommand(it.Value().GetData());
+    ExecuteCommand(it.Value());
   }
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Console_Implementation_Commands);

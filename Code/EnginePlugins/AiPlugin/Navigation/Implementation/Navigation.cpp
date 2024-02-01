@@ -11,13 +11,13 @@ plResult FindNavMeshPolyAt(dtNavMeshQuery& ref_query, const dtQueryFilter* pQuer
 
   plRcPos resultPos;
   if (dtStatusFailed(ref_query.findNearestPoly(position, &vSize.x, pQueryFilter, &out_polyRef, resultPos)))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (!plMath::IsEqual(position.m_Pos[0], resultPos.m_Pos[0], fPlaneEpsilon) ||
       !plMath::IsEqual(position.m_Pos[1], resultPos.m_Pos[1], fHeightEpsilon) ||
       !plMath::IsEqual(position.m_Pos[2], resultPos.m_Pos[2], fPlaneEpsilon))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (out_pAdjustedPosition != nullptr)
@@ -25,7 +25,7 @@ plResult FindNavMeshPolyAt(dtNavMeshQuery& ref_query, const dtQueryFilter* pQuer
     *out_pAdjustedPosition = resultPos;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -78,7 +78,7 @@ void plAiNavigation::Update()
           m_State = State::StartNewSearch;
         break;
 
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
 
     if (m_State == State::StartNewSearch)
@@ -94,8 +94,7 @@ void plAiNavigation::Update()
   {
     // make sure the system creates the necessary sectors at some point
     {
-      plRectFloat r;
-      r.SetInvalid();
+      plRectFloat r = plRectFloat::MakeInvalid();
       r.ExpandToInclude(m_vCurrentPosition.GetAsVec2());
       r.Grow(c_fPathSearchBoundary);
       m_pNavmesh->RequestSector(r.GetCenter(), r.GetHalfExtents());
@@ -105,7 +104,7 @@ void plAiNavigation::Update()
 
     if (!m_PathCorridor.movePosition(plRcPos(m_vCurrentPosition), &m_Query, m_pFilter))
     {
-      PLASMA_REPORT_FAILURE("Steered into invalid position."); // not sure under which conditions this can happen
+      PL_REPORT_FAILURE("Steered into invalid position."); // not sure under which conditions this can happen
       CancelNavigation();
       m_State = State::StartNewSearch;
       return;
@@ -148,8 +147,7 @@ void plAiNavigation::Update()
   {
     // make sure the system creates the necessary sectors at some point
     {
-      plRectFloat r;
-      r.SetInvalid();
+      plRectFloat r = plRectFloat::MakeInvalid();
       r.ExpandToInclude(m_vTargetPosition.GetAsVec2());
       r.Grow(c_fPathSearchBoundary);
       m_pNavmesh->RequestSector(r.GetCenter(), r.GetHalfExtents());
@@ -230,11 +228,6 @@ void plAiNavigation::SetTargetPosition(const plVec3& vPosition)
   m_uiTargetPositionChangedBit = 1;
 }
 
-const plVec3& plAiNavigation::GetTargetPosition() const
-{
-  return m_vTargetPosition;
-}
-
 void plAiNavigation::SetNavmesh(plAiNavMesh& ref_navmesh)
 {
   if (m_pNavmesh == &ref_navmesh)
@@ -279,8 +272,7 @@ bool plAiNavigation::UpdatePathSearch()
 {
   if (m_State == State::StartNewSearch)
   {
-    plRectFloat r;
-    r.SetInvalid();
+    plRectFloat r = plRectFloat::MakeInvalid();
     r.ExpandToInclude(m_vCurrentPosition.GetAsVec2());
     r.ExpandToInclude(m_vTargetPosition.GetAsVec2());
     r.Grow(c_fPathSearchBoundary);
@@ -315,7 +307,7 @@ bool plAiNavigation::UpdatePathSearch()
     if (dtStatusFailed(m_Query.initSlicedFindPath(startRef, m_PathSearchTargetPoly, plRcPos(m_vCurrentPosition), plRcPos(m_vTargetPosition), m_pFilter)))
     {
       m_State = State::NoPathFound;
-      PLASMA_REPORT_FAILURE("Detour: initSlicedFindPath failed.");
+      PL_REPORT_FAILURE("Detour: initSlicedFindPath failed.");
       return false;
     }
 
@@ -347,12 +339,12 @@ bool plAiNavigation::UpdatePathSearch()
     if (dtStatusFailed(m_Query.finalizeSlicedFindPath(resultPolys, &iPathCorridorLength, (int)MaxPathNodes)))
     {
       m_State = State::NoPathFound;
-      PLASMA_REPORT_FAILURE("Detour: finalizeSlicedFindPath failed.");
+      PL_REPORT_FAILURE("Detour: finalizeSlicedFindPath failed.");
       return false;
     }
 
     // reduce to actual length
-    PLASMA_ASSERT_DEV(iPathCorridorLength >= 1, "Expected path corridor to have at least length 1");
+    PL_ASSERT_DEV(iPathCorridorLength >= 1, "Expected path corridor to have at least length 1");
 
     if (resultPolys[iPathCorridorLength - 1] != m_PathSearchTargetPoly)
     {
@@ -381,7 +373,7 @@ void plAiNavigation::DebugDraw(const plDebugRendererContext& context, plColor ti
   const plUInt32 uiCorrLen = m_PathCorridor.getPathCount();
   const dtPolyRef* pCorrArr = m_PathCorridor.getPath();
 
-  if (tilesColor != plColor::ZeroColor())
+  if (tilesColor != plColor::MakeZero())
   {
     plHybridArray<plDebugRenderer::Triangle, 64> tris;
 
@@ -416,7 +408,7 @@ void plAiNavigation::DebugDraw(const plDebugRendererContext& context, plColor ti
     plDebugRenderer::DrawSolidTriangles(context, tris, tilesColor);
   }
 
-  if (straightLineColor != plColor::ZeroColor())
+  if (straightLineColor != plColor::MakeZero())
   {
     plHybridArray<plDebugRenderer::Line, 64> lines;
     plHybridArray<plVec3, 64> waypoints;
@@ -486,8 +478,8 @@ void plAiNavigation::ComputeSteeringInfo(plAiSteeringInfo& out_info, const plVec
   out_info.m_fArrivalDistance = plMath::HighValue<float>();
   out_info.m_vNextWaypoint = m_vCurrentPosition;
   out_info.m_vDirectionTowardsWaypoint = vForwardDir;
-  out_info.m_AbsRotationTowardsWaypoint = plAngle();
-  out_info.m_MaxAbsRotationAfterWaypoint = plAngle();
+  out_info.m_AbsRotationTowardsWaypoint = plAngle::MakeZero();
+  out_info.m_MaxAbsRotationAfterWaypoint = plAngle::MakeZero();
   // out_info.m_fWaypointCorridorWidth = plMath::HighValue<float>();
 
   plVec3 vPrevPos = m_vCurrentPosition;
@@ -519,11 +511,10 @@ void plAiNavigation::ComputeSteeringInfo(plAiSteeringInfo& out_info, const plVec
     {
       const plVec3 vNextPt = straightPath[idx];
       plVec2 vNextDir = (vNextPt - out_info.m_vNextWaypoint).GetAsVec2();
-      if (vNextDir.NormalizeIfNotZero(plVec2::ZeroVector()).Succeeded())
-      {
-        plAngle absDir = vNextDir.GetAngleBetween(out_info.m_vDirectionTowardsWaypoint);
-        out_info.m_MaxAbsRotationAfterWaypoint = plMath::Max(absDir, out_info.m_MaxAbsRotationAfterWaypoint);
-      }
+      vNextDir.Normalize();
+
+      plAngle absDir = vNextDir.GetAngleBetween(out_info.m_vDirectionTowardsWaypoint);
+      out_info.m_MaxAbsRotationAfterWaypoint = plMath::Max(absDir, out_info.m_MaxAbsRotationAfterWaypoint);
     }
   }
 }

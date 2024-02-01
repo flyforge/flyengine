@@ -12,14 +12,14 @@ plThreadWithDispatcher::~plThreadWithDispatcher() = default;
 
 void plThreadWithDispatcher::Dispatch(DispatchFunction&& delegate)
 {
-  PLASMA_LOCK(m_QueueMutex);
+  PL_LOCK(m_QueueMutex);
   m_ActiveQueue.PushBack(std::move(delegate));
 }
 
 void plThreadWithDispatcher::DispatchQueue()
 {
   {
-    PLASMA_LOCK(m_QueueMutex);
+    PL_LOCK(m_QueueMutex);
     std::swap(m_ActiveQueue, m_CurrentlyBeingDispatchedQueue);
   }
 
@@ -31,4 +31,4 @@ void plThreadWithDispatcher::DispatchQueue()
   m_CurrentlyBeingDispatchedQueue.Clear();
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_ThreadWithDispatcher);
+

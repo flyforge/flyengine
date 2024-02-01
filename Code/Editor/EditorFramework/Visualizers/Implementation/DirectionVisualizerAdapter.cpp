@@ -4,19 +4,19 @@
 #include <EditorFramework/Visualizers/DirectionVisualizerAdapter.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-plDirectionVisualizerAdapter::plDirectionVisualizerAdapter() {}
+plDirectionVisualizerAdapter::plDirectionVisualizerAdapter() = default;
 
-plDirectionVisualizerAdapter::~plDirectionVisualizerAdapter() {}
+plDirectionVisualizerAdapter::~plDirectionVisualizerAdapter() = default;
 
 void plDirectionVisualizerAdapter::Finalize()
 {
   auto* pDoc = m_pObject->GetDocumentObjectManager()->GetDocument()->GetMainDocument();
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
-  PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
+  PL_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
   const plDirectionVisualizerAttribute* pAttr = static_cast<const plDirectionVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::Arrow, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
+  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::Arrow, pAttr->m_Color, plGizmoFlags::ShowInOrtho | plGizmoFlags::Visualizer);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);
@@ -32,9 +32,9 @@ void plDirectionVisualizerAdapter::Update()
     plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
 
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plDirectionVisualizerAttribute 'color'");
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plDirectionVisualizerAttribute 'color'");
     m_hGizmo.SetColor(value.ConvertTo<plColor>() * pAttr->m_Color);
   }
 }
@@ -49,9 +49,9 @@ void plDirectionVisualizerAdapter::UpdateGizmoTransform()
     plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetLengthProperty()), value).IgnoreResult();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetLengthProperty()), value).AssertSuccess();
 
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plDirectionVisualizerAttribute 'length'");
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<float>(), "Invalid property bound to plDirectionVisualizerAttribute 'length'");
     fScale *= value.ConvertTo<float>();
   }
 
@@ -62,9 +62,9 @@ void plDirectionVisualizerAdapter::UpdateGizmoTransform()
     plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAxisProperty()), value).IgnoreResult();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetAxisProperty()), value).AssertSuccess();
 
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plInt32>(), "Invalid property bound to plDirectionVisualizerAttribute 'length'");
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plInt32>(), "Invalid property bound to plDirectionVisualizerAttribute 'length'");
 
     axis = static_cast<plBasisAxis::Enum>(value.ConvertTo<plInt32>());
   }

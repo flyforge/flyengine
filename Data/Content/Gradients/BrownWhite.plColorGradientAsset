@@ -11,9 +11,10 @@ o
 		s %AssetType{"ColorGradient"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{13021577390993623224,5135836194667462521}}
-		u4 %Hash{11308102445145864368}
+		u4 %Hash{10018470702334139718}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
+		VarArray %PackageDeps{}
 		VarArray %References{}
 	}
 }
@@ -95,7 +96,7 @@ Types
 {
 o
 {
-	Uuid %id{u4{14200200698897901346,5259721858618902128}}
+	Uuid %id{u4{9491473581377719452,4451399860225586302}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -104,52 +105,15 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plColorGradientAssetData"}
-		u3 %TypeSize{80}
-		u3 %TypeVersion{2}
-	}
-}
-o
-{
-	Uuid %id{u4{16258844364505849736,5307818732291421299}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plIntensityControlPoint"}
-		u3 %TypeSize{24}
-		u3 %TypeVersion{2}
-	}
-}
-o
-{
-	Uuid %id{u4{12343843963841529452,6934176365839250076}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plAlphaControlPoint"}
-		u3 %TypeSize{24}
 		u3 %TypeVersion{2}
 	}
 }
 o
 {
-	Uuid %id{u4{5125754200392540009,7630867336988665107}}
+	Uuid %id{u4{4645803681883095669,7506122234867881289}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -158,16 +122,15 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
-		s %TypeName{"plColorControlPoint"}
-		u3 %TypeSize{24}
+		s %TypeName{"plIntensityControlPoint"}
 		u3 %TypeVersion{2}
 	}
 }
 o
 {
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -179,13 +142,46 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDocumentRoot"}
-		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{9143222088539867141,9609721939939207251}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorGradientAssetData"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{13088963179257465887,12792043508414429321}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plColorControlPoint"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -197,7 +193,6 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plReflectedClass"}
-		u3 %TypeSize{8}
 		u3 %TypeVersion{1}
 	}
 }

@@ -18,7 +18,7 @@ class plAnimGraph;
 using plAnimGraphResourceHandle = plTypedResourceHandle<class plAnimGraphResource>;
 using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 
-PLASMA_DEFINE_AS_POD_TYPE(ozz::math::SimdFloat4);
+PL_DEFINE_AS_POD_TYPE(ozz::math::SimdFloat4);
 
 struct plAnimGraphPinDataBoneWeights
 {
@@ -33,7 +33,7 @@ struct plAnimGraphPinDataLocalTransforms
   plAnimPoseGeneratorCommandID m_CommandID;
   const plAnimGraphPinDataBoneWeights* m_pWeights = nullptr;
   float m_fOverallWeight = 1.0f;
-  plVec3 m_vRootMotion = plVec3::ZeroVector();
+  plVec3 m_vRootMotion = plVec3::MakeZero();
   bool m_bUseRootMotion = false;
 };
 
@@ -41,16 +41,16 @@ struct plAnimGraphPinDataModelTransforms
 {
   plUInt16 m_uiOwnIndex = 0xFFFF;
   plAnimPoseGeneratorCommandID m_CommandID;
-  plVec3 m_vRootMotion = plVec3::ZeroVector();
+  plVec3 m_vRootMotion = plVec3::MakeZero();
   plAngle m_RootRotationX;
   plAngle m_RootRotationY;
   plAngle m_RootRotationZ;
   bool m_bUseRootMotion = false;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimController
+class PL_RENDERERCORE_DLL plAnimController
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAnimController);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAnimController);
 
 public:
   plAnimController();
@@ -93,7 +93,7 @@ private:
   plSkeletonResourceHandle m_hSkeleton;
   plAnimGraphPinDataModelTransforms* m_pCurrentModelTransforms = nullptr;
 
-  plVec3 m_vRootMotion = plVec3::ZeroVector();
+  plVec3 m_vRootMotion = plVec3::MakeZero();
   plAngle m_RootRotationX;
   plAngle m_RootRotationY;
   plAngle m_RootRotationZ;

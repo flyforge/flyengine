@@ -44,21 +44,22 @@
 #define plInputSlot_XR_Hand_Right_Secondary_Analog_Stick_Click "xr_hand_right_secondary_analog_stick_click"
 #define plInputSlot_XR_Hand_Right_Secondary_Analog_Stick_Touch "xr_hand_right_secondary_analog_stick_touch"
 
-class PLASMA_GAMEENGINE_DLL plXRInputDevice : public plInputDevice
+
+class PL_GAMEENGINE_DLL plXRInputDevice : public plInputDevice
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plXRInputDevice, plInputDevice);
+  PL_ADD_DYNAMIC_REFLECTION(plXRInputDevice, plInputDevice);
 
 public:
   /// \name Devices
   ///@{
 
   /// \brief Fills out a list of valid (connected) device IDs.
-  virtual void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_Devices) const = 0;
+  virtual void GetDeviceList(plHybridArray<plXRDeviceID, 64>& out_devices) const = 0;
   /// \brief Returns the deviceID for a specific type of device.
   /// If the device is not connected, -1 is returned instead.
   virtual plXRDeviceID GetDeviceIDByType(plXRDeviceType::Enum type) const = 0;
   /// \brief Returns the current device state for a valid device ID.
-  virtual const plXRDeviceState& GetDeviceState(plXRDeviceID iDeviceID) const = 0;
+  virtual const plXRDeviceState& GetDeviceState(plXRDeviceID deviceID) const = 0;
   /// \brief Returns the device name for a valid device ID.
   ///
   /// This returns a human readable name to identify the device.
@@ -67,9 +68,9 @@ public:
   /// or mappings if a certain type of controller is used.
   /// Values could be for example:
   /// 'Simple Controller', 'Mixed Reality Motion Controller', 'Hand Interaction' etc.
-  virtual plString GetDeviceName(plXRDeviceID iDeviceID) const = 0;
+  virtual plString GetDeviceName(plXRDeviceID deviceID) const = 0;
   /// \brief Returns the device features for a valid device ID.
-  virtual plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID iDeviceID) const = 0;
+  virtual plBitflags<plXRDeviceFeatures> GetDeviceFeatures(plXRDeviceID deviceID) const = 0;
 
   /// \brief Returns the input event. Allows tracking device addition and removal.
   const plXRDeviceEvent& GetInputEvent() { return m_InputEvents; }

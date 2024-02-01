@@ -6,9 +6,9 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <RendererCore/Pipeline/ViewRenderMode.h>
 
-struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneViewPerspective
+struct PL_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneViewPerspective
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -20,11 +20,11 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plSceneViewPerspective
     Default = Perspective
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL, plSceneViewPerspective);
+PL_DECLARE_REFLECTABLE_TYPE(PL_EDITORENGINEPROCESSFRAMEWORK_DLL, plSceneViewPerspective);
 
-struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewConfig
+struct PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewConfig
 {
-  PlasmaEngineViewConfig()
+  plEngineViewConfig()
   {
     m_RenderMode = plViewRenderMode::Default;
     m_Perspective = plSceneViewPerspective::Default;
@@ -38,11 +38,11 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewConfig
   bool m_bUseCameraTransformOnDevice = true;
 
   plCamera m_Camera;
-  PlasmaEngineViewConfig* m_pLinkedViewConfig; // used to store which other view config this is linked to, for resetting values when switching views
+  plEngineViewConfig* m_pLinkedViewConfig; // used to store which other view config this is linked to, for resetting values when switching views
 
-  void ApplyPerspectiveSetting(float fov = 0.0f, float nearPlane = 0.1f, float farPlane = 1000.0f);
+  void ApplyPerspectiveSetting(float fFov = 0.0f, float fNearPlane = 0.1f, float fFarPlane = 1000.0f);
 };
-struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewLightSettingsEvent
+struct PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewLightSettingsEvent
 {
   enum class Type
   {
@@ -61,56 +61,56 @@ struct PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewLightSettingsEven
   Type m_Type;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEngineViewLightSettings : public PlasmaEditorEngineSyncObject
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEngineViewLightSettings : public plEditorEngineSyncObject
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEngineViewLightSettings, PlasmaEditorEngineSyncObject);
+  PL_ADD_DYNAMIC_REFLECTION(plEngineViewLightSettings, plEditorEngineSyncObject);
 
 public:
-  PlasmaEngineViewLightSettings(bool bEnable = true);
-  ~PlasmaEngineViewLightSettings();
+  plEngineViewLightSettings(bool bEnable = true);
+  ~plEngineViewLightSettings();
 
   bool GetSkyBox() const;
-  void SetSkyBox(bool val);
+  void SetSkyBox(bool bVal);
 
   bool GetSkyLight() const;
-  void SetSkyLight(bool val);
+  void SetSkyLight(bool bVal);
 
   const char* GetSkyLightCubeMap() const;
-  void SetSkyLightCubeMap(const char* val);
+  void SetSkyLightCubeMap(const char* szVal);
 
   float GetSkyLightIntensity() const;
-  void SetSkyLightIntensity(float val);
+  void SetSkyLightIntensity(float fVal);
 
   bool GetDirectionalLight() const;
-  void SetDirectionalLight(bool val);
+  void SetDirectionalLight(bool bVal);
 
   plAngle GetDirectionalLightAngle() const;
   void SetDirectionalLightAngle(plAngle val);
 
   bool GetDirectionalLightShadows() const;
-  void SetDirectionalLightShadows(bool val);
+  void SetDirectionalLightShadows(bool bVal);
 
   float GetDirectionalLightIntensity() const;
-  void SetDirectionalLightIntensity(float val);
+  void SetDirectionalLightIntensity(float fVal);
 
   bool GetFog() const;
-  void SetFog(bool val);
+  void SetFog(bool bVal);
 
-  mutable plEvent<const PlasmaEngineViewLightSettingsEvent&> m_EngineViewLightSettingsEvents;
+  mutable plEvent<const plEngineViewLightSettingsEvent&> m_EngineViewLightSettingsEvents;
 
   virtual bool SetupForEngine(plWorld* pWorld, plUInt32 uiNextComponentPickingID) override;
   virtual void UpdateForEngine(plWorld* pWorld) override;
 
 private:
-  void SetModifiedInternal(PlasmaEngineViewLightSettingsEvent::Type type);
+  void SetModifiedInternal(plEngineViewLightSettingsEvent::Type type);
 
   bool m_bSkyBox = true;
   bool m_bSkyLight = true;
-  plString m_sSkyLightCubeMap = "{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }";
+  plString m_sSkyLightCubeMap = "{ 0b202e08-a64f-465d-b38e-15b81d161822 }";
   float m_fSkyLightIntensity = 1.0f;
 
   bool m_bDirectionalLight = true;
-  plAngle m_DirectionalLightAngle = plAngle::Degree(30.0f);
+  plAngle m_DirectionalLightAngle = plAngle::MakeFromDegree(30.0f);
   bool m_bDirectionalLightShadows = false;
   float m_fDirectionalLightIntensity = 10.0f;
 

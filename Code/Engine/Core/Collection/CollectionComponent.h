@@ -5,7 +5,7 @@
 #include <Core/World/Component.h>
 #include <Core/World/World.h>
 
-typedef plComponentManager<class plCollectionComponent, plBlockStorageType::Compact> plCollectionComponentManager;
+using plCollectionComponentManager = plComponentManager<class plCollectionComponent, plBlockStorageType::Compact>;
 
 /// \brief An plCollectionComponent references an plCollectionResource and triggers resource preloading when needed
 ///
@@ -14,15 +14,15 @@ typedef plComponentManager<class plCollectionComponent, plBlockStorageType::Comp
 ///
 /// If a deactivated plCollectionComponent is part of the scene, it will not trigger a preload, but will do so once
 /// the component is activated.
-class PLASMA_CORE_DLL plCollectionComponent : public plComponent
+class PL_CORE_DLL plCollectionComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plCollectionComponent, plComponent, plCollectionComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plCollectionComponent, plComponent, plCollectionComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   virtual void OnSimulationStarted() override;
@@ -33,15 +33,16 @@ public:
   plCollectionComponent();
   ~plCollectionComponent();
 
-  void SetCollectionFile(plStringView sFile); // [ property ]
-  plStringView GetCollectionFile() const;      // [ property ]
+  void SetCollectionFile(const char* szFile); // [ property ]
+  const char* GetCollectionFile() const;      // [ property ]
 
   void SetCollection(const plCollectionResourceHandle& hPrefab);
-  PLASMA_ALWAYS_INLINE const plCollectionResourceHandle& GetCollection() const { return m_hCollection; }
+  PL_ALWAYS_INLINE const plCollectionResourceHandle& GetCollection() const { return m_hCollection; }
 
 protected:
   /// \brief Triggers the preload on the referenced plCollectionResource
   void InitiatePreload();
 
+  bool m_bRegisterNames = false;
   plCollectionResourceHandle m_hCollection;
 };

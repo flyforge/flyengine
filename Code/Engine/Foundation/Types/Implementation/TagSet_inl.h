@@ -5,14 +5,14 @@
 #include <Foundation/Types/Tag.h>
 
 
-// Template specialization to be able to use plTagSet properties as PLASMA_SET_MEMBER_PROPERTY.
+// Template specialization to be able to use plTagSet properties as PL_SET_MEMBER_PROPERTY.
 template <typename T>
 struct plContainerSubTypeResolver<plTagSetTemplate<T>>
 {
   using Type = const char*;
 };
 
-// Template specialization to be able to use plTagSet properties as PLASMA_SET_MEMBER_PROPERTY.
+// Template specialization to be able to use plTagSet properties as PL_SET_MEMBER_PROPERTY.
 template <typename Class>
 class plMemberSetProperty<Class, plTagSet, const char*> : public plTypedSetProperty<typename plTypeTraits<const char*>::NonConstReferenceType>
 {
@@ -26,7 +26,7 @@ public:
   plMemberSetProperty(const char* szPropertyName, GetConstContainerFunc constGetter, GetContainerFunc getter)
     : plTypedSetProperty<RealType>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(constGetter != nullptr, "The const get count function of an set property cannot be nullptr.");
+    PL_ASSERT_DEBUG(constGetter != nullptr, "The const get count function of an set property cannot be nullptr.");
 
     m_ConstGetter = constGetter;
     m_Getter = getter;
@@ -39,19 +39,19 @@ public:
 
   virtual void Clear(void* pInstance) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).Clear();
   }
 
   virtual void Insert(void* pInstance, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).SetByName(*static_cast<const RealType*>(pObject));
   }
 
   virtual void Remove(void* pInstance, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Getter != nullptr, "The property '{0}' has no non-const set accessor function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     m_Getter(static_cast<Class*>(pInstance)).RemoveByName(*static_cast<const RealType*>(pObject));
   }
 
@@ -74,7 +74,7 @@ private:
   GetContainerFunc m_Getter;
 };
 
-// Template specialization to be able to use plTagSet properties as PLASMA_SET_ACCESSOR_PROPERTY.
+// Template specialization to be able to use plTagSet properties as PL_SET_ACCESSOR_PROPERTY.
 template <typename Class>
 class plAccessorSetProperty<Class, const char*, const plTagSet&> : public plTypedSetProperty<const char*>
 {
@@ -92,7 +92,7 @@ public:
   plAccessorSetProperty(const char* szPropertyName, GetValuesFunc getValues, InsertFunc insert, RemoveFunc remove)
     : plTypedSetProperty<Type>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getValues != nullptr, "The get values function of an set property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getValues != nullptr, "The get values function of an set property cannot be nullptr.");
 
     m_GetValues = getValues;
     m_Insert = insert;
@@ -107,7 +107,7 @@ public:
 
   virtual void Clear(void* pInstance) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Insert != nullptr && m_Remove != nullptr, "The property '{0}' has no remove and insert function, thus it is read-only",
+    PL_ASSERT_DEBUG(m_Insert != nullptr && m_Remove != nullptr, "The property '{0}' has no remove and insert function, thus it is read-only",
       plAbstractProperty::GetPropertyName());
 
     // We must not cache the container c here as the Remove can make it invalid
@@ -118,19 +118,19 @@ public:
       decltype((static_cast<const Class*>(pInstance)->*m_GetValues)()) c = (static_cast<const Class*>(pInstance)->*m_GetValues)();
       auto it = cbegin(c);
       const plTag& value = *it;
-      Remove(pInstance, value.GetTagString());
+      Remove(pInstance, value.GetTagString().GetData());
     }
   }
 
   virtual void Insert(void* pInstance, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Insert != nullptr, "The property '{0}' has no insert function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Insert)(*static_cast<const RealType*>(pObject));
   }
 
   virtual void Remove(void* pInstance, const void* pObject) const override
   {
-    PLASMA_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEBUG(m_Remove != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
     (static_cast<Class*>(pInstance)->*m_Remove)(*static_cast<const RealType*>(pObject));
   }
 
@@ -234,7 +234,7 @@ bool plTagSetTemplate<BlockStorageAllocator>::operator!=(const plTagSetTemplate&
 template <typename BlockStorageAllocator>
 void plTagSetTemplate<BlockStorageAllocator>::Set(const plTag& tag)
 {
-  PLASMA_ASSERT_DEV(tag.IsValid(), "Only valid tags can be set in a tag set!");
+  PL_ASSERT_DEV(tag.IsValid(), "Only valid tags can be set in a tag set!");
 
   if (m_TagBlocks.IsEmpty())
   {
@@ -250,7 +250,7 @@ void plTagSetTemplate<BlockStorageAllocator>::Set(const plTag& tag)
 
   plUInt64& tagBlock = m_TagBlocks[tag.m_uiBlockIndex - GetTagBlockStart()];
 
-  const plUInt64 bitMask = PLASMA_BIT(tag.m_uiBitIndex);
+  const plUInt64 bitMask = PL_BIT(tag.m_uiBitIndex);
   const bool bBitWasSet = ((tagBlock & bitMask) != 0);
 
   tagBlock |= bitMask;
@@ -264,13 +264,13 @@ void plTagSetTemplate<BlockStorageAllocator>::Set(const plTag& tag)
 template <typename BlockStorageAllocator>
 void plTagSetTemplate<BlockStorageAllocator>::Remove(const plTag& tag)
 {
-  PLASMA_ASSERT_DEV(tag.IsValid(), "Only valid tags can be cleared from a tag set!");
+  PL_ASSERT_DEV(tag.IsValid(), "Only valid tags can be cleared from a tag set!");
 
   if (IsTagInAllocatedRange(tag))
   {
     plUInt64& tagBlock = m_TagBlocks[tag.m_uiBlockIndex - GetTagBlockStart()];
 
-    const plUInt64 bitMask = PLASMA_BIT(tag.m_uiBitIndex);
+    const plUInt64 bitMask = PL_BIT(tag.m_uiBitIndex);
     const bool bBitWasSet = ((tagBlock & bitMask) != 0);
 
     tagBlock &= ~bitMask;
@@ -285,11 +285,11 @@ void plTagSetTemplate<BlockStorageAllocator>::Remove(const plTag& tag)
 template <typename BlockStorageAllocator>
 bool plTagSetTemplate<BlockStorageAllocator>::IsSet(const plTag& tag) const
 {
-  PLASMA_ASSERT_DEV(tag.IsValid(), "Only valid tags can be checked!");
+  PL_ASSERT_DEV(tag.IsValid(), "Only valid tags can be checked!");
 
   if (IsTagInAllocatedRange(tag))
   {
-    return (m_TagBlocks[tag.m_uiBlockIndex - GetTagBlockStart()] & PLASMA_BIT(tag.m_uiBitIndex)) != 0;
+    return (m_TagBlocks[tag.m_uiBlockIndex - GetTagBlockStart()] & PL_BIT(tag.m_uiBitIndex)) != 0;
   }
   else
   {
@@ -326,13 +326,13 @@ bool plTagSetTemplate<BlockStorageAllocator>::IsAnySet(const plTagSetTemplate& o
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plUInt32 plTagSetTemplate<BlockStorageAllocator>::GetNumTagsSet() const
+PL_ALWAYS_INLINE plUInt32 plTagSetTemplate<BlockStorageAllocator>::GetNumTagsSet() const
 {
   return GetTagCount();
 }
 
 template <typename BlockStorageAllocator>
-PLASMA_ALWAYS_INLINE bool plTagSetTemplate<BlockStorageAllocator>::IsEmpty() const
+PL_ALWAYS_INLINE bool plTagSetTemplate<BlockStorageAllocator>::IsEmpty() const
 {
   return GetTagCount() == 0;
 }
@@ -373,7 +373,7 @@ bool plTagSetTemplate<BlockStorageAllocator>::IsSetByName(plStringView sTag) con
 }
 
 template <typename BlockStorageAllocator>
-PLASMA_ALWAYS_INLINE bool plTagSetTemplate<BlockStorageAllocator>::IsTagInAllocatedRange(const plTag& Tag) const
+PL_ALWAYS_INLINE bool plTagSetTemplate<BlockStorageAllocator>::IsTagInAllocatedRange(const plTag& Tag) const
 {
   return Tag.m_uiBlockIndex >= GetTagBlockStart() && Tag.m_uiBlockIndex < GetTagBlockEnd();
 }
@@ -381,7 +381,7 @@ PLASMA_ALWAYS_INLINE bool plTagSetTemplate<BlockStorageAllocator>::IsTagInAlloca
 template <typename BlockStorageAllocator>
 void plTagSetTemplate<BlockStorageAllocator>::Reallocate(plUInt32 uiNewTagBlockStart, plUInt32 uiNewMaxBlockIndex)
 {
-  PLASMA_ASSERT_DEV(uiNewTagBlockStart < plSmallInvalidIndex, "Tag block start is too big");
+  PL_ASSERT_DEV(uiNewTagBlockStart < plSmallInvalidIndex, "Tag block start is too big");
   const plUInt16 uiNewBlockArraySize = static_cast<plUInt16>((uiNewMaxBlockIndex - uiNewTagBlockStart) + 1);
 
   // Early out for non-filled tag sets
@@ -393,7 +393,7 @@ void plTagSetTemplate<BlockStorageAllocator>::Reallocate(plUInt32 uiNewTagBlockS
     return;
   }
 
-  PLASMA_ASSERT_DEBUG(uiNewTagBlockStart <= GetTagBlockStart(), "New block start must be smaller or equal to current block start!");
+  PL_ASSERT_DEBUG(uiNewTagBlockStart <= GetTagBlockStart(), "New block start must be smaller or equal to current block start!");
 
   plSmallArray<plUInt64, 32, BlockStorageAllocator> helperArray;
   helperArray.SetCount(uiNewBlockArraySize);
@@ -409,43 +409,43 @@ void plTagSetTemplate<BlockStorageAllocator>::Reallocate(plUInt32 uiNewTagBlockS
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagBlockStart() const
+PL_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagBlockStart() const
 {
   return m_TagBlocks.template GetUserData<UserData>().m_uiTagBlockStart;
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagBlockEnd() const
+PL_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagBlockEnd() const
 {
   return static_cast<plUInt16>(GetTagBlockStart() + m_TagBlocks.GetCount());
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::SetTagBlockStart(plUInt16 uiTagBlockStart)
+PL_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::SetTagBlockStart(plUInt16 uiTagBlockStart)
 {
   m_TagBlocks.template GetUserData<UserData>().m_uiTagBlockStart = uiTagBlockStart;
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagCount() const
+PL_ALWAYS_INLINE plUInt16 plTagSetTemplate<BlockStorageAllocator>::GetTagCount() const
 {
   return m_TagBlocks.template GetUserData<UserData>().m_uiTagCount;
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::SetTagCount(plUInt16 uiTagCount)
+PL_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::SetTagCount(plUInt16 uiTagCount)
 {
   m_TagBlocks.template GetUserData<UserData>().m_uiTagCount = uiTagCount;
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::IncreaseTagCount()
+PL_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::IncreaseTagCount()
 {
   m_TagBlocks.template GetUserData<UserData>().m_uiTagCount++;
 }
 
 template <typename BlockStorageAllocator /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::DecreaseTagCount()
+PL_ALWAYS_INLINE void plTagSetTemplate<BlockStorageAllocator>::DecreaseTagCount()
 {
   m_TagBlocks.template GetUserData<UserData>().m_uiTagCount--;
 }

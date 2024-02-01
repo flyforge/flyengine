@@ -5,35 +5,35 @@
 #include <EditorPluginScene/Objects/SceneObjectManager.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentSettingsBase, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentSettingsBase, 1, plRTTINoAllocator)
 {
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabDocumentSettings, 1, plRTTIDefaultAllocator<plPrefabDocumentSettings>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPrefabDocumentSettings, 1, plRTTIDefaultAllocator<plPrefabDocumentSettings>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("ExposedProperties", m_ExposedProperties),
+    PL_ARRAY_MEMBER_PROPERTY("ExposedProperties", m_ExposedProperties),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDocumentSettings, 1, plRTTIDefaultAllocator<plLayerDocumentSettings>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDocumentSettings, 1, plRTTIDefaultAllocator<plLayerDocumentSettings>)
 {
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentRoot, 2, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentRoot, 2, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Settings", m_pSettings)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_MEMBER_PROPERTY("Settings", m_pSettings)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
@@ -43,19 +43,19 @@ plSceneObjectManager::plSceneObjectManager()
 {
 }
 
-void plSceneObjectManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
+void plSceneObjectManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const
 {
-  Types.PushBack(plGetStaticRTTI<plGameObject>());
+  ref_types.PushBack(plGetStaticRTTI<plGameObject>());
 
   plRTTI::ForEachDerivedType<plComponent>(
-    [&](const plRTTI* pRtti) { Types.PushBack(pRtti); },
+    [&](const plRTTI* pRtti) { ref_types.PushBack(pRtti); },
     plRTTI::ForEachOptions::ExcludeAbstract);
 }
 
 plStatus plSceneObjectManager::InternalCanAdd(
-  const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const
+  const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const
 {
-  if (IsUnderRootProperty("Children", pParent, szParentProperty))
+  if (IsUnderRootProperty("Children", pParent, sParentProperty))
   {
     if (pParent == nullptr)
     {
@@ -90,11 +90,11 @@ plStatus plSceneObjectManager::InternalCanAdd(
       //}
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plSceneObjectManager::InternalCanMove(
-  const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProperty, const plVariant& index) const
+  const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProperty, const plVariant& index) const
 {
   // code to disallow attaching nodes to a prefab node
   // if (pNewParent != nullptr)
@@ -110,7 +110,7 @@ plStatus plSceneObjectManager::InternalCanMove(
   //  }
   //}
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plSceneObjectManager::InternalCanSelect(const plDocumentObject* pObject) const
@@ -120,7 +120,7 @@ plStatus plSceneObjectManager::InternalCanSelect(const plDocumentObject* pObject
     return plStatus(
       plFmt("Object of type '{0}' is not a 'plGameObject' and can't be selected.", pObject->GetTypeAccessor().GetType()->GetTypeName()));
   }*/
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 namespace
@@ -133,12 +133,12 @@ namespace
       : plGraphPatch("plSceneDocumentSettings", 2)
     {
     }
-    virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+    virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
     {
       // Previously, plSceneDocumentSettings only contained prefab settings. As these only apply to prefab documents, we switch the old version to prefab.
-      context.RenameClass("plPrefabDocumentSettings", 1);
+      ref_context.RenameClass("plPrefabDocumentSettings", 1);
       plVersionKey bases[] = {{"plSceneDocumentSettingsBase", 1}, {"plReflectedClass", 1}};
-      context.ChangeBaseClass(bases);
+      ref_context.ChangeBaseClass(bases);
     }
   };
   plSceneDocumentSettings_1_2 g_plSceneDocumentSettings_1_2;

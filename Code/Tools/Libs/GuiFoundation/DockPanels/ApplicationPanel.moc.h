@@ -9,7 +9,7 @@
 class plQtContainerWindow;
 
 /// \brief Base class for all panels that are supposed to be application wide (not tied to some document).
-class PLASMA_GUIFOUNDATION_DLL plQtApplicationPanel : public ads::CDockWidget
+class PL_GUIFOUNDATION_DLL plQtApplicationPanel : public ads::CDockWidget
 {
 public:
   Q_OBJECT
@@ -33,5 +33,5 @@ private:
 
   plQtContainerWindow* m_pContainerWindow;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GUIFOUNDATION_DLL, plQtApplicationPanel);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GUIFOUNDATION_DLL, plQtApplicationPanel);
 

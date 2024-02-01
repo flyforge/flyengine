@@ -6,23 +6,23 @@
 #include <GameEngine/Effects/Wind/SimpleWindWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSimpleWindComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSimpleWindComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("MinWindStrength", plWindStrength, m_MinWindStrength),
-    PLASMA_ENUM_MEMBER_PROPERTY("MaxWindStrength", plWindStrength, m_MaxWindStrength),
-    PLASMA_MEMBER_PROPERTY("MaxDeviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
+    PL_ENUM_MEMBER_PROPERTY("MinWindStrength", plWindStrength, m_MinWindStrength),
+    PL_ENUM_MEMBER_PROPERTY("MaxWindStrength", plWindStrength, m_MaxWindStrength),
+    PL_MEMBER_PROPERTY("MaxDeviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::DodgerBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSimpleWindComponent::plSimpleWindComponent() = default;
@@ -57,21 +57,21 @@ void plSimpleWindComponent::Update()
   pWindModule->SetFallbackWind(vCurWind);
 }
 
-void plSimpleWindComponent::SerializeComponent(plWorldWriter& stream) const
+void plSimpleWindComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_MinWindStrength;
   s << m_MaxWindStrength;
   s << m_Deviation;
 }
 
-void plSimpleWindComponent::DeserializeComponent(plWorldReader& stream)
+void plSimpleWindComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   if (uiVersion == 1)
   {
@@ -95,7 +95,7 @@ void plSimpleWindComponent::OnActivated()
   m_fNextStrength = plWindStrength::GetInMetersPerSecond(m_MinWindStrength);
   m_vNextDirection = GetOwner()->GetGlobalDirForwards();
   m_NextChange = GetWorld()->GetClock().GetAccumulatedTime();
-  m_LastChange = m_NextChange - plTime::Seconds(1);
+  m_LastChange = m_NextChange - plTime::MakeFromSeconds(1);
 
   ComputeNextState();
 }
@@ -109,7 +109,7 @@ void plSimpleWindComponent::OnDeactivated()
   if (pWindModule == nullptr)
     return;
 
-  pWindModule->SetFallbackWind(plVec3::ZeroVector());
+  pWindModule->SetFallbackWind(plVec3::MakeZero());
 }
 
 void plSimpleWindComponent::ComputeNextState()
@@ -129,22 +129,22 @@ void plSimpleWindComponent::ComputeNextState()
   float fStrengthDiff = fMaxStrength - fMinStrength;
   float fStrengthChange = fStrengthDiff * 0.2f;
 
-  m_NextChange = m_LastChange + plTime::Seconds(rng.DoubleMinMax(2.0f, 5.0f));
+  m_NextChange = m_LastChange + plTime::MakeFromSeconds(rng.DoubleMinMax(2.0f, 5.0f));
   m_fNextStrength = plMath::Clamp<float>(m_fLastStrength + (float)rng.DoubleMinMax(-fStrengthChange, +fStrengthChange), fMinStrength, fMaxStrength);
 
   const plVec3 vMainDir = GetOwner()->GetGlobalDirForwards();
 
-  if (m_Deviation < plAngle::Degree(1))
+  if (m_Deviation < plAngle::MakeFromDegree(1))
     m_vNextDirection = vMainDir;
   else
-    m_vNextDirection = plVec3::CreateRandomDeviation(rng, m_Deviation, vMainDir);
+    m_vNextDirection = plVec3::MakeRandomDeviation(rng, m_Deviation, vMainDir);
 
   plCoordinateSystem cs;
   GetWorld()->GetCoordinateSystem(GetOwner()->GetGlobalPosition(), cs);
   const float fRemoveUp = m_vNextDirection.Dot(cs.m_vUpDir);
 
   m_vNextDirection -= cs.m_vUpDir * fRemoveUp;
-  m_vNextDirection.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+  m_vNextDirection.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 }
 
 void plSimpleWindComponent::Initialize()
@@ -157,4 +157,4 @@ void plSimpleWindComponent::Initialize()
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Effects_Wind_Implementation_SimpleWindComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Effects_Wind_Implementation_SimpleWindComponent);

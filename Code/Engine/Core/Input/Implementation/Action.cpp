@@ -44,7 +44,7 @@ void plInputManager::ClearInputMapping(plStringView sInputSet, plStringView sInp
     {
       // if that action is triggered by the given input slot, remove that trigger from the action
 
-      if (it.Value().m_Config.m_sInputSlotTrigger[i1] == sInputSet)
+      if (it.Value().m_Config.m_sInputSlotTrigger[i1] == sInputSlot)
       {
         it.Value().m_Config.m_sInputSlotTrigger[i1].Clear();
       }
@@ -54,8 +54,8 @@ void plInputManager::ClearInputMapping(plStringView sInputSet, plStringView sInp
 
 void plInputManager::SetInputActionConfig(plStringView sInputSet, plStringView sAction, const plInputActionConfig& config, bool bClearPreviousInputMappings)
 {
-  PLASMA_ASSERT_DEV(!sInputSet.IsEmpty(), "The InputSet name must not be empty.");
-  PLASMA_ASSERT_DEV(!sAction.IsEmpty(), "No input action to map to was given.");
+  PL_ASSERT_DEV(!sInputSet.IsEmpty(), "The InputSet name must not be empty.");
+  PL_ASSERT_DEV(!sAction.IsEmpty(), "No input action to map to was given.");
 
   if (bClearPreviousInputMappings)
   {
@@ -97,13 +97,13 @@ void plInputManager::RemoveInputAction(plStringView sInputSet, plStringView sAct
   GetInternals().s_ActionMapping[sInputSet].Remove(sAction);
 }
 
-plKeyState::Enum plInputManager::GetInputActionState(plStringView sInputSet, plStringView sAction, float* pValue, plInt8* iTriggeredSlot)
+plKeyState::Enum plInputManager::GetInputActionState(plStringView sInputSet, plStringView sAction, float* pValue, plInt8* pTriggeredSlot)
 {
   if (pValue)
     *pValue = 0.0f;
 
-  if (iTriggeredSlot)
-    *iTriggeredSlot = -1;
+  if (pTriggeredSlot)
+    *pTriggeredSlot = -1;
 
   if (!s_sExclusiveInputSet.IsEmpty() && s_sExclusiveInputSet != sInputSet)
     return plKeyState::Up;
@@ -121,8 +121,8 @@ plKeyState::Enum plInputManager::GetInputActionState(plStringView sInputSet, plS
   if (pValue)
     *pValue = ItAction.Value().m_fValue;
 
-  if (iTriggeredSlot)
-    *iTriggeredSlot = ItAction.Value().m_iTriggeredViaAlternative;
+  if (pTriggeredSlot)
+    *pTriggeredSlot = ItAction.Value().m_iTriggeredViaAlternative;
 
   return ItAction.Value().m_State;
 }
@@ -180,7 +180,7 @@ plInputManager::plActionMap::Iterator plInputManager::GetBestAction(plActionMap&
 
   hell:
 
-    PLASMA_ASSERT_DEV(AltSlot >= 0 && AltSlot < plInputActionConfig::MaxInputSlotAlternatives, "Alternate Slot out of bounds.");
+    PL_ASSERT_DEV(AltSlot >= 0 && AltSlot < plInputActionConfig::MaxInputSlotAlternatives, "Alternate Slot out of bounds.");
 
     // if the action had input in the last update AND wants to keep the focus, it will ALWAYS get the input, until the input slot gets
     // inactive (key up) independent from priority, overlap of areas etc.
@@ -309,7 +309,7 @@ void plInputManager::UpdateInputActions(plStringView sInputSet, plActionMap& Act
       InputEventData e;
       e.m_EventType = InputEventData::InputActionChanged;
       e.m_sInputSet = sInputSet;
-      e.m_sInputAction = ItActions.Key().GetData();
+      e.m_sInputAction = ItActions.Key();
 
       s_InputEvents.Broadcast(e);
     }
@@ -329,25 +329,23 @@ const plString plInputManager::GetActionDisplayName(plStringView sAction)
   return GetInternals().s_ActionDisplayNames.GetValueOrDefault(sAction, sAction);
 }
 
-void plInputManager::GetAllInputSets(plDynamicArray<plString>& out_InputSetNames)
+void plInputManager::GetAllInputSets(plDynamicArray<plString>& out_inputSetNames)
 {
-  out_InputSetNames.Clear();
+  out_inputSetNames.Clear();
 
   for (plInputSetMap::Iterator it = GetInternals().s_ActionMapping.GetIterator(); it.IsValid(); ++it)
-    out_InputSetNames.PushBack(it.Key());
+    out_inputSetNames.PushBack(it.Key());
 }
 
-void plInputManager::GetAllInputActions(plStringView sInputSetName, plDynamicArray<plString>& out_InputActions)
+void plInputManager::GetAllInputActions(plStringView sInputSetName, plDynamicArray<plString>& out_inputActions)
 {
   const auto& map = GetInternals().s_ActionMapping[sInputSetName];
 
-  out_InputActions.Clear();
-  out_InputActions.Reserve(map.GetCount());
+  out_inputActions.Clear();
+  out_inputActions.Reserve(map.GetCount());
 
   for (plActionMap::ConstIterator it = map.GetIterator(); it.IsValid(); ++it)
-    out_InputActions.PushBack(it.Key());
+    out_inputActions.PushBack(it.Key());
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_Action);

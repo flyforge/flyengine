@@ -220,9 +220,9 @@ struct RMLUICORE_API TransformPrimitive {
 
 	enum Type {
 		MATRIX2D, MATRIX3D,
-		TRANSLATEX, TRANSLATEY, TRANSLATPLASMA, TRANSLATE2D, TRANSLATE3D,
-		SCALEX, SCALEY, SCALPLASMA, SCALE2D, SCALE3D,
-		ROTATEX, ROTATEY, ROTATPLASMA, ROTATE2D, ROTATE3D,
+		TRANSLATEX, TRANSLATEY, TRANSLATpl, TRANSLATE2D, TRANSLATE3D,
+		SCALEX, SCALEY, SCALpl, SCALE2D, SCALE3D,
+		ROTATEX, ROTATEY, ROTATpl, ROTATE2D, ROTATE3D,
 		SKEWX, SKEWY, SKEW2D,
 		PERSPECTIVE, DECOMPOSEDMATRIX4
 	};
@@ -231,17 +231,17 @@ struct RMLUICORE_API TransformPrimitive {
 	TransformPrimitive(Transforms::Matrix3D          p) : type(MATRIX3D) { matrix_3d = p; }
 	TransformPrimitive(Transforms::TranslateX        p) : type(TRANSLATEX) { translate_x = p; }
 	TransformPrimitive(Transforms::TranslateY        p) : type(TRANSLATEY) { translate_y = p; }
-	TransformPrimitive(Transforms::TranslateZ        p) : type(TRANSLATPLASMA) { translate_z = p; }
+	TransformPrimitive(Transforms::TranslateZ        p) : type(TRANSLATpl) { translate_z = p; }
 	TransformPrimitive(Transforms::Translate2D       p) : type(TRANSLATE2D) { translate_2d = p; }
 	TransformPrimitive(Transforms::Translate3D       p) : type(TRANSLATE3D) { translate_3d = p; }
 	TransformPrimitive(Transforms::ScaleX            p) : type(SCALEX) { scale_x = p; }
 	TransformPrimitive(Transforms::ScaleY            p) : type(SCALEY) { scale_y = p; }
-	TransformPrimitive(Transforms::ScaleZ            p) : type(SCALPLASMA) { scale_z = p; }
+	TransformPrimitive(Transforms::ScaleZ            p) : type(SCALpl) { scale_z = p; }
 	TransformPrimitive(Transforms::Scale2D           p) : type(SCALE2D) { scale_2d = p; }
 	TransformPrimitive(Transforms::Scale3D           p) : type(SCALE3D) { scale_3d = p; }
 	TransformPrimitive(Transforms::RotateX           p) : type(ROTATEX) { rotate_x = p; }
 	TransformPrimitive(Transforms::RotateY           p) : type(ROTATEY) { rotate_y = p; }
-	TransformPrimitive(Transforms::RotateZ           p) : type(ROTATPLASMA) { rotate_z = p; }
+	TransformPrimitive(Transforms::RotateZ           p) : type(ROTATpl) { rotate_z = p; }
 	TransformPrimitive(Transforms::Rotate2D          p) : type(ROTATE2D) { rotate_2d = p; }
 	TransformPrimitive(Transforms::Rotate3D          p) : type(ROTATE3D) { rotate_3d = p; }
 	TransformPrimitive(Transforms::SkewX             p) : type(SKEWX) { skew_x = p; }

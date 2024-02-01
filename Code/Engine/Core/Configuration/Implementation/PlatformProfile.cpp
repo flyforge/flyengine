@@ -9,16 +9,16 @@
 #include <Core/ResourceManager/ResourceManager.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProfileTargetPlatform, 1)
-  PLASMA_ENUM_CONSTANTS(plProfileTargetPlatform::PC, plProfileTargetPlatform::UWP, plProfileTargetPlatform::Android)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProfileTargetPlatform, 1)
+  PL_ENUM_CONSTANTS(plProfileTargetPlatform::PC, plProfileTargetPlatform::UWP, plProfileTargetPlatform::Android)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProfileConfigData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProfileConfigData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE
 // clang-format on
 
 plProfileConfigData::plProfileConfigData() = default;
@@ -30,17 +30,17 @@ void plProfileConfigData::LoadRuntimeData(plChunkStreamReader& inout_stream) {}
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPlatformProfile, 1, plRTTIDefaultAllocator<plPlatformProfile>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPlatformProfile, 1, plRTTIDefaultAllocator<plPlatformProfile>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Name", m_sName)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_ENUM_MEMBER_PROPERTY("Platform", plProfileTargetPlatform, m_TargetPlatform),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Configs", m_Configs)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plContainerAttribute(false, false, false)),
+    PL_MEMBER_PROPERTY("Name", m_sName)->AddAttributes(new plHiddenAttribute()),
+    PL_ENUM_MEMBER_PROPERTY("Platform", plProfileTargetPlatform, m_TargetPlatform),
+    PL_ARRAY_MEMBER_PROPERTY("Configs", m_Configs)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plContainerAttribute(false, false, false)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plPlatformProfile::plPlatformProfile() = default;
@@ -63,7 +63,8 @@ void plPlatformProfile::Clear()
 void plPlatformProfile::AddMissingConfigs()
 {
   plRTTI::ForEachDerivedType<plProfileConfigData>(
-    [this](const plRTTI* pRtti) {
+    [this](const plRTTI* pRtti)
+    {
       // find all types derived from plProfileConfigData
       bool bHasTypeAlready = false;
 
@@ -81,7 +82,7 @@ void plPlatformProfile::AddMissingConfigs()
       {
         // if not, allocate one
         plProfileConfigData* pObject = pRtti->GetAllocator()->Allocate<plProfileConfigData>();
-        PLASMA_ASSERT_DEV(pObject != nullptr, "Invalid profile config");
+        PL_ASSERT_DEV(pObject != nullptr, "Invalid profile config");
         plReflectionUtils::SetAllMemberPropertiesToDefault(pRtti, pObject);
 
         m_Configs.PushBack(pObject);
@@ -89,8 +90,12 @@ void plPlatformProfile::AddMissingConfigs()
     },
     plRTTI::ForEachOptions::ExcludeNonAllocatable);
 
+  // in case unknown configs were loaded from disk, remove them
+  m_Configs.RemoveAndSwap(nullptr);
+
   // sort all configs alphabetically
-  m_Configs.Sort([](const plProfileConfigData* lhs, const plProfileConfigData* rhs) -> bool { return lhs->GetDynamicRTTI()->GetTypeName().Compare(rhs->GetDynamicRTTI()->GetTypeName()) < 0; });
+  m_Configs.Sort([](const plProfileConfigData* lhs, const plProfileConfigData* rhs) -> bool
+    { return lhs->GetDynamicRTTI()->GetTypeName().Compare(rhs->GetDynamicRTTI()->GetTypeName()) < 0; });
 }
 
 const plProfileConfigData* plPlatformProfile::GetTypeConfig(const plRTTI* pRtti) const
@@ -113,7 +118,7 @@ plProfileConfigData* plPlatformProfile::GetTypeConfig(const plRTTI* pRtti)
 plResult plPlatformProfile::SaveForRuntime(plStringView sFile) const
 {
   plFileWriter file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plChunkStreamWriter chunk(file);
 
@@ -126,13 +131,13 @@ plResult plPlatformProfile::SaveForRuntime(plStringView sFile) const
 
   chunk.EndStream();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPlatformProfile::LoadForRuntime(plStringView sFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(sFile));
+  PL_SUCCEED_OR_RETURN(file.Open(sFile));
 
   plChunkStreamReader chunk(file);
 
@@ -150,9 +155,10 @@ plResult plPlatformProfile::LoadForRuntime(plStringView sFile)
 
   chunk.EndStream();
 
-  return PLASMA_SUCCESS;
+  ++m_uiLastModificationCounter;
+  return PL_SUCCESS;
 }
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Configuration_Implementation_PlatformProfile);
+PL_STATICLINK_FILE(Core, Core_Configuration_Implementation_PlatformProfile);

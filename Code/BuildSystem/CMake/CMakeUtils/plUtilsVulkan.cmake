@@ -2,15 +2,15 @@
 # ## Vulkan support
 # #####################################
 
-set(PLASMA_BUILD_VULKAN ON CACHE BOOL "Whether to enable Vulkan code")
+set(PL_BUILD_EXPERIMENTAL_VULKAN OFF CACHE BOOL "Whether to enable experimental / work-in-progress Vulkan code")
 
 # #####################################
 # ## pl_requires_vulkan()
 # #####################################
 macro(pl_requires_vulkan)
-	pl_requires_one_of(PLASMA_CMAKE_PLATFORM_LINUX PLASMA_CMAKE_PLATFORM_WINDOWS)
-	pl_requires(PLASMA_BUILD_VULKAN)
-	find_package(PlVulkan REQUIRED)
+	pl_requires(PL_CMAKE_PLATFORM_SUPPORTS_VULKAN)
+	pl_requires(PL_BUILD_EXPERIMENTAL_VULKAN)
+	find_package(EzVulkan REQUIRED)
 endmacro()
 
 # #####################################
@@ -19,21 +19,14 @@ endmacro()
 function(pl_link_target_vulkan TARGET_NAME)
 	pl_requires_vulkan()
 
-	find_package(PlVulkan REQUIRED)
+	find_package(EzVulkan REQUIRED)
 
-	if(PLASMAVULKAN_FOUND)
-		target_link_libraries(${TARGET_NAME} PRIVATE PlVulkan::Loader)
+	if(PLVULKAN_FOUND)
+		target_link_libraries(${TARGET_NAME} PRIVATE EzVulkan::Loader)
 
-		# Only on linux is the loader a dll.
-		if(PLASMA_CMAKE_PLATFORM_LINUX)
-			get_target_property(_dll_location PlVulkan::Loader IMPORTED_LOCATION)
-
-			if(NOT _dll_location STREQUAL "")
-				add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-					COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:PlVulkan::Loader> $<TARGET_FILE_DIR:${TARGET_NAME}>)
-			endif()
-
-			unset(_dll_location)
+		if (COMMAND pl_platformhook_link_target_vulkan)
+			# call platform-specific hook for linking with Vulkan
+			pl_platformhook_link_target_vulkan()
 		endif()
 	endif()
 endfunction()
@@ -44,16 +37,16 @@ endfunction()
 function(pl_link_target_dxc TARGET_NAME)
 	pl_requires_vulkan()
 
-	find_package(PlVulkan REQUIRED)
+	find_package(EzVulkan REQUIRED)
 
-	if(PLASMAVULKAN_FOUND)
-		target_link_libraries(${TARGET_NAME} PRIVATE PlVulkan::DXC)
+	if(PLVULKAN_FOUND)
+		target_link_libraries(${TARGET_NAME} PRIVATE EzVulkan::DXC)
 
-		get_target_property(_dll_location PlVulkan::DXC IMPORTED_LOCATION)
+		get_target_property(_dll_location EzVulkan::DXC IMPORTED_LOCATION)
 
 		if(NOT _dll_location STREQUAL "")
 			add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
-				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:PlVulkan::DXC> $<TARGET_FILE_DIR:${TARGET_NAME}>)
+				COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:EzVulkan::DXC> $<TARGET_FILE_DIR:${TARGET_NAME}>)
 		endif()
 
 		unset(_dll_location)
@@ -66,12 +59,21 @@ endfunction()
 function(pl_sources_target_spirv_reflect TARGET_NAME)
 	pl_requires_vulkan()
 
-	find_package(PlVulkan REQUIRED)
+	find_package(EzVulkan REQUIRED)
 
-	if(PLASMAVULKAN_FOUND)
-		target_include_directories(${TARGET_NAME} PRIVATE "${PLASMA_VULKAN_DIR}/source/SPIRV-Reflect")
-		target_sources(${TARGET_NAME} PRIVATE "${PLASMA_VULKAN_DIR}/source/SPIRV-Reflect/spirv_reflect.h")
-		target_sources(${TARGET_NAME} PRIVATE "${PLASMA_VULKAN_DIR}/source/SPIRV-Reflect/spirv_reflect.c")
-		source_group("SPIRV-Reflect" FILES "${PLASMA_VULKAN_DIR}/source/SPIRV-Reflect/spirv_reflect.h" "${PLASMA_VULKAN_DIR}/source/SPIRV-Reflect/spirv_reflect.c")
+	if(PLVULKAN_FOUND)
+		if(PL_CMAKE_PLATFORM_WINDOWS_DESKTOP AND PL_CMAKE_ARCHITECTURE_64BIT)
+			target_include_directories(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/Source/SPIRV-Reflect")
+			target_sources(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/Source/SPIRV-Reflect/spirv_reflect.h")
+			target_sources(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/Source/SPIRV-Reflect/spirv_reflect.c")
+			source_group("SPIRV-Reflect" FILES "${PL_VULKAN_DIR}/Source/SPIRV-Reflect/spirv_reflect.h" "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect/spirv_reflect.c")
+		elseif(PL_CMAKE_PLATFORM_LINUX AND PL_CMAKE_ARCHITECTURE_64BIT)
+			target_include_directories(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect")
+			target_sources(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect/spirv_reflect.h")
+			target_sources(${TARGET_NAME} PRIVATE "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect/spirv_reflect.c")
+			source_group("SPIRV-Reflect" FILES "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect/spirv_reflect.h" "${PL_VULKAN_DIR}/x86_64/include/SPIRV-Reflect/spirv_reflect.c")
+		else()
+			message(FATAL_ERROR "TODO: Vulkan is not yet supported on this platform and/or architecture.")
+		endif()
 	endif()
 endfunction()

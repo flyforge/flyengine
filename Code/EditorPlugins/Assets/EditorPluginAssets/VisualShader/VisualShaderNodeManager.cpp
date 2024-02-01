@@ -6,8 +6,8 @@
 // plVisualShaderPin
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualShaderPin, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisualShaderPin, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plVisualShaderPin::plVisualShaderPin(Type type, const plVisualShaderPinDescriptor* pDescriptor, const plDocumentObject* pObject)
   : plPin(type, pDescriptor->m_sName, pDescriptor->m_Color, pObject)
@@ -34,40 +34,49 @@ bool plVisualShaderNodeManager::InternalIsNode(const plDocumentObject* pObject) 
   return pObject->GetType()->IsDerivedFrom(plVisualShaderTypeRegistry::GetSingleton()->GetNodeBaseType());
 }
 
-void plVisualShaderNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& node)
+void plVisualShaderNodeManager::InternalCreatePins(const plDocumentObject* pObject, NodeInternal& ref_node)
 {
   const auto* pDesc = plVisualShaderTypeRegistry::GetSingleton()->GetDescriptorForType(pObject->GetType());
 
   if (pDesc == nullptr)
     return;
 
-  node.m_Inputs.Reserve(pDesc->m_InputPins.GetCount());
-  node.m_Outputs.Reserve(pDesc->m_OutputPins.GetCount());
+  ref_node.m_Inputs.Reserve(pDesc->m_InputPins.GetCount());
+  ref_node.m_Outputs.Reserve(pDesc->m_OutputPins.GetCount());
 
   for (const auto& pin : pDesc->m_InputPins)
   {
-    auto pPin = PLASMA_DEFAULT_NEW(plVisualShaderPin, plPin::Type::Input, &pin, pObject);
-    node.m_Inputs.PushBack(pPin);
+    auto pPin = PL_DEFAULT_NEW(plVisualShaderPin, plPin::Type::Input, &pin, pObject);
+    ref_node.m_Inputs.PushBack(pPin);
   }
 
   for (const auto& pin : pDesc->m_OutputPins)
   {
-    auto pPin = PLASMA_DEFAULT_NEW(plVisualShaderPin, plPin::Type::Output, &pin, pObject);
-    node.m_Outputs.PushBack(pPin);
+    auto pPin = PL_DEFAULT_NEW(plVisualShaderPin, plPin::Type::Output, &pin, pObject);
+    ref_node.m_Outputs.PushBack(pPin);
   }
 }
 
-void plVisualShaderNodeManager::GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const
+void plVisualShaderNodeManager::GetNodeCreationTemplates(plDynamicArray<plNodeCreationTemplate>& out_templates) const
 {
   const plRTTI* pNodeBaseType = plVisualShaderTypeRegistry::GetSingleton()->GetNodeBaseType();
-  
+
   plRTTI::ForEachDerivedType(
     pNodeBaseType,
-    [&](const plRTTI* pRtti) { Types.PushBack(pRtti); },
+    [&](const plRTTI* pRtti)
+    {
+      auto& nodeTemplate = out_templates.ExpandAndGetRef();
+      nodeTemplate.m_pType = pRtti;
+
+      if (const plVisualShaderNodeDescriptor* pDesc = plVisualShaderTypeRegistry::GetSingleton()->GetDescriptorForType(pRtti))
+      {
+        nodeTemplate.m_sCategory = pDesc->m_sCategory;
+      }
+    },
     plRTTI::ForEachOptions::ExcludeAbstract);
 }
 
-plStatus plVisualShaderNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_Result) const
+plStatus plVisualShaderNodeManager::InternalCanConnect(const plPin& source, const plPin& target, CanConnectResult& out_result) const
 {
   const plVisualShaderPin& pinSource = plStaticCast<const plVisualShaderPin&>(source);
   const plVisualShaderPin& pinTarget = plStaticCast<const plVisualShaderPin&>(target);
@@ -77,38 +86,28 @@ plStatus plVisualShaderNodeManager::InternalCanConnect(const plPin& source, cons
 
   if ((pinSource.GetDataType() == pSamplerType && pinTarget.GetDataType() != pSamplerType) || (pinSource.GetDataType() != pSamplerType && pinTarget.GetDataType() == pSamplerType))
   {
-    out_Result = CanConnectResult::ConnectNever;
+    out_result = CanConnectResult::ConnectNever;
     return plStatus("Pin of type 'sampler' cannot be connected with a pin of a different type.");
   }
 
   if ((pinSource.GetDataType() == pStringType && pinTarget.GetDataType() != pStringType) || (pinSource.GetDataType() != pStringType && pinTarget.GetDataType() == pStringType))
   {
-    out_Result = CanConnectResult::ConnectNever;
+    out_result = CanConnectResult::ConnectNever;
     return plStatus("Pin of type 'string' cannot be connected with a pin of a different type.");
   }
 
   if (WouldConnectionCreateCircle(source, target))
   {
-    out_Result = CanConnectResult::ConnectNever;
+    out_result = CanConnectResult::ConnectNever;
     return plStatus("Connecting these pins would create a circle in the shader graph.");
   }
 
-  out_Result = CanConnectResult::ConnectNto1;
-  return plStatus(PLASMA_SUCCESS);
-}
-
-const char* plVisualShaderNodeManager::GetTypeCategory(const plRTTI* pRtti) const
-{
-  const plVisualShaderNodeDescriptor* pDesc = plVisualShaderTypeRegistry::GetSingleton()->GetDescriptorForType(pRtti);
-
-  if (pDesc == nullptr)
-    return nullptr;
-
-  return pDesc->m_sCategory;
+  out_result = CanConnectResult::ConnectNto1;
+  return plStatus(PL_SUCCESS);
 }
 
 
-plStatus plVisualShaderNodeManager::InternalCanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, const char* szParentProperty, const plVariant& index) const
+plStatus plVisualShaderNodeManager::InternalCanAdd(const plRTTI* pRtti, const plDocumentObject* pParent, plStringView sParentProperty, const plVariant& index) const
 {
   auto pDesc = plVisualShaderTypeRegistry::GetSingleton()->GetDescriptorForType(pRtti);
 
@@ -120,14 +119,14 @@ plStatus plVisualShaderNodeManager::InternalCanAdd(const plRTTI* pRtti, const pl
     }
 
     /// \todo This is an arbitrary limit and it does not count how many nodes reference the same texture
-    static const plUInt32 uiMaxTextures = 16;
+    static constexpr plUInt32 uiMaxTextures = 16;
     if (pDesc->m_NodeType == plVisualShaderNodeType::Texture && CountNodesOfType(plVisualShaderNodeType::Texture) >= uiMaxTextures)
     {
       return plStatus(plFmt("The maximum number of texture nodes is {0}", uiMaxTextures));
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plUInt32 plVisualShaderNodeManager::CountNodesOfType(plVisualShaderNodeType::Enum type) const

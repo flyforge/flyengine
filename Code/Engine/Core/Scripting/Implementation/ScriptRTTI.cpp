@@ -2,6 +2,7 @@
 
 #include <Core/Scripting/ScriptRTTI.h>
 #include <Foundation/Communication/Message.h>
+#include <Foundation/Memory/CommonAllocators.h>
 #include <Foundation/Reflection/ReflectionUtils.h>
 
 plScriptRTTI::plScriptRTTI(plStringView sName, const plRTTI* pParentType, FunctionList&& functions, MessageHandlerList&& messageHandlers)
@@ -89,7 +90,7 @@ void plScriptMessageHandler::FillMessagePropertyValues(const plMessage& msg, plD
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 }
@@ -101,3 +102,22 @@ plScriptInstance::plScriptInstance(plReflectedClass& inout_owner, plWorld* pWorl
   , m_pWorld(pWorld)
 {
 }
+
+void plScriptInstance::SetInstanceVariables(const plArrayMap<plHashedString, plVariant>& parameters)
+{
+  for (auto it : parameters)
+  {
+    SetInstanceVariable(it.key, it.value);
+  }
+}
+
+//////////////////////////////////////////////////////////////////////////
+
+// static
+plAllocator* plScriptAllocator::GetAllocator()
+{
+  static plProxyAllocator s_ScriptAllocator("Script", plFoundation::GetDefaultAllocator());
+  return &s_ScriptAllocator;
+}
+
+

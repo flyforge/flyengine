@@ -7,12 +7,14 @@
 #include <Foundation/Time/Time.h>
 #include <Foundation/Time/Timestamp.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/Logging/Implementation/Win/ETWProvider_win.h>
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) || PL_ENABLED(PL_PLATFORM_LINUX)
+#  include <Foundation/Logging/ETWWriter.h>
 #endif
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <android/log.h>
 #endif
+
+#include <stdarg.h>
 
 plLogMsgType::Enum plLog::s_DefaultLogLevel = plLogMsgType::All;
 plLog::PrintFunction plLog::s_CustomPrintFunction = nullptr;
@@ -49,9 +51,9 @@ void plGlobalLog::RemoveLogWriter(plEventSubscriptionID& ref_subscriptionID)
 
 void plGlobalLog::SetGlobalLogOverride(plLogInterface* pInterface)
 {
-  PLASMA_LOCK(s_OverrideLogMutex);
+  PL_LOCK(s_OverrideLogMutex);
 
-  PLASMA_ASSERT_DEV(pInterface == nullptr || s_pOverrideLog == nullptr, "Only one override log can be set at a time");
+  PL_ASSERT_DEV(pInterface == nullptr || s_pOverrideLog == nullptr, "Only one override log can be set at a time");
   s_pOverrideLog = pInterface;
 }
 
@@ -60,7 +62,7 @@ void plGlobalLog::HandleLogMessage(const plLoggingEventData& le)
   if (s_pOverrideLog != nullptr && s_pOverrideLog != this && s_bAllowOverrideLog)
   {
     // only enter the lock when really necessary
-    PLASMA_LOCK(s_OverrideLogMutex);
+    PL_LOCK(s_OverrideLogMutex);
 
     // since s_bAllowOverrideLog is thread_local we do not need to re-check it
 
@@ -104,7 +106,7 @@ plLogBlock::plLogBlock(plStringView sName, plStringView sContextInfo)
 
   m_uiBlockDepth = m_pParentBlock ? (m_pParentBlock->m_uiBlockDepth + 1) : 0;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_fSeconds = plTime::Now().GetSeconds();
 #endif
 }
@@ -126,7 +128,7 @@ plLogBlock::plLogBlock(plLogInterface* pInterface, plStringView sName, plStringV
 
   m_uiBlockDepth = m_pParentBlock ? (m_pParentBlock->m_uiBlockDepth + 1) : 0;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_fSeconds = plTime::Now().GetSeconds();
 #endif
 }
@@ -136,7 +138,7 @@ plLogBlock::~plLogBlock()
   if (!m_pLogInterface)
     return;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_fSeconds = plTime::Now().GetSeconds() - m_fSeconds;
 #endif
 
@@ -155,7 +157,7 @@ void plLog::EndLogBlock(plLogInterface* pInterface, plLogBlock* pBlock)
     le.m_sText = pBlock->m_sName;
     le.m_uiIndentation = pBlock->m_uiBlockDepth;
     le.m_sTag = pBlock->m_sContextInfo;
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     le.m_fSeconds = pBlock->m_fSeconds;
 #endif
 
@@ -236,13 +238,13 @@ void plLog::Print(const char* szText)
 {
   printf("%s", szText);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-  plETWProvider::GetInstance().LogMessge(plLogMsgType::ErrorMsg, 0, szText);
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) || PL_ENABLED(PL_PLATFORM_LINUX)
+  plLogWriter::ETW::LogMessage(plLogMsgType::ErrorMsg, 0, szText);
 #endif
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   OutputDebugStringW(plStringWChar(szText).GetData());
 #endif
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
   __android_log_print(ANDROID_LOG_ERROR, "plEngine", "%s", szText);
 #endif
 
@@ -261,7 +263,7 @@ void plLog::Printf(const char* szFormat, ...)
   va_start(args, szFormat);
 
   char buffer[4096];
-  plStringUtils::vsnprintf(buffer, PLASMA_ARRAY_SIZE(buffer), szFormat, args);
+  plStringUtils::vsnprintf(buffer, PL_ARRAY_SIZE(buffer), szFormat, args);
 
   Print(buffer);
 
@@ -279,17 +281,17 @@ void plLog::OsMessageBox(const plFormatString& text)
   plStringBuilder display = text.GetText(tmp);
   display.Trim(" \n\r\t");
 
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   const char* title = "";
   if (plApplication::GetApplicationInstance())
   {
     title = plApplication::GetApplicationInstance()->GetApplicationName();
   }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
   MessageBoxW(nullptr, plStringWChar(display).GetData(), plStringWChar(title), MB_OK);
 #else
   plLog::Print(display);
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 #endif
 }
 
@@ -301,29 +303,29 @@ void plLog::GenerateFormattedTimestamp(TimestampMode mode, plStringBuilder& ref_
     return;
   }
 
-  const plDateTime dateTime(plTimestamp::CurrentTimestamp());
+  const plDateTime dateTime = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
 
   switch (mode)
   {
     case TimestampMode::Numeric:
-      ref_sTimestampOut.Format("[{}] ", plArgDateTime(dateTime, plArgDateTime::ShowDate | plArgDateTime::ShowMilliseconds | plArgDateTime::ShowTimeZone));
+      ref_sTimestampOut.SetFormat("[{}] ", plArgDateTime(dateTime, plArgDateTime::ShowDate | plArgDateTime::ShowMilliseconds | plArgDateTime::ShowTimeZone));
       break;
     case TimestampMode::TimeOnly:
-      ref_sTimestampOut.Format("[{}] ", plArgDateTime(dateTime, plArgDateTime::ShowMilliseconds));
+      ref_sTimestampOut.SetFormat("[{}] ", plArgDateTime(dateTime, plArgDateTime::ShowMilliseconds));
       break;
     case TimestampMode::Textual:
-      ref_sTimestampOut.Format(
+      ref_sTimestampOut.SetFormat(
         "[{}] ", plArgDateTime(dateTime, plArgDateTime::TextualDate | plArgDateTime::ShowMilliseconds | plArgDateTime::ShowTimeZone));
       break;
     default:
-      PLASMA_ASSERT_DEV(false, "Unknown timestamp mode.");
+      PL_ASSERT_DEV(false, "Unknown timestamp mode.");
       break;
   }
 }
 
 void plLog::SetThreadLocalLogSystem(plLogInterface* pInterface)
 {
-  PLASMA_ASSERT_DEV(pInterface != nullptr,
+  PL_ASSERT_DEV(pInterface != nullptr,
     "You cannot set a nullptr logging system. If you want to discard all log information, set a dummy system that does not do anything.");
 
   s_DefaultLogSystem = pInterface;
@@ -333,7 +335,7 @@ plLogInterface* plLog::GetThreadLocalLogSystem()
 {
   if (s_DefaultLogSystem == nullptr)
   {
-    // use new, not PLASMA_DEFAULT_NEW, to prevent tracking
+    // use new, not PL_DEFAULT_NEW, to prevent tracking
     s_DefaultLogSystem = new plGlobalLog;
   }
 
@@ -342,7 +344,7 @@ plLogInterface* plLog::GetThreadLocalLogSystem()
 
 void plLog::SetDefaultLogLevel(plLogMsgType::Enum logLevel)
 {
-  PLASMA_ASSERT_DEV(logLevel >= plLogMsgType::None && logLevel <= plLogMsgType::All, "Invalid default log level {}", (int)logLevel);
+  PL_ASSERT_DEV(logLevel >= plLogMsgType::None && logLevel <= plLogMsgType::All, "Invalid default log level {}", (int)logLevel);
 
   s_DefaultLogLevel = logLevel;
 }
@@ -399,7 +401,7 @@ void plLog::Info(plLogInterface* pInterface, const plFormatString& string)
   BroadcastLoggingEvent(pInterface, plLogMsgType::InfoMsg, string.GetText(tmp));
 }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 
 void plLog::Dev(plLogInterface* pInterface, const plFormatString& string)
 {
@@ -411,7 +413,7 @@ void plLog::Dev(plLogInterface* pInterface, const plFormatString& string)
 
 #endif
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 
 void plLog::Debug(plLogInterface* pInterface, const plFormatString& string)
 {
@@ -438,5 +440,3 @@ bool plLog::Flush(plUInt32 uiNumNewMsgThreshold, plTime timeIntervalThreshold, p
 
   return true;
 }
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Logging_Implementation_Log);

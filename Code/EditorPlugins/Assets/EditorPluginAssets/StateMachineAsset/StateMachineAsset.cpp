@@ -7,16 +7,16 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetDocument, 3, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineAssetDocument, 4, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plStateMachineAssetDocument::plStateMachineAssetDocument(const char* szDocumentPath)
-  : plAssetDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plStateMachineNodeManager), plAssetDocEngineConnection::None)
+plStateMachineAssetDocument::plStateMachineAssetDocument(plStringView sDocumentPath)
+  : plAssetDocument(sDocumentPath, PL_DEFAULT_NEW(plStateMachineNodeManager), plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   auto pManager = static_cast<plStateMachineNodeManager*>(GetObjectManager());
 
@@ -31,7 +31,7 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
 
   auto AddState = [&](const plDocumentObject* pObject) {
     plVariant nameVar = pObject->GetTypeAccessor().GetValue("Name");
-    PLASMA_ASSERT_DEV(nameVar.IsA<plString>(), "Implementation error");
+    PL_ASSERT_DEV(nameVar.IsA<plString>(), "Implementation error");
 
     const plString& name = nameVar.Get<plString>();
     if (stateNames.Contains(name))
@@ -41,7 +41,7 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
     stateNames.Insert(name);
 
     plVariant type = pObject->GetTypeAccessor().GetValue("Type");
-    PLASMA_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
+    PL_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
 
     if (auto pStateObject = pObject->GetChild(type.Get<plUuid>()))
     {
@@ -54,10 +54,14 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
     }
     else
     {
-      return plStatus(plFmt("State '{}' has no state type assigned", name));
+      auto pState = PL_DEFAULT_NEW(plStateMachineState_Empty);
+      pState->SetName(name);
+
+      const plUInt32 uiStateIndex = desc.AddState(pState);
+      objectToStateIndex.Insert(pObject, uiStateIndex);
     }
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   };
 
   auto& allObjects = pManager->GetRootObject()->GetChildren();
@@ -66,8 +70,8 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
   {
     if (auto pObject = pManager->GetInitialState())
     {
-      PLASMA_SUCCEED_OR_RETURN(AddState(pObject));
-      PLASMA_ASSERT_DEV(objectToStateIndex[pObject] == 0, "Initial state has to have index 0");
+      PL_SUCCEED_OR_RETURN(AddState(pObject));
+      PL_ASSERT_DEV(objectToStateIndex[pObject] == 0, "Initial state has to have index 0");
     }
     else
     {
@@ -80,7 +84,7 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
     if (pManager->IsNode(pObject) == false || pManager->IsInitialState(pObject) || pManager->IsAnyState(pObject))
       continue;
 
-    PLASMA_SUCCEED_OR_RETURN(AddState(pObject));
+    PL_SUCCEED_OR_RETURN(AddState(pObject));
   }
 
   for (const plDocumentObject* pObject : allObjects)
@@ -89,7 +93,7 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
       continue;
 
     plVariant type = pObject->GetTypeAccessor().GetValue("Type");
-    PLASMA_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
+    PL_ASSERT_DEV(type.IsA<plUuid>(), "Implementation error");
 
     plUniquePtr<plStateMachineTransition> pTransition;
     if (auto pTransitionObject = pObject->GetChild(type.Get<plUuid>()))
@@ -99,7 +103,7 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
     }
     else
     {
-      pTransition = PLASMA_DEFAULT_NEW(plStateMachineTransition_Timeout);
+      pTransition = PL_DEFAULT_NEW(plStateMachineTransition_Timeout);
     }
 
     const plConnection& connection = pManager->GetConnection(pObject);
@@ -107,16 +111,16 @@ plTransformStatus plStateMachineAssetDocument::InternalTransformAsset(plStreamWr
     plUInt32 uiToStateIndex = plInvalidIndex;
     if (pManager->IsAnyState(connection.GetSourcePin().GetParent()) == false)
     {
-      PLASMA_VERIFY(objectToStateIndex.TryGetValue(connection.GetSourcePin().GetParent(), uiFromStateIndex), "Implementation error");
+      PL_VERIFY(objectToStateIndex.TryGetValue(connection.GetSourcePin().GetParent(), uiFromStateIndex), "Implementation error");
     }
-    PLASMA_VERIFY(objectToStateIndex.TryGetValue(connection.GetTargetPin().GetParent(), uiToStateIndex), "Implementation error");
+    PL_VERIFY(objectToStateIndex.TryGetValue(connection.GetTargetPin().GetParent(), uiToStateIndex), "Implementation error");
 
     desc.AddTransition(uiFromStateIndex, uiToStateIndex, std::move(pTransition));
   }
 
   plDefaultMemoryStreamStorage storage;
   plMemoryStreamWriter writer(&storage);
-  PLASMA_SUCCEED_OR_RETURN(desc.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(desc.Serialize(stream));
 
   stream << storage.GetStorageSize32();
   return storage.CopyToStream(stream);
@@ -170,18 +174,18 @@ void plStateMachineAssetDocument::RestoreMetaDataAfterLoading(const plAbstractOb
 
 void plStateMachineAssetDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_MimeTypes) const
 {
-  out_MimeTypes.PushBack("application/PlasmaEditor.StateMachineGraph");
+  out_MimeTypes.PushBack("application/plEditor.StateMachineGraph");
 }
 
 bool plStateMachineAssetDocument::CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_MimeType) const
 {
-  out_MimeType = "application/PlasmaEditor.StateMachineGraph";
+  out_MimeType = "application/plEditor.StateMachineGraph";
 
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plStateMachineAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
+bool plStateMachineAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

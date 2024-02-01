@@ -3,9 +3,9 @@
 #include <EditorEngineProcessFramework/EditorEngineProcessFrameworkDLL.h>
 #include <RendererCore/Meshes/MeshComponent.h>
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoRenderData : public plMeshRenderData
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoRenderData : public plMeshRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmoRenderData, plMeshRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plGizmoRenderData, plMeshRenderData);
 
 public:
   plColor m_GizmoColor;
@@ -21,9 +21,13 @@ public:
   plUInt32 m_uiHighlightID = 0;
 };
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoComponent : public plMeshComponent
+/// \brief Used by the editor to render gizmo meshes.
+///
+/// Gizmos use special shaders to have constant screen-space size and swap geometry towards the viewer,
+/// so their culling is non-trivial. This component takes care of that and of the highlight color.
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plGizmoComponent : public plMeshComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plGizmoComponent, plMeshComponent, plGizmoComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plGizmoComponent, plMeshComponent, plGizmoComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plMeshComponentBase
@@ -39,6 +43,6 @@ public:
   plGizmoComponent();
   ~plGizmoComponent();
 
-  plColor m_GizmoColor;
+  plColor m_GizmoColor = plColor::White;
   bool m_bIsPickable = true;
 };

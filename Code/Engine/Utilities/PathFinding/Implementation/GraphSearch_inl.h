@@ -28,7 +28,7 @@ plInt64 plPathSearch<PathStateType>::FindBestNodeToExpand(PathStateType*& out_pP
     }
   }
 
-  PLASMA_ASSERT_DEV(out_pPathState != nullptr, "Implementation Error");
+  PL_ASSERT_DEV(out_pPathState != nullptr, "Implementation Error");
 
   const plInt64 iBestNodeIndex = m_StateQueue[iBestInQueue];
   m_StateQueue.RemoveAtAndSwap(iBestInQueue);
@@ -61,13 +61,13 @@ void plPathSearch<PathStateType>::FillOutPathResult(plInt64 iEndNodeIndex, plDeq
 template <typename PathStateType>
 void plPathSearch<PathStateType>::AddPathNode(plInt64 iNodeIndex, const PathStateType& NewState)
 {
-  PLASMA_ASSERT_DEV(NewState.m_fCostToNode > m_CurState.m_fCostToNode,
+  PL_ASSERT_DEV(NewState.m_fCostToNode > m_CurState.m_fCostToNode,
     "The costs must grow from one node to the next.\nStart Node Costs: {0}\nAdjacent Node Costs: {1}", plArgF(m_CurState.m_fCostToNode, 2),
     plArgF(NewState.m_fCostToNode, 2));
-  // PLASMA_ASSERT_DEV(NewState.m_fEstimatedCostToTarget >=  m_CurState.m_fEstimatedCostToTarget, "The estimated path costs cannot go down, the
+  // PL_ASSERT_DEV(NewState.m_fEstimatedCostToTarget >=  m_CurState.m_fEstimatedCostToTarget, "The estimated path costs cannot go down, the
   // heuristic must be 'optimistic' regarding to the real costs.\nEstimated Costs from Current: {0}\nEstimated Costs from Adjacent: {1}",
   // plArgF(m_pCurPathState->m_fEstimatedCostToTarget, 2), plArgF(NewState.m_fEstimatedCostToTarget, 2));
-  PLASMA_ASSERT_DEV(NewState.m_fEstimatedCostToTarget >= NewState.m_fCostToNode, "Unrealistic expectations will get you nowhere.");
+  PL_ASSERT_DEV(NewState.m_fEstimatedCostToTarget >= NewState.m_fCostToNode, "Unrealistic expectations will get you nowhere.");
 
   PathStateType* pExistingState;
 
@@ -97,7 +97,7 @@ template <typename PathStateType>
 plResult plPathSearch<PathStateType>::FindPath(plInt64 iStartNodeIndex, const PathStateType& StartState, plInt64 iTargetNodeIndex,
   plDeque<PathResultData>& out_Path, float fMaxPathCost /* = Infinity */)
 {
-  PLASMA_ASSERT_DEV(m_pStateGenerator != nullptr, "No Path State Generator is set.");
+  PL_ASSERT_DEV(m_pStateGenerator != nullptr, "No Path State Generator is set.");
 
   ClearPathStates();
 
@@ -114,7 +114,7 @@ plResult plPathSearch<PathStateType>::FindPath(plInt64 iStartNodeIndex, const Pa
     out_Path.Clear();
     out_Path.PushBack(r);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   m_PathStates.Reserve(10000);
@@ -140,8 +140,8 @@ plResult plPathSearch<PathStateType>::FindPath(plInt64 iStartNodeIndex, const Pa
     if (m_iCurNodeIndex == iTargetNodeIndex)
     {
       FillOutPathResult(m_iCurNodeIndex, out_Path);
-      m_pStateGenerator->SearchFinished(PLASMA_SUCCESS);
-      return PLASMA_SUCCESS;
+      m_pStateGenerator->SearchFinished(PL_SUCCESS);
+      return PL_SUCCESS;
     }
 
     // The heuristic may overestimate how much it takes to reach the destination
@@ -149,8 +149,8 @@ plResult plPathSearch<PathStateType>::FindPath(plInt64 iStartNodeIndex, const Pa
     // the actual costs
     if (pCurState->m_fCostToNode >= fMaxPathCost)
     {
-      m_pStateGenerator->SearchFinished(PLASMA_FAILURE);
-      return PLASMA_FAILURE;
+      m_pStateGenerator->SearchFinished(PL_FAILURE);
+      return PL_FAILURE;
     }
 
     m_CurState = *pCurState;
@@ -159,8 +159,8 @@ plResult plPathSearch<PathStateType>::FindPath(plInt64 iStartNodeIndex, const Pa
     m_pStateGenerator->GenerateAdjacentStates(m_iCurNodeIndex, m_CurState, this);
   }
 
-  m_pStateGenerator->SearchFinished(PLASMA_FAILURE);
-  return PLASMA_FAILURE;
+  m_pStateGenerator->SearchFinished(PL_FAILURE);
+  return PL_FAILURE;
 }
 
 
@@ -168,7 +168,7 @@ template <typename PathStateType>
 plResult plPathSearch<PathStateType>::FindClosest(
   plInt64 iStartNodeIndex, const PathStateType& StartState, IsSearchedObjectCallback Callback, plDeque<PathResultData>& out_Path, float fMaxPathCost)
 {
-  PLASMA_ASSERT_DEV(m_pStateGenerator != nullptr, "No Path State Generator is set.");
+  PL_ASSERT_DEV(m_pStateGenerator != nullptr, "No Path State Generator is set.");
 
   ClearPathStates();
 
@@ -195,8 +195,8 @@ plResult plPathSearch<PathStateType>::FindClosest(
     if (Callback(m_iCurNodeIndex, *pCurState))
     {
       FillOutPathResult(m_iCurNodeIndex, out_Path);
-      m_pStateGenerator->SearchFinished(PLASMA_SUCCESS);
-      return PLASMA_SUCCESS;
+      m_pStateGenerator->SearchFinished(PL_SUCCESS);
+      return PL_SUCCESS;
     }
 
     // The heuristic may overestimate how much it takes to reach the destination
@@ -204,8 +204,8 @@ plResult plPathSearch<PathStateType>::FindClosest(
     // the actual costs
     if (pCurState->m_fCostToNode >= fMaxPathCost)
     {
-      m_pStateGenerator->SearchFinished(PLASMA_FAILURE);
-      return PLASMA_FAILURE;
+      m_pStateGenerator->SearchFinished(PL_FAILURE);
+      return PL_FAILURE;
     }
 
     m_CurState = *pCurState;
@@ -214,6 +214,6 @@ plResult plPathSearch<PathStateType>::FindClosest(
     m_pStateGenerator->GenerateAdjacentStates(m_iCurNodeIndex, m_CurState, this);
   }
 
-  m_pStateGenerator->SearchFinished(PLASMA_FAILURE);
-  return PLASMA_FAILURE;
+  m_pStateGenerator->SearchFinished(PL_FAILURE);
+  return PL_FAILURE;
 }

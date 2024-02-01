@@ -9,7 +9,7 @@ void plTelemetry::QueueOutgoingMessage(TransmitMode tm, plUInt32 uiSystemID, plU
   if (tm == plTelemetry::Unreliable)
     return;
 
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   // add a new message to the queue
   MessageQueue& Queue = s_SystemMessages[uiSystemID];
@@ -42,7 +42,7 @@ void plTelemetry::FlushOutgoingQueues()
 
   bRecursion = true;
 
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   // go through all system types
   for (auto it = s_SystemMessages.GetIterator(); it.IsValid(); ++it)
@@ -57,7 +57,7 @@ void plTelemetry::FlushOutgoingQueues()
       Send(plTelemetry::Reliable, it.Value().m_OutgoingQueue[i]); // Send() will already update the network
 
     // check that they have not been queue again
-    PLASMA_ASSERT_DEV(it.Value().m_OutgoingQueue.GetCount() == uiCurCount, "Implementation Error: When queued messages are flushed, they should not get queued again.");
+    PL_ASSERT_DEV(it.Value().m_OutgoingQueue.GetCount() == uiCurCount, "Implementation Error: When queued messages are flushed, they should not get queued again.");
 
     it.Value().m_OutgoingQueue.Clear();
   }
@@ -72,7 +72,7 @@ plResult plTelemetry::ConnectToServer(plStringView sConnectTo)
   return OpenConnection(Client, sConnectTo);
 #else
   plLog::SeriousWarning("Enet is not compiled into this build, plTelemetry::ConnectToServer() will be ignored.");
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 #endif // BUILDSYSTEM_ENABLE_ENET_SUPPORT
 }
 
@@ -91,7 +91,7 @@ void plTelemetry::CreateServer()
 
 void plTelemetry::AcceptMessagesForSystem(plUInt32 uiSystemID, bool bAccept, ProcessMessagesCallback callback, void* pPassThrough)
 {
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   s_SystemMessages[uiSystemID].m_bAcceptMessages = bAccept;
   s_SystemMessages[uiSystemID].m_Callback = callback;
@@ -100,8 +100,8 @@ void plTelemetry::AcceptMessagesForSystem(plUInt32 uiSystemID, bool bAccept, Pro
 
 void plTelemetry::PerFrameUpdate()
 {
-  PLASMA_PROFILE_SCOPE("Telemetry.PerFrameUpdate");
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_PROFILE_SCOPE("Telemetry.PerFrameUpdate");
+  PL_LOCK(GetTelemetryMutex());
 
   // Call each callback to process the incoming messages
   for (auto it = s_SystemMessages.GetIterator(); it.IsValid(); ++it)
@@ -121,7 +121,7 @@ void plTelemetry::PerFrameUpdate()
 
 void plTelemetry::SetOutgoingQueueSize(plUInt32 uiSystemID, plUInt16 uiMaxQueued)
 {
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   s_SystemMessages[uiSystemID].m_uiMaxQueuedOutgoing = uiMaxQueued;
 }
@@ -186,5 +186,3 @@ void plTelemetry::Send(TransmitMode tm, plTelemetryMessage& msg)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_TelemetryHelpers);

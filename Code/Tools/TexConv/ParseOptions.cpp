@@ -4,6 +4,11 @@
 
 #include <Foundation/Utilities/CommandLineOptions.h>
 
+plCommandLineOptionEnum opt_Mode("_TexConv", "-mode", "Mode determines which arguments need to be set.\n\
+  In compare mode the mean-square error (MSE) is returned. 0 if it is below the threshold.\
+",
+  "Convert | Compare", 0);
+
 plCommandLineOptionPath opt_Out("_TexConv", "-out",
   "Absolute path to main output file.\n\
    ext = tga, dds, plTexture2D, plTexture3D, plTextureCube or plTextureAtlas.",
@@ -101,29 +106,98 @@ plCommandLineOptionEnum opt_BumpMapFilter("_TexConv", "-bumpMapFilter", "Filter 
 
 plCommandLineOptionEnum opt_Platform("_TexConv", "-platform", "What platform to generate the textures for.", "PC | Android", 0);
 
+plCommandLineOptionString opt_CompareHtmlTitle("_TexConv", "-cmpHtml", "Title for the compare result HTML. If empty no HTML file is written.", "");
+plCommandLineOptionPath opt_CompareActual("_TexConv", "-cmpImg", "Path to an image to compare with another.", "");
+plCommandLineOptionPath opt_CompareExpected("_TexConv", "-cmpRef", "Path to a reference image to compare against.", "");
+plCommandLineOptionInt opt_CompareThreshold("_TexConv", "-cmpMSE", "The error threshold for the comparison to be considered as failed.\n\
+  No output files are written, if the image difference is below this value.",
+  100, 0);
+plCommandLineOptionBool opt_CompareRelaxed("_TexConv", "-cmpRelaxed", "Use a more lenient comparison method.\nUseful for images with single-pixel wide rasterized lines.", false);
+
+
 plResult plTexConv::ParseCommandLine()
 {
   if (plCommandLineOption::LogAvailableOptions(plCommandLineOption::LogAvailableModes::IfHelpRequested, "_TexConv"))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_SUCCEED_OR_RETURN(ParseOutputFiles());
-  PLASMA_SUCCEED_OR_RETURN(DetectOutputFormat());
+  PL_SUCCEED_OR_RETURN(ParseMode());
 
-  PLASMA_SUCCEED_OR_RETURN(ParseOutputType());
-  PLASMA_SUCCEED_OR_RETURN(ParseAssetHeader());
-  PLASMA_SUCCEED_OR_RETURN(ParseTargetPlatform());
-  PLASMA_SUCCEED_OR_RETURN(ParseCompressionMode());
-  PLASMA_SUCCEED_OR_RETURN(ParseUsage());
-  PLASMA_SUCCEED_OR_RETURN(ParseMipmapMode());
-  PLASMA_SUCCEED_OR_RETURN(ParseWrapModes());
-  PLASMA_SUCCEED_OR_RETURN(ParseFilterModes());
-  PLASMA_SUCCEED_OR_RETURN(ParseResolutionModifiers());
-  PLASMA_SUCCEED_OR_RETURN(ParseMiscOptions());
-  PLASMA_SUCCEED_OR_RETURN(ParseInputFiles());
-  PLASMA_SUCCEED_OR_RETURN(ParseChannelMappings());
-  PLASMA_SUCCEED_OR_RETURN(ParseBumpMapFilter());
+  if (m_Mode == plTexConvMode::Compare)
+  {
+    PL_SUCCEED_OR_RETURN(ParseCompareMode());
+  }
+  else
+  {
+    PL_SUCCEED_OR_RETURN(ParseOutputFiles());
+    PL_SUCCEED_OR_RETURN(DetectOutputFormat());
 
-  return PLASMA_SUCCESS;
+    PL_SUCCEED_OR_RETURN(ParseOutputType());
+    PL_SUCCEED_OR_RETURN(ParseAssetHeader());
+    PL_SUCCEED_OR_RETURN(ParseTargetPlatform());
+    PL_SUCCEED_OR_RETURN(ParseCompressionMode());
+    PL_SUCCEED_OR_RETURN(ParseUsage());
+    PL_SUCCEED_OR_RETURN(ParseMipmapMode());
+    PL_SUCCEED_OR_RETURN(ParseWrapModes());
+    PL_SUCCEED_OR_RETURN(ParseFilterModes());
+    PL_SUCCEED_OR_RETURN(ParseResolutionModifiers());
+    PL_SUCCEED_OR_RETURN(ParseMiscOptions());
+    PL_SUCCEED_OR_RETURN(ParseInputFiles());
+    PL_SUCCEED_OR_RETURN(ParseChannelMappings());
+    PL_SUCCEED_OR_RETURN(ParseBumpMapFilter());
+  }
+
+  return PL_SUCCESS;
+}
+
+plResult plTexConv::ParseMode()
+{
+  switch (opt_Mode.GetOptionValue(plCommandLineOption::LogMode::FirstTime))
+  {
+    case 0:
+      m_Mode = plTexConvMode::Convert;
+      return PL_SUCCESS;
+
+    case 1:
+      m_Mode = plTexConvMode::Compare;
+      return PL_SUCCESS;
+  }
+
+  plLog::Error("Invalid mode selected.");
+  return PL_FAILURE;
+}
+
+plResult plTexConv::ParseCompareMode()
+{
+  m_sOutputFile = opt_Out.GetOptionValue(plCommandLineOption::LogMode::Always);
+
+  if (m_sOutputFile.IsEmpty())
+  {
+    plLog::Warning("Output path is not specified. Use option '-out \"path\"' to set the prefix path for the output files.");
+  }
+
+  m_sHtmlTitle = opt_CompareHtmlTitle.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
+
+  plStringBuilder tmp, res;
+  const auto pCmd = plCommandLineUtils::GetGlobalInstance();
+
+  m_Comparer.m_Descriptor.m_sActualFile = opt_CompareActual.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
+  m_Comparer.m_Descriptor.m_sExpectedFile = opt_CompareExpected.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
+  m_Comparer.m_Descriptor.m_MeanSquareErrorThreshold = opt_CompareThreshold.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
+  m_Comparer.m_Descriptor.m_bRelaxedComparison = opt_CompareRelaxed.GetOptionValue(plCommandLineOption::LogMode::FirstTime);
+
+  if (m_Comparer.m_Descriptor.m_sActualFile.IsEmpty())
+  {
+    plLog::Error("Image to compare is not specified.");
+    return PL_FAILURE;
+  }
+
+  if (m_Comparer.m_Descriptor.m_sExpectedFile.IsEmpty())
+  {
+    plLog::Error("Reference image to compare against is not specified.");
+    return PL_FAILURE;
+  }
+
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseOutputType()
@@ -131,7 +205,7 @@ plResult plTexConv::ParseOutputType()
   if (m_sOutputFile.IsEmpty())
   {
     m_Processor.m_Descriptor.m_OutputType = plTexConvOutputType::None;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plInt32 value = opt_Type.GetOptionValue(plCommandLineOption::LogMode::Always);
@@ -143,7 +217,7 @@ plResult plTexConv::ParseOutputType()
     if (!m_bOutputSupports2D)
     {
       plLog::Error("2D textures are not supported by the chosen output file format.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Cubemap)
@@ -151,7 +225,7 @@ plResult plTexConv::ParseOutputType()
     if (!m_bOutputSupportsCube)
     {
       plLog::Error("Cubemap textures are not supported by the chosen output file format.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
@@ -159,33 +233,33 @@ plResult plTexConv::ParseOutputType()
     if (!m_bOutputSupportsAtlas)
     {
       plLog::Error("Atlas textures are not supported by the chosen output file format.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (!ParseFile("-atlasDesc", m_Processor.m_Descriptor.m_sTextureAtlasDescFile))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
   else if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Volume)
   {
     if (!m_bOutputSupports3D)
     {
       plLog::Error("Volume textures are not supported by the chosen output file format.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else
   {
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
-    return PLASMA_FAILURE;
+    PL_ASSERT_NOT_IMPLEMENTED;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseInputFiles()
 {
   if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plStringBuilder tmp, res;
   const auto pCmd = plCommandLineUtils::GetGlobalInstance();
@@ -194,7 +268,7 @@ plResult plTexConv::ParseInputFiles()
 
   for (plUInt32 i = 0; i < 64; ++i)
   {
-    tmp.Format("-in{0}", i);
+    tmp.SetFormat("-in{0}", i);
 
     res = pCmd->GetAbsolutePathOption(tmp);
 
@@ -252,7 +326,7 @@ plResult plTexConv::ParseInputFiles()
     if (files[i].IsEmpty())
     {
       plLog::Error("Input file {} is not specified", i);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plLog::Info("Input file {}: '{}'", i, files[i]);
@@ -262,16 +336,14 @@ plResult plTexConv::ParseInputFiles()
   {
     plLog::Error("No input files were specified. Use \'-in \"path/to/file\"' to specify an input file. Use '-in0', '-in1' etc. to specify "
                  "multiple input files.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseOutputFiles()
 {
-  const auto pCmd = plCommandLineUtils::GetGlobalInstance();
-
   m_sOutputFile = opt_Out.GetOptionValue(plCommandLineOption::LogMode::Always);
 
   m_sOutputThumbnailFile = opt_ThumbnailOut.GetOptionValue(plCommandLineOption::LogMode::Always);
@@ -288,18 +360,18 @@ plResult plTexConv::ParseOutputFiles()
     m_Processor.m_Descriptor.m_uiLowResMipmaps = opt_LowMips.GetOptionValue(plCommandLineOption::LogMode::Always);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseUsage()
 {
   if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   const plInt32 value = opt_Usage.GetOptionValue(plCommandLineOption::LogMode::Always);
 
   m_Processor.m_Descriptor.m_Usage = static_cast<plTexConvUsage::Enum>(value);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseMipmapMode()
@@ -309,7 +381,7 @@ plResult plTexConv::ParseMipmapMode()
     plLog::Info("Selected output format does not support -mipmap options.");
 
     m_Processor.m_Descriptor.m_MipmapMode = plTexConvMipmapMode::None;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   const plInt32 value = opt_Mipmaps.GetOptionValue(plCommandLineOption::LogMode::Always);
@@ -323,7 +395,7 @@ plResult plTexConv::ParseMipmapMode()
     m_Processor.m_Descriptor.m_fMipmapAlphaThreshold = opt_MipsAlphaThreshold.GetOptionValue(plCommandLineOption::LogMode::Always);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseTargetPlatform()
@@ -331,7 +403,7 @@ plResult plTexConv::ParseTargetPlatform()
   plInt32 value = opt_Platform.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified);
 
   m_Processor.m_Descriptor.m_TargetPlatform = static_cast<plTexConvTargetPlatform::Enum>(value);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseCompressionMode()
@@ -341,20 +413,20 @@ plResult plTexConv::ParseCompressionMode()
     plLog::Info("Selected output format does not support -compression options.");
 
     m_Processor.m_Descriptor.m_CompressionMode = plTexConvCompressionMode::None;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   const plInt32 value = opt_Compression.GetOptionValue(plCommandLineOption::LogMode::Always);
 
   m_Processor.m_Descriptor.m_CompressionMode = static_cast<plTexConvCompressionMode::Enum>(value);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseWrapModes()
 {
   // cubemaps do not require any wrap mode settings
   if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Cubemap || m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas || m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::None)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   {
     plInt32 value = opt_AddressU.GetOptionValue(plCommandLineOption::LogMode::Always);
@@ -371,7 +443,7 @@ plResult plTexConv::ParseWrapModes()
     m_Processor.m_Descriptor.m_AddressModeW = static_cast<plImageAddressMode::Enum>(value);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseFilterModes()
@@ -379,25 +451,25 @@ plResult plTexConv::ParseFilterModes()
   if (!m_bOutputSupportsFiltering)
   {
     plLog::Info("Selected output format does not support -filter options.");
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plInt32 value = opt_Filter.GetOptionValue(plCommandLineOption::LogMode::Always);
 
   m_Processor.m_Descriptor.m_FilterMode = static_cast<plTextureFilterSetting::Enum>(value);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseResolutionModifiers()
 {
   if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::None)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   m_Processor.m_Descriptor.m_uiMinResolution = opt_MinRes.GetOptionValue(plCommandLineOption::LogMode::Always);
   m_Processor.m_Descriptor.m_uiMaxResolution = opt_MaxRes.GetOptionValue(plCommandLineOption::LogMode::Always);
   m_Processor.m_Descriptor.m_uiDownscaleSteps = opt_Downscale.GetOptionValue(plCommandLineOption::LogMode::Always);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseMiscOptions()
@@ -421,7 +493,7 @@ plResult plTexConv::ParseMiscOptions()
 
   m_Processor.m_Descriptor.m_fMaxValue = opt_Clamp.GetOptionValue(plCommandLineOption::LogMode::Always);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseAssetHeader()
@@ -429,11 +501,7 @@ plResult plTexConv::ParseAssetHeader()
   const plStringView ext = plPathUtils::GetFileExtension(m_sOutputFile);
 
   if (!ext.StartsWith_NoCase("pl"))
-    return PLASMA_SUCCESS;
-
-  const auto pCmd = plCommandLineUtils::GetGlobalInstance();
-
-  plUInt32 tmp = m_Processor.m_Descriptor.m_uiAssetVersion;
+    return PL_SUCCESS;
 
   m_Processor.m_Descriptor.m_uiAssetVersion = (plUInt16)opt_AssetVersion.GetOptionValue(plCommandLineOption::LogMode::Always);
 
@@ -443,7 +511,7 @@ plResult plTexConv::ParseAssetHeader()
       plConversionUtils::ConvertHexStringToUInt32(opt_AssetHashHigh.GetOptionValue(plCommandLineOption::LogMode::Always), uiHashHigh).Failed())
   {
     plLog::Error("'-assetHashLow 0xHEX32' and '-assetHashHigh 0xHEX32' have not been specified correctly.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_Processor.m_Descriptor.m_uiAssetHash = (static_cast<plUInt64>(uiHashHigh) << 32) | static_cast<plUInt64>(uiHashLow);
@@ -451,10 +519,10 @@ plResult plTexConv::ParseAssetHeader()
   if (m_Processor.m_Descriptor.m_uiAssetHash == 0)
   {
     plLog::Error("'-assetHashLow 0xHEX32' and '-assetHashHigh 0xHEX32' have not been specified correctly.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::ParseBumpMapFilter()
@@ -462,5 +530,5 @@ plResult plTexConv::ParseBumpMapFilter()
   const plInt32 value = opt_BumpMapFilter.GetOptionValue(plCommandLineOption::LogMode::Always);
 
   m_Processor.m_Descriptor.m_BumpMapFilter = static_cast<plTexConvBumpMapFilter::Enum>(value);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

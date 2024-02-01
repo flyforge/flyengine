@@ -13,7 +13,7 @@ plReflectionProbeMapping::plReflectionProbeMapping(plUInt32 uiAtlasSize)
   m_UnusedProbeSlots.Reserve(m_uiAtlasSize);
   m_AddProbes.Reserve(m_uiAtlasSize);
 
-  PLASMA_ASSERT_DEV(m_hReflectionSpecularTexture.IsInvalidated(), "World data already created.");
+  PL_ASSERT_DEV(m_hReflectionSpecularTexture.IsInvalidated(), "World data already created.");
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plGALTextureCreationDescription desc;
   desc.m_uiWidth = s_uiReflectionCubeMapSize;
@@ -33,7 +33,7 @@ plReflectionProbeMapping::plReflectionProbeMapping(plUInt32 uiAtlasSize)
 
 plReflectionProbeMapping::~plReflectionProbeMapping()
 {
-  PLASMA_ASSERT_DEV(!m_hReflectionSpecularTexture.IsInvalidated(), "World data not created.");
+  PL_ASSERT_DEV(!m_hReflectionSpecularTexture.IsInvalidated(), "World data not created.");
   plGALDevice::GetDefaultDevice()->DestroyTexture(m_hReflectionSpecularTexture);
   m_hReflectionSpecularTexture.Invalidate();
 }
@@ -42,7 +42,7 @@ void plReflectionProbeMapping::AddProbe(plReflectionProbeId probe, plBitflags<pl
 {
   m_RegisteredProbes.EnsureCount(probe.m_InstanceIndex + 1);
   ProbeDataInternal& probeData = m_RegisteredProbes[probe.m_InstanceIndex];
-  PLASMA_ASSERT_DEBUG(probeData.m_Flags == 0, "");
+  PL_ASSERT_DEBUG(probeData.m_Flags == 0, "");
   probeData.m_id = probe;
   probeData.m_Flags.SetValue(flags.GetValue());
   probeData.m_Flags.Add(plProbeMappingFlags::Dirty);
@@ -275,4 +275,3 @@ void plReflectionProbeMapping::UnmapProbe(plReflectionProbeId id)
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionProbeMapping);

@@ -3,10 +3,10 @@
 #include <Foundation/Types/ScopeExit.h>
 
 template <typename EventData, typename MutexType, plEventType EventType>
-plEventBase<EventData, MutexType, EventType>::plEventBase(plAllocatorBase* pAllocator)
+plEventBase<EventData, MutexType, EventType>::plEventBase(plAllocator* pAllocator)
   : m_EventHandlers(pAllocator)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_pSelf = this;
 #endif
 }
@@ -14,8 +14,8 @@ plEventBase<EventData, MutexType, EventType>::plEventBase(plAllocatorBase* pAllo
 template <typename EventData, typename MutexType, plEventType EventType>
 plEventBase<EventData, MutexType, EventType>::~plEventBase()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-  PLASMA_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  PL_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
 #endif
 }
 
@@ -24,17 +24,17 @@ plEventBase<EventData, MutexType, EventType>::~plEventBase()
 template <typename EventData, typename MutexType, plEventType EventType>
 plEventSubscriptionID plEventBase<EventData, MutexType, EventType>::AddEventHandler(Handler handler) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if constexpr (std::is_same_v<MutexType, plNoMutex>)
   {
-    if (EventType == plEventType::Default)
+    if constexpr (EventType == plEventType::Default)
     {
-      PLASMA_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
+      PL_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
     }
   }
 
-  PLASMA_ASSERT_DEV(!handler.IsComparable() || !HasEventHandler(handler), "The same event handler cannot be added twice");
+  PL_ASSERT_DEV(!handler.IsComparable() || !HasEventHandler(handler), "The same event handler cannot be added twice");
 
   auto& item = m_EventHandlers.ExpandAndGetRef();
   item.m_Handler = std::move(handler);
@@ -46,13 +46,13 @@ plEventSubscriptionID plEventBase<EventData, MutexType, EventType>::AddEventHand
 template <typename EventData, typename MutexType, plEventType EventType>
 void plEventBase<EventData, MutexType, EventType>::AddEventHandler(Handler handler, Unsubscriber& inout_unsubscriber) const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if constexpr (std::is_same_v<MutexType, plNoMutex>)
   {
     if constexpr (EventType == plEventType::Default)
     {
-      PLASMA_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
+      PL_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
     }
   }
 
@@ -67,15 +67,15 @@ void plEventBase<EventData, MutexType, EventType>::AddEventHandler(Handler handl
 template <typename EventData, typename MutexType, plEventType EventType>
 void plEventBase<EventData, MutexType, EventType>::RemoveEventHandler(const Handler& handler) const
 {
-  PLASMA_ASSERT_DEV(handler.IsComparable(), "Lambdas that capture data cannot be removed via function pointer. Use an plEventSubscriptionID instead.");
+  PL_ASSERT_DEV(handler.IsComparable(), "Lambdas that capture data cannot be removed via function pointer. Use an plEventSubscriptionID instead.");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if constexpr (EventType == plEventType::Default)
   {
     if constexpr (std::is_same_v<MutexType, plNoMutex>)
     {
-      PLASMA_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
+      PL_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
     }
   }
 
@@ -103,7 +103,7 @@ void plEventBase<EventData, MutexType, EventType>::RemoveEventHandler(const Hand
     }
   }
 
-  PLASMA_ASSERT_DEV(false, "plEvent::RemoveEventHandler: Handler has not been registered or already been unregistered.");
+  PL_ASSERT_DEV(false, "plEvent::RemoveEventHandler: Handler has not been registered or already been unregistered.");
 }
 
 template <typename EventData, typename MutexType, plEventType EventType>
@@ -115,13 +115,13 @@ void plEventBase<EventData, MutexType, EventType>::RemoveEventHandler(plEventSub
   const plEventSubscriptionID subId = inout_id;
   inout_id = 0;
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if constexpr (EventType == plEventType::Default)
   {
     if constexpr (std::is_same_v<MutexType, plNoMutex>)
     {
-      PLASMA_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
+      PL_ASSERT_DEV(m_uiRecursionDepth == 0, "Can't add or remove event handlers while broadcasting (without a mutex). Either enable the use of a mutex on this event, or switch to plCopyOnBroadcastEvent if this should be allowed. Since this event does not have a mutex, this error can also happen due to multi-threaded access.");
     }
   }
 
@@ -149,15 +149,15 @@ void plEventBase<EventData, MutexType, EventType>::RemoveEventHandler(plEventSub
     }
   }
 
-  PLASMA_ASSERT_DEV(false, "plEvent::RemoveEventHandler: Invalid subscription ID '{0}'.", (plInt32)subId);
+  PL_ASSERT_DEV(false, "plEvent::RemoveEventHandler: Invalid subscription ID '{0}'.", (plInt32)subId);
 }
 
 template <typename EventData, typename MutexType, plEventType EventType>
 bool plEventBase<EventData, MutexType, EventType>::HasEventHandler(const Handler& handler) const
 {
-  PLASMA_ASSERT_DEV(handler.IsComparable(), "Lambdas that capture data cannot be checked via function pointer. Use an plEventSubscriptionID instead.");
+  PL_ASSERT_DEV(handler.IsComparable(), "Lambdas that capture data cannot be checked via function pointer. Use an plEventSubscriptionID instead.");
 
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (plUInt32 i = 0; i < m_EventHandlers.GetCount(); ++i)
   {
@@ -171,14 +171,14 @@ bool plEventBase<EventData, MutexType, EventType>::HasEventHandler(const Handler
 template <typename EventData, typename MutexType, plEventType EventType>
 void plEventBase<EventData, MutexType, EventType>::Clear()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   m_EventHandlers.Clear();
 }
 
 template <typename EventData, typename MutexType, plEventType EventType>
 bool plEventBase<EventData, MutexType, EventType>::IsEmpty() const
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   return m_EventHandlers.IsEmpty();
 }
 
@@ -188,15 +188,15 @@ void plEventBase<EventData, MutexType, EventType>::Broadcast(EventData eventData
 {
   if constexpr (EventType == plEventType::Default)
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
-    PLASMA_ASSERT_DEV(m_uiRecursionDepth <= uiMaxRecursionDepth, "The event has been triggered recursively or from several threads simultaneously.");
+    PL_ASSERT_DEV(m_uiRecursionDepth <= uiMaxRecursionDepth, "The event has been triggered recursively or from several threads simultaneously.");
 
     if (m_uiRecursionDepth > uiMaxRecursionDepth)
       return;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-    PLASMA_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+    PL_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
 #endif
 
     m_uiRecursionDepth++;
@@ -227,28 +227,28 @@ void plEventBase<EventData, MutexType, EventType>::Broadcast(EventData eventData
   {
     plHybridArray<HandlerData, 16> eventHandlers;
     {
-      PLASMA_LOCK(m_Mutex);
+      PL_LOCK(m_Mutex);
 
       if constexpr (RecursionDepthSupported)
       {
-        PLASMA_ASSERT_DEV(m_uiRecursionDepth <= uiMaxRecursionDepth, "The event has been triggered recursively or from several threads simultaneously.");
+        PL_ASSERT_DEV(m_uiRecursionDepth <= uiMaxRecursionDepth, "The event has been triggered recursively or from several threads simultaneously.");
 
         if (m_uiRecursionDepth > uiMaxRecursionDepth)
           return;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-        PLASMA_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+        PL_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
 #endif
 
         m_uiRecursionDepth++;
       }
       else
       {
-        PLASMA_ASSERT_DEV(uiMaxRecursionDepth == 255, "uiMaxRecursionDepth is not supported if plEventType::CopyOnBroadcast is used and the event needs to be threadsafe.");
+        PL_ASSERT_DEV(uiMaxRecursionDepth == 255, "uiMaxRecursionDepth is not supported if plEventType::CopyOnBroadcast is used and the event needs to be threadsafe.");
       }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-      PLASMA_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+      PL_ASSERT_ALWAYS(m_pSelf == this, "The plEvent was relocated in memory. This is not allowed, as it breaks the Unsubscribers.");
 #endif
 
       eventHandlers = m_EventHandlers;
@@ -257,7 +257,7 @@ void plEventBase<EventData, MutexType, EventType>::Broadcast(EventData eventData
     // RAII to ensure correctness in case exceptions are used
     auto scopeExit = plMakeScopeExit([&]() {
     // Bug in MSVC 2017. Can't use if constexpr.
-#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC) && _MSC_VER < 1920
+#if PL_ENABLED(PL_COMPILER_MSVC) && _MSC_VER < 1920
       if (RecursionDepthSupported)
       {
         m_uiRecursionDepth--;
@@ -286,7 +286,7 @@ plEvent<EventData, MutexType, AllocatorWrapper, EventType>::plEvent()
 }
 
 template <typename EventData, typename MutexType, typename AllocatorWrapper, plEventType EventType>
-plEvent<EventData, MutexType, AllocatorWrapper, EventType>::plEvent(plAllocatorBase* pAllocator)
+plEvent<EventData, MutexType, AllocatorWrapper, EventType>::plEvent(plAllocator* pAllocator)
   : plEventBase<EventData, MutexType, EventType>(pAllocator)
 {
 }

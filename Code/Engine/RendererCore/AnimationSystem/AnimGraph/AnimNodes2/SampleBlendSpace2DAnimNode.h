@@ -5,7 +5,7 @@
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 
-struct PLASMA_RENDERERCORE_DLL plAnimationClip2D
+struct PL_RENDERERCORE_DLL plAnimationClip2D
 {
   plHashedString m_sClip;
   plVec2 m_vPosition;
@@ -14,11 +14,11 @@ struct PLASMA_RENDERERCORE_DLL plAnimationClip2D
   const char* GetAnimationFile() const;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plAnimationClip2D);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plAnimationClip2D);
 
-class PLASMA_RENDERERCORE_DLL plSampleBlendSpace2DAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSampleBlendSpace2DAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSampleBlendSpace2DAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSampleBlendSpace2DAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -43,7 +43,7 @@ public:
 private:
   plHashedString m_sCenterClip;                       // [ property ]
   plHybridArray<plAnimationClip2D, 8> m_Clips;        // [ property ]
-  plTime m_InputResponse = plTime::Milliseconds(100); // [ property ]
+  plTime m_InputResponse = plTime::MakeFromMilliseconds(100); // [ property ]
   bool m_bLoop = true;                                // [ property ]
   bool m_bApplyRootMotion = false;                    // [ property ]
   float m_fPlaybackSpeed = 1.0f;                      // [ property ]
@@ -59,7 +59,7 @@ private:
 
   struct ClipToPlay
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiIndex;
     float m_fWeight = 1.0f;

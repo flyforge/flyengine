@@ -2,14 +2,14 @@
 # ## Qt support
 # #####################################
 
-set(PLASMA_ENABLE_QT_SUPPORT ON CACHE BOOL "Whether to add Qt support.")
-set(PLASMA_QT_DIR $ENV{QTDIR} CACHE PATH "Directory of the Qt installation")
+set(PL_ENABLE_QT_SUPPORT ON CACHE BOOL "Whether to add Qt support.")
+set(PL_QT_DIR $ENV{QTDIR} CACHE PATH "Directory of the Qt installation")
 
 # #####################################
 # ## pl_requires_qt()
 # #####################################
 macro(pl_requires_qt)
-	pl_requires(PLASMA_ENABLE_QT_SUPPORT)
+	pl_requires(PL_ENABLE_QT_SUPPORT)
 endmacro()
 
 # #####################################
@@ -19,7 +19,7 @@ endmacro()
 macro(pl_find_qt)
 	pl_prepare_find_qt()
 
-	set(PLASMA_QT_COMPONENTS 
+	set(PL_QT_COMPONENTS
 		Widgets
 		Core
 		Gui
@@ -28,13 +28,19 @@ macro(pl_find_qt)
 		Svg
 	)
 
-	if(PLASMA_ENABLE_QT_SUPPORT)
-		if(PLASMA_QT_DIR)
-			find_package(Qt6 COMPONENTS ${PLASMA_QT_COMPONENTS} REQUIRED PATHS ${PLASMA_QT_DIR})
+	# plEngine requires at least Qt 6.3 because earlier versions have a bug which prevents the 3d viewport in the
+	# Editor from working correctly.
+	SET(PL_REQUIRED_QT_VERSION "6.3")
+
+	if(PL_ENABLE_QT_SUPPORT)
+		if(PL_QT_DIR)
+			find_package(Qt6 ${PL_REQUIRED_QT_VERSION} COMPONENTS ${PL_QT_COMPONENTS} REQUIRED PATHS ${PL_QT_DIR})
 		else()
-			find_package(Qt6 COMPONENTS ${PLASMA_QT_COMPONENTS} REQUIRED)
+			find_package(Qt6 ${PL_REQUIRED_QT_VERSION} COMPONENTS ${PL_QT_COMPONENTS} REQUIRED)
 		endif()
 	endif()
+
+	message(STATUS "Found Qt6 Version ${Qt6_VERSION} in ${Qt6_DIR}")
 	
 	mark_as_advanced(FORCE Qt6_DIR)
 	mark_as_advanced(FORCE Qt6Core_DIR)
@@ -50,14 +56,19 @@ macro(pl_find_qt)
 	mark_as_advanced(FORCE WINDEPLOYQT_EXECUTABLE)
 	mark_as_advanced(FORCE QT_ADDITIONAL_HOST_PACKAGES_PREFIX_PATH)
 	mark_as_advanced(FORCE QT_ADDITIONAL_PACKAGES_PREFIX_PATH)
+
+	if (COMMAND pl_platformhook_find_qt)
+		pl_platformhook_find_qt()
+	endif()
+	
 endmacro()
 
 # #####################################
 # ## pl_prepare_find_qt()
 # #####################################
 function(pl_prepare_find_qt)
-	set(PLASMA_CACHED_QT_DIR "PLASMA_CACHED_QT_DIR-NOTFOUND" CACHE STRING "")
-	mark_as_advanced(PLASMA_CACHED_QT_DIR FORCE)
+	set(PL_CACHED_QT_DIR "PL_CACHED_QT_DIR-NOTFOUND" CACHE STRING "")
+	mark_as_advanced(PL_CACHED_QT_DIR FORCE)
 
 	# #####################
 	# # Download Qt package
@@ -65,30 +76,15 @@ function(pl_prepare_find_qt)
 	pl_pull_platform_vars()
 	pl_pull_config_vars()
 
-	# Currently only implemented for x64
-	if(PLASMA_CMAKE_PLATFORM_WINDOWS_DESKTOP AND PLASMA_CMAKE_ARCHITECTURE_64BIT)
-		# Upgrade from Qt5 to Qt6 if the PLASMA_QT_DIR points to a previously automatically downloaded Qt5 package.
-		if("${PLASMA_QT_DIR}" MATCHES ".*Qt-5\\.13\\.0-vs141-x64")
-			set(PLASMA_QT_DIR "PLASMA_QT_DIR-NOTFOUND" CACHE PATH "Directory of the Qt installation" FORCE)
-		endif()
-	
-		if(PLASMA_CMAKE_ARCHITECTURE_64BIT)
-			set(PLASMA_SDK_VERSION "${PLASMA_CONFIG_QT_WINX64_VERSION}")
-			set(PLASMA_SDK_URL "${PLASMA_CONFIG_QT_WINX64_URL}")
-		endif()
-
-		if((PLASMA_QT_DIR STREQUAL "PLASMA_QT_DIR-NOTFOUND") OR(PLASMA_QT_DIR STREQUAL ""))
-			pl_download_and_extract("${PLASMA_SDK_URL}" "${CMAKE_BINARY_DIR}" "${PLASMA_SDK_VERSION}")
-
-			set(PLASMA_QT_DIR "${CMAKE_BINARY_DIR}/${PLASMA_SDK_VERSION}" CACHE PATH "Directory of the Qt installation" FORCE)
-		endif()
+	if (COMMAND pl_platformhook_download_qt)
+		pl_platformhook_download_qt()
 	endif()
 
 	# # Download Qt package
 	# #####################
-	if(NOT "${PLASMA_QT_DIR}" STREQUAL "${PLASMA_CACHED_QT_DIR}")
+	if(NOT "${PL_QT_DIR}" STREQUAL "${PL_CACHED_QT_DIR}")
 		# Need to reset qt vars now so that 'find_package' is re-executed
-		set(PLASMA_CACHED_QT_DIR ${PLASMA_QT_DIR} CACHE STRING "" FORCE)
+		set(PL_CACHED_QT_DIR ${PL_QT_DIR} CACHE STRING "" FORCE)
 
 		message(STATUS "Qt-dir has changed, clearing cached Qt paths")
 
@@ -108,8 +104,8 @@ function(pl_prepare_find_qt)
 	endif()
 
 	# force find_package to search for Qt in the correct folder
-	if(PLASMA_QT_DIR)
-		set(CMAKE_PREFIX_PATH ${PLASMA_QT_DIR} PARENT_SCOPE)
+	if(PL_QT_DIR)
+		set(CMAKE_PREFIX_PATH ${PL_QT_DIR} PARENT_SCOPE)
 	endif()
 endfunction()
 
@@ -130,15 +126,15 @@ function(pl_link_target_qt)
 		message(FATAL_ERROR "pl_link_target_qt: Invalid arguments '${FN_ARG_UNPARSED_ARGUMENTS}'")
 	endif()
 
-	get_property(PLASMA_SUBMODULE_PREFIX_PATH GLOBAL PROPERTY PLASMA_SUBMODULE_PREFIX_PATH)
+	get_property(PL_SUBMODULE_PREFIX_PATH GLOBAL PROPERTY PL_SUBMODULE_PREFIX_PATH)
 
 	file(RELATIVE_PATH SUB_FOLDER "${CMAKE_SOURCE_DIR}" "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 	target_include_directories(${FN_ARG_TARGET} PUBLIC ${CMAKE_BINARY_DIR}/${SUB_FOLDER})
 
-	target_compile_definitions(${FN_ARG_TARGET} PUBLIC PLASMA_USE_QT)
+	target_compile_definitions(${FN_ARG_TARGET} PUBLIC PL_USE_QT)
 
-	if(PLASMA_CMAKE_COMPILER_MSVC)
+	if(PL_CMAKE_COMPILER_MSVC)
 		# Qt6 requires runtime type information (RTTI) in debug builds.
 		target_compile_options(${FN_ARG_TARGET} PRIVATE "$<$<CONFIG:Debug>:/GR>")
 	endif()
@@ -156,23 +152,23 @@ function(pl_link_target_qt)
 		endif()
 	endforeach()
 
-	if(PLASMA_QT_DIR AND FN_ARG_COPY_DLLS)
+	if(PL_QT_DIR AND FN_ARG_COPY_DLLS)
 		# Copy 'imageformats' into the binary folder.
 		add_custom_command(TARGET ${FN_ARG_TARGET} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
-			"${PLASMA_QT_DIR}/plugins/imageformats"
+			"${PL_QT_DIR}/plugins/imageformats"
 			"$<TARGET_FILE_DIR:${FN_ARG_TARGET}>/imageformats")
 
 		# Copy 'platforms' into the binary folder.
 		add_custom_command(TARGET ${FN_ARG_TARGET} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
-			"${PLASMA_QT_DIR}/plugins/platforms"
+			"${PL_QT_DIR}/plugins/platforms"
 			"$<TARGET_FILE_DIR:${FN_ARG_TARGET}>/platforms")
 
 		# Copy 'iconengines' into the binary folder.
 		add_custom_command(TARGET ${FN_ARG_TARGET} POST_BUILD
 			COMMAND ${CMAKE_COMMAND} -E copy_directory
-			"${PLASMA_QT_DIR}/plugins/iconengines"
+			"${PL_QT_DIR}/plugins/iconengines"
 			"$<TARGET_FILE_DIR:${FN_ARG_TARGET}>/iconengines")
 	endif()
 endfunction()

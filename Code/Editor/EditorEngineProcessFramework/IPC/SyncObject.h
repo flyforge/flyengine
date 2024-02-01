@@ -7,15 +7,15 @@
 
 class plWorld;
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL PlasmaEditorEngineSyncObject : public plReflectedClass
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plEditorEngineSyncObject : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(PlasmaEditorEngineSyncObject, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plEditorEngineSyncObject, plReflectedClass);
 
 public:
-  PlasmaEditorEngineSyncObject();
-  ~PlasmaEditorEngineSyncObject();
+  plEditorEngineSyncObject();
+  ~plEditorEngineSyncObject();
 
-  void Configure(plUuid ownerGuid, plDelegate<void(PlasmaEditorEngineSyncObject*)> onDestruction);
+  void Configure(plUuid ownerGuid, plDelegate<void(plEditorEngineSyncObject*)> onDestruction);
 
   plUuid GetDocumentGuid() const;
   void SetModified(bool b = true) { m_bModified = b; }
@@ -29,7 +29,7 @@ public:
   virtual void UpdateForEngine(plWorld* pWorld) {}
 
 private:
-  PLASMA_ALLOW_PRIVATE_PROPERTIES(PlasmaEditorEngineSyncObject);
+  PL_ALLOW_PRIVATE_PROPERTIES(plEditorEngineSyncObject);
 
   friend class plAssetDocument;
 
@@ -37,5 +37,5 @@ private:
   plUuid m_SyncObjectGuid;
   plUuid m_OwnerGuid;
 
-  plDelegate<void(PlasmaEditorEngineSyncObject*)> m_OnDestruction;
+  plDelegate<void(plEditorEngineSyncObject*)> m_OnDestruction;
 };

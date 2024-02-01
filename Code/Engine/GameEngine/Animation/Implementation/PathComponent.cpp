@@ -14,15 +14,15 @@
 
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plPathComponentFlags, 1)
-  PLASMA_BITFLAGS_CONSTANTS(plPathComponentFlags::VisualizePath, plPathComponentFlags::VisualizeUpDir)
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plPathComponentFlags, 1)
+  PL_BITFLAGS_CONSTANTS(plPathComponentFlags::VisualizePath, plPathComponentFlags::VisualizeUpDir)
+PL_END_STATIC_REFLECTED_BITFLAGS;
 // clang-format on
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgPathChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgPathChanged, 1, plRTTIDefaultAllocator<plMsgPathChanged>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgPathChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgPathChanged, 1, plRTTIDefaultAllocator<plMsgPathChanged>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plPathComponent::ControlPoint::Serialize(plStreamWriter& s) const
@@ -32,7 +32,7 @@ plResult plPathComponent::ControlPoint::Serialize(plStreamWriter& s) const
   s << m_vTangentOut;
   s << m_Roll;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPathComponent::ControlPoint::Deserialize(plStreamReader& s)
@@ -42,34 +42,34 @@ plResult plPathComponent::ControlPoint::Deserialize(plStreamReader& s)
   s >> m_vTangentOut;
   s >> m_Roll;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plPathComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plPathComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_BITFLAGS_ACCESSOR_PROPERTY("Flags", plPathComponentFlags, GetPathFlags, SetPathFlags)->AddAttributes(new plDefaultValueAttribute(plPathComponentFlags::VisualizePath)),
-    PLASMA_ACCESSOR_PROPERTY("Closed", GetClosed,SetClosed),
-    PLASMA_ACCESSOR_PROPERTY("Detail", GetLinearizationError, SetLinearizationError)->AddAttributes(new plDefaultValueAttribute(0.01f), new plClampValueAttribute(0.001f, 1.0f)),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Nodes", Nodes_GetCount, Nodes_GetNode, Nodes_SetNode, Nodes_Insert, Nodes_Remove),
+    PL_BITFLAGS_ACCESSOR_PROPERTY("Flags", plPathComponentFlags, GetPathFlags, SetPathFlags)->AddAttributes(new plDefaultValueAttribute(plPathComponentFlags::VisualizePath)),
+    PL_ACCESSOR_PROPERTY("Closed", GetClosed,SetClosed),
+    PL_ACCESSOR_PROPERTY("Detail", GetLinearizationError, SetLinearizationError)->AddAttributes(new plDefaultValueAttribute(0.01f), new plClampValueAttribute(0.001f, 1.0f)),
+    PL_ARRAY_ACCESSOR_PROPERTY("Nodes", Nodes_GetCount, Nodes_GetNode, Nodes_SetNode, Nodes_Insert, Nodes_Remove),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgPathChanged, OnMsgPathChanged),
+    PL_MESSAGE_HANDLER(plMsgPathChanged, OnMsgPathChanged),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation/Paths"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plPathComponent::plPathComponent() = default;
@@ -534,13 +534,13 @@ static void ComputeCpDirs(const plDynamicArray<plPathComponent::ControlPoint>& p
     const auto& cpC = points[uiCurPt];
     const auto& cpN = points[uiNextPt];
 
-    const plVec3 posPrev = plMath::EvaluateBezierCurve(0.98f, cpP.m_vPosition, cpP.m_vPosition + cpP.m_vTangentIn, cpC.m_vPosition + cpC.m_vTangentOut, cpC.m_vPosition);
-    const plVec3 posNext = plMath::EvaluateBezierCurve(0.02f, cpC.m_vPosition, cpC.m_vPosition + cpC.m_vTangentIn, cpN.m_vPosition + cpN.m_vTangentOut, cpN.m_vPosition);
+    const plVec3 posPrev = plMath::EvaluateBplierCurve(0.98f, cpP.m_vPosition, cpP.m_vPosition + cpP.m_vTangentIn, cpC.m_vPosition + cpC.m_vTangentOut, cpC.m_vPosition);
+    const plVec3 posNext = plMath::EvaluateBplierCurve(0.02f, cpC.m_vPosition, cpC.m_vPosition + cpC.m_vTangentIn, cpN.m_vPosition + cpN.m_vTangentOut, cpN.m_vPosition);
 
     plVec3 dirP = (posPrev - cpC.m_vPosition);
     plVec3 dirN = (posNext - cpC.m_vPosition);
-    dirP.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
-    dirN.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+    dirP.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
+    dirN.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 
     plVec3 dirAvg = dirP - dirN;
     dirAvg.NormalizeIfNotZero(cs.m_vForwardDir).IgnoreResult();
@@ -568,8 +568,8 @@ static double ComputePathLength(plArrayPtr<plPathComponent::LinearizedElement> p
 
 static plVec3 ComputeTangentAt(float fT, const plPathComponent::ControlPoint& cp0, const plPathComponent::ControlPoint& cp1)
 {
-  const plVec3 posPrev = plMath::EvaluateBezierCurve(plMath::Max(0.0f, fT - 0.02f), cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
-  const plVec3 posNext = plMath::EvaluateBezierCurve(plMath::Min(1.0f, fT + 0.02f), cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
+  const plVec3 posPrev = plMath::EvaluateBplierCurve(plMath::Max(0.0f, fT - 0.02f), cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
+  const plVec3 posNext = plMath::EvaluateBplierCurve(plMath::Min(1.0f, fT + 0.02f), cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
 
   return (posNext - posPrev).GetNormalized();
 }
@@ -578,7 +578,7 @@ static void InsertHalfPoint(plDynamicArray<plPathComponent::LinearizedElement>& 
 {
   const float fHalfT = plMath::Lerp(fLowerT, fUpperT, 0.5f);
 
-  const plVec3 vHalfPos = plMath::EvaluateBezierCurve(fHalfT, cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
+  const plVec3 vHalfPos = plMath::EvaluateBplierCurve(fHalfT, cp0.m_vPosition, cp0.m_vPosition + cp0.m_vTangentIn, cp1.m_vPosition + cp1.m_vTangentOut, cp1.m_vPosition);
 
   if (iMinSteps <= 0)
   {
@@ -663,8 +663,7 @@ static void ComputeSegmentUpVector(plArrayPtr<plPathComponent::LinearizedElement
 
     const plAngle roll = plMath::Lerp(cp0.m_Roll, cp1.m_Roll, fLerpFactor);
 
-    plQuat qRoll;
-    qRoll.SetFromAxisAndAngle(tangents[t], roll);
+    plQuat qRoll = plQuat::MakeFromAxisAndAngle(tangents[t], roll);
 
     plVec3 vLocalUp = plMath::Lerp(cp0up, cp1up, fLerpFactor);
     vLocalUp.NormalizeIfNotZero(vWorldUp).IgnoreResult();
@@ -715,33 +714,33 @@ void plPathComponent::CreateLinearizedPathRepresentation(const plDynamicArray<Co
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plPathNodeTangentMode, 1)
-  PLASMA_ENUM_CONSTANTS(plPathNodeTangentMode::Auto, plPathNodeTangentMode::Linear)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plPathNodeTangentMode, 1)
+  PL_ENUM_CONSTANTS(plPathNodeTangentMode::Auto, plPathNodeTangentMode::Linear)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plPathNodeComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plPathNodeComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Roll", GetRoll, SetRoll),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Tangent1", plPathNodeTangentMode, GetTangentMode1, SetTangentMode1),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Tangent2", plPathNodeTangentMode, GetTangentMode2, SetTangentMode2),
+    PL_ACCESSOR_PROPERTY("Roll", GetRoll, SetRoll),
+    PL_ENUM_ACCESSOR_PROPERTY("Tangent1", plPathNodeTangentMode, GetTangentMode1, SetTangentMode1),
+    PL_ENUM_ACCESSOR_PROPERTY("Tangent2", plPathNodeTangentMode, GetTangentMode2, SetTangentMode2),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnMsgTransformChanged),
-    PLASMA_MESSAGE_HANDLER(plMsgParentChanged, OnMsgParentChanged),
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnMsgTransformChanged),
+    PL_MESSAGE_HANDLER(plMsgParentChanged, OnMsgParentChanged),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation/Paths"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plPathNodeComponent::plPathNodeComponent() = default;
@@ -862,3 +861,7 @@ void plPathComponentManager::Update(const plWorldModule::UpdateContext& context)
     }
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_PathComponent);
+

@@ -8,7 +8,7 @@ plResult plDataDirectoryType::InitializeDataDirectory(plStringView sDataDirPath)
   plStringBuilder sPath = sDataDirPath;
   sPath.MakeCleanPath();
 
-  PLASMA_ASSERT_DEV(sPath.IsEmpty() || sPath.EndsWith("/"), "Data directory path must end with a slash.");
+  PL_ASSERT_DEV(sPath.IsEmpty() || sPath.EndsWith("/"), "Data directory path must end with a slash.");
 
   m_sDataDirectoryPath = sPath;
 
@@ -39,5 +39,3 @@ void plDataDirectoryReaderWriterBase::Close()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_FileSystem_Implementation_DataDirType);

@@ -11,15 +11,16 @@ plQtDynamicEnumPropertyWidget::plQtDynamicEnumPropertyWidget()
   setLayout(m_pLayout);
 
   m_pWidget = new QComboBox(this);
+  m_pWidget->installEventFilter(this);
   m_pWidget->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   m_pLayout->addWidget(m_pWidget);
 
-  PLASMA_VERIFY(connect(m_pWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(on_CurrentEnum_changed(int))) != nullptr, "connection failed");
+  PL_VERIFY(connect(m_pWidget, SIGNAL(currentIndexChanged(int)), this, SLOT(on_CurrentEnum_changed(int))) != nullptr, "connection failed");
 }
 
 void plQtDynamicEnumPropertyWidget::OnInit()
 {
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     m_pProp->GetAttributeByType<plDynamicEnumAttribute>() != nullptr, "plQtDynamicEnumPropertyWidget was created without a plDynamicEnumAttribute!");
 
   const plDynamicEnumAttribute* pAttr = m_pProp->GetAttributeByType<plDynamicEnumAttribute>();
@@ -42,7 +43,7 @@ void plQtDynamicEnumPropertyWidget::InternalSetValue(const plVariant& value)
   if (value.IsValid())
   {
     plInt32 iIndex = m_pWidget->findData(value.ConvertTo<plInt64>());
-    // PLASMA_ASSERT_DEV(iIndex != -1, "Enum widget is set to an invalid value!"); // 'invalid value'
+    // PL_ASSERT_DEV(iIndex != -1, "Enum widget is set to an invalid value!"); // 'invalid value'
     m_pWidget->setCurrentIndex(iIndex);
   }
   else

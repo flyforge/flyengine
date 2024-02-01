@@ -7,8 +7,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataAssetDocumentManager, 1, plRTTIDefaultAllocator<plImageDataAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataAssetDocumentManager, 1, plRTTIDefaultAllocator<plImageDataAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plImageDataAssetDocumentManager::plImageDataAssetDocumentManager()
@@ -39,7 +39,7 @@ void plImageDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMan
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plImageDataAssetDocument>())
       {
-        plQtImageDataAssetDocumentWindow* pDocWnd = new plQtImageDataAssetDocumentWindow(static_cast<plImageDataAssetDocument*>(e.m_pDocument));
+        new plQtImageDataAssetDocumentWindow(static_cast<plImageDataAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -49,9 +49,9 @@ void plImageDataAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMan
   }
 }
 
-void plImageDataAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plImageDataAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  plImageDataAssetDocument* pDoc = new plImageDataAssetDocument(szPath);
+  plImageDataAssetDocument* pDoc = new plImageDataAssetDocument(sPath);
   out_pDocument = pDoc;
 }
 

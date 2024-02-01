@@ -12,7 +12,7 @@ struct plMsgAnimationReachedEnd;
 
 using plFollowPathComponentManager = plComponentManagerSimple<class plFollowPathComponent, plComponentUpdateType::WhenSimulating>;
 
-struct PLASMA_GAMEENGINE_DLL plFollowPathMode
+struct PL_GAMEENGINE_DLL plFollowPathMode
 {
   using StorageType = plUInt8;
 
@@ -26,7 +26,7 @@ struct PLASMA_GAMEENGINE_DLL plFollowPathMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plFollowPathMode)
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plFollowPathMode)
 
 /// \brief This component makes the plGameObject, that it is attached to, move along a path defined by an plPathComponent.
 ///
@@ -42,9 +42,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plFollowPathMode)
 /// You can achieve this, using the "Keep Simulation Changes" feature of the editor (simulate with zero speed, press K, stop simulation).
 /// Another option is to instead delay the spawning of the object below the hook, by using an plSpawnComponent next to the plFollowPathComponent,
 /// and thus have the payload spawn only after the hook has been placed properly.
-class PLASMA_GAMEENGINE_DLL plFollowPathComponent : public plComponent
+class PL_GAMEENGINE_DLL plFollowPathComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plFollowPathComponent, plComponent, plFollowPathComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plFollowPathComponent, plComponent, plFollowPathComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -73,7 +73,7 @@ public:
   float m_fLookAhead = 1.0f;                            ///< [ property ] How far along the path to 'look ahead' to smooth the rotation. A small distance means rotations are very abrupt.
   float m_fSmoothing = 0.5f;                            ///< [ property ] How much to combine the current position with the new position. 0 to 1. At zero, the position follows the path perfectly, but therefore also has very abrupt changes. With a lot of smoothing, the path becomes very sluggish.
   float m_fTiltAmount = 5.0f;                           ///< [ property ] How much to tilt when turning.
-  plAngle m_MaxTilt = plAngle::Degree(30.0f);   ///< [ property ] The max tilt angle of the object.
+  plAngle m_MaxTilt = plAngle::MakeFromDegree(30.0f);   ///< [ property ] The max tilt angle of the object.
 
   /// \brief Distance along the path at which the plFollowPathComponent should start off.
   void SetDistanceAlongPath(float fDistance); // [ property ]

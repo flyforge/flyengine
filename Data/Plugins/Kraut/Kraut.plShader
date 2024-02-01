@@ -3,17 +3,17 @@ ALL
 
 [PERMUTATIONS]
 
-SHADING_MODE
-SHADING_QUALITY
 BLEND_MODE
-TWO_SIDED
-
-FLIP_WINDING = FALSE
-GAMEOBJECT_VELOCITY = FALSE
 RENDER_PASS
+SHADING_MODE
+TWO_SIDED
+FLIP_WINDING = FALSE
+MSAA
 CAMERA_MODE
-MATERIAL_PREVIEW
+SHADING_QUALITY
 FORWARD_PASS_WRITE_DEPTH
+MATERIAL_PREVIEW
+VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
 
 [MATERIALPARAMETER]
 
@@ -42,7 +42,7 @@ int KrautTreeMode; // 0 == regular mesh, 1 == frond, 2 == leaf, 3 == static impo
 
 #include <Shaders/Materials/MaterialState.h>
 
-[VERTEXSHADER]
+[SHADER]
 
 #define USE_COLOR0
 #define USE_COLOR1
@@ -51,10 +51,13 @@ int KrautTreeMode; // 0 == regular mesh, 1 == frond, 2 == leaf, 3 == static impo
 #define USE_TEXCOORD0
 #define USE_TEXCOORD1
 #define CUSTOM_INTERPOLATOR float3 LeafNormal : TEXCOORD2;
+#define USE_MATERIAL_SUBSURFACE_COLOR
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
 #endif
+
+[VERTEXSHADER]
 
 #include <Shaders/Common/GlobalConstants.h>
 
@@ -249,10 +252,6 @@ VS_OUT main(VS_IN Input)
 
 [GEOMETRYSHADER]
 
-#if RENDER_PASS == RENDER_PASS_EDITOR
-  #define USE_DEBUG_INTERPOLATOR
-#endif
-
 void CopyCustomInterpolators(GS_OUT output, VS_OUT input)
 {
   output.LeafNormal = input.LeafNormal;
@@ -262,25 +261,10 @@ void CopyCustomInterpolators(GS_OUT output, VS_OUT input)
 
 [PIXELSHADER]
 
-
-#define USE_COLOR0
-#define USE_COLOR1
-#define USE_NORMAL
-#define USE_TANGENT
-#define USE_TEXCOORD0
-#define USE_TEXCOORD1
 #define USE_SIMPLE_MATERIAL_MODEL
 #define USE_MATERIAL_OCCLUSION
-#define USE_MATERIAL_SUBSURFACE_COLOR
 #define USE_TWO_SIDED_LIGHTING
-#define USE_DECALS
 #define USE_FOG
-#define CUSTOM_INTERPOLATOR float3 LeafNormal : TEXCOORD2;
-
-#if RENDER_PASS == RENDER_PASS_EDITOR
-  #define USE_DEBUG_INTERPOLATOR
-#endif
-
 
 #include <Shaders/Common/GlobalConstants.h>
 
@@ -390,12 +374,12 @@ float3 GetNormal()
 
 float GetMetallic()
 {
-  return 0.0f;
+  return 0;
 }
 
 float GetReflectance()
 {
-  return 0.02f;
+  return 0.2f;
 }
 
 float GetRoughness()
@@ -409,6 +393,11 @@ float GetRoughness()
   {
     return RoughnessValue;
   }
+}
+
+float GetMetallic()
+{
+  return 0.0f;
 }
 
 float GetOpacity()

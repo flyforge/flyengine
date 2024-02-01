@@ -5,7 +5,7 @@
 
 plResult plTexConvProcessor::Assemble2DTexture(const plImageHeader& refImg, plImage& dst) const
 {
-  PLASMA_PROFILE_SCOPE("Assemble2DTexture");
+  PL_PROFILE_SCOPE("Assemble2DTexture");
 
   dst.ResetAndAlloc(refImg);
 
@@ -53,7 +53,7 @@ plResult plTexConvProcessor::Assemble2DSlice(const plTexConvSliceChannelMapping&
           break;
 
         default:
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
           break;
       }
     }
@@ -86,13 +86,13 @@ plResult plTexConvProcessor::Assemble2DSlice(const plTexConvSliceChannelMapping&
   if (!bFlip && (pSourceValues[0] + 1 == pSourceValues[1]) && (pSourceValues[1] + 1 == pSourceValues[2]) &&
       (pSourceValues[2] + 1 == pSourceValues[3]))
   {
-    PLASMA_PROFILE_SCOPE("Assemble2DSlice(memcpy)");
+    PL_PROFILE_SCOPE("Assemble2DSlice(memcpy)");
 
     plMemoryUtils::Copy<plColor>(pPixelOut, reinterpret_cast<const plColor*>(pSourceValues[0]), uiResolutionX * uiResolutionY);
   }
   else
   {
-    PLASMA_PROFILE_SCOPE("Assemble2DSlice(gather)");
+    PL_PROFILE_SCOPE("Assemble2DSlice(gather)");
 
     for (plUInt32 y = 0; y < uiResolutionY; ++y)
     {
@@ -111,14 +111,14 @@ plResult plTexConvProcessor::Assemble2DSlice(const plTexConvSliceChannelMapping&
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::DetermineTargetResolution(const plImage& image, plEnum<plImageFormat> OutputImageFormat, plUInt32& out_uiTargetResolutionX, plUInt32& out_uiTargetResolutionY) const
 {
-  PLASMA_PROFILE_SCOPE("DetermineResolution");
+  PL_PROFILE_SCOPE("DetermineResolution");
 
-  PLASMA_ASSERT_DEV(out_uiTargetResolutionX == 0 && out_uiTargetResolutionY == 0, "Target resolution already determined");
+  PL_ASSERT_DEV(out_uiTargetResolutionX == 0 && out_uiTargetResolutionY == 0, "Target resolution already determined");
 
   const plUInt32 uiOrgResX = image.GetWidth();
   const plUInt32 uiOrgResY = image.GetHeight();
@@ -179,7 +179,7 @@ plResult plTexConvProcessor::DetermineTargetResolution(const plImage& image, plE
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_Texture2D);
+

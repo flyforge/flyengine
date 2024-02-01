@@ -139,4 +139,4 @@ void RemoveGlobalEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_GlobalEvents);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_GlobalEvents);

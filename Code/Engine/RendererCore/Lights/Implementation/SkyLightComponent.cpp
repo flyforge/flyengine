@@ -16,48 +16,48 @@ namespace
 {
   static plVariantArray GetDefaultTags()
   {
-    plVariantArray value(plStaticAllocatorWrapper::GetAllocator());
-    value.PushBack(plStringView("SkyLight"));
+    plVariantArray value(plStaticsAllocatorWrapper::GetAllocator());
+    value.PushBack("SkyLight");
     return value;
   }
 } // namespace
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSkyLightComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSkyLightComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("ReflectionProbeMode", plReflectionProbeMode, GetReflectionProbeMode, SetReflectionProbeMode)->AddAttributes(new plDefaultValueAttribute(plReflectionProbeMode::Dynamic), new plGroupAttribute("Capture Description")),
-    PLASMA_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
-    PLASMA_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Saturation", GetSaturation, SetSaturation)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_SET_ACCESSOR_PROPERTY("IncludeTags", GetIncludeTags, InsertIncludeTag, RemoveIncludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultTags())),
-    PLASMA_SET_ACCESSOR_PROPERTY("ExcludeTags", GetExcludeTags, InsertExcludeTag, RemoveExcludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default")),
-    PLASMA_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, {}), new plMinValueTextAttribute("Auto")),
-    PLASMA_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.01f, 10000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
-    PLASMA_ACCESSOR_PROPERTY("ShowMipMaps", GetShowMipMaps, SetShowMipMaps),
+    PL_ENUM_ACCESSOR_PROPERTY("ReflectionProbeMode", plReflectionProbeMode, GetReflectionProbeMode, SetReflectionProbeMode)->AddAttributes(new plDefaultValueAttribute(plReflectionProbeMode::Dynamic), new plGroupAttribute("Capture Description")),
+    PL_ACCESSOR_PROPERTY("CubeMap", GetCubeMapFile, SetCubeMapFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
+    PL_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Saturation", GetSaturation, SetSaturation)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_SET_ACCESSOR_PROPERTY("IncludeTags", GetIncludeTags, InsertIncludeTag, RemoveIncludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultTags())),
+    PL_SET_ACCESSOR_PROPERTY("ExcludeTags", GetExcludeTags, InsertExcludeTag, RemoveExcludeTag)->AddAttributes(new plTagSetWidgetAttribute("Default")),
+    PL_ACCESSOR_PROPERTY("NearPlane", GetNearPlane, SetNearPlane)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, {}), new plMinValueTextAttribute("Auto")),
+    PL_ACCESSOR_PROPERTY("FarPlane", GetFarPlane, SetFarPlane)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.01f, 10000.0f)),
+    PL_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
+    PL_ACCESSOR_PROPERTY("ShowMipMaps", GetShowMipMaps, SetShowMipMaps),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Lighting"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSkyLightComponent::plSkyLightComponent()
 {
-  m_Desc.m_uniqueID.CreateNewUuid();
+  m_Desc.m_uniqueID = plUuid::MakeUuid();
 }
 
 plSkyLightComponent::~plSkyLightComponent() = default;
@@ -296,4 +296,4 @@ public:
 
 plSkyLightComponentPatch_2_3 g_plSkyLightComponentPatch_2_3;
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SkyLightComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SkyLightComponent);

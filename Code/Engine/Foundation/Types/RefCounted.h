@@ -3,7 +3,7 @@
 
 #include <Foundation/Threading/AtomicUtils.h>
 
-class PLASMA_FOUNDATION_DLL plRefCountingImpl
+class PL_FOUNDATION_DLL plRefCountingImpl
 {
 public:
   /// \brief Constructor
@@ -48,7 +48,7 @@ private:
 };
 
 /// \brief Base class for reference counted objects.
-class PLASMA_FOUNDATION_DLL plRefCounted : public plRefCountingImpl
+class PL_FOUNDATION_DLL plRefCounted : public plRefCountingImpl
 {
 public:
   /// \brief Adds a virtual destructor.
@@ -124,14 +124,14 @@ public:
   /// \brief Returns the referenced object (may be nullptr).
   const T* operator->() const
   {
-    PLASMA_ASSERT_DEV(m_pReferencedObject != nullptr, "Pointer is nullptr.");
+    PL_ASSERT_DEV(m_pReferencedObject != nullptr, "Pointer is nullptr.");
     return m_pReferencedObject;
   }
 
   /// \brief Returns the referenced object (may be nullptr)
   T* operator->()
   {
-    PLASMA_ASSERT_DEV(m_pReferencedObject != nullptr, "Pointer is nullptr.");
+    PL_ASSERT_DEV(m_pReferencedObject != nullptr, "Pointer is nullptr.");
     return m_pReferencedObject;
   }
 

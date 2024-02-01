@@ -15,7 +15,7 @@ using plPrefabResourceHandle = plTypedResourceHandle<class plPrefabResource>;
 
 struct plSurfaceInteractionAlignment
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -30,10 +30,10 @@ struct plSurfaceInteractionAlignment
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plSurfaceInteractionAlignment);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plSurfaceInteractionAlignment);
 
 
-struct PLASMA_CORE_DLL plSurfaceInteraction
+struct PL_CORE_DLL plSurfaceInteraction
 {
   void SetPrefab(const char* szPrefab);
   const char* GetPrefab() const;
@@ -54,20 +54,20 @@ struct PLASMA_CORE_DLL plSurfaceInteraction
   plArrayMap<plHashedString, plVariant> m_Parameters;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plSurfaceInteraction);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plSurfaceInteraction);
 
-struct PLASMA_CORE_DLL plSurfaceResourceDescriptor : public plReflectedClass
+struct PL_CORE_DLL plSurfaceResourceDescriptor : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSurfaceResourceDescriptor, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plSurfaceResourceDescriptor, plReflectedClass);
 
 public:
-  void Load(plStreamReader& stream);
-  void Save(plStreamWriter& stream) const;
+  void Load(plStreamReader& inout_stream);
+  void Save(plStreamWriter& inout_stream) const;
 
   void SetBaseSurfaceFile(const char* szFile);
   const char* GetBaseSurfaceFile() const;
 
-  void SetCollisionInteraction(const char* name);
+  void SetCollisionInteraction(const char* szName);
   const char* GetCollisionInteraction() const;
 
   void SetSlideReactionPrefabFile(const char* szFile);
@@ -76,12 +76,10 @@ public:
   void SetRollReactionPrefabFile(const char* szFile);
   const char* GetRollReactionPrefabFile() const;
 
-
   plSurfaceResourceHandle m_hBaseSurface;
   float m_fPhysicsRestitution;
   float m_fPhysicsFrictionStatic;
   float m_fPhysicsFrictionDynamic;
-  float m_fSoundObstruction;
   plHashedString m_sOnCollideInteraction;
   plHashedString m_sSlideInteractionPrefab;
   plHashedString m_sRollInteractionPrefab;

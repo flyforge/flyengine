@@ -37,9 +37,9 @@ enum RTCGeometryType
 
   RTC_GEOMETRY_TYPE_FLAT_LINEAR_CURVE   = 17, // flat (ribbon-like) linear curves
 
-  RTC_GEOMETRY_TYPE_ROUND_BPLASMAIER_CURVE  = 24, // round (tube-like) Bezier curves
-  RTC_GEOMETRY_TYPE_FLAT_BPLASMAIER_CURVE   = 25, // flat (ribbon-like) Bezier curves
-  RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BPLASMAIER_CURVE  = 26, // flat normal-oriented Bezier curves
+  RTC_GEOMETRY_TYPE_ROUND_BEZIER_CURVE  = 24, // round (tube-like) Bezier curves
+  RTC_GEOMETRY_TYPE_FLAT_BEZIER_CURVE   = 25, // flat (ribbon-like) Bezier curves
+  RTC_GEOMETRY_TYPE_NORMAL_ORIENTED_BEZIER_CURVE  = 26, // flat normal-oriented Bezier curves
   
   RTC_GEOMETRY_TYPE_ROUND_BSPLINE_CURVE = 32, // round (tube-like) B-spline curves
   RTC_GEOMETRY_TYPE_FLAT_BSPLINE_CURVE  = 33, // flat (ribbon-like) B-spline curves

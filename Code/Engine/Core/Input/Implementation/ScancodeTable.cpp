@@ -253,5 +253,3 @@ plStringView plInputManager::ConvertScanCodeToEngineName(plUInt8 uiScanCode, boo
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_ScancodeTable);

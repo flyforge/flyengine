@@ -7,9 +7,7 @@ get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE)
 
 pl_create_target(LIBRARY ${PROJECT_NAME})
 
-if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-endif()
+pl_enable_strict_warnings(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
   PUBLIC
@@ -20,7 +18,7 @@ target_link_libraries(${PROJECT_NAME}
   mikktspace
 )
 
-if (PLASMA_3RDPARTY_LUA_SUPPORT)
+if (PL_3RDPARTY_LUA_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -29,7 +27,7 @@ if (PLASMA_3RDPARTY_LUA_SUPPORT)
 
 endif()
 
-if (PLASMA_3RDPARTY_DUKTAPE_SUPPORT)
+if (PL_3RDPARTY_DUKTAPE_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME}
     PUBLIC
@@ -38,7 +36,7 @@ if (PLASMA_3RDPARTY_DUKTAPE_SUPPORT)
 
 endif()
 
-if(PLASMA_3RDPARTY_GLFW_SUPPORT)
+if(PL_3RDPARTY_GLFW_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 

@@ -1,16 +1,16 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/AnimationSystem/Implementation/OzzUtils.h>
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 #include <ozz/animation/runtime/skeleton.h>
 #include <ozz/base/io/archive.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonResource, 1, plRTTIDefaultAllocator<plSkeletonResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonResource, 1, plRTTIDefaultAllocator<plSkeletonResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plSkeletonResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plSkeletonResource);
 // clang-format on
 
 plSkeletonResource::plSkeletonResource()
@@ -20,9 +20,9 @@ plSkeletonResource::plSkeletonResource()
 
 plSkeletonResource::~plSkeletonResource() = default;
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plSkeletonResource, plSkeletonResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plSkeletonResource, plSkeletonResourceDescriptor)
 {
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plSkeletonResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plSkeletonResourceDescriptor);
   *m_pDescriptor = std::move(descriptor);
 
   plResourceLoadDesc res;
@@ -47,7 +47,7 @@ plResourceLoadDesc plSkeletonResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plSkeletonResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plSkeletonResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plSkeletonResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -69,7 +69,7 @@ plResourceLoadDesc plSkeletonResource::UpdateContent(plStreamReader* Stream)
   plAssetFileHeader AssetHash;
   AssetHash.Read(*Stream).IgnoreResult();
 
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plSkeletonResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plSkeletonResourceDescriptor);
   m_pDescriptor->Deserialize(*Stream).IgnoreResult();
 
   res.m_State = plResourceState::Loaded;
@@ -123,11 +123,11 @@ plResult plSkeletonResourceDescriptor::Serialize(plStreamWriter& inout_stream) c
     inout_stream << geo.m_Type;
     inout_stream << geo.m_Transform;
 
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(geo.m_VertexPositions));
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(geo.m_TriangleIndices));
+    PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(geo.m_VertexPositions));
+    PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(geo.m_TriangleIndices));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSkeletonResourceDescriptor::Deserialize(plStreamReader& inout_stream)
@@ -135,7 +135,7 @@ plResult plSkeletonResourceDescriptor::Deserialize(plStreamReader& inout_stream)
   const plTypeVersion version = inout_stream.ReadVersion(7);
 
   if (version < 6)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Skeleton.Load(inout_stream);
 
@@ -173,8 +173,8 @@ plResult plSkeletonResourceDescriptor::Deserialize(plStreamReader& inout_stream)
 
     if (version >= 7)
     {
-      PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(geo.m_VertexPositions));
-      PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(geo.m_TriangleIndices));
+      PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(geo.m_VertexPositions));
+      PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(geo.m_TriangleIndices));
     }
   }
 
@@ -182,8 +182,8 @@ plResult plSkeletonResourceDescriptor::Deserialize(plStreamReader& inout_stream)
   // this allows to make the algorithm for creating the bone geometry more efficient
   m_Geometry.Sort([](const plSkeletonResourceGeometry& lhs, const plSkeletonResourceGeometry& rhs) -> bool { return lhs.m_uiAttachedToJoint < rhs.m_uiAttachedToJoint; });
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonResource);

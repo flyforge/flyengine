@@ -5,23 +5,23 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 //// clang-format off
-// PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLocalToModelPoseAnimNode, 1, plRTTIDefaultAllocator<plLocalToModelPoseAnimNode>)
+// PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLocalToModelPoseAnimNode, 1, plRTTIDefaultAllocator<plLocalToModelPoseAnimNode>)
 //{
-//   PLASMA_BEGIN_PROPERTIES
+//   PL_BEGIN_PROPERTIES
 //   {
-//     PLASMA_MEMBER_PROPERTY("LocalPose", m_LocalPosePin)->AddAttributes(new plHiddenAttribute),
-//     PLASMA_MEMBER_PROPERTY("ModelPose", m_ModelPosePin)->AddAttributes(new plHiddenAttribute),
+//     PL_MEMBER_PROPERTY("LocalPose", m_LocalPosePin)->AddAttributes(new plHiddenAttribute),
+//     PL_MEMBER_PROPERTY("ModelPose", m_ModelPosePin)->AddAttributes(new plHiddenAttribute),
 //   }
-//   PLASMA_END_PROPERTIES;
-//   PLASMA_BEGIN_ATTRIBUTES
+//   PL_END_PROPERTIES;
+//   PL_BEGIN_ATTRIBUTES
 //   {
 //     new plCategoryAttribute("Pose Processing"),
 //     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue)),
 //     new plTitleAttribute("Local To Model Space"),
 //   }
-//   PLASMA_END_ATTRIBUTES;
+//   PL_END_ATTRIBUTES;
 // }
-// PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+// PL_END_DYNAMIC_REFLECTED_TYPE;
 //// clang-format on
 //
 // plLocalToModelPoseAnimNode::plLocalToModelPoseAnimNode() = default;
@@ -31,24 +31,24 @@
 //{
 //  stream.WriteVersion(1);
 //
-//  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+//  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 //
-//  PLASMA_SUCCEED_OR_RETURN(m_LocalPosePin.Serialize(stream));
-//  PLASMA_SUCCEED_OR_RETURN(m_ModelPosePin.Serialize(stream));
+//  PL_SUCCEED_OR_RETURN(m_LocalPosePin.Serialize(stream));
+//  PL_SUCCEED_OR_RETURN(m_ModelPosePin.Serialize(stream));
 //
-//  return PLASMA_SUCCESS;
+//  return PL_SUCCESS;
 //}
 //
 // plResult plLocalToModelPoseAnimNode::DeserializeNode(plStreamReader& stream)
 //{
 //  stream.ReadVersion(1);
 //
-//  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+//  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 //
-//  PLASMA_SUCCEED_OR_RETURN(m_LocalPosePin.Deserialize(stream));
-//  PLASMA_SUCCEED_OR_RETURN(m_ModelPosePin.Deserialize(stream));
+//  PL_SUCCEED_OR_RETURN(m_LocalPosePin.Deserialize(stream));
+//  PL_SUCCEED_OR_RETURN(m_ModelPosePin.Deserialize(stream));
 //
-//  return PLASMA_SUCCESS;
+//  return PL_SUCCESS;
 //}
 //
 // void plLocalToModelPoseAnimNode::Step(plAnimGraphExecutor& executor, plAnimGraphInstance& graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
@@ -77,4 +77,4 @@
 //}
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_LocalToModelPoseAnimNode);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_LocalToModelPoseAnimNode);

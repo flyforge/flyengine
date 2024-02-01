@@ -6,15 +6,15 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimGraphNode, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimGraphNode, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("CustomTitle", GetCustomNodeTitle, SetCustomNodeTitle),
+    PL_ACCESSOR_PROPERTY("CustomTitle", GetCustomNodeTitle, SetCustomNodeTitle),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plAnimGraphNode::plAnimGraphNode() = default;
@@ -27,7 +27,7 @@ plResult plAnimGraphNode::SerializeNode(plStreamWriter& stream) const
   // no need to serialize this, not used at runtime
   //stream << m_CustomNodeTitle;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAnimGraphNode::DeserializeNode(plStreamReader& stream)
@@ -37,7 +37,7 @@ plResult plAnimGraphNode::DeserializeNode(plStreamReader& stream)
   // no need to serialize this, not used at runtime
   //stream >> m_CustomNodeTitle;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -45,21 +45,21 @@ plResult plAnimGraphNode::DeserializeNode(plStreamReader& stream)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plAnimState, plNoBase, 1, plRTTIDefaultAllocator<plAnimState>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plAnimState, plNoBase, 1, plRTTIDefaultAllocator<plAnimState>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Loop", m_bLoop),
-    PLASMA_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
-    PLASMA_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("FadeIn", m_FadeIn),
-    PLASMA_MEMBER_PROPERTY("FadeOut", m_FadeOut),
-    PLASMA_MEMBER_PROPERTY("ImmediateFadeIn", m_bImmediateFadeIn),
-    PLASMA_MEMBER_PROPERTY("ImmediateFadeOut", m_bImmediateFadeOut),
+    PL_MEMBER_PROPERTY("Loop", m_bLoop),
+    PL_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
+    PL_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("FadeIn", m_FadeIn),
+    PL_MEMBER_PROPERTY("FadeOut", m_FadeOut),
+    PL_MEMBER_PROPERTY("ImmediateFadeIn", m_bImmediateFadeIn),
+    PL_MEMBER_PROPERTY("ImmediateFadeOut", m_bImmediateFadeOut),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plAnimState::RampWeightUpOrDown(float& inout_fWeight, float fTargetWeight, plTime tDiff) const
@@ -97,7 +97,7 @@ bool plAnimState::WillStateBeOff(bool bTriggerActive) const
 
 void plAnimState::UpdateState(plTime diff)
 {
-  PLASMA_ASSERT_DEV(!m_Duration.IsZeroOrNegative(), "Invalid animation clip duration");
+  PL_ASSERT_DEV(!m_Duration.IsZeroOrNegative(), "Invalid animation clip duration");
 
   m_bHasTransitioned = false;
   m_bHasLoopedStart = false;
@@ -309,7 +309,7 @@ plResult plAnimState::Serialize(plStreamWriter& inout_stream) const
   inout_stream << m_fPlaybackSpeed;
   inout_stream << m_bApplyRootMotion;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAnimState::Deserialize(plStreamReader& inout_stream)
@@ -325,8 +325,8 @@ plResult plAnimState::Deserialize(plStreamReader& inout_stream)
   inout_stream >> m_fPlaybackSpeed;
   inout_stream >> m_bApplyRootMotion;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_Implementation_AnimGraphNode);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_Implementation_AnimGraphNode);

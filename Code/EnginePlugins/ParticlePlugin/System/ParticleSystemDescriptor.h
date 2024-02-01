@@ -11,9 +11,9 @@ class plParticleBehaviorFactory;
 class plParticleInitializerFactory;
 class plParticleTypeFactory;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleSystemDescriptor final : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleSystemDescriptor final : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleSystemDescriptor, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleSystemDescriptor, plReflectedClass);
 
 public:
   plParticleSystemDescriptor();
@@ -48,8 +48,8 @@ public:
 
   //////////////////////////////////////////////////////////////////////////
 
-  void Save(plStreamWriter& stream) const;
-  void Load(plStreamReader& stream);
+  void Save(plStreamWriter& inout_stream) const;
+  void Load(plStreamReader& inout_stream);
 
 private:
   void ClearEmitters();

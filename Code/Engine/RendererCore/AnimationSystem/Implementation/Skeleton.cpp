@@ -9,9 +9,9 @@
 #include <ozz/animation/runtime/skeleton.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonJointType, 1)
-  PLASMA_ENUM_CONSTANTS(plSkeletonJointType::None, plSkeletonJointType::Fixed, plSkeletonJointType::SwingTwist)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonJointType, 1)
+  PL_ENUM_CONSTANTS(plSkeletonJointType::None, plSkeletonJointType::Fixed, plSkeletonJointType::SwingTwist)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plSkeleton::plSkeleton() = default;
@@ -160,9 +160,9 @@ static void BuildRawOzzSkeleton(const plSkeleton& skeleton, plUInt16 uiExpectedP
     dstJoint.transform.translation.x = srcTransform.m_vPosition.x;
     dstJoint.transform.translation.y = srcTransform.m_vPosition.y;
     dstJoint.transform.translation.z = srcTransform.m_vPosition.z;
-    dstJoint.transform.rotation.x = srcTransform.m_qRotation.v.x;
-    dstJoint.transform.rotation.y = srcTransform.m_qRotation.v.y;
-    dstJoint.transform.rotation.z = srcTransform.m_qRotation.v.z;
+    dstJoint.transform.rotation.x = srcTransform.m_qRotation.x;
+    dstJoint.transform.rotation.y = srcTransform.m_qRotation.y;
+    dstJoint.transform.rotation.z = srcTransform.m_qRotation.z;
     dstJoint.transform.rotation.w = srcTransform.m_qRotation.w;
     dstJoint.transform.scale.x = srcTransform.m_vScale.x;
     dstJoint.transform.scale.y = srcTransform.m_vScale.y;
@@ -179,7 +179,7 @@ const ozz::animation::Skeleton& plSkeleton::GetOzzSkeleton() const
 
   // caching the skeleton isn't thread-safe
   static plMutex cacheSkeletonMutex;
-  PLASMA_LOCK(cacheSkeletonMutex);
+  PL_LOCK(cacheSkeletonMutex);
 
   // skip this, if the skeleton has been created in the mean-time
   if (m_pOzzSkeleton == nullptr)
@@ -190,7 +190,7 @@ const ozz::animation::Skeleton& plSkeleton::GetOzzSkeleton() const
     ozz::animation::offline::SkeletonBuilder skeletonBuilder;
     const auto pOzzSkeleton = skeletonBuilder(rawSkeleton);
 
-    auto ozzSkeleton = PLASMA_DEFAULT_NEW(ozz::animation::Skeleton);
+    auto ozzSkeleton = PL_DEFAULT_NEW(ozz::animation::Skeleton);
 
     plOzzUtils::CopySkeleton(ozzSkeleton, pOzzSkeleton.get());
 
@@ -208,12 +208,12 @@ plUInt64 plSkeleton::GetHeapMemoryUsage() const
 
 plAngle plSkeletonJoint::GetTwistLimitLow() const
 {
-  return plMath::Max(plAngle::Degree(-179), m_TwistLimitCenterAngle - m_TwistLimitHalfAngle);
+  return plMath::Max(plAngle::MakeFromDegree(-179), m_TwistLimitCenterAngle - m_TwistLimitHalfAngle);
 }
 
 plAngle plSkeletonJoint::GetTwistLimitHigh() const
 {
-  return plMath::Min(plAngle::Degree(179), m_TwistLimitCenterAngle + m_TwistLimitHalfAngle);
+  return plMath::Min(plAngle::MakeFromDegree(179), m_TwistLimitCenterAngle + m_TwistLimitHalfAngle);
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_Skeleton);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_Skeleton);

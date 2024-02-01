@@ -13,10 +13,9 @@ plConvexHullGenerator::~plConvexHullGenerator() = default;
 plResult plConvexHullGenerator::ComputeCenterAndScale(const plArrayPtr<const plVec3> vertices)
 {
   if (vertices.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  plBoundingBox box;
-  box.SetFromPoints(vertices.GetPtr(), vertices.GetCount());
+  plBoundingBox box = plBoundingBox::MakeFromPoints(vertices.GetPtr(), vertices.GetCount());
 
   const plVec3 c = box.GetCenter();
   m_vCenter.Set(c.x, c.y, c.z);
@@ -26,20 +25,20 @@ plResult plConvexHullGenerator::ComputeCenterAndScale(const plArrayPtr<const plV
   const double minExt = plMath::Min(ext.x, ext.y, ext.z);
 
   if (minExt <= 0.000001)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const double maxExt = plMath::Max(ext.x, ext.y, ext.z);
 
   m_fScale = 1.0 / maxExt;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plConvexHullGenerator::StoreNormalizedVertices(const plArrayPtr<const plVec3> vertices)
 {
   struct Comparer
   {
-    PLASMA_ALWAYS_INLINE bool Less(const plVec3d& a, const plVec3d& b) const
+    PL_ALWAYS_INLINE bool Less(const plVec3d& a, const plVec3d& b) const
     {
       constexpr double eps = 0.01;
 
@@ -79,16 +78,16 @@ plResult plConvexHullGenerator::StoreNormalizedVertices(const plArrayPtr<const p
   }
 
   if (m_Vertices.GetCount() < 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plConvexHullGenerator::StoreTriangle(plUInt16 i, plUInt16 j, plUInt16 k)
 {
   Triangle& triangle = m_Triangles.ExpandAndGetRef();
 
-  PLASMA_ASSERT_DEBUG((i < j) && (i < k) && (j < k), "Invalid Triangle");
+  PL_ASSERT_DEBUG((i < j) && (i < k) && (j < k), "Invalid Triangle");
 
   plVec3d tangent1 = m_Vertices[k] - m_Vertices[i];
   plVec3d tangent2 = m_Vertices[j] - m_Vertices[i];
@@ -105,7 +104,7 @@ void plConvexHullGenerator::StoreTriangle(plUInt16 i, plUInt16 j, plUInt16 k)
     tangent2 = tangent1.CrossRH(orth);
     triangle.m_vNormal = tangent1.CrossRH(tangent2);
 
-    PLASMA_ASSERT_DEBUG(!triangle.m_vNormal.IsZero(0.0000001), "Normal is still invalid");
+    PL_ASSERT_DEBUG(!triangle.m_vNormal.IsZero(0.0000001), "Normal is still invalid");
   }
 
   // needs to be normalized for later pruning
@@ -204,7 +203,7 @@ plResult plConvexHullGenerator::InitializeHull()
   }
 
   if (uiMainAxis1 == uiMainAxis2)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plHybridArray<plUInt32, 6> testIdx;
   testIdx.PushBack(uiMainAxis1);
@@ -266,7 +265,7 @@ plResult plConvexHullGenerator::InitializeHull()
   }
 
   if (uiIx1 == 0xFFFFFFFF || uiIx2 == 0xFFFFFFFF)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // move the four chosen ones to the front of the queue
   testIdx.Clear();
@@ -280,7 +279,7 @@ plResult plConvexHullGenerator::InitializeHull()
   {
     if (i > 0)
     {
-      PLASMA_ASSERT_DEBUG(testIdx[i - 1] != testIdx[i], "Same index used twice");
+      PL_ASSERT_DEBUG(testIdx[i - 1] != testIdx[i], "Same index used twice");
     }
 
     plMath::Swap(m_Vertices[i], m_Vertices[testIdx[i]]);
@@ -306,7 +305,7 @@ plResult plConvexHullGenerator::InitializeHull()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plConvexHullGenerator::ComputeHull()
@@ -314,14 +313,14 @@ plResult plConvexHullGenerator::ComputeHull()
   const plUInt32 uiMaxVertices = m_Vertices.GetCount();
 
   if (uiMaxVertices < 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_Edges.Clear();
   m_Edges.SetCount(plMath::Square(uiMaxVertices));
   m_Triangles.Clear();
   m_Triangles.Reserve(512);
 
-  PLASMA_SUCCEED_OR_RETURN(InitializeHull());
+  PL_SUCCEED_OR_RETURN(InitializeHull());
 
   // Add the points to the hull, one at a time.
   for (plUInt32 vtxId = 4; vtxId < uiMaxVertices; ++vtxId)
@@ -338,9 +337,9 @@ plResult plConvexHullGenerator::ComputeHull()
   }
 
   if (m_Triangles.GetCount() < 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plConvexHullGenerator::IsInside(plUInt32 vtxId) const
@@ -391,7 +390,7 @@ void plConvexHullGenerator::RemoveVisibleFaces(plUInt32 vtxId)
 
 void plConvexHullGenerator::PatchHole(plUInt32 vtxId)
 {
-  PLASMA_ASSERT_DEBUG(vtxId < 0xFFFFu, "Vertex Id is larger than 16 bits can address.");
+  PL_ASSERT_DEBUG(vtxId < 0xFFFFu, "Vertex Id is larger than 16 bits can address.");
   const plUInt32 uiMaxVertices = m_Vertices.GetCount();
 
   const plUInt32 uiNumFaces = m_Triangles.GetCount();
@@ -644,27 +643,27 @@ plResult plConvexHullGenerator::ProcessVertices(const plArrayPtr<const plVec3> v
     uiFirstVertex += uiAdd;
     uiNumVerticesLeft -= uiAdd;
 
-    PLASMA_SUCCEED_OR_RETURN(StoreNormalizedVertices(workingSet));
+    PL_SUCCEED_OR_RETURN(StoreNormalizedVertices(workingSet));
 
     if (m_Vertices.GetCount() >= 16384)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
-    PLASMA_SUCCEED_OR_RETURN(ComputeHull());
+    PL_SUCCEED_OR_RETURN(ComputeHull());
   }
 
   if (m_Triangles.GetCount() < 4)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plConvexHullGenerator::Build(const plArrayPtr<const plVec3> vertices)
 {
   m_Vertices.Clear();
 
-  PLASMA_SUCCEED_OR_RETURN(ComputeCenterAndScale(vertices));
+  PL_SUCCEED_OR_RETURN(ComputeCenterAndScale(vertices));
 
-  PLASMA_SUCCEED_OR_RETURN(ProcessVertices(vertices));
+  PL_SUCCEED_OR_RETURN(ProcessVertices(vertices));
 
   bool prune = true;
   while (prune)
@@ -673,33 +672,33 @@ plResult plConvexHullGenerator::Build(const plArrayPtr<const plVec3> vertices)
 
     if (PruneDegenerateTriangles(plMath::Cos(m_MinTriangleAngle)))
     {
-      PLASMA_SUCCEED_OR_RETURN(ComputeHull());
+      PL_SUCCEED_OR_RETURN(ComputeHull());
       prune = true;
     }
 
     if (PruneFlatVertices(plMath::Cos(m_FlatVertexNormalThreshold)))
     {
-      PLASMA_SUCCEED_OR_RETURN(ComputeHull());
+      PL_SUCCEED_OR_RETURN(ComputeHull());
       prune = true;
     }
 
     if (PruneSmallTriangles(m_fMinTriangleEdgeLength))
     {
-      PLASMA_SUCCEED_OR_RETURN(ComputeHull());
+      PL_SUCCEED_OR_RETURN(ComputeHull());
       prune = true;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-void plConvexHullGenerator::Retrieve(plDynamicArray<plVec3>& out_Vertices, plDynamicArray<Face>& out_Faces)
+void plConvexHullGenerator::Retrieve(plDynamicArray<plVec3>& out_vertices, plDynamicArray<Face>& out_faces)
 {
-  out_Vertices.Clear();
-  out_Faces.Clear();
+  out_vertices.Clear();
+  out_faces.Clear();
 
-  out_Vertices.Reserve(m_Triangles.GetCount() * 2);
-  out_Faces.Reserve(m_Triangles.GetCount());
+  out_vertices.Reserve(m_Triangles.GetCount() * 2);
+  out_faces.Reserve(m_Triangles.GetCount());
 
   plMap<plUInt32, plUInt32> vtxMap;
 
@@ -707,7 +706,7 @@ void plConvexHullGenerator::Retrieve(plDynamicArray<plVec3>& out_Vertices, plDyn
 
   for (const auto& tri : m_Triangles)
   {
-    auto& face = out_Faces.ExpandAndGetRef();
+    auto& face = out_faces.ExpandAndGetRef();
 
     for (int v = 0; v < 3; ++v)
     {
@@ -717,11 +716,11 @@ void plConvexHullGenerator::Retrieve(plDynamicArray<plVec3>& out_Vertices, plDyn
       auto it = vtxMap.FindOrAdd(orgIdx, &bExisted);
       if (!bExisted)
       {
-        it.Value() = out_Vertices.GetCount();
+        it.Value() = out_vertices.GetCount();
 
         const plVec3d pos = (m_Vertices[orgIdx] * fScaleBack) + m_vCenter;
 
-        plVec3& vtx = out_Vertices.ExpandAndGetRef();
+        plVec3& vtx = out_vertices.ExpandAndGetRef();
         vtx.Set((float)pos.x, (float)pos.y, (float)pos.z);
       }
 
@@ -735,10 +734,10 @@ void plConvexHullGenerator::Retrieve(plDynamicArray<plVec3>& out_Vertices, plDyn
   }
 }
 
-void plConvexHullGenerator::RetrieveVertices(plDynamicArray<plVec3>& out_Vertices)
+void plConvexHullGenerator::RetrieveVertices(plDynamicArray<plVec3>& out_vertices)
 {
-  out_Vertices.Clear();
-  out_Vertices.Reserve(m_Triangles.GetCount() * 2);
+  out_vertices.Clear();
+  out_vertices.Reserve(m_Triangles.GetCount() * 2);
 
   plMap<plUInt32, plUInt32> vtxMap;
 
@@ -754,11 +753,11 @@ void plConvexHullGenerator::RetrieveVertices(plDynamicArray<plVec3>& out_Vertice
       auto it = vtxMap.FindOrAdd(orgIdx, &bExisted);
       if (!bExisted)
       {
-        it.Value() = out_Vertices.GetCount();
+        it.Value() = out_vertices.GetCount();
 
         const plVec3d pos = (m_Vertices[orgIdx] * fScaleBack) + m_vCenter;
 
-        plVec3& vtx = out_Vertices.ExpandAndGetRef();
+        plVec3& vtx = out_vertices.ExpandAndGetRef();
         vtx.Set((float)pos.x, (float)pos.y, (float)pos.z);
       }
     }
@@ -766,5 +765,3 @@ void plConvexHullGenerator::RetrieveVertices(plDynamicArray<plVec3>& out_Vertice
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Graphics_Implementation_ConvexHull);

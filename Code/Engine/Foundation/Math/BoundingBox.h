@@ -12,7 +12,7 @@ class plBoundingBoxTemplate
 {
 public:
   // Means this object can be copied using memcpy instead of copy construction.
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using ComponentType = Type;
 
@@ -23,31 +23,34 @@ public:
   /// \brief Constructs the box with the given minimum and maximum values.
   plBoundingBoxTemplate(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
                                "all code-paths properly initialize this object.");
   }
 #endif
 
-  /// \brief Resets the box to an invalid state. ExpandToInclude can then be used to make it into a bounding box for objects.
-  void SetInvalid(); // [tested]
+  /// \brief Creates a box that is located at the origin and has zero size. This is a 'valid' box.
+  [[nodiscard]] static plBoundingBoxTemplate<Type> MakeZero();
 
-  /// \brief Sets the box from a center point and half-extents for each axis.
-  void SetCenterAndHalfExtents(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vHalfExtents); // [tested]
+  /// \brief Creates a box that is in an invalid state. ExpandToInclude can then be used to make it into a bounding box for objects.
+  [[nodiscard]] static plBoundingBoxTemplate<Type> MakeInvalid(); // [tested]
+
+  /// \brief Creates a box from a center point and half-extents for each axis.
+  [[nodiscard]] static plBoundingBoxTemplate<Type> MakeFromCenterAndHalfExtents(const plVec3Template<Type>& vCenter, const plVec3Template<Type>& vHalfExtents); // [tested]
+
+  /// \brief Creates a box with the given minimum and maximum values.
+  [[nodiscard]] static plBoundingBoxTemplate<Type> MakeFromMinMax(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax); // [tested]
+
+  /// \brief Creates a box around the given set of points. If uiNumPoints is zero, the returned box is invalid (same as MakeInvalid() returns).
+  [[nodiscard]] static plBoundingBoxTemplate<Type> MakeFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plVec3Template<Type>)); // [tested]
 
   /// \brief Checks whether the box is in an invalid state.
   bool IsValid() const; // [tested]
 
   /// \brief Checks whether any component is NaN.
   bool IsNaN() const; // [tested]
-
-  /// \brief Directly sets the minimum and maximum values.
-  void SetElements(const plVec3Template<Type>& vMin, const plVec3Template<Type>& vMax); // [tested]
-
-  /// \brief Creates a new bounding-box around the given set of points.
-  void SetFromPoints(const plVec3Template<Type>* pPoints, plUInt32 uiNumPoints, plUInt32 uiStride = sizeof(plVec3Template<Type>)); // [tested]
 
   /// \brief Writes the 8 different corners of the box to the given array.
   void GetCorners(plVec3Template<Type>* out_pCorners) const; // [tested]

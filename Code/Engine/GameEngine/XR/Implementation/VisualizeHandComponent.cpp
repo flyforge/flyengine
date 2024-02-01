@@ -8,16 +8,16 @@
 #include <RendererCore/Debug/DebugRendererContext.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plVisualizeHandComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plVisualizeHandComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plVisualizeHandComponent::plVisualizeHandComponent() = default;
@@ -42,7 +42,7 @@ void plVisualizeHandComponent::Update()
         for (plUInt32 uiBone = 0; uiBone < bones.GetCount(); uiBone++)
         {
           const plXRHandBone& bone = bones[uiBone];
-          plBoundingSphere sphere(plVec3::ZeroVector(), bone.m_fRadius);
+          plBoundingSphere sphere = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), bone.m_fRadius);
           plDebugRenderer::DrawLineSphere(GetWorld(), sphere, plColor::Aquamarine, bone.m_Transform);
 
           if (uiBone + 1 < bones.GetCount())
@@ -57,4 +57,4 @@ void plVisualizeHandComponent::Update()
   }
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_VisualizeHandComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_VisualizeHandComponent);

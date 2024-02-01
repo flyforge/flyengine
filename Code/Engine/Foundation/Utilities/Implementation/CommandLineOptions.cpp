@@ -6,7 +6,7 @@
 #include <Foundation/Utilities/CommandLineOptions.h>
 #include <Foundation/Utilities/ConversionUtils.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plCommandLineOption);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plCommandLineOption);
 
 void plCommandLineOption::GetSortingGroup(plStringBuilder& ref_sOut) const
 {
@@ -42,7 +42,7 @@ plResult plCommandLineOption::RequireOptions(plStringView sRequiredOptions, plSt
         *pMissingOption = opt;
       }
 
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -51,7 +51,7 @@ plResult plCommandLineOption::RequireOptions(plStringView sRequiredOptions, plSt
     pMissingOption->Clear();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plCommandLineOption::LogAvailableOptions(LogAvailableModes mode, plStringView sGroupFilter0 /*= {} */, const plCommandLineUtils* pUtils /*= plCommandLineUtils::GetGlobalInstance()*/)
@@ -300,12 +300,12 @@ plCommandLineOptionInt::plCommandLineOptionInt(plStringView sSortingGroup, plStr
   m_iMinValue = iMinValue;
   m_iMaxValue = iMaxValue;
 
-  PLASMA_ASSERT_DEV(m_iMinValue < m_iMaxValue, "Invalid min/max value");
+  PL_ASSERT_DEV(m_iMinValue < m_iMaxValue, "Invalid min/max value");
 }
 
 void plCommandLineOptionInt::GetParamDefaultValueDesc(plStringBuilder& ref_sOut) const
 {
-  ref_sOut.Format("{}", m_iDefaultValue);
+  ref_sOut.SetFormat("{}", m_iDefaultValue);
 }
 
 
@@ -317,7 +317,7 @@ void plCommandLineOptionInt::GetParamShortDesc(plStringBuilder& ref_sOut) const
   }
   else
   {
-    ref_sOut.Format("<int> [{} .. {}]", m_iMinValue, m_iMaxValue);
+    ref_sOut.SetFormat("<int> [{} .. {}]", m_iMinValue, m_iMaxValue);
   }
 }
 
@@ -345,7 +345,7 @@ int plCommandLineOptionInt::GetOptionValue(LogMode logMode, const plCommandLineU
 
   if (ShouldLog(logMode, bSpecified))
   {
-    tmp.Format("{}", result);
+    tmp.SetFormat("{}", result);
     LogOption(sOption, tmp, bSpecified);
   }
 
@@ -363,12 +363,12 @@ plCommandLineOptionFloat::plCommandLineOptionFloat(plStringView sSortingGroup, p
   m_fMinValue = fMinValue;
   m_fMaxValue = fMaxValue;
 
-  PLASMA_ASSERT_DEV(m_fMinValue < m_fMaxValue, "Invalid min/max value");
+  PL_ASSERT_DEV(m_fMinValue < m_fMaxValue, "Invalid min/max value");
 }
 
 void plCommandLineOptionFloat::GetParamDefaultValueDesc(plStringBuilder& ref_sOut) const
 {
-  ref_sOut.Format("{}", m_fDefaultValue);
+  ref_sOut.SetFormat("{}", m_fDefaultValue);
 }
 
 void plCommandLineOptionFloat::GetParamShortDesc(plStringBuilder& ref_sOut) const
@@ -379,7 +379,7 @@ void plCommandLineOptionFloat::GetParamShortDesc(plStringBuilder& ref_sOut) cons
   }
   else
   {
-    ref_sOut.Format("<float> [{} .. {}]", m_fMinValue, m_fMaxValue);
+    ref_sOut.SetFormat("<float> [{} .. {}]", m_fMinValue, m_fMaxValue);
   }
 }
 
@@ -407,7 +407,7 @@ float plCommandLineOptionFloat::GetOptionValue(LogMode logMode, const plCommandL
 
   if (ShouldLog(logMode, bSpecified))
   {
-    tmp.Format("{}", result);
+    tmp.SetFormat("{}", result);
     LogOption(sOption, tmp, bSpecified);
   }
 
@@ -578,7 +578,7 @@ void plCommandLineOptionEnum::GetEnumKeysAndValues(plDynamicArray<EnumKeyValue>&
     {
       eName = plStringView(enums[e].GetStartPointer(), eq);
 
-      PLASMA_VERIFY(plConversionUtils::StringToInt(eq + 1, eVal).Succeeded(), "Invalid enum declaration");
+      PL_VERIFY(plConversionUtils::StringToInt(eq + 1, eVal).Succeeded(), "Invalid enum declaration");
     }
     else
     {
@@ -599,4 +599,3 @@ void plCommandLineOptionEnum::GetEnumKeysAndValues(plDynamicArray<EnumKeyValue>&
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_CommandLineOptions);

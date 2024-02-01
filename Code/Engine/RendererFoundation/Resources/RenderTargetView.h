@@ -4,10 +4,10 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/Resources/Resource.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALRenderTargetView : public plGALObject<plGALRenderTargetViewCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALRenderTargetView : public plGALObject<plGALRenderTargetViewCreationDescription>
 {
 public:
-  PLASMA_ALWAYS_INLINE plGALTexture* GetTexture() const { return m_pTexture; }
+  PL_ALWAYS_INLINE plGALTexture* GetTexture() const { return m_pTexture; }
 
 protected:
   friend class plGALDevice;

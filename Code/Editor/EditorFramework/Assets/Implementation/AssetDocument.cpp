@@ -1,6 +1,6 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EditorEngineProcessFramework/IPC/SyncObject.h>
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorFramework/Assets/AssetDocument.h>
@@ -14,11 +14,11 @@
 #include <GuiFoundation/UIServices/ImageCache.moc.h>
 #include <Texture/Image/ImageConversion.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plAssetDocument::plAssetDocument(const char* szDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
-  : plDocument(szDocumentPath, pObjectManager)
+plAssetDocument::plAssetDocument(plStringView sDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
+  : plDocument(sDocumentPath, pObjectManager)
 {
   m_EngineConnectionType = engineConnectionType;
   m_EngineStatus = (m_EngineConnectionType != plAssetDocEngineConnection::None) ? EngineStatus::Disconnected : EngineStatus::Unsupported;
@@ -27,21 +27,21 @@ plAssetDocument::plAssetDocument(const char* szDocumentPath, plDocumentObjectMan
 
   if (m_EngineConnectionType != plAssetDocEngineConnection::None)
   {
-    PlasmaEditorEngineProcessConnection::GetSingleton()->s_Events.AddEventHandler(plMakeDelegate(&plAssetDocument::EngineConnectionEventHandler, this));
+    plEditorEngineProcessConnection::GetSingleton()->s_Events.AddEventHandler(plMakeDelegate(&plAssetDocument::EngineConnectionEventHandler, this));
   }
 }
 
 plAssetDocument::~plAssetDocument()
 {
-  m_Mirror.DeInit();
+  m_pMirror->DeInit();
 
   if (m_EngineConnectionType != plAssetDocEngineConnection::None)
   {
-    PlasmaEditorEngineProcessConnection::GetSingleton()->s_Events.RemoveEventHandler(plMakeDelegate(&plAssetDocument::EngineConnectionEventHandler, this));
+    plEditorEngineProcessConnection::GetSingleton()->s_Events.RemoveEventHandler(plMakeDelegate(&plAssetDocument::EngineConnectionEventHandler, this));
 
     if (m_pEngineConnection)
     {
-      PlasmaEditorEngineProcessConnection::GetSingleton()->DestroyEngineConnection(this);
+      plEditorEngineProcessConnection::GetSingleton()->DestroyEngineConnection(this);
     }
   }
 }
@@ -86,15 +86,16 @@ plBitflags<plAssetDocumentFlags> plAssetDocument::GetAssetFlags() const
 
 plDocumentInfo* plAssetDocument::CreateDocumentInfo()
 {
-  return PLASMA_DEFAULT_NEW(plAssetDocumentInfo);
+  return PL_DEFAULT_NEW(plAssetDocumentInfo);
 }
 
 plTaskGroupID plAssetDocument::InternalSaveDocument(AfterSaveCallback callback)
 {
   plAssetDocumentInfo* pInfo = static_cast<plAssetDocumentInfo*>(m_pDocumentInfo);
 
-  pInfo->m_AssetTransformDependencies.Clear();
-  pInfo->m_RuntimeDependencies.Clear();
+  pInfo->m_TransformDependencies.Clear();
+  pInfo->m_ThumbnailDependencies.Clear();
+  pInfo->m_PackageDependencies.Clear();
   pInfo->m_Outputs.Clear();
   pInfo->m_uiSettingsHash = GetDocumentHash();
   pInfo->m_sAssetsDocumentTypeName.Assign(GetDocumentTypeName());
@@ -102,8 +103,9 @@ plTaskGroupID plAssetDocument::InternalSaveDocument(AfterSaveCallback callback)
   UpdateAssetDocumentInfo(pInfo);
 
   // In case someone added an empty reference.
-  pInfo->m_AssetTransformDependencies.Remove(plString());
-  pInfo->m_RuntimeDependencies.Remove(plString());
+  pInfo->m_TransformDependencies.Remove(plString());
+  pInfo->m_ThumbnailDependencies.Remove(plString());
+  pInfo->m_PackageDependencies.Remove(plString());
 
   return plDocument::InternalSaveDocument(callback);
 }
@@ -122,7 +124,7 @@ void plAssetDocument::InternalAfterSaveDocument()
     {
       plUuid docGuid = GetGuid();
 
-      plSharedPtr<plDelegateTask<void>> pTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "TransformAfterSaveDocument", [docGuid]() {
+      plSharedPtr<plDelegateTask<void>> pTask = PL_DEFAULT_NEW(plDelegateTask<void>, "TransformAfterSaveDocument", plTaskNesting::Never, [docGuid]() {
         plDocument* pDoc = plDocumentManager::GetDocumentByGuid(docGuid);
         if (pDoc == nullptr)
           return;
@@ -147,17 +149,22 @@ void plAssetDocument::InternalAfterSaveDocument()
   }
 }
 
+void plAssetDocument::InitializeAfterLoading(bool bFirstTimeCreation)
+{
+  m_pMirror = PL_DEFAULT_NEW(plIPCObjectMirrorEditor);
+}
+
 void plAssetDocument::InitializeAfterLoadingAndSaving()
 {
   if (m_EngineConnectionType != plAssetDocEngineConnection::None)
   {
-    m_pEngineConnection = PlasmaEditorEngineProcessConnection::GetSingleton()->CreateEngineConnection(this);
+    m_pEngineConnection = plEditorEngineProcessConnection::GetSingleton()->CreateEngineConnection(this);
     m_EngineStatus = EngineStatus::Initializing;
 
     if (m_EngineConnectionType == plAssetDocEngineConnection::FullObjectMirroring)
     {
-      m_Mirror.SetIPC(m_pEngineConnection);
-      m_Mirror.InitSender(GetObjectManager());
+      m_pMirror->SetIPC(m_pEngineConnection);
+      m_pMirror->InitSender(GetObjectManager());
     }
   }
 }
@@ -170,7 +177,7 @@ void plAssetDocument::AddPrefabDependencies(const plDocumentObject* pObject, plA
     if (pMeta->m_CreateFromPrefab.IsValid())
     {
       plStringBuilder tmp;
-      pInfo->m_AssetTransformDependencies.Insert(plConversionUtils::ToString(pMeta->m_CreateFromPrefab, tmp));
+      pInfo->m_TransformDependencies.Insert(plConversionUtils::ToString(pMeta->m_CreateFromPrefab, tmp));
     }
 
     m_DocumentObjectMetaData->EndReadMetaData();
@@ -197,7 +204,8 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
     {
       bInsidePrefab = true;
       plStringBuilder tmp;
-      pInfo->m_RuntimeDependencies.Insert(plConversionUtils::ToString(pMeta->m_CreateFromPrefab, tmp));
+      pInfo->m_TransformDependencies.Insert(plConversionUtils::ToString(pMeta->m_CreateFromPrefab, tmp));
+      pInfo->m_ThumbnailDependencies.Insert(plConversionUtils::ToString(pMeta->m_CreateFromPrefab, tmp));
     }
 
     m_DocumentObjectMetaData->EndReadMetaData();
@@ -211,10 +219,20 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
     if (pProp->GetAttributeByType<plTemporaryAttribute>() != nullptr)
       continue;
 
-    bool bIsReference = pProp->GetAttributeByType<plAssetBrowserAttribute>() != nullptr;
-    bool bIsDependency = pProp->GetAttributeByType<plFileBrowserAttribute>() != nullptr;
+    plBitflags<plDependencyFlags> depFlags;
+
+    if (auto pAttr = pProp->GetAttributeByType<plAssetBrowserAttribute>())
+    {
+      depFlags |= pAttr->GetDependencyFlags();
+    }
+
+    if (auto pAttr = pProp->GetAttributeByType<plFileBrowserAttribute>())
+    {
+      depFlags |= pAttr->GetDependencyFlags();
+    }
+
     // add all strings that are marked as asset references or file references
-    if (bIsDependency || bIsReference)
+    if (depFlags != 0)
     {
       switch (pProp->GetCategory())
       {
@@ -231,18 +249,23 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
                 continue;
             }
 
-            const plVariant& var = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName());
+            const plVariant& value = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName());
 
-            if (var.IsA<plString>())
+            if (value.IsA<plString>())
             {
-              if (bIsDependency)
-                pInfo->m_AssetTransformDependencies.Insert(var.Get<plString>());
-              else
-                pInfo->m_RuntimeDependencies.Insert(var.Get<plString>());
+              if (depFlags.IsSet(plDependencyFlags::Transform))
+                pInfo->m_TransformDependencies.Insert(value.Get<plString>());
+
+              if (depFlags.IsSet(plDependencyFlags::Thumbnail))
+                pInfo->m_ThumbnailDependencies.Insert(value.Get<plString>());
+
+              if (depFlags.IsSet(plDependencyFlags::Package))
+                pInfo->m_PackageDependencies.Insert(value.Get<plString>());
             }
           }
         }
         break;
+
         case plPropertyCategory::Array:
         case plPropertyCategory::Set:
         {
@@ -262,10 +285,14 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
                 {
                   continue;
                 }
-                if (bIsDependency)
-                  pInfo->m_AssetTransformDependencies.Insert(value.Get<plString>());
-                else
-                  pInfo->m_RuntimeDependencies.Insert(value.Get<plString>());
+                if (depFlags.IsSet(plDependencyFlags::Transform))
+                  pInfo->m_TransformDependencies.Insert(value.Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Thumbnail))
+                  pInfo->m_ThumbnailDependencies.Insert(value.Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Package))
+                  pInfo->m_PackageDependencies.Insert(value.Get<plString>());
               }
             }
             else
@@ -273,17 +300,23 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
               for (plInt32 i = 0; i < iCount; ++i)
               {
                 plVariant value = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName(), i);
-                if (bIsDependency)
-                  pInfo->m_AssetTransformDependencies.Insert(value.Get<plString>());
-                else
-                  pInfo->m_RuntimeDependencies.Insert(value.Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Transform))
+                  pInfo->m_TransformDependencies.Insert(value.Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Thumbnail))
+                  pInfo->m_ThumbnailDependencies.Insert(value.Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Package))
+                  pInfo->m_PackageDependencies.Insert(value.Get<plString>());
               }
             }
           }
         }
         break;
+
         case plPropertyCategory::Map:
-          //#TODO Search for exposed params that reference assets.
+          // #TODO Search for exposed params that reference assets.
           if (pProp->GetFlags().IsSet(plPropertyFlags::StandardType) && pProp->GetSpecificType()->GetVariantType() == plVariantType::String)
           {
             plVariant value = pObject->GetTypeAccessor().GetValue(pProp->GetPropertyName());
@@ -299,24 +332,34 @@ void plAssetDocument::AddReferences(const plDocumentObject* pObject, plAssetDocu
                 {
                   continue;
                 }
-                if (bIsDependency)
-                  pInfo->m_AssetTransformDependencies.Insert(it.Value().Get<plString>());
-                else
-                  pInfo->m_RuntimeDependencies.Insert(it.Value().Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Transform))
+                  pInfo->m_TransformDependencies.Insert(it.Value().Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Thumbnail))
+                  pInfo->m_ThumbnailDependencies.Insert(it.Value().Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Package))
+                  pInfo->m_PackageDependencies.Insert(it.Value().Get<plString>());
               }
             }
             else
             {
               for (auto it : varDict)
               {
-                if (bIsDependency)
-                  pInfo->m_AssetTransformDependencies.Insert(it.Value().Get<plString>());
-                else
-                  pInfo->m_RuntimeDependencies.Insert(it.Value().Get<plString>());
+                if (depFlags.IsSet(plDependencyFlags::Transform))
+                  pInfo->m_TransformDependencies.Insert(it.Value().Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Thumbnail))
+                  pInfo->m_ThumbnailDependencies.Insert(it.Value().Get<plString>());
+
+                if (depFlags.IsSet(plDependencyFlags::Package))
+                  pInfo->m_PackageDependencies.Insert(it.Value().Get<plString>());
               }
             }
           }
           break;
+
         default:
           break;
       }
@@ -342,13 +385,13 @@ void plAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo) const
   AddReferences(pRoot, pInfo, false);
 }
 
-void plAssetDocument::EngineConnectionEventHandler(const PlasmaEditorEngineProcessConnection::Event& e)
+void plAssetDocument::EngineConnectionEventHandler(const plEditorEngineProcessConnection::Event& e)
 {
-  if (e.m_Type == PlasmaEditorEngineProcessConnection::Event::Type::ProcessCrashed)
+  if (e.m_Type == plEditorEngineProcessConnection::Event::Type::ProcessCrashed)
   {
     m_EngineStatus = EngineStatus::Disconnected;
   }
-  else if (e.m_Type == PlasmaEditorEngineProcessConnection::Event::Type::ProcessStarted)
+  else if (e.m_Type == plEditorEngineProcessConnection::Event::Type::ProcessStarted)
   {
     m_EngineStatus = EngineStatus::Initializing;
   }
@@ -409,7 +452,7 @@ plTransformStatus plAssetDocument::DoTransformAsset(const plPlatformProfile* pAs
   plUInt64 uiThumbHash = 0;
   plAssetInfo::TransformState state = plAssetCurator::GetSingleton()->IsAssetUpToDate(GetGuid(), pAssetProfile, GetAssetDocumentTypeDescriptor(), uiHash, uiThumbHash);
   if (state == plAssetInfo::TransformState::UpToDate && !transformFlags.IsSet(plTransformFlags::ForceTransform))
-    return plStatus(PLASMA_SUCCESS, "Transformed asset is already up to date");
+    return plStatus(PL_SUCCESS, "Transformed asset is already up to date");
 
   if (uiHash == 0)
     return plStatus("Computing the hash for this asset or any dependency failed");
@@ -453,17 +496,17 @@ plTransformStatus plAssetDocument::DoTransformAsset(const plPlatformProfile* pAs
 
 plTransformStatus plAssetDocument::TransformAsset(plBitflags<plTransformFlags> transformFlags, const plPlatformProfile* pAssetProfile)
 {
-  PLASMA_PROFILE_SCOPE("TransformAsset");
+  PL_PROFILE_SCOPE("TransformAsset");
 
   if (!transformFlags.IsSet(plTransformFlags::ForceTransform))
   {
-    PLASMA_SUCCEED_OR_RETURN(SaveDocument().m_Result);
+    PL_SUCCEED_OR_RETURN(SaveDocument().m_Result);
 
     const auto assetFlags = GetAssetFlags();
 
     if (assetFlags.IsSet(plAssetDocumentFlags::DisableTransform) || (assetFlags.IsSet(plAssetDocumentFlags::OnlyTransformManually) && !transformFlags.IsSet(plTransformFlags::TriggeredManually)))
     {
-      return plStatus(PLASMA_SUCCESS, "Transform is disabled for this asset");
+      return plStatus(PL_SUCCESS, "Transform is disabled for this asset");
     }
   }
 
@@ -471,7 +514,7 @@ plTransformStatus plAssetDocument::TransformAsset(plBitflags<plTransformFlags> t
 
   if (transformFlags.IsSet(plTransformFlags::TriggeredManually))
   {
-    SaveDocument().IgnoreResult();
+    SaveDocument().LogFailure();
     plAssetCurator::GetSingleton()->NotifyOfAssetChange(GetGuid());
   }
 
@@ -486,7 +529,7 @@ plTransformStatus plAssetDocument::CreateThumbnail()
   plAssetInfo::TransformState state = plAssetCurator::GetSingleton()->IsAssetUpToDate(GetGuid(), plAssetCurator::GetSingleton()->GetActiveAssetProfile(), GetAssetDocumentTypeDescriptor(), uiHash, uiThumbHash);
 
   if (state == plAssetInfo::TransformState::UpToDate)
-    return plStatus(PLASMA_SUCCESS, "Transformed asset is already up to date");
+    return plStatus(PL_SUCCESS, "Transformed asset is already up to date");
 
   if (uiHash == 0)
     return plStatus("Computing the hash for this asset or any dependency failed");
@@ -504,18 +547,18 @@ plTransformStatus plAssetDocument::CreateThumbnail()
   return plTransformStatus(plFmt("Asset state is {}", state));
 }
 
-plTransformStatus plAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   plDeferredFileWriter file;
   file.SetOutput(szTargetFile);
 
-  if (AssetHeader.Write(file) == PLASMA_FAILURE)
+  if (AssetHeader.Write(file) == PL_FAILURE)
   {
     file.Discard();
     return plTransformStatus("Failed to write asset header");
   }
 
-  plTransformStatus res = InternalTransformAsset(file, szOutputTag, pAssetProfile, AssetHeader, transformFlags);
+  plTransformStatus res = InternalTransformAsset(file, sOutputTag, pAssetProfile, AssetHeader, transformFlags);
   if (res.m_Result != plTransformResult::Success)
   {
     // We do not want to overwrite the old output file if we failed to transform the asset.
@@ -530,17 +573,17 @@ plTransformStatus plAssetDocument::InternalTransformAsset(const char* szTargetFi
     return plStatus("Opening the asset output file failed");
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
-plString plAssetDocument::GetThumbnailFilePath() const
+plString plAssetDocument::GetThumbnailFilePath(plStringView sSubAssetName /*= plStringView()*/) const
 {
-  return GetAssetDocumentManager()->GenerateResourceThumbnailPath(GetDocumentPath());
+  return GetAssetDocumentManager()->GenerateResourceThumbnailPath(GetDocumentPath(), sSubAssetName);
 }
 
-void plAssetDocument::InvalidateAssetThumbnail(plStringView sThumbnailFile) const
+void plAssetDocument::InvalidateAssetThumbnail(plStringView sSubAssetName /*= plStringView()*/) const
 {
-  const plString sResourceFile = sThumbnailFile.IsEmpty() ? GetThumbnailFilePath() : plString(sThumbnailFile);
+  const plString sResourceFile = GetThumbnailFilePath(sSubAssetName);
   plAssetCurator::GetSingleton()->NotifyOfFileChange(sResourceFile);
   plQtImageCache::GetSingleton()->InvalidateCache(sResourceFile);
 }
@@ -569,7 +612,7 @@ plStatus plAssetDocument::SaveThumbnail(const plImage& img, const ThumbnailInfo&
 plStatus plAssetDocument::SaveThumbnail(const QImage& qimg0, const ThumbnailInfo& thumbnailInfo) const
 {
   const plStringBuilder sResourceFile = GetThumbnailFilePath();
-  PLASMA_LOG_BLOCK("Save Asset Thumbnail", sResourceFile.GetData());
+  PL_LOG_BLOCK("Save Asset Thumbnail", sResourceFile.GetData());
 
   QImage qimg = qimg0;
 
@@ -605,7 +648,7 @@ plStatus plAssetDocument::SaveThumbnail(const QImage& qimg0, const ThumbnailInfo
 
   // make sure the directory exists, Qt will not create sub-folders
   const plStringBuilder sDir = sResourceFile.GetFileDirectory();
-  PLASMA_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sDir));
+  PL_SUCCEED_OR_RETURN(plOSFile::CreateDirectoryStructure(sDir));
 
   // save to JPEG
   if (!qimg.save(QString::fromUtf8(sResourceFile.GetData()), nullptr, 90))
@@ -617,7 +660,7 @@ plStatus plAssetDocument::SaveThumbnail(const QImage& qimg0, const ThumbnailInfo
   AppendThumbnailInfo(sResourceFile, thumbnailInfo);
   InvalidateAssetThumbnail();
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plAssetDocument::AppendThumbnailInfo(plStringView sThumbnailFile, const ThumbnailInfo& thumbnailInfo) const
@@ -656,11 +699,11 @@ plStatus plAssetDocument::RemoteExport(const plAssetFileHeader& header, const ch
   }
   else if (GetEngineStatus() == plAssetDocument::EngineStatus::Initializing)
   {
-    if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plDocumentOpenResponseMsgToEditor::GetStaticRTTI(), plTime::Seconds(10)).Failed())
+    if (plEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plDocumentOpenResponseMsgToEditor::GetStaticRTTI(), plTime::MakeFromSeconds(10)).Failed())
     {
       return plStatus(plFmt("Exporting {0} to \"{1}\" failed, document initialization timed out.", GetDocumentTypeName(), szOutputTarget));
     }
-    PLASMA_ASSERT_DEV(GetEngineStatus() == plAssetDocument::EngineStatus::Loaded, "After receiving plDocumentOpenResponseMsgToEditor, the document should be in loaded state.");
+    PL_ASSERT_DEV(GetEngineStatus() == plAssetDocument::EngineStatus::Loaded, "After receiving plDocumentOpenResponseMsgToEditor, the document should be in loaded state.");
   }
 
   range.BeginNextStep(szOutputTarget);
@@ -672,15 +715,15 @@ plStatus plAssetDocument::RemoteExport(const plAssetFileHeader& header, const ch
 
   GetEditorEngineConnection()->SendMessage(&msg);
 
-  plStatus status(PLASMA_FAILURE);
+  plStatus status(PL_FAILURE);
   plProcessCommunicationChannel::WaitForMessageCallback callback = [&status](plProcessMessage* pMsg) -> bool
   {
     plExportDocumentMsgToEditor* pMsg2 = plDynamicCast<plExportDocumentMsgToEditor*>(pMsg);
-    status = plStatus(pMsg2->m_bOutputSuccess ? PLASMA_SUCCESS : PLASMA_FAILURE, pMsg2->m_sFailureMsg);
+    status = plStatus(pMsg2->m_bOutputSuccess ? PL_SUCCESS : PL_FAILURE, pMsg2->m_sFailureMsg);
     return true;
   };
 
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plExportDocumentMsgToEditor::GetStaticRTTI(), plTime::Seconds(60), &callback).Failed())
+  if (plEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plExportDocumentMsgToEditor::GetStaticRTTI(), plTime::MakeFromSeconds(60), &callback).Failed())
   {
     return plStatus(plFmt("Remote exporting {0} to \"{1}\" timed out.", GetDocumentTypeName(), msg.m_sOutputFile));
   }
@@ -695,13 +738,13 @@ plStatus plAssetDocument::RemoteExport(const plAssetFileHeader& header, const ch
 
     ShowDocumentStatus(plFmt("{0} exported successfully", GetDocumentTypeName()));
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 }
 
 plTransformStatus plAssetDocument::InternalCreateThumbnail(const ThumbnailInfo& thumbnailInfo)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return plStatus("Not implemented");
 }
 
@@ -717,11 +760,11 @@ plStatus plAssetDocument::RemoteCreateThumbnail(const ThumbnailInfo& thumbnailIn
   }
   else if (GetEngineStatus() == plAssetDocument::EngineStatus::Initializing)
   {
-    if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plDocumentOpenResponseMsgToEditor::GetStaticRTTI(), plTime::Seconds(10)).Failed())
+    if (plEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plDocumentOpenResponseMsgToEditor::GetStaticRTTI(), plTime::MakeFromSeconds(10)).Failed())
     {
       return plStatus(plFmt("Create {0} thumbnail for \"{1}\" failed, document initialization timed out.", GetDocumentTypeName(), GetDocumentPath()));
     }
-    PLASMA_ASSERT_DEV(GetEngineStatus() == plAssetDocument::EngineStatus::Loaded, "After receiving plDocumentOpenResponseMsgToEditor, the document should be in loaded state.");
+    PL_ASSERT_DEV(GetEngineStatus() == plAssetDocument::EngineStatus::Loaded, "After receiving plDocumentOpenResponseMsgToEditor, the document should be in loaded state.");
   }
 
   SyncObjectsToEngine();
@@ -735,13 +778,14 @@ plStatus plAssetDocument::RemoteCreateThumbnail(const ThumbnailInfo& thumbnailIn
   GetEditorEngineConnection()->SendMessage(&msg);
 
   plDataBuffer data;
-  plProcessCommunicationChannel::WaitForMessageCallback callback = [&data](plProcessMessage* pMsg) -> bool {
+  plProcessCommunicationChannel::WaitForMessageCallback callback = [&data](plProcessMessage* pMsg) -> bool
+  {
     plCreateThumbnailMsgToEditor* pThumbnailMsg = plDynamicCast<plCreateThumbnailMsgToEditor*>(pMsg);
     data = pThumbnailMsg->m_ThumbnailData;
     return true;
   };
 
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plCreateThumbnailMsgToEditor::GetStaticRTTI(), plTime::Seconds(60), &callback).Failed())
+  if (plEditorEngineProcessConnection::GetSingleton()->WaitForDocumentMessage(GetGuid(), plCreateThumbnailMsgToEditor::GetStaticRTTI(), plTime::MakeFromSeconds(60), &callback).Failed())
   {
     return plStatus(plFmt("Create {0} thumbnail for \"{1}\" failed timed out.", GetDocumentTypeName(), GetDocumentPath()));
   }
@@ -759,15 +803,15 @@ plStatus plAssetDocument::RemoteCreateThumbnail(const ThumbnailInfo& thumbnailIn
 
     plImage image;
     image.ResetAndAlloc(imgHeader);
-    PLASMA_ASSERT_DEV(data.GetCount() == imgHeader.ComputeDataSize(), "Thumbnail plImage has different size than data buffer!");
+    PL_ASSERT_DEV(data.GetCount() == imgHeader.ComputeDataSize(), "Thumbnail plImage has different size than data buffer!");
     plMemoryUtils::Copy(image.GetPixelPointer<plUInt8>(), data.GetData(), msg.m_uiWidth * msg.m_uiHeight * 4);
-    SaveThumbnail(image, thumbnailInfo).IgnoreResult();
+    SaveThumbnail(image, thumbnailInfo).LogFailure();
 
     plLog::Success("{0} thumbnail for \"{1}\" has been exported.", GetDocumentTypeName(), GetDocumentPath());
 
     ShowDocumentStatus(plFmt("{0} thumbnail created successfully", GetDocumentTypeName()));
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 }
 
@@ -776,12 +820,12 @@ plUInt16 plAssetDocument::GetAssetTypeVersion() const
   return (plUInt16)GetDynamicRTTI()->GetTypeVersion();
 }
 
-void plAssetDocument::SendMessageToEngine(PlasmaEditorEngineDocumentMsg* pMessage /*= false*/) const
+bool plAssetDocument::SendMessageToEngine(plEditorEngineDocumentMsg* pMessage /*= false*/) const
 {
-  GetEditorEngineConnection()->SendMessage(pMessage);
+  return GetEditorEngineConnection()->SendMessage(pMessage);
 }
 
-void plAssetDocument::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plAssetDocument::HandleEngineMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plDocumentOpenResponseMsgToEditor>())
   {
@@ -792,7 +836,7 @@ void plAssetDocument::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* p
       msgClear.m_DocumentGuid = GetGuid();
       SendMessageToEngine(&msgClear);
 
-      m_Mirror.SendDocument();
+      m_pMirror->SendDocument();
     }
     m_EngineStatus = EngineStatus::Loaded;
     // make sure all sync objects are 'modified' so that they will get resent as well
@@ -805,31 +849,32 @@ void plAssetDocument::HandleEngineMessage(const PlasmaEditorEngineDocumentMsg* p
   m_ProcessMessageEvent.Broadcast(pMsg);
 }
 
-void plAssetDocument::AddSyncObject(PlasmaEditorEngineSyncObject* pSync) const
+void plAssetDocument::AddSyncObject(plEditorEngineSyncObject* pSync) const
 {
-  pSync->Configure(GetGuid(), [this](PlasmaEditorEngineSyncObject* pSync) { RemoveSyncObject(pSync); });
+  pSync->Configure(GetGuid(), [this](plEditorEngineSyncObject* pSync)
+    { RemoveSyncObject(pSync); });
 
   m_SyncObjects.PushBack(pSync);
   m_AllSyncObjects[pSync->GetGuid()] = pSync;
 }
 
-void plAssetDocument::RemoveSyncObject(PlasmaEditorEngineSyncObject* pSync) const
+void plAssetDocument::RemoveSyncObject(plEditorEngineSyncObject* pSync) const
 {
   m_DeletedObjects.PushBack(pSync->GetGuid());
   m_AllSyncObjects.Remove(pSync->GetGuid());
   m_SyncObjects.RemoveAndSwap(pSync);
 }
 
-PlasmaEditorEngineSyncObject* plAssetDocument::FindSyncObject(const plUuid& guid) const
+plEditorEngineSyncObject* plAssetDocument::FindSyncObject(const plUuid& guid) const
 {
-  PlasmaEditorEngineSyncObject* pSync = nullptr;
+  plEditorEngineSyncObject* pSync = nullptr;
   m_AllSyncObjects.TryGetValue(guid, pSync);
   return pSync;
 }
 
-PlasmaEditorEngineSyncObject* plAssetDocument::FindSyncObject(const plRTTI* pType) const
+plEditorEngineSyncObject* plAssetDocument::FindSyncObject(const plRTTI* pType) const
 {
-  for (PlasmaEditorEngineSyncObject* pSync : m_SyncObjects)
+  for (plEditorEngineSyncObject* pSync : m_SyncObjects)
   {
     if (pSync->GetDynamicRTTI() == pType)
     {
@@ -845,7 +890,7 @@ void plAssetDocument::SyncObjectsToEngine() const
   {
     for (const auto& guid : m_DeletedObjects)
     {
-      PlasmaEditorEngineSyncObjectMsg msg;
+      plEditorEngineSyncObjectMsg msg;
       msg.m_ObjectGuid = guid;
       SendMessageToEngine(&msg);
     }
@@ -858,7 +903,7 @@ void plAssetDocument::SyncObjectsToEngine() const
     if (!pObject->GetModified())
       continue;
 
-    PlasmaEditorEngineSyncObjectMsg msg;
+    plEditorEngineSyncObjectMsg msg;
     msg.m_ObjectGuid = pObject->m_SyncObjectGuid;
     msg.m_sObjectType = pObject->GetDynamicRTTI()->GetTypeName();
 
@@ -875,37 +920,59 @@ void plAssetDocument::SyncObjectsToEngine() const
   }
 }
 
+void plAssetDocument::SendDocumentOpenMessage(bool bOpen)
+{
+  PL_PROFILE_SCOPE("SendDocumentOpenMessage");
+
+  // it is important to have up-to-date lookup tables in the engine process, because document contexts might try to
+  // load resources, and if the file redirection does not happen correctly, derived resource types may not be created as they should
+  plAssetCurator::GetSingleton()->WriteAssetTables().IgnoreResult();
+
+  m_EngineStatus = EngineStatus::Initializing;
+
+  plDocumentOpenMsgToEngine m;
+  m.m_DocumentGuid = GetGuid();
+  m.m_bDocumentOpen = bOpen;
+  m.m_sDocumentType = GetDocumentTypeDescriptor()->m_sDocumentTypeName;
+  m.m_DocumentMetaData = GetCreateEngineMetaData();
+
+  if(!plEditorEngineProcessConnection::GetSingleton()->SendMessage(&m))
+  {
+    plLog::Error("Failed to send DocumentOpenMessage");
+  }
+}
+
 namespace
 {
   static const char* szThumbnailInfoTag = "plThumb";
 }
 
-plResult plAssetDocument::ThumbnailInfo::Deserialize(plStreamReader& Reader)
+plResult plAssetDocument::ThumbnailInfo::Deserialize(plStreamReader& inout_reader)
 {
   char tag[8] = {0};
 
-  if (Reader.ReadBytes(tag, 7) != 7)
-    return PLASMA_FAILURE;
+  if (inout_reader.ReadBytes(tag, 7) != 7)
+    return PL_FAILURE;
 
   if (!plStringUtils::IsEqual(tag, szThumbnailInfoTag))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  Reader >> m_uiHash;
-  Reader >> m_uiVersion;
-  Reader >> m_uiReserved;
+  inout_reader >> m_uiHash;
+  inout_reader >> m_uiVersion;
+  inout_reader >> m_uiReserved;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plAssetDocument::ThumbnailInfo::Serialize(plStreamWriter& Writer) const
+plResult plAssetDocument::ThumbnailInfo::Serialize(plStreamWriter& inout_writer) const
 {
-  PLASMA_SUCCEED_OR_RETURN(Writer.WriteBytes(szThumbnailInfoTag, 7));
+  PL_SUCCEED_OR_RETURN(inout_writer.WriteBytes(szThumbnailInfoTag, 7));
 
-  Writer << m_uiHash;
-  Writer << m_uiVersion;
-  Writer << m_uiReserved;
+  inout_writer << m_uiHash;
+  inout_writer << m_uiVersion;
+  inout_writer << m_uiReserved;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

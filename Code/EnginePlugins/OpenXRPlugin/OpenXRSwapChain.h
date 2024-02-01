@@ -6,14 +6,14 @@
 
 class plOpenXR;
 
-PLASMA_DEFINE_AS_POD_TYPE(XrSwapchainImageD3D11KHR);
+PL_DEFINE_AS_POD_TYPE(XrSwapchainImageD3D11KHR);
 
-class PLASMA_OPENXRPLUGIN_DLL plGALOpenXRSwapChain : public plGALXRSwapChain
+class PL_OPENXRPLUGIN_DLL plGALOpenXRSwapChain : public plGALXRSwapChain
 {
 public:
   plSizeU32 GetRenderTargetSize() const { return m_CurrentSize; }
-  XrSwapchain GetColorSwapchain() const { return m_colorSwapchain.handle; }
-  XrSwapchain GetDepthSwapchain() const { return m_depthSwapchain.handle; }
+  XrSwapchain GetColorSwapchain() const { return m_ColorSwapchain.handle; }
+  XrSwapchain GetDepthSwapchain() const { return m_DepthSwapchain.handle; }
 
   virtual void AcquireNextRenderTarget(plGALDevice* pDevice) override;
   virtual void PresentRenderTarget(plGALDevice* pDevice) override;
@@ -47,20 +47,20 @@ private:
   void DeinitSwapChain();
 
 private:
-  XrInstance m_instance = XR_NULL_HANDLE;
-  uint64_t m_systemId = XR_NULL_SYSTEM_ID;
-  XrSession m_session = XR_NULL_HANDLE;
-  plEnum<plGALMSAASampleCount> m_msaaCount;
+  XrInstance m_pInstance = XR_NULL_HANDLE;
+  uint64_t m_SystemId = XR_NULL_SYSTEM_ID;
+  XrSession m_pSession = XR_NULL_HANDLE;
+  plEnum<plGALMSAASampleCount> m_MsaaCount;
 
   // Swapchain
-  XrViewConfigurationView m_primaryConfigView;
-  Swapchain m_colorSwapchain;
-  Swapchain m_depthSwapchain;
+  XrViewConfigurationView m_PrimaryConfigView;
+  Swapchain m_ColorSwapchain;
+  Swapchain m_DepthSwapchain;
 
-  plHybridArray<XrSwapchainImageD3D11KHR, 3> m_colorSwapChainImagesD3D11;
-  plHybridArray<XrSwapchainImageD3D11KHR, 3> m_depthSwapChainImagesD3D11;
-  plHybridArray<plGALTextureHandle, 3> m_hColorRTs;
-  plHybridArray<plGALTextureHandle, 3> m_hDepthRTs;
+  plHybridArray<XrSwapchainImageD3D11KHR, 3> m_ColorSwapChainImagesD3D11;
+  plHybridArray<XrSwapchainImageD3D11KHR, 3> m_DepthSwapChainImagesD3D11;
+  plHybridArray<plGALTextureHandle, 3> m_ColorRTs;
+  plHybridArray<plGALTextureHandle, 3> m_DepthRTs;
 
   bool m_bImageAcquired = false;
   plGALTextureHandle m_hColorRT;

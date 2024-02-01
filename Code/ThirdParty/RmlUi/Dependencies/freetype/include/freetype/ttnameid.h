@@ -174,7 +174,7 @@ FT_BEGIN_HEADER
 #define TT_MAC_ID_SIMPLIFIED_CHINESE   25
 #define TT_MAC_ID_TIBETAN              26
 #define TT_MAC_ID_MONGOLIAN            27
-#define TT_MAC_ID_GEPLASMA                 28
+#define TT_MAC_ID_GEpl                 28
 #define TT_MAC_ID_SLAVIC               29
 #define TT_MAC_ID_VIETNAMESE           30
 #define TT_MAC_ID_SINDHI               31
@@ -502,7 +502,7 @@ FT_BEGIN_HEADER
 #define TT_MS_LANGID_SPANISH_COSTA_RICA                0x140A
 #define TT_MS_LANGID_SPANISH_PANAMA                    0x180A
 #define TT_MS_LANGID_SPANISH_DOMINICAN_REPUBLIC        0x1C0A
-#define TT_MS_LANGID_SPANISH_VENPLASMAUELA                 0x200A
+#define TT_MS_LANGID_SPANISH_VENplUELA                 0x200A
 #define TT_MS_LANGID_SPANISH_COLOMBIA                  0x240A
 #define TT_MS_LANGID_SPANISH_PERU                      0x280A
 #define TT_MS_LANGID_SPANISH_ARGENTINA                 0x2C0A

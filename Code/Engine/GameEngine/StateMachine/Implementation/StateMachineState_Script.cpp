@@ -45,13 +45,15 @@ namespace
       m_pInstance = pScript->Instantiate(*m_pOwner, m_pStateMachineInstance->GetOwnerWorld());
       if (m_pInstance != nullptr)
       {
-        m_pInstance->ApplyParameters(*m_pParameters);
+        m_pInstance->SetInstanceVariables(*m_pParameters);
       }
 
       if (plWorld* pWorld = m_pStateMachineInstance->GetOwnerWorld())
       {
-        auto pModule = pWorld->GetOrCreateModule<plScriptWorldModule>();
-        pModule->AddScriptReloadFunction(m_hScriptClass, plMakeDelegate(&ScriptInstanceData::ReloadScript, this));
+        pWorld->AddResourceReloadFunction(m_hScriptClass, plComponentHandle(), this,
+          [](plWorld::ResourceReloadContext& context) {
+            static_cast<ScriptInstanceData*>(context.m_pUserData)->ReloadScript();
+          });
       }
 
       CallOnEnter(pFromState);
@@ -67,7 +69,8 @@ namespace
         {
           auto pModule = pWorld->GetOrCreateModule<plScriptWorldModule>();
           pModule->StopAndDeleteAllCoroutines(m_pInstance.Borrow());
-          pModule->RemoveScriptReloadFunction(m_hScriptClass, plMakeDelegate(&ScriptInstanceData::ReloadScript, this));
+
+          pWorld->RemoveResourceReloadFunction(m_hScriptClass, plComponentHandle(), this);
         }
       }
 
@@ -125,16 +128,16 @@ namespace
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_Script, 1, plRTTIDefaultAllocator<plStateMachineState_Script>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_Script, 1, plRTTIDefaultAllocator<plStateMachineState_Script>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("ScriptClass", GetScriptClassFile, SetScriptClassFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ScriptClass")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("ScriptClass")),
+    PL_ACCESSOR_PROPERTY("ScriptClass", GetScriptClassFile, SetScriptClassFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_ScriptClass")),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("ScriptClass")),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState_Script::plStateMachineState_Script(plStringView sName)
@@ -177,7 +180,7 @@ void plStateMachineState_Script::Update(plStateMachineInstance& ref_instance, vo
 
 plResult plStateMachineState_Script::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   inout_stream << m_sScriptClassFile;
 
@@ -190,14 +193,14 @@ plResult plStateMachineState_Script::Serialize(plStreamWriter& inout_stream) con
     inout_stream << m_Parameters.GetValue(p);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineState_Script::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  // const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
-
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
   inout_stream >> m_sScriptClassFile;
 
   plUInt16 uiNumParams = 0;
@@ -214,7 +217,7 @@ plResult plStateMachineState_Script::Deserialize(plStreamReader& inout_stream)
     m_Parameters.Insert(key, value);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineState_Script::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -273,3 +276,7 @@ bool plStateMachineState_Script::GetParameter(const char* szKey, plVariant& out_
   out_value = m_Parameters.GetValue(it);
   return true;
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachineState_Script);
+

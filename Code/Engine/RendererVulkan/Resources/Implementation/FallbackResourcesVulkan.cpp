@@ -9,8 +9,30 @@
 #include <RendererVulkan/Resources/TextureVulkan.h>
 #include <RendererVulkan/Resources/UnorderedAccessViewVulkan.h>
 #include <RendererVulkan/Utils/ConversionUtilsVulkan.h>
+#include <Foundation/Configuration/Startup.h>
 
-plGALDeviceVulkan* plFallbackResourcesVulkan::s_pDevice = nullptr;
+// clang-format off
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererVulkan, FallbackResourcesVulkan)
+
+  BEGIN_SUBSYSTEM_DEPENDENCIES
+    "Foundation",
+    "Core"
+  END_SUBSYSTEM_DEPENDENCIES
+
+  ON_CORESYSTEMS_STARTUP
+  {
+    plFallbackResourcesVulkan::Initialize();
+  }
+
+  ON_CORESYSTEMS_SHUTDOWN
+  {
+    plFallbackResourcesVulkan::DeInitialize();
+  }
+
+PL_END_SUBSYSTEM_DECLARATION;
+// clang-format on
+
+plGALDevice* plFallbackResourcesVulkan::s_pDevice = nullptr;
 plEventSubscriptionID plFallbackResourcesVulkan::s_EventID = 0;
 
 plHashTable<plFallbackResourcesVulkan::Key, plGALResourceViewHandle, plFallbackResourcesVulkan::KeyHash> plFallbackResourcesVulkan::m_ResourceViews;
@@ -18,16 +40,14 @@ plHashTable<plFallbackResourcesVulkan::Key, plGALUnorderedAccessViewHandle, plFa
 plDynamicArray<plGALBufferHandle> plFallbackResourcesVulkan::m_Buffers;
 plDynamicArray<plGALTextureHandle> plFallbackResourcesVulkan::m_Textures;
 
-void plFallbackResourcesVulkan::Initialize(plGALDeviceVulkan* pDevice)
+void plFallbackResourcesVulkan::Initialize()
 {
-  s_pDevice = pDevice;
-  s_EventID = pDevice->m_Events.AddEventHandler(plMakeDelegate(&plFallbackResourcesVulkan::GALDeviceEventHandler));
+  s_EventID = plGALDevice::s_Events.AddEventHandler(plMakeDelegate(&plFallbackResourcesVulkan::GALDeviceEventHandler));
 }
 
 void plFallbackResourcesVulkan::DeInitialize()
 {
-  s_pDevice->m_Events.RemoveEventHandler(s_EventID);
-  s_pDevice = nullptr;
+  plGALDevice::s_Events.RemoveEventHandler(s_EventID);
 }
 void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
 {
@@ -35,6 +55,7 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
   {
     case plGALDeviceEvent::AfterInit:
     {
+      s_pDevice = e.m_pDevice;
       auto CreateTexture = [](plGALTextureType::Enum type, plGALMSAASampleCount::Enum samples, bool bDepth) -> plGALResourceViewHandle {
         plGALTextureCreationDescription desc;
         desc.m_uiWidth = 4;
@@ -48,7 +69,7 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
         desc.m_ResourceAccess.m_bImmutable = false;
         desc.m_bCreateRenderTarget = bDepth;
         plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
-        PLASMA_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
+        PL_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
         // Debug device not set yet.
         s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackResourceVulkan");
         m_Textures.PushBack(hTexture);
@@ -56,81 +77,47 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
       };
       {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::Texture2D, plGALMSAASampleCount::None, false);
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2D, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DArray, false}] = hView;
-      }
-      {
-        plGALTextureCreationDescription desc;
-        desc.m_uiWidth = 4;
-        desc.m_uiHeight = 4;
-        desc.m_uiMipLevelCount = 1;
-        desc.m_Format = plGALResourceFormat::RGBAHalf;
-        desc.m_Type = plGALTextureType::Texture2D;
-        desc.m_SampleCount = plGALMSAASampleCount::None;
-        desc.m_ResourceAccess.m_bImmutable = false;
-        desc.m_bCreateRenderTarget = false;
-        desc.m_bAllowUAV = true;
-        plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
-        PLASMA_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
-        // Debug device not set yet.
-        s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackResourceVulkan");
-        m_Textures.PushBack(hTexture);
-        plGALUnorderedAccessViewCreationDescription descUAV;
-        descUAV.m_hTexture = hTexture;
-        auto hUAV = s_pDevice->CreateUnorderedAccessView(descUAV);
-        m_UAVs[{vk::DescriptorType::eStorageImage, plShaderResourceType::UAV, false}] = hUAV;
-      }
-      {
-        plGALTextureCreationDescription desc;
-        desc.m_uiWidth = 4;
-        desc.m_uiHeight = 4;
-        desc.m_uiMipLevelCount = 1;
-        desc.m_Format = plGALResourceFormat::RGBAHalf;
-        desc.m_Type = plGALTextureType::Texture2D;
-        desc.m_SampleCount = plGALMSAASampleCount::None;
-        desc.m_ResourceAccess.m_bImmutable = false;
-        desc.m_bCreateRenderTarget = false;
-        desc.m_bAllowUAV = true;
-        plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
-        PLASMA_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
-        // Debug device not set yet.
-        s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackResourceVulkan");
-        m_Textures.PushBack(hTexture);
-        plGALUnorderedAccessViewCreationDescription descUAV;
-        descUAV.m_hTexture = hTexture;
-        auto hUAV = s_pDevice->CreateUnorderedAccessView(descUAV);
-        m_UAVs[{vk::DescriptorType::eStorageImage, plShaderResourceType::ConstantBuffer, false}] = hUAV;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2D, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2DArray, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2D, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2DArray, false}] = hView;
       }
       {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::Texture2D, plGALMSAASampleCount::None, true);
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2D, true}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DArray, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2D, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2DArray, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2D, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2DArray, true}] = hView;
       }
 
       // Swift shader can only do 4x MSAA. Add a check anyways.
-      vk::ImageFormatProperties props;
-      vk::Result res = s_pDevice->GetVulkanPhysicalDevice().getImageFormatProperties(vk::Format::eB8G8R8A8Srgb, vk::ImageType::e2D, vk::ImageTiling::eOptimal, vk::ImageUsageFlagBits::eSampled, {}, &props);
-      if (res == vk::Result::eSuccess && props.sampleCounts & vk::SampleCountFlagBits::e4)
+      const bool bSupported = s_pDevice->GetCapabilities().m_FormatSupport[plGALResourceFormat::BGRAUByteNormalizedsRGB].AreAllSet(plGALResourceFormatSupport::Sample | plGALResourceFormatSupport::MSAA4x);
+
+      if (bSupported)
       {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::Texture2D, plGALMSAASampleCount::FourSamples, false);
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DMS, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture2DMSArray, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2DMS, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture2DMSArray, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2DMS, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture2DMSArray, false}] = hView;
       }
       {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::TextureCube, plGALMSAASampleCount::None, false);
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::TextureCube, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::TextureCubeArray, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::TextureCube, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::TextureCubeArray, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::TextureCube, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::TextureCubeArray, false}] = hView;
       }
       {
         plGALResourceViewHandle hView = CreateTexture(plGALTextureType::Texture3D, plGALMSAASampleCount::None, false);
-        m_ResourceViews[{vk::DescriptorType::eSampledImage, plShaderResourceType::Texture3D, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::Texture, plGALShaderTextureType::Texture3D, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TextureAndSampler, plGALShaderTextureType::Texture3D, false}] = hView;
       }
       {
         plGALBufferCreationDescription desc;
         desc.m_bUseForIndirectArguments = false;
         desc.m_bUseAsStructuredBuffer = true;
         desc.m_bAllowRawViews = true;
-        desc.m_bStreamOutputTarget = false;
         desc.m_bAllowShaderResourceView = true;
         desc.m_bAllowUAV = true;
         desc.m_uiStructSize = 128;
@@ -140,10 +127,10 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
         s_pDevice->GetBuffer(hBuffer)->SetDebugName("FallbackStructuredBufferVulkan");
         m_Buffers.PushBack(hBuffer);
         plGALResourceViewHandle hView = s_pDevice->GetDefaultResourceView(hBuffer);
-        m_ResourceViews[{vk::DescriptorType::eUniformBuffer, plShaderResourceType::ConstantBuffer, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eUniformBuffer, plShaderResourceType::ConstantBuffer, true}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eStorageBuffer, plShaderResourceType::GenericBuffer, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eStorageBuffer, plShaderResourceType::GenericBuffer, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::ConstantBuffer, plGALShaderTextureType::Unknown, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::ConstantBuffer, plGALShaderTextureType::Unknown, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::StructuredBuffer, plGALShaderTextureType::Unknown, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::StructuredBuffer, plGALShaderTextureType::Unknown, true}] = hView;
       }
       {
         plGALBufferCreationDescription desc;
@@ -155,8 +142,60 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
         s_pDevice->GetBuffer(hBuffer)->SetDebugName("FallbackTexelBufferVulkan");
         m_Buffers.PushBack(hBuffer);
         plGALResourceViewHandle hView = s_pDevice->GetDefaultResourceView(hBuffer);
-        m_ResourceViews[{vk::DescriptorType::eUniformTexelBuffer, plShaderResourceType::GenericBuffer, false}] = hView;
-        m_ResourceViews[{vk::DescriptorType::eUniformTexelBuffer, plShaderResourceType::GenericBuffer, true}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TexelBuffer, plGALShaderTextureType::Unknown, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TexelBuffer, plGALShaderTextureType::Unknown, true}] = hView;
+      }
+      {
+        plGALTextureCreationDescription desc;
+        desc.m_uiWidth = 4;
+        desc.m_uiHeight = 4;
+        desc.m_uiMipLevelCount = 1;
+        desc.m_Format = plGALResourceFormat::RGBAHalf;
+        desc.m_Type = plGALTextureType::Texture2D;
+        desc.m_SampleCount = plGALMSAASampleCount::None;
+        desc.m_ResourceAccess.m_bImmutable = false;
+        desc.m_bCreateRenderTarget = false;
+        desc.m_bAllowUAV = true;
+        plGALTextureHandle hTexture = s_pDevice->CreateTexture(desc);
+        PL_ASSERT_DEV(!hTexture.IsInvalidated(), "Failed to create fallback resource");
+        // Debug device not set yet.
+        s_pDevice->GetTexture(hTexture)->SetDebugName("FallbackTextureRWVulkan");
+        m_Textures.PushBack(hTexture);
+
+        plGALUnorderedAccessViewCreationDescription descUAV;
+        descUAV.m_hTexture = hTexture;
+        auto hUAV = s_pDevice->CreateUnorderedAccessView(descUAV);
+        m_UAVs[{plGALShaderResourceType::TextureRW, plGALShaderTextureType::Unknown, false}] = hUAV;
+      }
+      {
+        plGALBufferCreationDescription desc;
+        desc.m_uiStructSize = sizeof(plUInt32);
+        desc.m_uiTotalSize = 1024;
+        desc.m_bAllowShaderResourceView = true;
+        desc.m_bAllowUAV = true;
+        desc.m_ResourceAccess.m_bImmutable = false;
+        plGALBufferHandle hBuffer = s_pDevice->CreateBuffer(desc);
+        s_pDevice->GetBuffer(hBuffer)->SetDebugName("FallbackTexelBufferRWVulkan");
+        m_Buffers.PushBack(hBuffer);
+        plGALResourceViewHandle hView = s_pDevice->GetDefaultResourceView(hBuffer);
+        m_ResourceViews[{plGALShaderResourceType::TexelBufferRW, plGALShaderTextureType::Unknown, false}] = hView;
+        m_ResourceViews[{plGALShaderResourceType::TexelBufferRW, plGALShaderTextureType::Unknown, true}] = hView;
+      }
+      {
+        plGALBufferCreationDescription desc;
+        desc.m_bUseForIndirectArguments = false;
+        desc.m_bUseAsStructuredBuffer = true;
+        desc.m_bAllowRawViews = true;
+        desc.m_bAllowShaderResourceView = true;
+        desc.m_bAllowUAV = true;
+        desc.m_uiStructSize = 128;
+        desc.m_uiTotalSize = 1280;
+        desc.m_ResourceAccess.m_bImmutable = false;
+        plGALBufferHandle hBuffer = s_pDevice->CreateBuffer(desc);
+        s_pDevice->GetBuffer(hBuffer)->SetDebugName("FallbackStructuredBufferRWVulkan");
+        m_Buffers.PushBack(hBuffer);
+        plGALResourceViewHandle hView = s_pDevice->GetDefaultResourceView(hBuffer);
+        m_ResourceViews[{plGALShaderResourceType::StructuredBufferRW, plGALShaderTextureType::Unknown, false}] = hView;
       }
     }
     break;
@@ -181,6 +220,7 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
       }
       m_Textures.Clear();
       m_Textures.Compact();
+      s_pDevice = nullptr;
     }
     break;
     default:
@@ -188,36 +228,36 @@ void plFallbackResourcesVulkan::GALDeviceEventHandler(const plGALDeviceEvent& e)
   }
 }
 
-const plGALResourceViewVulkan* plFallbackResourcesVulkan::GetFallbackResourceView(vk::DescriptorType descriptorType, plShaderResourceType::Enum plType, bool bDepth)
+const plGALResourceViewVulkan* plFallbackResourcesVulkan::GetFallbackResourceView(plGALShaderResourceType::Enum descriptorType, plGALShaderTextureType::Enum textureType, bool bDepth)
 {
-  if (plGALResourceViewHandle* pView = m_ResourceViews.GetValue(Key{descriptorType, plType, bDepth}))
+  if (plGALResourceViewHandle* pView = m_ResourceViews.GetValue(Key{descriptorType, textureType, bDepth}))
   {
     return static_cast<const plGALResourceViewVulkan*>(s_pDevice->GetResourceView(*pView));
   }
-  PLASMA_REPORT_FAILURE("No fallback resource set, update plFallbackResourcesVulkan::GALDeviceEventHandler.");
+  PL_REPORT_FAILURE("No fallback resource set, update plFallbackResourcesVulkan::GALDeviceEventHandler.");
   return nullptr;
 }
 
-const plGALUnorderedAccessViewVulkan* plFallbackResourcesVulkan::GetFallbackUnorderedAccessView(vk::DescriptorType descriptorType, plShaderResourceType::Enum plType)
+const plGALUnorderedAccessViewVulkan* plFallbackResourcesVulkan::GetFallbackUnorderedAccessView(plGALShaderResourceType::Enum descriptorType, plGALShaderTextureType::Enum textureType)
 {
-  if (plGALUnorderedAccessViewHandle* pView = m_UAVs.GetValue(Key{descriptorType, plType, false}))
+  if (plGALUnorderedAccessViewHandle* pView = m_UAVs.GetValue(Key{descriptorType, textureType, false}))
   {
     return static_cast<const plGALUnorderedAccessViewVulkan*>(s_pDevice->GetUnorderedAccessView(*pView));
   }
-  PLASMA_REPORT_FAILURE("No fallback resource set, update plFallbackResourcesVulkan::GALDeviceEventHandler.");
+  PL_REPORT_FAILURE("No fallback resource set, update plFallbackResourcesVulkan::GALDeviceEventHandler.");
   return nullptr;
 }
 
 plUInt32 plFallbackResourcesVulkan::KeyHash::Hash(const Key& a)
 {
   plHashStreamWriter32 writer;
-  writer << plConversionUtilsVulkan::GetUnderlyingValue(a.m_descriptorType);
-  writer << plConversionUtilsVulkan::GetUnderlyingValue(a.m_plType);
+  writer << a.m_ResourceType.GetValue();
+  writer << a.m_plType.GetValue();
   writer << a.m_bDepth;
   return writer.GetHashValue();
 }
 
 bool plFallbackResourcesVulkan::KeyHash::Equal(const Key& a, const Key& b)
 {
-  return a.m_descriptorType == b.m_descriptorType && a.m_plType == b.m_plType && a.m_bDepth == b.m_bDepth;
+  return a.m_ResourceType == b.m_ResourceType && a.m_plType == b.m_plType && a.m_bDepth == b.m_bDepth;
 }

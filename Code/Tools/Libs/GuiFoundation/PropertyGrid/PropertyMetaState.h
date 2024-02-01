@@ -58,28 +58,28 @@ struct plContainerElementMetaStateEvent
 /// The property grid calls GetTypePropertiesState() and GetContainerElementsState() with the current selection of plDocumentObject's.
 /// This triggers the plPropertyMetaStateEvent to be broadcast, which allows for other code to determine additional
 /// information for the properties and write it into the event data.
-class PLASMA_GUIFOUNDATION_DLL plPropertyMetaState
+class PL_GUIFOUNDATION_DLL plPropertyMetaState
 {
-  PLASMA_DECLARE_SINGLETON(plPropertyMetaState);
+  PL_DECLARE_SINGLETON(plPropertyMetaState);
 
 public:
   plPropertyMetaState();
 
   /// \brief Queries the property meta state for a single plDocumentObject
-  void GetTypePropertiesState(const plDocumentObject* pObject, plMap<plString, plPropertyUiState>& out_PropertyStates);
+  void GetTypePropertiesState(const plDocumentObject* pObject, plMap<plString, plPropertyUiState>& out_propertyStates);
 
   /// \brief Queries the property meta state for a multi selection of plDocumentObject's
   ///
   /// This will query the information for every single selected object and then merge the result into one.
-  void GetTypePropertiesState(const plHybridArray<plPropertySelection, 8>& items, plMap<plString, plPropertyUiState>& out_PropertyStates);
+  void GetTypePropertiesState(const plHybridArray<plPropertySelection, 8>& items, plMap<plString, plPropertyUiState>& out_propertyStates);
 
   /// \brief Queries the meta state for the elements of a single container property on one plDocumentObject.
-  void GetContainerElementsState(const plDocumentObject* pObject, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_PropertyStates);
+  void GetContainerElementsState(const plDocumentObject* pObject, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_propertyStates);
 
   /// \brief Queries the meta state for the elements of a single container property on a multi selection of plDocumentObjects.
   ///
   /// This will query the information for every single selected object and then merge the result into one.
-  void GetContainerElementsState(const plHybridArray<plPropertySelection, 8>& items, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_PropertyStates);
+  void GetContainerElementsState(const plHybridArray<plPropertySelection, 8>& items, const char* szProperty, plHashTable<plVariant, plPropertyUiState>& out_propertyStates);
 
   /// Attach to this event to get notified of property state queries.
   /// Add information to plPropertyMetaStateEvent::m_pPropertyStates to return data.

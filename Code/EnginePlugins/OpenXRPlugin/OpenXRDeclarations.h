@@ -6,7 +6,7 @@
     auto s = (code);                                                                                                        \
     if (s != XR_SUCCESS)                                                                                                    \
     {                                                                                                                       \
-      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PLASMA_STRINGIZE(code), s, PLASMA_SOURCE_FILE, PLASMA_SOURCE_LINE); \
+      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PL_STRINGIZE(code), s, PL_SOURCE_FILE, PL_SOURCE_LINE); \
     }                                                                                                                       \
   } while (false)
 
@@ -16,7 +16,7 @@
     auto s = (code);                                                                                                        \
     if (s != XR_SUCCESS)                                                                                                    \
     {                                                                                                                       \
-      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PLASMA_STRINGIZE(code), s, PLASMA_SOURCE_FILE, PLASMA_SOURCE_LINE); \
+      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PL_STRINGIZE(code), s, PL_SOURCE_FILE, PL_SOURCE_LINE); \
       return s;                                                                                                             \
     }                                                                                                                       \
   } while (false)
@@ -27,7 +27,7 @@
     auto s = (code);                                                                                                        \
     if (s != XR_SUCCESS)                                                                                                    \
     {                                                                                                                       \
-      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PLASMA_STRINGIZE(code), s, PLASMA_SOURCE_FILE, PLASMA_SOURCE_LINE); \
+      plLog::Error("OpenXR call '{0}' failed with: {1} in {2}:{3}", PL_STRINGIZE(code), s, PL_SOURCE_FILE, PL_SOURCE_LINE); \
       cleanup();                                                                                                            \
       return s;                                                                                                             \
     }                                                                                                                       \

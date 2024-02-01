@@ -1,12 +1,12 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #endif
 
 void plMemoryUtils::ReserveLower4GBAddressSpace()
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS) && PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS) && PL_ENABLED(PL_PLATFORM_64BIT)
   // The following code was taken from http://randomascii.wordpress.com/2012/02/14/64-bit-made-easy/
   // and adapted to our coding guidelines.
 
@@ -96,11 +96,10 @@ void plMemoryUtils::ReserveLower4GBAddressSpace()
   // Print diagnostics showing how many allocations we had to make in
   // order to reserve all of low memory, typically less than 200.
   char buffer[1000];
-  sprintf_s(buffer, "Reserved %1.3f MB (%u vallocs, %u heap allocs) of low-memory.\n", uiTotalReservation / (1024 * 1024.0), (plUInt32)uiNumVAllocs,
+  plStringUtils::snprintf(buffer, 1000, "Reserved %1.3f MB (%u vallocs, %u heap allocs) of low-memory.\n", uiTotalReservation / (1024 * 1024.0), (plUInt32)uiNumVAllocs,
     (plUInt32)uiNumHeapAllocs);
   OutputDebugStringA(buffer);
 #endif
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Memory_Implementation_MemoryUtils);

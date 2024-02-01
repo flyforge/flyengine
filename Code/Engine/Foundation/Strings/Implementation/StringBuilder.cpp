@@ -8,7 +8,6 @@
 
 plStringBuilder::plStringBuilder(plStringView sData1, plStringView sData2, plStringView sData3, plStringView sData4, plStringView sData5, plStringView sData6)
 {
-  m_uiCharacterCount = 0;
   AppendTerminator();
 
   Append(sData1, sData2, sData3, sData4, sData5, sData6);
@@ -22,7 +21,7 @@ void plStringBuilder::Set(plStringView sData1, plStringView sData2, plStringView
 
 void plStringBuilder::SetSubString_FromTo(const char* pStart, const char* pEnd)
 {
-  PLASMA_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStart, pEnd), "Invalid substring, the start does not point to a valid Utf-8 character");
+  PL_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStart, pEnd), "Invalid substring, the start does not point to a valid Utf-8 character");
 
   plStringView view(pStart, pEnd);
   *this = view;
@@ -30,7 +29,7 @@ void plStringBuilder::SetSubString_FromTo(const char* pStart, const char* pEnd)
 
 void plStringBuilder::SetSubString_ElementCount(const char* pStart, plUInt32 uiElementCount)
 {
-  PLASMA_ASSERT_DEBUG(
+  PL_ASSERT_DEBUG(
     plUnicodeUtils::IsValidUtf8(pStart, pStart + uiElementCount), "Invalid substring, the start does not point to a valid Utf-8 character");
 
   plStringView view(pStart, pStart + uiElementCount);
@@ -40,7 +39,7 @@ void plStringBuilder::SetSubString_ElementCount(const char* pStart, plUInt32 uiE
 void plStringBuilder::SetSubString_CharacterCount(const char* pStart, plUInt32 uiCharacterCount)
 {
   const char* pEnd = pStart;
-  plUnicodeUtils::MoveToNextUtf8(pEnd, uiCharacterCount);
+  plUnicodeUtils::MoveToNextUtf8(pEnd, uiCharacterCount).IgnoreResult(); // fine to fail, will just copy as much as possible
 
   plStringView view(pStart, pEnd);
   *this = view;
@@ -64,19 +63,17 @@ void plStringBuilder::Append(plStringView sData1, plStringView sData2, plStringV
     if (pStrings[i].IsEmpty())
       continue;
 
-    PLASMA_ASSERT_DEBUG(pStrings[i].GetStartPointer() < m_Data.GetData() || pStrings[i].GetStartPointer() >= m_Data.GetData() + m_Data.GetCapacity(),
+    PL_ASSERT_DEBUG(pStrings[i].GetStartPointer() < m_Data.GetData() || pStrings[i].GetStartPointer() >= m_Data.GetData() + m_Data.GetCapacity(),
       "Parameter {0} comes from the string builders own storage. This type assignment is not allowed.", i);
 
-    plUInt32 uiCharacters = 0;
-    plStringUtils::GetCharacterAndElementCount(pStrings[i].GetStartPointer(), uiCharacters, uiStrLen[i], pStrings[i].GetEndPointer());
+    uiStrLen[i] = pStrings[i].GetElementCount();
     uiMoreBytes += uiStrLen[i];
-    m_uiCharacterCount += uiCharacters;
 
-    PLASMA_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
+    PL_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
   }
 
   plUInt32 uiPrevCount = m_Data.GetCount(); // already contains a 0 terminator
-  PLASMA_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
+  PL_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
 
   // now resize
   m_Data.SetCountUninitialized(uiPrevCount + uiMoreBytes);
@@ -112,16 +109,14 @@ void plStringBuilder::Prepend(plStringView sData1, plStringView sData2, plString
     if (pStrings[i].IsEmpty())
       continue;
 
-    plUInt32 uiCharacters = 0;
-    plStringUtils::GetCharacterAndElementCount(pStrings[i].GetStartPointer(), uiCharacters, uiStrLen[i], pStrings[i].GetEndPointer());
+    uiStrLen[i] = pStrings[i].GetElementCount();
     uiMoreBytes += uiStrLen[i];
-    m_uiCharacterCount += uiCharacters;
 
-    PLASMA_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
+    PL_ASSERT_DEBUG(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
   }
 
   plUInt32 uiPrevCount = m_Data.GetCount(); // already contains a 0 terminator
-  PLASMA_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
+  PL_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
 
   // now resize
   m_Data.SetCountUninitialized(uiPrevCount + uiMoreBytes);
@@ -144,7 +139,7 @@ void plStringBuilder::Prepend(plStringView sData1, plStringView sData2, plString
   }
 }
 
-void plStringBuilder::PrintfArgs(const char* szUtf8Format, va_list szArgs0)
+void plStringBuilder::SetPrintfArgs(const char* szUtf8Format, va_list szArgs0)
 {
   va_list args;
   va_copy(args, szArgs0);
@@ -156,7 +151,7 @@ void plStringBuilder::PrintfArgs(const char* szUtf8Format, va_list szArgs0)
   char szTemp[TempBuffer];
   const plInt32 iCount = plStringUtils::vsnprintf(szTemp, TempBuffer - 1, szUtf8Format, args);
 
-  PLASMA_ASSERT_DEV(iCount != -1, "There was an error while formatting the string. Probably and unescaped usage of the %% sign.");
+  PL_ASSERT_DEV(iCount != -1, "There was an error while formatting the string. Probably and unescaped usage of the %% sign.");
 
   if (iCount == -1)
   {
@@ -245,39 +240,27 @@ void plStringBuilder::ChangeCharacterNonASCII(iterator& it, plUInt32 uiCharacter
 
 void plStringBuilder::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack)
 {
-  if (uiShrinkCharsFront + uiShrinkCharsBack >= m_uiCharacterCount)
+  if (uiShrinkCharsBack > 0)
   {
-    Clear();
-    return;
+    const char* szEnd = GetData() + GetElementCount();
+    const char* szNewEnd = szEnd;
+    if (plUnicodeUtils::MoveToPriorUtf8(szNewEnd, GetData(), uiShrinkCharsBack).Failed())
+    {
+      Clear();
+      return;
+    }
+
+    const plUInt32 uiLessBytes = (plUInt32)(szEnd - szNewEnd);
+
+    m_Data.PopBack(uiLessBytes + 1);
+    AppendTerminator();
   }
 
   const char* szNewStart = &m_Data[0];
-
-  if (IsPureASCII())
+  if (plUnicodeUtils::MoveToNextUtf8(szNewStart, uiShrinkCharsFront).Failed())
   {
-    if (uiShrinkCharsBack > 0)
-    {
-      m_Data.PopBack(uiShrinkCharsBack + 1);
-      AppendTerminator();
-    }
-
-    szNewStart = &m_Data[uiShrinkCharsFront];
-  }
-  else
-  {
-    if (uiShrinkCharsBack > 0)
-    {
-      const char* szEnd = GetData() + GetElementCount();
-      const char* szNewEnd = szEnd;
-      plUnicodeUtils::MoveToPriorUtf8(szNewEnd, uiShrinkCharsBack);
-
-      const plUInt32 uiLessBytes = (plUInt32)(szEnd - szNewEnd);
-
-      m_Data.PopBack(uiLessBytes + 1);
-      AppendTerminator();
-    }
-
-    plUnicodeUtils::MoveToNextUtf8(szNewStart, uiShrinkCharsFront);
+    Clear();
+    return;
   }
 
   if (szNewStart > &m_Data[0])
@@ -287,20 +270,15 @@ void plStringBuilder::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkChars
     plMemoryUtils::CopyOverlapped(&m_Data[0], szNewStart, m_Data.GetCount() - uiLessBytes);
     m_Data.PopBack(uiLessBytes);
   }
-
-  m_uiCharacterCount -= uiShrinkCharsFront;
-  m_uiCharacterCount -= uiShrinkCharsBack;
 }
 
 void plStringBuilder::ReplaceSubString(const char* szStartPos, const char* szEndPos, plStringView sReplaceWith)
 {
-  PLASMA_ASSERT_DEV(plMath::IsInRange(szStartPos, GetData(), GetData() + m_Data.GetCount()), "szStartPos is not inside this string.");
-  PLASMA_ASSERT_DEV(plMath::IsInRange(szEndPos, GetData(), GetData() + m_Data.GetCount()), "szEndPos is not inside this string.");
-  PLASMA_ASSERT_DEV(szStartPos <= szEndPos, "plStartPos must be before plEndPos");
+  PL_ASSERT_DEV(plMath::IsInRange(szStartPos, GetData(), GetData() + m_Data.GetCount()), "szStartPos is not inside this string.");
+  PL_ASSERT_DEV(plMath::IsInRange(szEndPos, GetData(), GetData() + m_Data.GetCount()), "szEndPos is not inside this string.");
+  PL_ASSERT_DEV(szStartPos <= szEndPos, "plStartPos must be before plEndPos");
 
-  plUInt32 uiWordChars = 0;
-  plUInt32 uiWordBytes = 0;
-  plStringUtils::GetCharacterAndElementCount(sReplaceWith.GetStartPointer(), uiWordChars, uiWordBytes, sReplaceWith.GetEndPointer());
+  const plUInt32 uiWordBytes = sReplaceWith.GetElementCount();
 
   const plUInt32 uiSubStringBytes = (plUInt32)(szEndPos - szStartPos);
 
@@ -312,27 +290,17 @@ void plStringBuilder::ReplaceSubString(const char* szStartPos, const char* szEnd
   {
     while (szWritePos < szEndPos)
     {
-      if (!plUnicodeUtils::IsUtf8ContinuationByte(*szWritePos))
-        --m_uiCharacterCount;
-
       *szWritePos = *szReadPos;
       ++szWritePos;
       ++szReadPos;
     }
 
-    // the number of bytes might be identical, but that does not mean that the number of characters is also identical
-    // therefore we subtract the number of characters that were found in the old substring
-    // and add the number of characters for the new substring
-    m_uiCharacterCount += uiWordChars;
     return;
   }
 
   // the replacement is shorter than the existing stuff -> move characters to the left, no reallocation needed
   if (uiWordBytes < uiSubStringBytes)
   {
-    m_uiCharacterCount -= plStringUtils::GetCharacterCount(szStartPos, szEndPos);
-    m_uiCharacterCount += uiWordChars;
-
     // first copy the replacement to the correct position
     plMemoryUtils::Copy(szWritePos, sReplaceWith.GetStartPointer(), uiWordBytes);
 
@@ -350,9 +318,6 @@ void plStringBuilder::ReplaceSubString(const char* szStartPos, const char* szEnd
 
   // else the replacement is longer than the existing word
   {
-    m_uiCharacterCount -= plStringUtils::GetCharacterCount(szStartPos, szEndPos);
-    m_uiCharacterCount += uiWordChars;
-
     const plUInt32 uiDifference = uiWordBytes - uiSubStringBytes;
     const plUInt64 uiRelativeWritePosition = szWritePos - GetData();
     const plUInt64 uiDataByteCountBefore = m_Data.GetCount();
@@ -377,7 +342,7 @@ const char* plStringBuilder::ReplaceFirst(plStringView sSearchFor, plStringView 
     szStartSearchAt = GetData();
   else
   {
-    PLASMA_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
+    PL_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
   }
 
   const char* szFoundAt = plStringUtils::FindSubString(szStartSearchAt, sSearchFor.GetStartPointer(), GetData() + m_Data.GetCount() - 1, sSearchFor.GetEndPointer());
@@ -400,7 +365,7 @@ const char* plStringBuilder::ReplaceLast(plStringView sSearchFor, plStringView s
     szStartSearchAt = GetData() + m_Data.GetCount() - 1;
   else
   {
-    PLASMA_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
+    PL_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
   }
 
   const char* szFoundAt = plStringUtils::FindLastSubString(GetData(), sSearchFor.GetStartPointer(), szStartSearchAt, GetData() + m_Data.GetCount() - 1, sSearchFor.GetEndPointer());
@@ -452,7 +417,7 @@ const char* plStringBuilder::ReplaceFirst_NoCase(plStringView sSearchFor, plStri
     szStartSearchAt = GetData();
   else
   {
-    PLASMA_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
+    PL_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
   }
 
   const char* szFoundAt = plStringUtils::FindSubString_NoCase(szStartSearchAt, sSearchFor.GetStartPointer(), GetData() + m_Data.GetCount() - 1, sSearchFor.GetEndPointer());
@@ -475,7 +440,7 @@ const char* plStringBuilder::ReplaceLast_NoCase(plStringView sSearchFor, plStrin
     szStartSearchAt = GetData() + m_Data.GetCount() - 1;
   else
   {
-    PLASMA_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
+    PL_ASSERT_DEV(plMath::IsInRange(szStartSearchAt, GetData(), GetData() + m_Data.GetCount() - 1), "szStartSearchAt is not inside the string range.");
   }
 
   const char* szFoundAt = plStringUtils::FindLastSubString_NoCase(GetData(), sSearchFor.GetStartPointer(), szStartSearchAt, GetData() + m_Data.GetCount() - 1, sSearchFor.GetEndPointer());
@@ -520,7 +485,7 @@ plUInt32 plStringBuilder::ReplaceAll_NoCase(plStringView sSearchFor, plStringVie
   return uiReplacements;
 }
 
-const char* plStringBuilder::ReplaceWholeWord(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB)
+const char* plStringBuilder::ReplaceWholeWord(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB)
 {
   const char* szPos = FindWholeWord(szSearchFor, isDelimiterCB);
 
@@ -533,7 +498,7 @@ const char* plStringBuilder::ReplaceWholeWord(const char* szSearchFor, plStringV
   return GetData() + uiOffset;
 }
 
-const char* plStringBuilder::ReplaceWholeWord_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB)
+const char* plStringBuilder::ReplaceWholeWord_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB)
 {
   const char* szPos = FindWholeWord_NoCase(szSearchFor, isDelimiterCB);
 
@@ -547,7 +512,7 @@ const char* plStringBuilder::ReplaceWholeWord_NoCase(const char* szSearchFor, pl
 }
 
 
-plUInt32 plStringBuilder::ReplaceWholeWordAll(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB)
+plUInt32 plStringBuilder::ReplaceWholeWordAll(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB)
 {
   const plUInt32 uiSearchBytes = plStringUtils::GetStringElementCount(szSearchFor);
   const plUInt32 uiWordBytes = plStringUtils::GetStringElementCount(sReplaceWith.GetStartPointer(), sReplaceWith.GetEndPointer());
@@ -575,7 +540,7 @@ plUInt32 plStringBuilder::ReplaceWholeWordAll(const char* szSearchFor, plStringV
   return uiReplacements;
 }
 
-plUInt32 plStringBuilder::ReplaceWholeWordAll_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB)
+plUInt32 plStringBuilder::ReplaceWholeWordAll_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB)
 {
   const plUInt32 uiSearchBytes = plStringUtils::GetStringElementCount(szSearchFor);
   const plUInt32 uiWordBytes = plStringUtils::GetStringElementCount(sReplaceWith.GetStartPointer(), sReplaceWith.GetEndPointer());
@@ -605,10 +570,7 @@ plUInt32 plStringBuilder::ReplaceWholeWordAll_NoCase(const char* szSearchFor, pl
 
 void plStringBuilder::operator=(plStringView rhs)
 {
-  plUInt32 uiBytes;
-  plUInt32 uiCharacters;
-
-  plStringUtils::GetCharacterAndElementCount(rhs.GetStartPointer(), uiCharacters, uiBytes, rhs.GetEndPointer());
+  plUInt32 uiBytes = rhs.GetElementCount();
 
   // if we need more room, allocate up front (rhs cannot use our own data in this case)
   if (uiBytes + 1 > m_Data.GetCount())
@@ -622,8 +584,6 @@ void plStringBuilder::operator=(plStringView rhs)
 
   m_Data.SetCountUninitialized(uiBytes + 1);
   m_Data[uiBytes] = '\0';
-
-  m_uiCharacterCount = uiCharacters;
 }
 
 enum PathUpState
@@ -696,12 +656,12 @@ void plStringBuilder::MakeCleanPath()
       if (iLevelsDown > 0)
       {
         --iLevelsDown;
-        PLASMA_ASSERT_DEBUG(writeOffset >= 3, "invalid write offset");
+        PL_ASSERT_DEBUG(writeOffset >= 3, "invalid write offset");
         writeOffset -= 3; // go back, skip two dots, one slash
 
         while ((writeOffset > 0) && (szCurWritePos[writeOffset - 1] != '/'))
         {
-          PLASMA_ASSERT_DEBUG(writeOffset > 0, "invalid write offset");
+          PL_ASSERT_DEBUG(writeOffset > 0, "invalid write offset");
           --writeOffset;
         }
       }
@@ -715,7 +675,7 @@ void plStringBuilder::MakeCleanPath()
     }
     else if (FoundPathUp == FoundDotSlash)
     {
-      PLASMA_ASSERT_DEBUG(writeOffset > 0, "invalid write offset");
+      PL_ASSERT_DEBUG(writeOffset > 0, "invalid write offset");
       writeOffset -= 1; // go back to where we wrote the dot
 
       FoundPathUp = NotStarted;
@@ -732,12 +692,9 @@ void plStringBuilder::MakeCleanPath()
   const plUInt32 uiPrevByteCount = m_Data.GetCount();
   const plUInt32 uiNewByteCount = (plUInt32)(writeOffset) + 1;
 
-  PLASMA_ASSERT_DEBUG(uiPrevByteCount >= uiNewByteCount, "It should not be possible that a path grows during cleanup. Old: {0} Bytes, New: {1} Bytes",
+  PL_IGNORE_UNUSED(uiPrevByteCount);
+  PL_ASSERT_DEBUG(uiPrevByteCount >= uiNewByteCount, "It should not be possible that a path grows during cleanup. Old: {0} Bytes, New: {1} Bytes",
     uiPrevByteCount, uiNewByteCount);
-
-  // we will only remove characters and only ASCII ones (slash, backslash, dot)
-  // so the number of characters shrinks equally to the number of bytes
-  m_uiCharacterCount -= (uiPrevByteCount - uiNewByteCount);
 
   // make sure to write the terminating \0 and reset the count
   szCurWritePos[writeOffset] = '\0';
@@ -746,7 +703,7 @@ void plStringBuilder::MakeCleanPath()
 
 void plStringBuilder::PathParentDirectory(plUInt32 uiLevelsUp)
 {
-  PLASMA_ASSERT_DEV(uiLevelsUp > 0, "We have to do something!");
+  PL_ASSERT_DEV(uiLevelsUp > 0, "We have to do something!");
 
   for (plUInt32 i = 0; i < uiLevelsUp; ++i)
     AppendPath("../");
@@ -798,7 +755,6 @@ void plStringBuilder::AppendWithSeparator(plStringView sOptional, plStringView s
   const plStringView pStrings[uiMaxParams] = {sOptional, sText1, sText2, sText3, sText4, sText5, sText6};
   plUInt32 uiStrLen[uiMaxParams] = {0};
   plUInt32 uiMoreBytes = 0;
-  plUInt32 uiMoreChars = 0;
 
   // first figure out how much the string has to grow
   for (plUInt32 i = 0; i < uiMaxParams; ++i)
@@ -806,15 +762,13 @@ void plStringBuilder::AppendWithSeparator(plStringView sOptional, plStringView s
     if (pStrings[i].IsEmpty())
       continue;
 
-    PLASMA_ASSERT_DEBUG(pStrings[i].GetStartPointer() < m_Data.GetData() || pStrings[i].GetStartPointer() >= m_Data.GetData() + m_Data.GetCapacity(),
+    PL_ASSERT_DEBUG(pStrings[i].GetStartPointer() < m_Data.GetData() || pStrings[i].GetStartPointer() >= m_Data.GetData() + m_Data.GetCapacity(),
       "Parameter {0} comes from the string builders own storage. This type assignment is not allowed.", i);
 
-    plUInt32 uiCharacters = 0;
-    plStringUtils::GetCharacterAndElementCount(pStrings[i].GetStartPointer(), uiCharacters, uiStrLen[i], pStrings[i].GetEndPointer());
+    uiStrLen[i] = pStrings[i].GetElementCount();
     uiMoreBytes += uiStrLen[i];
-    uiMoreChars += uiCharacters;
 
-    PLASMA_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
+    PL_ASSERT_DEV(plUnicodeUtils::IsValidUtf8(pStrings[i].GetStartPointer(), pStrings[i].GetEndPointer()), "Parameter {0} is not a valid Utf8 sequence.", i + 1);
   }
 
   if (uiMoreBytes == uiStrLen[0])
@@ -824,11 +778,10 @@ void plStringBuilder::AppendWithSeparator(plStringView sOptional, plStringView s
   }
 
   plUInt32 uiPrevCount = m_Data.GetCount(); // already contains a 0 terminator
-  PLASMA_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
+  PL_ASSERT_DEBUG(uiPrevCount > 0, "There should be a 0 terminator somewhere around here.");
 
   // now resize
   m_Data.SetCountUninitialized(uiPrevCount + uiMoreBytes);
-  m_uiCharacterCount += uiMoreChars;
 
   // and then append all the strings
   for (plUInt32 i = 0; i < uiMaxParams; ++i)
@@ -891,7 +844,7 @@ plResult plStringBuilder::MakeRelativeTo(plStringView sAbsolutePathToMakeThisRel
   if (sAbsBase.IsEqual_NoCase(sAbsThis.GetData()))
   {
     Clear();
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (!sAbsBase.EndsWith("/"))
@@ -914,7 +867,7 @@ plResult plStringBuilder::MakeRelativeTo(plStringView sAbsolutePathToMakeThisRel
         ++szStart;
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else
       sAbsThis.Shrink(0, 1);
@@ -937,7 +890,7 @@ plResult plStringBuilder::MakeRelativeTo(plStringView sAbsolutePathToMakeThisRel
 
   if (iSame < 0)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   Clear();
@@ -953,7 +906,7 @@ plResult plStringBuilder::MakeRelativeTo(plStringView sAbsolutePathToMakeThisRel
 
   Append(&(sAbsThis.GetData()[iSame]));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 /// An empty folder (zero length) does not contain ANY files.\n
@@ -964,7 +917,7 @@ plResult plStringBuilder::MakeRelativeTo(plStringView sAbsolutePathToMakeThisRel
 /// IsFileBelowFolder ("", "") -> always false\n
 bool plStringBuilder::IsPathBelowFolder(const char* szPathToFolder)
 {
-  PLASMA_ASSERT_DEV(!plStringUtils::IsNullOrEmpty(szPathToFolder), "The given path must not be empty. Because is 'nothing' under the empty path, or 'everything' ?");
+  PL_ASSERT_DEV(!plStringUtils::IsNullOrEmpty(szPathToFolder), "The given path must not be empty. Because is 'nothing' under the empty path, or 'everything' ?");
 
   // a non-existing file is never in any folder
   if (IsEmpty())
@@ -1028,12 +981,9 @@ void plStringBuilder::RemoveDoubleSlashesInPath()
   const plUInt32 uiPrevByteCount = m_Data.GetCount();
   const plUInt32 uiNewByteCount = (plUInt32)(szCurWritePos - &m_Data[0]) + 1;
 
-  PLASMA_ASSERT_DEBUG(uiPrevByteCount >= uiNewByteCount, "It should not be possible that a path grows during cleanup. Old: {0} Bytes, New: {1} Bytes",
+  PL_IGNORE_UNUSED(uiPrevByteCount);
+  PL_ASSERT_DEBUG(uiPrevByteCount >= uiNewByteCount, "It should not be possible that a path grows during cleanup. Old: {0} Bytes, New: {1} Bytes",
     uiPrevByteCount, uiNewByteCount);
-
-  // we will only remove characters and only ASCII ones (slash, backslash)
-  // so the number of characters shrinks equally to the number of bytes
-  m_uiCharacterCount -= (uiPrevByteCount - uiNewByteCount);
 
   // make sure to write the terminating \0 and reset the count
   *szCurWritePos = '\0';
@@ -1115,7 +1065,7 @@ bool plStringBuilder::TrimWordEnd(plStringView sWord)
   return trimmed;
 }
 
-void plStringBuilder::Format(const plFormatString& string)
+void plStringBuilder::SetFormat(const plFormatString& string)
 {
   Clear();
   plStringView sText = string.GetText(*this);
@@ -1140,14 +1090,54 @@ void plStringBuilder::PrependFormat(const plFormatString& string)
   Prepend(string.GetText(tmp));
 }
 
-void plStringBuilder::Printf(const char* szUtf8Format, ...)
+void plStringBuilder::SetPrintf(const char* szUtf8Format, ...)
 {
   va_list args;
   va_start(args, szUtf8Format);
 
-  PrintfArgs(szUtf8Format, args);
+  SetPrintfArgs(szUtf8Format, args);
 
   va_end(args);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_StringBuilder);
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+plStringBuilder::plStringBuilder(const std::string_view& rhs, plAllocator* pAllocator)
+  : m_Data(pAllocator)
+{
+  AppendTerminator();
+
+  *this = rhs;
+}
+
+plStringBuilder::plStringBuilder(const std::string& rhs, plAllocator* pAllocator)
+  : m_Data(pAllocator)
+{
+  AppendTerminator();
+
+  *this = rhs;
+}
+
+void plStringBuilder::operator=(const std::string_view& rhs)
+{
+  if (rhs.empty())
+  {
+    Clear();
+  }
+  else
+  {
+    *this = plStringView(rhs.data(), rhs.data() + rhs.size());
+  }
+}
+
+void plStringBuilder::operator=(const std::string& rhs)
+{
+  if (rhs.empty())
+  {
+    Clear();
+  }
+  else
+  {
+    *this = plStringView(rhs.data(), rhs.data() + rhs.size());
+  }
+}
+#endif

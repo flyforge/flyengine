@@ -8,9 +8,9 @@ using plJoltSliderConstraintComponentManager = plComponentManager<class plJoltSl
 ///
 /// The child actor may move along the parent actor along the positive X axis of the constraint.
 /// Usually lower and upper limits are used to prevent infinite movement.
-class PLASMA_JOLTPLUGIN_DLL plJoltSliderConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltSliderConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltSliderConstraintComponent, plJoltConstraintComponent, plJoltSliderConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltSliderConstraintComponent, plJoltConstraintComponent, plJoltSliderConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

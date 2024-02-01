@@ -4,7 +4,7 @@
 #include <Foundation/IO/FileSystem/FileSystem.h>
 
 static plInt32 s_iDataDirCounter = 0;
-static plMap<plString, plInt32, plCompareHelper<plString>, plStaticAllocatorWrapper> s_KnownDataDirs;
+static plMap<plString, plInt32, plCompareHelper<plString>, plStaticsAllocatorWrapper> s_KnownDataDirs;
 
 static void FileSystemEventHandler(const plFileSystem::FileEvent& e)
 {
@@ -22,7 +22,7 @@ static void FileSystemEventHandler(const plFileSystem::FileEvent& e)
       }
 
       plStringBuilder sName;
-      sName.Format("IO/DataDirs/Dir{0}", plArgI(it.Value(), 2, true));
+      sName.SetFormat("IO/DataDirs/Dir{0}", plArgI(it.Value(), 2, true));
 
       plStats::SetStat(sName.GetData(), e.m_sFileOrDirectory);
     }
@@ -36,7 +36,7 @@ static void FileSystemEventHandler(const plFileSystem::FileEvent& e)
         break;
 
       plStringBuilder sName;
-      sName.Format("IO/DataDirs/Dir{0}", plArgI(it.Value(), 2, true));
+      sName.SetFormat("IO/DataDirs/Dir{0}", plArgI(it.Value(), 2, true));
 
       plStats::RemoveStat(sName.GetData());
     }

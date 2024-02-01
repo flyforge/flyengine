@@ -1,3 +1,0 @@
-Processing failed
-LineTest: Line 3 [2]: Error: Macro name '__LINE__' is reserved
-Log: 'File 'LineTest', Line 3 (2): Macro name '__LINE__' is reserved'

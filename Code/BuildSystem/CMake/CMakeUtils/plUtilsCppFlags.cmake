@@ -5,7 +5,7 @@
 function(pl_check_build_type)
 	# set the default build type
 	if(NOT CMAKE_BUILD_TYPE)
-		set(CMAKE_BUILD_TYPE ${PLASMA_BUILDTYPENAME_DEV} CACHE STRING "Choose the type of build, options are: None ${PLASMA_BUILDTYPENAME_DEBUG} ${PLASMA_BUILDTYPENAME_DEV} ${PLASMA_BUILDTYPENAME_RELEASE}." FORCE)
+		set(CMAKE_BUILD_TYPE ${PL_BUILDTYPENAME_DEV} CACHE STRING "Choose the type of build, options are: None ${PL_BUILDTYPENAME_DEBUG} ${PL_BUILDTYPENAME_DEV} ${PL_BUILDTYPENAME_RELEASE}." FORCE)
 	endif()
 endfunction()
 
@@ -13,7 +13,7 @@ endfunction()
 # ## pl_set_build_flags_msvc(<target>)
 # #####################################
 function(pl_set_build_flags_msvc TARGET_NAME)
-	set(ARG_OPTIONS ENABLE_RTTI NO_WARNINGS_AS_ERRORS NO_CONTROLFLOWGUARD NO_DEBUG)
+	set(ARG_OPTIONS ENABLE_RTTI NO_WARNINGS_AS_ERRORS NO_COMPLIANCE NO_DEBUG)
 	set(ARG_ONEVALUEARGS "")
 	set(ARG_MULTIVALUEARGS "")
 	cmake_parse_arguments(ARG "${ARG_OPTIONS}" "${ARG_ONEVALUEARGS}" "${ARG_MULTIVALUEARGS}" ${ARGN})
@@ -34,6 +34,7 @@ function(pl_set_build_flags_msvc TARGET_NAME)
 
 	# use precise floating point model
 	target_compile_options(${TARGET_NAME} PRIVATE "/fp:precise")
+
 	# enable floating point exceptions
 	# target_compile_options(${TARGET_NAME} PRIVATE "/fp:except")
 
@@ -52,38 +53,46 @@ function(pl_set_build_flags_msvc TARGET_NAME)
 	# force the compiler to interpret code as utf8.
 	target_compile_options(${TARGET_NAME} PRIVATE "/utf-8")
 
+	# set the __cplusplus preprocessor macro to something useful
+	target_compile_options(${TARGET_NAME} PRIVATE "/Zc:__cplusplus")
+
 	# set high warning level
 	# target_compile_options(${TARGET_NAME} PRIVATE "/W4") # too much work to fix all warnings in pl
 
 	# /WX: treat warnings as errors
 	if(NOT ${ARG_NO_WARNINGS_AS_ERRORS} AND NOT CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-		target_compile_options(${TARGET_NAME} PRIVATE "/WX")
+		# target_compile_options(${TARGET_NAME} PRIVATE "/WX")
+		# switch Warning 4996 (deprecation warning) from warning level 3 to warning level 1
+		# since you can't mark warnings as "not errors" in MSVC, we must switch off
+		# the global warning-as-errors flag
+		# instead we could switch ON selected warnings as errors
+		target_compile_options(${TARGET_NAME} PRIVATE "/w14996")
 	endif()
 
-	if((CMAKE_SIZEOF_VOID_P EQUAL 4) AND PLASMA_CMAKE_ARCHITECTURE_X86)
+	if((CMAKE_SIZEOF_VOID_P EQUAL 4) AND PL_CMAKE_ARCHITECTURE_X86)
 		# enable SSE2 (incompatible with /fp:except)
 		target_compile_options(${TARGET_NAME} PRIVATE "/arch:SSE2")
 	endif()
 
 	# /Zo: Improved debugging of optimized code
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_RELEASE_UPPER}>:/Zo>")
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_DEV_UPPER}>:/Zo>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_RELEASE_UPPER}>:/Zo>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_DEV_UPPER}>:/Zo>")
 
 	# /Ob1: Only consider functions for inlining that are marked with inline or forceinline
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_DEBUG_UPPER}>:/Ob1>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_DEBUG_UPPER}>:/Ob1>")
 
 	# /Ox: favor speed for optimizations
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_RELEASE_UPPER}>:/Ox>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_RELEASE_UPPER}>:/Ox>")
 
 	# /Ob2: Consider all functions for inlining
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_RELEASE_UPPER}>:/Ob2>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_RELEASE_UPPER}>:/Ob2>")
 
 	# /Oi: Replace some functions with intrinsics or other special forms of the function
-	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PLASMA_BUILDTYPENAME_RELEASE_UPPER}>:/Oi>")
+	target_compile_options(${TARGET_NAME} PRIVATE "$<$<CONFIG:${PL_BUILDTYPENAME_RELEASE_UPPER}>:/Oi>")
 
 	# Enable SSE4.1 for Clang on Windows.
 	# Todo: In general we should make this configurable. As of writing SSE4.1 is always active for windows builds (independent of the compiler)
-	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND PLASMA_CMAKE_ARCHITECTURE_X86)
+	if(CMAKE_CXX_COMPILER_ID MATCHES "Clang" AND PL_CMAKE_ARCHITECTURE_X86)
 		target_compile_options(${TARGET_NAME} PRIVATE "-msse4.1")
 	endif()
 
@@ -108,16 +117,16 @@ function(pl_set_build_flags_msvc TARGET_NAME)
 	if(${ARG_NO_DEBUG})
 		# if NO_DEBUG is set, use the Dev build configuration even for Debug builds, to get best performance
 		message(STATUS "Using Dev build flags for Debug builds '${TARGET_NAME}'")
-		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PLASMA_BUILDTYPENAME_DEBUG_UPPER} ${LINKER_FLAGS_RELEASE})
-		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PLASMA_BUILDTYPENAME_DEV_UPPER} ${LINKER_FLAGS_RELEASE})
+		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PL_BUILDTYPENAME_DEBUG_UPPER} ${LINKER_FLAGS_RELEASE})
+		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PL_BUILDTYPENAME_DEV_UPPER} ${LINKER_FLAGS_RELEASE})
 	else()
-		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PLASMA_BUILDTYPENAME_DEBUG_UPPER} ${LINKER_FLAGS_DEBUG})
-		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PLASMA_BUILDTYPENAME_DEV_UPPER} ${LINKER_FLAGS_${PLASMA_DEV_BUILD_LINKERFLAGS}})
+		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PL_BUILDTYPENAME_DEBUG_UPPER} ${LINKER_FLAGS_DEBUG})
+		set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PL_BUILDTYPENAME_DEV_UPPER} ${LINKER_FLAGS_${PL_DEV_BUILD_LINKERFLAGS}})
 	endif()
 
-	set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PLASMA_BUILDTYPENAME_RELEASE_UPPER} ${LINKER_FLAGS_RELEASE})
+	set_target_properties(${TARGET_NAME} PROPERTIES LINK_FLAGS_${PL_BUILDTYPENAME_RELEASE_UPPER} ${LINKER_FLAGS_RELEASE})
 
-	if(PLASMA_ENABLE_COMPILER_STATIC_ANALYSIS)
+	if(PL_ENABLE_COMPILER_STATIC_ANALYSIS)
 		target_compile_options(${TARGET_NAME} PRIVATE "/analyze")
 	endif()
 
@@ -147,8 +156,6 @@ function(pl_set_build_flags_msvc TARGET_NAME)
 	# 'nodiscard': attribute is ignored in this syntactic position
 	target_compile_options(${TARGET_NAME} PRIVATE /wd5240)
     
-    # Disable deprecation warnings (qt, etc)
-    target_compile_options(${TARGET_NAME} PRIVATE /wd4996)
 
 endfunction()
 
@@ -156,64 +163,13 @@ endfunction()
 # ## pl_set_build_flags_clang(<target>)
 # #####################################
 function(pl_set_build_flags_clang TARGET_NAME)
-	# Cmake complains that this is not defined on OSX make build.
-	# if(PLASMA_COMPILE_ENGINE_AS_DLL)
-	# set (CMAKE_CPP_CREATE_DYNAMIC_LIBRARY ON)
-	# else ()
-	# set (CMAKE_CPP_CREATE_STATIC_LIBRARY ON)
-	# endif ()
-	if(PLASMA_CMAKE_PLATFORM_OSX)
-		target_compile_options(${TARGET_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>)
 
-		target_link_options(${TARGET_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-stdlib=libc++>)
-	endif()
-
-	if(PLASMA_CMAKE_ARCHITECTURE_X86)
+	if(PL_CMAKE_ARCHITECTURE_X86)
 		target_compile_options(${TARGET_NAME} PRIVATE "-msse4.1")
-	endif()
-
-	if(PLASMA_CMAKE_PLATFORM_LINUX)
-		target_compile_options(${TARGET_NAME} PRIVATE -fPIC)
-
-		# Look for the super fast ld compatible linker called "mold". If present we want to use it.
-		find_program(MOLD_PATH "mold")
-
-		# We want to use the llvm linker lld by default
-		# Unless the user has specified a different linker
-		get_target_property(TARGET_TYPE ${TARGET_NAME} TYPE)
-
-		if("${TARGET_TYPE}" STREQUAL "SHARED_LIBRARY")
-			if(NOT("${CMAKE_EXE_LINKER_FLAGS}" MATCHES "fuse-ld="))
-				if(MOLD_PATH)
-					target_link_options(${TARGET_NAME} PRIVATE "-fuse-ld=${MOLD_PATH}")
-				else()
-					target_link_options(${TARGET_NAME} PRIVATE "-fuse-ld=lld")
-				endif()
-			endif()
-
-			# Reporting missing symbols at linktime
-			target_link_options(${TARGET_NAME} PRIVATE "-Wl,-z,defs")
-		elseif("${TARGET_TYPE}" STREQUAL "EXECUTABLE")
-			if(NOT("${CMAKE_SHARED_LINKER_FLAGS}" MATCHES "fuse-ld="))
-				if(MOLD_PATH)
-					target_link_options(${TARGET_NAME} PRIVATE "-fuse-ld=${MOLD_PATH}")
-				else()
-					target_link_options(${TARGET_NAME} PRIVATE "-fuse-ld=lld")
-				endif()
-			endif()
-
-			# Reporting missing symbols at linktime
-			target_link_options(${TARGET_NAME} PRIVATE "-Wl,-z,defs")
-		endif()
 	endif()
 
 	# Disable warning: multi-character character constant
 	target_compile_options(${TARGET_NAME} PRIVATE -Wno-multichar)
-
-	if(PLASMA_CMAKE_PLATFORM_WINDOWS)
-		# Disable the warning that clang doesn't support pragma optimize.
-		target_compile_options(${TARGET_NAME} PRIVATE -Wno-ignored-pragma-optimize -Wno-pragma-pack)
-	endif()
 
 	if(NOT(CMAKE_CURRENT_SOURCE_DIR MATCHES "Code/ThirdParty"))
 		target_compile_options(${TARGET_NAME} PRIVATE -Werror=inconsistent-missing-override -Werror=switch -Werror=uninitialized -Werror=unused-result -Werror=return-type)
@@ -222,16 +178,21 @@ function(pl_set_build_flags_clang TARGET_NAME)
 		target_compile_options(${TARGET_NAME} PRIVATE -Wno-everything)
 	endif()
 
-	if(PLASMA_ENABLE_QT_SUPPORT)
+	if(PL_ENABLE_QT_SUPPORT)
 		# Ignore any warnings caused by Qt headers
-		target_compile_options(${TARGET_NAME} PRIVATE "--system-header-prefix=\"${PLASMA_QT_DIR}\"")
+		target_compile_options(${TARGET_NAME} PRIVATE "--system-header-prefix=\"${PL_QT_DIR}\"")
 	endif()
 
 	# Ignore any warnings caused by headers inside the ThirdParty directory.
-	if(PLASMA_SUBMODULE_PREFIX_PATH)
-		target_compile_options(${TARGET_NAME} PRIVATE "--system-header-prefix=\"${PLASMA_ROOT}/Code/ThirdParty\"")
+	if(PL_SUBMODULE_PREFIX_PATH)
+		target_compile_options(${TARGET_NAME} PRIVATE "--system-header-prefix=\"${PL_ROOT}/Code/ThirdParty\"")
 	else()
 		target_compile_options(${TARGET_NAME} PRIVATE "--system-header-prefix=\"${CMAKE_SOURCE_DIR}/Code/ThirdParty\"")
+	endif()
+
+	if (COMMAND pl_platformhook_set_build_flags_clang)
+		# call platform-specific hook
+		pl_platformhook_set_build_flags_clang()
 	endif()
 endfunction()
 
@@ -242,7 +203,7 @@ function(pl_set_build_flags_gcc TARGET_NAME)
 	# Wno-enum-compare removes all annoying enum cast warnings
 	target_compile_options(${TARGET_NAME} PRIVATE -fPIC -Wno-enum-compare -gdwarf-3 -pthread)
 
-	if(PLASMA_CMAKE_ARCHITECTURE_X86)
+	if(PL_CMAKE_ARCHITECTURE_X86)
 		target_compile_options(${TARGET_NAME} PRIVATE -mssse3 -mfpmath=sse)
 	endif()
 
@@ -251,7 +212,7 @@ function(pl_set_build_flags_gcc TARGET_NAME)
 	# these were previously set as CMAKE_C_FLAGS (not CPP)
 	target_compile_options(${TARGET_NAME} PRIVATE -fPIC -gdwarf-3)
 
-	if(PLASMA_CMAKE_ARCHITECTURE_X86)
+	if(PL_CMAKE_ARCHITECTURE_X86)
 		target_compile_options(${TARGET_NAME} PRIVATE -msse4.1)
 	endif()
 
@@ -260,7 +221,7 @@ function(pl_set_build_flags_gcc TARGET_NAME)
 
 	if(NOT(CMAKE_CURRENT_SOURCE_DIR MATCHES "Code/ThirdParty"))
 		# Warning / Error settings for pl code
-		# attributes = error if a attribute is placed incorrectly (e.g. PLASMA_FOUNDATION_DLL)
+		# attributes = error if a attribute is placed incorrectly (e.g. PL_FOUNDATION_DLL)
 		# unused-result = error if [[nodiscard]] return value is not handeled (plResult)
 		target_compile_options(${TARGET_NAME} PRIVATE -Werror=attributes -Werror=unused-result -Wno-ignored-attributes -Werror=return-type)
 	else()
@@ -305,20 +266,38 @@ function(pl_set_build_flags TARGET_NAME)
 
 	set_property(TARGET ${TARGET_NAME} PROPERTY CXX_STANDARD 17)
 
-	# There is a bug in the cmake version used by visual studio 2019 which is 3.15.19101501-MSVC_2 that does not correctly pass the c++17 parameter to the compiler. So we need to specify it manually.
-	if(ANDROID AND(${CMAKE_VERSION} VERSION_LESS "3.16.0"))
-		target_compile_options(${TARGET_NAME} PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=c++17>)
+	# On Android, we need to specify it manually.
+	if(ANDROID)
+		add_compile_options(-std=c++17)
 	endif()
 
-	if(PLASMA_CMAKE_COMPILER_MSVC)
+	if(PL_CMAKE_COMPILER_MSVC)
 		pl_set_build_flags_msvc(${TARGET_NAME} ${ARGN})
 	endif()
 
-	if(PLASMA_CMAKE_COMPILER_CLANG)
+	if(PL_CMAKE_COMPILER_CLANG)
 		pl_set_build_flags_clang(${TARGET_NAME} ${ARGN})
 	endif()
 
-	if(PLASMA_CMAKE_COMPILER_GCC)
+	if(PL_CMAKE_COMPILER_GCC)
 		pl_set_build_flags_gcc(${TARGET_NAME} ${ARGN})
+	endif()
+endfunction()
+
+# #####################################
+# ## pl_enable_strict_warnings(<target>)
+# #####################################
+function(pl_enable_strict_warnings TARGET_NAME)
+	if(PL_CMAKE_COMPILER_MSVC)
+		# In case there is W3 already, remove it so it doesn't spam warnings when using Ninja builds.
+		get_target_property(TARGET_COMPILE_OPTS ${PROJECT_NAME} COMPILE_OPTIONS)
+		list(REMOVE_ITEM TARGET_COMPILE_OPTS /W3)
+		set_target_properties(${TARGET_NAME} PROPERTIES COMPILE_OPTIONS "${TARGET_COMPILE_OPTS}")
+		
+		target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
+	endif()
+
+	if(PL_CMAKE_COMPILER_CLANG)
+		target_compile_options(${PROJECT_NAME} PRIVATE -Werror -Wall -Wlogical-op-parentheses)
 	endif()
 endfunction()

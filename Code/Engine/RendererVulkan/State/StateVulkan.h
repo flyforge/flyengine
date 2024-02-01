@@ -5,10 +5,10 @@
 
 #include <vulkan/vulkan.hpp>
 
-class PLASMA_RENDERERVULKAN_DLL plGALBlendStateVulkan : public plGALBlendState
+class PL_RENDERERVULKAN_DLL plGALBlendStateVulkan : public plGALBlendState
 {
 public:
-  PLASMA_ALWAYS_INLINE const vk::PipelineColorBlendStateCreateInfo* GetBlendState() const;
+  PL_ALWAYS_INLINE const vk::PipelineColorBlendStateCreateInfo* GetBlendState() const;
 
 protected:
   friend class plGALDeviceVulkan;
@@ -26,10 +26,10 @@ protected:
   vk::PipelineColorBlendAttachmentState m_blendAttachmentState[8] = {};
 };
 
-class PLASMA_RENDERERVULKAN_DLL plGALDepthStencilStateVulkan : public plGALDepthStencilState
+class PL_RENDERERVULKAN_DLL plGALDepthStencilStateVulkan : public plGALDepthStencilState
 {
 public:
-  PLASMA_ALWAYS_INLINE const vk::PipelineDepthStencilStateCreateInfo* GetDepthStencilState() const;
+  PL_ALWAYS_INLINE const vk::PipelineDepthStencilStateCreateInfo* GetDepthStencilState() const;
 
 protected:
   friend class plGALDeviceVulkan;
@@ -46,10 +46,10 @@ protected:
   vk::PipelineDepthStencilStateCreateInfo m_depthStencilState = {};
 };
 
-class PLASMA_RENDERERVULKAN_DLL plGALRasterizerStateVulkan : public plGALRasterizerState
+class PL_RENDERERVULKAN_DLL plGALRasterizerStateVulkan : public plGALRasterizerState
 {
 public:
-  PLASMA_ALWAYS_INLINE const vk::PipelineRasterizationStateCreateInfo* GetRasterizerState() const;
+  PL_ALWAYS_INLINE const vk::PipelineRasterizationStateCreateInfo* GetRasterizerState() const;
 
 protected:
   friend class plGALDeviceVulkan;
@@ -66,10 +66,10 @@ protected:
   vk::PipelineRasterizationStateCreateInfo m_rasterizerState = {};
 };
 
-class PLASMA_RENDERERVULKAN_DLL plGALSamplerStateVulkan : public plGALSamplerState
+class PL_RENDERERVULKAN_DLL plGALSamplerStateVulkan : public plGALSamplerState
 {
 public:
-  PLASMA_ALWAYS_INLINE const vk::DescriptorImageInfo& GetImageInfo() const;
+  PL_ALWAYS_INLINE const vk::DescriptorImageInfo& GetImageInfo() const;
 
 protected:
   friend class plGALDeviceVulkan;

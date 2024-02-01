@@ -9,13 +9,13 @@
 
 class QTreeWidgetItem;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtInputConfigDlg : public QDialog, public Ui_InputConfigDialog
+class PL_EDITORFRAMEWORK_DLL plQtInputConfigDlg : public QDialog, public Ui_InputConfigDialog
 {
 public:
   Q_OBJECT
 
 public:
-  plQtInputConfigDlg(QWidget* parent);
+  plQtInputConfigDlg(QWidget* pParent);
 
 private Q_SLOTS:
   void on_ButtonNewInputSet_clicked();

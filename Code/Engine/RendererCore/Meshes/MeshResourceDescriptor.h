@@ -5,12 +5,12 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 #include <RendererCore/Meshes/MeshBufferResource.h>
 
-class PLASMA_RENDERERCORE_DLL plMeshResourceDescriptor
+class PL_RENDERERCORE_DLL plMeshResourceDescriptor
 {
 public:
   struct SubMesh
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiPrimitiveCount;
     plUInt32 m_uiFirstPrimitive;

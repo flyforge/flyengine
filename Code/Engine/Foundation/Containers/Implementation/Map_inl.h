@@ -14,7 +14,7 @@ void plMapBase<KeyType, ValueType, Comparer>::ConstIterator::Next()
 
   if (m_pElement == nullptr)
   {
-    PLASMA_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
+    PL_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
     return;
   }
 
@@ -65,7 +65,7 @@ void plMapBase<KeyType, ValueType, Comparer>::ConstIterator::Prev()
 
   if (m_pElement == nullptr)
   {
-    PLASMA_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
+    PL_ASSERT_DEBUG(m_pElement != nullptr, "The Iterator is invalid (end).");
     return;
   }
 
@@ -125,7 +125,7 @@ void plMapBase<KeyType, ValueType, Comparer>::Constructor()
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-plMapBase<KeyType, ValueType, Comparer>::plMapBase(const Comparer& comparer, plAllocatorBase* pAllocator)
+plMapBase<KeyType, ValueType, Comparer>::plMapBase(const Comparer& comparer, plAllocator* pAllocator)
   : m_Elements(pAllocator)
   , m_Comparer(comparer)
 {
@@ -133,7 +133,7 @@ plMapBase<KeyType, ValueType, Comparer>::plMapBase(const Comparer& comparer, plA
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-plMapBase<KeyType, ValueType, Comparer>::plMapBase(const plMapBase<KeyType, ValueType, Comparer>& cc, plAllocatorBase* pAllocator)
+plMapBase<KeyType, ValueType, Comparer>::plMapBase(const plMapBase<KeyType, ValueType, Comparer>& cc, plAllocator* pAllocator)
   : m_Elements(pAllocator)
 {
   Constructor();
@@ -176,38 +176,38 @@ void plMapBase<KeyType, ValueType, Comparer>::Clear()
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::IsEmpty() const
+PL_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::IsEmpty() const
 {
   return (m_uiCount == 0);
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE plUInt32 plMapBase<KeyType, ValueType, Comparer>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plMapBase<KeyType, ValueType, Comparer>::GetCount() const
 {
   return m_uiCount;
 }
 
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::GetIterator()
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::GetIterator()
 {
   return Iterator(GetLeftMost());
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::GetIterator() const
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::GetIterator() const
 {
   return ConstIterator(GetLeftMost());
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::GetLastIterator()
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::GetLastIterator()
 {
   return Iterator(GetRightMost());
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::GetLastIterator() const
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::GetLastIterator() const
 {
   return ConstIterator(GetRightMost());
 }
@@ -220,7 +220,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
   Node* pNode = m_pRoot;
 
-  while (pNode->m_pLink[0] != &m_NilNode)
+  while ((const void*)pNode->m_pLink[0] != (const void*)&m_NilNode)
     pNode = pNode->m_pLink[0];
 
   return pNode;
@@ -234,7 +234,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
   Node* pNode = m_pRoot;
 
-  while (pNode->m_pLink[1] != &m_NilNode)
+  while ((const void*)pNode->m_pLink[1] != (const void*)&m_NilNode)
     pNode = pNode->m_pLink[1];
 
   return pNode;
@@ -246,7 +246,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 {
   Node* pNode = m_pRoot;
 
-  while (pNode != &m_NilNode)
+  while ((const void*)pNode != (const void*)&m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);
@@ -257,7 +257,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
     pNode = pNode->m_pLink[dir];
   }
 
-  if (pNode == &m_NilNode)
+  if ((const void*)pNode == (const void*)&m_NilNode)
     return nullptr;
 
   return pNode;
@@ -265,7 +265,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, ValueType& out_value) const
+PL_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, ValueType& out_value) const
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   if (pNode != nullptr)
@@ -279,7 +279,7 @@ PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(c
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, const ValueType*& out_pValue) const
+PL_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, const ValueType*& out_pValue) const
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   if (pNode != nullptr)
@@ -293,7 +293,7 @@ PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(c
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, ValueType*& out_pValue) const
+PL_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(const CompatibleKeyType& key, ValueType*& out_pValue) const
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   if (pNode != nullptr)
@@ -307,7 +307,7 @@ PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::TryGetValue(c
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE const ValueType* plMapBase<KeyType, ValueType, Comparer>::GetValue(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE const ValueType* plMapBase<KeyType, ValueType, Comparer>::GetValue(const CompatibleKeyType& key) const
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   return pNode ? &pNode->m_Value : nullptr;
@@ -315,7 +315,7 @@ PLASMA_ALWAYS_INLINE const ValueType* plMapBase<KeyType, ValueType, Comparer>::G
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE ValueType* plMapBase<KeyType, ValueType, Comparer>::GetValue(const CompatibleKeyType& key)
+PL_ALWAYS_INLINE ValueType* plMapBase<KeyType, ValueType, Comparer>::GetValue(const CompatibleKeyType& key)
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   return pNode ? &pNode->m_Value : nullptr;
@@ -323,7 +323,7 @@ PLASMA_ALWAYS_INLINE ValueType* plMapBase<KeyType, ValueType, Comparer>::GetValu
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE const ValueType& plMapBase<KeyType, ValueType, Comparer>::GetValueOrDefault(const CompatibleKeyType& key, const ValueType& defaultValue) const
+PL_ALWAYS_INLINE const ValueType& plMapBase<KeyType, ValueType, Comparer>::GetValueOrDefault(const CompatibleKeyType& key, const ValueType& defaultValue) const
 {
   Node* pNode = Internal_Find<CompatibleKeyType>(key);
   return pNode ? pNode->m_Value : defaultValue;
@@ -331,21 +331,21 @@ PLASMA_ALWAYS_INLINE const ValueType& plMapBase<KeyType, ValueType, Comparer>::G
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::Find(const CompatibleKeyType& key)
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::Find(const CompatibleKeyType& key)
 {
   return Iterator(Internal_Find<CompatibleKeyType>(key));
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::Find(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::Find(const CompatibleKeyType& key) const
 {
   return ConstIterator(Internal_Find<CompatibleKeyType>(key));
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::Contains(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE bool plMapBase<KeyType, ValueType, Comparer>::Contains(const CompatibleKeyType& key) const
 {
   return Internal_Find(key) != nullptr;
 }
@@ -357,7 +357,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
   Node* pNode = m_pRoot;
   Node* pNodeSmaller = nullptr;
 
-  while (pNode != &m_NilNode)
+  while ((const void*)pNode != (const void*)&m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);
@@ -376,14 +376,14 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::LowerBound(const CompatibleKeyType& key)
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::LowerBound(const CompatibleKeyType& key)
 {
   return Iterator(Internal_LowerBound(key));
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::LowerBound(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::LowerBound(const CompatibleKeyType& key) const
 {
   return ConstIterator(Internal_LowerBound(key));
 }
@@ -395,7 +395,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
   Node* pNode = m_pRoot;
   Node* pNodeSmaller = nullptr;
 
-  while (pNode != &m_NilNode)
+  while ((const void*)pNode != (const void*)&m_NilNode)
   {
     const plInt32 dir = (plInt32)m_Comparer.Less(pNode->m_Key, key);
     const plInt32 dir2 = (plInt32)m_Comparer.Less(key, pNode->m_Key);
@@ -418,14 +418,14 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::UpperBound(const CompatibleKeyType& key)
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::UpperBound(const CompatibleKeyType& key)
 {
   return Iterator(Internal_UpperBound(key));
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
 template <typename CompatibleKeyType>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::UpperBound(const CompatibleKeyType& key) const
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator plMapBase<KeyType, ValueType, Comparer>::UpperBound(const CompatibleKeyType& key) const
 {
   return ConstIterator(Internal_UpperBound(key));
 }
@@ -467,7 +467,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, Va
 
         dir = m_Comparer.Less(it->m_Key, key) ? 1 : 0;
 
-        PLASMA_ASSERT_DEBUG(top < STACK_SIZE, "plMapBase's internal stack is not large enough to be able to sort {0} elements.", GetCount());
+        PL_ASSERT_DEBUG(top < STACK_SIZE, "plMapBase's internal stack is not large enough to be able to sort {0} elements.", GetCount());
         up[top++] = it;
 
         if (it->m_pLink[dir] == pNilNode)
@@ -507,7 +507,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, Va
     m_NilNode.m_pParent = pNilNode;
   }
 
-  PLASMA_ASSERT_DEBUG(pInsertedNode != nullptr, "Implementation Error.");
+  PL_ASSERT_DEBUG(pInsertedNode != nullptr, "Implementation Error.");
 
   if (out_pExisted)
     *out_pExisted = false;
@@ -554,7 +554,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
     m_pFreeElementStack = m_pFreeElementStack->m_pParent;
   }
 
-  plMemoryUtils::Construct(pNode, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes>(pNode, 1);
 
   pNode->m_pParent = pParent;
   pNode->m_Key = std::forward<CompatibleKeyType>(key);
@@ -571,7 +571,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 template <typename KeyType, typename ValueType, typename Comparer>
 void plMapBase<KeyType, ValueType, Comparer>::ReleaseNode(Node* pNode)
 {
-  PLASMA_ASSERT_DEBUG(pNode != nullptr && pNode != &m_NilNode, "pNode is invalid.");
+  PL_ASSERT_DEBUG(pNode != nullptr && pNode != &m_NilNode, "pNode is invalid.");
 
   plMemoryUtils::Destruct<Node>(pNode, 1);
 
@@ -594,7 +594,7 @@ void plMapBase<KeyType, ValueType, Comparer>::ReleaseNode(Node* pNode)
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, ValueType, Comparer>::SkewNode(Node* root)
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, ValueType, Comparer>::SkewNode(Node* root)
 {
   if ((root->m_pLink[0]->m_uiLevel == root->m_uiLevel) && (root->m_uiLevel != 0))
   {
@@ -610,7 +610,7 @@ PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Node* plM
 }
 
 template <typename KeyType, typename ValueType, typename Comparer>
-PLASMA_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, ValueType, Comparer>::SplitNode(Node* root)
+PL_ALWAYS_INLINE typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, ValueType, Comparer>::SplitNode(Node* root)
 {
   if ((root->m_pLink[1]->m_pLink[1]->m_uiLevel == root->m_uiLevel) && (root->m_uiLevel != 0))
   {
@@ -644,7 +644,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
     while (true)
     {
-      PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+      PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
       up[top++] = it;
 
       if (it == &m_NilNode)
@@ -666,7 +666,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
       if (--top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
         up[top - 1]->m_pLink[dir] = it->m_pLink[dir2];
         up[top - 1]->m_pLink[dir]->m_pParent = up[top - 1];
       }
@@ -680,7 +680,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
       while (heir->m_pLink[0] != &m_NilNode)
       {
-        PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
         up[top++] = prev = heir;
 
         heir = heir->m_pLink[0];
@@ -697,11 +697,11 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
     {
       if (top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
         dir = up[top - 1]->m_pLink[1] == up[top];
       }
 
-      PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+      PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
 
       if ((up[top]->m_pLink[0]->m_uiLevel < up[top]->m_uiLevel - 1) || (up[top]->m_pLink[1]->m_uiLevel < up[top]->m_uiLevel - 1))
       {
@@ -720,14 +720,14 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 
       if (top != 0)
       {
-        PLASMA_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 1 && top < STACK_SIZE, "Implementation error");
 
         up[top - 1]->m_pLink[dir] = up[top];
         up[top - 1]->m_pLink[dir]->m_pParent = up[top - 1];
       }
       else
       {
-        PLASMA_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
+        PL_ASSERT_DEBUG(top >= 0 && top < STACK_SIZE, "Implementation error");
         root = up[top];
       }
     }
@@ -777,7 +777,7 @@ typename plMapBase<KeyType, ValueType, Comparer>::Node* plMapBase<KeyType, Value
 template <typename KeyType, typename ValueType, typename Comparer>
 typename plMapBase<KeyType, ValueType, Comparer>::Iterator plMapBase<KeyType, ValueType, Comparer>::Remove(const Iterator& pos)
 {
-  PLASMA_ASSERT_DEBUG(pos.m_pElement != nullptr, "The Iterator(pos) is invalid.");
+  PL_ASSERT_DEBUG(pos.m_pElement != nullptr, "The Iterator(pos) is invalid.");
 
   Iterator temp(pos);
   ++temp;
@@ -809,12 +809,6 @@ bool plMapBase<KeyType, ValueType, Comparer>::operator==(const plMapBase<KeyType
   return true;
 }
 
-template <typename KeyType, typename ValueType, typename Comparer>
-bool plMapBase<KeyType, ValueType, Comparer>::operator!=(const plMapBase<KeyType, ValueType, Comparer>& rhs) const
-{
-  return !operator==(rhs);
-}
-
 #undef STACK_SIZE
 
 
@@ -825,13 +819,13 @@ plMap<KeyType, ValueType, Comparer, AllocatorWrapper>::plMap()
 }
 
 template <typename KeyType, typename ValueType, typename Comparer, typename AllocatorWrapper>
-plMap<KeyType, ValueType, Comparer, AllocatorWrapper>::plMap(plAllocatorBase* pAllocator)
+plMap<KeyType, ValueType, Comparer, AllocatorWrapper>::plMap(plAllocator* pAllocator)
   : plMapBase<KeyType, ValueType, Comparer>(Comparer(), pAllocator)
 {
 }
 
 template <typename KeyType, typename ValueType, typename Comparer, typename AllocatorWrapper>
-plMap<KeyType, ValueType, Comparer, AllocatorWrapper>::plMap(const Comparer& comparer, plAllocatorBase* pAllocator)
+plMap<KeyType, ValueType, Comparer, AllocatorWrapper>::plMap(const Comparer& comparer, plAllocator* pAllocator)
   : plMapBase<KeyType, ValueType, Comparer>(comparer, pAllocator)
 {
 }

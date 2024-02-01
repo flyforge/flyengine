@@ -5,7 +5,7 @@
 plParticleSystemInstance* plParticleWorldModule::CreateSystemInstance(
   plUInt32 uiMaxParticles, plWorld* pWorld, plParticleEffectInstance* pOwnerEffect, float fSpawnMultiplier)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plParticleSystemInstance* pResult = nullptr;
 
@@ -27,12 +27,12 @@ plParticleSystemInstance* plParticleWorldModule::CreateSystemInstance(
 
 void plParticleWorldModule::DestroySystemInstance(plParticleSystemInstance* pInstance)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
-  PLASMA_ASSERT_DEBUG(pInstance != nullptr, "Invalid particle system");
+  PL_ASSERT_DEBUG(pInstance != nullptr, "Invalid particle system");
   pInstance->Destruct();
   m_ParticleSystemFreeList.PushBack(pInstance);
 }
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleSystems);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_WorldModule_ParticleSystems);

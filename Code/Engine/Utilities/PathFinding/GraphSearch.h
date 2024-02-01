@@ -16,12 +16,12 @@ class plPathSearch
 {
 public:
   /// \brief Used by FindClosest() to query whether the currently visited node fulfills the termination criteria.
-  typedef bool (*IsSearchedObjectCallback)(plInt64 iStartNodeIndex, const PathStateType& StartState);
+  using IsSearchedObjectCallback = bool (*)(plInt64 iStartNodeIndex, const PathStateType& StartState);
 
   /// \brief FindPath() and FindClosest() return an array of these objects as the path result.
   struct PathResultData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief The index of the node that was visited.
     plInt64 m_iNodeIndex;
@@ -36,7 +36,7 @@ public:
   /// \brief Searches for a path that starts at the graph node \a iStartNodeIndex with the start state \a StartState and shall terminate
   /// when the graph node \a iTargetNodeIndex was reached.
   ///
-  /// Returns PLASMA_FAILURE if no path could be found.
+  /// Returns PL_FAILURE if no path could be found.
   /// Returns the path result as a list of PathResultData objects in \a out_Path.
   ///
   /// The path search is stopped (and thus fails) if the path reaches costs of \a fMaxPathCost or higher.
@@ -46,7 +46,7 @@ public:
   /// \brief Searches for a path that starts at the graph node \a iStartNodeIndex with the start state \a StartState and shall terminate
   /// when a graph node is reached for which \a Callback return true.
   ///
-  /// Returns PLASMA_FAILURE if no path could be found.
+  /// Returns PL_FAILURE if no path could be found.
   /// Returns the path result as a list of PathResultData objects in \a out_Path.
   ///
   /// The path search is stopped (and thus fails) if the path reaches costs of \a fMaxPathCost or higher.

@@ -12,12 +12,12 @@ namespace plRmlUiInternal
   {
     m_hFallbackTexture = plResourceManager::LoadResource<plTexture2DResource>("White.color");
 
-    plGALDevice::GetDefaultDevice()->m_Events.AddEventHandler(plMakeDelegate(&Extractor::EndFrame, this));
+    plGALDevice::s_Events.AddEventHandler(plMakeDelegate(&Extractor::EndFrame, this));
   }
 
   Extractor::~Extractor()
   {
-    plGALDevice::GetDefaultDevice()->m_Events.RemoveEventHandler(plMakeDelegate(&Extractor::EndFrame, this));
+    plGALDevice::s_Events.RemoveEventHandler(plMakeDelegate(&Extractor::EndFrame, this));
 
     for (auto it = m_CompiledGeometry.GetIterator(); it.IsValid(); ++it)
     {
@@ -25,25 +25,25 @@ namespace plRmlUiInternal
     }
   }
 
-  void Extractor::RenderGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture, const Rml::Vector2f& translation)
+  void Extractor::RenderGeometry(Rml::Vertex* pVertices, int iNum_vertices, int* pIndices, int iNum_indices, Rml::TextureHandle hTexture, const Rml::Vector2f& translation)
   {
     // Should never be called since we are using compiled geometry
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  Rml::CompiledGeometryHandle Extractor::CompileGeometry(Rml::Vertex* vertices, int num_vertices, int* indices, int num_indices, Rml::TextureHandle texture)
+  Rml::CompiledGeometryHandle Extractor::CompileGeometry(Rml::Vertex* pVertices, int iNum_vertices, int* pIndices, int iNum_indices, Rml::TextureHandle hTexture)
   {
     CompiledGeometry geometry;
-    geometry.m_uiTriangleCount = num_indices / 3;
+    geometry.m_uiTriangleCount = iNum_indices / 3;
 
     // vertices
     {
       plDynamicArray<Vertex> vertexStorage(plFrameAllocator::GetCurrentAllocator());
-      vertexStorage.SetCountUninitialized(num_vertices);
+      vertexStorage.SetCountUninitialized(iNum_vertices);
 
       for (plUInt32 i = 0; i < vertexStorage.GetCount(); ++i)
       {
-        auto& srcVertex = vertices[i];
+        auto& srcVertex = pVertices[i];
         auto& destVertex = vertexStorage[i];
         destVertex.m_Position = plVec3(srcVertex.position.x, srcVertex.position.y, 0);
         destVertex.m_TexCoord = plVec2(srcVertex.tex_coord.x, srcVertex.tex_coord.y);
@@ -62,16 +62,16 @@ namespace plRmlUiInternal
     {
       plGALBufferCreationDescription desc;
       desc.m_uiStructSize = sizeof(plUInt32);
-      desc.m_uiTotalSize = num_indices * desc.m_uiStructSize;
+      desc.m_uiTotalSize = iNum_indices * desc.m_uiStructSize;
       desc.m_BufferType = plGALBufferType::IndexBuffer;
 
-      geometry.m_hIndexBuffer = plGALDevice::GetDefaultDevice()->CreateBuffer(desc, plMakeArrayPtr(indices, num_indices).ToByteArray());
+      geometry.m_hIndexBuffer = plGALDevice::GetDefaultDevice()->CreateBuffer(desc, plMakeArrayPtr(pIndices, iNum_indices).ToByteArray());
     }
 
     // texture
     {
       plTexture2DResourceHandle* phTexture = nullptr;
-      if (m_Textures.TryGetValue(TextureId::FromRml(texture), phTexture))
+      if (m_Textures.TryGetValue(TextureId::FromRml(hTexture), phTexture))
       {
         geometry.m_hTexture = *phTexture;
       }
@@ -84,14 +84,13 @@ namespace plRmlUiInternal
     return m_CompiledGeometry.Insert(std::move(geometry)).ToRml();
   }
 
-  void Extractor::RenderCompiledGeometry(Rml::CompiledGeometryHandle geometry_handle, const Rml::Vector2f& translation)
+  void Extractor::RenderCompiledGeometry(Rml::CompiledGeometryHandle hGeometry_handle, const Rml::Vector2f& translation)
   {
     auto& batch = m_Batches.ExpandAndGetRef();
 
-    PLASMA_VERIFY(m_CompiledGeometry.TryGetValue(GeometryId::FromRml(geometry_handle), batch.m_CompiledGeometry), "Invalid compiled geometry");
+    PL_VERIFY(m_CompiledGeometry.TryGetValue(GeometryId::FromRml(hGeometry_handle), batch.m_CompiledGeometry), "Invalid compiled geometry");
 
-    plMat4 offsetMat;
-    offsetMat.SetTranslationMatrix(m_vOffset.GetAsVec3(0));
+    plMat4 offsetMat = plMat4::MakeTranslation(m_vOffset.GetAsVec3(0));
 
     batch.m_Transform = offsetMat * m_mTransform;
     batch.m_Translation = plVec2(translation.x, translation.y);
@@ -107,21 +106,30 @@ namespace plRmlUiInternal
     }
   }
 
-  void Extractor::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle geometry_handle) { m_ReleasedCompiledGeometry.PushBack({plRenderWorld::GetFrameCounter(), GeometryId::FromRml(geometry_handle)}); }
-
-  void Extractor::EnableScissorRegion(bool enable) { m_bEnableScissorRect = enable; }
-
-  void Extractor::SetScissorRegion(int x, int y, int width, int height) { m_ScissorRect = plRectFloat(static_cast<float>(x), static_cast<float>(y), static_cast<float>(width), static_cast<float>(height)); }
-
-  bool Extractor::LoadTexture(Rml::TextureHandle& texture_handle, Rml::Vector2i& texture_dimensions, const Rml::String& source)
+  void Extractor::ReleaseCompiledGeometry(Rml::CompiledGeometryHandle hGeometry_handle)
   {
-    plTexture2DResourceHandle hTexture = plResourceManager::LoadResource<plTexture2DResource>(source.c_str());
+    m_ReleasedCompiledGeometry.PushBack({plRenderWorld::GetFrameCounter(), GeometryId::FromRml(hGeometry_handle)});
+  }
+
+  void Extractor::EnableScissorRegion(bool bEnable)
+  {
+    m_bEnableScissorRect = bEnable;
+  }
+
+  void Extractor::SetScissorRegion(int x, int y, int iWidth, int iHeight)
+  {
+    m_ScissorRect = plRectFloat(static_cast<float>(x), static_cast<float>(y), static_cast<float>(iWidth), static_cast<float>(iHeight));
+  }
+
+  bool Extractor::LoadTexture(Rml::TextureHandle& ref_hTexture_handle, Rml::Vector2i& ref_texture_dimensions, const Rml::String& sSource)
+  {
+    plTexture2DResourceHandle hTexture = plResourceManager::LoadResource<plTexture2DResource>(sSource.c_str());
 
     plResourceLock<plTexture2DResource> pTexture(hTexture, plResourceAcquireMode::BlockTillLoaded);
     if (pTexture.GetAcquireResult() == plResourceAcquireResult::Final)
     {
-      texture_handle = m_Textures.Insert(hTexture).ToRml();
-      texture_dimensions = Rml::Vector2i(pTexture->GetWidth(), pTexture->GetHeight());
+      ref_hTexture_handle = m_Textures.Insert(hTexture).ToRml();
+      ref_texture_dimensions = Rml::Vector2i(pTexture->GetWidth(), pTexture->GetHeight());
 
       return true;
     }
@@ -129,23 +137,23 @@ namespace plRmlUiInternal
     return false;
   }
 
-  bool Extractor::GenerateTexture(Rml::TextureHandle& texture_handle, const Rml::byte* source, const Rml::Vector2i& source_dimensions)
+  bool Extractor::GenerateTexture(Rml::TextureHandle& ref_hTexture_handle, const Rml::byte* pSource, const Rml::Vector2i& source_dimensions)
   {
     plUInt32 uiWidth = source_dimensions.x;
     plUInt32 uiHeight = source_dimensions.y;
     plUInt32 uiSizeInBytes = uiWidth * uiHeight * 4;
 
-    plUInt64 uiHash = plHashingUtils::xxHash64(source, uiSizeInBytes);
+    plUInt64 uiHash = plHashingUtils::xxHash64(pSource, uiSizeInBytes);
 
     plStringBuilder sTextureName;
-    sTextureName.Format("RmlUiGeneratedTexture_{}x{}_{}", uiWidth, uiHeight, uiHash);
+    sTextureName.SetFormat("RmlUiGeneratedTexture_{}x{}_{}", uiWidth, uiHeight, uiHash);
 
     plTexture2DResourceHandle hTexture = plResourceManager::GetExistingResource<plTexture2DResource>(sTextureName);
 
     if (!hTexture.IsValid())
     {
       plGALSystemMemoryDescription memoryDesc;
-      memoryDesc.m_pData = const_cast<Rml::byte*>(source);
+      memoryDesc.m_pData = const_cast<Rml::byte*>(pSource);
       memoryDesc.m_uiRowPitch = uiWidth * 4;
       memoryDesc.m_uiSlicePitch = uiSizeInBytes;
 
@@ -158,18 +166,25 @@ namespace plRmlUiInternal
       hTexture = plResourceManager::GetOrCreateResource<plTexture2DResource>(sTextureName, std::move(desc));
     }
 
-    texture_handle = m_Textures.Insert(hTexture).ToRml();
+    ref_hTexture_handle = m_Textures.Insert(hTexture).ToRml();
     return true;
   }
 
-  void Extractor::ReleaseTexture(Rml::TextureHandle texture_handle) { PLASMA_VERIFY(m_Textures.Remove(TextureId::FromRml(texture_handle)), "Invalid texture handle"); }
-
-  void Extractor::SetTransform(const Rml::Matrix4f* transform)
+  void Extractor::ReleaseTexture(Rml::TextureHandle hTexture_handle)
   {
-    if (transform != nullptr)
+    PL_VERIFY(m_Textures.Remove(TextureId::FromRml(hTexture_handle)), "Invalid texture handle");
+  }
+
+  void Extractor::SetTransform(const Rml::Matrix4f* pTransform)
+  {
+    if (pTransform != nullptr)
     {
-      constexpr plMatrixLayout::Enum matrixLayout = std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value ? plMatrixLayout::ColumnMajor : plMatrixLayout::RowMajor;
-      m_mTransform.SetFromArray(transform->data(), matrixLayout);
+      constexpr bool bColumnMajor = std::is_same<Rml::Matrix4f, Rml::ColumnMajorMatrix4f>::value;
+
+      if (bColumnMajor)
+        m_mTransform = plMat4::MakeFromColumnMajorArray(pTransform->data());
+      else
+        m_mTransform = plMat4::MakeFromRowMajorArray(pTransform->data());
     }
     else
     {
@@ -177,10 +192,10 @@ namespace plRmlUiInternal
     }
   }
 
-  void Extractor::BeginExtraction(const plVec2I32& offset)
+  void Extractor::BeginExtraction(const plVec2I32& vOffset)
   {
-    m_vOffset = plVec2(static_cast<float>(offset.x), static_cast<float>(offset.y));
-    m_mTransform = plMat4::IdentityMatrix();
+    m_vOffset = plVec2(static_cast<float>(vOffset.x), static_cast<float>(vOffset.y));
+    m_mTransform = plMat4::MakeIdentity();
 
     m_Batches.Clear();
   }
@@ -191,9 +206,9 @@ namespace plRmlUiInternal
   {
     if (m_Batches.IsEmpty() == false)
     {
-      plRmlUiRenderData* pRenderData = PLASMA_NEW(plFrameAllocator::GetCurrentAllocator(), plRmlUiRenderData, plFrameAllocator::GetCurrentAllocator());
+      plRmlUiRenderData* pRenderData = PL_NEW(plFrameAllocator::GetCurrentAllocator(), plRmlUiRenderData, plFrameAllocator::GetCurrentAllocator());
       pRenderData->m_GlobalTransform.SetIdentity();
-      pRenderData->m_GlobalBounds.SetInvalid();
+      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
       pRenderData->m_Batches = m_Batches;
 
       return pRenderData;

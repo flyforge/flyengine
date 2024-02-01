@@ -16,7 +16,7 @@ class plGraphPatchContext;
 /// \brief Patch base class for plAbstractObjectGraph patches.
 ///
 /// Create static instance of derived class to automatically patch graphs on load.
-class PLASMA_FOUNDATION_DLL plGraphPatch : public plEnumerable<plGraphPatch>
+class PL_FOUNDATION_DLL plGraphPatch : public plEnumerable<plGraphPatch>
 {
 public:
   enum class PatchType : plUInt8
@@ -43,7 +43,7 @@ public:
   plUInt32 GetTypeVersion() const;
   PatchType GetPatchType() const;
 
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plGraphPatch);
+  PL_DECLARE_ENUMERABLE_CLASS(plGraphPatch);
 
 private:
   const char* m_szType = nullptr;

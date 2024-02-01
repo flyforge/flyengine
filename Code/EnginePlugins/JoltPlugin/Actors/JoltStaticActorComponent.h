@@ -13,9 +13,9 @@ using plJoltStaticActorComponentManager = plComponentManager<class plJoltStaticA
 /// If that is desired, use a dynamic actor instead and set it to be "kinematic".
 ///
 /// Static actors are the only ones that can use concave collision meshes.
-class PLASMA_JOLTPLUGIN_DLL plJoltStaticActorComponent : public plJoltActorComponent
+class PL_JOLTPLUGIN_DLL plJoltStaticActorComponent : public plJoltActorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltStaticActorComponent, plJoltActorComponent, plJoltStaticActorComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltStaticActorComponent, plJoltActorComponent, plJoltStaticActorComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -47,7 +47,7 @@ public:
   const char* GetMeshFile() const;      // [ property ]
 
   void SetMesh(const plJoltMeshResourceHandle& hMesh);
-  PLASMA_ALWAYS_INLINE const plJoltMeshResourceHandle& GetMesh() const { return m_hCollisionMesh; }
+  PL_ALWAYS_INLINE const plJoltMeshResourceHandle& GetMesh() const { return m_hCollisionMesh; }
 
   void SetSurfaceFile(const char* szFile); // [ property ]
   const char* GetSurfaceFile() const;      // [ property ]

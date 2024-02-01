@@ -7,4 +7,4 @@ plQtScenegraphModel::plQtScenegraphModel(const plDocumentObjectManager* pObjectM
 {
 }
 
-plQtScenegraphModel::~plQtScenegraphModel() {}
+plQtScenegraphModel::~plQtScenegraphModel() = default;

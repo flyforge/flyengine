@@ -4,7 +4,7 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALVertexDeclaration : public plGALObject<plGALVertexDeclarationCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALVertexDeclaration : public plGALObject<plGALVertexDeclarationCreationDescription>
 {
 public:
 protected:

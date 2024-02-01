@@ -13,11 +13,11 @@ class plOpenDdlReader;
 class plOpenDdlReaderElement;
 
 // Include the proper Input implementation to use
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
 #  include <Core/System/Implementation/glfw/InputDevice_glfw.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 #  include <Core/System/Implementation/Win/InputDevice_win32.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 #  include <Core/System/Implementation/uwp/InputDevice_uwp.h>
 #else
 #  include <Core/System/Implementation/null/InputDevice_null.h>
@@ -28,20 +28,20 @@ class plOpenDdlReaderElement;
 // - GLFW on windows, using GLFWWindow* internally and HWND to pass windows around
 // - GLFW / XCB on linux. Runtime uses GLFWWindow*. Editor uses xcb-window. Tagged union is passed around as window handle.
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
 
 extern "C"
 {
   typedef struct GLFWwindow GLFWwindow;
 }
 
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 #    include <Foundation/Basics/Platform/Win/MinWindows.h>
 using plWindowHandle = plMinWindows::HWND;
 using plWindowInternalHandle = GLFWwindow*;
 #    define INVALID_WINDOW_HANDLE_VALUE (plWindowHandle)(0)
 #    define INVALID_INTERNAL_WINDOW_HANDLE_VALUE nullptr
-#  elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#  elif PL_ENABLED(PL_PLATFORM_LINUX)
 
 extern "C"
 {
@@ -96,14 +96,14 @@ using plWindowInternalHandle = GLFWwindow*;
 #    define INVALID_WINDOW_HANDLE_VALUE (GLFWwindow*)(0)
 #  endif
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 #  include <Foundation/Basics/Platform/Win/MinWindows.h>
 using plWindowHandle = plMinWindows::HWND;
 using plWindowInternalHandle = plWindowHandle;
 #  define INVALID_WINDOW_HANDLE_VALUE (plWindowHandle)(0)
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 using plWindowHandle = IUnknown*;
 using plWindowInternalHandle = plWindowHandle;
@@ -122,13 +122,12 @@ using plWindowInternalHandle = plWindowHandle;
 #endif
 
 /// \brief Base class of all window classes that have a client area and a native window handle.
-class PLASMA_CORE_DLL plWindowBase
+class PL_CORE_DLL plWindowBase
 {
 public:
-  virtual ~plWindowBase() {}
+  virtual ~plWindowBase() = default;
 
   virtual plSizeU32 GetClientAreaSize() const = 0;
-  virtual plSizeU32 GetRenderAreaSize() const = 0;
   virtual plWindowHandle GetNativeWindowHandle() const = 0;
 
   /// \brief Whether the window is a fullscreen window
@@ -144,7 +143,7 @@ public:
 };
 
 /// \brief Determines how the position and resolution for a window are picked
-struct PLASMA_CORE_DLL plWindowMode
+struct PL_CORE_DLL plWindowMode
 {
   using StorageType = plUInt8;
 
@@ -165,7 +164,7 @@ struct PLASMA_CORE_DLL plWindowMode
 };
 
 /// \brief Parameters for creating a window, such as position and resolution
-struct PLASMA_CORE_DLL plWindowCreationDesc
+struct PL_CORE_DLL plWindowCreationDesc
 {
   /// \brief Adjusts the position and size members, depending on the current value of m_WindowMode and m_iMonitor.
   ///
@@ -177,7 +176,7 @@ struct PLASMA_CORE_DLL plWindowCreationDesc
   plResult AdjustWindowSizeAndPosition();
 
   /// Serializes the configuration to DDL.
-  void SaveToDDL(plOpenDdlWriter& writer);
+  void SaveToDDL(plOpenDdlWriter& ref_writer);
 
   /// Serializes the configuration to DDL.
   plResult SaveToDDL(plStringView sFile);
@@ -190,7 +189,7 @@ struct PLASMA_CORE_DLL plWindowCreationDesc
 
 
   /// The window title to be displayed.
-  plString m_Title = "PlasmaEngine";
+  plString m_Title = "plEngine";
 
   /// Defines how the window size is determined.
   plEnum<plWindowMode> m_WindowMode;
@@ -204,9 +203,6 @@ struct PLASMA_CORE_DLL plWindowCreationDesc
 
   /// The pixel resolution of the window.
   plSizeU32 m_Resolution = plSizeU32(1280, 720);
-
-  /// The pixel resolution of the render target.
-  plSizeU32 m_RenderResolution = plSizeU32(1280, 720);
 
   /// The number of the window. This is mostly used for setting up the input system, which then reports
   /// different mouse positions for each window.
@@ -229,7 +225,7 @@ struct PLASMA_CORE_DLL plWindowCreationDesc
 /// Will handle basic message looping. Notable events can be listened to by overriding the corresponding callbacks.
 /// You should call ProcessWindowMessages every frame to keep the window responsive.
 /// Input messages will not be forwarded automatically. You can do so by overriding the OnWindowMessage function.
-class PLASMA_CORE_DLL plWindow : public plWindowBase
+class PL_CORE_DLL plWindow : public plWindowBase
 {
 public:
   /// \brief Creates empty window instance with standard settings
@@ -246,9 +242,6 @@ public:
 
   /// \brief Returns the size of the client area / ie. the window resolution.
   virtual plSizeU32 GetClientAreaSize() const override { return m_CreationDescription.m_Resolution; }
-
-  /// \brief Returns the size of the render area.
-  virtual plSizeU32 GetRenderAreaSize() const override { return m_CreationDescription.m_RenderResolution; }
 
   /// \brief Returns the platform specific window handle.
   virtual plWindowHandle GetNativeWindowHandle() const override;
@@ -312,7 +305,7 @@ public:
   virtual void OnResize(const plSizeU32& newWindowSize);
 
   /// \brief Called when the window position is changed. Not possible on all OSes.
-  virtual void OnWindowMove(const plInt32 newPosX, const plInt32 newPosY) {}
+  virtual void OnWindowMove(const plInt32 iNewPosX, const plInt32 iNewPosY) {}
 
   /// \brief Called when the window gets focus or loses focus.
   virtual void OnFocus(bool bHasFocus) {}
@@ -321,7 +314,7 @@ public:
   virtual void OnClickClose() {}
 
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   /// \brief Called on any window message.
   ///
   /// You can use this function for example to dispatch the message to another system.
@@ -330,13 +323,13 @@ public:
   ///   Will be called <i>after</i> the On[...] callbacks!
   ///
   /// \see OnResizeMessage
-  virtual void OnWindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT Msg, plMinWindows::WPARAM WParam, plMinWindows::LPARAM LParam);
+  virtual void OnWindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT msg, plMinWindows::WPARAM wparam, plMinWindows::LPARAM lparam);
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX)
+#elif PL_ENABLED(PL_PLATFORM_OSX)
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
 
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_ANDROID)
 
 #else
 #  error "Missing code for plWindow on this platform!"
@@ -362,7 +355,7 @@ private:
 
   mutable plWindowInternalHandle m_hWindowHandle = plWindowInternalHandle();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#if PL_ENABLED(PL_SUPPORTS_GLFW)
   static void SizeCallback(GLFWwindow* window, int width, int height);
   static void PositionCallback(GLFWwindow* window, int xpos, int ypos);
   static void CloseCallback(GLFWwindow* window);

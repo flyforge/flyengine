@@ -1,5 +1,6 @@
 #pragma once
 
+#include <Core/CoreDLL.h>
 #include <Foundation/Basics.h>
 
 class plSoundInterface
@@ -46,4 +47,24 @@ public:
 
   /// \brief Sets the position for listener N. Index -1 is used for the override mode listener.
   virtual void SetListener(plInt32 iIndex, const plVec3& vPosition, const plVec3& vForward, const plVec3& vUp, const plVec3& vVelocity) = 0;
+
+  /// \brief Plays a sound once. Callced by plSoundInterface::PlaySound().
+  virtual plResult OneShotSound(plStringView sResourceID, const plTransform& globalPosition, float fPitch = 1.0f, float fVolume = 1.0f, bool bBlockIfNotLoaded = true) = 0;
+
+  /// \brief Plays a sound once.
+  ///
+  /// Convenience function to call OneShotSound() without having to retrieve the plSoundInterface first.
+  ///
+  /// Which sound to play is specified through a resource ID ('Asset GUID').
+  /// This is not the most efficient way to load a sound, as there is no way to preload the resource.
+  /// If preloading is desired, you need to access the implementation-specific resource type directly (e.g. plFmodSoundEventResource).
+  /// Also see plFmodSoundEventResource::PlayOnce().
+  /// In practice, though, sounds are typically loaded in bulk from sound-banks, and preloading is not necessary.
+  ///
+  /// Be aware that this does not allow to adjust volume, pitch or position after creation. Stopping is also not possible.
+  /// Use a sound component, if that is necessary.
+  ///
+  /// Also by default a pitch of 1 is always used. If the game speed is not 1 (plWorld clock), a custom pitch would need to be provided,
+  /// if the sound should play at the same speed.
+  PL_CORE_DLL static plResult PlaySound(plStringView sResourceID, const plTransform& globalPosition, float fPitch = 1.0f, float fVolume = 1.0f, bool bBlockIfNotLoaded = true);
 };

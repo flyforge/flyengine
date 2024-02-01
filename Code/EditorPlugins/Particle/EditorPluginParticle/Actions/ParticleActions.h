@@ -13,7 +13,7 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hCategory;
   static plActionDescriptorHandle s_hPauseEffect;
@@ -26,7 +26,7 @@ public:
 
 class plParticleAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleAction, plButtonAction);
 
 public:
   enum class ActionType

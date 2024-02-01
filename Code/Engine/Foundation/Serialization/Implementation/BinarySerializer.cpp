@@ -85,7 +85,7 @@ void plAbstractGraphBinarySerializer::Read(
   inout_stream >> uiVersion;
   if (uiVersion != plBinarySerializerVersion::CurrentVersion)
   {
-    PLASMA_REPORT_FAILURE(
+    PL_REPORT_FAILURE(
       "Binary serializer version {0} does not match expected version {1}, re-export file.", uiVersion, plBinarySerializerVersion::CurrentVersion);
     return;
   }
@@ -103,4 +103,4 @@ void plAbstractGraphBinarySerializer::Read(
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_BinarySerializer);
+

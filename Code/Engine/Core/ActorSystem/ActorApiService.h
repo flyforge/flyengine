@@ -4,10 +4,10 @@
 
 #include <Foundation/Reflection/Reflection.h>
 
-class PLASMA_CORE_DLL plActorApiService : public plReflectedClass
+class PL_CORE_DLL plActorApiService : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActorApiService, plReflectedClass);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plActorApiService);
+  PL_ADD_DYNAMIC_REFLECTION(plActorApiService, plReflectedClass);
+  PL_DISALLOW_COPY_AND_ASSIGN(plActorApiService);
 
 public:
   plActorApiService();

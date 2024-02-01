@@ -3,6 +3,7 @@
 #include <Foundation/Logging/Log.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererFoundation/Device/Device.h>
+#include <RendererFoundation/Device/SharedTextureSwapChain.h>
 #include <RendererFoundation/Device/SwapChain.h>
 #include <RendererFoundation/Resources/Buffer.h>
 #include <RendererFoundation/Resources/ProxyTexture.h>
@@ -34,23 +35,23 @@ namespace
     };
   };
 
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALBlendStateHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALDepthStencilStateHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALRasterizerStateHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALSamplerStateHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALShaderHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALBufferHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALTextureHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALResourceViewHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALRenderTargetViewHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALUnorderedAccessViewHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALSwapChainHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALQueryHandle) == sizeof(plUInt32));
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(plGALVertexDeclarationHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALBlendStateHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALDepthStencilStateHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALRasterizerStateHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALSamplerStateHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALShaderHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALBufferHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALTextureHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALResourceViewHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALRenderTargetViewHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALUnorderedAccessViewHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALSwapChainHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALQueryHandle) == sizeof(plUInt32));
+  PL_CHECK_AT_COMPILETIME(sizeof(plGALVertexDeclarationHandle) == sizeof(plUInt32));
 } // namespace
 
 plGALDevice* plGALDevice::s_pDefaultDevice = nullptr;
-
+plEvent<const plGALDeviceEvent&> plGALDevice::s_Events;
 
 plGALDevice::plGALDevice(const plGALDeviceCreationDescription& desc)
   : m_Allocator("GALDevice", plFoundation::GetDefaultAllocator())
@@ -63,7 +64,7 @@ plGALDevice::~plGALDevice()
 {
   // Check for object leaks
   {
-    PLASMA_LOG_BLOCK("plGALDevice object leak report");
+    PL_LOG_BLOCK("plGALDevice object leak report");
 
     if (!m_Shaders.IsEmpty())
       plLog::Warning("{0} shaders have not been cleaned up", m_Shaders.GetCount());
@@ -105,14 +106,16 @@ plGALDevice::~plGALDevice()
 
 plResult plGALDevice::Init()
 {
-  PLASMA_LOG_BLOCK("plGALDevice::Init");
+  PL_LOG_BLOCK("plGALDevice::Init");
 
   plResult PlatformInitResult = InitPlatform();
 
-  if (PlatformInitResult == PLASMA_FAILURE)
+  if (PlatformInitResult == PL_FAILURE)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
+
+  plGALSharedTextureSwapChain::SetFactoryMethod([this](const plGALSharedTextureSwapChainCreationDescription& desc) -> plGALSwapChainHandle { return CreateSwapChain([&desc](plAllocator* pAllocator) -> plGALSwapChain* { return PL_NEW(pAllocator, plGALSharedTextureSwapChain, desc); }); });
 
   // Fill the capabilities
   FillCapabilitiesPlatform();
@@ -125,31 +128,33 @@ plResult plGALDevice::Init()
     plLog::Warning("Selected graphics adapter has no hardware acceleration.");
   }
 
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plProfilingSystem::InitializeGPUData();
+
+
 
   {
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::AfterInit;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALDevice::Shutdown()
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
-  PLASMA_LOG_BLOCK("plGALDevice::Shutdown");
+  PL_LOG_BLOCK("plGALDevice::Shutdown");
 
   {
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::BeforeShutdown;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 
   DestroyDeadObjects();
@@ -165,9 +170,9 @@ plResult plGALDevice::Shutdown()
 
 void plGALDevice::BeginPipeline(const char* szName, plGALSwapChainHandle hSwapChain)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
-  PLASMA_ASSERT_DEV(!m_bBeginPipelineCalled, "Nested Pipelines are not allowed: You must call plGALDevice::EndPipeline before you can call plGALDevice::BeginPipeline again");
+  PL_ASSERT_DEV(!m_bBeginPipelineCalled, "Nested Pipelines are not allowed: You must call plGALDevice::EndPipeline before you can call plGALDevice::BeginPipeline again");
   m_bBeginPipelineCalled = true;
 
   plGALSwapChain* pSwapChain = nullptr;
@@ -177,9 +182,9 @@ void plGALDevice::BeginPipeline(const char* szName, plGALSwapChainHandle hSwapCh
 
 void plGALDevice::EndPipeline(plGALSwapChainHandle hSwapChain)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
-  PLASMA_ASSERT_DEV(m_bBeginPipelineCalled, "You must have called plGALDevice::BeginPipeline before you can call plGALDevice::EndPipeline");
+  PL_ASSERT_DEV(m_bBeginPipelineCalled, "You must have called plGALDevice::BeginPipeline before you can call plGALDevice::EndPipeline");
   m_bBeginPipelineCalled = false;
 
   plGALSwapChain* pSwapChain = nullptr;
@@ -189,9 +194,9 @@ void plGALDevice::EndPipeline(plGALSwapChainHandle hSwapChain)
 
 plGALPass* plGALDevice::BeginPass(const char* szName)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
-  PLASMA_ASSERT_DEV(!m_bBeginPassCalled, "Nested Passes are not allowed: You must call plGALDevice::EndPass before you can call plGALDevice::BeginPass again");
+  PL_ASSERT_DEV(!m_bBeginPassCalled, "Nested Passes are not allowed: You must call plGALDevice::EndPass before you can call plGALDevice::BeginPass again");
   m_bBeginPassCalled = true;
 
   return BeginPassPlatform(szName);
@@ -199,9 +204,9 @@ plGALPass* plGALDevice::BeginPass(const char* szName)
 
 void plGALDevice::EndPass(plGALPass* pPass)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
-  PLASMA_ASSERT_DEV(m_bBeginPassCalled, "You must have called plGALDevice::BeginPass before you can call plGALDevice::EndPass");
+  PL_ASSERT_DEV(m_bBeginPassCalled, "You must have called plGALDevice::BeginPass before you can call plGALDevice::EndPass");
   m_bBeginPassCalled = false;
 
   EndPassPlatform(pPass);
@@ -209,7 +214,7 @@ void plGALDevice::EndPass(plGALPass* pPass)
 
 plGALBlendStateHandle plGALDevice::CreateBlendState(const plGALBlendStateCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   // Hash desc and return potential existing one (including inc. refcount)
   plUInt32 uiHash = desc.CalculateHash();
@@ -233,7 +238,7 @@ plGALBlendStateHandle plGALDevice::CreateBlendState(const plGALBlendStateCreatio
 
   if (pBlendState != nullptr)
   {
-    PLASMA_ASSERT_DEBUG(pBlendState->GetDescription().CalculateHash() == uiHash, "BlendState hash doesn't match");
+    PL_ASSERT_DEBUG(pBlendState->GetDescription().CalculateHash() == uiHash, "BlendState hash doesn't match");
 
     pBlendState->AddRef();
 
@@ -248,7 +253,7 @@ plGALBlendStateHandle plGALDevice::CreateBlendState(const plGALBlendStateCreatio
 
 void plGALDevice::DestroyBlendState(plGALBlendStateHandle hBlendState)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALBlendState* pBlendState = nullptr;
 
@@ -269,7 +274,7 @@ void plGALDevice::DestroyBlendState(plGALBlendStateHandle hBlendState)
 
 plGALDepthStencilStateHandle plGALDevice::CreateDepthStencilState(const plGALDepthStencilStateCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   // Hash desc and return potential existing one (including inc. refcount)
   plUInt32 uiHash = desc.CalculateHash();
@@ -293,7 +298,7 @@ plGALDepthStencilStateHandle plGALDevice::CreateDepthStencilState(const plGALDep
 
   if (pDepthStencilState != nullptr)
   {
-    PLASMA_ASSERT_DEBUG(pDepthStencilState->GetDescription().CalculateHash() == uiHash, "DepthStencilState hash doesn't match");
+    PL_ASSERT_DEBUG(pDepthStencilState->GetDescription().CalculateHash() == uiHash, "DepthStencilState hash doesn't match");
 
     pDepthStencilState->AddRef();
 
@@ -308,7 +313,7 @@ plGALDepthStencilStateHandle plGALDevice::CreateDepthStencilState(const plGALDep
 
 void plGALDevice::DestroyDepthStencilState(plGALDepthStencilStateHandle hDepthStencilState)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALDepthStencilState* pDepthStencilState = nullptr;
 
@@ -329,7 +334,7 @@ void plGALDevice::DestroyDepthStencilState(plGALDepthStencilStateHandle hDepthSt
 
 plGALRasterizerStateHandle plGALDevice::CreateRasterizerState(const plGALRasterizerStateCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   // Hash desc and return potential existing one (including inc. refcount)
   plUInt32 uiHash = desc.CalculateHash();
@@ -353,7 +358,7 @@ plGALRasterizerStateHandle plGALDevice::CreateRasterizerState(const plGALRasteri
 
   if (pRasterizerState != nullptr)
   {
-    PLASMA_ASSERT_DEBUG(pRasterizerState->GetDescription().CalculateHash() == uiHash, "RasterizerState hash doesn't match");
+    PL_ASSERT_DEBUG(pRasterizerState->GetDescription().CalculateHash() == uiHash, "RasterizerState hash doesn't match");
 
     pRasterizerState->AddRef();
 
@@ -368,7 +373,7 @@ plGALRasterizerStateHandle plGALDevice::CreateRasterizerState(const plGALRasteri
 
 void plGALDevice::DestroyRasterizerState(plGALRasterizerStateHandle hRasterizerState)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALRasterizerState* pRasterizerState = nullptr;
 
@@ -389,7 +394,7 @@ void plGALDevice::DestroyRasterizerState(plGALRasterizerStateHandle hRasterizerS
 
 plGALSamplerStateHandle plGALDevice::CreateSamplerState(const plGALSamplerStateCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   /// \todo Platform independent validation
 
@@ -415,7 +420,7 @@ plGALSamplerStateHandle plGALDevice::CreateSamplerState(const plGALSamplerStateC
 
   if (pSamplerState != nullptr)
   {
-    PLASMA_ASSERT_DEBUG(pSamplerState->GetDescription().CalculateHash() == uiHash, "SamplerState hash doesn't match");
+    PL_ASSERT_DEBUG(pSamplerState->GetDescription().CalculateHash() == uiHash, "SamplerState hash doesn't match");
 
     pSamplerState->AddRef();
 
@@ -430,7 +435,7 @@ plGALSamplerStateHandle plGALDevice::CreateSamplerState(const plGALSamplerStateC
 
 void plGALDevice::DestroySamplerState(plGALSamplerStateHandle hSamplerState)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALSamplerState* pSamplerState = nullptr;
 
@@ -453,7 +458,7 @@ void plGALDevice::DestroySamplerState(plGALSamplerStateHandle hSamplerState)
 
 plGALShaderHandle plGALDevice::CreateShader(const plGALShaderCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   bool bHasByteCodes = false;
 
@@ -486,7 +491,7 @@ plGALShaderHandle plGALDevice::CreateShader(const plGALShaderCreationDescription
 
 void plGALDevice::DestroyShader(plGALShaderHandle hShader)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALShader* pShader = nullptr;
 
@@ -503,7 +508,7 @@ void plGALDevice::DestroyShader(plGALShaderHandle hShader)
 
 plGALBufferHandle plGALDevice::CreateBuffer(const plGALBufferCreationDescription& desc, plArrayPtr<const plUInt8> initialData)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   if (desc.m_uiTotalSize == 0)
   {
@@ -559,7 +564,7 @@ plGALBufferHandle plGALDevice::FinalizeBufferInternal(const plGALBufferCreationD
 
 void plGALDevice::DestroyBuffer(plGALBufferHandle hBuffer)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALBuffer* pBuffer = nullptr;
 
@@ -610,7 +615,7 @@ plGALBufferHandle plGALDevice::CreateConstantBuffer(plUInt32 uiBufferSize)
 
 plGALTextureHandle plGALDevice::CreateTexture(const plGALTextureCreationDescription& desc, plArrayPtr<plGALSystemMemoryDescription> initialData)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   /// \todo Platform independent validation (desc width & height < platform maximum, format, etc.)
 
@@ -666,7 +671,7 @@ plGALTextureHandle plGALDevice::FinalizeTextureInternal(const plGALTextureCreati
 
 void plGALDevice::DestroyTexture(plGALTextureHandle hTexture)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALTexture* pTexture = nullptr;
   if (m_Textures.TryGetValue(hTexture, pTexture))
@@ -681,7 +686,7 @@ void plGALDevice::DestroyTexture(plGALTextureHandle hTexture)
 
 plGALTextureHandle plGALDevice::CreateProxyTexture(plGALTextureHandle hParentTexture, plUInt32 uiSlice)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALTexture* pParentTexture = nullptr;
 
@@ -697,11 +702,12 @@ plGALTextureHandle plGALDevice::CreateProxyTexture(plGALTextureHandle hParentTex
   }
 
   const auto& parentDesc = pParentTexture->GetDescription();
-  PLASMA_ASSERT_DEV(parentDesc.m_Type != plGALTextureType::Texture2DProxy, "Can't create a proxy texture of a proxy texture.");
-  PLASMA_ASSERT_DEV(parentDesc.m_Type == plGALTextureType::TextureCube || parentDesc.m_uiArraySize > 1,
+  PL_IGNORE_UNUSED(parentDesc);
+  PL_ASSERT_DEV(parentDesc.m_Type != plGALTextureType::Texture2DProxy, "Can't create a proxy texture of a proxy texture.");
+  PL_ASSERT_DEV(parentDesc.m_Type == plGALTextureType::TextureCube || parentDesc.m_uiArraySize > 1,
     "Proxy textures can only be created for cubemaps or array textures.");
 
-  plGALProxyTexture* pProxyTexture = PLASMA_NEW(&m_Allocator, plGALProxyTexture, *pParentTexture);
+  plGALProxyTexture* pProxyTexture = PL_NEW(&m_Allocator, plGALProxyTexture, *pParentTexture);
   plGALTextureHandle hProxyTexture(m_Textures.Insert(pProxyTexture));
 
   const auto& desc = pProxyTexture->GetDescription();
@@ -733,18 +739,98 @@ plGALTextureHandle plGALDevice::CreateProxyTexture(plGALTextureHandle hParentTex
 
 void plGALDevice::DestroyProxyTexture(plGALTextureHandle hProxyTexture)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALTexture* pTexture = nullptr;
   if (m_Textures.TryGetValue(hProxyTexture, pTexture))
   {
-    PLASMA_ASSERT_DEV(pTexture->GetDescription().m_Type == plGALTextureType::Texture2DProxy, "Given texture is not a proxy texture");
+    PL_ASSERT_DEV(pTexture->GetDescription().m_Type == plGALTextureType::Texture2DProxy, "Given texture is not a proxy texture");
 
     AddDeadObject(GALObjectType::Texture, hProxyTexture);
   }
   else
   {
     plLog::Warning("DestroyProxyTexture called on invalid handle (double free?)");
+  }
+}
+
+plGALTextureHandle plGALDevice::CreateSharedTexture(const plGALTextureCreationDescription& desc, plArrayPtr<plGALSystemMemoryDescription> initialData)
+{
+  PL_GALDEVICE_LOCK_AND_CHECK();
+
+  /// \todo Platform independent validation (desc width & height < platform maximum, format, etc.)
+
+  if (desc.m_ResourceAccess.IsImmutable() && (initialData.IsEmpty() || initialData.GetCount() < desc.m_uiMipLevelCount) &&
+      !desc.m_bCreateRenderTarget)
+  {
+    plLog::Error("Trying to create an immutable texture but not supplying initial data (or not enough data pointers) is not possible!");
+    return plGALTextureHandle();
+  }
+
+  if (desc.m_uiWidth == 0 || desc.m_uiHeight == 0)
+  {
+    plLog::Error("Trying to create a texture with width or height == 0 is not possible!");
+    return plGALTextureHandle();
+  }
+
+  if (desc.m_pExisitingNativeObject != nullptr)
+  {
+    plLog::Error("Shared textures cannot be created on exiting native objects!");
+    return plGALTextureHandle();
+  }
+
+  if (desc.m_Type != plGALTextureType::Texture2DShared)
+  {
+    plLog::Error("Only plGALTextureType::Texture2DShared is supported for shared textures!");
+    return plGALTextureHandle();
+  }
+
+  plGALTexture* pTexture = CreateSharedTexturePlatform(desc, initialData, plGALSharedTextureType::Exported, {});
+
+  return FinalizeTextureInternal(desc, pTexture);
+}
+
+plGALTextureHandle plGALDevice::OpenSharedTexture(const plGALTextureCreationDescription& desc, plGALPlatformSharedHandle hSharedHandle)
+{
+  PL_GALDEVICE_LOCK_AND_CHECK();
+
+  if (desc.m_pExisitingNativeObject != nullptr)
+  {
+    plLog::Error("Shared textures cannot be created on exiting native objects!");
+    return plGALTextureHandle();
+  }
+
+  if (desc.m_Type != plGALTextureType::Texture2DShared)
+  {
+    plLog::Error("Only plGALTextureType::Texture2DShared is supported for shared textures!");
+    return plGALTextureHandle();
+  }
+
+  if (desc.m_uiWidth == 0 || desc.m_uiHeight == 0)
+  {
+    plLog::Error("Trying to create a texture with width or height == 0 is not possible!");
+    return plGALTextureHandle();
+  }
+
+  plGALTexture* pTexture = CreateSharedTexturePlatform(desc, {}, plGALSharedTextureType::Imported, hSharedHandle);
+
+  return FinalizeTextureInternal(desc, pTexture);
+}
+
+void plGALDevice::DestroySharedTexture(plGALTextureHandle hSharedTexture)
+{
+  PL_GALDEVICE_LOCK_AND_CHECK();
+
+  plGALTexture* pTexture = nullptr;
+  if (m_Textures.TryGetValue(hSharedTexture, pTexture))
+  {
+    PL_ASSERT_DEV(pTexture->GetDescription().m_Type == plGALTextureType::Texture2DShared, "Given texture is not a shared texture texture");
+
+    AddDeadObject(GALObjectType::Texture, hSharedTexture);
+  }
+  else
+  {
+    plLog::Warning("DestroySharedTexture called on invalid handle (double free?)");
   }
 }
 
@@ -770,7 +856,7 @@ plGALResourceViewHandle plGALDevice::GetDefaultResourceView(plGALBufferHandle hB
 
 plGALResourceViewHandle plGALDevice::CreateResourceView(const plGALResourceViewCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALResourceBase* pResource = nullptr;
 
@@ -782,7 +868,7 @@ plGALResourceViewHandle plGALDevice::CreateResourceView(const plGALResourceViewC
 
   if (pResource == nullptr)
   {
-    //plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
+    plLog::Error("No valid texture handle or buffer handle given for resource view creation!");
     return plGALResourceViewHandle();
   }
 
@@ -812,7 +898,7 @@ plGALResourceViewHandle plGALDevice::CreateResourceView(const plGALResourceViewC
 
 void plGALDevice::DestroyResourceView(plGALResourceViewHandle hResourceView)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALResourceView* pResourceView = nullptr;
 
@@ -838,7 +924,7 @@ plGALRenderTargetViewHandle plGALDevice::GetDefaultRenderTargetView(plGALTexture
 
 plGALRenderTargetViewHandle plGALDevice::CreateRenderTargetView(const plGALRenderTargetViewCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALTexture* pTexture = nullptr;
 
@@ -847,7 +933,7 @@ plGALRenderTargetViewHandle plGALDevice::CreateRenderTargetView(const plGALRende
 
   if (pTexture == nullptr)
   {
-    //plLog::Error("No valid texture handle given for render target view creation!");
+    plLog::Error("No valid texture handle given for render target view creation!");
     return plGALRenderTargetViewHandle();
   }
 
@@ -879,7 +965,7 @@ plGALRenderTargetViewHandle plGALDevice::CreateRenderTargetView(const plGALRende
 
 void plGALDevice::DestroyRenderTargetView(plGALRenderTargetViewHandle hRenderTargetView)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALRenderTargetView* pRenderTargetView = nullptr;
 
@@ -895,11 +981,11 @@ void plGALDevice::DestroyRenderTargetView(plGALRenderTargetViewHandle hRenderTar
 
 plGALUnorderedAccessViewHandle plGALDevice::CreateUnorderedAccessView(const plGALUnorderedAccessViewCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   if (!desc.m_hTexture.IsInvalidated() && !desc.m_hBuffer.IsInvalidated())
   {
-   // plLog::Error("Can't pass both a texture and buffer to a plGALUnorderedAccessViewCreationDescription.");
+    plLog::Error("Can't pass both a texture and buffer to a plGALUnorderedAccessViewCreationDescription.");
     return plGALUnorderedAccessViewHandle();
   }
 
@@ -918,7 +1004,7 @@ plGALUnorderedAccessViewHandle plGALDevice::CreateUnorderedAccessView(const plGA
 
   if (pResource == nullptr)
   {
-    //plLog::Error("No valid texture handle or buffer handle given for unordered access view creation!");
+    plLog::Error("No valid texture handle or buffer handle given for unordered access view creation!");
     return plGALUnorderedAccessViewHandle();
   }
 
@@ -975,7 +1061,7 @@ plGALUnorderedAccessViewHandle plGALDevice::CreateUnorderedAccessView(const plGA
 
 void plGALDevice::DestroyUnorderedAccessView(plGALUnorderedAccessViewHandle hUnorderedAccessViewHandle)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALUnorderedAccessView* pUnorderedAccesssView = nullptr;
 
@@ -991,7 +1077,7 @@ void plGALDevice::DestroyUnorderedAccessView(plGALUnorderedAccessViewHandle hUno
 
 plGALSwapChainHandle plGALDevice::CreateSwapChain(const SwapChainFactoryFunction& func)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   ///// \todo Platform independent validation
   //if (desc.m_pWindow == nullptr)
@@ -1001,11 +1087,11 @@ plGALSwapChainHandle plGALDevice::CreateSwapChain(const SwapChainFactoryFunction
   //}
 
   plGALSwapChain* pSwapChain = func(&m_Allocator);
-  //plGALSwapChainDX11* pSwapChain = PLASMA_NEW(&m_Allocator, plGALSwapChainDX11, Description);
+  //plGALSwapChainDX11* pSwapChain = PL_NEW(&m_Allocator, plGALSwapChainDX11, Description);
 
   if (!pSwapChain->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pSwapChain);
+    PL_DELETE(&m_Allocator, pSwapChain);
     return plGALSwapChainHandle();
   }
 
@@ -1014,7 +1100,7 @@ plGALSwapChainHandle plGALDevice::CreateSwapChain(const SwapChainFactoryFunction
 
 plResult plGALDevice::UpdateSwapChain(plGALSwapChainHandle hSwapChain, plEnum<plGALPresentMode> newPresentMode)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALSwapChain* pSwapChain = nullptr;
 
@@ -1025,13 +1111,13 @@ plResult plGALDevice::UpdateSwapChain(plGALSwapChainHandle hSwapChain, plEnum<pl
   else
   {
     plLog::Warning("UpdateSwapChain called on invalid handle.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
 void plGALDevice::DestroySwapChain(plGALSwapChainHandle hSwapChain)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALSwapChain* pSwapChain = nullptr;
 
@@ -1047,7 +1133,7 @@ void plGALDevice::DestroySwapChain(plGALSwapChainHandle hSwapChain)
 
 plGALQueryHandle plGALDevice::CreateQuery(const plGALQueryCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALQuery* pQuery = CreateQueryPlatform(desc);
 
@@ -1063,7 +1149,7 @@ plGALQueryHandle plGALDevice::CreateQuery(const plGALQueryCreationDescription& d
 
 void plGALDevice::DestroyQuery(plGALQueryHandle hQuery)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALQuery* pQuery = nullptr;
 
@@ -1079,7 +1165,7 @@ void plGALDevice::DestroyQuery(plGALQueryHandle hQuery)
 
 plGALVertexDeclarationHandle plGALDevice::CreateVertexDeclaration(const plGALVertexDeclarationCreationDescription& desc)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   /// \todo Platform independent validation
 
@@ -1118,7 +1204,7 @@ plGALVertexDeclarationHandle plGALDevice::CreateVertexDeclaration(const plGALVer
 
 void plGALDevice::DestroyVertexDeclaration(plGALVertexDeclarationHandle hVertexDeclaration)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   plGALVertexDeclaration* pVertexDeclaration = nullptr;
 
@@ -1147,7 +1233,7 @@ plGALTextureHandle plGALDevice::GetBackBufferTextureFromSwapChain(plGALSwapChain
   }
   else
   {
-    PLASMA_REPORT_FAILURE("Swap chain handle invalid");
+    PL_REPORT_FAILURE("Swap chain handle invalid");
     return plGALTextureHandle();
   }
 }
@@ -1159,16 +1245,16 @@ plGALTextureHandle plGALDevice::GetBackBufferTextureFromSwapChain(plGALSwapChain
 void plGALDevice::BeginFrame(const plUInt64 uiRenderFrame)
 {
   {
-    PLASMA_PROFILE_SCOPE("BeforeBeginFrame");
+    PL_PROFILE_SCOPE("BeforeBeginFrame");
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::BeforeBeginFrame;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 
   {
-    PLASMA_GALDEVICE_LOCK_AND_CHECK();
-    PLASMA_ASSERT_DEV(!m_bBeginFrameCalled, "You must call plGALDevice::EndFrame before you can call plGALDevice::BeginFrame again");
+    PL_GALDEVICE_LOCK_AND_CHECK();
+    PL_ASSERT_DEV(!m_bBeginFrameCalled, "You must call plGALDevice::EndFrame before you can call plGALDevice::BeginFrame again");
     m_bBeginFrameCalled = true;
 
     BeginFramePlatform(uiRenderFrame);
@@ -1181,7 +1267,7 @@ void plGALDevice::BeginFrame(const plUInt64 uiRenderFrame)
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::AfterBeginFrame;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 }
 
@@ -1191,12 +1277,12 @@ void plGALDevice::EndFrame()
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::BeforeEndFrame;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 
   {
-    PLASMA_GALDEVICE_LOCK_AND_CHECK();
-    PLASMA_ASSERT_DEV(m_bBeginFrameCalled, "You must have called plGALDevice::Begin before you can call plGALDevice::EndFrame");
+    PL_GALDEVICE_LOCK_AND_CHECK();
+    PL_ASSERT_DEV(m_bBeginFrameCalled, "You must have called plGALDevice::Begin before you can call plGALDevice::EndFrame");
 
     DestroyDeadObjects();
 
@@ -1209,7 +1295,7 @@ void plGALDevice::EndFrame()
     plGALDeviceEvent e;
     e.m_pDevice = this;
     e.m_Type = plGALDeviceEvent::AfterEndFrame;
-    m_Events.Broadcast(e);
+    s_Events.Broadcast(e);
   }
 }
 
@@ -1243,6 +1329,12 @@ plUInt64 plGALDevice::GetMemoryConsumptionForBuffer(const plGALBufferCreationDes
   return desc.m_uiTotalSize;
 }
 
+void plGALDevice::Flush()
+{
+  PL_GALDEVICE_LOCK_AND_CHECK();
+
+  FlushPlatform();
+}
 
 void plGALDevice::WaitIdle()
 {
@@ -1251,7 +1343,9 @@ void plGALDevice::WaitIdle()
 
 void plGALDevice::DestroyViews(plGALResourceBase* pResource)
 {
-  PLASMA_GALDEVICE_LOCK_AND_CHECK();
+  PL_ASSERT_DEBUG(pResource != nullptr, "Must provide valid resource");
+
+  PL_GALDEVICE_LOCK_AND_CHECK();
 
   for (auto it = pResource->m_ResourceViews.GetIterator(); it.IsValid(); ++it)
   {
@@ -1303,8 +1397,8 @@ void plGALDevice::DestroyDeadObjects()
         plGALBlendStateHandle hBlendState(plGAL::pl16_16Id(deadObject.m_uiHandle));
         plGALBlendState* pBlendState = nullptr;
 
-        PLASMA_VERIFY(m_BlendStates.Remove(hBlendState, &pBlendState), "BlendState not found in idTable");
-        PLASMA_VERIFY(m_BlendStateTable.Remove(pBlendState->GetDescription().CalculateHash()), "BlendState not found in de-duplication table");
+        PL_VERIFY(m_BlendStates.Remove(hBlendState, &pBlendState), "BlendState not found in idTable");
+        PL_VERIFY(m_BlendStateTable.Remove(pBlendState->GetDescription().CalculateHash()), "BlendState not found in de-duplication table");
 
         DestroyBlendStatePlatform(pBlendState);
 
@@ -1315,8 +1409,8 @@ void plGALDevice::DestroyDeadObjects()
         plGALDepthStencilStateHandle hDepthStencilState(plGAL::pl16_16Id(deadObject.m_uiHandle));
         plGALDepthStencilState* pDepthStencilState = nullptr;
 
-        PLASMA_VERIFY(m_DepthStencilStates.Remove(hDepthStencilState, &pDepthStencilState), "DepthStencilState not found in idTable");
-        PLASMA_VERIFY(m_DepthStencilStateTable.Remove(pDepthStencilState->GetDescription().CalculateHash()),
+        PL_VERIFY(m_DepthStencilStates.Remove(hDepthStencilState, &pDepthStencilState), "DepthStencilState not found in idTable");
+        PL_VERIFY(m_DepthStencilStateTable.Remove(pDepthStencilState->GetDescription().CalculateHash()),
           "DepthStencilState not found in de-duplication table");
 
         DestroyDepthStencilStatePlatform(pDepthStencilState);
@@ -1328,8 +1422,8 @@ void plGALDevice::DestroyDeadObjects()
         plGALRasterizerStateHandle hRasterizerState(plGAL::pl16_16Id(deadObject.m_uiHandle));
         plGALRasterizerState* pRasterizerState = nullptr;
 
-        PLASMA_VERIFY(m_RasterizerStates.Remove(hRasterizerState, &pRasterizerState), "RasterizerState not found in idTable");
-        PLASMA_VERIFY(
+        PL_VERIFY(m_RasterizerStates.Remove(hRasterizerState, &pRasterizerState), "RasterizerState not found in idTable");
+        PL_VERIFY(
           m_RasterizerStateTable.Remove(pRasterizerState->GetDescription().CalculateHash()), "RasterizerState not found in de-duplication table");
 
         DestroyRasterizerStatePlatform(pRasterizerState);
@@ -1341,8 +1435,8 @@ void plGALDevice::DestroyDeadObjects()
         plGALSamplerStateHandle hSamplerState(plGAL::pl16_16Id(deadObject.m_uiHandle));
         plGALSamplerState* pSamplerState = nullptr;
 
-        PLASMA_VERIFY(m_SamplerStates.Remove(hSamplerState, &pSamplerState), "SamplerState not found in idTable");
-        PLASMA_VERIFY(m_SamplerStateTable.Remove(pSamplerState->GetDescription().CalculateHash()), "SamplerState not found in de-duplication table");
+        PL_VERIFY(m_SamplerStates.Remove(hSamplerState, &pSamplerState), "SamplerState not found in idTable");
+        PL_VERIFY(m_SamplerStateTable.Remove(pSamplerState->GetDescription().CalculateHash()), "SamplerState not found in de-duplication table");
 
         DestroySamplerStatePlatform(pSamplerState);
 
@@ -1376,11 +1470,19 @@ void plGALDevice::DestroyDeadObjects()
         plGALTextureHandle hTexture(plGAL::pl18_14Id(deadObject.m_uiHandle));
         plGALTexture* pTexture = nullptr;
 
-        m_Textures.Remove(hTexture, &pTexture);
+        PL_VERIFY(m_Textures.Remove(hTexture, &pTexture), "Unexpected invalild texture handle");
 
         DestroyViews(pTexture);
-        DestroyTexturePlatform(pTexture);
 
+        switch (pTexture->GetDescription().m_Type)
+        {
+          case plGALTextureType::Texture2DShared:
+            DestroySharedTexturePlatform(pTexture);
+            break;
+          default:
+            DestroyTexturePlatform(pTexture);
+            break;
+        }
         break;
       }
       case GALObjectType::ResourceView:
@@ -1391,9 +1493,9 @@ void plGALDevice::DestroyDeadObjects()
         m_ResourceViews.Remove(hResourceView, &pResourceView);
 
         plGALResourceBase* pResource = pResourceView->m_pResource;
-        PLASMA_ASSERT_DEBUG(pResource != nullptr, "");
+        PL_ASSERT_DEBUG(pResource != nullptr, "");
 
-        PLASMA_VERIFY(pResource->m_ResourceViews.Remove(pResourceView->GetDescription().CalculateHash()), "");
+        PL_VERIFY(pResource->m_ResourceViews.Remove(pResourceView->GetDescription().CalculateHash()), "");
         pResourceView->m_pResource = nullptr;
 
         DestroyResourceViewPlatform(pResourceView);
@@ -1408,8 +1510,8 @@ void plGALDevice::DestroyDeadObjects()
         m_RenderTargetViews.Remove(hRenderTargetView, &pRenderTargetView);
 
         plGALTexture* pTexture = pRenderTargetView->m_pTexture;
-        PLASMA_ASSERT_DEBUG(pTexture != nullptr, "");
-        PLASMA_VERIFY(pTexture->m_RenderTargetViews.Remove(pRenderTargetView->GetDescription().CalculateHash()), "");
+        PL_ASSERT_DEBUG(pTexture != nullptr, "");
+        PL_VERIFY(pTexture->m_RenderTargetViews.Remove(pRenderTargetView->GetDescription().CalculateHash()), "");
         pRenderTargetView->m_pTexture = nullptr;
 
         DestroyRenderTargetViewPlatform(pRenderTargetView);
@@ -1424,9 +1526,9 @@ void plGALDevice::DestroyDeadObjects()
         m_UnorderedAccessViews.Remove(hUnorderedAccessViewHandle, &pUnorderedAccesssView);
 
         plGALResourceBase* pResource = pUnorderedAccesssView->m_pResource;
-        PLASMA_ASSERT_DEBUG(pResource != nullptr, "");
+        PL_ASSERT_DEBUG(pResource != nullptr, "");
 
-        PLASMA_VERIFY(pResource->m_UnorderedAccessViews.Remove(pUnorderedAccesssView->GetDescription().CalculateHash()), "");
+        PL_VERIFY(pResource->m_UnorderedAccessViews.Remove(pUnorderedAccesssView->GetDescription().CalculateHash()), "");
         pUnorderedAccesssView->m_pResource = nullptr;
 
         DestroyUnorderedAccessViewPlatform(pUnorderedAccesssView);
@@ -1443,7 +1545,7 @@ void plGALDevice::DestroyDeadObjects()
         if (pSwapChain != nullptr)
         {
           pSwapChain->DeInitPlatform(this).IgnoreResult();
-          PLASMA_DELETE(&m_Allocator, pSwapChain);
+          PL_DELETE(&m_Allocator, pSwapChain);
         }
 
         break;
@@ -1464,7 +1566,7 @@ void plGALDevice::DestroyDeadObjects()
         plGALVertexDeclarationHandle hVertexDeclaration(plGAL::pl18_14Id(deadObject.m_uiHandle));
         plGALVertexDeclaration* pVertexDeclaration = nullptr;
 
-        m_VertexDeclarations.Remove(hVertexDeclaration, &pVertexDeclaration);
+        PL_VERIFY(m_VertexDeclarations.Remove(hVertexDeclaration, &pVertexDeclaration), "Unexpected invalid handle");
         m_VertexDeclarationTable.Remove(pVertexDeclaration->GetDescription().CalculateHash());
 
         DestroyVertexDeclarationPlatform(pVertexDeclaration);
@@ -1472,7 +1574,7 @@ void plGALDevice::DestroyDeadObjects()
         break;
       }
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 
@@ -1490,4 +1592,4 @@ const plGALSwapChain* plGALDevice::GetSwapChainInternal(plGALSwapChainHandle hSw
   return pSwapChain;
 }
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Device_Implementation_Device);
+

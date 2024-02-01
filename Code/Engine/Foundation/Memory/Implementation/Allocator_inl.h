@@ -1,169 +1,145 @@
+
+PL_ALWAYS_INLINE plAllocator::plAllocator() = default;
+
+PL_ALWAYS_INLINE plAllocator::~plAllocator() = default;
+
+
+namespace plMath
+{
+  // due to #include order issues, we have to forward declare this function here
+
+  PL_FOUNDATION_DLL plUInt64 SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c, plUInt64 d);
+} // namespace plMath
+
 namespace plInternal
 {
-  template <typename AllocationPolicy, plUInt32 TrackingFlags>
-  class plAllocatorImpl : public plAllocatorBase
+  template <typename T>
+  struct NewInstance
   {
-  public:
-    plAllocatorImpl(plStringView sName, plAllocatorBase* pParent);
-    ~plAllocatorImpl();
+    PL_ALWAYS_INLINE NewInstance(T* pInstance, plAllocator* pAllocator)
+    {
+      m_pInstance = pInstance;
+      m_pAllocator = pAllocator;
+    }
 
-    // plAllocatorBase implementation
-    virtual void* Allocate(size_t uiSize, size_t uiAlign, plMemoryUtils::DestructorFunction destructorFunc = nullptr) override;
-    virtual void Deallocate(void* pPtr) override;
-    virtual size_t AllocatedSize(const void* pPtr) override;
-    virtual plAllocatorId GetId() const override;
-    virtual Stats GetStats() const override;
+    template <typename U>
+    PL_ALWAYS_INLINE NewInstance(NewInstance<U>&& other)
+    {
+      m_pInstance = other.m_pInstance;
+      m_pAllocator = other.m_pAllocator;
 
-    plAllocatorBase* GetParent() const;
+      other.m_pInstance = nullptr;
+      other.m_pAllocator = nullptr;
+    }
 
-  protected:
-    AllocationPolicy m_allocator;
+    PL_ALWAYS_INLINE NewInstance(std::nullptr_t) {}
 
-    plAllocatorId m_Id;
-    plThreadID m_ThreadID;
+    template <typename U>
+    PL_ALWAYS_INLINE NewInstance<U> Cast()
+    {
+      return NewInstance<U>(static_cast<U*>(m_pInstance), m_pAllocator);
+    }
+
+    PL_ALWAYS_INLINE operator T*() { return m_pInstance; }
+
+    PL_ALWAYS_INLINE T* operator->() { return m_pInstance; }
+
+    T* m_pInstance = nullptr;
+    plAllocator* m_pAllocator = nullptr;
   };
 
-  template <typename AllocationPolicy, plUInt32 TrackingFlags, bool HasReallocate>
-  class plAllocatorMixinReallocate : public plAllocatorImpl<AllocationPolicy, TrackingFlags>
+  template <typename T>
+  PL_ALWAYS_INLINE bool operator<(const NewInstance<T>& lhs, T* rhs)
   {
-  public:
-    plAllocatorMixinReallocate(plStringView sName, plAllocatorBase* pParent);
-  };
-
-  template <typename AllocationPolicy, plUInt32 TrackingFlags>
-  class plAllocatorMixinReallocate<AllocationPolicy, TrackingFlags, true> : public plAllocatorImpl<AllocationPolicy, TrackingFlags>
-  {
-  public:
-    plAllocatorMixinReallocate(plStringView sName, plAllocatorBase* pParent);
-    virtual void* Reallocate(void* pPtr, size_t uiCurrentSize, size_t uiNewSize, size_t uiAlign) override;
-  };
-}; // namespace plInternal
-
-template <typename A, plUInt32 TrackingFlags>
-PLASMA_FORCE_INLINE plInternal::plAllocatorImpl<A, TrackingFlags>::plAllocatorImpl(plStringView sName, plAllocatorBase* pParent /* = nullptr */)
-  : m_allocator(pParent)
-  , m_ThreadID(plThreadUtils::GetCurrentThreadID())
-{
-  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
-  {
-    PLASMA_CHECK_AT_COMPILETIME_MSG((TrackingFlags & ~plMemoryTrackingFlags::All) == 0, "Invalid tracking flags");
-    const plUInt32 uiTrackingFlags = TrackingFlags;
-    plBitflags<plMemoryTrackingFlags> flags = *reinterpret_cast<const plBitflags<plMemoryTrackingFlags>*>(&uiTrackingFlags);
-    this->m_Id = plMemoryTracker::RegisterAllocator(sName, flags, pParent != nullptr ? pParent->GetId() : plAllocatorId());
-  }
-}
-
-template <typename A, plUInt32 TrackingFlags>
-plInternal::plAllocatorImpl<A, TrackingFlags>::~plAllocatorImpl()
-{
-  // PLASMA_ASSERT_RELEASE(m_ThreadID == plThreadUtils::GetCurrentThreadID(), "Allocator is deleted from another thread");
-
-  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
-  {
-    plMemoryTracker::DeregisterAllocator(this->m_Id);
-  }
-}
-
-template <typename A, plUInt32 TrackingFlags>
-void* plInternal::plAllocatorImpl<A, TrackingFlags>::Allocate(size_t uiSize, size_t uiAlign, plMemoryUtils::DestructorFunction destructorFunc)
-{
-  // zero size allocations always return nullptr without tracking (since deallocate nullptr is ignored)
-  if (uiSize == 0)
-    return nullptr;
-
-  PLASMA_ASSERT_DEBUG(plMath::IsPowerOf2((plUInt32)uiAlign), "Alignment must be power of two");
-
-  plTime fAllocationTime = plTime::Now();
-
-  void* ptr = m_allocator.Allocate(uiSize, uiAlign);
-  PLASMA_ASSERT_DEV(ptr != nullptr, "Could not allocate {0} bytes. Out of memory?", uiSize);
-
-  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
-  {
-    plBitflags<plMemoryTrackingFlags> flags;
-    flags.SetValue(TrackingFlags);
-
-    plMemoryTracker::AddAllocation(this->m_Id, flags, ptr, uiSize, uiAlign, plTime::Now() - fAllocationTime);
+    return lhs.m_pInstance < rhs;
   }
 
-  return ptr;
-}
-
-template <typename A, plUInt32 TrackingFlags>
-void plInternal::plAllocatorImpl<A, TrackingFlags>::Deallocate(void* pPtr)
-{
-  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  template <typename T>
+  PL_ALWAYS_INLINE bool operator<(T* lhs, const NewInstance<T>& rhs)
   {
-    plMemoryTracker::RemoveAllocation(this->m_Id, pPtr);
+    return lhs < rhs.m_pInstance;
   }
 
-  m_allocator.Deallocate(pPtr);
-}
-
-template <typename A, plUInt32 TrackingFlags>
-size_t plInternal::plAllocatorImpl<A, TrackingFlags>::AllocatedSize(const void* pPtr)
-{
-  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  template <typename T>
+  PL_FORCE_INLINE void Delete(plAllocator* pAllocator, T* pPtr)
   {
-    return plMemoryTracker::GetAllocationInfo(this->m_Id, pPtr).m_uiSize;
+    if (pPtr != nullptr)
+    {
+      plMemoryUtils::Destruct(pPtr, 1);
+      pAllocator->Deallocate(pPtr);
+    }
   }
 
-  return 0;
-}
-
-template <typename A, plUInt32 TrackingFlags>
-plAllocatorId plInternal::plAllocatorImpl<A, TrackingFlags>::GetId() const
-{
-  return this->m_Id;
-}
-
-template <typename A, plUInt32 TrackingFlags>
-plAllocatorBase::Stats plInternal::plAllocatorImpl<A, TrackingFlags>::GetStats() const
-{
-  if ((TrackingFlags & plMemoryTrackingFlags::RegisterAllocator) != 0)
+  template <typename T>
+  PL_FORCE_INLINE T* CreateRawBuffer(plAllocator* pAllocator, size_t uiCount)
   {
-    return plMemoryTracker::GetAllocatorStats(this->m_Id);
+    plUInt64 safeAllocationSize = plMath::SafeMultiply64(uiCount, sizeof(T));
+    return static_cast<T*>(pAllocator->Allocate(static_cast<size_t>(safeAllocationSize), PL_ALIGNMENT_OF(T))); // Down-cast to size_t for 32-bit
   }
 
-  return Stats();
-}
-
-template <typename A, plUInt32 TrackingFlags>
-PLASMA_ALWAYS_INLINE plAllocatorBase* plInternal::plAllocatorImpl<A, TrackingFlags>::GetParent() const
-{
-  return m_allocator.GetParent();
-}
-
-template <typename A, plUInt32 TrackingFlags, bool HasReallocate>
-plInternal::plAllocatorMixinReallocate<A, TrackingFlags, HasReallocate>::plAllocatorMixinReallocate(plStringView sName, plAllocatorBase* pParent)
-  : plAllocatorImpl<A, TrackingFlags>(sName, pParent)
-{
-}
-
-template <typename A, plUInt32 TrackingFlags>
-plInternal::plAllocatorMixinReallocate<A, TrackingFlags, true>::plAllocatorMixinReallocate(plStringView sName, plAllocatorBase* pParent)
-  : plAllocatorImpl<A, TrackingFlags>(sName, pParent)
-{
-}
-
-template <typename A, plUInt32 TrackingFlags>
-void* plInternal::plAllocatorMixinReallocate<A, TrackingFlags, true>::Reallocate(void* pPtr, size_t uiCurrentSize, size_t uiNewSize, size_t uiAlign)
-{
-  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  PL_FORCE_INLINE void DeleteRawBuffer(plAllocator* pAllocator, void* pPtr)
   {
-    plMemoryTracker::RemoveAllocation(this->m_Id, pPtr);
+    if (pPtr != nullptr)
+    {
+      pAllocator->Deallocate(pPtr);
+    }
   }
 
-  plTime fAllocationTime = plTime::Now();
-
-  void* pNewMem = this->m_allocator.Reallocate(pPtr, uiCurrentSize, uiNewSize, uiAlign);
-
-  if ((TrackingFlags & plMemoryTrackingFlags::EnableAllocationTracking) != 0)
+  template <typename T>
+  inline plArrayPtr<T> CreateArray(plAllocator* pAllocator, plUInt32 uiCount)
   {
-    plBitflags<plMemoryTrackingFlags> flags;
-    flags.SetValue(TrackingFlags);
+    T* buffer = CreateRawBuffer<T>(pAllocator, uiCount);
+    plMemoryUtils::Construct<SkipTrivialTypes>(buffer, uiCount);
 
-    plMemoryTracker::AddAllocation(this->m_Id, flags, pNewMem, uiNewSize, uiAlign, plTime::Now() - fAllocationTime);
+    return plArrayPtr<T>(buffer, uiCount);
   }
-  return pNewMem;
-}
+
+  template <typename T>
+  inline void DeleteArray(plAllocator* pAllocator, plArrayPtr<T> arrayPtr)
+  {
+    T* buffer = arrayPtr.GetPtr();
+    if (buffer != nullptr)
+    {
+      plMemoryUtils::Destruct(buffer, arrayPtr.GetCount());
+      pAllocator->Deallocate(buffer);
+    }
+  }
+
+  template <typename T>
+  PL_FORCE_INLINE T* ExtendRawBuffer(T* pPtr, plAllocator* pAllocator, size_t uiCurrentCount, size_t uiNewCount, plTypeIsPod)
+  {
+    return (T*)pAllocator->Reallocate(pPtr, uiCurrentCount * sizeof(T), uiNewCount * sizeof(T), PL_ALIGNMENT_OF(T));
+  }
+
+  template <typename T>
+  PL_FORCE_INLINE T* ExtendRawBuffer(T* pPtr, plAllocator* pAllocator, size_t uiCurrentCount, size_t uiNewCount, plTypeIsMemRelocatable)
+  {
+    return (T*)pAllocator->Reallocate(pPtr, uiCurrentCount * sizeof(T), uiNewCount * sizeof(T), PL_ALIGNMENT_OF(T));
+  }
+
+  template <typename T>
+  PL_FORCE_INLINE T* ExtendRawBuffer(T* pPtr, plAllocator* pAllocator, size_t uiCurrentCount, size_t uiNewCount, plTypeIsClass)
+  {
+    PL_CHECK_AT_COMPILETIME_MSG(!std::is_trivial<T>::value,
+      "POD type is treated as class. Use PL_DECLARE_POD_TYPE(YourClass) or PL_DEFINE_AS_POD_TYPE(ExternalClass) to mark it as POD.");
+
+    T* pNewMem = CreateRawBuffer<T>(pAllocator, uiNewCount);
+    plMemoryUtils::RelocateConstruct(pNewMem, pPtr, uiCurrentCount);
+    DeleteRawBuffer(pAllocator, pPtr);
+    return pNewMem;
+  }
+
+  template <typename T>
+  PL_FORCE_INLINE T* ExtendRawBuffer(T* pPtr, plAllocator* pAllocator, size_t uiCurrentCount, size_t uiNewCount)
+  {
+    PL_ASSERT_DEV(uiCurrentCount < uiNewCount, "Shrinking of a buffer is not implemented yet");
+    PL_ASSERT_DEV(!(uiCurrentCount == uiNewCount), "Same size passed in twice.");
+    if (pPtr == nullptr)
+    {
+      PL_ASSERT_DEV(uiCurrentCount == 0, "current count must be 0 if ptr is nullptr");
+
+      return CreateRawBuffer<T>(pAllocator, uiNewCount);
+    }
+    return ExtendRawBuffer(pPtr, pAllocator, uiCurrentCount, uiNewCount, plGetTypeClass<T>());
+  }
+} // namespace plInternal

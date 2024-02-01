@@ -4,17 +4,17 @@
 #include <GameEngine/StateMachine/StateMachineBuiltins.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_NestedStateMachine, 1, plRTTIDefaultAllocator<plStateMachineState_NestedStateMachine>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_NestedStateMachine, 1, plRTTIDefaultAllocator<plStateMachineState_NestedStateMachine>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_StateMachine", plDependencyFlags::Package)),
-    PLASMA_ACCESSOR_PROPERTY("InitialState", GetInitialState, SetInitialState),
-    PLASMA_MEMBER_PROPERTY("KeepCurrentStateOnExit", m_bKeepCurrentStateOnExit),
+    PL_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_StateMachine", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("InitialState", GetInitialState, SetInitialState),
+    PL_MEMBER_PROPERTY("KeepCurrentStateOnExit", m_bKeepCurrentStateOnExit),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState_NestedStateMachine::plStateMachineState_NestedStateMachine(plStringView sName)
@@ -73,23 +73,24 @@ void plStateMachineState_NestedStateMachine::Update(plStateMachineInstance& ref_
 
 plResult plStateMachineState_NestedStateMachine::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   inout_stream << m_hResource;
   inout_stream << m_sInitialState;
   inout_stream << m_bKeepCurrentStateOnExit;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineState_NestedStateMachine::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  // const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
 
   inout_stream >> m_hResource;
   inout_stream >> m_sInitialState;
   inout_stream >> m_bKeepCurrentStateOnExit;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineState_NestedStateMachine::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -132,15 +133,15 @@ void plStateMachineState_NestedStateMachine::SetInitialState(const char* szName)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_Compound, 1, plRTTIDefaultAllocator<plStateMachineState_Compound>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_Compound, 1, plRTTIDefaultAllocator<plStateMachineState_Compound>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("SubStates", m_SubStates)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_ARRAY_MEMBER_PROPERTY("SubStates", m_SubStates)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState_Compound::plStateMachineState_Compound(plStringView sName)
@@ -193,7 +194,7 @@ void plStateMachineState_Compound::Update(plStateMachineInstance& ref_instance, 
 
 plResult plStateMachineState_Compound::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   const plUInt32 uiNumSubStates = m_SubStates.GetCount();
   inout_stream << uiNumSubStates;
@@ -204,16 +205,17 @@ plResult plStateMachineState_Compound::Serialize(plStreamWriter& inout_stream) c
     plTypeVersionWriteContext::GetContext()->AddType(pStateType);
 
     inout_stream << pStateType->GetTypeName();
-    PLASMA_SUCCEED_OR_RETURN(pSubState->Serialize(inout_stream));
+    PL_SUCCEED_OR_RETURN(pSubState->Serialize(inout_stream));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineState_Compound::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  // const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
 
   plUInt32 uiNumSubStates = 0;
   inout_stream >> uiNumSubStates;
@@ -226,18 +228,18 @@ plResult plStateMachineState_Compound::Deserialize(plStreamReader& inout_stream)
     if (const plRTTI* pType = plRTTI::FindTypeByName(sTypeName))
     {
       plUniquePtr<plStateMachineState> pSubState = pType->GetAllocator()->Allocate<plStateMachineState>();
-      PLASMA_SUCCEED_OR_RETURN(pSubState->Deserialize(inout_stream));
+      PL_SUCCEED_OR_RETURN(pSubState->Deserialize(inout_stream));
 
       m_SubStates.PushBack(pSubState.Release());
     }
     else
     {
       plLog::Error("Unknown state machine state type '{}'", sTypeName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineState_Compound::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -248,24 +250,24 @@ bool plStateMachineState_Compound::GetInstanceDataDesc(plInstanceDataDesc& out_d
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plStateMachineLogicOperator, 1)
-  PLASMA_ENUM_CONSTANTS(plStateMachineLogicOperator::And, plStateMachineLogicOperator::Or)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plStateMachineLogicOperator, 1)
+  PL_ENUM_CONSTANTS(plStateMachineLogicOperator::And, plStateMachineLogicOperator::Or)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_BlackboardConditions, 1, plRTTIDefaultAllocator<plStateMachineTransition_BlackboardConditions>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_BlackboardConditions, 1, plRTTIDefaultAllocator<plStateMachineTransition_BlackboardConditions>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Operator", plStateMachineLogicOperator, m_Operator),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Conditions", m_Conditions),
+    PL_ENUM_MEMBER_PROPERTY("Operator", plStateMachineLogicOperator, m_Operator),
+    PL_ARRAY_MEMBER_PROPERTY("Conditions", m_Conditions),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineTransition_BlackboardConditions::plStateMachineTransition_BlackboardConditions() = default;
@@ -292,7 +294,7 @@ bool plStateMachineTransition_BlackboardConditions::IsConditionMet(plStateMachin
 
 plResult plStateMachineTransition_BlackboardConditions::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   inout_stream << m_Operator;
   return inout_stream.WriteArray(m_Conditions);
@@ -300,7 +302,7 @@ plResult plStateMachineTransition_BlackboardConditions::Serialize(plStreamWriter
 
 plResult plStateMachineTransition_BlackboardConditions::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
 
   inout_stream >> m_Operator;
   return inout_stream.ReadArray(m_Conditions);
@@ -309,15 +311,15 @@ plResult plStateMachineTransition_BlackboardConditions::Deserialize(plStreamRead
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_Timeout, 1, plRTTIDefaultAllocator<plStateMachineTransition_Timeout>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_Timeout, 1, plRTTIDefaultAllocator<plStateMachineTransition_Timeout>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Timeout", m_Timeout),
+    PL_MEMBER_PROPERTY("Timeout", m_Timeout),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineTransition_Timeout::plStateMachineTransition_Timeout() = default;
@@ -330,33 +332,33 @@ bool plStateMachineTransition_Timeout::IsConditionMet(plStateMachineInstance& re
 
 plResult plStateMachineTransition_Timeout::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   inout_stream << m_Timeout;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineTransition_Timeout::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
 
   inout_stream >> m_Timeout;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_Compound, 1, plRTTIDefaultAllocator<plStateMachineTransition_Compound>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_Compound, 1, plRTTIDefaultAllocator<plStateMachineTransition_Compound>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Operator", plStateMachineLogicOperator, m_Operator),
-    PLASMA_ARRAY_MEMBER_PROPERTY("SubTransitions", m_SubTransitions)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_ENUM_MEMBER_PROPERTY("Operator", plStateMachineLogicOperator, m_Operator),
+    PL_ARRAY_MEMBER_PROPERTY("SubTransitions", m_SubTransitions)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineTransition_Compound::plStateMachineTransition_Compound() = default;
@@ -388,7 +390,7 @@ bool plStateMachineTransition_Compound::IsConditionMet(plStateMachineInstance& r
 
 plResult plStateMachineTransition_Compound::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
   inout_stream << m_Operator;
 
@@ -401,16 +403,17 @@ plResult plStateMachineTransition_Compound::Serialize(plStreamWriter& inout_stre
     plTypeVersionWriteContext::GetContext()->AddType(pStateType);
 
     inout_stream << pStateType->GetTypeName();
-    PLASMA_SUCCEED_OR_RETURN(pSubTransition->Serialize(inout_stream));
+    PL_SUCCEED_OR_RETURN(pSubTransition->Serialize(inout_stream));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineTransition_Compound::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
-  // const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
 
   inout_stream >> m_Operator;
 
@@ -425,18 +428,18 @@ plResult plStateMachineTransition_Compound::Deserialize(plStreamReader& inout_st
     if (const plRTTI* pType = plRTTI::FindTypeByName(sTypeName))
     {
       plUniquePtr<plStateMachineTransition> pSubTransition = pType->GetAllocator()->Allocate<plStateMachineTransition>();
-      PLASMA_SUCCEED_OR_RETURN(pSubTransition->Deserialize(inout_stream));
+      PL_SUCCEED_OR_RETURN(pSubTransition->Deserialize(inout_stream));
 
       m_SubTransitions.PushBack(pSubTransition.Release());
     }
     else
     {
       plLog::Error("Unknown state machine state type '{}'", sTypeName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineTransition_Compound::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -445,4 +448,43 @@ bool plStateMachineTransition_Compound::GetInstanceDataDesc(plInstanceDataDesc& 
 }
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachineBuiltins);
+//////////////////////////////////////////////////////////////////////////
+
+// clang-format off
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition_TransitionEvent, 1, plRTTIDefaultAllocator<plStateMachineTransition_TransitionEvent>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("EventName", m_sEventName),
+  }
+  PL_END_PROPERTIES;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
+
+plStateMachineTransition_TransitionEvent::plStateMachineTransition_TransitionEvent() = default;
+plStateMachineTransition_TransitionEvent::~plStateMachineTransition_TransitionEvent() = default;
+
+bool plStateMachineTransition_TransitionEvent::IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const
+{
+  return ref_instance.GetCurrentTransitionEvent() == m_sEventName;
+}
+
+plResult plStateMachineTransition_TransitionEvent::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+
+  inout_stream << m_sEventName;
+  return PL_SUCCESS;
+}
+
+plResult plStateMachineTransition_TransitionEvent::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+
+  inout_stream >> m_sEventName;
+  return PL_SUCCESS;
+}
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachineBuiltins);

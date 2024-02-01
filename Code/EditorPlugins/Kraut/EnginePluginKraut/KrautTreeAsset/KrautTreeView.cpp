@@ -6,16 +6,16 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plKrautTreeViewContext::plKrautTreeViewContext(plKrautTreeContext* pKrautTreeContext)
-  : PlasmaEngineProcessViewContext(pKrautTreeContext)
+  : plEngineProcessViewContext(pKrautTreeContext)
 {
   m_pKrautTreeContext = pKrautTreeContext;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.05f, 10000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
-plKrautTreeViewContext::~plKrautTreeViewContext() {}
+plKrautTreeViewContext::~plKrautTreeViewContext() = default;
 
 bool plKrautTreeViewContext::UpdateThumbnailCamera(const plBoundingBoxSphere& bounds)
 {
@@ -30,7 +30,7 @@ plViewHandle plKrautTreeViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   pView->SetCameraUsageHint(plCameraUsageHint::Thumbnail);
@@ -39,23 +39,22 @@ plViewHandle plKrautTreeViewContext::CreateView()
 
 void plKrautTreeViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
-  PlasmaEngineProcessViewContext::SetCamera(pMsg);
+  plEngineProcessViewContext::SetCamera(pMsg);
 
-  const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
+  // const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
 
-  plBoundingBox bbox;
-  bbox.SetCenterAndHalfExtents(plVec3::ZeroVector(), plVec3::ZeroVector());
+  plBoundingBox bbox = plBoundingBox::MakeFromCenterAndHalfExtents(plVec3::MakeZero(), plVec3::MakeZero());
 
   auto hResource = m_pKrautTreeContext->GetResource();
   if (hResource.IsValid())
   {
-    //plResourceLock<plKrautGeneratorResource> pResource(hResource, plResourceAcquireMode::AllowLoadingFallback);
+    // plResourceLock<plKrautGeneratorResource> pResource(hResource, plResourceAcquireMode::AllowLoadingFallback);
 
     // TODO
 
-    //if (pResource->GetDetails().m_Bounds.IsValid())
+    // if (pResource->GetDetails().m_Bounds.IsValid())
     //{
-    //  bbox = pResource->GetDetails().m_Bounds.GetBox();
+    //   bbox = pResource->GetDetails().m_Bounds.GetBox();
 
     //  plStringBuilder sText;
     //  sText.PrependFormat("Bounding Box: width={0}, depth={1}, height={2}", plArgF(bbox.GetHalfExtents().x * 2, 2),

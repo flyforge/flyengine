@@ -9,146 +9,146 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAddObjectCommand, 1, plRTTIDefaultAllocator<plAddObjectCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAddObjectCommand, 1, plRTTIDefaultAllocator<plAddObjectCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Type", GetType, SetType),
-    PLASMA_MEMBER_PROPERTY("ParentGuid", m_Parent),
-    PLASMA_MEMBER_PROPERTY("ParentProperty", m_sParentProperty),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("NewGuid", m_NewObjectGuid),
+    PL_ACCESSOR_PROPERTY("Type", GetType, SetType),
+    PL_MEMBER_PROPERTY("ParentGuid", m_Parent),
+    PL_MEMBER_PROPERTY("ParentProperty", m_sParentProperty),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("NewGuid", m_NewObjectGuid),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPasteObjectsCommand, 1, plRTTIDefaultAllocator<plPasteObjectsCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPasteObjectsCommand, 1, plRTTIDefaultAllocator<plPasteObjectsCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ParentGuid", m_Parent),
-    PLASMA_MEMBER_PROPERTY("TextGraph", m_sGraphTextFormat),
-    PLASMA_MEMBER_PROPERTY("Mime", m_sMimeType),
-    PLASMA_MEMBER_PROPERTY("AllowPickedPosition", m_bAllowPickedPosition),
+    PL_MEMBER_PROPERTY("ParentGuid", m_Parent),
+    PL_MEMBER_PROPERTY("TextGraph", m_sGraphTextFormat),
+    PL_MEMBER_PROPERTY("Mime", m_sMimeType),
+    PL_MEMBER_PROPERTY("AllowPickedPosition", m_bAllowPickedPosition),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstantiatePrefabCommand, 1, plRTTIDefaultAllocator<plInstantiatePrefabCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInstantiatePrefabCommand, 1, plRTTIDefaultAllocator<plInstantiatePrefabCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ParentGuid", m_Parent),
-    PLASMA_MEMBER_PROPERTY("CreateFromPrefab", m_CreateFromPrefab),
-    PLASMA_MEMBER_PROPERTY("BaseGraph", m_sBasePrefabGraph),
-    PLASMA_MEMBER_PROPERTY("ObjectGraph", m_sObjectGraph),
-    PLASMA_MEMBER_PROPERTY("RemapGuid", m_RemapGuid),
-    PLASMA_MEMBER_PROPERTY("CreatedObjects", m_CreatedRootObject),
-    PLASMA_MEMBER_PROPERTY("AllowPickedPos", m_bAllowPickedPosition),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("ParentGuid", m_Parent),
+    PL_MEMBER_PROPERTY("CreateFromPrefab", m_CreateFromPrefab),
+    PL_MEMBER_PROPERTY("BaseGraph", m_sBasePrefabGraph),
+    PL_MEMBER_PROPERTY("ObjectGraph", m_sObjectGraph),
+    PL_MEMBER_PROPERTY("RemapGuid", m_RemapGuid),
+    PL_MEMBER_PROPERTY("CreatedObjects", m_CreatedRootObject),
+    PL_MEMBER_PROPERTY("AllowPickedPos", m_bAllowPickedPosition),
+    PL_MEMBER_PROPERTY("Index", m_Index),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plUnlinkPrefabCommand, 1, plRTTIDefaultAllocator<plUnlinkPrefabCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plUnlinkPrefabCommand, 1, plRTTIDefaultAllocator<plUnlinkPrefabCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Object", m_Object),
+    PL_MEMBER_PROPERTY("Object", m_Object),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveObjectCommand, 1, plRTTIDefaultAllocator<plRemoveObjectCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveObjectCommand, 1, plRTTIDefaultAllocator<plRemoveObjectCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveObjectCommand, 1, plRTTIDefaultAllocator<plMoveObjectCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveObjectCommand, 1, plRTTIDefaultAllocator<plMoveObjectCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("NewParentGuid", m_NewParent),
-    PLASMA_MEMBER_PROPERTY("ParentProperty", m_sParentProperty),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("NewParentGuid", m_NewParent),
+    PL_MEMBER_PROPERTY("ParentProperty", m_sParentProperty),
+    PL_MEMBER_PROPERTY("Index", m_Index),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetObjectPropertyCommand, 1, plRTTIDefaultAllocator<plSetObjectPropertyCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSetObjectPropertyCommand, 1, plRTTIDefaultAllocator<plSetObjectPropertyCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("NewValue", m_NewValue),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("NewValue", m_NewValue),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plResizeAndSetObjectPropertyCommand, 1, plRTTIDefaultAllocator<plResizeAndSetObjectPropertyCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plResizeAndSetObjectPropertyCommand, 1, plRTTIDefaultAllocator<plResizeAndSetObjectPropertyCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("NewValue", m_NewValue),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("NewValue", m_NewValue),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInsertObjectPropertyCommand, 1, plRTTIDefaultAllocator<plInsertObjectPropertyCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInsertObjectPropertyCommand, 1, plRTTIDefaultAllocator<plInsertObjectPropertyCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("NewValue", m_NewValue),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("NewValue", m_NewValue),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveObjectPropertyCommand, 1, plRTTIDefaultAllocator<plRemoveObjectPropertyCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveObjectPropertyCommand, 1, plRTTIDefaultAllocator<plRemoveObjectPropertyCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveObjectPropertyCommand, 1, plRTTIDefaultAllocator<plMoveObjectPropertyCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveObjectPropertyCommand, 1, plRTTIDefaultAllocator<plMoveObjectPropertyCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("OldIndex", m_OldIndex),
-    PLASMA_MEMBER_PROPERTY("NewIndex", m_NewIndex),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("OldIndex", m_OldIndex),
+    PL_MEMBER_PROPERTY("NewIndex", m_NewIndex),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
@@ -156,17 +156,15 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 ////////////////////////////////////////////////////////////////////////
 
 plAddObjectCommand::plAddObjectCommand()
-  : m_pType(nullptr)
-  , m_pObject(nullptr)
-{
-}
+
+  = default;
 
 plStringView plAddObjectCommand::GetType() const
 {
-if (m_pType == nullptr)
-  return {};
+  if (m_pType == nullptr)
+    return {};
 
-return m_pType->GetTypeName();
+  return m_pType->GetTypeName();
 }
 
 void plAddObjectCommand::SetType(plStringView sType)
@@ -181,7 +179,7 @@ plStatus plAddObjectCommand::DoInternal(bool bRedo)
   if (!bRedo)
   {
     if (!m_NewObjectGuid.IsValid())
-      m_NewObjectGuid.CreateNewUuid();
+      m_NewObjectGuid = plUuid::MakeUuid();
   }
 
   plDocumentObject* pParent = nullptr;
@@ -192,7 +190,7 @@ plStatus plAddObjectCommand::DoInternal(bool bRedo)
       return plStatus("Add Object: The given parent does not exist!");
   }
 
-  PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(m_pType, pParent, m_sParentProperty, m_Index));
+  PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(m_pType, pParent, m_sParentProperty, m_Index));
 
   if (!bRedo)
   {
@@ -200,18 +198,18 @@ plStatus plAddObjectCommand::DoInternal(bool bRedo)
   }
 
   pDocument->GetObjectManager()->AddObject(m_pObject, pParent, m_sParentProperty, m_Index);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plAddObjectCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
 
   plDocument* pDocument = GetDocument();
-  PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(m_pObject));
+  PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(m_pObject));
 
   pDocument->GetObjectManager()->RemoveObject(m_pObject);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plAddObjectCommand::CleanupInternal(CommandState state)
@@ -228,7 +226,7 @@ void plAddObjectCommand::CleanupInternal(CommandState state)
 // plPasteObjectsCommand
 ////////////////////////////////////////////////////////////////////////
 
-plPasteObjectsCommand::plPasteObjectsCommand() {}
+plPasteObjectsCommand::plPasteObjectsCommand() = default;
 
 plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
 {
@@ -249,13 +247,11 @@ plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
     {
       // Deserialize
       plRawMemoryStreamReader memoryReader(m_sGraphTextFormat.GetData(), m_sGraphTextFormat.GetElementCount());
-      PLASMA_SUCCEED_OR_RETURN(plAbstractGraphDdlSerializer::Read(memoryReader, &graph));
+      PL_SUCCEED_OR_RETURN(plAbstractGraphDdlSerializer::Read(memoryReader, &graph));
     }
 
     // Remap
-    plUuid seed;
-    seed.CreateNewUuid();
-    graph.ReMapNodeGuids(seed);
+    graph.ReMapNodeGuids(plUuid::MakeUuid());
 
     plDocumentObjectConverterReader reader(&graph, pDocument->GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateOnly);
 
@@ -277,8 +273,7 @@ plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
       {
         return pOrderA->m_Value.ConvertTo<plUInt32>() < pOrderB->m_Value.ConvertTo<plUInt32>();
       }
-      return a < b;
-    });
+      return a < b; });
 
     plHybridArray<plDocument::PasteInfo, 16> ToBePasted;
     for (plAbstractObjectNode* pNode : RootNodes)
@@ -325,22 +320,22 @@ plStatus plPasteObjectsCommand::DoInternal(bool bRedo)
       pDocument->GetObjectManager()->AddObject(po.m_pObject, po.m_pParent, po.m_sParentProperty, po.m_Index);
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plPasteObjectsCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
   plDocument* pDocument = GetDocument();
 
   for (auto& po : m_PastedObjects)
   {
-    PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
+    PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
 
     pDocument->GetObjectManager()->RemoveObject(po.m_pObject);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plPasteObjectsCommand::CleanupInternal(CommandState state)
@@ -380,7 +375,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
   {
     // TODO: this is hard-coded, it only works for scene documents !
     const plRTTI* pRootObjectType = plRTTI::FindTypeByName("plGameObject");
-    const char* szParentProperty = "Children";
+    plStringView sParentProperty = "Children"_plsv;
 
     plDocumentObject* pRootObject = nullptr;
     plHybridArray<plDocument::PasteInfo, 16> ToBePasted;
@@ -388,7 +383,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
 
     // create root object
     {
-      PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(pRootObjectType, pParent, szParentProperty, m_Index));
+      PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(pRootObjectType, pParent, sParentProperty, m_Index));
 
       // use the same GUID for the root object ID as the remap GUID, this way the object ID is deterministic and reproducible
       m_CreatedRootObject = m_RemapGuid;
@@ -419,7 +414,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
       }
     }
 
-    if (pDocument->Paste(ToBePasted, graph, m_bAllowPickedPosition, "application/PlasmaEditor.plAbstractGraph"))
+    if (pDocument->Paste(ToBePasted, graph, m_bAllowPickedPosition, "application/plEditor.plAbstractGraph"))
     {
       for (const auto& item : ToBePasted)
       {
@@ -463,7 +458,7 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
         reader.ApplyPropertiesToObject(pPrefabRoot, pNewObject);
 
         // attach all prefab nodes to the main group node
-        pDocument->GetObjectManager()->AddObject(pNewObject, pRootObject, szParentProperty, -1);
+        pDocument->GetObjectManager()->AddObject(pNewObject, pRootObject, sParentProperty, -1);
       }
     }
   }
@@ -476,22 +471,22 @@ plStatus plInstantiatePrefabCommand::DoInternal(bool bRedo)
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plInstantiatePrefabCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
   plDocument* pDocument = GetDocument();
 
   for (auto& po : m_PastedObjects)
   {
-    PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
+    PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
 
     pDocument->GetObjectManager()->RemoveObject(po.m_pObject);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plInstantiatePrefabCommand::CleanupInternal(CommandState state)
@@ -538,7 +533,7 @@ plStatus plUnlinkPrefabCommand::DoInternal(bool bRedo)
     pDocument->m_DocumentObjectMetaData->EndModifyMetaData(plDocumentObjectMetaData::PrefabFlag);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plUnlinkPrefabCommand::UndoInternal(bool bFireEvents)
@@ -558,7 +553,7 @@ plStatus plUnlinkPrefabCommand::UndoInternal(bool bFireEvents)
     pDocument->m_DocumentObjectMetaData->EndModifyMetaData(plDocumentObjectMetaData::PrefabFlag);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -567,10 +562,8 @@ plStatus plUnlinkPrefabCommand::UndoInternal(bool bFireEvents)
 ////////////////////////////////////////////////////////////////////////
 
 plRemoveObjectCommand::plRemoveObjectCommand()
-  : m_pParent(nullptr)
-  , m_pObject(nullptr)
-{
-}
+
+  = default;
 
 plStatus plRemoveObjectCommand::DoInternal(bool bRedo)
 {
@@ -587,7 +580,7 @@ plStatus plRemoveObjectCommand::DoInternal(bool bRedo)
     else
       return plStatus("Remove Object: The given object does not exist!");
 
-    PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(m_pObject));
+    PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(m_pObject));
 
     m_pParent = const_cast<plDocumentObject*>(m_pObject->GetParent());
     m_sParentProperty = m_pObject->GetParentProperty();
@@ -596,18 +589,18 @@ plStatus plRemoveObjectCommand::DoInternal(bool bRedo)
   }
 
   pDocument->GetObjectManager()->RemoveObject(m_pObject);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plRemoveObjectCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
 
   plDocument* pDocument = GetDocument();
-  PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(m_pObject->GetTypeAccessor().GetType(), m_pParent, m_sParentProperty, m_Index));
+  PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanAdd(m_pObject->GetTypeAccessor().GetType(), m_pParent, m_sParentProperty, m_Index));
 
   pDocument->GetObjectManager()->AddObject(m_pObject, m_pParent, m_sParentProperty, m_Index);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plRemoveObjectCommand::CleanupInternal(CommandState state)
@@ -655,16 +648,16 @@ plStatus plMoveObjectCommand::DoInternal(bool bRedo)
     const plIReflectedTypeAccessor& accessor = m_pOldParent->GetTypeAccessor();
     m_OldIndex = accessor.GetPropertyChildIndex(m_pObject->GetParentProperty(), m_pObject->GetGuid());
 
-    PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanMove(m_pObject, m_pNewParent, m_sParentProperty, m_Index));
+    PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanMove(m_pObject, m_pNewParent, m_sParentProperty, m_Index));
   }
 
   pDocument->GetObjectManager()->MoveObject(m_pObject, m_pNewParent, m_sParentProperty, m_Index);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plMoveObjectCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
 
   plDocument* pDocument = GetDocument();
 
@@ -685,11 +678,11 @@ plStatus plMoveObjectCommand::UndoInternal(bool bFireEvents)
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanMove(m_pObject, m_pOldParent, m_sOldParentProperty, FinalOldPosition));
+  PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanMove(m_pObject, m_pOldParent, m_sOldParentProperty, FinalOldPosition));
 
   pDocument->GetObjectManager()->MoveObject(m_pObject, m_pOldParent, m_sOldParentProperty, FinalOldPosition);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -757,7 +750,7 @@ plStatus plSetObjectPropertyCommand::UndoInternal(bool bFireEvents)
       return plStatus(plFmt("Set Property: The property '{0}' does not exist", m_sProperty));
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -798,7 +791,7 @@ plStatus plResizeAndSetObjectPropertyCommand::DoInternal(bool bRedo)
       ins.m_Index = i;
       ins.m_NewValue = plReflectionUtils::GetDefaultVariantFromType(m_NewValue.GetType());
 
-      AddSubCommand(ins).IgnoreResult();
+      AddSubCommand(ins).AssertSuccess();
     }
 
     plSetObjectPropertyCommand set;
@@ -807,10 +800,10 @@ plStatus plResizeAndSetObjectPropertyCommand::DoInternal(bool bRedo)
     set.m_NewValue = m_NewValue;
     set.m_Object = m_Object;
 
-    AddSubCommand(set).IgnoreResult();
+    AddSubCommand(set).AssertSuccess();
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -862,7 +855,7 @@ plStatus plInsertObjectPropertyCommand::UndoInternal(bool bFireEvents)
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -912,7 +905,7 @@ plStatus plRemoveObjectPropertyCommand::UndoInternal(bool bFireEvents)
       return plStatus(plFmt("Remove Property: Undo failed! The index '{0}' in property '{1}' does not exist", m_Index.ConvertTo<plString>(), m_sProperty));
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -941,7 +934,7 @@ plStatus plMoveObjectPropertyCommand::DoInternal(bool bRedo)
 
 plStatus plMoveObjectPropertyCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
 
   plVariant FinalOldPosition = m_OldIndex;
   plVariant FinalNewPosition = m_NewIndex;
@@ -968,5 +961,5 @@ plStatus plMoveObjectPropertyCommand::UndoInternal(bool bFireEvents)
     }
   }
 
-  return GetDocument()->GetObjectManager()->MoveValue(m_pObject, m_sProperty, FinalOldPosition, FinalNewPosition);
+  return GetDocument()->GetObjectManager()->MoveValue(m_pObject, m_sProperty, FinalNewPosition, FinalOldPosition);
 }

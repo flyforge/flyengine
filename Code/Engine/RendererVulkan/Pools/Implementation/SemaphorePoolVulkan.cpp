@@ -24,7 +24,7 @@ void plSemaphorePoolVulkan::DeInitialize()
 
 vk::Semaphore plSemaphorePoolVulkan::RequestSemaphore()
 {
-  PLASMA_ASSERT_DEBUG(s_device, "plSemaphorePoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(s_device, "plSemaphorePoolVulkan::Initialize not called");
   if (!s_semaphores.IsEmpty())
   {
     vk::Semaphore semaphore = s_semaphores.PeekBack();
@@ -42,6 +42,6 @@ vk::Semaphore plSemaphorePoolVulkan::RequestSemaphore()
 
 void plSemaphorePoolVulkan::ReclaimSemaphore(vk::Semaphore& semaphore)
 {
-  PLASMA_ASSERT_DEBUG(s_device, "plSemaphorePoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(s_device, "plSemaphorePoolVulkan::Initialize not called");
   s_semaphores.PushBack(semaphore);
 }

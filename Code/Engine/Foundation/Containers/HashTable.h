@@ -23,20 +23,18 @@ public:
   {
     using iterator_category = std::forward_iterator_tag;
     using value_type = ConstIterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = ConstIterator*;
     using reference = ConstIterator&;
 
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Checks whether this iterator points to a valid element.
     bool IsValid() const; // [tested]
 
     /// \brief Checks whether the two iterators point to the same element.
     bool operator==(const typename plHashTableBase<KeyType, ValueType, Hasher>::ConstIterator& rhs) const;
-
-    /// \brief Checks whether the two iterators point to the same element.
-    bool operator!=(const typename plHashTableBase<KeyType, ValueType, Hasher>::ConstIterator& rhs) const;
+    PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const typename plHashTableBase<KeyType, ValueType, Hasher>::ConstIterator&);
 
     /// \brief Returns the 'key' of the element that this iterator points to.
     const KeyType& Key() const; // [tested]
@@ -51,7 +49,7 @@ public:
     void operator++(); // [tested]
 
     /// \brief Returns '*this' to enable foreach
-    PLASMA_ALWAYS_INLINE ConstIterator& operator*() { return *this; } // [tested]
+    PL_ALWAYS_INLINE ConstIterator& operator*() { return *this; } // [tested]
 
   protected:
     friend class plHashTableBase<KeyType, ValueType, Hasher>;
@@ -68,22 +66,22 @@ public:
   /// \brief Iterator with write access.
   struct Iterator : public ConstIterator
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Creates a new iterator from another.
-    PLASMA_ALWAYS_INLINE Iterator(const Iterator& rhs); // [tested]
+    PL_ALWAYS_INLINE Iterator(const Iterator& rhs); // [tested]
 
     /// \brief Assigns one iterator no another.
-    PLASMA_ALWAYS_INLINE void operator=(const Iterator& rhs); // [tested]
+    PL_ALWAYS_INLINE void operator=(const Iterator& rhs); // [tested]
 
     // this is required to pull in the const version of this function
     using ConstIterator::Value;
 
     /// \brief Returns the 'value' of the element that this iterator points to.
-    PLASMA_FORCE_INLINE ValueType& Value(); // [tested]
+    PL_FORCE_INLINE ValueType& Value(); // [tested]
 
     /// \brief Returns '*this' to enable foreach
-    PLASMA_ALWAYS_INLINE Iterator& operator*() { return *this; } // [tested]
+    PL_ALWAYS_INLINE Iterator& operator*() { return *this; } // [tested]
 
   private:
     friend class plHashTableBase<KeyType, ValueType, Hasher>;
@@ -93,13 +91,13 @@ public:
 
 protected:
   /// \brief Creates an empty hashtable. Does not allocate any data yet.
-  explicit plHashTableBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plHashTableBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given hashtable.
-  plHashTableBase(const plHashTableBase<KeyType, ValueType, Hasher>& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHashTableBase(const plHashTableBase<KeyType, ValueType, Hasher>& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves data from an existing hashtable into this one.
-  plHashTableBase(plHashTableBase<KeyType, ValueType, Hasher>&& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHashTableBase(plHashTableBase<KeyType, ValueType, Hasher>&& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plHashTableBase(); // [tested]
@@ -113,9 +111,7 @@ protected:
 public:
   /// \brief Compares this table to another table.
   bool operator==(const plHashTableBase<KeyType, ValueType, Hasher>& rhs) const; // [tested]
-
-  /// \brief Compares this table to another table.
-  bool operator!=(const plHashTableBase<KeyType, ValueType, Hasher>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plHashTableBase<KeyType, ValueType, Hasher>&);
 
   /// \brief Expands the hashtable by over-allocating the internal storage so that the load factor is lower or equal to 60% when inserting the given
   /// number of entries.
@@ -203,7 +199,7 @@ public:
   ConstIterator GetEndIterator() const; // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const;
+  plAllocator* GetAllocator() const;
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const; // [tested]
@@ -225,7 +221,7 @@ private:
   plUInt32 m_uiCount;
   plUInt32 m_uiCapacity;
 
-  plAllocatorBase* m_pAllocator;
+  plAllocator* m_pAllocator;
 
   enum
   {
@@ -265,7 +261,7 @@ class plHashTable : public plHashTableBase<KeyType, ValueType, Hasher>
 {
 public:
   plHashTable();
-  explicit plHashTable(plAllocatorBase* pAllocator);
+  explicit plHashTable(plAllocator* pAllocator);
 
   plHashTable(const plHashTable<KeyType, ValueType, Hasher, AllocatorWrapper>& other);
   plHashTable(const plHashTableBase<KeyType, ValueType, Hasher>& other);

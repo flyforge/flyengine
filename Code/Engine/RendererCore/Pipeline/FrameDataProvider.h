@@ -2,9 +2,9 @@
 
 #include <RendererCore/Pipeline/Declarations.h>
 
-class PLASMA_RENDERERCORE_DLL plFrameDataProviderBase : public plReflectedClass
+class PL_RENDERERCORE_DLL plFrameDataProviderBase : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plFrameDataProviderBase, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plFrameDataProviderBase, plReflectedClass);
 
 protected:
   plFrameDataProviderBase();
@@ -16,9 +16,9 @@ protected:
 private:
   friend class plRenderPipeline;
 
-  const plRenderPipeline* m_pOwnerPipeline;
-  void* m_pData;
-  plUInt64 m_uiLastUpdateFrame;
+  const plRenderPipeline* m_pOwnerPipeline = nullptr;
+  void* m_pData = nullptr;
+  plUInt64 m_uiLastUpdateFrame = 0;
 };
 
 template <typename T>

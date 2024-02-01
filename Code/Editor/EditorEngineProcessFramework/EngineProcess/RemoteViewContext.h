@@ -6,14 +6,14 @@
 #include <Foundation/Types/UniquePtr.h>
 #include <RendererCore/Pipeline/Declarations.h>
 
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plRemoteEngineProcessViewContext : public PlasmaEngineProcessViewContext
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plRemoteEngineProcessViewContext : public plEngineProcessViewContext
 {
 public:
-  plRemoteEngineProcessViewContext(PlasmaEngineProcessDocumentContext* pContext);
+  plRemoteEngineProcessViewContext(plEngineProcessDocumentContext* pContext);
   ~plRemoteEngineProcessViewContext();
 
 protected:
-  virtual void HandleViewMessage(const PlasmaEditorEngineViewMsg* pMsg) override;
+  virtual void HandleViewMessage(const plEditorEngineViewMsg* pMsg) override;
   virtual plViewHandle CreateView() override;
 
   static plUInt32 s_uiActiveViewID;

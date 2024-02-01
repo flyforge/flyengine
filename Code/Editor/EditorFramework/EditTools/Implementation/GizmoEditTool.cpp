@@ -7,8 +7,8 @@
 #include <GuiFoundation/PropertyGrid/ManipulatorManager.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectGizmoEditTool, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectGizmoEditTool, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plGameObjectGizmoEditTool::plGameObjectGizmoEditTool()
 {
@@ -76,7 +76,7 @@ void plGameObjectGizmoEditTool::UpdateGizmoTransformation()
 
     /// \todo Pivot point
     const plVec3 vPivotPoint =
-      tGlobal.m_qRotation * plVec3::ZeroVector(); // LatestSelection->GetEditorTypeAccessor().GetValue("Pivot").ConvertTo<plVec3>();
+      tGlobal.m_qRotation * plVec3::MakeZero(); // LatestSelection->GetEditorTypeAccessor().GetValue("Pivot").ConvertTo<plVec3>();
 
     plTransform mt;
     mt.SetIdentity();
@@ -157,7 +157,7 @@ void plGameObjectGizmoEditTool::SelectionManagerEventHandler(const plSelectionMa
 
     case plSelectionManagerEvent::Type::SelectionSet:
     case plSelectionManagerEvent::Type::ObjectAdded:
-      PLASMA_ASSERT_DEBUG(m_GizmoSelection.IsEmpty(), "This array should have been cleared when the gizmo lost focus");
+      PL_ASSERT_DEBUG(m_GizmoSelection.IsEmpty(), "This array should have been cleared when the gizmo lost focus");
       UpdateGizmoVisibleState();
       break;
 
@@ -179,13 +179,13 @@ void plGameObjectGizmoEditTool::ManipulatorManagerEventHandler(const plManipulat
   }
 }
 
-void plGameObjectGizmoEditTool::EngineWindowEventHandler(const PlasmaEngineWindowEvent& e)
+void plGameObjectGizmoEditTool::EngineWindowEventHandler(const plEngineWindowEvent& e)
 {
   if (plQtGameObjectViewWidget* pViewWidget = qobject_cast<plQtGameObjectViewWidget*>(e.m_pView))
   {
     switch (e.m_Type)
     {
-      case PlasmaEngineWindowEvent::Type::ViewCreated:
+      case plEngineWindowEvent::Type::ViewCreated:
         pViewWidget->m_pOrthoGizmoContext->m_GizmoEvents.AddEventHandler(
           plMakeDelegate(&plGameObjectGizmoEditTool::TransformationGizmoEventHandler, this));
         break;

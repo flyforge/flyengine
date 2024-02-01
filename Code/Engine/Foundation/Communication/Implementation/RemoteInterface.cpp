@@ -7,7 +7,7 @@ plRemoteInterface::~plRemoteInterface()
 {
   // unfortunately we cannot do that ourselves here, because ShutdownConnection() calls virtual functions
   // and this object is already partially destructed here (derived class is already shut down)
-  PLASMA_ASSERT_DEV(m_RemoteMode == plRemoteMode::None, "plRemoteInterface::ShutdownConnection() has to be called before destroying the interface");
+  PL_ASSERT_DEV(m_RemoteMode == plRemoteMode::None, "plRemoteInterface::ShutdownConnection() has to be called before destroying the interface");
 }
 
 plResult plRemoteInterface::CreateConnection(plUInt32 uiConnectionToken, plRemoteMode mode, plStringView sServerAddress, bool bStartUpdateThread)
@@ -16,7 +16,7 @@ plResult plRemoteInterface::CreateConnection(plUInt32 uiConnectionToken, plRemot
   ShutdownConnection();
   m_uiApplicationID = uiPrevID;
 
-  PLASMA_LOCK(GetMutex());
+  PL_LOCK(GetMutex());
 
   m_uiConnectionToken = uiConnectionToken;
   m_sServerAddress = sServerAddress;
@@ -30,7 +30,7 @@ plResult plRemoteInterface::CreateConnection(plUInt32 uiConnectionToken, plRemot
   if (InternalCreateConnection(mode, sServerAddress).Failed())
   {
     ShutdownConnection();
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_RemoteMode = mode;
@@ -42,7 +42,7 @@ plResult plRemoteInterface::CreateConnection(plUInt32 uiConnectionToken, plRemot
     StartUpdateThread();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plRemoteInterface::StartServer(plUInt32 uiConnectionToken, plStringView sAddress, bool bStartUpdateThread /*= true*/)
@@ -55,10 +55,10 @@ plResult plRemoteInterface::ConnectToServer(plUInt32 uiConnectionToken, plString
   return CreateConnection(uiConnectionToken, plRemoteMode::Client, sAddress, bStartUpdateThread);
 }
 
-plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime::Seconds(10)*/)
+plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime::MakeFromSeconds(10)*/)
 {
   if (m_RemoteMode != plRemoteMode::Client)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plTime tStart = plTime::Now();
 
@@ -67,15 +67,15 @@ plResult plRemoteInterface::WaitForConnectionToServer(plTime timeout /*= plTime:
     UpdateRemoteInterface();
 
     if (IsConnectedToServer())
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     if (timeout.GetSeconds() != 0)
     {
       if (plTime::Now() - tStart > timeout)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
 
-    plThreadUtils::Sleep(plTime::Milliseconds(10));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
   }
 }
 
@@ -83,7 +83,7 @@ void plRemoteInterface::ShutdownConnection()
 {
   StopUpdateThread();
 
-  PLASMA_LOCK(GetMutex());
+  PL_LOCK(GetMutex());
 
   if (m_RemoteMode != plRemoteMode::None)
   {
@@ -99,14 +99,14 @@ void plRemoteInterface::UpdatePingToServer()
 {
   if (m_RemoteMode == plRemoteMode::Server)
   {
-    PLASMA_LOCK(GetMutex());
+    PL_LOCK(GetMutex());
     m_PingToServer = InternalGetPingToServer();
   }
 }
 
 void plRemoteInterface::UpdateRemoteInterface()
 {
-  PLASMA_LOCK(GetMutex());
+  PL_LOCK(GetMutex());
 
   InternalUpdateRemoteInterface();
 }
@@ -114,17 +114,17 @@ void plRemoteInterface::UpdateRemoteInterface()
 plResult plRemoteInterface::Transmit(plRemoteTransmitMode tm, const plArrayPtr<const plUInt8>& data)
 {
   if (m_RemoteMode == plRemoteMode::None)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_LOCK(GetMutex());
+  PL_LOCK(GetMutex());
 
   if (InternalTransmit(tm, data).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // make sure the message is processed immediately
   UpdateRemoteInterface();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -196,14 +196,14 @@ void plRemoteInterface::SetMessageHandler(plUInt32 uiSystemID, plRemoteMessageHa
 
 plUInt32 plRemoteInterface::ExecuteMessageHandlers(plUInt32 uiSystem)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   return ExecuteMessageHandlersForQueue(m_MessageQueues[uiSystem]);
 }
 
 plUInt32 plRemoteInterface::ExecuteAllMessageHandlers()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   plUInt32 ret = 0;
   for (auto it = m_MessageQueues.GetIterator(); it.IsValid(); ++it)
@@ -239,9 +239,9 @@ void plRemoteInterface::StartUpdateThread()
 
   if (m_pUpdateThread == nullptr)
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
-    m_pUpdateThread = PLASMA_DEFAULT_NEW(plRemoteThread);
+    m_pUpdateThread = PL_DEFAULT_NEW(plRemoteThread);
     m_pUpdateThread->m_pRemoteInterface = this;
     m_pUpdateThread->Start();
   }
@@ -254,8 +254,8 @@ void plRemoteInterface::StopUpdateThread()
     m_pUpdateThread->m_bKeepRunning = false;
     m_pUpdateThread->Join();
 
-    PLASMA_LOCK(m_Mutex);
-    PLASMA_DEFAULT_DELETE(m_pUpdateThread);
+    PL_LOCK(m_Mutex);
+    PL_DEFAULT_DELETE(m_pUpdateThread);
   }
 }
 
@@ -307,7 +307,7 @@ void plRemoteInterface::ReportDisconnectedFromClient(plUInt32 uiApplicationID)
 
 void plRemoteInterface::ReportMessage(plUInt32 uiApplicationID, plUInt32 uiSystemID, plUInt32 uiMsgID, const plArrayPtr<const plUInt8>& data)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   auto& queue = m_MessageQueues[uiSystemID];
 
@@ -359,24 +359,24 @@ plResult plRemoteInterface::DetermineTargetAddress(plStringView sConnectTo0, plU
     sConnectTo.Split(false, IP, ".");
 
     if (IP.GetCount() != 4)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     if (plConversionUtils::StringToInt(IP[0], ip1).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     if (plConversionUtils::StringToInt(IP[1], ip2).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     if (plConversionUtils::StringToInt(IP[2], ip3).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     if (plConversionUtils::StringToInt(IP[3], ip4).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
   else
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   out_IP = ((ip1 & 0xFF) | (ip2 & 0xFF) << 8 | (ip3 & 0xFF) << 16 | (ip4 & 0xFF) << 24);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -401,7 +401,7 @@ plUInt32 plRemoteThread::Run()
     {
       plTime tNow = plTime::Now();
 
-      if (tNow - lastPing > plTime::Milliseconds(500))
+      if (tNow - lastPing > plTime::MakeFromMilliseconds(500))
       {
         lastPing = tNow;
 
@@ -409,10 +409,10 @@ plUInt32 plRemoteThread::Run()
       }
     }
 
-    plThreadUtils::Sleep(plTime::Milliseconds(10));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
   }
 
   return 0;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_RemoteInterface);
+

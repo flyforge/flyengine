@@ -135,7 +135,7 @@
 #define XM_ALIGNED_DATA(x) __declspec(align(x))
 #endif
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_LINUX)
+#if PL_DISABLED(PL_PLATFORM_LINUX)
 #include "DirectXTex.h"
 #endif
 

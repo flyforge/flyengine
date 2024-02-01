@@ -8,7 +8,7 @@
 
 struct plMsgExtractRenderData;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinisherComponentManager final : public plComponentManager<class plParticleFinisherComponent, plBlockStorageType::Compact>
+class PL_PARTICLEPLUGIN_DLL plParticleFinisherComponentManager final : public plComponentManager<class plParticleFinisherComponent, plBlockStorageType::Compact>
 {
   using SUPER = plComponentManager<class plParticleFinisherComponent, plBlockStorageType::Compact>;
 
@@ -18,9 +18,13 @@ public:
   void UpdateBounds();
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinisherComponent final : public plRenderComponent
+/// \brief Automatically created by the particle system to finish playing a particle effect.
+///
+/// This is needed to play a particle effect to the end, when a game object with a particle effect on it gets deleted.
+/// This component should never be instantiated manually.
+class PL_PARTICLEPLUGIN_DLL plParticleFinisherComponent final : public plRenderComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plParticleFinisherComponent, plRenderComponent, plParticleFinisherComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plParticleFinisherComponent, plRenderComponent, plParticleFinisherComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -28,13 +32,11 @@ class PLASMA_PARTICLEPLUGIN_DLL plParticleFinisherComponent final : public plRen
 protected:
   virtual void OnDeactivated() override;
 
-
   //////////////////////////////////////////////////////////////////////////
   // plRenderComponent
 
 public:
-  virtual plResult GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg) override;
-
+  virtual plResult GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plParticleFinisherComponent

@@ -10,46 +10,46 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plAnimationClip1D, plNoBase, 1, plRTTIDefaultAllocator<plAnimationClip1D>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plAnimationClip1D, plNoBase, 1, plRTTIDefaultAllocator<plAnimationClip1D>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Clip", GetAnimationFile, SetAnimationFile)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
-    PLASMA_MEMBER_PROPERTY("Position", m_fPosition),
-    PLASMA_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Clip", GetAnimationFile, SetAnimationFile)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+    PL_MEMBER_PROPERTY("Position", m_fPosition),
+    PL_MEMBER_PROPERTY("Speed", m_fSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleBlendSpace1DAnimNode, 1, plRTTIDefaultAllocator<plSampleBlendSpace1DAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleBlendSpace1DAnimNode, 1, plRTTIDefaultAllocator<plSampleBlendSpace1DAnimNode>)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_MEMBER_PROPERTY("Loop", m_bLoop)->AddAttributes(new plDefaultValueAttribute(true)),
-      PLASMA_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, {})),
-      PLASMA_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
-      PLASMA_ARRAY_MEMBER_PROPERTY("Clips", m_Clips),
+      PL_MEMBER_PROPERTY("Loop", m_bLoop)->AddAttributes(new plDefaultValueAttribute(true)),
+      PL_MEMBER_PROPERTY("PlaybackSpeed", m_fPlaybackSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, {})),
+      PL_MEMBER_PROPERTY("ApplyRootMotion", m_bApplyRootMotion),
+      PL_ARRAY_MEMBER_PROPERTY("Clips", m_Clips),
 
-      PLASMA_MEMBER_PROPERTY("InStart", m_InStart)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InLoop", m_InLoop)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InSpeed", m_InSpeed)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InLerp", m_InLerp)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InStart", m_InStart)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InLoop", m_InLoop)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InSpeed", m_InSpeed)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InLerp", m_InLerp)->AddAttributes(new plHiddenAttribute()),
 
-      PLASMA_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("OutOnStarted", m_OutOnStarted)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("OutOnFinished", m_OutOnFinished)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutOnStarted", m_OutOnStarted)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutOnFinished", m_OutOnFinished)->AddAttributes(new plHiddenAttribute()),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Pose Generation"),
       new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue)),
       new plTitleAttribute("BlendSpace 1D: '{Clips[0]}' '{Clips[1]}' '{Clips[2]}'"),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plAnimationClip1D::SetAnimationFile(const char* szFile)
@@ -69,7 +69,7 @@ plResult plSampleBlendSpace1DAnimNode::SerializeNode(plStreamWriter& stream) con
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_Clips.GetCount();
   for (plUInt32 i = 0; i < m_Clips.GetCount(); ++i)
@@ -83,22 +83,22 @@ plResult plSampleBlendSpace1DAnimNode::SerializeNode(plStreamWriter& stream) con
   stream << m_bApplyRootMotion;
   stream << m_fPlaybackSpeed;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InStart.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLoop.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InSpeed.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLerp.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnStarted.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFinished.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InStart.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLoop.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InSpeed.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLerp.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnStarted.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFinished.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSampleBlendSpace1DAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   plUInt32 num = 0;
   stream >> num;
@@ -114,20 +114,19 @@ plResult plSampleBlendSpace1DAnimNode::DeserializeNode(plStreamReader& stream)
   stream >> m_bApplyRootMotion;
   stream >> m_fPlaybackSpeed;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InStart.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLoop.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InSpeed.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InLerp.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnStarted.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFinished.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InStart.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLoop.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InSpeed.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InLerp.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnStarted.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFinished.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSampleBlendSpace1DAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_Blendspace1D");
   if (!m_OutPose.IsConnected() || !m_InLerp.IsConnected() || m_Clips.IsEmpty())
     return;
 
@@ -135,7 +134,7 @@ void plSampleBlendSpace1DAnimNode::Step(plAnimController& ref_controller, plAnim
 
   if ((!m_InStart.IsConnected() && !pState->m_bPlaying) || m_InStart.IsTriggered(ref_graph))
   {
-    pState->m_PlaybackTime = plTime::Zero();
+    pState->m_PlaybackTime = plTime::MakeZero();
     pState->m_bPlaying = true;
 
     m_OutOnStarted.SetTriggered(ref_graph);
@@ -308,3 +307,7 @@ bool plSampleBlendSpace1DAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_d
   out_desc.FillFromType<InstanceState>();
   return true;
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_SampleBlendSpace1DAnimNode);
+

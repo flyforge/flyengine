@@ -27,7 +27,7 @@ struct plVersionKey
     m_sType.Assign(sType);
     m_uiTypeVersion = uiTypeVersion;
   }
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   plHashedString m_sType;
   plUInt32 m_uiTypeVersion;
 };
@@ -35,7 +35,7 @@ struct plVersionKey
 /// \brief Hash helper class for plVersionKey
 struct plGraphVersioningHash
 {
-  PLASMA_FORCE_INLINE static plUInt32 Hash(const plVersionKey& a)
+  PL_FORCE_INLINE static plUInt32 Hash(const plVersionKey& a)
   {
     auto typeNameHash = a.m_sType.GetHash();
     plUInt32 uiHash = plHashingUtils::xxHash32(&typeNameHash, sizeof(typeNameHash));
@@ -43,14 +43,14 @@ struct plGraphVersioningHash
     return uiHash;
   }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plVersionKey& a, const plVersionKey& b)
+  PL_ALWAYS_INLINE static bool Equal(const plVersionKey& a, const plVersionKey& b)
   {
     return a.m_sType == b.m_sType && a.m_uiTypeVersion == b.m_uiTypeVersion;
   }
 };
 
 /// \brief A class that overlaps plReflectedTypeDescriptor with the properties needed for patching.
-struct PLASMA_FOUNDATION_DLL plTypeVersionInfo
+struct PL_FOUNDATION_DLL plTypeVersionInfo
 {
   const char* GetTypeName() const;
   void SetTypeName(const char* szName);
@@ -61,11 +61,11 @@ struct PLASMA_FOUNDATION_DLL plTypeVersionInfo
   plHashedString m_sParentTypeName;
   plUInt32 m_uiTypeVersion;
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plTypeVersionInfo);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plTypeVersionInfo);
 
 /// \brief Handles the patching of a node. Is passed into the patch
 ///  classes to provide utility functions and track the node's patching progress.
-class PLASMA_FOUNDATION_DLL plGraphPatchContext
+class PL_FOUNDATION_DLL plGraphPatchContext
 {
 public:
   /// \brief Ensures that the base class named szType is at version uiTypeVersion.
@@ -102,9 +102,9 @@ private:
 /// \brief Singleton that allows version patching of plAbstractObjectGraph.
 ///
 /// Patching is automatically executed of plAbstractObjectGraph de-serialize functions.
-class PLASMA_FOUNDATION_DLL plGraphVersioning
+class PL_FOUNDATION_DLL plGraphVersioning
 {
-  PLASMA_DECLARE_SINGLETON(plGraphVersioning);
+  PL_DECLARE_SINGLETON(plGraphVersioning);
 
 public:
   plGraphVersioning();
@@ -117,7 +117,7 @@ public:
 private:
   friend class plGraphPatchContext;
 
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, GraphVersioning);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, GraphVersioning);
 
   void PluginEventHandler(const plPluginEvent& EventData);
   void UpdatePatches();

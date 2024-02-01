@@ -6,9 +6,9 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_GAMEENGINE_DLL plMsgMoveCharacterController : public plMessage
+struct PL_GAMEENGINE_DLL plMsgMoveCharacterController : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgMoveCharacterController, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgMoveCharacterController, plMessage);
 
   double m_fMoveForwards = 0;
   double m_fMoveBackwards = 0;
@@ -19,7 +19,6 @@ struct PLASMA_GAMEENGINE_DLL plMsgMoveCharacterController : public plMessage
   bool m_bRun = false;
   bool m_bJump = false;
   bool m_bCrouch = false;
-  plQuat m_qVelocityRotation = plQuat::IdentityQuaternion();
 };
 
 /// \brief Base class for implementations of a character controller.
@@ -27,16 +26,16 @@ struct PLASMA_GAMEENGINE_DLL plMsgMoveCharacterController : public plMessage
 /// A character controller implements the raw physical locomotion aspect of moving a character (player or NPC)
 /// through the world. This is typically implemented through a physics engine, when natural collision behavior
 /// is desired. In more constricted settings, it could use a much simpler implementation.
-class PLASMA_GAMEENGINE_DLL plCharacterControllerComponent : public plComponent
+class PL_GAMEENGINE_DLL plCharacterControllerComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plCharacterControllerComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plCharacterControllerComponent, plComponent);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 
   //////////////////////////////////////////////////////////////////////////
@@ -55,7 +54,7 @@ public:
   /// \brief Instructs the CC to move in certain directions. An implementation can queue the request for later processing.
   ///
   /// It can also add further functionality, such as adding gravity, stair stepping, etc.
-  virtual void MoveCharacter(plMsgMoveCharacterController& msg) = 0; // [ msg handler ]
+  virtual void MoveCharacter(plMsgMoveCharacterController& ref_msg) = 0; // [ msg handler ]
 
   /// \brief Teleports the CC to the desired global position. Ignores obstacles on the path.
   ///

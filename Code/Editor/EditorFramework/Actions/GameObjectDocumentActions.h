@@ -8,16 +8,16 @@ class plPreferences;
 struct plGameObjectEvent;
 class plGameObjectDocument;
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectDocumentActions
+class PL_EDITORFRAMEWORK_DLL plGameObjectDocumentActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping, const char* szPath);
-  static void MapMenuSimulationSpeed(const char* szMapping, const char* szPath);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapMenuSimulationSpeed(plStringView sMapping);
 
-  static void MapToolbarActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hGameObjectCategory;
   static plActionDescriptorHandle s_hRenderSelectionOverlay;
@@ -32,9 +32,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plGameObjectDocumentAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plGameObjectDocumentAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectDocumentAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectDocumentAction, plButtonAction);
 
 public:
   enum class ActionType
@@ -63,9 +63,9 @@ private:
 };
 
 
-class PLASMA_EDITORFRAMEWORK_DLL plCameraSpeedSliderAction : public plSliderAction
+class PL_EDITORFRAMEWORK_DLL plCameraSpeedSliderAction : public plSliderAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCameraSpeedSliderAction, plSliderAction);
+  PL_ADD_DYNAMIC_REFLECTION(plCameraSpeedSliderAction, plSliderAction);
 
 public:
   enum class ActionType

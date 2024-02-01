@@ -71,7 +71,7 @@ public:
   }
 
   template <std::size_t... I>
-  PLASMA_FORCE_INLINE void ExecuteImpl(void* pInstance, plVariant& out_returnValue, plArrayPtr<plVariant> arguments, std::index_sequence<I...>) const
+  PL_FORCE_INLINE void ExecuteImpl(void* pInstance, plVariant& out_returnValue, plArrayPtr<plVariant> arguments, std::index_sequence<I...>) const
   {
     CLASS* pTargetInstance = static_cast<CLASS*>(pInstance);
     if constexpr (std::is_same<R, void>::value)
@@ -114,7 +114,7 @@ public:
   }
 
   template <std::size_t... I>
-  PLASMA_FORCE_INLINE void ExecuteImpl(const void* pInstance, plVariant& out_returnValue, plArrayPtr<plVariant> arguments, std::index_sequence<I...>) const
+  PL_FORCE_INLINE void ExecuteImpl(const void* pInstance, plVariant& out_returnValue, plArrayPtr<plVariant> arguments, std::index_sequence<I...>) const
   {
     const CLASS* pTargetInstance = static_cast<const CLASS*>(pInstance);
     if constexpr (std::is_same<R, void>::value)
@@ -198,8 +198,8 @@ public:
   template <std::size_t... I>
   void ExecuteImpl(plTraitInt<0>, plVariant& out_returnValue, plArrayPtr<plVariant> arguments, std::index_sequence<I...>) const
   {
-    CLASS* pInstance = PLASMA_DEFAULT_NEW(CLASS, plVariantAdapter<typename getArgument<I, Args...>::Type>(arguments[I])...);
-    // CLASS* pInstance = PLASMA_DEFAULT_NEW(CLASS, static_cast<typename getArgument<I, Args...>::Type>(plVariantAdapter<typename getArgument<I,
+    CLASS* pInstance = PL_DEFAULT_NEW(CLASS, plVariantAdapter<typename getArgument<I, Args...>::Type>(arguments[I])...);
+    // CLASS* pInstance = PL_DEFAULT_NEW(CLASS, static_cast<typename getArgument<I, Args...>::Type>(plVariantAdapter<typename getArgument<I,
     // Args...>::Type>(arguments[I]))...);
     out_returnValue = pInstance;
   }

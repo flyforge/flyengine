@@ -417,7 +417,7 @@ struct FloatingDockContainerPrivate
 			TitleBar->setTitle(Text);
 		}
 #endif
-		_this->setWindowTitle(Text.toUpper());
+		_this->setWindowTitle(Text);
 	}
 
 	/**
@@ -429,11 +429,11 @@ struct FloatingDockContainerPrivate
 		// reflect CurrentWidget's title if configured to do so, otherwise display application name as window title
 		if (testConfigFlag(CDockManager::FloatingContainerHasWidgetTitle))
 		{
-			setWindowTitle(CurrentWidget->windowTitle().toUpper());
+			setWindowTitle(CurrentWidget->windowTitle());
 		}
 		else
 		{
-			setWindowTitle(qApp->applicationDisplayName().toUpper());
+			setWindowTitle(qApp->applicationDisplayName());
 		}
 
 		// reflect CurrentWidget's icon if configured to do so, otherwise display application icon as window icon
@@ -976,7 +976,7 @@ void CFloatingDockContainer::onDockAreasAddedOrRemoved()
 			    SLOT(onDockAreaCurrentChanged(int)));
 			d->SingleDockArea = nullptr;
 		}
-		d->setWindowTitle(qApp->applicationDisplayName().toUpper());
+		d->setWindowTitle(qApp->applicationDisplayName());
 		setWindowIcon(QApplication::windowIcon());
 	}
 }
@@ -1003,7 +1003,7 @@ void CFloatingDockContainer::updateWindowTitle()
 	}
 	else
 	{
-		d->setWindowTitle(qApp->applicationDisplayName().toUpper());
+		d->setWindowTitle(qApp->applicationDisplayName());
 		setWindowIcon(QApplication::windowIcon());
 	}
 }

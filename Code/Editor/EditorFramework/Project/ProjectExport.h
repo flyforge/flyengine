@@ -14,7 +14,7 @@ class plProgressRange;
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_EDITORFRAMEWORK_DLL plProjectExport
+struct PL_EDITORFRAMEWORK_DLL plProjectExport
 {
   static plResult ExportProject(const char* szTargetDirectory, const plPlatformProfile* pPlatformProfile, const plApplicationFileSystemConfig& dataDirs);
 

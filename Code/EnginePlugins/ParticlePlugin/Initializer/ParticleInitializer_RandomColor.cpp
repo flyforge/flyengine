@@ -9,20 +9,20 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomColor, 1, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomColor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializerFactory_RandomColor, 1, plRTTIDefaultAllocator<plParticleInitializerFactory_RandomColor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
-    PLASMA_MEMBER_PROPERTY("Color1", m_Color1)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
-    PLASMA_MEMBER_PROPERTY("Color2", m_Color2)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
+    PL_MEMBER_PROPERTY("Color1", m_Color1)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
+    PL_MEMBER_PROPERTY("Color2", m_Color2)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomColor, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomColor>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleInitializer_RandomColor, 1, plRTTIDefaultAllocator<plParticleInitializer_RandomColor>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleInitializerFactory_RandomColor::GetInitializerType() const
@@ -60,24 +60,24 @@ const char* plParticleInitializerFactory_RandomColor::GetColorGradientFile() con
   return m_hGradient.GetResourceID();
 }
 
-void plParticleInitializerFactory_RandomColor::Save(plStreamWriter& stream) const
+void plParticleInitializerFactory_RandomColor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_hGradient;
-  stream << m_Color1;
-  stream << m_Color2;
+  inout_stream << m_hGradient;
+  inout_stream << m_Color1;
+  inout_stream << m_Color2;
 }
 
-void plParticleInitializerFactory_RandomColor::Load(plStreamReader& stream)
+void plParticleInitializerFactory_RandomColor::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_hGradient;
-  stream >> m_Color1;
-  stream >> m_Color2;
+  inout_stream >> m_hGradient;
+  inout_stream >> m_Color1;
+  inout_stream >> m_Color2;
 }
 
 
@@ -88,7 +88,7 @@ void plParticleInitializer_RandomColor::CreateRequiredStreams()
 
 void plParticleInitializer_RandomColor::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Random Color");
+  PL_PROFILE_SCOPE("PFX: Random Color");
 
   plColorLinear16f* pColor = m_pStreamColor->GetWritableData<plColorLinear16f>();
 
@@ -139,4 +139,4 @@ void plParticleInitializer_RandomColor::InitializeElements(plUInt64 uiStartIndex
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomColor);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Initializer_ParticleInitializer_RandomColor);

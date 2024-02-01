@@ -29,7 +29,7 @@ public:
   /// \brief End the current frame capture and discard the corresponding data, saving processing time and file I/O in the process.
   virtual void EndFrameCaptureAndDiscardResult(plWindowHandle hWnd) = 0;
 
-  /// \brief Retrieve the absolute file name of the last successful frame capture. Returns PLASMA_FAILURE if no successful capture has
+  /// \brief Retrieve the absolute file name of the last successful frame capture. Returns PL_FAILURE if no successful capture has
   /// been performed.
   virtual plResult GetLastAbsCaptureFileName(plStringBuilder& out_sFileName) const = 0;
 };

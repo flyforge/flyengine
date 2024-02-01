@@ -8,7 +8,7 @@ class plTextureAssetProfileConfig;
 
 struct plTextureChannelMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -22,14 +22,14 @@ struct plTextureChannelMode
     Default = RGBA
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTextureChannelMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plTextureChannelMode);
 
 class plTextureAssetDocument : public plSimpleAssetDocument<plTextureAssetProperties>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureAssetDocument, plSimpleAssetDocument<plTextureAssetProperties>);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureAssetDocument, plSimpleAssetDocument<plTextureAssetProperties>);
 
 public:
-  plTextureAssetDocument(const char* szDocumentPath);
+  plTextureAssetDocument(plStringView sDocumentPath);
 
   // for previewing purposes
   plEnum<plTextureChannelMode> m_ChannelMode;
@@ -38,8 +38,8 @@ public:
 
 protected:
   virtual void InitializeAfterLoading(bool bFirstTimeCreation) override;
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PLASMA_SUCCESS); }
-  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override { return plStatus(PL_SUCCESS); }
+  virtual plTransformStatus InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
 
   plStatus RunTexConv(const char* szTargetFile, const plAssetFileHeader& AssetHeader, bool bUpdateThumbnail, const plTextureAssetProfileConfig* pAssetConfig);
 
@@ -50,15 +50,29 @@ protected:
 
 class plTextureAssetDocumentGenerator : public plAssetDocumentGenerator
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureAssetDocumentGenerator, plAssetDocumentGenerator);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureAssetDocumentGenerator, plAssetDocumentGenerator);
 
 public:
   plTextureAssetDocumentGenerator();
   ~plTextureAssetDocumentGenerator();
 
-  virtual void GetImportModes(plStringView sParentDirRelativePath, plHybridArray<plAssetDocumentGenerator::Info, 4>& out_Modes) const override;
-  virtual plStatus Generate(plStringView sDataDirRelativePath, const plAssetDocumentGenerator::Info& info, plDocument*& out_pGeneratedDocument) override;
+  enum class TextureType
+  {
+    Diffuse,
+    Normal,
+    Occlusion,
+    Roughness,
+    Metalness,
+    ORM,
+    Height,
+    HDR,
+    Linear,
+  };
+
+  virtual void GetImportModes(plStringView sAbsInputFile, plDynamicArray<plAssetDocumentGenerator::ImportMode>& out_modes) const override;
   virtual plStringView GetDocumentExtension() const override { return "plTextureAsset"; }
   virtual plStringView GetGeneratorGroup() const override { return "Images"; }
-  virtual plStringView GetNameSuffix() const override { return "texture"; }
+  virtual plStatus Generate(plStringView sInputFileAbs, plStringView sMode, plDocument*& out_pGeneratedDocument) override;
+
+  static TextureType DetermineTextureType(plStringView sFile);
 };

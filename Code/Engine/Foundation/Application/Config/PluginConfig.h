@@ -5,7 +5,7 @@
 #include <Foundation/Reflection/Reflection.h>
 #include <Foundation/Strings/String.h>
 
-class PLASMA_FOUNDATION_DLL plApplicationPluginConfig
+class PL_FOUNDATION_DLL plApplicationPluginConfig
 {
 public:
   plApplicationPluginConfig();
@@ -16,7 +16,7 @@ public:
   void Load(plStringView sConfigPath = s_sConfigFile);
   void Apply();
 
-  struct PLASMA_FOUNDATION_DLL PluginConfig
+  struct PL_FOUNDATION_DLL PluginConfig
   {
     bool operator<(const PluginConfig& rhs) const;
 
@@ -30,7 +30,8 @@ public:
   mutable plHybridArray<PluginConfig, 8> m_Plugins;
 };
 
+
 using plApplicationPluginConfig_PluginConfig = plApplicationPluginConfig::PluginConfig;
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plApplicationPluginConfig);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plApplicationPluginConfig_PluginConfig);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plApplicationPluginConfig);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plApplicationPluginConfig_PluginConfig);

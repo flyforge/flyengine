@@ -52,7 +52,7 @@ static plQtProxy* QtSliderProxyCreator(const plRTTI* pRtti)
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, QtProxies)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, QtProxies)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "ToolsFoundation",
@@ -85,13 +85,13 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, QtProxies)
     plQtProxy::s_pSignalProxy = nullptr;
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-bool plQtProxy::TriggerDocumentAction(plDocument* pDocument, QKeyEvent* event)
+bool plQtProxy::TriggerDocumentAction(plDocument* pDocument, QKeyEvent* pEvent, bool bTestOnly)
 {
-  auto CheckActions = [](QKeyEvent* event, plMap<plActionDescriptorHandle, QWeakPointer<plQtProxy>>& actions) -> bool {
-    for (auto weakActionProxy : actions)
+  auto CheckActions = [&](QKeyEvent* pEvent, plMap<plActionDescriptorHandle, QWeakPointer<plQtProxy>>& ref_actions) -> bool {
+    for (auto weakActionProxy : ref_actions)
     {
       if (auto pProxy = weakActionProxy.Value().toStrongRef())
       {
@@ -108,10 +108,13 @@ bool plQtProxy::TriggerDocumentAction(plDocument* pDocument, QKeyEvent* event)
         if (pQAction)
         {
           QKeySequence ks = pQAction->shortcut();
-          if (pQAction->isEnabled() && QKeySequence(event->key() | event->modifiers()) == ks)
+          if (pQAction->isEnabled() && QKeySequence(pEvent->key() | pEvent->modifiers()) == ks)
           {
-            pQAction->trigger();
-            event->accept();
+            if (!bTestOnly)
+            {
+              pQAction->trigger();
+            }
+            pEvent->accept();
             return true;
           }
         }
@@ -123,27 +126,27 @@ bool plQtProxy::TriggerDocumentAction(plDocument* pDocument, QKeyEvent* event)
   if (pDocument)
   {
     plMap<plActionDescriptorHandle, QWeakPointer<plQtProxy>>& actions = s_DocumentActions[pDocument];
-    if (CheckActions(event, actions))
+    if (CheckActions(pEvent, actions))
       return true;
   }
-  return CheckActions(event, s_GlobalActions);
+  return CheckActions(pEvent, s_GlobalActions);
 }
 
 plRttiMappedObjectFactory<plQtProxy>& plQtProxy::GetFactory()
 {
   return s_Factory;
 }
-QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& context, plActionDescriptorHandle hDesc)
+QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& ref_context, plActionDescriptorHandle hDesc)
 {
   QSharedPointer<plQtProxy> pProxy;
   const plActionDescriptor* pDesc = hDesc.GetDescriptor();
   if (pDesc->m_Type != plActionType::Action && pDesc->m_Type != plActionType::ActionAndMenu)
   {
-    auto pAction = pDesc->CreateAction(context);
+    auto pAction = pDesc->CreateAction(ref_context);
     pProxy = QSharedPointer<plQtProxy>(plQtProxy::GetFactory().CreateObject(pAction->GetDynamicRTTI()));
-    PLASMA_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
+    PL_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
     pProxy->SetAction(pAction);
-    PLASMA_ASSERT_DEV(pProxy->GetAction()->GetContext().m_pDocument == context.m_pDocument, "invalid document pointer");
+    PL_ASSERT_DEV(pProxy->GetAction()->GetContext().m_pDocument == ref_context.m_pDocument, "invalid document pointer");
     return pProxy;
   }
 
@@ -155,9 +158,9 @@ QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& context, plAction
       QWeakPointer<plQtProxy> pTemp = s_GlobalActions[hDesc];
       if (pTemp.isNull())
       {
-        auto pAction = pDesc->CreateAction(context);
+        auto pAction = pDesc->CreateAction(ref_context);
         pProxy = QSharedPointer<plQtProxy>(plQtProxy::GetFactory().CreateObject(pAction->GetDynamicRTTI()));
-        PLASMA_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
+        PL_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
         pProxy->SetAction(pAction);
         s_GlobalActions[hDesc] = pProxy.toWeakRef();
       }
@@ -171,14 +174,14 @@ QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& context, plAction
 
     case plActionScope::Document:
     {
-      const plDocument* pDocument = context.m_pDocument; // may be null
+      const plDocument* pDocument = ref_context.m_pDocument; // may be null
 
       QWeakPointer<plQtProxy> pTemp = s_DocumentActions[pDocument][hDesc];
       if (pTemp.isNull())
       {
-        auto pAction = pDesc->CreateAction(context);
+        auto pAction = pDesc->CreateAction(ref_context);
         pProxy = QSharedPointer<plQtProxy>(plQtProxy::GetFactory().CreateObject(pAction->GetDynamicRTTI()));
-        PLASMA_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
+        PL_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
         pProxy->SetAction(pAction);
         s_DocumentActions[pDocument][hDesc] = pProxy;
       }
@@ -193,17 +196,17 @@ QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& context, plAction
     case plActionScope::Window:
     {
       bool bExisted = true;
-      auto it = s_WindowActions.FindOrAdd(context.m_pWindow, &bExisted);
+      auto it = s_WindowActions.FindOrAdd(ref_context.m_pWindow, &bExisted);
       if (!bExisted)
       {
-        s_pSignalProxy->connect(context.m_pWindow, &QObject::destroyed, s_pSignalProxy, [=]() { s_WindowActions.Remove(context.m_pWindow); });
+        s_pSignalProxy->connect(ref_context.m_pWindow, &QObject::destroyed, s_pSignalProxy, [ref_context]() { s_WindowActions.Remove(ref_context.m_pWindow); });
       }
       QWeakPointer<plQtProxy> pTemp = it.Value()[hDesc];
       if (pTemp.isNull())
       {
-        auto pAction = pDesc->CreateAction(context);
+        auto pAction = pDesc->CreateAction(ref_context);
         pProxy = QSharedPointer<plQtProxy>(plQtProxy::GetFactory().CreateObject(pAction->GetDynamicRTTI()));
-        PLASMA_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
+        PL_ASSERT_DEBUG(pProxy != nullptr, "No proxy assigned to action '{0}'", pDesc->m_sActionName);
         pProxy->SetAction(pAction);
         it.Value()[hDesc] = pProxy;
       }
@@ -223,7 +226,7 @@ QSharedPointer<plQtProxy> plQtProxy::GetProxy(plActionContext& context, plAction
     plAction* pAction = pProxy->GetAction();
     const plActionContext& ctxt = pAction->GetContext();
     plDocument* pDoc = ctxt.m_pDocument;
-    PLASMA_ASSERT_DEV(pDoc == context.m_pDocument, "invalid document pointer");
+    PL_ASSERT_DEV(pDoc == ref_context.m_pDocument, "invalid document pointer");
   }
   return pProxy;
 }
@@ -262,7 +265,7 @@ void plQtMenuProxy::Update()
   auto pMenu = static_cast<plMenuAction*>(m_pAction);
 
   m_pMenu->setIcon(plQtUiServices::GetCachedIconResource(pMenu->GetIconPath()));
-  m_pMenu->setTitle(QString::fromUtf8(plTranslate(pMenu->GetName())));
+  m_pMenu->setTitle(plMakeQString(plTranslate(pMenu->GetName())));
 }
 
 void plQtMenuProxy::SetAction(plAction* pAction)
@@ -311,7 +314,7 @@ void plQtButtonProxy::Update()
   m_pQtAction->setShortcut(QKeySequence(QString::fromUtf8(pDesc->m_sShortcut.GetData())));
 
   const QString sDisplayShortcut = m_pQtAction->shortcut().toString(QKeySequence::NativeText);
-  QString sTooltip = plTranslateTooltip(pButton->GetName());
+  QString sTooltip = plMakeQString(plTranslateTooltip(pButton->GetName()));
 
   plStringBuilder sDisplay = plTranslate(pButton->GetName());
 
@@ -328,7 +331,7 @@ void plQtButtonProxy::Update()
     sTooltip.append(")");
   }
 
-  if (!plStringUtils::IsNullOrEmpty(pButton->GetAdditionalDisplayString()))
+  if (!pButton->GetAdditionalDisplayString().IsEmpty())
     sDisplay.Append(" '", pButton->GetAdditionalDisplayString(), "'"); // TODO: translate this as well?
 
   m_pQtAction->setIcon(plQtUiServices::GetCachedIconResource(pButton->GetIconPath()));
@@ -341,37 +344,37 @@ void plQtButtonProxy::Update()
 }
 
 
-void SetupQAction(plAction* pAction, QPointer<QAction>& pQtAction, QObject* pTarget)
+void SetupQAction(plAction* pAction, QPointer<QAction>& ref_pQtAction, QObject* pTarget)
 {
   plActionDescriptorHandle hDesc = pAction->GetDescriptorHandle();
   const plActionDescriptor* pDesc = hDesc.GetDescriptor();
 
-  if (pQtAction == nullptr)
+  if (ref_pQtAction == nullptr)
   {
-    pQtAction = new QAction(nullptr);
-    PLASMA_VERIFY(QObject::connect(pQtAction, SIGNAL(triggered(bool)), pTarget, SLOT(OnTriggered())) != nullptr, "connection failed");
+    ref_pQtAction = new QAction(nullptr);
+    PL_VERIFY(QObject::connect(ref_pQtAction, SIGNAL(triggered(bool)), pTarget, SLOT(OnTriggered())) != nullptr, "connection failed");
 
     switch (pDesc->m_Scope)
     {
       case plActionScope::Global:
       {
         // Parent is null so the global actions don't get deleted.
-        pQtAction->setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
+        ref_pQtAction->setShortcutContext(Qt::ShortcutContext::ApplicationShortcut);
       }
       break;
       case plActionScope::Document:
       {
         // Parent is set to the window belonging to the document.
         plQtDocumentWindow* pWindow = plQtDocumentWindow::FindWindowByDocument(pAction->GetContext().m_pDocument);
-        PLASMA_ASSERT_DEBUG(pWindow != nullptr, "You can't map a plActionScope::Document action without that document existing!");
-        pQtAction->setParent(pWindow);
-        pQtAction->setShortcutContext(Qt::ShortcutContext::WidgetWithChildrenShortcut);
+        PL_ASSERT_DEBUG(pWindow != nullptr, "You can't map a plActionScope::Document action without that document existing!");
+        ref_pQtAction->setParent(pWindow);
+        ref_pQtAction->setShortcutContext(Qt::ShortcutContext::WidgetWithChildrenShortcut);
       }
       break;
       case plActionScope::Window:
       {
-        pQtAction->setParent(pAction->GetContext().m_pWindow);
-        pQtAction->setShortcutContext(Qt::ShortcutContext::WidgetWithChildrenShortcut);
+        ref_pQtAction->setParent(pAction->GetContext().m_pWindow);
+        ref_pQtAction->setShortcutContext(Qt::ShortcutContext::WidgetWithChildrenShortcut);
       }
       break;
     }
@@ -380,7 +383,7 @@ void SetupQAction(plAction* pAction, QPointer<QAction>& pQtAction, QObject* pTar
 
 void plQtButtonProxy::SetAction(plAction* pAction)
 {
-  PLASMA_ASSERT_DEV(m_pAction == nullptr, "Es darf nicht sein, es kann nicht sein!");
+  PL_ASSERT_DEV(m_pAction == nullptr, "Es darf nicht sein, es kann nicht sein!");
 
   plQtProxy::SetAction(pAction);
   m_pAction->m_StatusUpdateEvent.AddEventHandler(plMakeDelegate(&plQtButtonProxy::StatusUpdateEventHandler, this));
@@ -417,7 +420,7 @@ void plQtDynamicMenuProxy::SetAction(plAction* pAction)
 {
   plQtMenuProxy::SetAction(pAction);
 
-  PLASMA_VERIFY(connect(m_pMenu, SIGNAL(aboutToShow()), this, SLOT(SlotMenuAboutToShow())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(connect(m_pMenu, SIGNAL(aboutToShow()), this, SLOT(SlotMenuAboutToShow())) != nullptr, "signal/slot connection failed");
 }
 
 void plQtDynamicMenuProxy::SlotMenuAboutToShow()
@@ -448,7 +451,7 @@ void plQtDynamicMenuProxy::SlotMenuAboutToShow()
         pAction->setCheckable(p.m_CheckState != plDynamicMenuAction::Item::CheckMark::NotCheckable);
         pAction->setChecked(p.m_CheckState == plDynamicMenuAction::Item::CheckMark::Checked);
 
-        PLASMA_VERIFY(connect(pAction, SIGNAL(triggered()), this, SLOT(SlotMenuEntryTriggered())) != nullptr, "signal/slot connection failed");
+        PL_VERIFY(connect(pAction, SIGNAL(triggered()), this, SLOT(SlotMenuEntryTriggered())) != nullptr, "signal/slot connection failed");
       }
     }
   }
@@ -507,11 +510,11 @@ void plQtDynamicActionAndMenuProxy::Update()
 
   plStringBuilder sDisplay = plTranslate(pButton->GetName());
 
-  if (!plStringUtils::IsNullOrEmpty(pButton->GetAdditionalDisplayString()))
+  if (!pButton->GetAdditionalDisplayString().IsEmpty())
     sDisplay.Append(" '", pButton->GetAdditionalDisplayString(), "'"); // TODO: translate this as well?
 
   const QString sDisplayShortcut = m_pQtAction->shortcut().toString(QKeySequence::NativeText);
-  QString sTooltip = plTranslateTooltip(pButton->GetName());
+  QString sTooltip = plMakeQString(plTranslateTooltip(pButton->GetName()));
 
   if (sTooltip.isEmpty())
   {
@@ -573,13 +576,13 @@ void plQtDynamicActionAndMenuProxy::StatusUpdateEventHandler(plAction* pAction)
 //////////////////// plQtSliderProxy /////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-plQtSliderWidgetAction::plQtSliderWidgetAction(QWidget* parent)
-  : QWidgetAction(parent)
+plQtSliderWidgetAction::plQtSliderWidgetAction(QWidget* pParent)
+  : QWidgetAction(pParent)
 {
 }
 
-plQtLabeledSlider::plQtLabeledSlider(QWidget* parent)
-  : QWidget(parent)
+plQtLabeledSlider::plQtLabeledSlider(QWidget* pParent)
+  : QWidget(pParent)
 {
   m_pLabel = new QLabel(this);
   m_pSlider = new QSlider(this);
@@ -640,7 +643,7 @@ QWidget* plQtSliderWidgetAction::createWidget(QWidget* parent)
   plQtLabeledSlider* pGroup = new plQtLabeledSlider(parent);
   pGroup->m_pSlider->setOrientation(Qt::Orientation::Horizontal);
 
-  PLASMA_VERIFY(connect(pGroup->m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(OnValueChanged(int))) != nullptr, "connection failed");
+  PL_VERIFY(connect(pGroup->m_pSlider, SIGNAL(valueChanged(int)), this, SLOT(OnValueChanged(int))) != nullptr, "connection failed");
 
   pGroup->m_pLabel->setText(text());
   pGroup->m_pLabel->installEventFilter(this);
@@ -698,15 +701,15 @@ void plQtSliderProxy::Update()
   pSliderAction->setMinimum(minVal);
   pSliderAction->setMaximum(maxVal);
   pSliderAction->setValue(pAction->GetValue());
-  pSliderAction->setText(plTranslate(pAction->GetName()));
-  pSliderAction->setToolTip(plTranslateTooltip(pAction->GetName()));
+  pSliderAction->setText(plMakeQString(plTranslate(pAction->GetName())));
+  pSliderAction->setToolTip(plMakeQString(plTranslateTooltip(pAction->GetName())));
   pSliderAction->setEnabled(pAction->IsEnabled());
   pSliderAction->setVisible(pAction->IsVisible());
 }
 
 void plQtSliderProxy::SetAction(plAction* pAction)
 {
-  PLASMA_ASSERT_DEV(m_pAction == nullptr, "Es darf nicht sein, es kann nicht sein!");
+  PL_ASSERT_DEV(m_pAction == nullptr, "Es darf nicht sein, es kann nicht sein!");
 
   plQtProxy::SetAction(pAction);
   m_pAction->m_StatusUpdateEvent.AddEventHandler(plMakeDelegate(&plQtSliderProxy::StatusUpdateEventHandler, this));
@@ -718,7 +721,7 @@ void plQtSliderProxy::SetAction(plAction* pAction)
   {
     m_pQtAction = new plQtSliderWidgetAction(nullptr);
 
-    PLASMA_VERIFY(connect(m_pQtAction, SIGNAL(valueChanged(int)), this, SLOT(OnValueChanged(int))) != nullptr, "connection failed");
+    PL_VERIFY(connect(m_pQtAction, SIGNAL(valueChanged(int)), this, SLOT(OnValueChanged(int))) != nullptr, "connection failed");
   }
 
   Update();

@@ -1,6 +1,6 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE void plSimdMat4f::Transpose()
+PL_ALWAYS_INLINE void plSimdMat4f::Transpose()
 {
   float32x4x2_t P0 = vzipq_f32(m_col0.m_v, m_col2.m_v);
   float32x4x2_t P1 = vzipq_f32(m_col1.m_v, m_col3.m_v);

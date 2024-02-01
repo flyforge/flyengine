@@ -5,9 +5,9 @@ PluginInfo
 {
 	string %DisplayName{"Particles"}
 	string %Description{"Adds support for particle effects."}
-	string %EditorPlugins{"plasmaEditorPluginParticle"}
-	string %EditorEnginePlugins{"PlasmaEnginePluginParticle"}
-	string %RuntimePlugins{"plasmaParticlePlugin"}
+	string %EditorPlugins{"plEditorPluginParticle"}
+	string %EditorEnginePlugins{"plEnginePluginParticle"}
+	string %RuntimePlugins{"plParticlePlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

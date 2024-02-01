@@ -9,49 +9,49 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plPlayerStartPointComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plPlayerStartPointComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("PlayerPrefab", GetPlayerPrefabFile, SetPlayerPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("PlayerPrefab")),
+    PL_ACCESSOR_PROPERTY("PlayerPrefab", GetPlayerPrefabFile, SetPlayerPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("PlayerPrefab")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColor::DarkSlateBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plPlayerStartPointComponent::plPlayerStartPointComponent() = default;
 plPlayerStartPointComponent::~plPlayerStartPointComponent() = default;
 
-void plPlayerStartPointComponent::SerializeComponent(plWorldWriter& stream) const
+void plPlayerStartPointComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_hPlayerPrefab;
 
-  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), stream, m_Parameters);
+  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), inout_stream, m_Parameters);
 }
 
-void plPlayerStartPointComponent::DeserializeComponent(plWorldReader& stream)
+void plPlayerStartPointComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_hPlayerPrefab;
 
   if (uiVersion >= 2)
   {
-    plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, stream);
+    plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, inout_stream);
   }
 }
 
@@ -87,7 +87,7 @@ const plPrefabResourceHandle& plPlayerStartPointComponent::GetPlayerPrefab() con
 
 const plRangeView<const char*, plUInt32> plPlayerStartPointComponent::GetParameters() const
 {
-  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; }, [this]() -> plUInt32 { return m_Parameters.GetCount(); }, [](plUInt32& it) { ++it; }, [this](const plUInt32& it) -> const char* { return m_Parameters.GetKey(it).GetString().GetData(); });
+  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; }, [this]() -> plUInt32 { return m_Parameters.GetCount(); }, [](plUInt32& ref_uiIt) { ++ref_uiIt; }, [this](const plUInt32& uiIt) -> const char* { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
 }
 
 void plPlayerStartPointComponent::SetParameter(const char* szKey, const plVariant& value)
@@ -119,4 +119,4 @@ bool plPlayerStartPointComponent::GetParameter(const char* szKey, plVariant& out
 }
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_PlayerStartPointComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_PlayerStartPointComponent);

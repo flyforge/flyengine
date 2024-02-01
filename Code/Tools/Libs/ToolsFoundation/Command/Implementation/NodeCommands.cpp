@@ -5,50 +5,50 @@
 #include <ToolsFoundation/NodeObject/DocumentNodeManager.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveNodeCommand, 1, plRTTIDefaultAllocator<plRemoveNodeCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRemoveNodeCommand, 1, plRTTIDefaultAllocator<plRemoveNodeCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveNodeCommand, 1, plRTTIDefaultAllocator<plMoveNodeCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMoveNodeCommand, 1, plRTTIDefaultAllocator<plMoveNodeCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ObjectGuid", m_Object),
-    PLASMA_MEMBER_PROPERTY("NewPos", m_NewPos),
+    PL_MEMBER_PROPERTY("ObjectGuid", m_Object),
+    PL_MEMBER_PROPERTY("NewPos", m_NewPos),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plConnectNodePinsCommand, 1, plRTTIDefaultAllocator<plConnectNodePinsCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plConnectNodePinsCommand, 1, plRTTIDefaultAllocator<plConnectNodePinsCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ConnectionGuid", m_ConnectionObject),
-    PLASMA_MEMBER_PROPERTY("SourceGuid", m_ObjectSource),
-    PLASMA_MEMBER_PROPERTY("TargetGuid", m_ObjectTarget),
-    PLASMA_MEMBER_PROPERTY("SourcePin", m_sSourcePin),
-    PLASMA_MEMBER_PROPERTY("TargetPin", m_sTargetPin),
+    PL_MEMBER_PROPERTY("ConnectionGuid", m_ConnectionObject),
+    PL_MEMBER_PROPERTY("SourceGuid", m_ObjectSource),
+    PL_MEMBER_PROPERTY("TargetGuid", m_ObjectTarget),
+    PL_MEMBER_PROPERTY("SourcePin", m_sSourcePin),
+    PL_MEMBER_PROPERTY("TargetPin", m_sTargetPin),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDisconnectNodePinsCommand, 1, plRTTIDefaultAllocator<plDisconnectNodePinsCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDisconnectNodePinsCommand, 1, plRTTIDefaultAllocator<plDisconnectNodePinsCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ConnectionGuid", m_ConnectionObject),
+    PL_MEMBER_PROPERTY("ConnectionGuid", m_ConnectionObject),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
@@ -80,9 +80,9 @@ plStatus plRemoveNodeCommand::DoInternal(bool bRedo)
         res = AddSubCommand(remove);
       }
 
-      PLASMA_SUCCEED_OR_RETURN(res);
+      PL_SUCCEED_OR_RETURN(res);
     }
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   };
 
   if (!bRedo)
@@ -94,13 +94,13 @@ plStatus plRemoveNodeCommand::DoInternal(bool bRedo)
     auto inputs = pManager->GetInputPins(m_pObject);
     for (auto& pPinTarget : inputs)
     {
-      PLASMA_SUCCEED_OR_RETURN(RemoveConnections(*pPinTarget));
+      PL_SUCCEED_OR_RETURN(RemoveConnections(*pPinTarget));
     }
 
     auto outputs = pManager->GetOutputPins(m_pObject);
     for (auto& pPinSource : outputs)
     {
-      PLASMA_SUCCEED_OR_RETURN(RemoveConnections(*pPinSource));
+      PL_SUCCEED_OR_RETURN(RemoveConnections(*pPinSource));
     }
 
     plRemoveObjectCommand cmd;
@@ -111,13 +111,13 @@ plStatus plRemoveNodeCommand::DoInternal(bool bRedo)
       return res;
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plRemoveNodeCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
-  return plStatus(PLASMA_SUCCESS);
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  return plStatus(PL_SUCCESS);
 }
 
 void plRemoveNodeCommand::CleanupInternal(CommandState state) {}
@@ -141,24 +141,24 @@ plStatus plMoveNodeCommand::DoInternal(bool bRedo)
       return plStatus("Move Node: The given object does not exist!");
 
     m_vOldPos = pManager->GetNodePos(m_pObject);
-    PLASMA_SUCCEED_OR_RETURN(pManager->CanMoveNode(m_pObject, m_NewPos));
+    PL_SUCCEED_OR_RETURN(pManager->CanMoveNode(m_pObject, m_NewPos));
   }
 
   pManager->MoveNode(m_pObject, m_NewPos);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plMoveNodeCommand::UndoInternal(bool bFireEvents)
 {
   plDocument* pDocument = GetDocument();
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(pDocument->GetObjectManager());
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
 
-  PLASMA_SUCCEED_OR_RETURN(pManager->CanMoveNode(m_pObject, m_vOldPos));
+  PL_SUCCEED_OR_RETURN(pManager->CanMoveNode(m_pObject, m_vOldPos));
 
   pManager->MoveNode(m_pObject, m_vOldPos);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -196,10 +196,10 @@ plStatus plConnectNodePinsCommand::DoInternal(bool bRedo)
     return plStatus("Connect Node Pins: The given pin does not exist!");
 
   plDocumentNodeManager::CanConnectResult res;
-  PLASMA_SUCCEED_OR_RETURN(pManager->CanConnect(m_pConnectionObject->GetType(), *pOutput, *pInput, res));
+  PL_SUCCEED_OR_RETURN(pManager->CanConnect(m_pConnectionObject->GetType(), *pOutput, *pInput, res));
 
   pManager->Connect(m_pConnectionObject, *pOutput, *pInput);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plConnectNodePinsCommand::UndoInternal(bool bFireEvents)
@@ -207,10 +207,10 @@ plStatus plConnectNodePinsCommand::UndoInternal(bool bFireEvents)
   plDocument* pDocument = GetDocument();
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(pDocument->GetObjectManager());
 
-  PLASMA_SUCCEED_OR_RETURN(pManager->CanDisconnect(m_pConnectionObject));
+  PL_SUCCEED_OR_RETURN(pManager->CanDisconnect(m_pConnectionObject));
 
   pManager->Disconnect(m_pConnectionObject);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -231,7 +231,7 @@ plStatus plDisconnectNodePinsCommand::DoInternal(bool bRedo)
     if (!pManager->IsConnection(m_pConnectionObject))
       return plStatus("Disconnect Node Pins: The given connection object is not valid connection!");
 
-    PLASMA_SUCCEED_OR_RETURN(pManager->CanRemove(m_pConnectionObject));
+    PL_SUCCEED_OR_RETURN(pManager->CanRemove(m_pConnectionObject));
 
     const plConnection& connection = pManager->GetConnection(m_pConnectionObject);
     const plPin& pinSource = connection.GetSourcePin();
@@ -243,11 +243,11 @@ plStatus plDisconnectNodePinsCommand::DoInternal(bool bRedo)
     m_sTargetPin = pinTarget.GetName();
   }
 
-  PLASMA_SUCCEED_OR_RETURN(pManager->CanDisconnect(m_pConnectionObject));
+  PL_SUCCEED_OR_RETURN(pManager->CanDisconnect(m_pConnectionObject));
 
   pManager->Disconnect(m_pConnectionObject);
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plDisconnectNodePinsCommand::UndoInternal(bool bFireEvents)
@@ -264,10 +264,10 @@ plStatus plDisconnectNodePinsCommand::UndoInternal(bool bFireEvents)
     return plStatus("Connect Node: The given pin does not exist!");
 
   plDocumentNodeManager::CanConnectResult res;
-  PLASMA_SUCCEED_OR_RETURN(pManager->CanConnect(m_pConnectionObject->GetType(), *pOutput, *pInput, res));
+  PL_SUCCEED_OR_RETURN(pManager->CanConnect(m_pConnectionObject->GetType(), *pOutput, *pInput, res));
 
   pManager->Connect(m_pConnectionObject, *pOutput, *pInput);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -276,14 +276,14 @@ plStatus plDisconnectNodePinsCommand::UndoInternal(bool bFireEvents)
 ////////////////////////////////////////////////////////////////////////
 
 // static
-plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* history, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin)
+plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* pHistory, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin)
 {
   plAddObjectCommand cmd;
   cmd.m_pType = pConnectionType;
-  cmd.m_NewObjectGuid.CreateNewUuid();
+  cmd.m_NewObjectGuid = plUuid::MakeUuid();
   cmd.m_Index = -1;
 
-  plStatus res = history->AddCommand(cmd);
+  plStatus res = pHistory->AddCommand(cmd);
   if (res.m_Result.Succeeded())
   {
     plConnectNodePinsCommand connect;
@@ -293,25 +293,25 @@ plStatus plNodeCommands::AddAndConnectCommand(plCommandHistory* history, const p
     connect.m_sSourcePin = sourcePin.GetName();
     connect.m_sTargetPin = targetPin.GetName();
 
-    res = history->AddCommand(connect);
+    res = pHistory->AddCommand(connect);
   }
 
   return res;
 }
 
 // static
-plStatus plNodeCommands::DisconnectAndRemoveCommand(plCommandHistory* history, const plUuid& connectionObject)
+plStatus plNodeCommands::DisconnectAndRemoveCommand(plCommandHistory* pHistory, const plUuid& connectionObject)
 {
   plDisconnectNodePinsCommand cmd;
   cmd.m_ConnectionObject = connectionObject;
 
-  plStatus res = history->AddCommand(cmd);
+  plStatus res = pHistory->AddCommand(cmd);
   if (res.m_Result.Succeeded())
   {
     plRemoveObjectCommand remove;
     remove.m_Object = cmd.m_ConnectionObject;
 
-    res = history->AddCommand(remove);
+    res = pHistory->AddCommand(remove);
   }
 
   return res;

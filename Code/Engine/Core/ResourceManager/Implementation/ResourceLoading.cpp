@@ -7,7 +7,7 @@
 plTypelessResourceHandle plResourceManager::LoadResourceByType(const plRTTI* pResourceType, plStringView sResourceID)
 {
   // the mutex here is necessary to prevent a race between resource unloading and storing the pointer in the handle
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
   return plTypelessResourceHandle(GetResource(pResourceType, sResourceID, true));
 }
 
@@ -16,20 +16,20 @@ void plResourceManager::InternalPreloadResource(plResource* pResource, bool bHig
   if (s_pState->m_bShutdown)
     return;
 
-  PLASMA_PROFILE_SCOPE("InternalPreloadResource");
+  PL_PROFILE_SCOPE("InternalPreloadResource");
 
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   // if there is nothing else that could be loaded, just return right away
   if (pResource->GetLoadingState() == plResourceState::Loaded && pResource->GetNumQualityLevelsLoadable() == 0)
   {
     // due to the threading this can happen for all resource types and is valid
-    // PLASMA_ASSERT_DEV(!IsQueuedForLoading(pResource), "Invalid flag on resource type '{0}'",
+    // PL_ASSERT_DEV(!IsQueuedForLoading(pResource), "Invalid flag on resource type '{0}'",
     // pResource->GetDynamicRTTI()->GetTypeName());
     return;
   }
 
-  PLASMA_ASSERT_DEV(!s_pState->m_bExportMode, "Resources should not be loaded in export mode");
+  PL_ASSERT_DEV(!s_pState->m_bExportMode, "Resources should not be loaded in export mode");
 
   // if we are already loading this resource, early out
   if (IsQueuedForLoading(pResource))
@@ -68,25 +68,25 @@ void plResourceManager::SetupWorkerTasks()
     plStringBuilder s;
 
     {
-      static const plUInt32 InitialDataLoadTasks = 4;
+      static constexpr plUInt32 InitialDataLoadTasks = 4;
 
       for (plUInt32 i = 0; i < InitialDataLoadTasks; ++i)
       {
-        s.Format("Resource Data Loader {0}", i);
+        s.SetFormat("Resource Data Loader {0}", i);
         auto& data = s_pState->m_WorkerTasksDataLoad.ExpandAndGetRef();
-        data.m_pTask = PLASMA_DEFAULT_NEW(plResourceManagerWorkerDataLoad);
+        data.m_pTask = PL_DEFAULT_NEW(plResourceManagerWorkerDataLoad);
         data.m_pTask->ConfigureTask(s, plTaskNesting::Maybe);
       }
     }
 
     {
-      static const plUInt32 InitialUpdateContentTasks = 16;
+      static constexpr plUInt32 InitialUpdateContentTasks = 16;
 
       for (plUInt32 i = 0; i < InitialUpdateContentTasks; ++i)
       {
-        s.Format("Resource Content Updater {0}", i);
+        s.SetFormat("Resource Content Updater {0}", i);
         auto& data = s_pState->m_WorkerTasksUpdateContent.ExpandAndGetRef();
-        data.m_pTask = PLASMA_DEFAULT_NEW(plResourceManagerWorkerUpdateContent);
+        data.m_pTask = PL_DEFAULT_NEW(plResourceManagerWorkerUpdateContent);
         data.m_pTask->ConfigureTask(s, plTaskNesting::Maybe);
       }
     }
@@ -98,7 +98,7 @@ void plResourceManager::RunWorkerTask(plResource* pResource)
   if (s_pState->m_bShutdown)
     return;
 
-  PLASMA_ASSERT_DEV(s_ResourceMutex.IsLocked(), "");
+  PL_ASSERT_DEV(s_ResourceMutex.IsLocked(), "");
 
   SetupWorkerTasks();
 
@@ -119,9 +119,9 @@ void plResourceManager::RunWorkerTask(plResource* pResource)
     // could not find any unused task -> need to create a new one
     {
       plStringBuilder s;
-      s.Format("Resource Data Loader {0}", s_pState->m_WorkerTasksDataLoad.GetCount());
+      s.SetFormat("Resource Data Loader {0}", s_pState->m_WorkerTasksDataLoad.GetCount());
       auto& data = s_pState->m_WorkerTasksDataLoad.ExpandAndGetRef();
-      data.m_pTask = PLASMA_DEFAULT_NEW(plResourceManagerWorkerDataLoad);
+      data.m_pTask = PL_DEFAULT_NEW(plResourceManagerWorkerDataLoad);
       data.m_pTask->ConfigureTask(s, plTaskNesting::Maybe);
       data.m_GroupId = plTaskSystem::StartSingleTask(data.m_pTask, plTaskPriority::FileAccess);
     }
@@ -135,7 +135,7 @@ void plResourceManager::ReverseBubbleSortStep(plDeque<LoadingInfo>& data)
   // which is exactly what we need for the priority queue.
   // We do this once a frame, which gives us nice iterative sorting, with relatively deterministic performance characteristics.
 
-  PLASMA_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "Calling code must acquire s_ResourceMutex");
+  PL_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "Calling code must acquire s_ResourceMutex");
 
   const plUInt32 uiCount = data.GetCount();
 
@@ -156,9 +156,9 @@ void plResourceManager::UpdateLoadingDeadlines()
   if (s_pState->m_LoadingQueue.IsEmpty())
     return;
 
-  PLASMA_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "Calling code must acquire s_ResourceMutex");
+  PL_ASSERT_DEBUG(s_ResourceMutex.IsLocked(), "Calling code must acquire s_ResourceMutex");
 
-  PLASMA_PROFILE_SCOPE("UpdateLoadingDeadlines");
+  PL_PROFILE_SCOPE("UpdateLoadingDeadlines");
 
   const plUInt32 uiCount = s_pState->m_LoadingQueue.GetCount();
   s_pState->m_uiLastResourcePriorityUpdateIdx = plMath::Min(s_pState->m_uiLastResourcePriorityUpdateIdx, uiCount);
@@ -174,7 +174,7 @@ void plResourceManager::UpdateLoadingDeadlines()
   if (uiUpdateCount > 0)
   {
     {
-      PLASMA_PROFILE_SCOPE("EvalLoadingDeadlines");
+      PL_PROFILE_SCOPE("EvalLoadingDeadlines");
 
       const plTime tNow = plTime::Now();
 
@@ -187,7 +187,7 @@ void plResourceManager::UpdateLoadingDeadlines()
     }
 
     {
-      PLASMA_PROFILE_SCOPE("SortLoadingDeadlines");
+      PL_PROFILE_SCOPE("SortLoadingDeadlines");
       ReverseBubbleSortStep(s_pState->m_LoadingQueue);
     }
   }
@@ -200,10 +200,10 @@ void plResourceManager::PreloadResource(plResource* pResource)
 
 void plResourceManager::PreloadResource(const plTypelessResourceHandle& hResource)
 {
-  PLASMA_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
+  PL_ASSERT_DEV(hResource.IsValid(), "Cannot acquire a resource through an invalid handle!");
 
   plResource* pResource = hResource.m_pResource;
-  PreloadResource(hResource.m_pResource);
+  PreloadResource(pResource);
 }
 
 plResourceState plResourceManager::GetLoadingState(const plTypelessResourceHandle& hResource)
@@ -216,10 +216,10 @@ plResourceState plResourceManager::GetLoadingState(const plTypelessResourceHandl
 
 plResult plResourceManager::RemoveFromLoadingQueue(plResource* pResource)
 {
-  PLASMA_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Resource mutex must be locked");
+  PL_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Resource mutex must be locked");
 
   if (!IsQueuedForLoading(pResource))
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   LoadingInfo li;
   li.m_pResource = pResource;
@@ -227,16 +227,16 @@ plResult plResourceManager::RemoveFromLoadingQueue(plResource* pResource)
   if (s_pState->m_LoadingQueue.RemoveAndSwap(li))
   {
     pResource->m_Flags.Remove(plResourceFlags::IsQueuedForLoading);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plResourceManager::AddToLoadingQueue(plResource* pResource, bool bHighestPriority)
 {
-  PLASMA_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Resource mutex must be locked");
-  PLASMA_ASSERT_DEV(IsQueuedForLoading(pResource) == false, "Resource is already in the loading queue");
+  PL_ASSERT_DEV(s_ResourceMutex.IsLocked(), "Resource mutex must be locked");
+  PL_ASSERT_DEV(IsQueuedForLoading(pResource) == false, "Resource is already in the loading queue");
 
   pResource->m_Flags.Add(plResourceFlags::IsQueuedForLoading);
 
@@ -258,7 +258,7 @@ void plResourceManager::AddToLoadingQueue(plResource* pResource, bool bHighestPr
 
 bool plResourceManager::ReloadResource(plResource* pResource, bool bForce)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   if (!pResource->m_Flags.IsAnySet(plResourceFlags::IsReloadable))
     return false;
@@ -323,7 +323,7 @@ bool plResourceManager::ReloadResource(plResource* pResource, bool bForce)
     // make sure existing data is purged
     pResource->CallUnloadData(plResource::Unload::AllQualityLevels);
 
-    PLASMA_ASSERT_DEV(pResource->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.",
+    PL_ASSERT_DEV(pResource->GetLoadingState() <= plResourceState::LoadedResourceMissing, "Resource '{0}' should be in an unloaded state now.",
       pResource->GetResourceID());
   }
   else
@@ -337,7 +337,7 @@ bool plResourceManager::ReloadResource(plResource* pResource, bool bForce)
 
     // resources that have been in use recently will be put into the preload queue immediately
     // everything else will be loaded on demand
-    if (pResource->GetLastAcquireTime() >= tNow - plTime::Seconds(30.0))
+    if (pResource->GetLastAcquireTime() >= tNow - plTime::MakeFromSeconds(30.0))
     {
       PreloadResource(pResource);
     }
@@ -348,8 +348,8 @@ bool plResourceManager::ReloadResource(plResource* pResource, bool bForce)
 
 plUInt32 plResourceManager::ReloadResourcesOfType(const plRTTI* pType, bool bForce)
 {
-  PLASMA_LOCK(s_ResourceMutex);
-  PLASMA_LOG_BLOCK("plResourceManager::ReloadResourcesOfType", pType->GetTypeName());
+  PL_LOCK(s_ResourceMutex);
+  PL_LOG_BLOCK("plResourceManager::ReloadResourcesOfType", pType->GetTypeName());
 
   plUInt32 count = 0;
 
@@ -366,8 +366,10 @@ plUInt32 plResourceManager::ReloadResourcesOfType(const plRTTI* pType, bool bFor
 
 plUInt32 plResourceManager::ReloadAllResources(bool bForce)
 {
-  PLASMA_LOCK(s_ResourceMutex);
-  PLASMA_LOG_BLOCK("plResourceManager::ReloadAllResources");
+  PL_PROFILE_SCOPE("ReloadAllResources");
+
+  PL_LOCK(s_ResourceMutex);
+  PL_LOG_BLOCK("plResourceManager::ReloadAllResources");
 
   plUInt32 count = 0;
 
@@ -391,12 +393,12 @@ plUInt32 plResourceManager::ReloadAllResources(bool bForce)
   return count;
 }
 
-void plResourceManager::UpdateResourceWithCustomLoader(const plTypelessResourceHandle& hResource, plUniquePtr<plResourceTypeLoader>&& loader)
+void plResourceManager::UpdateResourceWithCustomLoader(const plTypelessResourceHandle& hResource, plUniquePtr<plResourceTypeLoader>&& pLoader)
 {
-  PLASMA_LOCK(s_ResourceMutex);
+  PL_LOCK(s_ResourceMutex);
 
   hResource.m_pResource->m_Flags.Add(plResourceFlags::HasCustomDataLoader);
-  s_pState->m_CustomLoaders[hResource.m_pResource] = std::move(loader);
+  s_pState->m_CustomLoaders[hResource.m_pResource] = std::move(pLoader);
   // if there was already a custom loader set, but it got no action yet, it is deleted here and replaced with the newer loader
 
   ReloadResource(hResource.m_pResource, true);
@@ -413,7 +415,7 @@ void plResourceManager::EnsureResourceLoadingState(plResource* pResourceToLoad, 
     plTaskGroupID tgid;
 
     {
-      PLASMA_LOCK(s_ResourceMutex);
+      PL_LOCK(s_ResourceMutex);
 
       for (plUInt32 i = 0; i < s_pState->m_WorkerTasksUpdateContent.GetCount(); ++i)
       {
@@ -438,12 +440,10 @@ void plResourceManager::EnsureResourceLoadingState(plResource* pResourceToLoad, 
     {
       // do not use plThreadUtils::YieldTimeSlice here, otherwise the thread is not tagged as 'blocked' in the TaskSystem
       plTaskSystem::WaitForCondition([=]() -> bool
-      {
-        return (plInt32)pResourceToLoad->GetLoadingState() >= (plInt32)RequestedState || (pResourceToLoad->GetLoadingState() == plResourceState::LoadedResourceMissing); 
-      });
+        { return (plInt32)pResourceToLoad->GetLoadingState() >= (plInt32)RequestedState ||
+                 (pResourceToLoad->GetLoadingState() == plResourceState::LoadedResourceMissing); });
     }
   }
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_ResourceManager_Implementation_ResourceLoading);

@@ -11,20 +11,23 @@ plHybridArray<plSpatialData::CategoryData, 32>& plSpatialData::GetCategoryData()
 // static
 plSpatialData::Category plSpatialData::RegisterCategory(plStringView sCategoryName, const plBitflags<Flags>& flags)
 {
+  if (sCategoryName.IsEmpty())
+    return plInvalidSpatialDataCategory;
+
   Category oldCategory = FindCategory(sCategoryName);
   if (oldCategory != plInvalidSpatialDataCategory)
   {
-    PLASMA_ASSERT_DEV(GetCategoryFlags(oldCategory) == flags, "Category registered with different flags");
+    PL_ASSERT_DEV(GetCategoryFlags(oldCategory) == flags, "Category registered with different flags");
     return oldCategory;
   }
 
   if (GetCategoryData().GetCount() == 32)
   {
-    PLASMA_REPORT_FAILURE("Too many spatial data categories");
+    PL_REPORT_FAILURE("Too many spatial data categories");
     return plInvalidSpatialDataCategory;
   }
 
-  Category newCategory = Category(GetCategoryData().GetCount());
+  Category newCategory = Category(static_cast<plUInt16>(GetCategoryData().GetCount()));
 
   auto& data = GetCategoryData().ExpandAndGetRef();
   data.m_sName.Assign(sCategoryName);
@@ -41,10 +44,22 @@ plSpatialData::Category plSpatialData::FindCategory(plStringView sCategoryName)
   for (plUInt32 uiCategoryIndex = 0; uiCategoryIndex < GetCategoryData().GetCount(); ++uiCategoryIndex)
   {
     if (GetCategoryData()[uiCategoryIndex].m_sName == categoryName)
-      return Category(uiCategoryIndex);
+      return Category(static_cast<plUInt16>(uiCategoryIndex));
   }
 
   return plInvalidSpatialDataCategory;
+}
+
+// static
+const plHashedString& plSpatialData::GetCategoryName(Category category)
+{
+  if (category.m_uiValue < GetCategoryData().GetCount())
+  {
+    return GetCategoryData()[category.m_uiValue].m_sName;
+  }
+
+  static plHashedString sInvalidSpatialDataCategoryName;
+  return sInvalidSpatialDataCategoryName;
 }
 
 // static
@@ -61,4 +76,3 @@ plSpatialData::Category plDefaultSpatialDataCategories::OcclusionStatic = plSpat
 plSpatialData::Category plDefaultSpatialDataCategories::OcclusionDynamic = plSpatialData::RegisterCategory("OcclusionDynamic", plSpatialData::Flags::FrequentChanges);
 
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_SpatialData);

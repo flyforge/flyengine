@@ -3,9 +3,9 @@
 #include <Foundation/CodeUtils/MathExpression.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plMathExpressionAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plMathExpressionAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMathExpressionAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plMathExpressionAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -46,9 +46,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plCompareNumberAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plCompareNumberAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCompareNumberAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plCompareNumberAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -77,9 +77,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plBoolToNumberAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plBoolToNumberAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoolToNumberAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plBoolToNumberAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

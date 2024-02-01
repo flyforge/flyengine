@@ -14,7 +14,7 @@ struct plStagingBufferVulkan
   plVulkanAllocationInfo m_allocInfo;
 };
 
-class PLASMA_RENDERERVULKAN_DLL plStagingBufferPoolVulkan
+class PL_RENDERERVULKAN_DLL plStagingBufferPoolVulkan
 {
 public:
   void Initialize(plGALDeviceVulkan* pDevice);

@@ -10,9 +10,9 @@ struct plMsgExtractVolumes;
 
 using plImageDataResourceHandle = plTypedResourceHandle<class plImageDataResource>;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVolumeComponent : public plComponent
+class PL_PROCGENPLUGIN_DLL plProcVolumeComponent : public plComponent
 {
-  PLASMA_DECLARE_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, plComponent);
+  PL_DECLARE_ABSTRACT_COMPONENT_TYPE(plProcVolumeComponent, plComponent);
 
 public:
   plProcVolumeComponent();
@@ -30,10 +30,10 @@ public:
   void SetBlendMode(plEnum<plProcGenBlendMode> blendMode);
   plEnum<plProcGenBlendMode> GetBlendMode() const { return m_BlendMode; }
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  void OnTransformChanged(plMsgTransformChanged& msg);
+  void OnTransformChanged(plMsgTransformChanged& ref_msg);
 
   static const plEvent<const plProcGenInternal::InvalidatedArea&>& GetAreaInvalidatedEvent() { return s_AreaInvalidatedEvent; }
 
@@ -52,9 +52,9 @@ protected:
 
 using plProcVolumeSphereComponentManager = plComponentManager<class plProcVolumeSphereComponent, plBlockStorageType::Compact>;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVolumeSphereComponent : public plProcVolumeComponent
+class PL_PROCGENPLUGIN_DLL plProcVolumeSphereComponent : public plProcVolumeComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plProcVolumeSphereComponent, plProcVolumeComponent, plProcVolumeSphereComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plProcVolumeSphereComponent, plProcVolumeComponent, plProcVolumeSphereComponentManager);
 
 public:
   plProcVolumeSphereComponent();
@@ -63,65 +63,65 @@ public:
   float GetRadius() const { return m_fRadius; }
   void SetRadius(float fRadius);
 
-  float GetFadeOutStart() const { return m_fFadeOutStart; }
-  void SetFadeOutStart(float fFadeOutStart);
+  float GetFalloff() const { return m_fFalloff; }
+  void SetFalloff(float fFalloff);
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const;
-  void OnExtractVolumes(plMsgExtractVolumes& msg) const;
+  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const;
+  void OnExtractVolumes(plMsgExtractVolumes& ref_msg) const;
 
 protected:
   float m_fRadius = 5.0f;
-  float m_fFadeOutStart = 0.5f;
+  float m_fFalloff = 0.5f;
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 using plProcVolumeBoxComponentManager = plComponentManager<class plProcVolumeBoxComponent, plBlockStorageType::Compact>;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVolumeBoxComponent : public plProcVolumeComponent
+class PL_PROCGENPLUGIN_DLL plProcVolumeBoxComponent : public plProcVolumeComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plProcVolumeBoxComponent, plProcVolumeComponent, plProcVolumeBoxComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plProcVolumeBoxComponent, plProcVolumeComponent, plProcVolumeBoxComponentManager);
 
 public:
   plProcVolumeBoxComponent();
   ~plProcVolumeBoxComponent();
 
   const plVec3& GetExtents() const { return m_vExtents; }
-  void SetExtents(const plVec3& extents);
+  void SetExtents(const plVec3& vExtents);
 
-  const plVec3& GetFadeOutStart() const { return m_vFadeOutStart; }
-  void SetFadeOutStart(const plVec3& fadeOutStart);
+  const plVec3& GetFalloff() const { return m_vFalloff; }
+  void SetFalloff(const plVec3& vFalloff);
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const;
-  void OnExtractVolumes(plMsgExtractVolumes& msg) const;
+  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const;
+  void OnExtractVolumes(plMsgExtractVolumes& ref_msg) const;
 
 protected:
   plVec3 m_vExtents = plVec3(10.0f);
-  plVec3 m_vFadeOutStart = plVec3(0.5f);
+  plVec3 m_vFalloff = plVec3(0.5f);
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 using plProcVolumeImageComponentManager = plComponentManager<class plProcVolumeImageComponent, plBlockStorageType::Compact>;
 
-class PLASMA_PROCGENPLUGIN_DLL plProcVolumeImageComponent : public plProcVolumeBoxComponent
+class PL_PROCGENPLUGIN_DLL plProcVolumeImageComponent : public plProcVolumeBoxComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plProcVolumeImageComponent, plProcVolumeBoxComponent, plProcVolumeImageComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plProcVolumeImageComponent, plProcVolumeBoxComponent, plProcVolumeImageComponentManager);
 
 public:
   plProcVolumeImageComponent();
   ~plProcVolumeImageComponent();
 
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
-  void OnExtractVolumes(plMsgExtractVolumes& msg) const;
+  void OnExtractVolumes(plMsgExtractVolumes& ref_msg) const;
 
   void SetImageFile(const char* szFile); // [ property ]
   const char* GetImageFile() const;      // [ property ]

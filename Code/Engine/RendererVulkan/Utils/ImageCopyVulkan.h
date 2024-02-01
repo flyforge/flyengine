@@ -15,7 +15,7 @@ class plGALUnorderedAccessViewVulkan;
 
 
 /// \brief
-class PLASMA_RENDERERVULKAN_DLL plImageCopyVulkan
+class PL_RENDERERVULKAN_DLL plImageCopyVulkan
 {
 public:
   plImageCopyVulkan(plGALDeviceVulkan& GALDeviceVulkan);
@@ -29,7 +29,7 @@ public:
 
   struct RenderPassCacheKey
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     vk::Format targetFormat;
     vk::SampleCountFlagBits targetSamples;
@@ -37,7 +37,7 @@ public:
 
   struct FramebufferCacheKey
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     vk::RenderPass m_renderpass;
     vk::ImageView m_targetView;
@@ -47,7 +47,7 @@ public:
 
   struct ImageViewCacheKey
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     vk::Image m_image;
     vk::ImageSubresourceLayers m_subresourceLayers;
@@ -55,7 +55,7 @@ public:
 
   struct ImageViewCacheValue
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     vk::ImageSubresourceLayers m_subresourceLayers;
     vk::ImageView m_imageView;
@@ -87,7 +87,7 @@ private:
   // This avoids recreating them every frame
   struct Cache
   {
-    Cache(plAllocatorBase* pAllocator);
+    Cache(plAllocator* pAllocator);
     ~Cache();
 
     plHashTable<plGALShaderHandle, plGALVertexDeclarationHandle> m_vertexDeclarations;

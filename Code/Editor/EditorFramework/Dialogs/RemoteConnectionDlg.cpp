@@ -30,15 +30,15 @@ bool plQtRemoteConnectionDlg::Address::IsEmpty() const
   return part[0] == 0 && part[1] == 0 && part[2] == 0 && part[3] == 0;
 }
 
-plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* parent)
-  : QDialog(parent)
+plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
   QSettings Settings;
   Settings.beginGroup(QLatin1String("RemoteConnection"));
   {
-    for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentAddresses); ++i)
+    for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentAddresses); ++i)
     {
       m_RecentAddresses[i].part[0] = Settings.value(QString("IP%1a").arg(i), 0).toInt();
       m_RecentAddresses[i].part[1] = Settings.value(QString("IP%1b").arg(i), 0).toInt();
@@ -46,7 +46,7 @@ plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* parent)
       m_RecentAddresses[i].part[3] = Settings.value(QString("IP%1d").arg(i), 0).toInt();
     }
 
-    for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentFsAddresses); ++i)
+    for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentFsAddresses); ++i)
     {
       m_RecentFsAddresses[i].part[0] = Settings.value(QString("FsIP%1a").arg(i), 0).toInt();
       m_RecentFsAddresses[i].part[1] = Settings.value(QString("FsIP%1b").arg(i), 0).toInt();
@@ -60,7 +60,7 @@ plQtRemoteConnectionDlg::plQtRemoteConnectionDlg(QWidget* parent)
   m_UsedFsAddress = m_RecentFsAddresses[0];
 }
 
-plQtRemoteConnectionDlg::~plQtRemoteConnectionDlg() {}
+plQtRemoteConnectionDlg::~plQtRemoteConnectionDlg() = default;
 
 void plQtRemoteConnectionDlg::SetCurrentIP(const Address& addr)
 {
@@ -81,7 +81,7 @@ void plQtRemoteConnectionDlg::SetCurrentFsIP(const Address& addr)
 void plQtRemoteConnectionDlg::AddToRecentAddresses(Address* pRecentAddresses, const Address& addr)
 {
   Address prev = addr;
-  for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentAddresses); ++i)
+  for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentAddresses); ++i)
   {
     Address cur = pRecentAddresses[i];
     pRecentAddresses[i] = prev;
@@ -100,7 +100,7 @@ void plQtRemoteConnectionDlg::showEvent(QShowEvent* event)
   SetCurrentIP(m_UsedAddress);
   SetCurrentFsIP(m_UsedFsAddress);
 
-  for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentAddresses); ++i)
+  for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentAddresses); ++i)
   {
     if (!m_RecentAddresses[i].IsEmpty())
     {
@@ -118,7 +118,7 @@ void plQtRemoteConnectionDlg::showEvent(QShowEvent* event)
     }
   }
 
-  for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentFsAddresses); ++i)
+  for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentFsAddresses); ++i)
   {
     if (!m_RecentFsAddresses[i].IsEmpty())
     {
@@ -160,7 +160,7 @@ void plQtRemoteConnectionDlg::on_ButtonConnect_clicked()
     QSettings Settings;
     Settings.beginGroup(QLatin1String("RemoteConnection"));
     {
-      for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentAddresses); ++i)
+      for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentAddresses); ++i)
       {
         Settings.setValue(QString("IP%1b").arg(i), m_RecentAddresses[i].part[1]);
         Settings.setValue(QString("IP%1c").arg(i), m_RecentAddresses[i].part[2]);
@@ -168,7 +168,7 @@ void plQtRemoteConnectionDlg::on_ButtonConnect_clicked()
         Settings.setValue(QString("IP%1d").arg(i), m_RecentAddresses[i].part[3]);
       }
 
-      for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_RecentFsAddresses); ++i)
+      for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_RecentFsAddresses); ++i)
       {
         Settings.setValue(QString("FsIP%1b").arg(i), m_RecentFsAddresses[i].part[1]);
         Settings.setValue(QString("FsIP%1c").arg(i), m_RecentFsAddresses[i].part[2]);

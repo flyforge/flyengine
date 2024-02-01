@@ -4,7 +4,7 @@
 
 class plInputDeviceController;
 
-class PLASMA_CORE_DLL plControllerInput
+class PL_CORE_DLL plControllerInput
 {
 public:
   // \brief Returns if a global controller input device exists.

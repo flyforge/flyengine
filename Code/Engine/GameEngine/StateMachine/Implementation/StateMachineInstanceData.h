@@ -9,10 +9,10 @@
 namespace plStateMachineInternal
 {
   /// \brief Helper class to manage instance data for compound states or transitions
-  struct PLASMA_GAMEENGINE_DLL Compound
+  struct PL_GAMEENGINE_DLL Compound
   {
-    PLASMA_ALWAYS_INLINE plUInt32 GetBaseOffset() const { return m_InstanceDataOffsets.GetUserData<plUInt32>(); }
-    PLASMA_ALWAYS_INLINE plUInt32 GetDataSize() const { return m_InstanceDataAllocator.GetTotalDataSize(); }
+    PL_ALWAYS_INLINE plUInt32 GetBaseOffset() const { return m_InstanceDataOffsets.GetUserData<plUInt32>(); }
+    PL_ALWAYS_INLINE plUInt32 GetDataSize() const { return m_InstanceDataAllocator.GetTotalDataSize(); }
 
     plSmallArray<plUInt32, 2> m_InstanceDataOffsets;
     plInstanceDataAllocator m_InstanceDataAllocator;
@@ -29,18 +29,18 @@ namespace plStateMachineInternal
         }
       }
 
-      PLASMA_ALWAYS_INLINE plByteBlobPtr GetBlobPtr()
+      PL_ALWAYS_INLINE plByteBlobPtr GetBlobPtr()
       {
         return plByteBlobPtr(plMemoryUtils::AddByteOffset(reinterpret_cast<plUInt8*>(this), m_pOwner->GetBaseOffset()), m_pOwner->GetDataSize());
       }
     };
 
-    PLASMA_ALWAYS_INLINE void* GetSubInstanceData(InstanceData* pData, plUInt32 uiIndex) const
+    PL_ALWAYS_INLINE void* GetSubInstanceData(InstanceData* pData, plUInt32 uiIndex) const
     {
       return pData != nullptr ? m_InstanceDataAllocator.GetInstanceData(pData->GetBlobPtr(), m_InstanceDataOffsets[uiIndex]) : nullptr;
     }
 
-    PLASMA_FORCE_INLINE void Initialize(InstanceData* pData) const
+    PL_FORCE_INLINE void Initialize(InstanceData* pData) const
     {
       if (pData != nullptr && pData->m_pOwner == nullptr)
       {

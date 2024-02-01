@@ -17,9 +17,9 @@ using plForwardEventsToGameStateComponentManager = plComponentManager<class plFo
 ///
 /// Multiple of these components can exist in a scene, gathering and forwarding messages from many
 /// different game objects, so that the game state can react to many different things.
-class PLASMA_CORE_DLL plForwardEventsToGameStateComponent : public plEventMessageHandlerComponent
+class PL_CORE_DLL plForwardEventsToGameStateComponent : public plEventMessageHandlerComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plForwardEventsToGameStateComponent, plEventMessageHandlerComponent, plForwardEventsToGameStateComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plForwardEventsToGameStateComponent, plEventMessageHandlerComponent, plForwardEventsToGameStateComponentManager);
 
 public:
   //////////////////////////////////////////////////////////////////////////

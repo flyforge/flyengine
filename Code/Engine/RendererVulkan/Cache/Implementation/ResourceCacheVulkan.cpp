@@ -23,12 +23,12 @@ plMap<const plRefCounted*, plHybridArray<plResourceCacheVulkan::ComputePipelineM
 
 plHashTable<plGALShaderVulkan::DescriptorSetLayoutDesc, vk::DescriptorSetLayout, plResourceCacheVulkan::ResourceCacheHash> plResourceCacheVulkan::s_descriptorSetLayouts;
 
-#define PLASMA_LOG_VULKAN_RESOURCES
+#define PL_LOG_VULKAN_RESOURCES
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt32) == sizeof(plGALRenderTargetViewHandle));
+PL_CHECK_AT_COMPILETIME(sizeof(plUInt32) == sizeof(plGALRenderTargetViewHandle));
 namespace
 {
-  PLASMA_ALWAYS_INLINE plStreamWriter& operator<<(plStreamWriter& Stream, const plGALRenderTargetViewHandle& Value)
+  PL_ALWAYS_INLINE plStreamWriter& operator<<(plStreamWriter& Stream, const plGALRenderTargetViewHandle& Value)
   {
     Stream << reinterpret_cast<const plUInt32&>(Value);
     return Stream;
@@ -106,15 +106,10 @@ void plResourceCacheVulkan::GetRenderPassDesc(const plGALRenderingSetup& renderi
     const auto& formatInfo = s_pDevice->GetFormatLookupTable().GetFormatInfo(format);
 
     AttachmentDesc& depthAttachment = out_desc.attachments.ExpandAndGetRef();
-    depthAttachment.format = formatInfo.m_eRenderTarget;
-    if (pTex->GetFormatOverrideEnabled())
-    {
-      depthAttachment.format = pTex->GetImageFormat();
-    }
-
+    depthAttachment.format = formatInfo.m_format;
     depthAttachment.samples = plConversionUtilsVulkan::GetSamples(texDesc.m_SampleCount);
 
-    if (renderingSetup.m_bDiscardDepth)
+    if (renderingSetup.m_bDiscardDepth && !renderingSetup.m_bClearDepth)
     {
       depthAttachment.initialLayout = vk::ImageLayout::eUndefined;
       depthAttachment.loadOp = vk::AttachmentLoadOp::eDontCare;
@@ -151,15 +146,10 @@ void plResourceCacheVulkan::GetRenderPassDesc(const plGALRenderingSetup& renderi
     const auto& formatInfo = s_pDevice->GetFormatLookupTable().GetFormatInfo(format);
 
     AttachmentDesc& colorAttachment = out_desc.attachments.ExpandAndGetRef();
-    colorAttachment.format = formatInfo.m_eRenderTarget;
-    if (pTex->GetFormatOverrideEnabled())
-    {
-      colorAttachment.format = pTex->GetImageFormat();
-    }
-
+    colorAttachment.format = formatInfo.m_format;
     colorAttachment.samples = plConversionUtilsVulkan::GetSamples(texDesc.m_SampleCount);
 
-    if (renderingSetup.m_bDiscardColor)
+    if (renderingSetup.m_bDiscardColor && !(renderingSetup.m_uiRenderTargetClearMask & (1u << i)))
     {
       colorAttachment.initialLayout = vk::ImageLayout::eUndefined;
       colorAttachment.loadOp = vk::AttachmentLoadOp::eDontCare;
@@ -183,8 +173,8 @@ void plResourceCacheVulkan::GetRenderPassDesc(const plGALRenderingSetup& renderi
   }
 }
 
-PLASMA_DEFINE_AS_POD_TYPE(vk::AttachmentDescription);
-PLASMA_DEFINE_AS_POD_TYPE(vk::AttachmentReference);
+PL_DEFINE_AS_POD_TYPE(vk::AttachmentDescription);
+PL_DEFINE_AS_POD_TYPE(vk::AttachmentReference);
 
 vk::RenderPass plResourceCacheVulkan::RequestRenderPassInternal(const RenderPassDesc& desc)
 {
@@ -193,9 +183,9 @@ vk::RenderPass plResourceCacheVulkan::RequestRenderPassInternal(const RenderPass
     return *pPass;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating RenderPass #{}", s_renderPasses.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   plHybridArray<vk::AttachmentDescription, 4> attachments;
   plHybridArray<vk::AttachmentReference, 1> depthAttachmentRefs;
@@ -231,7 +221,7 @@ vk::RenderPass plResourceCacheVulkan::RequestRenderPassInternal(const RenderPass
     }
   }
 
-  PLASMA_ASSERT_DEV(depthAttachmentRefs.GetCount() <= 1, "There can be no more than 1 depth attachment.");
+  PL_ASSERT_DEV(depthAttachmentRefs.GetCount() <= 1, "There can be no more than 1 depth attachment.");
   const bool bHasColor = !colorAttachmentRefs.IsEmpty();
   const bool bHasDepth = !depthAttachmentRefs.IsEmpty();
   vk::SubpassDescription subpass;
@@ -275,9 +265,9 @@ vk::RenderPass plResourceCacheVulkan::RequestRenderPass(const plGALRenderingSetu
     return *pPass;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Redirecting shallow RenderPass #{}", s_shallowRenderPasses.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   RenderPassDesc renderPassDesc;
   GetRenderPassDesc(renderingSetup, renderPassDesc);
@@ -303,7 +293,7 @@ void plResourceCacheVulkan::GetFrameBufferDesc(vk::RenderPass renderPass, const 
     vk::Extent3D extend = pTex->GetMipLevelSize(pRenderTargetView->GetDescription().m_uiMipLevel);
     out_desc.m_msaa = texDesc.m_SampleCount;
     out_desc.m_size = {extend.width, extend.height};
-    out_desc.layers = texDesc.m_uiArraySize;
+    out_desc.layers = pRenderTargetView->GetDescription().m_uiSliceCount;
   }
   for (size_t i = 0; i < uiColorCount; i++)
   {
@@ -316,7 +306,7 @@ void plResourceCacheVulkan::GetFrameBufferDesc(vk::RenderPass renderPass, const 
     vk::Extent3D extend = pTex->GetMipLevelSize(pRenderTargetView->GetDescription().m_uiMipLevel);
     out_desc.m_msaa = texDesc.m_SampleCount;
     out_desc.m_size = {extend.width, extend.height};
-    out_desc.layers = texDesc.m_uiArraySize;
+    out_desc.layers = pRenderTargetView->GetDescription().m_uiSliceCount;
   }
 
   // In some places rendering is started with an empty plGALRenderTargetSetup just to be able to run GPU commands.
@@ -341,9 +331,9 @@ vk::Framebuffer plResourceCacheVulkan::RequestFrameBuffer(vk::RenderPass renderP
     return pFrameBuffer->m_frameBuffer;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating FrameBuffer #{}", s_frameBuffers.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   FramebufferDesc desc;
   GetFrameBufferDesc(renderPass, renderTargetSetup, desc);
@@ -376,13 +366,18 @@ vk::PipelineLayout plResourceCacheVulkan::RequestPipelineLayout(const PipelineLa
     return *pPipelineLayout;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating Pipeline Layout #{}", s_pipelineLayouts.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   vk::PipelineLayoutCreateInfo layoutInfo;
-  layoutInfo.setLayoutCount = 1;
-  layoutInfo.pSetLayouts = &desc.m_layout;
+  layoutInfo.setLayoutCount = desc.m_layout.GetCount();
+  layoutInfo.pSetLayouts = desc.m_layout.GetData();
+  if (desc.m_pushConstants.size != 0)
+  {
+    layoutInfo.pushConstantRangeCount = 1;
+    layoutInfo.pPushConstantRanges = &desc.m_pushConstants;
+  }
 
   vk::PipelineLayout layout;
   VK_ASSERT_DEBUG(s_device.createPipelineLayout(&layoutInfo, nullptr, &layout));
@@ -398,12 +393,12 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
     return *pPipeline;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating Graphics Pipeline #{}", s_graphicsPipelines.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   vk::PipelineVertexInputStateCreateInfo vertex_input;
-  plHybridArray<vk::VertexInputBindingDescription, PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT> bindings;
+  plHybridArray<vk::VertexInputBindingDescription, PL_GAL_MAX_VERTEX_BUFFER_COUNT> bindings;
   if (desc.m_pCurrentVertexDecl)
   {
     bindings = desc.m_pCurrentVertexDecl->GetBindings();
@@ -423,7 +418,7 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   // Specify rasterization state.
   const vk::PipelineRasterizationStateCreateInfo* raster = desc.m_pCurrentRasterizerState->GetRasterizerState();
 
-  // Our attachment will write to all color channels, but no blending is enabled.
+  // Our attachment will write to all color channels
   vk::PipelineColorBlendStateCreateInfo blend = *desc.m_pCurrentBlendState->GetBlendState();
   blend.attachmentCount = desc.m_uiAttachmentCount;
 
@@ -432,10 +427,10 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   viewport.viewportCount = 1;
   viewport.scissorCount = 1;
 
-  // Disable all depth testing.
+  // Depth Testing
   const vk::PipelineDepthStencilStateCreateInfo* depth_stencil = desc.m_pCurrentDepthStencilState->GetDepthStencilState();
 
-  // No multisampling.
+  // Multisampling.
   vk::PipelineMultisampleStateCreateInfo multisample;
   multisample.rasterizationSamples = plConversionUtilsVulkan::GetSamples(desc.m_msaa);
   if (multisample.rasterizationSamples != vk::SampleCountFlagBits::e1 && desc.m_pCurrentBlendState->GetDescription().m_bAlphaToCoverage)
@@ -502,9 +497,9 @@ vk::Pipeline plResourceCacheVulkan::RequestComputePipeline(const ComputePipeline
     return *pPipeline;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating Compute Pipeline #{}", s_computePipelines.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   vk::ComputePipelineCreateInfo pipe;
   pipe.layout = desc.m_layout;
@@ -534,9 +529,9 @@ vk::DescriptorSetLayout plResourceCacheVulkan::RequestDescriptorSetLayout(const 
     return *pLayout;
   }
 
-#ifdef PLASMA_LOG_VULKAN_RESOURCES
+#ifdef PL_LOG_VULKAN_RESOURCES
   plLog::Info("Creating Descriptor Set Layout #{}", s_descriptorSetLayouts.GetCount());
-#endif // PLASMA_LOG_VULKAN_RESOURCES
+#endif // PL_LOG_VULKAN_RESOURCES
 
   vk::DescriptorSetLayoutCreateInfo descriptorSetLayout;
   descriptorSetLayout.bindingCount = desc.m_bindings.GetCount();
@@ -693,7 +688,7 @@ bool plResourceCacheVulkan::ResourceCacheHash::Less(const GraphicsPipelineDesc& 
   LESS_CHECK(m_pCurrentShader);
   LESS_CHECK(m_pCurrentVertexDecl);
 
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
+  for (plUInt32 i = 0; i < PL_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
   {
     if (a.m_VertexBufferStrides[i] != b.m_VertexBufferStrides[i])
       return a.m_VertexBufferStrides[i] < b.m_VertexBufferStrides[i];
@@ -724,13 +719,30 @@ bool plResourceCacheVulkan::ResourceCacheHash::Equal(const FramebufferKey& a, co
 plUInt32 plResourceCacheVulkan::ResourceCacheHash::Hash(const PipelineLayoutDesc& desc)
 {
   plHashStreamWriter32 writer;
-  writer << desc.m_layout;
+  const plUInt32 uiCount = desc.m_layout.GetCount();
+  writer << uiCount;
+  for (plUInt32 i = 0; i < uiCount; ++i)
+  {
+    writer << desc.m_layout[i];
+  }
+  writer << desc.m_pushConstants.offset;
+  writer << desc.m_pushConstants.size;
+  writer << plConversionUtilsVulkan::GetUnderlyingFlagsValue(desc.m_pushConstants.stageFlags);
   return writer.GetHashValue();
 }
 
 bool plResourceCacheVulkan::ResourceCacheHash::Equal(const PipelineLayoutDesc& a, const PipelineLayoutDesc& b)
 {
-  return a.m_layout == b.m_layout;
+  if (a.m_layout.GetCount() != b.m_layout.GetCount())
+    return false;
+
+  const plUInt32 uiCount = a.m_layout.GetCount();
+  for (plUInt32 i = 0; i < uiCount; ++i)
+  {
+    if (a.m_layout[i] != b.m_layout[i])
+      return false;
+  }
+  return a.m_pushConstants == b.m_pushConstants;
 }
 
 plUInt32 plResourceCacheVulkan::ResourceCacheHash::Hash(const GraphicsPipelineDesc& desc)
@@ -750,9 +762,9 @@ plUInt32 plResourceCacheVulkan::ResourceCacheHash::Hash(const GraphicsPipelineDe
   return writer.GetHashValue();
 }
 
-bool ArraysEqual(const plUInt32 (&a)[PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT], const plUInt32 (&b)[PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT])
+bool ArraysEqual(const plUInt32 (&a)[PL_GAL_MAX_VERTEX_BUFFER_COUNT], const plUInt32 (&b)[PL_GAL_MAX_VERTEX_BUFFER_COUNT])
 {
-  for (plUInt32 i = 0; i < PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
+  for (plUInt32 i = 0; i < PL_GAL_MAX_VERTEX_BUFFER_COUNT; i++)
   {
     if (a[i] != b[i])
       return false;

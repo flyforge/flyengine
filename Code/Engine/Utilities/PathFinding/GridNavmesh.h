@@ -5,12 +5,12 @@
 #include <Utilities/DataStructures/GameGrid.h>
 
 /// \brief Takes an plGameGrid and creates an optimized navmesh structure from it, that is more efficient for path searches.
-class PLASMA_UTILITIES_DLL plGridNavmesh
+class PL_UTILITIES_DLL plGridNavmesh
 {
 public:
   struct ConvexArea
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// The space that is enclosed by this convex area.
     plRectU32 m_Rect;
@@ -24,7 +24,7 @@ public:
 
   struct AreaEdge
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// The 'area' of the edge. This is a one cell wide line that is always WITHIN the ConvexArea from where the edge connects to a neighbor
     /// area.
@@ -36,19 +36,19 @@ public:
 
   /// \brief Callback that determines whether the cell with index \a uiCell1 and the cell with index \a uiCell2 represent the same type of
   /// terrain.
-  typedef bool (*CellComparator)(plUInt32 uiCell1, plUInt32 uiCell2, void* pPassThrough);
+  using CellComparator = bool (*)(plUInt32, plUInt32, void*);
 
   /// \brief Callback that determines whether the cell with index \a uiCell is blocked entirely (for every type of unit) and therefore can
   /// be optimized away.
-  typedef bool (*CellBlocked)(plUInt32 uiCell, void* pPassThrough);
+  using CellBlocked = bool (*)(plUInt32, void*);
 
   /// \brief Creates the navmesh from the given plGameGrid.
   template <class CellData>
   void CreateFromGrid(
-    const plGameGrid<CellData>& Grid, CellComparator IsSameCellType, void* pPassThroughSame, CellBlocked IsCellBlocked, void* pPassThroughBlocked);
+    const plGameGrid<CellData>& grid, CellComparator isSameCellType, void* pPassThroughSame, CellBlocked isCellBlocked, void* pPassThroughBlocked);
 
   /// \brief Returns the index of the ConvexArea at the given cell coordinates. Negative, if the cell is blocked.
-  plInt32 GetAreaAt(const plVec2I32& Coord) const { return m_NodesGrid.GetCell(Coord); }
+  plInt32 GetAreaAt(const plVec2I32& vCoord) const { return m_NodesGrid.GetCell(vCoord); }
 
   /// \brief Returns the number of convex areas that this navmesh consists of.
   plUInt32 GetNumConvexAreas() const { return m_ConvexAreas.GetCount(); }

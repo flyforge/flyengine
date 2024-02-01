@@ -18,16 +18,16 @@ namespace
   {
     plHashedString m_sName;
     plVariant m_DefaultValue;
-    plDynamicArray<plShaderParser::EnumValue, plStaticAllocatorWrapper> m_EnumValues;
+    plDynamicArray<plShaderParser::EnumValue, plStaticsAllocatorWrapper> m_EnumValues;
   };
 
-  static plDeque<PermutationVarConfig, plStaticAllocatorWrapper> s_PermutationVarConfigsStorage;
+  static plDeque<PermutationVarConfig, plStaticsAllocatorWrapper> s_PermutationVarConfigsStorage;
   static plHashTable<plHashedString, PermutationVarConfig*> s_PermutationVarConfigs;
   static plMutex s_PermutationVarConfigsMutex;
 
   const PermutationVarConfig* FindConfig(const char* szName, const plTempHashedString& sHashedName)
   {
-    PLASMA_LOCK(s_PermutationVarConfigsMutex);
+    PL_LOCK(s_PermutationVarConfigsMutex);
 
     PermutationVarConfig* pConfig = nullptr;
     if (!s_PermutationVarConfigs.TryGetValue(sHashedName, pConfig))
@@ -41,7 +41,7 @@ namespace
 
   const PermutationVarConfig* FindConfig(const plHashedString& sName)
   {
-    PLASMA_LOCK(s_PermutationVarConfigsMutex);
+    PL_LOCK(s_PermutationVarConfigsMutex);
 
     PermutationVarConfig* pConfig = nullptr;
     if (!s_PermutationVarConfigs.TryGetValue(sName, pConfig))
@@ -126,13 +126,13 @@ void plShaderManager::ReloadPermutationVarConfig(const char* szName, const plTem
 {
   // clear earlier data
   {
-    PLASMA_LOCK(s_PermutationVarConfigsMutex);
+    PL_LOCK(s_PermutationVarConfigsMutex);
 
     s_PermutationVarConfigs.Remove(sHashedName);
   }
 
   plStringBuilder sPath;
-  sPath.Format("{0}/{1}.plPermVar", s_sPermVarSubDir, szName);
+  sPath.SetFormat("{0}/{1}.plPermVar", s_sPermVarSubDir, szName);
 
   plStringBuilder sTemp = s_sPlatform;
   sTemp.Append(" 1");
@@ -154,7 +154,7 @@ void plShaderManager::ReloadPermutationVarConfig(const char* szName, const plTem
   plShaderParser::ParsePermutationVarConfig(sTemp, defaultValue, enumDef);
   if (defaultValue.IsValid())
   {
-    PLASMA_LOCK(s_PermutationVarConfigsMutex);
+    PL_LOCK(s_PermutationVarConfigsMutex);
 
     auto pConfig = &s_PermutationVarConfigsStorage.ExpandAndGetRef();
     pConfig->m_sName.Assign(szName);
@@ -260,7 +260,7 @@ plArrayPtr<const plShaderParser::EnumValue> plShaderManager::GetPermutationEnumV
 
 void plShaderManager::PreloadPermutations(plShaderResourceHandle hShader, const plHashTable<plHashedString, plHashedString>& permVars, plTime shouldBeAvailableIn)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 #if 0
   plResourceLock<plShaderResource> pShader(hShader, plResourceAcquireMode::BlockTillLoaded);
 
@@ -361,4 +361,4 @@ plShaderPermutationResourceHandle plShaderManager::PreloadSinglePermutationInter
   return hShaderPermutation;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_ShaderCompiler_Implementation_ShaderManager);
+

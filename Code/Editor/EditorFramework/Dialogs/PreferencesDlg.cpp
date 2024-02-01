@@ -8,11 +8,11 @@
 class plPreferencesObjectManager : public plDocumentObjectManager
 {
 public:
-  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& Types) const override
+  virtual void GetCreateableTypes(plHybridArray<const plRTTI*, 32>& ref_types) const override
   {
     for (auto pRtti : m_KnownTypes)
     {
-      Types.PushBack(pRtti);
+      ref_types.PushBack(pRtti);
     }
   }
 
@@ -22,30 +22,31 @@ public:
 
 class plPreferencesDocument : public plDocument
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPreferencesDocument, plDocument);
+  PL_ADD_DYNAMIC_REFLECTION(plPreferencesDocument, plDocument);
+
 
 public:
-  plPreferencesDocument(const char* szDocumentPath)
-    : plDocument(szDocumentPath, PLASMA_DEFAULT_NEW(plPreferencesObjectManager))
+  plPreferencesDocument(plStringView sDocumentPath)
+    : plDocument(sDocumentPath, PL_DEFAULT_NEW(plPreferencesObjectManager))
   {
   }
 
 public:
-  virtual plDocumentInfo* CreateDocumentInfo() override { return PLASMA_DEFAULT_NEW(plDocumentInfo); }
+  virtual plDocumentInfo* CreateDocumentInfo() override { return PL_DEFAULT_NEW(plDocumentInfo); }
 };
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreferencesDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreferencesDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plQtPreferencesDlg::plQtPreferencesDlg(QWidget* parent)
-  : QDialog(parent)
+plQtPreferencesDlg::plQtPreferencesDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
   splitter->setStretchFactor(0, 0);
   splitter->setStretchFactor(1, 1);
 
-  m_pDocument = PLASMA_DEFAULT_NEW(plPreferencesDocument, "<none>");
+  m_pDocument = PL_DEFAULT_NEW(plPreferencesDocument, "<none>");
 
   // if this is set, all properties are applied immediately
   // m_pDocument->GetObjectManager()->m_PropertyEvents.AddEventHandler(plMakeDelegate(&plQtPreferencesDlg::PropertyChangedEventHandler,
@@ -74,7 +75,7 @@ plQtPreferencesDlg::~plQtPreferencesDlg()
   delete Properties;
   Properties = nullptr;
 
-  PLASMA_DEFAULT_DELETE(m_pDocument);
+  PL_DEFAULT_DELETE(m_pDocument);
 }
 
 plUuid plQtPreferencesDlg::NativeToObject(plPreferences* pPreferences)
@@ -85,8 +86,7 @@ plUuid plQtPreferencesDlg::NativeToObject(plPreferences* pPreferences)
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, true, true);
 
-  plUuid guid;
-  guid.CreateNewUuid();
+  const plUuid guid = plUuid::MakeUuid();
   context.RegisterObject(guid, pType, pPreferences);
   plAbstractObjectNode* pNode = conv.AddObjectToGraph(pType, pPreferences, "root");
 
@@ -109,7 +109,8 @@ void plQtPreferencesDlg::ObjectToNative(plUuid objectGuid, const plDocument* pPr
 
   // Write object to graph.
   plAbstractObjectGraph graph;
-  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool {
+  auto filter = [](const plDocumentObject*, const plAbstractProperty* pProp) -> bool
+  {
     if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
       return false;
     return true;
@@ -213,7 +214,7 @@ void plQtPreferencesDlg::AllPreferencesToObject()
 void plQtPreferencesDlg::PropertyChangedEventHandler(const plDocumentObjectPropertyEvent& e)
 {
   const plUuid guid = e.m_pObject->GetGuid();
-  PLASMA_ASSERT_DEV(m_DocumentBinding.Contains(guid), "Object GUID is not in the known list!");
+  PL_ASSERT_DEV(m_DocumentBinding.Contains(guid), "Object GUID is not in the known list!");
 
   ObjectToNative(guid, m_DocumentBinding[guid]);
 }

@@ -5,12 +5,12 @@
 #include <Foundation/Containers/Set.h>
 #include <Foundation/Strings/String.h>
 
-class PLASMA_FOUNDATION_DLL plDataTransfer;
+class PL_FOUNDATION_DLL plDataTransfer;
 
 /// \brief A small wrapper class around an plTelemetryMessage for sending a 'data transfer'. See plDataTransfer for more details.
-class PLASMA_FOUNDATION_DLL plDataTransferObject
+class PL_FOUNDATION_DLL plDataTransferObject
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDataTransferObject);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDataTransferObject);
 
 public:
   /// \brief plDataTransferObject instances should always be created on the stack and should be very short lived.
@@ -71,7 +71,7 @@ private:
 /// or not, is not a problem, the application may just ignore the request. Similarly, the application may also 'push' out a data transfer,
 /// even when no data was requested. However, this can overload the network bandwidth or the computer that runs plInspector, if not done
 /// carefully.
-class PLASMA_FOUNDATION_DLL plDataTransfer
+class PL_FOUNDATION_DLL plDataTransfer
 {
 public:
   /// \brief By default the data transfer is deactivated.

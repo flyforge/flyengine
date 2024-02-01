@@ -1,5 +1,7 @@
 #include <EditorPluginAssets/EditorPluginAssetsPCH.h>
 
+#include <EditorFramework/Assets/AssetCurator.h>
+#include <EditorPluginAssets/BlackboardTemplateAsset/BlackboardTemplateAsset.h>
 #include <EditorPluginAssets/BlackboardTemplateAsset/BlackboardTemplateAssetWindow.moc.h>
 #include <GuiFoundation/ActionViews/MenuBarActionMapView.moc.h>
 #include <GuiFoundation/ActionViews/ToolBarActionMapView.moc.h>
@@ -9,6 +11,9 @@
 plQtBlackboardTemplateAssetDocumentWindow::plQtBlackboardTemplateAssetDocumentWindow(plDocument* pDocument)
   : plQtDocumentWindow(pDocument)
 {
+  GetDocument()->GetObjectManager()->m_PropertyEvents.AddEventHandler(plMakeDelegate(&plQtBlackboardTemplateAssetDocumentWindow::PropertyEventHandler, this));
+  GetDocument()->GetObjectManager()->m_StructureEvents.AddEventHandler(plMakeDelegate(&plQtBlackboardTemplateAssetDocumentWindow::StructureEventHandler, this));
+
   // Menu Bar
   {
     plQtMenuBarActionMapView* pMenuBar = static_cast<plQtMenuBarActionMapView*>(menuBar());
@@ -48,4 +53,68 @@ plQtBlackboardTemplateAssetDocumentWindow::plQtBlackboardTemplateAssetDocumentWi
   FinishWindowCreation();
 }
 
-plQtBlackboardTemplateAssetDocumentWindow::~plQtBlackboardTemplateAssetDocumentWindow() = default;
+plQtBlackboardTemplateAssetDocumentWindow::~plQtBlackboardTemplateAssetDocumentWindow()
+{
+  GetDocument()->GetObjectManager()->m_PropertyEvents.RemoveEventHandler(plMakeDelegate(&plQtBlackboardTemplateAssetDocumentWindow::PropertyEventHandler, this));
+  GetDocument()->GetObjectManager()->m_StructureEvents.RemoveEventHandler(plMakeDelegate(&plQtBlackboardTemplateAssetDocumentWindow::StructureEventHandler, this));
+
+  RestoreResource();
+}
+
+void plQtBlackboardTemplateAssetDocumentWindow::UpdatePreview()
+{
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+    return;
+
+  auto pDocument = static_cast<plBlackboardTemplateAssetDocument*>(GetDocument());
+
+  plResourceUpdateMsgToEngine msg;
+  msg.m_sResourceType = "BlackboardTemplate";
+
+  plStringBuilder tmp;
+  msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
+
+  plContiguousMemoryStreamStorage streamStorage;
+  plMemoryStreamWriter memoryWriter(&streamStorage);
+
+  // Write Path
+  plStringBuilder sAbsFilePath = GetDocument()->GetDocumentPath();
+  sAbsFilePath.ChangeFileExtension("plBlackboardTemplate");
+  // Write Header
+  memoryWriter << sAbsFilePath;
+  const plUInt64 uiHash = plAssetCurator::GetSingleton()->GetAssetDependencyHash(GetDocument()->GetGuid());
+  plAssetFileHeader AssetHeader;
+  AssetHeader.SetFileHashAndVersion(uiHash, pDocument->GetAssetTypeVersion());
+  AssetHeader.Write(memoryWriter).IgnoreResult();
+  // Write Asset Data
+  if (pDocument->WriteAsset(memoryWriter, plAssetCurator::GetSingleton()->GetActiveAssetProfile()).Succeeded())
+  {
+    msg.m_Data = plArrayPtr<const plUInt8>(streamStorage.GetData(), streamStorage.GetStorageSize32());
+
+    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+  }
+}
+
+void plQtBlackboardTemplateAssetDocumentWindow::RestoreResource()
+{
+  plRestoreResourceMsgToEngine msg;
+  msg.m_sResourceType = "BlackboardTemplate";
+
+  plStringBuilder tmp;
+  msg.m_sResourceID = plConversionUtils::ToString(GetDocument()->GetGuid(), tmp);
+
+  plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+}
+
+void plQtBlackboardTemplateAssetDocumentWindow::PropertyEventHandler(const plDocumentObjectPropertyEvent& e)
+{
+  UpdatePreview();
+}
+
+void plQtBlackboardTemplateAssetDocumentWindow::StructureEventHandler(const plDocumentObjectStructureEvent& e)
+{
+  if (e.m_EventType == plDocumentObjectStructureEvent::Type::AfterObjectRemoved)
+  {
+    UpdatePreview();
+  }
+}

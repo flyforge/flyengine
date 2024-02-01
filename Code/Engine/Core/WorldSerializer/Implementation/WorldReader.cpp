@@ -10,42 +10,42 @@ plWorldReader::FindComponentTypeCallback plWorldReader::s_FindComponentTypeCallb
 plWorldReader::plWorldReader() = default;
 plWorldReader::~plWorldReader() = default;
 
-plResult plWorldReader::ReadWorldDescription(plStreamReader& stream, bool warningOnUknownSkip)
+plResult plWorldReader::ReadWorldDescription(plStreamReader& inout_stream, bool bWarningOnUknownSkip)
 {
-  m_pStream = &stream;
+  m_pStream = &inout_stream;
 
   m_uiVersion = 0;
-  stream >> m_uiVersion;
+  inout_stream >> m_uiVersion;
 
   if (m_uiVersion < 8 || m_uiVersion > 10)
   {
     plLog::Error("Invalid world version (got {}).", m_uiVersion);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // destroy old context first
   m_pStringDedupReadContext = nullptr;
-  m_pStringDedupReadContext = PLASMA_DEFAULT_NEW(plStringDeduplicationReadContext, stream);
+  m_pStringDedupReadContext = PL_DEFAULT_NEW(plStringDeduplicationReadContext, inout_stream);
 
   if (m_uiVersion == 8)
   {
     // add tags from the stream
-    PLASMA_SUCCEED_OR_RETURN(plTagRegistry::GetGlobalRegistry().Load(stream));
+    PL_SUCCEED_OR_RETURN(plTagRegistry::GetGlobalRegistry().Load(inout_stream));
   }
 
   plUInt32 uiNumRootObjects = 0;
-  stream >> uiNumRootObjects;
+  inout_stream >> uiNumRootObjects;
 
   plUInt32 uiNumChildObjects = 0;
-  stream >> uiNumChildObjects;
+  inout_stream >> uiNumChildObjects;
 
   plUInt32 uiNumComponentTypes = 0;
-  stream >> uiNumComponentTypes;
+  inout_stream >> uiNumComponentTypes;
 
   if (uiNumComponentTypes > plMath::MaxValue<plUInt16>())
   {
     plLog::Error("World description has too many component types, got {0} - maximum allowed are {1}", uiNumComponentTypes, plMath::MaxValue<plUInt16>());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_RootObjectsToCreate.Reserve(uiNumRootObjects);
@@ -71,13 +71,13 @@ plResult plWorldReader::ReadWorldDescription(plStreamReader& stream, bool warnin
   }
 
   // read all component data
-  ReadComponentDataToMemStream(warningOnUknownSkip);
+  ReadComponentDataToMemStream(bWarningOnUknownSkip);
   m_pStringDedupReadContext->SetActive(false);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::InstantiateWorld(plWorld& world, const plUInt16* pOverrideTeamID, plTime maxStepTime, plProgress* pProgress)
+plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::InstantiateWorld(plWorld& ref_world, const plUInt16* pOverrideTeamID, plTime maxStepTime, plProgress* pProgress)
 {
   plPrefabInstantiationOptions options;
   options.m_pOverrideTeamID = pOverrideTeamID;
@@ -85,12 +85,12 @@ plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::InstantiateW
   options.m_pProgress = pProgress;
   options.m_RandomSeedMode = plPrefabInstantiationOptions::RandomSeedMode::FixedFromSerialization;
 
-  return Instantiate(world, false, plTransform(), options);
+  return Instantiate(ref_world, false, plTransform(), options);
 }
 
-plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::InstantiatePrefab(plWorld& world, const plTransform& rootTransform, const plPrefabInstantiationOptions& options)
+plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::InstantiatePrefab(plWorld& ref_world, const plTransform& rootTransform, const plPrefabInstantiationOptions& options)
 {
-  return Instantiate(world, true, rootTransform, options);
+  return Instantiate(ref_world, true, rootTransform, options);
 }
 
 plGameObjectHandle plWorldReader::ReadGameObjectHandle()
@@ -170,14 +170,14 @@ plUInt32 plWorldReader::GetChildObjectCount() const
   return m_ChildObjectsToCreate.GetCount();
 }
 
-void plWorldReader::SetMaxStepTime(InstantiationContextBase* context, plTime maxStepTime)
+void plWorldReader::SetMaxStepTime(InstantiationContextBase* pContext, plTime maxStepTime)
 {
-  return static_cast<InstantiationContext*>(context)->SetMaxStepTime(maxStepTime);
+  return static_cast<InstantiationContext*>(pContext)->SetMaxStepTime(maxStepTime);
 }
 
-plTime plWorldReader::GetMaxStepTime(InstantiationContextBase* context)
+plTime plWorldReader::GetMaxStepTime(InstantiationContextBase* pContext)
 {
-  return static_cast<InstantiationContext*>(context)->GetMaxStepTime();
+  return static_cast<InstantiationContext*>(pContext)->GetMaxStepTime();
 }
 
 void plWorldReader::ReadGameObjectDesc(GameObjectToCreate& godesc)
@@ -243,8 +243,7 @@ void plWorldReader::ReadComponentTypeInfo(plUInt32 uiComponentTypeIdx)
 
 void plWorldReader::ReadComponentDataToMemStream(bool warningOnUnknownSkip)
 {
-  auto WriteToMemStream = [&](plMemoryStreamWriter& writer, bool bReadNumComponents)
-  {
+  auto WriteToMemStream = [&](plMemoryStreamWriter& ref_writer, bool bReadNumComponents) {
     plUInt8 Temp[4096];
     for (auto& compTypeInfo : m_ComponentTypes)
     {
@@ -272,9 +271,9 @@ void plWorldReader::ReadComponentDataToMemStream(bool warningOnUnknownSkip)
 
         while (uiAllComponentsSize > 0)
         {
-          const plUInt64 uiRead = m_pStream->ReadBytes(Temp, plMath::Min<plUInt32>(uiAllComponentsSize, PLASMA_ARRAY_SIZE(Temp)));
+          const plUInt64 uiRead = m_pStream->ReadBytes(Temp, plMath::Min<plUInt32>(uiAllComponentsSize, PL_ARRAY_SIZE(Temp)));
 
-          writer.WriteBytes(Temp, uiRead).IgnoreResult();
+          ref_writer.WriteBytes(Temp, uiRead).IgnoreResult();
 
           uiAllComponentsSize -= (plUInt32)uiRead;
         }
@@ -311,21 +310,21 @@ plUniquePtr<plWorldReader::InstantiationContextBase> plWorldReader::Instantiate(
 
   ClearHandles();
 
-  if (options.m_MaxStepTime <= plTime::Zero())
+  if (options.m_MaxStepTime <= plTime::MakeZero())
   {
     InstantiationContext context = InstantiationContext(*this, bUseTransform, rootTransform, options);
 
-    PLASMA_VERIFY(context.Step() == InstantiationContextBase::StepResult::Finished, "Instantiation should be completed after this call");
+    PL_VERIFY(context.Step() == InstantiationContextBase::StepResult::Finished, "Instantiation should be completed after this call");
     return nullptr;
   }
 
-  plUniquePtr<InstantiationContext> pContext = PLASMA_DEFAULT_NEW(InstantiationContext, *this, bUseTransform, rootTransform, options);
+  plUniquePtr<InstantiationContext> pContext = PL_DEFAULT_NEW(InstantiationContext, *this, bUseTransform, rootTransform, options);
 
   return std::move(pContext);
 }
 
-plWorldReader::InstantiationContext::InstantiationContext(plWorldReader& worldReader, bool bUseTransform, const plTransform& rootTransform, const plPrefabInstantiationOptions& options)
-  : m_WorldReader(worldReader)
+plWorldReader::InstantiationContext::InstantiationContext(plWorldReader& ref_worldReader, bool bUseTransform, const plTransform& rootTransform, const plPrefabInstantiationOptions& options)
+  : m_WorldReader(ref_worldReader)
   , m_bUseTransform(bUseTransform)
   , m_RootTransform(rootTransform)
   , m_Options(options)
@@ -334,17 +333,17 @@ plWorldReader::InstantiationContext::InstantiationContext(plWorldReader& worldRe
 
   if (m_Options.m_MaxStepTime.IsZeroOrNegative())
   {
-    m_Options.m_MaxStepTime = plTime::Hours(24 * 365);
+    m_Options.m_MaxStepTime = plTime::MakeFromHours(24 * 365);
   }
 
   if (options.m_MaxStepTime.IsPositive())
   {
-    m_hComponentInitBatch = worldReader.m_pWorld->CreateComponentInitBatch("WorldReaderBatch", options.m_MaxStepTime.IsPositive() ? false : true);
+    m_hComponentInitBatch = ref_worldReader.m_pWorld->CreateComponentInitBatch("WorldReaderBatch", options.m_MaxStepTime.IsPositive() ? false : true);
   }
 
   if (options.m_pProgress != nullptr)
   {
-    m_pOverallProgressRange = PLASMA_DEFAULT_NEW(plProgressRange, "Instantiate", Phase::Count, false, options.m_pProgress);
+    m_pOverallProgressRange = PL_DEFAULT_NEW(plProgressRange, "Instantiate", Phase::Count, false, options.m_pProgress);
     m_pOverallProgressRange->SetStepWeighting(Phase::CreateRootObjects, m_WorldReader.m_RootObjectsToCreate.GetCount() / 100.0f);
     m_pOverallProgressRange->SetStepWeighting(Phase::CreateChildObjects, m_WorldReader.m_ChildObjectsToCreate.GetCount() / 100.0f);
     m_pOverallProgressRange->SetStepWeighting(Phase::CreateComponents, m_WorldReader.m_uiTotalNumComponents / 100.0f);
@@ -367,11 +366,11 @@ plWorldReader::InstantiationContext::~InstantiationContext()
 
 plWorldReader::InstantiationContext::StepResult plWorldReader::InstantiationContext::Step()
 {
-  PLASMA_ASSERT_DEV(m_Phase != Phase::Invalid, "InstantiationContext cannot be re-used.");
+  PL_ASSERT_DEV(m_Phase != Phase::Invalid, "InstantiationContext cannot be re-used.");
 
-  PLASMA_PROFILE_SCOPE("plWorldReader::InstContext::Step");
+  PL_PROFILE_SCOPE("plWorldReader::InstContext::Step");
 
-  PLASMA_LOCK(m_WorldReader.m_pWorld->GetWriteMarker());
+  PL_LOCK(m_WorldReader.m_pWorld->GetWriteMarker());
 
   plTime endTime = plTime::Now() + m_Options.m_MaxStepTime;
 
@@ -379,17 +378,22 @@ plWorldReader::InstantiationContext::StepResult plWorldReader::InstantiationCont
   {
     if (!m_Options.m_ReplaceNamedRootWithParent.IsEmpty())
     {
-      PLASMA_ASSERT_DEBUG(!m_Options.m_hParent.IsInvalidated(), "Parent must be provided when m_ReplaceNamedRootWithParent is specified.");
+      PL_ASSERT_DEBUG(!m_Options.m_hParent.IsInvalidated(), "Parent must be provided when m_ReplaceNamedRootWithParent is specified.");
 
       if (m_WorldReader.m_RootObjectsToCreate.GetCount() == 1 && m_WorldReader.m_RootObjectsToCreate[0].m_Desc.m_sName == m_Options.m_ReplaceNamedRootWithParent)
       {
         m_uiCurrentIndex = 1;
         m_WorldReader.m_IndexToGameObjectHandle.PushBack(m_Options.m_hParent);
 
-        if (m_WorldReader.m_RootObjectsToCreate[0].m_Desc.m_bDynamic)
+        plGameObject* pParent = nullptr;
+        if (m_WorldReader.m_pWorld->TryGetObject(m_Options.m_hParent, pParent))
         {
-          plGameObject* pParent = nullptr;
-          if (m_WorldReader.m_pWorld->TryGetObject(m_Options.m_hParent, pParent))
+          if (m_Options.m_pCreatedRootObjectsOut)
+          {
+            m_Options.m_pCreatedRootObjectsOut->PushBack(pParent);
+          }
+
+          if (m_WorldReader.m_RootObjectsToCreate[0].m_Desc.m_bDynamic)
           {
             pParent->MakeDynamic();
           }
@@ -431,7 +435,7 @@ plWorldReader::InstantiationContext::StepResult plWorldReader::InstantiationCont
       plStreamReader* pPrevReader = m_WorldReader.m_pStream;
       m_WorldReader.m_pStream = &m_CurrentReader;
 
-      PLASMA_SCOPE_EXIT(m_WorldReader.m_pStream = pPrevReader; m_WorldReader.m_pStringDedupReadContext->SetActive(false););
+      PL_SCOPE_EXIT(m_WorldReader.m_pStream = pPrevReader; m_WorldReader.m_pStringDedupReadContext->SetActive(false););
 
       if (!CreateComponents(endTime))
         return StepResult::Continue;
@@ -451,7 +455,7 @@ plWorldReader::InstantiationContext::StepResult plWorldReader::InstantiationCont
       plStreamReader* pPrevReader = m_WorldReader.m_pStream;
       m_WorldReader.m_pStream = &m_CurrentReader;
 
-      PLASMA_SCOPE_EXIT(m_WorldReader.m_pStream = pPrevReader; m_WorldReader.m_pStringDedupReadContext->SetActive(false););
+      PL_SCOPE_EXIT(m_WorldReader.m_pStream = pPrevReader; m_WorldReader.m_pStringDedupReadContext->SetActive(false););
 
       if (!DeserializeComponents(endTime))
         return StepResult::Continue;
@@ -504,16 +508,16 @@ void plWorldReader::InstantiationContext::Cancel()
 }
 
 // a super simple, but also efficient random number generator
-inline static plUInt32 NextStableRandomSeed(plUInt32& seed)
+inline static plUInt32 NextStableRandomSeed(plUInt32& ref_uiSeed)
 {
-  seed = 214013L * seed + 2531011L;
-  return ((seed >> 16) & 0x7FFFF);
+  ref_uiSeed = 214013L * ref_uiSeed + 2531011L;
+  return ((ref_uiSeed >> 16) & 0x7FFFF);
 }
 
 template <bool UseTransform>
-bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray<GameObjectToCreate>& objects, plGameObjectHandle hParent, plDynamicArray<plGameObject*>* out_CreatedObjects, plTime endTime)
+bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray<GameObjectToCreate>& objects, plGameObjectHandle hParent, plDynamicArray<plGameObject*>* out_pCreatedObjects, plTime endTime)
 {
-  PLASMA_PROFILE_SCOPE("plWorldReader::CreateGameObjects");
+  PL_PROFILE_SCOPE("plWorldReader::CreateGameObjects");
 
   while (m_uiCurrentIndex < objects.GetCount())
   {
@@ -552,7 +556,7 @@ bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray
     {
       plTransform tChild(desc.m_LocalPosition, desc.m_LocalRotation, desc.m_LocalScaling);
       plTransform tFinal;
-      tFinal.SetGlobalTransform(m_RootTransform, tChild);
+      tFinal = plTransform::MakeGlobalTransform(m_RootTransform, tChild);
 
       desc.m_LocalPosition = tFinal.m_vPosition;
       desc.m_LocalRotation = tFinal.m_qRotation;
@@ -567,9 +571,9 @@ bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray
       pObject->SetGlobalKey(godesc.m_sGlobalKey);
     }
 
-    if (out_CreatedObjects)
+    if (out_pCreatedObjects)
     {
-      out_CreatedObjects->PushBack(pObject);
+      out_pCreatedObjects->PushBack(pObject);
     }
 
     ++m_uiCurrentIndex;
@@ -589,7 +593,7 @@ bool plWorldReader::InstantiationContext::CreateGameObjects(const plDynamicArray
 
 bool plWorldReader::InstantiationContext::CreateComponents(plTime endTime)
 {
-  PLASMA_PROFILE_SCOPE("plWorldReader::CreateComponents");
+  PL_PROFILE_SCOPE("plWorldReader::CreateComponents");
 
   plStreamReader& s = *m_WorldReader.m_pStream;
 
@@ -602,7 +606,7 @@ bool plWorldReader::InstantiationContext::CreateComponents(plTime endTime)
       continue;
 
     plComponentManagerBase* pManager = m_WorldReader.m_pWorld->GetOrCreateManagerForComponentType(compTypeInfo.m_pRtti);
-    PLASMA_ASSERT_DEV(pManager != nullptr, "Cannot create components of type '{0}', manager is not available.", compTypeInfo.m_pRtti->GetTypeName());
+    PL_ASSERT_DEV(pManager != nullptr, "Cannot create components of type '{0}', manager is not available.", compTypeInfo.m_pRtti->GetTypeName());
 
     while (m_uiCurrentIndex < compTypeInfo.m_uiNumComponents)
     {
@@ -620,7 +624,7 @@ bool plWorldReader::InstantiationContext::CreateComponents(plTime endTime)
       plGameObject* pOwnerObject = nullptr;
       if (!m_WorldReader.m_pWorld->TryGetObject(hOwner, pOwnerObject))
       {
-        PLASMA_REPORT_FAILURE("Owner object must be not null");
+        PL_REPORT_FAILURE("Owner object must be not null");
       }
 
       plComponent* pComponent = nullptr;
@@ -630,10 +634,10 @@ bool plWorldReader::InstantiationContext::CreateComponents(plTime endTime)
 
       for (plUInt8 j = 0; j < 8; ++j)
       {
-        pComponent->SetUserFlag(j, (userFlags & PLASMA_BIT(j)) != 0);
+        pComponent->SetUserFlag(j, (userFlags & PL_BIT(j)) != 0);
       }
 
-      PLASMA_ASSERT_DEBUG(uiComponentIdx == compTypeInfo.m_ComponentIndexToHandle.GetCount(), "Component index doesn't match");
+      PL_ASSERT_DEBUG(uiComponentIdx == compTypeInfo.m_ComponentIndexToHandle.GetCount(), "Component index doesn't match");
       compTypeInfo.m_ComponentIndexToHandle.PushBack(hComponent);
 
       ++m_uiCurrentIndex;
@@ -659,9 +663,7 @@ bool plWorldReader::InstantiationContext::CreateComponents(plTime endTime)
 
 bool plWorldReader::InstantiationContext::DeserializeComponents(plTime endTime)
 {
-  PLASMA_PROFILE_SCOPE("plWorldReader::DeserializeComponents");
-
-  plStreamReader& s = *m_WorldReader.m_pStream;
+  PL_PROFILE_SCOPE("plWorldReader::DeserializeComponents");
 
   for (; m_uiCurrentComponentTypeIndex < m_WorldReader.m_ComponentTypes.GetCount(); ++m_uiCurrentComponentTypeIndex)
   {
@@ -699,9 +701,7 @@ bool plWorldReader::InstantiationContext::DeserializeComponents(plTime endTime)
 
 bool plWorldReader::InstantiationContext::AddComponentsToBatch(plTime endTime)
 {
-  PLASMA_PROFILE_SCOPE("plWorldReader::AddComponentsToBatch");
-
-  plUInt32 uiInitializedComponents = 0;
+  PL_PROFILE_SCOPE("plWorldReader::AddComponentsToBatch");
 
   if (!m_hComponentInitBatch.IsInvalidated())
   {
@@ -720,7 +720,6 @@ bool plWorldReader::InstantiationContext::AddComponentsToBatch(plTime endTime)
       if (m_WorldReader.m_pWorld->TryGetComponent(compTypeInfo.m_ComponentIndexToHandle[m_uiCurrentIndex++], pComponent))
       {
         pComponent->GetOwningManager()->InitializeComponent(pComponent);
-        ++uiInitializedComponents;
 
         ++m_uiCurrentNumComponentsProcessed;
 
@@ -769,7 +768,7 @@ void plWorldReader::InstantiationContext::BeginNextProgressStep(plStringView sNa
   {
     m_pOverallProgressRange->BeginNextStep(sName);
     m_pSubProgressRange = nullptr;
-    m_pSubProgressRange = PLASMA_DEFAULT_NEW(plProgressRange, sName, false, m_pOverallProgressRange->GetProgressbar());
+    m_pSubProgressRange = PL_DEFAULT_NEW(plProgressRange, sName, false, m_pOverallProgressRange->GetProgressbar());
   }
 }
 
@@ -781,4 +780,4 @@ void plWorldReader::InstantiationContext::SetSubProgressCompletion(double fCompl
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_WorldSerializer_Implementation_WorldReader);
+

@@ -11,7 +11,7 @@
 ///
 /// This class implements that algorithm pretty much verbatim.
 /// It does not implement keeping track of the time dept and paying that off later, though.
-class PLASMA_FOUNDATION_DLL plDefaultTimeStepSmoothing : public plTimeStepSmoothing
+class PL_FOUNDATION_DLL plDefaultTimeStepSmoothing : public plTimeStepSmoothing
 {
 public:
   plDefaultTimeStepSmoothing();

@@ -3,10 +3,10 @@
 #include <Core/Scripting/ScriptClassResource.h>
 #include <VisualScriptPlugin/Runtime/VisualScriptData.h>
 
-class PLASMA_VISUALSCRIPTPLUGIN_DLL plVisualScriptClassResource : public plScriptClassResource
+class PL_VISUALSCRIPTPLUGIN_DLL plVisualScriptClassResource : public plScriptClassResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVisualScriptClassResource, plScriptClassResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plVisualScriptClassResource);
+  PL_ADD_DYNAMIC_REFLECTION(plVisualScriptClassResource, plScriptClassResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plVisualScriptClassResource);
 
 public:
   plVisualScriptClassResource();

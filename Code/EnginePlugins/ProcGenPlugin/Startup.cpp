@@ -5,7 +5,7 @@
 #include <ProcGenPlugin/Resources/ProcGenGraphResource.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ProcGen, ProcGenPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(ProcGen, ProcGenPlugin)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -34,5 +34,5 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ProcGen, ProcGenPlugin)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on

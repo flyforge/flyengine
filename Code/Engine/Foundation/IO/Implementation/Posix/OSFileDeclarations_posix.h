@@ -12,7 +12,7 @@ struct plOSFileData
   FILE* m_pFileHandle;
 };
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
 
 struct plFileIterationData
 {

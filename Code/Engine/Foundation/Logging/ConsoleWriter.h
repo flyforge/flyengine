@@ -5,7 +5,7 @@
 namespace plLogWriter
 {
   /// \brief A simple log writer that writes out log messages using printf.
-  class PLASMA_FOUNDATION_DLL Console
+  class PL_FOUNDATION_DLL Console
   {
   public:
     /// \brief Register this at plLog to write all log messages to the console using printf.

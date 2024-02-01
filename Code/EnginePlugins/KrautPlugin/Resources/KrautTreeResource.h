@@ -10,7 +10,7 @@ using plKrautTreeResourceHandle = plTypedResourceHandle<class plKrautTreeResourc
 using plMaterialResourceHandle = plTypedResourceHandle<class plMaterialResource>;
 using plSurfaceResourceHandle = plTypedResourceHandle<class plSurfaceResource>;
 
-struct PLASMA_KRAUTPLUGIN_DLL plKrautTreeResourceDetails
+struct PL_KRAUTPLUGIN_DLL plKrautTreeResourceDetails
 {
   plBoundingBoxSphere m_Bounds;
   plVec3 m_vLeafCenter;
@@ -18,14 +18,14 @@ struct PLASMA_KRAUTPLUGIN_DLL plKrautTreeResourceDetails
   plString m_sSurfaceResource;
 };
 
-struct PLASMA_KRAUTPLUGIN_DLL plKrautTreeResourceDescriptor
+struct PL_KRAUTPLUGIN_DLL plKrautTreeResourceDescriptor
 {
   void Save(plStreamWriter& inout_stream) const;
   plResult Load(plStreamReader& inout_stream);
 
   struct VertexData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_vPosition;
     plVec3 m_vTexCoord; // U,V and Q
@@ -44,7 +44,7 @@ struct PLASMA_KRAUTPLUGIN_DLL plKrautTreeResourceDescriptor
 
   struct TriangleData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiVertexIndex[3];
   };
@@ -79,11 +79,11 @@ struct PLASMA_KRAUTPLUGIN_DLL plKrautTreeResourceDescriptor
   plHybridArray<MaterialData, 8> m_Materials;
 };
 
-class PLASMA_KRAUTPLUGIN_DLL plKrautTreeResource : public plResource
+class PL_KRAUTPLUGIN_DLL plKrautTreeResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautTreeResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plKrautTreeResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautTreeResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plKrautTreeResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDescriptor);
 
 public:
   plKrautTreeResource();

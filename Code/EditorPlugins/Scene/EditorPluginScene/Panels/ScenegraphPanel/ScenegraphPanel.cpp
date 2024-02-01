@@ -30,7 +30,7 @@ plQtScenegraphPanel::plQtScenegraphPanel(QWidget* pParent, plSceneDocument* pDoc
   : plQtDocumentPanel(pParent, pDocument)
 {
   setObjectName("ScenegraphPanel");
-  setWindowTitle("SCENEGRAPH");
+  setWindowTitle("Scenegraph");
   m_pSceneDocument = pDocument;
 
   m_pStack = new QStackedWidget(this);
@@ -47,7 +47,7 @@ plQtScenegraphPanel::plQtScenegraphPanel(QWidget* pParent, plScene2Document* pDo
   : plQtDocumentPanel(pParent, pDocument)
 {
   setObjectName("ScenegraphPanel");
-  setWindowTitle("SCENEGRAPH");
+  setWindowTitle("Scenegraph");
   m_pSceneDocument = pDocument;
 
   m_pStack = new QStackedWidget(this);
@@ -71,9 +71,7 @@ plQtScenegraphPanel::plQtScenegraphPanel(QWidget* pParent, plScene2Document* pDo
   ActiveLayerChanged(pDocument->GetActiveLayer());
 }
 
-plQtScenegraphPanel::~plQtScenegraphPanel()
-{
-}
+plQtScenegraphPanel::~plQtScenegraphPanel() = default;
 
 void plQtScenegraphPanel::LayerEventHandler(const plScene2LayerEvent& e)
 {
@@ -96,7 +94,7 @@ void plQtScenegraphPanel::LayerEventHandler(const plScene2LayerEvent& e)
 
 void plQtScenegraphPanel::LayerLoaded(const plUuid& layerGuid)
 {
-  PLASMA_ASSERT_DEV(!m_LayerWidgets.Contains(layerGuid), "LayerLoaded was fired twice for the same layer.");
+  PL_ASSERT_DEV(!m_LayerWidgets.Contains(layerGuid), "LayerLoaded was fired twice for the same layer.");
 
   auto pScene2 = static_cast<plScene2Document*>(m_pSceneDocument);
   auto pLayer = pScene2->GetLayerDocument(layerGuid);
@@ -109,7 +107,7 @@ void plQtScenegraphPanel::LayerLoaded(const plUuid& layerGuid)
 
 void plQtScenegraphPanel::LayerUnloaded(const plUuid& layerGuid)
 {
-  PLASMA_ASSERT_DEV(m_LayerWidgets.Contains(layerGuid), "LayerUnloaded was fired without the layer being loaded first.");
+  PL_ASSERT_DEV(m_LayerWidgets.Contains(layerGuid), "LayerUnloaded was fired without the layer being loaded first.");
 
   plQtGameObjectWidget* pWidget = m_LayerWidgets[layerGuid];
   m_pStack->removeWidget(pWidget);

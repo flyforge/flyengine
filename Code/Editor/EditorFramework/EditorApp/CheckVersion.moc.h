@@ -4,29 +4,28 @@
 
 #include <Foundation/Strings/String.h>
 
-#include <QByteArray>
-#include <QNetworkAccessManager>
+#include <Foundation/Types/UniquePtr.h>
 #include <QObject>
-#include <QPointer>
+#include <QProcess>
 
 class PageDownloader : public QObject
 {
   Q_OBJECT
 
 public:
-  explicit PageDownloader(QUrl url);
+  explicit PageDownloader(const QString& sUrl);
 
-  const QByteArray& GetDownloadedData() const { return m_DownloadedData; }
+  plStringView GetDownloadedData() const { return m_sDownloadedPage; }
 
 signals:
   void FinishedDownload();
 
 private slots:
-  void DownloadDone(QNetworkReply* pReply);
+  void DownloadDone(int exitCode, QProcess::ExitStatus exitStatus);
 
 private:
-  QNetworkAccessManager m_WebCtrl;
-  QByteArray m_DownloadedData;
+  plUniquePtr<QProcess> m_pProcess;
+  plStringBuilder m_sDownloadedPage;
 };
 
 /// \brief Downloads a web page and checks whether the latest version online is newer than the current one
@@ -60,6 +59,5 @@ private:
   bool m_bCheckInProgresss = false;
   plString m_sConfigFile;
   plString m_sKnownLatestVersion;
-  QPointer<PageDownloader> m_pVersionPage;
+  plUniquePtr<PageDownloader> m_pVersionPage;
 };
-

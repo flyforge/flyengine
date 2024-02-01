@@ -53,16 +53,18 @@
 #include <poll.h>
 #endif
 
-// BEGIN EZ-SPECIFIC BUGFIX
+// BEGIN PL-SPECIFIC BUGFIX
+#ifdef __ANDROID__
+#define HAS_SOCKLEN_T 1
+#endif
+
 // see https://github.com/lsalzman/enet/issues/90
-#ifdef PLASMA_PLATFORM_ANDROID
 #ifndef HAS_SOCKLEN_T
 #ifndef __socklen_t_defined
 typedef int socklen_t;
 #endif
 #endif
-#endif
-// END EZ-SPECIFIC BUGFIX
+// END PL-SPECIFIC BUGFIX
 
 #ifndef MSG_NOSIGNAL
 #define MSG_NOSIGNAL 0

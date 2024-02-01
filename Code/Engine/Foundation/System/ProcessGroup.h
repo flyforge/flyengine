@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_PROCESSES)
+#if PL_ENABLED(PL_SUPPORTS_PROCESSES)
 #  include <Foundation/System/Process.h>
 
 /// \brief Process groups are used to tie multiple processes together and ensure they get terminated either on demand or when the
@@ -11,9 +11,9 @@
 ///
 /// Only processes that were launched asynchronously and in a suspended state can be added to process groups.
 /// They will be resumed by the group.
-class PLASMA_FOUNDATION_DLL plProcessGroup
+class PL_FOUNDATION_DLL plProcessGroup
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plProcessGroup);
+  PL_DISALLOW_COPY_AND_ASSIGN(plProcessGroup);
 
 public:
   /// \brief Creates a process group. The name is only used for debugging purposes.
@@ -25,10 +25,10 @@ public:
 
   /// \brief Waits for all the processes in the group to terminate.
   ///
-  /// Returns PLASMA_SUCCESS only if all processes have shut down.
+  /// Returns PL_SUCCESS only if all processes have shut down.
   /// In all other cases, e.g. if the optional timeout is reached,
-  /// PLASMA_FAILURE is returned.
-  plResult WaitToFinish(plTime timeout = plTime::Zero());
+  /// PL_FAILURE is returned.
+  plResult WaitToFinish(plTime timeout = plTime::MakeZero());
 
   /// \brief Tries to kill all processes associated with this group.
   ///

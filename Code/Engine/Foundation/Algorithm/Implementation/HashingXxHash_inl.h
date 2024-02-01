@@ -171,23 +171,23 @@ namespace plInternal
 } // namespace plInternal
 
 template <size_t N>
-constexpr PLASMA_ALWAYS_INLINE plUInt32 plHashingUtils::xxHash32String(const char (&str)[N], plUInt32 uiSeed)
+constexpr PL_ALWAYS_INLINE plUInt32 plHashingUtils::xxHash32String(const char (&str)[N], plUInt32 uiSeed)
 {
   return plInternal::CompileTimeXxHash32(str, uiSeed);
 }
 
 template <size_t N>
-constexpr PLASMA_ALWAYS_INLINE plUInt64 plHashingUtils::xxHash64String(const char (&str)[N], plUInt64 uiSeed)
+constexpr PL_ALWAYS_INLINE plUInt64 plHashingUtils::xxHash64String(const char (&str)[N], plUInt64 uiSeed)
 {
   return plInternal::CompileTimeXxHash64(str, uiSeed);
 }
 
-PLASMA_ALWAYS_INLINE plUInt32 plHashingUtils::xxHash32String(plStringView sStr, plUInt32 uiSeed)
+PL_ALWAYS_INLINE plUInt32 plHashingUtils::xxHash32String(plStringView sStr, plUInt32 uiSeed)
 {
   return xxHash32(sStr.GetStartPointer(), sStr.GetElementCount(), uiSeed);
 }
 
-PLASMA_ALWAYS_INLINE plUInt64 plHashingUtils::xxHash64String(plStringView sStr, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 plHashingUtils::xxHash64String(plStringView sStr, plUInt64 uiSeed)
 {
   return xxHash64(sStr.GetStartPointer(), sStr.GetElementCount(), uiSeed);
 }

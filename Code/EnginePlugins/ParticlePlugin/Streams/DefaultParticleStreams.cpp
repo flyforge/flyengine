@@ -11,8 +11,8 @@
 // ZERO-INIT STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_ZeroInit, 1, plRTTIDefaultAllocator<plParticleStream_ZeroInit>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_ZeroInit, 1, plRTTIDefaultAllocator<plParticleStream_ZeroInit>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 
@@ -20,11 +20,11 @@ PLASMA_END_DYNAMIC_REFLECTED_TYPE;
 // POSITION STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Position, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Position>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Position, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Position>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Position, 1, plRTTIDefaultAllocator<plParticleStream_Position>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Position, 1, plRTTIDefaultAllocator<plParticleStream_Position>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Position::plParticleStreamFactory_Position()
   : plParticleStreamFactory("Position", plProcessingStream::DataType::Float4, plGetStaticRTTI<plParticleStream_Position>())
@@ -52,11 +52,11 @@ void plParticleStream_Position::InitializeElements(plUInt64 uiStartIndex, plUInt
 // SIZE STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Size, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Size>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Size, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Size>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Size, 1, plRTTIDefaultAllocator<plParticleStream_Size>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Size, 1, plRTTIDefaultAllocator<plParticleStream_Size>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Size::plParticleStreamFactory_Size()
   : plParticleStreamFactory("Size", plProcessingStream::DataType::Half, plGetStaticRTTI<plParticleStream_Size>())
@@ -79,11 +79,11 @@ void plParticleStream_Size::InitializeElements(plUInt64 uiStartIndex, plUInt64 u
 // COLOR STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Color, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Color>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Color, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Color>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Color, 1, plRTTIDefaultAllocator<plParticleStream_Color>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Color, 1, plRTTIDefaultAllocator<plParticleStream_Color>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Color::plParticleStreamFactory_Color()
   : plParticleStreamFactory("Color", plProcessingStream::DataType::Half4, plGetStaticRTTI<plParticleStream_Color>())
@@ -106,11 +106,11 @@ void plParticleStream_Color::InitializeElements(plUInt64 uiStartIndex, plUInt64 
 // VELOCITY STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Velocity, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Velocity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Velocity, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Velocity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Velocity, 1, plRTTIDefaultAllocator<plParticleStream_Velocity>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Velocity, 1, plRTTIDefaultAllocator<plParticleStream_Velocity>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Velocity::plParticleStreamFactory_Velocity()
   : plParticleStreamFactory("Velocity", plProcessingStream::DataType::Float3, plGetStaticRTTI<plParticleStream_Velocity>())
@@ -139,8 +139,8 @@ void plParticleStream_Velocity::InitializeElements(plUInt64 uiStartIndex, plUInt
 // LAST POSITION STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_LastPosition, 1, plRTTIDefaultAllocator<plParticleStreamFactory_LastPosition>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_LastPosition, 1, plRTTIDefaultAllocator<plParticleStreamFactory_LastPosition>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_LastPosition::plParticleStreamFactory_LastPosition()
   : plParticleStreamFactory("LastPosition", plProcessingStream::DataType::Float3, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -151,8 +151,8 @@ plParticleStreamFactory_LastPosition::plParticleStreamFactory_LastPosition()
 // ROTATION SPEED STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_RotationSpeed, 1, plRTTIDefaultAllocator<plParticleStreamFactory_RotationSpeed>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_RotationSpeed, 1, plRTTIDefaultAllocator<plParticleStreamFactory_RotationSpeed>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_RotationSpeed::plParticleStreamFactory_RotationSpeed()
   : plParticleStreamFactory("RotationSpeed", plProcessingStream::DataType::Half, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -163,8 +163,8 @@ plParticleStreamFactory_RotationSpeed::plParticleStreamFactory_RotationSpeed()
 // ROTATION OFFSET STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_RotationOffset, 1, plRTTIDefaultAllocator<plParticleStreamFactory_RotationOffset>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_RotationOffset, 1, plRTTIDefaultAllocator<plParticleStreamFactory_RotationOffset>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_RotationOffset::plParticleStreamFactory_RotationOffset()
   : plParticleStreamFactory("RotationOffset", plProcessingStream::DataType::Half, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -175,8 +175,8 @@ plParticleStreamFactory_RotationOffset::plParticleStreamFactory_RotationOffset()
 // EFFECT ID STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_EffectID, 1, plRTTIDefaultAllocator<plParticleStreamFactory_EffectID>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_EffectID, 1, plRTTIDefaultAllocator<plParticleStreamFactory_EffectID>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_EffectID::plParticleStreamFactory_EffectID()
   : plParticleStreamFactory("EffectID", plProcessingStream::DataType::Int, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -187,8 +187,8 @@ plParticleStreamFactory_EffectID::plParticleStreamFactory_EffectID()
 // ON OFF STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_OnOff, 1, plRTTIDefaultAllocator<plParticleStreamFactory_OnOff>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_OnOff, 1, plRTTIDefaultAllocator<plParticleStreamFactory_OnOff>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_OnOff::plParticleStreamFactory_OnOff()
   : plParticleStreamFactory("OnOff", plProcessingStream::DataType::Int, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -201,11 +201,11 @@ plParticleStreamFactory_OnOff::plParticleStreamFactory_OnOff()
 // AXIS STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Axis, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Axis>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Axis, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Axis>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Axis, 1, plRTTIDefaultAllocator<plParticleStream_Axis>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Axis, 1, plRTTIDefaultAllocator<plParticleStream_Axis>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Axis::plParticleStreamFactory_Axis()
   : plParticleStreamFactory("Axis", plProcessingStream::DataType::Float3, plGetStaticRTTI<plParticleStream_Axis>())
@@ -228,8 +228,8 @@ void plParticleStream_Axis::InitializeElements(plUInt64 uiStartIndex, plUInt64 u
 // TRAIL DATA STREAM
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_TrailData, 1, plRTTIDefaultAllocator<plParticleStreamFactory_TrailData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_TrailData, 1, plRTTIDefaultAllocator<plParticleStreamFactory_TrailData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_TrailData::plParticleStreamFactory_TrailData()
   : plParticleStreamFactory("TrailData", plProcessingStream::DataType::Short2, plGetStaticRTTI<plParticleStream_ZeroInit>())
@@ -242,11 +242,11 @@ plParticleStreamFactory_TrailData::plParticleStreamFactory_TrailData()
 //////////////////////////////////////////////////////////////////////////
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Variation, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Variation>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStreamFactory_Variation, 1, plRTTIDefaultAllocator<plParticleStreamFactory_Variation>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Variation, 1, plRTTIDefaultAllocator<plParticleStream_Variation>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleStream_Variation, 1, plRTTIDefaultAllocator<plParticleStream_Variation>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleStreamFactory_Variation::plParticleStreamFactory_Variation()
   : plParticleStreamFactory("Variation", plProcessingStream::DataType::Int, plGetStaticRTTI<plParticleStream_Variation>())
@@ -275,4 +275,4 @@ void plParticleStream_Variation::InitializeElements(plUInt64 uiStartIndex, plUIn
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Streams_DefaultParticleStreams);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Streams_DefaultParticleStreams);

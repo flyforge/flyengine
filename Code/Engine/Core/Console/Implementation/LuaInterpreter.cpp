@@ -6,14 +6,14 @@
 
 #ifdef BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
-static void AllowScriptCVarAccess(plLuaWrapper& Script);
+static void AllowScriptCVarAccess(plLuaWrapper& ref_script);
 
-static const plString GetNextWord(plStringView& sString)
+static const plString GetNextWord(plStringView& ref_sString)
 {
-  const char* szStartWord = plStringUtils::SkipCharacters(sString.GetStartPointer(), plStringUtils::IsWhiteSpace, false);
+  const char* szStartWord = plStringUtils::SkipCharacters(ref_sString.GetStartPointer(), plStringUtils::IsWhiteSpace, false);
   const char* szEndWord = plStringUtils::FindWordEnd(szStartWord, plStringUtils::IsIdentifierDelimiter_C_Code, true);
 
-  sString = plStringView(szEndWord);
+  ref_sString = plStringView(szEndWord);
 
   return plStringView(szStartWord, szEndWord);
 }
@@ -23,9 +23,9 @@ static plString GetRestWords(plStringView sString)
   return plStringUtils::SkipCharacters(sString.GetStartPointer(), plStringUtils::IsWhiteSpace, false);
 }
 
-static int LUAFUNC_ConsoleFunc(lua_State* state)
+static int LUAFUNC_ConsoleFunc(lua_State* pState)
 {
-  plLuaWrapper s(state);
+  plLuaWrapper s(pState);
 
   plConsoleFunctionBase* pFunc = (plConsoleFunctionBase*)s.GetFunctionLightUserData();
 
@@ -76,7 +76,7 @@ static int LUAFUNC_ConsoleFunc(lua_State* state)
   return s.ReturnToScript();
 }
 
-static void SanitizeCVarNames(plStringBuilder& sCommand)
+static void SanitizeCVarNames(plStringBuilder& ref_sCommand)
 {
   plStringBuilder sanitizedCVarName;
 
@@ -85,11 +85,11 @@ static void SanitizeCVarNames(plStringBuilder& sCommand)
     sanitizedCVarName = pCVar->GetName();
     sanitizedCVarName.ReplaceAll(".", "_");
 
-    sCommand.ReplaceAll(pCVar->GetName(), sanitizedCVarName);
+    ref_sCommand.ReplaceAll(pCVar->GetName(), sanitizedCVarName);
   }
 }
 
-static void UnSanitizeCVarName(plStringBuilder& cvarName)
+static void UnSanitizeCVarName(plStringBuilder& ref_sCvarName)
 {
   plStringBuilder sanitizedCVarName;
 
@@ -98,23 +98,23 @@ static void UnSanitizeCVarName(plStringBuilder& cvarName)
     sanitizedCVarName = pCVar->GetName();
     sanitizedCVarName.ReplaceAll(".", "_");
 
-    if (cvarName == sanitizedCVarName)
+    if (ref_sCvarName == sanitizedCVarName)
     {
-      cvarName = pCVar->GetName();
+      ref_sCvarName = pCVar->GetName();
       return;
     }
   }
 }
 
-void plCommandInterpreterLua::Interpret(plCommandInterpreterState& inout_State)
+void plCommandInterpreterLua::Interpret(plCommandInterpreterState& inout_state)
 {
-  inout_State.m_sOutput.Clear();
+  inout_state.m_sOutput.Clear();
 
-  plStringBuilder sRealCommand = inout_State.m_sInput;
+  plStringBuilder sRealCommand = inout_state.m_sInput;
 
   if (sRealCommand.IsEmpty())
   {
-    inout_State.AddOutputLine("");
+    inout_state.AddOutputLine("");
     return;
   }
 
@@ -161,7 +161,7 @@ void plCommandInterpreterLua::Interpret(plCommandInterpreterState& inout_State)
 
   sTemp = "> ";
   sTemp.Append(sRealCommand);
-  inout_State.AddOutputLine(sTemp, plConsoleString::Type::Executed);
+  inout_state.AddOutputLine(sTemp, plConsoleString::Type::Executed);
 
   plCVar* pCVAR = plCVar::FindCVarByName(sRealVarName.GetData());
   if (pCVAR != nullptr)
@@ -181,32 +181,32 @@ void plCommandInterpreterLua::Interpret(plCommandInterpreterState& inout_State)
 
       if (Script.ExecuteString(sSanitizedCommand, "console", &muteLog).Failed())
       {
-        inout_State.AddOutputLine("  Error Executing Command.", plConsoleString::Type::Error);
+        inout_state.AddOutputLine("  Error Executing Command.", plConsoleString::Type::Error);
         return;
       }
       else
       {
-        if (pCVAR->GetFlags().IsAnySet(plCVarFlags::RequiresRestart))
+        if (pCVAR->GetFlags().IsAnySet(plCVarFlags::ShowRequiresRestartMsg))
         {
-          inout_State.AddOutputLine("  This change takes only effect after a restart.", plConsoleString::Type::Note);
+          inout_state.AddOutputLine("  This change takes only effect after a restart.", plConsoleString::Type::Note);
         }
 
-        sTemp.Format("  {0} = {1}", sRealVarName, plQuakeConsole::GetFullInfoAsString(pCVAR));
-        inout_State.AddOutputLine(sTemp, plConsoleString::Type::Success);
+        sTemp.SetFormat("  {0} = {1}", sRealVarName, plQuakeConsole::GetFullInfoAsString(pCVAR));
+        inout_state.AddOutputLine(sTemp, plConsoleString::Type::Success);
       }
     }
     else
     {
-      sTemp.Format("{0} = {1}", sRealVarName, plQuakeConsole::GetFullInfoAsString(pCVAR));
-      inout_State.AddOutputLine(sTemp);
+      sTemp.SetFormat("{0} = {1}", sRealVarName, plQuakeConsole::GetFullInfoAsString(pCVAR));
+      inout_state.AddOutputLine(sTemp);
 
       if (!pCVAR->GetDescription().IsEmpty())
       {
-        sTemp.Format("  Description: {0}", pCVAR->GetDescription());
-        inout_State.AddOutputLine(sTemp, plConsoleString::Type::Success);
+        sTemp.SetFormat("  Description: {0}", pCVAR->GetDescription());
+        inout_state.AddOutputLine(sTemp, plConsoleString::Type::Success);
       }
       else
-        inout_State.AddOutputLine("  No Description available.", plConsoleString::Type::Success);
+        inout_state.AddOutputLine("  No Description available.", plConsoleString::Type::Success);
     }
 
     return;
@@ -217,15 +217,15 @@ void plCommandInterpreterLua::Interpret(plCommandInterpreterState& inout_State)
 
     if (Script.ExecuteString(sSanitizedCommand, "console", &muteLog).Failed())
     {
-      inout_State.AddOutputLine("  Error Executing Command.", plConsoleString::Type::Error);
+      inout_state.AddOutputLine("  Error Executing Command.", plConsoleString::Type::Error);
       return;
     }
   }
 }
 
-static int LUAFUNC_ReadCVAR(lua_State* state)
+static int LUAFUNC_ReadCVAR(lua_State* pState)
 {
-  plLuaWrapper s(state);
+  plLuaWrapper s(pState);
 
   plStringBuilder cvarName = s.GetStringParameter(0);
   UnSanitizeCVarName(cvarName);
@@ -272,9 +272,9 @@ static int LUAFUNC_ReadCVAR(lua_State* state)
 }
 
 
-static int LUAFUNC_WriteCVAR(lua_State* state)
+static int LUAFUNC_WriteCVAR(lua_State* pState)
 {
-  plLuaWrapper s(state);
+  plLuaWrapper s(pState);
 
   plStringBuilder cvarName = s.GetStringParameter(0);
   UnSanitizeCVarName(cvarName);
@@ -322,10 +322,10 @@ static int LUAFUNC_WriteCVAR(lua_State* state)
   return s.ReturnToScript();
 }
 
-static void AllowScriptCVarAccess(plLuaWrapper& Script)
+static void AllowScriptCVarAccess(plLuaWrapper& ref_script)
 {
-  Script.RegisterCFunction("ReadCVar", LUAFUNC_ReadCVAR);
-  Script.RegisterCFunction("WriteCVar", LUAFUNC_WriteCVAR);
+  ref_script.RegisterCFunction("ReadCVar", LUAFUNC_ReadCVAR);
+  ref_script.RegisterCFunction("WriteCVar", LUAFUNC_WriteCVAR);
 
   plStringBuilder sInit = "\
 function readcvar (t, key)\n\
@@ -344,10 +344,9 @@ __index = readcvar,\n\
 __metatable = \"Access Denied\",\n\
 })";
 
-  Script.ExecuteString(sInit.GetData()).IgnoreResult();
+  ref_script.ExecuteString(sInit.GetData()).IgnoreResult();
 }
 
 #endif // BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Console_Implementation_LuaInterpreter);

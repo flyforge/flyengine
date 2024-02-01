@@ -3,10 +3,10 @@
 #include <Foundation/Reflection/Implementation/RTTI.h>
 #include <Foundation/Types/VariantTypeRegistry.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plVariantTypeRegistry);
+PL_IMPLEMENT_SINGLETON(plVariantTypeRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, VariantTypeRegistry)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, VariantTypeRegistry)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Reflection"
@@ -14,16 +14,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, VariantTypeRegistry)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plVariantTypeRegistry);
+    PL_DEFAULT_NEW(plVariantTypeRegistry);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plVariantTypeRegistry * pDummy = plVariantTypeRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plVariantTypeRegistry::plVariantTypeRegistry()
@@ -66,7 +66,7 @@ void plVariantTypeRegistry::UpdateTypes()
 
   while (pInstance)
   {
-    PLASMA_ASSERT_DEV(pInstance->GetType()->GetAllocator()->CanAllocate(), "Custom type '{0}' needs to be allocatable.", pInstance->GetType()->GetTypeName());
+    PL_ASSERT_DEV(pInstance->GetType()->GetAllocator()->CanAllocate(), "Custom type '{0}' needs to be allocatable.", pInstance->GetType()->GetTypeName());
 
     m_TypeInfos.Insert(pInstance->GetType(), pInstance);
     pInstance = pInstance->GetNextInstance();
@@ -75,9 +75,9 @@ void plVariantTypeRegistry::UpdateTypes()
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plVariantTypeInfo);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plVariantTypeInfo);
 
 plVariantTypeInfo::plVariantTypeInfo() = default;
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_VariantTypeRegistry);
+PL_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_VariantTypeRegistry);

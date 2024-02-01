@@ -13,26 +13,26 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltHingeConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltHingeConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("LimitMode", plJoltConstraintLimitMode, GetLimitMode, SetLimitMode),
-    PLASMA_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitAngle, SetLowerLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
-    PLASMA_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitAngle, SetUpperLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0), plAngle::Degree(180))),
-    PLASMA_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("DriveMode", plJoltConstraintDriveMode, GetDriveMode, SetDriveMode),
-    PLASMA_ACCESSOR_PROPERTY("DriveTargetValue", GetDriveTargetValue, SetDriveTargetValue),
-    PLASMA_ACCESSOR_PROPERTY("DriveStrength", GetDriveStrength, SetDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum")),
+    PL_ENUM_ACCESSOR_PROPERTY("LimitMode", plJoltConstraintLimitMode, GetLimitMode, SetLimitMode),
+    PL_ACCESSOR_PROPERTY("LowerLimit", GetLowerLimitAngle, SetLowerLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
+    PL_ACCESSOR_PROPERTY("UpperLimit", GetUpperLimitAngle, SetUpperLimitAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(180))),
+    PL_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ENUM_ACCESSOR_PROPERTY("DriveMode", plJoltConstraintDriveMode, GetDriveMode, SetDriveMode),
+    PL_ACCESSOR_PROPERTY("DriveTargetValue", GetDriveTargetValue, SetDriveTargetValue),
+    PL_ACCESSOR_PROPERTY("DriveStrength", GetDriveStrength, SetDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.2f, plColor::BurlyWood)
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltHingeConstraintComponent::plJoltHingeConstraintComponent() = default;
@@ -81,13 +81,13 @@ void plJoltHingeConstraintComponent::SetLimitMode(plJoltConstraintLimitMode::Enu
 
 void plJoltHingeConstraintComponent::SetLowerLimitAngle(plAngle f)
 {
-  m_LowerLimit = plMath::Clamp(f, plAngle(), plAngle::Degree(180));
+  m_LowerLimit = plMath::Clamp(f, plAngle(), plAngle::MakeFromDegree(180));
   QueueApplySettings();
 }
 
 void plJoltHingeConstraintComponent::SetUpperLimitAngle(plAngle f)
 {
-  m_UpperLimit = plMath::Clamp(f, plAngle(), plAngle::Degree(180));
+  m_UpperLimit = plMath::Clamp(f, plAngle(), plAngle::MakeFromDegree(180));
   QueueApplySettings();
 }
 
@@ -146,7 +146,7 @@ void plJoltHingeConstraintComponent::ApplySettings()
     float low = m_LowerLimit.GetRadian();
     float high = m_UpperLimit.GetRadian();
 
-    const float fLowest = plAngle::Degree(1.0f).GetRadian();
+    const float fLowest = plAngle::MakeFromDegree(1.0f).GetRadian();
 
     // there should be at least some slack
     if (low <= fLowest && high <= fLowest)
@@ -223,4 +223,4 @@ bool plJoltHingeConstraintComponent::ExceededBreakingPoint()
   return false;
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltHingeConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltHingeConstraintComponent);

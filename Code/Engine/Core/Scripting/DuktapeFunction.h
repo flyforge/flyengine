@@ -5,7 +5,7 @@
 
 #ifdef BUILDSYSTEM_ENABLE_DUKTAPE_SUPPORT
 
-class PLASMA_CORE_DLL plDuktapeFunction final : public plDuktapeHelper
+class PL_CORE_DLL plDuktapeFunction final : public plDuktapeHelper
 {
 public:
   plDuktapeFunction(duk_context* pExistingContext);

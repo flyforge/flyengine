@@ -24,12 +24,12 @@ plResult plTexConvProcessor::ForceSRGBFormats()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::GenerateMipmaps(plImage& img, plUInt32 uiNumMips, MipmapChannelMode channelMode /*= MipmapChannelMode::AllChannels*/) const
 {
-  PLASMA_PROFILE_SCOPE("GenerateMipmaps");
+  PL_PROFILE_SCOPE("GenerateMipmaps");
 
   plImageUtils::MipMapOptions opt;
   opt.m_numMipMaps = uiNumMips;
@@ -40,7 +40,7 @@ plResult plTexConvProcessor::GenerateMipmaps(plImage& img, plUInt32 uiNumMips, M
   switch (m_Descriptor.m_MipmapMode)
   {
     case plTexConvMipmapMode::None:
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
 
     case plTexConvMipmapMode::Linear:
       opt.m_filter = &filterLinear;
@@ -59,17 +59,6 @@ plResult plTexConvProcessor::GenerateMipmaps(plImage& img, plUInt32 uiNumMips, M
   opt.m_alphaThreshold = m_Descriptor.m_fMipmapAlphaThreshold;
 
   opt.m_renormalizeNormals = m_Descriptor.m_Usage == plTexConvUsage::NormalMap || m_Descriptor.m_Usage == plTexConvUsage::NormalMap_Inverted || m_Descriptor.m_Usage == plTexConvUsage::BumpMap;
-
-  if (m_Descriptor.m_Usage == plTexConvUsage::NormalMap_Inverted)
-  {
-    auto imgData = img.GetBlobPtr<plColor>();
-    auto pData = imgData.GetPtr();
-    while (pData < imgData.GetEndPtr())
-    {
-      pData->g = pData->GetInvertedColor().g;
-      ++pData;
-    }
-  }
 
   // Copy red to alpha channel if we only have a single channel input texture
   if (opt.m_preserveCoverage && channelMode == MipmapChannelMode::SingleChannel)
@@ -90,7 +79,7 @@ plResult plTexConvProcessor::GenerateMipmaps(plImage& img, plUInt32 uiNumMips, M
   if (img.GetNumMipLevels() <= 1)
   {
     plLog::Error("Mipmap generation failed.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Copy alpha channel back to red
@@ -105,15 +94,15 @@ plResult plTexConvProcessor::GenerateMipmaps(plImage& img, plUInt32 uiNumMips, M
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::PremultiplyAlpha(plImage& image) const
 {
-  PLASMA_PROFILE_SCOPE("PremultiplyAlpha");
+  PL_PROFILE_SCOPE("PremultiplyAlpha");
 
   if (!m_Descriptor.m_bPremultiplyAlpha)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   for (plColor& col : image.GetBlobPtr<plColor>())
   {
@@ -122,27 +111,27 @@ plResult plTexConvProcessor::PremultiplyAlpha(plImage& image) const
     col.b *= col.a;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::AdjustHdrExposure(plImage& img) const
 {
-  PLASMA_PROFILE_SCOPE("AdjustHdrExposure");
+  PL_PROFILE_SCOPE("AdjustHdrExposure");
 
   plImageUtils::ChangeExposure(img, m_Descriptor.m_fHdrExposureBias);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::ConvertToNormalMap(plArrayPtr<plImage> imgs) const
 {
-  PLASMA_PROFILE_SCOPE("ConvertToNormalMap");
+  PL_PROFILE_SCOPE("ConvertToNormalMap");
 
   for (plImage& img : imgs)
   {
-    PLASMA_SUCCEED_OR_RETURN(ConvertToNormalMap(img));
+    PL_SUCCEED_OR_RETURN(ConvertToNormalMap(img));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::ConvertToNormalMap(plImage& bumpMap) const
@@ -161,7 +150,7 @@ plResult plTexConvProcessor::ConvertToNormalMap(plImage& bumpMap) const
 
   // we'll assume that both the input bump map and the new image are using
   // RGBA 32 bit floating point as an internal format which should be tightly packed
-  PLASMA_ASSERT_DEV(bumpMap.GetImageFormat() == plImageFormat::R32G32B32A32_FLOAT && bumpMap.GetRowPitch() % sizeof(plColor) == 0, "");
+  PL_ASSERT_DEV(bumpMap.GetImageFormat() == plImageFormat::R32G32B32A32_FLOAT && bumpMap.GetRowPitch() % sizeof(plColor) == 0, "");
 
   const plColor* bumpPixels = bumpMap.GetPixelPointer<plColor>(0, 0, 0, 0, 0, 0);
   const auto getBumpPixel = [&](plUInt32 x, plUInt32 y) -> float
@@ -275,24 +264,24 @@ plResult plTexConvProcessor::ConvertToNormalMap(plImage& bumpMap) const
 
   bumpMap.ResetAndMove(std::move(newImage));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::ClampInputValues(plArrayPtr<plImage> images, float maxValue) const
 {
   for (plImage& image : images)
   {
-    PLASMA_SUCCEED_OR_RETURN(ClampInputValues(image, maxValue));
+    PL_SUCCEED_OR_RETURN(ClampInputValues(image, maxValue));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConvProcessor::ClampInputValues(plImage& image, float maxValue) const
 {
   // we'll assume that at this point in the processing pipeline, the format is
   // RGBA32F which should result in tightly packed mipmaps.
-  PLASMA_ASSERT_DEV(image.GetImageFormat() == plImageFormat::R32G32B32A32_FLOAT && image.GetRowPitch() % sizeof(float[4]) == 0, "");
+  PL_ASSERT_DEV(image.GetImageFormat() == plImageFormat::R32G32B32A32_FLOAT && image.GetRowPitch() % sizeof(float[4]) == 0, "");
 
   for (auto& value : image.GetBlobPtr<float>())
   {
@@ -306,15 +295,15 @@ plResult plTexConvProcessor::ClampInputValues(plImage& image, float maxValue) co
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-static bool FillAvgImageColor(plImage& img)
+static bool FillAvgImageColor(plImage& ref_img)
 {
-  plColor avg = plColor::ZeroColor();
+  plColor avg = plColor::MakeZero();
   plUInt32 uiValidCount = 0;
 
-  for (const plColor& col : img.GetBlobPtr<plColor>())
+  for (const plColor& col : ref_img.GetBlobPtr<plColor>())
   {
     if (col.a > 0.0f)
     {
@@ -323,7 +312,7 @@ static bool FillAvgImageColor(plImage& img)
     }
   }
 
-  if (uiValidCount == 0 || uiValidCount == img.GetBlobPtr<plColor>().GetCount())
+  if (uiValidCount == 0 || uiValidCount == ref_img.GetBlobPtr<plColor>().GetCount())
   {
     // nothing to do
     return false;
@@ -333,7 +322,7 @@ static bool FillAvgImageColor(plImage& img)
   avg.NormalizeToLdrRange();
   avg.a = 0.0f;
 
-  for (plColor& col : img.GetBlobPtr<plColor>())
+  for (plColor& col : ref_img.GetBlobPtr<plColor>())
   {
     if (col.a == 0.0f)
     {
@@ -344,9 +333,9 @@ static bool FillAvgImageColor(plImage& img)
   return true;
 }
 
-static void ClearAlpha(plImage& img, float fAlphaThreshold)
+static void ClearAlpha(plImage& ref_img, float fAlphaThreshold)
 {
-  for (plColor& col : img.GetBlobPtr<plColor>())
+  for (plColor& col : ref_img.GetBlobPtr<plColor>())
   {
     if (col.a <= fAlphaThreshold)
     {
@@ -372,8 +361,7 @@ static plColor GetAvgColor(plColor* pPixels, plInt32 iWidth, plInt32 iHeight, pl
   if (colAt.a > 0)
     return colAt;
 
-  plColor avg;
-  avg.SetZero();
+  plColor avg = plColor::MakeZero();
   plUInt32 uiValidCount = 0;
 
   const plInt32 iRadius = 1;
@@ -417,12 +405,12 @@ static void DilateColors(plColor* pPixels, plInt32 iWidth, plInt32 iHeight, floa
 plResult plTexConvProcessor::DilateColor2D(plImage& img) const
 {
   if (m_Descriptor.m_uiDilateColor == 0)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  PLASMA_PROFILE_SCOPE("DilateColor2D");
+  PL_PROFILE_SCOPE("DilateColor2D");
 
   if (!FillAvgImageColor(img))
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   const plUInt32 uiNumPasses = m_Descriptor.m_uiDilateColor;
 
@@ -438,7 +426,22 @@ plResult plTexConvProcessor::DilateColor2D(plImage& img) const
 
   ClearAlpha(img, 1.0f / 256.0f);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_TexConv_Implementation_TextureModifications);
+plResult plTexConvProcessor::InvertNormalMap(plImage& image)
+{
+  if (m_Descriptor.m_Usage != plTexConvUsage::NormalMap_Inverted)
+    return PL_SUCCESS;
+
+  // we'll assume that at this point in the processing pipeline, the format is
+  // RGBA32F which should result in tightly packed mipmaps.
+  PL_ASSERT_DEV(image.GetImageFormat() == plImageFormat::R32G32B32A32_FLOAT && image.GetRowPitch() % sizeof(float[4]) == 0, "");
+
+  for (auto& value : image.GetBlobPtr<plColor>())
+  {
+    value.g = 1.0f - value.g;
+  }
+
+  return PL_SUCCESS;
+}

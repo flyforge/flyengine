@@ -12,7 +12,7 @@ struct plMsgExtractRenderData;
 struct plRenderWorldRenderEvent;
 class plAbstractObjectNode;
 
-class PLASMA_RENDERERCORE_DLL plBakedProbesComponentManager : public plSettingsComponentManager<class plBakedProbesComponent>
+class PL_RENDERERCORE_DLL plBakedProbesComponentManager : public plSettingsComponentManager<class plBakedProbesComponent>
 {
 public:
   plBakedProbesComponentManager(plWorld* pWorld);
@@ -30,9 +30,9 @@ private:
   void CreateDebugResources();
 };
 
-class PLASMA_RENDERERCORE_DLL plBakedProbesComponent : public plSettingsComponent
+class PL_RENDERERCORE_DLL plBakedProbesComponent : public plSettingsComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plBakedProbesComponent, plSettingsComponent, plBakedProbesComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plBakedProbesComponent, plSettingsComponent, plBakedProbesComponentManager);
 
 public:
   plBakedProbesComponent();
@@ -70,7 +70,7 @@ private:
   bool m_bShowDebugOverlay = false;
   bool m_bShowDebugProbes = false;
   bool m_bUseTestPosition = false;
-  plVec3 m_vTestPosition = plVec3::ZeroVector();
+  plVec3 m_vTestPosition = plVec3::MakeZero();
 
   struct RenderDebugViewTask;
   plSharedPtr<RenderDebugViewTask> m_pRenderDebugViewTask;

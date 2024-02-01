@@ -8,24 +8,24 @@
 #include <RendererCore/Components/SkyBoxComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeContext, 1, plRTTIDefaultAllocator<plKrautTreeContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeContext, 1, plRTTIDefaultAllocator<plKrautTreeContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Kraut Tree"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Kraut Tree"),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plKrautTreeContext::plKrautTreeContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::CreateWorld)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::CreateWorld)
 {
   m_pMainObject = nullptr;
 }
 
-void plKrautTreeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg0)
+void plKrautTreeContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg0)
 {
   if (auto pMsg = plDynamicCast<const plQuerySelectionBBoxMsgToEngine*>(pMsg0))
   {
@@ -37,7 +37,7 @@ void plKrautTreeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg
   {
     if (pMsg->m_sWhatToDo == "UpdateTree" && !m_hKrautComponent.IsInvalidated())
     {
-      PLASMA_LOCK(m_pWorld->GetWriteMarker());
+      PL_LOCK(m_pWorld->GetWriteMarker());
 
       plKrautTreeComponent* pTree = nullptr;
       if (!m_pWorld->TryGetComponent(m_hKrautComponent, pTree))
@@ -54,13 +54,13 @@ void plKrautTreeContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg
     return;
   }
 
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg0);
+  plEngineProcessDocumentContext::HandleMessage(pMsg0);
 }
 
 void plKrautTreeContext::OnInitialize()
 {
   auto pWorld = m_pWorld;
-  PLASMA_LOCK(pWorld->GetWriteMarker());
+  PL_LOCK(pWorld->GetWriteMarker());
 
 
   plKrautTreeComponent* pTree;
@@ -100,7 +100,7 @@ void plKrautTreeContext::OnInitialize()
     plSimpleWindComponent* pWind = nullptr;
     plSimpleWindComponent::CreateComponent(pObj, pWind);
 
-    pWind->m_Deviation = plAngle::Degree(180);
+    pWind->m_Deviation = plAngle::MakeFromDegree(180);
     pWind->m_MinWindStrength = plWindStrength::Calm;
     pWind->m_MaxWindStrength = plWindStrength::ModerateBreple;
   }
@@ -120,7 +120,7 @@ void plKrautTreeContext::OnInitialize()
       {
         // Build geometry
         plGeometry::GeoOptions opt;
-        opt.m_Transform.SetTranslationMatrix(plVec3(0, 0, -0.05f));
+        opt.m_Transform = plMat4::MakeTranslation(plVec3(0, 0, -0.05f));
 
         plGeometry geom;
         geom.AddCylinder(8.0f, 7.9f, 0.05f, 0.05f, true, true, 32, opt);
@@ -161,20 +161,20 @@ void plKrautTreeContext::OnInitialize()
   }
 }
 
-PlasmaEngineProcessViewContext* plKrautTreeContext::CreateViewContext()
+plEngineProcessViewContext* plKrautTreeContext::CreateViewContext()
 {
-  return PLASMA_DEFAULT_NEW(plKrautTreeViewContext, this);
+  return PL_DEFAULT_NEW(plKrautTreeViewContext, this);
 }
 
-void plKrautTreeContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plKrautTreeContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_DEFAULT_DELETE(pContext);
+  PL_DEFAULT_DELETE(pContext);
 }
 
-bool plKrautTreeContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext)
+bool plKrautTreeContext::UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext)
 {
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pMainObject->UpdateLocalBounds();
     m_pMainObject->UpdateGlobalTransformAndBounds();
@@ -192,16 +192,15 @@ bool plKrautTreeContext::UpdateThumbnailViewContext(PlasmaEngineProcessViewConte
 }
 
 
-void plKrautTreeContext::QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plKrautTreeContext::QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg)
 {
   if (m_pMainObject == nullptr)
     return;
 
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
 
     m_pMainObject->UpdateLocalBounds();
     m_pMainObject->UpdateGlobalTransformAndBounds();

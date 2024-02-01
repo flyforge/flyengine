@@ -12,7 +12,7 @@ public:
     const void* m_ConstPtr;
   };
 
-  PLASMA_ALWAYS_INLINE plDelegateBase() { m_Instance.m_Ptr = nullptr; }
+  PL_ALWAYS_INLINE plDelegateBase() { m_Instance.m_Ptr = nullptr; }
 
 protected:
   InstancePtr m_Instance;

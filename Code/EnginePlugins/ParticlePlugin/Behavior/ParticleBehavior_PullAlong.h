@@ -4,9 +4,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_PullAlong final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_PullAlong final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_PullAlong, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_PullAlong, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_PullAlong();
@@ -14,16 +14,16 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   float m_fStrength;
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_PullAlong final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_PullAlong final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_PullAlong, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_PullAlong, plParticleBehavior);
 
 public:
   virtual void CreateRequiredStreams() override;

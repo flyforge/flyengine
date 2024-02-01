@@ -6,28 +6,28 @@
 #include <RendererCore/BakedProbes/BakedProbesVolumeComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plBakedProbesVolumeComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plBakedProbesVolumeComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
+    PL_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(10.0f)), new plClampValueAttribute(plVec3(0), plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
     new plCategoryAttribute("Lighting/Baking"),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColor::OrangeRed),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plBakedProbesVolumeComponent::plBakedProbesVolumeComponent() = default;
@@ -76,8 +76,8 @@ void plBakedProbesVolumeComponent::DeserializeComponent(plWorldReader& inout_str
 
 void plBakedProbesVolumeComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ref_msg) const
 {
-  ref_msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plInvalidSpatialDataCategory);
+  ref_msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plInvalidSpatialDataCategory);
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesVolumeComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_BakedProbes_Implementation_BakedProbesVolumeComponent);

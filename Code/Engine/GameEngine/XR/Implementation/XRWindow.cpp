@@ -11,8 +11,8 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowXR, 1, plRTTINoAllocator);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowXR, 1, plRTTINoAllocator);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 
@@ -26,18 +26,12 @@ plWindowXR::plWindowXR(plXRInterface* pVrInterface, plUniquePtr<plWindowBase> pC
 
 plWindowXR::~plWindowXR()
 {
-  PLASMA_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
+  PL_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
 }
 
 plSizeU32 plWindowXR::GetClientAreaSize() const
 {
   return m_pVrInterface->GetHmdInfo().m_vEyeRenderTargetSize;
-}
-
-plSizeU32 plWindowXR::GetRenderAreaSize() const
-{
-  // In XR mode, the render area should be the size of the eye render target.
-  return GetClientAreaSize();
 }
 
 plWindowHandle plWindowXR::GetNativeWindowHandle() const
@@ -77,7 +71,7 @@ plWindowOutputTargetXR::plWindowOutputTargetXR(plXRInterface* pXrInterface, plUn
   {
     // Create companion resources.
     m_hCompanionShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/VRCompanionView.plShader");
-    PLASMA_ASSERT_DEV(m_hCompanionShader.IsValid(), "Could not load VR companion view shader!");
+    PL_ASSERT_DEV(m_hCompanionShader.IsValid(), "Could not load VR companion view shader!");
     m_hCompanionConstantBuffer = plRenderContext::CreateConstantBufferStorage<plVRCompanionViewConstants>();
   }
 }
@@ -97,12 +91,12 @@ void plWindowOutputTargetXR::Present(bool bEnableVSync)
 void plWindowOutputTargetXR::RenderCompanionView(bool bThrottleCompanionView)
 {
   plTime currentTime = plTime::Now();
-  if (bThrottleCompanionView && currentTime < (m_LastPresent + plTime::Milliseconds(16)))
+  if (bThrottleCompanionView && currentTime < (m_LastPresent + plTime::MakeFromMilliseconds(16)))
     return;
 
   m_LastPresent = currentTime;
 
-  PLASMA_PROFILE_SCOPE("RenderCompanionView");
+  PL_PROFILE_SCOPE("RenderCompanionView");
   plGALTextureHandle m_hColorRT = m_pXrInterface->GetCurrentTexture();
   if (m_hColorRT.IsInvalidated() || !m_pCompanionWindowOutputTarget)
     return;
@@ -146,13 +140,13 @@ void plWindowOutputTargetXR::RenderCompanionView(bool bThrottleCompanionView)
   }
 }
 
-plResult plWindowOutputTargetXR::CaptureImage(plImage& out_Image)
+plResult plWindowOutputTargetXR::CaptureImage(plImage& out_image)
 {
   if (m_pCompanionWindowOutputTarget)
   {
-    return m_pCompanionWindowOutputTarget->CaptureImage(out_Image);
+    return m_pCompanionWindowOutputTarget->CaptureImage(out_image);
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 const plWindowOutputTargetBase* plWindowOutputTargetXR::GetCompanionWindowOutputTarget() const
@@ -162,11 +156,11 @@ const plWindowOutputTargetBase* plWindowOutputTargetXR::GetCompanionWindowOutput
 
 //////////////////////////////////////////////////////////////////////////
 
-plActorPluginWindowXR::plActorPluginWindowXR(plXRInterface* pVrInterface, plUniquePtr<plWindowBase> companionWindow, plUniquePtr<plWindowOutputTargetGAL> companionWindowOutput)
+plActorPluginWindowXR::plActorPluginWindowXR(plXRInterface* pVrInterface, plUniquePtr<plWindowBase> pCompanionWindow, plUniquePtr<plWindowOutputTargetGAL> pCompanionWindowOutput)
   : m_pVrInterface(pVrInterface)
 {
-  m_pWindow = PLASMA_DEFAULT_NEW(plWindowXR, pVrInterface, std::move(companionWindow));
-  m_pWindowOutputTarget = PLASMA_DEFAULT_NEW(plWindowOutputTargetXR, pVrInterface, std::move(companionWindowOutput));
+  m_pWindow = PL_DEFAULT_NEW(plWindowXR, pVrInterface, std::move(pCompanionWindow));
+  m_pWindowOutputTarget = PL_DEFAULT_NEW(plWindowOutputTargetXR, pVrInterface, std::move(pCompanionWindowOutput));
 }
 
 plActorPluginWindowXR::~plActorPluginWindowXR()
@@ -194,4 +188,4 @@ void plActorPluginWindowXR::Update()
   }
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_XRWindow);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_XRWindow);

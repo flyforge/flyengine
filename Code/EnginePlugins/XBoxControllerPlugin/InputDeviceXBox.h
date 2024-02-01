@@ -6,9 +6,9 @@
 /// \brief An implementation of plInputDeviceController that handles XBox 360 controllers.
 ///
 /// Works on all platforms that provide the XINPUT API.
-class PLASMA_XBOXCONTROLLER_DLL plInputDeviceXBox360 : public plInputDeviceController
+class PL_XBOXCONTROLLER_DLL plInputDeviceXBox360 : public plInputDeviceController
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInputDeviceXBox360, plInputDeviceController);
+  PL_ADD_DYNAMIC_REFLECTION(plInputDeviceXBox360, plInputDeviceController);
 
 public:
   plInputDeviceXBox360();

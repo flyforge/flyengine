@@ -1,6 +1,6 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Collection/CollectionResource.h>
 #include <Core/Input/InputManager.h>
 #include <Core/WorldSerializer/WorldReader.h>
@@ -13,8 +13,8 @@
 #include <RendererCore/Components/CameraComponent.h>
 #include <RendererCore/Debug/DebugRenderer.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFallbackGameState, 1, plRTTIDefaultAllocator<plFallbackGameState>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plFallbackGameState, 1, plRTTIDefaultAllocator<plFallbackGameState>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plFallbackGameState::plFallbackGameState()
 {
@@ -105,7 +105,7 @@ plUniquePtr<plWorld> plFallbackGameState::CreateLoadingScreenWorld()
 {
   plWorldDesc desc("LoadingScreen");
 
-  return PLASMA_DEFAULT_NEW(plWorld, desc);
+  return PL_DEFAULT_NEW(plWorld, desc);
 }
 
 plResult plFallbackGameState::StartSceneLoading(plStringView sSceneFile, plStringView sPreloadCollection)
@@ -113,22 +113,22 @@ plResult plFallbackGameState::StartSceneLoading(plStringView sSceneFile, plStrin
   if (m_pSceneToLoad != nullptr && m_sTitleOfLoadingScene == sSceneFile)
   {
     // already being loaded
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   m_sTitleOfLoadingScene = sSceneFile;
 
-  m_pSceneToLoad = PLASMA_DEFAULT_NEW(plSceneLoadUtility);
+  m_pSceneToLoad = PL_DEFAULT_NEW(plSceneLoadUtility);
   m_pSceneToLoad->StartSceneLoading(sSceneFile, sPreloadCollection);
 
   if (m_pSceneToLoad->GetLoadingState() == plSceneLoadUtility::LoadingState::Failed)
   {
     plLog::Error("Scene loading failed: {}", m_pSceneToLoad->GetLoadingFailureReason());
     CancelSceneLoading();
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plFallbackGameState::CancelSceneLoading()
@@ -144,8 +144,8 @@ bool plFallbackGameState::IsLoadingScene() const
 
 void plFallbackGameState::SwitchToLoadedScene()
 {
-  PLASMA_ASSERT_DEV(IsLoadingScene(), "Can't switch to loaded scene, if no scene is currently being loaded.");
-  PLASMA_ASSERT_DEV(m_pSceneToLoad->GetLoadingState() == plSceneLoadUtility::LoadingState::FinishedSuccessfully, "Can't switch to loaded scene before it has finished loading.");
+  PL_ASSERT_DEV(IsLoadingScene(), "Can't switch to loaded scene, if no scene is currently being loaded.");
+  PL_ASSERT_DEV(m_pSceneToLoad->GetLoadingState() == plSceneLoadUtility::LoadingState::FinishedSuccessfully, "Can't switch to loaded scene before it has finished loading.");
 
   m_State = State::Ok;
   m_sTitleOfActiveScene = m_sTitleOfLoadingScene;
@@ -161,7 +161,7 @@ void plFallbackGameState::SwitchToLoadedScene()
 plResult plFallbackGameState::SpawnPlayer(const plTransform* pStartPosition)
 {
   if (SUPER::SpawnPlayer(pStartPosition).Succeeded())
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   if (m_pMainWorld && pStartPosition)
   {
@@ -170,7 +170,7 @@ plResult plFallbackGameState::SpawnPlayer(const plTransform* pStartPosition)
       pStartPosition->m_qRotation * plVec3(0, 0, 1));
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 static plHybridArray<plGameAppInputConfig, 16> g_AllInput;
@@ -335,7 +335,7 @@ void plFallbackGameState::ProcessInput()
 
   if (m_bEnableFreeCameras)
   {
-    PLASMA_LOCK(m_pMainWorld->GetReadMarker());
+    PL_LOCK(m_pMainWorld->GetReadMarker());
 
     if (plInputManager::GetInputActionState("Game", "NextCamera") == plKeyState::Pressed)
       ++m_iActiveCameraComponentIndex;
@@ -370,19 +370,19 @@ void plFallbackGameState::ProcessInput()
       m_MainCamera.MoveGlobally(0, 0, -fInput * fMoveSpeed);
 
     if (plInputManager::GetInputActionState("Game", "TurnLeft", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::Degree(-fRotateSpeed * fInput));
+      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::MakeFromDegree(-fRotateSpeed * fInput));
     if (plInputManager::GetInputActionState("Game", "TurnRight", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::Degree(fRotateSpeed * fInput));
+      m_MainCamera.RotateGlobally(plAngle(), plAngle(), plAngle::MakeFromDegree(fRotateSpeed * fInput));
     if (plInputManager::GetInputActionState("Game", "TurnUp", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateLocally(plAngle(), plAngle::Degree(fRotateSpeed * fInput), plAngle());
+      m_MainCamera.RotateLocally(plAngle(), plAngle::MakeFromDegree(fRotateSpeed * fInput), plAngle());
     if (plInputManager::GetInputActionState("Game", "TurnDown", &fInput) != plKeyState::Up)
-      m_MainCamera.RotateLocally(plAngle(), plAngle::Degree(-fRotateSpeed * fInput), plAngle());
+      m_MainCamera.RotateLocally(plAngle(), plAngle::MakeFromDegree(-fRotateSpeed * fInput), plAngle());
   }
 }
 
 void plFallbackGameState::AfterWorldUpdate()
 {
-  PLASMA_LOCK(m_pMainWorld->GetReadMarker());
+  PL_LOCK(m_pMainWorld->GetReadMarker());
 
   // Update the camera transform after world update so the owner node has its final position for this frame.
   // Setting the camera transform in ProcessInput introduces one frame delay.
@@ -410,7 +410,7 @@ void plFallbackGameState::FindAvailableScenes()
   if (!plFileSystem::ExistsFile(":project/plProject"))
     return;
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
   plFileSystemIterator fsit;
   plStringBuilder sScenePath;
 
@@ -542,4 +542,4 @@ bool plFallbackGameState::IsInLoadingScreen() const
   return m_bIsInLoadingScreen;
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_GameState_Implementation_FallbackGameState);
+PL_STATICLINK_FILE(GameEngine, GameEngine_GameState_Implementation_FallbackGameState);

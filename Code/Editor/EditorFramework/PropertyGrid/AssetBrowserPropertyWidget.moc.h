@@ -9,7 +9,7 @@
 
 /// *** Asset Browser ***
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtAssetPropertyWidget : public plQtStandardPropertyWidget
+class PL_EDITORFRAMEWORK_DLL plQtAssetPropertyWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 

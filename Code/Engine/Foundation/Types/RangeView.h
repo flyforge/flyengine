@@ -29,28 +29,28 @@ public:
   using ValueCallback = plDelegate<ValueType(const IteratorType&)>;
 
   /// \brief Initializes the plRangeView with the delegates used to enumerate the range.
-  PLASMA_ALWAYS_INLINE plRangeView(BeginCallback begin, EndCallback end, NextCallback next, ValueCallback value);
+  PL_ALWAYS_INLINE plRangeView(BeginCallback begin, EndCallback end, NextCallback next, ValueCallback value);
 
   /// \brief Const iterator, don't use directly, use ranged based for loops or call begin() end().
   struct ConstIterator
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     using iterator_category = std::forward_iterator_tag;
     using value_type = ConstIterator;
     using pointer = ConstIterator*;
     using reference = ConstIterator&;
 
-    PLASMA_ALWAYS_INLINE ConstIterator(const ConstIterator& rhs) = default;
-    PLASMA_FORCE_INLINE void Next();
-    PLASMA_FORCE_INLINE ValueType Value() const;
-    PLASMA_ALWAYS_INLINE ValueType operator*() const { return Value(); }
-    PLASMA_ALWAYS_INLINE void operator++() { Next(); }
-    PLASMA_FORCE_INLINE bool operator==(const typename plRangeView<ValueType, IteratorType>::ConstIterator& it2) const;
-    PLASMA_FORCE_INLINE bool operator!=(const typename plRangeView<ValueType, IteratorType>::ConstIterator& it2) const;
+    PL_ALWAYS_INLINE ConstIterator(const ConstIterator& rhs) = default;
+    PL_FORCE_INLINE void Next();
+    PL_FORCE_INLINE ValueType Value() const;
+    PL_ALWAYS_INLINE ValueType operator*() const { return Value(); }
+    PL_ALWAYS_INLINE void operator++() { Next(); }
+    PL_FORCE_INLINE bool operator==(const typename plRangeView<ValueType, IteratorType>::ConstIterator& it2) const;
+    PL_FORCE_INLINE bool operator!=(const typename plRangeView<ValueType, IteratorType>::ConstIterator& it2) const;
 
   protected:
-    PLASMA_FORCE_INLINE explicit ConstIterator(const plRangeView<ValueType, IteratorType>* view, IteratorType pos);
+    PL_FORCE_INLINE explicit ConstIterator(const plRangeView<ValueType, IteratorType>* view, IteratorType pos);
 
     friend class plRangeView<ValueType, IteratorType>;
     const plRangeView<ValueType, IteratorType>* m_pView = nullptr;
@@ -60,7 +60,7 @@ public:
   /// \brief Iterator, don't use directly, use ranged based for loops or call begin() end().
   struct Iterator : public ConstIterator
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     using iterator_category = std::forward_iterator_tag;
     using value_type = Iterator;
@@ -68,12 +68,12 @@ public:
     using reference = Iterator&;
 
     using ConstIterator::Value;
-    PLASMA_ALWAYS_INLINE Iterator(const Iterator& rhs) = default;
-    PLASMA_FORCE_INLINE ValueType Value();
-    PLASMA_ALWAYS_INLINE ValueType operator*() { return Value(); }
+    PL_ALWAYS_INLINE Iterator(const Iterator& rhs) = default;
+    PL_FORCE_INLINE ValueType Value();
+    PL_ALWAYS_INLINE ValueType operator*() { return Value(); }
 
   protected:
-    PLASMA_FORCE_INLINE explicit Iterator(const plRangeView<ValueType, IteratorType>* view, IteratorType pos);
+    PL_FORCE_INLINE explicit Iterator(const plRangeView<ValueType, IteratorType>* view, IteratorType pos);
   };
 
   Iterator begin() { return Iterator(this, m_Begin()); }

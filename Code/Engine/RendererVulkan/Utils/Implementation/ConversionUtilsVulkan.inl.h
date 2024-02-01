@@ -1,4 +1,6 @@
 #include <RendererFoundation/Resources/ResourceFormats.h>
+#include <RendererVulkan/Utils/ConversionUtilsVulkan.h>
+
 
 namespace
 {
@@ -12,7 +14,7 @@ namespace
   }
 } // namespace
 
-PLASMA_ALWAYS_INLINE vk::SampleCountFlagBits plConversionUtilsVulkan::GetSamples(plEnum<plGALMSAASampleCount> samples)
+PL_ALWAYS_INLINE vk::SampleCountFlagBits plConversionUtilsVulkan::GetSamples(plEnum<plGALMSAASampleCount> samples)
 {
   switch (samples)
   {
@@ -25,12 +27,12 @@ PLASMA_ALWAYS_INLINE vk::SampleCountFlagBits plConversionUtilsVulkan::GetSamples
     case plGALMSAASampleCount::EightSamples:
       return vk::SampleCountFlagBits::e8;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::SampleCountFlagBits::e1;
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::PresentModeKHR plConversionUtilsVulkan::GetPresentMode(plEnum<plGALPresentMode> presentMode, const plDynamicArray<vk::PresentModeKHR>& supportedModes)
+PL_ALWAYS_INLINE vk::PresentModeKHR plConversionUtilsVulkan::GetPresentMode(plEnum<plGALPresentMode> presentMode, const plDynamicArray<vk::PresentModeKHR>& supportedModes)
 {
   switch (presentMode)
   {
@@ -46,12 +48,12 @@ PLASMA_ALWAYS_INLINE vk::PresentModeKHR plConversionUtilsVulkan::GetPresentMode(
     case plGALPresentMode::VSync:
       return vk::PresentModeKHR::eFifo; // FIFO must be supported according to the standard.
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::PresentModeKHR::eFifo;
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALRenderTargetViewCreationDescription& viewDesc)
+PL_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALRenderTargetViewCreationDescription& viewDesc)
 {
   vk::ImageSubresourceRange range;
   plGALResourceFormat::Enum viewFormat = viewDesc.m_OverrideViewFormat == plGALResourceFormat::Invalid ? texDesc.m_Format : viewDesc.m_OverrideViewFormat;
@@ -60,7 +62,7 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   return range;
 }
 
-PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALResourceViewCreationDescription& viewDesc)
+PL_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALResourceViewCreationDescription& viewDesc)
 {
   vk::ImageSubresourceRange range;
 
@@ -79,6 +81,7 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
+    case plGALTextureType::Texture2DShared:
       range.layerCount = viewDesc.m_uiArraySize;
       range.baseArrayLayer = viewDesc.m_uiFirstArraySlice;
       break;
@@ -90,13 +93,13 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
       range.layerCount = 1;
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
   return range;
 }
 
 
-PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALUnorderedAccessViewCreationDescription& viewDesc)
+PL_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(const plGALTextureCreationDescription& texDesc, const plGALUnorderedAccessViewCreationDescription& viewDesc)
 {
   vk::ImageSubresourceRange range;
 
@@ -117,6 +120,7 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
+    case plGALTextureType::Texture2DShared:
       range.baseArrayLayer = viewDesc.m_uiFirstArraySlice;
       break;
     case plGALTextureType::TextureCube:
@@ -125,7 +129,7 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
     case plGALTextureType::Texture3D:
       if (bIsArrayView)
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
       else
       {
@@ -133,12 +137,12 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
       }
       break;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
   return range;
 }
 
-PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(
+PL_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubresourceRange(
   const vk::ImageSubresourceLayers& layers)
 {
   vk::ImageSubresourceRange range;
@@ -150,12 +154,13 @@ PLASMA_ALWAYS_INLINE vk::ImageSubresourceRange plConversionUtilsVulkan::GetSubre
   return range;
 }
 
-PLASMA_ALWAYS_INLINE vk::ImageViewType plConversionUtilsVulkan::GetImageViewType(plEnum<plGALTextureType> texType, bool bIsArrayView)
+PL_ALWAYS_INLINE vk::ImageViewType plConversionUtilsVulkan::GetImageViewType(plEnum<plGALTextureType> texType, bool bIsArrayView)
 {
   switch (texType)
   {
     case plGALTextureType::Texture2D:
     case plGALTextureType::Texture2DProxy:
+    case plGALTextureType::Texture2DShared:
       if (!bIsArrayView)
       {
         return vk::ImageViewType::e2D;
@@ -177,12 +182,12 @@ PLASMA_ALWAYS_INLINE vk::ImageViewType plConversionUtilsVulkan::GetImageViewType
       return vk::ImageViewType::e3D;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::ImageViewType::e1D;
   }
 }
 
-PLASMA_ALWAYS_INLINE bool plConversionUtilsVulkan::IsDepthFormat(vk::Format format)
+PL_ALWAYS_INLINE bool plConversionUtilsVulkan::IsDepthFormat(vk::Format format)
 {
   switch (format)
   {
@@ -197,7 +202,7 @@ PLASMA_ALWAYS_INLINE bool plConversionUtilsVulkan::IsDepthFormat(vk::Format form
   }
 }
 
-PLASMA_ALWAYS_INLINE bool plConversionUtilsVulkan::IsStencilFormat(vk::Format format)
+PL_ALWAYS_INLINE bool plConversionUtilsVulkan::IsStencilFormat(vk::Format format)
 {
   switch (format)
   {
@@ -211,7 +216,7 @@ PLASMA_ALWAYS_INLINE bool plConversionUtilsVulkan::IsStencilFormat(vk::Format fo
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::PrimitiveTopology plConversionUtilsVulkan::GetPrimitiveTopology(plEnum<plGALPrimitiveTopology> topology)
+PL_ALWAYS_INLINE vk::PrimitiveTopology plConversionUtilsVulkan::GetPrimitiveTopology(plEnum<plGALPrimitiveTopology> topology)
 {
   switch (topology)
   {
@@ -222,12 +227,12 @@ PLASMA_ALWAYS_INLINE vk::PrimitiveTopology plConversionUtilsVulkan::GetPrimitive
     case plGALPrimitiveTopology::Triangles:
       return vk::PrimitiveTopology::eTriangleList;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return vk::PrimitiveTopology::ePointList;
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderStage(plGALShaderStage::Enum stage)
+PL_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderStage(plGALShaderStage::Enum stage)
 {
   switch (stage)
   {
@@ -242,14 +247,14 @@ PLASMA_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderS
     case plGALShaderStage::PixelShader:
       return vk::ShaderStageFlagBits::eFragment;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       [[fallthrough]];
     case plGALShaderStage::ComputeShader:
       return vk::ShaderStageFlagBits::eCompute;
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStage(plGALShaderStage::Enum stage)
+PL_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStage(plGALShaderStage::Enum stage)
 {
   switch (stage)
   {
@@ -264,14 +269,14 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
     case plGALShaderStage::PixelShader:
       return vk::PipelineStageFlagBits::eFragmentShader;
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       [[fallthrough]];
     case plGALShaderStage::ComputeShader:
       return vk::PipelineStageFlagBits::eComputeShader;
   }
 }
 
-PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStage(vk::ShaderStageFlags flags)
+PL_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStage(vk::ShaderStageFlags flags)
 {
   vk::PipelineStageFlags res;
   if (flags & vk::ShaderStageFlagBits::eVertex)
@@ -286,18 +291,61 @@ PLASMA_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipeline
     res |= vk::PipelineStageFlagBits::eFragmentShader;
   if (flags & vk::ShaderStageFlagBits::eCompute)
     res |= vk::PipelineStageFlagBits::eComputeShader;
-  if(flags & vk::ShaderStageFlagBits::eTaskEXT)
-    res |= vk::PipelineStageFlagBits::eTaskShaderEXT;
-  if(flags & vk::ShaderStageFlagBits::eMeshEXT)
-    res |= vk::PipelineStageFlagBits::eMeshShaderEXT;
-  if(flags & vk::ShaderStageFlagBits::eRaygenKHR ||
-       flags & vk::ShaderStageFlagBits::eAnyHitKHR ||
-       flags & vk::ShaderStageFlagBits::eClosestHitKHR ||
-       flags & vk::ShaderStageFlagBits::eMissKHR ||
-       flags & vk::ShaderStageFlagBits::eIntersectionKHR)
-  {
-    res |= vk::PipelineStageFlagBits::eRayTracingShaderKHR;
-  }
 
   return res;
 }
+
+PL_ALWAYS_INLINE vk::DescriptorType plConversionUtilsVulkan::GetDescriptorType(plGALShaderResourceType::Enum type)
+{
+  switch (type)
+  {
+    case plGALShaderResourceType::Unknown:
+      PL_REPORT_FAILURE("Unknown descriptor type");
+    case plGALShaderResourceType::Sampler:
+      return vk::DescriptorType::eSampler;
+    case plGALShaderResourceType::ConstantBuffer:
+      return vk::DescriptorType::eUniformBuffer;
+    case plGALShaderResourceType::Texture:
+      return vk::DescriptorType::eSampledImage;
+    case plGALShaderResourceType::TextureAndSampler:
+      return vk::DescriptorType::eCombinedImageSampler;
+    case plGALShaderResourceType::TexelBuffer:
+      return vk::DescriptorType::eUniformTexelBuffer;
+    case plGALShaderResourceType::StructuredBuffer:
+      return vk::DescriptorType::eStorageBuffer;
+    case plGALShaderResourceType::TextureRW:
+      return vk::DescriptorType::eStorageImage;
+    case plGALShaderResourceType::TexelBufferRW:
+      return vk::DescriptorType::eStorageTexelBuffer;
+    case plGALShaderResourceType::StructuredBufferRW:
+      return vk::DescriptorType::eStorageBuffer;
+  }
+
+  return vk::DescriptorType::eMutableVALVE;
+}
+
+PL_ALWAYS_INLINE vk::ShaderStageFlagBits plConversionUtilsVulkan::GetShaderStages(plBitflags<plGALShaderStageFlags> stages)
+{
+  return (vk::ShaderStageFlagBits)stages.GetValue();
+}
+
+PL_ALWAYS_INLINE vk::PipelineStageFlags plConversionUtilsVulkan::GetPipelineStages(plBitflags<plGALShaderStageFlags> stages)
+{
+  vk::PipelineStageFlags res;
+  for (int i = 0; i < plGALShaderStage::ENUM_COUNT; ++i)
+  {
+    plGALShaderStageFlags::Enum flag = plGALShaderStageFlags::MakeFromShaderStage((plGALShaderStage::Enum)i);
+    if (stages.IsSet(flag))
+    {
+      res |= GetPipelineStage((plGALShaderStage::Enum)i);
+    }
+  }
+  return res;
+}
+
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eVertex == (plUInt32)plGALShaderStageFlags::VertexShader);
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationControl == (plUInt32)plGALShaderStageFlags::HullShader);
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eTessellationEvaluation == (plUInt32)plGALShaderStageFlags::DomainShader);
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eGeometry == (plUInt32)plGALShaderStageFlags::GeometryShader);
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eFragment == (plUInt32)plGALShaderStageFlags::PixelShader);
+PL_CHECK_AT_COMPILETIME((plUInt32)vk::ShaderStageFlagBits::eCompute == (plUInt32)plGALShaderStageFlags::ComputeShader);

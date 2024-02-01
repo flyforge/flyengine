@@ -4,36 +4,36 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plPrefabReferenceComponent, 4, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plPrefabReferenceComponent, 4, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Prefab", GetPrefabFile, SetPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
+    PL_ACCESSOR_PROPERTY("Prefab", GetPrefabFile, SetPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Prefab"),
+    new plCategoryAttribute("Prefabs"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 enum PrefabComponentFlags
 {
-  SelfDeletion = 1
+  SelfDeletion = 1, ///< the prefab component is currently deleting itself but does not want to remove the instantiated objects
 };
 
 plPrefabReferenceComponent::plPrefabReferenceComponent() = default;
 plPrefabReferenceComponent::~plPrefabReferenceComponent() = default;
 
-void plPrefabReferenceComponent::SerializePrefabParameters(const plWorld& world, plWorldWriter& stream, plArrayMap<plHashedString, plVariant> parameters)
+void plPrefabReferenceComponent::SerializePrefabParameters(const plWorld& world, plWorldWriter& inout_stream, plArrayMap<plHashedString, plVariant> parameters)
 {
   // we need a copy of the parameters here, therefore we don't take it by reference
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
   const plUInt32 numParams = parameters.GetCount();
 
   plHybridArray<plGameObjectHandle, 8> GoReferences;
@@ -64,7 +64,7 @@ void plPrefabReferenceComponent::SerializePrefabParameters(const plWorld& world,
             // and discard the string's value, and instead write a string that specifies the index of the serialized handle to use
 
             // local game object reference - index into GoReferences
-            tmp.Format("#!LGOR-{}", GoReferences.GetCount());
+            tmp.SetFormat("#!LGOR-{}", GoReferences.GetCount());
             var = tmp.GetData();
 
             GoReferences.PushBack(hObject);
@@ -79,7 +79,7 @@ void plPrefabReferenceComponent::SerializePrefabParameters(const plWorld& world,
 
     for (plUInt8 i = 0; i < numRefs; ++i)
     {
-      stream.WriteGameObjectHandle(GoReferences[i]);
+      inout_stream.WriteGameObjectHandle(GoReferences[i]);
     }
   }
 
@@ -92,13 +92,13 @@ void plPrefabReferenceComponent::SerializePrefabParameters(const plWorld& world,
   }
 }
 
-void plPrefabReferenceComponent::DeserializePrefabParameters(plArrayMap<plHashedString, plVariant>& out_parameters, plWorldReader& stream)
+void plPrefabReferenceComponent::DeserializePrefabParameters(plArrayMap<plHashedString, plVariant>& out_parameters, plWorldReader& inout_stream)
 {
   out_parameters.Clear();
 
   // versioning of this stuff is tied to the version number of plPrefabReferenceComponent
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(plGetStaticRTTI<plPrefabReferenceComponent>());
-  auto& s = stream.GetStream();
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(plGetStaticRTTI<plPrefabReferenceComponent>());
+  auto& s = inout_stream.GetStream();
 
   // temp array to hold (and remap) the serialized game object handles
   plHybridArray<plGameObjectHandle, 8> GoReferences;
@@ -112,7 +112,7 @@ void plPrefabReferenceComponent::DeserializePrefabParameters(plArrayMap<plHashed
     // just read them all, this will remap as necessary to the plWorldReader
     for (plUInt8 i = 0; i < numRefs; ++i)
     {
-      GoReferences[i] = stream.ReadGameObjectHandle();
+      GoReferences[i] = inout_stream.ReadGameObjectHandle();
     }
   }
 
@@ -148,7 +148,7 @@ void plPrefabReferenceComponent::DeserializePrefabParameters(plArrayMap<plHashed
             // and stringify the handle into a 'global game object reference', ie. one that contains the internal integer data of the handle
             // a regular runtime world has a reference resolver that is capable to reverse this stringified format to a handle again
             // which will happen once 'InstantiatePrefab' passes the m_Parameters list to the newly created objects
-            tmp.Format("#!GGOR-{}", hObject.GetInternalID().m_Data);
+            tmp.SetFormat("#!GGOR-{}", hObject.GetInternalID().m_Data);
 
             // map local game object reference to global game object reference
             value = tmp.GetData();
@@ -161,21 +161,21 @@ void plPrefabReferenceComponent::DeserializePrefabParameters(plArrayMap<plHashed
   }
 }
 
-void plPrefabReferenceComponent::SerializeComponent(plWorldWriter& stream) const
+void plPrefabReferenceComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_hPrefab;
 
-  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), stream, m_Parameters);
+  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), inout_stream, m_Parameters);
 }
 
-void plPrefabReferenceComponent::DeserializeComponent(plWorldReader& stream)
+void plPrefabReferenceComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_hPrefab;
 
@@ -185,7 +185,7 @@ void plPrefabReferenceComponent::DeserializeComponent(plWorldReader& stream)
     s >> bDummy;
   }
 
-  plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, stream);
+  plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, inout_stream);
 }
 
 void plPrefabReferenceComponent::SetPrefabFile(const char* szFile)
@@ -224,7 +224,6 @@ void plPrefabReferenceComponent::SetPrefab(const plPrefabResourceHandle& hPrefab
     GetWorld()->GetComponentManager<plPrefabReferenceComponentManager>()->AddToUpdateList(this);
   }
 }
-
 
 void plPrefabReferenceComponent::InstantiatePrefab()
 {
@@ -274,6 +273,9 @@ void plPrefabReferenceComponent::InstantiatePrefab()
 
       for (plGameObject* pChild : createdRootObjects)
       {
+        if (pChild == GetOwner())
+          continue;
+
         FixComponent(pChild, uiUniqueID);
       }
 
@@ -320,7 +322,9 @@ void plPrefabReferenceComponent::ClearPreviousInstances()
   {
     // if this is in the editor, and the 'activate' flag is toggled,
     // get rid of all our created child objects
+
     plArrayPtr<plComponent* const> comps = GetOwner()->GetComponents();
+
     for (plUInt32 ip1 = comps.GetCount(); ip1 > 0; ip1--)
     {
       const plUInt32 i = ip1 - 1;
@@ -331,6 +335,7 @@ void plPrefabReferenceComponent::ClearPreviousInstances()
         comps[i]->GetOwningManager()->DeleteComponent(comps[i]);
       }
     }
+
     for (auto it = GetOwner()->GetChildren(); it.IsValid(); ++it)
     {
       if (it->WasCreatedByPrefab())
@@ -440,7 +445,7 @@ plPrefabReferenceComponentManager::~plPrefabReferenceComponentManager()
 
 void plPrefabReferenceComponentManager::Initialize()
 {
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plPrefabReferenceComponentManager::Update, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plPrefabReferenceComponentManager::Update, this);
 
   RegisterUpdateFunction(desc);
 }
@@ -491,4 +496,4 @@ void plPrefabReferenceComponentManager::AddToUpdateList(plPrefabReferenceCompone
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Prefabs_Implementation_PrefabReferenceComponent);
+PL_STATICLINK_FILE(Core, Core_Prefabs_Implementation_PrefabReferenceComponent);

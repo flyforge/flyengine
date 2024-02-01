@@ -5,7 +5,7 @@
 #include <Texture/TextureDLL.h>
 
 /// \brief Represents a function used for filtering an image.
-class PLASMA_TEXTURE_DLL plImageFilter
+class PL_TEXTURE_DLL plImageFilter
 {
 public:
   /// \brief Samples the filter function at a single point. Note that the distribution isn't necessarily normalized.
@@ -18,68 +18,68 @@ protected:
   plImageFilter(float width);
 
 private:
-  plSimdFloat m_width;
+  plSimdFloat m_fWidth;
 };
 
 /// \brief Box filter
-class PLASMA_TEXTURE_DLL plImageFilterBox : public plImageFilter
+class PL_TEXTURE_DLL plImageFilterBox : public plImageFilter
 {
 public:
-  plImageFilterBox(float width = 0.5f);
+  plImageFilterBox(float fWidth = 0.5f);
 
   virtual plSimdFloat SamplePoint(const plSimdFloat& x) const override;
 };
 
 /// \brief Triangle filter
-class PLASMA_TEXTURE_DLL plImageFilterTriangle : public plImageFilter
+class PL_TEXTURE_DLL plImageFilterTriangle : public plImageFilter
 {
 public:
-  plImageFilterTriangle(float width = 1.0f);
+  plImageFilterTriangle(float fWidth = 1.0f);
 
   virtual plSimdFloat SamplePoint(const plSimdFloat& x) const override;
 };
 
 /// \brief Kaiser-windowed sinc filter
-class PLASMA_TEXTURE_DLL plImageFilterSincWithKaiserWindow : public plImageFilter
+class PL_TEXTURE_DLL plImageFilterSincWithKaiserWindow : public plImageFilter
 {
 public:
   /// \brief Construct a sinc filter with a Kaiser window of the given window width and beta parameter.
   /// Note that the beta parameter (equaling alpha * pi in the mathematical definition of the Kaiser window) is often incorrectly alpha by other
   /// filtering tools.
-  plImageFilterSincWithKaiserWindow(float windowWidth = 3.0f, float beta = 4.0f);
+  plImageFilterSincWithKaiserWindow(float fWindowWidth = 3.0f, float fBeta = 4.0f);
 
   virtual plSimdFloat SamplePoint(const plSimdFloat& x) const override;
 
 private:
-  plSimdFloat m_beta;
-  plSimdFloat m_invBesselBeta;
+  plSimdFloat m_fBeta;
+  plSimdFloat m_fInvBesselBeta;
 };
 
 /// \brief Pre-computes the required filter weights for rescaling a sequence of image samples.
-class PLASMA_TEXTURE_DLL plImageFilterWeights
+class PL_TEXTURE_DLL plImageFilterWeights
 {
 public:
   /// \brief Pre-compute the weights for the given filter for scaling between the given number of samples.
-  plImageFilterWeights(const plImageFilter& filter, plUInt32 srcSamples, plUInt32 dstSamples);
+  plImageFilterWeights(const plImageFilter& filter, plUInt32 uiSrcSamples, plUInt32 uiDstSamples);
 
   /// \brief Returns the number of weights.
   plUInt32 GetNumWeights() const;
 
   /// \brief Returns the weight used for the source sample GetFirstSourceSampleIndex(dstSampleIndex) + weightIndex
-  plSimdFloat GetWeight(plUInt32 dstSampleIndex, plUInt32 weightIndex) const;
+  plSimdFloat GetWeight(plUInt32 uiDstSampleIndex, plUInt32 uiWeightIndex) const;
 
   /// \brief Returns the index of the first source sample that needs to be weighted to evaluate the destination sample
-  inline plInt32 GetFirstSourceSampleIndex(plUInt32 dstSampleIndex) const;
+  inline plInt32 GetFirstSourceSampleIndex(plUInt32 uiDstSampleIndex) const;
 
   plArrayPtr<const float> ViewWeights() const;
 
 private:
-  plHybridArray<float, 16> m_weights;
-  plSimdFloat m_widthInSourceSpace;
-  plSimdFloat m_sourceToDestScale;
-  plSimdFloat m_destToSourceScale;
-  plUInt32 m_numWeights;
-  plUInt32 m_dstSamplesReduced;
+  plHybridArray<float, 16> m_Weights;
+  plSimdFloat m_fWidthInSourceSpace;
+  plSimdFloat m_fSourceToDestScale;
+  plSimdFloat m_fDestToSourceScale;
+  plUInt32 m_uiNumWeights;
+  plUInt32 m_uiDstSamplesReduced;
 };
 
 #include <Texture/Image/Implementation/ImageFilter_inl.h>

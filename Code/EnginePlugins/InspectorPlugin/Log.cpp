@@ -22,7 +22,7 @@ namespace plLogWriter
 
       if (eventData.m_EventType == plLogMsgType::EndGroup)
       {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
         msg.GetWriter() << eventData.m_fSeconds;
 #else
         msg.GetWriter() << 0.0f;
@@ -46,4 +46,4 @@ void RemoveLogWriter()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Log);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Log);

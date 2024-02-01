@@ -5,9 +5,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_Volume final : public plParticleFinalizerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_Volume final : public plParticleFinalizerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_Volume, plParticleFinalizerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_Volume, plParticleFinalizerFactory);
 
 public:
   plParticleFinalizerFactory_Volume();
@@ -18,9 +18,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizer_Volume final : public plParticleFinalizer
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizer_Volume final : public plParticleFinalizer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_Volume, plParticleFinalizer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_Volume, plParticleFinalizer);
 
 public:
   plParticleFinalizer_Volume();

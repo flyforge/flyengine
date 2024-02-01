@@ -3,13 +3,13 @@
 #include <Core/Configuration/PlatformProfile.h>
 #include <GameEngine/GameEngineDLL.h>
 
-class PLASMA_GAMEENGINE_DLL plRenderPipelineProfileConfig : public plProfileConfigData
+class PL_GAMEENGINE_DLL plRenderPipelineProfileConfig : public plProfileConfigData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRenderPipelineProfileConfig, plProfileConfigData);
+  PL_ADD_DYNAMIC_REFLECTION(plRenderPipelineProfileConfig, plProfileConfigData);
 
 public:
-  virtual void SaveRuntimeData(plChunkStreamWriter& stream) const override;
-  virtual void LoadRuntimeData(plChunkStreamReader& stream) override;
+  virtual void SaveRuntimeData(plChunkStreamWriter& inout_stream) const override;
+  virtual void LoadRuntimeData(plChunkStreamReader& inout_stream) override;
 
   plString m_sMainRenderPipeline;
   // plString m_sEditorRenderPipeline;

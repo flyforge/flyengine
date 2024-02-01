@@ -62,12 +62,12 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
   FillOutConfig(cfg, config, aabb);
 
   rcHeightfield* heightfield = rcAllocHeightfield();
-  PLASMA_SCOPE_EXIT(rcFreeHeightField(heightfield));
+  PL_SCOPE_EXIT(rcFreeHeightField(heightfield));
 
   if (!rcCreateHeightfield(pContext, *heightfield, cfg.width, cfg.height, cfg.bmin, cfg.bmax, cfg.cs, cfg.ch))
   {
     plLog::Error("[AI]Could not create solid heightfield for navmesh.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   rcClearUnwalkableTriangles(pContext, cfg.walkableSlopeAngle, pVertices, vertices.GetCount(), pTriangles, triangles.GetCount(), triangleAreaIDs.GetPtr());
@@ -75,7 +75,7 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
   if (!rcRasterizeTriangles(pContext, pVertices, vertices.GetCount(), pTriangles, triangleAreaIDs.GetPtr(), triangles.GetCount(), *heightfield, cfg.walkableClimb))
   {
     plLog::Error("[AI]Could not rasterize navmesh triangles.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   rcFilterLowHangingWalkableObstacles(pContext, cfg.walkableClimb, *heightfield);
@@ -85,18 +85,18 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
   rcFilterWalkableLowHeightSpans(pContext, cfg.walkableHeight, *heightfield);
 
   rcCompactHeightfield* compactHeightfield = rcAllocCompactHeightfield();
-  PLASMA_SCOPE_EXIT(rcFreeCompactHeightfield(compactHeightfield));
+  PL_SCOPE_EXIT(rcFreeCompactHeightfield(compactHeightfield));
 
   if (!rcBuildCompactHeightfield(pContext, cfg.walkableHeight, cfg.walkableClimb, *heightfield, *compactHeightfield))
   {
     plLog::Error("[AI]Could not build compact navmesh data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!rcErodeWalkableArea(pContext, cfg.walkableRadius, *compactHeightfield))
   {
     plLog::Error("[AI]Could not erode navmesh with character radius");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Partition the heightfield so that we can use simple algorithm later to triangulate the walkable areas.
@@ -108,14 +108,14 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
     if (!rcBuildDistanceField(pContext, *compactHeightfield))
     {
       plLog::Error("[AI]Could not build navmesh distance field.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Partition the walkable surface into simple regions without holes.
     if (!rcBuildRegions(pContext, *compactHeightfield, cfg.borderSize, cfg.minRegionArea, cfg.mergeRegionArea))
     {
       plLog::Error("[AI]Could not build navmesh watershed regions.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -127,7 +127,7 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
     if (!rcBuildRegionsMonotone(pContext, *compactHeightfield, cfg.borderSize, cfg.minRegionArea, cfg.mergeRegionArea))
     {
       plLog::Error("[AI]Could not build monotone navmesh regions.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -138,23 +138,23 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
     if (!rcBuildLayerRegions(pContext, *compactHeightfield, cfg.borderSize, cfg.minRegionArea))
     {
       plLog::Error("[AI]Could not build navmesh layer regions.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
   rcContourSet* contourSet = rcAllocContourSet();
-  PLASMA_SCOPE_EXIT(rcFreeContourSet(contourSet));
+  PL_SCOPE_EXIT(rcFreeContourSet(contourSet));
 
   if (!rcBuildContours(pContext, *compactHeightfield, cfg.maxSimplificationError, cfg.maxEdgeLen, *contourSet))
   {
     plLog::Error("[AI]Could not create navmesh contours");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!rcBuildPolyMesh(pContext, *contourSet, cfg.maxVertsPerPoly, out_polyMesh))
   {
     plLog::Error("[AI]Could not triangulate navmesh contours");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   //////////////////////////////////////////////////////////////////////////
@@ -172,7 +172,7 @@ plResult BuildRecastPolyMesh(const plAiNavmeshConfig& config, plBoundingBox aabb
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult BuildDetourNavMeshData(const plAiNavmeshConfig& config, const rcPolyMesh& polyMesh, plDataBuffer& out_navmeshData, plVec2I32 vSectorCoord)
@@ -201,18 +201,18 @@ plResult BuildDetourNavMeshData(const plAiNavmeshConfig& config, const rcPolyMes
 
   plInt32 navDataSize = 0;
   plUInt8* navData = nullptr;
-  PLASMA_SCOPE_EXIT(dtFree(navData));
+  PL_SCOPE_EXIT(dtFree(navData));
 
   if (!dtCreateNavMeshData(&params, &navData, &navDataSize))
   {
     plLog::Error("Could not build Detour navmesh.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   out_navmeshData.SetCountUninitialized(navDataSize);
   plMemoryUtils::Copy(out_navmeshData.GetData(), navData, navDataSize);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plNavMeshSectorGenerationTask::Execute()
@@ -268,7 +268,7 @@ static void QueryInputGeo(const plPhysicsWorldModuleInterface* pPhysics, plUInt3
       pPrevSurf = triangles[tri].m_pSurface;
 
       iGroundType = GetSurfaceGroundType(pPrevSurf);
-      PLASMA_ASSERT_DEV(iGroundType < 32, "Area ID is out of range");
+      PL_ASSERT_DEV(iGroundType < 32, "Area ID is out of range");
     }
 
     // we abuse the surface pointer to store the ground type int, so that we don't need any additional array and sorting logic
@@ -313,7 +313,7 @@ void plAiNavMesh::BuildSector(SectorID sectorID, const plPhysicsWorldModuleInter
   const plVec2I32 sectorCoord = CalculateSectorCoord(sectorID);
   auto& sector = m_Sectors[sectorID];
 
-  PLASMA_ASSERT_DEV(sector.m_FlagUpdateAvailable == 0, "Shouldn't update a sector that is already being updated");
+  PL_ASSERT_DEV(sector.m_FlagUpdateAvailable == 0, "Shouldn't update a sector that is already being updated");
 
   const plBoundingBox bounds = GetSectorBounds(sectorCoord, -1000, +1000);
 
@@ -334,10 +334,10 @@ void plAiNavMesh::BuildSector(SectorID sectorID, const plPhysicsWorldModuleInter
   }
 
   {
-    PLASMA_ASSERT_DEV(sector.m_FlagUpdateAvailable == 0, "Race condition in navmesh sector update");
+    PL_ASSERT_DEV(sector.m_FlagUpdateAvailable == 0, "Race condition in navmesh sector update");
     sector.m_FlagUpdateAvailable = 1;
 
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
     m_UpdatingSectors.PushBack(sectorID);
   }
 }

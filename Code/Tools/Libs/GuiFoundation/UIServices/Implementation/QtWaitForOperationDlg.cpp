@@ -3,17 +3,15 @@
 #include <GuiFoundation/UIServices/QtWaitForOperationDlg.moc.h>
 #include <QTimer>
 
-plQtWaitForOperationDlg::plQtWaitForOperationDlg(QWidget* parent)
-  : QDialog(parent)
+plQtWaitForOperationDlg::plQtWaitForOperationDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
   QTimer::singleShot(10, this, &plQtWaitForOperationDlg::onIdle);
 }
 
-plQtWaitForOperationDlg::~plQtWaitForOperationDlg()
-{
-}
+plQtWaitForOperationDlg::~plQtWaitForOperationDlg() = default;
 
 void plQtWaitForOperationDlg::on_ButtonCancel_clicked()
 {

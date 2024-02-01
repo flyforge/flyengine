@@ -4,65 +4,69 @@
 #include <ProcGenPlugin/Declarations.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcGenBinaryOperator, 1)
-  PLASMA_ENUM_CONSTANTS(plProcGenBinaryOperator::Add, plProcGenBinaryOperator::Subtract, plProcGenBinaryOperator::Multiply, plProcGenBinaryOperator::Divide)
-  PLASMA_ENUM_CONSTANTS(plProcGenBinaryOperator::Max, plProcGenBinaryOperator::Min)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcGenBinaryOperator, 1)
+  PL_ENUM_CONSTANTS(plProcGenBinaryOperator::Add, plProcGenBinaryOperator::Subtract, plProcGenBinaryOperator::Multiply, plProcGenBinaryOperator::Divide)
+  PL_ENUM_CONSTANTS(plProcGenBinaryOperator::Max, plProcGenBinaryOperator::Min)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcGenBlendMode, 1)
-  PLASMA_ENUM_CONSTANTS(plProcGenBlendMode::Add, plProcGenBlendMode::Subtract, plProcGenBlendMode::Multiply, plProcGenBlendMode::Divide)
-  PLASMA_ENUM_CONSTANTS(plProcGenBlendMode::Max, plProcGenBlendMode::Min)
-  PLASMA_ENUM_CONSTANTS(plProcGenBlendMode::Set)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcGenBlendMode, 1)
+  PL_ENUM_CONSTANTS(plProcGenBlendMode::Add, plProcGenBlendMode::Subtract, plProcGenBlendMode::Multiply, plProcGenBlendMode::Divide)
+  PL_ENUM_CONSTANTS(plProcGenBlendMode::Max, plProcGenBlendMode::Min)
+  PL_ENUM_CONSTANTS(plProcGenBlendMode::Set)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcVertexColorChannelMapping, 1)
-  PLASMA_ENUM_CONSTANTS(plProcVertexColorChannelMapping::R, plProcVertexColorChannelMapping::G, plProcVertexColorChannelMapping::B, plProcVertexColorChannelMapping::A)
-  PLASMA_ENUM_CONSTANTS(plProcVertexColorChannelMapping::Black, plProcVertexColorChannelMapping::White)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcVertexColorChannelMapping, 1)
+  PL_ENUM_CONSTANTS(plProcVertexColorChannelMapping::R, plProcVertexColorChannelMapping::G, plProcVertexColorChannelMapping::B, plProcVertexColorChannelMapping::A)
+  PL_ENUM_CONSTANTS(plProcVertexColorChannelMapping::Black, plProcVertexColorChannelMapping::White)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plProcVertexColorMapping, plNoBase, 1, plRTTIDefaultAllocator<plProcVertexColorMapping>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plProcVertexColorMapping, plNoBase, 1, plRTTIDefaultAllocator<plProcVertexColorMapping>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("R", plProcVertexColorChannelMapping, m_R)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::R)),
-    PLASMA_ENUM_MEMBER_PROPERTY("G", plProcVertexColorChannelMapping, m_G)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::G)),
-    PLASMA_ENUM_MEMBER_PROPERTY("B", plProcVertexColorChannelMapping, m_B)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::B)),
-    PLASMA_ENUM_MEMBER_PROPERTY("A", plProcVertexColorChannelMapping, m_A)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::A)),
+    PL_ENUM_MEMBER_PROPERTY("R", plProcVertexColorChannelMapping, m_R)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::R)),
+    PL_ENUM_MEMBER_PROPERTY("G", plProcVertexColorChannelMapping, m_G)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::G)),
+    PL_ENUM_MEMBER_PROPERTY("B", plProcVertexColorChannelMapping, m_B)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::B)),
+    PL_ENUM_MEMBER_PROPERTY("A", plProcVertexColorChannelMapping, m_A)->AddAttributes(new plDefaultValueAttribute(plProcVertexColorChannelMapping::A)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcPlacementMode, 1)
-  PLASMA_ENUM_CONSTANTS(plProcPlacementMode::Raycast, plProcPlacementMode::Fixed)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcPlacementMode, 1)
+  PL_ENUM_CONSTANTS(plProcPlacementMode::Raycast, plProcPlacementMode::Fixed)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plProcVolumeImageMode, 1)
-  PLASMA_ENUM_CONSTANTS(plProcVolumeImageMode::ReferenceColor, plProcVolumeImageMode::ChannelR, plProcVolumeImageMode::ChannelG, plProcVolumeImageMode::ChannelB, plProcVolumeImageMode::ChannelA)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcPlacementPattern, 1)
+  PL_ENUM_CONSTANTS(plProcPlacementPattern::RegularGrid, plProcPlacementPattern::HexGrid, plProcPlacementPattern::Natural)
+PL_END_STATIC_REFLECTED_ENUM;
+
+PL_BEGIN_STATIC_REFLECTED_ENUM(plProcVolumeImageMode, 1)
+  PL_ENUM_CONSTANTS(plProcVolumeImageMode::ReferenceColor, plProcVolumeImageMode::ChannelR, plProcVolumeImageMode::ChannelG, plProcVolumeImageMode::ChannelB, plProcVolumeImageMode::ChannelA)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 static plTypeVersion s_ProcVertexColorMappingVersion = 1;
-plResult plProcVertexColorMapping::Serialize(plStreamWriter& stream) const
+plResult plProcVertexColorMapping::Serialize(plStreamWriter& inout_stream) const
 {
-  stream.WriteVersion(s_ProcVertexColorMappingVersion);
-  stream << m_R;
-  stream << m_G;
-  stream << m_B;
-  stream << m_A;
+  inout_stream.WriteVersion(s_ProcVertexColorMappingVersion);
+  inout_stream << m_R;
+  inout_stream << m_G;
+  inout_stream << m_B;
+  inout_stream << m_A;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plProcVertexColorMapping::Deserialize(plStreamReader& stream)
+plResult plProcVertexColorMapping::Deserialize(plStreamReader& inout_stream)
 {
-  /*plTypeVersion version =*/stream.ReadVersion(s_ProcVertexColorMappingVersion);
-  stream >> m_R;
-  stream >> m_G;
-  stream >> m_B;
-  stream >> m_A;
+  /*plTypeVersion version =*/inout_stream.ReadVersion(s_ProcVertexColorMappingVersion);
+  inout_stream >> m_R;
+  inout_stream >> m_G;
+  inout_stream >> m_B;
+  inout_stream >> m_A;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 namespace plProcGenInternal

@@ -786,7 +786,7 @@ inline XMVECTOR XM_CALLCONV XMQuaternionRotationMatrix(FXMMATRIX M) noexcept
     uint32x4_t z2gew2 = vcleq_f32(r11pr00, g_XMZero);
 
     // x^2 + y^2 >= z^2 + w^2 equivalent to r22 <= 0
-    uint32x4_t x2py2gpl2pw2 = vcleq_f32(r22, g_XMZero);
+    uint32x4_t x2py2gez2pw2 = vcleq_f32(r22, g_XMZero);
 
     // (4*x^2, 4*y^2, 4*z^2, 4*w^2)
     float32x4_t t0 = vmulq_f32(XMPMMP, r00);
@@ -842,7 +842,7 @@ inline XMVECTOR XM_CALLCONV XMQuaternionRotationMatrix(FXMMATRIX M) noexcept
     // magnitude.
     t0 = vbslq_f32(x2gey2, tensor0, tensor1);
     t1 = vbslq_f32(z2gew2, tensor2, tensor3);
-    t2 = vbslq_f32(x2py2gpl2pw2, t0, t1);
+    t2 = vbslq_f32(x2py2gez2pw2, t0, t1);
 
     // Normalize the row.  No division by zero is possible because the
     // quaternion is unit-length (and the row is a nonzero multiple of
@@ -876,7 +876,7 @@ inline XMVECTOR XM_CALLCONV XMQuaternionRotationMatrix(FXMMATRIX M) noexcept
     XMVECTOR z2gew2 = _mm_cmple_ps(r11pr00, g_XMZero);
 
     // x^2 + y^2 >= z^2 + w^2 equivalent to r22 <= 0
-    XMVECTOR x2py2gpl2pw2 = _mm_cmple_ps(r22, g_XMZero);
+    XMVECTOR x2py2gez2pw2 = _mm_cmple_ps(r22, g_XMZero);
 
     // (4*x^2, 4*y^2, 4*z^2, 4*w^2)
     XMVECTOR t0 = XM_FMADD_PS(XMPMMP, r00, g_XMOne);
@@ -927,8 +927,8 @@ inline XMVECTOR XM_CALLCONV XMQuaternionRotationMatrix(FXMMATRIX M) noexcept
     t1 = _mm_and_ps(z2gew2, tensor2);
     t2 = _mm_andnot_ps(z2gew2, tensor3);
     t1 = _mm_or_ps(t1, t2);
-    t0 = _mm_and_ps(x2py2gpl2pw2, t0);
-    t1 = _mm_andnot_ps(x2py2gpl2pw2, t1);
+    t0 = _mm_and_ps(x2py2gez2pw2, t0);
+    t1 = _mm_andnot_ps(x2py2gez2pw2, t1);
     t2 = _mm_or_ps(t0, t1);
 
     // Normalize the row.  No division by zero is possible because the

@@ -7,34 +7,34 @@
 #include <Foundation/Reflection/Reflection.h>
 
 /// \brief Base class of all attributes can be used to decorate a RTTI property.
-class PLASMA_FOUNDATION_DLL plPropertyAttribute : public plReflectedClass
+class PL_FOUNDATION_DLL plPropertyAttribute : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPropertyAttribute, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plPropertyAttribute, plReflectedClass);
 };
 
 /// \brief A property attribute that indicates that the property may not be modified through the UI
-class PLASMA_FOUNDATION_DLL plReadOnlyAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plReadOnlyAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plReadOnlyAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plReadOnlyAttribute, plPropertyAttribute);
 };
 
 /// \brief A property attribute that indicates that the property is not to be shown in the UI
-class PLASMA_FOUNDATION_DLL plHiddenAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plHiddenAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plHiddenAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plHiddenAttribute, plPropertyAttribute);
 };
 
 /// \brief A property attribute that indicates that the property is not to be serialized
 /// and whatever it points to only exists temporarily while running or in editor.
-class PLASMA_FOUNDATION_DLL plTemporaryAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plTemporaryAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTemporaryAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plTemporaryAttribute, plPropertyAttribute);
 };
 
 /// \brief Used to categorize types (e.g. add component menu)
-class PLASMA_FOUNDATION_DLL plCategoryAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plCategoryAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCategoryAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plCategoryAttribute, plPropertyAttribute);
 
 public:
   plCategoryAttribute() = default;
@@ -50,9 +50,9 @@ private:
 };
 
 /// \brief A property attribute that indicates that this feature is still in development and should not be shown to all users.
-class PLASMA_FOUNDATION_DLL plInDevelopmentAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plInDevelopmentAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInDevelopmentAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plInDevelopmentAttribute, plPropertyAttribute);
 
 public:
   enum Phase
@@ -73,9 +73,9 @@ public:
 /// \brief Used for dynamic titles of visual script nodes.
 /// E.g. "Set Bool Property '{Name}'" will allow the title to by dynamic
 /// by reading the current value of the 'Name' property.
-class PLASMA_FOUNDATION_DLL plTitleAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plTitleAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTitleAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plTitleAttribute, plPropertyAttribute);
 
 public:
   plTitleAttribute() = default;
@@ -91,9 +91,9 @@ private:
 };
 
 /// \brief Used to colorize types
-class PLASMA_FOUNDATION_DLL plColorAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plColorAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plColorAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plColorAttribute, plPropertyAttribute);
 
 public:
   plColorAttribute() = default;
@@ -101,7 +101,6 @@ public:
     : m_Color(color)
   {
   }
-
   const plColor& GetColor() const { return m_Color; }
 
 private:
@@ -109,15 +108,15 @@ private:
 };
 
 /// \brief A property attribute that indicates that the alpha channel of an plColorGammaUB or plColor should be exposed in the UI.
-class PLASMA_FOUNDATION_DLL plExposeColorAlphaAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plExposeColorAlphaAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExposeColorAlphaAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plExposeColorAlphaAttribute, plPropertyAttribute);
 };
 
 /// \brief Used for any property shown as a line edit (int, float, vector etc).
-class PLASMA_FOUNDATION_DLL plSuffixAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plSuffixAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSuffixAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plSuffixAttribute, plPropertyAttribute);
 
 public:
   plSuffixAttribute() = default;
@@ -133,9 +132,9 @@ private:
 };
 
 /// \brief Used to show a text instead of the minimum value of a property.
-class PLASMA_FOUNDATION_DLL plMinValueTextAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plMinValueTextAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMinValueTextAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plMinValueTextAttribute, plPropertyAttribute);
 
 public:
   plMinValueTextAttribute() = default;
@@ -151,9 +150,9 @@ private:
 };
 
 /// \brief Sets the default value of the property.
-class PLASMA_FOUNDATION_DLL plDefaultValueAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plDefaultValueAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDefaultValueAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDefaultValueAttribute, plPropertyAttribute);
 
 public:
   plDefaultValueAttribute() = default;
@@ -196,9 +195,9 @@ private:
 
 /// \brief A property attribute that allows to define min and max values for the UI. Min or max may be set to an invalid variant to indicate
 /// unbounded values in one direction.
-class PLASMA_FOUNDATION_DLL plClampValueAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plClampValueAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plClampValueAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plClampValueAttribute, plPropertyAttribute);
 
 public:
   plClampValueAttribute() = default;
@@ -211,15 +210,15 @@ public:
   const plVariant& GetMinValue() const { return m_MinValue; }
   const plVariant& GetMaxValue() const { return m_MaxValue; }
 
-private:
+protected:
   plVariant m_MinValue;
   plVariant m_MaxValue;
 };
 
 /// \brief Used to categorize properties into groups
-class PLASMA_FOUNDATION_DLL plGroupAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plGroupAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGroupAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plGroupAttribute, plPropertyAttribute);
 
 public:
   plGroupAttribute();
@@ -243,9 +242,9 @@ private:
 /// its type to look for a factory creator in plRttiMappedObjectFactory<plQtPropertyWidget>.
 /// E.g. plRttiMappedObjectFactory<plQtPropertyWidget>::RegisterCreator(plGetStaticRTTI<plFileBrowserAttribute>(), FileBrowserCreator);
 /// will replace the property widget for all properties that use plFileBrowserAttribute.
-class PLASMA_FOUNDATION_DLL plTypeWidgetAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plTypeWidgetAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTypeWidgetAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plTypeWidgetAttribute, plPropertyAttribute);
 };
 
 /// \brief Derive from this class if you want to define an attribute that replaces the property widget of containers.
@@ -253,18 +252,18 @@ class PLASMA_FOUNDATION_DLL plTypeWidgetAttribute : public plPropertyAttribute
 /// Using this attribute affects the container widget but not container elements.
 /// Only derive from this class if you want to replace the container widget itself, in every other case
 /// prefer to use plTypeWidgetAttribute.
-class PLASMA_FOUNDATION_DLL plContainerWidgetAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plContainerWidgetAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plContainerWidgetAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plContainerWidgetAttribute, plPropertyAttribute);
 };
 
 /// \brief Add this attribute to a tag set member property to make it use the tag set editor
 /// and define the categories it will use as a ; separated list of category names.
 ///
-/// Usage: PLASMA_SET_MEMBER_PROPERTY("Tags", m_Tags)->AddAttributes(new plTagSetWidgetAttribute("Category1;Category2")),
-class PLASMA_FOUNDATION_DLL plTagSetWidgetAttribute : public plContainerWidgetAttribute
+/// Usage: PL_SET_MEMBER_PROPERTY("Tags", m_Tags)->AddAttributes(new plTagSetWidgetAttribute("Category1;Category2")),
+class PL_FOUNDATION_DLL plTagSetWidgetAttribute : public plContainerWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTagSetWidgetAttribute, plContainerWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plTagSetWidgetAttribute, plContainerWidgetAttribute);
 
 public:
   plTagSetWidgetAttribute() = default;
@@ -280,9 +279,9 @@ private:
 };
 
 /// \brief This attribute indicates that a widget should not use temporary transactions when changing the value.
-class PLASMA_FOUNDATION_DLL plNoTemporaryTransactionsAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plNoTemporaryTransactionsAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plNoTemporaryTransactionsAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plNoTemporaryTransactionsAttribute, plPropertyAttribute);
 };
 
 /// \brief Add this attribute to a variant map property to make it map to the exposed parameters
@@ -290,11 +289,11 @@ class PLASMA_FOUNDATION_DLL plNoTemporaryTransactionsAttribute : public plProper
 /// The exposed parameters of the currently set asset on that property will be used as the source.
 ///
 /// Usage:
-/// PLASMA_ACCESSOR_PROPERTY("Effect", GetParticleEffectFile, SetParticleEffectFile)->AddAttributes(new plAssetBrowserAttribute("Particle
-/// Effect")), PLASMA_MAP_ACCESSOR_PROPERTY("Parameters",...)->AddAttributes(new plExposedParametersAttribute("Effect")),
-class PLASMA_FOUNDATION_DLL plExposedParametersAttribute : public plContainerWidgetAttribute
+/// PL_ACCESSOR_PROPERTY("Effect", GetParticleEffectFile, SetParticleEffectFile)->AddAttributes(new plAssetBrowserAttribute("Particle
+/// Effect")), PL_MAP_ACCESSOR_PROPERTY("Parameters",...)->AddAttributes(new plExposedParametersAttribute("Effect")),
+class PL_FOUNDATION_DLL plExposedParametersAttribute : public plContainerWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExposedParametersAttribute, plContainerWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plExposedParametersAttribute, plContainerWidgetAttribute);
 
 public:
   plExposedParametersAttribute() = default;
@@ -314,16 +313,16 @@ private:
 /// The default values are retrieved from the asset meta data of the currently set asset on that property.
 ///
 /// Usage:
-/// PLASMA_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("Skeleton")),
+/// PL_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("Skeleton")),
 ///
 /// // Use this if the embedded class m_SkeletonMetaData is of type plSkeletonMetaData.
-/// PLASMA_MEMBER_PROPERTY("SkeletonMetaData", m_SkeletonMetaData)->AddAttributes(new plDynamicDefaultValueAttribute("Skeleton", "plSkeletonMetaData")),
+/// PL_MEMBER_PROPERTY("SkeletonMetaData", m_SkeletonMetaData)->AddAttributes(new plDynamicDefaultValueAttribute("Skeleton", "plSkeletonMetaData")),
 ///
 /// // Use this if you don't want embed the entire meta object but just some container of it. In this case the LocalBones container must match in type to the property 'BonesArrayNameInMetaData' in the meta data type 'plSkeletonMetaData'.
-/// PLASMA_MAP_MEMBER_PROPERTY("LocalBones", m_Bones)->AddAttributes(new plDynamicDefaultValueAttribute("Skeleton", "plSkeletonMetaData", "BonesArrayNameInMetaData")),
-class PLASMA_FOUNDATION_DLL plDynamicDefaultValueAttribute : public plTypeWidgetAttribute
+/// PL_MAP_MEMBER_PROPERTY("LocalBones", m_Bones)->AddAttributes(new plDynamicDefaultValueAttribute("Skeleton", "plSkeletonMetaData", "BonesArrayNameInMetaData")),
+class PL_FOUNDATION_DLL plDynamicDefaultValueAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicDefaultValueAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicDefaultValueAttribute, plTypeWidgetAttribute);
 
 public:
   plDynamicDefaultValueAttribute() = default;
@@ -347,9 +346,9 @@ private:
 
 
 /// \brief Sets the allowed actions on a container.
-class PLASMA_FOUNDATION_DLL plContainerAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plContainerAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plContainerAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plContainerAttribute, plPropertyAttribute);
 
 public:
   plContainerAttribute() = default;
@@ -386,7 +385,7 @@ private:
 /// ## Surface on hit prefab: **Package**
 /// * Transforming a surface is not affected if the prefab it spawns on impact changes. Only the reference is stored.
 /// * The set prefab does not show up in the thumbnail so it is not needed.
-/// * We do however need to package it or otherwise the runtime would fail to spawn the prefab on impact.
+/// * We do, however, need to package it or otherwise the runtime would fail to spawn the prefab on impact.
 ///
 /// As a rule of thumb (also the default for each):
 /// * plFileBrowserAttribute are mostly Transform and Thumbnail.
@@ -398,9 +397,9 @@ struct plDependencyFlags
   enum Enum
   {
     None = 0,              ///< The reference is not needed for anything in production. An example of this is editor references that are only used at edit time, e.g. a default animation clip for a skeleton.
-    Thumbnail = PLASMA_BIT(0), ///< This reference is a dependency to generating a thumbnail. The material references of a mesh for example.
-    Transform = PLASMA_BIT(1), ///< This reference is a dependency to transforming this asset. The input model of a mesh for example.
-    Package = PLASMA_BIT(2),   ///< This reference is needs to be packaged as it is used at runtime by this asset. All sounds or debris generated on impact of a surface are common examples of this.
+    Thumbnail = PL_BIT(0), ///< This reference is a dependency to generating a thumbnail. The material references of a mesh for example.
+    Transform = PL_BIT(1), ///< This reference is a dependency to transforming this asset. The input model of a mesh for example.
+    Package = PL_BIT(2),   ///< This reference needs to be packaged as it is used at runtime by this asset. All sounds or debris generated on impact of a surface are common examples of this.
     Default = 0
   };
 
@@ -412,40 +411,38 @@ struct plDependencyFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plDependencyFlags);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plDependencyFlags);
+PL_DECLARE_FLAGS_OPERATORS(plDependencyFlags);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plDependencyFlags);
 
 /// \brief A property attribute that indicates that the string property should display a file browsing button.
 ///
 /// Allows to specify the title for the browse dialog and the allowed file types.
-/// Usage: PLASMA_MEMBER_PROPERTY("File", m_sFilePath)->AddAttributes(new plFileBrowserAttribute("Choose a File", "*.txt")),
-class PLASMA_FOUNDATION_DLL plFileBrowserAttribute : public plTypeWidgetAttribute
+/// Usage: PL_MEMBER_PROPERTY("File", m_sFilePath)->AddAttributes(new plFileBrowserAttribute("Choose a File", "*.txt")),
+class PL_FOUNDATION_DLL plFileBrowserAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plFileBrowserAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plFileBrowserAttribute, plTypeWidgetAttribute);
 
 public:
   // Predefined common type filters
-  static constexpr const char* Meshes = "*.obj;*.fbx;*.gltf;*.glb";
-  static constexpr const char* MeshesWithAnimations = "*.fbx;*.gltf;*.glb";
-  static constexpr const char* ImagesLdrOnly = "*.dds;*.tga;*.png;*.jpg;*.jpeg";
-  static constexpr const char* ImagesHdrOnly = "*.hdr;*.exr";
-  static constexpr const char* ImagesLdrAndHdr = "*.dds;*.tga;*.png;*.jpg;*.jpeg;*.hdr;*.exr";
-  static constexpr const char* CubemapsLdrAndHdr = "*.dds;*.hdr";
+  static constexpr plStringView Meshes = "*.obj;*.fbx;*.gltf;*.glb"_plsv;
+  static constexpr plStringView MeshesWithAnimations = "*.fbx;*.gltf;*.glb"_plsv;
+  static constexpr plStringView ImagesLdrOnly = "*.dds;*.tga;*.png;*.jpg;*.jpeg"_plsv;
+  static constexpr plStringView ImagesHdrOnly = "*.hdr;*.exr"_plsv;
+  static constexpr plStringView ImagesLdrAndHdr = "*.dds;*.tga;*.png;*.jpg;*.jpeg;*.hdr;*.exr"_plsv;
+  static constexpr plStringView CubemapsLdrAndHdr = "*.dds;*.hdr"_plsv;
 
   plFileBrowserAttribute() = default;
-  plFileBrowserAttribute(const char* szDialogTitle,
-    const char* szTypeFilter, const char* szCustomAction = nullptr,
-    plBitflags<plDependencyFlags> depencyFlags = plDependencyFlags::Transform | plDependencyFlags::Thumbnail)
-    : m_sDialogTitle(szDialogTitle)
-    , m_sTypeFilter(szTypeFilter)
-    , m_sCustomAction(szCustomAction)
+  plFileBrowserAttribute(plStringView sDialogTitle, plStringView sTypeFilter, plStringView sCustomAction = {}, plBitflags<plDependencyFlags> depencyFlags = plDependencyFlags::Transform | plDependencyFlags::Thumbnail)
+    : m_sDialogTitle(sDialogTitle)
+    , m_sTypeFilter(sTypeFilter)
+    , m_sCustomAction(sCustomAction)
     , m_DependencyFlags(depencyFlags)
   {
   }
 
-  const char* GetDialogTitle() const { return m_sDialogTitle; }
-  const char* GetTypeFilter() const { return m_sTypeFilter; }
-  const char* GetCustomAction() const { return m_sCustomAction; }
+  plStringView GetDialogTitle() const { return m_sDialogTitle; }
+  plStringView GetTypeFilter() const { return m_sTypeFilter; }
+  plStringView GetCustomAction() const { return m_sCustomAction; }
   plBitflags<plDependencyFlags> GetDependencyFlags() const { return m_DependencyFlags; }
 
 private:
@@ -458,10 +455,10 @@ private:
 /// \brief A property attribute that indicates that the string property is actually an asset reference.
 ///
 /// Allows to specify the allowed asset types, separated with ;
-/// Usage: PLASMA_MEMBER_PROPERTY("Texture", m_sTexture)->AddAttributes(new plAssetBrowserAttribute("Texture 2D;Texture 3D")),
-class PLASMA_FOUNDATION_DLL plAssetBrowserAttribute : public plTypeWidgetAttribute
+/// Usage: PL_MEMBER_PROPERTY("Texture", m_sTexture)->AddAttributes(new plAssetBrowserAttribute("Texture 2D;Texture 3D")),
+class PL_FOUNDATION_DLL plAssetBrowserAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetBrowserAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetBrowserAttribute, plTypeWidgetAttribute);
 
 public:
   plAssetBrowserAttribute() = default;
@@ -488,9 +485,9 @@ private:
 /// \brief Can be used on integer properties to display them as enums. The valid enum values and their names may change at runtime.
 ///
 /// See plDynamicEnum for details.
-class PLASMA_FOUNDATION_DLL plDynamicEnumAttribute : public plTypeWidgetAttribute
+class PL_FOUNDATION_DLL plDynamicEnumAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicEnumAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicEnumAttribute, plTypeWidgetAttribute);
 
 public:
   plDynamicEnumAttribute() = default;
@@ -508,9 +505,9 @@ private:
 /// \brief Can be used on string properties to display them as enums. The valid enum values and their names may change at runtime.
 ///
 /// See plDynamicStringEnum for details.
-class PLASMA_FOUNDATION_DLL plDynamicStringEnumAttribute : public plTypeWidgetAttribute
+class PL_FOUNDATION_DLL plDynamicStringEnumAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicStringEnumAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicStringEnumAttribute, plTypeWidgetAttribute);
 
 public:
   plDynamicStringEnumAttribute() = default;
@@ -526,9 +523,9 @@ private:
 };
 
 /// \brief Can be used on integer properties to display them as bitflags. The valid bitflags and their names may change at runtime.
-class PLASMA_FOUNDATION_DLL plDynamicBitflagsAttribute : public plTypeWidgetAttribute
+class PL_FOUNDATION_DLL plDynamicBitflagsAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicBitflagsAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicBitflagsAttribute, plTypeWidgetAttribute);
 
 public:
   plDynamicBitflagsAttribute() = default;
@@ -545,9 +542,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plManipulatorAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plManipulatorAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plManipulatorAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plManipulatorAttribute, plPropertyAttribute);
 
 public:
   plManipulatorAttribute(const char* szProperty1, const char* szProperty2 = nullptr, const char* szProperty3 = nullptr,
@@ -563,9 +560,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plSphereManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plSphereManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSphereManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plSphereManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plSphereManipulatorAttribute();
@@ -578,9 +575,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plCapsuleManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plCapsuleManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCapsuleManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plCapsuleManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plCapsuleManipulatorAttribute();
@@ -593,9 +590,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plBoxManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plBoxManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoxManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plBoxManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plBoxManipulatorAttribute();
@@ -611,9 +608,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plNonUniformBoxManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plNonUniformBoxManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plNonUniformBoxManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plNonUniformBoxManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plNonUniformBoxManipulatorAttribute();
@@ -637,9 +634,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plConeLengthManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plConeLengthManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConeLengthManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plConeLengthManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plConeLengthManipulatorAttribute();
@@ -650,9 +647,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plConeAngleManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plConeAngleManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConeAngleManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plConeAngleManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plConeAngleManipulatorAttribute();
@@ -666,9 +663,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plTransformManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plTransformManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTransformManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plTransformManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plTransformManipulatorAttribute();
@@ -683,9 +680,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plBoneManipulatorAttribute : public plManipulatorAttribute
+class PL_FOUNDATION_DLL plBoneManipulatorAttribute : public plManipulatorAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoneManipulatorAttribute, plManipulatorAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plBoneManipulatorAttribute, plManipulatorAttribute);
 
 public:
   plBoneManipulatorAttribute();
@@ -703,12 +700,12 @@ struct plVisualizerAnchor
   enum Enum
   {
     Center = 0,
-    PosX = PLASMA_BIT(0),
-    NegX = PLASMA_BIT(1),
-    PosY = PLASMA_BIT(2),
-    NegY = PLASMA_BIT(3),
-    PosZ = PLASMA_BIT(4),
-    NegZ = PLASMA_BIT(5),
+    PosX = PL_BIT(0),
+    NegX = PL_BIT(1),
+    PosY = PL_BIT(2),
+    NegY = PL_BIT(3),
+    PosZ = PL_BIT(4),
+    NegZ = PL_BIT(5),
 
     Default = Center
   };
@@ -724,13 +721,13 @@ struct plVisualizerAnchor
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plVisualizerAnchor);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plVisualizerAnchor);
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plVisualizerAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plVisualizerAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVisualizerAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plVisualizerAttribute, plPropertyAttribute);
 
 public:
   plVisualizerAttribute(const char* szProperty1, const char* szProperty2 = nullptr, const char* szProperty3 = nullptr,
@@ -746,13 +743,13 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plBoxVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plBoxVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoxVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plBoxVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plBoxVisualizerAttribute();
-  plBoxVisualizerAttribute(const char* szSizeProperty, float fSizeScale = 1.0f, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr, const char* szRotationProperty = nullptr);
+  plBoxVisualizerAttribute(const char* szSizeProperty, float fSizeScale = 1.0f, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr, const char* szRotationProperty = nullptr);
 
   const plUntrackedString& GetSizeProperty() const { return m_sProperty1; }
   const plUntrackedString& GetColorProperty() const { return m_sProperty2; }
@@ -766,13 +763,13 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plSphereVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plSphereVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSphereVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plSphereVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plSphereVisualizerAttribute();
-  plSphereVisualizerAttribute(const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
+  plSphereVisualizerAttribute(const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
 
   const plUntrackedString& GetRadiusProperty() const { return m_sProperty1; }
   const plUntrackedString& GetColorProperty() const { return m_sProperty2; }
@@ -785,9 +782,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plCapsuleVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plCapsuleVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCapsuleVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plCapsuleVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plCapsuleVisualizerAttribute();
@@ -802,14 +799,14 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plCylinderVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plCylinderVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCylinderVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plCylinderVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plCylinderVisualizerAttribute();
-  plCylinderVisualizerAttribute(plEnum<plBasisAxis> axis, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
-  plCylinderVisualizerAttribute(const char* szAxisProperty, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::ZeroVector(), const char* szOffsetProperty = nullptr);
+  plCylinderVisualizerAttribute(plEnum<plBasisAxis> axis, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
+  plCylinderVisualizerAttribute(const char* szAxisProperty, const char* szHeightProperty, const char* szRadiusProperty, const plColor& fixedColor = plColorScheme::LightUI(plColorScheme::Grape), const char* szColorProperty = nullptr, plBitflags<plVisualizerAnchor> anchor = plVisualizerAnchor::Center, plVec3 vOffsetOrScale = plVec3::MakeZero(), const char* szOffsetProperty = nullptr);
 
   const plUntrackedString& GetAxisProperty() const { return m_sProperty5; }
   const plUntrackedString& GetHeightProperty() const { return m_sProperty1; }
@@ -824,9 +821,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plDirectionVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plDirectionVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDirectionVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDirectionVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plDirectionVisualizerAttribute();
@@ -844,9 +841,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plConeVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plConeVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConeVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plConeVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plConeVisualizerAttribute();
@@ -870,9 +867,9 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_FOUNDATION_DLL plCameraVisualizerAttribute : public plVisualizerAttribute
+class PL_FOUNDATION_DLL plCameraVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCameraVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plCameraVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plCameraVisualizerAttribute();
@@ -909,7 +906,7 @@ const Type* plAbstractProperty::GetAttributeByType() const
 {
   for (const auto* pAttr : m_Attributes)
   {
-    if (pAttr->GetDynamicRTTI()->IsDerivedFrom<Type>())
+    if (pAttr && pAttr->GetDynamicRTTI()->IsDerivedFrom<Type>())
       return static_cast<const Type*>(pAttr);
   }
   return nullptr;
@@ -918,9 +915,9 @@ const Type* plAbstractProperty::GetAttributeByType() const
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief A property attribute that specifies the max size of an array. If it is reached, no further elemets are allowed to be added.
-class PLASMA_FOUNDATION_DLL plMaxArraySizeAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plMaxArraySizeAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMaxArraySizeAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plMaxArraySizeAttribute, plPropertyAttribute);
 
 public:
   plMaxArraySizeAttribute() = default;
@@ -937,9 +934,9 @@ private:
 /// \brief If this attribute is set, the UI is encouraged to prevent the user from creating duplicates of the same thing.
 ///
 /// For arrays of objects this means that multiple objects of the same type are not allowed.
-class PLASMA_FOUNDATION_DLL plPreventDuplicatesAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plPreventDuplicatesAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPreventDuplicatesAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plPreventDuplicatesAttribute, plPropertyAttribute);
 
 public:
   plPreventDuplicatesAttribute() = default;
@@ -948,15 +945,15 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief Attribute for types that should not be exposed to the scripting framework
-class PLASMA_FOUNDATION_DLL plExcludeFromScript : public plPropertyAttribute
+class PL_FOUNDATION_DLL plExcludeFromScript : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExcludeFromScript, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plExcludeFromScript, plPropertyAttribute);
 };
 
 /// \brief Attribute to mark a function up to be exposed to the scripting system. Arguments specify the names of the function parameters.
-class PLASMA_FOUNDATION_DLL plScriptableFunctionAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plScriptableFunctionAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScriptableFunctionAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plScriptableFunctionAttribute, plPropertyAttribute);
 
   enum ArgType : plUInt8
   {
@@ -979,9 +976,9 @@ private:
 };
 
 /// \brief Wrapper Attribute to add an attribute to a function argument
-class PLASMA_FOUNDATION_DLL plFunctionArgumentAttributes : public plPropertyAttribute
+class PL_FOUNDATION_DLL plFunctionArgumentAttributes : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plFunctionArgumentAttributes, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plFunctionArgumentAttributes, plPropertyAttribute);
 
   plFunctionArgumentAttributes() = default;
   plFunctionArgumentAttributes(plUInt32 uiArgIndex, const plPropertyAttribute* pAttribute1, const plPropertyAttribute* pAttribute2 = nullptr, const plPropertyAttribute* pAttribute3 = nullptr, const plPropertyAttribute* pAttribute4 = nullptr);
@@ -995,9 +992,9 @@ private:
 };
 
 /// \brief Used to mark an array or (unsigned)int property as source for dynamic pin generation on nodes
-class PLASMA_FOUNDATION_DLL plDynamicPinAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plDynamicPinAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDynamicPinAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plDynamicPinAttribute, plPropertyAttribute);
 
 public:
   plDynamicPinAttribute() = default;
@@ -1017,9 +1014,9 @@ private:
 /// Once a component is added to a scene with this attribute, the named long op will appear in the UI and can be executed.
 ///
 /// The automatic registration is done by plLongOpsAdapter
-class PLASMA_FOUNDATION_DLL plLongOpAttribute : public plPropertyAttribute
+class PL_FOUNDATION_DLL plLongOpAttribute : public plPropertyAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLongOpAttribute, plPropertyAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plLongOpAttribute, plPropertyAttribute);
 
 public:
   plLongOpAttribute() = default;
@@ -1034,9 +1031,9 @@ public:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief A property attribute that indicates that the string property is actually a game object reference.
-class PLASMA_FOUNDATION_DLL plGameObjectReferenceAttribute : public plTypeWidgetAttribute
+class PL_FOUNDATION_DLL plGameObjectReferenceAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectReferenceAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectReferenceAttribute, plTypeWidgetAttribute);
 
 public:
   plGameObjectReferenceAttribute() = default;
@@ -1044,11 +1041,35 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
+/// \brief Displays the value range as an image, allowing users to pick a value like on a slider.
+///
+/// This attribute always has to be combined with an plClampValueAttribute to define the min and max value range.
+/// The constructor takes the name of an image generator. The generator is used to build the QImage used for the slider background.
+///
+/// Image generators are registered through plQtImageSliderWidget::s_ImageGenerators. Search the codebase for that variable
+/// to determine which types of image generators are available.
+/// You can register custom generators as well.
+class PL_FOUNDATION_DLL plImageSliderUiAttribute : public plTypeWidgetAttribute
+{
+  PL_ADD_DYNAMIC_REFLECTION(plImageSliderUiAttribute, plTypeWidgetAttribute);
+
+public:
+  plImageSliderUiAttribute() = default;
+  plImageSliderUiAttribute(const char* szImageGenerator)
+  {
+    m_sImageGenerator = szImageGenerator;
+  }
+
+  plUntrackedString m_sImageGenerator;
+};
+
+//////////////////////////////////////////////////////////////////////////
+
 /// \brief A property attribute that indicates the property should be left aligned with the next one on its right
 /// \note Do not use on a single property or the last property of a list, as it would cause bad alignment
-class PLASMA_FOUNDATION_DLL plGroupNextAttribute : public plTypeWidgetAttribute
+class PL_FOUNDATION_DLL plGroupNextAttribute : public plTypeWidgetAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGroupNextAttribute, plTypeWidgetAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plGroupNextAttribute, plTypeWidgetAttribute);
 
 public:
   plGroupNextAttribute() = default;

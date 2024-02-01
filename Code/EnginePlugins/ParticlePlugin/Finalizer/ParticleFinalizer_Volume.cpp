@@ -11,11 +11,11 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_Volume, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_Volume>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_Volume, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_Volume>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_Volume, 1, plRTTIDefaultAllocator<plParticleFinalizer_Volume>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_Volume, 1, plRTTIDefaultAllocator<plParticleFinalizer_Volume>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plParticleFinalizerFactory_Volume::plParticleFinalizerFactory_Volume() = default;
@@ -50,12 +50,11 @@ void plParticleFinalizer_Volume::Process(plUInt64 uiNumElements)
   if (uiNumElements == 0)
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Volume");
+  PL_PROFILE_SCOPE("PFX: Volume");
 
   const plSimdVec4f* pPosition = m_pStreamPosition->GetData<plSimdVec4f>();
 
-  plSimdBBoxSphere volume;
-  volume.SetFromPoints(pPosition, static_cast<plUInt32>(uiNumElements));
+  const plSimdBBoxSphere volume = plSimdBBoxSphere::MakeFromPoints(pPosition, static_cast<plUInt32>(uiNumElements));
 
   float fMaxSize = 0;
 
@@ -87,3 +86,7 @@ void plParticleFinalizer_Volume::Process(plUInt64 uiNumElements)
 
   GetOwnerSystem()->SetBoundingVolume(plSimdConversion::ToBBoxSphere(volume), fMaxSize);
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer_Volume);
+

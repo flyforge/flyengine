@@ -1,19 +1,19 @@
 #pragma once
 
 template <class Container>
-PLASMA_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetBitInt(plUInt32 uiBitIndex) const
+PL_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetBitInt(plUInt32 uiBitIndex) const
 {
   return (uiBitIndex >> 5); // div 32
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetBitMask(plUInt32 uiBitIndex) const
+PL_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetBitMask(plUInt32 uiBitIndex) const
 {
   return 1 << (uiBitIndex & 0x1F); // modulo 32, shifted to bit position
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plBitfield<Container>::GetCount() const
 {
   return m_uiCount;
 }
@@ -50,7 +50,7 @@ void plBitfield<Container>::SetCount(plUInt32 uiBitCount, bool bSetNew)
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE bool plBitfield<Container>::IsEmpty() const
+PL_ALWAYS_INLINE bool plBitfield<Container>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
@@ -61,7 +61,7 @@ bool plBitfield<Container>::IsAnyBitSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 ui
   if (m_uiCount == 0 || uiNumBits == 0)
     return false;
 
-  PLASMA_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
 
   const plUInt32 uiLastBit = plMath::Min<plUInt32>(uiFirstBit + uiNumBits, m_uiCount - 1);
 
@@ -108,7 +108,7 @@ bool plBitfield<Container>::IsAnyBitSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 ui
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE bool plBitfield<Container>::IsNoBitSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 uiLastBit /*= 0xFFFFFFFF*/) const
+PL_ALWAYS_INLINE bool plBitfield<Container>::IsNoBitSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 uiLastBit /*= 0xFFFFFFFF*/) const
 {
   return !IsAnyBitSet(uiFirstBit, uiLastBit);
 }
@@ -119,7 +119,7 @@ bool plBitfield<Container>::AreAllBitsSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 
   if (m_uiCount == 0 || uiNumBits == 0)
     return false;
 
-  PLASMA_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
 
   const plUInt32 uiLastBit = plMath::Min<plUInt32>(uiFirstBit + uiNumBits, m_uiCount - 1);
 
@@ -166,7 +166,7 @@ bool plBitfield<Container>::AreAllBitsSet(plUInt32 uiFirstBit /*= 0*/, plUInt32 
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE void plBitfield<Container>::Clear()
+PL_ALWAYS_INLINE void plBitfield<Container>::Clear()
 {
   m_uiCount = 0;
   m_Container.Clear();
@@ -175,7 +175,7 @@ PLASMA_ALWAYS_INLINE void plBitfield<Container>::Clear()
 template <class Container>
 void plBitfield<Container>::SetBit(plUInt32 uiBit)
 {
-  PLASMA_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
 
   m_Container[GetBitInt(uiBit)] |= GetBitMask(uiBit);
 }
@@ -183,13 +183,13 @@ void plBitfield<Container>::SetBit(plUInt32 uiBit)
 template <class Container>
 void plBitfield<Container>::ClearBit(plUInt32 uiBit)
 {
-  PLASMA_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
 
   m_Container[GetBitInt(uiBit)] &= ~GetBitMask(uiBit);
 }
 
 template <class Container>
-PLASMA_ALWAYS_INLINE void plBitfield<Container>::SetBitValue(plUInt32 uiBit, bool bValue)
+PL_ALWAYS_INLINE void plBitfield<Container>::SetBitValue(plUInt32 uiBit, bool bValue)
 {
   if (bValue)
   {
@@ -204,7 +204,7 @@ PLASMA_ALWAYS_INLINE void plBitfield<Container>::SetBitValue(plUInt32 uiBit, boo
 template <class Container>
 bool plBitfield<Container>::IsBitSet(plUInt32 uiBit) const
 {
-  PLASMA_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, m_uiCount);
 
   return (m_Container[GetBitInt(uiBit)] & GetBitMask(uiBit)) != 0;
 }
@@ -229,7 +229,7 @@ void plBitfield<Container>::SetBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBits)
   if (m_uiCount == 0 || uiNumBits == 0)
     return;
 
-  PLASMA_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
 
   const plUInt32 uiLastBit = uiFirstBit + uiNumBits - 1;
 
@@ -267,7 +267,7 @@ void plBitfield<Container>::ClearBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBit
   if (m_uiCount == 0 || uiNumBits == 0)
     return;
 
-  PLASMA_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
+  PL_ASSERT_DEBUG(uiFirstBit < m_uiCount, "Cannot access bit {0}, the bitfield only has {1} bits.", uiFirstBit, m_uiCount);
 
   const plUInt32 uiLastBit = uiFirstBit + uiNumBits - 1;
 
@@ -304,25 +304,25 @@ void plBitfield<Container>::ClearBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBit
 //////////////////////////////////////////////////////////////////////////
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plStaticBitfield<T>::plStaticBitfield()
+PL_ALWAYS_INLINE plStaticBitfield<T>::plStaticBitfield()
 {
   static_assert(std::is_unsigned<T>::value, "Storage type must be unsigned");
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plStaticBitfield<T> plStaticBitfield<T>::FromMask(StorageType bits)
+PL_ALWAYS_INLINE plStaticBitfield<T> plStaticBitfield<T>::MakeFromMask(StorageType bits)
 {
   return plStaticBitfield<T>(bits);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plStaticBitfield<T>::IsAnyBitSet() const
+PL_ALWAYS_INLINE bool plStaticBitfield<T>::IsAnyBitSet() const
 {
   return m_Storage != 0;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plStaticBitfield<T>::IsNoBitSet() const
+PL_ALWAYS_INLINE bool plStaticBitfield<T>::IsNoBitSet() const
 {
   return m_Storage == 0;
 }
@@ -337,57 +337,72 @@ bool plStaticBitfield<T>::AreAllBitsSet() const
 template <typename T>
 void plStaticBitfield<T>::ClearBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBits)
 {
-  PLASMA_ASSERT_DEBUG(uiFirstBit < GetNumBits(), "Cannot access first bit {0}, the bitfield only has {1} bits.", uiFirstBit, GetNumBits());
+  PL_ASSERT_DEBUG(uiFirstBit < GetStorageTypeBitCount(), "Cannot access first bit {0}, the bitfield only has {1} bits.", uiFirstBit, GetStorageTypeBitCount());
 
-  for (plUInt32 i = 0; i < uiNumBits; ++i)
-  {
-    const plUInt32 uiBit = uiFirstBit + i;
-    m_Storage &= ~(static_cast<T>(1u) << uiBit);
-  }
+  T mask = (uiNumBits / 8 >= sizeof(T)) ? (~static_cast<T>(0)) : ((static_cast<T>(1) << uiNumBits) - 1);
+  mask <<= uiFirstBit;
+  mask = ~mask;
+  m_Storage &= mask;
 }
 
 template <typename T>
 void plStaticBitfield<T>::SetBitRange(plUInt32 uiFirstBit, plUInt32 uiNumBits)
 {
-  PLASMA_ASSERT_DEBUG(uiFirstBit < GetNumBits(), "Cannot access first bit {0}, the bitfield only has {1} bits.", uiFirstBit, GetNumBits());
+  PL_ASSERT_DEBUG(uiFirstBit < GetStorageTypeBitCount(), "Cannot access first bit {0}, the bitfield only has {1} bits.", uiFirstBit, GetStorageTypeBitCount());
 
-  for (plUInt32 i = 0; i < uiNumBits; ++i)
-  {
-    const plUInt32 uiBit = uiFirstBit + i;
-    m_Storage |= static_cast<T>(1u) << uiBit;
-  }
+  T mask = (uiNumBits / 8 >= sizeof(T)) ? (~static_cast<T>(0)) : ((static_cast<T>(1) << uiNumBits) - 1);
+  mask <<= uiFirstBit;
+  m_Storage |= mask;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::SetAllBits()
+PL_ALWAYS_INLINE plUInt32 plStaticBitfield<T>::GetNumBitsSet() const
+{
+  return plMath::CountBits(m_Storage);
+}
+
+template <typename T>
+PL_ALWAYS_INLINE plUInt32 plStaticBitfield<T>::GetHighestBitSet() const
+{
+  return m_Storage == 0 ? GetStorageTypeBitCount() : plMath::FirstBitHigh(m_Storage);
+}
+
+template <typename T>
+PL_ALWAYS_INLINE plUInt32 plStaticBitfield<T>::GetLowestBitSet() const
+{
+  return m_Storage == 0 ? GetStorageTypeBitCount() : plMath::FirstBitLow(m_Storage);
+}
+
+template <typename T>
+PL_ALWAYS_INLINE void plStaticBitfield<T>::SetAllBits()
 {
   m_Storage = plMath::MaxValue<T>(); // possible because we assert that T is unsigned
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::ClearAllBits()
+PL_ALWAYS_INLINE void plStaticBitfield<T>::ClearAllBits()
 {
   m_Storage = 0;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plStaticBitfield<T>::IsBitSet(plUInt32 uiBit) const
+PL_ALWAYS_INLINE bool plStaticBitfield<T>::IsBitSet(plUInt32 uiBit) const
 {
-  PLASMA_ASSERT_DEBUG(uiBit < GetNumBits(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetNumBits());
+  PL_ASSERT_DEBUG(uiBit < GetStorageTypeBitCount(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetStorageTypeBitCount());
 
   return (m_Storage & (static_cast<T>(1u) << uiBit)) != 0;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::ClearBit(plUInt32 uiBit)
+PL_ALWAYS_INLINE void plStaticBitfield<T>::ClearBit(plUInt32 uiBit)
 {
-  PLASMA_ASSERT_DEBUG(uiBit < GetNumBits(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetNumBits());
+  PL_ASSERT_DEBUG(uiBit < GetStorageTypeBitCount(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetStorageTypeBitCount());
 
   m_Storage &= ~(static_cast<T>(1u) << uiBit);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::SetBitValue(plUInt32 uiBit, bool bValue)
+PL_ALWAYS_INLINE void plStaticBitfield<T>::SetBitValue(plUInt32 uiBit, bool bValue)
 {
   if (bValue)
   {
@@ -400,21 +415,21 @@ PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::SetBitValue(plUInt32 uiBit, bool 
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::SetBit(plUInt32 uiBit)
+PL_ALWAYS_INLINE void plStaticBitfield<T>::SetBit(plUInt32 uiBit)
 {
-  PLASMA_ASSERT_DEBUG(uiBit < GetNumBits(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetNumBits());
+  PL_ASSERT_DEBUG(uiBit < GetStorageTypeBitCount(), "Cannot access bit {0}, the bitfield only has {1} bits.", uiBit, GetStorageTypeBitCount());
 
   m_Storage |= static_cast<T>(1u) << uiBit;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plStaticBitfield<T>::SetValue(T value)
+PL_ALWAYS_INLINE void plStaticBitfield<T>::SetValue(T value)
 {
   m_Storage = value;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T plStaticBitfield<T>::GetValue() const
+PL_ALWAYS_INLINE T plStaticBitfield<T>::GetValue() const
 {
   return m_Storage;
 }

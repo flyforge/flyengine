@@ -6,11 +6,11 @@ class plColorGradient;
 
 class plColorControlPoint : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plColorControlPoint, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plColorControlPoint, plReflectedClass);
 
 public:
-  plTime GetTickAsTime() const { return plTime::Seconds(m_iTick / 4800.0); }
-  void SetTickFromTime(plTime time, plInt64 fps);
+  plTime GetTickAsTime() const { return plTime::MakeFromSeconds(m_iTick / 4800.0); }
+  void SetTickFromTime(plTime time, plInt64 iFps);
 
   // double m_fPositionX;
   plInt64 m_iTick; // 4800 ticks per second
@@ -21,11 +21,11 @@ public:
 
 class plAlphaControlPoint : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAlphaControlPoint, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plAlphaControlPoint, plReflectedClass);
 
 public:
-  plTime GetTickAsTime() const { return plTime::Seconds(m_iTick / 4800.0); }
-  void SetTickFromTime(plTime time, plInt64 fps);
+  plTime GetTickAsTime() const { return plTime::MakeFromSeconds(m_iTick / 4800.0); }
+  void SetTickFromTime(plTime time, plInt64 iFps);
 
   // double m_fPositionX;
   plInt64 m_iTick; // 4800 ticks per second
@@ -34,11 +34,11 @@ public:
 
 class plIntensityControlPoint : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plIntensityControlPoint, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plIntensityControlPoint, plReflectedClass);
 
 public:
-  plTime GetTickAsTime() const { return plTime::Seconds(m_iTick / 4800.0); }
-  void SetTickFromTime(plTime time, plInt64 fps);
+  plTime GetTickAsTime() const { return plTime::MakeFromSeconds(m_iTick / 4800.0); }
+  void SetTickFromTime(plTime time, plInt64 iFps);
 
   // double m_fPositionX;
   plInt64 m_iTick; // 4800 ticks per second
@@ -47,7 +47,7 @@ public:
 
 class plColorGradientAssetData : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plColorGradientAssetData, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plColorGradientAssetData, plReflectedClass);
 
 public:
   plDynamicArray<plColorControlPoint> m_ColorCPs;
@@ -58,21 +58,21 @@ public:
 
   /// \brief Fills out the plColorGradient structure with an exact copy of the data in the asset.
   /// Does NOT yet sort the control points, so before evaluating the color gradient, that must be called manually.
-  void FillGradientData(plColorGradient& out_Result) const;
+  void FillGradientData(plColorGradient& out_result) const;
   plColor Evaluate(plInt64 iTick) const;
 };
 
 class plColorGradientAssetDocument : public plSimpleAssetDocument<plColorGradientAssetData>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plColorGradientAssetDocument, plSimpleAssetDocument<plColorGradientAssetData>);
+  PL_ADD_DYNAMIC_REFLECTION(plColorGradientAssetDocument, plSimpleAssetDocument<plColorGradientAssetData>);
 
 public:
-  plColorGradientAssetDocument(const char* szDocumentPath);
+  plColorGradientAssetDocument(plStringView sDocumentPath);
 
-  void WriteResource(plStreamWriter& stream) const;
+  void WriteResource(plStreamWriter& inout_stream) const;
 
 protected:
-  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile,
+  virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile,
     const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
   virtual plTransformStatus InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo) override;
 };

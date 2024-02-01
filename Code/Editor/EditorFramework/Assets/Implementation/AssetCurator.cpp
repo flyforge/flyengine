@@ -3,7 +3,7 @@
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorFramework/Assets/AssetDocument.h>
 #include <EditorFramework/Assets/AssetProcessor.h>
-#include <EditorFramework/Assets/AssetWatcher.h>
+#include <EditorFramework/Assets/AssetTableWriter.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/Configuration/SubSystem.h>
 #include <Foundation/IO/FileSystem/DeferredFileWriter.h>
@@ -12,30 +12,33 @@
 #include <Foundation/Serialization/ReflectionSerializer.h>
 #include <Foundation/Time/Stopwatch.h>
 #include <Foundation/Utilities/CommandLineOptions.h>
+#include <Foundation/Utilities/DGMLWriter.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
+#include <ToolsFoundation/FileSystem/FileSystemModel.h>
 
-#define PLASMA_CURATOR_CACHE_VERSION 2
-#define PLASMA_CURATOR_CACHE_FILE_VERSION 6
+#define PL_CURATOR_CACHE_VERSION 2      // Change this to delete and re-gen all asset caches.
+#define PL_CURATOR_CACHE_FILE_VERSION 8 // Change this if for cache format changes.
 
-PLASMA_IMPLEMENT_SINGLETON(plAssetCurator);
+PL_IMPLEMENT_SINGLETON(plAssetCurator);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, AssetCurator)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, AssetCurator)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "ToolsFoundation",
+  "FileSystemModel",
   "DocumentManager"
   END_SUBSYSTEM_DEPENDENCIES
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plAssetCurator);
+    PL_DEFAULT_NEW(plAssetCurator);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plAssetCurator* pDummy = plAssetCurator::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
   ON_HIGHLEVELSYSTEMS_STARTUP
@@ -46,48 +49,23 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, AssetCurator)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
-
-// clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plFileStatus, plNoBase, 3, plRTTIDefaultAllocator<plFileStatus>)
-{
-  PLASMA_BEGIN_PROPERTIES
-  {
-    PLASMA_MEMBER_PROPERTY("Timestamp", m_Timestamp),
-    PLASMA_MEMBER_PROPERTY("Hash", m_uiHash),
-    PLASMA_MEMBER_PROPERTY("AssetGuid", m_AssetGuid),
-  }
-  PLASMA_END_PROPERTIES;
-}
-PLASMA_END_STATIC_REFLECTED_TYPE;
-// clang-format on
-
-inline plStreamWriter& operator<<(plStreamWriter& Stream, const plFileStatus& uiValue)
-{
-  Stream.WriteBytes(&uiValue, sizeof(plFileStatus)).IgnoreResult();
-  return Stream;
-}
-
-inline plStreamReader& operator>>(plStreamReader& Stream, plFileStatus& uiValue)
-{
-  Stream.ReadBytes(&uiValue, sizeof(plFileStatus));
-  return Stream;
-}
 
 void plAssetInfo::Update(plUniquePtr<plAssetInfo>& rhs)
 {
-  m_ExistanceState = rhs->m_ExistanceState;
+  // Don't update the existance state, it is handled via plAssetCurator::SetAssetExistanceState
+  // m_ExistanceState = rhs->m_ExistanceState;
   m_TransformState = rhs->m_TransformState;
   m_pDocumentTypeDescriptor = rhs->m_pDocumentTypeDescriptor;
-  m_sAbsolutePath = std::move(rhs->m_sAbsolutePath);
-  m_sDataDirParentRelativePath = std::move(rhs->m_sDataDirParentRelativePath);
-  m_sDataDirRelativePath = plStringView(m_sDataDirParentRelativePath.FindSubString("/") + 1); // skip the initial folder
+  m_Path = std::move(rhs->m_Path);
   m_Info = std::move(rhs->m_Info);
+
   m_AssetHash = rhs->m_AssetHash;
   m_ThumbHash = rhs->m_ThumbHash;
-  m_MissingDependencies = rhs->m_MissingDependencies;
-  m_MissingReferences = rhs->m_MissingReferences;
+  m_MissingTransformDeps = std::move(rhs->m_MissingTransformDeps);
+  m_MissingThumbnailDeps = std::move(rhs->m_MissingThumbnailDeps);
+  m_CircularDependencies = std::move(rhs->m_CircularDependencies);
   // Don't copy m_SubAssets, we want to update it independently.
   rhs = nullptr;
 }
@@ -95,7 +73,7 @@ void plAssetInfo::Update(plUniquePtr<plAssetInfo>& rhs)
 plStringView plSubAsset::GetName() const
 {
   if (m_bMainAsset)
-    return plPathUtils::GetFileName(m_pAssetInfo->m_sDataDirParentRelativePath);
+    return plPathUtils::GetFileName(m_pAssetInfo->m_Path.GetDataDirParentRelativePath());
   else
     return m_Data.m_sName;
 }
@@ -103,7 +81,7 @@ plStringView plSubAsset::GetName() const
 
 void plSubAsset::GetSubAssetIdentifier(plStringBuilder& out_sPath) const
 {
-  out_sPath = m_pAssetInfo->m_sDataDirParentRelativePath;
+  out_sPath = m_pAssetInfo->m_Path.GetDataDirParentRelativePath();
 
   if (!m_bMainAsset)
   {
@@ -122,15 +100,15 @@ plAssetCurator::plAssetCurator()
 
 plAssetCurator::~plAssetCurator()
 {
-  PLASMA_ASSERT_DEBUG(m_KnownAssets.IsEmpty(), "Need to call Deinitialize before curator is deleted.");
+  PL_ASSERT_DEBUG(m_KnownAssets.IsEmpty(), "Need to call Deinitialize before curator is deleted.");
 }
 
 void plAssetCurator::StartInitialize(const plApplicationFileSystemConfig& cfg)
 {
-  PLASMA_PROFILE_SCOPE("StartInitialize");
+  PL_PROFILE_SCOPE("StartInitialize");
 
   {
-    PLASMA_LOG_BLOCK("SetupAssetProfiles");
+    PL_LOG_BLOCK("SetupAssetProfiles");
 
     SetupDefaultAssetProfiles();
     if (LoadAssetProfiles().Failed())
@@ -147,39 +125,50 @@ void plAssetCurator::StartInitialize(const plApplicationFileSystemConfig& cfg)
   m_bRunUpdateTask = true;
   m_FileSystemConfig = cfg;
 
-  m_DirDescriptor = plAssetDocumentTypeDescriptor();
-  m_DirDescriptor.m_sIcon = ":/AssetIcons/Directory.svg";
+  plFileSystemModel::GetSingleton()->m_FileChangedEvents.AddEventHandler(plMakeDelegate(&plAssetCurator::OnFileChangedEvent, this));
+  plFileSystemModel::FilesMap referencedFiles;
+  plFileSystemModel::FoldersMap referencedFolders;
+  LoadCaches(referencedFiles, referencedFolders);
+  // We postpone the plAssetFiles initialize to after we have loaded the cache. No events will be fired before initialize is called.
+  plFileSystemModel::GetSingleton()->Initialize(m_FileSystemConfig, std::move(referencedFiles), std::move(referencedFolders));
 
-  m_pWatcher = PLASMA_DEFAULT_NEW(plAssetWatcher, m_FileSystemConfig);
+  m_pAssetTableWriter = PL_DEFAULT_NEW(plAssetTableWriter, m_FileSystemConfig);
 
-  plSharedPtr<plDelegateTask<void>> pInitTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "AssetCuratorUpdateCache", [this]() {
-    PLASMA_LOCK(m_CuratorMutex);
-LoadCaches();
-
-    m_CuratorMutex.Unlock();
-    CheckFileSystem();
-    m_CuratorMutex.Lock();
-
-    // As we fired a AssetListReset in CheckFileSystem, set everything new to FileUnchanged or
-    // we would fire an added call for every asset.
-    for (auto it = m_KnownSubAssets.GetIterator(); it.IsValid(); ++it)
+  plSharedPtr<plDelegateTask<void>> pInitTask = PL_DEFAULT_NEW(plDelegateTask<void>, "AssetCuratorUpdateCache", plTaskNesting::Never, [this]()
     {
-      if (it.Value().m_ExistanceState == plAssetExistanceState::FileAdded)
-      {
-        it.Value().m_ExistanceState = plAssetExistanceState::FileUnchanged;
-      }
-    }
-    for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
-    {
-      if (it.Value()->m_ExistanceState == plAssetExistanceState::FileAdded)
-      {
-        it.Value()->m_ExistanceState = plAssetExistanceState::FileUnchanged;
-      }
-    }
+      PL_LOCK(m_CuratorMutex);
 
-    SaveCaches(); 
-  });
-  
+      m_CuratorMutex.Unlock();
+      CheckFileSystem();
+      m_CuratorMutex.Lock();
+
+      // As we fired a AssetListReset in CheckFileSystem, set everything new to FileUnchanged or
+      // we would fire an added call for every asset.
+      for (auto it = m_KnownSubAssets.GetIterator(); it.IsValid(); ++it)
+      {
+        if (it.Value().m_ExistanceState == plAssetExistanceState::FileAdded)
+        {
+          it.Value().m_ExistanceState = plAssetExistanceState::FileUnchanged;
+        }
+      }
+      for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
+      {
+        if (it.Value()->m_ExistanceState == plAssetExistanceState::FileAdded)
+        {
+          it.Value()->m_ExistanceState = plAssetExistanceState::FileUnchanged;
+        }
+      }
+
+      // Re-save caches after we made a full CheckFileSystem pass.
+      plFileSystemModel::FilesMap referencedFiles;
+      plFileSystemModel::FoldersMap referencedFolders;
+      plFileSystemModel* pFiles = plFileSystemModel::GetSingleton();
+      {
+        referencedFiles = *pFiles->GetFiles();
+        referencedFolders = *pFiles->GetFolders();
+      }
+      SaveCaches(referencedFiles, referencedFolders); //
+    });
   pInitTask->ConfigureTask("Initialize Curator", plTaskNesting::Never);
   m_InitializeCuratorTaskID = plTaskSystem::StartSingleTask(pInitTask, plTaskPriority::FileAccessHighPriority);
 
@@ -192,11 +181,11 @@ LoadCaches();
 
 void plAssetCurator::WaitForInitialize()
 {
-  PLASMA_PROFILE_SCOPE("WaitForInitialize");
+  PL_PROFILE_SCOPE("WaitForInitialize");
   plTaskSystem::WaitForGroup(m_InitializeCuratorTaskID);
   m_InitializeCuratorTaskID.Invalidate();
 
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
   ProcessAllCoreAssets();
   // Broadcast reset.
   {
@@ -209,33 +198,30 @@ void plAssetCurator::WaitForInitialize()
 
 void plAssetCurator::Deinitialize()
 {
-  PLASMA_PROFILE_SCOPE("Deinitialize");
+  PL_PROFILE_SCOPE("Deinitialize");
 
   SaveAssetProfiles().IgnoreResult();
 
   ShutdownUpdateTask();
   plAssetProcessor::GetSingleton()->StopProcessTask(true);
-  m_pWatcher = nullptr;
+  plFileSystemModel* pFiles = plFileSystemModel::GetSingleton();
+  plFileSystemModel::FilesMap referencedFiles;
+  plFileSystemModel::FoldersMap referencedFolders;
+  pFiles->Deinitialize(&referencedFiles, &referencedFolders);
+  SaveCaches(referencedFiles, referencedFolders);
 
-  SaveCaches();
+  pFiles->m_FileChangedEvents.RemoveEventHandler(plMakeDelegate(&plAssetCurator::OnFileChangedEvent, this));
+  pFiles = nullptr;
+  m_pAssetTableWriter = nullptr;
 
   {
-    m_ReferencedFiles.Clear();
-
     for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
     {
-      PLASMA_DEFAULT_DELETE(it.Value());
+      PL_DEFAULT_DELETE(it.Value());
     }
-    for (auto it = m_KnownDirectories.GetIterator(); it.IsValid(); ++it)
-    {
-      PLASMA_DEFAULT_DELETE(it.Value());
-    }
-
-    m_RemovedFolders.Clear();
     m_KnownSubAssets.Clear();
     m_KnownAssets.Clear();
     m_TransformStateStale.Clear();
-    m_KnownDirectories.Clear();
 
     for (int i = 0; i < plAssetInfo::TransformState::COUNT; i++)
     {
@@ -267,10 +253,9 @@ void plAssetCurator::MainThreadTick(bool bTopLevel)
 
   bReentry = true;
 
-  if (m_pWatcher)
-    m_pWatcher->MainThreadTick();
+  plFileSystemModel::GetSingleton()->MainThreadTick();
 
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
   plHybridArray<plAssetInfo*, 32> deletedAssets;
   for (const plUuid& guid : m_SubAssetChanged)
   {
@@ -290,19 +275,39 @@ void plAssetCurator::MainThreadTick(bool bTopLevel)
         e.m_Type = plAssetCuratorEvent::Type::AssetAdded;
         m_Events.Broadcast(e);
       }
+      else if (pInfo->m_ExistanceState == plAssetExistanceState::FileMoved)
+      {
+        if (pInfo->m_bMainAsset)
+        {
+          // Make sure the document knows that its underlying file was renamed.
+          if (plDocument* pDoc = plDocumentManager::GetDocumentByGuid(guid))
+            pDoc->DocumentRenamed(pInfo->m_pAssetInfo->m_Path);
+        }
+
+        pInfo->m_ExistanceState = plAssetExistanceState::FileUnchanged;
+        if (pInfo->m_bMainAsset)
+          pInfo->m_pAssetInfo->m_ExistanceState = plAssetExistanceState::FileUnchanged;
+        e.m_Type = plAssetCuratorEvent::Type::AssetMoved;
+        m_Events.Broadcast(e);
+      }
       else if (pInfo->m_ExistanceState == plAssetExistanceState::FileRemoved)
       {
-        e.m_Type = plAssetCuratorEvent::Type::AssetRemoved;
-        m_Events.Broadcast(e);
-        if (!pInfo->m_bIsDir)
+        // this is a bit tricky:
+        // when the document is deleted on disk, it would be nicer not to close it (discarding modifications!)
+        // instead we could set it as modified
+        // but then when it was only moved or renamed that means we have another document with the same GUID
+        // so once the user would save the now modified document, we would end up with two documents with the same GUID
+        // so, for now, since this is probably a rare case anyway, we just close the document without asking
+        if (pInfo->m_bMainAsset)
         {
-          if (pInfo->m_bMainAsset)
-          {
-            deletedAssets.PushBack(pInfo->m_pAssetInfo);
-          }
-          m_KnownAssets.Remove(guid);
-          m_KnownSubAssets.Remove(guid);
+          plDocumentManager::EnsureDocumentIsClosedInAllManagers(pInfo->m_pAssetInfo->m_Path);
+          e.m_Type = plAssetCuratorEvent::Type::AssetRemoved;
+          m_Events.Broadcast(e);
+
+          deletedAssets.PushBack(pInfo->m_pAssetInfo);
         }
+        m_KnownAssets.Remove(guid);
+        m_KnownSubAssets.Remove(guid);
       }
       else // Either plAssetInfo::ExistanceState::FileModified or tranform changed
       {
@@ -319,7 +324,7 @@ void plAssetCurator::MainThreadTick(bool bTopLevel)
   // Delete file asset info after all the sub-assets have been handled (so no ref exist to it anymore).
   for (plAssetInfo* pInfo : deletedAssets)
   {
-    PLASMA_DEFAULT_DELETE(pInfo);
+    PL_DEFAULT_DELETE(pInfo);
   }
 
   RunNextUpdateTask();
@@ -334,15 +339,8 @@ void plAssetCurator::MainThreadTick(bool bTopLevel)
     UpdateAssetTransformState(assetToImport, plAssetInfo::TransformState::Unknown);
   }
 
-  // TODO: Probably needs to be done in headless as well to make proper thumbnails
-  if (!plQtEditorApp::GetSingleton()->IsInHeadlessMode())
-  {
-    if (bTopLevel && m_bNeedToReloadResources && plTime::Now() > m_NextReloadResources)
-    {
-      m_bNeedToReloadResources = false;
-      WriteAssetTables().IgnoreResult();
-    }
-  }
+  if (bTopLevel && m_pAssetTableWriter)
+    m_pAssetTableWriter->MainThreadTick();
 
   bReentry = false;
 }
@@ -356,7 +354,7 @@ plDateTime plAssetCurator::GetLastFullTransformDate() const
   if (plOSFile::GetFileStats(path, stat).Failed())
     return {};
 
-  return stat.m_LastModificationTime;
+  return plDateTime::MakeFromTimestamp(stat.m_LastModificationTime);
 }
 
 void plAssetCurator::StoreFullTransformDate()
@@ -368,9 +366,9 @@ void plAssetCurator::StoreFullTransformDate()
   if (file.Open(path, plFileOpenMode::Write).Succeeded())
   {
     plDateTime date;
-    date.SetTimestamp(plTimestamp::CurrentTimestamp());
+    date.SetFromTimestamp(plTimestamp::CurrentTimestamp()).AssertSuccess();
 
-    path.Format("{}", date);
+    path.SetFormat("{}", date);
     file.Write(path.GetData(), path.GetElementCount()).AssertSuccess();
   }
 }
@@ -381,11 +379,11 @@ void plAssetCurator::StoreFullTransformDate()
 
 plStatus plAssetCurator::TransformAllAssets(plBitflags<plTransformFlags> transformFlags, const plPlatformProfile* pAssetProfile)
 {
-  PLASMA_PROFILE_SCOPE("TransformAllAssets");
+  PL_PROFILE_SCOPE("TransformAllAssets");
 
   plDynamicArray<plUuid> assets;
   {
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
     assets.Reserve(m_KnownAssets.GetCount());
     for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
     {
@@ -401,7 +399,7 @@ plStatus plAssetCurator::TransformAllAssets(plBitflags<plTransformFlags> transfo
     if (range.WasCanceled())
       break;
 
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
 
     plAssetInfo* pAssetInfo = nullptr;
     if (!m_KnownAssets.TryGetValue(assetGuid, pAssetInfo))
@@ -414,7 +412,7 @@ plStatus plAssetCurator::TransformAllAssets(plBitflags<plTransformFlags> transfo
       // what was specified before
       // since this is a valid case, we just stop updating the progress bar, in case more assets are detected
 
-      range.BeginNextStep(plPathUtils::GetFileNameAndExtension(pAssetInfo->m_sDataDirParentRelativePath).GetStartPointer());
+      range.BeginNextStep(plPathUtils::GetFileNameAndExtension(pAssetInfo->m_Path.GetDataDirParentRelativePath()));
       --uiNumStepsLeft;
     }
 
@@ -422,9 +420,11 @@ plStatus plAssetCurator::TransformAllAssets(plBitflags<plTransformFlags> transfo
     if (res.Failed())
     {
       uiNumFailedSteps++;
-      plLog::Error("{0} ({1})", res.m_sMessage, pAssetInfo->m_sDataDirParentRelativePath);
+      plLog::Error("{0} ({1})", res.m_sMessage, pAssetInfo->m_Path.GetDataDirParentRelativePath());
     }
   }
+
+  TransformAssetsForSceneExport(pAssetProfile);
 
   range.BeginNextStep("Writing Lookup Tables");
 
@@ -435,14 +435,14 @@ plStatus plAssetCurator::TransformAllAssets(plBitflags<plTransformFlags> transfo
   if (uiNumFailedSteps > 0)
     return plStatus(plFmt("Transform all assets failed on {0} assets.", uiNumFailedSteps));
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plAssetCurator::ResaveAllAssets()
 {
   plProgressRange range("Re-saving all Assets", 1 + m_KnownAssets.GetCount(), true);
 
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
   plDynamicArray<plUuid> sortedAssets;
   sortedAssets.Reserve(m_KnownAssets.GetCount());
@@ -454,7 +454,7 @@ void plAssetCurator::ResaveAllAssets()
   for (auto itAsset = m_KnownAssets.GetIterator(); itAsset.IsValid(); ++itAsset)
   {
     auto it2 = dependencies.Insert(itAsset.Key(), plSet<plUuid>());
-    for (const plString& dep : itAsset.Value()->m_Info->m_AssetTransformDependencies)
+    for (const plString& dep : itAsset.Value()->m_Info->m_TransformDependencies)
     {
       if (plConversionUtils::IsStringUuid(dep))
       {
@@ -495,13 +495,13 @@ void plAssetCurator::ResaveAllAssets()
       break;
 
     plAssetInfo* pAssetInfo = GetAssetInfo(sortedAssets[i]);
-    PLASMA_ASSERT_DEBUG(pAssetInfo, "Should not happen as data was derived from known assets list.");
-    range.BeginNextStep(plPathUtils::GetFileNameAndExtension(pAssetInfo->m_sDataDirParentRelativePath).GetStartPointer());
+    PL_ASSERT_DEBUG(pAssetInfo, "Should not happen as data was derived from known assets list.");
+    range.BeginNextStep(plPathUtils::GetFileNameAndExtension(pAssetInfo->m_Path.GetDataDirParentRelativePath()));
 
     auto res = ResaveAsset(pAssetInfo);
     if (res.m_Result.Failed())
     {
-      plLog::Error("{0} ({1})", res.m_sMessage, pAssetInfo->m_sDataDirParentRelativePath);
+      plLog::Error("{0} ({1})", res.m_sMessage, pAssetInfo->m_Path.GetDataDirParentRelativePath());
     }
   }
 }
@@ -513,13 +513,13 @@ plTransformStatus plAssetCurator::TransformAsset(const plUuid& assetGuid, plBitf
   plStopwatch timer;
   const plAssetDocumentTypeDescriptor* pTypeDesc = nullptr;
   {
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
 
     plAssetInfo* pInfo = nullptr;
     if (!m_KnownAssets.TryGetValue(assetGuid, pInfo))
       return plTransformStatus("Transform failed, unknown asset.");
 
-    sAbsPath = pInfo->m_sAbsolutePath;
+    sAbsPath = pInfo->m_Path;
     res = ProcessAsset(pInfo, pAssetProfile, transformFlags);
   }
   if (pTypeDesc && transformFlags.IsAnySet(plTransformFlags::TriggeredManually))
@@ -529,7 +529,7 @@ plTransformStatus plAssetCurator::TransformAsset(const plUuid& assetGuid, plBitf
     {
       // some assets modify the document during transformation
       // make sure the state is saved, at least when the user actively executed the action
-      pDoc->SaveDocument().IgnoreResult();
+      pDoc->SaveDocument().LogFailure();
     }
   }
   plLog::Info("Transform asset time: {0}s", plArgF(timer.GetRunningTotal().GetSeconds(), 2));
@@ -538,7 +538,7 @@ plTransformStatus plAssetCurator::TransformAsset(const plUuid& assetGuid, plBitf
 
 plTransformStatus plAssetCurator::CreateThumbnail(const plUuid& assetGuid)
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
   plAssetInfo* pInfo = nullptr;
   if (!m_KnownAssets.TryGetValue(assetGuid, pInfo))
@@ -547,38 +547,54 @@ plTransformStatus plAssetCurator::CreateThumbnail(const plUuid& assetGuid)
   return ProcessAsset(pInfo, nullptr, plTransformFlags::None);
 }
 
-plResult plAssetCurator::WriteAssetTables(const plPlatformProfile* pAssetProfile /* = nullptr*/)
+void plAssetCurator::TransformAssetsForSceneExport(const plPlatformProfile* pAssetProfile /*= nullptr*/)
+{
+  PL_PROFILE_SCOPE("Transform Special Assets");
+
+  plSet<plTempHashedString> types;
+
+  {
+    auto& allDMs = plDocumentManager::GetAllDocumentManagers();
+    for (auto& dm : allDMs)
+    {
+      if (plAssetDocumentManager* pADM = plDynamicCast<plAssetDocumentManager*>(dm))
+      {
+        pADM->GetAssetTypesRequiringTransformForSceneExport(types);
+      }
+    }
+  }
+
+  plSet<plUuid> assets;
+  {
+    plAssetCurator::plLockedAssetTable allAssets = GetKnownAssets();
+
+    for (auto it : *allAssets)
+    {
+      if (types.Contains(it.Value()->m_Info->m_sAssetsDocumentTypeName))
+      {
+        assets.Insert(it.Value()->m_Info->m_DocumentID);
+      }
+    }
+  }
+
+  for (const auto& guid : assets)
+  {
+    // Ignore result
+    TransformAsset(guid, plTransformFlags::TriggeredManually | plTransformFlags::ForceTransform, pAssetProfile);
+  }
+}
+
+plResult plAssetCurator::WriteAssetTables(const plPlatformProfile* pAssetProfile, bool bForce)
 {
   CURATOR_PROFILE("WriteAssetTables");
-  PLASMA_LOG_BLOCK("plAssetCurator::WriteAssetTables");
+  PL_LOG_BLOCK("plAssetCurator::WriteAssetTables");
 
-  // TODO: figure out a way to early out this function, if nothing can have changed
-
-  plResult res = PLASMA_SUCCESS;
-
-  plStringBuilder sd;
-
-  for (const auto& dd : m_FileSystemConfig.m_DataDirs)
+  if (pAssetProfile == nullptr)
   {
-    PLASMA_SUCCEED_OR_RETURN(plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sd));
-    sd.Append("/");
-
-    if (WriteAssetTable(sd, pAssetProfile).Failed())
-      res = PLASMA_FAILURE;
+    pAssetProfile = GetActiveAssetProfile();
   }
 
-  if (pAssetProfile == nullptr || pAssetProfile == GetActiveAssetProfile())
-  {
-    plSimpleConfigMsgToEngine msg;
-    msg.m_sWhatToDo = "ReloadAssetLUT";
-    msg.m_sPayload = GetActiveAssetProfile()->GetConfigName();
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
-
-    msg.m_sWhatToDo = "ReloadResources";
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
-  }
-
-  return res;
+  return m_pAssetTableWriter->WriteAssetTables(pAssetProfile, bForce);
 }
 
 
@@ -586,72 +602,41 @@ plResult plAssetCurator::WriteAssetTables(const plPlatformProfile* pAssetProfile
 // plAssetCurator Asset Access
 ////////////////////////////////////////////////////////////////////////
 
-const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* szPathOrGuid, bool bExhaustiveSearch) const
+const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(plStringView sPathOrGuid, bool bExhaustiveSearch) const
 {
   CURATOR_PROFILE("FindSubAsset");
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
-  if (plConversionUtils::IsStringUuid(szPathOrGuid))
+  if (plConversionUtils::IsStringUuid(sPathOrGuid))
   {
-    return GetSubAsset(plConversionUtils::ConvertStringToUuid(szPathOrGuid));
+    return GetSubAsset(plConversionUtils::ConvertStringToUuid(sPathOrGuid));
   }
 
   // Split into mainAsset|subAsset
   plStringBuilder mainAsset;
   plStringView subAsset;
-  const char* szSeparator = plStringUtils::FindSubString(szPathOrGuid, "|");
+  const char* szSeparator = sPathOrGuid.FindSubString("|");
   if (szSeparator != nullptr)
   {
-    mainAsset.SetSubString_FromTo(szPathOrGuid, szSeparator);
+    mainAsset.SetSubString_FromTo(sPathOrGuid.GetStartPointer(), szSeparator);
     subAsset = plStringView(szSeparator + 1);
   }
   else
   {
-    mainAsset = szPathOrGuid;
+    mainAsset = sPathOrGuid;
   }
   mainAsset.MakeCleanPath();
 
   // Find mainAsset
-  plMap<plString, plFileStatus, plCompareString_NoCase>::ConstIterator it;
-  if (plPathUtils::IsAbsolutePath(mainAsset))
-  {
-    it = m_ReferencedFiles.Find(mainAsset);
-  }
-  else
-  {
-    // Data dir parent relative?
-    for (const auto& dd : m_FileSystemConfig.m_DataDirs)
-    {
-      plStringBuilder sDataDir;
-      plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sDataDir).IgnoreResult();
-      sDataDir.PathParentDirectory();
-      sDataDir.AppendPath(mainAsset);
-      it = m_ReferencedFiles.Find(sDataDir);
-      if (it.IsValid())
-        break;
-    }
-
-    if (!it.IsValid())
-    {
-      // Data dir relative?
-      for (const auto& dd : m_FileSystemConfig.m_DataDirs)
-      {
-        plStringBuilder sDataDir;
-        plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sDataDir).IgnoreResult();
-        sDataDir.AppendPath(mainAsset);
-        it = m_ReferencedFiles.Find(sDataDir);
-        if (it.IsValid())
-          break;
-      }
-    }
-  }
+  plFileStatus stat;
+  plResult res = plFileSystemModel::GetSingleton()->FindFile(mainAsset, stat);
 
   // Did we find an asset?
-  if (it.IsValid() && it.Value().m_AssetGuid.IsValid())
+  if (res == PL_SUCCESS && stat.m_DocumentID.IsValid())
   {
     plAssetInfo* pAssetInfo = nullptr;
-    m_KnownAssets.TryGetValue(it.Value().m_AssetGuid, pAssetInfo);
-    PLASMA_ASSERT_DEV(pAssetInfo != nullptr, "Files reference non-existant assset!");
+    m_KnownAssets.TryGetValue(stat.m_DocumentID, pAssetInfo);
+    PL_ASSERT_DEV(pAssetInfo != nullptr, "Files reference non-existant assset!");
 
     if (subAsset.IsValid())
     {
@@ -677,24 +662,25 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* 
   // TODO: This is the old slow code path that will find the longest substring match.
   // Should be removed or folded into FindBestMatchForFile once it's surely not needed anymore.
 
-  auto FindAsset = [this](plStringView path) -> plAssetInfo* {
+  auto FindAsset = [this](plStringView sPathView) -> plAssetInfo*
+  {
     // try to find the 'exact' relative path
     // otherwise find the shortest possible path
     plUInt32 uiMinLength = 0xFFFFFFFF;
     plAssetInfo* pBestInfo = nullptr;
 
-    if (path.IsEmpty())
+    if (sPathView.IsEmpty())
       return nullptr;
 
-    const plStringBuilder sPath = path;
+    const plStringBuilder sPath = sPathView;
     const plStringBuilder sPathWithSlash("/", sPath);
 
     for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
     {
-      if (it.Value()->m_sDataDirParentRelativePath.EndsWith_NoCase(sPath))
+      if (it.Value()->m_Path.GetDataDirParentRelativePath().EndsWith_NoCase(sPath))
       {
         // endswith -> could also be equal
-        if (path.IsEqual_NoCase(it.Value()->m_sDataDirParentRelativePath.GetData()))
+        if (sPathView.IsEqual_NoCase(it.Value()->m_Path.GetDataDirParentRelativePath()))
         {
           // if equal, just take it
           return it.Value();
@@ -702,9 +688,9 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* 
 
         // need to check again with a slash to make sure we don't return something that is of an invalid type
         // this can happen where the user is allowed to type random paths
-        if (it.Value()->m_sDataDirParentRelativePath.EndsWith_NoCase(sPathWithSlash))
+        if (it.Value()->m_Path.GetDataDirParentRelativePath().EndsWith_NoCase(sPathWithSlash))
         {
-          const plUInt32 uiLength = it.Value()->m_sDataDirParentRelativePath.GetElementCount();
+          const plUInt32 uiLength = it.Value()->m_Path.GetDataDirParentRelativePath().GetElementCount();
           if (uiLength < uiMinLength)
           {
             uiMinLength = uiLength;
@@ -717,11 +703,11 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* 
     return pBestInfo;
   };
 
-  szSeparator = plStringUtils::FindSubString(szPathOrGuid, "|");
+  szSeparator = sPathOrGuid.FindSubString("|");
   if (szSeparator != nullptr)
   {
     plStringBuilder mainAsset2;
-    mainAsset2.SetSubString_FromTo(szPathOrGuid, szSeparator);
+    mainAsset2.SetSubString_FromTo(sPathOrGuid.GetStartPointer(), szSeparator);
 
     plStringView subAsset2(szSeparator + 1);
     if (plAssetInfo* pAssetInfo = FindAsset(mainAsset2))
@@ -737,7 +723,7 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* 
     }
   }
 
-  plStringBuilder sPath = szPathOrGuid;
+  plStringBuilder sPath = sPathOrGuid;
   sPath.MakeCleanPath();
   if (sPath.IsAbsolutePath())
   {
@@ -755,7 +741,7 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::FindSubAsset(const char* 
 
 const plAssetCurator::plLockedSubAsset plAssetCurator::GetSubAsset(const plUuid& assetGuid) const
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
   auto it = m_KnownSubAssets.Find(assetGuid);
   if (it.IsValid())
@@ -769,6 +755,11 @@ const plAssetCurator::plLockedSubAsset plAssetCurator::GetSubAsset(const plUuid&
 const plAssetCurator::plLockedSubAssetTable plAssetCurator::GetKnownSubAssets() const
 {
   return plLockedSubAssetTable(m_CuratorMutex, &m_KnownSubAssets);
+}
+
+const plAssetCurator::plLockedAssetTable plAssetCurator::GetKnownAssets() const
+{
+  return plLockedAssetTable(m_CuratorMutex, &m_KnownAssets);
 }
 
 plUInt64 plAssetCurator::GetAssetDependencyHash(plUuid assetGuid)
@@ -787,61 +778,14 @@ plUInt64 plAssetCurator::GetAssetReferenceHash(plUuid assetGuid)
   return thumbHash;
 }
 
-void plAssetCurator::GenerateTransitiveHull(const plStringView assetOrPath, plSet<plString>* pDependencies, plSet<plString>* pReferences)
+plAssetInfo::TransformState plAssetCurator::IsAssetUpToDate(const plUuid& assetGuid, const plPlatformProfile*, const plAssetDocumentTypeDescriptor* pTypeDescriptor, plUInt64& out_uiAssetHash, plUInt64& out_uiThumbHash, bool bForce)
 {
-  if (plConversionUtils::IsStringUuid(assetOrPath))
-  {
-    auto it = m_KnownSubAssets.Find(plConversionUtils::ConvertStringToUuid(assetOrPath));
-    plAssetInfo* pAssetInfo = it.Value().m_pAssetInfo;
-    const bool bInsertDep = pDependencies && !pDependencies->Contains(pAssetInfo->m_sAbsolutePath);
-    const bool bInsertRef = pReferences && !pReferences->Contains(pAssetInfo->m_sAbsolutePath);
-
-    if (bInsertDep)
-    {
-      pDependencies->Insert(pAssetInfo->m_sAbsolutePath);
-    }
-    if (bInsertRef)
-    {
-      pReferences->Insert(pAssetInfo->m_sAbsolutePath);
-    }
-
-    if (pDependencies)
-    {
-      for (const plString& dep : pAssetInfo->m_Info->m_AssetTransformDependencies)
-      {
-        GenerateTransitiveHull(dep, pDependencies, nullptr);
-      }
-    }
-
-    if (pReferences)
-    {
-      for (const plString& ref : pAssetInfo->m_Info->m_RuntimeDependencies)
-      {
-        GenerateTransitiveHull(ref, nullptr, pReferences);
-      }
-    }
-  }
-  else
-  {
-    if (pDependencies && !pDependencies->Contains(assetOrPath))
-    {
-      pDependencies->Insert(assetOrPath);
-    }
-    if (pReferences && !pReferences->Contains(assetOrPath))
-    {
-      pReferences->Insert(assetOrPath);
-    }
-  }
-}
-
-plAssetInfo::TransformState plAssetCurator::IsAssetUpToDate(const plUuid& assetGuid, const plPlatformProfile*, const plAssetDocumentTypeDescriptor* pTypeDescriptor, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce)
-{
-  return plAssetCurator::UpdateAssetTransformState(assetGuid, out_AssetHash, out_ThumbHash, bForce);
+  return plAssetCurator::UpdateAssetTransformState(assetGuid, out_uiAssetHash, out_uiThumbHash, bForce);
 }
 
 void plAssetCurator::InvalidateAssetsWithTransformState(plAssetInfo::TransformState state)
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
   plHashSet<plUuid> allWithState = m_TransformState[state];
 
@@ -854,8 +798,9 @@ void plAssetCurator::InvalidateAssetsWithTransformState(plAssetInfo::TransformSt
 plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid assetGuid, plUInt64& out_AssetHash, plUInt64& out_ThumbHash, bool bForce)
 {
   CURATOR_PROFILE("UpdateAssetTransformState");
+  plStringBuilder sAbsAssetPath;
   {
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
     // If assetGuid is a sub-asset, redirect to main asset.
     auto it = m_KnownSubAssets.Find(assetGuid);
     if (!it.IsValid())
@@ -864,6 +809,20 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
     }
     plAssetInfo* pAssetInfo = it.Value().m_pAssetInfo;
     assetGuid = pAssetInfo->m_Info->m_DocumentID;
+    sAbsAssetPath = pAssetInfo->m_Path;
+
+    // Circular dependencies can change if any asset in the circle has changed (and potentially broken the circle). Thus, we need to call CheckForCircularDependencies again for every asset.
+    if (!pAssetInfo->m_CircularDependencies.IsEmpty() && m_TransformStateStale.Contains(assetGuid))
+    {
+      pAssetInfo->m_CircularDependencies.Clear();
+      if (CheckForCircularDependencies(pAssetInfo).Failed())
+      {
+        UpdateAssetTransformState(assetGuid, plAssetInfo::CircularDependency);
+        out_AssetHash = 0;
+        out_ThumbHash = 0;
+        return plAssetInfo::CircularDependency;
+      }
+    }
 
     // Setting an asset to unknown actually does not change the m_TransformState but merely adds it to the m_TransformStateStale list.
     // This is to prevent the user facing state to constantly fluctuate if something is tagged as modified but not actually changed (E.g. saving a
@@ -875,12 +834,8 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
       return pAssetInfo->m_TransformState;
     }
   }
-  if (EnsureAssetInfoUpdated(assetGuid).Failed())
-  {
-    plStringBuilder tmp;
-    plLog::Error("Asset with GUID {0} is unknown", plConversionUtils::ToString(assetGuid, tmp));
-    return plAssetInfo::TransformState::Unknown;
-  }
+
+  plFileSystemModel::GetSingleton()->NotifyOfChange(sAbsAssetPath);
 
   // Data to pull from the asset under the lock that is needed for update computation.
   plAssetDocumentManager* pManager = nullptr;
@@ -888,61 +843,78 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
   plString sAssetFile;
   plUInt8 uiLastStateUpdate = 0;
   plUInt64 uiSettingsHash = 0;
-  plHybridArray<plString, 16> assetTransformDependencies;
-  plHybridArray<plString, 16> runtimeDependencies;
+  plHybridArray<plString, 16> transformDeps;
+  plHybridArray<plString, 16> thumbnailDeps;
   plHybridArray<plString, 16> outputs;
+  plHybridArray<plString, 16> subAssetNames;
 
   // Lock asset and get all data needed for update computation.
   {
     CURATOR_PROFILE("CopyAssetData");
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
     plAssetInfo* pAssetInfo = GetAssetInfo(assetGuid);
-
+    if (!pAssetInfo)
+    {
+      plStringBuilder tmp;
+      plLog::Error("Asset with GUID {0} is unknown", plConversionUtils::ToString(assetGuid, tmp));
+      return plAssetInfo::TransformState::Unknown;
+    }
     pManager = pAssetInfo->GetManager();
     pTypeDescriptor = pAssetInfo->m_pDocumentTypeDescriptor;
-    sAssetFile = pAssetInfo->m_sAbsolutePath;
+    sAssetFile = pAssetInfo->m_Path;
     uiLastStateUpdate = pAssetInfo->m_LastStateUpdate;
     // The settings has combines both the file settings and the global profile settings.
     uiSettingsHash = pAssetInfo->m_Info->m_uiSettingsHash + pManager->GetAssetProfileHash();
-    for (const plString& dep : pAssetInfo->m_Info->m_AssetTransformDependencies)
+    for (const plString& dep : pAssetInfo->m_Info->m_TransformDependencies)
     {
-      assetTransformDependencies.PushBack(dep);
+      transformDeps.PushBack(dep);
     }
-    for (const plString& ref : pAssetInfo->m_Info->m_RuntimeDependencies)
+    for (const plString& ref : pAssetInfo->m_Info->m_ThumbnailDependencies)
     {
-      runtimeDependencies.PushBack(ref);
+      thumbnailDeps.PushBack(ref);
     }
     for (const plString& output : pAssetInfo->m_Info->m_Outputs)
     {
       outputs.PushBack(output);
     }
+    for (auto& subAssetUuid : pAssetInfo->m_SubAssets)
+    {
+      if (plSubAsset* pSubAsset = GetSubAssetInternal(subAssetUuid))
+      {
+        subAssetNames.PushBack(pSubAsset->m_Data.m_sName);
+      }
+    }
   }
 
   plAssetInfo::TransformState state = plAssetInfo::TransformState::Unknown;
-  plSet<plString> missingDependencies;
-  plSet<plString> missingReferences;
+  plSet<plString> missingTransformDeps;
+  plSet<plString> missingThumbnailDeps;
   // Compute final state and hashes.
   {
-    state = HashAsset(uiSettingsHash, assetTransformDependencies, runtimeDependencies, missingDependencies, missingReferences, out_AssetHash, out_ThumbHash, bForce);
-    PLASMA_ASSERT_DEV(state == plAssetInfo::Unknown || state == plAssetInfo::MissingDependency || state == plAssetInfo::MissingReference, "Unhandled case of HashAsset return value.");
+    state = HashAsset(uiSettingsHash, transformDeps, thumbnailDeps, missingTransformDeps, missingThumbnailDeps, out_AssetHash, out_ThumbHash, bForce);
+    PL_ASSERT_DEV(state == plAssetInfo::Unknown || state == plAssetInfo::MissingTransformDependency || state == plAssetInfo::MissingThumbnailDependency, "Unhandled case of HashAsset return value.");
 
     if (state == plAssetInfo::Unknown)
     {
       if (pManager->IsOutputUpToDate(sAssetFile, outputs, out_AssetHash, pTypeDescriptor))
       {
         state = plAssetInfo::TransformState::UpToDate;
-        if (pTypeDescriptor->m_AssetDocumentFlags.IsSet(plAssetDocumentFlags::SupportsThumbnail))
+        if (pTypeDescriptor->m_AssetDocumentFlags.IsAnySet(plAssetDocumentFlags::SupportsThumbnail | plAssetDocumentFlags::AutoThumbnailOnTransform))
         {
           if (!pManager->IsThumbnailUpToDate(sAssetFile, "", out_ThumbHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion()))
           {
-            state = plAssetInfo::TransformState::NeedsThumbnail;
+            state = pTypeDescriptor->m_AssetDocumentFlags.IsSet(plAssetDocumentFlags::AutoThumbnailOnTransform) ? plAssetInfo::TransformState::NeedsTransform : plAssetInfo::TransformState::NeedsThumbnail;
           }
         }
-        else if (pTypeDescriptor->m_AssetDocumentFlags.IsSet(plAssetDocumentFlags::AutoThumbnailOnTransform))
+        else if (pTypeDescriptor->m_AssetDocumentFlags.IsAnySet(plAssetDocumentFlags::SubAssetsSupportThumbnail | plAssetDocumentFlags::SubAssetsAutoThumbnailOnTransform))
         {
-          if (!pManager->IsThumbnailUpToDate(sAssetFile, "", out_ThumbHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion()))
+          for (const plString& subAssetName : subAssetNames)
           {
-            state = plAssetInfo::TransformState::NeedsTransform;
+            if (!pManager->IsThumbnailUpToDate(sAssetFile, subAssetName, out_ThumbHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion()))
+            {
+              state = pTypeDescriptor->m_AssetDocumentFlags.IsSet(plAssetDocumentFlags::SubAssetsAutoThumbnailOnTransform) ? plAssetInfo::TransformState::NeedsTransform : plAssetInfo::TransformState::NeedsThumbnail;
+              break;
+            }
           }
         }
       }
@@ -954,7 +926,7 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
   }
 
   {
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
     plAssetInfo* pAssetInfo = GetAssetInfo(assetGuid);
     if (pAssetInfo)
     {
@@ -968,8 +940,8 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
         UpdateAssetTransformState(assetGuid, state);
         pAssetInfo->m_AssetHash = out_AssetHash;
         pAssetInfo->m_ThumbHash = out_ThumbHash;
-        pAssetInfo->m_MissingDependencies = std::move(missingDependencies);
-        pAssetInfo->m_MissingReferences = std::move(missingReferences);
+        pAssetInfo->m_MissingTransformDeps = std::move(missingTransformDeps);
+        pAssetInfo->m_MissingThumbnailDeps = std::move(missingThumbnailDeps);
         if (state == plAssetInfo::TransformState::UpToDate)
         {
           UpdateSubAssets(*pAssetInfo);
@@ -988,7 +960,7 @@ plAssetInfo::TransformState plAssetCurator::UpdateAssetTransformState(plUuid ass
 
 void plAssetCurator::GetAssetTransformStats(plUInt32& out_uiNumAssets, plHybridArray<plUInt32, plAssetInfo::TransformState::COUNT>& out_count)
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
   out_count.SetCountUninitialized(plAssetInfo::TransformState::COUNT);
   for (int i = 0; i < plAssetInfo::TransformState::COUNT; i++)
   {
@@ -998,9 +970,9 @@ void plAssetCurator::GetAssetTransformStats(plUInt32& out_uiNumAssets, plHybridA
   out_uiNumAssets = m_KnownAssets.GetCount();
 }
 
-plString plAssetCurator::FindDataDirectoryForAsset(const char* szAbsoluteAssetPath) const
+plString plAssetCurator::FindDataDirectoryForAsset(plStringView sAbsoluteAssetPath) const
 {
-  plStringBuilder sAssetPath(szAbsoluteAssetPath);
+  plStringBuilder sAssetPath(sAbsoluteAssetPath);
 
   for (const auto& dd : m_FileSystemConfig.m_DataDirs)
   {
@@ -1011,70 +983,69 @@ plString plAssetCurator::FindDataDirectoryForAsset(const char* szAbsoluteAssetPa
       return sDataDir;
   }
 
-  PLASMA_REPORT_FAILURE("Could not find data directory for asset '{0}", szAbsoluteAssetPath);
+  PL_REPORT_FAILURE("Could not find data directory for asset '{0}", sAbsoluteAssetPath);
   return plFileSystem::GetSdkRootDirectory();
 }
 
-plResult plAssetCurator::FindBestMatchForFile(plStringBuilder& sFile, plArrayPtr<plString> AllowedFileExtensions) const
+plResult plAssetCurator::FindBestMatchForFile(plStringBuilder& ref_sFile, plArrayPtr<plString> allowedFileExtensions) const
 {
   // TODO: Merge with exhaustive search in FindSubAsset
-  sFile.MakeCleanPath();
+  ref_sFile.MakeCleanPath();
 
-  plStringBuilder testName = sFile;
+  plStringBuilder testName = ref_sFile;
 
-  for (const auto& ext : AllowedFileExtensions)
+  for (const auto& ext : allowedFileExtensions)
   {
     testName.ChangeFileExtension(ext);
 
     if (plFileSystem::ExistsFile(testName))
     {
-      sFile = testName;
+      ref_sFile = testName;
       goto found;
     }
   }
 
-  testName = sFile.GetFileNameAndExtension();
+  testName = ref_sFile.GetFileNameAndExtension();
 
   if (testName.IsEmpty())
   {
-    sFile = "";
-    return PLASMA_FAILURE;
+    ref_sFile = "";
+    return PL_FAILURE;
   }
 
   if (plPathUtils::ContainsInvalidFilenameChars(testName))
   {
     // not much we can do here, if the filename is already invalid, we will probably not find it in out known files list
 
-    plPathUtils::MakeValidFilename(testName, '_', sFile);
-    return PLASMA_FAILURE;
+    plPathUtils::MakeValidFilename(testName, '_', ref_sFile);
+    return PL_FAILURE;
   }
 
   {
-    PLASMA_LOCK(m_CuratorMutex);
+    PL_LOCK(m_CuratorMutex);
 
-    auto SearchFile = [this](plStringBuilder& name) -> bool {
-      for (auto it = m_ReferencedFiles.GetIterator(); it.IsValid(); ++it)
-      {
-        if (it.Value().m_Status != plFileStatus::Status::Valid)
-          continue;
+    auto SearchFile = [this](plStringBuilder& ref_sName) -> bool
+    {
+      return plFileSystemModel::GetSingleton()->FindFile([&ref_sName](const plDataDirPath& file, const plFileStatus& stat)
+                                                {
+                                                  if (stat.m_Status != plFileStatus::Status::Valid)
+                                                    return false;
 
-        const plString& key = it.Key();
-
-        if (key.EndsWith_NoCase(name))
-        {
-          name = it.Key();
-          return true;
-        }
-      }
-
-      return false;
+                                                  if (file.GetAbsolutePath().EndsWith_NoCase(ref_sName))
+                                                  {
+                                                    ref_sName = file.GetAbsolutePath();
+                                                    return true;
+                                                  }
+                                                  return false; //
+                                                })
+        .Succeeded();
     };
 
     // search for the full name
     {
       testName.Prepend("/"); // make sure to not find partial names
 
-      for (const auto& ext : AllowedFileExtensions)
+      for (const auto& ext : allowedFileExtensions)
       {
         testName.ChangeFileExtension(ext);
 
@@ -1083,36 +1054,37 @@ plResult plAssetCurator::FindBestMatchForFile(plStringBuilder& sFile, plArrayPtr
       }
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
 found:
   if (plQtEditorApp::GetSingleton()->MakePathDataDirectoryRelative(testName))
   {
-    sFile = testName;
-    return PLASMA_SUCCESS;
+    ref_sFile = testName;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-void plAssetCurator::FindAllUses(plUuid assetGuid, plSet<plUuid>& uses, bool transitive) const
+void plAssetCurator::FindAllUses(plUuid assetGuid, plSet<plUuid>& ref_uses, bool bTransitive) const
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
   plSet<plUuid> todoList;
   todoList.Insert(assetGuid);
 
-  auto GatherReferences = [&](const plMap<plString, plHybridArray<plUuid, 1>>& inverseTracker, const plStringBuilder& sAsset) {
+  auto GatherReferences = [&](const plMap<plString, plHybridArray<plUuid, 1>>& inverseTracker, const plStringBuilder& sAsset)
+  {
     auto it = inverseTracker.Find(sAsset);
     if (it.IsValid())
     {
       for (const plUuid& guid : it.Value())
       {
-        if (!uses.Contains(guid))
+        if (!ref_uses.Contains(guid))
           todoList.Insert(guid);
 
-        uses.Insert(guid);
+        ref_uses.Insert(guid);
       }
     }
   };
@@ -1126,23 +1098,41 @@ void plAssetCurator::FindAllUses(plUuid assetGuid, plSet<plUuid>& uses, bool tra
 
     if (pInfo)
     {
-      sCurrentAsset = pInfo->m_sAbsolutePath;
-      GatherReferences(m_InverseReferences, sCurrentAsset);
-      GatherReferences(m_InverseDependency, sCurrentAsset);
+      sCurrentAsset = pInfo->m_Path;
+      GatherReferences(m_InverseThumbnailDeps, sCurrentAsset);
+      GatherReferences(m_InverseTransformDeps, sCurrentAsset);
     }
-  } while (transitive && !todoList.IsEmpty());
+  } while (bTransitive && !todoList.IsEmpty());
+}
+
+void plAssetCurator::FindAllUses(plStringView sAbsolutePath, plSet<plUuid>& ref_uses) const
+{
+  PL_LOCK(m_CuratorMutex);
+  if (auto it = m_InverseTransformDeps.Find(sAbsolutePath); it.IsValid())
+  {
+    for (const plUuid& guid : it.Value())
+    {
+      ref_uses.Insert(guid);
+    }
+  }
+}
+
+bool plAssetCurator::IsReferenced(plStringView sAbsolutePath) const
+{
+  PL_LOCK(m_CuratorMutex);
+  auto it = m_InverseTransformDeps.Find(sAbsolutePath);
+  return it.IsValid() && !it.Value().IsEmpty();
 }
 
 ////////////////////////////////////////////////////////////////////////
 // plAssetCurator Manual and Automatic Change Notification
 ////////////////////////////////////////////////////////////////////////
 
-void plAssetCurator::NotifyOfFileChange(const char* szAbsolutePath)
+void plAssetCurator::NotifyOfFileChange(plStringView sAbsolutePath)
 {
-  plStringBuilder sPath(szAbsolutePath);
+  plStringBuilder sPath(sAbsolutePath);
   sPath.MakeCleanPath();
-  HandleSingleFile(sPath);
-  // MainThreadTick();
+  plFileSystemModel::GetSingleton()->NotifyOfChange(sPath);
 }
 
 void plAssetCurator::NotifyOfAssetChange(const plUuid& assetGuid)
@@ -1162,37 +1152,20 @@ void plAssetCurator::UpdateAssetLastAccessTime(const plUuid& assetGuid)
 
 void plAssetCurator::CheckFileSystem()
 {
-  PLASMA_PROFILE_SCOPE("CheckFileSystem");
+  PL_PROFILE_SCOPE("CheckFileSystem");
   plStopwatch sw;
-
-  plProgressRange* range = nullptr;
-  if (plThreadUtils::IsMainThread())
-    range = PLASMA_DEFAULT_NEW(plProgressRange, "Check File-System for Assets", m_FileSystemConfig.m_DataDirs.GetCount(), false);
 
   // make sure the hashing task has finished
   ShutdownUpdateTask();
 
-  PLASMA_LOCK(m_CuratorMutex);
-
-  SetAllAssetStatusUnknown();
-
-  // check every data directory
-  for (auto& dd : m_FileSystemConfig.m_DataDirs)
   {
-    plStringBuilder sTemp;
-    plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sTemp).IgnoreResult();
-
-    if (plThreadUtils::IsMainThread())
-      range->BeginNextStep(dd.m_sDataDirSpecialPath);
-
-    IterateDataDirectory(sTemp);
+    PL_LOCK(m_CuratorMutex);
+    SetAllAssetStatusUnknown();
   }
-
-  RemoveStaleFileInfos();
+  plFileSystemModel::GetSingleton()->CheckFileSystem();
 
   if (plThreadUtils::IsMainThread())
   {
-    PLASMA_DEFAULT_DELETE(range);
     // Broadcast reset only if we are on the main thread.
     // Otherwise we are on the init task thread and the reset will be called on the main thread by WaitForInitialize.
     plAssetCuratorEvent e;
@@ -1206,13 +1179,220 @@ void plAssetCurator::CheckFileSystem()
   plLog::Debug("Asset Curator Refresh Time: {0} ms", plArgF(sw.GetRunningTotal().GetMilliseconds(), 3));
 }
 
-void plAssetCurator::NeedsReloadResources()
+void plAssetCurator::NeedsReloadResources(const plUuid& assetGuid)
 {
-  if (m_bNeedToReloadResources)
-    return;
+  if (m_pAssetTableWriter)
+  {
+    m_pAssetTableWriter->NeedsReloadResource(assetGuid);
 
-  m_bNeedToReloadResources = true;
-  m_NextReloadResources = plTime::Now() + plTime::Seconds(1.5);
+    plAssetInfo* pAssetInfo = nullptr;
+    if (m_KnownAssets.TryGetValue(assetGuid, pAssetInfo))
+    {
+      for (auto& subAssetUuid : pAssetInfo->m_SubAssets)
+      {
+        m_pAssetTableWriter->NeedsReloadResource(subAssetUuid);
+      }
+    }
+  }
+}
+
+void plAssetCurator::GenerateTransitiveHull(const plStringView sAssetOrPath, plSet<plString>& inout_deps, bool bIncludeTransformDeps, bool bIncludeThumbnailDeps, bool bIncludePackageDeps) const
+{
+  PL_LOCK(m_CuratorMutex);
+
+  plHybridArray<plString, 6> toDoList;
+  inout_deps.Insert(sAssetOrPath);
+  toDoList.PushBack(sAssetOrPath);
+
+  while (!toDoList.IsEmpty())
+  {
+    plString currentAsset = toDoList.PeekBack();
+    toDoList.PopBack();
+
+    if (plConversionUtils::IsStringUuid(currentAsset))
+    {
+      auto it = m_KnownSubAssets.Find(plConversionUtils::ConvertStringToUuid(currentAsset));
+      plAssetInfo* pAssetInfo = it.Value().m_pAssetInfo;
+
+      if (bIncludeTransformDeps)
+      {
+        for (const plString& dep : pAssetInfo->m_Info->m_TransformDependencies)
+        {
+          if (!inout_deps.Contains(dep))
+          {
+            inout_deps.Insert(dep);
+            toDoList.PushBack(dep);
+          }
+        }
+      }
+      if (bIncludeThumbnailDeps)
+      {
+        for (const plString& dep : pAssetInfo->m_Info->m_ThumbnailDependencies)
+        {
+          if (!inout_deps.Contains(dep))
+          {
+            inout_deps.Insert(dep);
+            toDoList.PushBack(dep);
+          }
+        }
+      }
+      if (bIncludePackageDeps)
+      {
+        for (const plString& dep : pAssetInfo->m_Info->m_PackageDependencies)
+        {
+          if (!inout_deps.Contains(dep))
+          {
+            inout_deps.Insert(dep);
+            toDoList.PushBack(dep);
+          }
+        }
+      }
+    }
+  }
+}
+
+void plAssetCurator::GenerateInverseTransitiveHull(const plAssetInfo* pAssetInfo, plSet<plUuid>& inout_inverseDeps, bool bIncludeTransformDebs, bool bIncludeThumbnailDebs) const
+{
+  PL_LOCK(m_CuratorMutex);
+
+  plHybridArray<const plAssetInfo*, 6> toDoList;
+  toDoList.PushBack(pAssetInfo);
+  inout_inverseDeps.Insert(pAssetInfo->m_Info->m_DocumentID);
+
+  while (!toDoList.IsEmpty())
+  {
+    const plAssetInfo* currentAsset = toDoList.PeekBack();
+    toDoList.PopBack();
+
+    if (bIncludeTransformDebs)
+    {
+      if (auto it = m_InverseTransformDeps.Find(currentAsset->m_Path.GetAbsolutePath()); it.IsValid())
+      {
+        for (const plUuid& asset : it.Value())
+        {
+          if (!inout_inverseDeps.Contains(asset))
+          {
+            plAssetInfo* pAssetInfo = nullptr;
+            if (m_KnownAssets.TryGetValue(asset, pAssetInfo))
+            {
+              toDoList.PushBack(pAssetInfo);
+              inout_inverseDeps.Insert(asset);
+            }
+          }
+        }
+      }
+    }
+
+    if (bIncludeThumbnailDebs)
+    {
+      if (auto it = m_InverseThumbnailDeps.Find(currentAsset->m_Path.GetAbsolutePath()); it.IsValid())
+      {
+        for (const plUuid& asset : it.Value())
+        {
+          if (!inout_inverseDeps.Contains(asset))
+          {
+            plAssetInfo* pAssetInfo = nullptr;
+            if (m_KnownAssets.TryGetValue(asset, pAssetInfo))
+            {
+              toDoList.PushBack(pAssetInfo);
+              inout_inverseDeps.Insert(asset);
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+void plAssetCurator::WriteDependencyDGML(const plUuid& guid, plStringView sOutputFile) const
+{
+  PL_LOCK(m_CuratorMutex);
+
+  plDGMLGraph graph;
+
+  plSet<plString> deps;
+  plStringBuilder sTemp;
+  GenerateTransitiveHull(plConversionUtils::ToString(guid, sTemp), deps, true, true);
+
+  plHashTable<plString, plUInt32> nodeMap;
+  nodeMap.Reserve(deps.GetCount());
+  for (auto& dep : deps)
+  {
+    plDGMLGraph::NodeDesc nd;
+    if (plConversionUtils::IsStringUuid(dep))
+    {
+      auto it = m_KnownSubAssets.Find(plConversionUtils::ConvertStringToUuid(dep));
+      const plSubAsset& subAsset = it.Value();
+      const plAssetInfo* pAssetInfo = subAsset.m_pAssetInfo;
+      if (subAsset.m_bMainAsset)
+      {
+        nd.m_Color = plColor::Blue;
+        sTemp.SetFormat("{}", pAssetInfo->m_Path.GetDataDirParentRelativePath());
+      }
+      else
+      {
+        nd.m_Color = plColor::AliceBlue;
+        sTemp.SetFormat("{} | {}", pAssetInfo->m_Path.GetDataDirParentRelativePath(), subAsset.GetName());
+      }
+      nd.m_Shape = plDGMLGraph::NodeShape::Rectangle;
+    }
+    else
+    {
+      sTemp = dep;
+      nd.m_Color = plColor::Orange;
+      nd.m_Shape = plDGMLGraph::NodeShape::Rectangle;
+    }
+    plUInt32 uiGraphNode = graph.AddNode(sTemp, &nd);
+    nodeMap.Insert(dep, uiGraphNode);
+  }
+
+  for (auto& node : deps)
+  {
+    plDGMLGraph::NodeDesc nd;
+    if (plConversionUtils::IsStringUuid(node))
+    {
+      plUInt32 uiInputNode = *nodeMap.GetValue(node);
+
+      auto it = m_KnownSubAssets.Find(plConversionUtils::ConvertStringToUuid(node));
+      plAssetInfo* pAssetInfo = it.Value().m_pAssetInfo;
+
+      plMap<plUInt32, plString> connection;
+
+      auto ExtendConnection = [&](const plString& sRef, plStringView sLabel)
+      {
+        plUInt32 uiOutputNode = *nodeMap.GetValue(sRef);
+        sTemp = connection[uiOutputNode];
+        if (sTemp.IsEmpty())
+          sTemp = sLabel;
+        else
+          sTemp.AppendFormat(" | {}", sLabel);
+        connection[uiOutputNode] = sTemp;
+      };
+
+      for (const plString& sRef : pAssetInfo->m_Info->m_TransformDependencies)
+      {
+        ExtendConnection(sRef, "Transform");
+      }
+
+      for (const plString& sRef : pAssetInfo->m_Info->m_ThumbnailDependencies)
+      {
+        ExtendConnection(sRef, "Thumbnail");
+      }
+
+      // This will make the graph very big, not recommended.
+      /* for (const plString& ref : pAssetInfo->m_Info->m_PackageDependencies)
+       {
+         ExtendConnection(ref, "Package");
+       }*/
+
+      for (auto it : connection)
+      {
+        graph.AddConnection(uiInputNode, it.Key(), it.Value());
+      }
+    }
+  }
+
+  plDGMLGraphWriter::WriteGraphToFile(sOutputFile, graph).IgnoreResult();
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -1231,18 +1411,23 @@ plTransformStatus plAssetCurator::ProcessAsset(plAssetInfo* pAssetInfo, const pl
   plUInt64 uiThumbHash = 0;
   plAssetInfo::TransformState state = IsAssetUpToDate(pAssetInfo->m_Info->m_DocumentID, pAssetProfile, pTypeDesc, uiHash, uiThumbHash);
 
-  for (const auto& dep : pAssetInfo->m_Info->m_AssetTransformDependencies)
+  if (state == plAssetInfo::TransformState::CircularDependency)
+  {
+    return plTransformStatus(plFmt("Circular dependency for asset '{0}', can't transform.", pAssetInfo->m_Path.GetAbsolutePath()));
+  }
+
+  for (const auto& dep : pAssetInfo->m_Info->m_TransformDependencies)
   {
     plBitflags<plTransformFlags> transformFlagsDeps = transformFlags;
     transformFlagsDeps.Remove(plTransformFlags::ForceTransform);
     if (plAssetInfo* pInfo = GetAssetInfo(dep))
     {
-      PLASMA_SUCCEED_OR_RETURN(ProcessAsset(pInfo, pAssetProfile, transformFlagsDeps));
+      PL_SUCCEED_OR_RETURN(ProcessAsset(pInfo, pAssetProfile, transformFlagsDeps));
     }
   }
 
   plTransformStatus resReferences;
-  for (const auto& ref : pAssetInfo->m_Info->m_RuntimeDependencies)
+  for (const auto& ref : pAssetInfo->m_Info->m_ThumbnailDependencies)
   {
     plBitflags<plTransformFlags> transformFlagsRefs = transformFlags;
     transformFlagsRefs.Remove(plTransformFlags::ForceTransform);
@@ -1255,17 +1440,17 @@ plTransformStatus plAssetCurator::ProcessAsset(plAssetInfo* pAssetInfo, const pl
   }
 
 
-  PLASMA_ASSERT_DEV(pTypeDesc->m_pDocumentType->IsDerivedFrom<plAssetDocument>(), "Asset document does not derive from correct base class ('{0}')", pAssetInfo->m_sDataDirParentRelativePath);
+  PL_ASSERT_DEV(pTypeDesc->m_pDocumentType->IsDerivedFrom<plAssetDocument>(), "Asset document does not derive from correct base class ('{0}')", pAssetInfo->m_Path.GetDataDirParentRelativePath());
 
   auto assetFlags = pTypeDesc->m_AssetDocumentFlags;
 
   // Skip assets that cannot be auto-transformed.
   {
     if (assetFlags.IsAnySet(plAssetDocumentFlags::DisableTransform))
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
 
     if (!transformFlags.IsSet(plTransformFlags::TriggeredManually) && assetFlags.IsAnySet(plAssetDocumentFlags::OnlyTransformManually))
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
   }
 
   // If references are not complete and we generate thumbnails on transform we can cancel right away.
@@ -1274,7 +1459,7 @@ plTransformStatus plAssetCurator::ProcessAsset(plAssetInfo* pAssetInfo, const pl
     return resReferences;
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   {
     // Sanity check that transforming the dependencies did not change the asset's transform state.
     // In theory this can happen if an asset is transformed by multiple processes at the same time or changes to the file system are being made in the middle of the transform.
@@ -1298,36 +1483,45 @@ plTransformStatus plAssetCurator::ProcessAsset(plAssetInfo* pAssetInfo, const pl
   }
 
   if (state == plAssetInfo::TransformState::UpToDate)
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
-  if (state == plAssetInfo::TransformState::MissingDependency)
+  if (state == plAssetInfo::TransformState::MissingTransformDependency)
   {
-    return plTransformStatus(plFmt("Missing dependency for asset '{0}', can't transform.", pAssetInfo->m_sAbsolutePath));
+    return plTransformStatus(plFmt("Missing dependency for asset '{0}', can't transform.", pAssetInfo->m_Path.GetAbsolutePath()));
   }
 
   // does the document already exist and is open ?
   bool bWasOpen = false;
-  plDocument* pDoc = pTypeDesc->m_pManager->GetDocumentByPath(pAssetInfo->m_sAbsolutePath);
+  plDocument* pDoc = pTypeDesc->m_pManager->GetDocumentByPath(pAssetInfo->m_Path);
   if (pDoc)
     bWasOpen = true;
   else
-    pDoc = plQtEditorApp::GetSingleton()->OpenDocument(pAssetInfo->m_sAbsolutePath, plDocumentFlags::None);
+    pDoc = plQtEditorApp::GetSingleton()->OpenDocument(pAssetInfo->m_Path.GetAbsolutePath(), plDocumentFlags::None);
 
   if (pDoc == nullptr)
-    return plTransformStatus(plFmt("Could not open asset document '{0}'", pAssetInfo->m_sDataDirParentRelativePath));
+    return plTransformStatus(plFmt("Could not open asset document '{0}'", pAssetInfo->m_Path.GetDataDirParentRelativePath()));
 
-  PLASMA_SCOPE_EXIT(if (!pDoc->HasWindowBeenRequested() && !bWasOpen) pDoc->GetDocumentManager()->CloseDocument(pDoc););
+  PL_SCOPE_EXIT(if (!pDoc->HasWindowBeenRequested() && !bWasOpen) pDoc->GetDocumentManager()->CloseDocument(pDoc););
 
   plTransformStatus ret;
   plAssetDocument* pAsset = static_cast<plAssetDocument*>(pDoc);
   if (state == plAssetInfo::TransformState::NeedsTransform || (state == plAssetInfo::TransformState::NeedsThumbnail && assetFlags.IsSet(plAssetDocumentFlags::AutoThumbnailOnTransform)) || (transformFlags.IsSet(plTransformFlags::TriggeredManually) && state == plAssetInfo::TransformState::NeedsImport))
   {
     ret = pAsset->TransformAsset(transformFlags, pAssetProfile);
+    if (ret.Succeeded())
+    {
+      m_pAssetTableWriter->NeedsReloadResource(pAsset->GetGuid());
+
+      for (auto& subAssetUuid : pAssetInfo->m_SubAssets)
+      {
+        m_pAssetTableWriter->NeedsReloadResource(subAssetUuid);
+      }
+    }
   }
 
-  if (state == plAssetInfo::TransformState::MissingReference)
+  if (state == plAssetInfo::TransformState::MissingThumbnailDependency)
   {
-    return plTransformStatus(plFmt("Missing reference for asset '{0}', can't create thumbnail.", pAssetInfo->m_sAbsolutePath));
+    return plTransformStatus(plFmt("Missing reference for asset '{0}', can't create thumbnail.", pAssetInfo->m_Path.GetAbsolutePath()));
   }
 
   if (opt_AssetThumbnails.GetOptionValue(plCommandLineOption::LogMode::FirstTimeIfSpecified) != 1)
@@ -1352,14 +1546,14 @@ plTransformStatus plAssetCurator::ProcessAsset(plAssetInfo* pAssetInfo, const pl
 plStatus plAssetCurator::ResaveAsset(plAssetInfo* pAssetInfo)
 {
   bool bWasOpen = false;
-  plDocument* pDoc = pAssetInfo->GetManager()->GetDocumentByPath(pAssetInfo->m_sAbsolutePath);
+  plDocument* pDoc = pAssetInfo->GetManager()->GetDocumentByPath(pAssetInfo->m_Path);
   if (pDoc)
     bWasOpen = true;
   else
-    pDoc = plQtEditorApp::GetSingleton()->OpenDocument(pAssetInfo->m_sAbsolutePath, plDocumentFlags::None);
+    pDoc = plQtEditorApp::GetSingleton()->OpenDocument(pAssetInfo->m_Path.GetAbsolutePath(), plDocumentFlags::None);
 
   if (pDoc == nullptr)
-    return plStatus(plFmt("Could not open asset document '{0}'", pAssetInfo->m_sDataDirParentRelativePath));
+    return plStatus(plFmt("Could not open asset document '{0}'", pAssetInfo->m_Path.GetDataDirParentRelativePath()));
 
   plStatus ret = pDoc->SaveDocument(true);
 
@@ -1412,500 +1606,6 @@ plSubAsset* plAssetCurator::GetSubAssetInternal(const plUuid& assetGuid)
   return nullptr;
 }
 
-void plAssetCurator::HandleSingleFile(const plString& sAbsolutePath)
-{
-  CURATOR_PROFILE("HandleSingleFile");
-  PLASMA_LOCK(m_CuratorMutex);
-
-  plFileStats Stats;
-  if (plOSFile::GetFileStats(sAbsolutePath, Stats).Failed())
-  {
-    // this is a bit tricky:
-    // when the document is deleted on disk, it would be nicer not to close it (discarding modifications!)
-    // instead we could set it as modified
-    // but then when it was only moved or renamed that means we have another document with the same GUID
-    // so once the user would save the now modified document, we would end up with two documents with the same GUID
-    // so, for now, since this is probably a rare case anyway, we just close the document without asking
-    plDocumentManager::EnsureDocumentIsClosedInAllManagers(sAbsolutePath);
-
-    if (plFileStatus* pFileStatus = m_ReferencedFiles.GetValue(sAbsolutePath))
-    {
-      pFileStatus->m_Timestamp.Invalidate();
-      pFileStatus->m_uiHash = 0;
-      pFileStatus->m_Status = plFileStatus::Status::Unknown;
-
-      plUuid guid0 = pFileStatus->m_AssetGuid;
-      if (guid0.IsValid())
-      {
-        plAssetInfo* pAssetInfo = m_KnownAssets[guid0];
-        UntrackDependencies(pAssetInfo);
-        RemoveAssetTransformState(guid0);
-        SetAssetExistanceState(*pAssetInfo, plAssetExistanceState::FileRemoved);
-        pFileStatus->m_AssetGuid = plUuid();
-      }
-
-      auto it = m_InverseDependency.Find(sAbsolutePath);
-      if (it.IsValid())
-      {
-        for (const plUuid& guid : it.Value())
-        {
-          InvalidateAssetTransformState(guid);
-        }
-      }
-
-      auto it2 = m_InverseReferences.Find(sAbsolutePath);
-      if (it2.IsValid())
-      {
-        for (const plUuid& guid : it2.Value())
-        {
-          InvalidateAssetTransformState(guid);
-        }
-      }
-    }
-
-    return;
-  }
-  if (Stats.m_bIsDirectory)
-    HandleSingleDir(sAbsolutePath, Stats);
-  else
-    HandleSingleFile(sAbsolutePath, Stats);
-}
-
-void plAssetCurator::HandleSingleFile(const plString& sAbsolutePath, const plFileStats& FileStat)
-{
-  PLASMA_ASSERT_DEV(!FileStat.m_bIsDirectory, "Directories are handled by plAssetWatcher and should not pass into this function.");
-  CURATOR_PROFILE("HandleSingleFile2");
-  PLASMA_LOCK(m_CuratorMutex);
-
-  plStringBuilder sExt = plPathUtils::GetFileExtension(sAbsolutePath);
-  sExt.ToLower();
-
-  // store information for every file, even when it is no asset, it might be a dependency for some asset
-  auto& RefFile = m_ReferencedFiles[sAbsolutePath];
-
-  // mark the file as valid (i.e. we saw it on disk, so it hasn't been deleted or such)
-  RefFile.m_Status = plFileStatus::Status::Valid;
-
-  bool fileChanged = !RefFile.m_Timestamp.Compare(FileStat.m_LastModificationTime, plTimestamp::CompareMode::Identical);
-  if (fileChanged)
-  {
-    RefFile.m_Timestamp.Invalidate();
-    RefFile.m_uiHash = 0;
-    if (RefFile.m_AssetGuid.IsValid())
-      InvalidateAssetTransformState(RefFile.m_AssetGuid);
-
-    auto it = m_InverseDependency.Find(sAbsolutePath);
-    if (it.IsValid())
-    {
-      for (const plUuid& guid : it.Value())
-      {
-        InvalidateAssetTransformState(guid);
-      }
-    }
-
-    auto it2 = m_InverseReferences.Find(sAbsolutePath);
-    if (it2.IsValid())
-    {
-      for (const plUuid& guid : it2.Value())
-      {
-        InvalidateAssetTransformState(guid);
-      }
-    }
-  }
-
-  // Assets should never be in an AssetCache folder.
-  const char* szNeedle = sAbsolutePath.FindSubString("AssetCache/");
-  if (szNeedle != nullptr && sAbsolutePath.GetData() != szNeedle && szNeedle[-1] == '/')
-  {
-    return;
-  }
-
-  // check that this is an asset type that we know
-  if (!m_ValidAssetExtensions.Contains(sExt))
-  {
-    return;
-  }
-
-  // the file is a known asset type
-  // so make sure it gets a valid GUID assigned
-
-  // File hasn't change, early out.
-  if (RefFile.m_AssetGuid.IsValid() && !fileChanged)
-    return;
-
-  // This will update the timestamp for assets.
-  EnsureAssetInfoUpdated(sAbsolutePath).IgnoreResult();
-}
-
-void plAssetCurator::HandleSingleDir(const plString& sAbsolutePath)
-{
-  plFileStats Stats;
-  if (plFileSystem::GetFileStats(sAbsolutePath, Stats).Failed())
-  {
-    if (plFileStatus* pFileStatus = m_AssetFolders.GetValue(sAbsolutePath))
-    {
-      pFileStatus->m_Timestamp.Invalidate();
-      pFileStatus->m_uiHash = 0;
-      pFileStatus->m_Status = plFileStatus::Status::Unknown;
-
-      plUuid guid0 = pFileStatus->m_AssetGuid;
-      if (guid0.IsValid())
-      {
-        plAssetInfo* pAssetInfo = m_KnownDirectories[guid0];
-
-        m_KnownDirectories.Remove(guid0);
-        m_KnownSubAssets.Remove(guid0);
-        m_AssetFolders.Remove(sAbsolutePath);
-        m_RemovedFolders.PushBack(pAssetInfo->m_sDataDirRelativePath);
-        pFileStatus->m_AssetGuid = plUuid();
-        PLASMA_DEFAULT_DELETE(pAssetInfo);
-      }
-    }
-    return;
-  }
-
-  HandleSingleDir(sAbsolutePath, Stats);
-}
-
-void plAssetCurator::HandleSingleDir(const plString& sAbsolutePath, const plFileStats& FileStat)
-{
-  PLASMA_ASSERT_DEV(FileStat.m_bIsDirectory, "Files are handled by HandleSingleFile function.");
-
-  // store the folder of the asset
-  plStringBuilder sAssetFolder = sAbsolutePath;
-  sAssetFolder.TrimWordEnd("/");
-
-  if (m_AssetFolders.Contains(sAssetFolder) || !plPathUtils::IsAbsolutePath(sAssetFolder))
-  {
-    m_AssetFolders[sAssetFolder].m_Status = plFileStatus::Status::Valid;
-    return;
-  }
-
-  if (plStringUtils::FindSubString_NoCase(sAssetFolder, "assetcache") != nullptr)
-  {
-    return;
-  }
-
-  plUuid id = plUuid();
-  id.CreateNewUuid();
-
-  plFileStatus newStatus = plFileStatus();
-  newStatus.m_AssetGuid = id;
-
-  m_AssetFolders.Insert(sAssetFolder, newStatus);
-
-  plSubAsset folderAsset = plSubAsset();
-
-  folderAsset.m_pAssetInfo = PLASMA_DEFAULT_NEW(plAssetInfo);
-
-  folderAsset.m_pAssetInfo->m_sAbsolutePath = sAssetFolder;
-  if (plFileSystem::MakePathRelative(sAssetFolder.GetData(), sAssetFolder).Failed())
-  {
-    plLog::Error("Failed to make path relative {}", sAssetFolder);
-    return;
-  }
-  folderAsset.m_pAssetInfo->m_sDataDirRelativePath = plString(sAssetFolder);
-
-  folderAsset.m_pAssetInfo->m_pDocumentTypeDescriptor = &m_DirDescriptor;
-  //plSubAssetData
-  folderAsset.m_Data = plSubAssetData();
-  folderAsset.m_Data.m_sName = sAssetFolder.GetFileName();
-  folderAsset.m_Data.m_Guid = id;
-
-  sAssetFolder.PathParentDirectory();
-  folderAsset.m_pAssetInfo->m_sDataDirParentRelativePath = plString(sAssetFolder);
-
-  folderAsset.m_bMainAsset = false;
-  folderAsset.m_bIsDir = true;
-  folderAsset.m_pAssetInfo->m_TransformState = plAssetInfo::TransformState::Folder;
-  m_KnownSubAssets.Insert(id, folderAsset);
-  m_KnownDirectories.Insert(id, folderAsset.m_pAssetInfo);
-}
-
-plResult plAssetCurator::WriteAssetTable(const char* szDataDirectory, const plPlatformProfile* pAssetProfile0 /*= nullptr*/)
-{
-  const plPlatformProfile* pAssetProfile = pAssetProfile0;
-
-  if (pAssetProfile == nullptr)
-  {
-    pAssetProfile = GetActiveAssetProfile();
-  }
-
-  plStringBuilder sDataDir = szDataDirectory;
-  sDataDir.MakeCleanPath();
-
-  plStringBuilder sFinalPath(sDataDir, "/AssetCache/", pAssetProfile->GetConfigName(), ".plAidlt");
-  sFinalPath.MakeCleanPath();
-
-  plStringBuilder sTemp, sTemp2;
-  plString sResourcePath;
-
-  plMap<plString, plString> GuidToPath;
-
-  {
-    for (auto& man : plAssetDocumentManager::GetAllDocumentManagers())
-    {
-      if (!man->GetDynamicRTTI()->IsDerivedFrom<plAssetDocumentManager>())
-        continue;
-
-      plAssetDocumentManager* pManager = static_cast<plAssetDocumentManager*>(man);
-
-      // allow to add fully custom entries
-      pManager->AddEntriesToAssetTable(sDataDir, pAssetProfile, GuidToPath);
-    }
-  }
-
-  // TODO: Iterate over m_KnownSubAssets instead
-  for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
-  {
-    sTemp = it.Value()->m_sAbsolutePath;
-
-    // ignore all assets that are not located in this data directory
-    if (!sTemp.IsPathBelowFolder(sDataDir))
-      continue;
-
-    plAssetDocumentManager* pManager = it.Value()->GetManager();
-
-    auto WriteEntry = [this, &sDataDir, &pAssetProfile, &GuidToPath, pManager, &sTemp, &sTemp2](const plUuid& guid) {
-      plSubAsset* pSub = GetSubAssetInternal(guid);
-      plString sEntry = pManager->GetAssetTableEntry(pSub, sDataDir, pAssetProfile);
-
-      // it is valid to write no asset table entry, if no redirection is required
-      // this is used by decal assets for instance
-      if (!sEntry.IsEmpty())
-      {
-        plConversionUtils::ToString(guid, sTemp2);
-
-        GuidToPath[sTemp2] = sEntry;
-      }
-    };
-
-    WriteEntry(it.Key());
-    for (const plUuid& subGuid : it.Value()->m_SubAssets)
-    {
-      WriteEntry(subGuid);
-    }
-  }
-
-  plDeferredFileWriter file;
-  file.SetOutput(sFinalPath);
-
-  for (auto it = GuidToPath.GetIterator(); it.IsValid(); ++it)
-  {
-    const plString& guid = it.Key();
-    const plString& path = it.Value();
-
-    file.WriteBytes(guid.GetData(), guid.GetElementCount()).IgnoreResult();
-    file.WriteBytes(";", 1).IgnoreResult();
-    file.WriteBytes(path.GetData(), path.GetElementCount()).IgnoreResult();
-    file.WriteBytes("\n", 1).IgnoreResult();
-  }
-
-  if (file.Close().Failed())
-  {
-    plLog::Error("Failed to open asset lookup table file ('{0}')", sFinalPath);
-    return PLASMA_FAILURE;
-  }
-
-  return PLASMA_SUCCESS;
-}
-
-void plAssetCurator::ProcessAllCoreAssets()
-{
-  PLASMA_PROFILE_SCOPE("ProcessAllCoreAssets");
-  if (plQtUiServices::IsHeadless())
-    return;
-
-  // The 'Core Assets' are always transformed for the PC platform,
-  // as they are needed to run the editor properly
-  const plPlatformProfile* pAssetProfile = GetDevelopmentAssetProfile();
-
-  for (const auto& dd : m_FileSystemConfig.m_DataDirs)
-  {
-    plStringBuilder sCoreCollectionPath;
-    plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sCoreCollectionPath).IgnoreResult();
-
-    plStringBuilder sName = sCoreCollectionPath.GetFileName();
-    sName.Append(".plCollectionAsset");
-    sCoreCollectionPath.AppendPath(sName);
-
-    QFile coreCollection(sCoreCollectionPath.GetData());
-    if (coreCollection.exists())
-    {
-      auto pSubAsset = FindSubAsset(sCoreCollectionPath);
-      if (pSubAsset)
-      {
-        // prefer certain asset types over others, to ensure that thumbnail generation works
-        plHybridArray<plTempHashedString, 4> transformOrder;
-        transformOrder.PushBack(plTempHashedString("RenderPipeline"));
-        transformOrder.PushBack(plTempHashedString(""));
-
-        plTransformStatus resReferences(PLASMA_SUCCESS);
-
-        for (const plTempHashedString& name : transformOrder)
-        {
-          for (const auto& ref : pSubAsset->m_pAssetInfo->m_Info->m_RuntimeDependencies)
-          {
-            if (plAssetInfo* pInfo = GetAssetInfo(ref))
-            {
-              if (name.GetHash() == 0ull || pInfo->m_Info->m_sAssetsDocumentTypeName == name)
-              {
-                resReferences = ProcessAsset(pInfo, pAssetProfile, plTransformFlags::TriggeredManually);
-                if (resReferences.Failed())
-                  break;
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-}
-
-////////////////////////////////////////////////////////////////////////
-// plAssetCurator Update Task
-////////////////////////////////////////////////////////////////////////
-
-void plAssetCurator::RestartUpdateTask()
-{
-  PLASMA_LOCK(m_CuratorMutex);
-  m_bRunUpdateTask = true;
-
-  RunNextUpdateTask();
-}
-
-void plAssetCurator::ShutdownUpdateTask()
-{
-  {
-    PLASMA_LOCK(m_CuratorMutex);
-    m_bRunUpdateTask = false;
-  }
-
-  if (m_pUpdateTask)
-  {
-    plTaskSystem::WaitForGroup(m_UpdateTaskGroup);
-
-    PLASMA_LOCK(m_CuratorMutex);
-    m_pUpdateTask.Clear();
-  }
-}
-
-bool plAssetCurator::GetNextAssetToUpdate(plUuid& guid, plStringBuilder& out_sAbsPath)
-{
-  PLASMA_LOCK(m_CuratorMutex);
-
-  while (!m_TransformStateStale.IsEmpty())
-  {
-    auto it = m_TransformStateStale.GetIterator();
-    guid = it.Key();
-
-    auto pAssetInfo = GetAssetInfo(guid);
-
-    // PLASMA_ASSERT_DEBUG(pAssetInfo != nullptr, "Non-existent assets should not have a tracked transform state.");
-
-    if (pAssetInfo != nullptr)
-    {
-      out_sAbsPath = pAssetInfo->m_sAbsolutePath;
-      return true;
-    }
-    else
-    {
-      plLog::Error("Non-existent assets ('{0}') should not have a tracked transform state.", guid);
-      m_TransformStateStale.Remove(it);
-    }
-  }
-
-  return false;
-}
-
-void plAssetCurator::OnUpdateTaskFinished(const plSharedPtr<plTask>& pTask)
-{
-  PLASMA_LOCK(m_CuratorMutex);
-
-  RunNextUpdateTask();
-}
-
-void plAssetCurator::RunNextUpdateTask()
-{
-  PLASMA_LOCK(m_CuratorMutex);
-
-  if (!m_bRunUpdateTask || (m_TransformStateStale.IsEmpty() && m_TransformState[plAssetInfo::TransformState::Unknown].IsEmpty()))
-    return;
-
-  if (m_pUpdateTask == nullptr)
-  {
-    m_pUpdateTask = PLASMA_DEFAULT_NEW(plUpdateTask, plMakeDelegate(&plAssetCurator::OnUpdateTaskFinished, this));
-  }
-
-  if (m_pUpdateTask->IsTaskFinished())
-  {
-    m_UpdateTaskGroup = plTaskSystem::StartSingleTask(m_pUpdateTask, plTaskPriority::FileAccess);
-  }
-}
-
-
-////////////////////////////////////////////////////////////////////////
-// plAssetCurator Check File System Helper
-////////////////////////////////////////////////////////////////////////
-
-void plAssetCurator::SetAllAssetStatusUnknown()
-{
-  // tags all known files as unknown, such that we can later remove files
-  // that can not be found anymore
-
-  for (auto it = m_ReferencedFiles.GetIterator(); it.IsValid(); ++it)
-  {
-    it.Value().m_Status = plFileStatus::Status::Unknown;
-  }
-
-  for (auto it = m_AssetFolders.GetIterator(); it.IsValid(); ++it)
-  {
-    it.Value().m_Status = plFileStatus::Status::Unknown;
-  }
-
-  for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
-  {
-    UpdateAssetTransformState(it.Key(), plAssetInfo::TransformState::Unknown);
-  }
-}
-
-void plAssetCurator::RemoveStaleFileInfos()
-{
-  plSet<plString> unknownFiles;
-  for (auto it = m_ReferencedFiles.GetIterator(); it.IsValid(); ++it)
-  {
-    // search for files that existed previously but have not been found anymore recently
-    if (it.Value().m_Status == plFileStatus::Status::Unknown)
-    {
-      unknownFiles.Insert(it.Key());
-    }
-  }
-
-  for (const plString& sFile : unknownFiles)
-  {
-    if (!sFile.IsEmpty())
-    HandleSingleFile(sFile);
-    m_ReferencedFiles.Remove(sFile);
-  }
-
-  unknownFiles.Clear();
-  for (auto it = m_AssetFolders.GetIterator(); it.IsValid(); ++it)
-  {
-    // search for files that existed previously but have not been found anymore recently
-    if (it.Value().m_Status == plFileStatus::Status::Unknown)
-    {
-      unknownFiles.Insert(it.Key());
-    }
-  }
-
-  for (const plString& sFile : unknownFiles)
-  {
-    if (!sFile.IsEmpty())
-    HandleSingleDir(sFile);
-    m_ReferencedFiles.Remove(sFile);
-  }
-}
-
 void plAssetCurator::BuildFileExtensionSet(plSet<plString>& AllExtensions)
 {
   plStringBuilder sTemp;
@@ -1934,65 +1634,250 @@ void plAssetCurator::BuildFileExtensionSet(plSet<plString>& AllExtensions)
   }
 }
 
-void plAssetCurator::IterateDataDirectory(const char* szDataDir, plSet<plString>* pFoundFiles)
+void plAssetCurator::OnFileChangedEvent(const plFileChangedEvent& e)
 {
-  plStringBuilder sDataDir = szDataDir;
-  sDataDir.MakeCleanPath();
-  PLASMA_ASSERT_DEV(plPathUtils::IsAbsolutePath(szDataDir), "Only absolute paths are supported for directory iteration.");
-
-  while (sDataDir.EndsWith("/"))
-    sDataDir.Shrink(0, 1);
-
-  if (sDataDir.IsEmpty())
-    return;
-
-  plFileSystemIterator iterator;
-  iterator.StartSearch(sDataDir, plFileSystemIteratorFlags::ReportFilesAndFoldersRecursive);
-
-  if (!iterator.IsValid())
-    return;
-
-  plStringBuilder sPath;
-  plFileStats Stats;
-  for (; iterator.IsValid(); iterator.Next())
+  switch (e.m_Type)
   {
-    Stats = iterator.GetStats();
-    sPath = iterator.GetCurrentPath();
-    sPath.AppendPath(Stats.m_sName);
-    sPath.MakeCleanPath();
-
-    if (Stats.m_bIsDirectory)
+    case plFileChangedEvent::Type::DocumentLinked:
+    case plFileChangedEvent::Type::DocumentUnlinked:
+      break;
+    case plFileChangedEvent::Type::FileAdded:
+    case plFileChangedEvent::Type::FileChanged:
     {
-      HandleSingleDir(sPath, Stats);
-    }
-    else
-    {
-      HandleSingleFile(sPath, Stats);
-      // TODO : Review, is it useful to return a list of files if we already Handle them here?
-      if (pFoundFiles)
+      // If the asset was just added it is not tracked and thus no need to invalidate anything.
+      if (e.m_Type == plFileChangedEvent::Type::FileChanged)
       {
-        pFoundFiles->Insert(sPath);
+        PL_LOCK(m_CuratorMutex);
+        plUuid guid0 = e.m_Status.m_DocumentID;
+        if (guid0.IsValid())
+          InvalidateAssetTransformState(guid0);
+
+        auto it = m_InverseTransformDeps.Find(e.m_Path);
+        if (it.IsValid())
+        {
+          for (const plUuid& guid : it.Value())
+          {
+            InvalidateAssetTransformState(guid);
+          }
+        }
+
+        auto it2 = m_InverseThumbnailDeps.Find(e.m_Path);
+        if (it2.IsValid())
+        {
+          for (const plUuid& guid : it2.Value())
+          {
+            InvalidateAssetTransformState(guid);
+          }
+        }
+      }
+
+      // Assets should never be in an AssetCache folder.
+      if (e.m_Path.GetAbsolutePath().FindSubString("/AssetCache/") != nullptr)
+      {
+        return;
+      }
+
+      // check that this is an asset type that we know
+      plStringBuilder sExt = plPathUtils::GetFileExtension(e.m_Path);
+      sExt.ToLower();
+      if (!m_ValidAssetExtensions.Contains(sExt))
+      {
+        return;
+      }
+
+      EnsureAssetInfoUpdated(e.m_Path, e.m_Status).IgnoreResult();
+    }
+    break;
+    case plFileChangedEvent::Type::FileRemoved:
+    {
+      PL_LOCK(m_CuratorMutex);
+      plUuid guid0 = e.m_Status.m_DocumentID;
+      if (guid0.IsValid())
+      {
+        if (auto it = m_KnownAssets.Find(guid0); it.IsValid())
+        {
+          plAssetInfo* pAssetInfo = it.Value();
+          PL_ASSERT_DEBUG(plFileSystemModel::IsSameFile(e.m_Path, pAssetInfo->m_Path), "");
+          UntrackDependencies(pAssetInfo);
+          RemoveAssetTransformState(guid0);
+          SetAssetExistanceState(*pAssetInfo, plAssetExistanceState::FileRemoved);
+        }
+      }
+      auto it = m_InverseTransformDeps.Find(e.m_Path);
+      if (it.IsValid())
+      {
+        for (const plUuid& guid : it.Value())
+        {
+          InvalidateAssetTransformState(guid);
+        }
+      }
+
+      auto it2 = m_InverseThumbnailDeps.Find(e.m_Path);
+      if (it2.IsValid())
+      {
+        for (const plUuid& guid : it2.Value())
+        {
+          InvalidateAssetTransformState(guid);
+        }
+      }
+    }
+    break;
+    case plFileChangedEvent::Type::ModelReset:
+      break;
+    default:
+      PL_ASSERT_NOT_IMPLEMENTED;
+  }
+}
+
+void plAssetCurator::ProcessAllCoreAssets()
+{
+  PL_PROFILE_SCOPE("ProcessAllCoreAssets");
+  if (plQtUiServices::IsHeadless())
+    return;
+
+  // The 'Core Assets' are always transformed for the PC platform,
+  // as they are needed to run the editor properly
+  const plPlatformProfile* pAssetProfile = GetDevelopmentAssetProfile();
+
+  for (const auto& dd : m_FileSystemConfig.m_DataDirs)
+  {
+    plStringBuilder sCoreCollectionPath;
+    plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sCoreCollectionPath).IgnoreResult();
+
+    plStringBuilder sName = sCoreCollectionPath.GetFileName();
+    sName.Append(".plCollectionAsset");
+    sCoreCollectionPath.AppendPath(sName);
+
+    QFile coreCollection(sCoreCollectionPath.GetData());
+    if (coreCollection.exists())
+    {
+      auto pSubAsset = FindSubAsset(sCoreCollectionPath);
+      if (pSubAsset)
+      {
+        // prefer certain asset types over others, to ensure that thumbnail generation works
+        plHybridArray<plTempHashedString, 4> transformOrder;
+        transformOrder.PushBack(plTempHashedString("RenderPipeline"));
+        transformOrder.PushBack(plTempHashedString(""));
+
+        plTransformStatus resReferences(PL_SUCCESS);
+
+        for (const plTempHashedString& name : transformOrder)
+        {
+          for (const auto& ref : pSubAsset->m_pAssetInfo->m_Info->m_PackageDependencies)
+          {
+            if (plAssetInfo* pInfo = GetAssetInfo(ref))
+            {
+              if (name.GetHash() == 0ull || pInfo->m_Info->m_sAssetsDocumentTypeName == name)
+              {
+                resReferences = ProcessAsset(pInfo, pAssetProfile, plTransformFlags::TriggeredManually);
+                if (resReferences.Failed())
+                  break;
+              }
+            }
+          }
+        }
       }
     }
   }
-
-  if (plFileSystem::GetFileStats(sDataDir, Stats).Failed())
-  {
-    plLog::Error("Failed to get stats for directory : {}", sDataDir);
-    return;
-  }
-  sPath = iterator.GetCurrentPath();
-  sPath.AppendPath(Stats.m_sName);
-  sPath.MakeCleanPath();
-
-  if (plOSFile::ExistsDirectory(sPath))
-    HandleSingleDir(sPath, Stats);
 }
 
-void plAssetCurator::LoadCaches()
+////////////////////////////////////////////////////////////////////////
+// plAssetCurator Update Task
+////////////////////////////////////////////////////////////////////////
+
+void plAssetCurator::RestartUpdateTask()
 {
-  PLASMA_PROFILE_SCOPE("LoadCaches");
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
+  m_bRunUpdateTask = true;
+
+  RunNextUpdateTask();
+}
+
+void plAssetCurator::ShutdownUpdateTask()
+{
+  {
+    PL_LOCK(m_CuratorMutex);
+    m_bRunUpdateTask = false;
+  }
+
+  if (m_pUpdateTask)
+  {
+    plTaskSystem::WaitForGroup(m_UpdateTaskGroup);
+
+    PL_LOCK(m_CuratorMutex);
+    m_pUpdateTask.Clear();
+  }
+}
+
+bool plAssetCurator::GetNextAssetToUpdate(plUuid& guid, plStringBuilder& out_sAbsPath)
+{
+  PL_LOCK(m_CuratorMutex);
+
+  while (!m_TransformStateStale.IsEmpty())
+  {
+    auto it = m_TransformStateStale.GetIterator();
+    guid = it.Key();
+
+    auto pAssetInfo = GetAssetInfo(guid);
+
+    // PL_ASSERT_DEBUG(pAssetInfo != nullptr, "Non-existent assets should not have a tracked transform state.");
+
+    if (pAssetInfo != nullptr)
+    {
+      out_sAbsPath = pAssetInfo->m_Path;
+      return true;
+    }
+    else
+    {
+      plLog::Error("Non-existent assets ('{0}') should not have a tracked transform state.", guid);
+      m_TransformStateStale.Remove(it);
+    }
+  }
+
+  return false;
+}
+
+void plAssetCurator::OnUpdateTaskFinished(const plSharedPtr<plTask>& pTask)
+{
+  PL_LOCK(m_CuratorMutex);
+
+  RunNextUpdateTask();
+}
+
+void plAssetCurator::RunNextUpdateTask()
+{
+  PL_LOCK(m_CuratorMutex);
+
+  if (!m_bRunUpdateTask || (m_TransformStateStale.IsEmpty() && m_TransformState[plAssetInfo::TransformState::Unknown].IsEmpty()))
+    return;
+
+  if (m_pUpdateTask == nullptr)
+  {
+    m_pUpdateTask = PL_DEFAULT_NEW(plUpdateTask, plMakeDelegate(&plAssetCurator::OnUpdateTaskFinished, this));
+  }
+
+  if (m_pUpdateTask->IsTaskFinished())
+  {
+    m_UpdateTaskGroup = plTaskSystem::StartSingleTask(m_pUpdateTask, plTaskPriority::FileAccess);
+  }
+}
+
+////////////////////////////////////////////////////////////////////////
+// plAssetCurator Check File System Helper
+////////////////////////////////////////////////////////////////////////
+
+void plAssetCurator::SetAllAssetStatusUnknown()
+{
+  for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
+  {
+    UpdateAssetTransformState(it.Key(), plAssetInfo::TransformState::Unknown);
+  }
+}
+
+void plAssetCurator::LoadCaches(plFileSystemModel::FilesMap& out_referencedFiles, plFileSystemModel::FoldersMap& out_referencedFolders)
+{
+  PL_PROFILE_SCOPE("LoadCaches");
+  PL_LOCK(m_CuratorMutex);
 
   plStopwatch sw;
   for (const auto& dd : m_FileSystemConfig.m_DataDirs)
@@ -2008,23 +1893,10 @@ void plAssetCurator::LoadCaches()
     {
       plUInt32 uiCuratorCacheVersion = 0;
       plUInt32 uiFileVersion = 0;
-      plUInt32 uiAssetCount = 0;
-      plUInt32 uiFileCount = 0;
       reader >> uiCuratorCacheVersion;
       reader >> uiFileVersion;
-      reader >> uiAssetCount;
-      reader >> uiFileCount;
 
-      m_KnownAssets.Reserve(m_CachedAssets.GetCount());
-      m_KnownSubAssets.Reserve(m_CachedAssets.GetCount());
-
-      m_TransformState[plAssetInfo::Unknown].Reserve(m_CachedAssets.GetCount());
-      m_TransformState[plAssetInfo::UpToDate].Reserve(m_CachedAssets.GetCount());
-      m_SubAssetChanged.Reserve(m_CachedAssets.GetCount());
-      m_TransformStateStale.Reserve(m_CachedAssets.GetCount());
-      m_Updating.Reserve(m_CachedAssets.GetCount());
-
-      if (uiCuratorCacheVersion != PLASMA_CURATOR_CACHE_VERSION)
+      if (uiCuratorCacheVersion != PL_CURATOR_CACHE_VERSION)
       {
         // Do not purge cache on processors.
         if (!plQtUiServices::IsHeadless())
@@ -2041,12 +1913,13 @@ void plAssetCurator::LoadCaches()
         continue;
       }
 
-      if (uiFileVersion != PLASMA_CURATOR_CACHE_FILE_VERSION)
+      if (uiFileVersion != PL_CURATOR_CACHE_FILE_VERSION)
         continue;
 
-      const plRTTI* pFileStatusType = plGetStaticRTTI<plFileStatus>();
       {
-        PLASMA_PROFILE_SCOPE("Assets");
+        PL_PROFILE_SCOPE("Assets");
+        plUInt32 uiAssetCount = 0;
+        reader >> uiAssetCount;
         for (plUInt32 i = 0; i < uiAssetCount; i++)
         {
           plString sPath;
@@ -2054,23 +1927,50 @@ void plAssetCurator::LoadCaches()
 
           const plRTTI* pType = nullptr;
           plAssetDocumentInfo* pEntry = static_cast<plAssetDocumentInfo*>(plReflectionSerializer::ReadObjectFromBinary(reader, pType));
-          PLASMA_ASSERT_DEBUG(pEntry != nullptr && pType == plGetStaticRTTI<plAssetDocumentInfo>(), "Failed to deserialize plAssetDocumentInfo!");
+          PL_ASSERT_DEBUG(pEntry != nullptr && pType == plGetStaticRTTI<plAssetDocumentInfo>(), "Failed to deserialize plAssetDocumentInfo!");
           m_CachedAssets.Insert(sPath, plUniquePtr<plAssetDocumentInfo>(pEntry, plFoundation::GetDefaultAllocator()));
 
           plFileStatus stat;
           reader >> stat;
           m_CachedFiles.Insert(std::move(sPath), stat);
         }
+
+        m_KnownAssets.Reserve(m_CachedAssets.GetCount());
+        m_KnownSubAssets.Reserve(m_CachedAssets.GetCount());
+
+        m_TransformState[plAssetInfo::Unknown].Reserve(m_CachedAssets.GetCount());
+        m_TransformState[plAssetInfo::UpToDate].Reserve(m_CachedAssets.GetCount());
+        m_SubAssetChanged.Reserve(m_CachedAssets.GetCount());
+        m_TransformStateStale.Reserve(m_CachedAssets.GetCount());
+        m_Updating.Reserve(m_CachedAssets.GetCount());
       }
       {
-        PLASMA_PROFILE_SCOPE("Files");
+        PL_PROFILE_SCOPE("Files");
+        plUInt32 uiFileCount = 0;
+        reader >> uiFileCount;
         for (plUInt32 i = 0; i < uiFileCount; i++)
         {
-          plString sPath;
-          reader >> sPath;
+          plDataDirPath path;
+          reader >> path;
           plFileStatus stat;
           reader >> stat;
-          m_ReferencedFiles.Insert(std::move(sPath), stat);
+          // We invalidate all asset guids as the current cache as stored on disk is missing various bits in the curator that requires the code to go through the found new asset init code on load again.
+          stat.m_DocumentID = plUuid::MakeInvalid();
+          out_referencedFiles.Insert(std::move(path), stat);
+        }
+      }
+
+      {
+        PL_PROFILE_SCOPE("Folders");
+        plUInt32 uiFolderCount = 0;
+        reader >> uiFolderCount;
+        for (plUInt32 i = 0; i < uiFolderCount; i++)
+        {
+          plDataDirPath path;
+          reader >> path;
+          plFileStatus::Status stat;
+          reader >> (plUInt8&)stat;
+          out_referencedFolders.Insert(std::move(path), stat);
         }
       }
     }
@@ -2079,9 +1979,9 @@ void plAssetCurator::LoadCaches()
   plLog::Debug("Asset Curator LoadCaches: {0} ms", plArgF(sw.GetRunningTotal().GetMilliseconds(), 3));
 }
 
-void plAssetCurator::SaveCaches()
+void plAssetCurator::SaveCaches(const plFileSystemModel::FilesMap& referencedFiles, const plFileSystemModel::FoldersMap& referencedFolders)
 {
-  PLASMA_PROFILE_SCOPE("SaveCaches");
+  PL_PROFILE_SCOPE("SaveCaches");
   m_CachedAssets.Clear();
   m_CachedFiles.Clear();
 
@@ -2089,36 +1989,46 @@ void plAssetCurator::SaveCaches()
   if (plQtUiServices::IsHeadless())
     return;
 
-  PLASMA_LOCK(m_CuratorMutex);
-  const plUInt32 uiCuratorCacheVersion = PLASMA_CURATOR_CACHE_VERSION;
+  PL_LOCK(m_CuratorMutex);
+  const plUInt32 uiCuratorCacheVersion = PL_CURATOR_CACHE_VERSION;
 
   plStopwatch sw;
-  for (const auto& dd : m_FileSystemConfig.m_DataDirs)
+  for (plUInt32 i = 0; i < m_FileSystemConfig.m_DataDirs.GetCount(); i++)
   {
+    const auto& dd = m_FileSystemConfig.m_DataDirs[i];
+
     plStringBuilder sDataDir;
     plFileSystem::ResolveSpecialDirectory(dd.m_sDataDirSpecialPath, sDataDir).IgnoreResult();
 
     plStringBuilder sCacheFile = sDataDir;
     sCacheFile.AppendPath("AssetCache", "AssetCurator.plCache");
 
-    const plUInt32 uiFileVersion = PLASMA_CURATOR_CACHE_FILE_VERSION;
+    const plUInt32 uiFileVersion = PL_CURATOR_CACHE_FILE_VERSION;
     plUInt32 uiAssetCount = 0;
     plUInt32 uiFileCount = 0;
+    plUInt32 uiFolderCount = 0;
 
     {
-      PLASMA_PROFILE_SCOPE("Count");
+      PL_PROFILE_SCOPE("Count");
       for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
       {
-        if (it.Value()->m_ExistanceState == plAssetExistanceState::FileUnchanged && it.Value()->m_sAbsolutePath.StartsWith(sDataDir))
+        if (it.Value()->m_ExistanceState == plAssetExistanceState::FileUnchanged && it.Value()->m_Path.GetDataDirIndex() == i)
         {
           ++uiAssetCount;
         }
       }
-      for (auto it = m_ReferencedFiles.GetIterator(); it.IsValid(); ++it)
+      for (auto it = referencedFiles.GetIterator(); it.IsValid(); ++it)
       {
-        if (it.Value().m_Status == plFileStatus::Status::Valid && !it.Value().m_AssetGuid.IsValid() && it.Key().StartsWith(sDataDir))
+        if (it.Value().m_Status == plFileStatus::Status::Valid && it.Key().GetDataDirIndex() == i)
         {
           ++uiFileCount;
+        }
+      }
+      for (auto it = referencedFolders.GetIterator(); it.IsValid(); ++it)
+      {
+        if (it.Value() == plFileStatus::Status::Valid && it.Key().GetDataDirIndex() == i)
+        {
+          ++uiFolderCount;
         }
       }
     }
@@ -2127,38 +2037,130 @@ void plAssetCurator::SaveCaches()
 
     writer << uiCuratorCacheVersion;
     writer << uiFileVersion;
-    writer << uiAssetCount;
-    writer << uiFileCount;
 
     {
-      PLASMA_PROFILE_SCOPE("Assets");
+      PL_PROFILE_SCOPE("Assets");
+      writer << uiAssetCount;
       for (auto it = m_KnownAssets.GetIterator(); it.IsValid(); ++it)
       {
         const plAssetInfo* pAsset = it.Value();
-        if (pAsset->m_ExistanceState == plAssetExistanceState::FileUnchanged && pAsset->m_sAbsolutePath.StartsWith(sDataDir))
+        if (pAsset->m_ExistanceState == plAssetExistanceState::FileUnchanged && pAsset->m_Path.GetDataDirIndex() == i)
         {
-          writer << pAsset->m_sAbsolutePath;
+          writer << pAsset->m_Path.GetAbsolutePath();
           plReflectionSerializer::WriteObjectToBinary(writer, plGetStaticRTTI<plAssetDocumentInfo>(), pAsset->m_Info.Borrow());
-          const plFileStatus* pStat = m_ReferencedFiles.GetValue(it.Value()->m_sAbsolutePath);
-          PLASMA_ASSERT_DEBUG(pStat != nullptr, "");
+          const plFileStatus* pStat = referencedFiles.GetValue(it.Value()->m_Path);
+          PL_ASSERT_DEBUG(pStat != nullptr, "");
           writer << *pStat;
         }
       }
     }
     {
-      PLASMA_PROFILE_SCOPE("Files");
-      for (auto it = m_ReferencedFiles.GetIterator(); it.IsValid(); ++it)
+      PL_PROFILE_SCOPE("Files");
+      writer << uiFileCount;
+      for (auto it = referencedFiles.GetIterator(); it.IsValid(); ++it)
       {
         const plFileStatus& stat = it.Value();
-        if (stat.m_Status == plFileStatus::Status::Valid && !stat.m_AssetGuid.IsValid() && it.Key().StartsWith(sDataDir))
+        if (stat.m_Status == plFileStatus::Status::Valid && it.Key().GetDataDirIndex() == i)
         {
           writer << it.Key();
           writer << stat;
         }
       }
     }
+    {
+      PL_PROFILE_SCOPE("Folders");
+      writer << uiFolderCount;
+      for (auto it = referencedFolders.GetIterator(); it.IsValid(); ++it)
+      {
+        const plFileStatus::Status stat = it.Value();
+        if (stat == plFileStatus::Status::Valid && it.Key().GetDataDirIndex() == i)
+        {
+          writer << it.Key();
+          writer << (plUInt8)stat;
+        }
+      }
+    }
+
     writer.Close().IgnoreResult();
   }
 
   plLog::Debug("Asset Curator SaveCaches: {0} ms", plArgF(sw.GetRunningTotal().GetMilliseconds(), 3));
+}
+
+void plAssetCurator::ClearAssetCaches(plAssetDocumentManager::OutputReliability threshold)
+{
+  const bool bWasRunning = plAssetProcessor::GetSingleton()->GetProcessTaskState() == plAssetProcessor::ProcessTaskState::Running;
+
+  if (bWasRunning)
+  {
+    // pause background asset processing while we delete files
+    plAssetProcessor::GetSingleton()->StopProcessTask(true);
+  }
+
+  {
+    PL_LOCK(m_CuratorMutex);
+
+    plStringBuilder filePath;
+
+    plSet<plString> keepAssets;
+    plSet<plString> filesToDelete;
+
+    // for all assets, gather their outputs and check which ones we want to keep
+    // e.g. textures are perfectly reliable, and even when clearing the cache we can keep them, also because they cost a lot of time to regenerate
+    for (auto it : m_KnownSubAssets)
+    {
+      const auto& subAsset = it.Value();
+      auto pManager = subAsset.m_pAssetInfo->GetManager();
+      if (pManager->GetAssetTypeOutputReliability() > threshold)
+      {
+        auto pDocumentTypeDescriptor = subAsset.m_pAssetInfo->m_pDocumentTypeDescriptor;
+        const auto& path = subAsset.m_pAssetInfo->m_Path;
+
+        // check additional outputs
+        for (const auto& output : subAsset.m_pAssetInfo->m_Info->m_Outputs)
+        {
+          filePath = pManager->GetAbsoluteOutputFileName(pDocumentTypeDescriptor, path, output);
+          filePath.MakeCleanPath();
+          keepAssets.Insert(filePath);
+        }
+
+        filePath = pManager->GetAbsoluteOutputFileName(pDocumentTypeDescriptor, path, nullptr);
+        filePath.MakeCleanPath();
+        keepAssets.Insert(filePath);
+
+        // and also keep the thumbnail
+        filePath = pManager->GenerateResourceThumbnailPath(path, subAsset.m_Data.m_sName);
+        filePath.MakeCleanPath();
+        keepAssets.Insert(filePath);
+      }
+    }
+
+    // iterate over all AssetCache folders in all data directories and gather the list of files for deletion
+    plFileSystemIterator iter;
+    for (plFileSystem::StartSearch(iter, "AssetCache/", plFileSystemIteratorFlags::ReportFilesRecursive); iter.IsValid(); iter.Next())
+    {
+      iter.GetStats().GetFullPath(filePath);
+      filePath.MakeCleanPath();
+
+      if (keepAssets.Contains(filePath))
+        continue;
+
+      filesToDelete.Insert(filePath);
+    }
+
+    for (const plString& file : filesToDelete)
+    {
+      plOSFile::DeleteFile(file).IgnoreResult();
+    }
+  }
+
+  plAssetCurator::CheckFileSystem();
+
+  plAssetCurator::ProcessAllCoreAssets();
+
+  if (bWasRunning)
+  {
+    // restart background asset processing
+    plAssetProcessor::GetSingleton()->StartProcessTask();
+  }
 }

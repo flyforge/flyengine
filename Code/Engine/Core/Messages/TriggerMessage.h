@@ -4,7 +4,7 @@
 #include <Core/World/Declarations.h>
 #include <Foundation/Communication/Message.h>
 
-struct PLASMA_CORE_DLL plTriggerState
+struct PL_CORE_DLL plTriggerState
 {
   using StorageType = plUInt8;
 
@@ -18,13 +18,13 @@ struct PLASMA_CORE_DLL plTriggerState
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_CORE_DLL, plTriggerState);
+PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plTriggerState);
 
 /// \brief For internal use by components to trigger some known behavior. Usually components will post this message to themselves with a
 /// delay, e.g. to trigger self destruction.
-struct PLASMA_CORE_DLL plMsgComponentInternalTrigger : public plMessage
+struct PL_CORE_DLL plMsgComponentInternalTrigger : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgComponentInternalTrigger, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgComponentInternalTrigger, plMessage);
 
   /// Identifies what the message should trigger.
   plHashedString m_sMessage;
@@ -33,9 +33,9 @@ struct PLASMA_CORE_DLL plMsgComponentInternalTrigger : public plMessage
 };
 
 /// \brief Sent when something enters or leaves a trigger
-struct PLASMA_CORE_DLL plMsgTriggerTriggered : public plEventMessage
+struct PL_CORE_DLL plMsgTriggerTriggered : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgTriggerTriggered, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgTriggerTriggered, plEventMessage);
 
   /// Identifies what the message should trigger.
   plHashedString m_sMessage;

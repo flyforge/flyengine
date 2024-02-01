@@ -3,9 +3,9 @@
 #include <Foundation/Strings/HashedString.h>
 #include <RendererCore/Pipeline/Declarations.h>
 
-struct PLASMA_RENDERERCORE_DLL plViewRenderMode
+struct PL_RENDERERCORE_DLL plViewRenderMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -32,7 +32,6 @@ struct PLASMA_RENDERERCORE_DLL plViewRenderMode
     Depth,
     StaticVsDynamic,
     BoneWeights,
-    MotionVectors,
 
     ENUM_COUNT,
 
@@ -43,4 +42,4 @@ struct PLASMA_RENDERERCORE_DLL plViewRenderMode
   static int GetRenderPassForShader(Enum renderMode);
   static void GetDebugText(Enum renderMode, plStringBuilder& out_sDebugText);
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plViewRenderMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plViewRenderMode);

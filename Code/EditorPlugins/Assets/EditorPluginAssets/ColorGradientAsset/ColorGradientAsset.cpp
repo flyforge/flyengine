@@ -5,85 +5,85 @@
 #include <GuiFoundation/Widgets/CurveEditData.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorControlPoint, 2, plRTTIDefaultAllocator<plColorControlPoint>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorControlPoint, 2, plRTTIDefaultAllocator<plColorControlPoint>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    //PLASMA_MEMBER_PROPERTY("Position", m_fPositionX),
-    PLASMA_MEMBER_PROPERTY("Tick", m_iTick),
-    PLASMA_MEMBER_PROPERTY("Red", m_Red)->AddAttributes(new plDefaultValueAttribute(255)),
-    PLASMA_MEMBER_PROPERTY("Green", m_Green)->AddAttributes(new plDefaultValueAttribute(255)),
-    PLASMA_MEMBER_PROPERTY("Blue", m_Blue)->AddAttributes(new plDefaultValueAttribute(255)),
+    //PL_MEMBER_PROPERTY("Position", m_fPositionX),
+    PL_MEMBER_PROPERTY("Tick", m_iTick),
+    PL_MEMBER_PROPERTY("Red", m_Red)->AddAttributes(new plDefaultValueAttribute(255)),
+    PL_MEMBER_PROPERTY("Green", m_Green)->AddAttributes(new plDefaultValueAttribute(255)),
+    PL_MEMBER_PROPERTY("Blue", m_Blue)->AddAttributes(new plDefaultValueAttribute(255)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAlphaControlPoint, 2, plRTTIDefaultAllocator<plAlphaControlPoint>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAlphaControlPoint, 2, plRTTIDefaultAllocator<plAlphaControlPoint>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    //PLASMA_MEMBER_PROPERTY("Position", m_fPositionX),
-    PLASMA_MEMBER_PROPERTY("Tick", m_iTick),
-    PLASMA_MEMBER_PROPERTY("Alpha", m_Alpha)->AddAttributes(new plDefaultValueAttribute(255)),
+    //PL_MEMBER_PROPERTY("Position", m_fPositionX),
+    PL_MEMBER_PROPERTY("Tick", m_iTick),
+    PL_MEMBER_PROPERTY("Alpha", m_Alpha)->AddAttributes(new plDefaultValueAttribute(255)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plIntensityControlPoint, 2, plRTTIDefaultAllocator<plIntensityControlPoint>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plIntensityControlPoint, 2, plRTTIDefaultAllocator<plIntensityControlPoint>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    //PLASMA_MEMBER_PROPERTY("Position", m_fPositionX),
-    PLASMA_MEMBER_PROPERTY("Tick", m_iTick),
-    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    //PL_MEMBER_PROPERTY("Position", m_fPositionX),
+    PL_MEMBER_PROPERTY("Tick", m_iTick),
+    PL_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetData, 2, plRTTIDefaultAllocator<plColorGradientAssetData>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetData, 2, plRTTIDefaultAllocator<plColorGradientAssetData>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_MEMBER_PROPERTY("ColorCPs", m_ColorCPs),
-    PLASMA_ARRAY_MEMBER_PROPERTY("AlphaCPs", m_AlphaCPs),
-    PLASMA_ARRAY_MEMBER_PROPERTY("IntensityCPs", m_IntensityCPs),
+    PL_ARRAY_MEMBER_PROPERTY("ColorCPs", m_ColorCPs),
+    PL_ARRAY_MEMBER_PROPERTY("AlphaCPs", m_AlphaCPs),
+    PL_ARRAY_MEMBER_PROPERTY("IntensityCPs", m_IntensityCPs),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plColorControlPoint::SetTickFromTime(plTime time, plInt64 fps)
+void plColorControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / fps;
+  const plUInt32 uiTicksPerStep = 4800 / iFps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plAlphaControlPoint::SetTickFromTime(plTime time, plInt64 fps)
+void plAlphaControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / fps;
+  const plUInt32 uiTicksPerStep = 4800 / iFps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plIntensityControlPoint::SetTickFromTime(plTime time, plInt64 fps)
+void plIntensityControlPoint::SetTickFromTime(plTime time, plInt64 iFps)
 {
-  const plUInt32 uiTicksPerStep = 4800 / fps;
+  const plUInt32 uiTicksPerStep = 4800 / iFps;
   m_iTick = (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-plColorGradientAssetDocument::plColorGradientAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plColorGradientAssetData>(szDocumentPath, plAssetDocEngineConnection::None)
+plColorGradientAssetDocument::plColorGradientAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plColorGradientAssetData>(sDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-void plColorGradientAssetDocument::WriteResource(plStreamWriter& stream) const
+void plColorGradientAssetDocument::WriteResource(plStreamWriter& inout_stream) const
 {
   const plColorGradientAssetData* pProp = GetProperties();
 
@@ -91,7 +91,7 @@ void plColorGradientAssetDocument::WriteResource(plStreamWriter& stream) const
   pProp->FillGradientData(desc.m_Gradient);
   desc.m_Gradient.SortControlPoints();
 
-  desc.Save(stream);
+  desc.Save(inout_stream);
 }
 
 plInt64 plColorGradientAssetData::TickFromTime(plTime time)
@@ -102,21 +102,21 @@ plInt64 plColorGradientAssetData::TickFromTime(plTime time)
   return (plInt64)plMath::RoundToMultiple(time.GetSeconds() * 4800.0, (double)uiTicksPerStep);
 }
 
-void plColorGradientAssetData::FillGradientData(plColorGradient& out_Result) const
+void plColorGradientAssetData::FillGradientData(plColorGradient& out_result) const
 {
   for (const auto& cp : m_ColorCPs)
   {
-    out_Result.AddColorControlPoint(cp.GetTickAsTime().GetSeconds(), plColorGammaUB(cp.m_Red, cp.m_Green, cp.m_Blue));
+    out_result.AddColorControlPoint(cp.GetTickAsTime().GetSeconds(), plColorGammaUB(cp.m_Red, cp.m_Green, cp.m_Blue));
   }
 
   for (const auto& cp : m_AlphaCPs)
   {
-    out_Result.AddAlphaControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_Alpha);
+    out_result.AddAlphaControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_Alpha);
   }
 
   for (const auto& cp : m_IntensityCPs)
   {
-    out_Result.AddIntensityControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_fIntensity);
+    out_result.AddIntensityControlPoint(cp.GetTickAsTime().GetSeconds(), cp.m_fIntensity);
   }
 }
 
@@ -178,10 +178,10 @@ plColor plColorGradientAssetData::Evaluate(plInt64 iTick) const
   return color;
 }
 
-plTransformStatus plColorGradientAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plColorGradientAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   WriteResource(stream);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plTransformStatus plColorGradientAssetDocument::InternalCreateThumbnail(const ThumbnailInfo& ThumbnailInfo)
@@ -260,7 +260,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Color CPs", "ColorCPs");
     pNode->RenameProperty("Alpha CPs", "AlphaCPs");
@@ -280,7 +280,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())
@@ -303,7 +303,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())
@@ -326,7 +326,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     auto* pPoint = pNode->FindProperty("Position");
     if (pPoint && pPoint->m_Value.IsA<float>())

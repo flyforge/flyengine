@@ -7,7 +7,7 @@
 
 namespace
 {
-  PLASMA_FORCE_INLINE float ApplyValue(plProcGenBlendMode::Enum blendMode, float fInitialValue, float fNewValue)
+  PL_FORCE_INLINE float ApplyValue(plProcGenBlendMode::Enum blendMode, float fInitialValue, float fNewValue)
   {
     switch (blendMode)
     {
@@ -31,8 +31,8 @@ namespace
   }
 } // namespace
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plVolumeCollection::Sphere) == 64);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plVolumeCollection::Box) == 80);
+PL_CHECK_AT_COMPILETIME(sizeof(plVolumeCollection::Sphere) == 64);
+PL_CHECK_AT_COMPILETIME(sizeof(plVolumeCollection::Box) == 80);
 
 void plVolumeCollection::Shape::SetGlobalToLocalTransform(const plSimdMat4f& t)
 {
@@ -55,8 +55,8 @@ plSimdMat4f plVolumeCollection::Shape::GetGlobalToLocalTransform() const
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVolumeCollection, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVolumeCollection, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition, float fInitialValue, plProcVolumeImageMode::Enum imgMode, const plColor& refColor) const
 {
@@ -84,7 +84,7 @@ float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition,
       {
         const float fNewValue = ApplyValue(box.m_BlendMode, fValue, box.m_fValue);
         plSimdVec4f vAlpha = absLocalPos.CompMul(plSimdConversion::ToVec3(box.m_vFadeOutScale)) + plSimdConversion::ToVec3(box.m_vFadeOutBias);
-        vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
+        vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
         const float fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
         fValue = plMath::Lerp(fValue, fNewValue, fAlpha);
       }
@@ -105,7 +105,7 @@ float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition,
         const plColor col = plImageUtils::NearestSample(image.m_pPixelData, image.m_uiImageWidth, image.m_uiImageHeight, plImageAddressMode::Clamp, uv);
 
         float fValueToUse = image.m_fValue;
-        PLASMA_IGNORE_UNUSED(fValueToUse);
+        PL_IGNORE_UNUSED(fValueToUse);
 
         switch (imgMode)
         {
@@ -130,7 +130,7 @@ float plVolumeCollection::EvaluateAtGlobalPosition(const plSimdVec4f& vPosition,
         {
           const float fNewValue = ApplyValue(image.m_BlendMode, fValue, fValueToUse);
           plSimdVec4f vAlpha = absLocalPos.CompMul(plSimdConversion::ToVec3(image.m_vFadeOutScale)) + plSimdConversion::ToVec3(image.m_vFadeOutBias);
-          vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::ZeroVector());
+          vAlpha = vAlpha.CompMin(plSimdVec4f(1.0f)).CompMax(plSimdVec4f::MakeZero());
           const float fAlpha = vAlpha.x() * vAlpha.y() * vAlpha.z();
           fValue = plMath::Lerp(fValue, fNewValue, fAlpha);
         }
@@ -150,26 +150,25 @@ void plVolumeCollection::ExtractVolumesInBox(const plWorld& world, const plBound
 
   plSpatialSystem::QueryParams queryParams;
   queryParams.m_uiCategoryBitmask = spatialCategory.GetBitmask();
-  queryParams.m_IncludeTags = includeTags;
+  queryParams.m_pIncludeTags = &includeTags;
 
-  world.GetSpatialSystem()->FindObjectsInBox(box, queryParams, [&](plGameObject* pObject)
+  world.GetSpatialSystem()->FindObjectsInBox(box, queryParams, [&](plGameObject* pObject) {
+    if (pComponentBaseType != nullptr)
     {
-      if (pComponentBaseType != nullptr)
-      {
-        plHybridArray<const plComponent*, 8> components;
-        pObject->TryGetComponentsOfBaseType(pComponentBaseType, components);
+      plHybridArray<const plComponent*, 8> components;
+      pObject->TryGetComponentsOfBaseType(pComponentBaseType, components);
 
-        for (auto pComponent : components)
-        {
-          pComponent->SendMessage(msg);
-        }
-      }
-      else
+      for (auto pComponent : components)
       {
-        pObject->SendMessage(msg);
+        pComponent->SendMessage(msg);
       }
+    }
+    else
+    {
+      pObject->SendMessage(msg);
+    }
 
-      return plVisitorExecution::Continue; });
+    return plVisitorExecution::Continue; });
 
   out_collection.m_Spheres.Sort();
   out_collection.m_Boxes.Sort();
@@ -212,8 +211,8 @@ void plVolumeCollection::ExtractVolumesInBox(const plWorld& world, const plBound
       uiSmallestKey = pSmallestShape->m_uiSortingKey;
     }
 
-    PLASMA_IGNORE_UNUSED(uiSmallestKey);
-    PLASMA_ASSERT_DEBUG(pSmallestShape != nullptr, "Error sorting proc-gen volumes.");
+    PL_IGNORE_UNUSED(uiSmallestKey);
+    PL_ASSERT_DEBUG(pSmallestShape != nullptr, "Error sorting proc-gen volumes.");
 
     out_collection.m_SortedShapes.PushBack(pSmallestShape);
 
@@ -290,6 +289,6 @@ void plVolumeCollection::AddImage(const plSimdTransform& transform, const plVec3
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgExtractVolumes);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractVolumes, 1, plRTTIDefaultAllocator<plMsgExtractVolumes>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgExtractVolumes);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractVolumes, 1, plRTTIDefaultAllocator<plMsgExtractVolumes>)
+PL_END_DYNAMIC_REFLECTED_TYPE;

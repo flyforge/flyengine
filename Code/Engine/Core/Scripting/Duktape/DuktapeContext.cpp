@@ -43,11 +43,11 @@ void plDuktapeContext::EnableModuleSupport(duk_c_function moduleSearchFunction)
 
 void plDuktapeContext::InitializeContext()
 {
-  PLASMA_ASSERT_ALWAYS(m_pContext == nullptr, "Duktape context should be null");
+  PL_ASSERT_ALWAYS(m_pContext == nullptr, "Duktape context should be null");
 
   m_pContext = duk_create_heap(DukAlloc, DukRealloc, DukFree, this, FatalErrorHandler);
 
-  PLASMA_ASSERT_ALWAYS(m_pContext != nullptr, "Duktape context could not be created");
+  PL_ASSERT_ALWAYS(m_pContext != nullptr, "Duktape context could not be created");
 }
 
 void plDuktapeContext::DestroyContext()
@@ -56,20 +56,21 @@ void plDuktapeContext::DestroyContext()
   m_pContext = nullptr;
 
   const auto stats = m_Allocator.GetStats();
-  PLASMA_ASSERT_DEBUG(stats.m_uiAllocationSize == 0, "Duktape did not free all data");
-  PLASMA_ASSERT_DEBUG(stats.m_uiNumAllocations == stats.m_uiNumDeallocations, "Duktape did not free all data");
+  PL_IGNORE_UNUSED(stats);
+  PL_ASSERT_DEBUG(stats.m_uiAllocationSize == 0, "Duktape did not free all data");
+  PL_ASSERT_DEBUG(stats.m_uiNumAllocations == stats.m_uiNumDeallocations, "Duktape did not free all data");
 }
 
 void plDuktapeContext::FatalErrorHandler(void* pUserData, const char* szMsg)
 {
   // unfortunately it is not possible to do a stack trace here
   plLog::Error("DukTape: {}", szMsg);
-  PLASMA_ASSERT_ALWAYS(false, "Duktape fatal error {}", szMsg);
+  PL_ASSERT_ALWAYS(false, "Duktape fatal error {}", szMsg);
 }
 
 void* plDuktapeContext::DukAlloc(void* pUserData, size_t size)
 {
-  PLASMA_ASSERT_DEBUG(size > 0, "Invalid allocation");
+  PL_ASSERT_DEBUG(size > 0, "Invalid allocation");
 
   plDuktapeContext* pDukWrapper = reinterpret_cast<plDuktapeContext*>(pUserData);
 
@@ -113,4 +114,3 @@ void plDuktapeContext::DukFree(void* pUserData, void* pPointer)
 #endif
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Scripting_Duktape_DuktapeContext);

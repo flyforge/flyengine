@@ -6,8 +6,8 @@
 #include <EditorFramework/Gizmos/SnapProvider.h>
 #include <EditorFramework/InputContexts/OrthoGizmoContext.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plOrthoGizmoContext, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plOrthoGizmoContext, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plOrthoGizmoContext::plOrthoGizmoContext(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView, const plCamera* pCamera)
 {
@@ -30,47 +30,47 @@ void plOrthoGizmoContext::FocusLost(bool bCancel)
   m_bCanInteract = false;
   SetActiveInputContext(nullptr);
 
-  PlasmaEditorInputContext::FocusLost(bCancel);
+  plEditorInputContext::FocusLost(bCancel);
 }
 
-PlasmaEditorInput plOrthoGizmoContext::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plOrthoGizmoContext::DoMousePressEvent(QMouseEvent* e)
 {
   if (!IsViewInOrthoMode())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   if (GetOwnerWindow()->GetDocument()->GetSelectionManager()->IsSelectionEmpty())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() == Qt::MouseButton::LeftButton)
   {
     m_bCanInteract = true;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plOrthoGizmoContext::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plOrthoGizmoContext::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
   {
     m_bCanInteract = false;
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   }
 
   if (e->button() == Qt::MouseButton::LeftButton)
   {
     FocusLost(false);
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!e->buttons().testFlag(Qt::MouseButton::LeftButton))
   {
     m_bCanInteract = false;
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   }
 
   if (IsActiveInputContext())
@@ -85,7 +85,9 @@ PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
 
     const plVec3 vLastTranslationResult = m_vTranslationResult;
 
-    const plVec2I32 diff = plVec2I32(e->globalX(), e->globalY()) - m_vLastMousePos;
+    const QPoint mousePosition = e->globalPosition().toPoint();
+
+    const plVec2I32 diff = plVec2I32(mousePosition.x(), mousePosition.y()) - m_vLastMousePos;
 
     m_vUnsnappedTranslationResult += m_pCamera->GetDirRight() * (float)diff.x * fDistPerPixel;
     m_vUnsnappedTranslationResult -= m_pCamera->GetDirUp() * (float)diff.y * fDistPerPixel;
@@ -98,7 +100,7 @@ PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
 
     m_vTranslationDiff = m_vTranslationResult - vLastTranslationResult;
 
-    m_UnsnappedRotationResult += plAngle::Degree(-diff.x);
+    m_UnsnappedRotationResult += plAngle::MakeFromDegree(-diff.x);
 
     plAngle snappedRotation = m_UnsnappedRotationResult;
 
@@ -106,7 +108,7 @@ PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
     if (!e->modifiers().testFlag(Qt::AltModifier))
       plSnapProvider::SnapRotation(snappedRotation);
 
-    m_qRotationResult.SetFromAxisAndAngle(m_pCamera->GetDirForwards(), snappedRotation);
+    m_qRotationResult = plQuat::MakeFromAxisAndAngle(m_pCamera->GetDirForwards(), snappedRotation);
 
     {
       m_fScaleMouseMove += diff.x;
@@ -134,16 +136,16 @@ PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
 
     m_GizmoEvents.Broadcast(ev);
 
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
 
   if (m_bCanInteract)
   {
-    m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::WrapAtScreenBorders);
+    m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::WrapAtScreenBorders);
     m_vTranslationResult.SetZero();
     m_vUnsnappedTranslationResult.SetZero();
     m_qRotationResult.SetIdentity();
-    m_UnsnappedRotationResult = plAngle::Radian(0.0f);
+    m_UnsnappedRotationResult = plAngle::MakeFromRadian(0.0f);
     m_fScalingResult = 1.0f;
     m_fUnsnappedScalingResult = 1.0f;
     m_fScaleMouseMove = 0.0f;
@@ -156,10 +158,10 @@ PlasmaEditorInput plOrthoGizmoContext::DoMouseMoveEvent(QMouseEvent* e)
     ev.m_Type = plGizmoEvent::Type::BeginInteractions;
 
     m_GizmoEvents.Broadcast(ev);
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 bool plOrthoGizmoContext::IsViewInOrthoMode() const

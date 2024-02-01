@@ -153,7 +153,7 @@ namespace plMath
 
   // There is a compiler bug in VS 2019 targeting 32-bit that causes an internal compiler error when casting double to long long.
   // FloatToInt(double) is not available on these version of the MSVC compiler.
-#if PLASMA_DISABLED(PLASMA_PLATFORM_ARCH_X86) || (_MSC_VER <= 1916)
+#if PL_DISABLED(PL_PLATFORM_ARCH_X86) || (_MSC_VER <= 1916)
   /// \brief Casts the float to an integer, removes the fractional part
   ///
   /// \sa Trunc, Round, Floor, Ceil
@@ -256,6 +256,18 @@ namespace plMath
   /// \brief Returns the number of bits set
   [[nodiscard]] plUInt32 CountBits(plUInt64 value);
 
+  /// \brief Creates a bitmask in which the low N bits are set. For example for N=5, this would be '0000 ... 0001 1111'
+  ///
+  /// For N >= 32 all bits will be set.
+  template <typename Type>
+  [[nodiscard]] Type Bitmask_LowN(plUInt32 uiNumBitsToSet);
+
+  /// \brief Creates a bitmask in which the high N bits are set. For example for N=5, this would be '1111 1000 ... 0000'
+  ///
+  /// For N >= 32 all bits will be set.
+  template <typename Type>
+  [[nodiscard]] Type Bitmask_HighN(plUInt32 uiNumBitsToSet);
+
   /// \brief Swaps the values in the two variables f1 and f2
   template <typename T>
   void Swap(T& ref_f1, T& ref_f2); // [tested]
@@ -268,6 +280,10 @@ namespace plMath
   template <typename T>
   [[nodiscard]] T Lerp(T f1, T f2, double fFactor); // [tested]
 
+  /// \brief Returns the interpolation factor such that Lerp(fMin, fMax, factor) == fValue.
+  template <typename T>
+  [[nodiscard]] constexpr float Unlerp(T fMin, T fMax, T fValue); // [tested]
+
   /// \brief Returns 0, if value < edge, and 1, if value >= edge.
   template <typename T>
   [[nodiscard]] constexpr T Step(T value, T edge); // [tested]
@@ -276,8 +292,12 @@ namespace plMath
   template <typename Type>
   [[nodiscard]] Type SmoothStep(Type value, Type edge1, Type edge2); // [tested]
 
+  /// \brief Returns 0, if value is <= edge1, 1 if value >= edge2 and the second order hermite interpolation in between
+  template <typename Type>
+  [[nodiscard]] Type SmootherStep(Type value, Type edge1, Type edge2); // [tested]
+
   /// \brief Returns true, if there exists some x with base^x == value
-  [[nodiscard]] PLASMA_FOUNDATION_DLL bool IsPowerOf(plInt32 value, plInt32 iBase); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL bool IsPowerOf(plInt32 value, plInt32 iBase); // [tested]
 
   /// \brief Returns true, if there exists some x with 2^x == value
   [[nodiscard]] constexpr bool IsPowerOf2(plInt32 value); // [tested]
@@ -285,14 +305,23 @@ namespace plMath
   /// \brief Returns true, if there exists some x with 2^x == value
   [[nodiscard]] constexpr bool IsPowerOf2(plUInt32 value); // [tested]
 
+  /// \brief Returns true, if there exists some x with 2^x == value
+  [[nodiscard]] constexpr bool IsPowerOf2(plUInt64 value); // [tested]
+
   /// \brief Returns the next power-of-two that is <= value
-  [[nodiscard]] PLASMA_FOUNDATION_DLL plUInt32 PowerOfTwo_Floor(plUInt32 value); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt32 PowerOfTwo_Floor(plUInt32 value); // [tested]
+
+  /// \brief Returns the next power-of-two that is <= value
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt64 PowerOfTwo_Floor(plUInt64 value); // [tested]
 
   /// \brief Returns the next power-of-two that is >= value
-  [[nodiscard]] PLASMA_FOUNDATION_DLL plUInt32 PowerOfTwo_Ceil(plUInt32 value); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt32 PowerOfTwo_Ceil(plUInt32 value); // [tested]
+
+  /// \brief Returns the next power-of-two that is >= value
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt64 PowerOfTwo_Ceil(plUInt64 value); // [tested]
 
   /// \brief Returns the greatest common divisor.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL plUInt32 GreatestCommonDivisor(plUInt32 a, plUInt32 b); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt32 GreatestCommonDivisor(plUInt32 a, plUInt32 b); // [tested]
 
   /// \brief Checks, whether fValue is in the range [fDesired - fMaxImprecision; fDesired + fMaxImprecision].
   template <typename Type>
@@ -333,31 +362,31 @@ namespace plMath
   /// \brief Evaluates the cubic spline defined by four control points at time \a t and returns the interpolated result.
   /// Can be used with T as float, vec2, vec3 or vec4
   template <typename T, typename T2>
-  [[nodiscard]] T EvaluateBezierCurve(T2 t, const T& startPoint, const T& controlPoint1, const T& controlPoint2, const T& endPoint);
+  [[nodiscard]] T EvaluateBplierCurve(T2 t, const T& startPoint, const T& controlPoint1, const T& controlPoint2, const T& endPoint);
 
-  /// \brief out_Result = \a a * \a b. If an overflow happens, PLASMA_FAILURE is returned.
-  PLASMA_FOUNDATION_DLL plResult TryMultiply32(plUInt32& out_uiResult, plUInt32 a, plUInt32 b, plUInt32 c = 1, plUInt32 d = 1); // [tested]
-
-  /// \brief returns \a a * \a b. If an overflow happens, the program is terminated.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL plUInt32 SafeMultiply32(plUInt32 a, plUInt32 b, plUInt32 c = 1, plUInt32 d = 1);
-
-  /// \brief out_Result = \a a * \a b. If an overflow happens, PLASMA_FAILURE is returned.
-  PLASMA_FOUNDATION_DLL plResult TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, plUInt64 c = 1, plUInt64 d = 1); // [tested]
+  /// \brief out_Result = \a a * \a b. If an overflow happens, PL_FAILURE is returned.
+  PL_FOUNDATION_DLL plResult TryMultiply32(plUInt32& out_uiResult, plUInt32 a, plUInt32 b, plUInt32 c = 1, plUInt32 d = 1); // [tested]
 
   /// \brief returns \a a * \a b. If an overflow happens, the program is terminated.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL plUInt64 SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c = 1, plUInt64 d = 1);
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt32 SafeMultiply32(plUInt32 a, plUInt32 b, plUInt32 c = 1, plUInt32 d = 1);
 
-  /// \brief Checks whether the given 64bit value actually fits into size_t, If it doesn't PLASMA_FAILURE is returned.
+  /// \brief out_Result = \a a * \a b. If an overflow happens, PL_FAILURE is returned.
+  PL_FOUNDATION_DLL plResult TryMultiply64(plUInt64& out_uiResult, plUInt64 a, plUInt64 b, plUInt64 c = 1, plUInt64 d = 1); // [tested]
+
+  /// \brief returns \a a * \a b. If an overflow happens, the program is terminated.
+  [[nodiscard]] PL_FOUNDATION_DLL plUInt64 SafeMultiply64(plUInt64 a, plUInt64 b, plUInt64 c = 1, plUInt64 d = 1);
+
+  /// \brief Checks whether the given 64bit value actually fits into size_t, If it doesn't PL_FAILURE is returned.
   plResult TryConvertToSizeT(size_t& out_uiResult, plUInt64 uiValue); // [tested]
 
   /// \brief Checks whether the given 64bit value actually fits into size_t, If it doesn't the program is terminated.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL size_t SafeConvertToSizeT(plUInt64 uiValue);
+  [[nodiscard]] PL_FOUNDATION_DLL size_t SafeConvertToSizeT(plUInt64 uiValue);
 
   /// \brief If 'value' is not-a-number (NaN) 'fallback' is returned, otherwise 'value' is passed through unmodified.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL float ReplaceNaN(float fValue, float fFallback); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL float ReplaceNaN(float fValue, float fFallback); // [tested]
 
   /// \brief If 'value' is not-a-number (NaN) 'fallback' is returned, otherwise 'value' is passed through unmodified.
-  [[nodiscard]] PLASMA_FOUNDATION_DLL double ReplaceNaN(double fValue, double fFallback); // [tested]
+  [[nodiscard]] PL_FOUNDATION_DLL double ReplaceNaN(double fValue, double fFallback); // [tested]
 
 } // namespace plMath
 

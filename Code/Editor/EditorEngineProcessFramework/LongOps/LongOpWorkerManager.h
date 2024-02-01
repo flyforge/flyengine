@@ -8,15 +8,15 @@
 
 class plLongOpWorker;
 struct plProgressEvent;
-typedef plDynamicArray<plUInt8> plDataBuffer;
+using plDataBuffer = plDynamicArray<plUInt8>;
 
 /// \brief The LongOp worker manager is active in the engine process of the editor.
 ///
 /// This class has no public functionality, it communicates with the plLongOpControllerManager
 /// and executes the plLongOpWorker's that are named by the respective plLongOpProxy's.
-class PLASMA_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpWorkerManager final : public plLongOpManager
+class PL_EDITORENGINEPROCESSFRAMEWORK_DLL plLongOpWorkerManager final : public plLongOpManager
 {
-  PLASMA_DECLARE_SINGLETON(plLongOpWorkerManager);
+  PL_DECLARE_SINGLETON(plLongOpWorkerManager);
 
 public:
   plLongOpWorkerManager();
@@ -36,7 +36,7 @@ private:
   };
 
   virtual void ProcessCommunicationChannelEventHandler(const plProcessCommunicationChannel::Event& e) override;
-  WorkerOpInfo* GetOperation(const plUuid& guid) const;
+  WorkerOpInfo* GetOperation(const plUuid& opGuid) const;
   void LaunchWorkerOperation(WorkerOpInfo& opInfo, plStreamReader& config);
   void WorkerProgressBarEventHandler(const plProgressEvent& e);
   void RemoveOperation(plUuid opGuid);

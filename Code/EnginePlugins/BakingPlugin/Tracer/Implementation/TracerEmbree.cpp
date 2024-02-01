@@ -12,7 +12,7 @@
 namespace
 {
   static RTCDevice s_rtcDevice;
-  static plHashTable<plHashedString, RTCScene, plHashHelper<plHashedString>, plStaticAllocatorWrapper> s_rtcMeshCache;
+  static plHashTable<plHashedString, RTCScene, plHashHelper<plHashedString>, plStaticsAllocatorWrapper> s_rtcMeshCache;
 
   const char* rtcErrorCodeToString[] = {
     "RTC_NO_ERROR",
@@ -25,7 +25,7 @@ namespace
 
   const char* GetStringFromRTCErrorCode(RTCError code)
   {
-    return (code >= 0 && code < PLASMA_ARRAY_SIZE(rtcErrorCodeToString)) ? rtcErrorCodeToString[code] : "RTC invalid error code";
+    return (code >= 0 && code < PL_ARRAY_SIZE(rtcErrorCodeToString)) ? rtcErrorCodeToString[code] : "RTC invalid error code";
   }
 
   static void ErrorCallback(void* userPtr, RTCError code, const char* str)
@@ -53,11 +53,11 @@ namespace
       else
       {
         plLog::Error("Failed to create Embree Device. Error: {}", GetStringFromRTCErrorCode(rtcGetDeviceError(nullptr)));
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static void DeinitDevice()
@@ -152,7 +152,7 @@ namespace
 
     scene = rtcNewScene(s_rtcDevice);
     {
-      PLASMA_VERIFY(rtcAttachGeometry(scene, triangleMesh) == 0, "Geometry id must be 0");
+      PL_VERIFY(rtcAttachGeometry(scene, triangleMesh) == 0, "Geometry id must be 0");
       rtcReleaseGeometry(triangleMesh);
 
       rtcCommitScene(scene);
@@ -197,14 +197,14 @@ struct plTracerEmbree::Data
 
 plTracerEmbree::plTracerEmbree()
 {
-  m_pData = PLASMA_DEFAULT_NEW(Data);
+  m_pData = PL_DEFAULT_NEW(Data);
 }
 
 plTracerEmbree::~plTracerEmbree() = default;
 
 plResult plTracerEmbree::BuildScene(const plBakingScene& scene)
 {
-  PLASMA_SUCCEED_OR_RETURN(InitDevice());
+  PL_SUCCEED_OR_RETURN(InitDevice());
 
   m_pData->ClearScene();
   m_pData->m_rtcScene = rtcNewScene(s_rtcDevice);
@@ -232,7 +232,7 @@ plResult plTracerEmbree::BuildScene(const plBakingScene& scene)
 
     plMat3 normalTransform = transform.GetRotationalPart().GetInverse(0.0f).GetTranspose();
 
-    PLASMA_ASSERT_DEBUG(uiInstanceID == m_pData->m_rtcInstancedGeometry.GetCount(), "");
+    PL_ASSERT_DEBUG(uiInstanceID == m_pData->m_rtcInstancedGeometry.GetCount(), "");
     auto& instancedGeometry = m_pData->m_rtcInstancedGeometry.ExpandAndGetRef();
     instancedGeometry.m_mesh = rtcGetGeometry(mesh, 0);
     instancedGeometry.m_normalTransform0 = plSimdConversion::ToVec3(normalTransform.GetColumn(0));
@@ -242,10 +242,10 @@ plResult plTracerEmbree::BuildScene(const plBakingScene& scene)
 
   rtcCommitScene(m_pData->m_rtcScene);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_DEFINE_AS_POD_TYPE(RTCRayHit);
+PL_DEFINE_AS_POD_TYPE(RTCRayHit);
 
 void plTracerEmbree::TraceRays(plArrayPtr<const Ray> rays, plArrayPtr<Hit> hits)
 {

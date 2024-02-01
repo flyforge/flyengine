@@ -11,8 +11,8 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 ////////////////////////////////////////////////////////////////////////
 // plEditActions
@@ -27,12 +27,12 @@ plActionDescriptorHandle plEditActions::s_hDelete;
 
 void plEditActions::RegisterActions()
 {
-  s_hEditCategory = PLASMA_REGISTER_CATEGORY("EditCategory");
-  s_hCopy = PLASMA_REGISTER_ACTION_1("Selection.Copy", plActionScope::Document, "Document", "Ctrl+C", plEditAction, plEditAction::ButtonType::Copy);
-  s_hPaste = PLASMA_REGISTER_ACTION_1("Selection.Paste", plActionScope::Document, "Document", "Ctrl+V", plEditAction, plEditAction::ButtonType::Paste);
-  s_hPasteAsChild = PLASMA_REGISTER_ACTION_1("Selection.PasteAsChild", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::PasteAsChild);
-  s_hPasteAtOriginalLocation = PLASMA_REGISTER_ACTION_1("Selection.PasteAtOriginalLocation", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::PasteAtOriginalLocation);
-  s_hDelete = PLASMA_REGISTER_ACTION_1("Selection.Delete", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::Delete);
+  s_hEditCategory = PL_REGISTER_CATEGORY("EditCategory");
+  s_hCopy = PL_REGISTER_ACTION_1("Selection.Copy", plActionScope::Document, "Document", "Ctrl+C", plEditAction, plEditAction::ButtonType::Copy);
+  s_hPaste = PL_REGISTER_ACTION_1("Selection.Paste", plActionScope::Document, "Document", "Ctrl+V", plEditAction, plEditAction::ButtonType::Paste);
+  s_hPasteAsChild = PL_REGISTER_ACTION_1("Selection.PasteAsChild", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::PasteAsChild);
+  s_hPasteAtOriginalLocation = PL_REGISTER_ACTION_1("Selection.PasteAtOriginalLocation", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::PasteAtOriginalLocation);
+  s_hDelete = PL_REGISTER_ACTION_1("Selection.Delete", plActionScope::Document, "Document", "", plEditAction, plEditAction::ButtonType::Delete);
 }
 
 void plEditActions::UnregisterActions()
@@ -45,57 +45,51 @@ void plEditActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hDelete);
 }
 
-void plEditActions::MapActions(const char* szMapping, const char* szPath, bool bDeleteAction, bool bAdvancedPasteActions)
+void plEditActions::MapActions(plStringView sMapping, bool bDeleteAction, bool bAdvancedPasteActions)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/EditCategory");
+  pMap->MapAction(s_hEditCategory, "G.Edit", 3.5f);
 
-  pMap->MapAction(s_hEditCategory, szPath, 3.5f);
-
-  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
-  pMap->MapAction(s_hPaste, sSubPath, 2.0f);
+  pMap->MapAction(s_hCopy, "G.Edit", "EditCategory", 1.0f);
+  pMap->MapAction(s_hPaste, "G.Edit", "EditCategory", 2.0f);
 
   if (bAdvancedPasteActions)
   {
-    pMap->MapAction(s_hPasteAsChild, sSubPath, 2.5f);
-    pMap->MapAction(s_hPasteAtOriginalLocation, sSubPath, 2.7f);
+    pMap->MapAction(s_hPasteAsChild, "G.Edit", "EditCategory", 2.5f);
+    pMap->MapAction(s_hPasteAtOriginalLocation, "G.Edit", "EditCategory", 2.7f);
   }
 
   if (bDeleteAction)
-    pMap->MapAction(s_hDelete, sSubPath, 3.0f);
+    pMap->MapAction(s_hDelete, "G.Edit", "EditCategory", 3.0f);
 }
 
 
-void plEditActions::MapContextMenuActions(const char* szMapping, const char* szPath)
+void plEditActions::MapContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/EditCategory");
+  pMap->MapAction(s_hEditCategory, "", 10.0f);
 
-  pMap->MapAction(s_hEditCategory, szPath, 10.0f);
-
-  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
-  pMap->MapAction(s_hPasteAsChild, sSubPath, 2.0f);
-  pMap->MapAction(s_hDelete, sSubPath, 3.0f);
+  pMap->MapAction(s_hCopy, "EditCategory", 1.0f);
+  pMap->MapAction(s_hPasteAsChild, "EditCategory", 2.0f);
+  pMap->MapAction(s_hDelete, "EditCategory", 3.0f);
 }
 
 
-void plEditActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
+void plEditActions::MapViewContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the edit actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/EditCategory");
+  pMap->MapAction(s_hEditCategory, "", 10.0f);
 
-  pMap->MapAction(s_hEditCategory, szPath, 10.0f);
-
-  pMap->MapAction(s_hCopy, sSubPath, 1.0f);
-  pMap->MapAction(s_hPasteAsChild, sSubPath, 2.0f);
-  pMap->MapAction(s_hPasteAtOriginalLocation, sSubPath, 2.5f);
-  pMap->MapAction(s_hDelete, sSubPath, 3.0f);
+  pMap->MapAction(s_hCopy, "EditCategory", 1.0f);
+  pMap->MapAction(s_hPasteAsChild, "EditCategory", 2.0f);
+  pMap->MapAction(s_hPasteAtOriginalLocation, "EditCategory", 2.5f);
+  pMap->MapAction(s_hDelete, "EditCategory", 3.0f);
 }
 
 ////////////////////////////////////////////////////////////////////////

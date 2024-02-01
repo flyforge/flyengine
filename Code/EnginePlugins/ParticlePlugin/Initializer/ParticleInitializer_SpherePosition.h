@@ -3,9 +3,9 @@
 #include <Foundation/Types/VarianceTypes.h>
 #include <ParticlePlugin/Initializer/ParticleInitializer.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory_SpherePosition final : public plParticleInitializerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory_SpherePosition final : public plParticleInitializerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_SpherePosition, plParticleInitializerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_SpherePosition, plParticleInitializerFactory);
 
 public:
   plParticleInitializerFactory_SpherePosition();
@@ -14,10 +14,10 @@ public:
   virtual void CopyInitializerProperties(plParticleInitializer* pInitializer, bool bFirstTime) const override;
   virtual float GetSpawnCountMultiplier(const plParticleEffectInstance* pEffect) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
 public:
   plVec3 m_vPositionOffset;
@@ -29,9 +29,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer_SpherePosition final : public plParticleInitializer
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer_SpherePosition final : public plParticleInitializer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer_SpherePosition, plParticleInitializer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer_SpherePosition, plParticleInitializer);
 
 public:
   plVec3 m_vPositionOffset;

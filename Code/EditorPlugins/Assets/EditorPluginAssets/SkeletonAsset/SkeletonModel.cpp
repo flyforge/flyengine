@@ -9,18 +9,18 @@ plQtJointAdapter::plQtJointAdapter(const plSkeletonAssetDocument* pDocument)
 {
 }
 
-plQtJointAdapter::~plQtJointAdapter() {}
+plQtJointAdapter::~plQtJointAdapter() = default;
 
-QVariant plQtJointAdapter::data(const plDocumentObject* pObject, int row, int column, int role) const
+QVariant plQtJointAdapter::data(const plDocumentObject* pObject, int iRow, int iColumn, int iRole) const
 {
-  switch (role)
+  switch (iRole)
   {
     case Qt::DecorationRole:
     {
-      QIcon icon = plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginAssets/SkeletonBones.svg");
+      QIcon icon = plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorPluginAssets/CurveY.svg"); // Giv ICon Plpl!
       return icon;
     }
     break;
   }
-  return plQtNamedAdapter::data(pObject, row, column, role);
+  return plQtNamedAdapter::data(pObject, iRow, iColumn, iRole);
 }

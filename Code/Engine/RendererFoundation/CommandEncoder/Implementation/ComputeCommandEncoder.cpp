@@ -12,33 +12,25 @@ plGALComputeCommandEncoder::plGALComputeCommandEncoder(plGALDevice& ref_device, 
 
 plGALComputeCommandEncoder::~plGALComputeCommandEncoder() = default;
 
-void plGALComputeCommandEncoder::Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
+plResult plGALComputeCommandEncoder::Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY, plUInt32 uiThreadGroupCountZ)
 {
   AssertRenderingThread();
 
-  PLASMA_ASSERT_DEBUG(uiThreadGroupCountX > 0 && uiThreadGroupCountY > 0 && uiThreadGroupCountZ > 0, "Thread group counts of zero are not meaningful. Did you mean 1?");
-
-  /// \todo Assert for compute
-
-  m_ComputeImpl.DispatchPlatform(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
+  PL_ASSERT_DEBUG(uiThreadGroupCountX > 0 && uiThreadGroupCountY > 0 && uiThreadGroupCountZ > 0, "Thread group counts of zero are not meaningful. Did you mean 1?");
 
   CountDispatchCall();
+  return m_ComputeImpl.DispatchPlatform(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
 }
 
-void plGALComputeCommandEncoder::DispatchIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+plResult plGALComputeCommandEncoder::DispatchIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
 {
   AssertRenderingThread();
-  /// \todo Assert for compute
-  /// \todo Assert for indirect dispatch
-  /// \todo Assert offset < buffer size
 
   const plGALBuffer* pBuffer = GetDevice().GetBuffer(hIndirectArgumentBuffer);
-  PLASMA_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
-
-  /// \todo Assert that the buffer can be used for indirect arguments (flag in desc)
-  m_ComputeImpl.DispatchIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
+  PL_ASSERT_DEV(pBuffer != nullptr, "Invalid buffer handle for indirect arguments!");
 
   CountDispatchCall();
+  return m_ComputeImpl.DispatchIndirectPlatform(pBuffer, uiArgumentOffsetInBytes);
 }
 
 void plGALComputeCommandEncoder::ClearStatisticsCounters()
@@ -49,4 +41,3 @@ void plGALComputeCommandEncoder::ClearStatisticsCounters()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_CommandEncoder_Implementation_ComputeCommandEncoder);

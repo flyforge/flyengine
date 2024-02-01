@@ -5,9 +5,9 @@
 
 class plActor;
 
-class PLASMA_CORE_DLL plActorPlugin : public plReflectedClass
+class PL_CORE_DLL plActorPlugin : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActorPlugin, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plActorPlugin, plReflectedClass);
 
 public:
   plActorPlugin();

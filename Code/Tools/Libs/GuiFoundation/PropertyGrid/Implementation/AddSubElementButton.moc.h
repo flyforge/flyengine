@@ -8,7 +8,7 @@ class QPushButton;
 class QMenu;
 class plQtSearchableMenu;
 
-class PLASMA_GUIFOUNDATION_DLL plQtAddSubElementButton : public plQtPropertyWidget
+class PL_GUIFOUNDATION_DLL plQtAddSubElementButton : public plQtPropertyWidget
 {
   Q_OBJECT
 

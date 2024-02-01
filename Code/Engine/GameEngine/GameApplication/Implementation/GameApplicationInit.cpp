@@ -9,8 +9,9 @@
 #include <Foundation/Utilities/CommandLineOptions.h>
 #include <GameEngine/Animation/PropertyAnimResource.h>
 #include <GameEngine/GameApplication/GameApplication.h>
-#include <GameEngine/Utils/ImageDataResource.h>
+#include <GameEngine/StateMachine/StateMachineResource.h>
 #include <GameEngine/Utils/BlackboardTemplateResource.h>
+#include <GameEngine/Utils/ImageDataResource.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphResource.h>
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 #include <RendererCore/Decals/DecalAtlasResource.h>
@@ -27,18 +28,17 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/DeviceFactory.h>
 
-// TODO: Enable once vulkan is stable with latest rendering
-// #ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
-// constexpr const char* szDefaultRenderer = "Vulkan";
-// #else
+#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
+constexpr const char* szDefaultRenderer = "Vulkan";
+#else
 constexpr const char* szDefaultRenderer = "DX11";
-//#endif
+#endif
 
 plCommandLineOptionString opt_Renderer("app", "-renderer", "The renderer implementation to use.", szDefaultRenderer);
 
 void plGameApplication::Init_ConfigureAssetManagement()
 {
-  const plStringBuilder sAssetRedirFile("AssetCache/", m_PlatformProfile.m_sName, ".plAidlt");
+  const plStringBuilder sAssetRedirFile("AssetCache/", m_PlatformProfile.GetConfigName(), ".plAidlt");
 
   // which redirection table to search
   plDataDirectory::FolderType::s_sRedirectionFile = sAssetRedirFile;
@@ -46,27 +46,29 @@ void plGameApplication::Init_ConfigureAssetManagement()
   // which platform assets to use
   plDataDirectory::FolderType::s_sRedirectionPrefix = "AssetCache/";
 
-  plResourceManager::RegisterResourceForAssetType("Collection", plGetStaticRTTI<plCollectionResource>());
-  plResourceManager::RegisterResourceForAssetType("Material", plGetStaticRTTI<plMaterialResource>());
-  plResourceManager::RegisterResourceForAssetType("Mesh", plGetStaticRTTI<plMeshResource>());
   plResourceManager::RegisterResourceForAssetType("Animated Mesh", plGetStaticRTTI<plMeshResource>());
-  plResourceManager::RegisterResourceForAssetType("Prefab", plGetStaticRTTI<plPrefabResource>());
-  plResourceManager::RegisterResourceForAssetType("RenderPipeline", plGetStaticRTTI<plRenderPipelineResource>());
-  plResourceManager::RegisterResourceForAssetType("Surface", plGetStaticRTTI<plSurfaceResource>());
-  plResourceManager::RegisterResourceForAssetType("Texture 2D", plGetStaticRTTI<plTexture2DResource>());
-  plResourceManager::RegisterResourceForAssetType("Render Target", plGetStaticRTTI<plTexture2DResource>());
-  plResourceManager::RegisterResourceForAssetType("Texture Cube", plGetStaticRTTI<plTextureCubeResource>());
-  plResourceManager::RegisterResourceForAssetType("Color Gradient", plGetStaticRTTI<plColorGradientResource>());
-  plResourceManager::RegisterResourceForAssetType("Curve1D", plGetStaticRTTI<plCurve1DResource>());
-  plResourceManager::RegisterResourceForAssetType("Skeleton", plGetStaticRTTI<plSkeletonResource>());
   plResourceManager::RegisterResourceForAssetType("Animation Clip", plGetStaticRTTI<plAnimationClipResource>());
   plResourceManager::RegisterResourceForAssetType("Animation Graph", plGetStaticRTTI<plAnimGraphResource>());
-  plResourceManager::RegisterResourceForAssetType("Image Data", plGetStaticRTTI<plImageDataResource>());
-  plResourceManager::RegisterResourceForAssetType("PropertyAnim", plGetStaticRTTI<plPropertyAnimResource>());
-  plResourceManager::RegisterResourceForAssetType("Decal", plGetStaticRTTI<plDecalResource>());
-  plResourceManager::RegisterResourceForAssetType("LUT", plGetStaticRTTI<plTexture3DResource>());
   plResourceManager::RegisterResourceForAssetType("BlackboardTemplate", plGetStaticRTTI<plBlackboardTemplateResource>());
+  plResourceManager::RegisterResourceForAssetType("Collection", plGetStaticRTTI<plCollectionResource>());
+  plResourceManager::RegisterResourceForAssetType("ColorGradient", plGetStaticRTTI<plColorGradientResource>());
+  plResourceManager::RegisterResourceForAssetType("Curve1D", plGetStaticRTTI<plCurve1DResource>());
+  plResourceManager::RegisterResourceForAssetType("Decal", plGetStaticRTTI<plDecalResource>());
+  plResourceManager::RegisterResourceForAssetType("Decal Atlas", plGetStaticRTTI<plDecalAtlasResource>());
+  plResourceManager::RegisterResourceForAssetType("Image Data", plGetStaticRTTI<plImageDataResource>());
+  plResourceManager::RegisterResourceForAssetType("LUT", plGetStaticRTTI<plTexture3DResource>());
+  plResourceManager::RegisterResourceForAssetType("Material", plGetStaticRTTI<plMaterialResource>());
+  plResourceManager::RegisterResourceForAssetType("Mesh", plGetStaticRTTI<plMeshResource>());
+  plResourceManager::RegisterResourceForAssetType("Prefab", plGetStaticRTTI<plPrefabResource>());
+  plResourceManager::RegisterResourceForAssetType("PropertyAnim", plGetStaticRTTI<plPropertyAnimResource>());
+  plResourceManager::RegisterResourceForAssetType("RenderPipeline", plGetStaticRTTI<plRenderPipelineResource>());
+  plResourceManager::RegisterResourceForAssetType("Render Target", plGetStaticRTTI<plTexture2DResource>());
+  plResourceManager::RegisterResourceForAssetType("Skeleton", plGetStaticRTTI<plSkeletonResource>());
+  plResourceManager::RegisterResourceForAssetType("StateMachine", plGetStaticRTTI<plStateMachineResource>());
   plResourceManager::RegisterResourceForAssetType("Substance Texture", plGetStaticRTTI<plTexture2DResource>());
+  plResourceManager::RegisterResourceForAssetType("Surface", plGetStaticRTTI<plSurfaceResource>());
+  plResourceManager::RegisterResourceForAssetType("Texture 2D", plGetStaticRTTI<plTexture2DResource>());
+  plResourceManager::RegisterResourceForAssetType("Texture Cube", plGetStaticRTTI<plTextureCubeResource>());
 }
 
 void plGameApplication::Init_SetupDefaultResources()
@@ -79,7 +81,9 @@ void plGameApplication::Init_SetupDefaultResources()
   {
     plShaderResourceDescriptor desc;
     plShaderResourceHandle hFallbackShader = plResourceManager::CreateResource<plShaderResource>("FallbackShaderResource", std::move(desc), "FallbackShaderResource");
-    plShaderResourceHandle hMissingShader = plResourceManager::CreateResource<plShaderResource>("MissingShaderResource", std::move(desc), "MissingShaderResource");
+
+    plShaderResourceDescriptor desc2;
+    plShaderResourceHandle hMissingShader = plResourceManager::CreateResource<plShaderResource>("MissingShaderResource", std::move(desc2), "MissingShaderResource");
 
     plResourceManager::SetResourceTypeLoadingFallback<plShaderResource>(hFallbackShader);
     plResourceManager::SetResourceTypeMissingFallback<plShaderResource>(hMissingShader);
@@ -189,11 +193,11 @@ void plGameApplication::Init_SetupDefaultResources()
     plCurve1DResourceHandle hResource = plResourceManager::CreateResource<plCurve1DResource>("MissingCurve1D", std::move(cd), "Missing Curve1D Resource");
     plResourceManager::SetResourceTypeMissingFallback<plCurve1DResource>(hResource);
   }
-  
+
   // Property Animations
   {
     plPropertyAnimResourceDescriptor desc;
-    desc.m_AnimationDuration = plTime::Seconds(0.1);
+    desc.m_AnimationDuration = plTime::MakeFromSeconds(0.1);
 
     plPropertyAnimResourceHandle hResource = plResourceManager::CreateResource<plPropertyAnimResource>("MissingPropertyAnim", std::move(desc), "Missing Property Animation Resource");
     plResourceManager::SetResourceTypeMissingFallback<plPropertyAnimResource>(hResource);
@@ -235,7 +239,7 @@ void plGameApplication::Init_SetupGraphicsDevice()
 {
   plGALDeviceCreationDescription DeviceInit;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   DeviceInit.m_bDebugDevice = true;
 #endif
 
@@ -250,15 +254,15 @@ void plGameApplication::Init_SetupGraphicsDevice()
     {
       plStringView sRendererName = GetRendererNameFromCommandLine();
       pDevice = plGALDeviceFactory::CreateDevice(sRendererName, plFoundation::GetDefaultAllocator(), DeviceInit);
-      PLASMA_ASSERT_DEV(pDevice != nullptr, "Device implemention for '{}' not found", sRendererName);
+      PL_ASSERT_DEV(pDevice != nullptr, "Device implementation for '{}' not found", sRendererName);
     }
 
-    PLASMA_VERIFY(pDevice->Init() == PLASMA_SUCCESS, "Graphics device creation failed!");
+    PL_VERIFY(pDevice->Init() == PL_SUCCESS, "Graphics device creation failed!");
     plGALDevice::SetDefaultDevice(pDevice);
   }
 
   // Create GPU resource pool
-  plGPUResourcePool* pResourcePool = PLASMA_DEFAULT_NEW(plGPUResourcePool);
+  plGPUResourcePool* pResourcePool = PL_DEFAULT_NEW(plGPUResourcePool);
   plGPUResourcePool::SetDefaultInstance(pResourcePool);
 }
 
@@ -272,17 +276,17 @@ void plGameApplication::Init_LoadRequiredPlugins()
   plGALDeviceFactory::GetShaderModelAndCompiler(sRendererName, szShaderModel, szShaderCompiler);
   plShaderManager::Configure(szShaderModel, true);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-  plPlugin::LoadPlugin("plasmaInspectorPlugin").IgnoreResult();
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  plPlugin::LoadPlugin("plInspectorPlugin").IgnoreResult();
 
   // on sandboxed platforms, we can only load data through fileserve, so enforce use of this plugin
-#  if PLASMA_DISABLED(PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
-  plPlugin::LoadPlugin("plasmaFileservePlugin").IgnoreResult(); // don't care if it fails to load
+#  if PL_DISABLED(PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
+  plPlugin::LoadPlugin("plFileservePlugin").IgnoreResult(); // don't care if it fails to load
 #  endif
 
 #endif
 
-  PLASMA_VERIFY(plPlugin::LoadPlugin(szShaderCompiler).Succeeded(), "Shader compiler '{}' plugin not found", szShaderCompiler);
+  PL_VERIFY(plPlugin::LoadPlugin(szShaderCompiler).Succeeded(), "Shader compiler '{}' plugin not found", szShaderCompiler);
 }
 
 void plGameApplication::Deinit_ShutdownGraphicsDevice()
@@ -297,9 +301,8 @@ void plGameApplication::Deinit_ShutdownGraphicsDevice()
 
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   pDevice->Shutdown().IgnoreResult();
-  PLASMA_DEFAULT_DELETE(pDevice);
+  PL_DEFAULT_DELETE(pDevice);
   plGALDevice::SetDefaultDevice(nullptr);
 }
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_GameApplication_Implementation_GameApplicationInit);

@@ -4,10 +4,10 @@
 #include <RendererFoundation/Descriptors/Descriptors.h>
 #include <RendererFoundation/Resources/Resource.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALBuffer : public plGALResource<plGALBufferCreationDescription>
+class PL_RENDERERFOUNDATION_DLL plGALBuffer : public plGALResource<plGALBufferCreationDescription>
 {
 public:
-  PLASMA_ALWAYS_INLINE plUInt32 GetSize() const;
+  PL_ALWAYS_INLINE plUInt32 GetSize() const;
 
 protected:
   friend class plGALDevice;

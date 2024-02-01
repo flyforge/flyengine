@@ -3,7 +3,7 @@
 #include <Foundation/Strings/StringView.h>
 #include <Foundation/Utilities/ConversionUtils.h>
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 #  include <Foundation/Logging/Log.h>
 
 plAtomicInteger32 plStringUtils::g_MaxUsedStringLength;
@@ -21,7 +21,7 @@ void plStringUtils::AddUsedStringLength(plUInt32 uiLength)
 
 void plStringUtils::PrintStringLengthStatistics()
 {
-  PLASMA_LOG_BLOCK("String Length Statistics");
+  PL_LOG_BLOCK("String Length Statistics");
 
   plLog::Info("Max String Length: {0}", (plInt32)g_MaxUsedStringLength);
 
@@ -205,7 +205,7 @@ plUInt32 plStringUtils::ToUpperString(char* pString, const char* pStringEnd)
   char* pWriteStart = pString;
   const char* pReadStart = pString;
 
-  while (pReadStart < pStringEnd && *pReadStart != '\0')
+  while ((pReadStart < pStringEnd) && (*pReadStart != '\0'))
   {
     const plUInt32 uiChar = plUnicodeUtils::DecodeUtf8ToUtf32(pReadStart);
     const plUInt32 uiCharUpper = plStringUtils::ToUpperChar(uiChar);
@@ -223,7 +223,7 @@ plUInt32 plStringUtils::ToLowerString(char* pString, const char* pStringEnd)
   char* pWriteStart = pString;
   const char* pReadStart = pString;
 
-  while (pReadStart < pStringEnd && *pReadStart != '\0')
+  while ((pReadStart < pStringEnd) && (*pReadStart != '\0'))
   {
     const plUInt32 uiChar = plUnicodeUtils::DecodeUtf8ToUtf32(pReadStart);
     const plUInt32 uiCharUpper = plStringUtils::ToLowerChar(uiChar);
@@ -237,7 +237,7 @@ plUInt32 plStringUtils::ToLowerString(char* pString, const char* pStringEnd)
 }
 
 // Macro to Handle nullptr-pointer strings
-#define PLASMA_STRINGCOMPARE_HANDLE_NULL_PTRS(szString1, szString2, ret_equal, ret_str2_larger, ret_str1_larger, szString1End, szString2End)   \
+#define PL_STRINGCOMPARE_HANDLE_NULL_PTRS(szString1, szString2, ret_equal, ret_str2_larger, ret_str1_larger, szString1End, szString2End)   \
   if (szString1 == szString2) /* Handles the case that both are nullptr and that both are actually the same string */                      \
   {                                                                                                                                        \
     if ((szString1 == nullptr) || (szString1End == szString2End)) /* if both are nullptr, ignore the end pointer, otherwise the strings    \
@@ -263,9 +263,9 @@ plUInt32 plStringUtils::ToLowerString(char* pString, const char* pStringEnd)
 
 plInt32 plStringUtils::Compare(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
 {
-  PLASMA_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
+  PL_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
 
-  while ((*pString1 != '\0') && (*pString2 != '\0') && (pString1 < pString1End) && (pString2 < pString2End))
+  while ((pString1 < pString1End) && (pString2 < pString2End) && (*pString1 != '\0') && (*pString2 != '\0'))
   {
     if (*pString1 != *pString2)
       return ToSignedInt(*pString1) - ToSignedInt(*pString2);
@@ -296,9 +296,9 @@ plInt32 plStringUtils::CompareN(
   if (uiCharsToCompare == 0)
     return 0;
 
-  PLASMA_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
+  PL_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
 
-  while ((*pString1 != '\0') && (*pString2 != '\0') && (uiCharsToCompare > 0) && (pString1 < pString1End) && (pString2 < pString2End))
+  while ((uiCharsToCompare > 0) && (pString1 < pString1End) && (pString2 < pString2End) && (*pString1 != '\0') && (*pString2 != '\0'))
   {
     if (*pString1 != *pString2)
       return ToSignedInt(*pString1) - ToSignedInt(*pString2);
@@ -331,9 +331,9 @@ plInt32 plStringUtils::CompareN(
 
 plInt32 plStringUtils::Compare_NoCase(const char* pString1, const char* pString2, const char* pString1End, const char* pString2End)
 {
-  PLASMA_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
+  PL_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
 
-  while ((*pString1 != '\0') && (*pString2 != '\0') && (pString1 < pString1End) && (pString2 < pString2End))
+  while ((pString1 < pString1End) && (pString2 < pString2End) && (*pString1 != '\0') && (*pString2 != '\0'))
   {
     // utf8::next will already advance the iterators
     const plUInt32 uiChar1 = plUnicodeUtils::DecodeUtf8ToUtf32(pString1);
@@ -369,9 +369,9 @@ plInt32 plStringUtils::CompareN_NoCase(
   if (uiCharsToCompare == 0)
     return 0;
 
-  PLASMA_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
+  PL_STRINGCOMPARE_HANDLE_NULL_PTRS(pString1, pString2, 0, -1, 1, pString1End, pString2End);
 
-  while ((*pString1 != '\0') && (*pString2 != '\0') && (uiCharsToCompare > 0) && (pString1 < pString1End) && (pString2 < pString2End))
+  while ((uiCharsToCompare > 0) && (pString1 < pString1End) && (pString2 < pString2End) && (*pString1 != '\0') && (*pString2 != '\0'))
   {
     // utf8::next will already advance the iterators
     const plUInt32 uiChar1 = plUnicodeUtils::DecodeUtf8ToUtf32(pString1);
@@ -407,7 +407,7 @@ plInt32 plStringUtils::CompareN_NoCase(
 
 plUInt32 plStringUtils::Copy(char* szDest, plUInt32 uiDstSize, const char* szSource, const char* pSourceEnd)
 {
-  PLASMA_ASSERT_DEBUG(szDest != nullptr && uiDstSize > 0, "Invalid output buffer.");
+  PL_ASSERT_DEBUG(szDest != nullptr && uiDstSize > 0, "Invalid output buffer.");
 
   if (IsNullOrEmpty(szSource))
   {
@@ -425,7 +425,7 @@ plUInt32 plStringUtils::Copy(char* szDest, plUInt32 uiDstSize, const char* szSou
   char* szLastCharacterPos = szDest + uiBytesToCopy;
 
 // Check if we just copied half a UTF-8 character
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (uiBytesToCopy > 0)
   {
     char* szUtf8StartByte = szLastCharacterPos - 1;
@@ -433,9 +433,9 @@ plUInt32 plStringUtils::Copy(char* szDest, plUInt32 uiDstSize, const char* szSou
     {
       szUtf8StartByte--;
     }
-    ptrdiff_t isLength = szLastCharacterPos - szUtf8StartByte;
-    ptrdiff_t expectedLength = plUnicodeUtils::GetUtf8SequenceLength(*szUtf8StartByte);
-    PLASMA_ASSERT_DEBUG(isLength == expectedLength, "The destination buffer was too small, so a utf-8 byte sequence got cut off. This function "
+    std::ptrdiff_t isLength = szLastCharacterPos - szUtf8StartByte;
+    std::ptrdiff_t expectedLength = plUnicodeUtils::GetUtf8SequenceLength(*szUtf8StartByte);
+    PL_ASSERT_DEBUG(isLength == expectedLength, "The destination buffer was too small, so a utf-8 byte sequence got cut off. This function "
                                                 "is not designed to copy into buffers that are too small.");
   }
 #endif
@@ -452,7 +452,7 @@ plUInt32 plStringUtils::Copy(char* szDest, plUInt32 uiDstSize, const char* szSou
 
 plUInt32 plStringUtils::CopyN(char* szDest, plUInt32 uiDstSize, const char* szSource, plUInt32 uiCharsToCopy, const char* pSourceEnd)
 {
-  PLASMA_ASSERT_DEBUG(szDest != nullptr && uiDstSize > 0, "Invalid output buffer.");
+  PL_ASSERT_DEBUG(szDest != nullptr && uiDstSize > 0, "Invalid output buffer.");
 
   if (IsNullOrEmpty(szSource))
   {
@@ -512,7 +512,7 @@ bool plStringUtils::StartsWith(const char* szString, const char* szStartsWith, c
   if (IsNullOrEmpty(szString, pStringEnd))
     return false;
 
-  while ((*szString != '\0') && (szString < pStringEnd))
+  while ((szString < pStringEnd) && (*szString != '\0'))
   {
     // if we have reached the end of the StartsWith string, the other string DOES start with it
     if (*szStartsWith == '\0' || szStartsWith == szStartsWithEnd)
@@ -536,7 +536,7 @@ bool plStringUtils::StartsWith_NoCase(const char* szString, const char* szStarts
   if (IsNullOrEmpty(szString, pStringEnd))
     return false;
 
-  while ((*szString != '\0') && (szString < pStringEnd))
+  while ((szString < pStringEnd) && (*szString != '\0'))
   {
     // if we have reached the end of the StartsWith string, the other string DOES start with it
     if (*szStartsWith == '\0' || szStartsWith == szStartsWithEnd)
@@ -545,8 +545,8 @@ bool plStringUtils::StartsWith_NoCase(const char* szString, const char* szStarts
     if (plStringUtils::CompareChars_NoCase(szStartsWith, szString) != 0)
       return false;
 
-    plUnicodeUtils::MoveToNextUtf8(szString, pStringEnd);
-    plUnicodeUtils::MoveToNextUtf8(szStartsWith, szStartsWithEnd);
+    plUnicodeUtils::MoveToNextUtf8(szString, pStringEnd).AssertSuccess();
+    plUnicodeUtils::MoveToNextUtf8(szStartsWith, szStartsWithEnd).AssertSuccess();
   }
 
   // if both are equally long, this comparison will return true
@@ -589,8 +589,8 @@ bool plStringUtils::EndsWith_NoCase(const char* szString, const char* szEndsWith
       return true;
 
     // move to the previous character
-    plUnicodeUtils::MoveToPriorUtf8(pCur1);
-    plUnicodeUtils::MoveToPriorUtf8(pCur2);
+    plUnicodeUtils::MoveToPriorUtf8(pCur1, szString).AssertSuccess();
+    plUnicodeUtils::MoveToPriorUtf8(pCur2, szEndsWith).AssertSuccess();
 
     if (plStringUtils::CompareChars_NoCase(pCur1, pCur2) != 0)
       return false;
@@ -615,7 +615,7 @@ const char* plStringUtils::FindSubString(const char* szSource, const char* szStr
     if (plStringUtils::StartsWith(pCurPos, szStringToFind, pSourceEnd, szStringToFindEnd))
       return pCurPos;
 
-    plUnicodeUtils::MoveToNextUtf8(pCurPos, pSourceEnd);
+    plUnicodeUtils::MoveToNextUtf8(pCurPos, pSourceEnd).AssertSuccess();
   }
 
   return nullptr;
@@ -629,12 +629,12 @@ const char* plStringUtils::FindSubString_NoCase(const char* szSource, const char
 
   const char* pCurPos = &szSource[0];
 
-  while ((*pCurPos != '\0') && (pCurPos < pSourceEnd))
+  while ((pCurPos < pSourceEnd) && (*pCurPos != '\0'))
   {
     if (plStringUtils::StartsWith_NoCase(pCurPos, szStringToFind, pSourceEnd, szStringToFindEnd))
       return pCurPos;
 
-    plUnicodeUtils::MoveToNextUtf8(pCurPos, pSourceEnd);
+    plUnicodeUtils::MoveToNextUtf8(pCurPos, pSourceEnd).AssertSuccess();
   }
 
   return nullptr;
@@ -654,7 +654,7 @@ const char* plStringUtils::FindLastSubString(const char* szSource, const char* s
   // while we haven't reached the stars .. erm, start
   while (szStartSearchAt > szSource)
   {
-    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt);
+    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt, szSource).AssertSuccess();
 
     if (plStringUtils::StartsWith(szStartSearchAt, szStringToFind, pSourceEnd, szStringToFindEnd))
       return szStartSearchAt;
@@ -674,7 +674,7 @@ const char* plStringUtils::FindLastSubString_NoCase(const char* szSource, const 
 
   while (szStartSearchAt > szSource)
   {
-    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt);
+    plUnicodeUtils::MoveToPriorUtf8(szStartSearchAt, szSource).AssertSuccess();
 
     if (plStringUtils::StartsWith_NoCase(szStartSearchAt, szStringToFind, pSourceEnd, szStringToFindEnd))
       return szStartSearchAt;
@@ -684,7 +684,7 @@ const char* plStringUtils::FindLastSubString_NoCase(const char* szSource, const 
 }
 
 
-const char* plStringUtils::FindWholeWord(const char* szString, const char* szSearchFor, PLASMA_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd)
+const char* plStringUtils::FindWholeWord(const char* szString, const char* szSearchFor, PL_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd)
 {
   // Handle nullptr-pointer strings
   if ((IsNullOrEmpty(szString)) || (IsNullOrEmpty(szSearchFor)))
@@ -695,7 +695,7 @@ const char* plStringUtils::FindWholeWord(const char* szString, const char* szSea
   const char* pPrevPos = nullptr;
   const char* pCurPos = szString;
 
-  while ((*pCurPos != '\0') && (pCurPos < pStringEnd))
+  while ((pCurPos < pStringEnd) && (*pCurPos != '\0'))
   {
     if (StartsWith(pCurPos, szSearchFor, pStringEnd)) // yay, we found a substring, now make sure it is a 'whole word'
     {
@@ -708,14 +708,13 @@ const char* plStringUtils::FindWholeWord(const char* szString, const char* szSea
     }
 
     pPrevPos = pCurPos;
-    plUnicodeUtils::MoveToNextUtf8(pCurPos, pStringEnd);
+    plUnicodeUtils::MoveToNextUtf8(pCurPos, pStringEnd).AssertSuccess();
   }
 
   return nullptr;
 }
 
-const char* plStringUtils::FindWholeWord_NoCase(
-  const char* szString, const char* szSearchFor, PLASMA_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd)
+const char* plStringUtils::FindWholeWord_NoCase(const char* szString, const char* szSearchFor, PL_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd)
 {
   // Handle nullptr-pointer strings
   if ((IsNullOrEmpty(szString)) || (IsNullOrEmpty(szSearchFor)))
@@ -726,7 +725,7 @@ const char* plStringUtils::FindWholeWord_NoCase(
   const char* pPrevPos = nullptr;
   const char* pCurPos = szString;
 
-  while ((*pCurPos != '\0') && (pCurPos < pStringEnd))
+  while ((pCurPos < pStringEnd) && (*pCurPos != '\0'))
   {
     if (StartsWith_NoCase(pCurPos, szSearchFor, pStringEnd)) // yay, we found a substring, now make sure it is a 'whole word'
     {
@@ -738,7 +737,7 @@ const char* plStringUtils::FindWholeWord_NoCase(
     }
 
     pPrevPos = pCurPos;
-    plUnicodeUtils::MoveToNextUtf8(pCurPos, pStringEnd);
+    plUnicodeUtils::MoveToNextUtf8(pCurPos, pStringEnd).AssertSuccess();
   }
 
   return nullptr;
@@ -747,7 +746,7 @@ const char* plStringUtils::FindWholeWord_NoCase(
 plResult plStringUtils::FindUIntAtTheEnd(const char* szString, plUInt32& out_uiValue, plUInt32* pStringLengthBeforeUInt /*= nullptr*/)
 {
   if (plStringUtils::IsNullOrEmpty(szString))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const char* szWork = szString;
   const char* szNumberStart = nullptr;
@@ -776,7 +775,7 @@ plResult plStringUtils::FindUIntAtTheEnd(const char* szString, plUInt32& out_uiV
     plInt64 iResult = 0;
     if (plConversionUtils::StringToInt64(szNumberStart, iResult).Failed() || iResult < 0 || iResult > 0xFFFFFFFFu)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     out_uiValue = static_cast<plUInt32>(iResult);
@@ -786,17 +785,17 @@ plResult plStringUtils::FindUIntAtTheEnd(const char* szString, plUInt32& out_uiV
       *pStringLengthBeforeUInt = static_cast<plUInt32>(szNumberStart - szString);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 }
 
-const char* plStringUtils::SkipCharacters(const char* szString, PLASMA_CHARACTER_FILTER skipCharacterCB, bool bAlwaysSkipFirst)
+const char* plStringUtils::SkipCharacters(const char* szString, PL_CHARACTER_FILTER skipCharacterCB, bool bAlwaysSkipFirst)
 {
-  PLASMA_ASSERT_DEBUG(szString != nullptr, "Invalid string");
+  PL_ASSERT_DEBUG(szString != nullptr, "Invalid string");
 
   while (*szString != '\0')
   {
@@ -804,15 +803,16 @@ const char* plStringUtils::SkipCharacters(const char* szString, PLASMA_CHARACTER
       break;
 
     bAlwaysSkipFirst = false;
-    plUnicodeUtils::MoveToNextUtf8(szString);
+
+    plUnicodeUtils::MoveToNextUtf8(szString).AssertSuccess();
   }
 
   return szString;
 }
 
-const char* plStringUtils::FindWordEnd(const char* szString, PLASMA_CHARACTER_FILTER isDelimiterCB, bool bAlwaysSkipFirst)
+const char* plStringUtils::FindWordEnd(const char* szString, PL_CHARACTER_FILTER isDelimiterCB, bool bAlwaysSkipFirst)
 {
-  PLASMA_ASSERT_DEBUG(szString != nullptr, "Invalid string");
+  PL_ASSERT_DEBUG(szString != nullptr, "Invalid string");
 
   while (*szString != '\0')
   {
@@ -820,7 +820,7 @@ const char* plStringUtils::FindWordEnd(const char* szString, PLASMA_CHARACTER_FI
       break;
 
     bAlwaysSkipFirst = false;
-    plUnicodeUtils::MoveToNextUtf8(szString);
+    plUnicodeUtils::MoveToNextUtf8(szString).AssertSuccess();
   }
 
   return szString;
@@ -922,7 +922,7 @@ bool plStringUtils::IsValidIdentifierName(const char* pString, const char* pStri
   if ((cur >= '0') && (cur <= '9'))
     return false;
 
-  while (*pString != '\0' && pString < pStringEnd)
+  while ((pString < pStringEnd) && (*pString != '\0'))
   {
     cur = plUnicodeUtils::DecodeUtf8ToUtf32(pString);
 
@@ -932,5 +932,3 @@ bool plStringUtils::IsValidIdentifierName(const char* pString, const char* pStri
 
   return true;
 }
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_StringUtils);

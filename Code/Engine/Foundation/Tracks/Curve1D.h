@@ -9,7 +9,7 @@
 class plStreamWriter;
 class plStreamReader;
 
-struct PLASMA_FOUNDATION_DLL plCurveTangentMode
+struct PL_FOUNDATION_DLL plCurveTangentMode
 {
   using StorageType = plUInt8;
 
@@ -25,13 +25,13 @@ struct PLASMA_FOUNDATION_DLL plCurveTangentMode
 };
 
 /// \brief A 1D curve for animating a single value over time.
-class PLASMA_FOUNDATION_DLL plCurve1D
+class PL_FOUNDATION_DLL plCurve1D
 {
 public:
   /// \brief Stores position and tangents to control spline interpolation
   struct ControlPoint
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     ControlPoint();
 
@@ -48,7 +48,7 @@ public:
 
     plUInt16 m_uiOriginalIndex;
 
-    PLASMA_ALWAYS_INLINE bool operator<(const ControlPoint& rhs) const { return m_Position.x < rhs.m_Position.x; }
+    PL_ALWAYS_INLINE bool operator<(const ControlPoint& rhs) const { return m_Position.x < rhs.m_Position.x; }
   };
 
 public:

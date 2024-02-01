@@ -18,7 +18,7 @@ plQtTimeScrubberWidget::plQtTimeScrubberWidget(QWidget* pParent)
   setSizePolicy(QSizePolicy::Policy::Expanding, QSizePolicy::Policy::Expanding);
 }
 
-plQtTimeScrubberWidget::~plQtTimeScrubberWidget() {}
+plQtTimeScrubberWidget::~plQtTimeScrubberWidget() = default;
 
 void plQtTimeScrubberWidget::SetDuration(plUInt64 uiNumTicks)
 {
@@ -26,7 +26,7 @@ void plQtTimeScrubberWidget::SetDuration(plUInt64 uiNumTicks)
     return;
 
   m_uiDurationTicks = uiNumTicks;
-  m_Duration = plTime::Seconds((double)uiNumTicks / 4800.0);
+  m_Duration = plTime::MakeFromSeconds((double)uiNumTicks / 4800.0);
   m_fNormScrubberPosition = plMath::Clamp((double)m_uiScrubberTickPos / (double)m_uiDurationTicks, 0.0, 1.0);
 
   update();
@@ -131,7 +131,7 @@ void plQtTimeScrubberWidget::paintEvent(QPaintEvent* event)
       const double scaledX = x * scale;
 
       textRect.setRect(scaledX - 20, areaTop, 39, areaHeight);
-      tmp.Format("{0}", plArgF(x));
+      tmp.SetFormat("{0}", plArgF(x));
 
       p.drawText(textRect, tmp.GetData(), textOpt);
     }
@@ -206,8 +206,8 @@ void plQtTimeScrubberWidget::SetScrubberPosFromPixelCoord(plInt32 posX)
 
 //////////////////////////////////////////////////////////////////////////
 
-plQtTimeScrubberToolbar::plQtTimeScrubberToolbar(QWidget* parent)
-  : QToolBar("Time Scrubber", parent)
+plQtTimeScrubberToolbar::plQtTimeScrubberToolbar(QWidget* pParent)
+  : QToolBar("Time Scrubber", pParent)
 {
   m_pScrubber = new plQtTimeScrubberWidget(this);
   setObjectName("TimeScrubberToolbar");
@@ -242,9 +242,9 @@ plQtTimeScrubberToolbar::plQtTimeScrubberToolbar(QWidget* parent)
 
   connect(m_pPlayButton, &QPushButton::clicked, this, [this](bool) { Q_EMIT PlayPauseEvent(); });
   connect(m_pRepeatButton, &QPushButton::clicked, this, [this](bool) { Q_EMIT RepeatEvent(); });
-  connect(m_pDuration, &QLineEdit::textChanged, this, [this](const QString& text) {
+  connect(m_pDuration, &QLineEdit::textChanged, this, [this](const QString& sText) {
     bool ok = false;
-    double val = text.toDouble(&ok);
+    double val = sText.toDouble(&ok);
 
     if (ok)
       Q_EMIT DurationChangedEvent(val);
@@ -272,12 +272,12 @@ void plQtTimeScrubberToolbar::SetScrubberPosition(plUInt64 uiTick)
   m_pScrubber->SetScrubberPosition(uiTick);
 }
 
-void plQtTimeScrubberToolbar::SetButtonState(bool playing, bool repeatEnabled)
+void plQtTimeScrubberToolbar::SetButtonState(bool bPlaying, bool bRepeatEnabled)
 {
-  if (playing)
+  if (bPlaying)
     m_pPlayButton->setIcon(QIcon(":/GuiFoundation/Icons/ControlPause.svg"));
   else
     m_pPlayButton->setIcon(QIcon(":/GuiFoundation/Icons/ControlPlay.svg"));
 
-  m_pRepeatButton->setChecked(repeatEnabled);
+  m_pRepeatButton->setChecked(bRepeatEnabled);
 }

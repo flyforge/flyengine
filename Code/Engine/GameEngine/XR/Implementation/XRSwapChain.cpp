@@ -4,10 +4,10 @@
 #include <GameEngine/XR/XRSwapChain.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGALXRSwapChain, plGALSwapChain, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGALXRSwapChain, plGALSwapChain, 1, plRTTINoAllocator)
 {
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plGALXRSwapChain::Functor plGALXRSwapChain::s_Factory;
@@ -20,7 +20,7 @@ plGALXRSwapChain::plGALXRSwapChain(plXRInterface* pXrInterface)
 
 plResult plGALXRSwapChain::UpdateSwapChain(plGALDevice* pDevice, plEnum<plGALPresentMode> newPresentMode)
 {
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plGALXRSwapChain::SetFactoryMethod(Functor factory)
@@ -30,6 +30,9 @@ void plGALXRSwapChain::SetFactoryMethod(Functor factory)
 
 plGALSwapChainHandle plGALXRSwapChain::Create(plXRInterface* pXrInterface)
 {
-  PLASMA_ASSERT_DEV(s_Factory.IsValid(), "No factory method assigned for plGALXRSwapChain.");
+  PL_ASSERT_DEV(s_Factory.IsValid(), "No factory method assigned for plGALXRSwapChain.");
   return s_Factory(pXrInterface);
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_XRSwapChain);

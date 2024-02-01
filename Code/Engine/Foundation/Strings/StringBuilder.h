@@ -31,11 +31,11 @@ class plFormatString;
 /// such as 'ReplaceSubString'. If individual characters must be modified, it might make more sense to create
 /// a second plStringBuilder, and iterate over the first while rebuilding the desired result in the second.
 /// Once a string is built and should only be stored for read access, it should be stored in an plString instance.
-class PLASMA_FOUNDATION_DLL plStringBuilder : public plStringBase<plStringBuilder>
+class PL_FOUNDATION_DLL plStringBuilder : public plStringBase<plStringBuilder>
 {
 public:
   /// \brief Initializes the string to be empty. No data is allocated, but the plStringBuilder ALWAYS creates an array on the stack.
-  plStringBuilder(plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
+  plStringBuilder(plAllocator* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
 
   /// \brief Copies the given string into this one.
   plStringBuilder(const plStringBuilder& rhs); // [tested]
@@ -46,16 +46,14 @@ public:
   /// \brief Copies the given string into this one.
   template <plUInt16 Size>
   plStringBuilder(const plHybridStringBase<Size>& rhs)
-    : m_uiCharacterCount(rhs.m_uiCharacterCount)
-    , m_Data(rhs.m_Data)
+    : m_Data(rhs.m_Data)
   {
   }
 
   /// \brief Copies the given string into this one.
   template <plUInt16 Size, typename A>
   plStringBuilder(const plHybridString<Size, A>& rhs)
-    : m_uiCharacterCount(rhs.m_uiCharacterCount)
-    , m_Data(rhs.m_Data)
+    : m_Data(rhs.m_Data)
   {
   }
 
@@ -63,16 +61,14 @@ public:
   /// \brief Moves the given string into this one.
   template <plUInt16 Size>
   plStringBuilder(plHybridStringBase<Size>&& rhs)
-    : m_uiCharacterCount(rhs.m_uiCharacterCount)
-    , m_Data(std::move(rhs.m_Data))
+    : m_Data(std::move(rhs.m_Data))
   {
   }
 
   /// \brief Moves the given string into this one.
   template <plUInt16 Size, typename A>
   plStringBuilder(plHybridString<Size, A>&& rhs)
-    : m_uiCharacterCount(rhs.m_uiCharacterCount)
-    , m_Data(std::move(rhs.m_Data))
+    : m_Data(std::move(rhs.m_Data))
   {
   }
 
@@ -81,13 +77,13 @@ public:
     plStringView sData5 = {}, plStringView sData6 = {}); // [tested]
 
   /// \brief Copies the given Utf8 string into this one.
-  /* implicit */ plStringBuilder(const char* szUTF8, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
+  /* implicit */ plStringBuilder(const char* szUTF8, plAllocator* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
 
   /// \brief Copies the given wchar_t string into this one.
-  /* implicit */ plStringBuilder(const wchar_t* pWChar, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
+  /* implicit */ plStringBuilder(const wchar_t* pWChar, plAllocator* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
 
   /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
-  /* implicit */ plStringBuilder(plStringView rhs, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
+  /* implicit */ plStringBuilder(plStringView rhs, plAllocator* pAllocator = plFoundation::GetDefaultAllocator()); // [tested]
 
   /// \brief Copies the given string into this one.
   void operator=(const plStringBuilder& rhs); // [tested]
@@ -108,7 +104,6 @@ public:
   template <plUInt16 Size>
   void operator=(const plHybridStringBase<Size>& rhs)
   {
-    m_uiCharacterCount = rhs.m_uiCharacterCount;
     m_Data = rhs.m_Data;
   }
 
@@ -116,7 +111,6 @@ public:
   template <plUInt16 Size, typename A>
   void operator=(const plHybridString<Size, A>& rhs)
   {
-    m_uiCharacterCount = rhs.m_uiCharacterCount;
     m_Data = rhs.m_Data;
   }
 
@@ -124,7 +118,6 @@ public:
   template <plUInt16 Size>
   void operator=(plHybridStringBase<Size>&& rhs)
   {
-    m_uiCharacterCount = rhs.m_uiCharacterCount;
     m_Data = std::move(rhs.m_Data);
   }
 
@@ -132,12 +125,11 @@ public:
   template <plUInt16 Size, typename A>
   void operator=(plHybridString<Size, A>&& rhs) noexcept
   {
-    m_uiCharacterCount = rhs.m_uiCharacterCount;
     m_Data = std::move(rhs.m_Data);
   }
 
   /// \brief Returns the allocator that is used by this object.
-  plAllocatorBase* GetAllocator() const;
+  plAllocator* GetAllocator() const;
 
   /// \brief Resets this string to be empty. Does not deallocate any previously allocated data, as it might be reused later again.
   void Clear(); // [tested]
@@ -150,10 +142,10 @@ public:
 
   /// \brief Returns the number of characters of which this string consists. Might be less than GetElementCount, if it contains Utf8
   /// multi-byte characters.
+  ///
+  /// \note This is a slow operation, as it has to run through the entire string to count the Unicode characters.
+  /// Only call this once and use the result as long as the string doesn't change. Don't call this in a loop.
   plUInt32 GetCharacterCount() const; // [tested]
-
-  /// \brief Returns whether this string only contains ASCII characters, which means that GetElementCount() == GetCharacterCount()
-  bool IsPureASCII() const; // [tested]
 
   /// \brief Converts all characters to upper case. Might move the string data around, so all iterators to the data will be invalid
   /// afterwards.
@@ -206,19 +198,19 @@ public:
     plStringView sData5 = {}, plStringView sData6 = {}); // [tested]
 
   /// \brief Sets this string to the formatted string, uses printf-style formatting.
-  void Printf(const char* szUtf8Format, ...); // [tested]
+  void SetPrintf(const char* szUtf8Format, ...); // [tested]
 
   /// \brief Sets this string to the formatted string, uses printf-style formatting.
-  void PrintfArgs(const char* szUtf8Format, va_list szArgs); // [tested]
+  void SetPrintfArgs(const char* szUtf8Format, va_list szArgs); // [tested]
 
   /// \brief Replaces this with a formatted string. Uses '{}' formatting placeholders, see plFormatString for details.
-  void Format(const plFormatString& string);
+  void SetFormat(const plFormatString& string);
 
   /// \brief Replaces this with a formatted string. Uses '{}' formatting placeholders, see plFormatString for details.
   template <typename... ARGS>
-  void Format(const char* szFormat, ARGS&&... args)
+  void SetFormat(const char* szFormat, ARGS&&... args)
   {
-    Format(plFormatStringImpl<ARGS...>(szFormat, std::forward<ARGS>(args)...));
+    SetFormat(plFormatStringImpl<ARGS...>(szFormat, std::forward<ARGS>(args)...));
   }
 
   /// \brief Appends a formatted string. Uses '{}' formatting placeholders, see plFormatString for details.
@@ -288,23 +280,23 @@ public:
   /// the delimiter function IsDelimiterCB.
   ///
   /// Returns the start position of where the word was replaced or nullptr if nothing got replaced.
-  const char* ReplaceWholeWord(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB); // [tested]
+  const char* ReplaceWholeWord(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB); // [tested]
 
   /// \brief Case-insensitive version of ReplaceWholeWord.
   ///
   /// Returns the start position of where the word was replaced or nullptr if nothing got replaced.
-  const char* ReplaceWholeWord_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB); // [tested]
+  const char* ReplaceWholeWord_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB); // [tested]
 
   /// \brief Replaces all occurrences of szSearchFor by szReplaceWith, if szSearchFor was found to be a 'whole word', as indicated by the
   /// delimiter function IsDelimiterCB.
   ///
   /// Returns how many words got replaced.
-  plUInt32 ReplaceWholeWordAll(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB); // [tested]
+  plUInt32 ReplaceWholeWordAll(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB); // [tested]
 
   /// \brief Case-insensitive version of ReplaceWholeWordAll.
   ///
   /// Returns how many words got replaced.
-  plUInt32 ReplaceWholeWordAll_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB); // [tested]
+  plUInt32 ReplaceWholeWordAll_NoCase(const char* szSearchFor, plStringView sReplaceWith, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB); // [tested]
 
   /// \brief Replaces the current string with the content from the stream. Reads the stream to its end.
   void ReadAll(plStreamReader& inout_stream);
@@ -390,6 +382,20 @@ public:
   /// \brief If the string ends with the given word (case insensitive), it is removed and the function returns true.
   bool TrimWordEnd(plStringView sWord); // [tested]
 
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
+  /* implicit */ plStringBuilder(const std::string_view& rhs, plAllocator* pAllocator = plFoundation::GetDefaultAllocator());
+
+  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
+  /* implicit */ plStringBuilder(const std::string& rhs, plAllocator* pAllocator = plFoundation::GetDefaultAllocator());
+
+  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
+  void operator=(const std::string_view& rhs);
+
+  /// \brief Copies the given substring into this one. The plStringView might actually be a substring of this very string.
+  void operator=(const std::string& rhs);
+#endif
+
 private:
   /// \brief Will remove all double path separators (slashes and backslashes) in a path, except if the path starts with two (back-)slashes,
   /// those are kept, as they might indicate a UNC path.
@@ -404,7 +410,6 @@ private:
 
   friend plStreamReader;
 
-  plUInt32 m_uiCharacterCount;
   plHybridArray<char, 128> m_Data;
 };
 

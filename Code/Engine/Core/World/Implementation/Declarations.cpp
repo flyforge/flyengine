@@ -5,47 +5,47 @@
 #include <Foundation/Types/VariantTypeRegistry.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGameObjectHandle, plNoBase, 1, plRTTIDefaultAllocator<plGameObjectHandle>)
-PLASMA_END_STATIC_REFLECTED_TYPE;
-PLASMA_DEFINE_CUSTOM_VARIANT_TYPE(plGameObjectHandle);
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGameObjectHandle, plNoBase, 1, plRTTIDefaultAllocator<plGameObjectHandle>)
+PL_END_STATIC_REFLECTED_TYPE;
+PL_DEFINE_CUSTOM_VARIANT_TYPE(plGameObjectHandle);
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plComponentHandle, plNoBase, 1, plRTTIDefaultAllocator<plComponentHandle>)
-PLASMA_END_STATIC_REFLECTED_TYPE;
-PLASMA_DEFINE_CUSTOM_VARIANT_TYPE(plComponentHandle);
+PL_BEGIN_STATIC_REFLECTED_TYPE(plComponentHandle, plNoBase, 1, plRTTIDefaultAllocator<plComponentHandle>)
+PL_END_STATIC_REFLECTED_TYPE;
+PL_DEFINE_CUSTOM_VARIANT_TYPE(plComponentHandle);
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plObjectMode, 1)
-  PLASMA_ENUM_CONSTANTS(plObjectMode::Automatic, plObjectMode::ForceDynamic)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plObjectMode, 1)
+  PL_ENUM_CONSTANTS(plObjectMode::Automatic, plObjectMode::ForceDynamic)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plOnComponentFinishedAction, 1)
-  PLASMA_ENUM_CONSTANTS(plOnComponentFinishedAction::None, plOnComponentFinishedAction::DeleteComponent, plOnComponentFinishedAction::DeleteGameObject)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plOnComponentFinishedAction, 1)
+  PL_ENUM_CONSTANTS(plOnComponentFinishedAction::None, plOnComponentFinishedAction::DeleteComponent, plOnComponentFinishedAction::DeleteGameObject)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plOnComponentFinishedAction2, 1)
-  PLASMA_ENUM_CONSTANTS(plOnComponentFinishedAction2::None, plOnComponentFinishedAction2::DeleteComponent, plOnComponentFinishedAction2::DeleteGameObject, plOnComponentFinishedAction2::Restart)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plOnComponentFinishedAction2, 1)
+  PL_ENUM_CONSTANTS(plOnComponentFinishedAction2::None, plOnComponentFinishedAction2::DeleteComponent, plOnComponentFinishedAction2::DeleteGameObject, plOnComponentFinishedAction2::Restart)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
-void operator<<(plStreamWriter& Stream, const plGameObjectHandle& Value)
+void operator<<(plStreamWriter& inout_stream, const plGameObjectHandle& hValue)
 {
-  PLASMA_ASSERT_DEV(false, "This function should not be called. Use plWorldWriter::WriteGameObjectHandle instead.");
+  PL_ASSERT_DEV(false, "This function should not be called. Use plWorldWriter::WriteGameObjectHandle instead.");
 }
 
-void operator>>(plStreamReader& Stream, plGameObjectHandle& Value)
+void operator>>(plStreamReader& inout_stream, plGameObjectHandle& ref_hValue)
 {
-  PLASMA_ASSERT_DEV(false, "This function should not be called. Use plWorldReader::ReadGameObjectHandle instead.");
+  PL_ASSERT_DEV(false, "This function should not be called. Use plWorldReader::ReadGameObjectHandle instead.");
 }
 
-void operator<<(plStreamWriter& Stream, const plComponentHandle& Value)
+void operator<<(plStreamWriter& inout_stream, const plComponentHandle& hValue)
 {
-  PLASMA_ASSERT_DEV(false, "This function should not be called. Use plWorldWriter::WriteComponentHandle instead.");
+  PL_ASSERT_DEV(false, "This function should not be called. Use plWorldWriter::WriteComponentHandle instead.");
 }
 
-void operator>>(plStreamReader& Stream, plComponentHandle& Value)
+void operator>>(plStreamReader& inout_stream, plComponentHandle& ref_hValue)
 {
-  PLASMA_ASSERT_DEV(false, "This function should not be called. Use plWorldReader::ReadComponentHandle instead.");
+  PL_ASSERT_DEV(false, "This function should not be called. Use plWorldReader::ReadComponentHandle instead.");
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -89,16 +89,16 @@ namespace
   }
 
   template <typename T>
-  void HandleDeleteObjectMsgImpl(plMsgDeleteGameObject& msg, plEnum<T>& action)
+  void HandleDeleteObjectMsgImpl(plMsgDeleteGameObject& ref_msg, plEnum<T>& ref_action)
   {
-    if (action == T::DeleteComponent)
+    if (ref_action == T::DeleteComponent)
     {
-      msg.m_bCancel = true;
-      action = T::DeleteGameObject;
+      ref_msg.m_bCancel = true;
+      ref_action = T::DeleteGameObject;
     }
-    else if (action == T::DeleteGameObject)
+    else if (ref_action == T::DeleteGameObject)
     {
-      msg.m_bCancel = true;
+      ref_msg.m_bCancel = true;
     }
   }
 } // namespace
@@ -110,9 +110,9 @@ void plOnComponentFinishedAction::HandleFinishedAction(plComponent* pComponent, 
   HandleFinishedActionImpl<plOnComponentFinishedAction>(pComponent, action);
 }
 
-void plOnComponentFinishedAction::HandleDeleteObjectMsg(plMsgDeleteGameObject& msg, plEnum<plOnComponentFinishedAction>& action)
+void plOnComponentFinishedAction::HandleDeleteObjectMsg(plMsgDeleteGameObject& ref_msg, plEnum<plOnComponentFinishedAction>& ref_action)
 {
-  HandleDeleteObjectMsgImpl(msg, action);
+  HandleDeleteObjectMsgImpl(ref_msg, ref_action);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -122,9 +122,9 @@ void plOnComponentFinishedAction2::HandleFinishedAction(plComponent* pComponent,
   HandleFinishedActionImpl<plOnComponentFinishedAction2>(pComponent, action);
 }
 
-void plOnComponentFinishedAction2::HandleDeleteObjectMsg(plMsgDeleteGameObject& msg, plEnum<plOnComponentFinishedAction2>& action)
+void plOnComponentFinishedAction2::HandleDeleteObjectMsg(plMsgDeleteGameObject& ref_msg, plEnum<plOnComponentFinishedAction2>& ref_action)
 {
-  HandleDeleteObjectMsgImpl(msg, action);
+  HandleDeleteObjectMsgImpl(ref_msg, ref_action);
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_Declarations);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_Declarations);

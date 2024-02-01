@@ -11,13 +11,13 @@ class plStreamReader;
 ///
 /// The gradient consists of a number of control points, for rgb, alpha and intensity.
 /// One can evaluate the curve at any x coordinate.
-class PLASMA_FOUNDATION_DLL plColorGradient
+class PL_FOUNDATION_DLL plColorGradient
 {
 public:
   /// \brief Color control point. Stores red, green and blue in gamma space.
   struct ColorCP
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     double m_PosX;
     plUInt8 m_GammaRed;
@@ -25,31 +25,31 @@ public:
     plUInt8 m_GammaBlue;
     float m_fInvDistToNextCp; /// Internal: Optimization for Evaluate to not recalculate 1/distance to the next control point
 
-    PLASMA_ALWAYS_INLINE bool operator<(const ColorCP& rhs) const { return m_PosX < rhs.m_PosX; }
+    PL_ALWAYS_INLINE bool operator<(const ColorCP& rhs) const { return m_PosX < rhs.m_PosX; }
   };
 
   /// \brief Alpha control point.
   struct AlphaCP
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     double m_PosX;
     plUInt8 m_Alpha;
     float m_fInvDistToNextCp; /// Internal: Optimization for Evaluate to not recalculate 1/distance to the next control point
 
-    PLASMA_ALWAYS_INLINE bool operator<(const AlphaCP& rhs) const { return m_PosX < rhs.m_PosX; }
+    PL_ALWAYS_INLINE bool operator<(const AlphaCP& rhs) const { return m_PosX < rhs.m_PosX; }
   };
 
   /// \brief Intensity control point. Used to scale rgb for high-dynamic range values.
   struct IntensityCP
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     double m_PosX;
     float m_Intensity;
     float m_fInvDistToNextCp; /// Internal: Optimization for Evaluate to not recalculate 1/distance to the next control point
 
-    PLASMA_ALWAYS_INLINE bool operator<(const IntensityCP& rhs) const { return m_PosX < rhs.m_PosX; }
+    PL_ALWAYS_INLINE bool operator<(const IntensityCP& rhs) const { return m_PosX < rhs.m_PosX; }
   };
 
 public:

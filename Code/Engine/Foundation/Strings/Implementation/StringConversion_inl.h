@@ -6,31 +6,31 @@
 
 // **************** plStringWChar ****************
 
-inline plStringWChar::plStringWChar(plAllocatorBase* pAllocator)
+inline plStringWChar::plStringWChar(plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   m_Data.PushBack('\0');
 }
 
-inline plStringWChar::plStringWChar(const plUInt16* pUtf16, plAllocatorBase* pAllocator)
+inline plStringWChar::plStringWChar(const plUInt16* pUtf16, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf16;
 }
 
-inline plStringWChar::plStringWChar(const plUInt32* pUtf32, plAllocatorBase* pAllocator)
+inline plStringWChar::plStringWChar(const plUInt32* pUtf32, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf32;
 }
 
-inline plStringWChar::plStringWChar(const wchar_t* pWChar, plAllocatorBase* pAllocator)
+inline plStringWChar::plStringWChar(const wchar_t* pWChar, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pWChar;
 }
 
-inline plStringWChar::plStringWChar(plStringView sUtf8, plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+inline plStringWChar::plStringWChar(plStringView sUtf8, plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
 {
   *this = sUtf8;
 }
@@ -38,46 +38,46 @@ inline plStringWChar::plStringWChar(plStringView sUtf8, plAllocatorBase* pAlloca
 
 // **************** plStringUtf8 ****************
 
-inline plStringUtf8::plStringUtf8(plAllocatorBase* pAllocator)
+inline plStringUtf8::plStringUtf8(plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   m_Data.PushBack('\0');
 }
 
-inline plStringUtf8::plStringUtf8(const char* szUtf8, plAllocatorBase* pAllocator)
+inline plStringUtf8::plStringUtf8(const char* szUtf8, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = szUtf8;
 }
 
-inline plStringUtf8::plStringUtf8(const plUInt16* pUtf16, plAllocatorBase* pAllocator)
+inline plStringUtf8::plStringUtf8(const plUInt16* pUtf16, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf16;
 }
 
-inline plStringUtf8::plStringUtf8(const plUInt32* pUtf32, plAllocatorBase* pAllocator)
+inline plStringUtf8::plStringUtf8(const plUInt32* pUtf32, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf32;
 }
 
-inline plStringUtf8::plStringUtf8(const wchar_t* pWChar, plAllocatorBase* pAllocator)
+inline plStringUtf8::plStringUtf8(const wchar_t* pWChar, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pWChar;
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
 inline plStringUtf8::plStringUtf8(
-  const Microsoft::WRL::Wrappers::HString& hstring, plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+  const Microsoft::WRL::Wrappers::HString& hstring, plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
   : m_Data(pAllocator)
 {
   *this = hstring;
 }
 
-inline plStringUtf8::plStringUtf8(const HSTRING& hstring, plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+inline plStringUtf8::plStringUtf8(const HSTRING& hstring, plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
 {
   *this = hstring;
 }
@@ -86,31 +86,31 @@ inline plStringUtf8::plStringUtf8(const HSTRING& hstring, plAllocatorBase* pAllo
 
 // **************** plStringUtf16 ****************
 
-inline plStringUtf16::plStringUtf16(plAllocatorBase* pAllocator)
+inline plStringUtf16::plStringUtf16(plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   m_Data.PushBack('\0');
 }
 
-inline plStringUtf16::plStringUtf16(const char* szUtf8, plAllocatorBase* pAllocator)
+inline plStringUtf16::plStringUtf16(const char* szUtf8, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = szUtf8;
 }
 
-inline plStringUtf16::plStringUtf16(const plUInt16* pUtf16, plAllocatorBase* pAllocator)
+inline plStringUtf16::plStringUtf16(const plUInt16* pUtf16, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf16;
 }
 
-inline plStringUtf16::plStringUtf16(const plUInt32* pUtf32, plAllocatorBase* pAllocator)
+inline plStringUtf16::plStringUtf16(const plUInt32* pUtf32, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf32;
 }
 
-inline plStringUtf16::plStringUtf16(const wchar_t* pWChar, plAllocatorBase* pAllocator)
+inline plStringUtf16::plStringUtf16(const wchar_t* pWChar, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pWChar;
@@ -120,31 +120,31 @@ inline plStringUtf16::plStringUtf16(const wchar_t* pWChar, plAllocatorBase* pAll
 
 // **************** plStringUtf32 ****************
 
-inline plStringUtf32::plStringUtf32(plAllocatorBase* pAllocator)
+inline plStringUtf32::plStringUtf32(plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   m_Data.PushBack('\0');
 }
 
-inline plStringUtf32::plStringUtf32(const char* szUtf8, plAllocatorBase* pAllocator)
+inline plStringUtf32::plStringUtf32(const char* szUtf8, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = szUtf8;
 }
 
-inline plStringUtf32::plStringUtf32(const plUInt16* pUtf16, plAllocatorBase* pAllocator)
+inline plStringUtf32::plStringUtf32(const plUInt16* pUtf16, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf16;
 }
 
-inline plStringUtf32::plStringUtf32(const plUInt32* pUtf32, plAllocatorBase* pAllocator)
+inline plStringUtf32::plStringUtf32(const plUInt32* pUtf32, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pUtf32;
 }
 
-inline plStringUtf32::plStringUtf32(const wchar_t* pWChar, plAllocatorBase* pAllocator)
+inline plStringUtf32::plStringUtf32(const wchar_t* pWChar, plAllocator* pAllocator)
   : m_Data(pAllocator)
 {
   *this = pWChar;

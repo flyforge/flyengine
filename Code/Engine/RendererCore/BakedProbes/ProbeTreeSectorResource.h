@@ -4,11 +4,11 @@
 #include <Core/ResourceManager/Resource.h>
 #include <RendererCore/BakedProbes/BakingUtils.h>
 
-typedef plTypedResourceHandle<class plProbeTreeSectorResource> plProbeTreeSectorResourceHandle;
+using plProbeTreeSectorResourceHandle = plTypedResourceHandle<class plProbeTreeSectorResource>;
 
-struct PLASMA_RENDERERCORE_DLL plProbeTreeSectorResourceDescriptor
+struct PL_RENDERERCORE_DLL plProbeTreeSectorResourceDescriptor
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plProbeTreeSectorResourceDescriptor);
+  PL_DISALLOW_COPY_AND_ASSIGN(plProbeTreeSectorResourceDescriptor);
 
   plProbeTreeSectorResourceDescriptor();
   ~plProbeTreeSectorResourceDescriptor();
@@ -28,11 +28,11 @@ struct PLASMA_RENDERERCORE_DLL plProbeTreeSectorResourceDescriptor
   plResult Deserialize(plStreamReader& inout_stream);
 };
 
-class PLASMA_RENDERERCORE_DLL plProbeTreeSectorResource : public plResource
+class PL_RENDERERCORE_DLL plProbeTreeSectorResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProbeTreeSectorResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plProbeTreeSectorResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plProbeTreeSectorResource, plProbeTreeSectorResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plProbeTreeSectorResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plProbeTreeSectorResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plProbeTreeSectorResource, plProbeTreeSectorResourceDescriptor);
 
 public:
   plProbeTreeSectorResource();

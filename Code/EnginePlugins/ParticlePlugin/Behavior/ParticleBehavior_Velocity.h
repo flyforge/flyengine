@@ -5,9 +5,9 @@
 class plPhysicsWorldModuleInterface;
 class plWindWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Velocity final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Velocity final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Velocity, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Velocity, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_Velocity();
@@ -16,10 +16,10 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
   float m_fRiseSpeed = 0;
   float m_fFriction = 0;
@@ -27,9 +27,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_Velocity final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_Velocity final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Velocity, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Velocity, plParticleBehavior);
 
 public:
   virtual void CreateRequiredStreams() override;
@@ -53,5 +53,5 @@ protected:
   plProcessingStream* m_pStreamPosition;
   plProcessingStream* m_pStreamVelocity;
 
-  plVec3 m_vLastWind = plVec3::ZeroVector();
+  plVec3 m_vLastWind = plVec3::MakeZero();
 };

@@ -6,12 +6,12 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 
 
-void plSceneDocument::UnlinkPrefabs(const plDeque<const plDocumentObject*>& Selection)
+void plSceneDocument::UnlinkPrefabs(const plDeque<const plDocumentObject*>& selection)
 {
-  SUPER::UnlinkPrefabs(Selection);
+  SUPER::UnlinkPrefabs(selection);
 
   // Clear cached names.
-  for (auto pObject : Selection)
+  for (auto pObject : selection)
   {
     auto pMetaScene = m_GameObjectMetaData->BeginModifyMetaData(pObject->GetGuid());
     pMetaScene->m_CachedNodeName.Clear();
@@ -20,14 +20,14 @@ void plSceneDocument::UnlinkPrefabs(const plDeque<const plDocumentObject*>& Sele
 }
 
 
-bool plSceneDocument::IsObjectEditorPrefab(const plUuid& object, plUuid* out_PrefabAssetGuid) const
+bool plSceneDocument::IsObjectEditorPrefab(const plUuid& object, plUuid* out_pPrefabAssetGuid) const
 {
   auto pMeta = m_DocumentObjectMetaData->BeginReadMetaData(object);
   const bool bIsPrefab = pMeta->m_CreateFromPrefab.IsValid();
 
-  if (out_PrefabAssetGuid)
+  if (out_pPrefabAssetGuid)
   {
-    *out_PrefabAssetGuid = pMeta->m_CreateFromPrefab;
+    *out_pPrefabAssetGuid = pMeta->m_CreateFromPrefab;
   }
 
   m_DocumentObjectMetaData->EndReadMetaData();
@@ -36,7 +36,7 @@ bool plSceneDocument::IsObjectEditorPrefab(const plUuid& object, plUuid* out_Pre
 }
 
 
-bool plSceneDocument::IsObjectEnginePrefab(const plUuid& object, plUuid* out_PrefabAssetGuid) const
+bool plSceneDocument::IsObjectEnginePrefab(const plUuid& object, plUuid* out_pPrefabAssetGuid) const
 {
   const plDocumentObject* pObject = GetObjectManager()->GetObject(object);
 
@@ -54,7 +54,7 @@ bool plSceneDocument::IsObjectEnginePrefab(const plUuid& object, plUuid* out_Pre
 
       if (varPrefab.IsA<plString>())
       {
-        if (out_PrefabAssetGuid)
+        if (out_pPrefabAssetGuid)
         {
           const plString sAsset = varPrefab.Get<plString>();
 
@@ -62,7 +62,7 @@ bool plSceneDocument::IsObjectEnginePrefab(const plUuid& object, plUuid* out_Pre
 
           if (info.isValid())
           {
-            *out_PrefabAssetGuid = info->m_Data.m_Guid;
+            *out_pPrefabAssetGuid = info->m_Data.m_Guid;
           }
         }
 
@@ -76,14 +76,14 @@ bool plSceneDocument::IsObjectEnginePrefab(const plUuid& object, plUuid* out_Pre
 
 void plSceneDocument::UpdatePrefabs()
 {
-  PLASMA_LOCK(m_GameObjectMetaData->GetMutex());
+  PL_LOCK(m_GameObjectMetaData->GetMutex());
   SUPER::UpdatePrefabs();
 }
 
 
-plUuid plSceneDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, const char* szPrefabFile, const plUuid& PrefabAsset, const plUuid& PrefabSeed, bool bEnginePrefab)
+plUuid plSceneDocument::ReplaceByPrefab(const plDocumentObject* pRootObject, plStringView sPrefabFile, const plUuid& prefabAsset, const plUuid& prefabSeed, bool bEnginePrefab)
 {
-  plUuid newGuid = SUPER::ReplaceByPrefab(pRootObject, szPrefabFile, PrefabAsset, PrefabSeed, bEnginePrefab);
+  plUuid newGuid = SUPER::ReplaceByPrefab(pRootObject, sPrefabFile, prefabAsset, prefabSeed, bEnginePrefab);
   if (newGuid.IsValid())
   {
     auto pMeta = m_GameObjectMetaData->BeginModifyMetaData(newGuid);
@@ -110,24 +110,24 @@ plUuid plSceneDocument::RevertPrefab(const plDocumentObject* pObject)
 
     setCmd.m_sProperty = "LocalPosition";
     setCmd.m_NewValue = vLocalPos;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalRotation";
     setCmd.m_NewValue = vLocalRot;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalScaling";
     setCmd.m_NewValue = vLocalScale;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalUniformScaling";
     setCmd.m_NewValue = fLocalUniformScale;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
   }
   return newGuid;
 }
 
-void plSceneDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab)
+void plSceneDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab)
 {
   auto pHistory = GetCommandHistory();
   const plVec3 vLocalPos = pObject->GetTypeAccessor().GetValue("LocalPosition").ConvertTo<plVec3>();
@@ -135,7 +135,7 @@ void plSceneDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid
   const plVec3 vLocalScale = pObject->GetTypeAccessor().GetValue("LocalScaling").ConvertTo<plVec3>();
   const float fLocalUniformScale = pObject->GetTypeAccessor().GetValue("LocalUniformScaling").ConvertTo<float>();
 
-  SUPER::UpdatePrefabObject(pObject, PrefabAsset, PrefabSeed, szBasePrefab);
+  SUPER::UpdatePrefabObject(pObject, PrefabAsset, PrefabSeed, sBasePrefab);
 
   // the root object has the same GUID as the PrefabSeed
   if (PrefabSeed.IsValid())
@@ -145,30 +145,30 @@ void plSceneDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid
 
     setCmd.m_sProperty = "LocalPosition";
     setCmd.m_NewValue = vLocalPos;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalRotation";
     setCmd.m_NewValue = vLocalRot;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalScaling";
     setCmd.m_NewValue = vLocalScale;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
 
     setCmd.m_sProperty = "LocalUniformScaling";
     setCmd.m_NewValue = fLocalUniformScale;
-    pHistory->AddCommand(setCmd).IgnoreResult();
+    pHistory->AddCommand(setCmd).AssertSuccess();
   }
 }
 
-void plSceneDocument::ConvertToEditorPrefab(const plDeque<const plDocumentObject*>& Selection)
+void plSceneDocument::ConvertToEditorPrefab(const plDeque<const plDocumentObject*>& selection)
 {
   plDeque<const plDocumentObject*> newSelection;
 
   auto pHistory = GetCommandHistory();
   pHistory->StartTransaction("Convert to Editor Prefab");
 
-  for (const plDocumentObject* pObject : Selection)
+  for (const plDocumentObject* pObject : selection)
   {
     plUuid assetGuid;
     if (!IsObjectEnginePrefab(pObject->GetGuid(), &assetGuid))
@@ -181,9 +181,8 @@ void plSceneDocument::ConvertToEditorPrefab(const plDeque<const plDocumentObject
 
     const plTransform transform = GetGlobalTransform(pObject);
 
-    plUuid newGuid;
-    newGuid.CreateNewUuid();
-    plUuid newObject = ReplaceByPrefab(pObject, pAsset->m_pAssetInfo->m_sAbsolutePath, assetGuid, newGuid, false);
+    plUuid newGuid = plUuid::MakeUuid();
+    plUuid newObject = ReplaceByPrefab(pObject, pAsset->m_pAssetInfo->m_Path.GetAbsolutePath(), assetGuid, newGuid, false);
 
     if (newObject.IsValid())
     {
@@ -199,7 +198,7 @@ void plSceneDocument::ConvertToEditorPrefab(const plDeque<const plDocumentObject
   GetSelectionManager()->SetSelection(newSelection);
 }
 
-void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject*>& Selection)
+void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject*>& selection)
 {
   plDeque<const plDocumentObject*> newSelection;
 
@@ -208,7 +207,7 @@ void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject
 
   plStringBuilder tmp;
 
-  for (const plDocumentObject* pObject : Selection)
+  for (const plDocumentObject* pObject : selection)
   {
     plUuid assetGuid;
     if (!IsObjectEditorPrefab(pObject->GetGuid(), &assetGuid))
@@ -226,8 +225,8 @@ void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject
     // create an object with the reference prefab component
     {
       plUuid ObjectGuid, CmpGuid;
-      ObjectGuid.CreateNewUuid();
-      CmpGuid.CreateNewUuid();
+      ObjectGuid = plUuid::MakeUuid();
+      CmpGuid = plUuid::MakeUuid();
 
       plAddObjectCommand cmd;
       cmd.m_Parent = (pObject->GetParent() == GetObjectManager()->GetRootObject()) ? plUuid() : pObject->GetParent()->GetGuid();
@@ -236,20 +235,20 @@ void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject
       cmd.m_NewObjectGuid = ObjectGuid;
       cmd.m_sParentProperty = "Children";
 
-      PLASMA_VERIFY(pHistory->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(pHistory->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
       cmd.SetType("plPrefabReferenceComponent");
       cmd.m_sParentProperty = "Components";
       cmd.m_Index = -1;
       cmd.m_NewObjectGuid = CmpGuid;
       cmd.m_Parent = ObjectGuid;
-      PLASMA_VERIFY(pHistory->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(pHistory->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
       plSetObjectPropertyCommand cmd2;
       cmd2.m_Object = CmpGuid;
       cmd2.m_sProperty = "Prefab";
       cmd2.m_NewValue = plConversionUtils::ToString(assetGuid, tmp).GetData();
-      PLASMA_VERIFY(pHistory->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(pHistory->AddCommand(cmd2).m_Result.Succeeded(), "AddCommand failed");
 
 
       pNewObject = GetObjectManager()->GetObject(ObjectGuid);
@@ -265,7 +264,7 @@ void plSceneDocument::ConvertToEnginePrefab(const plDeque<const plDocumentObject
       plRemoveObjectCommand rem;
       rem.m_Object = pObject->GetGuid();
 
-      PLASMA_VERIFY(pHistory->AddCommand(rem).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(pHistory->AddCommand(rem).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 

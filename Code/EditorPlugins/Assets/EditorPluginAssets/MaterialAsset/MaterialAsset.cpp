@@ -37,21 +37,21 @@ namespace
       plReflectionUtils::GetEnumKeysAndValues(pProp->GetSpecificType(), enumValues, plReflectionUtils::EnumConversionMode::ValueNameOnly);
       for (auto& enumValue : enumValues)
       {
-        sDefine.Format("{} {}", enumValue.m_sKey, enumValue.m_iValue);
-        PLASMA_SUCCEED_OR_RETURN(inout_pp.AddCustomDefine(sDefine));
+        sDefine.SetFormat("{} {}", enumValue.m_sKey, enumValue.m_iValue);
+        PL_SUCCEED_OR_RETURN(inout_pp.AddCustomDefine(sDefine));
 
         if (enumValue.m_iValue == iValue)
         {
           sDefine.Set(szName, " ", enumValue.m_sKey);
-          PLASMA_SUCCEED_OR_RETURN(inout_pp.AddCustomDefine(sDefine));
+          PL_SUCCEED_OR_RETURN(inout_pp.AddCustomDefine(sDefine));
         }
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    PLASMA_REPORT_FAILURE("Invalid shader permutation property type '{0}'", pProp->GetSpecificType()->GetTypeName());
-    return PLASMA_FAILURE;
+    PL_REPORT_FAILURE("Invalid shader permutation property type '{0}'", pProp->GetSpecificType()->GetTypeName());
+    return PL_FAILURE;
   }
 
   plResult ParseMaterialConfig(plStringView sRelativeFileName, const plDocumentObject* pShaderPropertyObject, plVariantDictionary& out_materialConfig)
@@ -60,7 +60,7 @@ namespace
     {
       plFileReader File;
       if (File.Open(sRelativeFileName).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       sFileContent.ReadAll(File);
     }
@@ -77,8 +77,8 @@ namespace
 
     // set material permutation var
     {
-      PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine("TRUE 1"));
-      PLASMA_SUCCEED_OR_RETURN(pp.AddCustomDefine("FALSE 0"));
+      PL_SUCCEED_OR_RETURN(pp.AddCustomDefine("TRUE 1"));
+      PL_SUCCEED_OR_RETURN(pp.AddCustomDefine("FALSE 0"));
 
       plHybridArray<const plAbstractProperty*, 32> properties;
       pShaderPropertyObject->GetType()->GetAllProperties(properties);
@@ -91,39 +91,39 @@ namespace
         if (pCategory == nullptr || plStringUtils::IsEqual(pCategory->GetCategory(), "Permutation") == false)
           continue;
 
-        PLASMA_SUCCEED_OR_RETURN(AddDefines(pp, pShaderPropertyObject, pProp));
+        PL_SUCCEED_OR_RETURN(AddDefines(pp, pShaderPropertyObject, pProp));
       }
     }
 
-    pp.SetFileOpenFunction([&](plStringView sAbsoluteFile, plDynamicArray<plUInt8>& FileContent, plTimestamp& out_FileModification) {
+    pp.SetFileOpenFunction([&](plStringView sAbsoluteFile, plDynamicArray<plUInt8>& out_fileContent, plTimestamp& out_fileModification) {
         if (sAbsoluteFile == "MaterialConfig")
         {
-          FileContent.PushBackRange(plMakeArrayPtr((const plUInt8*)sMaterialConfig.GetStartPointer(), sMaterialConfig.GetElementCount()));
-          return PLASMA_SUCCESS;
+          out_fileContent.PushBackRange(plMakeArrayPtr((const plUInt8*)sMaterialConfig.GetStartPointer(), sMaterialConfig.GetElementCount()));
+          return PL_SUCCESS;
         }
 
         plFileReader r;
         if (r.Open(sAbsoluteFile).Failed())
         {
           plLog::Error("Could not find include file '{0}'", sAbsoluteFile);
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
         plFileStats stats;
         if (plFileSystem::GetFileStats(sAbsoluteFile, stats).Succeeded())
         {
-          out_FileModification = stats.m_LastModificationTime;
+          out_fileModification = stats.m_LastModificationTime;
         }
 #endif
 
         plUInt8 Temp[4096];
         while (plUInt64 uiRead = r.ReadBytes(Temp, 4096))
         {
-          FileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
+          out_fileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
         }
 
-        return PLASMA_SUCCESS; });
+        return PL_SUCCESS; });
 
     bool bFoundUndefinedVars = false;
     pp.m_ProcessingEvents.AddEventHandler([&bFoundUndefinedVars](const plPreprocessor::ProcessingEvent& e) {
@@ -138,7 +138,7 @@ namespace
     if (pp.Process("MaterialConfig", sOutput, false).Failed() || bFoundUndefinedVars)
     {
       plLog::Error("Preprocessing the material config section failed");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plHybridArray<plStringView, 32> allAssignments;
@@ -164,41 +164,41 @@ namespace
       out_materialConfig[components[0]] = components[1];
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 } // namespace
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plMaterialAssetPreview, 1)
-  PLASMA_ENUM_CONSTANT(plMaterialAssetPreview::Ball),
-  PLASMA_ENUM_CONSTANT(plMaterialAssetPreview::Sphere),
-  PLASMA_ENUM_CONSTANT(plMaterialAssetPreview::Box),
-  PLASMA_ENUM_CONSTANT(plMaterialAssetPreview::Plane),
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plMaterialAssetPreview, 1)
+  PL_ENUM_CONSTANT(plMaterialAssetPreview::Ball),
+  PL_ENUM_CONSTANT(plMaterialAssetPreview::Sphere),
+  PL_ENUM_CONSTANT(plMaterialAssetPreview::Box),
+  PL_ENUM_CONSTANT(plMaterialAssetPreview::Plane),
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plMaterialShaderMode, 1)
-PLASMA_ENUM_CONSTANTS(plMaterialShaderMode::BaseMaterial, plMaterialShaderMode::File, plMaterialShaderMode::Custom)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plMaterialShaderMode, 1)
+PL_ENUM_CONSTANTS(plMaterialShaderMode::BaseMaterial, plMaterialShaderMode::File, plMaterialShaderMode::Custom)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetProperties, 4, plRTTIDefaultAllocator<plMaterialAssetProperties>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetProperties, 4, plRTTIDefaultAllocator<plMaterialAssetProperties>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("ShaderMode", plMaterialShaderMode, GetShaderMode, SetShaderMode),
-    PLASMA_ACCESSOR_PROPERTY("BaseMaterial", GetBaseMaterial, SetBaseMaterial)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_ACCESSOR_PROPERTY("Surface", GetSurface, SetSurface)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
-    PLASMA_ACCESSOR_PROPERTY("Shader", GetShader, SetShader)->AddAttributes(new plFileBrowserAttribute("Select Shader", "*.plShader", "CustomAction_CreateShaderFromTemplate")),
+    PL_ENUM_ACCESSOR_PROPERTY("ShaderMode", plMaterialShaderMode, GetShaderMode, SetShaderMode),
+    PL_ACCESSOR_PROPERTY("BaseMaterial", GetBaseMaterial, SetBaseMaterial)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material", plDependencyFlags::Transform | plDependencyFlags::Thumbnail | plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("Surface", GetSurface, SetSurface)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("Shader", GetShader, SetShader)->AddAttributes(new plFileBrowserAttribute("Select Shader", "*.plShader", "CustomAction_CreateShaderFromTemplate")),
     // This property holds the phantom shader properties type so it is only used in the object graph but not actually in the instance of this object.
-    PLASMA_ACCESSOR_PROPERTY("ShaderProperties", GetShaderProperties, SetShaderProperties)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plContainerAttribute(false, false, false)),
+    PL_ACCESSOR_PROPERTY("ShaderProperties", GetShaderProperties, SetShaderProperties)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plContainerAttribute(false, false, false)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetDocument, 8, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMaterialAssetDocument, 7, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plUuid plMaterialAssetDocument::s_LitBaseMaterial;
@@ -272,20 +272,20 @@ void plMaterialAssetProperties::SetShaderMode(plEnum<plMaterialShaderMode> mode)
   {
     case plMaterialShaderMode::BaseMaterial:
     {
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").IgnoreResult();
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", "").IgnoreResult();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").AssertSuccess();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", "").AssertSuccess();
     }
     break;
     case plMaterialShaderMode::File:
     {
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").IgnoreResult();
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", "").IgnoreResult();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").AssertSuccess();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", "").AssertSuccess();
     }
     break;
     case plMaterialShaderMode::Custom:
     {
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").IgnoreResult();
-      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", plConversionUtils::ToString(m_pDocument->GetGuid(), tmp).GetData()).IgnoreResult();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "BaseMaterial", "").AssertSuccess();
+      pAccessor->SetValue(m_pDocument->GetPropertyObject(), "Shader", plConversionUtils::ToString(m_pDocument->GetGuid(), tmp).GetData()).AssertSuccess();
     }
     break;
   }
@@ -313,7 +313,7 @@ void plMaterialAssetProperties::UpdateShader(bool bForce)
   if (pHistory->IsInUndoRedo())
     return;
 
-  PLASMA_ASSERT_DEBUG(pHistory->IsInTransaction(), "Missing undo scope on stack.");
+  PL_ASSERT_DEBUG(pHistory->IsInTransaction(), "Missing undo scope on stack.");
 
   plDocumentObject* pPropObject = m_pDocument->GetShaderPropertyObject();
 
@@ -367,7 +367,7 @@ void plMaterialAssetProperties::DeleteProperties()
   plRemoveObjectCommand cmd;
   cmd.m_Object = pPropObject->GetGuid();
   auto res = pHistory->AddCommand(cmd);
-  PLASMA_ASSERT_DEV(res.m_Result.Succeeded(), "Removal of old properties should never fail.");
+  PL_ASSERT_DEV(res.m_Result.Succeeded(), "Removal of old properties should never fail.");
 }
 
 void plMaterialAssetProperties::CreateProperties(const char* szShaderPath)
@@ -391,10 +391,10 @@ void plMaterialAssetProperties::CreateProperties(const char* szShaderPath)
     cmd.m_sParentProperty = "ShaderProperties";
     cmd.m_Parent = m_pDocument->GetPropertyObject()->GetGuid();
     cmd.m_NewObjectGuid = cmd.m_Parent;
-    cmd.m_NewObjectGuid.CombineWithSeed(plUuid::StableUuidForString("ShaderProperties"));
+    cmd.m_NewObjectGuid.CombineWithSeed(plUuid::MakeStableUuidFromString("ShaderProperties"));
 
     auto res = pHistory->AddCommand(cmd);
-    PLASMA_ASSERT_DEV(res.m_Result.Succeeded(), "Addition of new properties should never fail.");
+    PL_ASSERT_DEV(res.m_Result.Succeeded(), "Addition of new properties should never fail.");
     LoadOldValues();
   }
 }
@@ -408,7 +408,7 @@ void plMaterialAssetProperties::SaveOldValues()
     const plRTTI* pType = accessor.GetType();
     plHybridArray<const plAbstractProperty*, 32> properties;
     pType->GetAllProperties(properties);
-    for (const plAbstractProperty* pProp : properties)
+    for (auto pProp : properties)
     {
       if (pProp->GetCategory() == plPropertyCategory::Member)
       {
@@ -428,7 +428,7 @@ void plMaterialAssetProperties::LoadOldValues()
     const plRTTI* pType = accessor.GetType();
     plHybridArray<const plAbstractProperty*, 32> properties;
     pType->GetAllProperties(properties);
-    for (const plAbstractProperty* pProp : properties)
+    for (auto pProp : properties)
     {
       if (pProp->GetCategory() == plPropertyCategory::Member)
       {
@@ -444,7 +444,7 @@ void plMaterialAssetProperties::LoadOldValues()
             cmd.m_NewValue = it.Value();
 
             // Do not check for success, if a cached value failed to apply, simply ignore it.
-            pHistory->AddCommand(cmd).IgnoreResult();
+            pHistory->AddCommand(cmd).AssertSuccess();
           }
         }
       }
@@ -489,10 +489,10 @@ plString plMaterialAssetProperties::ResolveRelativeShaderPath() const
     auto pAsset = plAssetCurator::GetSingleton()->GetSubAsset(guid);
     if (pAsset)
     {
-      PLASMA_ASSERT_DEV(pAsset->m_pAssetInfo->GetManager() == m_pDocument->GetDocumentManager(), "Referenced shader via guid by this material is not of type material asset (plMaterialShaderMode::Custom).");
+      PL_ASSERT_DEV(pAsset->m_pAssetInfo->GetManager() == m_pDocument->GetDocumentManager(), "Referenced shader via guid by this material is not of type material asset (plMaterialShaderMode::Custom).");
 
-      plStringBuilder sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(pAsset->m_pAssetInfo->m_sAbsolutePath);
-      plStringBuilder sResult = pAsset->m_pAssetInfo->GetManager()->GetRelativeOutputFileName(m_pDocument->GetAssetDocumentTypeDescriptor(), sProjectDir, pAsset->m_pAssetInfo->m_sAbsolutePath, plMaterialAssetDocumentManager::s_szShaderOutputTag);
+      plStringBuilder sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(pAsset->m_pAssetInfo->m_Path);
+      plStringBuilder sResult = pAsset->m_pAssetInfo->GetManager()->GetRelativeOutputFileName(m_pDocument->GetAssetDocumentTypeDescriptor(), sProjectDir, pAsset->m_pAssetInfo->m_Path, plMaterialAssetDocumentManager::s_szShaderOutputTag);
 
       sResult.Prepend("AssetCache/");
       return sResult;
@@ -513,8 +513,8 @@ plString plMaterialAssetProperties::ResolveRelativeShaderPath() const
 
 //////////////////////////////////////////////////////////////////////////
 
-plMaterialAssetDocument::plMaterialAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plMaterialAssetProperties>(PLASMA_DEFAULT_NEW(plMaterialObjectManager), szDocumentPath, plAssetDocEngineConnection::Simple, true)
+plMaterialAssetDocument::plMaterialAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plMaterialAssetProperties>(PL_DEFAULT_NEW(plMaterialObjectManager), sDocumentPath, plAssetDocEngineConnection::Simple, true)
 {
   plQtEditorApp::GetSingleton()->m_Events.AddEventHandler(plMakeDelegate(&plMaterialAssetDocument::EditorEventHandler, this));
 }
@@ -626,11 +626,11 @@ plUuid plMaterialAssetDocument::GetMaterialNodeGuid(const plAbstractObjectGraph&
   return plUuid();
 }
 
-void plMaterialAssetDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, const char* szBasePrefab)
+void plMaterialAssetDocument::UpdatePrefabObject(plDocumentObject* pObject, const plUuid& PrefabAsset, const plUuid& PrefabSeed, plStringView sBasePrefab)
 {
   // Base
   plAbstractObjectGraph baseGraph;
-  plPrefabUtils::LoadGraph(baseGraph, szBasePrefab);
+  plPrefabUtils::LoadGraph(baseGraph, sBasePrefab);
   baseGraph.PruneGraph(GetMaterialNodeGuid(baseGraph));
 
   // NewBase
@@ -744,7 +744,7 @@ void plMaterialAssetDocument::UpdatePrefabObject(plDocumentObject* pObject, cons
       if (pProp->GetFlags().IsSet(plPropertyFlags::Pointer))
         continue;
 
-      GetCommandHistory()->AddCommand(cmd).IgnoreResult();
+      GetCommandHistory()->AddCommand(cmd).AssertSuccess();
     }
   }
 
@@ -766,7 +766,7 @@ public:
   plResult m_Status;
 
   plVisualShaderErrorLog()
-    : m_Status(PLASMA_SUCCESS)
+    : m_Status(PL_SUCCESS)
   {
   }
 
@@ -775,7 +775,7 @@ public:
     switch (le.m_EventType)
     {
       case plLogMsgType::ErrorMsg:
-        m_Status = PLASMA_FAILURE;
+        m_Status = PL_FAILURE;
         m_sResult.Append("Error: ", le.m_sText, "\n");
         break;
 
@@ -790,9 +790,9 @@ public:
   }
 };
 
-plTransformStatus plMaterialAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plMaterialAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  if (plStringUtils::IsEqual(szOutputTag, plMaterialAssetDocumentManager::s_szShaderOutputTag))
+  if (sOutputTag.IsEqual(plMaterialAssetDocumentManager::s_szShaderOutputTag))
   {
     plStatus ret = RecreateVisualShaderFile(AssetHeader);
 
@@ -877,13 +877,13 @@ plTransformStatus plMaterialAssetDocument::InternalTransformAsset(const char* sz
   }
   else
   {
-    return SUPER::InternalTransformAsset(szTargetFile, szOutputTag, pAssetProfile, AssetHeader, transformFlags);
+    return SUPER::InternalTransformAsset(szTargetFile, sOutputTag, pAssetProfile, AssetHeader, transformFlags);
   }
 }
 
-plTransformStatus plMaterialAssetDocument::InternalTransformAsset(plStreamWriter& stream, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plMaterialAssetDocument::InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  PLASMA_ASSERT_DEV(plStringUtils::IsNullOrEmpty(szOutputTag), "Additional output '{0}' not implemented!", szOutputTag);
+  PL_ASSERT_DEV(sOutputTag.IsEmpty(), "Additional output '{0}' not implemented!", sOutputTag);
 
   return WriteMaterialAsset(stream, pAssetProfile, true);
 }
@@ -920,15 +920,20 @@ void plMaterialAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
   if (GetProperties()->m_ShaderMode != plMaterialShaderMode::BaseMaterial)
   {
     // remove base material dependency, if it isn't used
-    pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetBaseMaterial());
-    pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetBaseMaterial());
+    pInfo->m_TransformDependencies.Remove(GetProperties()->GetBaseMaterial());
+    pInfo->m_ThumbnailDependencies.Remove(GetProperties()->GetBaseMaterial());
   }
 
   if (GetProperties()->m_ShaderMode != plMaterialShaderMode::File)
   {
-    // remove shader file dependency, if it isn't used
-    pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetShader());
-    pInfo->m_AssetTransformDependencies.Remove(GetProperties()->GetShader());
+    const bool bInUseByBaseMaterial = GetProperties()->m_ShaderMode == plMaterialShaderMode::BaseMaterial && plStringUtils::IsEqual(GetProperties()->GetShader(), GetProperties()->GetBaseMaterial());
+
+    // remove shader file dependency, if it isn't used and differs from the base material
+    if (!bInUseByBaseMaterial)
+    {
+      pInfo->m_TransformDependencies.Remove(GetProperties()->GetShader());
+      pInfo->m_ThumbnailDependencies.Remove(GetProperties()->GetShader());
+    }
   }
 
   if (GetProperties()->m_ShaderMode == plMaterialShaderMode::Custom)
@@ -936,8 +941,8 @@ void plMaterialAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
     // We write our own guid into the shader field so BaseMaterial materials can find the shader file.
     // This would cause us to have a dependency to ourselves so we need to remove it.
     plStringBuilder tmp;
-    pInfo->m_AssetTransformDependencies.Remove(plConversionUtils::ToString(GetGuid(), tmp));
-    pInfo->m_AssetTransformDependencies.Remove(plConversionUtils::ToString(GetGuid(), tmp));
+    pInfo->m_TransformDependencies.Remove(plConversionUtils::ToString(GetGuid(), tmp));
+    pInfo->m_ThumbnailDependencies.Remove(plConversionUtils::ToString(GetGuid(), tmp));
 
     plVisualShaderCodeGenerator codeGen;
 
@@ -946,7 +951,7 @@ void plMaterialAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pInfo
 
     for (const auto& sCfgFile : cfgFiles)
     {
-      pInfo->m_AssetTransformDependencies.Insert(sCfgFile);
+      pInfo->m_TransformDependencies.Insert(sCfgFile);
     }
 
     pInfo->m_Outputs.Insert(plMaterialAssetDocumentManager::s_szShaderOutputTag);
@@ -963,7 +968,7 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
 
   // now generate the .plMaterialBin file
   {
-    const plUInt8 uiVersion = 8;
+    const plUInt8 uiVersion = 7;
 
     inout_stream0 << uiVersion;
 
@@ -971,7 +976,7 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
     uiCompressionMode = 1;
-    plCompressedStreamWriterZstd stream(&inout_stream0, plCompressedStreamWriterZstd::Compression::Average);
+    plCompressedStreamWriterZstd stream(&inout_stream0, 0, plCompressedStreamWriterZstd::Compression::Average);
 #else
     plStreamWriter& stream = stream0;
 #endif
@@ -985,58 +990,53 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
     stream << sRelativeShaderPath;
 
     plHybridArray<const plAbstractProperty*, 16> Textures2D;
-    plHybridArray<const plAbstractProperty*, 16> Textures3D;
     plHybridArray<const plAbstractProperty*, 16> TexturesCube;
     plHybridArray<const plAbstractProperty*, 16> Permutations;
     plHybridArray<const plAbstractProperty*, 16> Constants;
 
     const plDocumentObject* pObject = GetShaderPropertyObject();
-    if (pObject == nullptr)
-      return plStatus("Invalid shader property object");
-
-    bool hasBaseMaterial = plPrefabUtils::GetPrefabRoot(pObject, *m_DocumentObjectMetaData).IsValid();
-    auto pType = pObject->GetTypeAccessor().GetType();
-    plHybridArray<const plAbstractProperty*, 32> properties;
-    pType->GetAllProperties(properties);
-
-    plHybridArray<plPropertySelection, 1> selection;
-    selection.PushBack({pObject, plVariant()});
-    plDefaultObjectState defaultState(GetObjectAccessor(), selection.GetArrayPtr());
-
-    for (auto pProp : properties)
+    if (pObject != nullptr)
     {
-      if (hasBaseMaterial && defaultState.IsDefaultValue(pProp))
-        continue;
+      bool hasBaseMaterial = plPrefabUtils::GetPrefabRoot(pObject, *m_DocumentObjectMetaData).IsValid();
+      auto pType = pObject->GetTypeAccessor().GetType();
+      plHybridArray<const plAbstractProperty*, 32> properties;
+      pType->GetAllProperties(properties);
 
-      const plCategoryAttribute* pCategory = pProp->GetAttributeByType<plCategoryAttribute>();
+      plHybridArray<plPropertySelection, 1> selection;
+      selection.PushBack({pObject, plVariant()});
+      plDefaultObjectState defaultState(GetObjectAccessor(), selection.GetArrayPtr());
 
-      PLASMA_ASSERT_DEBUG(pCategory, "Category cannot be null for a shader property");
-      if (pCategory == nullptr)
-        continue;
+      for (auto pProp : properties)
+      {
+        if (hasBaseMaterial && defaultState.IsDefaultValue(pProp))
+          continue;
 
-      if (plStringUtils::IsEqual(pCategory->GetCategory(), "Texture 2D"))
-      {
-        Textures2D.PushBack(pProp);
-      }
-      else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Texture 3D"))
-      {
-        Textures3D.PushBack(pProp);
-      }
-      else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Texture Cube"))
-      {
-        TexturesCube.PushBack(pProp);
-      }
-      else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Permutation"))
-      {
-        Permutations.PushBack(pProp);
-      }
-      else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Constant"))
-      {
-        Constants.PushBack(pProp);
-      }
-      else
-      {
-        PLASMA_REPORT_FAILURE("Invalid shader property type '{0}'", pCategory->GetCategory());
+        const plCategoryAttribute* pCategory = pProp->GetAttributeByType<plCategoryAttribute>();
+
+        PL_ASSERT_DEBUG(pCategory, "Category cannot be null for a shader property");
+        if (pCategory == nullptr)
+          continue;
+
+        if (plStringUtils::IsEqual(pCategory->GetCategory(), "Texture 2D"))
+        {
+          Textures2D.PushBack(pProp);
+        }
+        else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Texture Cube"))
+        {
+          TexturesCube.PushBack(pProp);
+        }
+        else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Permutation"))
+        {
+          Permutations.PushBack(pProp);
+        }
+        else if (plStringUtils::IsEqual(pCategory->GetCategory(), "Constant"))
+        {
+          Constants.PushBack(pProp);
+        }
+        else
+        {
+          PL_REPORT_FAILURE("Invalid shader property type '{0}'", pCategory->GetCategory());
+        }
       }
     }
 
@@ -1058,7 +1058,7 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
         }
         else
         {
-          PLASMA_REPORT_FAILURE("Invalid shader permutation property type '{0}'", pProp->GetSpecificType()->GetTypeName());
+          PL_REPORT_FAILURE("Invalid shader permutation property type '{0}'", pProp->GetSpecificType()->GetTypeName());
         }
 
         stream << szName;
@@ -1072,21 +1072,6 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
       stream << uiTextures;
 
       for (auto pProp : Textures2D)
-      {
-        const char* szName = pProp->GetPropertyName();
-        sValue = pObject->GetTypeAccessor().GetValue(szName).ConvertTo<plString>();
-
-        stream << szName;
-        stream << sValue;
-      }
-    }
-
-    // write out the 3D textures
-    {
-      const plUInt16 uiTextures = Textures3D.GetCount();
-      stream << uiTextures;
-
-      for (auto pProp : Textures3D)
       {
         const char* szName = pProp->GetPropertyName();
         sValue = pObject->GetTypeAccessor().GetValue(szName).ConvertTo<plString>();
@@ -1129,7 +1114,10 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
     // render data category
     {
       plVariantDictionary materialConfig;
-      PLASMA_SUCCEED_OR_RETURN(ParseMaterialConfig(sRelativeShaderPath, pObject, materialConfig));
+      if (pObject != nullptr)
+      {
+        PL_SUCCEED_OR_RETURN(ParseMaterialConfig(sRelativeShaderPath, pObject, materialConfig));
+      }
 
       plVariant renderDataCategory;
       materialConfig.TryGetValue("RenderDataCategory", renderDataCategory);
@@ -1159,7 +1147,7 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
           if (!asset.isValid())
             continue;
 
-          sValue = asset->m_pAssetInfo->GetManager()->GetAbsoluteOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, asset->m_pAssetInfo->m_sAbsolutePath, "", pAssetProfile);
+          sValue = asset->m_pAssetInfo->GetManager()->GetAbsoluteOutputFileName(asset->m_pAssetInfo->m_pDocumentTypeDescriptor, asset->m_pAssetInfo->m_Path, "", pAssetProfile);
 
           sFilename = sValue.GetFileName();
           sFilename.Append("-lowres");
@@ -1176,7 +1164,7 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
 
           stream << sResourceName;
           stream << content.GetCount();
-          PLASMA_SUCCEED_OR_RETURN(stream.WriteBytes(content.GetData(), content.GetCount()));
+          PL_SUCCEED_OR_RETURN(stream.WriteBytes(content.GetData(), content.GetCount()));
         }
       }
 
@@ -1185,13 +1173,13 @@ plStatus plMaterialAssetDocument::WriteMaterialAsset(plStreamWriter& inout_strea
     }
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
-    PLASMA_SUCCEED_OR_RETURN(stream.FinishCompressedStream());
+    PL_SUCCEED_OR_RETURN(stream.FinishCompressedStream());
 
     plLog::Dev("Compressed material data from {0} KB to {1} KB ({2}%%)", plArgF((float)stream.GetUncompressedSize() / 1024.0f, 1), plArgF((float)stream.GetCompressedSize() / 1024.0f, 1), plArgF(100.0f * stream.GetCompressedSize() / stream.GetUncompressedSize(), 1));
 #endif
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plMaterialAssetDocument::TagVisualShaderFileInvalid(const plPlatformProfile* pAssetProfile, const char* szError)
@@ -1229,7 +1217,7 @@ plStatus plMaterialAssetDocument::RecreateVisualShaderFile(const plAssetFileHead
 {
   if (GetProperties()->m_ShaderMode != plMaterialShaderMode::Custom)
   {
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 
   plAssetDocumentManager* pManager = plDynamicCast<plAssetDocumentManager*>(GetDocumentManager());
@@ -1237,7 +1225,7 @@ plStatus plMaterialAssetDocument::RecreateVisualShaderFile(const plAssetFileHead
 
   plVisualShaderCodeGenerator codeGen;
 
-  PLASMA_SUCCEED_OR_RETURN(codeGen.GenerateVisualShader(static_cast<const plDocumentNodeManager*>(GetObjectManager()), m_sCheckPermutations));
+  PL_SUCCEED_OR_RETURN(codeGen.GenerateVisualShader(static_cast<const plDocumentNodeManager*>(GetObjectManager()), m_sCheckPermutations));
 
   plFileWriter file;
   if (file.Open(sAutoGenShader).Succeeded())
@@ -1245,12 +1233,12 @@ plStatus plMaterialAssetDocument::RecreateVisualShaderFile(const plAssetFileHead
     plStringBuilder shader = codeGen.GetFinalShaderCode();
     shader.PrependFormat("//{0}|{1}\n", assetHeader.GetFileHash(), assetHeader.GetFileVersion());
 
-    PLASMA_SUCCEED_OR_RETURN(file.WriteBytes(shader.GetData(), shader.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(file.WriteBytes(shader.GetData(), shader.GetElementCount()));
     file.Close();
 
     InvalidateCachedShader();
 
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   else
     return plStatus(plFmt("Failed to write auto-generated shader to '{0}'", sAutoGenShader));
@@ -1274,9 +1262,9 @@ void plMaterialAssetDocument::InvalidateCachedShader()
   plShaderTypeRegistry::GetSingleton()->GetShaderType(sShader);
 }
 
-void plMaterialAssetDocument::EditorEventHandler(const PlasmaEditorAppEvent& e)
+void plMaterialAssetDocument::EditorEventHandler(const plEditorAppEvent& e)
 {
-  if (e.m_Type == PlasmaEditorAppEvent::Type::ReloadResources)
+  if (e.m_Type == plEditorAppEvent::Type::ReloadResources)
   {
     InvalidateCachedShader();
   }
@@ -1354,7 +1342,7 @@ void plMaterialAssetDocument::RemoveDisconnectedNodes()
       plRemoveNodeCommand rem;
       rem.m_Object = it.Key()->GetGuid();
 
-      pHistory->AddCommand(rem).IgnoreResult();
+      pHistory->AddCommand(rem).AssertSuccess();
     }
 
     pHistory->FinishTransaction();
@@ -1405,18 +1393,18 @@ plUuid plMaterialAssetDocument::GetNeutralNormalMap()
 
 void plMaterialAssetDocument::GetSupportedMimeTypesForPasting(plHybridArray<plString, 4>& out_mimeTypes) const
 {
-  out_mimeTypes.PushBack("application/PlasmaEditor.NodeGraph");
+  out_mimeTypes.PushBack("application/plEditor.NodeGraph");
 }
 
 bool plMaterialAssetDocument::CopySelectedObjects(plAbstractObjectGraph& out_objectGraph, plStringBuilder& out_sMimeType) const
 {
-  out_sMimeType = "application/PlasmaEditor.NodeGraph";
+  out_sMimeType = "application/plEditor.NodeGraph";
 
   const plDocumentNodeManager* pManager = static_cast<const plDocumentNodeManager*>(GetObjectManager());
   return pManager->CopySelectedObjects(out_objectGraph);
 }
 
-bool plMaterialAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, const char* szMimeType)
+bool plMaterialAssetDocument::Paste(const plArrayPtr<PasteInfo>& info, const plAbstractObjectGraph& objectGraph, bool bAllowPickedPosition, plStringView sMimeType)
 {
   plDocumentNodeManager* pManager = static_cast<plDocumentNodeManager*>(GetObjectManager());
   return pManager->PasteObjects(info, objectGraph, plQtNodeScene::GetLastMouseInteractionPos(), bAllowPickedPosition);

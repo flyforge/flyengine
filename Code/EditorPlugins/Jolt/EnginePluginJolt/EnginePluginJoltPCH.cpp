@@ -1,6 +1,6 @@
 #include <EnginePluginJolt/EnginePluginJoltPCH.h>
 
-PLASMA_STATICLINK_LIBRARY(EnginePluginJolt)
+PL_STATICLINK_LIBRARY(EnginePluginJolt)
 {
   if (bReturn)
     return;

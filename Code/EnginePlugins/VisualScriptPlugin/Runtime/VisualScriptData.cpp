@@ -10,18 +10,18 @@ namespace
     "Instance",
     "Constant",
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_DataOffsetSourceNames) == (size_t)plVisualScriptDataDescription::DataOffset::Source::Count);
+  static_assert(PL_ARRAY_SIZE(s_DataOffsetSourceNames) == (size_t)plVisualScriptDataDescription::DataOffset::Source::Count);
 } // namespace
 
 // Check that DataOffset fits in one uint32 and also check that we have enough bits for dataType and source.
 static_assert(sizeof(plVisualScriptDataDescription::DataOffset) == sizeof(plUInt32));
-static_assert(plVisualScriptDataType::Count <= PLASMA_BIT(plVisualScriptDataDescription::DataOffset::TYPE_BITS));
-static_assert(plVisualScriptDataDescription::DataOffset::Source::Count <= PLASMA_BIT(plVisualScriptDataDescription::DataOffset::SOURCE_BITS));
+static_assert(plVisualScriptDataType::Count <= PL_BIT(plVisualScriptDataDescription::DataOffset::TYPE_BITS));
+static_assert(plVisualScriptDataDescription::DataOffset::Source::Count <= PL_BIT(plVisualScriptDataDescription::DataOffset::SOURCE_BITS));
 
 // static
 const char* plVisualScriptDataDescription::DataOffset::Source::GetName(Enum source)
 {
-  PLASMA_ASSERT_DEBUG(source >= 0 && source < PLASMA_ARRAY_SIZE(s_DataOffsetSourceNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(source >= 0 && source < PL_ARRAY_SIZE(s_DataOffsetSourceNames), "Out of bounds access");
   return s_DataOffsetSourceNames[source];
 }
 
@@ -41,13 +41,13 @@ plResult plVisualScriptDataDescription::Serialize(plStreamWriter& inout_stream) 
 
   inout_stream << m_uiStorageSizeNeeded;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptDataDescription::Deserialize(plStreamReader& inout_stream)
 {
   plTypeVersion uiVersion = inout_stream.ReadVersion(s_uiVisualScriptDataDescriptionVersion);
-  PLASMA_IGNORE_UNUSED(uiVersion);
+  PL_IGNORE_UNUSED(uiVersion);
 
   for (auto& typeInfo : m_PerTypeInfo)
   {
@@ -57,7 +57,7 @@ plResult plVisualScriptDataDescription::Deserialize(plStreamReader& inout_stream
 
   inout_stream >> m_uiStorageSizeNeeded;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plVisualScriptDataDescription::Clear()
@@ -69,7 +69,7 @@ void plVisualScriptDataDescription::Clear()
 void plVisualScriptDataDescription::CalculatePerTypeStartOffsets()
 {
   plUInt32 uiOffset = 0;
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_PerTypeInfo); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_PerTypeInfo); ++i)
   {
     auto dataType = static_cast<plVisualScriptDataType::Enum>(i);
     auto& typeInfo = m_PerTypeInfo[i];
@@ -114,27 +114,27 @@ void plVisualScriptDataStorage::AllocateStorage()
     if (scriptDataType == plVisualScriptDataType::String)
     {
       auto pStrings = reinterpret_cast<plString*>(pData + typeInfo.m_uiStartOffset);
-      plMemoryUtils::Construct(pStrings, typeInfo.m_uiCount);
+      plMemoryUtils::Construct<SkipTrivialTypes>(pStrings, typeInfo.m_uiCount);
     }
     if (scriptDataType == plVisualScriptDataType::HashedString)
     {
       auto pStrings = reinterpret_cast<plHashedString*>(pData + typeInfo.m_uiStartOffset);
-      plMemoryUtils::Construct(pStrings, typeInfo.m_uiCount);
+      plMemoryUtils::Construct<SkipTrivialTypes>(pStrings, typeInfo.m_uiCount);
     }
     else if (scriptDataType == plVisualScriptDataType::Variant)
     {
       auto pVariants = reinterpret_cast<plVariant*>(pData + typeInfo.m_uiStartOffset);
-      plMemoryUtils::Construct(pVariants, typeInfo.m_uiCount);
+      plMemoryUtils::Construct<SkipTrivialTypes>(pVariants, typeInfo.m_uiCount);
     }
     else if (scriptDataType == plVisualScriptDataType::Array)
     {
       auto pVariantArrays = reinterpret_cast<plVariantArray*>(pData + typeInfo.m_uiStartOffset);
-      plMemoryUtils::Construct(pVariantArrays, typeInfo.m_uiCount);
+      plMemoryUtils::Construct<SkipTrivialTypes>(pVariantArrays, typeInfo.m_uiCount);
     }
     else if (scriptDataType == plVisualScriptDataType::Map)
     {
       auto pVariantMaps = reinterpret_cast<plVariantDictionary*>(pData + typeInfo.m_uiStartOffset);
-      plMemoryUtils::Construct(pVariantMaps, typeInfo.m_uiCount);
+      plMemoryUtils::Construct<SkipTrivialTypes>(pVariantMaps, typeInfo.m_uiCount);
     }
   }
 }
@@ -228,7 +228,7 @@ plResult plVisualScriptDataStorage::Serialize(plStreamWriter& inout_stream) cons
       auto pVariantArraysEnd = pVariantArrays + typeInfo.m_uiCount;
       while (pVariantArrays < pVariantArraysEnd)
       {
-        PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(*pVariantArrays));
+        PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(*pVariantArrays));
         ++pVariantArrays;
       }
     }
@@ -238,18 +238,18 @@ plResult plVisualScriptDataStorage::Serialize(plStreamWriter& inout_stream) cons
       auto pVariantMapsEnd = pVariantMaps + typeInfo.m_uiCount;
       while (pVariantMaps < pVariantMapsEnd)
       {
-        PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteHashTable(*pVariantMaps));
+        PL_SUCCEED_OR_RETURN(inout_stream.WriteHashTable(*pVariantMaps));
         ++pVariantMaps;
       }
     }
     else
     {
       const plUInt32 uiBytesToWrite = typeInfo.m_uiCount * plVisualScriptDataType::GetStorageSize(static_cast<plVisualScriptDataType::Enum>(scriptDataType));
-      PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(pData + typeInfo.m_uiStartOffset, uiBytesToWrite));
+      PL_SUCCEED_OR_RETURN(inout_stream.WriteBytes(pData + typeInfo.m_uiStartOffset, uiBytesToWrite));
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plVisualScriptDataStorage::Deserialize(plStreamReader& inout_stream)
@@ -303,7 +303,7 @@ plResult plVisualScriptDataStorage::Deserialize(plStreamReader& inout_stream)
       auto pVariantArraysEnd = pVariantArrays + typeInfo.m_uiCount;
       while (pVariantArrays < pVariantArraysEnd)
       {
-        PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(*pVariantArrays));
+        PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(*pVariantArrays));
         ++pVariantArrays;
       }
     }
@@ -313,7 +313,7 @@ plResult plVisualScriptDataStorage::Deserialize(plStreamReader& inout_stream)
       auto pVariantMapsEnd = pVariantMaps + typeInfo.m_uiCount;
       while (pVariantMaps < pVariantMapsEnd)
       {
-        PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(*pVariantMaps));
+        PL_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(*pVariantMaps));
         ++pVariantMaps;
       }
     }
@@ -324,7 +324,7 @@ plResult plVisualScriptDataStorage::Deserialize(plStreamReader& inout_stream)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plTypedPointer plVisualScriptDataStorage::GetPointerData(DataOffset dataOffset, plUInt32 uiExecutionCounter) const
@@ -348,15 +348,17 @@ plTypedPointer plVisualScriptDataStorage::GetPointerData(DataOffset dataOffset, 
     return *reinterpret_cast<const plTypedPointer*>(pData);
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
-  return plTypedPointer();
+  plTypedPointer t;
+  t.m_pObject = const_cast<plUInt8*>(pData);
+  t.m_pType = plVisualScriptDataType::GetRtti(static_cast<plVisualScriptDataType::Enum>(dataOffset.m_uiType));
+  return t;
 }
 
 plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, const plRTTI* pExpectedType, plUInt32 uiExecutionCounter) const
 {
   auto scriptDataType = dataOffset.GetType();
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   // pExpectedType == nullptr means that the caller expects an plVariant so we decide solely based on the scriptDataType.
   // We set the pExpectedType to the equivalent of the scriptDataType here so we don't need to check for pExpectedType == nullptr in all the asserts below.
   if (pExpectedType == nullptr || pExpectedType == plGetStaticRTTI<plVariant>())
@@ -371,11 +373,11 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       return plVariant();
 
     case plVisualScriptDataType::Bool:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<bool>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<bool>(), "");
       return GetData<bool>(dataOffset);
 
     case plVisualScriptDataType::Byte:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plUInt8>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plUInt8>(), "");
       return GetData<plUInt8>(dataOffset);
 
     case plVisualScriptDataType::Int:
@@ -395,46 +397,46 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       {
         return static_cast<plUInt32>(GetData<plInt32>(dataOffset));
       }
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
 
     case plVisualScriptDataType::Int64:
-      PLASMA_ASSERT_DEBUG(pExpectedType->GetTypeFlags().IsSet(plTypeFlags::IsEnum) || pExpectedType == plGetStaticRTTI<plInt64>(), "");
+      PL_ASSERT_DEBUG(pExpectedType->GetTypeFlags().IsSet(plTypeFlags::IsEnum) || pExpectedType == plGetStaticRTTI<plInt64>(), "");
       return GetData<plInt64>(dataOffset);
 
     case plVisualScriptDataType::Float:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<float>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<float>(), "");
       return GetData<float>(dataOffset);
 
     case plVisualScriptDataType::Double:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<double>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<double>(), "");
       return GetData<double>(dataOffset);
 
     case plVisualScriptDataType::Color:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plColor>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plColor>(), "");
       return GetData<plColor>(dataOffset);
 
     case plVisualScriptDataType::Vector3:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVec3>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVec3>(), "");
       return GetData<plVec3>(dataOffset);
 
     case plVisualScriptDataType::Quaternion:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plQuat>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plQuat>(), "");
       return GetData<plQuat>(dataOffset);
 
     case plVisualScriptDataType::Transform:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plTransform>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plTransform>(), "");
       return GetData<plTransform>(dataOffset);
 
     case plVisualScriptDataType::Time:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plTime>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plTime>(), "");
       return GetData<plTime>(dataOffset);
 
     case plVisualScriptDataType::Angle:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plAngle>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plAngle>(), "");
       return GetData<plAngle>(dataOffset);
 
     case plVisualScriptDataType::String:
-      if (pExpectedType == nullptr || pExpectedType == plGetStaticRTTI<plString>() || pExpectedType == plGetStaticRTTI<plConstCharPtr>())
+      if (pExpectedType == nullptr || pExpectedType == plGetStaticRTTI<plString>() || pExpectedType == plGetStaticRTTI<const char*>())
       {
         return GetData<plString>(dataOffset);
       }
@@ -442,7 +444,7 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       {
         return plVariant(GetData<plString>(dataOffset).GetView(), false);
       }
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
 
     case plVisualScriptDataType::HashedString:
       if (pExpectedType == nullptr || pExpectedType == plGetStaticRTTI<plHashedString>())
@@ -453,7 +455,7 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       {
         return plTempHashedString(GetData<plHashedString>(dataOffset));
       }
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
 
     case plVisualScriptDataType::GameObject:
       if (pExpectedType == nullptr || pExpectedType == plGetStaticRTTI<plGameObject>())
@@ -464,10 +466,10 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       {
         return GetData<plGameObjectHandle>(dataOffset);
       }
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
 
     case plVisualScriptDataType::Component:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plComponentHandle>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plComponentHandle>(), "");
       return GetData<plComponentHandle>(dataOffset);
 
     case plVisualScriptDataType::TypedPointer:
@@ -477,14 +479,14 @@ plVariant plVisualScriptDataStorage::GetDataAsVariant(DataOffset dataOffset, con
       return GetData<plVariant>(dataOffset);
 
     case plVisualScriptDataType::Array:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVariantArray>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVariantArray>(), "");
       return GetData<plVariantArray>(dataOffset);
 
     case plVisualScriptDataType::Map:
-      PLASMA_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVariantDictionary>(), "");
+      PL_ASSERT_DEBUG(pExpectedType == plGetStaticRTTI<plVariantDictionary>(), "");
       return GetData<plVariantDictionary>(dataOffset);
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return plVariant();
@@ -576,7 +578,7 @@ void plVisualScriptDataStorage::SetDataFromVariant(DataOffset dataOffset, const 
     case plVisualScriptDataType::HashedString:
       if (value.IsA<plTempHashedString>())
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
       else
       {
@@ -622,6 +624,6 @@ void plVisualScriptDataStorage::SetDataFromVariant(DataOffset dataOffset, const 
       SetData(dataOffset, value.Get<plScriptCoroutineHandle>());
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 }

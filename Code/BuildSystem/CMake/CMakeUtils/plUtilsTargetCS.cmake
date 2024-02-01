@@ -5,7 +5,7 @@
 macro(pl_create_target_cs TYPE TARGET_NAME)
 	pl_apply_build_filter(${TARGET_NAME})
 
-	set(ARG_OPTIONS NO_PLASMA_PREFIX)
+	set(ARG_OPTIONS NO_PL_PREFIX)
 	set(ARG_ONEVALUEARGS DOTNET_VERSION)
 	set(ARG_MULTIVALUEARGS "")
 	cmake_parse_arguments(ARG "${ARG_OPTIONS}" "${ARG_ONEVALUEARGS}" "${ARG_MULTIVALUEARGS}" ${ARGN})
@@ -19,9 +19,9 @@ macro(pl_create_target_cs TYPE TARGET_NAME)
 	pl_glob_source_files(${CMAKE_CURRENT_SOURCE_DIR} ALL_SOURCE_FILES)
 
 	# SHARED_LIBRARY means always shared
-	# LIBRARY means SHARED_LIBRARY when PLASMA_COMPILE_ENGINE_AS_DLL is on, otherwise STATIC_LIBRARY
+	# LIBRARY means SHARED_LIBRARY when PL_COMPILE_ENGINE_AS_DLL is on, otherwise STATIC_LIBRARY
 	if((${TYPE} STREQUAL "LIBRARY") OR(${TYPE} STREQUAL "STATIC_LIBRARY") OR(${TYPE} STREQUAL "SHARED_LIBRARY"))
-		if((${PLASMA_COMPILE_ENGINE_AS_DLL} AND(${TYPE} STREQUAL "LIBRARY")) OR(${TYPE} STREQUAL "SHARED_LIBRARY"))
+		if((${PL_COMPILE_ENGINE_AS_DLL} AND(${TYPE} STREQUAL "LIBRARY")) OR(${TYPE} STREQUAL "SHARED_LIBRARY"))
 			message(STATUS "Shared Library (C#): ${TARGET_NAME}")
 			add_library(${TARGET_NAME} SHARED ${ALL_SOURCE_FILES})
 
@@ -30,7 +30,7 @@ macro(pl_create_target_cs TYPE TARGET_NAME)
 			add_library(${TARGET_NAME} ${ALL_SOURCE_FILES})
 		endif()
 
-		if(NOT ARG_NO_PLASMA_PREFIX)
+		if(NOT ARG_NO_PL_PREFIX)
 			pl_add_output_pl_prefix(${TARGET_NAME})
 		endif()
 
@@ -56,7 +56,7 @@ macro(pl_create_target_cs TYPE TARGET_NAME)
 		# message(STATUS "Custom .NET version: ${ARG_DOTNET_VERSION}")
 		set_property(TARGET ${TARGET_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v${ARG_DOTNET_VERSION}")
 	else()
-		set_property(TARGET ${TARGET_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.6.1")
+		set_property(TARGET ${TARGET_NAME} PROPERTY VS_DOTNET_TARGET_FRAMEWORK_VERSION "v4.8")
 	endif()
 
 	pl_set_default_target_output_dirs(${TARGET_NAME})

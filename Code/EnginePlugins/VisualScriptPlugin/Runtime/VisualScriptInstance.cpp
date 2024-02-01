@@ -9,7 +9,7 @@ plVisualScriptInstance::plVisualScriptInstance(plReflectedClass& inout_owner, pl
 {
   if (pInstanceDataDesc != nullptr)
   {
-    m_pInstanceDataStorage = PLASMA_DEFAULT_NEW(plVisualScriptDataStorage, pInstanceDataDesc);
+    m_pInstanceDataStorage = PL_SCRIPT_NEW(plVisualScriptDataStorage, pInstanceDataDesc);
     m_pInstanceDataStorage->AllocateStorage();
 
     for (auto& it : m_pInstanceDataMapping->m_Content)
@@ -20,27 +20,36 @@ plVisualScriptInstance::plVisualScriptInstance(plReflectedClass& inout_owner, pl
   }
 }
 
-void plVisualScriptInstance::ApplyParameters(const plArrayMap<plHashedString, plVariant>& parameters)
+void plVisualScriptInstance::SetInstanceVariable(const plHashedString& sName, const plVariant& value)
 {
   if (m_pInstanceDataMapping == nullptr)
     return;
 
-  for (auto it : parameters)
+  plVisualScriptInstanceData* pInstanceData = nullptr;
+  if (m_pInstanceDataMapping->m_Content.TryGetValue(sName, pInstanceData) == false)
+    return;
+
+  plResult conversionStatus = PL_FAILURE;
+  plVariantType::Enum targetType = plVisualScriptDataType::GetVariantType(pInstanceData->m_DataOffset.GetType());
+
+  plVariant convertedValue = value.ConvertTo(targetType, &conversionStatus);
+  if (conversionStatus.Failed())
   {
-    plVisualScriptInstanceData* pInstanceData = nullptr;
-    if (m_pInstanceDataMapping->m_Content.TryGetValue(it.key, pInstanceData))
-    {
-      plResult conversionStatus = PLASMA_FAILURE;
-      plVariantType::Enum targetType = plVisualScriptDataType::GetVariantType(pInstanceData->m_DataOffset.GetType());
-
-      plVariant convertedValue = it.value.ConvertTo(targetType, &conversionStatus);
-      if (conversionStatus.Failed())
-      {
-        plLog::Error("Can't apply script parameter '{}' because the given value of type '{}' can't be converted the expected target type '{}'", it.key, it.value.GetType(), targetType);
-        continue;
-      }
-
-      m_pInstanceDataStorage->SetDataFromVariant(pInstanceData->m_DataOffset, convertedValue, 0);
-    }
+    plLog::Error("Can't apply instance variable '{}' because the given value of type '{}' can't be converted the expected target type '{}'", sName, value.GetType(), targetType);
+    return;
   }
+
+  m_pInstanceDataStorage->SetDataFromVariant(pInstanceData->m_DataOffset, convertedValue, 0);
+}
+
+plVariant plVisualScriptInstance::GetInstanceVariable(const plHashedString& sName)
+{
+  if (m_pInstanceDataMapping == nullptr)
+    return plVariant();
+
+  plVisualScriptInstanceData* pInstanceData = nullptr;
+  if (m_pInstanceDataMapping->m_Content.TryGetValue(sName, pInstanceData) == false)
+    return plVariant();
+
+  return m_pInstanceDataStorage->GetDataAsVariant(pInstanceData->m_DataOffset, nullptr, 0);
 }

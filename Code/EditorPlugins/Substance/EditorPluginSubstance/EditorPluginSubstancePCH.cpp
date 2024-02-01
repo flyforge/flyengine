@@ -1,6 +1,6 @@
 #include <EditorPluginSubstance/EditorPluginSubstancePCH.h>
 
-PLASMA_STATICLINK_LIBRARY(EditorPluginSubstance)
+PL_STATICLINK_LIBRARY(EditorPluginSubstance)
 {
   if (bReturn)
     return;

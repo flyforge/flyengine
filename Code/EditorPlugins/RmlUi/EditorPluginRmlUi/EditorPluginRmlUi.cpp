@@ -16,16 +16,17 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("RmlUiAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("RmlUiAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plStandardMenus::MapActions("RmlUiAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("RmlUiAssetMenuBar");
-      plDocumentActions::MapActions("RmlUiAssetMenuBar", "Menu.File", false);
-      plCommandHistoryActions::MapActions("RmlUiAssetMenuBar", "Menu.Edit");
+      plDocumentActions::MapMenuActions("RmlUiAssetMenuBar");
+      plAssetActions::MapMenuActions("RmlUiAssetMenuBar");
+      plCommandHistoryActions::MapActions("RmlUiAssetMenuBar");
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("RmlUiAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("RmlUiAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("RmlUiAssetToolBar");
       plCommandHistoryActions::MapActions("RmlUiAssetToolBar", "");
       plAssetActions::MapToolBarActions("RmlUiAssetToolBar", true);
     }
@@ -34,12 +35,12 @@ void OnLoadPlugin()
 
 void OnUnloadPlugin() {}
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }

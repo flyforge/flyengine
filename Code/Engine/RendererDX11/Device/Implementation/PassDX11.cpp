@@ -10,11 +10,11 @@
 plGALPassDX11::plGALPassDX11(plGALDevice& device)
   : plGALPass(device)
 {
-  m_pCommandEncoderState = PLASMA_DEFAULT_NEW(plGALCommandEncoderRenderState);
-  m_pCommandEncoderImpl = PLASMA_DEFAULT_NEW(plGALCommandEncoderImplDX11, static_cast<plGALDeviceDX11&>(device));
+  m_pCommandEncoderState = PL_DEFAULT_NEW(plGALCommandEncoderRenderState);
+  m_pCommandEncoderImpl = PL_DEFAULT_NEW(plGALCommandEncoderImplDX11, static_cast<plGALDeviceDX11&>(device));
 
-  m_pRenderCommandEncoder = PLASMA_DEFAULT_NEW(plGALRenderCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
-  m_pComputeCommandEncoder = PLASMA_DEFAULT_NEW(plGALComputeCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
+  m_pRenderCommandEncoder = PL_DEFAULT_NEW(plGALRenderCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
+  m_pComputeCommandEncoder = PL_DEFAULT_NEW(plGALComputeCommandEncoder, device, *m_pCommandEncoderState, *m_pCommandEncoderImpl, *m_pCommandEncoderImpl);
 
   m_pCommandEncoderImpl->m_pOwner = m_pRenderCommandEncoder.Borrow();
 }
@@ -30,7 +30,7 @@ plGALRenderCommandEncoder* plGALPassDX11::BeginRenderingPlatform(const plGALRend
 
 void plGALPassDX11::EndRenderingPlatform(plGALRenderCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_pRenderCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
+  PL_ASSERT_DEV(m_pRenderCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
 }
 
 plGALComputeCommandEncoder* plGALPassDX11::BeginComputePlatform(const char* szName)
@@ -41,7 +41,7 @@ plGALComputeCommandEncoder* plGALPassDX11::BeginComputePlatform(const char* szNa
 
 void plGALPassDX11::EndComputePlatform(plGALComputeCommandEncoder* pCommandEncoder)
 {
-  PLASMA_ASSERT_DEV(m_pComputeCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
+  PL_ASSERT_DEV(m_pComputeCommandEncoder.Borrow() == pCommandEncoder, "Invalid command encoder");
 }
 
 void plGALPassDX11::BeginPass(const char* szName)

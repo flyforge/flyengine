@@ -9,20 +9,20 @@
 #include <Foundation/IO/OpenDdlWriter.h>
 #include <Foundation/Profiling/Profiling.h>
 
-void plPluginBundle::WriteStateToDDL(plOpenDdlWriter& ddl, const char* szOwnName) const
+void plPluginBundle::WriteStateToDDL(plOpenDdlWriter& ref_ddl, const char* szOwnName) const
 {
-  ddl.BeginObject("PluginState");
-  plOpenDdlUtils::StoreString(ddl, szOwnName, "ID");
-  plOpenDdlUtils::StoreBool(ddl, m_bSelected, "Selected");
-  plOpenDdlUtils::StoreBool(ddl, m_bLoadCopy, "LoadCopy");
-  ddl.EndObject();
+  ref_ddl.BeginObject("PluginState");
+  plOpenDdlUtils::StoreString(ref_ddl, szOwnName, "ID");
+  plOpenDdlUtils::StoreBool(ref_ddl, m_bSelected, "Selected");
+  plOpenDdlUtils::StoreBool(ref_ddl, m_bLoadCopy, "LoadCopy");
+  ref_ddl.EndObject();
 }
 
-void plPluginBundle::ReadStateFromDDL(plOpenDdlReader& ddl, const char* szOwnName)
+void plPluginBundle::ReadStateFromDDL(plOpenDdlReader& ref_ddl, const char* szOwnName)
 {
   m_bSelected = false;
 
-  auto pState = ddl.GetRootElement()->FindChildOfType("PluginState");
+  auto pState = ref_ddl.GetRootElement()->FindChildOfType("PluginState");
   while (pState)
   {
     auto pName = pState->FindChildOfType(plOpenDdlPrimitiveType::String, "ID");
@@ -41,22 +41,22 @@ void plPluginBundle::ReadStateFromDDL(plOpenDdlReader& ddl, const char* szOwnNam
   }
 }
 
-void plPluginBundleSet::WriteStateToDDL(plOpenDdlWriter& ddl) const
+void plPluginBundleSet::WriteStateToDDL(plOpenDdlWriter& ref_ddl) const
 {
   for (const auto& it : m_Plugins)
   {
     if (it.Value().m_bSelected)
     {
-      it.Value().WriteStateToDDL(ddl, it.Key());
+      it.Value().WriteStateToDDL(ref_ddl, it.Key());
     }
   }
 }
 
-void plPluginBundleSet::ReadStateFromDDL(plOpenDdlReader& ddl)
+void plPluginBundleSet::ReadStateFromDDL(plOpenDdlReader& ref_ddl)
 {
   for (auto& it : m_Plugins)
   {
-    it.Value().ReadStateFromDDL(ddl, it.Key());
+    it.Value().ReadStateFromDDL(ref_ddl, it.Key());
   }
 }
 
@@ -79,16 +79,16 @@ bool plPluginBundleSet::IsStateEqual(const plPluginBundleSet& rhs) const
   return true;
 }
 
-plResult plPluginBundle::ReadBundleFromDDL(plOpenDdlReader& ddl)
+plResult plPluginBundle::ReadBundleFromDDL(plOpenDdlReader& ref_ddl)
 {
-  PLASMA_LOG_BLOCK("Reading plugin info file");
+  PL_LOG_BLOCK("Reading plugin info file");
 
-  auto pInfo = ddl.GetRootElement()->FindChildOfType("PluginInfo");
+  auto pInfo = ref_ddl.GetRootElement()->FindChildOfType("PluginInfo");
 
   if (pInfo == nullptr)
   {
     plLog::Error("'PluginInfo' root object is missing");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (auto pElement = pInfo->FindChildOfType(plOpenDdlPrimitiveType::Bool, "Mandatory"))
@@ -151,12 +151,12 @@ plResult plPluginBundle::ReadBundleFromDDL(plOpenDdlReader& ddl)
 
   m_bMissing = false;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plQtEditorApp::DetectAvailablePluginBundles(plStringView sSearchDirectory)
 {
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
   // find all plPluginBundle files
   {
     plStringBuilder sSearch = sSearchDirectory;
@@ -234,13 +234,13 @@ void plQtEditorApp::DetectAvailablePluginBundles(plStringView sSearchDirectory)
     }
   }
 #else
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 #endif
 }
 
 void plQtEditorApp::LoadEditorPlugins()
 {
-  PLASMA_PROFILE_SCOPE("LoadEditorPlugins");
+  PL_PROFILE_SCOPE("LoadEditorPlugins");
   DetectAvailablePluginBundles(plOSFile::GetApplicationDirectory());
 
   plPlugin::InitializeStaticallyLinkedPlugins();

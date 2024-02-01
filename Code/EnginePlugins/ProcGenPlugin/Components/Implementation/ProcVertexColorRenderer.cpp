@@ -7,16 +7,16 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcVertexColorRenderer, 1, plRTTIDefaultAllocator<plProcVertexColorRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcVertexColorRenderer, 1, plRTTIDefaultAllocator<plProcVertexColorRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plProcVertexColorRenderer::plProcVertexColorRenderer() = default;
 plProcVertexColorRenderer::~plProcVertexColorRenderer() = default;
 
-void plProcVertexColorRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plProcVertexColorRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plProcVertexColorRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plProcVertexColorRenderData>());
 }
 
 void plProcVertexColorRenderer::SetAdditionalData(const plRenderViewContext& renderViewContext, const plMeshRenderData* pRenderData) const

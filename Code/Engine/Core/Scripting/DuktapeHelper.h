@@ -7,8 +7,8 @@
 #ifdef BUILDSYSTEM_ENABLE_DUKTAPE_SUPPORT
 
 struct duk_hthread;
-typedef duk_hthread duk_context;
-typedef int (*duk_c_function)(duk_context* ctx);
+using duk_context = duk_hthread;
+using duk_c_function = int (*)(duk_context*);
 
 struct plDuktapeTypeMask
 {
@@ -16,15 +16,15 @@ struct plDuktapeTypeMask
 
   enum Enum
   {
-    None = PLASMA_BIT(0),      ///< no value, e.g. invalid index
-    Undefined = PLASMA_BIT(1), ///< ECMAScript undefined
-    Null = PLASMA_BIT(2),      ///< ECMAScript null
-    Bool = PLASMA_BIT(3),      ///< boolean, true or false
-    Number = PLASMA_BIT(4),    ///< any number, stored as a double
-    String = PLASMA_BIT(5),    ///< ECMAScript string: CESU-8 / extended UTF-8 encoded
-    Object = PLASMA_BIT(6),    ///< ECMAScript object: includes objects, arrays, functions, threads
-    Buffer = PLASMA_BIT(7),    ///< fixed or dynamic, garbage collected byte buffer
-    Pointer = PLASMA_BIT(8)    ///< raw void pointer
+    None = PL_BIT(0),      ///< no value, e.g. invalid index
+    Undefined = PL_BIT(1), ///< ECMAScript undefined
+    Null = PL_BIT(2),      ///< ECMAScript null
+    Bool = PL_BIT(3),      ///< boolean, true or false
+    Number = PL_BIT(4),    ///< any number, stored as a double
+    String = PL_BIT(5),    ///< ECMAScript string: CESU-8 / extended UTF-8 encoded
+    Object = PL_BIT(6),    ///< ECMAScript object: includes objects, arrays, functions, threads
+    Buffer = PL_BIT(7),    ///< fixed or dynamic, garbage collected byte buffer
+    Pointer = PL_BIT(8)    ///< raw void pointer
 
   };
 
@@ -40,37 +40,37 @@ struct plDuktapeTypeMask
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plDuktapeTypeMask);
+PL_DECLARE_FLAGS_OPERATORS(plDuktapeTypeMask);
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 
-#    define PLASMA_DUK_VERIFY_STACK(duk, ExpectedStackChange) \
+#    define PL_DUK_VERIFY_STACK(duk, ExpectedStackChange) \
       duk.EnableStackChangeVerification();                \
-      duk.VerifyExpectedStackChange(ExpectedStackChange, PLASMA_SOURCE_FILE, PLASMA_SOURCE_LINE, PLASMA_SOURCE_FUNCTION);
+      duk.VerifyExpectedStackChange(ExpectedStackChange, PL_SOURCE_FILE, PL_SOURCE_LINE, PL_SOURCE_FUNCTION);
 
-#    define PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, ReturnCode, ExpectedStackChange) \
+#    define PL_DUK_RETURN_AND_VERIFY_STACK(duk, ReturnCode, ExpectedStackChange) \
       {                                                                          \
         auto ret = ReturnCode;                                                   \
-        PLASMA_DUK_VERIFY_STACK(duk, ExpectedStackChange);                           \
+        PL_DUK_VERIFY_STACK(duk, ExpectedStackChange);                           \
         return ret;                                                              \
       }
 
-#    define PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, ExpectedStackChange) \
-      PLASMA_DUK_VERIFY_STACK(duk, ExpectedStackChange);                      \
+#    define PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, ExpectedStackChange) \
+      PL_DUK_VERIFY_STACK(duk, ExpectedStackChange);                      \
       return;
 
 
 #  else
 
-#    define PLASMA_DUK_VERIFY_STACK(duk, ExpectedStackChange)
+#    define PL_DUK_VERIFY_STACK(duk, ExpectedStackChange)
 
-#    define PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, ReturnCode, ExpectedStackChange) return ReturnCode;
+#    define PL_DUK_RETURN_AND_VERIFY_STACK(duk, ReturnCode, ExpectedStackChange) return ReturnCode;
 
-#    define PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, ExpectedStackChange) return;
+#    define PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, ExpectedStackChange) return;
 
 #  endif
 
-class PLASMA_CORE_DLL plDuktapeHelper
+class PL_CORE_DLL plDuktapeHelper
 {
 public:
   plDuktapeHelper(duk_context* pContext);
@@ -82,12 +82,12 @@ public:
   ///@{
 
   /// \brief Returns the raw Duktape context for custom operations.
-  PLASMA_ALWAYS_INLINE duk_context* GetContext() const { return m_pContext; }
+  PL_ALWAYS_INLINE duk_context* GetContext() const { return m_pContext; }
 
   /// \brief Implicit conversion to duk_context*
-  PLASMA_ALWAYS_INLINE operator duk_context*() const { return m_pContext; }
+  PL_ALWAYS_INLINE operator duk_context*() const { return m_pContext; }
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   void VerifyExpectedStackChange(plInt32 iExpectedStackChange, const char* szFile, plUInt32 uiLine, const char* szFunction) const;
 #  endif
 
@@ -209,7 +209,7 @@ public:
   ///@}
 
 public:
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   void EnableStackChangeVerification() const;
 #  endif
 
@@ -218,7 +218,7 @@ protected:
   duk_context* m_pContext = nullptr;
   plInt32 m_iPushedValues = 0;
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   plInt32 m_iStackTopAtStart = -1000;
   mutable bool m_bVerifyStackChange = false;
 

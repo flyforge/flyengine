@@ -6,26 +6,26 @@
 #include <ParticlePlugin/System/ParticleSystemDescriptor.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectDescriptor, 2, plRTTIDefaultAllocator<plParticleEffectDescriptor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectDescriptor, 2, plRTTIDefaultAllocator<plParticleEffectDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("WhenInvisible", plEffectInvisibleUpdateRate, m_InvisibleUpdateRate),
-    PLASMA_MEMBER_PROPERTY("AlwaysShared", m_bAlwaysShared),
-    PLASMA_MEMBER_PROPERTY("SimulateInLocalSpace", m_bSimulateInLocalSpace),
-    PLASMA_MEMBER_PROPERTY("ApplyOwnerVelocity", m_fApplyInstanceVelocity)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_MEMBER_PROPERTY("PreSimulateDuration", m_PreSimulateDuration),
-    PLASMA_MAP_MEMBER_PROPERTY("FloatParameters", m_FloatParameters),
-    PLASMA_MAP_MEMBER_PROPERTY("ColorParameters", m_ColorParameters)->AddAttributes(new plExposeColorAlphaAttribute),
-    PLASMA_SET_ACCESSOR_PROPERTY("ParticleSystems", GetParticleSystems, AddParticleSystem, RemoveParticleSystem)->AddFlags(plPropertyFlags::PointerOwner),
-    PLASMA_SET_ACCESSOR_PROPERTY("EventReactions", GetEventReactions, AddEventReaction, RemoveEventReaction)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_ENUM_MEMBER_PROPERTY("WhenInvisible", plEffectInvisibleUpdateRate, m_InvisibleUpdateRate),
+    PL_MEMBER_PROPERTY("AlwaysShared", m_bAlwaysShared),
+    PL_MEMBER_PROPERTY("SimulateInLocalSpace", m_bSimulateInLocalSpace),
+    PL_MEMBER_PROPERTY("ApplyOwnerVelocity", m_fApplyInstanceVelocity)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("PreSimulateDuration", m_PreSimulateDuration),
+    PL_MAP_MEMBER_PROPERTY("FloatParameters", m_FloatParameters),
+    PL_MAP_MEMBER_PROPERTY("ColorParameters", m_ColorParameters)->AddAttributes(new plExposeColorAlphaAttribute),
+    PL_SET_ACCESSOR_PROPERTY("ParticleSystems", GetParticleSystems, AddParticleSystem, RemoveParticleSystem)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_SET_ACCESSOR_PROPERTY("EventReactions", GetEventReactions, AddEventReaction, RemoveEventReaction)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleEffectDescriptor::plParticleEffectDescriptor() {}
+plParticleEffectDescriptor::plParticleEffectDescriptor() = default;
 
 plParticleEffectDescriptor::~plParticleEffectDescriptor()
 {
@@ -72,77 +72,77 @@ enum class ParticleEffectVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleEffectDescriptor::Save(plStreamWriter& stream) const
+void plParticleEffectDescriptor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)ParticleEffectVersion::Version_Current;
 
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
   const plUInt32 uiNumSystems = m_ParticleSystems.GetCount();
 
-  stream << uiNumSystems;
+  inout_stream << uiNumSystems;
 
   // Version 3
-  stream << m_bSimulateInLocalSpace;
-  stream << m_PreSimulateDuration;
+  inout_stream << m_bSimulateInLocalSpace;
+  inout_stream << m_PreSimulateDuration;
   // Version 4
-  stream << m_InvisibleUpdateRate;
+  inout_stream << m_InvisibleUpdateRate;
   // Version 5
-  stream << m_bAlwaysShared;
+  inout_stream << m_bAlwaysShared;
 
   // Version 3
   for (auto pSystem : m_ParticleSystems)
   {
-    stream << pSystem->GetDynamicRTTI()->GetTypeName();
+    inout_stream << pSystem->GetDynamicRTTI()->GetTypeName();
 
-    pSystem->Save(stream);
+    pSystem->Save(inout_stream);
   }
 
   // Version 6
   {
     plUInt8 paramCol = static_cast<plUInt8>(m_ColorParameters.GetCount());
-    stream << paramCol;
+    inout_stream << paramCol;
     for (auto it = m_ColorParameters.GetIterator(); it.IsValid(); ++it)
     {
-      stream << it.Key();
-      stream << it.Value();
+      inout_stream << it.Key();
+      inout_stream << it.Value();
     }
 
     plUInt8 paramFloat = static_cast<plUInt8>(m_FloatParameters.GetCount());
-    stream << paramFloat;
+    inout_stream << paramFloat;
     for (auto it = m_FloatParameters.GetIterator(); it.IsValid(); ++it)
     {
-      stream << it.Key();
-      stream << it.Value();
+      inout_stream << it.Key();
+      inout_stream << it.Value();
     }
   }
 
   // Version 7
-  stream << m_fApplyInstanceVelocity;
+  inout_stream << m_fApplyInstanceVelocity;
 
   // Version 8
   {
     const plUInt32 uiNumReactions = m_EventReactions.GetCount();
-    stream << uiNumReactions;
+    inout_stream << uiNumReactions;
 
     for (auto pReaction : m_EventReactions)
     {
-      stream << pReaction->GetDynamicRTTI()->GetTypeName();
+      inout_stream << pReaction->GetDynamicRTTI()->GetTypeName();
 
-      pReaction->Save(stream);
+      pReaction->Save(inout_stream);
     }
   }
 }
 
 
-void plParticleEffectDescriptor::Load(plStreamReader& stream)
+void plParticleEffectDescriptor::Load(plStreamReader& inout_stream)
 {
   ClearSystems();
   ClearEventReactions();
 
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= (int)ParticleEffectVersion::Version_Current, "Unknown particle effect template version {0}", uiVersion);
+  inout_stream >> uiVersion;
+  PL_ASSERT_DEV(uiVersion <= (int)ParticleEffectVersion::Version_Current, "Unknown particle effect template version {0}", uiVersion);
 
   if (uiVersion < (int)ParticleEffectVersion::Version_9)
   {
@@ -151,12 +151,12 @@ void plParticleEffectDescriptor::Load(plStreamReader& stream)
   }
 
   plUInt32 uiNumSystems = 0;
-  stream >> uiNumSystems;
+  inout_stream >> uiNumSystems;
 
-  stream >> m_bSimulateInLocalSpace;
-  stream >> m_PreSimulateDuration;
-  stream >> m_InvisibleUpdateRate;
-  stream >> m_bAlwaysShared;
+  inout_stream >> m_bSimulateInLocalSpace;
+  inout_stream >> m_PreSimulateDuration;
+  inout_stream >> m_InvisibleUpdateRate;
+  inout_stream >> m_bAlwaysShared;
 
   m_ParticleSystems.SetCountUninitialized(uiNumSystems);
 
@@ -164,14 +164,14 @@ void plParticleEffectDescriptor::Load(plStreamReader& stream)
 
   for (auto& pSystem : m_ParticleSystems)
   {
-    stream >> sType;
+    inout_stream >> sType;
 
     const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-    PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown particle effect type '{0}'", sType);
+    PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown particle effect type '{0}'", sType);
 
     pSystem = pRtti->GetAllocator()->Allocate<plParticleSystemDescriptor>();
 
-    pSystem->Load(stream);
+    pSystem->Load(inout_stream);
   }
 
   plStringBuilder key;
@@ -179,43 +179,43 @@ void plParticleEffectDescriptor::Load(plStreamReader& stream)
   m_FloatParameters.Clear();
 
   plUInt8 paramCol;
-  stream >> paramCol;
+  inout_stream >> paramCol;
   for (plUInt32 i = 0; i < paramCol; ++i)
   {
     plColor val;
-    stream >> key;
-    stream >> val;
+    inout_stream >> key;
+    inout_stream >> val;
     m_ColorParameters[key] = val;
   }
 
   plUInt8 paramFloat;
-  stream >> paramFloat;
+  inout_stream >> paramFloat;
   for (plUInt32 i = 0; i < paramFloat; ++i)
   {
     float val;
-    stream >> key;
-    stream >> val;
+    inout_stream >> key;
+    inout_stream >> val;
     m_FloatParameters[key] = val;
   }
 
-  stream >> m_fApplyInstanceVelocity;
+  inout_stream >> m_fApplyInstanceVelocity;
 
   plUInt32 uiNumReactions = 0;
-  stream >> uiNumReactions;
+  inout_stream >> uiNumReactions;
 
   m_EventReactions.SetCountUninitialized(uiNumReactions);
 
   for (auto& pReaction : m_EventReactions)
   {
-    stream >> sType;
+    inout_stream >> sType;
 
     const plRTTI* pRtti = plRTTI::FindTypeByName(sType);
-    PLASMA_ASSERT_DEBUG(pRtti != nullptr, "Unknown particle effect event reaction type '{0}'", sType);
+    PL_ASSERT_DEBUG(pRtti != nullptr, "Unknown particle effect event reaction type '{0}'", sType);
 
     pReaction = pRtti->GetAllocator()->Allocate<plParticleEventReactionFactory>();
 
-    pReaction->Load(stream);
+    pReaction->Load(inout_stream);
   }
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectDescriptor);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectDescriptor);

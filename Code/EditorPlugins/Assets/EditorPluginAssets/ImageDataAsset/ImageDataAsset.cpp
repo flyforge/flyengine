@@ -4,16 +4,16 @@
 #include <EditorPluginAssets/ImageDataAsset/ImageDataAsset.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataAssetDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImageDataAssetDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plImageDataAssetDocument::plImageDataAssetDocument(const char* szDocumentPath)
-  : plSimpleAssetDocument<plImageDataAssetProperties>(szDocumentPath, plAssetDocEngineConnection::None)
+plImageDataAssetDocument::plImageDataAssetDocument(plStringView sDocumentPath)
+  : plSimpleAssetDocument<plImageDataAssetProperties>(sDocumentPath, plAssetDocEngineConnection::None)
 {
 }
 
-plTransformStatus plImageDataAssetDocument::InternalTransformAsset(const char* szTargetFile, const char* szOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
+plTransformStatus plImageDataAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
   const bool bUpdateThumbnail = pAssetProfile == plAssetCurator::GetSingleton()->GetDevelopmentAssetProfile();
 
@@ -25,7 +25,7 @@ plTransformStatus plImageDataAssetDocument::InternalTransformAsset(const char* s
     // if the file was touched, but nothing written to it, delete the file
     // might happen if TexConv crashed or had an error
     plOSFile::DeleteFile(szTargetFile).IgnoreResult();
-    result.m_Result = PLASMA_FAILURE;
+    result.m_Result = PL_FAILURE;
   }
 
   if (result.Succeeded())
@@ -57,11 +57,11 @@ plStatus plImageDataAssetDocument::RunTexConv(const char* szTargetFile, const pl
     const plUInt32 uiHashLow32 = uiHash64 & 0xFFFFFFFF;
     const plUInt32 uiHashHigh32 = (uiHash64 >> 32) & 0xFFFFFFFF;
 
-    temp.Format("{0}", plArgU(uiHashLow32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashLow32, 8, true, 16, true));
     arguments << "-assetHashLow";
     arguments << temp.GetData();
 
-    temp.Format("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
+    temp.SetFormat("{0}", plArgU(uiHashHigh32, 8, true, 16, true));
     arguments << "-assetHashHigh";
     arguments << temp.GetData();
   }
@@ -117,12 +117,12 @@ plStatus plImageDataAssetDocument::RunTexConv(const char* szTargetFile, const pl
   arguments << "-rgba";
   arguments << "in0.rgba";
 
-  PLASMA_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
+  PL_SUCCEED_OR_RETURN(plQtEditorApp::GetSingleton()->ExecuteTool("TexConv", arguments, 180, plLog::GetThreadLocalLogSystem()));
 
   if (bUpdateThumbnail)
   {
     plUInt64 uiThumbnailHash = plAssetCurator::GetSingleton()->GetAssetReferenceHash(GetGuid());
-    PLASMA_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
+    PL_ASSERT_DEV(uiThumbnailHash != 0, "Thumbnail hash should never be zero when reaching this point!");
 
     ThumbnailInfo thumbnailInfo;
     thumbnailInfo.SetFileHashAndVersion(uiThumbnailHash, GetAssetTypeVersion());
@@ -130,5 +130,5 @@ plStatus plImageDataAssetDocument::RunTexConv(const char* szTargetFile, const pl
     InvalidateAssetThumbnail();
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

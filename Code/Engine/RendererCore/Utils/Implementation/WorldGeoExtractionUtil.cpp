@@ -10,28 +10,28 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgExtractGeometry);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractGeometry, 1, plRTTIDefaultAllocator<plMsgExtractGeometry>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgExtractGeometry);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractGeometry, 1, plRTTIDefaultAllocator<plMsgExtractGeometry>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plWorldGeoExtractionUtil::ExtractWorldGeometry(MeshObjectList& ref_objects, const plWorld& world, ExtractionMode mode, plTagSet* pExcludeTags /*= nullptr*/)
 {
-  PLASMA_PROFILE_SCOPE("ExtractWorldGeometry");
-  PLASMA_LOG_BLOCK("ExtractWorldGeometry", world.GetName());
+  PL_PROFILE_SCOPE("ExtractWorldGeometry");
+  PL_LOG_BLOCK("ExtractWorldGeometry", world.GetName());
 
   plMsgExtractGeometry msg;
   msg.m_Mode = mode;
   msg.m_pMeshObjects = &ref_objects;
 
-  PLASMA_LOCK(world.GetReadMarker());
+  PL_LOCK(world.GetReadMarker());
 
   for (auto it = world.GetObjects(); it.IsValid(); ++it)
   {
@@ -44,14 +44,14 @@ void plWorldGeoExtractionUtil::ExtractWorldGeometry(MeshObjectList& ref_objects,
 
 void plWorldGeoExtractionUtil::ExtractWorldGeometry(MeshObjectList& ref_objects, const plWorld& world, ExtractionMode mode, const plDeque<plGameObjectHandle>& selection)
 {
-  PLASMA_PROFILE_SCOPE("ExtractWorldGeometry");
-  PLASMA_LOG_BLOCK("ExtractWorldGeometry", world.GetName());
+  PL_PROFILE_SCOPE("ExtractWorldGeometry");
+  PL_LOG_BLOCK("ExtractWorldGeometry", world.GetName());
 
   plMsgExtractGeometry msg;
   msg.m_Mode = mode;
   msg.m_pMeshObjects = &ref_objects;
 
-  PLASMA_LOCK(world.GetReadMarker());
+  PL_LOCK(world.GetReadMarker());
 
   for (plGameObjectHandle hObject : selection)
   {
@@ -65,7 +65,7 @@ void plWorldGeoExtractionUtil::ExtractWorldGeometry(MeshObjectList& ref_objects,
 
 void plWorldGeoExtractionUtil::WriteWorldGeometryToOBJ(const char* szFile, const MeshObjectList& objects, const plMat3& mTransform)
 {
-  PLASMA_LOG_BLOCK("Write World Geometry to OBJ", szFile);
+  PL_LOG_BLOCK("Write World Geometry to OBJ", szFile);
 
   plFileWriter file;
   if (file.Open(szFile).Failed())
@@ -74,7 +74,7 @@ void plWorldGeoExtractionUtil::WriteWorldGeometryToOBJ(const char* szFile, const
     return;
   }
 
-  plMat4 transform = plMat4::IdentityMatrix();
+  plMat4 transform = plMat4::MakeIdentity();
   transform.SetRotationalPart(mTransform);
 
   plStringBuilder line;
@@ -109,7 +109,7 @@ void plWorldGeoExtractionUtil::WriteWorldGeometryToOBJ(const char* szFile, const
     {
       const plVec3 pos = finalTransform.TransformPosition(*pPositions);
 
-      line.Format("v {0} {1} {2}\n", plArgF(pos.x, 8), plArgF(pos.y, 8), plArgF(pos.z, 8));
+      line.SetFormat("v {0} {1} {2}\n", plArgF(pos.x, 8), plArgF(pos.y, 8), plArgF(pos.z, 8));
       file.WriteBytes(line.GetData(), line.GetElementCount()).IgnoreResult();
 
       pPositions = plMemoryUtils::AddByteOffset(pPositions, uiElementStride);
@@ -160,7 +160,7 @@ void plWorldGeoExtractionUtil::WriteWorldGeometryToOBJ(const char* szFile, const
   for (plUInt32 i = 0; i < indices.GetCount(); i += 3)
   {
     // indices are 1 based in obj
-    line.Format("f {0} {1} {2}\n", indices[i + 0] + 1, indices[i + 1] + 1, indices[i + 2] + 1);
+    line.SetFormat("f {0} {1} {2}\n", indices[i + 0] + 1, indices[i + 1] + 1, indices[i + 2] + 1);
     file.WriteBytes(line.GetData(), line.GetElementCount()).IgnoreResult();
   }
 
@@ -204,4 +204,4 @@ void plMsgExtractGeometry::AddBox(const plTransform& transform, plVec3 vExtents)
   meshObject.m_hMeshResource = hBoxMesh;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Utils_Implementation_WorldGeoExtractionUtil);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Utils_Implementation_WorldGeoExtractionUtil);

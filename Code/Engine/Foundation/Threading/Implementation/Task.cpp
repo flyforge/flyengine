@@ -16,7 +16,7 @@ void plTask::Reset()
 
 void plTask::ConfigureTask(const char* szTaskName, plTaskNesting nestingMode, plOnTaskFinishedCallback callback /*= plOnTaskFinishedCallback()*/)
 {
-  PLASMA_ASSERT_DEV(IsTaskFinished(), "This function must be called before the task is started.");
+  PL_ASSERT_DEV(IsTaskFinished(), "This function must be called before the task is started.");
 
   m_sTaskName = szTaskName;
   m_NestingMode = nestingMode;
@@ -44,7 +44,7 @@ void plTask::Run(plUInt32 uiInvocation)
     if (m_bUsesMultiplicity)
       scopeName.AppendFormat("-{}", uiInvocation);
 
-    PLASMA_PROFILE_SCOPE(scopeName.GetData());
+    PL_PROFILE_SCOPE(scopeName.GetData());
 
     if (m_bUsesMultiplicity)
     {
@@ -60,4 +60,3 @@ void plTask::Run(plUInt32 uiInvocation)
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_Task);

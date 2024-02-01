@@ -7,49 +7,51 @@
 #include <Foundation/Types/SharedPtr.h>
 #include <GameEngine/GameEngineDLL.h>
 
-struct PLASMA_GAMEENGINE_DLL plPropertyAnimTarget
+/// \brief What data type an animation modifies.
+struct PL_GAMEENGINE_DLL plPropertyAnimTarget
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
-    Number,
-    VectorX,
-    VectorY,
-    VectorZ,
-    VectorW,
-    RotationX,
-    RotationY,
-    RotationZ,
-    Color,
+    Number,    ///< A single value.
+    VectorX,   ///< The x coordinate of a vector.
+    VectorY,   ///< The y coordinate of a vector.
+    VectorZ,   ///< The z coordinate of a vector.
+    VectorW,   ///< The w coordinate of a vector.
+    RotationX, ///< The x coordinate of a rotation.
+    RotationY, ///< The y coordinate of a rotation.
+    RotationZ, ///< The z coordinate of a rotation.
+    Color,     ///< A color.
 
     Default = Number,
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plPropertyAnimTarget);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plPropertyAnimTarget);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_GAMEENGINE_DLL plPropertyAnimMode
+/// \brief Describes how an animation should be played back.
+struct PL_GAMEENGINE_DLL plPropertyAnimMode
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
-    Once,
-    Loop,
-    BackAndForth,
+    Once,         ///< Play the animation once from start to end and then stop.
+    Loop,         ///< Play the animation from start to end, then loop back to the start and repeat indefinitely.
+    BackAndForth, ///< Play the animation from start to end, then reverse direction and play from end to start, then repeat indefinitely.
 
     Default = Loop,
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plPropertyAnimMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plPropertyAnimMode);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_GAMEENGINE_DLL plPropertyAnimEntry
+struct PL_GAMEENGINE_DLL plPropertyAnimEntry
 {
   plString m_sObjectSearchSequence; ///< Sequence of named objects to search for the target
   plString m_sComponentType;        ///< Empty to reference the game object properties (position etc.)
@@ -58,12 +60,12 @@ struct PLASMA_GAMEENGINE_DLL plPropertyAnimEntry
   const plRTTI* m_pComponentRtti = nullptr;
 };
 
-struct PLASMA_GAMEENGINE_DLL plFloatPropertyAnimEntry : public plPropertyAnimEntry
+struct PL_GAMEENGINE_DLL plFloatPropertyAnimEntry : public plPropertyAnimEntry
 {
   plCurve1D m_Curve;
 };
 
-struct PLASMA_GAMEENGINE_DLL plColorPropertyAnimEntry : public plPropertyAnimEntry
+struct PL_GAMEENGINE_DLL plColorPropertyAnimEntry : public plPropertyAnimEntry
 {
   plColorGradient m_Gradient;
 };
@@ -71,7 +73,7 @@ struct PLASMA_GAMEENGINE_DLL plColorPropertyAnimEntry : public plPropertyAnimEnt
 //////////////////////////////////////////////////////////////////////////
 
 // this class is actually ref counted and used with plSharedPtr to allow to work on the same data, even when the resource was reloaded
-struct PLASMA_GAMEENGINE_DLL plPropertyAnimResourceDescriptor : public plRefCounted
+struct PL_GAMEENGINE_DLL plPropertyAnimResourceDescriptor : public plRefCounted
 {
   plTime m_AnimationDuration;
   plDynamicArray<plFloatPropertyAnimEntry> m_FloatAnimations;
@@ -86,12 +88,12 @@ struct PLASMA_GAMEENGINE_DLL plPropertyAnimResourceDescriptor : public plRefCoun
 
 using plPropertyAnimResourceHandle = plTypedResourceHandle<class plPropertyAnimResource>;
 
-class PLASMA_GAMEENGINE_DLL plPropertyAnimResource : public plResource
+class PL_GAMEENGINE_DLL plPropertyAnimResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPropertyAnimResource, plResource);
+  PL_ADD_DYNAMIC_REFLECTION(plPropertyAnimResource, plResource);
 
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plPropertyAnimResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plPropertyAnimResource, plPropertyAnimResourceDescriptor);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plPropertyAnimResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plPropertyAnimResource, plPropertyAnimResourceDescriptor);
 
 public:
   plPropertyAnimResource();

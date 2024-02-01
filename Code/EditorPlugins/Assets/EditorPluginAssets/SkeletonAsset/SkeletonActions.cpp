@@ -5,8 +5,8 @@
 #include <GuiFoundation/Action/ActionManager.h>
 #include <GuiFoundation/Action/ActionMapManager.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plSkeletonActions::s_hCategory;
 plActionDescriptorHandle plSkeletonActions::s_hRenderBones;
@@ -18,13 +18,13 @@ plActionDescriptorHandle plSkeletonActions::s_hRenderPreviewMesh;
 
 void plSkeletonActions::RegisterActions()
 {
-  s_hCategory = PLASMA_REGISTER_CATEGORY("SkeletonCategory");
-  s_hRenderBones = PLASMA_REGISTER_ACTION_1("Skeleton.RenderBones", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderBones);
-  s_hRenderColliders = PLASMA_REGISTER_ACTION_1("Skeleton.RenderColliders", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderColliders);
-  s_hRenderJoints = PLASMA_REGISTER_ACTION_1("Skeleton.RenderJoints", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderJoints);
-  s_hRenderSwingLimits = PLASMA_REGISTER_ACTION_1("Skeleton.RenderSwingLimits", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderSwingLimits);
-  s_hRenderTwistLimits = PLASMA_REGISTER_ACTION_1("Skeleton.RenderTwistLimits", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderTwistLimits);
-  s_hRenderPreviewMesh = PLASMA_REGISTER_ACTION_1("Skeleton.RenderPreviewMesh", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderPreviewMesh);
+  s_hCategory = PL_REGISTER_CATEGORY("SkeletonCategory");
+  s_hRenderBones = PL_REGISTER_ACTION_1("Skeleton.RenderBones", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderBones);
+  s_hRenderColliders = PL_REGISTER_ACTION_1("Skeleton.RenderColliders", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderColliders);
+  s_hRenderJoints = PL_REGISTER_ACTION_1("Skeleton.RenderJoints", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderJoints);
+  s_hRenderSwingLimits = PL_REGISTER_ACTION_1("Skeleton.RenderSwingLimits", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderSwingLimits);
+  s_hRenderTwistLimits = PL_REGISTER_ACTION_1("Skeleton.RenderTwistLimits", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderTwistLimits);
+  s_hRenderPreviewMesh = PL_REGISTER_ACTION_1("Skeleton.RenderPreviewMesh", plActionScope::Document, "Skeletons", "", plSkeletonAction, plSkeletonAction::ActionType::RenderPreviewMesh);
 }
 
 void plSkeletonActions::UnregisterActions()
@@ -38,10 +38,10 @@ void plSkeletonActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hRenderPreviewMesh);
 }
 
-void plSkeletonActions::MapActions(const char* szMapping, const char* szPath)
+void plSkeletonActions::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 
@@ -86,7 +86,7 @@ plSkeletonAction::plSkeletonAction(const plActionContext& context, const char* s
       break;
 
     case ActionType::RenderPreviewMesh:
-      SetIconPath(":/AssetIcons/PreviewMesh.svg");
+      SetIconPath(":/EditorPluginAssets/PreviewMesh.svg");
       break;
   }
 

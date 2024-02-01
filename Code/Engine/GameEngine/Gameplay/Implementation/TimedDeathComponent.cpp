@@ -9,48 +9,48 @@
 #include <GameEngine/Gameplay/TimedDeathComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plTimedDeathComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plTimedDeathComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MinDelay", m_MinDelay)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::Seconds(1.0))),
-    PLASMA_MEMBER_PROPERTY("DelayRange", m_DelayRange)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("TimeoutPrefab", GetTimeoutPrefab, SetTimeoutPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
+    PL_MEMBER_PROPERTY("MinDelay", m_MinDelay)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::MakeFromSeconds(1.0))),
+    PL_MEMBER_PROPERTY("DelayRange", m_DelayRange)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
+    PL_ACCESSOR_PROPERTY("TimeoutPrefab", GetTimeoutPrefab, SetTimeoutPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
+    PL_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plTimedDeathComponent::plTimedDeathComponent() = default;
 plTimedDeathComponent::~plTimedDeathComponent() = default;
 
-void plTimedDeathComponent::SerializeComponent(plWorldWriter& stream) const
+void plTimedDeathComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_MinDelay;
   s << m_DelayRange;
   s << m_hTimeoutPrefab;
 }
 
-void plTimedDeathComponent::DeserializeComponent(plWorldReader& stream)
+void plTimedDeathComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   s >> m_MinDelay;
   s >> m_DelayRange;
@@ -64,7 +64,7 @@ void plTimedDeathComponent::OnSimulationStarted()
 
   plWorld* pWorld = GetWorld();
 
-  const plTime tKill = plTime::Seconds(pWorld->GetRandomNumberGenerator().DoubleInRange(m_MinDelay.GetSeconds(), m_DelayRange.GetSeconds()));
+  const plTime tKill = plTime::MakeFromSeconds(pWorld->GetRandomNumberGenerator().DoubleInRange(m_MinDelay.GetSeconds(), m_DelayRange.GetSeconds()));
 
   PostMessage(msg, tKill);
 
@@ -129,7 +129,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Min Delay", "MinDelay");
     pNode->RenameProperty("Delay Range", "DelayRange");
@@ -141,4 +141,4 @@ plTimedDeathComponentPatch_1_2 g_plTimedDeathComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_TimedDeathComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_TimedDeathComponent);

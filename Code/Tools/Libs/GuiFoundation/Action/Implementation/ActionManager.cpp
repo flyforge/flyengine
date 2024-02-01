@@ -15,7 +15,7 @@
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "ToolsFoundation"
@@ -31,7 +31,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionManager)
     plActionManager::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plEvent<const plActionManager::Event&> plActionManager::s_Events;
@@ -46,7 +46,7 @@ plMap<plString, plString> plActionManager::s_ShortcutOverride;
 plActionDescriptorHandle plActionManager::RegisterAction(const plActionDescriptor& desc)
 {
   plActionDescriptorHandle hType = GetActionHandle(desc.m_sCategoryPath, desc.m_sActionName);
-  PLASMA_ASSERT_DEV(hType.IsInvalidated(), "The action '{0}' in category '{1}' was already registered!", desc.m_sActionName, desc.m_sCategoryPath);
+  PL_ASSERT_DEV(hType.IsInvalidated(), "The action '{0}' in category '{1}' was already registered!", desc.m_sActionName, desc.m_sCategoryPath);
 
   plActionDescriptor* pDesc = CreateActionDesc(desc);
 
@@ -74,27 +74,27 @@ plActionDescriptorHandle plActionManager::RegisterAction(const plActionDescripto
   return hType;
 }
 
-bool plActionManager::UnregisterAction(plActionDescriptorHandle& hAction)
+bool plActionManager::UnregisterAction(plActionDescriptorHandle& ref_hAction)
 {
   plActionDescriptor* pDesc = nullptr;
-  if (!s_ActionTable.TryGetValue(hAction, pDesc))
+  if (!s_ActionTable.TryGetValue(ref_hAction, pDesc))
   {
-    hAction.Invalidate();
+    ref_hAction.Invalidate();
     return false;
   }
 
   auto it = s_CategoryPathToActions.Find(pDesc->m_sCategoryPath);
-  PLASMA_ASSERT_DEV(it.IsValid(), "Action is present but not mapped in its category path!");
-  PLASMA_VERIFY(it.Value().m_Actions.Remove(hAction), "Action is present but not in its category data!");
-  PLASMA_VERIFY(it.Value().m_ActionNameToHandle.Remove(pDesc->m_sActionName), "Action is present but its name is not in the map!");
+  PL_ASSERT_DEV(it.IsValid(), "Action is present but not mapped in its category path!");
+  PL_VERIFY(it.Value().m_Actions.Remove(ref_hAction), "Action is present but not in its category data!");
+  PL_VERIFY(it.Value().m_ActionNameToHandle.Remove(pDesc->m_sActionName), "Action is present but its name is not in the map!");
   if (it.Value().m_Actions.IsEmpty())
   {
     s_CategoryPathToActions.Remove(it);
   }
 
-  s_ActionTable.Remove(hAction);
+  s_ActionTable.Remove(ref_hAction);
   DeleteActionDesc(pDesc);
-  hAction.Invalidate();
+  ref_hAction.Invalidate();
   return true;
 }
 
@@ -135,8 +135,7 @@ plString plActionManager::FindActionCategory(const char* szActionName)
   return plString();
 }
 
-plResult plActionManager::ExecuteAction(
-  const char* szCategory, const char* szActionName, const plActionContext& context, const plVariant& value /*= plVariant()*/)
+plResult plActionManager::ExecuteAction(const char* szCategory, const char* szActionName, const plActionContext& context, const plVariant& value /*= plVariant()*/)
 {
   plString sCategory = szCategory;
 
@@ -148,22 +147,22 @@ plResult plActionManager::ExecuteAction(
   auto hAction = plActionManager::GetActionHandle(sCategory, szActionName);
 
   if (hAction.IsInvalidated())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plActionDescriptor* pDesc = plActionManager::GetActionDescriptor(hAction);
 
   if (pDesc == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plAction* pAction = pDesc->CreateAction(context);
 
   if (pAction == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   pAction->Execute(value);
   pDesc->DeleteAction(pAction);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plActionManager::SaveShortcutAssignment()
@@ -171,7 +170,7 @@ void plActionManager::SaveShortcutAssignment()
   plStringBuilder sFile = plApplicationServices::GetSingleton()->GetApplicationPreferencesFolder();
   sFile.AppendPath("Settings/Shortcuts.ddl");
 
-  PLASMA_LOG_BLOCK("LoadShortcutAssignment", sFile.GetData());
+  PL_LOG_BLOCK("LoadShortcutAssignment", sFile.GetData());
 
   plDeferredFileWriter file;
   file.SetOutput(sFile);
@@ -211,7 +210,7 @@ void plActionManager::LoadShortcutAssignment()
   plStringBuilder sFile = plApplicationServices::GetSingleton()->GetApplicationPreferencesFolder();
   sFile.AppendPath("Settings/Shortcuts.ddl");
 
-  PLASMA_LOG_BLOCK("LoadShortcutAssignment", sFile.GetData());
+  PL_LOG_BLOCK("LoadShortcutAssignment", sFile.GetData());
 
   plFileReader file;
   if (file.Open(sFile).Failed())
@@ -275,8 +274,8 @@ void plActionManager::Shutdown()
   plCommandHistoryActions::UnregisterActions();
   plEditActions::UnregisterActions();
 
-  PLASMA_ASSERT_DEV(s_ActionTable.IsEmpty(), "Some actions were registered but not unregistred.");
-  PLASMA_ASSERT_DEV(s_CategoryPathToActions.IsEmpty(), "Some actions were registered but not unregistred.");
+  PL_ASSERT_DEV(s_ActionTable.IsEmpty(), "Some actions were registered but not unregistred.");
+  PL_ASSERT_DEV(s_CategoryPathToActions.IsEmpty(), "Some actions were registered but not unregistred.");
 
   s_ActionTable.Clear();
   s_CategoryPathToActions.Clear();
@@ -285,12 +284,12 @@ void plActionManager::Shutdown()
 
 plActionDescriptor* plActionManager::CreateActionDesc(const plActionDescriptor& desc)
 {
-  plActionDescriptor* pDesc = PLASMA_DEFAULT_NEW(plActionDescriptor);
+  plActionDescriptor* pDesc = PL_DEFAULT_NEW(plActionDescriptor);
   *pDesc = desc;
   return pDesc;
 }
 
 void plActionManager::DeleteActionDesc(plActionDescriptor* pDesc)
 {
-  PLASMA_DEFAULT_DELETE(pDesc);
+  PL_DEFAULT_DELETE(pDesc);
 }

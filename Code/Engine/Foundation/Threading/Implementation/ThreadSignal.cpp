@@ -12,7 +12,7 @@ plThreadSignal::~plThreadSignal() = default;
 
 void plThreadSignal::WaitForSignal() const
 {
-  PLASMA_LOCK(m_ConditionVariable);
+  PL_LOCK(m_ConditionVariable);
 
   while (!m_bSignalState)
   {
@@ -27,10 +27,10 @@ void plThreadSignal::WaitForSignal() const
 
 plThreadSignal::WaitResult plThreadSignal::WaitForSignal(plTime timeout) const
 {
-  PLASMA_LOCK(m_ConditionVariable);
+  PL_LOCK(m_ConditionVariable);
 
   const plTime tStart = plTime::Now();
-  plTime tElapsed = plTime::Zero();
+  plTime tElapsed = plTime::MakeZero();
 
   while (!m_bSignalState)
   {
@@ -57,7 +57,7 @@ plThreadSignal::WaitResult plThreadSignal::WaitForSignal(plTime timeout) const
 void plThreadSignal::RaiseSignal()
 {
   {
-    PLASMA_LOCK(m_ConditionVariable);
+    PL_LOCK(m_ConditionVariable);
     m_bSignalState = true;
   }
 
@@ -74,8 +74,8 @@ void plThreadSignal::RaiseSignal()
 
 void plThreadSignal::ClearSignal()
 {
-  PLASMA_LOCK(m_ConditionVariable);
+  PL_LOCK(m_ConditionVariable);
   m_bSignalState = false;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_ThreadSignal);
+

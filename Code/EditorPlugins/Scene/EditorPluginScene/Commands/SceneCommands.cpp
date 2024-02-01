@@ -7,26 +7,26 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDuplicateObjectsCommand, 1, plRTTIDefaultAllocator<plDuplicateObjectsCommand>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDuplicateObjectsCommand, 1, plRTTIDefaultAllocator<plDuplicateObjectsCommand>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("GraphText", m_sGraphTextFormat),
-    PLASMA_MEMBER_PROPERTY("ParentNodes", m_sParentNodes),
-    PLASMA_MEMBER_PROPERTY("NumCopies", m_uiNumberOfCopies),
-    PLASMA_MEMBER_PROPERTY("Translate", m_vAccumulativeTranslation),
-    PLASMA_MEMBER_PROPERTY("Rotate", m_vAccumulativeRotation),
-    PLASMA_MEMBER_PROPERTY("RandomRotation", m_vRandomRotation),
-    PLASMA_MEMBER_PROPERTY("RandomTranslation", m_vRandomTranslation),
-    PLASMA_MEMBER_PROPERTY("Group", m_bGroupDuplicates),
-    PLASMA_MEMBER_PROPERTY("RevolveAxis", m_iRevolveAxis),
-    PLASMA_MEMBER_PROPERTY("RevoleStartAngle", m_RevolveStartAngle),
-    PLASMA_MEMBER_PROPERTY("RevolveAngleStep", m_RevolveAngleStep),
-    PLASMA_MEMBER_PROPERTY("RevolveRadius", m_fRevolveRadius),
+    PL_MEMBER_PROPERTY("GraphText", m_sGraphTextFormat),
+    PL_MEMBER_PROPERTY("ParentNodes", m_sParentNodes),
+    PL_MEMBER_PROPERTY("NumCopies", m_uiNumberOfCopies),
+    PL_MEMBER_PROPERTY("Translate", m_vAccumulativeTranslation),
+    PL_MEMBER_PROPERTY("Rotate", m_vAccumulativeRotation),
+    PL_MEMBER_PROPERTY("RandomRotation", m_vRandomRotation),
+    PL_MEMBER_PROPERTY("RandomTranslation", m_vRandomTranslation),
+    PL_MEMBER_PROPERTY("Group", m_bGroupDuplicates),
+    PL_MEMBER_PROPERTY("RevolveAxis", m_iRevolveAxis),
+    PL_MEMBER_PROPERTY("RevoleStartAngle", m_RevolveStartAngle),
+    PL_MEMBER_PROPERTY("RevolveAngleStep", m_RevolveAngleStep),
+    PL_MEMBER_PROPERTY("RevolveRadius", m_fRevolveRadius),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 
@@ -52,7 +52,7 @@ plStatus plDuplicateObjectsCommand::DoInternal(bool bRedo)
 
   if (!bRedo)
   {
-    PLASMA_ASSERT_DEV(!m_bGroupDuplicates, "Not yet implemented");
+    PL_ASSERT_DEV(!m_bGroupDuplicates, "Not yet implemented");
 
     plAbstractObjectGraph graph;
     DeserializeGraph(graph);
@@ -112,7 +112,7 @@ plStatus plDuplicateObjectsCommand::DoInternal(bool bRedo)
 
   SetAsSelection();
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plDuplicateObjectsCommand::SetAsSelection()
@@ -143,8 +143,7 @@ void plDuplicateObjectsCommand::CreateOneDuplicate(plAbstractObjectGraph& graph,
   plSceneDocument* pDocument = static_cast<plSceneDocument*>(GetDocument());
 
   // Remap
-  plUuid seed;
-  seed.CreateNewUuid();
+  const plUuid seed = plUuid::MakeUuid();
   graph.ReMapNodeGuids(seed);
 
   plDocumentObjectConverterReader reader(&graph, pDocument->GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateOnly);
@@ -265,14 +264,12 @@ void plDuplicateObjectsCommand::AdjustObjectPositions(plHybridArray<plDocument::
 
     revolve += fStep * m_RevolveAngleStep;
 
-    plMat3 mRevolve;
-    mRevolve.SetRotationMatrix(vRevolveAxis, revolve);
+    plMat3 mRevolve = plMat3::MakeAxisRotation(vRevolveAxis, revolve);
 
     vPosOffset = mRevolve * vPosOffset;
   }
 
-  plQuat qRot;
-  qRot.SetFromEulerAngles(plAngle::Degree(fStep * m_vAccumulativeRotation.x + vRandR.x), plAngle::Degree(fStep * m_vAccumulativeRotation.y + vRandR.y), plAngle::Degree(fStep * m_vAccumulativeRotation.z + vRandR.z));
+  plQuat qRot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.x + vRandR.x), plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.y + vRandR.y), plAngle::MakeFromDegree(fStep * m_vAccumulativeRotation.z + vRandR.z));
 
   for (const auto& pi : Duplicates)
   {
@@ -291,17 +288,17 @@ void plDuplicateObjectsCommand::AdjustObjectPositions(plHybridArray<plDocument::
 
 plStatus plDuplicateObjectsCommand::UndoInternal(bool bFireEvents)
 {
-  PLASMA_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
+  PL_ASSERT_DEV(bFireEvents, "This command does not support temporary commands");
   plDocument* pDocument = GetDocument();
 
   for (auto& po : m_DuplicatedObjects)
   {
-    PLASMA_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
+    PL_SUCCEED_OR_RETURN(pDocument->GetObjectManager()->CanRemove(po.m_pObject));
 
     pDocument->GetObjectManager()->RemoveObject(po.m_pObject);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plDuplicateObjectsCommand::CleanupInternal(CommandState state)

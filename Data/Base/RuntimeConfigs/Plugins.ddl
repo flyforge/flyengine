@@ -1,42 +1,50 @@
 Plugin
 {
-	string %Path{"PlasmaEnginePluginAssets"}
+	string %Path{"plFmodPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginAssets"}
 }
 Plugin
 {
-	string %Path{"PlasmaEnginePluginParticle"}
+	string %Path{"plGameComponentsPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginParticle"}
 }
 Plugin
 {
-	string %Path{"PlasmaEnginePluginJolt"}
+	string %Path{"plJoltPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginJolt"}
 }
 Plugin
 {
-	string %Path{"PlasmaEnginePluginScene"}
+	string %Path{"plKrautPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginScene"}
 }
 Plugin
 {
-	string %Path{"plasmaParticlePlugin"}
+	string %Path{"plParticlePlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginParticle"}
 }
 Plugin
 {
-	string %Path{"plasmaJoltPlugin"}
+	string %Path{"plProcGenPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginJolt"}
 }
 Plugin
 {
-	string %Path{"plasmaTypeScriptPlugin"}
+	string %Path{"plRecastPlugin"}
 	bool %LoadCopy{false}
-	string %DependencyOf{"EditorPluginTypeScript"}
+}
+Plugin
+{
+	string %Path{"plRmlUiPlugin"}
+	bool %LoadCopy{false}
+}
+Plugin
+{
+	string %Path{"plTypeScriptPlugin"}
+	bool %LoadCopy{false}
+}
+Plugin
+{
+	string %Path{"plXBoxControllerPlugin"}
+	bool %LoadCopy{false}
 }

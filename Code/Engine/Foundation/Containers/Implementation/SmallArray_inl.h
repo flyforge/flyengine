@@ -3,42 +3,42 @@ template <typename T, plUInt16 Size>
 plSmallArrayBase<T, Size>::plSmallArrayBase() = default;
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(const plSmallArrayBase<T, Size>& other, plAllocatorBase* pAllocator)
+PL_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(const plSmallArrayBase<T, Size>& other, plAllocator* pAllocator)
 {
   CopyFrom((plArrayPtr<const T>)other, pAllocator);
   m_uiUserData = other.m_uiUserData;
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator)
+PL_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(const plArrayPtr<const T>& other, plAllocator* pAllocator)
 {
   CopyFrom(other, pAllocator);
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(plSmallArrayBase<T, Size>&& other, plAllocatorBase* pAllocator)
+PL_ALWAYS_INLINE plSmallArrayBase<T, Size>::plSmallArrayBase(plSmallArrayBase<T, Size>&& other, plAllocator* pAllocator)
 {
   MoveFrom(std::move(other), pAllocator);
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_FORCE_INLINE plSmallArrayBase<T, Size>::~plSmallArrayBase()
+PL_FORCE_INLINE plSmallArrayBase<T, Size>::~plSmallArrayBase()
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount == 0, "The derived class did not destruct all objects. Count is {0}.", m_uiCount);
-  PLASMA_ASSERT_DEBUG(m_pElements == nullptr, "The derived class did not free its memory.");
+  PL_ASSERT_DEBUG(m_uiCount == 0, "The derived class did not destruct all objects. Count is {0}.", m_uiCount);
+  PL_ASSERT_DEBUG(m_pElements == nullptr, "The derived class did not free its memory.");
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::CopyFrom(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::CopyFrom(const plArrayPtr<const T>& other, plAllocator* pAllocator)
 {
-  PLASMA_ASSERT_DEV(other.GetCount() <= plSmallInvalidIndex, "Can't copy {} elements to small array. Maximum count is {}", other.GetCount(), plSmallInvalidIndex);
+  PL_ASSERT_DEV(other.GetCount() <= plSmallInvalidIndex, "Can't copy {} elements to small array. Maximum count is {}", other.GetCount(), plSmallInvalidIndex);
 
   if (GetData() == other.GetPtr())
   {
     if (m_uiCount == other.GetCount())
       return;
 
-    PLASMA_ASSERT_DEV(m_uiCount > other.GetCount(), "Dangling array pointer. The given array pointer points to invalid memory.");
+    PL_ASSERT_DEV(m_uiCount > other.GetCount(), "Dangling array pointer. The given array pointer points to invalid memory.");
     T* pElements = GetElementsPtr();
     plMemoryUtils::Destruct(pElements + other.GetCount(), m_uiCount - other.GetCount());
     m_uiCount = static_cast<plUInt16>(other.GetCount());
@@ -66,7 +66,7 @@ void plSmallArrayBase<T, Size>::CopyFrom(const plArrayPtr<const T>& other, plAll
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::MoveFrom(plSmallArrayBase<T, Size>&& other, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::MoveFrom(plSmallArrayBase<T, Size>&& other, plAllocator* pAllocator)
 {
   Clear();
 
@@ -75,7 +75,7 @@ void plSmallArrayBase<T, Size>::MoveFrom(plSmallArrayBase<T, Size>&& other, plAl
     if (m_uiCapacity > Size)
     {
       // only delete our own external storage
-      PLASMA_DELETE_RAW_BUFFER(pAllocator, m_pElements);
+      PL_DELETE_RAW_BUFFER(pAllocator, m_pElements);
     }
 
     m_uiCapacity = other.m_uiCapacity;
@@ -96,23 +96,24 @@ void plSmallArrayBase<T, Size>::MoveFrom(plSmallArrayBase<T, Size>&& other, plAl
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plSmallArrayBase<T, Size>::operator plArrayPtr<const T>() const
+PL_ALWAYS_INLINE plSmallArrayBase<T, Size>::operator plArrayPtr<const T>() const
 {
   return plArrayPtr<const T>(GetElementsPtr(), m_uiCount);
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plSmallArrayBase<T, Size>::operator plArrayPtr<T>()
+PL_ALWAYS_INLINE plSmallArrayBase<T, Size>::operator plArrayPtr<T>()
 {
   return plArrayPtr<T>(GetElementsPtr(), m_uiCount);
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::operator==(const plSmallArrayBase<T, Size>& rhs) const
+PL_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::operator==(const plSmallArrayBase<T, Size>& rhs) const
 {
   return *this == rhs.GetArrayPtr();
 }
 
+#if PL_DISABLED(PL_USE_CPP20_OPERATORS)
 template <typename T, plUInt16 Size>
 bool plSmallArrayBase<T, Size>::operator==(const plArrayPtr<const T>& rhs) const
 {
@@ -121,35 +122,24 @@ bool plSmallArrayBase<T, Size>::operator==(const plArrayPtr<const T>& rhs) const
 
   return plMemoryUtils::IsEqual(GetElementsPtr(), rhs.GetPtr(), m_uiCount);
 }
+#endif
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::operator!=(const plSmallArrayBase<T, Size>& rhs) const
+PL_ALWAYS_INLINE const T& plSmallArrayBase<T, Size>::operator[](const plUInt32 uiIndex) const
 {
-  return !(*this == rhs);
-}
-
-template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::operator!=(const plArrayPtr<const T>& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE const T& plSmallArrayBase<T, Size>::operator[](const plUInt32 uiIndex) const
-{
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
   return GetElementsPtr()[uiIndex];
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE T& plSmallArrayBase<T, Size>::operator[](const plUInt32 uiIndex)
+PL_ALWAYS_INLINE T& plSmallArrayBase<T, Size>::operator[](const plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
   return GetElementsPtr()[uiIndex];
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, plAllocator* pAllocator)
 {
   const plUInt32 uiOldCount = m_uiCount;
   const plUInt32 uiNewCount = uiCount;
@@ -157,7 +147,7 @@ void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, plAllocatorBase* pAll
   if (uiNewCount > uiOldCount)
   {
     Reserve(static_cast<plUInt16>(uiNewCount), pAllocator);
-    plMemoryUtils::DefaultConstruct(GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
+    plMemoryUtils::Construct<ConstructAll>(GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
   }
   else if (uiNewCount < uiOldCount)
   {
@@ -168,7 +158,7 @@ void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, plAllocatorBase* pAll
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, const T& fillValue, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, const T& fillValue, plAllocator* pAllocator)
 {
   const plUInt32 uiOldCount = m_uiCount;
   const plUInt32 uiNewCount = uiCount;
@@ -187,7 +177,7 @@ void plSmallArrayBase<T, Size>::SetCount(plUInt16 uiCount, const T& fillValue, p
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::EnsureCount(plUInt16 uiCount, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::EnsureCount(plUInt16 uiCount, plAllocator* pAllocator)
 {
   if (uiCount > m_uiCount)
   {
@@ -197,7 +187,7 @@ void plSmallArrayBase<T, Size>::EnsureCount(plUInt16 uiCount, plAllocatorBase* p
 
 template <typename T, plUInt16 Size>
 template <typename> // Second template needed so that the compiler does only instantiate it when called. Otherwise the static_assert would trigger early.
-void plSmallArrayBase<T, Size>::SetCountUninitialized(plUInt16 uiCount, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::SetCountUninitialized(plUInt16 uiCount, plAllocator* pAllocator)
 {
   static_assert(plIsPodType<T>::value == plTypeIsPod::value, "SetCountUninitialized is only supported for POD types.");
   const plUInt32 uiOldCount = m_uiCount;
@@ -206,7 +196,7 @@ void plSmallArrayBase<T, Size>::SetCountUninitialized(plUInt16 uiCount, plAlloca
   if (uiNewCount > uiOldCount)
   {
     Reserve(uiNewCount, pAllocator);
-    plMemoryUtils::Construct(GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
+    plMemoryUtils::Construct<SkipTrivialTypes>(GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
   }
   else if (uiNewCount < uiOldCount)
   {
@@ -217,13 +207,13 @@ void plSmallArrayBase<T, Size>::SetCountUninitialized(plUInt16 uiCount, plAlloca
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plUInt32 plSmallArrayBase<T, Size>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plSmallArrayBase<T, Size>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::IsEmpty() const
+PL_ALWAYS_INLINE bool plSmallArrayBase<T, Size>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
@@ -242,9 +232,9 @@ bool plSmallArrayBase<T, Size>::Contains(const T& value) const
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::Insert(const T& value, plUInt32 uiIndex, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::Insert(const T& value, plUInt32 uiIndex, plAllocator* pAllocator)
 {
-  PLASMA_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
 
   Reserve(m_uiCount + 1, pAllocator);
 
@@ -253,9 +243,9 @@ void plSmallArrayBase<T, Size>::Insert(const T& value, plUInt32 uiIndex, plAlloc
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::Insert(T&& value, plUInt32 uiIndex, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::Insert(T&& value, plUInt32 uiIndex, plAllocator* pAllocator)
 {
-  PLASMA_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
 
   Reserve(m_uiCount + 1, pAllocator);
 
@@ -288,9 +278,9 @@ bool plSmallArrayBase<T, Size>::RemoveAndSwap(const T& value)
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::RemoveAtAndCopy(plUInt32 uiIndex, plUInt32 uiNumElements /*= 1*/)
+void plSmallArrayBase<T, Size>::RemoveAtAndCopy(plUInt32 uiIndex, plUInt16 uiNumElements /*= 1*/)
 {
-  PLASMA_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
+  PL_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
 
   T* pElements = GetElementsPtr();
 
@@ -299,9 +289,9 @@ void plSmallArrayBase<T, Size>::RemoveAtAndCopy(plUInt32 uiIndex, plUInt32 uiNum
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::RemoveAtAndSwap(plUInt32 uiIndex, plUInt32 uiNumElements /*= 1*/)
+void plSmallArrayBase<T, Size>::RemoveAtAndSwap(plUInt32 uiIndex, plUInt16 uiNumElements /*= 1*/)
 {
-  PLASMA_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
+  PL_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
 
   T* pElements = GetElementsPtr();
 
@@ -345,13 +335,13 @@ plUInt32 plSmallArrayBase<T, Size>::LastIndexOf(const T& value, plUInt32 uiStart
 }
 
 template <typename T, plUInt16 Size>
-T& plSmallArrayBase<T, Size>::ExpandAndGetRef(plAllocatorBase* pAllocator)
+T& plSmallArrayBase<T, Size>::ExpandAndGetRef(plAllocator* pAllocator)
 {
   Reserve(m_uiCount + 1, pAllocator);
 
   T* pElements = GetElementsPtr();
 
-  plMemoryUtils::Construct(pElements + m_uiCount, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes>(pElements + m_uiCount, 1);
 
   T& ReturnRef = *(pElements + m_uiCount);
 
@@ -361,7 +351,7 @@ T& plSmallArrayBase<T, Size>::ExpandAndGetRef(plAllocatorBase* pAllocator)
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::PushBack(const T& value, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::PushBack(const T& value, plAllocator* pAllocator)
 {
   Reserve(m_uiCount + 1, pAllocator);
 
@@ -370,7 +360,7 @@ void plSmallArrayBase<T, Size>::PushBack(const T& value, plAllocatorBase* pAlloc
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::PushBack(T&& value, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::PushBack(T&& value, plAllocator* pAllocator)
 {
   Reserve(m_uiCount + 1, pAllocator);
 
@@ -381,7 +371,7 @@ void plSmallArrayBase<T, Size>::PushBack(T&& value, plAllocatorBase* pAllocator)
 template <typename T, plUInt16 Size>
 void plSmallArrayBase<T, Size>::PushBackUnchecked(const T& value)
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
+  PL_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
 
   plMemoryUtils::CopyConstruct(GetElementsPtr() + m_uiCount, value, 1);
   m_uiCount++;
@@ -390,14 +380,14 @@ void plSmallArrayBase<T, Size>::PushBackUnchecked(const T& value)
 template <typename T, plUInt16 Size>
 void plSmallArrayBase<T, Size>::PushBackUnchecked(T&& value)
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
+  PL_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
 
   plMemoryUtils::MoveConstruct<T>(GetElementsPtr() + m_uiCount, std::move(value));
   m_uiCount++;
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::PushBackRange(const plArrayPtr<const T>& range, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::PushBackRange(const plArrayPtr<const T>& range, plAllocator* pAllocator)
 {
   const plUInt32 uiRangeCount = range.GetCount();
   Reserve(m_uiCount + uiRangeCount, pAllocator);
@@ -409,23 +399,23 @@ void plSmallArrayBase<T, Size>::PushBackRange(const plArrayPtr<const T>& range, 
 template <typename T, plUInt16 Size>
 void plSmallArrayBase<T, Size>::PopBack(plUInt32 uiCountToRemove /* = 1 */)
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount >= uiCountToRemove, "Out of bounds access. Array has {0} elements, trying to pop {1} elements.", m_uiCount, uiCountToRemove);
+  PL_ASSERT_DEBUG(m_uiCount >= uiCountToRemove, "Out of bounds access. Array has {0} elements, trying to pop {1} elements.", m_uiCount, uiCountToRemove);
 
   m_uiCount -= uiCountToRemove;
   plMemoryUtils::Destruct(GetElementsPtr() + m_uiCount, uiCountToRemove);
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_FORCE_INLINE T& plSmallArrayBase<T, Size>::PeekBack()
+PL_FORCE_INLINE T& plSmallArrayBase<T, Size>::PeekBack()
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
+  PL_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
   return GetElementsPtr()[m_uiCount - 1];
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_FORCE_INLINE const T& plSmallArrayBase<T, Size>::PeekBack() const
+PL_FORCE_INLINE const T& plSmallArrayBase<T, Size>::PeekBack() const
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
+  PL_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
   return GetElementsPtr()[m_uiCount - 1];
 }
 
@@ -451,7 +441,7 @@ void plSmallArrayBase<T, Size>::Sort()
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE T* plSmallArrayBase<T, Size>::GetData()
+PL_ALWAYS_INLINE T* plSmallArrayBase<T, Size>::GetData()
 {
   if (IsEmpty())
     return nullptr;
@@ -460,7 +450,7 @@ PLASMA_ALWAYS_INLINE T* plSmallArrayBase<T, Size>::GetData()
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE const T* plSmallArrayBase<T, Size>::GetData() const
+PL_ALWAYS_INLINE const T* plSmallArrayBase<T, Size>::GetData() const
 {
   if (IsEmpty())
     return nullptr;
@@ -469,31 +459,31 @@ PLASMA_ALWAYS_INLINE const T* plSmallArrayBase<T, Size>::GetData() const
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plArrayPtr<T> plSmallArrayBase<T, Size>::GetArrayPtr()
+PL_ALWAYS_INLINE plArrayPtr<T> plSmallArrayBase<T, Size>::GetArrayPtr()
 {
   return plArrayPtr<T>(GetData(), GetCount());
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plArrayPtr<const T> plSmallArrayBase<T, Size>::GetArrayPtr() const
+PL_ALWAYS_INLINE plArrayPtr<const T> plSmallArrayBase<T, Size>::GetArrayPtr() const
 {
   return plArrayPtr<const T>(GetData(), GetCount());
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<T>::ByteType> plSmallArrayBase<T, Size>::GetByteArrayPtr()
+PL_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<T>::ByteType> plSmallArrayBase<T, Size>::GetByteArrayPtr()
 {
   return GetArrayPtr().ToByteArray();
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<const T>::ByteType> plSmallArrayBase<T, Size>::GetByteArrayPtr() const
+PL_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<const T>::ByteType> plSmallArrayBase<T, Size>::GetByteArrayPtr() const
 {
   return GetArrayPtr().ToByteArray();
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::Reserve(plUInt16 uiCapacity, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::Reserve(plUInt16 uiCapacity, plAllocator* pAllocator)
 {
   if (m_uiCapacity >= uiCapacity)
     return;
@@ -509,14 +499,14 @@ void plSmallArrayBase<T, Size>::Reserve(plUInt16 uiCapacity, plAllocatorBase* pA
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::Compact(plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::Compact(plAllocator* pAllocator)
 {
   if (IsEmpty())
   {
     if (m_uiCapacity > Size)
     {
       // completely deallocate all data, if the array is empty.
-      PLASMA_DELETE_RAW_BUFFER(pAllocator, m_pElements);
+      PL_DELETE_RAW_BUFFER(pAllocator, m_pElements);
     }
 
     m_uiCapacity = Size;
@@ -533,14 +523,14 @@ void plSmallArrayBase<T, Size>::Compact(plAllocatorBase* pAllocator)
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE plUInt64 plSmallArrayBase<T, Size>::GetHeapMemoryUsage() const
+PL_ALWAYS_INLINE plUInt64 plSmallArrayBase<T, Size>::GetHeapMemoryUsage() const
 {
   return m_uiCapacity <= Size ? 0 : m_uiCapacity * sizeof(T);
 }
 
 template <typename T, plUInt16 Size>
 template <typename U>
-PLASMA_ALWAYS_INLINE const U& plSmallArrayBase<T, Size>::GetUserData() const
+PL_ALWAYS_INLINE const U& plSmallArrayBase<T, Size>::GetUserData() const
 {
   static_assert(sizeof(U) <= sizeof(plUInt32));
   return reinterpret_cast<const U&>(m_uiUserData);
@@ -548,18 +538,18 @@ PLASMA_ALWAYS_INLINE const U& plSmallArrayBase<T, Size>::GetUserData() const
 
 template <typename T, plUInt16 Size>
 template <typename U>
-PLASMA_ALWAYS_INLINE U& plSmallArrayBase<T, Size>::GetUserData()
+PL_ALWAYS_INLINE U& plSmallArrayBase<T, Size>::GetUserData()
 {
   static_assert(sizeof(U) <= sizeof(plUInt32));
   return reinterpret_cast<U&>(m_uiUserData);
 }
 
 template <typename T, plUInt16 Size>
-void plSmallArrayBase<T, Size>::SetCapacity(plUInt16 uiCapacity, plAllocatorBase* pAllocator)
+void plSmallArrayBase<T, Size>::SetCapacity(plUInt16 uiCapacity, plAllocator* pAllocator)
 {
   if (m_uiCapacity > Size && uiCapacity > m_uiCapacity)
   {
-    m_pElements = PLASMA_EXTEND_RAW_BUFFER(pAllocator, m_pElements, m_uiCount, uiCapacity);
+    m_pElements = PL_EXTEND_RAW_BUFFER(pAllocator, m_pElements, m_uiCount, uiCapacity);
     m_uiCapacity = uiCapacity;
   }
   else
@@ -574,7 +564,7 @@ void plSmallArrayBase<T, Size>::SetCapacity(plUInt16 uiCapacity, plAllocatorBase
     if (uiNewCapacity > Size)
     {
       // new external storage
-      T* pNewElements = PLASMA_NEW_RAW_BUFFER(pAllocator, T, uiCapacity);
+      T* pNewElements = PL_NEW_RAW_BUFFER(pAllocator, T, uiCapacity);
       plMemoryUtils::RelocateConstruct(pNewElements, pOldElements, m_uiCount);
       m_pElements = pNewElements;
     }
@@ -586,19 +576,19 @@ void plSmallArrayBase<T, Size>::SetCapacity(plUInt16 uiCapacity, plAllocatorBase
 
     if (uiOldCapacity > Size)
     {
-      PLASMA_DELETE_RAW_BUFFER(pAllocator, pOldElements);
+      PL_DELETE_RAW_BUFFER(pAllocator, pOldElements);
     }
   }
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE T* plSmallArrayBase<T, Size>::GetElementsPtr()
+PL_ALWAYS_INLINE T* plSmallArrayBase<T, Size>::GetElementsPtr()
 {
   return m_uiCapacity <= Size ? reinterpret_cast<T*>(m_StaticData) : m_pElements;
 }
 
 template <typename T, plUInt16 Size>
-PLASMA_ALWAYS_INLINE const T* plSmallArrayBase<T, Size>::GetElementsPtr() const
+PL_ALWAYS_INLINE const T* plSmallArrayBase<T, Size>::GetElementsPtr() const
 {
   return m_uiCapacity <= Size ? reinterpret_cast<const T*>(m_StaticData) : m_pElements;
 }
@@ -609,19 +599,19 @@ template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllo
 plSmallArray<T, Size, AllocatorWrapper>::plSmallArray() = default;
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(const plSmallArray<T, Size, AllocatorWrapper>& other)
+PL_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(const plSmallArray<T, Size, AllocatorWrapper>& other)
   : SUPER(other, AllocatorWrapper::GetAllocator())
 {
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(const plArrayPtr<const T>& other)
+PL_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(const plArrayPtr<const T>& other)
   : SUPER(other, AllocatorWrapper::GetAllocator())
 {
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(plSmallArray<T, Size, AllocatorWrapper>&& other)
+PL_ALWAYS_INLINE plSmallArray<T, Size, AllocatorWrapper>::plSmallArray(plSmallArray<T, Size, AllocatorWrapper>&& other)
   : SUPER(static_cast<SUPER&&>(other), AllocatorWrapper::GetAllocator())
 {
 }
@@ -634,93 +624,93 @@ plSmallArray<T, Size, AllocatorWrapper>::~plSmallArray()
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(const plSmallArray<T, Size, AllocatorWrapper>& rhs)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(const plSmallArray<T, Size, AllocatorWrapper>& rhs)
 {
   *this = ((plArrayPtr<const T>)rhs); // redirect this to the plArrayPtr version
   this->m_uiUserData = rhs.m_uiUserData;
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(const plArrayPtr<const T>& rhs)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(const plArrayPtr<const T>& rhs)
 {
   SUPER::CopyFrom(rhs, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(plSmallArray<T, Size, AllocatorWrapper>&& rhs) noexcept
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::operator=(plSmallArray<T, Size, AllocatorWrapper>&& rhs) noexcept
 {
   SUPER::MoveFrom(std::move(rhs), AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCount(plUInt16 uiCount)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCount(plUInt16 uiCount)
 {
   SUPER::SetCount(uiCount, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCount(plUInt16 uiCount, const T& fillValue)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCount(plUInt16 uiCount, const T& fillValue)
 {
   SUPER::SetCount(uiCount, fillValue, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::EnsureCount(plUInt16 uiCount)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::EnsureCount(plUInt16 uiCount)
 {
   SUPER::EnsureCount(uiCount, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
 template <typename> // Second template needed so that the compiler does only instantiate it when called. Otherwise the static_assert would trigger early.
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCountUninitialized(plUInt16 uiCount)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::SetCountUninitialized(plUInt16 uiCount)
 {
   SUPER::SetCountUninitialized(uiCount, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Insert(const T& value, plUInt32 uiIndex)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Insert(const T& value, plUInt32 uiIndex)
 {
   SUPER::Insert(value, uiIndex, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Insert(T&& value, plUInt32 uiIndex)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Insert(T&& value, plUInt32 uiIndex)
 {
   SUPER::Insert(value, uiIndex, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE T& plSmallArray<T, Size, AllocatorWrapper>::ExpandAndGetRef()
+PL_ALWAYS_INLINE T& plSmallArray<T, Size, AllocatorWrapper>::ExpandAndGetRef()
 {
   return SUPER::ExpandAndGetRef(AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBack(const T& value)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBack(const T& value)
 {
   SUPER::PushBack(value, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBack(T&& value)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBack(T&& value)
 {
   SUPER::PushBack(std::move(value), AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBackRange(const plArrayPtr<const T>& range)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::PushBackRange(const plArrayPtr<const T>& range)
 {
   SUPER::PushBackRange(range, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Reserve(plUInt16 uiCapacity)
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Reserve(plUInt16 uiCapacity)
 {
   SUPER::Reserve(uiCapacity, AllocatorWrapper::GetAllocator());
 }
 
 template <typename T, plUInt16 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-PLASMA_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Compact()
+PL_ALWAYS_INLINE void plSmallArray<T, Size, AllocatorWrapper>::Compact()
 {
   SUPER::Compact(AllocatorWrapper::GetAllocator());
 }

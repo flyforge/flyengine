@@ -28,8 +28,9 @@ plQtCppProjectDlg::plQtCppProjectDlg(QWidget* pParent)
 
   if(plStatus compilerTestResult = plCppProject::TestCompiler(); compilerTestResult.Failed())
   {
+    // TODO: how do I color the ErrorText label in Red (or whatever error color is configured?)
     plStringBuilder fmt;
-    ErrorText->setText(plFmt("<html><b>Error:</b> {}<br>Please go to preferences and configure the C & C++ compiler.", compilerTestResult.m_sMessage).GetTextCStr(fmt));
+    ErrorText->setText(plMakeQString(plFmt("<html><b>Error:</b> {}<br>Please go to preferences and configure the C & C++ compiler.", compilerTestResult.m_sMessage).GetText(fmt)));
     GenerateSolution->setDisabled(true);
   }
 
@@ -117,7 +118,7 @@ public:
         return;
       }
 
-        PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+        PL_DEFAULT_CASE_NOT_IMPLEMENTED;
     }
   }
 };
@@ -139,7 +140,7 @@ void plQtCppProjectDlg::on_GenerateSolution_clicked()
 
   if (!m_OldCppSettings.m_sPluginName.IsEmpty() && m_OldCppSettings.m_sPluginName != m_CppSettings.m_sPluginName)
   {
-    if (plQtUiServices::MessageBoxQuestion("You are attempting to change the name of the existing C++ plugin.\n\nTHIS IS A BAD IDEA.\n\nThe C++ sources and CMake files were already created with the old name in it. To not accidentally delete your work, PLASMA won't touch any of those files. Therefore this change won't have any effect, unless you have already deleted those files yourself and PLASMA can just create new ones. Only select YES if you have done the necessary steps and/or know what you are doing.", QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
+    if (plQtUiServices::MessageBoxQuestion("You are attempting to change the name of the existing C++ plugin.\n\nTHIS IS A BAD IDEA.\n\nThe C++ sources and CMake files were already created with the old name in it. To not accidentally delete your work, PL won't touch any of those files. Therefore this change won't have any effect, unless you have already deleted those files yourself and PL can just create new ones. Only select YES if you have done the necessary steps and/or know what you are doing.", QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No, QMessageBox::StandardButton::No) != QMessageBox::StandardButton::Yes)
     {
       return;
     }
@@ -153,7 +154,7 @@ void plQtCppProjectDlg::on_GenerateSolution_clicked()
 
   m_OldCppSettings.Load().IgnoreResult();
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
   if (plSystemInformation::IsDebuggerAttached())
   {
     plQtUiServices::GetSingleton()->MessageBoxWarning("When a debugger is attached, CMake usually fails with the error that no C/C++ compiler can be found.\n\nDetach the debugger now, then press OK to continue.");
@@ -172,7 +173,7 @@ void plQtCppProjectDlg::on_GenerateSolution_clicked()
     progress.SetStepWeighting(1, 0.1f);
     progress.SetStepWeighting(2, 0.8f);
 
-    PLASMA_SCOPE_EXIT(UpdateUI());
+    PL_SCOPE_EXIT(UpdateUI());
 
     {
       progress.BeginNextStep("Clean Build Directory");

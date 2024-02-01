@@ -9,42 +9,42 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSpawnComponent, 3, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSpawnComponent, 3, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Prefab", GetPrefabFile, SetPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
-    PLASMA_ACCESSOR_PROPERTY("AttachAsChild", GetAttachAsChild, SetAttachAsChild),
-    PLASMA_ACCESSOR_PROPERTY("SpawnAtStart", GetSpawnAtStart, SetSpawnAtStart),
-    PLASMA_ACCESSOR_PROPERTY("SpawnContinuously", GetSpawnContinuously, SetSpawnContinuously),
-    PLASMA_MEMBER_PROPERTY("MinDelay", m_MinDelay)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::Seconds(1.0))),
-    PLASMA_MEMBER_PROPERTY("DelayRange", m_DelayRange)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
-    PLASMA_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(179.0))),
+    PL_ACCESSOR_PROPERTY("Prefab", GetPrefabFile, SetPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
+    PL_ACCESSOR_PROPERTY("AttachAsChild", GetAttachAsChild, SetAttachAsChild),
+    PL_ACCESSOR_PROPERTY("SpawnAtStart", GetSpawnAtStart, SetSpawnAtStart),
+    PL_ACCESSOR_PROPERTY("SpawnContinuously", GetSpawnContinuously, SetSpawnContinuously),
+    PL_MEMBER_PROPERTY("MinDelay", m_MinDelay)->AddAttributes(new plClampValueAttribute(plTime(), plVariant()), new plDefaultValueAttribute(plTime::MakeFromSeconds(1.0))),
+    PL_MEMBER_PROPERTY("DelayRange", m_DelayRange)->AddAttributes(new plClampValueAttribute(plTime(), plVariant())),
+    PL_MEMBER_PROPERTY("Deviation", m_MaxDeviation)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(179.0))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Gameplay"),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 0.5f, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "Deviation", 0.5f, nullptr, plColorScheme::LightUI(plColorScheme::Lime)),
     new plConeAngleManipulatorAttribute("Deviation", 0.5f),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
+    PL_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(CanTriggerManualSpawn),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(TriggerManualSpawn, In, "IgnoreSpawnDelay", In, "LocalOffset"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(ScheduleSpawn),
+    PL_SCRIPT_FUNCTION_PROPERTY(CanTriggerManualSpawn),
+    PL_SCRIPT_FUNCTION_PROPERTY(TriggerManualSpawn, In, "IgnoreSpawnDelay", In, "LocalOffset"),
+    PL_SCRIPT_FUNCTION_PROPERTY(ScheduleSpawn),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSpawnComponent::plSpawnComponent() = default;
@@ -81,12 +81,12 @@ bool plSpawnComponent::SpawnOnce(const plVec3& vLocalOffset)
       const plVec3 vTiltAxis = plVec3(0, 1, 0);
       const plVec3 vTurnAxis = plVec3(1, 0, 0);
 
-      const plAngle tiltAngle = plAngle::Radian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, (double)m_MaxDeviation.GetRadian()));
-      const plAngle turnAngle = plAngle::Radian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0));
+      const plAngle tiltAngle = plAngle::MakeFromRadian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, (double)m_MaxDeviation.GetRadian()));
+      const plAngle turnAngle = plAngle::MakeFromRadian((float)GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, plMath::Pi<double>() * 2.0));
 
       plQuat qTilt, qTurn, qDeviate;
-      qTilt.SetFromAxisAndAngle(vTiltAxis, tiltAngle);
-      qTurn.SetFromAxisAndAngle(vTurnAxis, turnAngle);
+      qTilt = plQuat::MakeFromAxisAndAngle(vTiltAxis, tiltAngle);
+      qTurn = plQuat::MakeFromAxisAndAngle(vTurnAxis, turnAngle);
       qDeviate = qTurn * qTilt;
 
       tLocalSpawn.m_qRotation = qDeviate;
@@ -117,7 +117,7 @@ void plSpawnComponent::DoSpawn(const plTransform& tLocalSpawn)
   else
   {
     plTransform tGlobalSpawn;
-    tGlobalSpawn.SetGlobalTransform(GetOwner()->GetGlobalTransform(), tLocalSpawn);
+    tGlobalSpawn = plTransform::MakeGlobalTransform(GetOwner()->GetGlobalTransform(), tLocalSpawn);
 
     pResource->InstantiatePrefab(*GetWorld(), tGlobalSpawn, options, &m_Parameters);
   }
@@ -135,15 +135,15 @@ void plSpawnComponent::ScheduleSpawn()
 
   plWorld* pWorld = GetWorld();
 
-  const plTime tKill = plTime::Seconds(pWorld->GetRandomNumberGenerator().DoubleInRange(m_MinDelay.GetSeconds(), m_DelayRange.GetSeconds()));
+  const plTime tKill = plTime::MakeFromSeconds(pWorld->GetRandomNumberGenerator().DoubleInRange(m_MinDelay.GetSeconds(), m_DelayRange.GetSeconds()));
 
   PostMessage(msg, tKill);
 }
 
-void plSpawnComponent::SerializeComponent(plWorldWriter& stream) const
+void plSpawnComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_SpawnFlags.GetValue();
   s << m_hPrefab;
@@ -153,15 +153,15 @@ void plSpawnComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_MaxDeviation;
   s << m_LastManualSpawn;
 
-  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), stream, m_Parameters);
+  plPrefabReferenceComponent::SerializePrefabParameters(*GetWorld(), inout_stream, m_Parameters);
 }
 
-void plSpawnComponent::DeserializeComponent(plWorldReader& stream)
+void plSpawnComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
 
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   plSpawnComponentFlags::StorageType flags;
   s >> flags;
@@ -176,7 +176,7 @@ void plSpawnComponent::DeserializeComponent(plWorldReader& stream)
 
   if (uiVersion >= 3)
   {
-    plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, stream);
+    plPrefabReferenceComponent::DeserializePrefabParameters(m_Parameters, inout_stream);
   }
 }
 
@@ -187,7 +187,7 @@ bool plSpawnComponent::CanTriggerManualSpawn() const
   return tNow - m_LastManualSpawn >= m_MinDelay;
 }
 
-bool plSpawnComponent::TriggerManualSpawn(bool bIgnoreSpawnDelay /*= false*/, const plVec3& vLocalOffset /*= plVec3::ZeroVector()*/)
+bool plSpawnComponent::TriggerManualSpawn(bool bIgnoreSpawnDelay /*= false*/, const plVec3& vLocalOffset /*= plVec3::MakeZero()*/)
 {
   const plTime tNow = GetWorld()->GetClock().GetAccumulatedTime();
 
@@ -259,7 +259,7 @@ void plSpawnComponent::OnTriggered(plMsgComponentInternalTrigger& msg)
   {
     m_SpawnFlags.Remove(plSpawnComponentFlags::SpawnInFlight);
 
-    SpawnOnce(plVec3::ZeroVector());
+    SpawnOnce(plVec3::MakeZero());
 
     // do it all again
     if (m_SpawnFlags.IsAnySet(plSpawnComponentFlags::SpawnContinuously))
@@ -275,7 +275,7 @@ void plSpawnComponent::OnTriggered(plMsgComponentInternalTrigger& msg)
 
 const plRangeView<const char*, plUInt32> plSpawnComponent::GetParameters() const
 {
-  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; }, [this]() -> plUInt32 { return m_Parameters.GetCount(); }, [](plUInt32& it) { ++it; }, [this](const plUInt32& it) -> const char* { return m_Parameters.GetKey(it).GetString().GetData(); });
+  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; }, [this]() -> plUInt32 { return m_Parameters.GetCount(); }, [](plUInt32& ref_uiIt) { ++ref_uiIt; }, [this](const plUInt32& uiIt) -> const char* { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
 }
 
 void plSpawnComponent::SetParameter(const char* szKey, const plVariant& value)
@@ -320,7 +320,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Attach as Child", "AttachAsChild");
     pNode->RenameProperty("Spawn at Start", "SpawnAtStart");
@@ -334,4 +334,4 @@ plSpawnComponentPatch_1_2 g_plSpawnComponentPatch_1_2;
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_SpawnComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_SpawnComponent);

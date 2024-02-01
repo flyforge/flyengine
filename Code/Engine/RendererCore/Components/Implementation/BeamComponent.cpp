@@ -13,33 +13,32 @@
 
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plBeamComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plBeamComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("TargetObject", DummyGetter, SetTargetObject)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White)),
-    PLASMA_ACCESSOR_PROPERTY("Width", GetWidth, SetWidth)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.001f, plVariant()), new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("UVUnitsPerWorldUnit", GetUVUnitsPerWorldUnit, SetUVUnitsPerWorldUnit)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, plVariant())),
+    PL_ACCESSOR_PROPERTY("TargetObject", DummyGetter, SetTargetObject)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White)),
+    PL_ACCESSOR_PROPERTY("Width", GetWidth, SetWidth)->AddAttributes(new plDefaultValueAttribute(0.1f), new plClampValueAttribute(0.001f, plVariant()), new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("UVUnitsPerWorldUnit", GetUVUnitsPerWorldUnit, SetUVUnitsPerWorldUnit)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plBeamComponent::plBeamComponent() = default;
-
 plBeamComponent::~plBeamComponent() = default;
 
 void plBeamComponent::Update()
@@ -114,19 +113,18 @@ plResult plBeamComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& 
     const plVec3 currentTargetPosition = pTargetObject->GetGlobalPosition();
     const plVec3 targetPositionInOwnerSpace = GetOwner()->GetGlobalTransform().GetInverse().TransformPosition(currentTargetPosition);
 
-    plVec3 pts[] = {plVec3::ZeroVector(), targetPositionInOwnerSpace};
+    plVec3 pts[] = {plVec3::MakeZero(), targetPositionInOwnerSpace};
 
-    plBoundingBox box;
-    box.SetFromPoints(pts, 2);
+    plBoundingBox box = plBoundingBox::MakeFromPoints(pts, 2);
     const float fHalfWidth = m_fWidth * 0.5f;
     box.m_vMin -= plVec3(0, fHalfWidth, fHalfWidth);
     box.m_vMax += plVec3(0, fHalfWidth, fHalfWidth);
-    ref_bounds = box;
+    ref_bounds = plBoundingBoxSphere::MakeFromBox(box);
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -149,9 +147,6 @@ void plBeamComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
   if (!m_hMesh.IsValid() || !m_hMaterial.IsValid())
     return;
 
-  const plUInt32 uiFlipWinding = GetOwner()->GetGlobalTransformSimd().ContainsNegativeScale() ? 1 : 0;
-  const plUInt32 uiUniformScale = GetOwner()->GetGlobalTransformSimd().ContainsUniformScale() ? 1 : 0;
-
   plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
   {
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
@@ -168,7 +163,6 @@ void plBeamComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
   // Determine render data category.
   plResourceLock<plMaterialResource> pMaterial(m_hMaterial, plResourceAcquireMode::AllowLoadingFallback);
   plRenderData::Category category = pMaterial->GetRenderDataCategory();
-
 
   msg.AddRenderData(pRenderData, category, plRenderData::Caching::Never);
 }
@@ -250,7 +244,7 @@ void plBeamComponent::CreateMeshes()
   // Create the beam mesh name, it expresses the beam in local space with it's width
   // this way multiple beams in a corridor can share the same mesh for example.
   plStringBuilder meshName;
-  meshName.Format("plBeamComponent_{0}_{1}_{2}_{3}.createdAtRuntime.plMesh", m_fWidth, plArgF(targetPositionInOwnerSpace.x, 2), plArgF(targetPositionInOwnerSpace.y, 2), plArgF(targetPositionInOwnerSpace.z, 2));
+  meshName.SetFormat("plBeamComponent_{0}_{1}_{2}_{3}.createdAtRuntime.plMesh", m_fWidth, plArgF(targetPositionInOwnerSpace.x, 2), plArgF(targetPositionInOwnerSpace.y, 2), plArgF(targetPositionInOwnerSpace.z, 2));
 
   m_hMesh = plResourceManager::GetExistingResource<plMeshResource>(meshName);
 
@@ -262,16 +256,16 @@ void plBeamComponent::CreateMeshes()
   //      x
   //
   //  4        2
-  plVec3 crossVector1 = (0.5f * plVec3::UnitYAxis() + 0.5f * plVec3::UnitZAxis());
+  plVec3 crossVector1 = (0.5f * plVec3::MakeAxisY() + 0.5f * plVec3::MakeAxisZ());
   crossVector1.SetLength(m_fWidth * 0.5f).IgnoreResult();
 
-  plVec3 crossVector2 = (0.5f * plVec3::UnitYAxis() - 0.5f * plVec3::UnitZAxis());
+  plVec3 crossVector2 = (0.5f * plVec3::MakeAxisY() - 0.5f * plVec3::MakeAxisZ());
   crossVector2.SetLength(m_fWidth * 0.5f).IgnoreResult();
 
-  plVec3 crossVector3 = (-0.5f * plVec3::UnitYAxis() + 0.5f * plVec3::UnitZAxis());
+  plVec3 crossVector3 = (-0.5f * plVec3::MakeAxisY() + 0.5f * plVec3::MakeAxisZ());
   crossVector3.SetLength(m_fWidth * 0.5f).IgnoreResult();
 
-  plVec3 crossVector4 = (-0.5f * plVec3::UnitYAxis() - 0.5f * plVec3::UnitZAxis());
+  plVec3 crossVector4 = (-0.5f * plVec3::MakeAxisY() - 0.5f * plVec3::MakeAxisZ());
   crossVector4.SetLength(m_fWidth * 0.5f).IgnoreResult();
 
   const float fDistance = (m_vLastOwnerPosition - m_vLastTargetPosition).GetLength();
@@ -285,10 +279,10 @@ void plBeamComponent::CreateMeshes()
 
     // Quad 1
     {
-      plUInt32 index0 = g.AddVertex(plVec3::ZeroVector() + crossVector1, plVec3::UnitXAxis(), plVec2(0, 0), plColor::White);
-      plUInt32 index1 = g.AddVertex(plVec3::ZeroVector() + crossVector4, plVec3::UnitXAxis(), plVec2(0, 1), plColor::White);
-      plUInt32 index2 = g.AddVertex(targetPositionInOwnerSpace + crossVector1, plVec3::UnitXAxis(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 0), plColor::White);
-      plUInt32 index3 = g.AddVertex(targetPositionInOwnerSpace + crossVector4, plVec3::UnitXAxis(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 1), plColor::White);
+      plUInt32 index0 = g.AddVertex(plVec3::MakeZero() + crossVector1, plVec3::MakeAxisX(), plVec2(0, 0), plColor::White);
+      plUInt32 index1 = g.AddVertex(plVec3::MakeZero() + crossVector4, plVec3::MakeAxisX(), plVec2(0, 1), plColor::White);
+      plUInt32 index2 = g.AddVertex(targetPositionInOwnerSpace + crossVector1, plVec3::MakeAxisX(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 0), plColor::White);
+      plUInt32 index3 = g.AddVertex(targetPositionInOwnerSpace + crossVector4, plVec3::MakeAxisX(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 1), plColor::White);
 
       plUInt32 indices[] = {index0, index2, index3, index1};
       g.AddPolygon(plArrayPtr(indices), false);
@@ -297,10 +291,10 @@ void plBeamComponent::CreateMeshes()
 
     // Quad 2
     {
-      plUInt32 index0 = g.AddVertex(plVec3::ZeroVector() + crossVector2, plVec3::UnitXAxis(), plVec2(0, 0), plColor::White);
-      plUInt32 index1 = g.AddVertex(plVec3::ZeroVector() + crossVector3, plVec3::UnitXAxis(), plVec2(0, 1), plColor::White);
-      plUInt32 index2 = g.AddVertex(targetPositionInOwnerSpace + crossVector2, plVec3::UnitXAxis(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 0), plColor::White);
-      plUInt32 index3 = g.AddVertex(targetPositionInOwnerSpace + crossVector3, plVec3::UnitXAxis(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 1), plColor::White);
+      plUInt32 index0 = g.AddVertex(plVec3::MakeZero() + crossVector2, plVec3::MakeAxisX(), plVec2(0, 0), plColor::White);
+      plUInt32 index1 = g.AddVertex(plVec3::MakeZero() + crossVector3, plVec3::MakeAxisX(), plVec2(0, 1), plColor::White);
+      plUInt32 index2 = g.AddVertex(targetPositionInOwnerSpace + crossVector2, plVec3::MakeAxisX(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 0), plColor::White);
+      plUInt32 index3 = g.AddVertex(targetPositionInOwnerSpace + crossVector3, plVec3::MakeAxisX(), plVec2(fDistance * m_fUVUnitsPerWorldUnit, 1), plColor::White);
 
       plUInt32 indices[] = {index0, index2, index3, index1};
       g.AddPolygon(plArrayPtr(indices), false);
@@ -345,4 +339,4 @@ void plBeamComponent::Cleanup()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_BeamComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_BeamComponent);

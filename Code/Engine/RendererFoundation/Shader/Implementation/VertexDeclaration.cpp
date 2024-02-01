@@ -7,8 +7,6 @@ plGALVertexDeclaration::plGALVertexDeclaration(const plGALVertexDeclarationCreat
 {
 }
 
-plGALVertexDeclaration::~plGALVertexDeclaration() {}
+plGALVertexDeclaration::~plGALVertexDeclaration() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Shader_Implementation_VertexDeclaration);

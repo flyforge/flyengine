@@ -3,8 +3,8 @@
 #include <ToolsFoundation/CommandHistory/CommandHistory.h>
 #include <ToolsFoundation/Document/Document.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCommandTransaction, 1, plRTTIDefaultAllocator<plCommandTransaction>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCommandTransaction, 1, plRTTIDefaultAllocator<plCommandTransaction>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 ////////////////////////////////////////////////////////////////////////
 // plCommandTransaction
@@ -18,18 +18,18 @@ plCommandTransaction::plCommandTransaction()
 
 plCommandTransaction::~plCommandTransaction()
 {
-  PLASMA_ASSERT_DEV(m_ChildActions.IsEmpty(), "The list should be cleared in 'Cleanup'");
+  PL_ASSERT_DEV(m_ChildActions.IsEmpty(), "The list should be cleared in 'Cleanup'");
 }
 
 plStatus plCommandTransaction::DoInternal(bool bRedo)
 {
-  PLASMA_ASSERT_DEV(bRedo == true, "Implementation error");
-  return plStatus(PLASMA_SUCCESS);
+  PL_ASSERT_DEV(bRedo == true, "Implementation error");
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plCommandTransaction::UndoInternal(bool bFireEvents)
 {
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 void plCommandTransaction::CleanupInternal(CommandState state) {}
@@ -38,7 +38,7 @@ plStatus plCommandTransaction::AddCommandTransaction(plCommand* pCommand)
 {
   pCommand->m_pDocument = m_pDocument;
   m_ChildActions.PushBack(pCommand);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -47,7 +47,7 @@ plStatus plCommandTransaction::AddCommandTransaction(plCommand* pCommand)
 
 plCommandHistory::plCommandHistory(plDocument* pDocument)
 {
-  auto pStorage = PLASMA_DEFAULT_NEW(Storage);
+  auto pStorage = PL_DEFAULT_NEW(Storage);
   pStorage->m_pDocument = pDocument;
   SwapStorage(pStorage);
 
@@ -59,15 +59,15 @@ plCommandHistory::~plCommandHistory()
 {
   if (m_pHistoryStorage->GetRefCount() == 1)
   {
-    PLASMA_ASSERT_ALWAYS(m_pHistoryStorage->m_UndoHistory.IsEmpty(), "Must clear history before destructor as object manager will be dead already");
-    PLASMA_ASSERT_ALWAYS(m_pHistoryStorage->m_RedoHistory.IsEmpty(), "Must clear history before destructor as object manager will be dead already");
+    PL_ASSERT_ALWAYS(m_pHistoryStorage->m_UndoHistory.IsEmpty(), "Must clear history before destructor as object manager will be dead already");
+    PL_ASSERT_ALWAYS(m_pHistoryStorage->m_RedoHistory.IsEmpty(), "Must clear history before destructor as object manager will be dead already");
   }
 }
 
-void plCommandHistory::BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands)
+void plCommandHistory::BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands)
 {
-  PLASMA_ASSERT_DEBUG(!m_bTemporaryMode, "Temporary Mode cannot be nested");
-  StartTransaction(szDisplayString);
+  PL_ASSERT_DEV(!m_bTemporaryMode, "Temporary Mode cannot be nested");
+  StartTransaction(sDisplayString);
   StartTransaction("[Temporary]");
 
   m_bFireEventsWhenUndoingTempCommands = bFireEventsWhenUndoingTempCommands;
@@ -96,7 +96,7 @@ bool plCommandHistory::InTemporaryTransaction() const
 void plCommandHistory::SuspendTemporaryTransaction()
 {
   m_iPreSuspendTemporaryDepth = (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount();
-  PLASMA_ASSERT_DEV(m_bTemporaryMode, "No temporary transaction active.");
+  PL_ASSERT_DEV(m_bTemporaryMode, "No temporary transaction active.");
   while (m_iTemporaryDepth < (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount())
   {
     EndTransaction(true);
@@ -106,19 +106,19 @@ void plCommandHistory::SuspendTemporaryTransaction()
 
 void plCommandHistory::ResumeTemporaryTransaction()
 {
-  PLASMA_ASSERT_DEV(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount() + 1, "Can't resume temporary, not before temporary depth.");
+  PL_ASSERT_DEV(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount() + 1, "Can't resume temporary, not before temporary depth.");
   while (m_iPreSuspendTemporaryDepth > (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount())
   {
     StartTransaction("[Temporary]");
   }
   m_bTemporaryMode = true;
-  PLASMA_ASSERT_DEV(m_iPreSuspendTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "");
+  PL_ASSERT_DEV(m_iPreSuspendTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "");
 }
 
 void plCommandHistory::EndTemporaryCommands(bool bCancel)
 {
-  PLASMA_ASSERT_DEBUG(m_bTemporaryMode, "Temporary Mode was not enabled");
-  PLASMA_ASSERT_DEBUG(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "Transaction stack is at depth {0} but temporary is at {1}",
+  PL_ASSERT_DEV(m_bTemporaryMode, "Temporary Mode was not enabled");
+  PL_ASSERT_DEV(m_iTemporaryDepth == (plInt32)m_pHistoryStorage->m_TransactionStack.GetCount(), "Transaction stack is at depth {0} but temporary is at {1}",
     m_pHistoryStorage->m_TransactionStack.GetCount(), m_iTemporaryDepth);
   m_bTemporaryMode = false;
 
@@ -127,9 +127,9 @@ void plCommandHistory::EndTemporaryCommands(bool bCancel)
 
 plStatus plCommandHistory::UndoInternal()
 {
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "invalidly nested undo/redo");
-  PLASMA_ASSERT_DEV(m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Can't undo with active transaction!");
-  PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_UndoHistory.IsEmpty(), "Can't undo with empty undo queue!");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "invalidly nested undo/redo");
+  PL_ASSERT_DEV(m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Can't undo with active transaction!");
+  PL_ASSERT_DEV(!m_pHistoryStorage->m_UndoHistory.IsEmpty(), "Can't undo with empty undo queue!");
 
   m_bIsInUndoRedo = true;
   {
@@ -142,14 +142,14 @@ plStatus plCommandHistory::UndoInternal()
   plCommandTransaction* pTransaction = m_pHistoryStorage->m_UndoHistory.PeekBack();
 
   plStatus status = pTransaction->Undo(true);
-  if (status.m_Result == PLASMA_SUCCESS)
+  if (status.m_Result == PL_SUCCESS)
   {
     m_pHistoryStorage->m_UndoHistory.PopBack();
     m_pHistoryStorage->m_RedoHistory.PushBack(pTransaction);
 
     m_pHistoryStorage->m_pDocument->SetModified(true);
 
-    status = plStatus(PLASMA_SUCCESS);
+    status = plStatus(PL_SUCCESS);
   }
 
   m_bIsInUndoRedo = false;
@@ -166,17 +166,17 @@ plStatus plCommandHistory::Undo(plUInt32 uiNumEntries)
 {
   for (plUInt32 i = 0; i < uiNumEntries; i++)
   {
-    PLASMA_SUCCEED_OR_RETURN(UndoInternal());
+    PL_SUCCEED_OR_RETURN(UndoInternal());
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plCommandHistory::RedoInternal()
 {
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "invalidly nested undo/redo");
-  PLASMA_ASSERT_DEV(m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Can't redo with active transaction!");
-  PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_RedoHistory.IsEmpty(), "Can't redo with empty undo queue!");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "invalidly nested undo/redo");
+  PL_ASSERT_DEV(m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Can't redo with active transaction!");
+  PL_ASSERT_DEV(!m_pHistoryStorage->m_RedoHistory.IsEmpty(), "Can't redo with empty undo queue!");
 
   m_bIsInUndoRedo = true;
   {
@@ -188,15 +188,15 @@ plStatus plCommandHistory::RedoInternal()
 
   plCommandTransaction* pTransaction = m_pHistoryStorage->m_RedoHistory.PeekBack();
 
-  plStatus status(PLASMA_FAILURE);
-  if (pTransaction->Do(true).m_Result == PLASMA_SUCCESS)
+  plStatus status(PL_FAILURE);
+  if (pTransaction->Do(true).m_Result == PL_SUCCESS)
   {
     m_pHistoryStorage->m_RedoHistory.PopBack();
     m_pHistoryStorage->m_UndoHistory.PushBack(pTransaction);
 
     m_pHistoryStorage->m_pDocument->SetModified(true);
 
-    status = plStatus(PLASMA_SUCCESS);
+    status = plStatus(PL_SUCCESS);
   }
 
   m_bIsInUndoRedo = false;
@@ -213,10 +213,10 @@ plStatus plCommandHistory::Redo(plUInt32 uiNumEntries)
 {
   for (plUInt32 i = 0; i < uiNumEntries; i++)
   {
-    PLASMA_SUCCEED_OR_RETURN(RedoInternal());
+    PL_SUCCEED_OR_RETURN(RedoInternal());
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 bool plCommandHistory::CanUndo() const
@@ -236,7 +236,7 @@ bool plCommandHistory::CanRedo() const
 }
 
 
-const char* plCommandHistory::GetUndoDisplayString() const
+plStringView plCommandHistory::GetUndoDisplayString() const
 {
   if (m_pHistoryStorage->m_UndoHistory.IsEmpty())
     return "";
@@ -245,7 +245,7 @@ const char* plCommandHistory::GetUndoDisplayString() const
 }
 
 
-const char* plCommandHistory::GetRedoDisplayString() const
+plStringView plCommandHistory::GetRedoDisplayString() const
 {
   if (m_pHistoryStorage->m_RedoHistory.IsEmpty())
     return "";
@@ -253,9 +253,9 @@ const char* plCommandHistory::GetRedoDisplayString() const
   return m_pHistoryStorage->m_RedoHistory.PeekBack()->m_sDisplayString;
 }
 
-void plCommandHistory::StartTransaction(const plFormatString& sDisplayString)
+void plCommandHistory::StartTransaction(const plFormatString& displayString)
 {
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot start new transaction while redoing/undoing.");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot start new transaction while redoing/undoing.");
 
   /// \todo Allow to have a limited transaction history and clean up transactions after a while
 
@@ -275,12 +275,12 @@ void plCommandHistory::StartTransaction(const plFormatString& sDisplayString)
 
   pTransaction = plGetStaticRTTI<plCommandTransaction>()->GetAllocator()->Allocate<plCommandTransaction>();
   pTransaction->m_pDocument = m_pHistoryStorage->m_pDocument;
-  pTransaction->m_sDisplayString = sDisplayString.GetText(tmp);
+  pTransaction->m_sDisplayString = displayString.GetText(tmp);
 
   if (!m_pHistoryStorage->m_TransactionStack.IsEmpty())
   {
     // Stacked transaction
-    m_pHistoryStorage->m_TransactionStack.PeekBack()->AddCommandTransaction(pTransaction).IgnoreResult();
+    m_pHistoryStorage->m_TransactionStack.PeekBack()->AddCommandTransaction(pTransaction).AssertSuccess();
     m_pHistoryStorage->m_TransactionStack.PushBack(pTransaction);
     m_pHistoryStorage->m_ActiveCommandStack.PushBack(pTransaction);
   }
@@ -301,7 +301,7 @@ void plCommandHistory::StartTransaction(const plFormatString& sDisplayString)
 
 void plCommandHistory::EndTransaction(bool bCancel)
 {
-  PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Trying to end transaction without starting one!");
+  PL_ASSERT_DEV(!m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Trying to end transaction without starting one!");
 
   if (m_pHistoryStorage->m_TransactionStack.GetCount() == 1)
   {
@@ -342,7 +342,7 @@ void plCommandHistory::EndTransaction(bool bCancel)
   {
     plCommandTransaction* pTransaction = m_pHistoryStorage->m_TransactionStack.PeekBack();
 
-    pTransaction->Undo(true).IgnoreResult();
+    pTransaction->Undo(true).AssertSuccess();
     m_pHistoryStorage->m_TransactionStack.PopBack();
     m_pHistoryStorage->m_ActiveCommandStack.PopBack();
 
@@ -363,12 +363,12 @@ void plCommandHistory::EndTransaction(bool bCancel)
   }
 }
 
-plStatus plCommandHistory::AddCommand(plCommand& command)
+plStatus plCommandHistory::AddCommand(plCommand& ref_command)
 {
-  PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Cannot add command while no transaction is started");
-  PLASMA_ASSERT_DEV(!m_pHistoryStorage->m_ActiveCommandStack.IsEmpty(), "Transaction stack is not synced anymore with m_ActiveCommandStack");
+  PL_ASSERT_DEV(!m_pHistoryStorage->m_TransactionStack.IsEmpty(), "Cannot add command while no transaction is started");
+  PL_ASSERT_DEV(!m_pHistoryStorage->m_ActiveCommandStack.IsEmpty(), "Transaction stack is not synced anymore with m_ActiveCommandStack");
 
-  auto res = m_pHistoryStorage->m_ActiveCommandStack.PeekBack()->AddSubCommand(command);
+  auto res = m_pHistoryStorage->m_ActiveCommandStack.PeekBack()->AddSubCommand(ref_command);
 
   // Error handling should be on the caller side.
   // if (res.Failed() && !res.m_sMessage.IsEmpty())
@@ -381,7 +381,7 @@ plStatus plCommandHistory::AddCommand(plCommand& command)
 
 void plCommandHistory::ClearUndoHistory()
 {
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot clear undo/redo history while redoing/undoing.");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot clear undo/redo history while redoing/undoing.");
   while (!m_pHistoryStorage->m_UndoHistory.IsEmpty())
   {
     plCommandTransaction* pTransaction = m_pHistoryStorage->m_UndoHistory.PeekBack();
@@ -395,7 +395,7 @@ void plCommandHistory::ClearUndoHistory()
 
 void plCommandHistory::ClearRedoHistory()
 {
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot clear undo/redo history while redoing/undoing.");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "Cannot clear undo/redo history while redoing/undoing.");
   while (!m_pHistoryStorage->m_RedoHistory.IsEmpty())
   {
     plCommandTransaction* pTransaction = m_pHistoryStorage->m_RedoHistory.PeekBack();
@@ -411,8 +411,8 @@ void plCommandHistory::MergeLastTwoTransactions()
 {
   /// \todo This would not be necessary, if hierarchical transactions would not crash
 
-  PLASMA_ASSERT_DEV(m_pHistoryStorage->m_RedoHistory.IsEmpty(), "This can only be called directly after EndTransaction, when the redo history is empty");
-  PLASMA_ASSERT_DEV(m_pHistoryStorage->m_UndoHistory.GetCount() >= 2, "Can only do this when at least two transcations are in the queue");
+  PL_ASSERT_DEV(m_pHistoryStorage->m_RedoHistory.IsEmpty(), "This can only be called directly after EndTransaction, when the redo history is empty");
+  PL_ASSERT_DEV(m_pHistoryStorage->m_UndoHistory.GetCount() >= 2, "Can only do this when at least two transcations are in the queue");
 
   plCommandTransaction* pLast = m_pHistoryStorage->m_UndoHistory.PeekBack();
   m_pHistoryStorage->m_UndoHistory.PopBack();
@@ -435,21 +435,21 @@ plUInt32 plCommandHistory::GetRedoStackSize() const
   return m_pHistoryStorage->m_RedoHistory.GetCount();
 }
 
-const plCommandTransaction* plCommandHistory::GetUndoStackEntry(plUInt32 iIndex) const
+const plCommandTransaction* plCommandHistory::GetUndoStackEntry(plUInt32 uiIndex) const
 {
-  return m_pHistoryStorage->m_UndoHistory[GetUndoStackSize() - 1 - iIndex];
+  return m_pHistoryStorage->m_UndoHistory[GetUndoStackSize() - 1 - uiIndex];
 }
 
-const plCommandTransaction* plCommandHistory::GetRedoStackEntry(plUInt32 iIndex) const
+const plCommandTransaction* plCommandHistory::GetRedoStackEntry(plUInt32 uiIndex) const
 {
-  return m_pHistoryStorage->m_RedoHistory[GetRedoStackSize() - 1 - iIndex];
+  return m_pHistoryStorage->m_RedoHistory[GetRedoStackSize() - 1 - uiIndex];
 }
 
 plSharedPtr<plCommandHistory::Storage> plCommandHistory::SwapStorage(plSharedPtr<plCommandHistory::Storage> pNewStorage)
 {
-  PLASMA_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
+  PL_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
 
-  PLASMA_ASSERT_DEV(!m_bIsInUndoRedo, "Can't be in Undo/Redo when swapping storage.");
+  PL_ASSERT_DEV(!m_bIsInUndoRedo, "Can't be in Undo/Redo when swapping storage.");
 
   auto retVal = m_pHistoryStorage;
 
@@ -457,7 +457,8 @@ plSharedPtr<plCommandHistory::Storage> plCommandHistory::SwapStorage(plSharedPtr
 
   m_pHistoryStorage = pNewStorage;
 
-  m_pHistoryStorage->m_Events.AddEventHandler([this](const plCommandHistoryEvent& e) { m_Events.Broadcast(e); }, m_EventsUnsubscriber);
+  m_pHistoryStorage->m_Events.AddEventHandler([this](const plCommandHistoryEvent& e) { m_Events.Broadcast(e); },
+    m_EventsUnsubscriber);
 
   return retVal;
 }

@@ -32,7 +32,7 @@ plDGMLGraph::NodeId plDGMLGraph::AddGroup(plStringView sTitle, GroupType type, c
 
 void plDGMLGraph::AddNodeToGroup(NodeId node, NodeId group)
 {
-  PLASMA_ASSERT_DEBUG(m_Nodes[group].m_GroupType != GroupType::None, "The given group node has not been created as a group node");
+  PL_ASSERT_DEBUG(m_Nodes[group].m_GroupType != GroupType::None, "The given group node has not been created as a group node");
 
   m_Nodes[node].m_ParentGroup = group;
 }
@@ -75,16 +75,16 @@ plResult plDGMLGraphWriter::WriteGraphToFile(plStringView sFileName, const plDGM
 
     plFileWriter fileWriter;
     if (!fileWriter.Open(sFileName.GetData(sTemp)).Succeeded())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     fileWriter.WriteBytes(sGraph.GetData(), sGraph.GetElementCount()).IgnoreResult();
 
     fileWriter.Close();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plDGMLGraphWriter::WriteGraphToString(plStringBuilder& ref_sStringBuilder, const plDGMLGraph& graph)
@@ -233,7 +233,7 @@ plResult plDGMLGraphWriter::WriteGraphToString(plStringBuilder& ref_sStringBuild
 
   ref_sStringBuilder.Append("</DirectedGraph>\n");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_DGMLWriter);
+

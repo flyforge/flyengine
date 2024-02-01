@@ -24,7 +24,7 @@ public:
     : plAbstractMemberProperty(szPropertyName)
   {
     m_Flags = plPropertyFlags::GetParameterFlags<Type>();
-    PLASMA_CHECK_AT_COMPILETIME_MSG(
+    PL_CHECK_AT_COMPILETIME_MSG(
       !std::is_pointer<Type>::value ||
         plVariant::TypeDeduction<typename plTypeTraits<Type>::NonConstReferencePointerType>::value == plVariantType::Invalid,
       "Pointer to standard types are not supported.");
@@ -92,7 +92,7 @@ public:
   plAccessorProperty(const char* szPropertyName, GetterFunc getter, SetterFunc setter)
     : plTypedMemberProperty<RealType>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
 
     m_Getter = getter;
     m_Setter = setter;
@@ -120,7 +120,7 @@ public:
   /// \note Make sure the property is not read-only before calling this, otherwise an assert will fire.
   virtual void SetValue(void* pInstance, RealType value) const override // [tested]
   {
-    PLASMA_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
 
     if (m_Setter)
       (static_cast<Class*>(pInstance)->*m_Setter)(value);
@@ -160,7 +160,7 @@ public:
   plMemberProperty(const char* szPropertyName, GetterFunc getter, SetterFunc setter, PointerFunc pointer)
     : plTypedMemberProperty<Type>(szPropertyName)
   {
-    PLASMA_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
+    PL_ASSERT_DEBUG(getter != nullptr, "The getter of a property cannot be nullptr.");
 
     m_Getter = getter;
     m_Setter = setter;
@@ -181,7 +181,7 @@ public:
   /// \note Make sure the property is not read-only before calling this, otherwise an assert will fire.
   virtual void SetValue(void* pInstance, Type value) const override
   {
-    PLASMA_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
+    PL_ASSERT_DEV(m_Setter != nullptr, "The property '{0}' has no setter function, thus it is read-only.", plAbstractProperty::GetPropertyName());
 
     if (m_Setter)
       m_Setter(static_cast<Class*>(pInstance), value);

@@ -5,8 +5,8 @@
 #include <EditorFramework/Assets/AssetBrowserDlg.moc.h>
 #include <EditorFramework/Document/GameObjectContextDocument.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plGameObjectContextActions::s_hCategory;
 plActionDescriptorHandle plGameObjectContextActions::s_hPickContextScene;
@@ -15,12 +15,12 @@ plActionDescriptorHandle plGameObjectContextActions::s_hClearContextObject;
 
 void plGameObjectContextActions::RegisterActions()
 {
-  s_hCategory = PLASMA_REGISTER_CATEGORY("GameObjectContextCategory");
-  s_hPickContextScene = PLASMA_REGISTER_ACTION_1("GameObjectContext.PickContextScene", plActionScope::Window, "Game Object Context", "",
+  s_hCategory = PL_REGISTER_CATEGORY("GameObjectContextCategory");
+  s_hPickContextScene = PL_REGISTER_ACTION_1("GameObjectContext.PickContextScene", plActionScope::Window, "Game Object Context", "",
     plGameObjectContextAction, plGameObjectContextAction::ActionType::PickContextScene);
-  s_hPickContextObject = PLASMA_REGISTER_ACTION_1("GameObjectContext.PickContextObject", plActionScope::Window, "Game Object Context", "",
+  s_hPickContextObject = PL_REGISTER_ACTION_1("GameObjectContext.PickContextObject", plActionScope::Window, "Game Object Context", "",
     plGameObjectContextAction, plGameObjectContextAction::ActionType::PickContextObject);
-  s_hClearContextObject = PLASMA_REGISTER_ACTION_1("GameObjectContext.ClearContextObject", plActionScope::Window, "Game Object Context", "",
+  s_hClearContextObject = PL_REGISTER_ACTION_1("GameObjectContext.ClearContextObject", plActionScope::Window, "Game Object Context", "",
     plGameObjectContextAction, plGameObjectContextAction::ActionType::ClearContextObject);
 }
 
@@ -33,26 +33,26 @@ void plGameObjectContextActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hClearContextObject);
 }
 
-void plGameObjectContextActions::MapToolbarActions(const char* szMapping, const char* szPath)
+void plGameObjectContextActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 10.0f);
 
-  plStringBuilder szSubPath(szPath, "/GameObjectContextCategory");
+  const plStringView szSubPath = "GameObjectContextCategory";
   pMap->MapAction(s_hPickContextScene, szSubPath, 1.0f);
 }
 
 
-void plGameObjectContextActions::MapContextMenuActions(const char* szMapping, const char* szPath)
+void plGameObjectContextActions::MapContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 10.0f);
 
-  plStringBuilder szSubPath(szPath, "/GameObjectContextCategory");
+  const plStringView szSubPath = "GameObjectContextCategory";
   pMap->MapAction(s_hPickContextObject, szSubPath, 1.0f);
   pMap->MapAction(s_hClearContextObject, szSubPath, 2.0f);
 }

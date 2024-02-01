@@ -1,6 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Foundation/IO/MemoryStream.h>
 #include <Foundation/IO/Stream.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraph.h>
@@ -9,21 +9,21 @@
 #include <RendererCore/AnimationSystem/AnimationClipResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipMapping, 1, plRTTIDefaultAllocator<plAnimationClipMapping>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationClipMapping, 1, plRTTIDefaultAllocator<plAnimationClipMapping>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("ClipName", GetClipName, SetClipName)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
-    PLASMA_ACCESSOR_PROPERTY("Clip", GetClip, SetClip)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
+    PL_ACCESSOR_PROPERTY("ClipName", GetClipName, SetClipName)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+    PL_ACCESSOR_PROPERTY("Clip", GetClip, SetClip)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Keyframe_Animation")),
   }
-    PLASMA_END_PROPERTIES;
+    PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimGraphResource, 1, plRTTIDefaultAllocator<plAnimGraphResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimGraphResource, 1, plRTTIDefaultAllocator<plAnimGraphResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plAnimGraphResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plAnimGraphResource);
 // clang-format on
 
 const char* plAnimationClipMapping::GetClip() const
@@ -120,4 +120,4 @@ void plAnimGraphResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryCPU = 0;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_Implementation_AnimGraphResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_Implementation_AnimGraphResource);

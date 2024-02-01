@@ -11,7 +11,7 @@ struct plPhantomRttiManagerEvent;
 
 class plShaderTypeRegistry
 {
-  PLASMA_DECLARE_SINGLETON(plShaderTypeRegistry);
+  PL_DECLARE_SINGLETON(plShaderTypeRegistry);
 
 public:
   plShaderTypeRegistry();
@@ -21,19 +21,16 @@ public:
   const plRTTI* GetShaderBaseType() const { return m_pBaseType; }
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorFramework, ShaderTypeRegistry);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(EditorFramework, ShaderTypeRegistry);
 
   struct ShaderData
   {
-    ShaderData()
-      : m_pType(nullptr)
-    {
-    }
+    ShaderData() = default;
 
     plString m_sShaderPath;
     plString m_sAbsShaderPath;
     plTimestamp m_fileModifiedTime;
-    const plRTTI* m_pType;
+    const plRTTI* m_pType = nullptr;
   };
   void UpdateShaderType(ShaderData& data);
   void PhantomTypeRegistryEventHandler(const plPhantomRttiManagerEvent& e);

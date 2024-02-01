@@ -15,8 +15,8 @@
 #include <SharedPluginScene/Common/Messages.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plSceneActions::s_hSceneCategory;
 plActionDescriptorHandle plSceneActions::s_hSceneUtilsMenu;
@@ -36,76 +36,70 @@ plActionDescriptorHandle plSceneActions::s_hCreateLevelCamera[10];
 
 void plSceneActions::RegisterActions()
 {
-  s_hSceneCategory = PLASMA_REGISTER_CATEGORY("SceneCategory");
-  s_hSceneUtilsMenu = PLASMA_REGISTER_MENU_WITH_ICON("Scene.Utils.Menu", "");
+  s_hSceneCategory = PL_REGISTER_CATEGORY("SceneCategory");
+  s_hSceneUtilsMenu = PL_REGISTER_MENU_WITH_ICON("Scene.Utils.Menu", "");
 
-  s_hExportScene = PLASMA_REGISTER_ACTION_1(
-    "Scene.ExportAndRun", plActionScope::Document, "Scene", "Ctrl+E", plSceneAction, plSceneAction::ActionType::ExportAndRunScene);
-  s_hGameModeSimulate = PLASMA_REGISTER_ACTION_1(
-    "Scene.GameMode.Simulate", plActionScope::Document, "Scene", "F5", plSceneAction, plSceneAction::ActionType::StartGameModeSimulate);
-  s_hGameModePlay = PLASMA_REGISTER_ACTION_1(
-    "Scene.GameMode.Play", plActionScope::Document, "Scene", "Ctrl+F5", plSceneAction, plSceneAction::ActionType::StartGameModePlay);
+  s_hExportScene = PL_REGISTER_ACTION_1("Scene.ExportAndRun", plActionScope::Document, "Scene", "Ctrl+R", plSceneAction, plSceneAction::ActionType::ExportAndRunScene);
+  s_hGameModeSimulate = PL_REGISTER_ACTION_1("Scene.GameMode.Simulate", plActionScope::Document, "Scene", "F5", plSceneAction, plSceneAction::ActionType::StartGameModeSimulate);
+  s_hGameModePlay = PL_REGISTER_ACTION_1("Scene.GameMode.Play", plActionScope::Document, "Scene", "Ctrl+F5", plSceneAction, plSceneAction::ActionType::StartGameModePlay);
 
-  s_hGameModePlayFromHere = PLASMA_REGISTER_ACTION_1("Scene.GameMode.PlayFromHere", plActionScope::Document, "Scene", "Ctrl+Shift+F5", plSceneAction,
+  s_hGameModePlayFromHere = PL_REGISTER_ACTION_1("Scene.GameMode.PlayFromHere", plActionScope::Document, "Scene", "Ctrl+Shift+F5", plSceneAction,
     plSceneAction::ActionType::StartGameModePlayFromHere);
 
-  s_hGameModeStop =
-    PLASMA_REGISTER_ACTION_1("Scene.GameMode.Stop", plActionScope::Document, "Scene", "Shift+F5", plSceneAction, plSceneAction::ActionType::StopGameMode);
+  s_hGameModeStop = PL_REGISTER_ACTION_1("Scene.GameMode.Stop", plActionScope::Document, "Scene", "Shift+F5", plSceneAction, plSceneAction::ActionType::StopGameMode);
 
-  s_hUtilExportSceneToOBJ =
-    PLASMA_REGISTER_ACTION_1("Scene.ExportSceneToOBJ", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::ExportSceneToOBJ);
+  s_hUtilExportSceneToOBJ = PL_REGISTER_ACTION_1("Scene.ExportSceneToOBJ", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::ExportSceneToOBJ);
 
-  s_hKeepSimulationChanges = PLASMA_REGISTER_ACTION_1(
-    "Scene.KeepSimulationChanges", plActionScope::Document, "Scene", "K", plSceneAction, plSceneAction::ActionType::KeepSimulationChanges);
+  s_hKeepSimulationChanges = PL_REGISTER_ACTION_1("Scene.KeepSimulationChanges", plActionScope::Document, "Scene", "K", plSceneAction, plSceneAction::ActionType::KeepSimulationChanges);
 
-  s_hCreateThumbnail = PLASMA_REGISTER_ACTION_1("Scene.CreateThumbnail", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::CreateThumbnail);
+  s_hCreateThumbnail = PL_REGISTER_ACTION_1("Scene.CreateThumbnail", plActionScope::Document, "Scene", "", plSceneAction, plSceneAction::ActionType::CreateThumbnail);
   // unfortunately the macros use lambdas thus using a loop to generate the strings does not work
   {
-    s_hFavoriteCamsMenu = PLASMA_REGISTER_MENU_WITH_ICON("Scene.FavoriteCams.Menu", "");
+    s_hFavoriteCamsMenu = PL_REGISTER_MENU_WITH_ICON("Scene.FavoriteCams.Menu", "");
 
-    s_hStoreEditorCamera[0] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.0", plActionScope::Document, "Scene - Cameras", "Ctrl+0", plSceneAction, plSceneAction::ActionType::StoreEditorCamera0);
-    s_hStoreEditorCamera[1] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.1", plActionScope::Document, "Scene - Cameras", "Ctrl+1", plSceneAction, plSceneAction::ActionType::StoreEditorCamera1);
-    s_hStoreEditorCamera[2] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.2", plActionScope::Document, "Scene - Cameras", "Ctrl+2", plSceneAction, plSceneAction::ActionType::StoreEditorCamera2);
-    s_hStoreEditorCamera[3] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.3", plActionScope::Document, "Scene - Cameras", "Ctrl+3", plSceneAction, plSceneAction::ActionType::StoreEditorCamera3);
-    s_hStoreEditorCamera[4] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.4", plActionScope::Document, "Scene - Cameras", "Ctrl+4", plSceneAction, plSceneAction::ActionType::StoreEditorCamera4);
-    s_hStoreEditorCamera[5] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.5", plActionScope::Document, "Scene - Cameras", "Ctrl+5", plSceneAction, plSceneAction::ActionType::StoreEditorCamera5);
-    s_hStoreEditorCamera[6] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.6", plActionScope::Document, "Scene - Cameras", "Ctrl+6", plSceneAction, plSceneAction::ActionType::StoreEditorCamera6);
-    s_hStoreEditorCamera[7] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.7", plActionScope::Document, "Scene - Cameras", "Ctrl+7", plSceneAction, plSceneAction::ActionType::StoreEditorCamera7);
-    s_hStoreEditorCamera[8] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.8", plActionScope::Document, "Scene - Cameras", "Ctrl+8", plSceneAction, plSceneAction::ActionType::StoreEditorCamera8);
-    s_hStoreEditorCamera[9] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Store.9", plActionScope::Document, "Scene - Cameras", "Ctrl+9", plSceneAction, plSceneAction::ActionType::StoreEditorCamera9);
+    s_hStoreEditorCamera[0] = PL_REGISTER_ACTION_1("Scene.Camera.Store.0", plActionScope::Document, "Scene - Cameras", "Ctrl+0", plSceneAction, plSceneAction::ActionType::StoreEditorCamera0);
+    s_hStoreEditorCamera[1] = PL_REGISTER_ACTION_1("Scene.Camera.Store.1", plActionScope::Document, "Scene - Cameras", "Ctrl+1", plSceneAction, plSceneAction::ActionType::StoreEditorCamera1);
+    s_hStoreEditorCamera[2] = PL_REGISTER_ACTION_1("Scene.Camera.Store.2", plActionScope::Document, "Scene - Cameras", "Ctrl+2", plSceneAction, plSceneAction::ActionType::StoreEditorCamera2);
+    s_hStoreEditorCamera[3] = PL_REGISTER_ACTION_1("Scene.Camera.Store.3", plActionScope::Document, "Scene - Cameras", "Ctrl+3", plSceneAction, plSceneAction::ActionType::StoreEditorCamera3);
+    s_hStoreEditorCamera[4] = PL_REGISTER_ACTION_1("Scene.Camera.Store.4", plActionScope::Document, "Scene - Cameras", "Ctrl+4", plSceneAction, plSceneAction::ActionType::StoreEditorCamera4);
+    s_hStoreEditorCamera[5] = PL_REGISTER_ACTION_1("Scene.Camera.Store.5", plActionScope::Document, "Scene - Cameras", "Ctrl+5", plSceneAction, plSceneAction::ActionType::StoreEditorCamera5);
+    s_hStoreEditorCamera[6] = PL_REGISTER_ACTION_1("Scene.Camera.Store.6", plActionScope::Document, "Scene - Cameras", "Ctrl+6", plSceneAction, plSceneAction::ActionType::StoreEditorCamera6);
+    s_hStoreEditorCamera[7] = PL_REGISTER_ACTION_1("Scene.Camera.Store.7", plActionScope::Document, "Scene - Cameras", "Ctrl+7", plSceneAction, plSceneAction::ActionType::StoreEditorCamera7);
+    s_hStoreEditorCamera[8] = PL_REGISTER_ACTION_1("Scene.Camera.Store.8", plActionScope::Document, "Scene - Cameras", "Ctrl+8", plSceneAction, plSceneAction::ActionType::StoreEditorCamera8);
+    s_hStoreEditorCamera[9] = PL_REGISTER_ACTION_1("Scene.Camera.Store.9", plActionScope::Document, "Scene - Cameras", "Ctrl+9", plSceneAction, plSceneAction::ActionType::StoreEditorCamera9);
 
-    s_hRestoreEditorCamera[0] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.0", plActionScope::Document, "Scene - Cameras", "0", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera0);
-    s_hRestoreEditorCamera[1] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.1", plActionScope::Document, "Scene - Cameras", "1", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera1);
-    s_hRestoreEditorCamera[2] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.2", plActionScope::Document, "Scene - Cameras", "2", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera2);
-    s_hRestoreEditorCamera[3] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.3", plActionScope::Document, "Scene - Cameras", "3", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera3);
-    s_hRestoreEditorCamera[4] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.4", plActionScope::Document, "Scene - Cameras", "4", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera4);
-    s_hRestoreEditorCamera[5] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.5", plActionScope::Document, "Scene - Cameras", "5", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera5);
-    s_hRestoreEditorCamera[6] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.6", plActionScope::Document, "Scene - Cameras", "6", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera6);
-    s_hRestoreEditorCamera[7] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.7", plActionScope::Document, "Scene - Cameras", "7", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera7);
-    s_hRestoreEditorCamera[8] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.8", plActionScope::Document, "Scene - Cameras", "8", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera8);
-    s_hRestoreEditorCamera[9] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Restore.9", plActionScope::Document, "Scene - Cameras", "9", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera9);
+    s_hRestoreEditorCamera[0] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.0", plActionScope::Document, "Scene - Cameras", "0", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera0);
+    s_hRestoreEditorCamera[1] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.1", plActionScope::Document, "Scene - Cameras", "1", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera1);
+    s_hRestoreEditorCamera[2] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.2", plActionScope::Document, "Scene - Cameras", "2", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera2);
+    s_hRestoreEditorCamera[3] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.3", plActionScope::Document, "Scene - Cameras", "3", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera3);
+    s_hRestoreEditorCamera[4] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.4", plActionScope::Document, "Scene - Cameras", "4", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera4);
+    s_hRestoreEditorCamera[5] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.5", plActionScope::Document, "Scene - Cameras", "5", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera5);
+    s_hRestoreEditorCamera[6] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.6", plActionScope::Document, "Scene - Cameras", "6", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera6);
+    s_hRestoreEditorCamera[7] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.7", plActionScope::Document, "Scene - Cameras", "7", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera7);
+    s_hRestoreEditorCamera[8] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.8", plActionScope::Document, "Scene - Cameras", "8", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera8);
+    s_hRestoreEditorCamera[9] = PL_REGISTER_ACTION_1("Scene.Camera.Restore.9", plActionScope::Document, "Scene - Cameras", "9", plSceneAction, plSceneAction::ActionType::RestoreEditorCamera9);
 
-    s_hJumpToCamera[0] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.0", plActionScope::Document, "Scene - Cameras", "Alt+0", plSceneAction, plSceneAction::ActionType::JumpToCamera0);
-    s_hJumpToCamera[1] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.1", plActionScope::Document, "Scene - Cameras", "Alt+1", plSceneAction, plSceneAction::ActionType::JumpToCamera1);
-    s_hJumpToCamera[2] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.2", plActionScope::Document, "Scene - Cameras", "Alt+2", plSceneAction, plSceneAction::ActionType::JumpToCamera2);
-    s_hJumpToCamera[3] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.3", plActionScope::Document, "Scene - Cameras", "Alt+3", plSceneAction, plSceneAction::ActionType::JumpToCamera3);
-    s_hJumpToCamera[4] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.4", plActionScope::Document, "Scene - Cameras", "Alt+4", plSceneAction, plSceneAction::ActionType::JumpToCamera4);
-    s_hJumpToCamera[5] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.5", plActionScope::Document, "Scene - Cameras", "Alt+5", plSceneAction, plSceneAction::ActionType::JumpToCamera5);
-    s_hJumpToCamera[6] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.6", plActionScope::Document, "Scene - Cameras", "Alt+6", plSceneAction, plSceneAction::ActionType::JumpToCamera6);
-    s_hJumpToCamera[7] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.7", plActionScope::Document, "Scene - Cameras", "Alt+7", plSceneAction, plSceneAction::ActionType::JumpToCamera7);
-    s_hJumpToCamera[8] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.8", plActionScope::Document, "Scene - Cameras", "Alt+8", plSceneAction, plSceneAction::ActionType::JumpToCamera8);
-    s_hJumpToCamera[9] = PLASMA_REGISTER_ACTION_1("Scene.Camera.JumpTo.9", plActionScope::Document, "Scene - Cameras", "Alt+9", plSceneAction, plSceneAction::ActionType::JumpToCamera9);
+    s_hJumpToCamera[0] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.0", plActionScope::Document, "Scene - Cameras", "Alt+0", plSceneAction, plSceneAction::ActionType::JumpToCamera0);
+    s_hJumpToCamera[1] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.1", plActionScope::Document, "Scene - Cameras", "Alt+1", plSceneAction, plSceneAction::ActionType::JumpToCamera1);
+    s_hJumpToCamera[2] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.2", plActionScope::Document, "Scene - Cameras", "Alt+2", plSceneAction, plSceneAction::ActionType::JumpToCamera2);
+    s_hJumpToCamera[3] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.3", plActionScope::Document, "Scene - Cameras", "Alt+3", plSceneAction, plSceneAction::ActionType::JumpToCamera3);
+    s_hJumpToCamera[4] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.4", plActionScope::Document, "Scene - Cameras", "Alt+4", plSceneAction, plSceneAction::ActionType::JumpToCamera4);
+    s_hJumpToCamera[5] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.5", plActionScope::Document, "Scene - Cameras", "Alt+5", plSceneAction, plSceneAction::ActionType::JumpToCamera5);
+    s_hJumpToCamera[6] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.6", plActionScope::Document, "Scene - Cameras", "Alt+6", plSceneAction, plSceneAction::ActionType::JumpToCamera6);
+    s_hJumpToCamera[7] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.7", plActionScope::Document, "Scene - Cameras", "Alt+7", plSceneAction, plSceneAction::ActionType::JumpToCamera7);
+    s_hJumpToCamera[8] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.8", plActionScope::Document, "Scene - Cameras", "Alt+8", plSceneAction, plSceneAction::ActionType::JumpToCamera8);
+    s_hJumpToCamera[9] = PL_REGISTER_ACTION_1("Scene.Camera.JumpTo.9", plActionScope::Document, "Scene - Cameras", "Alt+9", plSceneAction, plSceneAction::ActionType::JumpToCamera9);
 
-    s_hCreateLevelCamera[0] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.0", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+0", plSceneAction, plSceneAction::ActionType::CreateLevelCamera0);
-    s_hCreateLevelCamera[1] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.1", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+1", plSceneAction, plSceneAction::ActionType::CreateLevelCamera1);
-    s_hCreateLevelCamera[2] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.2", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+2", plSceneAction, plSceneAction::ActionType::CreateLevelCamera2);
-    s_hCreateLevelCamera[3] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.3", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+3", plSceneAction, plSceneAction::ActionType::CreateLevelCamera3);
-    s_hCreateLevelCamera[4] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.4", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+4", plSceneAction, plSceneAction::ActionType::CreateLevelCamera4);
-    s_hCreateLevelCamera[5] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.5", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+5", plSceneAction, plSceneAction::ActionType::CreateLevelCamera5);
-    s_hCreateLevelCamera[6] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.6", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+6", plSceneAction, plSceneAction::ActionType::CreateLevelCamera6);
-    s_hCreateLevelCamera[7] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.7", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+7", plSceneAction, plSceneAction::ActionType::CreateLevelCamera7);
-    s_hCreateLevelCamera[8] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.8", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+8", plSceneAction, plSceneAction::ActionType::CreateLevelCamera8);
-    s_hCreateLevelCamera[9] = PLASMA_REGISTER_ACTION_1("Scene.Camera.Create.9", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+9", plSceneAction, plSceneAction::ActionType::CreateLevelCamera9);
+    s_hCreateLevelCamera[0] = PL_REGISTER_ACTION_1("Scene.Camera.Create.0", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+0", plSceneAction, plSceneAction::ActionType::CreateLevelCamera0);
+    s_hCreateLevelCamera[1] = PL_REGISTER_ACTION_1("Scene.Camera.Create.1", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+1", plSceneAction, plSceneAction::ActionType::CreateLevelCamera1);
+    s_hCreateLevelCamera[2] = PL_REGISTER_ACTION_1("Scene.Camera.Create.2", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+2", plSceneAction, plSceneAction::ActionType::CreateLevelCamera2);
+    s_hCreateLevelCamera[3] = PL_REGISTER_ACTION_1("Scene.Camera.Create.3", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+3", plSceneAction, plSceneAction::ActionType::CreateLevelCamera3);
+    s_hCreateLevelCamera[4] = PL_REGISTER_ACTION_1("Scene.Camera.Create.4", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+4", plSceneAction, plSceneAction::ActionType::CreateLevelCamera4);
+    s_hCreateLevelCamera[5] = PL_REGISTER_ACTION_1("Scene.Camera.Create.5", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+5", plSceneAction, plSceneAction::ActionType::CreateLevelCamera5);
+    s_hCreateLevelCamera[6] = PL_REGISTER_ACTION_1("Scene.Camera.Create.6", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+6", plSceneAction, plSceneAction::ActionType::CreateLevelCamera6);
+    s_hCreateLevelCamera[7] = PL_REGISTER_ACTION_1("Scene.Camera.Create.7", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+7", plSceneAction, plSceneAction::ActionType::CreateLevelCamera7);
+    s_hCreateLevelCamera[8] = PL_REGISTER_ACTION_1("Scene.Camera.Create.8", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+8", plSceneAction, plSceneAction::ActionType::CreateLevelCamera8);
+    s_hCreateLevelCamera[9] = PL_REGISTER_ACTION_1("Scene.Camera.Create.9", plActionScope::Document, "Scene - Cameras", "Ctrl+Alt+9", plSceneAction, plSceneAction::ActionType::CreateLevelCamera9);
   }
 }
 
@@ -132,22 +126,22 @@ void plSceneActions::UnregisterActions()
   }
 }
 
-void plSceneActions::MapMenuActions(const char* szMapping)
+void plSceneActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
-    const char* szSubPath = "Menu.Scene/SceneCategory";
-    const char* szUtilsSubPath = "Menu.Scene/Scene.Utils.Menu";
+    const char* szSubPath = "G.Scene/SceneCategory";
+    const char* szUtilsSubPath = "G.Scene/Scene.Utils.Menu";
 
-    pMap->MapAction(s_hSceneUtilsMenu, "Menu.Scene", 2.0f);
+    pMap->MapAction(s_hSceneUtilsMenu, "G.Scene", 2.0f);
     // pMap->MapAction(s_hCreateThumbnail, szUtilsSubPath, 0.0f); // now available through the export scene dialog
     pMap->MapAction(s_hKeepSimulationChanges, szUtilsSubPath, 1.0f);
     pMap->MapAction(s_hUtilExportSceneToOBJ, szUtilsSubPath, 2.0f);
 
-    pMap->MapAction(s_hFavoriteCamsMenu, "Menu.Scene", 3.0f);
-    const char* szFavCamsSubPath = "Menu.Scene/Scene.FavoriteCams.Menu";
+    pMap->MapAction(s_hFavoriteCamsMenu, "G.Scene", 3.0f);
+    const char* szFavCamsSubPath = "G.Scene/Scene.FavoriteCams.Menu";
 
     for (plUInt32 i = 0; i < 10; ++i)
     {
@@ -157,7 +151,7 @@ void plSceneActions::MapMenuActions(const char* szMapping)
       pMap->MapAction(s_hCreateLevelCamera[i], szFavCamsSubPath, 40.0f + i);
     }
 
-    pMap->MapAction(s_hSceneCategory, "Menu.Scene", 4.0f);
+    pMap->MapAction(s_hSceneCategory, "G.Scene", 4.0f);
     pMap->MapAction(s_hExportScene, szSubPath, 1.0f);
     pMap->MapAction(s_hGameModeStop, szSubPath, 4.0f);
     pMap->MapAction(s_hGameModeSimulate, szSubPath, 5.0f);
@@ -166,10 +160,10 @@ void plSceneActions::MapMenuActions(const char* szMapping)
   }
 }
 
-void plSceneActions::MapToolbarActions(const char* szMapping)
+void plSceneActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
   {
     const char* szSubPath = "SceneCategory";
@@ -184,14 +178,12 @@ void plSceneActions::MapToolbarActions(const char* szMapping)
   }
 }
 
-void plSceneActions::MapViewContextMenuActions(const char* szMapping, const char* szPath)
+void plSceneActions::MapViewContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  plStringBuilder sSubPath(szPath, "/SceneCategory");
-
-  pMap->MapAction(s_hGameModePlayFromHere, szPath, 1.0f);
+  pMap->MapAction(s_hGameModePlayFromHere, "", 1.0f);
 }
 
 plSceneAction::plSceneAction(const plActionContext& context, const char* szName, plSceneAction::ActionType type)
@@ -220,7 +212,7 @@ plSceneAction::plSceneAction(const plActionContext& context, const char* szName,
       break;
 
     case ActionType::StartGameModePlayFromHere:
-      SetIconPath(":/EditorPluginScene/Icons/ScenePlayTheGame.svg");
+      SetIconPath(":/EditorPluginScene/Icons/ScenePlayTheGame.svg"); // TODO: icon
       break;
 
     case ActionType::StopGameMode:
@@ -291,6 +283,8 @@ void plSceneAction::Execute(const plVariant& value)
           return;
       }
 
+      bool bDidTransformAll = false;
+
       range.BeginNextStep("Transform Assets");
       if (dlg.s_bTransformAll)
       {
@@ -298,6 +292,7 @@ void plSceneAction::Execute(const plVariant& value)
         {
           // once all assets have been transformed, disable it for the next export
           dlg.s_bTransformAll = false;
+          bDidTransformAll = true;
         }
       }
 
@@ -307,6 +302,7 @@ void plSceneAction::Execute(const plVariant& value)
       if (!m_pSceneDocument->IsPrefab() && !bCreateThumbnail)
       {
         // if the thumbnail doesn't exist, or is very old, update it anyway
+
         plStringBuilder sThumbnailPath = m_pSceneDocument->GetAssetDocumentManager()->GenerateResourceThumbnailPath(m_pSceneDocument->GetDocumentPath());
 
         plFileStats stat;
@@ -317,13 +313,21 @@ void plSceneAction::Execute(const plVariant& value)
         else
         {
           auto tNow = plTimestamp::CurrentTimestamp();
-          auto tComp = stat.m_LastModificationTime + plTime::Hours(24) * 7;
+          auto tComp = stat.m_LastModificationTime + plTime::MakeFromHours(24) * 7;
 
           if (tComp.GetInt64(plSIUnitOfTime::Second) < tNow.GetInt64(plSIUnitOfTime::Second))
           {
             bCreateThumbnail = true;
           }
         }
+      }
+
+
+      // Convert collections
+      if (!bDidTransformAll)
+      {
+        plAssetCurator* pCurator = plAssetCurator::GetSingleton();
+        pCurator->TransformAssetsForSceneExport(pCurator->GetActiveAssetProfile());
       }
 
       dlg.s_bUpdateThumbnail = false;
@@ -515,7 +519,7 @@ QStringList plSceneAction::GetPlayerCommandLine(plStringBuilder& out_sSingleLine
   plStringBuilder sWndCfgPath = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder();
   sWndCfgPath.AppendPath("RuntimeConfigs/Window.ddl");
 
-#if PLASMA_ENABLED(PLASMA_MIGRATE_RUNTIMECONFIGS)
+#if PL_ENABLED(PL_MIGRATE_RUNTIMECONFIGS)
   plStringBuilder sWndCfgPathOld = plApplicationServices::GetSingleton()->GetProjectPreferencesFolder();
   sWndCfgPathOld.AppendPath("Window.ddl");
   sWndCfgPath = plFileSystem::MigrateFileLocation(sWndCfgPathOld, sWndCfgPath);

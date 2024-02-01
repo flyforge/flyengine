@@ -9,7 +9,7 @@
 #include <ozz/base/maths/soa_float.h>
 #include <ozz/base/maths/soa_transform.h>
 
-PLASMA_DEFINE_AS_POD_TYPE(ozz::math::SoaTransform);
+PL_DEFINE_AS_POD_TYPE(ozz::math::SoaTransform);
 
 class plSkeletonResource;
 class plAnimPoseGenerator;
@@ -52,7 +52,7 @@ enum class plAnimPoseEventTrackSampleMode : plUInt8
 /// The pose generation graph is built by allocating commands on the graph and then setting up
 /// which command is an input to which other node.
 /// A command can be an input to multiple other commands. It will be evaluated only once.
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommand
 {
   plHybridArray<plAnimPoseGeneratorCommandID, 4> m_Inputs;
 
@@ -72,7 +72,7 @@ private:
 /// The command has to be added as an input to one of
 /// * plAnimPoseGeneratorCommandCombinePoses
 /// * plAnimPoseGeneratorCommandLocalToModelPose
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandRestPose final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandRestPose final : public plAnimPoseGeneratorCommand
 {
 private:
   friend class plAnimPoseGenerator;
@@ -89,7 +89,7 @@ private:
 /// If the event track shall be sampled as well, event messages are sent to the plGameObject for which the pose is generated.
 ///
 /// This command can optionally have input commands of type plAnimPoseGeneratorCommandSampleEventTrack.
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandSampleTrack final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandSampleTrack final : public plAnimPoseGeneratorCommand
 {
   plAnimationClipResourceHandle m_hAnimationClip;
   float m_fNormalizedSamplePos;
@@ -114,7 +114,7 @@ private:
 ///
 /// Every input pose gets both an overall weight, as well as optionally a per-bone weight mask.
 /// If a per-bone mask is used, the respective input pose will only affect those bones.
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandCombinePoses final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandCombinePoses final : public plAnimPoseGeneratorCommand
 {
   plHybridArray<float, 4> m_InputWeights;
   plHybridArray<plArrayPtr<const ozz::math::SimdFloat4>, 4> m_InputBoneWeights;
@@ -131,7 +131,7 @@ private:
 /// * plAnimPoseGeneratorCommandSampleTrack
 /// * plAnimPoseGeneratorCommandCombinePoses
 /// * plAnimPoseGeneratorCommandRestPose
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandLocalToModelPose final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandLocalToModelPose final : public plAnimPoseGeneratorCommand
 {
   plGameObject* m_pSendLocalPoseMsgTo = nullptr;
 
@@ -148,7 +148,7 @@ private:
 ///
 /// Every graph should have exactly one of these nodes. Commands that are not (indirectly) connected to an
 /// output node will not be evaluated and won't have any effect.
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandModelPoseToOutput final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandModelPoseToOutput final : public plAnimPoseGeneratorCommand
 {
 };
 
@@ -159,7 +159,7 @@ struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandModelPoseToOutput final
 /// * plAnimPoseGeneratorCommandSampleEventTrack
 ///
 /// They are used to sample event tracks only.
-struct PLASMA_RENDERERCORE_DLL plAnimPoseGeneratorCommandSampleEventTrack final : public plAnimPoseGeneratorCommand
+struct PL_RENDERERCORE_DLL plAnimPoseGeneratorCommandSampleEventTrack final : public plAnimPoseGeneratorCommand
 {
   plAnimationClipResourceHandle m_hAnimationClip;
   float m_fNormalizedSamplePos;
@@ -173,7 +173,7 @@ private:
   plUInt32 m_uiUniqueID = 0;
 };
 
-class PLASMA_RENDERERCORE_DLL plAnimPoseGenerator final
+class PL_RENDERERCORE_DLL plAnimPoseGenerator final
 {
 public:
   plAnimPoseGenerator();

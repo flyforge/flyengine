@@ -14,9 +14,9 @@ class plStreamReader;
 /// To use, create an object of this type on the stack, call Begin() and use the returned
 /// plStreamWriter for subsequent serialization operations. Call End() once you want to finish writing
 /// deduplicated strings. For a sample see StreamOperationsTest.cpp
-class PLASMA_FOUNDATION_DLL plStringDeduplicationWriteContext : public plSerializationContext<plStringDeduplicationWriteContext>
+class PL_FOUNDATION_DLL plStringDeduplicationWriteContext : public plSerializationContext<plStringDeduplicationWriteContext>
 {
-  PLASMA_DECLARE_SERIALIZATION_CONTEXT(plStringDeduplicationWriteContext);
+  PL_DECLARE_SERIALIZATION_CONTEXT(plStringDeduplicationWriteContext);
 
 public:
   /// \brief Setup the write context to perform string deduplication.
@@ -49,9 +49,9 @@ protected:
 };
 
 /// \brief This class to restore strings written to a stream using a plStringDeduplicationWriteContext.
-class PLASMA_FOUNDATION_DLL plStringDeduplicationReadContext : public plSerializationContext<plStringDeduplicationReadContext>
+class PL_FOUNDATION_DLL plStringDeduplicationReadContext : public plSerializationContext<plStringDeduplicationReadContext>
 {
-  PLASMA_DECLARE_SERIALIZATION_CONTEXT(plStringDeduplicationReadContext);
+  PL_DECLARE_SERIALIZATION_CONTEXT(plStringDeduplicationReadContext);
 
 public:
   /// \brief Setup the string table used internally.

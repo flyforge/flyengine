@@ -5,9 +5,9 @@
 #include <GuiFoundation/Action/ActionManager.h>
 #include <GuiFoundation/Action/ActionMapManager.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAction, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptAction, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plTypeScriptActions::s_hCategory;
 plActionDescriptorHandle plTypeScriptActions::s_hEditScript;
@@ -15,8 +15,8 @@ plActionDescriptorHandle plTypeScriptActions::s_hEditScript;
 
 void plTypeScriptActions::RegisterActions()
 {
-  s_hCategory = PLASMA_REGISTER_CATEGORY("TypeScriptCategory");
-  s_hEditScript = PLASMA_REGISTER_ACTION_1(
+  s_hCategory = PL_REGISTER_CATEGORY("TypeScriptCategory");
+  s_hEditScript = PL_REGISTER_ACTION_1(
     "TypeScript.Edit", plActionScope::Document, "TypeScripts", "Edit Script", plTypeScriptAction, plTypeScriptAction::ActionType::EditScript);
 }
 
@@ -26,10 +26,10 @@ void plTypeScriptActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hEditScript);
 }
 
-void plTypeScriptActions::MapActions(const char* szMapping, const char* szPath)
+void plTypeScriptActions::MapActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hCategory, "", 11.0f);
 

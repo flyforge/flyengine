@@ -7,11 +7,11 @@
 #include <GuiFoundation/ActionViews/MenuBarActionMapView.moc.h>
 #include <QDesktopServices>
 
-PLASMA_IMPLEMENT_SINGLETON(plQtSettingsTab);
+PL_IMPLEMENT_SINGLETON(plQtSettingsTab);
 
 plString plQtSettingsTab::GetWindowIcon() const
 {
-  return ""; //:/GuiFoundation/PLASMA-logo.svg";
+  return ""; //:/GuiFoundation/PL-logo.svg";
 }
 
 plString plQtSettingsTab::GetDisplayNameShort() const
@@ -46,7 +46,7 @@ plQtSettingsTab::plQtSettingsTab()
   , m_SingletonRegistrar(this)
 {
   setCentralWidget(new QWidget());
-  PLASMA_ASSERT_DEV(centralWidget() != nullptr, "");
+  PL_ASSERT_DEV(centralWidget() != nullptr, "");
 
   setupUi(centralWidget());
   QMetaObject::connectSlotsByName(this);

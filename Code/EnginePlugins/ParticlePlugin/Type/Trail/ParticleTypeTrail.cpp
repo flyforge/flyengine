@@ -8,26 +8,26 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeTrailFactory, 1, plRTTIDefaultAllocator<plParticleTypeTrailFactory>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeTrailFactory, 1, plRTTIDefaultAllocator<plParticleTypeTrailFactory>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("RenderMode", plParticleTypeRenderMode, m_RenderMode),
-    PLASMA_MEMBER_PROPERTY("Texture", m_sTexture)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D"), new plDefaultValueAttribute(plStringView("{ e00262e8-58f5-42f5-880d-569257047201 }"))),// wrap in plStringView to prevent a memory leak report
-    PLASMA_MEMBER_PROPERTY("Segments", m_uiMaxPoints)->AddAttributes(new plDefaultValueAttribute(6), new plClampValueAttribute(3, 64)),
-    PLASMA_ENUM_MEMBER_PROPERTY("TextureAtlas", plParticleTextureAtlasType, m_TextureAtlasType),
-    PLASMA_MEMBER_PROPERTY("NumSpritesX", m_uiNumSpritesX)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 16)),
-    PLASMA_MEMBER_PROPERTY("NumSpritesY", m_uiNumSpritesY)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 16)),
-    PLASMA_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
-    PLASMA_MEMBER_PROPERTY("DistortionTexture", m_sDistortionTexture)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
-    PLASMA_MEMBER_PROPERTY("DistortionStrength", m_fDistortionStrength)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.0f, 500.0f)),
+    PL_ENUM_MEMBER_PROPERTY("RenderMode", plParticleTypeRenderMode, m_RenderMode),
+    PL_MEMBER_PROPERTY("Texture", m_sTexture)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D"), new plDefaultValueAttribute(plStringView("{ e00262e8-58f5-42f5-880d-569257047201 }"))),// wrap in plStringView to prevent a memory leak report
+    PL_MEMBER_PROPERTY("Segments", m_uiMaxPoints)->AddAttributes(new plDefaultValueAttribute(6), new plClampValueAttribute(3, 64)),
+    PL_ENUM_MEMBER_PROPERTY("TextureAtlas", plParticleTextureAtlasType, m_TextureAtlasType),
+    PL_MEMBER_PROPERTY("NumSpritesX", m_uiNumSpritesX)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 16)),
+    PL_MEMBER_PROPERTY("NumSpritesY", m_uiNumSpritesY)->AddAttributes(new plDefaultValueAttribute(1), new plClampValueAttribute(1, 16)),
+    PL_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
+    PL_MEMBER_PROPERTY("DistortionTexture", m_sDistortionTexture)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_2D")),
+    PL_MEMBER_PROPERTY("DistortionStrength", m_fDistortionStrength)->AddAttributes(new plDefaultValueAttribute(100.0f), new plClampValueAttribute(0.0f, 500.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeTrail, 1, plRTTIDefaultAllocator<plParticleTypeTrail>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeTrail, 1, plRTTIDefaultAllocator<plParticleTypeTrail>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleTypeTrailFactory::GetTypeType() const
@@ -50,7 +50,7 @@ void plParticleTypeTrailFactory::CopyTypeProperties(plParticleType* pObject, boo
   pType->m_fDistortionStrength = m_fDistortionStrength;
 
   // fixed 25 FPS for the update rate
-  pType->m_UpdateDiff = plTime::Seconds(1.0 / 25.0); // m_UpdateDiff;
+  pType->m_UpdateDiff = plTime::MakeFromSeconds(1.0 / 25.0); // m_UpdateDiff;
 
   if (!m_sTexture.IsEmpty())
     pType->m_hTexture = plResourceManager::LoadResource<plTexture2DResource>(m_sTexture);
@@ -86,50 +86,50 @@ enum class TypeTrailVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleTypeTrailFactory::Save(plStreamWriter& stream) const
+void plParticleTypeTrailFactory::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)TypeTrailVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_sTexture;
-  stream << m_uiMaxPoints;
-  stream << m_UpdateDiff;
-  stream << m_RenderMode;
+  inout_stream << m_sTexture;
+  inout_stream << m_uiMaxPoints;
+  inout_stream << m_UpdateDiff;
+  inout_stream << m_RenderMode;
 
   // version 3
-  stream << m_TextureAtlasType;
-  stream << m_uiNumSpritesX;
-  stream << m_uiNumSpritesY;
+  inout_stream << m_TextureAtlasType;
+  inout_stream << m_uiNumSpritesX;
+  inout_stream << m_uiNumSpritesY;
 
   // version 4
-  stream << m_sTintColorParameter;
+  inout_stream << m_sTintColorParameter;
 
   // version 5
-  stream << m_sDistortionTexture;
-  stream << m_fDistortionStrength;
+  inout_stream << m_sDistortionTexture;
+  inout_stream << m_fDistortionStrength;
 }
 
-void plParticleTypeTrailFactory::Load(plStreamReader& stream)
+void plParticleTypeTrailFactory::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)TypeTrailVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)TypeTrailVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_sTexture;
-  stream >> m_uiMaxPoints;
-  stream >> m_UpdateDiff;
+  inout_stream >> m_sTexture;
+  inout_stream >> m_uiMaxPoints;
+  inout_stream >> m_UpdateDiff;
 
   if (uiVersion >= 2)
   {
-    stream >> m_RenderMode;
+    inout_stream >> m_RenderMode;
   }
 
   if (uiVersion >= 3)
   {
-    stream >> m_TextureAtlasType;
-    stream >> m_uiNumSpritesX;
-    stream >> m_uiNumSpritesY;
+    inout_stream >> m_TextureAtlasType;
+    inout_stream >> m_uiNumSpritesX;
+    inout_stream >> m_uiNumSpritesY;
 
     if (m_TextureAtlasType == plParticleTextureAtlasType::None)
     {
@@ -140,13 +140,13 @@ void plParticleTypeTrailFactory::Load(plStreamReader& stream)
 
   if (uiVersion >= 4)
   {
-    stream >> m_sTintColorParameter;
+    inout_stream >> m_sTintColorParameter;
   }
 
   if (uiVersion >= 5)
   {
-    stream >> m_sDistortionTexture;
-    stream >> m_fDistortionStrength;
+    inout_stream >> m_sDistortionTexture;
+    inout_stream >> m_fDistortionStrength;
   }
 }
 
@@ -178,9 +178,9 @@ void plParticleTypeTrail::CreateRequiredStreams()
   }
 }
 
-void plParticleTypeTrail::ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleTypeTrail::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
-  PLASMA_PROFILE_SCOPE("PFX: Trail");
+  PL_PROFILE_SCOPE("PFX: Trail");
 
   if (!m_hTexture.IsValid())
     return;
@@ -207,11 +207,11 @@ void plParticleTypeTrail::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
 
     // this will automatically be deallocated at the end of the frame
     m_BaseParticleData =
-      PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBaseParticleShaderData, (plUInt32)GetOwnerSystem()->GetNumActiveParticles());
+      PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plBaseParticleShaderData, (plUInt32)GetOwnerSystem()->GetNumActiveParticles());
     m_TrailPointsShared =
-      PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec4, (plUInt32)GetOwnerSystem()->GetNumActiveParticles() * uiBucketSize);
+      PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plVec4, (plUInt32)GetOwnerSystem()->GetNumActiveParticles() * uiBucketSize);
     m_TrailParticleData =
-      PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plTrailParticleShaderData, (plUInt32)GetOwnerSystem()->GetNumActiveParticles());
+      PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plTrailParticleShaderData, (plUInt32)GetOwnerSystem()->GetNumActiveParticles());
 
     for (plUInt32 p = 0; p < numActiveParticles; ++p)
     {
@@ -288,7 +288,7 @@ void plParticleTypeTrail::ExtractTypeRenderData(plMsgExtractRenderData& msg, con
       break;
   }
 
-  msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::LitTransparent, plRenderData::Caching::Never);
+  ref_msg.AddRenderData(pRenderData, plDefaultRenderDataCategories::LitTransparent, plRenderData::Caching::Never);
 }
 
 void plParticleTypeTrail::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNumElements)
@@ -451,4 +451,4 @@ void plParticleTypeTrail::OnParticleDeath(const plStreamGroupElementRemovedEvent
   m_FreeTrailData.PushBack(pTrailData[e.m_uiElementIndex].m_uiIndexForTrailPoints);
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Trail_ParticleTypeTrail);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Trail_ParticleTypeTrail);

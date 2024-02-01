@@ -4,9 +4,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Bounds final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Bounds final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Bounds, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Bounds, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_Bounds();
@@ -14,8 +14,8 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plVec3 m_vPositionOffset;
   plVec3 m_vBoxExtents;
@@ -23,9 +23,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_Bounds final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_Bounds final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Bounds, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Bounds, plParticleBehavior);
 
 public:
   plVec3 m_vPositionOffset;

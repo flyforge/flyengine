@@ -1,23 +1,26 @@
 #include <Core/CorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Collection/CollectionResource.h>
 #include <Foundation/Profiling/Profiling.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionResource, 1, plRTTIDefaultAllocator<plCollectionResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCollectionResource, 1, plRTTIDefaultAllocator<plCollectionResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plCollectionResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plCollectionResource);
 
 plCollectionResource::plCollectionResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
 }
 
-bool plCollectionResource::PreloadResources(plUInt32 numResourcesToPreload)
+// UnloadData() already makes sure to call UnregisterNames();
+plCollectionResource::~plCollectionResource() = default;
+
+bool plCollectionResource::PreloadResources(plUInt32 uiNumResourcesToPreload)
 {
-  PLASMA_LOCK(m_PreloadMutex);
-  PLASMA_PROFILE_SCOPE("Inject Resources to Preload");
+  PL_LOCK(m_PreloadMutex);
+  PL_PROFILE_SCOPE("Inject Resources to Preload");
 
   if (m_PreloadedResources.GetCount() == m_Collection.m_Resources.GetCount())
   {
@@ -31,7 +34,7 @@ bool plCollectionResource::PreloadResources(plUInt32 numResourcesToPreload)
   m_PreloadedResources.Reserve(m_Collection.m_Resources.GetCount());
 
   const plUInt32 remainingResources = m_Collection.m_Resources.GetCount() - m_PreloadedResources.GetCount();
-  const plUInt32 end = plMath::Min(remainingResources, numResourcesToPreload) + m_PreloadedResources.GetCount();
+  const plUInt32 end = plMath::Min(remainingResources, uiNumResourcesToPreload) + m_PreloadedResources.GetCount();
   for (plUInt32 i = m_PreloadedResources.GetCount(); i < end; ++i)
   {
     const plCollectionEntry& e = m_Collection.m_Resources[i];
@@ -46,7 +49,7 @@ bool plCollectionResource::PreloadResources(plUInt32 numResourcesToPreload)
       else
       {
         plLog::Error("There was no valid RTTI available for assets with type name '{}'. Could not pre-load resource '{}'. Did you forget to register "
-                       "the resource type with the plResourceManager?",
+                     "the resource type with the plResourceManager?",
           e.m_sAssetTypeName, plArgSensitive(e.m_sResourceID, "ResourceID"));
       }
     }
@@ -66,9 +69,9 @@ bool plCollectionResource::PreloadResources(plUInt32 numResourcesToPreload)
   return m_PreloadedResources.GetCount() < m_Collection.m_Resources.GetCount();
 }
 
-bool plCollectionResource::IsLoadingFinished(float* out_progress) const
+bool plCollectionResource::IsLoadingFinished(float* out_pProgress) const
 {
-  PLASMA_LOCK(m_PreloadMutex);
+  PL_LOCK(m_PreloadMutex);
 
   plUInt64 loadedWeight = 0;
   plUInt64 totalWeight = 0;
@@ -94,17 +97,16 @@ bool plCollectionResource::IsLoadingFinished(float* out_progress) const
     }
   }
 
-  if (out_progress != nullptr)
+  if (out_pProgress != nullptr)
   {
     const float maxLoadedFraction = m_Collection.m_Resources.GetCount() == 0 ? 1.f : (float)m_PreloadedResources.GetCount() / m_Collection.m_Resources.GetCount();
-
     if (totalWeight != 0 && totalWeight != loadedWeight)
     {
-      *out_progress = static_cast<float>(static_cast<double>(loadedWeight) / totalWeight) * maxLoadedFraction;
+      *out_pProgress = static_cast<float>(static_cast<double>(loadedWeight) / totalWeight) * maxLoadedFraction;
     }
     else
     {
-      *out_progress = maxLoadedFraction;
+      *out_pProgress = maxLoadedFraction;
     }
   }
 
@@ -122,7 +124,7 @@ const plCollectionResourceDescriptor& plCollectionResource::GetDescriptor() cons
   return m_Collection;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plCollectionResource, plCollectionResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plCollectionResource, plCollectionResourceDescriptor)
 {
   m_Collection = descriptor;
 
@@ -147,7 +149,7 @@ plResourceLoadDesc plCollectionResource::UnloadData(Unload WhatToUnload)
     // It is intentionally removed as it caused this lock and the resource manager lock to be locked in reverse order.
     // To prevent potential deadlocks and be able to sanity check our locking the entire codebase should never lock any
     // locks in reverse order, even if this lock is probably fine it prevents us from reasoning over the entire system.
-    // PLASMA_LOCK(m_preloadMutex);
+    // PL_LOCK(m_preloadMutex);
     m_PreloadedResources.Clear();
     m_Collection.m_Resources.Clear();
 
@@ -160,7 +162,7 @@ plResourceLoadDesc plCollectionResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plCollectionResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plCollectionResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plCollectionResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -190,7 +192,7 @@ plResourceLoadDesc plCollectionResource::UpdateContent(plStreamReader* Stream)
 
 void plCollectionResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
 {
-  PLASMA_LOCK(m_PreloadMutex);
+  PL_LOCK(m_PreloadMutex);
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
   out_NewMemoryUsage.m_uiMemoryCPU = static_cast<plUInt32>(m_PreloadedResources.GetHeapMemoryUsage() + m_Collection.m_Resources.GetHeapMemoryUsage());
 }
@@ -203,7 +205,7 @@ void plCollectionResource::RegisterNames()
 
   m_bRegistered = true;
 
-  PLASMA_LOCK(plResourceManager::GetMutex());
+  PL_LOCK(plResourceManager::GetMutex());
 
   for (const auto& entry : m_Collection.m_Resources)
   {
@@ -222,7 +224,7 @@ void plCollectionResource::UnregisterNames()
 
   m_bRegistered = false;
 
-  PLASMA_LOCK(plResourceManager::GetMutex());
+  PL_LOCK(plResourceManager::GetMutex());
 
   for (const auto& entry : m_Collection.m_Resources)
   {
@@ -233,62 +235,62 @@ void plCollectionResource::UnregisterNames()
   }
 }
 
-void plCollectionResourceDescriptor::Save(plStreamWriter& stream) const
+void plCollectionResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 3;
   const plUInt8 uiIdentifier = 0xC0;
   const plUInt32 uiNumResources = m_Resources.GetCount();
 
-  stream << uiVersion;
-  stream << uiIdentifier;
-  stream << uiNumResources;
+  inout_stream << uiVersion;
+  inout_stream << uiIdentifier;
+  inout_stream << uiNumResources;
 
   for (plUInt32 i = 0; i < uiNumResources; ++i)
   {
-    stream << m_Resources[i].m_sAssetTypeName;
-    stream << m_Resources[i].m_sOptionalNiceLookupName;
-    stream << m_Resources[i].m_sResourceID;
-    stream << m_Resources[i].m_uiFileSize;
+    inout_stream << m_Resources[i].m_sAssetTypeName;
+    inout_stream << m_Resources[i].m_sOptionalNiceLookupName;
+    inout_stream << m_Resources[i].m_sResourceID;
+    inout_stream << m_Resources[i].m_uiFileSize;
   }
 }
 
-void plCollectionResourceDescriptor::Load(plStreamReader& stream)
+void plCollectionResourceDescriptor::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
   plUInt8 uiIdentifier = 0;
   plUInt32 uiNumResources = 0;
 
-  stream >> uiVersion;
-  stream >> uiIdentifier;
+  inout_stream >> uiVersion;
+  inout_stream >> uiIdentifier;
 
   if (uiVersion == 1)
   {
     plUInt16 uiNumResourcesShort;
-    stream >> uiNumResourcesShort;
+    inout_stream >> uiNumResourcesShort;
     uiNumResources = uiNumResourcesShort;
   }
   else
   {
-    stream >> uiNumResources;
+    inout_stream >> uiNumResources;
   }
 
-  PLASMA_ASSERT_DEV(uiIdentifier == 0xC0, "File does not contain a valid plCollectionResourceDescriptor");
-  PLASMA_ASSERT_DEV(uiVersion > 0 && uiVersion <= 3, "Invalid file version {0}", uiVersion);
+  PL_ASSERT_DEV(uiIdentifier == 0xC0, "File does not contain a valid plCollectionResourceDescriptor");
+  PL_ASSERT_DEV(uiVersion > 0 && uiVersion <= 3, "Invalid file version {0}", uiVersion);
 
   m_Resources.SetCount(uiNumResources);
 
   for (plUInt32 i = 0; i < uiNumResources; ++i)
   {
-    stream >> m_Resources[i].m_sAssetTypeName;
-    stream >> m_Resources[i].m_sOptionalNiceLookupName;
-    stream >> m_Resources[i].m_sResourceID;
+    inout_stream >> m_Resources[i].m_sAssetTypeName;
+    inout_stream >> m_Resources[i].m_sOptionalNiceLookupName;
+    inout_stream >> m_Resources[i].m_sResourceID;
     if (uiVersion >= 3)
     {
-      stream >> m_Resources[i].m_uiFileSize;
+      inout_stream >> m_Resources[i].m_uiFileSize;
     }
   }
 }
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Collection_Implementation_CollectionResource);
+PL_STATICLINK_FILE(Core, Core_Collection_Implementation_CollectionResource);

@@ -4,16 +4,16 @@
 #include <EditorPluginAi/Dialogs/AiProjectSettingsDlg.moc.h>
 #include <GuiFoundation/Action/ActionMapManager.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAiAction, 0, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAiAction, 0, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plAiActions::s_hCategoryAi;
 plActionDescriptorHandle plAiActions::s_hProjectSettings;
 
 void plAiActions::RegisterActions()
 {
-  s_hCategoryAi = PLASMA_REGISTER_CATEGORY("Ai");
-  s_hProjectSettings = PLASMA_REGISTER_ACTION_1("Ai.Settings.Project", plActionScope::Document, "Ai", "", plAiAction, plAiAction::ActionType::ProjectSettings);
+  s_hCategoryAi = PL_REGISTER_CATEGORY("Ai");
+  s_hProjectSettings = PL_REGISTER_ACTION_1("Ai.Settings.Project", plActionScope::Document, "Ai", "", plAiAction, plAiAction::ActionType::ProjectSettings);
 }
 
 void plAiActions::UnregisterActions()
@@ -26,10 +26,10 @@ void plAiActions::MapMenuActions()
 {
   /// \todo Is there a way to integrate into ALL document types in a specific menu (ie. project settings)
   plActionMap* pMap = plActionMapManager::GetActionMap("EditorPluginScene_Scene2MenuBar");
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
-  pMap->MapAction(s_hCategoryAi, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 10.0f);
-  pMap->MapAction(s_hProjectSettings, "Menu.Editor/ProjectCategory/Menu.ProjectSettings/Ai", 1.0f);
+  pMap->MapAction(s_hCategoryAi, "G.Plugins.Settings", 10.0f);
+  pMap->MapAction(s_hProjectSettings, "G.Plugins.Settings", "Ai", 1.0f);
 }
 
 plAiAction::plAiAction(const plActionContext& context, const char* szName, ActionType type)

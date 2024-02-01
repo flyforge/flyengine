@@ -6,7 +6,7 @@
 ///
 /// stb_image also supports other formats, but we stick to our own loader code where we can.
 /// Also, stb HDR image support is not handled here yet.
-class PLASMA_TEXTURE_DLL plStbImageFileFormats : public plImageFileFormat
+class PL_TEXTURE_DLL plStbImageFileFormats : public plImageFileFormat
 {
 public:
   virtual plResult ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const override;

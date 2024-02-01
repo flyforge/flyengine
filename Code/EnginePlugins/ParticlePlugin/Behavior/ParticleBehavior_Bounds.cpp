@@ -10,28 +10,28 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Bounds, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Bounds>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_Bounds, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_Bounds>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
-    PLASMA_MEMBER_PROPERTY("BoxExtents", m_vBoxExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(2, 2, 2))),
-    PLASMA_ENUM_MEMBER_PROPERTY("OutOfBoundsMode", plParticleOutOfBoundsMode, m_OutOfBoundsMode),
+    PL_MEMBER_PROPERTY("PositionOffset", m_vPositionOffset),
+    PL_MEMBER_PROPERTY("BoxExtents", m_vBoxExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(2, 2, 2))),
+    PL_ENUM_MEMBER_PROPERTY("OutOfBoundsMode", plParticleOutOfBoundsMode, m_OutOfBoundsMode),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plBoxVisualizerAttribute("BoxExtents", 1.0f, plColor::LightGreen, nullptr, plVisualizerAnchor::Center, plVec3::OneVector(), "PositionOffset")
+    new plBoxVisualizerAttribute("BoxExtents", 1.0f, plColor::LightGreen, nullptr, plVisualizerAnchor::Center, plVec3(1.0f), "PositionOffset")
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Bounds, 1, plRTTIDefaultAllocator<plParticleBehavior_Bounds>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_Bounds, 1, plRTTIDefaultAllocator<plParticleBehavior_Bounds>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleBehaviorFactory_Bounds::plParticleBehaviorFactory_Bounds() {}
+plParticleBehaviorFactory_Bounds::plParticleBehaviorFactory_Bounds() = default;
 
 const plRTTI* plParticleBehaviorFactory_Bounds::GetBehaviorType() const
 {
@@ -57,31 +57,31 @@ enum class BehaviorBoundsVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleBehaviorFactory_Bounds::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_Bounds::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)BehaviorBoundsVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_vPositionOffset;
-  stream << m_vBoxExtents;
+  inout_stream << m_vPositionOffset;
+  inout_stream << m_vBoxExtents;
 
   // version 1
-  stream << m_OutOfBoundsMode;
+  inout_stream << m_OutOfBoundsMode;
 }
 
-void plParticleBehaviorFactory_Bounds::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_Bounds::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)BehaviorBoundsVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)BehaviorBoundsVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_vPositionOffset;
-  stream >> m_vBoxExtents;
+  inout_stream >> m_vPositionOffset;
+  inout_stream >> m_vBoxExtents;
 
   if (uiVersion >= 1)
   {
-    stream >> m_OutOfBoundsMode;
+    inout_stream >> m_OutOfBoundsMode;
   }
 }
 
@@ -97,7 +97,7 @@ void plParticleBehavior_Bounds::QueryOptionalStreams()
 
 void plParticleBehavior_Bounds::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Bounds");
+  PL_PROFILE_SCOPE("PFX: Bounds");
 
   const plSimdTransform trans = plSimdConversion::ToTransform(GetOwnerSystem()->GetTransform());
   const plSimdTransform invTrans = trans.GetInverse();
@@ -163,3 +163,7 @@ void plParticleBehavior_Bounds::Process(plUInt64 uiNumElements)
     }
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_Bounds);
+

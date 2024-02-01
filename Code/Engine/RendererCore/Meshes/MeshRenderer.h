@@ -6,10 +6,10 @@ class plMeshRenderData;
 struct plPerInstanceData;
 
 /// \brief Implements rendering of static meshes
-class PLASMA_RENDERERCORE_DLL plMeshRenderer : public plRenderer
+class PL_RENDERERCORE_DLL plMeshRenderer : public plRenderer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMeshRenderer, plRenderer);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plMeshRenderer);
+  PL_ADD_DYNAMIC_REFLECTION(plMeshRenderer, plRenderer);
+  PL_DISALLOW_COPY_AND_ASSIGN(plMeshRenderer);
 
 public:
   plMeshRenderer();

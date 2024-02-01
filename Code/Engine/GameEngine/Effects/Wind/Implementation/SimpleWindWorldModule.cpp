@@ -6,10 +6,10 @@
 #include <GameEngine/Effects/Wind/WindVolumeComponent.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plSimpleWindWorldModule);
+PL_IMPLEMENT_WORLD_MODULE(plSimpleWindWorldModule);
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimpleWindWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimpleWindWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSimpleWindWorldModule::plSimpleWindWorldModule(plWorld* pWorld)
@@ -29,10 +29,10 @@ plVec3 plSimpleWindWorldModule::GetWindAt(const plVec3& vPosition) const
     plSpatialSystem::QueryParams queryParams;
     queryParams.m_uiCategoryBitmask = plWindVolumeComponent::SpatialDataCategory.GetBitmask();
 
-    pSpatial->FindObjectsInSphere(plBoundingSphere(vPosition, 0.5f), queryParams, volumes);
+    pSpatial->FindObjectsInSphere(plBoundingSphere::MakeFromCenterAndRadius(vPosition, 0.5f), queryParams, volumes);
 
     const plSimdVec4f pos = plSimdConversion::ToVec3(vPosition);
-    plSimdVec4f force = plSimdVec4f::ZeroVector();
+    plSimdVec4f force = plSimdVec4f::MakeZero();
 
     for (plGameObject* pObj : volumes)
     {
@@ -56,4 +56,4 @@ void plSimpleWindWorldModule::SetFallbackWind(const plVec3& vWind)
 
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Effects_Wind_Implementation_SimpleWindWorldModule);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Effects_Wind_Implementation_SimpleWindWorldModule);

@@ -6,7 +6,7 @@
 class plShaderCompilerApplication : public plGameApplication
 {
 public:
-  typedef plGameApplication SUPER;
+  using SUPER = plGameApplication;
 
   plShaderCompilerApplication();
 

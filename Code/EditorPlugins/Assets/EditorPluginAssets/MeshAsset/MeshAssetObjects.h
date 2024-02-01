@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plMeshPrimitive
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -29,11 +29,11 @@ struct plMeshPrimitive
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plMeshPrimitive);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plMeshPrimitive);
 
 class plMeshAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMeshAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plMeshAssetProperties, plReflectedClass);
 
 public:
   plMeshAssetProperties();
@@ -47,7 +47,7 @@ public:
   float m_fRadius = 0.5f;
   float m_fRadius2 = 0.5f;
   float m_fHeight = 1.0f;
-  plAngle m_Angle = plAngle::Degree(360.0f);
+  plAngle m_Angle = plAngle::MakeFromDegree(360.0f);
   plUInt16 m_uiDetail = 0;
   plUInt16 m_uiDetail2 = 0;
   bool m_bCap = true;
@@ -62,7 +62,6 @@ public:
   bool m_bRecalculateNormals = false;
   bool m_bRecalculateTrangents = true;
   bool m_bImportMaterials = true;
-  bool m_bOptimize = true;
 
   plEnum<plMeshNormalPrecision> m_NormalPrecision;
   plEnum<plMeshTexCoordPrecision> m_TexCoordPrecision;

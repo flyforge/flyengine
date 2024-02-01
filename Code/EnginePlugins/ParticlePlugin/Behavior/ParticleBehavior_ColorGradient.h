@@ -3,21 +3,21 @@
 #include <Core/Curves/ColorGradientResource.h>
 #include <ParticlePlugin/Behavior/ParticleBehavior.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_ColorGradient final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_ColorGradient final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_ColorGradient, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_ColorGradient, plParticleBehaviorFactory);
 
 public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   // ************************************* PROPERTIES ***********************************
 
   void SetColorGradient(const plColorGradientResourceHandle& hResource) { m_hGradient = hResource; }
-  PLASMA_ALWAYS_INLINE const plColorGradientResourceHandle& GetColorGradient() const { return m_hGradient; }
+  PL_ALWAYS_INLINE const plColorGradientResourceHandle& GetColorGradient() const { return m_hGradient; }
 
   void SetColorGradientFile(const char* szFile);
   const char* GetColorGradientFile() const;
@@ -31,9 +31,9 @@ private:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_ColorGradient final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_ColorGradient final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_ColorGradient, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_ColorGradient, plParticleBehavior);
 
 public:
   plColorGradientResourceHandle m_hGradient;

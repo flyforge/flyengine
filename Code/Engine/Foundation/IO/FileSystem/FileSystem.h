@@ -39,7 +39,7 @@
 /// Reading/writing file streams can happen in parallel, only the administrative tasks need to be protected.
 /// File events are broadcast as they occur, that means they will be executed on whichever thread triggered them.
 /// Since they are executed from within the filesystem mutex, they cannot occur in parallel.
-class PLASMA_FOUNDATION_DLL plFileSystem
+class PL_FOUNDATION_DLL plFileSystem
 {
 public:
   /// \brief Enum that describes the type of file-event that occurred.
@@ -179,11 +179,8 @@ public:
   /// ">temp/" - Resolves to what plOSFile::GetTempDataFolder() returns.
   /// ">appdir/" - Resolves to what plOSFile::GetApplicationDirectory() returns.
   ///
-  /// Returns PLASMA_FAILURE if \a szDirectory starts with an unknown special directory.
+  /// Returns PL_FAILURE if \a szDirectory starts with an unknown special directory.
   static plResult ResolveSpecialDirectory(plStringView sDirectory, plStringBuilder& out_sPath);
-
-  /// \brief Returns the given path relative to one of the data directories
-  static plResult MakePathRelative(plStringView sPath, plStringBuilder& out_Path);
 
   ///@}
 
@@ -194,7 +191,7 @@ public:
   /// system.
   static plMutex& GetMutex();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
   /// \brief Starts a multi-folder search for \a szSearchTerm on all current data directories.
   static void StartSearch(plFileSystemIterator& ref_iterator, plStringView sSearchTerm, plBitflags<plFileSystemIteratorFlags> flags = plFileSystemIteratorFlags::Default);
 #endif
@@ -235,12 +232,12 @@ public:
   /// directory that would handle it.
   /// \param out_ppDataDir If not null, it will be set to the data directory that would handle this path.
   ///
-  /// \returns The function will return PLASMA_FAILURE if it was not able to determine any location where the file could be read from or written to.
+  /// \returns The function will return PL_FAILURE if it was not able to determine any location where the file could be read from or written to.
   static plResult ResolvePath(plStringView sPath, plStringBuilder* out_pAbsolutePath, plStringBuilder* out_pDataDirRelativePath, plDataDirectoryType** out_pDataDir = nullptr); // [tested]
 
   /// \brief Starts at szStartDirectory and goes up until it finds a folder that contains the given sub folder structure.
   ///
-  /// Returns PLASMA_FAILURE if nothing is found. Otherwise \a result is the absolute path to the existing folder that has a given sub-folder.
+  /// Returns PL_FAILURE if nothing is found. Otherwise \a result is the absolute path to the existing folder that has a given sub-folder.
   ///
   /// \param result If successful, this contains the folder path in which szSubPath exists.
   /// \param szStartDirectory The directory in which to start the search and iterate upwards.
@@ -284,7 +281,7 @@ private:
 
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, FileSystem);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, FileSystem);
 
   /// \brief Called by the Startup System to initialize the file system
   static void Startup();
@@ -304,7 +301,7 @@ private:
 
   struct Factory
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     float m_fPriority;
     plDataDirFactory m_Factory;

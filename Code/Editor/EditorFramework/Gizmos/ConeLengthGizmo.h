@@ -5,22 +5,22 @@
 #include <QPoint>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plConeLengthGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plConeLengthGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConeLengthGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plConeLengthGizmo, plGizmo);
 
 public:
   plConeLengthGizmo();
 
-  void SetRadius(float radius);
+  void SetRadius(float fRadius);
   float GetRadius() const { return m_fRadius; }
 
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -32,7 +32,7 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  PlasmaEngineGizmoHandle m_hConeRadius;
+  plEngineGizmoHandle m_hConeRadius;
 
   enum class ManipulateMode
   {

@@ -10,28 +10,28 @@
 #include <ozz/base/maths/soa_transform.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonPoseMode, 1)
-  PLASMA_ENUM_CONSTANTS(plSkeletonPoseMode::CustomPose, plSkeletonPoseMode::RestPose, plSkeletonPoseMode::Disabled)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSkeletonPoseMode, 1)
+  PL_ENUM_CONSTANTS(plSkeletonPoseMode::CustomPose, plSkeletonPoseMode::RestPose, plSkeletonPoseMode::Disabled)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plSkeletonPoseComponent, 4, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSkeletonPoseComponent, 4, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skeleton")),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Mode", plSkeletonPoseMode, GetPoseMode, SetPoseMode),
-    PLASMA_MEMBER_PROPERTY("EditBones", m_fDummy),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Bones", GetBones, GetBone, SetBone, RemoveBone)->AddAttributes(new plExposedParametersAttribute("Skeleton"), new plContainerAttribute(false, true, false)),
+    PL_ACCESSOR_PROPERTY("Skeleton", GetSkeletonFile, SetSkeletonFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skeleton")),
+    PL_ENUM_ACCESSOR_PROPERTY("Mode", plSkeletonPoseMode, GetPoseMode, SetPoseMode),
+    PL_MEMBER_PROPERTY("EditBones", m_fDummy),
+    PL_MAP_ACCESSOR_PROPERTY("Bones", GetBones, GetBone, SetBone, RemoveBone)->AddAttributes(new plExposedParametersAttribute("Skeleton"), new plContainerAttribute(false, true, false)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
     new plBoneManipulatorAttribute("Bones", "EditBones"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSkeletonPoseComponent::plSkeletonPoseComponent() = default;
@@ -301,7 +301,7 @@ void plSkeletonPoseComponent::SendCustomPose()
     if (thisBone.m_sName.IsEmpty() || thisBone.m_sParent.IsEmpty())
       continue;
 
-    PLASMA_ASSERT_DEBUG(!thisBone.m_Transform.m_qRotation.IsNaN(), "Invalid bone transform in pose component");
+    PL_ASSERT_DEBUG(!thisBone.m_Transform.m_qRotation.IsNaN(), "Invalid bone transform in pose component");
 
     const plQuat& boneRot = thisBone.m_Transform.m_qRotation;
 
@@ -309,9 +309,9 @@ void plSkeletonPoseComponent::SendCustomPose()
     const plUInt32 idx1 = uiBone % 4;
 
     ozz::math::SoaQuaternion& q = ozzLocalTransforms[idx0].rotation;
-    reinterpret_cast<float*>(&q.x)[idx1] = boneRot.v.x;
-    reinterpret_cast<float*>(&q.y)[idx1] = boneRot.v.y;
-    reinterpret_cast<float*>(&q.z)[idx1] = boneRot.v.z;
+    reinterpret_cast<float*>(&q.x)[idx1] = boneRot.x;
+    reinterpret_cast<float*>(&q.y)[idx1] = boneRot.y;
+    reinterpret_cast<float*>(&q.z)[idx1] = boneRot.z;
     reinterpret_cast<float*>(&q.w)[idx1] = boneRot.w;
   }
 
@@ -319,7 +319,7 @@ void plSkeletonPoseComponent::SendCustomPose()
   job.input = ozz::span<const ozz::math::SoaTransform>(ozzLocalTransforms.data(), ozzLocalTransforms.size());
   job.output = ozz::span<ozz::math::Float4x4>(reinterpret_cast<ozz::math::Float4x4*>(finalTransforms.GetData()), finalTransforms.GetCount());
   job.skeleton = &skel.GetOzzSkeleton();
-  PLASMA_ASSERT_DEBUG(job.Validate(), "");
+  PL_ASSERT_DEBUG(job.Validate(), "");
   job.Run();
 
 
@@ -341,7 +341,7 @@ void plSkeletonPoseComponentManager::Update(const plWorldModule::UpdateContext& 
   plDeque<plComponentHandle> requireUpdate;
 
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
     requireUpdate.Swap(m_RequireUpdate);
   }
 
@@ -357,7 +357,7 @@ void plSkeletonPoseComponentManager::Update(const plWorldModule::UpdateContext& 
 
 void plSkeletonPoseComponentManager::EnqueueUpdate(plComponentHandle hComponent)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   if (m_RequireUpdate.IndexOf(hComponent) != plInvalidIndex)
     return;
@@ -369,11 +369,11 @@ void plSkeletonPoseComponentManager::Initialize()
 {
   SUPER::Initialize();
 
-  plWorldModule::UpdateFunctionDesc desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSkeletonPoseComponentManager::Update, this);
+  plWorldModule::UpdateFunctionDesc desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plSkeletonPoseComponentManager::Update, this);
   desc.m_Phase = UpdateFunctionDesc::Phase::PreAsync;
 
   RegisterUpdateFunction(desc);
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonPoseComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_SkeletonPoseComponent);

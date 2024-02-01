@@ -7,7 +7,7 @@ plHybridArray<T, Size, AllocatorWrapper>::plHybridArray()
 }
 
 template <typename T, plUInt32 Size, typename AllocatorWrapper /*= plDefaultAllocatorWrapper*/>
-plHybridArray<T, Size, AllocatorWrapper>::plHybridArray(plAllocatorBase* pAllocator)
+plHybridArray<T, Size, AllocatorWrapper>::plHybridArray(plAllocator* pAllocator)
   : plDynamicArray<T, AllocatorWrapper>(GetStaticArray(), Size, pAllocator)
 {
 }

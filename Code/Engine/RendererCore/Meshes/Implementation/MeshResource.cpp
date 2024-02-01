@@ -1,14 +1,14 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/Material/MaterialResource.h>
 #include <RendererCore/Meshes/MeshResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshResource, 1, plRTTIDefaultAllocator<plMeshResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshResource, 1, plRTTIDefaultAllocator<plMeshResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plMeshResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plMeshResource);
 // clang-format on
 
 plUInt32 plMeshResource::s_uiMeshBufferNameSuffix = 0;
@@ -16,7 +16,7 @@ plUInt32 plMeshResource::s_uiMeshBufferNameSuffix = 0;
 plMeshResource::plMeshResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
-  m_Bounds.SetInvalid();
+  m_Bounds = plBoundingBoxSphere::MakeInvalid();
 }
 
 plResourceLoadDesc plMeshResource::UnloadData(Unload WhatToUnload)
@@ -84,7 +84,7 @@ void plMeshResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshResource, plMeshResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plMeshResource, plMeshResourceDescriptor)
 {
   // if there is an existing mesh buffer to use, take that
   m_hMeshBuffer = descriptor.GetExistingMeshBuffer();
@@ -98,7 +98,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshResource, plMeshResourceDescriptor)
   {
     s_uiMeshBufferNameSuffix++;
     plStringBuilder sMbName;
-    sMbName.Format("{0}  [MeshBuffer {1}]", GetResourceID(), plArgU(s_uiMeshBufferNameSuffix, 4, true, 16, true));
+    sMbName.SetFormat("{0}  [MeshBuffer {1}]", GetResourceID(), plArgU(s_uiMeshBufferNameSuffix, 4, true, 16, true));
 
     // note: this gets move'd, might be invalid afterwards
     plMeshBufferResourceDescriptor& mb = descriptor.MeshBufferDesc();
@@ -123,7 +123,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshResource, plMeshResourceDescriptor)
   }
 
   m_Bounds = descriptor.GetBounds();
-  PLASMA_ASSERT_DEV(m_Bounds.IsValid(), "The mesh bounds are invalid. Make sure to call plMeshResourceDescriptor::ComputeBounds()");
+  PL_ASSERT_DEV(m_Bounds.IsValid(), "The mesh bounds are invalid. Make sure to call plMeshResourceDescriptor::ComputeBounds()");
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -133,4 +133,4 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plMeshResource, plMeshResourceDescriptor)
   return res;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshResource);

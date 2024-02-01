@@ -1,6 +1,6 @@
 #include <Foundation/FoundationPCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#if PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <Foundation/Basics/Platform/Android/AndroidUtils.h>
 #  include <android_native_app_glue.h>
 
@@ -43,4 +43,3 @@ jobject plAndroidUtils::GetAndroidNativeActivity()
 #endif
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Basics_Platform_Android_AndroidUtils);

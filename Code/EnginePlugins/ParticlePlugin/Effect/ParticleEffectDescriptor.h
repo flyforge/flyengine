@@ -4,9 +4,9 @@
 #include <ParticlePlugin/Declarations.h>
 #include <ParticlePlugin/ParticlePluginDLL.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEffectDescriptor final : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleEffectDescriptor final : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleEffectDescriptor, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleEffectDescriptor, plReflectedClass);
 
 public:
   plParticleEffectDescriptor();
@@ -21,8 +21,8 @@ public:
   const plHybridArray<plParticleEventReactionFactory*, 4>& GetEventReactions() const { return m_EventReactions; }
 
 
-  void Save(plStreamWriter& stream) const;
-  void Load(plStreamReader& stream);
+  void Save(plStreamWriter& inout_stream) const;
+  void Load(plStreamReader& inout_stream);
 
   void ClearSystems();
   void ClearEventReactions();

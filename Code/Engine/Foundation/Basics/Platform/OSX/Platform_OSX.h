@@ -1,6 +1,6 @@
 #pragma once
 
-#if PLASMA_DISABLED(PLASMA_PLATFORM_OSX)
+#if PL_DISABLED(PL_PLATFORM_OSX)
 #  error "This header should only be included on OSX"
 #endif
 
@@ -15,6 +15,7 @@
 
 #include <Foundation/Basics/Compiler/Clang/Clang.h>
 #include <Foundation/Basics/Compiler/GCC/GCC.h>
+#include <Foundation/Basics/Compiler/MSVC/MSVC.h>
 
-#undef PLASMA_PLATFORM_LITTLE_ENDIAN
-#define PLASMA_PLATFORM_LITTLE_ENDIAN PLASMA_ON
+#undef PL_PLATFORM_LITTLE_ENDIAN
+#define PL_PLATFORM_LITTLE_ENDIAN PL_ON

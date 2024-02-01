@@ -6,7 +6,7 @@
 
 struct ID3D11Buffer;
 
-class PLASMA_RENDERERDX11_DLL plGALBufferDX11 : public plGALBuffer
+class PL_RENDERERDX11_DLL plGALBufferDX11 : public plGALBuffer
 {
 public:
   ID3D11Buffer* GetDXBuffer() const;
@@ -26,9 +26,9 @@ protected:
 
   virtual void SetDebugNamePlatform(const char* szName) const override;
 
-  ID3D11Buffer* m_pDXBuffer;
+  ID3D11Buffer* m_pDXBuffer = nullptr;
 
-  DXGI_FORMAT m_IndexFormat; // Only applicable for index buffers
+  DXGI_FORMAT m_IndexFormat = DXGI_FORMAT_UNKNOWN; // Only applicable for index buffers
 };
 
 #include <RendererDX11/Resources/Implementation/BufferDX11_inl.h>

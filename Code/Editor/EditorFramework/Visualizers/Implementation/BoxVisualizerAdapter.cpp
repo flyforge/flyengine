@@ -11,11 +11,11 @@ void plBoxVisualizerAdapter::Finalize()
 {
   auto* pDoc = m_pObject->GetDocumentObjectManager()->GetDocument()->GetMainDocument();
   const plAssetDocument* pAssetDocument = plDynamicCast<const plAssetDocument*>(pDoc);
-  PLASMA_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
+  PL_ASSERT_DEV(pAssetDocument != nullptr, "Visualizers are only supported in plAssetDocument.");
 
   const plBoxVisualizerAttribute* pAttr = static_cast<const plBoxVisualizerAttribute*>(m_pVisualizerAttr);
 
-  m_hGizmo.ConfigureHandle(nullptr, PlasmaEngineGizmoHandleType::LineBox, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
+  m_hGizmo.ConfigureHandle(nullptr, plEngineGizmoHandleType::LineBox, pAttr->m_Color, plGizmoFlags::Visualizer | plGizmoFlags::ShowInOrtho);
 
   pAssetDocument->AddSyncObject(&m_hGizmo);
   m_hGizmo.SetVisible(m_bVisualizerIsVisible);
@@ -37,8 +37,8 @@ void plBoxVisualizerAdapter::Update()
   if (!pAttr->GetColorProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).IgnoreResult();
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plBoxVisualizerAttribute 'color'");
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetColorProperty()), value).AssertSuccess();
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plColor>(), "Invalid property bound to plBoxVisualizerAttribute 'color'");
     m_hGizmo.SetColor(value.ConvertTo<plColor>() * pAttr->m_Color);
   }
 
@@ -47,9 +47,9 @@ void plBoxVisualizerAdapter::Update()
   if (!pAttr->GetOffsetProperty().IsEmpty())
   {
     plVariant value;
-    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).IgnoreResult();
+    pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetOffsetProperty()), value).AssertSuccess();
 
-    PLASMA_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plVec3>(), "Invalid property bound to plBoxVisualizerAttribute 'offset'");
+    PL_ASSERT_DEBUG(value.IsValid() && value.CanConvertTo<plVec3>(), "Invalid property bound to plBoxVisualizerAttribute 'offset'");
 
     if (m_vPositionOffset.IsZero())
       m_vPositionOffset = value.ConvertTo<plVec3>();
@@ -74,7 +74,7 @@ void plBoxVisualizerAdapter::UpdateGizmoTransform()
   t.m_vPosition = m_vPositionOffset;
   t.m_qRotation = m_qRotation;
 
-  plVec3 vOffset = plVec3::ZeroVector();
+  plVec3 vOffset = plVec3::MakeZero();
 
   if (m_Anchor.IsSet(plVisualizerAnchor::PosX))
     vOffset.x -= t.m_vScale.x * 0.5f;

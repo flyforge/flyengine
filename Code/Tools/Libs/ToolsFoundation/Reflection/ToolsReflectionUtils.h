@@ -10,7 +10,7 @@ class plAbstractObjectGraph;
 /// \brief Helper functions for handling reflection related operations.
 ///
 /// Also check out plToolsSerializationUtils for related functionality.
-class PLASMA_TOOLSFOUNDATION_DLL plToolsReflectionUtils
+class PL_TOOLSFOUNDATION_DLL plToolsReflectionUtils
 {
 public:
   /// \brief Returns the default value for the entire property as it is stored on the editor side.
@@ -25,5 +25,5 @@ public:
 
   static void GatherObjectTypes(const plDocumentObject* pObject, plSet<const plRTTI*>& inout_types);
 
-  static bool DependencySortTypeDescriptorArray(plDynamicArray<plReflectedTypeDescriptor*>& descriptors);
+  static bool DependencySortTypeDescriptorArray(plDynamicArray<plReflectedTypeDescriptor*>& ref_descriptors);
 };

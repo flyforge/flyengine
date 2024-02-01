@@ -1,27 +1,29 @@
 #include <GuiFoundation/GuiFoundationPCH.h>
 
-#include <Foundation/Algorithm/HashingUtils.h>
-#include <Foundation/Configuration/Startup.h>
-#include <Foundation/Types/VarianceTypes.h>
-#include <Foundation/Types/VariantTypeRegistry.h>
+#include <GuiFoundation/PropertyGrid/Implementation/ExpressionPropertyWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/Implementation/PropertyWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/Implementation/TagSetPropertyWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/Implementation/VarianceWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyGridWidget.moc.h>
 #include <GuiFoundation/PropertyGrid/PropertyMetaState.h>
 #include <GuiFoundation/Widgets/CollapsibleGroupBox.moc.h>
+#include <GuiFoundation/Widgets/CurveEditData.h>
+
 #include <ToolsFoundation/Document/Document.h>
 
+#include <Foundation/Algorithm/HashingUtils.h>
+#include <Foundation/CodeUtils/Expression/ExpressionDeclarations.h>
+#include <Foundation/Configuration/Startup.h>
 #include <Foundation/Profiling/Profiling.h>
-#include <GuiFoundation/Widgets/CurveEditData.h>
-#include <QLayout>
-#include <QScrollArea>
+#include <Foundation/Types/VarianceTypes.h>
+#include <Foundation/Types/VariantTypeRegistry.h>
+
 
 plRttiMappedObjectFactory<plQtPropertyWidget> plQtPropertyGridWidget::s_Factory;
 
 static plQtPropertyWidget* StandardTypeCreator(const plRTTI* pRtti)
 {
-  PLASMA_ASSERT_DEV(pRtti->GetTypeFlags().IsSet(plTypeFlags::StandardType), "This function is only valid for StandardType properties, regardless of category");
+  PL_ASSERT_DEV(pRtti->GetTypeFlags().IsSet(plTypeFlags::StandardType), "This function is only valid for StandardType properties, regardless of category");
 
   if (pRtti == plGetStaticRTTI<plVariant>())
   {
@@ -93,9 +95,6 @@ static plQtPropertyWidget* StandardTypeCreator(const plRTTI* pRtti)
     case plVariant::Type::String:
       return new plQtPropertyEditorLineEditWidget();
 
-    case plVariant::Type::StringView:
-      return new plQtPropertyEditorLineEditWidget();
-
     case plVariant::Type::Color:
     case plVariant::Type::ColorGamma:
       return new plQtPropertyEditorColorWidget();
@@ -107,7 +106,7 @@ static plQtPropertyWidget* StandardTypeCreator(const plRTTI* pRtti)
       return new plQtPropertyEditorLineEditWidget();
 
     default:
-      PLASMA_REPORT_FAILURE("No default property widget available for type: {0}", pRtti->GetTypeName());
+      PL_REPORT_FAILURE("No default property widget available for type: {0}", pRtti->GetTypeName());
       return nullptr;
   }
 }
@@ -137,8 +136,13 @@ static plQtPropertyWidget* Curve1DTypeCreator(const plRTTI* pRtti)
   return new plQtPropertyEditorCurve1DWidget();
 }
 
+static plQtPropertyWidget* ExpressionTypeCreator(const plRTTI* pRtti)
+{
+  return new plQtPropertyEditorExpressionWidget();
+}
+
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "ToolsFoundation", "PropertyMetaState"
@@ -169,7 +173,6 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plUInt64>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plConstCharPtr>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plString>(), StandardTypeCreator);
-    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plStringView>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plTime>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plColor>(), StandardTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plColorGammaUB>(), StandardTypeCreator);
@@ -184,8 +187,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plTagSetWidgetAttribute>(), TagSetCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plVarianceTypeBase>(), VarianceTypeCreator);
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plSingleCurveData>(), Curve1DTypeCreator);
-
-
+    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plExpressionWidgetAttribute>(), ExpressionTypeCreator);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
@@ -218,14 +220,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, PropertyGrid)
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plColorGammaUB>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plAngle>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plVariant>());
+    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plHashedString>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plEnumBase>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plBitflagsBase>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plTagSetWidgetAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plVarianceTypeBase>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plSingleCurveData>());
+    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExpressionWidgetAttribute>());
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plRttiMappedObjectFactory<plQtPropertyWidget>& plQtPropertyGridWidget::GetFactory()
@@ -461,7 +465,7 @@ plQtPropertyWidget* plQtPropertyGridWidget::CreatePropertyWidget(const plAbstrac
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 
@@ -531,7 +535,7 @@ void plQtPropertyGridWidget::TypeEventHandler(const plPhantomRttiManagerEvent& e
   if (e.m_Type == plPhantomRttiManagerEvent::Type::TypeAdded)
     return;
 
-  PLASMA_PROFILE_SCOPE("TypeEventHandler");
+  PL_PROFILE_SCOPE("TypeEventHandler");
   if (m_bBindToSelectionManager)
     SetSelection(m_pDocument->GetSelectionManager()->GetSelection());
   else

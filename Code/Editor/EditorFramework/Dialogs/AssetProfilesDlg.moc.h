@@ -13,13 +13,13 @@ class plQtDocumentTreeView;
 class plDocument;
 struct plDocumentObjectPropertyEvent;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtAssetProfilesDlg : public QDialog, public Ui_plQtAssetProfilesDlg
+class PL_EDITORFRAMEWORK_DLL plQtAssetProfilesDlg : public QDialog, public Ui_plQtAssetProfilesDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtAssetProfilesDlg(QWidget* parent);
+  plQtAssetProfilesDlg(QWidget* pParent);
   ~plQtAssetProfilesDlg();
 
   plUInt32 m_uiActiveConfig = 0;

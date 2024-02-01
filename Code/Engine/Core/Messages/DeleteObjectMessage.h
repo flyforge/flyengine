@@ -3,9 +3,9 @@
 #include <Core/CoreDLL.h>
 #include <Foundation/Communication/Message.h>
 
-struct PLASMA_CORE_DLL plMsgDeleteGameObject : public plMessage
+struct PL_CORE_DLL plMsgDeleteGameObject : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgDeleteGameObject, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgDeleteGameObject, plMessage);
 
   /// \brief If set to true, any parent/ancestor that has no other children or components will also be deleted.
   bool m_bDeleteEmptyParents = true;

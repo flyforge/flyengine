@@ -1,13 +1,13 @@
 #include <RendererCore/RendererCorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <RendererCore/Meshes/CpuMeshResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCpuMeshResource, 1, plRTTIDefaultAllocator<plCpuMeshResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCpuMeshResource, 1, plRTTIDefaultAllocator<plCpuMeshResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plCpuMeshResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plCpuMeshResource);
 // clang-format on
 
 plCpuMeshResource::plCpuMeshResource()
@@ -73,7 +73,7 @@ void plCpuMeshResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plCpuMeshResource, plMeshResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plCpuMeshResource, plMeshResourceDescriptor)
 {
   m_Descriptor = descriptor;
 
@@ -87,4 +87,4 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plCpuMeshResource, plMeshResourceDescriptor
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_CpuMeshResource);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_CpuMeshResource);

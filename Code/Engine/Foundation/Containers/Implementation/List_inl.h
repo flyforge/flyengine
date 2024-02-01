@@ -20,7 +20,7 @@ plListBase<T>::ListElement::ListElement(const T& data)
 // **** plListBase ****
 
 template <typename T>
-plListBase<T>::plListBase(plAllocatorBase* pAllocator)
+plListBase<T>::plListBase(plAllocator* pAllocator)
   : m_End(reinterpret_cast<ListElement*>(&m_Last))
   , m_uiCount(0)
   , m_Elements(pAllocator)
@@ -31,7 +31,7 @@ plListBase<T>::plListBase(plAllocatorBase* pAllocator)
 }
 
 template <typename T>
-plListBase<T>::plListBase(const plListBase<T>& cc, plAllocatorBase* pAllocator)
+plListBase<T>::plListBase(const plListBase<T>& cc, plAllocator* pAllocator)
   : m_End(reinterpret_cast<ListElement*>(&m_Last))
   , m_uiCount(0)
   , m_Elements(pAllocator)
@@ -72,7 +72,7 @@ typename plListBase<T>::ListElement* plListBase<T>::AcquireNode(const T& data)
     m_pFreeElementStack = m_pFreeElementStack->m_pNext;
   }
 
-  plMemoryUtils::Construct<ListElement>(pNode, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes, ListElement>(pNode, 1);
   pNode->m_Data = data;
   return pNode;
 }
@@ -101,49 +101,49 @@ void plListBase<T>::ReleaseNode(ListElement* pNode)
 
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetIterator()
+PL_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetIterator()
 {
   return Iterator(m_First.m_pNext);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetLastIterator()
+PL_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetLastIterator()
 {
   return Iterator(m_Last.m_pPrev);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetEndIterator()
+PL_ALWAYS_INLINE typename plListBase<T>::Iterator plListBase<T>::GetEndIterator()
 {
   return m_End;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetIterator() const
+PL_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetIterator() const
 {
   return ConstIterator(m_First.m_pNext);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetLastIterator() const
+PL_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetLastIterator() const
 {
   return ConstIterator(m_Last.m_pPrev);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetEndIterator() const
+PL_ALWAYS_INLINE typename plListBase<T>::ConstIterator plListBase<T>::GetEndIterator() const
 {
   return m_End;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUInt32 plListBase<T>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plListBase<T>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plListBase<T>::IsEmpty() const
+PL_ALWAYS_INLINE bool plListBase<T>::IsEmpty() const
 {
   return (m_uiCount == 0);
 }
@@ -159,72 +159,72 @@ void plListBase<T>::Clear()
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE void plListBase<T>::Compact()
+PL_FORCE_INLINE void plListBase<T>::Compact()
 {
   m_Elements.Compact();
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE T& plListBase<T>::PeekFront()
+PL_FORCE_INLINE T& plListBase<T>::PeekFront()
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   return m_First.m_pNext->m_Data;
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE T& plListBase<T>::PeekBack()
+PL_FORCE_INLINE T& plListBase<T>::PeekBack()
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   return m_Last.m_pPrev->m_Data;
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE const T& plListBase<T>::PeekFront() const
+PL_FORCE_INLINE const T& plListBase<T>::PeekFront() const
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   return m_First.m_pNext->m_Data;
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE const T& plListBase<T>::PeekBack() const
+PL_FORCE_INLINE const T& plListBase<T>::PeekBack() const
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   return m_Last.m_pPrev->m_Data;
 }
 
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plListBase<T>::PushBack()
+PL_ALWAYS_INLINE void plListBase<T>::PushBack()
 {
   PushBack(T());
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plListBase<T>::PushBack(const T& element)
+PL_ALWAYS_INLINE void plListBase<T>::PushBack(const T& element)
 {
   Insert(GetEndIterator(), element);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plListBase<T>::PushFront()
+PL_ALWAYS_INLINE void plListBase<T>::PushFront()
 {
   PushFront(T());
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plListBase<T>::PushFront(const T& element)
+PL_ALWAYS_INLINE void plListBase<T>::PushFront(const T& element)
 {
   Insert(GetIterator(), element);
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE void plListBase<T>::PopBack()
+PL_FORCE_INLINE void plListBase<T>::PopBack()
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   Remove(Iterator(m_Last.m_pPrev));
 }
@@ -232,7 +232,7 @@ PLASMA_FORCE_INLINE void plListBase<T>::PopBack()
 template <typename T>
 void plListBase<T>::PopFront()
 {
-  PLASMA_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEBUG(!IsEmpty(), "The container is empty.");
 
   Remove(Iterator(m_First.m_pNext));
 }
@@ -240,7 +240,7 @@ void plListBase<T>::PopFront()
 template <typename T>
 typename plListBase<T>::Iterator plListBase<T>::Insert(const Iterator& pos, const T& data)
 {
-  PLASMA_ASSERT_DEV(pos.m_pElement != nullptr, "The iterator (pos) is invalid.");
+  PL_ASSERT_DEV(pos.m_pElement != nullptr, "The iterator (pos) is invalid.");
 
   ++m_uiCount;
   ListElement* elem = AcquireNode(data);
@@ -257,7 +257,7 @@ typename plListBase<T>::Iterator plListBase<T>::Insert(const Iterator& pos, cons
 template <typename T>
 void plListBase<T>::Insert(const Iterator& pos, ConstIterator first, const ConstIterator& last)
 {
-  PLASMA_ASSERT_DEV(pos.m_pElement != nullptr && first.m_pElement != nullptr && last.m_pElement != nullptr, "One of the iterators is invalid.");
+  PL_ASSERT_DEV(pos.m_pElement != nullptr && first.m_pElement != nullptr && last.m_pElement != nullptr, "One of the iterators is invalid.");
 
   while (first != last)
   {
@@ -269,8 +269,8 @@ void plListBase<T>::Insert(const Iterator& pos, ConstIterator first, const Const
 template <typename T>
 typename plListBase<T>::Iterator plListBase<T>::Remove(const Iterator& pos)
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The container is empty.");
-  PLASMA_ASSERT_DEV(pos.m_pElement != nullptr, "The iterator (pos) is invalid.");
+  PL_ASSERT_DEV(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEV(pos.m_pElement != nullptr, "The iterator (pos) is invalid.");
 
   ListElement* pPrev = pos.m_pElement->m_pPrev;
   ListElement* pNext = pos.m_pElement->m_pNext;
@@ -286,8 +286,8 @@ typename plListBase<T>::Iterator plListBase<T>::Remove(const Iterator& pos)
 template <typename T>
 typename plListBase<T>::Iterator plListBase<T>::Remove(Iterator first, const Iterator& last)
 {
-  PLASMA_ASSERT_DEV(!IsEmpty(), "The container is empty.");
-  PLASMA_ASSERT_DEV(first.m_pElement != nullptr && last.m_pElement != nullptr, "An iterator is invalid.");
+  PL_ASSERT_DEV(!IsEmpty(), "The container is empty.");
+  PL_ASSERT_DEV(first.m_pElement != nullptr && last.m_pElement != nullptr, "An iterator is invalid.");
 
   while (first != last)
     first = Remove(first);
@@ -329,12 +329,6 @@ bool plListBase<T>::operator==(const plListBase<T>& rhs) const
   return true;
 }
 
-template <typename T>
-bool plListBase<T>::operator!=(const plListBase<T>& rhs) const
-{
-  return !operator==(rhs);
-}
-
 template <typename T, typename A>
 plList<T, A>::plList()
   : plListBase<T>(A::GetAllocator())
@@ -342,7 +336,7 @@ plList<T, A>::plList()
 }
 
 template <typename T, typename A>
-plList<T, A>::plList(plAllocatorBase* pAllocator)
+plList<T, A>::plList(plAllocator* pAllocator)
   : plListBase<T>(pAllocator)
 {
 }

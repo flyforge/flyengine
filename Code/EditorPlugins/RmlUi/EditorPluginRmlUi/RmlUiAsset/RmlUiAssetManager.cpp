@@ -3,8 +3,8 @@
 #include <EditorPluginRmlUi/RmlUiAsset/RmlUiAssetManager.h>
 #include <EditorPluginRmlUi/RmlUiAsset/RmlUiAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiAssetDocumentManager, 1, plRTTIDefaultAllocator<plRmlUiAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiAssetDocumentManager, 1, plRTTIDefaultAllocator<plRmlUiAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plRmlUiAssetDocumentManager::plRmlUiAssetDocumentManager()
 {
@@ -13,7 +13,7 @@ plRmlUiAssetDocumentManager::plRmlUiAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "RmlUi";
   m_DocTypeDesc.m_sFileExtension = "plRmlUiAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/RmlUi.svg";
-  m_DocTypeDesc.m_sAssetCategory = "UI";
+  m_DocTypeDesc.m_sAssetCategory = "Input";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plRmlUiAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Rml_UI");
@@ -35,7 +35,7 @@ void plRmlUiAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plRmlUiAssetDocument>())
       {
-        plQtRmlUiAssetDocumentWindow* pDocWnd = new plQtRmlUiAssetDocumentWindow(static_cast<plRmlUiAssetDocument*>(e.m_pDocument));
+        new plQtRmlUiAssetDocumentWindow(static_cast<plRmlUiAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -46,9 +46,9 @@ void plRmlUiAssetDocumentManager::OnDocumentManagerEvent(const plDocumentManager
 }
 
 void plRmlUiAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plRmlUiAssetDocument(szPath);
+  out_pDocument = new plRmlUiAssetDocument(sPath);
 }
 
 void plRmlUiAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

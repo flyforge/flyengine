@@ -9,7 +9,7 @@ class plQtSettingsTab : public plQtDocumentWindow, Ui_SettingsTab
 {
   Q_OBJECT
 
-  PLASMA_DECLARE_SINGLETON(plQtSettingsTab);
+  PL_DECLARE_SINGLETON(plQtSettingsTab);
 
 public:
   plQtSettingsTab();

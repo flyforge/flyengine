@@ -1,6 +1,6 @@
 #include <KrautPlugin/KrautPluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <KrautPlugin/Resources/KrautTreeResource.h>
 #include <RendererCore/Material/MaterialResource.h>
 #include <RendererCore/Meshes/MeshBufferUtils.h>
@@ -13,16 +13,16 @@
 #endif
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeResource, 1, plRTTIDefaultAllocator<plKrautTreeResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeResource, 1, plRTTIDefaultAllocator<plKrautTreeResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plKrautTreeResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plKrautTreeResource);
 // clang-format on
 
 plKrautTreeResource::plKrautTreeResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
-  m_Details.m_Bounds.SetInvalid();
+  m_Details.m_Bounds = plBoundingBoxSphere::MakeInvalid();
 }
 
 plResourceLoadDesc plKrautTreeResource::UnloadData(Unload WhatToUnload)
@@ -81,7 +81,7 @@ void plKrautTreeResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryGPU = 0;
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDescriptor)
 {
   m_TreeLODs.Clear();
   m_Details = descriptor.m_Details;
@@ -110,9 +110,6 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDes
     const plUInt32 uiNumVertices = lodSrc.m_Vertices.GetCount();
     const plUInt32 uiNumTriangles = lodSrc.m_Triangles.GetCount();
     const plUInt32 uiSubMeshes = lodSrc.m_SubMeshes.GetCount();
-
-    // if (uiNumVertices == 0 || uiNumTriangles == 0 || uiSubMeshes == 0)
-    //   continue;
 
     buffer.AddStream(plGALVertexAttributeSemantic::Position, plGALResourceFormat::XYZFloat);                                                // 0
     buffer.AddStream(plGALVertexAttributeSemantic::TexCoord0, plGALResourceFormat::XYFloat);                                                // 1
@@ -165,7 +162,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDes
       md.SetMaterial(mat, descriptor.m_Materials[mat].m_sMaterial);
     }
 
-    sResName.Format("{0}_{1}_LOD{2}", GetResourceID(), GetCurrentResourceChangeCounter(), lodIdx);
+    sResName.SetFormat("{0}_{1}_LOD{2}", GetResourceID(), GetCurrentResourceChangeCounter(), lodIdx);
 
     if (GetResourceDescription().IsEmpty())
     {
@@ -173,7 +170,7 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDes
     }
     else
     {
-      sResDesc.Format("{0}_{1}_LOD{2}", GetResourceDescription(), GetCurrentResourceChangeCounter(), lodIdx);
+      sResDesc.SetFormat("{0}_{1}_LOD{2}", GetResourceDescription(), GetCurrentResourceChangeCounter(), lodIdx);
     }
 
     lodDst.m_hMesh = plResourceManager::GetExistingResource<plMeshResource>(sResName);
@@ -204,7 +201,7 @@ void plKrautTreeResourceDescriptor::Save(plStreamWriter& inout_stream0) const
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
   uiCompressionMode = 1;
-  plCompressedStreamWriterZstd stream(&inout_stream0, plCompressedStreamWriterZstd::Compression::Average);
+  plCompressedStreamWriterZstd stream(&inout_stream0, 0, plCompressedStreamWriterZstd::Compression::Average);
 #else
   plStreamWriter& stream = stream0;
 #endif
@@ -284,7 +281,7 @@ plResult plKrautTreeResourceDescriptor::Load(plStreamReader& inout_stream0)
   inout_stream0 >> uiVersion;
 
   if (uiVersion < 15)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt8 uiCompressionMode = 0;
   inout_stream0 >> uiCompressionMode;
@@ -307,12 +304,12 @@ plResult plKrautTreeResourceDescriptor::Load(plStreamReader& inout_stream0)
       break;
 #else
       plLog::Error("Kraut tree is compressed with zstandard, but support for this compressor is not compiled in.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 #endif
 
     default:
       plLog::Error("Kraut tree is compressed with an unknown algorithm.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   plStreamReader& stream = *pCompressor;
@@ -410,5 +407,5 @@ plResult plKrautTreeResourceDescriptor::Load(plStreamReader& inout_stream0)
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

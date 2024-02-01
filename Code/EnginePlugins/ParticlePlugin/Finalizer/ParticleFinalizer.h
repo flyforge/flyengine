@@ -10,9 +10,9 @@ class plParticleSystemInstance;
 class plParticleFinalizer;
 
 /// \brief Base class for all particle Finalizers
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizerFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizerFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetFinalizerType() const = 0;
@@ -21,9 +21,9 @@ public:
   plParticleFinalizer* CreateFinalizer(plParticleSystemInstance* pOwner) const;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizer : public plParticleModule
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizer : public plParticleModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizer, plParticleModule);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizer, plParticleModule);
 
   friend class plParticleSystemInstance;
 

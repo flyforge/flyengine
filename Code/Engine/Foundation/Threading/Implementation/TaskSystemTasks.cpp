@@ -29,9 +29,12 @@ plTaskGroupID plTaskSystem::StartSingleTask(
 void plTaskSystem::TaskHasFinished(plSharedPtr<plTask>&& pTask, plTaskGroup* pGroup)
 {
   // call task finished callback and deallocate the task (if last reference)
-  if (pTask && pTask->m_OnTaskFinished.IsValid() && pTask->m_iRemainingRuns == 0)
+  if (pTask && pTask->m_iRemainingRuns == 0)
   {
-    pTask->m_OnTaskFinished(pTask);
+    if (pTask->m_OnTaskFinished.IsValid())
+    {
+      pTask->m_OnTaskFinished(pTask);
+    }
 
     // make sure to clear the task sharedptr BEFORE we mark the task (group) as finished,
     // so that if this is the last reference, the task gets deallocated first
@@ -47,7 +50,7 @@ void plTaskSystem::TaskHasFinished(plSharedPtr<plTask>&& pTask, plTaskGroup* pGr
       // see plTaskGroup::WaitForFinish() for why we need this lock here
       // without it, there would be a race condition between these two places, reading and writing m_uiGroupCounter and waiting/signaling
       // m_CondVarGroupFinished
-      PLASMA_LOCK(pGroup->m_CondVarGroupFinished);
+      PL_LOCK(pGroup->m_CondVarGroupFinished);
 
       groupCounter = pGroup->m_uiGroupCounter;
 
@@ -55,20 +58,20 @@ void plTaskSystem::TaskHasFinished(plSharedPtr<plTask>&& pTask, plTaskGroup* pGr
       pGroup->m_uiGroupCounter += 2;
     }
 
-    // wake up all threads that are waiting for this group
-    pGroup->m_CondVarGroupFinished.SignalAll();
-
     {
-      PLASMA_LOCK(s_TaskSystemMutex);
+      PL_LOCK(s_TaskSystemMutex);
+
+      // unless an outside reference is held onto a task, this will deallocate the tasks
+      pGroup->m_Tasks.Clear();
 
       for (plUInt32 dep = 0; dep < pGroup->m_OthersDependingOnMe.GetCount(); ++dep)
       {
         DependencyHasFinished(pGroup->m_OthersDependingOnMe[dep].m_pTaskGroup);
       }
-
-      // unless an outside reference is held onto a task, this will deallocate the tasks
-      pGroup->m_Tasks.Clear();
     }
+
+    // wake up all threads that are waiting for this group
+    pGroup->m_CondVarGroupFinished.SignalAll();
 
     if (pGroup->m_OnFinishedCallback.IsValid())
     {
@@ -88,10 +91,10 @@ plTaskSystem::TaskData plTaskSystem::GetNextTask(plTaskPriority::Enum FirstPrior
 {
   // this is the central function that selects tasks for the worker threads to work on
 
-  PLASMA_ASSERT_DEV(FirstPriority >= plTaskPriority::EarlyThisFrame && LastPriority < plTaskPriority::ENUM_COUNT, "Priority Range is invalid: {0} to {1}",
+  PL_ASSERT_DEV(FirstPriority >= plTaskPriority::EarlyThisFrame && LastPriority < plTaskPriority::ENUM_COUNT, "Priority Range is invalid: {0} to {1}",
     FirstPriority, LastPriority);
 
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 
   // go through all the task lists that this thread is willing to work on
   for (plUInt32 prio = FirstPriority; prio <= (plUInt32)LastPriority; ++prio)
@@ -110,7 +113,7 @@ plTaskSystem::TaskData plTaskSystem::GetNextTask(plTaskPriority::Enum FirstPrior
 
   if (pWorkerState)
   {
-    PLASMA_VERIFY(pWorkerState->Set((int)plTaskWorkerState::Idle) == (int)plTaskWorkerState::Active, "Corrupt Worker State");
+    PL_VERIFY(pWorkerState->Set((int)plTaskWorkerState::Idle) == (int)plTaskWorkerState::Active, "Corrupt Worker State");
   }
 
   return TaskData();
@@ -129,7 +132,7 @@ bool plTaskSystem::ExecuteTask(plTaskPriority::Enum FirstPriority, plTaskPriorit
 
   if (bOnlyTasksThatNeverWait && td.m_pTask->m_NestingMode != plTaskNesting::Never)
   {
-    PLASMA_ASSERT_DEV(td.m_pBelongsToGroup == WaitingForGroup.m_pTaskGroup, "");
+    PL_ASSERT_DEV(td.m_pBelongsToGroup == WaitingForGroup.m_pTaskGroup, "");
   }
 
   tl_TaskWorkerInfo.m_bAllowNestedTasks = td.m_pTask->m_NestingMode != plTaskNesting::Never;
@@ -148,26 +151,26 @@ bool plTaskSystem::ExecuteTask(plTaskPriority::Enum FirstPriority, plTaskPriorit
 plResult plTaskSystem::CancelTask(const plSharedPtr<plTask>& pTask, plOnTaskRunning::Enum onTaskRunning)
 {
   if (pTask->IsTaskFinished())
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   // pTask may actually finish between here and the lock below
   // in that case we will return failure, as in we had to 'wait' for a task,
   // but it will be handled correctly
 
-  PLASMA_PROFILE_SCOPE("CancelTask");
+  PL_PROFILE_SCOPE("CancelTask");
 
   // we set the cancel flag, to make sure that tasks that support canceling will terminate asap
   pTask->m_bCancelExecution = true;
 
   {
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
 
     // if the task is still in the queue of its group, it had not yet been scheduled
     if (!pTask->m_bTaskIsScheduled && pTask->m_BelongsToGroup.m_pTaskGroup->m_Tasks.RemoveAndSwap(pTask))
     {
       // we set the task to finished, even though it was not executed
       pTask->m_iRemainingRuns = 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     // check if the task has already been scheduled for execution
@@ -181,14 +184,14 @@ plResult plTaskSystem::CancelTask(const plSharedPtr<plTask>& pTask, plOnTaskRunn
         {
           if (it->m_pTask == pTask)
           {
-            s_pState->m_Tasks[i].Remove(it);
-
             // we set the task to finished, even though it was not executed
             pTask->m_iRemainingRuns = 0;
 
             // tell the system that one task of that group is 'finished', to ensure its dependencies will get scheduled
             TaskHasFinished(std::move(it->m_pTask), it->m_pBelongsToGroup);
-            return PLASMA_SUCCESS;
+
+            s_pState->m_Tasks[i].Remove(it);
+            return PL_SUCCESS;
           }
 
           ++it;
@@ -206,7 +209,7 @@ plResult plTaskSystem::CancelTask(const plSharedPtr<plTask>& pTask, plOnTaskRunn
       { return pTask->IsTaskFinished(); });
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
@@ -278,7 +281,7 @@ void plTaskSystem::ReprioritizeFrameTasks()
 
 void plTaskSystem::ExecuteSomeFrameTasks(plTime smoothFrameTime)
 {
-  PLASMA_PROFILE_SCOPE("ExecuteSomeFrameTasks");
+  PL_PROFILE_SCOPE("ExecuteSomeFrameTasks");
 
   // 'SomeFrameMainThread' tasks are usually used to upload resources that have been loaded in the background
   // they do not need to be executed right away, but the earlier, the better
@@ -313,7 +316,7 @@ void plTaskSystem::ExecuteSomeFrameTasks(plTime smoothFrameTime)
   plUInt32 uiNumTasksTodo = 0;
 
   {
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
     uiNumTasksTodo = s_pState->m_Tasks[plTaskPriority::SomeFrameMainThread].GetCount();
   }
 
@@ -335,7 +338,7 @@ void plTaskSystem::ExecuteSomeFrameTasks(plTime smoothFrameTime)
     // therefore at some point we will start executing these tasks, no matter how low the frame rate is
     //
     // this gives us some buffer to smooth out performance drops
-    s_FrameTimeThreshold += plTime::Milliseconds(0.2);
+    s_FrameTimeThreshold += plTime::MakeFromMilliseconds(0.2);
   }
 
   // if the queue is really full, we have to guarantee more progress
@@ -354,7 +357,7 @@ void plTaskSystem::ExecuteSomeFrameTasks(plTime smoothFrameTime)
 
 void plTaskSystem::FinishFrameTasks()
 {
-  PLASMA_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function must be executed on the main thread.");
+  PL_ASSERT_DEV(plThreadUtils::IsMainThread(), "This function must be executed on the main thread.");
 
   // make sure all 'main thread' and 'short' tasks are either finished or being worked on by other threads already
   {
@@ -379,7 +382,7 @@ void plTaskSystem::FinishFrameTasks()
   // all the important tasks for this frame should be finished or worked on by now
   // so we can now re-prioritize the tasks for the next frame
   {
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
 
     ReprioritizeFrameTasks();
   }
@@ -393,7 +396,7 @@ void plTaskSystem::FinishFrameTasks()
     const plTime tDiff = tNow - s_LastFrameUpdate;
 
     // prevent division by zero (inside ComputeThreadUtilization)
-    if (tDiff > plTime::Seconds(0.0))
+    if (tDiff > plTime::MakeFromSeconds(0.0))
     {
       s_LastFrameUpdate = tNow;
 
@@ -411,4 +414,3 @@ void plTaskSystem::FinishFrameTasks()
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystemTasks);

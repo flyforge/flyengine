@@ -91,7 +91,7 @@ plResult plTypeScriptBinding::Init_GameObject()
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetGlobalDirForwards", __CPP_GameObject_GetX_Vec3, 1, GameObject_X::GlobalDirForwards);
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetGlobalDirRight", __CPP_GameObject_GetX_Vec3, 1, GameObject_X::GlobalDirRight);
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetGlobalDirUp", __CPP_GameObject_GetX_Vec3, 1, GameObject_X::GlobalDirUp);
-  m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetVelocity", __CPP_GameObject_GetX_Vec3, 1, GameObject_X::LinearVelocity);
+  m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetLinearVelocity", __CPP_GameObject_GetX_Vec3, 1, GameObject_X::LinearVelocity);
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_SetName", __CPP_GameObject_SetString, 2, 0);
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_GetName", __CPP_GameObject_GetString, 1, 0);
   m_Duk.RegisterGlobalFunction("__CPP_GameObject_SetGlobalKey", __CPP_GameObject_SetString, 2, 1);
@@ -110,7 +110,7 @@ plResult plTypeScriptBinding::Init_GameObject()
   m_Duk.RegisterGlobalFunctionWithVarArgs("__CPP_GameObject_HasAnyTags", __CPP_GameObject_CheckTags, 0);
   m_Duk.RegisterGlobalFunctionWithVarArgs("__CPP_GameObject_HasAllTags", __CPP_GameObject_CheckTags, 1);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plGameObjectHandle plTypeScriptBinding::RetrieveGameObjectHandle(duk_context* pDuk, plInt32 iObjIdx /*= 0 */)
@@ -135,17 +135,17 @@ plGameObject* plTypeScriptBinding::ExpectGameObject(duk_context* pDuk, plInt32 i
   plWorld* pWorld = plTypeScriptBinding::RetrieveWorld(pDuk);
 
   plGameObject* pGameObject = nullptr;
-  PLASMA_VERIFY(pWorld->TryGetObject(hObject, pGameObject), "Invalid plGameObject");
+  PL_VERIFY(pWorld->TryGetObject(hObject, pGameObject), "Invalid plGameObject");
 
   return pGameObject;
 }
 
-bool plTypeScriptBinding::RegisterGameObject(plGameObjectHandle handle, plUInt32& out_uiStashIdx)
+bool plTypeScriptBinding::RegisterGameObject(plGameObjectHandle hHandle, plUInt32& out_uiStashIdx)
 {
-  if (handle.IsInvalidated())
+  if (hHandle.IsInvalidated())
     return false;
 
-  plUInt32& uiStashIdx = m_GameObjectToStashIdx[handle];
+  plUInt32& uiStashIdx = m_GameObjectToStashIdx[hHandle];
 
   if (uiStashIdx != 0)
   {
@@ -157,7 +157,7 @@ bool plTypeScriptBinding::RegisterGameObject(plGameObjectHandle handle, plUInt32
 
   plDuktapeHelper duk(m_Duk);                                     // [ ]
   duk.PushGlobalObject();                                         // [ global ]
-  PLASMA_VERIFY(duk.PushLocalObject("__GameObject").Succeeded(), ""); // [ global __GameObject ]
+  PL_VERIFY(duk.PushLocalObject("__GameObject").Succeeded(), ""); // [ global __GameObject ]
   duk_get_prop_string(duk, -1, "GameObject");                     // [ global __GameObject GameObject ]
 
   duk_new(duk, 0); // [ global __GameObject object ]
@@ -166,7 +166,7 @@ bool plTypeScriptBinding::RegisterGameObject(plGameObjectHandle handle, plUInt32
   {
     plGameObjectHandle* pHandleBuffer =
       reinterpret_cast<plGameObjectHandle*>(duk_push_fixed_buffer(duk, sizeof(plGameObjectHandle))); // [ global __GameObject object buffer ]
-    *pHandleBuffer = handle;
+    *pHandleBuffer = hHandle;
     duk_put_prop_index(duk, -2, plTypeScriptBindingIndexProperty::GameObjectHandle); // [ global __GameObject object ]
   }
 
@@ -174,7 +174,7 @@ bool plTypeScriptBinding::RegisterGameObject(plGameObjectHandle handle, plUInt32
   duk.PopStack(3);                        // [ ]
 
   out_uiStashIdx = uiStashIdx;
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
 }
 
 bool plTypeScriptBinding::DukPutGameObject(const plGameObjectHandle& hObject)
@@ -185,10 +185,10 @@ bool plTypeScriptBinding::DukPutGameObject(const plGameObjectHandle& hObject)
   if (!RegisterGameObject(hObject, uiStashIdx))
   {
     duk.PushNull(); // [ null ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, false, +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, false, +1);
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, DukPushStashObject(duk, uiStashIdx), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, DukPushStashObject(duk, uiStashIdx), +1);
 }
 
 void plTypeScriptBinding::DukPutGameObject(const plGameObject* pObject)
@@ -211,13 +211,13 @@ static int __CPP_GameObject_IsValid(duk_context* pDuk)
 
   if (hObject.IsInvalidated())
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(false), +1);
   }
 
   plWorld* pWorld = plTypeScriptBinding::RetrieveWorld(pDuk);
 
   plGameObject* pGameObject = nullptr;
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pWorld->TryGetObject(hObject, pGameObject)), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(pWorld->TryGetObject(hObject, pGameObject)), +1);
 }
 
 static int __CPP_GameObject_SetX_Vec3(duk_context* pDuk)
@@ -254,7 +254,7 @@ static int __CPP_GameObject_SetX_Vec3(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnVoid();
@@ -303,12 +303,12 @@ static int __CPP_GameObject_GetX_Vec3(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   plTypeScriptBinding::PushVec3(pDuk, value);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_SetX_Float(duk_context* pDuk)
@@ -331,7 +331,7 @@ static int __CPP_GameObject_SetX_Float(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnVoid();
@@ -356,10 +356,10 @@ static int __CPP_GameObject_GetX_Float(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnFloat(value), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnFloat(value), +1);
 }
 
 static int __CPP_GameObject_SetX_Quat(duk_context* pDuk)
@@ -388,7 +388,7 @@ static int __CPP_GameObject_SetX_Quat(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnVoid();
@@ -413,12 +413,12 @@ static int __CPP_GameObject_GetX_Quat(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   plTypeScriptBinding::PushQuat(pDuk, value);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_SetX_Bool(duk_context* pDuk)
@@ -436,7 +436,7 @@ static int __CPP_GameObject_SetX_Bool(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnVoid();
@@ -461,10 +461,10 @@ static int __CPP_GameObject_GetX_Bool(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(value), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(value), +1);
 }
 
 static int __CPP_GameObject_FindChildByName(duk_context* pDuk)
@@ -481,7 +481,7 @@ static int __CPP_GameObject_FindChildByName(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pChild);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_FindChildByPath(duk_context* pDuk)
@@ -497,7 +497,7 @@ static int __CPP_GameObject_FindChildByPath(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pChild);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_TryGetComponentOfBaseTypeName(duk_context* pDuk)
@@ -511,19 +511,19 @@ static int __CPP_GameObject_TryGetComponentOfBaseTypeName(duk_context* pDuk)
   const plRTTI* pRtti = plRTTI::FindTypeByName(szTypeName);
   if (pRtti == nullptr)
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
   }
 
   plComponent* pComponent = nullptr;
   if (!pGameObject->TryGetComponentOfBaseType(pRtti, pComponent))
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
   }
 
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
   pBinding->DukPutComponentObject(pComponent);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_TryGetComponentOfBaseTypeNameHash(duk_context* pDuk)
@@ -537,19 +537,19 @@ static int __CPP_GameObject_TryGetComponentOfBaseTypeNameHash(duk_context* pDuk)
   const plRTTI* pRtti = plRTTI::FindTypeByNameHash32(uiTypeNameHash);
   if (pRtti == nullptr)
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
   }
 
   plComponent* pComponent = nullptr;
   if (!pGameObject->TryGetComponentOfBaseType(pRtti, pComponent))
   {
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnNull(), +1);
   }
 
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(duk);
   pBinding->DukPutComponentObject(pComponent);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_TryGetScriptComponent(duk_context* pDuk)
@@ -580,7 +580,7 @@ static int __CPP_GameObject_TryGetScriptComponent(duk_context* pDuk)
   duk.PushNull();
 
 found:
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_SearchForChildByNameSequence(duk_context* pDuk)
@@ -603,7 +603,7 @@ static int __CPP_GameObject_SearchForChildByNameSequence(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pObject);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_SendMessage(duk_context* pDuk)
@@ -616,7 +616,7 @@ static int __CPP_GameObject_SendMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
 
     if (duk.GetBoolValue(3))
       pGameObject->SendMessageRecursive(*pMsg);
@@ -626,12 +626,12 @@ static int __CPP_GameObject_SendMessage(duk_context* pDuk)
     if (duk.GetBoolValue(4)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncPlObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostMessage
   {
-    const plTime delay = plTime::Seconds(duk.GetNumberValue(4));
+    const plTime delay = plTime::MakeFromSeconds(duk.GetNumberValue(4));
 
     plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, delay);
 
@@ -655,19 +655,19 @@ static int __CPP_GameObject_SendEventMessage(duk_context* pDuk)
 
   if (duk.GetFunctionMagicValue() == 0) // SendEventMessage
   {
-    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::Zero());
+    plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, plTime::MakeZero());
 
     pGameObject->SendEventMessage(plStaticCast<plEventMessage&>(*pMsg), pSender);
 
     if (duk.GetBoolValue(4)) // expect the message to have result values
     {
       // sync msg back to TS
-      plTypeScriptBinding::SyncEzObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
+      plTypeScriptBinding::SyncPlObjectToTsObject(pDuk, pMsg->GetDynamicRTTI(), pMsg.Borrow(), 1);
     }
   }
   else // PostEventMessage
   {
-    const plTime delay = plTime::Seconds(duk.GetNumberValue(4));
+    const plTime delay = plTime::MakeFromSeconds(duk.GetNumberValue(4));
 
     plUniquePtr<plMessage> pMsg = pBinding->MessageFromParameter(pDuk, 1, delay);
 
@@ -735,7 +735,7 @@ static int __CPP_GameObject_GetTeamID(duk_context* pDuk)
 
   plGameObject* pGameObject = plTypeScriptBinding::ExpectGameObject(duk, 0 /*this*/);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnUInt(pGameObject->GetTeamID()), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnUInt(pGameObject->GetTeamID()), +1);
 }
 
 static int __CPP_GameObject_ChangeTags(duk_context* pDuk)
@@ -769,12 +769,12 @@ static int __CPP_GameObject_ChangeTags(duk_context* pDuk)
           break;
 
         default:
-          PLASMA_ASSERT_NOT_IMPLEMENTED;
+          PL_ASSERT_NOT_IMPLEMENTED;
       }
     }
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_GameObject_CheckTags(duk_context* pDuk)
@@ -813,12 +813,12 @@ static int __CPP_GameObject_CheckTags(duk_context* pDuk)
       }
       else
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
     }
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(result), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnBool(result), +1);
 }
 
 static int __CPP_GameObject_GetParent(duk_context* pDuk)
@@ -832,7 +832,7 @@ static int __CPP_GameObject_GetParent(duk_context* pDuk)
   plTypeScriptBinding* pBinding = plTypeScriptBinding::RetrieveBinding(pDuk);
   pBinding->DukPutGameObject(pParent);
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }
 
 static int __CPP_GameObject_SetX_GameObject(duk_context* pDuk)
@@ -861,7 +861,7 @@ static int __CPP_GameObject_SetX_GameObject(duk_context* pDuk)
       break;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }
 
 static int __CPP_GameObject_GetChildren(duk_context* pDuk)
@@ -880,5 +880,5 @@ static int __CPP_GameObject_GetChildren(duk_context* pDuk)
     duk_put_prop_index(pDuk, arrayObj, curIdx);
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnCustom(), +1);
 }

@@ -4,7 +4,7 @@
 #include <GuiFoundation/PropertyGrid/PropertyBaseWidget.moc.h>
 #include <QToolButton>
 
-class PLASMA_GUIFOUNDATION_DLL plQtElementGroupButton : public QToolButton
+class PL_GUIFOUNDATION_DLL plQtElementGroupButton : public QToolButton
 {
   Q_OBJECT
 public:

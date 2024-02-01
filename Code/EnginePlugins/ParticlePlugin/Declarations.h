@@ -32,16 +32,16 @@ class plParticleFinalizerFactory;
 
 using plParticleEffectResourceHandle = plTypedResourceHandle<class plParticleEffectResource>;
 
-typedef plGenericId<22, 10> plParticleEffectId;
+using plParticleEffectId = plGenericId<22, 10>;
 
 /// \brief A handle to a particle effect
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEffectHandle
+class PL_PARTICLEPLUGIN_DLL plParticleEffectHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plParticleEffectHandle, plParticleEffectId);
+  PL_DECLARE_HANDLE_TYPE(plParticleEffectHandle, plParticleEffectId);
 };
 
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleSystemState
+struct PL_PARTICLEPLUGIN_DLL plParticleSystemState
 {
   enum Enum
   {
@@ -52,7 +52,7 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleSystemState
   };
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleStreamBinding
+class PL_PARTICLEPLUGIN_DLL plParticleStreamBinding
 {
 public:
   void UpdateBindings(const plProcessingStreamGroup* pGroup) const;
@@ -72,9 +72,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleTypeRenderMode
+struct PL_PARTICLEPLUGIN_DLL plParticleTypeRenderMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -89,14 +89,14 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleTypeRenderMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plParticleTypeRenderMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plParticleTypeRenderMode);
 
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief What to do when an effect is not visible.
-struct PLASMA_PARTICLEPLUGIN_DLL plEffectInvisibleUpdateRate
+struct PL_PARTICLEPLUGIN_DLL plEffectInvisibleUpdateRate
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -111,13 +111,13 @@ struct PLASMA_PARTICLEPLUGIN_DLL plEffectInvisibleUpdateRate
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plEffectInvisibleUpdateRate);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plEffectInvisibleUpdateRate);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleTextureAtlasType
+struct PL_PARTICLEPLUGIN_DLL plParticleTextureAtlasType
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -131,13 +131,13 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleTextureAtlasType
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plParticleTextureAtlasType);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plParticleTextureAtlasType);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleColorGradientMode
+struct PL_PARTICLEPLUGIN_DLL plParticleColorGradientMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -148,14 +148,14 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleColorGradientMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plParticleColorGradientMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plParticleColorGradientMode);
 
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_PARTICLEPLUGIN_DLL plParticleOutOfBoundsMode
+struct PL_PARTICLEPLUGIN_DLL plParticleOutOfBoundsMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -166,20 +166,20 @@ struct PLASMA_PARTICLEPLUGIN_DLL plParticleOutOfBoundsMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_PARTICLEPLUGIN_DLL, plParticleOutOfBoundsMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_PARTICLEPLUGIN_DLL, plParticleOutOfBoundsMode);
 
 //////////////////////////////////////////////////////////////////////////
 
 struct plParticleEffectFloatParam
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   plHashedString m_sName;
   float m_Value;
 };
 
 struct plParticleEffectColorParam
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   plHashedString m_sName;
   plColor m_Value;
 };

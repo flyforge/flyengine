@@ -35,11 +35,6 @@ const plVulkanAllocationInfo& plGALTextureVulkan::GetAllocationInfo() const
   return m_allocInfo;
 }
 
-bool plGALTextureVulkan::GetFormatOverrideEnabled() const
-{
-  return m_formatOverride;
-}
-
 bool plGALTextureVulkan::IsLinearLayout() const
 {
   return m_bLinearCPU;

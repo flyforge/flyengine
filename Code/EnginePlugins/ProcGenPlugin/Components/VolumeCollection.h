@@ -7,9 +7,9 @@
 
 using plImageDataResourceHandle = plTypedResourceHandle<class plImageDataResource>;
 
-class PLASMA_PROCGENPLUGIN_DLL plVolumeCollection : public plReflectedClass
+class PL_PROCGENPLUGIN_DLL plVolumeCollection : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVolumeCollection, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plVolumeCollection, plReflectedClass);
 
 public:
   struct ShapeType
@@ -36,7 +36,7 @@ public:
     plFloat16 m_fValue;
     plUInt32 m_uiSortingKey;
 
-    PLASMA_ALWAYS_INLINE bool operator<(const Shape& other) const { return m_uiSortingKey < other.m_uiSortingKey; }
+    PL_ALWAYS_INLINE bool operator<(const Shape& other) const { return m_uiSortingKey < other.m_uiSortingKey; }
 
     void SetGlobalToLocalTransform(const plSimdMat4f& t);
     plSimdMat4f GetGlobalToLocalTransform() const;
@@ -82,9 +82,9 @@ private:
   plDynamicArray<const Shape*> m_SortedShapes;
 };
 
-struct PLASMA_PROCGENPLUGIN_DLL plMsgExtractVolumes : public plMessage
+struct PL_PROCGENPLUGIN_DLL plMsgExtractVolumes : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgExtractVolumes, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgExtractVolumes, plMessage);
 
   plVolumeCollection* m_pCollection = nullptr;
 };

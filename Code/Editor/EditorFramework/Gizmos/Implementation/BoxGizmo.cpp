@@ -4,8 +4,8 @@
 #include <EditorFramework/DocumentWindow/EngineDocumentWindow.moc.h>
 #include <EditorFramework/Gizmos/BoxGizmo.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxGizmo, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoxGizmo, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plBoxGizmo::plBoxGizmo()
 {
@@ -13,16 +13,16 @@ plBoxGizmo::plBoxGizmo()
 
   m_ManipulateMode = ManipulateMode::None;
 
-  m_hCorners.ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxCorners, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+  m_hCorners.ConfigureHandle(this, plEngineGizmoHandleType::BoxCorners, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
 
   for (int i = 0; i < 3; ++i)
   {
-    m_Edges[i].ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxEdges, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
-    m_Faces[i].ConfigureHandle(this, PlasmaEngineGizmoHandleType::BoxFaces, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+    m_Edges[i].ConfigureHandle(this, plEngineGizmoHandleType::BoxEdges, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
+    m_Faces[i].ConfigureHandle(this, plEngineGizmoHandleType::BoxFaces, plColorLinearUB(200, 200, 200, 128), plGizmoFlags::Pickable);
   }
 
   SetVisible(false);
-  SetTransformation(plTransform::IdentityTransform());
+  SetTransformation(plTransform::MakeIdentity());
 }
 
 void plBoxGizmo::OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView)
@@ -50,24 +50,24 @@ void plBoxGizmo::OnVisibleChanged(bool bVisible)
 void plBoxGizmo::OnTransformationChanged(const plTransform& transform)
 {
   plMat4 scale, rot;
-  scale.SetScalingMatrix(m_vSize);
+  scale = plMat4::MakeScaling(m_vSize);
   scale = transform.GetAsMat4() * scale;
 
   m_hCorners.SetTransformation(scale);
 
-  rot.SetRotationMatrixX(plAngle::Degree(90));
+  rot = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
   m_Edges[0].SetTransformation(scale * rot);
 
-  rot.SetRotationMatrixY(plAngle::Degree(90));
+  rot = plMat4::MakeRotationY(plAngle::MakeFromDegree(90));
   m_Faces[0].SetTransformation(scale * rot);
 
   rot.SetIdentity();
   m_Edges[1].SetTransformation(scale * rot);
 
-  rot.SetRotationMatrixX(plAngle::Degree(90));
+  rot = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
   m_Faces[1].SetTransformation(scale * rot);
 
-  rot.SetRotationMatrixZ(plAngle::Degree(90));
+  rot = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
   m_Edges[2].SetTransformation(scale * rot);
 
   rot.SetIdentity();
@@ -87,15 +87,15 @@ void plBoxGizmo::DoFocusLost(bool bCancel)
   m_ManipulateMode = ManipulateMode::None;
 }
 
-PlasmaEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
   if (e->modifiers() != 0)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pInteractionGizmoHandle == &m_hCorners)
   {
@@ -126,7 +126,7 @@ PlasmaEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
     m_ManipulateMode = ManipulateMode::PlaneYZ;
   }
   else
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -134,7 +134,7 @@ PlasmaEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_LastInteraction = plTime::Now();
 
-  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   SetActiveInputContext(this);
 
@@ -143,36 +143,38 @@ PlasmaEditorInput plBoxGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plBoxGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
-    return PlasmaEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
+    return plEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const plVec2I32 vNewMousePos = plVec2I32(e->globalPos().x(), e->globalPos().y());
+  const QPoint mousePosition = e->globalPosition().toPoint();
+
+  const plVec2I32 vNewMousePos = plVec2I32(mousePosition.x(), mousePosition.y());
   const plVec2I32 vDiff = vNewMousePos - m_vLastMousePos;
 
   m_vLastMousePos = UpdateMouseMode(e);
@@ -215,12 +217,12 @@ PlasmaEditorInput plBoxGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-void plBoxGizmo::SetSize(const plVec3& size)
+void plBoxGizmo::SetSize(const plVec3& vSize)
 {
-  m_vSize = size;
+  m_vSize = vSize;
 
   // update the scale
   OnTransformationChanged(GetTransformation());

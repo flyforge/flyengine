@@ -7,11 +7,11 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Profiling/Profiling.h>
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
 
 struct GPUTimingScope
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plGALTimestampHandle m_BeginTimestamp;
   plGALTimestampHandle m_EndTimestamp;
@@ -34,12 +34,12 @@ public:
       if (e.m_pDevice->GetTimestampResult(timingScope.m_EndTimestamp, endTime).Succeeded())
       {
         plTime beginTime;
-        PLASMA_VERIFY(e.m_pDevice->GetTimestampResult(timingScope.m_BeginTimestamp, beginTime).Succeeded(),
+        PL_VERIFY(e.m_pDevice->GetTimestampResult(timingScope.m_BeginTimestamp, beginTime).Succeeded(),
           "Begin timestamp should be finished before end timestamp");
 
         if (!beginTime.IsZero() && !endTime.IsZero())
         {
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
           static bool warnOnRingBufferOverun = true;
           if (warnOnRingBufferOverun && endTime < beginTime)
           {
@@ -63,21 +63,21 @@ public:
   static GPUTimingScope& AllocateScope() { return s_TimingScopes.ExpandAndGetRef(); }
 
 private:
-  static void OnEngineStartup() { plGALDevice::GetDefaultDevice()->m_Events.AddEventHandler(&GPUProfilingSystem::ProcessTimestamps); }
+  static void OnEngineStartup() { plGALDevice::GetDefaultDevice()->s_Events.AddEventHandler(&GPUProfilingSystem::ProcessTimestamps); }
 
   static void OnEngineShutdown()
   {
     s_TimingScopes.Clear();
-    plGALDevice::GetDefaultDevice()->m_Events.RemoveEventHandler(&GPUProfilingSystem::ProcessTimestamps);
+    plGALDevice::GetDefaultDevice()->s_Events.RemoveEventHandler(&GPUProfilingSystem::ProcessTimestamps);
   }
 
-  static plDeque<GPUTimingScope, plStaticAllocatorWrapper> s_TimingScopes;
+  static plDeque<GPUTimingScope, plStaticsAllocatorWrapper> s_TimingScopes;
 
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererFoundation, GPUProfilingSystem);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererFoundation, GPUProfilingSystem);
 };
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererFoundation, GPUProfilingSystem)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererFoundation, GPUProfilingSystem)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -94,10 +94,10 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererFoundation, GPUProfilingSystem)
     GPUProfilingSystem::OnEngineShutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-plDeque<GPUTimingScope, plStaticAllocatorWrapper> GPUProfilingSystem::s_TimingScopes;
+plDeque<GPUTimingScope, plStaticsAllocatorWrapper> GPUProfilingSystem::s_TimingScopes;
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -107,7 +107,7 @@ GPUTimingScope* plProfilingScopeAndMarker::Start(plGALCommandEncoder* pCommandEn
 
   auto& timingScope = GPUProfilingSystem::AllocateScope();
   timingScope.m_BeginTimestamp = pCommandEncoder->InsertTimestamp();
-  plStringUtils::Copy(timingScope.m_szName, PLASMA_ARRAY_SIZE(timingScope.m_szName), szName);
+  plStringUtils::Copy(timingScope.m_szName, PL_ARRAY_SIZE(timingScope.m_szName), szName);
 
   return &timingScope;
 }
@@ -120,7 +120,7 @@ void plProfilingScopeAndMarker::Stop(plGALCommandEncoder* pCommandEncoder, GPUTi
 }
 
 plProfilingScopeAndMarker::plProfilingScopeAndMarker(plGALCommandEncoder* pCommandEncoder, const char* szName)
-  : plProfilingScope(szName, nullptr, plTime::Zero())
+  : plProfilingScope(szName, nullptr, plTime::MakeZero())
   , m_pCommandEncoder(pCommandEncoder)
 {
   m_pTimingScope = Start(pCommandEncoder, szName);
@@ -133,4 +133,4 @@ plProfilingScopeAndMarker::~plProfilingScopeAndMarker()
 
 #endif
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Profiling_Implementation_Profiling);
+PL_STATICLINK_FILE(RendererFoundation, RendererFoundation_Profiling_Implementation_Profiling);

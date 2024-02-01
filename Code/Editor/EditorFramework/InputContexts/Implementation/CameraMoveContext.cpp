@@ -7,7 +7,7 @@
 #include <EditorFramework/Preferences/ScenePreferences.h>
 #include <Foundation/Utilities/GraphicsUtils.h>
 
-static const float s_fMoveSpeed[25] = {
+static constexpr float s_fMoveSpeed[25] = {
   0.5f,
   0.75f,
   1.0f,
@@ -78,7 +78,7 @@ plCameraMoveContext::plCameraMoveContext(plQtEngineDocumentWindow* pOwnerWindow,
 
 float plCameraMoveContext::ConvertCameraSpeed(plUInt32 uiSpeedIdx)
 {
-  return s_fMoveSpeed[plMath::Clamp<plUInt32>(uiSpeedIdx, 0, PLASMA_ARRAY_SIZE(s_fMoveSpeed) - 1)];
+  return s_fMoveSpeed[plMath::Clamp<plUInt32>(uiSpeedIdx, 0, PL_ARRAY_SIZE(s_fMoveSpeed) - 1)];
 }
 
 void plCameraMoveContext::DoFocusLost(bool bCancel)
@@ -148,13 +148,13 @@ void plCameraMoveContext::UpdateContext()
   if (m_bMoveDown)
     m_pCamera->MoveGlobally(0, 0, -1 * fSpeedFactor);
   if (m_bRotateLeft)
-    m_pCamera->RotateGlobally(plAngle::Radian(0), plAngle::Radian(0), plAngle::Degree(-fRotateHorizontal));
+    m_pCamera->RotateGlobally(plAngle::MakeFromRadian(0), plAngle::MakeFromRadian(0), plAngle::MakeFromDegree(-fRotateHorizontal));
   if (m_bRotateRight)
-    m_pCamera->RotateGlobally(plAngle::Radian(0), plAngle::Radian(0), plAngle::Degree(fRotateHorizontal));
+    m_pCamera->RotateGlobally(plAngle::MakeFromRadian(0), plAngle::MakeFromRadian(0), plAngle::MakeFromDegree(fRotateHorizontal));
   if (m_bRotateUp)
-    m_pCamera->RotateLocally(plAngle::Radian(0), plAngle::Degree(fRotateVertical), plAngle::Radian(0));
+    m_pCamera->RotateLocally(plAngle::MakeFromRadian(0), plAngle::MakeFromDegree(fRotateVertical), plAngle::MakeFromRadian(0));
   if (m_bRotateDown)
-    m_pCamera->RotateLocally(plAngle::Radian(0), plAngle::Degree(-fRotateVertical), plAngle::Radian(0));
+    m_pCamera->RotateLocally(plAngle::MakeFromRadian(0), plAngle::MakeFromDegree(-fRotateVertical), plAngle::MakeFromRadian(0));
 
   if (m_bMoveForwardsInPlane)
   {
@@ -162,7 +162,7 @@ void plCameraMoveContext::UpdateContext()
     {
       plVec3 vDir = m_pCamera->GetCenterDirForwards();
       vDir.z = 0.0f;
-      vDir.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+      vDir.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
       m_pCamera->MoveGlobally(vDir.x * fSpeedFactor, vDir.y * fSpeedFactor, vDir.z * fSpeedFactor);
     }
     else
@@ -177,7 +177,7 @@ void plCameraMoveContext::UpdateContext()
     {
       plVec3 vDir = m_pCamera->GetCenterDirForwards();
       vDir.z = 0.0f;
-      vDir.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+      vDir.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
       m_pCamera->MoveGlobally(vDir.x * -fSpeedFactor, vDir.y * -fSpeedFactor, vDir.z * -fSpeedFactor);
     }
     else
@@ -195,13 +195,13 @@ void plCameraMoveContext::DeactivateIfLast()
   FocusLost(false);
 }
 
-PlasmaEditorInput plCameraMoveContext::DoKeyReleaseEvent(QKeyEvent* e)
+plEditorInput plCameraMoveContext::DoKeyReleaseEvent(QKeyEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pCamera == nullptr)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   m_bRun = (e->modifiers() & Qt::KeyboardModifier::ShiftModifier) != 0;
   m_bSlowDown = false;
@@ -210,54 +210,54 @@ PlasmaEditorInput plCameraMoveContext::DoKeyReleaseEvent(QKeyEvent* e)
   {
     case Qt::Key_W:
       m_bMoveForwards = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_S:
       m_bMoveBackwards = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_A:
       m_bMoveLeft = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_D:
       m_bMoveRight = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Q:
       m_bMoveDown = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_E:
       m_bMoveUp = false;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Left:
       m_bMoveLeft = false;
       m_bRotateLeft = false;
       DeactivateIfLast();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Right:
       m_bMoveRight = false;
       m_bRotateRight = false;
       DeactivateIfLast();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Up:
       m_bMoveForwards = false;
       m_bRotateUp = false;
       DeactivateIfLast();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Down:
       m_bMoveBackwards = false;
       m_bRotateDown = false;
       DeactivateIfLast();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plCameraMoveContext::DoKeyPressEvent(QKeyEvent* e)
+plEditorInput plCameraMoveContext::DoKeyPressEvent(QKeyEvent* e)
 {
   if (m_pCamera == nullptr)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   //if (e->modifiers() == Qt::KeyboardModifier::ControlModifier)
-  //  return PlasmaEditorInput::MayBeHandledByOthers;
+  //  return plEditorInput::MayBeHandledByOthers;
 
   m_bRun = (e->modifiers() & Qt::KeyboardModifier::ShiftModifier) != 0;
 
@@ -269,62 +269,62 @@ PlasmaEditorInput plCameraMoveContext::DoKeyPressEvent(QKeyEvent* e)
       else
         m_bMoveLeft = true;
       SetActiveInputContext(this);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Right:
       if (e->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier))
         m_bRotateRight = true;
       else
         m_bMoveRight = true;
       SetActiveInputContext(this);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Up:
       if (e->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier))
         m_bRotateUp = true;
       else
         m_bMoveForwards = true;
       SetActiveInputContext(this);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Down:
       if (e->modifiers().testFlag(Qt::KeyboardModifier::ControlModifier))
         m_bRotateDown = true;
       else
         m_bMoveBackwards = true;
       SetActiveInputContext(this);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
   }
 
   if (!m_bRotateCamera)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   switch (e->key())
   {
     case Qt::Key_W:
       m_bMoveForwards = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_S:
       m_bMoveBackwards = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_A:
       m_bMoveLeft = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_D:
       m_bMoveRight = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_Q:
       m_bMoveDown = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     case Qt::Key_E:
       m_bMoveUp = true;
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
-PlasmaEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
 {
   if (m_pCamera == nullptr)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pCamera->IsOrthographic())
   {
@@ -332,10 +332,10 @@ PlasmaEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
     {
       m_bOpenMenuOnMouseUp = (e->buttons() == Qt::MouseButton::RightButton);
       m_bMoveCamera = true;
-      m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+      m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
       m_bDidMoveMouse[1] = false;
       MakeActiveInputContext();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
     else
     {
@@ -357,10 +357,10 @@ PlasmaEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
       else
         m_bRotateCamera = true;
 
-      m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+      m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
       m_bDidMoveMouse[1] = false;
       MakeActiveInputContext();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
     else
     {
@@ -377,10 +377,10 @@ PlasmaEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
       else
         m_bMoveCamera = true;
 
-      m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+      m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
       m_bDidMoveMouse[0] = false;
       MakeActiveInputContext();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (e->button() == Qt::MouseButton::MiddleButton)
@@ -397,21 +397,21 @@ PlasmaEditorInput plCameraMoveContext::DoMousePressEvent(QMouseEvent* e)
       else
         m_bMoveCameraInPlane = true;
 
-      m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+      m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
       m_bDidMoveMouse[2] = false;
       MakeActiveInputContext();
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 void plCameraMoveContext::ResetCursor()
 {
   if (!m_bRotateCamera && !m_bMoveCamera && !m_bMoveCameraInPlane && !m_bOrbitCamera && !m_bSlideForwards)
   {
-    SetMouseMode(PlasmaEditorInputContext::MouseMode::Normal);
+    SetMouseMode(plEditorInputContext::MouseMode::Normal);
 
     MakeActiveInputContext(false);
   }
@@ -421,21 +421,21 @@ void plCameraMoveContext::SetCurrentMouseMode()
 {
   if (m_bRotateCamera || m_bMoveCamera || m_bMoveCameraInPlane || m_bOrbitCamera || m_bSlideForwards)
   {
-    SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+    SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
   }
   else
   {
-    SetMouseMode(PlasmaEditorInputContext::MouseMode::Normal);
+    SetMouseMode(plEditorInputContext::MouseMode::Normal);
   }
 }
 
-PlasmaEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pCamera == nullptr)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (m_pCamera->IsOrthographic())
   {
@@ -447,9 +447,9 @@ PlasmaEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
 
       if (!m_bDidMoveMouse[1] && m_bOpenMenuOnMouseUp)
       {
-        GetOwnerView()->OpenContextMenu(e->globalPos());
+        GetOwnerView()->OpenContextMenu(e->globalPosition().toPoint());
       }
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
   else
@@ -474,10 +474,10 @@ PlasmaEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
 
       if (!m_bDidMoveMouse[1] && m_bOpenMenuOnMouseUp)
       {
-        GetOwnerView()->OpenContextMenu(e->globalPos());
+        GetOwnerView()->OpenContextMenu(e->globalPosition().toPoint());
       }
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (e->button() == Qt::MouseButton::LeftButton)
@@ -490,10 +490,10 @@ PlasmaEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
       {
         // not really handled, so make this context inactive and tell the surrounding code that it may pass
         // the event to the next handler
-        return PlasmaEditorInput::MayBeHandledByOthers;
+        return plEditorInput::MayBeHandledByOthers;
       }
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (e->button() == Qt::MouseButton::MiddleButton)
@@ -509,14 +509,14 @@ PlasmaEditorInput plCameraMoveContext::DoMouseReleaseEvent(QMouseEvent* e)
       {
         // not really handled, so make this context inactive and tell the surrounding code that it may pass
         // the event to the next handler
-        return PlasmaEditorInput::MayBeHandledByOthers;
+        return plEditorInput::MayBeHandledByOthers;
       }
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 const plVec3& plCameraMoveContext::GetOrbitPoint() const
@@ -529,14 +529,14 @@ void plCameraMoveContext::SetOrbitPoint(const plVec3& vPos)
   m_vOrbitPoint = vPos;
 }
 
-PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
 {
   // do nothing, unless this is an active context
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   // store that the mouse has been moved since the last click
-  for (plInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_bDidMoveMouse); ++i)
+  for (plInt32 i = 0; i < PL_ARRAY_SIZE(m_bDidMoveMouse); ++i)
     m_bDidMoveMouse[i] = true;
 
   // send a message to clear any highlight
@@ -544,7 +544,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
   GetOwnerWindow()->GetEditorEngineConnection()->SendHighlightObjectMessage(&msg);
 
   if (m_pCamera == nullptr)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plScenePreferencesUser* pPreferences = plPreferences::QueryPreferences<plScenePreferencesUser>(GetOwnerWindow()->GetDocument());
 
@@ -581,7 +581,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
 
       m_pCamera->MoveLocally(0, fMoveRight, fMoveUp);
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
   else
@@ -609,7 +609,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
       m_pCamera->MoveLocally(0, fMoveRight, fMoveUp);
 
       m_vLastMousePos = UpdateMouseMode(e);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_bRotateCamera || m_bOrbitCamera)
@@ -624,8 +624,8 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
       float fRotateHorizontal = diff.x * fMouseRotateSensitivityX;
       float fRotateVertical = -diff.y * fMouseRotateSensitivityY;
 
-      m_pCamera->RotateLocally(plAngle::Radian(0), plAngle::Radian(fRotateVertical), plAngle::Radian(0));
-      m_pCamera->RotateGlobally(plAngle::Radian(0), plAngle::Radian(0), plAngle::Radian(fRotateHorizontal));
+      m_pCamera->RotateLocally(plAngle::MakeFromRadian(0), plAngle::MakeFromRadian(fRotateVertical), plAngle::MakeFromRadian(0));
+      m_pCamera->RotateGlobally(plAngle::MakeFromRadian(0), plAngle::MakeFromRadian(0), plAngle::MakeFromRadian(fRotateHorizontal));
 
       if (m_bOrbitCamera)
       {
@@ -636,7 +636,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
       }
 
       m_vLastMousePos = UpdateMouseMode(e);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_bMoveCamera)
@@ -648,7 +648,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
 
       m_vLastMousePos = UpdateMouseMode(e);
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_bMoveCameraInPlane)
@@ -660,14 +660,14 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
 
       plVec3 vDir = m_pCamera->GetCenterDirForwards();
       vDir.z = 0.0f;
-      vDir.NormalizeIfNotZero(plVec3::ZeroVector()).IgnoreResult();
+      vDir.NormalizeIfNotZero(plVec3::MakeZero()).IgnoreResult();
 
       m_vOrbitPoint += vDir * fMoveForward;
       m_pCamera->MoveGlobally(vDir.x * fMoveForward, vDir.y * fMoveForward, vDir.z * fMoveForward);
 
       m_vLastMousePos = UpdateMouseMode(e);
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_bSlideForwards)
@@ -678,7 +678,7 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
 
       m_vLastMousePos = UpdateMouseMode(e);
 
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     if (m_bPanOrbitPoint)
@@ -707,11 +707,11 @@ PlasmaEditorInput plCameraMoveContext::DoMouseMoveEvent(QMouseEvent* e)
       }
 
       m_vLastMousePos = UpdateMouseMode(e);
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 
-  return PlasmaEditorInput::MayBeHandledByOthers;
+  return plEditorInput::MayBeHandledByOthers;
 }
 
 void plCameraMoveContext::SetMoveSpeed(plInt32 iSpeed)
@@ -723,10 +723,10 @@ void plCameraMoveContext::SetMoveSpeed(plInt32 iSpeed)
   }
 }
 
-PlasmaEditorInput plCameraMoveContext::DoWheelEvent(QWheelEvent* e)
+plEditorInput plCameraMoveContext::DoWheelEvent(QWheelEvent* e)
 {
   if (m_bMoveCamera || m_bMoveCameraInPlane || m_bOrbitCamera || m_bRotateCamera)
-    return PlasmaEditorInput::WasExclusivelyHandled; // ignore it, but others should not handle it either
+    return plEditorInput::WasExclusivelyHandled; // ignore it, but others should not handle it either
 
   const plScenePreferencesUser* pPreferences = plPreferences::QueryPreferences<plScenePreferencesUser>(GetOwnerWindow()->GetDocument());
 
@@ -751,7 +751,7 @@ PlasmaEditorInput plCameraMoveContext::DoWheelEvent(QWheelEvent* e)
     m_pCamera->SetCameraMode(m_pCamera->GetCameraMode(), fNewDim, m_pCamera->GetNearPlane(), m_pCamera->GetFarPlane());
 
     // handled, independent of whether we are the active context or not
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
   }
   else
   {
@@ -771,7 +771,7 @@ PlasmaEditorInput plCameraMoveContext::DoWheelEvent(QWheelEvent* e)
       }
 
       // handled, independent of whether we are the active context or not
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
 
     {
@@ -794,7 +794,7 @@ PlasmaEditorInput plCameraMoveContext::DoWheelEvent(QWheelEvent* e)
       }
 
       // handled, independent of whether we are the active context or not
-      return PlasmaEditorInput::WasExclusivelyHandled;
+      return plEditorInput::WasExclusivelyHandled;
     }
   }
 }

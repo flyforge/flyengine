@@ -128,7 +128,7 @@ CREDITS:
       Guillaume Chereau
       github:jry2
       github:romigrou
-      Sergio Gonzalpl
+      Sergio Gonzalez
       Jonas Karlsson
       Filip Wasil
       Thatcher Ulrich
@@ -136,7 +136,7 @@ CREDITS:
       Patrick Boettcher
       github:xeekworx
       Cap Petschulat
-      Simon Rodrigupl
+      Simon Rodriguez
       Ivan Tikhonov
       github:ignotion
       Adam Schackart
@@ -166,7 +166,7 @@ LICENSE
 #endif
 
 //////////////////////////////////////////////////////////////////////////
-// Start PlasmaEngine edit
+// Start ezEngine edit
 // Configure the DLL Import/Export Define
 #undef STBIWDEF
 #ifdef BUILDSYSTEM_COMPILE_ENGINE_AS_DLL
@@ -182,7 +182,7 @@ LICENSE
 #else
 #  define STBIWDEF
 #endif
-// End PlasmaEngine edit
+// End ezEngine edit
 //////////////////////////////////////////////////////////////////////////
 
 #ifndef STB_IMAGE_WRITE_STATIC  // C++ forbids static forward declarations

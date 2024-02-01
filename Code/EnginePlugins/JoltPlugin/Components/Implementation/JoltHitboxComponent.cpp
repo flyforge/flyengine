@@ -13,32 +13,32 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltHitboxComponent, 2, plComponentMode::Dynamic)
+PL_BEGIN_COMPONENT_TYPE(plJoltHitboxComponent, 2, plComponentMode::Dynamic)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("QueryShapeOnly", m_bQueryShapeOnly)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("UpdateThreshold", m_UpdateThreshold),
+    PL_MEMBER_PROPERTY("QueryShapeOnly", m_bQueryShapeOnly)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("UpdateThreshold", m_UpdateThreshold),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
+    PL_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(RecreatePhysicsShapes),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetObjectFilterID),
+    PL_SCRIPT_FUNCTION_PROPERTY(RecreatePhysicsShapes),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_FUNCTIONS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltHitboxComponent::plJoltHitboxComponent() = default;
@@ -126,7 +126,7 @@ void plJoltHitboxComponent::RecreatePhysicsShapes()
   DestroyPhysicsShapes();
   CreatePhysicsShapes(msg.m_hSkeleton);
 
-  m_LastUpdate = plTime::Zero();
+  m_LastUpdate = plTime::MakeZero();
 }
 
 void plJoltHitboxComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& hSkeleton)
@@ -135,7 +135,7 @@ void plJoltHitboxComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& 
 
   const auto& desc = pSkeleton->GetDescriptor();
 
-  PLASMA_ASSERT_DEV(m_Shapes.IsEmpty(), "");
+  PL_ASSERT_DEV(m_Shapes.IsEmpty(), "");
   m_Shapes.Reserve(desc.m_Geometry.GetCount());
 
   plJoltWorldModule* pModule = GetWorld()->GetOrCreateModule<plJoltWorldModule>();
@@ -147,7 +147,7 @@ void plJoltHitboxComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& 
   const plQuat qFinalBoneRot = /*boneRot **/ qBoneDirAdjustment;
 
   plQuat qRotZtoX; // the capsule should extend along X, but the capsule shape goes along Z
-  qRotZtoX.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
+  qRotZtoX = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(-90));
 
   for (plUInt32 idx = 0; idx < desc.m_Geometry.GetCount(); ++idx)
   {
@@ -231,7 +231,7 @@ void plJoltHitboxComponent::CreatePhysicsShapes(const plSkeletonResourceHandle& 
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 }
@@ -246,4 +246,4 @@ void plJoltHitboxComponent::DestroyPhysicsShapes()
   m_Shapes.Clear();
 }
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltBoneColliderComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltBoneColliderComponent);

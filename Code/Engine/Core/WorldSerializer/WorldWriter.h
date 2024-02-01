@@ -9,19 +9,19 @@
 /// Used for exporting a world in binary form either as a level or as a prefab (though there is no
 /// difference).
 /// Can be used for saving a game, if the exact state of the world shall be stored (e.g. like in an FPS).
-class PLASMA_CORE_DLL plWorldWriter
+class PL_CORE_DLL plWorldWriter
 {
 public:
   /// \brief Writes all content in \a world to \a stream.
   ///
   /// All game objects with tags that overlap with \a pExclude will be ignored.
-  void WriteWorld(plStreamWriter& stream, plWorld& world, const plTagSet* pExclude = nullptr);
+  void WriteWorld(plStreamWriter& inout_stream, plWorld& ref_world, const plTagSet* pExclude = nullptr);
 
   /// \brief Only writes the given root objects and all their children to the stream.
-  void WriteObjects(plStreamWriter& stream, const plDeque<const plGameObject*>& rootObjects);
+  void WriteObjects(plStreamWriter& inout_stream, const plDeque<const plGameObject*>& rootObjects);
 
   /// \brief Only writes the given root objects and all their children to the stream.
-  void WriteObjects(plStreamWriter& stream, plArrayPtr<const plGameObject*> rootObjects);
+  void WriteObjects(plStreamWriter& inout_stream, plArrayPtr<const plGameObject*> rootObjects);
 
   /// \brief Writes the given game object handle to the stream.
   ///

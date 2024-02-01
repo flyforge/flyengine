@@ -1,8 +1,8 @@
 
 #include <Foundation/FoundationInternal.h>
-PLASMA_FOUNDATION_INTERNAL_HEADER
+PL_FOUNDATION_INTERNAL_HEADER
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #  include <Foundation/Configuration/Plugin.h>
@@ -11,6 +11,11 @@ PLASMA_FOUNDATION_INTERNAL_HEADER
 #  include <Foundation/Strings/StringBuilder.h>
 
 using plPluginModule = HMODULE;
+
+bool plPlugin::PlatformNeedsPluginCopy()
+{
+  return true;
+}
 
 void plPlugin::GetPluginPaths(plStringView sPluginName, plStringBuilder& ref_sOriginalFile, plStringBuilder& ref_sCopiedFile, plUInt8 uiFileCopyNumber)
 {
@@ -45,11 +50,11 @@ plResult UnloadPluginModule(plPluginModule& ref_pModule, plStringView sPluginFil
   if (FreeLibrary(ref_pModule) == FALSE)
   {
     plLog::Error("Could not unload plugin '{0}'. Error-Code {1}", sPluginFile, plArgErrorCode(GetLastError()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ref_pModule = nullptr;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult LoadPluginModule(plStringView sFileToLoad, plPluginModule& ref_pModule, plStringView sPluginFile)
@@ -57,9 +62,9 @@ plResult LoadPluginModule(plStringView sFileToLoad, plPluginModule& ref_pModule,
   // reset last error code
   SetLastError(ERROR_SUCCESS);
 
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   plStringBuilder relativePath = sFileToLoad;
-  PLASMA_SUCCEED_OR_RETURN(relativePath.MakeRelativeTo(plOSFile::GetApplicationDirectory()));
+  PL_SUCCEED_OR_RETURN(relativePath.MakeRelativeTo(plOSFile::GetApplicationDirectory()));
   ref_pModule = LoadPackagedLibrary(plStringWChar(relativePath).GetData(), 0);
 #  else
   ref_pModule = LoadLibraryW(plStringWChar(sFileToLoad).GetData());
@@ -76,10 +81,10 @@ plResult LoadPluginModule(plStringView sFileToLoad, plPluginModule& ref_pModule,
                    "party DLLs next to the plugin.");
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #else

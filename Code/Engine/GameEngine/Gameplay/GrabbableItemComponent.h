@@ -2,16 +2,18 @@
 
 #include <GameEngine/GameEngineDLL.h>
 
-#include <Core/World/Component.h>
 #include <Core/World/World.h>
 
-struct PLASMA_GAMEENGINE_DLL plGrabbableItemGrabPoint
+struct plMsgUpdateLocalBounds;
+struct plMsgExtractRenderData;
+
+struct PL_GAMEENGINE_DLL plGrabbableItemGrabPoint
 {
   plVec3 m_vLocalPosition;
   plQuat m_qLocalRotation;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plGrabbableItemGrabPoint);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plGrabbableItemGrabPoint);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -27,16 +29,16 @@ using plGrabbableItemComponentManager = plComponentManager<class plGrabbableItem
 ///
 /// The component only holds data, it doesn't add any custom behavior. It is the responsibility of other components to use this
 /// data in a sensible way.
-class PLASMA_GAMEENGINE_DLL plGrabbableItemComponent : public plComponent
+class PL_GAMEENGINE_DLL plGrabbableItemComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plGrabbableItemComponent, plComponent, plGrabbableItemComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plGrabbableItemComponent, plComponent, plGrabbableItemComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
   //////////////////////////////////////////////////////////////////////////
   // plGrabbableItemComponent
@@ -45,11 +47,14 @@ public:
   plGrabbableItemComponent();
   ~plGrabbableItemComponent();
 
-  plUInt32 GrabPoints_GetCount() const;                                       // [ property ]
-  plGrabbableItemGrabPoint GrabPoints_GetValue(plUInt32 uiIndex) const;       // [ property ]
-  void GrabPoints_SetValue(plUInt32 uiIndex, plGrabbableItemGrabPoint value); // [ property ]
-  void GrabPoints_Insert(plUInt32 uiIndex, plGrabbableItemGrabPoint value);   // [ property ]
-  void GrabPoints_Remove(plUInt32 uiIndex);                                   // [ property ]
+  void SetDebugShowPoints(bool bShow); // [ property ]
+  bool GetDebugShowPoints() const;     // [ property ]
 
-  plDynamicArray<plGrabbableItemGrabPoint> m_GrabPoints;
+  plDynamicArray<plGrabbableItemGrabPoint> m_GrabPoints; // [ property ]
+
+  static void DebugDrawGrabPoint(const plWorld& world, const plTransform& globalGrabPointTransform);
+
+protected:
+  void OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const;
+  void OnExtractRenderData(plMsgExtractRenderData& msg) const;
 };

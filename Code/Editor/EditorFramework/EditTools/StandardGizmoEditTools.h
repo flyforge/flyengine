@@ -10,9 +10,9 @@
 class plQtGameObjectDocumentWindow;
 class plPreferences;
 
-class PLASMA_EDITORFRAMEWORK_DLL plTranslateGizmoEditTool : public plGameObjectGizmoEditTool
+class PL_EDITORFRAMEWORK_DLL plTranslateGizmoEditTool : public plGameObjectGizmoEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTranslateGizmoEditTool, plGameObjectGizmoEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plTranslateGizmoEditTool, plGameObjectGizmoEditTool);
 
 public:
   plTranslateGizmoEditTool();
@@ -20,7 +20,7 @@ public:
 
   virtual plEditToolSupportedSpaces GetSupportedSpaces() const override { return plEditToolSupportedSpaces::LocalAndWorldSpace; }
   virtual bool GetSupportsMoveParentOnly() const override { return true; }
-  virtual void GetGridSettings(plGridSettingsMsgToEngine& outGridSettings) override;
+  virtual void GetGridSettings(plGridSettingsMsgToEngine& out_gridSettings) override;
 
 protected:
   virtual void OnConfigured() override;
@@ -37,9 +37,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_EDITORFRAMEWORK_DLL plRotateGizmoEditTool : public plGameObjectGizmoEditTool
+class PL_EDITORFRAMEWORK_DLL plRotateGizmoEditTool : public plGameObjectGizmoEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRotateGizmoEditTool, plGameObjectGizmoEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plRotateGizmoEditTool, plGameObjectGizmoEditTool);
 
 public:
   plRotateGizmoEditTool();
@@ -61,9 +61,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_EDITORFRAMEWORK_DLL plScaleGizmoEditTool : public plGameObjectGizmoEditTool
+class PL_EDITORFRAMEWORK_DLL plScaleGizmoEditTool : public plGameObjectGizmoEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plScaleGizmoEditTool, plGameObjectGizmoEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plScaleGizmoEditTool, plGameObjectGizmoEditTool);
 
 public:
   plScaleGizmoEditTool();
@@ -84,9 +84,9 @@ private:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_EDITORFRAMEWORK_DLL plDragToPositionGizmoEditTool : public plGameObjectGizmoEditTool
+class PL_EDITORFRAMEWORK_DLL plDragToPositionGizmoEditTool : public plGameObjectGizmoEditTool
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDragToPositionGizmoEditTool, plGameObjectGizmoEditTool);
+  PL_ADD_DYNAMIC_REFLECTION(plDragToPositionGizmoEditTool, plGameObjectGizmoEditTool);
 
 public:
   plDragToPositionGizmoEditTool();

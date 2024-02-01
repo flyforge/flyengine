@@ -7,7 +7,7 @@
 
 class plProcGenNodeBase : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGenNodeBase, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGenNodeBase, plReflectedClass);
 
 public:
   struct GraphContext
@@ -24,19 +24,19 @@ public:
     OutputType m_OutputType = OutputType::Unknown;
   };
 
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) = 0;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) = 0;
 };
 
 //////////////////////////////////////////////////////////////////////////
 
 class plProcGenOutput : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGenOutput, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGenOutput, plProcGenNodeBase);
 
 public:
   bool m_bActive = true;
 
-  void Save(plStreamWriter& stream);
+  void Save(plStreamWriter& inout_stream);
 
   plString m_sName;
 
@@ -47,12 +47,12 @@ public:
 
 class plProcGen_PlacementOutput : public plProcGenOutput
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_PlacementOutput, plProcGenOutput);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_PlacementOutput, plProcGenOutput);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
-  void Save(plStreamWriter& stream);
+  void Save(plStreamWriter& inout_stream);
 
   plHybridArray<plString, 4> m_ObjectsToPlace;
 
@@ -61,7 +61,7 @@ public:
   plVec3 m_vMinOffset = plVec3(0);
   plVec3 m_vMaxOffset = plVec3(0);
 
-  plAngle m_YawRotationSnap = plAngle::Radian(0.0f);
+  plAngle m_YawRotationSnap = plAngle::MakeFromRadian(0.0f);
   float m_fAlignToNormal = 1.0f;
 
   plVec3 m_vMinScale = plVec3(1);
@@ -76,6 +76,7 @@ public:
   plString m_sColorGradient;
 
   plEnum<plProcPlacementMode> m_PlacementMode;
+  plEnum<plProcPlacementPattern> m_PlacementPattern;
 
   plRenderPipelineNodeInputPin m_DensityPin;
   plRenderPipelineNodeInputPin m_ScalePin;
@@ -87,12 +88,12 @@ public:
 
 class plProcGen_VertexColorOutput : public plProcGenOutput
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_VertexColorOutput, plProcGenOutput);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_VertexColorOutput, plProcGenOutput);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
-  void Save(plStreamWriter& stream);
+  void Save(plStreamWriter& inout_stream);
 
   plRenderPipelineNodeInputPin m_RPin;
   plRenderPipelineNodeInputPin m_GPin;
@@ -104,10 +105,10 @@ public:
 
 class plProcGen_Random : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_Random, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_Random, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   plInt32 m_iSeed = -1;
 
@@ -126,13 +127,13 @@ private:
 
 class plProcGen_PerlinNoise : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_PerlinNoise, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_PerlinNoise, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   plVec3 m_Scale = plVec3(10);
-  plVec3 m_Offset = plVec3::ZeroVector();
+  plVec3 m_Offset = plVec3::MakeZero();
   plUInt32 m_uiNumOctaves = 3;
 
   float m_fOutputMin = 0.0f;
@@ -145,10 +146,10 @@ public:
 
 class plProcGen_Blend : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_Blend, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_Blend, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   plEnum<plProcGenBinaryOperator> m_Operator;
   float m_fInputValueA = 1.0f;
@@ -164,10 +165,10 @@ public:
 
 class plProcGen_Height : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_Height, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_Height, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   float m_fMinHeight = 0.0f;
   float m_fMaxHeight = 1000.0f;
@@ -181,13 +182,13 @@ public:
 
 class plProcGen_Slope : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_Slope, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_Slope, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
-  plAngle m_MinSlope = plAngle::Degree(0.0f);
-  plAngle m_MaxSlope = plAngle::Degree(30.0f);
+  plAngle m_MinSlope = plAngle::MakeFromDegree(0.0f);
+  plAngle m_MaxSlope = plAngle::MakeFromDegree(30.0f);
   float m_fLowerFade = 0.0f;
   float m_fUpperFade = 0.2f;
 
@@ -198,10 +199,10 @@ public:
 
 class plProcGen_MeshVertexColor : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_MeshVertexColor, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_MeshVertexColor, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   plRenderPipelineNodeOutputPin m_RPin;
   plRenderPipelineNodeOutputPin m_GPin;
@@ -213,10 +214,10 @@ public:
 
 class plProcGen_ApplyVolumes : public plProcGenNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGen_ApplyVolumes, plProcGenNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGen_ApplyVolumes, plProcGenNodeBase);
 
 public:
-  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_Ast, GraphContext& context) override;
+  virtual plExpressionAST::Node* GenerateExpressionASTNode(plTempHashedString sOutputName, plArrayPtr<plExpressionAST::Node*> inputs, plExpressionAST& out_ast, GraphContext& ref_context) override;
 
   float m_fInputValue = 0.0f;
 

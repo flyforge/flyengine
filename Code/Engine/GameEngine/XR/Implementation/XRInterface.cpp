@@ -4,9 +4,9 @@
 #include <GameEngine/XR/XRInterface.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plXRStageSpace, 1)
-  PLASMA_BITFLAGS_CONSTANTS(plXRStageSpace::Seated, plXRStageSpace::Standing)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plXRStageSpace, 1)
+  PL_BITFLAGS_CONSTANTS(plXRStageSpace::Seated, plXRStageSpace::Standing)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_XRInterface);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_XRInterface);

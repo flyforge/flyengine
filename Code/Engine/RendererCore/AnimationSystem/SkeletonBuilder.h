@@ -6,7 +6,7 @@
 
 /// \brief The skeleton builder class provides the means to build skeleton instances from scratch.
 /// This class is not necessary to use skeletons, usually they should be deserialized from data created by the tools.
-class PLASMA_RENDERERCORE_DLL plSkeletonBuilder
+class PL_RENDERERCORE_DLL plSkeletonBuilder
 {
 
 public:
@@ -38,7 +38,7 @@ protected:
     plUInt16 m_uiParentIndex = plInvalidJointIndex;
     plHashedString m_sName;
     plEnum<plSkeletonJointType> m_JointType;
-    plQuat m_qLocalJointOrientation = plQuat::IdentityQuaternion();
+    plQuat m_qLocalJointOrientation = plQuat::MakeIdentity();
     plAngle m_HalfSwingLimitZ;
     plAngle m_HalfSwingLimitY;
     plAngle m_TwistLimitHalfAngle;

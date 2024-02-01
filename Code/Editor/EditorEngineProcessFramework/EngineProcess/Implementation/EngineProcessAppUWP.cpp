@@ -8,25 +8,25 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Resources/RenderTargetSetup.h>
 
-PlasmaEditorEngineProcessAppUWP::PlasmaEditorEngineProcessAppUWP() {}
+plEditorEngineProcessAppUWP::plEditorEngineProcessAppUWP() = default;
 
-PlasmaEditorEngineProcessAppUWP::~PlasmaEditorEngineProcessAppUWP() {}
+plEditorEngineProcessAppUWP::~plEditorEngineProcessAppUWP() = default;
 
-plViewHandle PlasmaEditorEngineProcessAppUWP::CreateRemoteWindowAndView(plCamera* pCamera)
+plViewHandle plEditorEngineProcessAppUWP::CreateRemoteWindowAndView(plCamera* pCamera)
 {
-  PLASMA_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
+  PL_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
 
   CreateRemoteWindow();
 
-  return PlasmaEditorEngineProcessApp::CreateRemoteWindowAndView(pCamera);
+  return plEditorEngineProcessApp::CreateRemoteWindowAndView(pCamera);
 }
 
-plRenderPipelineResourceHandle PlasmaEditorEngineProcessAppUWP::CreateDefaultMainRenderPipeline()
+plRenderPipelineResourceHandle plEditorEngineProcessAppUWP::CreateDefaultMainRenderPipeline()
 {
-  return PlasmaEditorEngineProcessApp::CreateDefaultMainRenderPipeline();
+  return plEditorEngineProcessApp::CreateDefaultMainRenderPipeline();
 }
 
-plRenderPipelineResourceHandle PlasmaEditorEngineProcessAppUWP::CreateDefaultDebugRenderPipeline()
+plRenderPipelineResourceHandle plEditorEngineProcessAppUWP::CreateDefaultDebugRenderPipeline()
 {
   return CreateDefaultMainRenderPipeline();
 }

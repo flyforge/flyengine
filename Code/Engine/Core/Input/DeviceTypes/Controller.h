@@ -8,9 +8,9 @@
 /// This class adds functions to query and modify the state about controller vibration, about the mapping of
 /// physical controllers to virtual ones (which controller index triggers which controller input slots) and
 /// also allows to query which controller is actually connected.
-class PLASMA_CORE_DLL plInputDeviceController : public plInputDevice
+class PL_CORE_DLL plInputDeviceController : public plInputDevice
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInputDeviceController, plInputDevice);
+  PL_ADD_DYNAMIC_REFLECTION(plInputDeviceController, plInputDevice);
 
 public:
   enum
@@ -47,10 +47,10 @@ public:
   /// This kind of vibration is always combined with vibration tracks (the maximum of both values is applied at any
   /// one time). Using this function is it possible to have more direct control over vibration, while the
   /// vibration tracks are convenient for the most common (short) effects.
-  void SetVibrationStrength(plUInt8 uiVirtual, Motor::Enum eMotor, float fValue);
+  void SetVibrationStrength(plUInt8 uiVirtual, Motor::Enum motor, float fValue);
 
   /// \brief Returns the amount of (constant) vibration that is currently set on this controller.
-  float GetVibrationStrength(plUInt8 uiVirtual, Motor::Enum eMotor);
+  float GetVibrationStrength(plUInt8 uiVirtual, Motor::Enum motor);
 
   /// \brief Sets from which physical controller a virtual controller is supposed to take its input.
   ///
@@ -88,7 +88,7 @@ public:
   /// \param fVibrationTrackValue An array of at least \a uiSamples float values, each between 0 and 1.
   /// \param uiSamples How many samples \a fVibrationTrackValue contains. A maximum of MaxVibrationSamples samples is used.
   /// \param fScalingFactor Additional scaling factor to apply to all values in \a fVibrationTrackValue.
-  void AddVibrationTrack(plUInt8 uiVirtual, Motor::Enum eMotor, float* fVibrationTrackValue, plUInt32 uiSamples, float fScalingFactor = 1.0f);
+  void AddVibrationTrack(plUInt8 uiVirtual, Motor::Enum motor, float* pVibrationTrackValue, plUInt32 uiSamples, float fScalingFactor = 1.0f);
 
 protected:
   /// \brief Combines the constant vibration and vibration tracks and applies them on each controller.

@@ -3,34 +3,34 @@
 #include "ParticleSystemConstants.h"
 #include "BaseParticleShaderData.h"
 
-struct PLASMA_SHADER_STRUCT plTrailParticleShaderData
+struct PL_SHADER_STRUCT plTrailParticleShaderData
 {
   INT1(NumPoints);
   FLOAT3(dummy);
 };
 
-struct PLASMA_SHADER_STRUCT plTrailParticlePointsData8
+struct PL_SHADER_STRUCT plTrailParticlePointsData8
 {
   FLOAT4(Positions[8]);
 };
 
-struct PLASMA_SHADER_STRUCT plTrailParticlePointsData16
+struct PL_SHADER_STRUCT plTrailParticlePointsData16
 {
   FLOAT4(Positions[16]);
 };
 
-struct PLASMA_SHADER_STRUCT plTrailParticlePointsData32
+struct PL_SHADER_STRUCT plTrailParticlePointsData32
 {
   FLOAT4(Positions[32]);
 };
 
-struct PLASMA_SHADER_STRUCT plTrailParticlePointsData64
+struct PL_SHADER_STRUCT plTrailParticlePointsData64
 {
   FLOAT4(Positions[64]);
 };
 
 // this is only defined during shader compilation
-#if PLASMA_ENABLED(PLATFORM_SHADER)
+#if PL_ENABLED(PLATFORM_SHADER)
 
 StructuredBuffer<plTrailParticleShaderData> particleTrailData;
 

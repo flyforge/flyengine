@@ -46,24 +46,24 @@ namespace
     plImageFormat::Enum m_asLinear{plImageFormat::UNKNOWN};
     plImageFormat::Enum m_asSrgb{plImageFormat::UNKNOWN};
 
-    plUInt32 getNumBlocksX(plUInt32 width, plUInt32 planeIndex) const
+    plUInt32 getNumBlocksX(plUInt32 uiWidth, plUInt32 uiPlaneIndex) const
     {
-      return (width - 1) / m_planeData[planeIndex].m_uiBlockWidth + 1;
+      return (uiWidth - 1) / m_planeData[uiPlaneIndex].m_uiBlockWidth + 1;
     }
 
-    plUInt32 getNumBlocksY(plUInt32 height, plUInt32 planeIndex) const
+    plUInt32 getNumBlocksY(plUInt32 uiHeight, plUInt32 uiPlaneIndex) const
     {
-      return (height - 1) / m_planeData[planeIndex].m_uiBlockHeight + 1;
+      return (uiHeight - 1) / m_planeData[uiPlaneIndex].m_uiBlockHeight + 1;
     }
 
-    plUInt32 getNumBlocksZ(plUInt32 depth, plUInt32 planeIndex) const
+    plUInt32 getNumBlocksZ(plUInt32 uiDepth, plUInt32 uiPlaneIndex) const
     {
-      return (depth - 1) / m_planeData[planeIndex].m_uiBlockDepth + 1;
+      return (uiDepth - 1) / m_planeData[uiPlaneIndex].m_uiBlockDepth + 1;
     }
 
-    plUInt32 getRowPitch(plUInt32 width, plUInt32 planeIndex) const
+    plUInt32 getRowPitch(plUInt32 uiWidth, plUInt32 uiPlaneIndex) const
     {
-      return getNumBlocksX(width, planeIndex) * m_planeData[planeIndex].m_uiBitsPerBlock / 8;
+      return getNumBlocksX(uiWidth, uiPlaneIndex) * m_planeData[uiPlaneIndex].m_uiBitsPerBlock / 8;
     }
   };
 
@@ -93,7 +93,7 @@ namespace
   InitFormatLinear(plImageFormat::format, #format, plImageFormatDataType::dataType, uiBitsPerPixel, uiBitsR, uiBitsG, uiBitsB, uiBitsA, uiNumChannels)
 
   void InitFormatCompressed(plImageFormat::Enum format, const char* szName, plImageFormatDataType::Enum dataType, plUInt8 uiBitsPerBlock,
-    plUInt8 uiBlockWidth, plUInt8 uiBlockHeight, plUInt8 uiBlockDepth, bool requireFirstLevelBlockAligned, plUInt8 uiNumChannels)
+    plUInt8 uiBlockWidth, plUInt8 uiBlockHeight, plUInt8 uiBlockDepth, bool bRequireFirstLevelBlockAligned, plUInt8 uiNumChannels)
   {
     s_formatMetaData[format].m_szName = szName;
 
@@ -106,7 +106,7 @@ namespace
 
     s_formatMetaData[format].m_uiNumChannels = uiNumChannels;
 
-    s_formatMetaData[format].m_requireFirstLevelBlockAligned = requireFirstLevelBlockAligned;
+    s_formatMetaData[format].m_requireFirstLevelBlockAligned = bRequireFirstLevelBlockAligned;
 
     s_formatMetaData[format].m_asLinear = format;
     s_formatMetaData[format].m_asSrgb = format;
@@ -117,7 +117,7 @@ namespace
   InitFormatCompressed(plImageFormat::format, #format, plImageFormatDataType::dataType, uiBitsPerBlock, uiBlockWidth, uiBlockHeight, uiBlockDepth, \
     requireFirstLevelBlockAligned, uiNumChannels)
 
-  void InitFormatDepth(plImageFormat::Enum format, const char* szName, plImageFormatDataType::Enum dataType, plUInt8 uiBitsPerPixel, bool isStencil,
+  void InitFormatDepth(plImageFormat::Enum format, const char* szName, plImageFormatDataType::Enum dataType, plUInt8 uiBitsPerPixel, bool bIsStencil,
     plUInt8 uiBitsD, plUInt8 uiBitsS)
   {
     s_formatMetaData[format].m_szName = szName;
@@ -127,9 +127,9 @@ namespace
     s_formatMetaData[format].m_formatType = plImageFormatType::LINEAR;
 
     s_formatMetaData[format].m_isDepth = true;
-    s_formatMetaData[format].m_isStencil = isStencil;
+    s_formatMetaData[format].m_isStencil = bIsStencil;
 
-    s_formatMetaData[format].m_uiNumChannels = isStencil ? 2 : 1;
+    s_formatMetaData[format].m_uiNumChannels = bIsStencil ? 2 : 1;
 
     s_formatMetaData[format].m_uiBitsPerChannel[plImageFormatChannel::D] = uiBitsD;
     s_formatMetaData[format].m_uiBitsPerChannel[plImageFormatChannel::S] = uiBitsS;
@@ -422,7 +422,7 @@ static void SetupImageFormatTable()
   s_formatMetaData[plImageFormat::NV12].m_planeData[1].m_subFormat = plImageFormat::R8G8_UNORM;
 }
 
-static const PLASMA_ALWAYS_INLINE plImageFormatMetaData& GetImageFormatMetaData(plImageFormat::Enum format)
+static const PL_ALWAYS_INLINE plImageFormatMetaData& GetImageFormatMetaData(plImageFormat::Enum format)
 {
   if (s_formatMetaData.IsEmpty())
   {
@@ -433,7 +433,7 @@ static const PLASMA_ALWAYS_INLINE plImageFormatMetaData& GetImageFormatMetaData(
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Image, ImageFormats)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Image, ImageFormats)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -444,28 +444,28 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Image, ImageFormats)
     SetupImageFormatTable();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-plUInt32 plImageFormat::GetBitsPerPixel(Enum format, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetBitsPerPixel(Enum format, plUInt32 uiPlaneIndex)
 {
   const plImageFormatMetaData& metaData = GetImageFormatMetaData(format);
-  auto pixelsPerBlock = metaData.m_planeData[planeIndex].m_uiBlockWidth * metaData.m_planeData[planeIndex].m_uiBlockHeight * metaData.m_planeData[planeIndex].m_uiBlockDepth;
-  return (metaData.m_planeData[planeIndex].m_uiBitsPerBlock + pixelsPerBlock - 1) / pixelsPerBlock; // Return rounded-up value
+  auto pixelsPerBlock = metaData.m_planeData[uiPlaneIndex].m_uiBlockWidth * metaData.m_planeData[uiPlaneIndex].m_uiBlockHeight * metaData.m_planeData[uiPlaneIndex].m_uiBlockDepth;
+  return (metaData.m_planeData[uiPlaneIndex].m_uiBitsPerBlock + pixelsPerBlock - 1) / pixelsPerBlock; // Return rounded-up value
 }
 
 
-float plImageFormat::GetExactBitsPerPixel(Enum format, plUInt32 planeIndex)
+float plImageFormat::GetExactBitsPerPixel(Enum format, plUInt32 uiPlaneIndex)
 {
   const plImageFormatMetaData& metaData = GetImageFormatMetaData(format);
-  auto pixelsPerBlock = metaData.m_planeData[planeIndex].m_uiBlockWidth * metaData.m_planeData[planeIndex].m_uiBlockHeight * metaData.m_planeData[planeIndex].m_uiBlockDepth;
-  return static_cast<float>(metaData.m_planeData[planeIndex].m_uiBitsPerBlock) / pixelsPerBlock;
+  auto pixelsPerBlock = metaData.m_planeData[uiPlaneIndex].m_uiBlockWidth * metaData.m_planeData[uiPlaneIndex].m_uiBlockHeight * metaData.m_planeData[uiPlaneIndex].m_uiBlockDepth;
+  return static_cast<float>(metaData.m_planeData[uiPlaneIndex].m_uiBitsPerBlock) / pixelsPerBlock;
 }
 
 
-plUInt32 plImageFormat::GetBitsPerBlock(Enum format, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetBitsPerBlock(Enum format, plUInt32 uiPlaneIndex)
 {
-  return GetImageFormatMetaData(format).m_planeData[planeIndex].m_uiBitsPerBlock;
+  return GetImageFormatMetaData(format).m_planeData[uiPlaneIndex].m_uiBitsPerBlock;
 }
 
 
@@ -508,7 +508,7 @@ plImageFormat::Enum plImageFormat::GetPlaneSubFormat(Enum format, plUInt32 uiPla
   }
   else
   {
-    PLASMA_ASSERT_DEV(uiPlaneIndex == 0, "Invalid plane index {0} for format {0}", uiPlaneIndex, plImageFormat::GetName(format));
+    PL_ASSERT_DEV(uiPlaneIndex == 0, "Invalid plane index {0} for format {0}", uiPlaneIndex, plImageFormat::GetName(format));
     return format;
   }
 }
@@ -646,7 +646,7 @@ bool plImageFormat::IsCompatible(Enum left, Enum right)
     case plImageFormat::ASTC_12x12_UNORM_SRGB:
       return (right == plImageFormat::ASTC_12x12_UNORM || right == plImageFormat::ASTC_12x12_UNORM_SRGB);
     default:
-      PLASMA_ASSERT_DEV(false, "Encountered unhandled format: {0}", plImageFormat::GetName(left));
+      PL_ASSERT_DEV(false, "Encountered unhandled format: {0}", plImageFormat::GetName(left));
       return false;
   }
 }
@@ -697,19 +697,19 @@ plUInt32 plImageFormat::GetAlphaMask(Enum format)
   return GetImageFormatMetaData(format).m_uiChannelMasks[plImageFormatChannel::A];
 }
 
-plUInt32 plImageFormat::GetBlockWidth(Enum format, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetBlockWidth(Enum format, plUInt32 uiPlaneIndex)
 {
-  return GetImageFormatMetaData(format).m_planeData[planeIndex].m_uiBlockWidth;
+  return GetImageFormatMetaData(format).m_planeData[uiPlaneIndex].m_uiBlockWidth;
 }
 
-plUInt32 plImageFormat::GetBlockHeight(Enum format, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetBlockHeight(Enum format, plUInt32 uiPlaneIndex)
 {
-  return GetImageFormatMetaData(format).m_planeData[planeIndex].m_uiBlockHeight;
+  return GetImageFormatMetaData(format).m_planeData[uiPlaneIndex].m_uiBlockHeight;
 }
 
-plUInt32 plImageFormat::GetBlockDepth(Enum format, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetBlockDepth(Enum format, plUInt32 uiPlaneIndex)
 {
-  return GetImageFormatMetaData(format).m_planeData[planeIndex].m_uiBlockDepth;
+  return GetImageFormatMetaData(format).m_planeData[uiPlaneIndex].m_uiBlockDepth;
 }
 
 plImageFormatDataType::Enum plImageFormat::GetDataType(Enum format)
@@ -747,29 +747,29 @@ plImageFormat::Enum plImageFormat::AsLinear(Enum format)
   return GetImageFormatMetaData(format).m_asLinear;
 }
 
-plUInt32 plImageFormat::GetNumBlocksX(Enum format, plUInt32 width, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetNumBlocksX(Enum format, plUInt32 uiWidth, plUInt32 uiPlaneIndex)
 {
-  return (width - 1) / GetBlockWidth(format, planeIndex) + 1;
+  return (uiWidth - 1) / GetBlockWidth(format, uiPlaneIndex) + 1;
 }
 
-plUInt32 plImageFormat::GetNumBlocksY(Enum format, plUInt32 height, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetNumBlocksY(Enum format, plUInt32 uiHeight, plUInt32 uiPlaneIndex)
 {
-  return (height - 1) / GetBlockHeight(format, planeIndex) + 1;
+  return (uiHeight - 1) / GetBlockHeight(format, uiPlaneIndex) + 1;
 }
 
-plUInt32 plImageFormat::GetNumBlocksZ(Enum format, plUInt32 depth, plUInt32 planeIndex)
+plUInt32 plImageFormat::GetNumBlocksZ(Enum format, plUInt32 uiDepth, plUInt32 uiPlaneIndex)
 {
-  return (depth - 1) / GetBlockDepth(format, planeIndex) + 1;
+  return (uiDepth - 1) / GetBlockDepth(format, uiPlaneIndex) + 1;
 }
 
-plUInt64 plImageFormat::GetRowPitch(Enum format, plUInt32 width, plUInt32 planeIndex)
+plUInt64 plImageFormat::GetRowPitch(Enum format, plUInt32 uiWidth, plUInt32 uiPlaneIndex)
 {
-  return static_cast<plUInt64>(GetNumBlocksX(format, width, planeIndex)) * GetBitsPerBlock(format, planeIndex) / 8;
+  return static_cast<plUInt64>(GetNumBlocksX(format, uiWidth, uiPlaneIndex)) * GetBitsPerBlock(format, uiPlaneIndex) / 8;
 }
 
-plUInt64 plImageFormat::GetDepthPitch(Enum format, plUInt32 width, plUInt32 height, plUInt32 planeIndex)
+plUInt64 plImageFormat::GetDepthPitch(Enum format, plUInt32 uiWidth, plUInt32 uiHeight, plUInt32 uiPlaneIndex)
 {
-  return static_cast<plUInt64>(GetNumBlocksY(format, height, planeIndex)) * static_cast<plUInt64>(GetRowPitch(format, width, planeIndex));
+  return static_cast<plUInt64>(GetNumBlocksY(format, uiHeight, uiPlaneIndex)) * static_cast<plUInt64>(GetRowPitch(format, uiWidth, uiPlaneIndex));
 }
 
 plImageFormatType::Enum plImageFormat::GetType(Enum format)
@@ -777,4 +777,4 @@ plImageFormatType::Enum plImageFormat::GetType(Enum format)
   return GetImageFormatMetaData(format).m_formatType;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageFormat);
+PL_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageFormat);

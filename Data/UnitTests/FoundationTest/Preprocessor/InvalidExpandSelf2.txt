@@ -1,5 +1,0 @@
-#define SOME_MACRO(PARAM) SOME_MACRO (PARAM*3)
-
-#if SOME_MACRO(2) == 6
-	false1
-#endif

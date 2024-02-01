@@ -9,15 +9,15 @@
 ## Generate Docs
 
 * Use the *Doxyfile* in this directory.
-* Set `%PlasmaEngine%/Documentation` as the working directory.
+* Set `%plEngine%/Documentation` as the working directory.
 
 Either run it with the *Doxywizard*, or from the command line:
 
 ```cmd
-%PlasmaEngine%\Documentation>"C:\Program Files\doxygen\bin\doxygen.exe" Doxyfile
+%plEngine%\Documentation>"C:\Program Files\doxygen\bin\doxygen.exe" Doxyfile
 ```
 
-The output is written to: `%PlasmaEngine%/Output/Doxygen/html/index.htm`
+The output is written to: `%plEngine%/Output/Doxygen/html/index.htm`
 
 ## Searchdata.xml
 

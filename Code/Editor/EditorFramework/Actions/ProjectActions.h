@@ -7,26 +7,28 @@
 class plCppSettings;
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plProjectActions
+class PL_EDITORFRAMEWORK_DLL plProjectActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping);
+  static void MapActions(plStringView sMapping);
 
-  static plActionDescriptorHandle s_hProjectMenu;
-  static plActionDescriptorHandle s_hCategoryGeneral;
-  static plActionDescriptorHandle s_hCategoryAssets;
-  static plActionDescriptorHandle s_hCategoryConfig;
+  static plActionDescriptorHandle s_hCatProjectGeneral;
+  static plActionDescriptorHandle s_hCatProjectAssets;
+  static plActionDescriptorHandle s_hCatProjectConfig;
+  static plActionDescriptorHandle s_hCatProjectExternal;
 
+  static plActionDescriptorHandle s_hCatFilesGeneral;
+  static plActionDescriptorHandle s_hCatFileCommon;
+  static plActionDescriptorHandle s_hCatFileSpecial;
+  static plActionDescriptorHandle s_hCatAssetDoc;
 
-  static plActionDescriptorHandle s_hDocumentCategory;
   static plActionDescriptorHandle s_hCreateDocument;
   static plActionDescriptorHandle s_hOpenDocument;
   static plActionDescriptorHandle s_hRecentDocuments;
 
-  static plActionDescriptorHandle s_hProjectCategory;
   static plActionDescriptorHandle s_hOpenDashboard;
   static plActionDescriptorHandle s_hCreateProject;
   static plActionDescriptorHandle s_hOpenProject;
@@ -35,21 +37,22 @@ public:
 
   static plActionDescriptorHandle s_hDocsAndCommunity;
 
-  static plActionDescriptorHandle s_hSettingsCategory;
-  //static plActionDescriptorHandle s_hEditorSettingsMenu;
-  static plActionDescriptorHandle s_hProjectSettingsMenu;
+  static plActionDescriptorHandle s_hCatProjectSettings;
+  static plActionDescriptorHandle s_hCatPluginSettings;
   static plActionDescriptorHandle s_hShortcutEditor;
   static plActionDescriptorHandle s_hDataDirectories;
   static plActionDescriptorHandle s_hWindowConfig;
   static plActionDescriptorHandle s_hInputConfig;
   static plActionDescriptorHandle s_hPreferencesDlg;
-  static plActionDescriptorHandle s_hTagsDlg;
+  static plActionDescriptorHandle s_hTagsConfig;
   static plActionDescriptorHandle s_hAssetProfiles;
   static plActionDescriptorHandle s_hExportProject;
   static plActionDescriptorHandle s_hPluginSelection;
 
-  static plActionDescriptorHandle s_hToolsMenu;
-  static plActionDescriptorHandle s_hToolsCategory;
+  static plActionDescriptorHandle s_hCatToolsExternal;
+  static plActionDescriptorHandle s_hCatToolsEditor;
+  static plActionDescriptorHandle s_hCatToolsDocument;
+  static plActionDescriptorHandle s_hCatEditorSettings;
   static plActionDescriptorHandle s_hReloadResources;
   static plActionDescriptorHandle s_hReloadEngine;
   static plActionDescriptorHandle s_hLaunchFileserve;
@@ -57,6 +60,7 @@ public:
   static plActionDescriptorHandle s_hSaveProfiling;
   static plActionDescriptorHandle s_hOpenVsCode;
   static plActionDescriptorHandle s_hImportAsset;
+  static plActionDescriptorHandle s_hClearAssetCaches;
 
   static plActionDescriptorHandle s_hCppProjectMenu;
   static plActionDescriptorHandle s_hSetupCppProject;
@@ -66,37 +70,37 @@ public:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plRecentDocumentsMenuAction : public plDynamicMenuAction
+class PL_EDITORFRAMEWORK_DLL plRecentDocumentsMenuAction : public plDynamicMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRecentDocumentsMenuAction, plDynamicMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plRecentDocumentsMenuAction, plDynamicMenuAction);
 
 public:
   plRecentDocumentsMenuAction(const plActionContext& context, const char* szName, const char* szIconPath)
     : plDynamicMenuAction(context, szName, szIconPath)
   {
   }
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
   virtual void Execute(const plVariant& value) override;
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plRecentProjectsMenuAction : public plDynamicMenuAction
+class PL_EDITORFRAMEWORK_DLL plRecentProjectsMenuAction : public plDynamicMenuAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRecentProjectsMenuAction, plDynamicMenuAction);
+  PL_ADD_DYNAMIC_REFLECTION(plRecentProjectsMenuAction, plDynamicMenuAction);
 
 public:
   plRecentProjectsMenuAction(const plActionContext& context, const char* szName, const char* szIconPath)
     : plDynamicMenuAction(context, szName, szIconPath)
   {
   }
-  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_Entries) override;
+  virtual void GetEntries(plHybridArray<plDynamicMenuAction::Item, 16>& out_entries) override;
   virtual void Execute(const plVariant& value) override;
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plProjectAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plProjectAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProjectAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plProjectAction, plButtonAction);
 
 public:
   enum class ButtonType
@@ -128,6 +132,7 @@ public:
     ShowDocsAndCommunity,
     ExportProject,
     PluginSelection,
+    ClearAssetCaches,
   };
 
   plProjectAction(const plActionContext& context, const char* szName, ButtonType button);

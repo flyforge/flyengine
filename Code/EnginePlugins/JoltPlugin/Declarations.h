@@ -22,7 +22,7 @@ struct plJoltSteppingMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plJoltSteppingMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plJoltSteppingMode);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -41,12 +41,12 @@ struct plOnJoltContact
   enum Enum
   {
     None = 0,
-    // SendReportMsg = PLASMA_BIT(0),
-    ImpactReactions = PLASMA_BIT(1), ///< Spawn prefabs for impacts (two objects hit each other with enough force).
-    SlideReactions = PLASMA_BIT(2),  ///< Spawn prefabs for sliding (one object slides along the surface of another).
-    RollXReactions = PLASMA_BIT(3),  ///< Spawn prefabs for rolling (one object rotates around its X axis while touching another).
-    RollYReactions = PLASMA_BIT(4),  ///< Spawn prefabs for rolling (one object rotates around its Y axis while touching another).
-    RollZReactions = PLASMA_BIT(5),  ///< Spawn prefabs for rolling (one object rotates around its Z axis while touching another).
+    // SendReportMsg = PL_BIT(0),
+    ImpactReactions = PL_BIT(1), ///< Spawn prefabs for impacts (two objects hit each other with enough force).
+    SlideReactions = PL_BIT(2),  ///< Spawn prefabs for sliding (one object slides along the surface of another).
+    RollXReactions = PL_BIT(3),  ///< Spawn prefabs for rolling (one object rotates around its X axis while touching another).
+    RollYReactions = PL_BIT(4),  ///< Spawn prefabs for rolling (one object rotates around its Y axis while touching another).
+    RollZReactions = PL_BIT(5),  ///< Spawn prefabs for rolling (one object rotates around its Z axis while touching another).
 
     AllRollReactions = RollXReactions | RollYReactions | RollZReactions,
     SlideAndRollReactions = AllRollReactions | SlideReactions,
@@ -66,8 +66,8 @@ struct plOnJoltContact
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plOnJoltContact);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_JOLTPLUGIN_DLL, plOnJoltContact);
+PL_DECLARE_FLAGS_OPERATORS(plOnJoltContact);
+PL_DECLARE_REFLECTABLE_TYPE(PL_JOLTPLUGIN_DLL, plOnJoltContact);
 
 //////////////////////////////////////////////////////////////////////////
 
@@ -86,9 +86,9 @@ struct plJoltSettings
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief This message can be sent to a constraint component to break the constraint.
-struct PLASMA_JOLTPLUGIN_DLL plJoltMsgDisconnectConstraints : public plMessage
+struct PL_JOLTPLUGIN_DLL plJoltMsgDisconnectConstraints : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plJoltMsgDisconnectConstraints, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plJoltMsgDisconnectConstraints, plMessage);
 
   /// The actor that is being deleted. All constraints that are linked to it must be removed for Jolt not to crash.
   plJoltActorComponent* m_pActor = nullptr;

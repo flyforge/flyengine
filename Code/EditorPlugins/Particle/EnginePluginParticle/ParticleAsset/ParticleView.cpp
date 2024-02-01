@@ -5,12 +5,12 @@
 #include <RendererCore/Pipeline/View.h>
 
 plParticleViewContext::plParticleViewContext(plParticleContext* pParticleContext)
-  : PlasmaEngineProcessViewContext(pParticleContext)
+  : plEngineProcessViewContext(pParticleContext)
 {
   m_pParticleContext = pParticleContext;
 }
 
-plParticleViewContext::~plParticleViewContext() {}
+plParticleViewContext::~plParticleViewContext() = default;
 
 void plParticleViewContext::PositionThumbnailCamera(const plBoundingBoxSphere& bounds)
 {
@@ -27,7 +27,7 @@ plViewHandle plParticleViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   return pView->GetHandle();

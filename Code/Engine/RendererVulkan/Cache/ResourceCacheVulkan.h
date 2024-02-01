@@ -18,10 +18,10 @@ class plGALShaderVulkan;
 class plGALVertexDeclarationVulkan;
 class plRefCounted;
 
-PLASMA_DEFINE_AS_POD_TYPE(vk::DynamicState);
+PL_DEFINE_AS_POD_TYPE(vk::DynamicState);
 
 /// \brief Creates and caches persistent Vulkan resources. Resources are never freed until the device is shut down.
-class PLASMA_RENDERERVULKAN_DLL plResourceCacheVulkan
+class PL_RENDERERVULKAN_DLL plResourceCacheVulkan
 {
 public:
   static void Initialize(plGALDeviceVulkan* pDevice, vk::Device device);
@@ -32,29 +32,29 @@ public:
 
   struct PipelineLayoutDesc
   {
-    PLASMA_DECLARE_POD_TYPE();
-    vk::DescriptorSetLayout m_layout;
+    plHybridArray<vk::DescriptorSetLayout, 4> m_layout;
+    vk::PushConstantRange m_pushConstants;
   };
 
   struct GraphicsPipelineDesc
   {
-    PLASMA_DECLARE_POD_TYPE();
-    vk::RenderPass m_renderPass;
-    vk::PipelineLayout m_layout;
+    PL_DECLARE_POD_TYPE();
+    vk::RenderPass m_renderPass; // Created from plGALRenderingSetup
+    vk::PipelineLayout m_layout; // Created from shader
     plEnum<plGALPrimitiveTopology> m_topology;
     plEnum<plGALMSAASampleCount> m_msaa;
-    plUInt8 m_uiAttachmentCount = 0;
+    plUInt8 m_uiAttachmentCount = 0; // DX12 requires format list for RT and DT
     const plGALRasterizerStateVulkan* m_pCurrentRasterizerState = nullptr;
     const plGALBlendStateVulkan* m_pCurrentBlendState = nullptr;
     const plGALDepthStencilStateVulkan* m_pCurrentDepthStencilState = nullptr;
     const plGALShaderVulkan* m_pCurrentShader = nullptr;
     const plGALVertexDeclarationVulkan* m_pCurrentVertexDecl = nullptr;
-    plUInt32 m_VertexBufferStrides[PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT] = {};
+    plUInt32 m_VertexBufferStrides[PL_GAL_MAX_VERTEX_BUFFER_COUNT] = {};
   };
 
   struct ComputePipelineDesc
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     vk::PipelineLayout m_layout;
     const plGALShaderVulkan* m_pCurrentShader = nullptr;
   };
@@ -88,21 +88,21 @@ private:
     VkRenderPass renderPass;
     plSizeU32 m_size = {0, 0};
     uint32_t layers = 1;
-    plHybridArray<vk::ImageView, PLASMA_GAL_MAX_RENDERTARGET_COUNT + 1> attachments;
+    plHybridArray<vk::ImageView, PL_GAL_MAX_RENDERTARGET_COUNT + 1> attachments;
     plEnum<plGALMSAASampleCount> m_msaa;
   };
 
   /// \brief Hashable version without pointers or redundant data of vk::AttachmentDescription
   struct AttachmentDesc
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     vk::Format format = vk::Format::eUndefined;
     vk::SampleCountFlagBits samples = vk::SampleCountFlagBits::e1;
     // Not set at all right now
     vk::ImageUsageFlags usage = vk::ImageUsageFlagBits::eSampled;
     // Not set at all right now
     vk::ImageLayout initialLayout = vk::ImageLayout::eUndefined;
-    // No support for eDontCare in PLASMA right now
+    // No support for eDontCare in PL right now
     vk::AttachmentLoadOp loadOp = vk::AttachmentLoadOp::eClear;
     vk::AttachmentStoreOp storeOp = vk::AttachmentStoreOp::eStore;
     vk::AttachmentLoadOp stencilLoadOp = vk::AttachmentLoadOp::eClear;
@@ -112,7 +112,7 @@ private:
   /// \brief Hashable version without pointers of vk::RenderPassCreateInfo
   struct RenderPassDesc
   {
-    plHybridArray<AttachmentDesc, PLASMA_GAL_MAX_RENDERTARGET_COUNT> attachments;
+    plHybridArray<AttachmentDesc, PL_GAL_MAX_RENDERTARGET_COUNT> attachments;
   };
 
   struct ResourceCacheHash
@@ -146,7 +146,7 @@ private:
     plSizeU32 m_size;
     plEnum<plGALMSAASampleCount> m_msaa;
     plUInt32 m_layers = 0;
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
   };
 
   static vk::RenderPass RequestRenderPassInternal(const RenderPassDesc& desc);

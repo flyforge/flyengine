@@ -6,54 +6,52 @@
 
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerContext, 1, plRTTIDefaultAllocator<plLayerContext>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerContext, 1, plRTTIDefaultAllocator<plLayerContext>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_CONSTANT_PROPERTY("DocumentType", (const char*) "Layer"),
+    PL_CONSTANT_PROPERTY("DocumentType", (const char*) "Layer"),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(AllocateContext),
+    PL_FUNCTION_PROPERTY(AllocateContext),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PlasmaEngineProcessDocumentContext* plLayerContext::AllocateContext(const plDocumentOpenMsgToEngine* pMsg)
+plEngineProcessDocumentContext* plLayerContext::AllocateContext(const plDocumentOpenMsgToEngine* pMsg)
 {
   if (pMsg->m_DocumentMetaData.IsA<plUuid>())
   {
-    return plGetStaticRTTI<plLayerContext>()->GetAllocator()->Allocate<PlasmaEngineProcessDocumentContext>();
+    return plGetStaticRTTI<plLayerContext>()->GetAllocator()->Allocate<plEngineProcessDocumentContext>();
   }
   else
   {
-    return plGetStaticRTTI<plSceneContext>()->GetAllocator()->Allocate<PlasmaEngineProcessDocumentContext>();
+    return plGetStaticRTTI<plSceneContext>()->GetAllocator()->Allocate<plEngineProcessDocumentContext>();
   }
 }
 
 plLayerContext::plLayerContext()
-  : PlasmaEngineProcessDocumentContext(PlasmaEngineProcessDocumentContextFlags::None)
+  : plEngineProcessDocumentContext(plEngineProcessDocumentContextFlags::None)
 {
 }
 
-plLayerContext::~plLayerContext()
-{
-}
+plLayerContext::~plLayerContext() = default;
 
-void plLayerContext::HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plLayerContext::HandleMessage(const plEditorEngineDocumentMsg* pMsg)
 {
   // Everything in the picking buffer needs a unique ID. As layers and scene share the same world we need to make sure no id is used twice.
   // To achieve this the scene's next ID is retrieved on every change and written back in base new IDs were used up.
   m_Context.m_uiNextComponentPickingID = m_pParentSceneContext->m_Context.m_uiNextComponentPickingID;
-  PlasmaEngineProcessDocumentContext::HandleMessage(pMsg);
+  plEngineProcessDocumentContext::HandleMessage(pMsg);
   m_pParentSceneContext->m_Context.m_uiNextComponentPickingID = m_Context.m_uiNextComponentPickingID;
 
   if (pMsg->IsInstanceOf<plEntityMsgToEngine>())
   {
-    PLASMA_LOCK(m_pWorld->GetWriteMarker());
+    PL_LOCK(m_pWorld->GetWriteMarker());
     m_pParentSceneContext->AddLayerIndexTag(*static_cast<const plEntityMsgToEngine*>(pMsg), m_Context, m_LayerTag);
   }
 }
@@ -73,7 +71,7 @@ const plTag& plLayerContext::GetLayerTag() const
 void plLayerContext::OnInitialize()
 {
   plUuid parentScene = m_MetaData.Get<plUuid>();
-  PlasmaEngineProcessDocumentContext* pContext = GetDocumentContext(parentScene);
+  plEngineProcessDocumentContext* pContext = GetDocumentContext(parentScene);
   m_pParentSceneContext = plDynamicCast<plSceneContext*>(pContext);
 
   m_pWorld = m_pParentSceneContext->GetWorld();
@@ -82,7 +80,7 @@ void plLayerContext::OnInitialize()
 
   plUInt32 uiLayerID = m_pParentSceneContext->RegisterLayer(this);
   plStringBuilder sVisibilityTag;
-  sVisibilityTag.Format("Layer_{}", uiLayerID);
+  sVisibilityTag.SetFormat("Layer_{}", uiLayerID);
   m_LayerTag = plTagRegistry::GetGlobalRegistry().RegisterTag(sVisibilityTag);
 
   plShadowPool::AddExcludeTagToWhiteList(m_LayerTag);
@@ -102,20 +100,20 @@ void plLayerContext::OnDeinitialize()
   m_pParentSceneContext = nullptr;
 }
 
-PlasmaEngineProcessViewContext* plLayerContext::CreateViewContext()
+plEngineProcessViewContext* plLayerContext::CreateViewContext()
 {
-  PLASMA_REPORT_FAILURE("Layers should not create views.");
+  PL_REPORT_FAILURE("Layers should not create views.");
   return nullptr;
 }
 
-void plLayerContext::DestroyViewContext(PlasmaEngineProcessViewContext* pContext)
+void plLayerContext::DestroyViewContext(plEngineProcessViewContext* pContext)
 {
-  PLASMA_REPORT_FAILURE("Layers should not create views.");
+  PL_REPORT_FAILURE("Layers should not create views.");
 }
 
 plStatus plLayerContext::ExportDocument(const plExportDocumentMsgToEngine* pMsg)
 {
-  PLASMA_REPORT_FAILURE("Layers do not support export yet. THe layer content is baked into the main scene instead.");
+  PL_REPORT_FAILURE("Layers do not support export yet. THe layer content is baked into the main scene instead.");
   return plStatus("Nope");
 }
 

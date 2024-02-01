@@ -2,9 +2,9 @@
 
 #include <Foundation/IO/StringDeduplicationContext.h>
 
-static const plTypeVersion s_uiStringDeduplicationVersion = 1;
+static constexpr plTypeVersion s_uiStringDeduplicationVersion = 1;
 
-PLASMA_IMPLEMENT_SERIALIZATION_CONTEXT(plStringDeduplicationWriteContext)
+PL_IMPLEMENT_SERIALIZATION_CONTEXT(plStringDeduplicationWriteContext)
 
 plStringDeduplicationWriteContext::plStringDeduplicationWriteContext(plStreamWriter& ref_originalStream)
   : plSerializationContext()
@@ -16,7 +16,7 @@ plStringDeduplicationWriteContext::~plStringDeduplicationWriteContext() = defaul
 
 plStreamWriter& plStringDeduplicationWriteContext::Begin()
 {
-  PLASMA_ASSERT_DEV(m_TempStreamStorage.GetStorageSize64() == 0, "Begin() can only be called once on a string deduplication context.");
+  PL_ASSERT_DEV(m_TempStreamStorage.GetStorageSize64() == 0, "Begin() can only be called once on a string deduplication context.");
 
   m_TempStreamWriter.SetStorage(&m_TempStreamStorage);
 
@@ -50,9 +50,9 @@ plResult plStringDeduplicationWriteContext::End()
   }
 
   // Now append the original stream
-  PLASMA_SUCCEED_OR_RETURN(m_TempStreamStorage.CopyToStream(m_OriginalStream));
+  PL_SUCCEED_OR_RETURN(m_TempStreamStorage.CopyToStream(m_OriginalStream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plStringDeduplicationWriteContext::SerializeString(const plStringView& sString, plStreamWriter& ref_writer)
@@ -74,7 +74,7 @@ plUInt32 plStringDeduplicationWriteContext::GetUniqueStringCount() const
 }
 
 
-PLASMA_IMPLEMENT_SERIALIZATION_CONTEXT(plStringDeduplicationReadContext)
+PL_IMPLEMENT_SERIALIZATION_CONTEXT(plStringDeduplicationReadContext)
 
 plStringDeduplicationReadContext::plStringDeduplicationReadContext(plStreamReader& inout_stream)
   : plSerializationContext()
@@ -105,12 +105,12 @@ plStringDeduplicationReadContext::~plStringDeduplicationReadContext() = default;
 
 plStringView plStringDeduplicationReadContext::DeserializeString(plStreamReader& ref_reader)
 {
-  plUInt32 uiIndex;
+  plUInt32 uiIndex = plInvalidIndex;
   ref_reader >> uiIndex;
 
   if (uiIndex >= m_DeduplicatedStrings.GetCount())
   {
-    PLASMA_ASSERT_DEBUG(uiIndex < m_DeduplicatedStrings.GetCount(), "Failed to read data from file.");
+    PL_ASSERT_DEBUG(uiIndex < m_DeduplicatedStrings.GetCount(), "Failed to read data from file.");
     return {};
   }
 
@@ -118,4 +118,3 @@ plStringView plStringDeduplicationReadContext::DeserializeString(plStreamReader&
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_StringDeduplicationContext);

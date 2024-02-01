@@ -4,7 +4,7 @@
 
 class plDocumentObjectManager;
 
-class PLASMA_TOOLSFOUNDATION_DLL plObjectDirectAccessor : public plObjectAccessorBase
+class PL_TOOLSFOUNDATION_DLL plObjectDirectAccessor : public plObjectAccessorBase
 {
 public:
   plObjectDirectAccessor(plDocumentObjectManager* pManager);

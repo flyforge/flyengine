@@ -1,10 +1,9 @@
 
 #pragma once
 
-#include <Foundation/Reflection/Reflection.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALResourceFormat
+struct PL_RENDERERFOUNDATION_DLL plGALResourceFormat
 {
   using StorageType = plUInt8;
 
@@ -120,14 +119,14 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALResourceFormat
 
   static bool IsSrgb(plGALResourceFormat::Enum format);
 
+  /// \brief Returns whether the given resource format returns integer values when sampled (e.g. RUShort). Note that normalized formats like RGUShortNormalized are not considered integer formats as they return float values in the [0..1] range when sampled.
+  static bool IsIntegerFormat(plGALResourceFormat::Enum format);
+
 private:
   static const plUInt8 s_BitsPerElement[plGALResourceFormat::ENUM_COUNT];
 
   static const plUInt8 s_ChannelCount[plGALResourceFormat::ENUM_COUNT];
 };
-
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERFOUNDATION_DLL, plGALResourceFormat);
-
 
 template <typename NativeFormatType, NativeFormatType InvalidFormat>
 class plGALFormatLookupEntry
@@ -165,9 +164,9 @@ class plGALFormatLookupTable
 public:
   plGALFormatLookupTable();
 
-  PLASMA_ALWAYS_INLINE const FormatClass& GetFormatInfo(plGALResourceFormat::Enum format) const;
+  PL_ALWAYS_INLINE const FormatClass& GetFormatInfo(plGALResourceFormat::Enum format) const;
 
-  PLASMA_ALWAYS_INLINE void SetFormatInfo(plGALResourceFormat::Enum format, const FormatClass& newFormatInfo);
+  PL_ALWAYS_INLINE void SetFormatInfo(plGALResourceFormat::Enum format, const FormatClass& newFormatInfo);
 
 private:
   FormatClass m_Formats[plGALResourceFormat::ENUM_COUNT];

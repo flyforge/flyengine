@@ -5,9 +5,9 @@
 #include <RendererCore/Shader/ConstantBufferStorage.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
-class PLASMA_RENDERERCORE_DLL plReflectionFilterPass : public plRenderPipelinePass
+class PL_RENDERERCORE_DLL plReflectionFilterPass : public plRenderPipelinePass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plReflectionFilterPass, plRenderPipelinePass);
+  PL_ADD_DYNAMIC_REFLECTION(plReflectionFilterPass, plRenderPipelinePass);
 
 public:
   plReflectionFilterPass();
@@ -16,6 +16,8 @@ public:
   virtual bool GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs) override;
 
   virtual void Execute(const plRenderViewContext& renderViewContext, const plArrayPtr<plRenderPipelinePassConnection* const> inputs, const plArrayPtr<plRenderPipelinePassConnection* const> outputs) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   plUInt32 GetInputCubemap() const;
   void SetInputCubemap(plUInt32 uiCubemapHandle);
@@ -28,10 +30,10 @@ protected:
   plRenderPipelineNodeOutputPin m_PinAvgLuminance;
   plRenderPipelineNodeOutputPin m_PinIrradianceData;
 
-  float m_fIntensity;
-  float m_fSaturation;
-  plUInt32 m_uiSpecularOutputIndex;
-  plUInt32 m_uiIrradianceOutputIndex;
+  float m_fIntensity = 1.0f;
+  float m_fSaturation = 1.0f;
+  plUInt32 m_uiSpecularOutputIndex = 0;
+  plUInt32 m_uiIrradianceOutputIndex = 0;
 
   plGALTextureHandle m_hInputCubemap;
 

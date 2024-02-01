@@ -1,19 +1,19 @@
 #include <Core/CorePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/Curves/ColorGradientResource.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientResource, 1, plRTTIDefaultAllocator<plColorGradientResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plColorGradientResource, 1, plRTTIDefaultAllocator<plColorGradientResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plColorGradientResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plColorGradientResource);
 
 plColorGradientResource::plColorGradientResource()
   : plResource(DoUpdate::OnAnyThread, 1)
 {
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plColorGradientResource, plColorGradientResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plColorGradientResource, plColorGradientResourceDescriptor)
 {
   m_Descriptor = descriptor;
 
@@ -39,7 +39,7 @@ plResourceLoadDesc plColorGradientResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plColorGradientResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plColorGradientResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plColorGradientResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -73,26 +73,26 @@ void plColorGradientResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage)
   out_NewMemoryUsage.m_uiMemoryCPU = static_cast<plUInt32>(m_Descriptor.m_Gradient.GetHeapMemoryUsage()) + static_cast<plUInt32>(sizeof(m_Descriptor));
 }
 
-void plColorGradientResourceDescriptor::Save(plStreamWriter& stream) const
+void plColorGradientResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 1;
 
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  m_Gradient.Save(stream);
+  m_Gradient.Save(inout_stream);
 }
 
-void plColorGradientResourceDescriptor::Load(plStreamReader& stream)
+void plColorGradientResourceDescriptor::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
 
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion == 1, "Invalid file version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion == 1, "Invalid file version {0}", uiVersion);
 
-  m_Gradient.Load(stream);
+  m_Gradient.Load(inout_stream);
 }
 
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Curves_Implementation_ColorGradientResource);
+PL_STATICLINK_FILE(Core, Core_Curves_Implementation_ColorGradientResource);

@@ -5,8 +5,8 @@
 #include <EditorPluginAssets/TextureCubeAsset/TextureCubeAssetManager.h>
 #include <EditorPluginAssets/TextureCubeAsset/TextureCubeAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocumentManager, 1, plRTTIDefaultAllocator<plTextureCubeAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTextureCubeAssetDocumentManager, 1, plRTTIDefaultAllocator<plTextureCubeAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plTextureCubeAssetDocumentManager::plTextureCubeAssetDocumentManager()
 {
@@ -18,6 +18,7 @@ plTextureCubeAssetDocumentManager::plTextureCubeAssetDocumentManager()
   m_DocTypeDesc.m_sDocumentTypeName = "Texture Cube";
   m_DocTypeDesc.m_sFileExtension = "plTextureCubeAsset";
   m_DocTypeDesc.m_sIcon = ":/AssetIcons/Texture_Cube.svg";
+  m_DocTypeDesc.m_sAssetCategory = "Rendering";
   m_DocTypeDesc.m_pDocumentType = plGetStaticRTTI<plTextureCubeAssetDocument>();
   m_DocTypeDesc.m_pManager = this;
   m_DocTypeDesc.m_CompatibleTypes.PushBack("CompatibleAsset_Texture_Cube");
@@ -39,7 +40,7 @@ void plTextureCubeAssetDocumentManager::OnDocumentManagerEvent(const plDocumentM
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plTextureCubeAssetDocument>())
       {
-        plQtTextureCubeAssetDocumentWindow* pDocWnd = new plQtTextureCubeAssetDocumentWindow(static_cast<plTextureCubeAssetDocument*>(e.m_pDocument));
+        new plQtTextureCubeAssetDocumentWindow(static_cast<plTextureCubeAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -50,9 +51,9 @@ void plTextureCubeAssetDocumentManager::OnDocumentManagerEvent(const plDocumentM
 }
 
 void plTextureCubeAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plTextureCubeAssetDocument(szPath);
+  out_pDocument = new plTextureCubeAssetDocument(sPath);
 }
 
 void plTextureCubeAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

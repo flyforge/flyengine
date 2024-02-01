@@ -1,13 +1,13 @@
 #include <TypeScriptPlugin/TypeScriptPluginPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <TypeScriptPlugin/Resources/ScriptCompendiumResource.h>
 
 // clang-format off
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plScriptCompendiumResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plScriptCompendiumResource);
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptCompendiumResource, 1, plRTTIDefaultAllocator<plScriptCompendiumResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptCompendiumResource, 1, plRTTIDefaultAllocator<plScriptCompendiumResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptCompendiumResource::plScriptCompendiumResource()
@@ -66,44 +66,45 @@ void plScriptCompendiumResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsa
 
 //////////////////////////////////////////////////////////////////////////
 
-plResult plScriptCompendiumResourceDesc::Serialize(plStreamWriter& stream) const
+plResult plScriptCompendiumResourceDesc::Serialize(plStreamWriter& inout_stream) const
 {
-  stream.WriteVersion(2);
+  inout_stream.WriteVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteMap(m_PathToSource));
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteMap(m_AssetGuidToInfo));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteMap(m_PathToSource));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteMap(m_AssetGuidToInfo));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plScriptCompendiumResourceDesc::Deserialize(plStreamReader& stream)
+plResult plScriptCompendiumResourceDesc::Deserialize(plStreamReader& inout_stream)
 {
-  plTypeVersion version = stream.ReadVersion(2);
+  plTypeVersion version = inout_stream.ReadVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadMap(m_PathToSource));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadMap(m_PathToSource));
 
   if (version >= 2)
   {
-    PLASMA_SUCCEED_OR_RETURN(stream.ReadMap(m_AssetGuidToInfo));
+    PL_SUCCEED_OR_RETURN(inout_stream.ReadMap(m_AssetGuidToInfo));
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plScriptCompendiumResourceDesc::ComponentTypeInfo::Serialize(plStreamWriter& stream) const
+plResult plScriptCompendiumResourceDesc::ComponentTypeInfo::Serialize(plStreamWriter& inout_stream) const
 {
-  stream.WriteVersion(1);
+  inout_stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteString(m_sComponentTypeName));
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteString(m_sComponentFilePath));
-  return PLASMA_SUCCESS;
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteString(m_sComponentTypeName));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteString(m_sComponentFilePath));
+  return PL_SUCCESS;
 }
 
-plResult plScriptCompendiumResourceDesc::ComponentTypeInfo::Deserialize(plStreamReader& stream)
+plResult plScriptCompendiumResourceDesc::ComponentTypeInfo::Deserialize(plStreamReader& inout_stream)
 {
-  plTypeVersion version = stream.ReadVersion(1);
+  plTypeVersion version = inout_stream.ReadVersion(1);
+  PL_IGNORE_UNUSED(version);
 
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadString(m_sComponentTypeName));
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadString(m_sComponentFilePath));
-  return PLASMA_SUCCESS;
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadString(m_sComponentTypeName));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadString(m_sComponentFilePath));
+  return PL_SUCCESS;
 }

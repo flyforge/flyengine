@@ -11,9 +11,9 @@ bool plQtExtractGeometryDlg::s_bOnlySelection = false;
 int plQtExtractGeometryDlg::s_iExtractionMode = (int)plWorldGeoExtractionUtil::ExtractionMode::RenderMesh;
 int plQtExtractGeometryDlg::s_iCoordinateSystem = 1;
 
-plQtExtractGeometryDlg::plQtExtractGeometryDlg(QWidget* parent)
+plQtExtractGeometryDlg::plQtExtractGeometryDlg(QWidget* pParent)
 
-  : QDialog(parent)
+  : QDialog(pParent)
 {
   setupUi(this);
 

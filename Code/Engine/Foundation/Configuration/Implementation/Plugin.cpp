@@ -5,11 +5,11 @@
 #include <Foundation/IO/OSFile.h>
 #include <Foundation/Logging/Log.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Configuration/Implementation/Win/Plugin_Win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_OSX) || PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#elif PL_ENABLED(PL_PLATFORM_OSX) || PL_ENABLED(PL_PLATFORM_LINUX)
 #  include <Foundation/Configuration/Implementation/Posix/Plugin_Posix.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_ANDROID)
+#elif PL_ENABLED(PL_PLATFORM_ANDROID)
 #  include <Foundation/Configuration/Implementation/Android/Plugin_Android.h>
 #else
 #  error "Plugins not implemented on this Platform."
@@ -127,12 +127,12 @@ static plResult UnloadPluginInternal(plStringView sPluginFile)
   auto thisMod = g_LoadedModules.Find(sPluginFile);
 
   if (!thisMod.IsValid())
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   plLog::Debug("Plugin to unload: \"{0}\"", sPluginFile);
 
   plPlugin::BeginPluginChanges();
-  PLASMA_SCOPE_EXIT(plPlugin::EndPluginChanges());
+  PL_SCOPE_EXIT(plPlugin::EndPluginChanges());
 
   // Broadcast event: Before unloading plugin
   {
@@ -161,13 +161,14 @@ static plResult UnloadPluginInternal(plStringView sPluginFile)
   thisMod.Value().Uninitialize();
 
   // unload the plugin module
-  if (UnloadPluginModule(thisMod.Value().m_hModule, sPluginFile) == PLASMA_FAILURE)
+  if (UnloadPluginModule(thisMod.Value().m_hModule, sPluginFile) == PL_FAILURE)
   {
     plLog::Error("Unloading plugin module '{}' failed.", sPluginFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // delete the plugin copy that we had loaded
+  if(plPlugin::PlatformNeedsPluginCopy())
   {
     plStringBuilder sOriginalFile, sCopiedFile;
     plPlugin::GetPluginPaths(sPluginFile, sOriginalFile, sCopiedFile, g_LoadedModules[sPluginFile].m_uiFileNumber);
@@ -186,7 +187,7 @@ static plResult UnloadPluginInternal(plStringView sPluginFile)
   plLog::Success("Plugin '{0}' is unloaded.", sPluginFile);
   g_LoadedModules.Remove(thisMod);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static plResult LoadPluginInternal(plStringView sPluginFile, plBitflags<plPluginLoadFlags> flags)
@@ -199,24 +200,24 @@ static plResult LoadPluginInternal(plStringView sPluginFile, plBitflags<plPlugin
   if (!plOSFile::ExistsFile(sOriginalFile))
   {
     plLog::Error("The plugin '{0}' does not exist.", sPluginFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  if (flags.IsSet(plPluginLoadFlags::LoadCopy))
+  if (plPlugin::PlatformNeedsPluginCopy() && flags.IsSet(plPluginLoadFlags::LoadCopy))
   {
     // create a copy of the original plugin file
     const plUInt8 uiMaxParallelInstances = static_cast<plUInt8>(s_uiMaxParallelInstances);
     for (uiFileNumber = 0; uiFileNumber < uiMaxParallelInstances; ++uiFileNumber)
     {
       plPlugin::GetPluginPaths(sPluginFile, sOriginalFile, sCopiedFile, uiFileNumber);
-      if (plOSFile::CopyFile(sOriginalFile, sCopiedFile) == PLASMA_SUCCESS)
+      if (plOSFile::CopyFile(sOriginalFile, sCopiedFile) == PL_SUCCESS)
         goto success;
     }
 
     plLog::Error("Could not copy the plugin file '{0}' to '{1}' (and all previous file numbers). Plugin MaxParallelInstances is set to {2}.", sOriginalFile, sCopiedFile, s_uiMaxParallelInstances);
 
     g_LoadedModules.Remove(sCopiedFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
@@ -230,7 +231,7 @@ success:
   thisMod.m_LoadFlags = flags;
 
   plPlugin::BeginPluginChanges();
-  PLASMA_SCOPE_EXIT(plPlugin::EndPluginChanges());
+  PL_SCOPE_EXIT(plPlugin::EndPluginChanges());
 
   // Broadcast Event: Before loading plugin
   {
@@ -242,13 +243,13 @@ success:
 
   g_pCurrentlyLoadingModule = &thisMod;
 
-  if (LoadPluginModule(sCopiedFile, g_pCurrentlyLoadingModule->m_hModule, sPluginFile) == PLASMA_FAILURE)
+  if (LoadPluginModule(sCopiedFile, g_pCurrentlyLoadingModule->m_hModule, sPluginFile) == PL_FAILURE)
   {
     // loaded, but failed
     g_pCurrentlyLoadingModule = nullptr;
     thisMod.m_hModule = 0;
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   g_pCurrentlyLoadingModule = nullptr;
@@ -274,7 +275,7 @@ success:
   }
 
   plLog::Success("Plugin '{0}' is loaded.", sPluginFile);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plPlugin::ExistsPluginFile(plStringView sPluginFile)
@@ -292,15 +293,15 @@ plResult plPlugin::LoadPlugin(plStringView sPluginFile, plBitflags<plPluginLoadF
     // early out without logging an error
 
     if (!ExistsPluginFile(sPluginFile))
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  PLASMA_LOG_BLOCK("Loading Plugin", sPluginFile);
+  PL_LOG_BLOCK("Loading Plugin", sPluginFile);
 
   if (g_LoadedModules.Find(sPluginFile).IsValid())
   {
     plLog::Debug("Plugin '{0}' already loaded.", sPluginFile);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // make sure this is done first
@@ -329,7 +330,7 @@ plResult plPlugin::LoadPlugin(plStringView sPluginFile, plBitflags<plPluginLoadF
 void plPlugin::UnloadAllPlugins()
 {
   BeginPluginChanges();
-  PLASMA_SCOPE_EXIT(EndPluginChanges());
+  PL_SCOPE_EXIT(EndPluginChanges());
 
   for (plUInt32 i = s_PluginLoadOrder.GetCount(); i > 0; --i)
   {
@@ -339,7 +340,7 @@ void plPlugin::UnloadAllPlugins()
     }
   }
 
-  PLASMA_ASSERT_DEBUG(g_LoadedModules.IsEmpty(), "Not all plugins were unloaded somehow.");
+  PL_ASSERT_DEBUG(g_LoadedModules.IsEmpty(), "Not all plugins were unloaded somehow.");
 
   for (auto mod : g_LoadedModules)
   {
@@ -375,4 +376,4 @@ plPlugin::Init::Init(const char* szAddPluginDependency)
   pMD->m_sPluginDependencies.PushBack(szAddPluginDependency);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Configuration_Implementation_Plugin);
+

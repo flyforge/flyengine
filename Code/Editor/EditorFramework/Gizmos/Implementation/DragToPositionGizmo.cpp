@@ -7,52 +7,32 @@
 #include <EditorFramework/Gizmos/SnapProvider.h>
 #include <EditorFramework/Preferences/EditorPreferences.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragToPositionGizmo, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDragToPositionGizmo, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plDragToPositionGizmo::plDragToPositionGizmo()
 {
   m_bModifiesRotation = false;
 
-  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
-  m_bUseExperimentalGizmo = !pPreferences->m_bOldGizmos;
+  // TODO: adjust colors for +/- axis
+  const plColor colr1 = plColorGammaUB(206, 0, 46);
+  const plColor colr2 = plColorGammaUB(206, 0, 46);
+  const plColor colg1 = plColorGammaUB(101, 206, 0);
+  const plColor colg2 = plColorGammaUB(101, 206, 0);
+  const plColor colb1 = plColorGammaUB(0, 125, 206);
+  const plColor colb2 = plColorGammaUB(0, 125, 206);
+  const plColor coly = plColorGammaUB(128, 128, 0);
 
-  if (m_bUseExperimentalGizmo)
-  {
-    // TODO: adjust colors for +/- axis
-    const plColor colr1 = plColorGammaUB(206, 0, 46);
-    const plColor colr2 = plColorGammaUB(206, 0, 46);
-    const plColor colg1 = plColorGammaUB(101, 206, 0);
-    const plColor colg2 = plColorGammaUB(101, 206, 0);
-    const plColor colb1 = plColorGammaUB(0, 125, 206);
-    const plColor colb2 = plColorGammaUB(0, 125, 206);
-    const plColor coly = plColorGammaUB(128, 128, 0);
-
-    m_hBobble.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, coly, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragCenter.obj");
-    m_hAlignPX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPX.obj");
-    m_hAlignNX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNX.obj");
-    m_hAlignPY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPY.obj");
-    m_hAlignNY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNY.obj");
-    m_hAlignPZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPZ.obj");
-    m_hAlignNZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNZ.obj");
-  }
-  else
-  {
-    const float b = 0.1f;
-    const float l = 0.5f;
-    const float h = 0.9f;
-
-    m_hBobble.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Box, plColor::DodgerBlue, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignPX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(h, b, b), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignNX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(l, b, b), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignPY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(b, h, b), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignNY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(b, l, b), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignPZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(b, b, h), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAlignNZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::HalfPiston, plColor(b, b, l / 3), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-  }
+  m_hBobble.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, coly, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragCenter.obj");
+  m_hAlignPX.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPX.obj");
+  m_hAlignNX.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNX.obj");
+  m_hAlignPY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPY.obj");
+  m_hAlignNY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNY.obj");
+  m_hAlignPZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb1, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowPZ.obj");
+  m_hAlignNZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb2, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/DragArrowNZ.obj");
 
   SetVisible(false);
-  SetTransformation(plTransform::IdentityTransform());
+  SetTransformation(plTransform::MakeIdentity());
 }
 
 void plDragToPositionGizmo::UpdateStatusBarText(plQtEngineDocumentWindow* pWindow)
@@ -104,39 +84,13 @@ void plDragToPositionGizmo::OnVisibleChanged(bool bVisible)
 
 void plDragToPositionGizmo::OnTransformationChanged(const plTransform& transform)
 {
-  if (m_bUseExperimentalGizmo)
-  {
-    m_hBobble.SetTransformation(transform);
-    m_hAlignPX.SetTransformation(transform);
-    m_hAlignNX.SetTransformation(transform);
-    m_hAlignPY.SetTransformation(transform);
-    m_hAlignNY.SetTransformation(transform);
-    m_hAlignPZ.SetTransformation(transform);
-    m_hAlignNZ.SetTransformation(transform);
-  }
-  else
-  {
-    plTransform m;
-    m.SetIdentity();
-
-    m.m_vScale = plVec3(0.2f);
-    m_hBobble.SetTransformation(transform * m);
-
-    m.SetIdentity();
-    m_hAlignPX.SetTransformation(transform * m);
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(180));
-    m_hAlignNX.SetTransformation(transform * m);
-
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(+90));
-    m_hAlignPY.SetTransformation(transform * m);
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(-90));
-    m_hAlignNY.SetTransformation(transform * m);
-
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
-    m_hAlignPZ.SetTransformation(transform * m);
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(+90));
-    m_hAlignNZ.SetTransformation(transform * m);
-  }
+  m_hBobble.SetTransformation(transform);
+  m_hAlignPX.SetTransformation(transform);
+  m_hAlignNX.SetTransformation(transform);
+  m_hAlignPY.SetTransformation(transform);
+  m_hAlignNY.SetTransformation(transform);
+  m_hAlignPZ.SetTransformation(transform);
+  m_hAlignNZ.SetTransformation(transform);
 }
 
 void plDragToPositionGizmo::DoFocusLost(bool bCancel)
@@ -160,13 +114,13 @@ void plDragToPositionGizmo::DoFocusLost(bool bCancel)
   m_pInteractionGizmoHandle = nullptr;
 }
 
-PlasmaEditorInput plDragToPositionGizmo::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plDragToPositionGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -197,42 +151,42 @@ PlasmaEditorInput plDragToPositionGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plDragToPositionGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plDragToPositionGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plDragToPositionGizmo::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plDragToPositionGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
-    return PlasmaEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
+    return plEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
   const plObjectPickingResult& res = GetOwnerView()->PickObject(e->pos().x(), e->pos().y());
 
   if (!res.m_PickedObject.IsValid())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   if (res.m_vPickedPosition.IsNaN() || res.m_vPickedNormal.IsNaN() || res.m_vPickedNormal.IsZero())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   plVec3 vSnappedPosition = res.m_vPickedPosition;
 
@@ -289,13 +243,13 @@ PlasmaEditorInput plDragToPositionGizmo::DoMouseMoveEvent(QMouseEvent* e)
     alignAxis = m_qStartOrientation * alignAxis;
     alignAxis.Normalize();
 
-    if (alignAxis.GetAngleBetween(res.m_vPickedNormal) > plAngle::Degree(179))
+    if (alignAxis.GetAngleBetween(res.m_vPickedNormal) > plAngle::MakeFromDegree(179))
     {
-      rot.SetFromAxisAndAngle(m_qStartOrientation * orthoAxis, plAngle::Degree(180));
+      rot = plQuat::MakeFromAxisAndAngle(m_qStartOrientation * orthoAxis, plAngle::MakeFromDegree(180));
     }
     else
     {
-      rot.SetShortestRotation(alignAxis, res.m_vPickedNormal);
+      rot = plQuat::MakeShortestRotation(alignAxis, res.m_vPickedNormal);
     }
   }
 
@@ -307,5 +261,5 @@ PlasmaEditorInput plDragToPositionGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }

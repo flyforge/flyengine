@@ -3,8 +3,8 @@
 #include <EditorPluginAssets/SkeletonAsset/SkeletonAssetManager.h>
 #include <EditorPluginAssets/SkeletonAsset/SkeletonAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocumentManager, 1, plRTTIDefaultAllocator<plSkeletonAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkeletonAssetDocumentManager, 1, plRTTIDefaultAllocator<plSkeletonAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSkeletonAssetDocumentManager::plSkeletonAssetDocumentManager()
 {
@@ -35,7 +35,7 @@ void plSkeletonAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plSkeletonAssetDocument>())
       {
-        plQtSkeletonAssetDocumentWindow* pDocWnd = new plQtSkeletonAssetDocumentWindow(static_cast<plSkeletonAssetDocument*>(e.m_pDocument));
+        new plQtSkeletonAssetDocumentWindow(static_cast<plSkeletonAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -46,9 +46,9 @@ void plSkeletonAssetDocumentManager::OnDocumentManagerEvent(const plDocumentMana
 }
 
 void plSkeletonAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plSkeletonAssetDocument(szPath);
+  out_pDocument = new plSkeletonAssetDocument(sPath);
 }
 
 void plSkeletonAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

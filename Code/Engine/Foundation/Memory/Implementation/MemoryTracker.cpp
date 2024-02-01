@@ -3,55 +3,49 @@
 #include <Foundation/Containers/HashTable.h>
 #include <Foundation/Containers/IdTable.h>
 #include <Foundation/Logging/Log.h>
-#include <Foundation/Memory/Allocator.h>
-#include <Foundation/Memory/Policies/HeapAllocation.h>
+#include <Foundation/Memory/AllocatorWithPolicy.h>
+#include <Foundation/Memory/Policies/AllocPolicyHeap.h>
 #include <Foundation/Strings/String.h>
 #include <Foundation/System/StackTracer.h>
 #include <Foundation/Threading/Lock.h>
 #include <Foundation/Threading/Mutex.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
-#endif
-
 namespace
 {
   // no tracking for the tracker data itself
-  using TrackerDataAllocator = plAllocator<plMemoryPolicies::plHeapAllocation, 0>;
+  using TrackerDataAllocator = plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::Nothing>;
 
   static TrackerDataAllocator* s_pTrackerDataAllocator;
 
   struct TrackerDataAllocatorWrapper
   {
-    PLASMA_ALWAYS_INLINE static plAllocatorBase* GetAllocator() { return s_pTrackerDataAllocator; }
+    PL_ALWAYS_INLINE static plAllocator* GetAllocator() { return s_pTrackerDataAllocator; }
   };
 
 
   struct AllocatorData
   {
-    PLASMA_ALWAYS_INLINE AllocatorData() = default;
+    PL_ALWAYS_INLINE AllocatorData() = default;
 
     plHybridString<32, TrackerDataAllocatorWrapper> m_sName;
-    plBitflags<plMemoryTrackingFlags> m_Flags;
+    plAllocatorTrackingMode m_TrackingMode;
 
     plAllocatorId m_ParentId;
 
-    plAllocatorBase::Stats m_Stats;
+    plAllocator::Stats m_Stats;
 
     plHashTable<const void*, plMemoryTracker::AllocationInfo, plHashHelper<const void*>, TrackerDataAllocatorWrapper> m_Allocations;
   };
 
   struct TrackerData
   {
-    PLASMA_ALWAYS_INLINE void Lock() { m_Mutex.Lock(); }
-    PLASMA_ALWAYS_INLINE void Unlock() { m_Mutex.Unlock(); }
+    PL_ALWAYS_INLINE void Lock() { m_Mutex.Lock(); }
+    PL_ALWAYS_INLINE void Unlock() { m_Mutex.Unlock(); }
 
     plMutex m_Mutex;
 
     using AllocatorTable = plIdTable<plAllocatorId, AllocatorData, TrackerDataAllocatorWrapper>;
     AllocatorTable m_AllocatorData;
-
-    plAllocatorId m_StaticAllocatorId;
   };
 
   static TrackerData* s_pTrackerData;
@@ -63,21 +57,21 @@ namespace
     if (s_bIsInitialized)
       return;
 
-    PLASMA_ASSERT_DEV(!s_bIsInitializing, "MemoryTracker initialization entered recursively");
+    PL_ASSERT_DEV(!s_bIsInitializing, "MemoryTracker initialization entered recursively");
     s_bIsInitializing = true;
 
     if (s_pTrackerDataAllocator == nullptr)
     {
-      alignas(PLASMA_ALIGNMENT_OF(TrackerDataAllocator)) static plUInt8 TrackerDataAllocatorBuffer[sizeof(TrackerDataAllocator)];
+      alignas(PL_ALIGNMENT_OF(TrackerDataAllocator)) static plUInt8 TrackerDataAllocatorBuffer[sizeof(TrackerDataAllocator)];
       s_pTrackerDataAllocator = new (TrackerDataAllocatorBuffer) TrackerDataAllocator("MemoryTracker");
-      PLASMA_ASSERT_DEV(s_pTrackerDataAllocator != nullptr, "MemoryTracker initialization failed");
+      PL_ASSERT_DEV(s_pTrackerDataAllocator != nullptr, "MemoryTracker initialization failed");
     }
 
     if (s_pTrackerData == nullptr)
     {
-      alignas(PLASMA_ALIGNMENT_OF(TrackerData)) static plUInt8 TrackerDataBuffer[sizeof(TrackerData)];
+      alignas(PL_ALIGNMENT_OF(TrackerData)) static plUInt8 TrackerDataBuffer[sizeof(TrackerData)];
       s_pTrackerData = new (TrackerDataBuffer) TrackerData();
-      PLASMA_ASSERT_DEV(s_pTrackerData != nullptr, "MemoryTracker initialization failed");
+      PL_ASSERT_DEV(s_pTrackerData != nullptr, "MemoryTracker initialization failed");
     }
 
     s_bIsInitialized = true;
@@ -88,7 +82,7 @@ namespace
   {
     char szBuffer[512];
     plUInt64 uiSize = info.m_uiSize;
-    plStringUtils::snprintf(szBuffer, PLASMA_ARRAY_SIZE(szBuffer), "Leaked %llu bytes allocated by '%s'\n", uiSize, szAllocatorName);
+    plStringUtils::snprintf(szBuffer, PL_ARRAY_SIZE(szBuffer), "Leaked %llu bytes allocated by '%s'\n", uiSize, szAllocatorName);
 
     plLog::Print(szBuffer);
 
@@ -119,7 +113,7 @@ plAllocatorId plMemoryTracker::Iterator::ParentId() const
   return CAST_ITER(m_pData)->Value().m_ParentId;
 }
 
-const plAllocatorBase::Stats& plMemoryTracker::Iterator::Stats() const
+const plAllocator::Stats& plMemoryTracker::Iterator::Stats() const
 {
   return CAST_ITER(m_pData)->Value().m_Stats;
 }
@@ -137,37 +131,30 @@ bool plMemoryTracker::Iterator::IsValid() const
 plMemoryTracker::Iterator::~Iterator()
 {
   auto it = CAST_ITER(m_pData);
-  PLASMA_DELETE(s_pTrackerDataAllocator, it);
+  PL_DELETE(s_pTrackerDataAllocator, it);
   m_pData = nullptr;
 }
 
 
 // static
-plAllocatorId plMemoryTracker::RegisterAllocator(plStringView sName, plBitflags<plMemoryTrackingFlags> flags, plAllocatorId parentId)
+plAllocatorId plMemoryTracker::RegisterAllocator(plStringView sName, plAllocatorTrackingMode mode, plAllocatorId parentId)
 {
   Initialize();
 
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   AllocatorData data;
   data.m_sName = sName;
-  data.m_Flags = flags;
+  data.m_TrackingMode = mode;
   data.m_ParentId = parentId;
 
-  plAllocatorId id = s_pTrackerData->m_AllocatorData.Insert(data);
-
-  if (data.m_sName == PLASMA_STATIC_ALLOCATOR_NAME)
-  {
-    s_pTrackerData->m_StaticAllocatorId = id;
-  }
-
-  return id;
+  return s_pTrackerData->m_AllocatorData.Insert(data);
 }
 
 // static
 void plMemoryTracker::DeregisterAllocator(plAllocatorId allocatorId)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   const AllocatorData& data = s_pTrackerData->m_AllocatorData[allocatorId];
 
@@ -179,32 +166,30 @@ void plMemoryTracker::DeregisterAllocator(plAllocatorId allocatorId)
       DumpLeak(it.Value(), data.m_sName.GetData());
     }
 
-    PLASMA_REPORT_FAILURE("Allocator '{0}' leaked {1} allocation(s)", data.m_sName.GetData(), uiLiveAllocations);
+    PL_REPORT_FAILURE("Allocator '{0}' leaked {1} allocation(s)", data.m_sName.GetData(), uiLiveAllocations);
   }
 
   s_pTrackerData->m_AllocatorData.Remove(allocatorId);
 }
 
 // static
-void plMemoryTracker::AddAllocation(plAllocatorId allocatorId, plBitflags<plMemoryTrackingFlags> flags, const void* pPtr, size_t uiSize, size_t uiAlign, plTime allocationTime)
+void plMemoryTracker::AddAllocation(plAllocatorId allocatorId, plAllocatorTrackingMode mode, const void* pPtr, size_t uiSize, size_t uiAlign, plTime allocationTime)
 {
-  PLASMA_ASSERT_DEV((flags & plMemoryTrackingFlags::EnableAllocationTracking) != 0, "Allocation tracking is turned off, but plMemoryTracker::AddAllocation() is called anyway.");
-
-  PLASMA_ASSERT_DEV(uiAlign < 0xFFFF, "Alignment too big");
+  PL_ASSERT_DEV(uiAlign < 0xFFFF, "Alignment too big");
 
   plArrayPtr<void*> stackTrace;
-  if (flags.IsSet(plMemoryTrackingFlags::EnableStackTrace))
+  if (mode >= plAllocatorTrackingMode::AllocationStatsAndStacktraces)
   {
     void* pBuffer[64];
     plArrayPtr<void*> tempTrace(pBuffer);
     const plUInt32 uiNumTraces = plStackTracer::GetStackTrace(tempTrace);
 
-    stackTrace = PLASMA_NEW_ARRAY(s_pTrackerDataAllocator, void*, uiNumTraces);
+    stackTrace = PL_NEW_ARRAY(s_pTrackerDataAllocator, void*, uiNumTraces);
     plMemoryUtils::Copy(stackTrace.GetPtr(), pBuffer, uiNumTraces);
   }
 
   {
-    PLASMA_LOCK(*s_pTrackerData);
+    PL_LOCK(*s_pTrackerData);
 
     AllocatorData& data = s_pTrackerData->m_AllocatorData[allocatorId];
     data.m_Stats.m_uiNumAllocations++;
@@ -212,7 +197,6 @@ void plMemoryTracker::AddAllocation(plAllocatorId allocatorId, plBitflags<plMemo
     data.m_Stats.m_uiPerFrameAllocationSize += uiSize;
     data.m_Stats.m_PerFrameAllocationTime += allocationTime;
 
-    PLASMA_ASSERT_DEBUG(data.m_Flags == flags, "Given flags have to be identical to allocator flags");
     auto pInfo = &data.m_Allocations[pPtr];
     pInfo->m_uiSize = uiSize;
     pInfo->m_uiAlignment = (plUInt16)uiAlign;
@@ -226,7 +210,7 @@ void plMemoryTracker::RemoveAllocation(plAllocatorId allocatorId, const void* pP
   plArrayPtr<void*> stackTrace;
 
   {
-    PLASMA_LOCK(*s_pTrackerData);
+    PL_LOCK(*s_pTrackerData);
 
     AllocatorData& data = s_pTrackerData->m_AllocatorData[allocatorId];
 
@@ -240,17 +224,17 @@ void plMemoryTracker::RemoveAllocation(plAllocatorId allocatorId, const void* pP
     }
     else
     {
-      PLASMA_REPORT_FAILURE("Invalid Allocation '{0}'. Memory corruption?", plArgP(pPtr));
+      PL_REPORT_FAILURE("Invalid Allocation '{0}'. Memory corruption?", plArgP(pPtr));
     }
   }
 
-  PLASMA_DELETE_ARRAY(s_pTrackerDataAllocator, stackTrace);
+  PL_DELETE_ARRAY(s_pTrackerDataAllocator, stackTrace);
 }
 
 // static
 void plMemoryTracker::RemoveAllAllocations(plAllocatorId allocatorId)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
   AllocatorData& data = s_pTrackerData->m_AllocatorData[allocatorId];
   for (auto it = data.m_Allocations.GetIterator(); it.IsValid(); ++it)
   {
@@ -258,15 +242,15 @@ void plMemoryTracker::RemoveAllAllocations(plAllocatorId allocatorId)
     data.m_Stats.m_uiNumDeallocations++;
     data.m_Stats.m_uiAllocationSize -= info.m_uiSize;
 
-    PLASMA_DELETE_ARRAY(s_pTrackerDataAllocator, info.GetStackTrace());
+    PL_DELETE_ARRAY(s_pTrackerDataAllocator, info.GetStackTrace());
   }
   data.m_Allocations.Clear();
 }
 
 // static
-void plMemoryTracker::SetAllocatorStats(plAllocatorId allocatorId, const plAllocatorBase::Stats& stats)
+void plMemoryTracker::SetAllocatorStats(plAllocatorId allocatorId, const plAllocator::Stats& stats)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   s_pTrackerData->m_AllocatorData[allocatorId].m_Stats = stats;
 }
@@ -274,28 +258,28 @@ void plMemoryTracker::SetAllocatorStats(plAllocatorId allocatorId, const plAlloc
 // static
 void plMemoryTracker::ResetPerFrameAllocatorStats()
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   for (auto it = s_pTrackerData->m_AllocatorData.GetIterator(); it.IsValid(); ++it)
   {
     AllocatorData& data = it.Value();
     data.m_Stats.m_uiPerFrameAllocationSize = 0;
-    data.m_Stats.m_PerFrameAllocationTime.SetZero();
+    data.m_Stats.m_PerFrameAllocationTime = plTime::MakeZero();
   }
 }
 
 // static
 plStringView plMemoryTracker::GetAllocatorName(plAllocatorId allocatorId)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   return s_pTrackerData->m_AllocatorData[allocatorId].m_sName;
 }
 
 // static
-const plAllocatorBase::Stats& plMemoryTracker::GetAllocatorStats(plAllocatorId allocatorId)
+const plAllocator::Stats& plMemoryTracker::GetAllocatorStats(plAllocatorId allocatorId)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   return s_pTrackerData->m_AllocatorData[allocatorId].m_Stats;
 }
@@ -303,7 +287,7 @@ const plAllocatorBase::Stats& plMemoryTracker::GetAllocatorStats(plAllocatorId a
 // static
 plAllocatorId plMemoryTracker::GetAllocatorParentId(plAllocatorId allocatorId)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   return s_pTrackerData->m_AllocatorData[allocatorId].m_ParentId;
 }
@@ -311,7 +295,7 @@ plAllocatorId plMemoryTracker::GetAllocatorParentId(plAllocatorId allocatorId)
 // static
 const plMemoryTracker::AllocationInfo& plMemoryTracker::GetAllocationInfo(plAllocatorId allocatorId, const void* pPtr)
 {
-  PLASMA_LOCK(*s_pTrackerData);
+  PL_LOCK(*s_pTrackerData);
 
   const AllocatorData& data = s_pTrackerData->m_AllocatorData[allocatorId];
   const AllocationInfo* info = nullptr;
@@ -322,31 +306,28 @@ const plMemoryTracker::AllocationInfo& plMemoryTracker::GetAllocationInfo(plAllo
 
   static AllocationInfo invalidInfo;
 
-  PLASMA_REPORT_FAILURE("Could not find info for allocation {0}", plArgP(pPtr));
+  PL_REPORT_FAILURE("Could not find info for allocation {0}", plArgP(pPtr));
   return invalidInfo;
 }
 
-
 struct LeakInfo
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plAllocatorId m_AllocatorId;
   size_t m_uiSize = 0;
-  const void* m_pParentLeak = nullptr;
-
-  PLASMA_ALWAYS_INLINE bool IsRootLeak() const { return m_pParentLeak == nullptr && m_AllocatorId != s_pTrackerData->m_StaticAllocatorId; }
+  bool m_bIsRootLeak = true;
 };
 
 // static
-void plMemoryTracker::DumpMemoryLeaks()
+plUInt32 plMemoryTracker::PrintMemoryLeaks(PrintFunc printfunc)
 {
   if (s_pTrackerData == nullptr) // if both tracking and tracing is disabled there is no tracker data
-    return;
-  PLASMA_LOCK(*s_pTrackerData);
+    return 0;
 
-  static plHashTable<const void*, LeakInfo, plHashHelper<const void*>, TrackerDataAllocatorWrapper> leakTable;
-  leakTable.Clear();
+  PL_LOCK(*s_pTrackerData);
+
+  plHashTable<const void*, LeakInfo, plHashHelper<const void*>, TrackerDataAllocatorWrapper> leakTable;
 
   // first collect all leaks
   for (auto it = s_pTrackerData->m_AllocatorData.GetIterator(); it.IsValid(); ++it)
@@ -357,7 +338,11 @@ void plMemoryTracker::DumpMemoryLeaks()
       LeakInfo leak;
       leak.m_AllocatorId = it.Id();
       leak.m_uiSize = it2.Value().m_uiSize;
-      leak.m_pParentLeak = nullptr;
+
+      if (data.m_TrackingMode == plAllocatorTrackingMode::AllocationStatsIgnoreLeaks)
+      {
+        leak.m_bIsRootLeak = false;
+      }
 
       leakTable.Insert(it2.Key(), leak);
     }
@@ -379,7 +364,7 @@ void plMemoryTracker::DumpMemoryLeaks()
       LeakInfo* dependentLeak = nullptr;
       if (leakTable.TryGetValue(testPtr, dependentLeak))
       {
-        dependentLeak->m_pParentLeak = ptr;
+        dependentLeak->m_bIsRootLeak = false;
       }
 
       curPtr = plMemoryUtils::AddByteOffset(curPtr, sizeof(void*));
@@ -387,49 +372,64 @@ void plMemoryTracker::DumpMemoryLeaks()
   }
 
   // dump leaks
-  plUInt64 uiNumLeaks = 0;
+  plUInt32 uiNumLeaks = 0;
 
   for (auto it = leakTable.GetIterator(); it.IsValid(); ++it)
   {
     const void* ptr = it.Key();
     const LeakInfo& leak = it.Value();
 
-    if (leak.IsRootLeak())
+    if (leak.m_bIsRootLeak)
     {
-      if (uiNumLeaks == 0)
-      {
-        plLog::Print("\n\n--------------------------------------------------------------------\n"
-                     "Memory Leak Report:"
-                     "\n--------------------------------------------------------------------\n\n");
-      }
-
       const AllocatorData& data = s_pTrackerData->m_AllocatorData[leak.m_AllocatorId];
-      plMemoryTracker::AllocationInfo info;
-      data.m_Allocations.TryGetValue(ptr, info);
 
-      DumpLeak(info, data.m_sName.GetData());
+      if (data.m_TrackingMode != plAllocatorTrackingMode::AllocationStatsIgnoreLeaks)
+      {
+        if (uiNumLeaks == 0)
+        {
+          printfunc("\n\n--------------------------------------------------------------------\n"
+                    "Memory Leak Report:"
+                    "\n--------------------------------------------------------------------\n\n");
+        }
 
-      ++uiNumLeaks;
+        plMemoryTracker::AllocationInfo info;
+        data.m_Allocations.TryGetValue(ptr, info);
+
+        DumpLeak(info, data.m_sName.GetData());
+
+        ++uiNumLeaks;
+      }
     }
   }
 
   if (uiNumLeaks > 0)
   {
-    plLog::Printf("\n--------------------------------------------------------------------\n"
-                  "Found %llu root memory leak(s)."
-                  "\n--------------------------------------------------------------------\n\n",
+    char tmp[1024];
+    plStringUtils::snprintf(tmp, 1024, "\n--------------------------------------------------------------------\n"
+                                       "Found %u root memory leak(s)."
+                                       "\n--------------------------------------------------------------------\n\n",
       uiNumLeaks);
 
-    PLASMA_REPORT_FAILURE("Found {0} root memory leak(s).", uiNumLeaks);
+    printfunc(tmp);
+  }
+
+  return uiNumLeaks;
+}
+
+// static
+void plMemoryTracker::DumpMemoryLeaks()
+{
+  const plUInt32 uiNumLeaks = PrintMemoryLeaks(plLog::Print);
+
+  if (uiNumLeaks > 0)
+  {
+    PL_REPORT_FAILURE("Found {0} root memory leak(s). See console output for details.", uiNumLeaks);
   }
 }
 
 // static
 plMemoryTracker::Iterator plMemoryTracker::GetIterator()
 {
-  auto pInnerIt = PLASMA_NEW(s_pTrackerDataAllocator, TrackerData::AllocatorTable::Iterator, s_pTrackerData->m_AllocatorData.GetIterator());
+  auto pInnerIt = PL_NEW(s_pTrackerDataAllocator, TrackerData::AllocatorTable::Iterator, s_pTrackerData->m_AllocatorData.GetIterator());
   return Iterator(pInnerIt);
 }
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Memory_Implementation_MemoryTracker);

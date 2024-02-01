@@ -16,9 +16,9 @@ class plStateMachineInstance;
 /// Note that states are shared between multiple instances and thus
 /// shouldn't modify any data on their own but always operate on the passed instance and instance data.
 /// \see plStateMachineInstanceDataDesc
-class PLASMA_GAMEENGINE_DLL plStateMachineState : public plReflectedClass
+class PL_GAMEENGINE_DLL plStateMachineState : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineState, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState, plReflectedClass);
 
 public:
   plStateMachineState(plStringView sName = plStringView());
@@ -27,12 +27,12 @@ public:
   plStringView GetName() const { return m_sName; }
   const plHashedString& GetNameHashed() const { return m_sName; }
 
-  virtual void OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const = 0;
-  virtual void OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const;
-  virtual void Update(plStateMachineInstance& instance, void* pInstanceData, plTime deltaTime) const;
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const = 0;
+  virtual void OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const;
+  virtual void Update(plStateMachineInstance& ref_instance, void* pInstanceData, plTime deltaTime) const;
 
-  virtual plResult Serialize(plStreamWriter& stream) const;
-  virtual plResult Deserialize(plStreamReader& stream);
+  virtual plResult Serialize(plStreamWriter& inout_stream) const;
+  virtual plResult Deserialize(plStreamReader& inout_stream);
 
   /// \brief Returns whether this state needs additional instance data and if so fills the out_desc.
   ///
@@ -46,6 +46,17 @@ private:
   void Reflection_Update(plStateMachineInstance* pStateMachineInstance, plTime deltaTime);
 
   plHashedString m_sName;
+};
+
+class PL_GAMEENGINE_DLL plStateMachineState_Empty final : public plStateMachineState
+{
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineState_Empty, plStateMachineState);
+
+public:
+  plStateMachineState_Empty(plStringView sName = plStringView());
+  ~plStateMachineState_Empty() = default;
+
+  virtual void OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const override {}
 };
 
 struct plStateMachineState_ScriptBaseClassFunctions
@@ -66,14 +77,14 @@ struct plStateMachineState_ScriptBaseClassFunctions
 /// Same as with states, transitions are also shared between multiple instances and thus
 /// should decide their condition based on the passed instance and instance data.
 /// \see plStateMachineInstanceDataDesc
-class PLASMA_GAMEENGINE_DLL plStateMachineTransition : public plReflectedClass
+class PL_GAMEENGINE_DLL plStateMachineTransition : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineTransition, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineTransition, plReflectedClass);
 
-  virtual bool IsConditionMet(plStateMachineInstance& instance, void* pInstanceData) const = 0;
+  virtual bool IsConditionMet(plStateMachineInstance& ref_instance, void* pInstanceData) const = 0;
 
-  virtual plResult Serialize(plStreamWriter& stream) const;
-  virtual plResult Deserialize(plStreamReader& stream);
+  virtual plResult Serialize(plStreamWriter& inout_stream) const;
+  virtual plResult Deserialize(plStreamReader& inout_stream);
 
   /// \brief Returns whether this transition needs additional instance data and if so fills the out_desc.
   ///
@@ -84,9 +95,9 @@ class PLASMA_GAMEENGINE_DLL plStateMachineTransition : public plReflectedClass
 /// \brief The state machine description defines the structure of a state machine like e.g.
 /// what states it has and how to transition between them.
 /// Once an instance is created from a description it is not allowed to change the description afterwards.
-class PLASMA_GAMEENGINE_DLL plStateMachineDescription : public plRefCounted
+class PL_GAMEENGINE_DLL plStateMachineDescription : public plRefCounted
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plStateMachineDescription);
+  PL_DISALLOW_COPY_AND_ASSIGN(plStateMachineDescription);
 
 public:
   plStateMachineDescription();
@@ -98,8 +109,8 @@ public:
   /// \brief Adds the given transition between the two given states. A uiFromStateIndex of plInvalidIndex generates a transition that can be done from any other possible state.
   void AddTransition(plUInt32 uiFromStateIndex, plUInt32 uiToStateIndex, plUniquePtr<plStateMachineTransition>&& pTransistion);
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 
 private:
   friend class plStateMachineInstance;
@@ -129,12 +140,12 @@ private:
 
 /// \brief The state machine instance represents the actual state machine.
 /// Typically it is created from a description but for small use cases it can also be used without a description.
-class PLASMA_GAMEENGINE_DLL plStateMachineInstance
+class PL_GAMEENGINE_DLL plStateMachineInstance
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plStateMachineInstance);
+  PL_DISALLOW_COPY_AND_ASSIGN(plStateMachineInstance);
 
 public:
-  plStateMachineInstance(plReflectedClass& owner, const plSharedPtr<const plStateMachineDescription>& pDescription = nullptr);
+  plStateMachineInstance(plReflectedClass& ref_owner, const plSharedPtr<const plStateMachineDescription>& pDescription = nullptr);
   ~plStateMachineInstance();
 
   plResult SetState(plStateMachineState* pState);
@@ -148,28 +159,35 @@ public:
   plReflectedClass& GetOwner() { return m_Owner; }
   plWorld* GetOwnerWorld();
 
-  void SetBlackboard(const plSharedPtr<plBlackboard>& blackboard);
+  void SetBlackboard(const plSharedPtr<plBlackboard>& pBlackboard);
   const plSharedPtr<plBlackboard>& GetBlackboard() const { return m_pBlackboard; }
 
   /// \brief Returns how long the state machine is in its current state
   plTime GetTimeInCurrentState() const { return m_TimeInCurrentState; }
 
-  // The following functions are for scripting reflection and shouldn't be called manually
-  bool Reflection_SetState(const plHashedString & sStateName);
+  /// \brief Sends a named event that state transitions can react to.
+  void FireTransitionEvent(plStringView sEvent);
+
+  plStringView GetCurrentTransitionEvent() const { return m_sCurrentTransitionEvent; }
+
+private:
+  PL_ALLOW_PRIVATE_PROPERTIES(plStateMachineInstance);
+
+  bool Reflection_SetState(const plHashedString& sStateName);
   plComponent* Reflection_GetOwnerComponent() const;
   plBlackboard* Reflection_GetBlackboard() const { return m_pBlackboard.Borrow(); }
-private:
+
   void SetStateInternal(plUInt32 uiStateIndex);
   void EnterCurrentState(const plStateMachineState* pFromState);
   void ExitCurrentState(const plStateMachineState* pToState);
   plUInt32 FindNewStateToTransitionTo();
 
-  PLASMA_ALWAYS_INLINE void* GetInstanceData(plUInt32 uiOffset)
+  PL_ALWAYS_INLINE void* GetInstanceData(plUInt32 uiOffset)
   {
     return plInstanceDataAllocator::GetInstanceData(m_InstanceData.GetByteBlobPtr(), uiOffset);
   }
 
-  PLASMA_ALWAYS_INLINE void* GetCurrentStateInstanceData()
+  PL_ALWAYS_INLINE void* GetCurrentStateInstanceData()
   {
     if (m_pDescription != nullptr && m_uiCurrentStateIndex < m_pDescription->m_States.GetCount())
     {
@@ -185,10 +203,11 @@ private:
   plStateMachineState* m_pCurrentState = nullptr;
   plUInt32 m_uiCurrentStateIndex = plInvalidIndex;
   plTime m_TimeInCurrentState;
+  plStringView m_sCurrentTransitionEvent;
 
   const plStateMachineDescription::TransitionArray* m_pCurrentTransitions = nullptr;
 
   plBlob m_InstanceData;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plStateMachineInstance);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plStateMachineInstance);

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Foundation/FoundationInternal.h>
-PLASMA_FOUNDATION_INTERNAL_HEADER
+PL_FOUNDATION_INTERNAL_HEADER
 
 #include <CoreFoundation/CoreFoundation.h>
 

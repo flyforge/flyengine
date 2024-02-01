@@ -11,71 +11,71 @@ namespace
 {
   static plVariantArray GetDefaultTags()
   {
-    plVariantArray value(plStaticAllocatorWrapper::GetAllocator());
+    plVariantArray value(plStaticsAllocatorWrapper::GetAllocator());
     value.PushBack("CastShadow");
     return value;
   }
 } // namespace
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGameObject, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGameObject, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Active", GetActiveFlag, SetActiveFlag)->AddAttributes(new plDefaultValueAttribute(true), new plGroupNextAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("Name", GetNameInternal, SetNameInternal),
-    PLASMA_ACCESSOR_PROPERTY("GlobalKey", GetGlobalKeyInternal, SetGlobalKeyInternal)->AddAttributes(new plGroupNextAttribute()),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Mode", plObjectMode, Reflection_GetMode, Reflection_SetMode),
-    PLASMA_ACCESSOR_PROPERTY("LocalPosition", GetLocalPosition, SetLocalPosition)->AddAttributes(new plSuffixAttribute(" m")),
-    PLASMA_ACCESSOR_PROPERTY("LocalRotation", GetLocalRotation, SetLocalRotation),
-    PLASMA_ACCESSOR_PROPERTY("LocalScaling", GetLocalScaling, SetLocalScaling)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f, 1.0f, 1.0f))),
-    PLASMA_ACCESSOR_PROPERTY("LocalUniformScaling", GetLocalUniformScaling, SetLocalUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_SET_MEMBER_PROPERTY("Tags", m_Tags)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultTags())),
-    PLASMA_SET_ACCESSOR_PROPERTY("Children", Reflection_GetChildren, Reflection_AddChild, Reflection_DetachChild)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
-    PLASMA_SET_ACCESSOR_PROPERTY("Components", Reflection_GetComponents, Reflection_AddComponent, Reflection_RemoveComponent)->AddFlags(plPropertyFlags::PointerOwner),
+    PL_ACCESSOR_PROPERTY("Active", GetActiveFlag, SetActiveFlag)->AddAttributes(new plGroupNextAttribute(), new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("Name", GetNameInternal, SetNameInternal),
+    PL_ACCESSOR_PROPERTY("GlobalKey", GetGlobalKeyInternal, SetGlobalKeyInternal)->AddAttributes(new plGroupNextAttribute()),
+    PL_ENUM_ACCESSOR_PROPERTY("Mode", plObjectMode, Reflection_GetMode, Reflection_SetMode),
+    PL_ACCESSOR_PROPERTY("LocalPosition", GetLocalPosition, SetLocalPosition)->AddAttributes(new plSuffixAttribute(" m")),
+    PL_ACCESSOR_PROPERTY("LocalRotation", GetLocalRotation, SetLocalRotation),
+    PL_ACCESSOR_PROPERTY("LocalScaling", GetLocalScaling, SetLocalScaling)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f, 1.0f, 1.0f))),
+    PL_ACCESSOR_PROPERTY("LocalUniformScaling", GetLocalUniformScaling, SetLocalUniformScaling)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_SET_MEMBER_PROPERTY("Tags", m_Tags)->AddAttributes(new plTagSetWidgetAttribute("Default"), new plDefaultValueAttribute(GetDefaultTags())),
+    PL_SET_ACCESSOR_PROPERTY("Children", Reflection_GetChildren, Reflection_AddChild, Reflection_DetachChild)->AddFlags(plPropertyFlags::PointerOwner | plPropertyFlags::Hidden),
+    PL_SET_ACCESSOR_PROPERTY("Components", Reflection_GetComponents, Reflection_AddComponent, Reflection_RemoveComponent)->AddFlags(plPropertyFlags::PointerOwner),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IsActive),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetCreatedByPrefab),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(WasCreatedByPrefab),
+    PL_SCRIPT_FUNCTION_PROPERTY(IsActive),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetCreatedByPrefab),
+    PL_SCRIPT_FUNCTION_PROPERTY(WasCreatedByPrefab),
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(HasName, In, "Name"),
+    PL_SCRIPT_FUNCTION_PROPERTY(HasName, In, "Name"),
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_GetParent),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(FindChildByName, In, "Name", In, "Recursive")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(FindChildByPath, In, "Path")->AddFlags(plPropertyFlags::Const),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_GetParent),
+    PL_SCRIPT_FUNCTION_PROPERTY(FindChildByName, In, "Name", In, "Recursive")->AddFlags(plPropertyFlags::Const),
+    PL_SCRIPT_FUNCTION_PROPERTY(FindChildByPath, In, "Path")->AddFlags(plPropertyFlags::Const),
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalPosition, In, "Position"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalPosition),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalRotation, In, "Rotation"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalRotation),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalScaling, In, "Scaling"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalScaling),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalTransform, In, "Transform"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalTransform),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalPosition, In, "Position"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalPosition),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalRotation, In, "Rotation"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalRotation),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalScaling, In, "Scaling"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalScaling),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetGlobalTransform, In, "Transform"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalTransform),
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirForwards),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirRight),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirUp),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirForwards),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirRight),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetGlobalDirUp),
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetLinearVelocity),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetAngularVelocity),
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+    PL_SCRIPT_FUNCTION_PROPERTY(GetLinearVelocity),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetAngularVelocity),
 #endif
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetTeamID, In, "Id"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetTeamID),    
+    PL_SCRIPT_FUNCTION_PROPERTY(SetTeamID, In, "Id"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetTeamID),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_FUNCTIONS;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
+    PL_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 void plGameObject::Reflection_AddChild(plGameObject* pChild)
@@ -299,7 +299,7 @@ plGameObject::~plGameObject()
 
 void plGameObject::operator=(const plGameObject& other)
 {
-  PLASMA_ASSERT_DEV(m_InternalId.m_WorldIndex == other.m_InternalId.m_WorldIndex, "Cannot copy between worlds.");
+  PL_ASSERT_DEV(m_InternalId.m_WorldIndex == other.m_InternalId.m_WorldIndex, "Cannot copy between worlds.");
 
   m_InternalId = other.m_InternalId;
   m_Flags = other.m_Flags;
@@ -328,7 +328,7 @@ void plGameObject::operator=(const plGameObject& other)
   m_Components.CopyFrom(other.m_Components, GetWorld()->GetAllocator());
   for (plComponent* pComponent : m_Components)
   {
-    PLASMA_ASSERT_DEV(pComponent->m_pOwner == &other, "");
+    PL_ASSERT_DEV(pComponent->m_pOwner == &other, "");
     pComponent->m_pOwner = this;
   }
 
@@ -354,7 +354,7 @@ void plGameObject::MakeDynamic()
 
 void plGameObject::MakeStatic()
 {
-  PLASMA_ASSERT_DEV(!DetermineDynamicMode(), "This object can't be static because it has a dynamic parent or dynamic component(s) attached.");
+  PL_ASSERT_DEV(!DetermineDynamicMode(), "This object can't be static because it has a dynamic parent or dynamic component(s) attached.");
 
   MakeStaticInternal();
 }
@@ -411,7 +411,7 @@ void plGameObject::SetParent(const plGameObjectHandle& hParent, plGameObject::Tr
 
   plGameObject* pParent = nullptr;
   bool _ = pWorld->TryGetObject(hParent, pParent);
-  PLASMA_IGNORE_UNUSED(_);
+  PL_IGNORE_UNUSED(_);
   pWorld->SetParent(this, pParent, preserve);
 }
 
@@ -664,7 +664,7 @@ plVec3 plGameObject::GetGlobalDirUp() const
   return GetGlobalRotation() * coordinateSystem.m_vUpDir;
 }
 
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
 void plGameObject::SetLastGlobalTransform(const plSimdTransform& transform)
 {
   m_pTransformationData->m_lastGlobalTransform = transform;
@@ -682,7 +682,7 @@ plVec3 plGameObject::GetAngularVelocity() const
 {
   const plSimdFloat invDeltaSeconds = GetWorld()->GetInvDeltaSeconds();
   const plSimdQuat q = m_pTransformationData->m_globalTransform.m_Rotation * -m_pTransformationData->m_lastGlobalTransform.m_Rotation;
-  plSimdVec4f angularVelocity = plSimdVec4f::ZeroVector();
+  plSimdVec4f angularVelocity = plSimdVec4f::MakeZero();
 
   plSimdVec4f axis;
   plSimdFloat angle;
@@ -702,11 +702,11 @@ void plGameObject::UpdateGlobalTransform()
 void plGameObject::UpdateLocalBounds()
 {
   plMsgUpdateLocalBounds msg;
-  msg.m_ResultingLocalBounds.SetInvalid();
+  msg.m_ResultingLocalBounds = plBoundingBoxSphere::MakeInvalid();
 
   SendMessage(msg);
 
-  const bool bIsAlwaysVisible = m_pTransformationData->m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
+  const bool bIsAlwaysVisible = m_pTransformationData->m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
   bool bRecreateSpatialData = false;
 
   if (m_pTransformationData->m_hSpatialData.IsInvalidated() == false)
@@ -837,8 +837,8 @@ void plGameObject::OnMsgDeleteGameObject(plMsgDeleteGameObject& msg)
 
 void plGameObject::AddComponent(plComponent* pComponent)
 {
-  PLASMA_ASSERT_DEV(pComponent->m_pOwner == nullptr, "Component must not be added twice.");
-  PLASMA_ASSERT_DEV(IsDynamic() || !pComponent->IsDynamic(), "Cannot attach a dynamic component to a static object. Call MakeDynamic() first.");
+  PL_ASSERT_DEV(pComponent->m_pOwner == nullptr, "Component must not be added twice.");
+  PL_ASSERT_DEV(IsDynamic() || !pComponent->IsDynamic(), "Cannot attach a dynamic component to a static object. Call MakeDynamic() first.");
 
   pComponent->m_pOwner = this;
   m_Components.PushBack(pComponent, GetWorld()->GetAllocator());
@@ -860,7 +860,7 @@ void plGameObject::AddComponent(plComponent* pComponent)
 void plGameObject::RemoveComponent(plComponent* pComponent)
 {
   plUInt32 uiIndex = m_Components.IndexOf(pComponent);
-  PLASMA_ASSERT_DEV(uiIndex != plInvalidIndex, "Component not found");
+  PL_ASSERT_DEV(uiIndex != plInvalidIndex, "Component not found");
 
   pComponent->m_pOwner = nullptr;
   m_Components.RemoveAtAndSwap(uiIndex);
@@ -890,7 +890,7 @@ bool plGameObject::SendMessageInternal(plMessage& msg, bool bWasPostedMsg)
     bSentToAny |= pComponent->SendMessageInternal(msg, bWasPostedMsg);
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (!bSentToAny && msg.GetDebugMessageRouting())
   {
     plLog::Warning("plGameObject::SendMessage: None of the target object's components had a handler for messages of type {0}.", msg.GetId());
@@ -914,7 +914,7 @@ bool plGameObject::SendMessageInternal(plMessage& msg, bool bWasPostedMsg) const
     bSentToAny |= pComponent->SendMessageInternal(msg, bWasPostedMsg);
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (!bSentToAny && msg.GetDebugMessageRouting())
   {
     plLog::Warning("plGameObject::SendMessage (const): None of the target object's components had a handler for messages of type {0}.", msg.GetId());
@@ -943,7 +943,7 @@ bool plGameObject::SendMessageRecursiveInternal(plMessage& msg, bool bWasPostedM
   }
 
   // should only be evaluated at the top function call
-  // #if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+  // #if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   //  if (!bSentToAny && msg.GetDebugMessageRouting())
   //  {
   //    plLog::Warning("plGameObject::SendMessageRecursive: None of the target object's components had a handler for messages of type {0}.",
@@ -974,7 +974,7 @@ bool plGameObject::SendMessageRecursiveInternal(plMessage& msg, bool bWasPostedM
   }
 
   // should only be evaluated at the top function call
-  // #if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+  // #if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   //  if (!bSentToAny && msg.GetDebugMessageRouting())
   //  {
   //    plLog::Warning("plGameObject::SendMessageRecursive(const): None of the target object's components had a handler for messages of type
@@ -1005,7 +1005,7 @@ bool plGameObject::SendEventMessage(plMessage& ref_msg, const plComponent* pSend
   plHybridArray<plComponent*, 4> eventMsgHandlers;
   GetWorld()->FindEventMsgHandlers(ref_msg, this, eventMsgHandlers);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (ref_msg.GetDebugMessageRouting())
   {
     if (eventMsgHandlers.IsEmpty())
@@ -1108,7 +1108,7 @@ void plGameObject::RemoveTag(const plTag& tag)
 void plGameObject::FixComponentPointer(plComponent* pOldPtr, plComponent* pNewPtr)
 {
   plUInt32 uiIndex = m_Components.IndexOf(pOldPtr);
-  PLASMA_ASSERT_DEV(uiIndex != plInvalidIndex, "Memory corruption?");
+  PL_ASSERT_DEV(uiIndex != plInvalidIndex, "Memory corruption?");
   m_Components[uiIndex] = pNewPtr;
 }
 
@@ -1131,7 +1131,7 @@ void plGameObject::TransformationData::UpdateLocalTransform()
 
   if (m_pParentData != nullptr)
   {
-    tLocal.SetLocalTransform(m_pParentData->m_globalTransform, m_globalTransform);
+    tLocal = plSimdTransform::MakeLocalTransform(m_pParentData->m_globalTransform, m_globalTransform);
   }
   else
   {
@@ -1187,7 +1187,7 @@ void plGameObject::TransformationData::UpdateGlobalBoundsAndSpatialData(plSpatia
 
   UpdateGlobalBounds();
 
-  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
+  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
   if (m_hSpatialData.IsInvalidated() == false && bIsAlwaysVisible == false && m_globalBounds != oldGlobalBounds)
   {
     ref_spatialSystem.UpdateSpatialDataBounds(m_hSpatialData, m_globalBounds);
@@ -1202,7 +1202,7 @@ void plGameObject::TransformationData::RecreateSpatialData(plSpatialSystem& ref_
     m_hSpatialData.Invalidate();
   }
 
-  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::Zero();
+  const bool bIsAlwaysVisible = m_localBounds.m_BoxHalfExtents.w() != plSimdFloat::MakeZero();
   if (bIsAlwaysVisible)
   {
     m_hSpatialData = ref_spatialSystem.CreateSpatialDataAlwaysVisible(m_pObject, m_uiSpatialDataCategoryBitmask, m_pObject->m_Tags);
@@ -1214,4 +1214,4 @@ void plGameObject::TransformationData::RecreateSpatialData(plSpatialSystem& ref_
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_GameObject);
+PL_STATICLINK_FILE(Core, Core_World_Implementation_GameObject);

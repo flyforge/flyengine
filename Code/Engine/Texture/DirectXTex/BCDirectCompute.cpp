@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 //-------------------------------------------------------------------------------------
 // BCDirectCompute.cpp
@@ -24,13 +24,13 @@ using Microsoft::WRL::ComPtr;
 
 namespace
 {
-    #include "Shaders\Compiled\BC7Encode_EncodeBlockCS.inc"
-    #include "Shaders\Compiled\BC7Encode_TryMode02CS.inc"
-    #include "Shaders\Compiled\BC7Encode_TryMode137CS.inc"
-    #include "Shaders\Compiled\BC7Encode_TryMode456CS.inc"
-    #include "Shaders\Compiled\BC6HEncode_EncodeBlockCS.inc"
-    #include "Shaders\Compiled\BC6HEncode_TryModeG10CS.inc"
-    #include "Shaders\Compiled\BC6HEncode_TryModeLE10CS.inc"
+    #include "Shaders/Compiled/BC7Encode_EncodeBlockCS.inc"
+    #include "Shaders/Compiled/BC7Encode_TryMode02CS.inc"
+    #include "Shaders/Compiled/BC7Encode_TryMode137CS.inc"
+    #include "Shaders/Compiled/BC7Encode_TryMode456CS.inc"
+    #include "Shaders/Compiled/BC6HEncode_EncodeBlockCS.inc"
+    #include "Shaders/Compiled/BC6HEncode_TryModeG10CS.inc"
+    #include "Shaders/Compiled/BC6HEncode_TryModeLE10CS.inc"
 
     struct BufferBC6HBC7
     {
@@ -621,5 +621,4 @@ HRESULT GPUCompressBC::Compress(const Image& srcImage, const Image& destImage)
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_BCDirectCompute);
 

@@ -5,7 +5,7 @@
 #include <RendererCore/Pipeline/SortingFunctions.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderData)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderData)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -25,37 +25,37 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderData)
     plRenderData::ClearRendererInstances();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderer, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderer, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgExtractRenderData);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractRenderData, 1, plRTTIDefaultAllocator<plMsgExtractRenderData>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgExtractRenderData);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractRenderData, 1, plRTTIDefaultAllocator<plMsgExtractRenderData>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgExtractOccluderData);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractOccluderData, 1, plRTTIDefaultAllocator<plMsgExtractOccluderData>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgExtractOccluderData);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgExtractOccluderData, 1, plRTTIDefaultAllocator<plMsgExtractOccluderData>)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plExcludeFromScript()
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plHybridArray<plRenderData::CategoryData, 32> plRenderData::s_CategoryData;
@@ -138,7 +138,7 @@ void plRenderData::CreateRendererInstances()
 
   for (auto pRendererType : s_RendererTypes)
   {
-    PLASMA_ASSERT_DEV(pRendererType->IsDerivedFrom(plGetStaticRTTI<plRenderer>()), "Renderer type '{}' must be derived from plRenderer",
+    PL_ASSERT_DEV(pRendererType->IsDerivedFrom(plGetStaticRTTI<plRenderer>()), "Renderer type '{}' must be derived from plRenderer",
       pRendererType->GetTypeName());
 
     auto pRenderer = pRendererType->GetAllocator()->Allocate<plRenderer>();
@@ -183,11 +183,11 @@ plRenderData::Category plDefaultRenderDataCategories::Light = plRenderData::Regi
 plRenderData::Category plDefaultRenderDataCategories::Decal = plRenderData::RegisterCategory("Decal", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::ReflectionProbe = plRenderData::RegisterCategory("ReflectionProbe", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::Sky = plRenderData::RegisterCategory("Sky", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
-plRenderData::Category plDefaultRenderDataCategories::PostSky = plRenderData::RegisterCategory("PostSky", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::LitOpaque = plRenderData::RegisterCategory("LitOpaque", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::LitMasked = plRenderData::RegisterCategory("LitMasked", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::LitTransparent = plRenderData::RegisterCategory("LitTransparent", &plRenderSortingFunctions::BackToFrontThenByRenderData);
 plRenderData::Category plDefaultRenderDataCategories::LitForeground = plRenderData::RegisterCategory("LitForeground", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
+plRenderData::Category plDefaultRenderDataCategories::LitScreenFX = plRenderData::RegisterCategory("LitScreenFX", &plRenderSortingFunctions::BackToFrontThenByRenderData);
 plRenderData::Category plDefaultRenderDataCategories::SimpleOpaque = plRenderData::RegisterCategory("SimpleOpaque", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
 plRenderData::Category plDefaultRenderDataCategories::SimpleTransparent = plRenderData::RegisterCategory("SimpleTransparent", &plRenderSortingFunctions::BackToFrontThenByRenderData);
 plRenderData::Category plDefaultRenderDataCategories::SimpleForeground = plRenderData::RegisterCategory("SimpleForeground", &plRenderSortingFunctions::ByRenderDataThenFrontToBack);
@@ -209,4 +209,4 @@ void plMsgExtractRenderData::AddRenderData(
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderData);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderData);

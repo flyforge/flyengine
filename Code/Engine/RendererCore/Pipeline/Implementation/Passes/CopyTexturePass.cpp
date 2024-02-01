@@ -8,16 +8,16 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plCopyTexturePass, 1, plRTTIDefaultAllocator<plCopyTexturePass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCopyTexturePass, 1, plRTTIDefaultAllocator<plCopyTexturePass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput)
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plCopyTexturePass::plCopyTexturePass()
@@ -30,8 +30,6 @@ plCopyTexturePass::~plCopyTexturePass() = default;
 bool plCopyTexturePass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-
   const plGALTextureCreationDescription* pInput = inputs[m_PinInput.m_uiInputIndex];
 
   if (pInput != nullptr)
@@ -80,4 +78,4 @@ void plCopyTexturePass::Execute(const plRenderViewContext& renderViewContext, co
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_CopyTexturePass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_CopyTexturePass);

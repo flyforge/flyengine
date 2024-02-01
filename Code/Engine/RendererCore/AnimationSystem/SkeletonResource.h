@@ -20,7 +20,7 @@ struct plSkeletonResourceGeometry
   plDynamicArray<plUInt8> m_TriangleIndices;
 };
 
-struct PLASMA_RENDERERCORE_DLL plSkeletonResourceDescriptor
+struct PL_RENDERERCORE_DLL plSkeletonResourceDescriptor
 {
   plSkeletonResourceDescriptor();
   ~plSkeletonResourceDescriptor();
@@ -34,7 +34,7 @@ struct PLASMA_RENDERERCORE_DLL plSkeletonResourceDescriptor
 
   plUInt64 GetHeapMemoryUsage() const;
 
-  plTransform m_RootTransform = plTransform::IdentityTransform();
+  plTransform m_RootTransform = plTransform::MakeIdentity();
   plSkeleton m_Skeleton;
   float m_fMaxImpulse = plMath::HighValue<float>();
 
@@ -43,11 +43,11 @@ struct PLASMA_RENDERERCORE_DLL plSkeletonResourceDescriptor
 
 using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 
-class PLASMA_RENDERERCORE_DLL plSkeletonResource : public plResource
+class PL_RENDERERCORE_DLL plSkeletonResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSkeletonResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plSkeletonResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plSkeletonResource, plSkeletonResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plSkeletonResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plSkeletonResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plSkeletonResource, plSkeletonResourceDescriptor);
 
 public:
   plSkeletonResource();

@@ -13,7 +13,7 @@ class plOpenDdlReader;
 ///
 /// So it lists the editor DLLs, the runtime DLLs, all the additional transitive dependencies that need to be packaged,
 /// and so on.
-struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundle
+struct PL_EDITORFRAMEWORK_DLL plPluginBundle
 {
   // State: user selectable per project
   bool m_bSelected = false; ///< whether this bundle is supposed to be used.
@@ -36,13 +36,13 @@ struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundle
   plHybridArray<plString, 1> m_EnabledInTemplates;  ///< In which project templates this plugin should be active by default.
 
   /// \brief Reads the bundle description, but not the state.
-  plResult ReadBundleFromDDL(plOpenDdlReader& ddl);
+  plResult ReadBundleFromDDL(plOpenDdlReader& ref_ddl);
 
   /// \brief Writes only the bundle's state to a DDL file.
-  void WriteStateToDDL(plOpenDdlWriter& ddl, const char* szOwnName) const;
+  void WriteStateToDDL(plOpenDdlWriter& ref_ddl, const char* szOwnName) const;
 
   /// \brief Reads only the bundle's state from a DDL file.
-  void ReadStateFromDDL(plOpenDdlReader& ddl, const char* szOwnName);
+  void ReadStateFromDDL(plOpenDdlReader& ref_ddl, const char* szOwnName);
 
   /// \brief Checks whether two bundles have the same state.
   bool IsStateEqual(const plPluginBundle& rhs) const
@@ -52,15 +52,15 @@ struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundle
 };
 
 /// \brief Contains multiple plPluginBundle's.
-struct PLASMA_EDITORFRAMEWORK_DLL plPluginBundleSet
+struct PL_EDITORFRAMEWORK_DLL plPluginBundleSet
 {
   plMap<plString, plPluginBundle> m_Plugins;
 
   /// \brief Writes the state of all bundles to a DDL file.
-  void WriteStateToDDL(plOpenDdlWriter& ddl) const;
+  void WriteStateToDDL(plOpenDdlWriter& ref_ddl) const;
 
   /// \brief Reads the state of all bundles from a DDL file.
-  void ReadStateFromDDL(plOpenDdlReader& ddl);
+  void ReadStateFromDDL(plOpenDdlReader& ref_ddl);
 
   /// \brief Checks whether two bundle sets have the same state.
   bool IsStateEqual(const plPluginBundleSet& rhs) const;

@@ -13,20 +13,20 @@
 #include <RendererCore/Textures/Texture2DResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeMeshFactory, 1, plRTTIDefaultAllocator<plParticleTypeMeshFactory>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeMeshFactory, 1, plRTTIDefaultAllocator<plParticleTypeMeshFactory>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Mesh", m_sMesh)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Static")),
-    PLASMA_MEMBER_PROPERTY("Material", m_sMaterial)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
+    PL_MEMBER_PROPERTY("Mesh", m_sMesh)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Static")),
+    PL_MEMBER_PROPERTY("Material", m_sMaterial)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_MEMBER_PROPERTY("TintColorParam", m_sTintColorParameter),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeMesh, 1, plRTTIDefaultAllocator<plParticleTypeMesh>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleTypeMesh, 1, plRTTIDefaultAllocator<plParticleTypeMesh>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleTypeMeshFactory::GetTypeType() const
@@ -61,31 +61,31 @@ enum class TypeMeshVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleTypeMeshFactory::Save(plStreamWriter& stream) const
+void plParticleTypeMeshFactory::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)TypeMeshVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_sMesh;
-  stream << m_sTintColorParameter;
+  inout_stream << m_sMesh;
+  inout_stream << m_sTintColorParameter;
 
   // Version 2
-  stream << m_sMaterial;
+  inout_stream << m_sMaterial;
 }
 
-void plParticleTypeMeshFactory::Load(plStreamReader& stream)
+void plParticleTypeMeshFactory::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)TypeMeshVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)TypeMeshVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_sMesh;
-  stream >> m_sTintColorParameter;
+  inout_stream >> m_sMesh;
+  inout_stream >> m_sTintColorParameter;
 
   if (uiVersion >= 2)
   {
-    stream >> m_sMaterial;
+    inout_stream >> m_sMaterial;
   }
 }
 
@@ -111,7 +111,7 @@ void plParticleTypeMesh::InitializeElements(plUInt64 uiStartIndex, plUInt64 uiNu
   {
     const plUInt64 uiElementIdx = uiStartIndex + i;
 
-    pAxis[uiElementIdx] = plVec3::CreateRandomDirection(rng);
+    pAxis[uiElementIdx] = plVec3::MakeRandomDirection(rng);
   }
 }
 
@@ -144,14 +144,13 @@ bool plParticleTypeMesh::QueryMeshAndMaterialInfo() const
     return false;
 
   m_Bounds = pMesh->GetBounds();
-
   m_RenderCategory = pMaterial->GetRenderDataCategory();
 
   m_bRenderDataCached = true;
   return true;
 }
 
-void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const
+void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const
 {
   if (!m_bRenderDataCached)
   {
@@ -174,7 +173,7 @@ void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& msg, cons
   if (numParticles == 0)
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Mesh");
+  PL_PROFILE_SCOPE("PFX: Mesh");
 
   const plTime tCur = GetOwnerEffect()->GetTotalEffectLifeTime();
   const plColor tintColor = GetOwnerEffect()->GetColorParameter(m_sTintColorParameter, plColor::White);
@@ -194,7 +193,7 @@ void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& msg, cons
       const plUInt32 idx = p;
 
       plTransform trans;
-      trans.m_qRotation.SetFromAxisAndAngle(pAxis[p], plAngle::Radian((float)(tCur.GetSeconds() * pRotationSpeed[idx]) + pRotationOffset[idx]));
+      trans.m_qRotation = plQuat::MakeFromAxisAndAngle(pAxis[p], plAngle::MakeFromRadian((float)(tCur.GetSeconds() * pRotationSpeed[idx]) + pRotationOffset[idx]));
       trans.m_vPosition = pPosition[idx].GetAsVec3();
       trans.m_vScale.Set(pSize[idx]);
 
@@ -212,7 +211,11 @@ void plParticleTypeMesh::ExtractTypeRenderData(plMsgExtractRenderData& msg, cons
         pRenderData->FillBatchIdAndSortingKey();
       }
 
-      msg.AddRenderData(pRenderData, m_RenderCategory, plRenderData::Caching::Never);
+      ref_msg.AddRenderData(pRenderData, m_RenderCategory, plRenderData::Caching::Never);
     }
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Type_Mesh_ParticleTypeMesh);
+

@@ -4,32 +4,32 @@
 #include <Foundation/Reflection/Implementation/StaticRTTI.h>
 #include <Foundation/Types/TypeTraits.h>
 
-#define PLASMA_DECLARE_VARIANCE_HASH_HELPER(TYPE)                        \
+#define PL_DECLARE_VARIANCE_HASH_HELPER(TYPE)                        \
   template <>                                                        \
   struct plHashHelper<TYPE>                                          \
   {                                                                  \
-    PLASMA_ALWAYS_INLINE static plUInt32 Hash(const TYPE& value)         \
+    PL_ALWAYS_INLINE static plUInt32 Hash(const TYPE& value)         \
     {                                                                \
       return plHashingUtils::xxHash32(&value, sizeof(TYPE));         \
     }                                                                \
-    PLASMA_ALWAYS_INLINE static bool Equal(const TYPE& a, const TYPE& b) \
+    PL_ALWAYS_INLINE static bool Equal(const TYPE& a, const TYPE& b) \
     {                                                                \
       return a == b;                                                 \
     }                                                                \
   };
 
-struct PLASMA_FOUNDATION_DLL plVarianceTypeBase
+struct PL_FOUNDATION_DLL plVarianceTypeBase
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   float m_fVariance = 0;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plVarianceTypeBase);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plVarianceTypeBase);
 
-struct PLASMA_FOUNDATION_DLL plVarianceTypeFloat : public plVarianceTypeBase
+struct PL_FOUNDATION_DLL plVarianceTypeFloat : public plVarianceTypeBase
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   bool operator==(const plVarianceTypeFloat& rhs) const
   {
     return m_fVariance == rhs.m_fVariance && m_Value == rhs.m_Value;
@@ -41,13 +41,13 @@ struct PLASMA_FOUNDATION_DLL plVarianceTypeFloat : public plVarianceTypeBase
   float m_Value = 0;
 };
 
-PLASMA_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeFloat);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plVarianceTypeFloat);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeFloat);
+PL_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeFloat);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plVarianceTypeFloat);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeFloat);
 
-struct PLASMA_FOUNDATION_DLL plVarianceTypeTime : public plVarianceTypeBase
+struct PL_FOUNDATION_DLL plVarianceTypeTime : public plVarianceTypeBase
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   bool operator==(const plVarianceTypeTime& rhs) const
   {
     return m_fVariance == rhs.m_fVariance && m_Value == rhs.m_Value;
@@ -59,13 +59,13 @@ struct PLASMA_FOUNDATION_DLL plVarianceTypeTime : public plVarianceTypeBase
   plTime m_Value;
 };
 
-PLASMA_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeTime);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plVarianceTypeTime);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeTime);
+PL_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeTime);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plVarianceTypeTime);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeTime);
 
-struct PLASMA_FOUNDATION_DLL plVarianceTypeAngle : public plVarianceTypeBase
+struct PL_FOUNDATION_DLL plVarianceTypeAngle : public plVarianceTypeBase
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   bool operator==(const plVarianceTypeAngle& rhs) const
   {
     return m_fVariance == rhs.m_fVariance && m_Value == rhs.m_Value;
@@ -77,6 +77,6 @@ struct PLASMA_FOUNDATION_DLL plVarianceTypeAngle : public plVarianceTypeBase
   plAngle m_Value;
 };
 
-PLASMA_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeAngle);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plVarianceTypeAngle);
-PLASMA_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeAngle);
+PL_DECLARE_VARIANCE_HASH_HELPER(plVarianceTypeAngle);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plVarianceTypeAngle);
+PL_DECLARE_CUSTOM_VARIANT_TYPE(plVarianceTypeAngle);

@@ -7,7 +7,7 @@ static void TelemetryMessage(void* pPassThrough)
 {
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage('SVAR', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('SVAR', Msg) == PL_SUCCESS)
   {
     if (Msg.GetMessageID() == ' SET')
     {
@@ -105,7 +105,7 @@ static void SendCVarTelemetry(plCVar* pCVar)
     break;
 
     case plCVarType::ENUM_COUNT:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 
@@ -208,4 +208,4 @@ void RemoveCVarEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_CVars);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_CVars);

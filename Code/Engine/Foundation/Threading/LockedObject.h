@@ -6,7 +6,7 @@ template <typename T, typename O>
 class plLockedObject
 {
 public:
-  PLASMA_ALWAYS_INLINE explicit plLockedObject(T& ref_lock, O* pObject)
+  PL_ALWAYS_INLINE explicit plLockedObject(T& ref_lock, O* pObject)
     : m_pLock(&ref_lock)
     , m_pObject(pObject)
   {
@@ -15,7 +15,7 @@ public:
 
   plLockedObject() = default;
 
-  PLASMA_ALWAYS_INLINE plLockedObject(plLockedObject<T, O>&& rhs) { *this = std::move(rhs); }
+  PL_ALWAYS_INLINE plLockedObject(plLockedObject<T, O>&& rhs) { *this = std::move(rhs); }
 
   plLockedObject(const plLockedObject<T, O>& rhs) = delete;
 
@@ -34,7 +34,7 @@ public:
 
   void operator=(const plLockedObject<T, O>& rhs) = delete;
 
-  PLASMA_ALWAYS_INLINE ~plLockedObject()
+  PL_ALWAYS_INLINE ~plLockedObject()
   {
     if (m_pLock)
     {
@@ -43,7 +43,11 @@ public:
   }
 
   /// \brief Whether the encapsulated object exists at all or is nullptr
-  PLASMA_ALWAYS_INLINE bool isValid() const { return m_pObject != nullptr; }
+  PL_ALWAYS_INLINE bool isValid() const { return m_pObject != nullptr; }
+
+  O* Borrow() { return m_pObject; }
+
+  const O* Borrow() const { return m_pObject; }
 
   O* operator->() { return m_pObject; }
 

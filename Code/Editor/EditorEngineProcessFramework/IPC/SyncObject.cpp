@@ -3,24 +3,24 @@
 #include <EditorEngineProcessFramework/IPC/SyncObject.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorEngineSyncObject, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorEngineSyncObject, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("SyncGuid", m_SyncObjectGuid),
+    PL_MEMBER_PROPERTY("SyncGuid", m_SyncObjectGuid),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PlasmaEditorEngineSyncObject::PlasmaEditorEngineSyncObject()
+plEditorEngineSyncObject::plEditorEngineSyncObject()
 {
-  m_SyncObjectGuid.CreateNewUuid();
+  m_SyncObjectGuid = plUuid::MakeUuid();
   m_bModified = true;
 }
 
-PlasmaEditorEngineSyncObject::~PlasmaEditorEngineSyncObject()
+plEditorEngineSyncObject::~plEditorEngineSyncObject()
 {
   if (m_OnDestruction.IsValid())
   {
@@ -28,13 +28,13 @@ PlasmaEditorEngineSyncObject::~PlasmaEditorEngineSyncObject()
   }
 }
 
-void PlasmaEditorEngineSyncObject::Configure(plUuid ownerGuid, plDelegate<void(PlasmaEditorEngineSyncObject*)> onDestruction)
+void plEditorEngineSyncObject::Configure(plUuid ownerGuid, plDelegate<void(plEditorEngineSyncObject*)> onDestruction)
 {
   m_OwnerGuid = ownerGuid;
   m_OnDestruction = onDestruction;
 }
 
-plUuid PlasmaEditorEngineSyncObject::GetDocumentGuid() const
+plUuid plEditorEngineSyncObject::GetDocumentGuid() const
 {
   return m_OwnerGuid;
 }

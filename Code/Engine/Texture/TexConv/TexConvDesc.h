@@ -27,9 +27,9 @@ struct plTexConvSliceChannelMapping
   };
 };
 
-class PLASMA_TEXTURE_DLL plTexConvDesc
+class PL_TEXTURE_DLL plTexConvDesc
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plTexConvDesc);
+  PL_DISALLOW_COPY_AND_ASSIGN(plTexConvDesc);
 
 public:
   plTexConvDesc() = default;

@@ -7,7 +7,7 @@
 #include <Foundation/Threading/AtomicInteger.h>
 
 /// \brief Helper functions to work with UTF-8 strings (which include pure ASCII strings)
-class PLASMA_FOUNDATION_DLL plStringUtils
+class PL_FOUNDATION_DLL plStringUtils
 {
 public:
   /// \brief Returns true, if the given string is a nullptr pointer or a string that immediately terminates with a '\0' character.
@@ -206,7 +206,7 @@ public:
   static const char* FindLastSubString_NoCase(const char* szSource, const char* szStringToFind, const char* szStartSearchAt = nullptr, const char* pSourceEnd = plUnicodeUtils::GetMaxStringEnd<char>(), const char* szStringToFindEnd = plUnicodeUtils::GetMaxStringEnd<char>()); // [tested]
 
   /// \brief Function Definition for a function that determines whether a (Utf32) character belongs to a certain category of characters.
-  using PLASMA_CHARACTER_FILTER = bool (*)(plUInt32 uiChar);
+  using PL_CHARACTER_FILTER = bool (*)(plUInt32 uiChar);
 
   /// \brief Starts at szString and advances to the next character for which SkipCharacterCB returns false;
   ///
@@ -214,13 +214,13 @@ public:
   /// return immediately and nothing will change.
   /// If \a bAlwaysSkipFirst is true, the first character will always be skipped, regardless what it is (unless it is the zero terminator).
   /// The latter is useful to skip an entire word and get to the next word in a string.\n
-  static const char* SkipCharacters(const char* szString, PLASMA_CHARACTER_FILTER skipCharacterCB, bool bAlwaysSkipFirst = false); // [tested]
+  static const char* SkipCharacters(const char* szString, PL_CHARACTER_FILTER skipCharacterCB, bool bAlwaysSkipFirst = false); // [tested]
 
   /// \brief Returns the position in szString at which \a IsDelimiterCB returns true.
   ///
   /// This is basically the inverse of SkipCharacters. SkipCharacters advances over all characters that fulfill the filter,
   /// FindWordEnd advances over all characters that do not fulfill it.
-  static const char* FindWordEnd(const char* szString, PLASMA_CHARACTER_FILTER isDelimiterCB, bool bAlwaysSkipFirst = true); // [tested]
+  static const char* FindWordEnd(const char* szString, PL_CHARACTER_FILTER isDelimiterCB, bool bAlwaysSkipFirst = true); // [tested]
 
   /// \brief Removes all characters at the start and end of the string that match the respective characters and updates the new start and
   /// end of the string.
@@ -252,15 +252,15 @@ public:
 
   /// \brief Searches szString for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word,
   /// the position is returned. Otherwise nullptr.
-  static const char* FindWholeWord(const char* szString, const char* szSearchFor, PLASMA_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd = plUnicodeUtils::GetMaxStringEnd<char>()); // [tested]
+  static const char* FindWholeWord(const char* szString, const char* szSearchFor, PL_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd = plUnicodeUtils::GetMaxStringEnd<char>()); // [tested]
 
   /// \brief Searches szString for the word szSearchFor. If IsDelimiterCB returns true for both characters in front and back of the word,
   /// the position is returned. Otherwise nullptr. Ignores case.
-  static const char* FindWholeWord_NoCase(const char* szString, const char* szSearchFor, PLASMA_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd = plUnicodeUtils::GetMaxStringEnd<char>()); // [tested]
+  static const char* FindWholeWord_NoCase(const char* szString, const char* szSearchFor, PL_CHARACTER_FILTER isDelimiterCB, const char* pStringEnd = plUnicodeUtils::GetMaxStringEnd<char>()); // [tested]
 
   /// \brief Checks if the given szString ends with an unsigned integer (e.g. "MyString123").
-  /// If pStringLengthBeforeUInt is non-null the string length up to the first digit is stored. Returns PLASMA_SUCCESS if
-  /// there is a value at the end of string, PLASMA_FAILURE otherwise.
+  /// If pStringLengthBeforeUInt is non-null the string length up to the first digit is stored. Returns PL_SUCCESS if
+  /// there is a value at the end of string, PL_FAILURE otherwise.
   static plResult FindUIntAtTheEnd(const char* szString, plUInt32& out_uiValue, plUInt32* pStringLengthBeforeUInt = nullptr); // [tested]
 
   /// \brief [internal] Prefer to use snprintf.
@@ -270,16 +270,16 @@ public:
   /// \brief [internal] Prefer to use snprintf.
   static void OutputFormattedFloat(char* szOutputBuffer, plUInt32 uiBufferSize, plUInt32& ref_uiWritePos, double value, plUInt8 uiWidth, bool bPadZeros, plInt8 iPrecision, bool bScientific, bool bRemoveTrailingZeroes = false);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   static void AddUsedStringLength(plUInt32 uiLength);
   static void PrintStringLengthStatistics();
   static plAtomicInteger32 g_MaxUsedStringLength;
   static plAtomicInteger32 g_UsedStringLengths[256];
 #else
-  PLASMA_ALWAYS_INLINE static void AddUsedStringLength(plUInt32)
+  PL_ALWAYS_INLINE static void AddUsedStringLength(plUInt32)
   {
   }
-  PLASMA_ALWAYS_INLINE static void PrintStringLengthStatistics() {}
+  PL_ALWAYS_INLINE static void PrintStringLengthStatistics() {}
 #endif
 };
 

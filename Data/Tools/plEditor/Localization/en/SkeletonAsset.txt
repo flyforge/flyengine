@@ -1,0 +1,21 @@
+# Asset Types
+
+Skeleton;Skeleton
+
+# Component Types
+
+plSkeletonComponent;Skeletonp
+
+# UI
+
+SkeletonImport;Skeleton
+
+Skeleton.RenderBones;Render Bones
+Skeleton.RenderColliders;Render Colliders
+Skeleton.RenderJoints;Render Joints
+Skeleton.RenderSwingLimits;Render Swing Limits
+Skeleton.RenderTwistLimits;Render Twist Limits
+Skeleton.RenderPreviewMesh;Render Preview Mesh
+
+# Properties
+

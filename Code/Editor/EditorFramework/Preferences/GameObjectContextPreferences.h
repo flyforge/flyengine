@@ -4,7 +4,7 @@
 
 class plGameObjectContextPreferencesUser : public plPreferences
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGameObjectContextPreferencesUser, plPreferences);
+  PL_ADD_DYNAMIC_REFLECTION(plGameObjectContextPreferencesUser, plPreferences);
 
 public:
   plGameObjectContextPreferencesUser();

@@ -7,30 +7,30 @@
 #include <JoltPlugin/System/JoltWorldModule.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltSwingTwistConstraintComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltSwingTwistConstraintComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("SwingLimitY", GetSwingLimitY, SetSwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(175))),
-    PLASMA_ACCESSOR_PROPERTY("SwingLimitZ", GetSwingLimitZ, SetSwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::Degree(175))),
+    PL_ACCESSOR_PROPERTY("SwingLimitY", GetSwingLimitY, SetSwingLimitY)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
+    PL_ACCESSOR_PROPERTY("SwingLimitZ", GetSwingLimitZ, SetSwingLimitZ)->AddAttributes(new plClampValueAttribute(plAngle(), plAngle::MakeFromDegree(175))),
 
-    PLASMA_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Friction", GetFriction, SetFriction)->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
 
-    PLASMA_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(plAngle::Degree(5), plAngle::Degree(175)), new plDefaultValueAttribute(plAngle::Degree(90))),
-    PLASMA_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(plAngle::Degree(5), plAngle::Degree(175)), new plDefaultValueAttribute(plAngle::Degree(90))),
+    PL_ACCESSOR_PROPERTY("LowerTwistLimit", GetLowerTwistLimit, SetLowerTwistLimit)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(5), plAngle::MakeFromDegree(175)), new plDefaultValueAttribute(plAngle::MakeFromDegree(90))),
+    PL_ACCESSOR_PROPERTY("UpperTwistLimit", GetUpperTwistLimit, SetUpperTwistLimit)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(5), plAngle::MakeFromDegree(175)), new plDefaultValueAttribute(plAngle::MakeFromDegree(90))),
 
-    //PLASMA_ENUM_ACCESSOR_PROPERTY("TwistDriveMode", plJoltConstraintDriveMode, GetTwistDriveMode, SetTwistDriveMode),
-    //PLASMA_ACCESSOR_PROPERTY("TwistDriveTargetValue", GetTwistDriveTargetValue, SetTwistDriveTargetValue),
-    //PLASMA_ACCESSOR_PROPERTY("TwistDriveStrength", GetTwistDriveStrength, SetTwistDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum"))
+    //PL_ENUM_ACCESSOR_PROPERTY("TwistDriveMode", plJoltConstraintDriveMode, GetTwistDriveMode, SetTwistDriveMode),
+    //PL_ACCESSOR_PROPERTY("TwistDriveTargetValue", GetTwistDriveTargetValue, SetTwistDriveTargetValue),
+    //PL_ACCESSOR_PROPERTY("TwistDriveStrength", GetTwistDriveStrength, SetTwistDriveStrength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plMinValueTextAttribute("Maximum"))
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "SwingLimitY", 0.3f, nullptr)
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltSwingTwistConstraintComponent::plJoltSwingTwistConstraintComponent() = default;
@@ -88,12 +88,12 @@ void plJoltSwingTwistConstraintComponent::CreateContstraintType(JPH::Body* pBody
   opt.mPlaneHalfConeAngle = m_SwingLimitY.GetRadian() * 0.5f;
   opt.mNormalHalfConeAngle = m_SwingLimitZ.GetRadian() * 0.5f;
   opt.mMaxFrictionTorque = m_fFriction;
-  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::UnitXAxis()));
-  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::UnitXAxis()));
+  opt.mTwistAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::MakeAxisX()));
+  opt.mTwistAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::MakeAxisX()));
   opt.mTwistMinAngle = -m_LowerTwistLimit.GetRadian();
   opt.mTwistMaxAngle = m_UpperTwistLimit.GetRadian();
-  opt.mPlaneAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::UnitYAxis()));
-  opt.mPlaneAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::UnitYAxis()));
+  opt.mPlaneAxis1 = inv1.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameA.m_qRotation * plVec3::MakeAxisY()));
+  opt.mPlaneAxis2 = inv2.Multiply3x3(plJoltConversionUtils::ToVec3(m_LocalFrameB.m_qRotation * plVec3::MakeAxisY()));
 
   m_pConstraint = opt.Create(*pBody0, *pBody1);
 }
@@ -220,4 +220,4 @@ void plJoltSwingTwistConstraintComponent::SetUpperTwistLimit(plAngle f)
 // }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltSwingTwistConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltSwingTwistConstraintComponent);

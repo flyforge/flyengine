@@ -162,4 +162,3 @@ plFloat16Vec4::operator plVec4() const
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Math_Implementation_Float16);

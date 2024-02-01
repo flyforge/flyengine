@@ -5,19 +5,19 @@
 #include <Foundation/Basics.h>
 
 /// \brief Declares an id type, see generic id below how to use this
-#define PLASMA_DECLARE_ID_TYPE(name, instanceIndexBits, generationBits)                                        \
+#define PL_DECLARE_ID_TYPE(name, instanceIndexBits, generationBits)                                        \
   static const StorageType MAX_INSTANCES = (1ULL << instanceIndexBits);                                    \
   static const StorageType INVALID_INSTANCE_INDEX = MAX_INSTANCES - 1;                                     \
   static const StorageType INDEX_AND_GENERATION_MASK = (1ULL << (instanceIndexBits + generationBits)) - 1; \
-  PLASMA_DECLARE_POD_TYPE();                                                                                   \
-  PLASMA_ALWAYS_INLINE name() { m_Data = INVALID_INSTANCE_INDEX; }                                             \
-  PLASMA_ALWAYS_INLINE explicit name(StorageType internalData) { m_Data = internalData; }                      \
-  PLASMA_ALWAYS_INLINE bool operator==(const name other) const { return m_Data == other.m_Data; }              \
-  PLASMA_ALWAYS_INLINE bool operator!=(const name other) const { return m_Data != other.m_Data; }              \
-  PLASMA_ALWAYS_INLINE bool operator<(const name other) const { return m_Data < other.m_Data; }                \
-  PLASMA_ALWAYS_INLINE void Invalidate() { m_Data = INVALID_INSTANCE_INDEX; }                                  \
-  PLASMA_ALWAYS_INLINE bool IsInvalidated() const { return m_Data == INVALID_INSTANCE_INDEX; }                 \
-  PLASMA_ALWAYS_INLINE bool IsIndexAndGenerationEqual(const name other) const                                  \
+  PL_DECLARE_POD_TYPE();                                                                                   \
+  PL_ALWAYS_INLINE name() { m_Data = INVALID_INSTANCE_INDEX; }                                             \
+  PL_ALWAYS_INLINE explicit name(StorageType internalData) { m_Data = internalData; }                      \
+  PL_ALWAYS_INLINE bool operator==(const name other) const { return m_Data == other.m_Data; }              \
+  PL_ALWAYS_INLINE bool operator!=(const name other) const { return m_Data != other.m_Data; }              \
+  PL_ALWAYS_INLINE bool operator<(const name other) const { return m_Data < other.m_Data; }                \
+  PL_ALWAYS_INLINE void Invalidate() { m_Data = INVALID_INSTANCE_INDEX; }                                  \
+  PL_ALWAYS_INLINE bool IsInvalidated() const { return m_Data == INVALID_INSTANCE_INDEX; }                 \
+  PL_ALWAYS_INLINE bool IsIndexAndGenerationEqual(const name other) const                                  \
   {                                                                                                        \
     return (m_Data & INDEX_AND_GENERATION_MASK) == (other.m_Data & INDEX_AND_GENERATION_MASK);             \
   }
@@ -35,9 +35,9 @@ struct plGenericId
   };
   using StorageType = typename plSizeToType<STORAGE_SIZE>::Type;
 
-  PLASMA_DECLARE_ID_TYPE(plGenericId, InstanceIndexBits, GenerationBits);
+  PL_DECLARE_ID_TYPE(plGenericId, InstanceIndexBits, GenerationBits);
 
-  PLASMA_ALWAYS_INLINE plGenericId(StorageType instanceIndex, StorageType generation)
+  PL_ALWAYS_INLINE plGenericId(StorageType instanceIndex, StorageType generation)
   {
     m_Data = 0;
     m_InstanceIndex = instanceIndex;
@@ -55,20 +55,20 @@ struct plGenericId
   };
 };
 
-#define PLASMA_DECLARE_HANDLE_TYPE(name, idType)                                                              \
+#define PL_DECLARE_HANDLE_TYPE(name, idType)                                                              \
 public:                                                                                                   \
-  PLASMA_DECLARE_POD_TYPE();                                                                                  \
-  PLASMA_ALWAYS_INLINE name() {}                                                                              \
-  PLASMA_ALWAYS_INLINE explicit name(idType internalId)                                                       \
+  PL_DECLARE_POD_TYPE();                                                                                  \
+  PL_ALWAYS_INLINE name() {}                                                                              \
+  PL_ALWAYS_INLINE explicit name(idType internalId)                                                       \
     : m_InternalId(internalId)                                                                            \
   {                                                                                                       \
   }                                                                                                       \
-  PLASMA_ALWAYS_INLINE bool operator==(const name other) const { return m_InternalId == other.m_InternalId; } \
-  PLASMA_ALWAYS_INLINE bool operator!=(const name other) const { return m_InternalId != other.m_InternalId; } \
-  PLASMA_ALWAYS_INLINE bool operator<(const name other) const { return m_InternalId < other.m_InternalId; }   \
-  PLASMA_ALWAYS_INLINE void Invalidate() { m_InternalId.Invalidate(); }                                       \
-  PLASMA_ALWAYS_INLINE bool IsInvalidated() const { return m_InternalId.IsInvalidated(); }                    \
-  PLASMA_ALWAYS_INLINE idType GetInternalID() const { return m_InternalId; }                                  \
+  PL_ALWAYS_INLINE bool operator==(const name other) const { return m_InternalId == other.m_InternalId; } \
+  PL_ALWAYS_INLINE bool operator!=(const name other) const { return m_InternalId != other.m_InternalId; } \
+  PL_ALWAYS_INLINE bool operator<(const name other) const { return m_InternalId < other.m_InternalId; }   \
+  PL_ALWAYS_INLINE void Invalidate() { m_InternalId.Invalidate(); }                                       \
+  PL_ALWAYS_INLINE bool IsInvalidated() const { return m_InternalId.IsInvalidated(); }                    \
+  PL_ALWAYS_INLINE idType GetInternalID() const { return m_InternalId; }                                  \
   using IdType = idType;                                                                                  \
                                                                                                           \
 protected:                                                                                                \

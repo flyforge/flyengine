@@ -20,5 +20,5 @@ protected:
   plVec3 m_vPositionOffset;
   plQuat m_qRotation;
 
-  PlasmaEngineGizmoHandle m_hGizmo;
+  plEngineGizmoHandle m_hGizmo;
 };

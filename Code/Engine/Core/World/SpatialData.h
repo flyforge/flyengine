@@ -7,12 +7,12 @@ struct plSpatialData
 {
   struct Flags
   {
-    typedef plUInt8 StorageType;
+    using StorageType = plUInt8;
 
     enum Enum
     {
       None = 0,
-      FrequentChanges = PLASMA_BIT(0), ///< Indicates that objects in this category change their bounds frequently. Spatial System implementations can use that as hint for internal optimizations.
+      FrequentChanges = PL_BIT(0), ///< Indicates that objects in this category change their bounds frequently. Spatial System implementations can use that as hint for internal optimizations.
 
       Default = None
     };
@@ -25,35 +25,38 @@ struct plSpatialData
 
   struct Category
   {
-    PLASMA_ALWAYS_INLINE Category()
-      : m_uiValue(plInvalidIndex)
+    PL_ALWAYS_INLINE Category()
+      : m_uiValue(plSmallInvalidIndex)
     {
     }
 
-    PLASMA_ALWAYS_INLINE explicit Category(plUInt32 uiValue)
+    PL_ALWAYS_INLINE explicit Category(plUInt16 uiValue)
       : m_uiValue(uiValue)
     {
     }
 
-    PLASMA_ALWAYS_INLINE bool operator==(const Category& other) const { return m_uiValue == other.m_uiValue; }
-    PLASMA_ALWAYS_INLINE bool operator!=(const Category& other) const { return m_uiValue != other.m_uiValue; }
+    PL_ALWAYS_INLINE bool operator==(const Category& other) const { return m_uiValue == other.m_uiValue; }
+    PL_ALWAYS_INLINE bool operator!=(const Category& other) const { return m_uiValue != other.m_uiValue; }
 
-    plUInt32 m_uiValue;
+    plUInt16 m_uiValue;
 
-    PLASMA_ALWAYS_INLINE plUInt32 GetBitmask() const { return m_uiValue != plInvalidIndex ? static_cast<plUInt32>(PLASMA_BIT(m_uiValue)) : 0; }
+    PL_ALWAYS_INLINE plUInt32 GetBitmask() const { return m_uiValue != plSmallInvalidIndex ? static_cast<plUInt32>(PL_BIT(m_uiValue)) : 0; }
   };
 
   /// \brief Registers a spatial data category under the given name.
   ///
   /// If the same category was already registered before, it returns that instead.
   /// Asserts that there are no more than 32 unique categories.
-  PLASMA_CORE_DLL static Category RegisterCategory(plStringView sCategoryName, const plBitflags<Flags>& flags);
+  PL_CORE_DLL static Category RegisterCategory(plStringView sCategoryName, const plBitflags<Flags>& flags);
 
   /// \brief Returns either an existing category with the given name or plInvalidSpatialDataCategory.
-  PLASMA_CORE_DLL static Category FindCategory(plStringView sCategoryName);
+  PL_CORE_DLL static Category FindCategory(plStringView sCategoryName);
+
+  /// \brief Returns the name of the given category.
+  PL_CORE_DLL static const plHashedString& GetCategoryName(Category category);
 
   /// \brief Returns the flags for the given category.
-  PLASMA_CORE_DLL static const plBitflags<Flags>& GetCategoryFlags(Category category);
+  PL_CORE_DLL static const plBitflags<Flags>& GetCategoryFlags(Category category);
 
 private:
   struct CategoryData
@@ -65,7 +68,7 @@ private:
   static plHybridArray<plSpatialData::CategoryData, 32>& GetCategoryData();
 };
 
-struct PLASMA_CORE_DLL plDefaultSpatialDataCategories
+struct PL_CORE_DLL plDefaultSpatialDataCategories
 {
   static plSpatialData::Category RenderStatic;
   static plSpatialData::Category RenderDynamic;

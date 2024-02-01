@@ -6,7 +6,7 @@
 #include <Foundation/Strings/String.h>
 #include <Texture/TexConv/TexConvEnums.h>
 
-struct PLASMA_TEXTURE_DLL plTextureAtlasCreationDesc
+struct PL_TEXTURE_DLL plTextureAtlasCreationDesc
 {
   struct Layer
   {
@@ -25,14 +25,14 @@ struct PLASMA_TEXTURE_DLL plTextureAtlasCreationDesc
   plHybridArray<Layer, 4> m_Layers;
   plDynamicArray<Item> m_Items;
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 
   plResult Save(plStringView sFile) const;
   plResult Load(plStringView sFile);
 };
 
-struct PLASMA_TEXTURE_DLL plTextureAtlasRuntimeDesc
+struct PL_TEXTURE_DLL plTextureAtlasRuntimeDesc
 {
   struct Item
   {
@@ -45,6 +45,6 @@ struct PLASMA_TEXTURE_DLL plTextureAtlasRuntimeDesc
 
   void Clear();
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 };

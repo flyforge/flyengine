@@ -16,7 +16,7 @@ enum class plQtPinHighlightState
   CanReplaceConnection,
 };
 
-class PLASMA_GUIFOUNDATION_DLL plQtPin : public QGraphicsPathItem
+class PL_GUIFOUNDATION_DLL plQtPin : public QGraphicsPathItem
 {
 public:
   plQtPin();
@@ -38,10 +38,10 @@ public:
   virtual void UpdateConnections();
   void SetHighlightState(plQtPinHighlightState state);
 
-  void SetActive(bool active);
+  void SetActive(bool bActive);
 
-  virtual void ExtendContextMenu(QMenu& menu) {}
-  virtual void keyPressEvent(QKeyEvent* event) override {}
+  virtual void ExtendContextMenu(QMenu& ref_menu) {}
+  virtual void keyPressEvent(QKeyEvent* pEvent) override {}
 
 protected:
   virtual bool UpdatePinColors(const plColorGammaUB* pOverwriteColor = nullptr);
@@ -52,6 +52,7 @@ protected:
   QPointF m_PinCenter;
 
   bool m_bTranslatePinName = true;
+
 private:
   bool m_bIsActive = true;
 

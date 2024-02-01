@@ -7,18 +7,18 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-typedef plComponentManagerSimple<class plSpatialAnchorComponent, plComponentUpdateType::WhenSimulating> plSpatialAnchorComponentManager;
+using plSpatialAnchorComponentManager = plComponentManagerSimple<class plSpatialAnchorComponent, plComponentUpdateType::WhenSimulating>;
 
-class PLASMA_GAMEENGINE_DLL plSpatialAnchorComponent : public plComponent
+class PL_GAMEENGINE_DLL plSpatialAnchorComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSpatialAnchorComponent, plComponent, plSpatialAnchorComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSpatialAnchorComponent, plComponent, plSpatialAnchorComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
 
 public:
-  virtual void SerializeComponent(plWorldWriter& stream) const override;
-  virtual void DeserializeComponent(plWorldReader& stream) override;
+  virtual void SerializeComponent(plWorldWriter& inout_stream) const override;
+  virtual void DeserializeComponent(plWorldReader& inout_stream) override;
 
 protected:
   virtual void OnSimulationStarted() override;

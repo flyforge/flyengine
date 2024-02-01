@@ -50,9 +50,9 @@ struct plToolsProjectRequest
   plStringBuilder m_sAbsDocumentPath;
 };
 
-class PLASMA_TOOLSFOUNDATION_DLL plToolsProject
+class PL_TOOLSFOUNDATION_DLL plToolsProject
 {
-  PLASMA_DECLARE_SINGLETON(plToolsProject);
+  PL_DECLARE_SINGLETON(plToolsProject);
 
 public:
   static plEvent<const plToolsProjectEvent&> s_Events;
@@ -72,8 +72,8 @@ public:
   static plInt32 SuggestContainerWindow(plDocument* pDoc);
   /// \brief Resolve document GUID into an absolute path.
   plStringBuilder GetPathForDocumentGuid(const plUuid& guid);
-  static plStatus OpenProject(const char* szProjectPath);
-  static plStatus CreateProject(const char* szProjectPath);
+  static plStatus OpenProject(plStringView sProjectPath);
+  static plStatus CreateProject(plStringView sProjectPath);
 
   /// \brief Broadcasts the SaveAll event, though otherwise has no direct effect.
   static void BroadcastSaveAll();
@@ -97,20 +97,20 @@ public:
   plString GetProjectDataFolder() const;
 
   /// \brief Starts at the  given document and then searches the tree upwards until it finds an plProject file.
-  static plString FindProjectDirectoryForDocument(const char* szDocumentPath);
+  static plString FindProjectDirectoryForDocument(plStringView sDocumentPath);
 
-  bool IsDocumentInAllowedRoot(const char* szDocumentPath, plString* out_RelativePath = nullptr) const;
+  bool IsDocumentInAllowedRoot(plStringView sDocumentPath, plString* out_pRelativePath = nullptr) const;
 
-  void AddAllowedDocumentRoot(const char* szPath);
+  void AddAllowedDocumentRoot(plStringView sPath);
 
   /// \brief Makes sure the given sub-folder exists inside the project directory
-  void CreateSubFolder(const char* szFolder) const;
+  void CreateSubFolder(plStringView sFolder) const;
 
 private:
-  static plStatus CreateOrOpenProject(const char* szProjectPath, bool bCreate);
+  static plStatus CreateOrOpenProject(plStringView sProjectPath, bool bCreate);
 
 private:
-  plToolsProject(const char* szProjectPath);
+  plToolsProject(plStringView sProjectPath);
   ~plToolsProject();
 
   plStatus Create();

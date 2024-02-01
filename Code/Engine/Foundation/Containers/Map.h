@@ -40,43 +40,41 @@ public:
   {
     using iterator_category = std::forward_iterator_tag;
     using value_type = ConstIterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = ConstIterator*;
     using reference = ConstIterator&;
 
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Constructs an invalid iterator.
-    PLASMA_ALWAYS_INLINE ConstIterator()
+    PL_ALWAYS_INLINE ConstIterator()
       : m_pElement(nullptr)
     {
     } // [tested]
 
     /// \brief Checks whether this iterator points to a valid element.
-    PLASMA_ALWAYS_INLINE bool IsValid() const { return (m_pElement != nullptr); } // [tested]
+    PL_ALWAYS_INLINE bool IsValid() const { return (m_pElement != nullptr); } // [tested]
 
     /// \brief Checks whether the two iterators point to the same element.
-    PLASMA_ALWAYS_INLINE bool operator==(const typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator& it2) const { return (m_pElement == it2.m_pElement); }
-
-    /// \brief Checks whether the two iterators point to the same element.
-    PLASMA_ALWAYS_INLINE bool operator!=(const typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator& it2) const { return (m_pElement != it2.m_pElement); }
+    PL_ALWAYS_INLINE bool operator==(const typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator& it2) const { return (m_pElement == it2.m_pElement); }
+    PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const typename plMapBase<KeyType, ValueType, Comparer>::ConstIterator&);
 
     /// \brief Returns the 'key' of the element that this iterator points to.
-    PLASMA_FORCE_INLINE const KeyType& Key() const
+    PL_FORCE_INLINE const KeyType& Key() const
     {
-      PLASMA_ASSERT_DEBUG(IsValid(), "Cannot access the 'key' of an invalid iterator.");
+      PL_ASSERT_DEBUG(IsValid(), "Cannot access the 'key' of an invalid iterator.");
       return m_pElement->m_Key;
     } // [tested]
 
     /// \brief Returns the 'value' of the element that this iterator points to.
-    PLASMA_FORCE_INLINE const ValueType& Value() const
+    PL_FORCE_INLINE const ValueType& Value() const
     {
-      PLASMA_ASSERT_DEBUG(IsValid(), "Cannot access the 'value' of an invalid iterator.");
+      PL_ASSERT_DEBUG(IsValid(), "Cannot access the 'value' of an invalid iterator.");
       return m_pElement->m_Value;
     } // [tested]
 
     /// \brief Returns '*this' to enable foreach
-    PLASMA_ALWAYS_INLINE ConstIterator& operator*() { return *this; } // [tested]
+    PL_ALWAYS_INLINE ConstIterator& operator*() { return *this; } // [tested]
 
     /// \brief Advances the iterator to the next element in the map. The iterator will not be valid anymore, if the end is reached.
     void Next(); // [tested]
@@ -85,15 +83,15 @@ public:
     void Prev(); // [tested]
 
     /// \brief Shorthand for 'Next'
-    PLASMA_ALWAYS_INLINE void operator++() { Next(); } // [tested]
+    PL_ALWAYS_INLINE void operator++() { Next(); } // [tested]
 
     /// \brief Shorthand for 'Prev'
-    PLASMA_ALWAYS_INLINE void operator--() { Prev(); } // [tested]
+    PL_ALWAYS_INLINE void operator--() { Prev(); } // [tested]
 
   protected:
     friend class plMapBase<KeyType, ValueType, Comparer>;
 
-    PLASMA_ALWAYS_INLINE explicit ConstIterator(Node* pInit)
+    PL_ALWAYS_INLINE explicit ConstIterator(Node* pInit)
       : m_pElement(pInit)
     {
     }
@@ -106,35 +104,35 @@ public:
   {
     using iterator_category = std::forward_iterator_tag;
     using value_type = Iterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = Iterator*;
     using reference = Iterator&;
 
     // this is required to pull in the const version of this function
     using ConstIterator::Value;
 
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Constructs an invalid iterator.
-    PLASMA_ALWAYS_INLINE Iterator()
+    PL_ALWAYS_INLINE Iterator()
       : ConstIterator()
     {
     }
 
     /// \brief Returns the 'value' of the element that this iterator points to.
-    PLASMA_FORCE_INLINE ValueType& Value()
+    PL_FORCE_INLINE ValueType& Value()
     {
-      PLASMA_ASSERT_DEBUG(this->IsValid(), "Cannot access the 'value' of an invalid iterator.");
+      PL_ASSERT_DEBUG(this->IsValid(), "Cannot access the 'value' of an invalid iterator.");
       return this->m_pElement->m_Value;
     }
 
     /// \brief Returns '*this' to enable foreach
-    PLASMA_ALWAYS_INLINE Iterator& operator*() { return *this; } // [tested]
+    PL_ALWAYS_INLINE Iterator& operator*() { return *this; } // [tested]
 
   private:
     friend class plMapBase<KeyType, ValueType, Comparer>;
 
-    PLASMA_ALWAYS_INLINE explicit Iterator(Node* pInit)
+    PL_ALWAYS_INLINE explicit Iterator(Node* pInit)
       : ConstIterator(pInit)
     {
     }
@@ -142,10 +140,10 @@ public:
 
 protected:
   /// \brief Initializes the map to be empty.
-  plMapBase(const Comparer& comparer, plAllocatorBase* pAllocator); // [tested]
+  plMapBase(const Comparer& comparer, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies all key/value pairs from the given map into this one.
-  plMapBase(const plMapBase<KeyType, ValueType, Comparer>& cc, plAllocatorBase* pAllocator); // [tested]
+  plMapBase(const plMapBase<KeyType, ValueType, Comparer>& cc, plAllocator* pAllocator); // [tested]
 
   /// \brief Destroys all elements from the map.
   ~plMapBase(); // [tested]
@@ -254,13 +252,11 @@ public:
   ConstIterator UpperBound(const CompatibleKeyType& key) const; // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const { return m_Elements.GetAllocator(); }
+  plAllocator* GetAllocator() const { return m_Elements.GetAllocator(); }
 
   /// \brief Comparison operator
   bool operator==(const plMapBase<KeyType, ValueType, Comparer>& rhs) const; // [tested]
-
-  /// \brief Comparison operator
-  bool operator!=(const plMapBase<KeyType, ValueType, Comparer>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plMapBase<KeyType, ValueType, Comparer>&);
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const { return m_Elements.GetHeapMemoryUsage(); } // [tested]
@@ -329,8 +325,8 @@ class plMap : public plMapBase<KeyType, ValueType, Comparer>
 {
 public:
   plMap();
-  explicit plMap(plAllocatorBase* pAllocator);
-  plMap(const Comparer& comparer, plAllocatorBase* pAllocator);
+  explicit plMap(plAllocator* pAllocator);
+  plMap(const Comparer& comparer, plAllocator* pAllocator);
 
   plMap(const plMap<KeyType, ValueType, Comparer, AllocatorWrapper>& other);
   plMap(const plMapBase<KeyType, ValueType, Comparer>& other);

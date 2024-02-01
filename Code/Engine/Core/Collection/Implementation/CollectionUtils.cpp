@@ -4,9 +4,9 @@
 #include <Foundation/IO/FileSystem/FileSystem.h>
 #include <Foundation/IO/OSFile.h>
 
-void plCollectionUtils::AddFiles(plCollectionResourceDescriptor& collection, plStringView sAssetTypeNameView, plStringView sAbsPathToFolder, plStringView sFileExtension, plStringView sStripPrefix, plStringView sPrependPrefix)
+void plCollectionUtils::AddFiles(plCollectionResourceDescriptor& ref_collection, plStringView sAssetTypeNameView, plStringView sAbsPathToFolder, plStringView sFileExtension, plStringView sStripPrefix, plStringView sPrependPrefix)
 {
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
 
   const plUInt32 uiStripPrefixLength = plStringUtils::GetCharacterCount(sStripPrefix.GetStartPointer(), sStripPrefix.GetEndPointer());
 
@@ -32,7 +32,7 @@ void plCollectionUtils::AddFiles(plCollectionResourceDescriptor& collection, plS
       sFullPath.Prepend(sPrependPrefix);
       sFullPath.MakeCleanPath();
 
-      auto& entry = collection.m_Resources.ExpandAndGetRef();
+      auto& entry = ref_collection.m_Resources.ExpandAndGetRef();
       entry.m_sAssetTypeName = sAssetTypeName;
       entry.m_sResourceID = sFullPath;
       entry.m_uiFileSize = stats.m_uiFileSize;
@@ -40,12 +40,12 @@ void plCollectionUtils::AddFiles(plCollectionResourceDescriptor& collection, plS
   }
 
 #else
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 #endif
 }
 
 
-PLASMA_CORE_DLL void plCollectionUtils::MergeCollections(plCollectionResourceDescriptor& result, plArrayPtr<const plCollectionResourceDescriptor*> inputCollections)
+PL_CORE_DLL void plCollectionUtils::MergeCollections(plCollectionResourceDescriptor& ref_result, plArrayPtr<const plCollectionResourceDescriptor*> inputCollections)
 {
   plMap<plString, const plCollectionEntry*> firstEntryOfID;
 
@@ -56,27 +56,27 @@ PLASMA_CORE_DLL void plCollectionUtils::MergeCollections(plCollectionResourceDes
       if (!firstEntryOfID.Contains(inputEntry.m_sResourceID))
       {
         firstEntryOfID.Insert(inputEntry.m_sResourceID, &inputEntry);
-        result.m_Resources.PushBack(inputEntry);
+        ref_result.m_Resources.PushBack(inputEntry);
       }
     }
   }
 }
 
 
-PLASMA_CORE_DLL void plCollectionUtils::DeDuplicateEntries(plCollectionResourceDescriptor& result, const plCollectionResourceDescriptor& input)
+PL_CORE_DLL void plCollectionUtils::DeDuplicateEntries(plCollectionResourceDescriptor& ref_result, const plCollectionResourceDescriptor& input)
 {
   const plCollectionResourceDescriptor* firstInput = &input;
-  MergeCollections(result, plArrayPtr<const plCollectionResourceDescriptor*>(&firstInput, 1));
+  MergeCollections(ref_result, plArrayPtr<const plCollectionResourceDescriptor*>(&firstInput, 1));
 }
 
-void plCollectionUtils::AddResourceHandle(plCollectionResourceDescriptor& collection, plTypelessResourceHandle handle, plStringView sAssetTypeName, plStringView sAbsFolderpath)
+void plCollectionUtils::AddResourceHandle(plCollectionResourceDescriptor& ref_collection, plTypelessResourceHandle hHandle, plStringView sAssetTypeName, plStringView sAbsFolderpath)
 {
-  if (!handle.IsValid())
+  if (!hHandle.IsValid())
     return;
 
-  const char* resID = handle.GetResourceID();
+  const char* resID = hHandle.GetResourceID();
 
-  auto& entry = collection.m_Resources.ExpandAndGetRef();
+  auto& entry = ref_collection.m_Resources.ExpandAndGetRef();
 
   entry.m_sAssetTypeName.Assign(sAssetTypeName);
   entry.m_sResourceID = resID;
@@ -100,4 +100,4 @@ void plCollectionUtils::AddResourceHandle(plCollectionResourceDescriptor& collec
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Collection_Implementation_CollectionUtils);
+

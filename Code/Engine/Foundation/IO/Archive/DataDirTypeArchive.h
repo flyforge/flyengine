@@ -15,7 +15,7 @@ namespace plDataDirectory
   class ArchiveReaderZstd;
   class ArchiveReaderZip;
 
-  class PLASMA_FOUNDATION_DLL ArchiveType : public plDataDirectoryType
+  class PL_FOUNDATION_DLL ArchiveType : public plDataDirectoryType
   {
   public:
     ArchiveType();
@@ -53,9 +53,9 @@ namespace plDataDirectory
 #endif
   };
 
-  class PLASMA_FOUNDATION_DLL ArchiveReaderUncompressed : public plDataDirectoryReader
+  class PL_FOUNDATION_DLL ArchiveReaderUncompressed : public plDataDirectoryReader
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(ArchiveReaderUncompressed);
+    PL_DISALLOW_COPY_AND_ASSIGN(ArchiveReaderUncompressed);
 
   public:
     ArchiveReaderUncompressed(plInt32 iDataDirUserData);
@@ -76,9 +76,9 @@ namespace plDataDirectory
   };
 
 #ifdef BUILDSYSTEM_ENABLE_ZSTD_SUPPORT
-  class PLASMA_FOUNDATION_DLL ArchiveReaderZstd : public ArchiveReaderUncompressed
+  class PL_FOUNDATION_DLL ArchiveReaderZstd : public ArchiveReaderUncompressed
   {
-    PLASMA_DISALLOW_COPY_AND_ASSIGN(ArchiveReaderZstd);
+    PL_DISALLOW_COPY_AND_ASSIGN(ArchiveReaderZstd);
 
   public:
     ArchiveReaderZstd(plInt32 iDataDirUserData);

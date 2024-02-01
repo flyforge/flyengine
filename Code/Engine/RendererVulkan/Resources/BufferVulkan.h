@@ -7,18 +7,18 @@
 
 #include <vulkan/vulkan.hpp>
 
-class PLASMA_RENDERERVULKAN_DLL plGALBufferVulkan : public plGALBuffer
+class PL_RENDERERVULKAN_DLL plGALBufferVulkan : public plGALBuffer
 {
 public:
   void DiscardBuffer() const;
-  PLASMA_ALWAYS_INLINE vk::Buffer GetVkBuffer() const;
+  PL_ALWAYS_INLINE vk::Buffer GetVkBuffer() const;
   const vk::DescriptorBufferInfo& GetBufferInfo() const;
 
-  PLASMA_ALWAYS_INLINE vk::IndexType GetIndexType() const;
-  PLASMA_ALWAYS_INLINE plVulkanAllocation GetAllocation() const;
-  PLASMA_ALWAYS_INLINE const plVulkanAllocationInfo& GetAllocationInfo() const;
-  PLASMA_ALWAYS_INLINE vk::PipelineStageFlags GetUsedByPipelineStage() const;
-  PLASMA_ALWAYS_INLINE vk::AccessFlags GetAccessMask() const;
+  PL_ALWAYS_INLINE vk::IndexType GetIndexType() const;
+  PL_ALWAYS_INLINE plVulkanAllocation GetAllocation() const;
+  PL_ALWAYS_INLINE const plVulkanAllocationInfo& GetAllocationInfo() const;
+  PL_ALWAYS_INLINE vk::PipelineStageFlags GetUsedByPipelineStage() const;
+  PL_ALWAYS_INLINE vk::AccessFlags GetAccessMask() const;
   static vk::DeviceSize GetAlignment(const plGALDeviceVulkan* pDevice, vk::BufferUsageFlags usage);
 
 protected:

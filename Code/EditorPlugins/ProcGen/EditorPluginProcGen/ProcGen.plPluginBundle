@@ -5,9 +5,9 @@ PluginInfo
 {
 	string %DisplayName{"Procedural Generation"}
 	string %Description{"Adds support for placing objects procedurally."}
-	string %EditorPlugins{"plasmaEditorPluginProcGen"}
+	string %EditorPlugins{"plEditorPluginProcGen"}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaProcGenPlugin"}
+	string %RuntimePlugins{"plProcGenPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

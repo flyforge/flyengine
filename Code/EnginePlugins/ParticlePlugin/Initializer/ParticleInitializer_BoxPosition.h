@@ -2,9 +2,9 @@
 
 #include <ParticlePlugin/Initializer/ParticleInitializer.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory_BoxPosition final : public plParticleInitializerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory_BoxPosition final : public plParticleInitializerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_BoxPosition, plParticleInitializerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory_BoxPosition, plParticleInitializerFactory);
 
 public:
   plParticleInitializerFactory_BoxPosition();
@@ -13,8 +13,8 @@ public:
   virtual void CopyInitializerProperties(plParticleInitializer* pInitializer, bool bFirstTime) const override;
   virtual float GetSpawnCountMultiplier(const plParticleEffectInstance* pEffect) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
 public:
   plVec3 m_vPositionOffset;
@@ -25,9 +25,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer_BoxPosition final : public plParticleInitializer
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer_BoxPosition final : public plParticleInitializer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer_BoxPosition, plParticleInitializer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer_BoxPosition, plParticleInitializer);
 
 public:
   plVec3 m_vPositionOffset;

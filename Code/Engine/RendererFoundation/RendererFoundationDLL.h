@@ -6,21 +6,23 @@
 #include <Foundation/Types/RefCounted.h>
 
 // Configure the DLL Import/Export Define
-#if PLASMA_ENABLED(PLASMA_COMPILE_ENGINE_AS_DLL)
+#if PL_ENABLED(PL_COMPILE_ENGINE_AS_DLL)
 #  ifdef BUILDSYSTEM_BUILDING_RENDERERFOUNDATION_LIB
-#    define PLASMA_RENDERERFOUNDATION_DLL PLASMA_DECL_EXPORT
+#    define PL_RENDERERFOUNDATION_DLL PL_DECL_EXPORT
 #  else
-#    define PLASMA_RENDERERFOUNDATION_DLL PLASMA_DECL_IMPORT
+#    define PL_RENDERERFOUNDATION_DLL PL_DECL_IMPORT
 #  endif
 #else
-#  define PLASMA_RENDERERFOUNDATION_DLL
+#  define PL_RENDERERFOUNDATION_DLL
 #endif
 
+// #TODO_SHADER obsolete, DX11 only
+#define PL_GAL_MAX_CONSTANT_BUFFER_COUNT 16
+#define PL_GAL_MAX_SAMPLER_COUNT 16
+
 // Necessary array sizes
-#define PLASMA_GAL_MAX_CONSTANT_BUFFER_COUNT 16
-#define PLASMA_GAL_MAX_SAMPLER_COUNT 16
-#define PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT 16
-#define PLASMA_GAL_MAX_RENDERTARGET_COUNT 8
+#define PL_GAL_MAX_VERTEX_BUFFER_COUNT 16
+#define PL_GAL_MAX_RENDERTARGET_COUNT 8
 
 // Forward declarations
 
@@ -44,6 +46,7 @@ class plGALSwapChain;
 class plGALShader;
 class plGALResourceBase;
 class plGALTexture;
+class plGALSharedTexture;
 class plGALBuffer;
 class plGALDepthStencilState;
 class plGALBlendState;
@@ -64,7 +67,7 @@ class plGALComputeCommandEncoder;
 // Basic enums
 struct plGALPrimitiveTopology
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
   enum Enum
   {
     // keep this order, it is used to allocate the desired number of indices in plMeshBufferResourceDescriptor::AllocateStreams
@@ -78,7 +81,7 @@ struct plGALPrimitiveTopology
   static plUInt32 VerticesPerPrimitive(plGALPrimitiveTopology::Enum e) { return (plUInt32)e + 1; }
 };
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALIndexType
+struct PL_RENDERERFOUNDATION_DLL plGALIndexType
 {
   enum Enum
   {
@@ -97,9 +100,12 @@ private:
   static const plUInt8 s_Size[plGALIndexType::ENUM_COUNT];
 };
 
-
-struct PLASMA_RENDERERFOUNDATION_DLL plGALShaderStage
+/// \brief The stage of a shader. A complete shader can consist of multiple stages.
+/// \sa plGALShaderStageFlags, plGALShaderCreationDescription
+struct PL_RENDERERFOUNDATION_DLL plGALShaderStage
 {
+  using StorageType = plUInt8;
+
   enum Enum : plUInt8
   {
     VertexShader,
@@ -107,18 +113,72 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALShaderStage
     DomainShader,
     GeometryShader,
     PixelShader,
-
     ComputeShader,
-
-    ENUM_COUNT
+    /*
+    // #TODO_SHADER: Future work:
+    TaskShader,
+    MeshShader,
+    RayGenShader,
+    RayAnyHitShader,
+    RayClosestHitShader,
+    RayMissShader,
+    RayIntersectionShader,
+    */
+    ENUM_COUNT,
+    Default = VertexShader
   };
 
   static const char* Names[ENUM_COUNT];
 };
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALMSAASampleCount
+/// \brief A set of shader stages.
+/// \sa plGALShaderStage, plShaderResourceBinding
+struct PL_RENDERERFOUNDATION_DLL plGALShaderStageFlags
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt16;
+
+  enum Enum : plUInt16
+  {
+    VertexShader = PL_BIT(0),
+    HullShader = PL_BIT(1),
+    DomainShader = PL_BIT(2),
+    GeometryShader = PL_BIT(3),
+    PixelShader = PL_BIT(4),
+    ComputeShader = PL_BIT(5),
+    /*
+    // #TODO_SHADER: Future work:
+    TaskShader = PL_BIT(6),
+    MeshShader = PL_BIT(7),
+    RayGenShader = PL_BIT(8),
+    RayAnyHitShader = PL_BIT(9),
+    RayClosestHitShader = PL_BIT(10),
+    RayMissShader = PL_BIT(11),
+    RayIntersectionShader = PL_BIT(12),
+    */
+    Default = 0
+  };
+
+  struct Bits
+  {
+    StorageType VertexShader : 1;
+    StorageType HullShader : 1;
+    StorageType DomainShader : 1;
+    StorageType GeometryShader : 1;
+    StorageType PixelShader : 1;
+    StorageType ComputeShader : 1;
+  };
+
+  inline static plGALShaderStageFlags::Enum MakeFromShaderStage(plGALShaderStage::Enum stage)
+  {
+    return static_cast<plGALShaderStageFlags::Enum>(PL_BIT(stage));
+  }
+};
+PL_DECLARE_FLAGS_OPERATORS(plGALShaderStageFlags);
+
+
+struct PL_RENDERERFOUNDATION_DLL plGALMSAASampleCount
+{
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -133,11 +193,9 @@ struct PLASMA_RENDERERFOUNDATION_DLL plGALMSAASampleCount
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERFOUNDATION_DLL, plGALMSAASampleCount);
-
 struct plGALTextureType
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -146,6 +204,7 @@ struct plGALTextureType
     TextureCube,
     Texture3D,
     Texture2DProxy,
+    Texture2DShared,
 
     ENUM_COUNT,
 
@@ -155,6 +214,8 @@ struct plGALTextureType
 
 struct plGALBlend
 {
+  using StorageType = plUInt8;
+
   enum Enum
   {
     Zero = 0,
@@ -171,12 +232,16 @@ struct plGALBlend
     BlendFactor,
     InvBlendFactor,
 
-    ENUM_COUNT
+    ENUM_COUNT,
+
+    Default = One
   };
 };
 
 struct plGALBlendOp
 {
+  using StorageType = plUInt8;
+
   enum Enum
   {
     Add = 0,
@@ -185,13 +250,14 @@ struct plGALBlendOp
     Min,
     Max,
 
-    ENUM_COUNT
+    ENUM_COUNT,
+    Default = Add
   };
 };
 
 struct plGALStencilOp
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -212,7 +278,7 @@ struct plGALStencilOp
 
 struct plGALCompareFunc
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -234,7 +300,7 @@ struct plGALCompareFunc
 /// \brief Defines which sides of a polygon gets culled by the graphics card
 struct plGALCullMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   /// \brief Defines which sides of a polygon gets culled by the graphics card
   enum Enum
@@ -253,7 +319,7 @@ struct plGALCullMode
 
 struct plGALTextureFilterMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -269,9 +335,9 @@ struct plGALUpdateMode
 {
   enum Enum
   {
-    Discard,
-    NoOverwrite,
-    CopyToTempStorage
+    Discard,          ///< Buffer must be completely overwritten. No old data will be read. Data will not persist across frames.
+    NoOverwrite,      ///< User is responsible for synchronizing access between GPU and CPU.
+    CopyToTempStorage ///< Upload to temp buffer, then buffer to buffer transfer at the current time in the command buffer.
   };
 };
 
@@ -299,7 +365,7 @@ public:
   {
   }
 
-  PLASMA_ALWAYS_INLINE const CreationDescription& GetDescription() const { return m_Description; }
+  PL_ALWAYS_INLINE const CreationDescription& GetDescription() const { return m_Description; }
 
 protected:
   const CreationDescription m_Description;
@@ -308,105 +374,105 @@ protected:
 // Handles
 namespace plGAL
 {
-  typedef plGenericId<16, 16> pl16_16Id;
-  typedef plGenericId<18, 14> pl18_14Id;
-  typedef plGenericId<20, 12> pl20_12Id;
+  using pl16_16Id = plGenericId<16, 16>;
+  using pl18_14Id = plGenericId<18, 14>;
+  using pl20_12Id = plGenericId<20, 12>;
 } // namespace plGAL
 
 class plGALSwapChainHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALSwapChainHandle, plGAL::pl16_16Id);
+  PL_DECLARE_HANDLE_TYPE(plGALSwapChainHandle, plGAL::pl16_16Id);
 
   friend class plGALDevice;
 };
 
 class plGALShaderHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALShaderHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALShaderHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALTextureHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALTextureHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALTextureHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALBufferHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALBufferHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALBufferHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALResourceViewHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALResourceViewHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALResourceViewHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALUnorderedAccessViewHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALUnorderedAccessViewHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALUnorderedAccessViewHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALRenderTargetViewHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALRenderTargetViewHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALRenderTargetViewHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALDepthStencilStateHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALDepthStencilStateHandle, plGAL::pl16_16Id);
+  PL_DECLARE_HANDLE_TYPE(plGALDepthStencilStateHandle, plGAL::pl16_16Id);
 
   friend class plGALDevice;
 };
 
 class plGALBlendStateHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALBlendStateHandle, plGAL::pl16_16Id);
+  PL_DECLARE_HANDLE_TYPE(plGALBlendStateHandle, plGAL::pl16_16Id);
 
   friend class plGALDevice;
 };
 
 class plGALRasterizerStateHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALRasterizerStateHandle, plGAL::pl16_16Id);
+  PL_DECLARE_HANDLE_TYPE(plGALRasterizerStateHandle, plGAL::pl16_16Id);
 
   friend class plGALDevice;
 };
 
 class plGALSamplerStateHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALSamplerStateHandle, plGAL::pl16_16Id);
+  PL_DECLARE_HANDLE_TYPE(plGALSamplerStateHandle, plGAL::pl16_16Id);
 
   friend class plGALDevice;
 };
 
 class plGALVertexDeclarationHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALVertexDeclarationHandle, plGAL::pl18_14Id);
+  PL_DECLARE_HANDLE_TYPE(plGALVertexDeclarationHandle, plGAL::pl18_14Id);
 
   friend class plGALDevice;
 };
 
 class plGALQueryHandle
 {
-  PLASMA_DECLARE_HANDLE_TYPE(plGALQueryHandle, plGAL::pl20_12Id);
+  PL_DECLARE_HANDLE_TYPE(plGALQueryHandle, plGAL::pl20_12Id);
 
   friend class plGALDevice;
 };
 
 struct plGALTimestampHandle
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt64 m_uiIndex;
   plUInt64 m_uiFrameCounter;
@@ -416,27 +482,27 @@ namespace plGAL
 {
   struct ModifiedRange
   {
-    PLASMA_ALWAYS_INLINE void Reset()
+    PL_ALWAYS_INLINE void Reset()
     {
       m_uiMin = plInvalidIndex;
       m_uiMax = 0;
     }
 
-    PLASMA_FORCE_INLINE void SetToIncludeValue(plUInt32 value)
+    PL_FORCE_INLINE void SetToIncludeValue(plUInt32 value)
     {
       m_uiMin = plMath::Min(m_uiMin, value);
       m_uiMax = plMath::Max(m_uiMax, value);
     }
 
-    PLASMA_FORCE_INLINE void SetToIncludeRange(plUInt32 uiMin, plUInt32 uiMax)
+    PL_FORCE_INLINE void SetToIncludeRange(plUInt32 uiMin, plUInt32 uiMax)
     {
       m_uiMin = plMath::Min(m_uiMin, uiMin);
       m_uiMax = plMath::Max(m_uiMax, uiMax);
     }
 
-    PLASMA_ALWAYS_INLINE bool IsValid() const { return m_uiMin <= m_uiMax; }
+    PL_ALWAYS_INLINE bool IsValid() const { return m_uiMin <= m_uiMax; }
 
-    PLASMA_ALWAYS_INLINE plUInt32 GetCount() const { return m_uiMax - m_uiMin + 1; }
+    PL_ALWAYS_INLINE plUInt32 GetCount() const { return m_uiMax - m_uiMin + 1; }
 
     plUInt32 m_uiMin = plInvalidIndex;
     plUInt32 m_uiMax = 0;

@@ -1,8 +1,0 @@
-#
-
-# define __LINE_ 1
-
-#line 1 "LineTest"
-
-#define\
- __LINE__

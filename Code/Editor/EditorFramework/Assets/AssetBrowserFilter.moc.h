@@ -2,38 +2,48 @@
 
 #include <EditorFramework/Assets/AssetBrowserModel.moc.h>
 #include <EditorFramework/EditorFrameworkDLL.h>
-#include <Foundation/Strings/String.h>
+#include <ToolsFoundation/Utilities/SearchPatternFilter.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtAssetBrowserFilter : public plQtAssetFilter
+class PL_EDITORFRAMEWORK_DLL plQtAssetBrowserFilter : public plQtAssetFilter
 {
   Q_OBJECT
 public:
-  explicit plQtAssetBrowserFilter(QObject* pParent, plUInt8 uMaxDepth = 32);
+  explicit plQtAssetBrowserFilter(QObject* pParent);
 
   /// Resets all filters to their default state.
   void Reset();
+  void UpdateImportExtensions(const plSet<plString>& extensions);
 
   void SetShowItemsInSubFolders(bool bShow);
   bool GetShowItemsInSubFolders() const { return m_bShowItemsInSubFolders; }
+
+  void SetShowFiles(bool bShow);
+  bool GetShowFiles() const { return m_bShowFiles; }
+
+  void SetShowNonImportableFiles(bool bShow);
+  bool GetShowNonImportableFiles() const { return m_bShowNonImportableFiles; }
 
   void SetShowItemsInHiddenFolders(bool bShow);
   bool GetShowItemsInHiddenFolders() const { return m_bShowItemsInHiddenFolders; }
 
   void SetSortByRecentUse(bool bSort);
-  bool GetSortByRecentUse() const { return m_bSortByRecentUse; }
+  virtual bool GetSortByRecentUse() const override { return m_bSortByRecentUse; }
 
   void SetTextFilter(const char* szText);
-  const char* GetTextFilter() const { return m_sTextFilter; }
+  const char* GetTextFilter() const { return m_SearchFilter.GetSearchText(); }
 
-  //register is true when we are not using the history to set the filter, otherwise false
-  void SetPathFilter(const char* szPath, bool bRegister = true);
-  const char* GetPathFilter() const { return m_sPathFilter; }
+  void SetPathFilter(const char* szPath);
+  plStringView GetPathFilter() const;
 
   void SetTypeFilter(const char* szTypes);
   const char* GetTypeFilter() const { return m_sTypeFilter; }
 
-  void OnPrevious();
-  void OnNext();
+  void SetFileExtensionFilters(plStringView sExtensions);
+
+  /// \brief If set, the given item will be visible no matter what until any other filter is changed.
+  /// This is used to ensure that newly created assets are always visible, even if they are excluded from the current filter.
+  void SetTemporaryPinnedItem(plStringView sDataDirParentRelativePath);
+  plStringView GetTemporaryPinnedItem() const { return m_sTemporaryPinnedItem; }
 
 Q_SIGNALS:
   void TextFilterChanged();
@@ -42,12 +52,16 @@ Q_SIGNALS:
   void SortByRecentUseChanged();
 
 public:
-  virtual bool IsAssetFiltered(const plSubAsset* pInfo) const override;
-  virtual bool Less(const plSubAsset* pInfoA, const plSubAsset* pInfoB) const override;
+  virtual bool IsAssetFiltered(plStringView sDataDirParentRelativePath, bool bIsFolder, const plSubAsset* pInfo) const override;
 
 private:
-  plString m_sTextFilter, m_sTypeFilter, m_sPathFilter;
+  plString m_sTypeFilter;
+  plString m_sPathFilter;
+  plString m_sTemporaryPinnedItem;
+  plSearchPatternFilter m_SearchFilter;
   bool m_bShowItemsInSubFolders = false;
+  bool m_bShowFiles = true;
+  bool m_bShowNonImportableFiles = true;
   bool m_bShowItemsInHiddenFolders = false;
   bool m_bSortByRecentUse = false;
   mutable plStringBuilder m_sTemp; // stored here to reduce unnecessary allocations
@@ -56,10 +70,6 @@ private:
   bool m_bUsesSearchActive = false;
   bool m_bTransitive = false;
   plSet<plUuid> m_Uses;
-
-  //emplacement history
-  //lists used as stacks, push, peek, pop from the front and sometimes flush half at the back (the older data)
-  plUInt8 m_uMaxDepth;
-  plDynamicArray<plString> m_HistoryPrev; //plList not compiling ??? -> highly inefficient with dynarr.
-  plDynamicArray<plString> m_HistoryNext; //plList not compiling ??? -> highly inefficient with dynarr.
+  plSet<plString> m_ImportExtensions;
+  plSet<plString> m_FileExtensions;
 };

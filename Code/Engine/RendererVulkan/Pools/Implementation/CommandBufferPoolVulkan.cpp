@@ -2,6 +2,13 @@
 
 #include <RendererVulkan/Pools/CommandBufferPoolVulkan.h>
 
+
+plCommandBufferPoolVulkan::~plCommandBufferPoolVulkan()
+{
+  PL_ASSERT_DEBUG(m_CommandBuffers.IsEmpty(), "Either DeInitialize was not called or ReclaimCommandBuffer was called after DeInitialize");
+  PL_ASSERT_DEBUG(!m_device, "DeInitialize was not called");
+}
+
 void plCommandBufferPoolVulkan::Initialize(vk::Device device, plUInt32 graphicsFamilyIndex)
 {
   m_device = device;
@@ -31,7 +38,7 @@ void plCommandBufferPoolVulkan::DeInitialize()
 
 vk::CommandBuffer plCommandBufferPoolVulkan::RequestCommandBuffer()
 {
-  PLASMA_ASSERT_DEBUG(m_device, "plCommandBufferPoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(m_device, "plCommandBufferPoolVulkan::Initialize not called");
   if (!m_CommandBuffers.IsEmpty())
   {
     vk::CommandBuffer CommandBuffer = m_CommandBuffers.PeekBack();
@@ -54,7 +61,7 @@ vk::CommandBuffer plCommandBufferPoolVulkan::RequestCommandBuffer()
 
 void plCommandBufferPoolVulkan::ReclaimCommandBuffer(vk::CommandBuffer& commandBuffer)
 {
-  PLASMA_ASSERT_DEBUG(m_device, "plCommandBufferPoolVulkan::Initialize not called");
+  PL_ASSERT_DEBUG(m_device, "plCommandBufferPoolVulkan::Initialize not called");
   commandBuffer.reset(vk::CommandBufferResetFlagBits::eReleaseResources);
   m_CommandBuffers.PushBack(commandBuffer);
 }

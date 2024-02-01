@@ -9,16 +9,16 @@
 plBoxManipulatorAdapter::plBoxManipulatorAdapter() = default;
 plBoxManipulatorAdapter::~plBoxManipulatorAdapter() = default;
 
-void plBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& outGridSettings)
+void plBoxManipulatorAdapter::QueryGridSettings(plGridSettingsMsgToEngine& out_gridSettings)
 {
-  outGridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
+  out_gridSettings.m_vGridCenter = m_Gizmo.GetTransformation().m_vPosition;
 
   // if density != 0, it is enabled at least in ortho mode
-  outGridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
+  out_gridSettings.m_fGridDensity = plSnapProvider::GetTranslationSnapValue();
 
   // to be active in perspective mode, tangents have to be non-zero
-  outGridSettings.m_vGridTangent1.SetZero();
-  outGridSettings.m_vGridTangent2.SetZero();
+  out_gridSettings.m_vGridTangent1.SetZero();
+  out_gridSettings.m_vGridTangent2.SetZero();
 }
 
 void plBoxManipulatorAdapter::Finalize()
@@ -28,7 +28,7 @@ void plBoxManipulatorAdapter::Finalize()
   auto* pWindow = plQtDocumentWindow::FindWindowByDocument(pDoc);
 
   plQtEngineDocumentWindow* pEngineWindow = qobject_cast<plQtEngineDocumentWindow*>(pWindow);
-  PLASMA_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
+  PL_ASSERT_DEV(pEngineWindow != nullptr, "Manipulators are only supported in engine document windows");
 
   m_Gizmo.SetTransformation(GetObjectTransform());
 
@@ -101,9 +101,7 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 
       plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
-      pObjectAccessor->GetValue(m_pObject, GetProperty(szSizeProperty), oldSize).IgnoreResult();
-
-      const plVec3 vOldSize = oldSize.ConvertTo<plVec3>();
+      pObjectAccessor->GetValue(m_pObject, GetProperty(szSizeProperty), oldSize).AssertSuccess();
 
       plVariant newValue = vNewSize;
 
@@ -111,7 +109,7 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
 
       if (!plStringUtils::IsNullOrEmpty(szSizeProperty))
       {
-        pObjectAccessor->SetValue(m_pObject, GetProperty(szSizeProperty), newValue).IgnoreResult();
+        pObjectAccessor->SetValue(m_pObject, GetProperty(szSizeProperty), newValue).AssertSuccess();
       }
 
       if (pAttr->m_bRecenterParent)
@@ -121,8 +119,6 @@ void plBoxManipulatorAdapter::GizmoEventHandler(const plGizmoEvent& e)
         if (const plGameObjectDocument* pGameDoc = plDynamicCast<const plGameObjectDocument*>(pParent->GetDocumentObjectManager()->GetDocument()))
         {
           plTransform tParent = pGameDoc->GetGlobalTransform(pParent);
-
-          plObjectAccessorBase* pObjectAccessor = GetObjectAccessor();
 
           if (m_vOldSize.x != vNewSizeNeg.x)
             tParent.m_vPosition -= tParent.m_qRotation * plVec3((vNewSizeNeg.x - m_vOldSize.x) * 0.5f, 0, 0);

@@ -5,7 +5,7 @@
 
 class plImageDataAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plImageDataAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plImageDataAssetProperties, plReflectedClass);
 
 public:
   plString m_sInputFile;

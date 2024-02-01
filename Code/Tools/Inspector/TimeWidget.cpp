@@ -180,7 +180,7 @@ void plQtTimeWidget::UpdateStats()
     m_LastUpdatedClockList = plTime::Now();
 
     plStringBuilder s;
-    s.Format("Max: {0}ms", plArgF(tShowMax.GetMilliseconds(), 0));
+    s.SetFormat("Max: {0}ms", plArgF(tShowMax.GetMilliseconds(), 0));
     LabelMaxTime->setText(s.GetData());
 
     for (plMap<plString, plQtTimeWidget::ClockData>::Iterator it = m_ClockData.GetIterator(); it.IsValid(); ++it)
@@ -191,7 +191,7 @@ void plQtTimeWidget::UpdateStats()
         continue;
 
       plStringBuilder sTooltip;
-      sTooltip.Format("<p>Clock: {0}<br>Max Time Step: <b>{1}ms</b><br>Min Time Step: <b>{2}ms</b><br></p>", it.Key().GetData(),
+      sTooltip.SetFormat("<p>Clock: {0}<br>Max Time Step: <b>{1}ms</b><br>Min Time Step: <b>{2}ms</b><br></p>", it.Key().GetData(),
         plArgF(Clock.m_MaxTimestep.GetMilliseconds(), 2), plArgF(Clock.m_MinTimestep.GetMilliseconds(), 2));
 
       Clock.m_pListItem->setToolTip(sTooltip.GetData());
@@ -208,12 +208,12 @@ void plQtTimeWidget::ProcessTelemetry(void* pUnuseed)
 
   plStringBuilder sTemp;
 
-  while (plTelemetry::RetrieveMessage('TIME', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('TIME', Msg) == PL_SUCCESS)
   {
     plString sClockName;
     Msg.GetReader() >> sClockName;
 
-    sTemp.Format("{0} [smoothed]", sClockName);
+    sTemp.SetFormat("{0} [smoothed]", sClockName);
 
     ClockData& ad = s_pWidget->m_ClockData[sClockName];
     ClockData& ads = s_pWidget->m_ClockData[sTemp.GetData()];

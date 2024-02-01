@@ -5,16 +5,16 @@
 
 using plProcGenGraphResourceHandle = plTypedResourceHandle<class plProcGenGraphResource>;
 
-struct PLASMA_PROCGENPLUGIN_DLL plProcGenGraphResourceDescriptor
+struct PL_PROCGENPLUGIN_DLL plProcGenGraphResourceDescriptor
 {
   // empty, these types of resources must be loaded from file
 };
 
-class PLASMA_PROCGENPLUGIN_DLL plProcGenGraphResource : public plResource
+class PL_PROCGENPLUGIN_DLL plProcGenGraphResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcGenGraphResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plProcGenGraphResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plProcGenGraphResource, plProcGenGraphResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plProcGenGraphResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plProcGenGraphResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plProcGenGraphResource, plProcGenGraphResourceDescriptor);
 
 public:
   plProcGenGraphResource();

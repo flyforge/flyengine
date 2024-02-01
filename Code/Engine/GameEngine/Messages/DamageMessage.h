@@ -3,9 +3,9 @@
 #include <Core/Messages/EventMessage.h>
 #include <GameEngine/GameEngineDLL.h>
 
-struct PLASMA_GAMEENGINE_DLL plMsgDamage : public plEventMessage
+struct PL_GAMEENGINE_DLL plMsgDamage : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgDamage, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgDamage, plEventMessage);
 
   double m_fDamage = 0;
   plString m_sHitObjectName; ///< The actual game object that was hit (may be a child of the object to which the message is sent)

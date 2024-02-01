@@ -7,9 +7,9 @@
 class plProcessingStreamGroup;
 
 /// \brief Base class for all stream processor implementations.
-class PLASMA_FOUNDATION_DLL plProcessingStreamProcessor : public plReflectedClass
+class PL_FOUNDATION_DLL plProcessingStreamProcessor : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProcessingStreamProcessor, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plProcessingStreamProcessor, plReflectedClass);
 
 public:
   /// \brief Base constructor

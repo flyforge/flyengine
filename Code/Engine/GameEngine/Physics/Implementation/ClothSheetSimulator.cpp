@@ -3,11 +3,11 @@
 #include <Foundation/SimdMath/SimdConversion.h>
 #include <GameEngine/Physics/ClothSheetSimulator.h>
 
-void plClothSimulator::SimulateCloth(const plTime& tDiff)
+void plClothSimulator::SimulateCloth(const plTime& diff)
 {
-  m_LeftOverTimeStep += tDiff;
+  m_LeftOverTimeStep += diff;
 
-  constexpr plTime tStep = plTime::Seconds(1.0 / 60.0);
+  constexpr plTime tStep = plTime::MakeFromSeconds(1.0 / 60.0);
   const plSimdFloat tStepSqr = static_cast<float>(tStep.GetSeconds() * tStep.GetSeconds());
 
   while (m_LeftOverTimeStep >= tStep)
@@ -18,12 +18,12 @@ void plClothSimulator::SimulateCloth(const plTime& tDiff)
   }
 }
 
-void plClothSimulator::SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError)
+void plClothSimulator::SimulateStep(const plSimdFloat fDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError)
 {
   if (m_Nodes.GetCount() < 4)
     return;
 
-  UpdateNodePositions(tDiffSqr);
+  UpdateNodePositions(fDiffSqr);
 
   // repeatedly apply the distance constraint, until the overall error is low enough
   for (plUInt32 i = 0; i < uiMaxIterations; ++i)
@@ -37,7 +37,7 @@ void plClothSimulator::SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIt
 
 plSimdFloat plClothSimulator::EnforceDistanceConstraint()
 {
-  plSimdFloat fError = plSimdFloat::Zero();
+  plSimdFloat fError = plSimdFloat::MakeZero();
 
   for (plUInt32 y = 0; y < m_uiHeight; ++y)
   {
@@ -86,7 +86,7 @@ plSimdVec4f plClothSimulator::MoveTowards(const plSimdVec4f posThis, const plSim
   plSimdVec4f vDir = (posNext - posThis);
   plSimdFloat fLen = vDir.GetLength<3>();
 
-  if (fLen.IsEqual(plSimdFloat::Zero(), 0.001f))
+  if (fLen.IsEqual(plSimdFloat::MakeZero(), 0.001f))
   {
     vDir = fallbackDir;
     fLen = 1;
@@ -146,3 +146,5 @@ bool plClothSimulator::HasEquilibrium(plSimdFloat fAllowedMovement) const
 
   return true;
 }
+
+

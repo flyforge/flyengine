@@ -20,7 +20,7 @@
 // larger chunks
 
 template <typename T, bool Construct>
-void plDequeBase<T, Construct>::Constructor(plAllocatorBase* pAllocator)
+void plDequeBase<T, Construct>::Constructor(plAllocator* pAllocator)
 {
   m_pAllocator = pAllocator;
   m_pChunks = nullptr;
@@ -32,21 +32,21 @@ void plDequeBase<T, Construct>::Constructor(plAllocatorBase* pAllocator)
 
   ResetReduceSizeCounter();
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   m_uiChunkSize = CHUNK_SIZE(T);
 #endif
 }
 
 template <typename T, bool Construct>
-plDequeBase<T, Construct>::plDequeBase(plAllocatorBase* pAllocator)
+plDequeBase<T, Construct>::plDequeBase(plAllocator* pAllocator)
 {
   Constructor(pAllocator);
 }
 
 template <typename T, bool Construct>
-plDequeBase<T, Construct>::plDequeBase(const plDequeBase<T, Construct>& rhs, plAllocatorBase* pAllocator)
+plDequeBase<T, Construct>::plDequeBase(const plDequeBase<T, Construct>& rhs, plAllocator* pAllocator)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   Constructor(pAllocator);
 
@@ -54,9 +54,9 @@ plDequeBase<T, Construct>::plDequeBase(const plDequeBase<T, Construct>& rhs, plA
 }
 
 template <typename T, bool Construct>
-plDequeBase<T, Construct>::plDequeBase(plDequeBase<T, Construct>&& rhs, plAllocatorBase* pAllocator)
+plDequeBase<T, Construct>::plDequeBase(plDequeBase<T, Construct>&& rhs, plAllocator* pAllocator)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   Constructor(pAllocator);
 
@@ -72,7 +72,7 @@ plDequeBase<T, Construct>::~plDequeBase()
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::operator=(const plDequeBase<T, Construct>& rhs)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   Clear();                // does not deallocate anything
   RESERVE(rhs.m_uiCount); // allocates data, if required
@@ -86,7 +86,7 @@ void plDequeBase<T, Construct>::operator=(const plDequeBase<T, Construct>& rhs)
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::operator=(plDequeBase<T, Construct>&& rhs)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   if (m_pAllocator != rhs.m_pAllocator)
     operator=(static_cast<plDequeBase<T, Construct>&>(rhs));
@@ -124,12 +124,6 @@ bool plDequeBase<T, Construct>::operator==(const plDequeBase<T, Construct>& rhs)
   }
 
   return true;
-}
-
-template <typename T, bool Construct>
-bool plDequeBase<T, Construct>::operator!=(const plDequeBase<T, Construct>& rhs) const
-{
-  return !operator==(rhs);
 }
 
 template <typename T, bool Construct>
@@ -194,11 +188,11 @@ void plDequeBase<T, Construct>::Reserve(plUInt32 uiCount)
     const plUInt32 uiSpareChunks = m_uiChunks - uiRequiredChunks;
     const plUInt32 uiSpareChunksStart = uiSpareChunks / 2;
 
-    PLASMA_ASSERT_DEBUG(uiSpareChunksStart > 0, "Implementation error.");
+    PL_ASSERT_DEBUG(uiSpareChunksStart > 0, "Implementation error.");
 
     // always leave one spare chunk at the front, to ensure that one can prepend elements
 
-    PLASMA_ASSERT_DEBUG(uiSpareChunksStart != uiCurFirstChunk, "No rearrangement possible.");
+    PL_ASSERT_DEBUG(uiSpareChunksStart != uiCurFirstChunk, "No rearrangement possible.");
 
     // if the new first active chunk is to the left
     if (uiSpareChunksStart < uiCurFirstChunk)
@@ -206,14 +200,14 @@ void plDequeBase<T, Construct>::Reserve(plUInt32 uiCount)
     else
       MoveIndexChunksRight(uiSpareChunksStart - uiCurFirstChunk);
 
-    PLASMA_ASSERT_DEBUG(m_uiFirstElement > 0, "Did not achieve the desired effect.");
-    PLASMA_ASSERT_DEBUG(GetCurMaxCount() >= uiCount, "Did not achieve the desired effect ({0} >= {1}).", GetCurMaxCount(), uiCount);
+    PL_ASSERT_DEBUG(m_uiFirstElement > 0, "Did not achieve the desired effect.");
+    PL_ASSERT_DEBUG(GetCurMaxCount() >= uiCount, "Did not achieve the desired effect ({0} >= {1}).", GetCurMaxCount(), uiCount);
   }
   else
   {
     const plUInt32 uiReallocSize = 16 + uiRequiredChunks + 16;
 
-    T** pNewChunksArray = PLASMA_NEW_RAW_BUFFER(m_pAllocator, T*, uiReallocSize);
+    T** pNewChunksArray = PL_NEW_RAW_BUFFER(m_pAllocator, T*, uiReallocSize);
     plMemoryUtils::ZeroFill(pNewChunksArray, uiReallocSize);
 
     const plUInt32 uiFirstUsedChunk = m_uiFirstElement / CHUNK_SIZE(T);
@@ -239,10 +233,10 @@ void plDequeBase<T, Construct>::Reserve(plUInt32 uiCount)
 
     m_uiFirstElement += 16 * CHUNK_SIZE(T);
 
-    PLASMA_ASSERT_DEBUG(m_uiFirstElement == (16 * CHUNK_SIZE(T)) + (m_uiFirstElement % CHUNK_SIZE(T)), "");
+    PL_ASSERT_DEBUG(m_uiFirstElement == (16 * CHUNK_SIZE(T)) + (m_uiFirstElement % CHUNK_SIZE(T)), "");
 
 
-    PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
+    PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
     m_pChunks = pNewChunksArray;
     m_uiChunks = uiReallocSize;
   }
@@ -292,7 +286,7 @@ void plDequeBase<T, Construct>::CompactIndexArray(plUInt32 uiMinChunksToKeep)
   if (uiChunksToKeep + 4 >= m_uiChunks / 2)
     return;
 
-  T** pNewChunkArray = PLASMA_NEW_RAW_BUFFER(m_pAllocator, T*, uiChunksToKeep);
+  T** pNewChunkArray = PL_NEW_RAW_BUFFER(m_pAllocator, T*, uiChunksToKeep);
   plMemoryUtils::ZeroFill<T*>(pNewChunkArray, uiChunksToKeep);
 
   const plUInt32 uiFirstChunk = GetFirstUsedChunk();
@@ -315,7 +309,7 @@ void plDequeBase<T, Construct>::CompactIndexArray(plUInt32 uiMinChunksToKeep)
     {
       if (m_pChunks[i])
       {
-        PLASMA_ASSERT_DEBUG(iPos < 16 || ((iPos >= 16 + uiRequiredChunks) && (iPos < uiChunksToKeep)), "Implementation error.");
+        PL_ASSERT_DEBUG(iPos < 16 || ((iPos >= 16 + uiRequiredChunks) && (iPos < uiChunksToKeep)), "Implementation error.");
 
         pNewChunkArray[iPos] = m_pChunks[i];
         m_pChunks[i] = nullptr;
@@ -330,7 +324,7 @@ void plDequeBase<T, Construct>::CompactIndexArray(plUInt32 uiMinChunksToKeep)
     {
       if (m_pChunks[i])
       {
-        PLASMA_ASSERT_DEBUG(iPos < 16 || ((iPos >= 16 + uiRequiredChunks) && (iPos < uiChunksToKeep)), "Implementation error.");
+        PL_ASSERT_DEBUG(iPos < 16 || ((iPos >= 16 + uiRequiredChunks) && (iPos < uiChunksToKeep)), "Implementation error.");
 
         pNewChunkArray[iPos] = m_pChunks[i];
         m_pChunks[i] = nullptr;
@@ -342,7 +336,7 @@ void plDequeBase<T, Construct>::CompactIndexArray(plUInt32 uiMinChunksToKeep)
     }
   }
 
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
   m_pChunks = pNewChunkArray;
   m_uiChunks = uiChunksToKeep;
   m_uiFirstElement = (16 * CHUNK_SIZE(T)) + (m_uiFirstElement % CHUNK_SIZE(T));
@@ -365,7 +359,7 @@ void plDequeBase<T, Construct>::SetCount(plUInt32 uiCount)
     {
       // default construct the new elements
       for (plUInt32 i = uiOldCount; i < uiNewCount; ++i)
-        plMemoryUtils::DefaultConstruct(&ElementAt(i), 1);
+        plMemoryUtils::Construct<ConstructAll>(&ElementAt(i), 1);
     }
     else
     {
@@ -437,7 +431,7 @@ void plDequeBase<T, Construct>::EnsureCount(plUInt32 uiCount)
 template <typename T, bool Construct>
 inline plUInt32 plDequeBase<T, Construct>::GetContiguousRange(plUInt32 uiIndex) const
 {
-  PLASMA_ASSERT_DEV(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
 
   const plUInt32 uiChunkSize = CHUNK_SIZE(T);
 
@@ -452,7 +446,7 @@ inline plUInt32 plDequeBase<T, Construct>::GetContiguousRange(plUInt32 uiIndex) 
 template <typename T, bool Construct>
 inline T& plDequeBase<T, Construct>::operator[](plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
 
   const plUInt32 uiRealIndex = m_uiFirstElement + uiIndex;
 
@@ -465,7 +459,7 @@ inline T& plDequeBase<T, Construct>::operator[](plUInt32 uiIndex)
 template <typename T, bool Construct>
 inline const T& plDequeBase<T, Construct>::operator[](plUInt32 uiIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "The deque has {0} elements. Cannot access element {1}.", m_uiCount, uiIndex);
 
   const plUInt32 uiRealIndex = m_uiFirstElement + uiIndex;
 
@@ -484,7 +478,9 @@ inline T& plDequeBase<T, Construct>::ExpandAndGetRef()
   T* pElement = &ElementAt(m_uiCount - 1);
 
   if (Construct)
-    plMemoryUtils::DefaultConstruct(pElement, 1);
+  {
+    plMemoryUtils::Construct<ConstructAll>(pElement, 1);
+  }
 
   return *pElement;
 }
@@ -498,13 +494,15 @@ inline void plDequeBase<T, Construct>::PushBack()
   T* pElement = &ElementAt(m_uiCount - 1);
 
   if (Construct)
-    plMemoryUtils::DefaultConstruct(pElement, 1);
+  {
+    plMemoryUtils::Construct<ConstructAll>(pElement, 1);
+  }
 }
 
 template <typename T, bool Construct>
 inline void plDequeBase<T, Construct>::PushBack(const T& element)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   RESERVE(m_uiCount + 1);
   ++m_uiCount;
@@ -515,7 +513,7 @@ inline void plDequeBase<T, Construct>::PushBack(const T& element)
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::PushBack(T&& element)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   RESERVE(m_uiCount + 1);
   ++m_uiCount;
@@ -526,7 +524,7 @@ void plDequeBase<T, Construct>::PushBack(T&& element)
 template <typename T, bool Construct>
 inline void plDequeBase<T, Construct>::PopBack(plUInt32 uiElements)
 {
-  PLASMA_ASSERT_DEV(uiElements <= GetCount(), "Cannot remove {0} elements, the deque only contains {1} elements.", uiElements, GetCount());
+  PL_ASSERT_DEV(uiElements <= GetCount(), "Cannot remove {0} elements, the deque only contains {1} elements.", uiElements, GetCount());
 
   for (plUInt32 i = 0; i < uiElements; ++i)
   {
@@ -543,7 +541,7 @@ inline void plDequeBase<T, Construct>::PopBack(plUInt32 uiElements)
 template <typename T, bool Construct>
 inline void plDequeBase<T, Construct>::PushFront(const T& element)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   RESERVE(m_uiCount + 1);
   ++m_uiCount;
@@ -555,7 +553,7 @@ inline void plDequeBase<T, Construct>::PushFront(const T& element)
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::PushFront(T&& element)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   RESERVE(m_uiCount + 1);
   ++m_uiCount;
@@ -574,18 +572,22 @@ inline void plDequeBase<T, Construct>::PushFront()
   T* pElement = &ElementAt(0);
 
   if (Construct)
-    plMemoryUtils::Construct(pElement, 1);
+  {
+    plMemoryUtils::Construct<SkipTrivialTypes>(pElement, 1);
+  }
 }
 
 template <typename T, bool Construct>
 inline void plDequeBase<T, Construct>::PopFront(plUInt32 uiElements)
 {
-  PLASMA_ASSERT_DEV(uiElements <= GetCount(), "Cannot remove {0} elements, the deque only contains {1} elements.", uiElements, GetCount());
+  PL_ASSERT_DEV(uiElements <= GetCount(), "Cannot remove {0} elements, the deque only contains {1} elements.", uiElements, GetCount());
 
   for (plUInt32 i = 0; i < uiElements; ++i)
   {
     if (Construct)
+    {
       plMemoryUtils::Destruct(&operator[](0), 1);
+    }
 
     --m_uiCount;
     ++m_uiFirstElement;
@@ -596,43 +598,43 @@ inline void plDequeBase<T, Construct>::PopFront(plUInt32 uiElements)
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE bool plDequeBase<T, Construct>::IsEmpty() const
+PL_ALWAYS_INLINE bool plDequeBase<T, Construct>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE const T& plDequeBase<T, Construct>::PeekFront() const
+PL_ALWAYS_INLINE const T& plDequeBase<T, Construct>::PeekFront() const
 {
   return operator[](0);
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE T& plDequeBase<T, Construct>::PeekFront()
+PL_ALWAYS_INLINE T& plDequeBase<T, Construct>::PeekFront()
 {
   return operator[](0);
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE const T& plDequeBase<T, Construct>::PeekBack() const
+PL_ALWAYS_INLINE const T& plDequeBase<T, Construct>::PeekBack() const
 {
   return operator[](m_uiCount - 1);
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE T& plDequeBase<T, Construct>::PeekBack()
+PL_ALWAYS_INLINE T& plDequeBase<T, Construct>::PeekBack()
 {
   return operator[](m_uiCount - 1);
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE bool plDequeBase<T, Construct>::Contains(const T& value) const
+PL_ALWAYS_INLINE bool plDequeBase<T, Construct>::Contains(const T& value) const
 {
   return IndexOf(value) != plInvalidIndex;
 }
@@ -663,9 +665,9 @@ plUInt32 plDequeBase<T, Construct>::LastIndexOf(const T& value, plUInt32 uiStart
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::RemoveAtAndSwap(plUInt32 uiIndex)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
-  PLASMA_ASSERT_DEV(uiIndex < m_uiCount, "Cannot remove element {0}, the deque only contains {1} elements.", uiIndex, m_uiCount);
+  PL_ASSERT_DEV(uiIndex < m_uiCount, "Cannot remove element {0}, the deque only contains {1} elements.", uiIndex, m_uiCount);
 
   if (uiIndex + 1 < m_uiCount) // do not copy over the same element, if uiIndex is actually the last element
     operator[](uiIndex) = PeekBack();
@@ -674,7 +676,7 @@ void plDequeBase<T, Construct>::RemoveAtAndSwap(plUInt32 uiIndex)
 }
 
 template <typename T, bool Construct>
-PLASMA_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksLeft(plUInt32 uiChunkDiff)
+PL_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksLeft(plUInt32 uiChunkDiff)
 {
   const plUInt32 uiCurFirstChunk = GetFirstUsedChunk();
   const plUInt32 uiRemainingChunks = m_uiChunks - uiCurFirstChunk;
@@ -685,14 +687,14 @@ PLASMA_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksLeft(plUInt32
     plMath::Swap(m_pChunks[uiNewFirstChunk + front], m_pChunks[front + uiCurFirstChunk]);
 
   // just ensures that the following subtraction is possible
-  PLASMA_ASSERT_DEBUG(m_uiFirstElement > uiChunkDiff * CHUNK_SIZE(T), "");
+  PL_ASSERT_DEBUG(m_uiFirstElement > uiChunkDiff * CHUNK_SIZE(T), "");
 
   // adjust which element is the first by how much the index array has been moved
   m_uiFirstElement -= uiChunkDiff * CHUNK_SIZE(T);
 }
 
 template <typename T, bool Construct>
-PLASMA_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksRight(plUInt32 uiChunkDiff)
+PL_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksRight(plUInt32 uiChunkDiff)
 {
   const plUInt32 uiCurFirstChunk = GetFirstUsedChunk();
   const plUInt32 uiLastChunk = (m_uiCount == 0) ? (m_uiFirstElement / CHUNK_SIZE(T)) : ((m_uiFirstElement + m_uiCount - 1) / CHUNK_SIZE(T));
@@ -707,13 +709,13 @@ PLASMA_FORCE_INLINE void plDequeBase<T, Construct>::MoveIndexChunksRight(plUInt3
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetFirstUsedChunk() const
+PL_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetFirstUsedChunk() const
 {
   return m_uiFirstElement / CHUNK_SIZE(T);
 }
 
 template <typename T, bool Construct>
-PLASMA_FORCE_INLINE plUInt32 plDequeBase<T, Construct>::GetLastUsedChunk(plUInt32 uiAtSize) const
+PL_FORCE_INLINE plUInt32 plDequeBase<T, Construct>::GetLastUsedChunk(plUInt32 uiAtSize) const
 {
   if (uiAtSize == 0)
     return GetFirstUsedChunk();
@@ -722,13 +724,13 @@ PLASMA_FORCE_INLINE plUInt32 plDequeBase<T, Construct>::GetLastUsedChunk(plUInt3
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetLastUsedChunk() const
+PL_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetLastUsedChunk() const
 {
   return GetLastUsedChunk(m_uiCount);
 }
 
 template <typename T, bool Construct>
-PLASMA_FORCE_INLINE plUInt32 plDequeBase<T, Construct>::GetRequiredChunks(plUInt32 uiAtSize) const
+PL_FORCE_INLINE plUInt32 plDequeBase<T, Construct>::GetRequiredChunks(plUInt32 uiAtSize) const
 {
   if (uiAtSize == 0)
     return 0;
@@ -748,7 +750,7 @@ void plDequeBase<T, Construct>::DeallocateUnusedChunks(plUInt32 uiMaxChunks)
     if (m_pChunks[i])
     {
       --m_uiAllocatedChunks;
-      PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
+      PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
 
       if (m_uiAllocatedChunks <= uiMaxChunks)
         return;
@@ -763,7 +765,7 @@ void plDequeBase<T, Construct>::DeallocateUnusedChunks(plUInt32 uiMaxChunks)
     if (m_pChunks[i])
     {
       --m_uiAllocatedChunks;
-      PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
+      PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
 
       if (m_uiAllocatedChunks <= uiMaxChunks)
         return;
@@ -772,7 +774,7 @@ void plDequeBase<T, Construct>::DeallocateUnusedChunks(plUInt32 uiMaxChunks)
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE void plDequeBase<T, Construct>::ResetReduceSizeCounter()
+PL_ALWAYS_INLINE void plDequeBase<T, Construct>::ResetReduceSizeCounter()
 {
   m_iReduceSizeTimer = CHUNK_SIZE(T) * 8; // every time 8 chunks might be unused -> check whether to reduce the deque's size
 }
@@ -793,7 +795,7 @@ void plDequeBase<T, Construct>::ReduceSize(plInt32 iReduction)
   // if the deque is shrunk and operates in this state long enough, m_uiMaxCount will be reduced more and more
   const plUInt32 uiMaxChunks = (m_uiMaxCount / CHUNK_SIZE(T)) + 3; // +1 because of rounding, +2 spare chunks
 
-  PLASMA_ASSERT_DEBUG(uiMaxChunks >= GetRequiredChunks(m_uiCount), "Implementation Error.");
+  PL_ASSERT_DEBUG(uiMaxChunks >= GetRequiredChunks(m_uiCount), "Implementation Error.");
 
   DeallocateUnusedChunks(uiMaxChunks);
 
@@ -807,13 +809,13 @@ void plDequeBase<T, Construct>::ReduceSize(plInt32 iReduction)
 }
 
 template <typename T, bool Construct>
-PLASMA_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetCurMaxCount() const
+PL_ALWAYS_INLINE plUInt32 plDequeBase<T, Construct>::GetCurMaxCount() const
 {
   return m_uiChunks * CHUNK_SIZE(T) - m_uiFirstElement;
 }
 
 template <typename T, bool Construct>
-PLASMA_FORCE_INLINE T* plDequeBase<T, Construct>::GetUnusedChunk()
+PL_FORCE_INLINE T* plDequeBase<T, Construct>::GetUnusedChunk()
 {
   // first search for an unused, but already allocated, chunk and reuse it, if possible
   const plUInt32 uiCurFirstChunk = GetFirstUsedChunk();
@@ -845,20 +847,20 @@ PLASMA_FORCE_INLINE T* plDequeBase<T, Construct>::GetUnusedChunk()
   // nothing unused found, allocate a new block
   ResetReduceSizeCounter();
   ++m_uiAllocatedChunks;
-  return PLASMA_NEW_RAW_BUFFER(m_pAllocator, T, CHUNK_SIZE(T));
+  return PL_NEW_RAW_BUFFER(m_pAllocator, T, CHUNK_SIZE(T));
 }
 
 template <typename T, bool Construct>
 T& plDequeBase<T, Construct>::ElementAt(plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "");
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "");
 
   const plUInt32 uiRealIndex = m_uiFirstElement + uiIndex;
 
   const plUInt32 uiChunkIndex = uiRealIndex / CHUNK_SIZE(T);
   const plUInt32 uiChunkOffset = uiRealIndex % CHUNK_SIZE(T);
 
-  PLASMA_ASSERT_DEBUG(uiChunkIndex < m_uiChunks, "");
+  PL_ASSERT_DEBUG(uiChunkIndex < m_uiChunks, "");
 
   if (m_pChunks[uiChunkIndex] == nullptr)
     m_pChunks[uiChunkIndex] = GetUnusedChunk();
@@ -877,13 +879,13 @@ void plDequeBase<T, Construct>::DeallocateAll()
     if (m_pChunks[i])
     {
       --m_uiAllocatedChunks;
-      PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
+      PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks[i]);
     }
 
     ++i;
   }
 
-  PLASMA_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
+  PL_DELETE_RAW_BUFFER(m_pAllocator, m_pChunks);
 
   Constructor(m_pAllocator);
 }
@@ -891,9 +893,9 @@ void plDequeBase<T, Construct>::DeallocateAll()
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::RemoveAtAndCopy(plUInt32 uiIndex)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
-  PLASMA_ASSERT_DEV(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex);
 
   for (plUInt32 i = uiIndex + 1; i < m_uiCount; ++i)
   {
@@ -906,7 +908,7 @@ void plDequeBase<T, Construct>::RemoveAtAndCopy(plUInt32 uiIndex)
 template <typename T, bool Construct>
 bool plDequeBase<T, Construct>::RemoveAndCopy(const T& value)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   plUInt32 uiIndex = IndexOf(value);
 
@@ -920,7 +922,7 @@ bool plDequeBase<T, Construct>::RemoveAndCopy(const T& value)
 template <typename T, bool Construct>
 bool plDequeBase<T, Construct>::RemoveAndSwap(const T& value)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   plUInt32 uiIndex = IndexOf(value);
 
@@ -934,10 +936,10 @@ bool plDequeBase<T, Construct>::RemoveAndSwap(const T& value)
 template <typename T, bool Construct>
 void plDequeBase<T, Construct>::Insert(const T& value, plUInt32 uiIndex)
 {
-  PLASMA_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
+  PL_CHECK_AT_COMPILETIME_MSG(Construct, "This function is not supported on Deques that do not construct their data.");
 
   // Index 0 inserts before the first element, Index m_uiCount inserts after the last element.
-  PLASMA_ASSERT_DEV(uiIndex <= m_uiCount, "The deque has {0} elements. Cannot insert an element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex <= m_uiCount, "The deque has {0} elements. Cannot insert an element at index {1}.", m_uiCount, uiIndex);
 
   PushBack();
 
@@ -994,7 +996,7 @@ plDeque<T, A, Construct>::plDeque()
 }
 
 template <typename T, typename A, bool Construct>
-plDeque<T, A, Construct>::plDeque(plAllocatorBase* pAllocator)
+plDeque<T, A, Construct>::plDeque(plAllocator* pAllocator)
   : plDequeBase<T, Construct>(pAllocator)
 {
 }

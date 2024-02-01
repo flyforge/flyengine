@@ -10,14 +10,14 @@ struct plSnapProviderEvent;
 struct plGameObjectEvent;
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plTransformGizmoActions
+class PL_EDITORFRAMEWORK_DLL plTransformGizmoActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping, const char* szPath);
-  static void MapToolbarActions(const char* szMapping, const char* szPath);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hGizmoCategory;
   static plActionDescriptorHandle s_hGizmoMenu;
@@ -32,9 +32,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plGizmoAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plGizmoAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGizmoAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plGizmoAction, plButtonAction);
 
 public:
   plGizmoAction(const plActionContext& context, const char* szName, const plRTTI* pGizmoType);
@@ -51,7 +51,7 @@ protected:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plToggleWorldSpaceGizmo : public plGizmoAction
+class PL_EDITORFRAMEWORK_DLL plToggleWorldSpaceGizmo : public plGizmoAction
 {
 public:
   plToggleWorldSpaceGizmo(const plActionContext& context, const char* szName, const plRTTI* pGizmoType);
@@ -59,9 +59,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plTransformGizmoAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plTransformGizmoAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTransformGizmoAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plTransformGizmoAction, plButtonAction);
 
 public:
   enum class ActionType
@@ -85,15 +85,15 @@ private:
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plTranslateGizmoAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plTranslateGizmoAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTranslateGizmoAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plTranslateGizmoAction, plButtonAction);
 
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapActions(plStringView sMapping);
 
 private:
   static plActionDescriptorHandle s_hSnappingValueMenu;

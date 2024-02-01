@@ -5,14 +5,14 @@
 #include <GuiFoundation/GuiFoundationDLL.h>
 
 /////
-class PLASMA_EDITORPLUGINSCENE_DLL plSceneGizmoActions
+class PL_EDITORPLUGINSCENE_DLL plSceneGizmoActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping, const char* szPath);
-  static void MapToolbarActions(const char* szMapping, const char* szPath);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hGreyBoxingGizmo;
 };

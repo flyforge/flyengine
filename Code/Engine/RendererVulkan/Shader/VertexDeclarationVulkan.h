@@ -10,8 +10,8 @@
 class plGALVertexDeclarationVulkan : public plGALVertexDeclaration
 {
 public:
-  PLASMA_ALWAYS_INLINE plArrayPtr<const vk::VertexInputAttributeDescription> GetAttributes() const;
-  PLASMA_ALWAYS_INLINE plArrayPtr<const vk::VertexInputBindingDescription> GetBindings() const;
+  PL_ALWAYS_INLINE plArrayPtr<const vk::VertexInputAttributeDescription> GetAttributes() const;
+  PL_ALWAYS_INLINE plArrayPtr<const vk::VertexInputBindingDescription> GetBindings() const;
 
 protected:
   friend class plGALDeviceVulkan;
@@ -25,8 +25,8 @@ protected:
 
   virtual ~plGALVertexDeclarationVulkan();
 
-  plHybridArray<vk::VertexInputAttributeDescription, PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT> m_attributes;
-  plHybridArray<vk::VertexInputBindingDescription, PLASMA_GAL_MAX_VERTEX_BUFFER_COUNT> m_bindings;
+  plHybridArray<vk::VertexInputAttributeDescription, PL_GAL_MAX_VERTEX_BUFFER_COUNT> m_attributes;
+  plHybridArray<vk::VertexInputBindingDescription, PL_GAL_MAX_VERTEX_BUFFER_COUNT> m_bindings;
 };
 
 #include <RendererVulkan/Shader/Implementation/VertexDeclarationVulkan_inl.h>

@@ -10,15 +10,15 @@ class plQtLogModel;
 class plQtSearchWidget;
 
 /// \brief The application wide panel that shows the engine log output and the editor log output
-class PLASMA_GUIFOUNDATION_DLL plQtLogWidget : public QWidget, public Ui_LogWidget
+class PL_GUIFOUNDATION_DLL plQtLogWidget : public QWidget, public Ui_LogWidget
 {
   Q_OBJECT
 
 public:
-  plQtLogWidget(QWidget* parent);
+  plQtLogWidget(QWidget* pParent);
   ~plQtLogWidget();
 
-  void ShowControls(bool show);
+  void ShowControls(bool bShow);
 
   plQtLogModel* GetLog();
   plQtSearchWidget* GetSearchWidget();

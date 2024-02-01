@@ -3,7 +3,7 @@
 #include <Texture/Image/ImageFormat.h>
 
 /// \brief Helper class containing methods to convert between plImageFormat::Enum and platform-specific image formats.
-class PLASMA_TEXTURE_DLL plImageFormatMappings
+class PL_TEXTURE_DLL plImageFormatMappings
 {
 public:
   /// \brief Maps an plImageFormat::Enum to an equivalent Direct3D DXGI_FORMAT.

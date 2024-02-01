@@ -9,13 +9,13 @@
 #include <Foundation/Strings/PathUtils.h>
 #include <ToolsFoundation/Command/TreeCommands.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentManager, 1, plRTTIDefaultAllocator<plSceneDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneDocumentManager, 1, plRTTIDefaultAllocator<plSceneDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 plSceneDocumentManager::plSceneDocumentManager()
 {
-  // Document type descriptor for a standard PLASMA scene
+  // Document type descriptor for a standard PL scene
   {
     auto& docTypeDesc = m_DocTypeDescs.ExpandAndGetRef();
     docTypeDesc.m_sDocumentTypeName = "Scene";
@@ -64,33 +64,33 @@ plSceneDocumentManager::plSceneDocumentManager()
   }
 }
 
-void plSceneDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plSceneDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  if (plStringUtils::IsEqual(szDocumentTypeName, "Scene"))
+  if (sDocumentTypeName.IsEqual("Scene"))
   {
-    out_pDocument = new plScene2Document(szPath);
+    out_pDocument = new plScene2Document(sPath);
 
     if (bCreateNewDocument)
     {
       SetupDefaultScene(out_pDocument);
     }
   }
-  else if (plStringUtils::IsEqual(szDocumentTypeName, "Prefab"))
+  else if (sDocumentTypeName.IsEqual("Prefab"))
   {
-    out_pDocument = new plSceneDocument(szPath, plSceneDocument::DocumentType::Prefab);
+    out_pDocument = new plSceneDocument(sPath, plSceneDocument::DocumentType::Prefab);
   }
-  else if (plStringUtils::IsEqual(szDocumentTypeName, "Layer"))
+  else if (sDocumentTypeName.IsEqual("Layer"))
   {
     if (pOpenContext == nullptr)
     {
       // Opened individually
-      out_pDocument = new plSceneDocument(szPath, plSceneDocument::DocumentType::Layer);
+      out_pDocument = new plSceneDocument(sPath, plSceneDocument::DocumentType::Layer);
     }
     else
     {
       // Opened via a parent scene document
       plScene2Document* pDoc = const_cast<plScene2Document*>(plDynamicCast<const plScene2Document*>(pOpenContext->GetDocumentObjectManager()->GetDocument()));
-      out_pDocument = new plLayerDocument(szPath, pDoc);
+      out_pDocument = new plLayerDocument(sPath, pDoc);
     }
   }
 }
@@ -103,9 +103,9 @@ void plSceneDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<co
   }
 }
 
-void plSceneDocumentManager::InternalCloneDocument(const char* szPath, const char* szClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes)
+void plSceneDocumentManager::InternalCloneDocument(plStringView sPath, plStringView sClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes)
 {
-  plAssetDocumentManager::InternalCloneDocument(szPath, szClonePath, documentId, seedGuid, cloneGuid, pHeader, pObjects, pTypes);
+  plAssetDocumentManager::InternalCloneDocument(sPath, sClonePath, documentId, seedGuid, cloneGuid, pHeader, pObjects, pTypes);
 
 
   auto pRoot = pObjects->GetNodeByName("ObjectTree");
@@ -135,12 +135,12 @@ void plSceneDocumentManager::InternalCloneDocument(const char* szPath, const cha
             auto assetInfo = plAssetCurator::GetSingleton()->GetSubAsset(pLayer->m_Layer);
             if (assetInfo.isValid())
             {
-              sLayerPath = assetInfo->m_pAssetInfo->m_sAbsolutePath;
+              sLayerPath = assetInfo->m_pAssetInfo->m_Path;
             }
             else
             {
               plLog::Error("Failed to resolve layer: {}. Cloned Layer will be invalid.");
-              pLayer->m_Layer.SetInvalid();
+              pLayer->m_Layer = plUuid::MakeInvalid();
             }
           }
           if (!sLayerPath.IsEmpty())
@@ -148,7 +148,7 @@ void plSceneDocumentManager::InternalCloneDocument(const char* szPath, const cha
             plUuid newLayerGuid = pLayer->m_Layer;
             newLayerGuid.CombineWithSeed(seedGuid);
 
-            plStringBuilder sLayerClonePath = szClonePath;
+            plStringBuilder sLayerClonePath = sClonePath;
             sLayerClonePath.RemoveFileExtension();
             sLayerClonePath.Append("_data");
             plStringBuilder sCloneFleName = plPathUtils::GetFileNameAndExtension(sLayerPath.GetData());
@@ -159,8 +159,7 @@ void plSceneDocumentManager::InternalCloneDocument(const char* szPath, const cha
           }
         }
       }
-    }
-  });
+    } });
 }
 
 void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
@@ -168,24 +167,20 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
   auto history = pDocument->GetCommandHistory();
   history->StartTransaction("Initial Scene Setup");
 
-  plUuid skyObjectGuid;
-  skyObjectGuid.CreateNewUuid();
-  plUuid lightObjectGuid;
-  lightObjectGuid.CreateNewUuid();
-  plUuid meshObjectGuid;
-  meshObjectGuid.CreateNewUuid();
+  const plUuid skyObjectGuid = plUuid::MakeUuid();
+  const plUuid lightObjectGuid = plUuid::MakeUuid();
+  const plUuid meshObjectGuid = plUuid::MakeUuid();
 
   // Thumbnail Camera
   {
-    plUuid objectGuid;
-    objectGuid.CreateNewUuid();
+    const plUuid objectGuid = plUuid::MakeUuid();
 
     plAddObjectCommand cmd;
     cmd.m_Index = -1;
     cmd.SetType("plGameObject");
     cmd.m_NewObjectGuid = objectGuid;
     cmd.m_sParentProperty = "Children";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     // object name
     {
@@ -193,7 +188,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "Name";
       propCmd.m_NewValue = "Scene Thumbnail Camera";
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     // camera position
@@ -202,7 +197,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "LocalPosition";
       propCmd.m_NewValue = plVec3(0, 0, 0);
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     // camera component
@@ -212,7 +207,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       cmd.SetType("plCameraComponent");
       cmd.m_Parent = objectGuid;
       cmd.m_sParentProperty = "Components";
-      PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
       // camera shortcut
       {
@@ -220,7 +215,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
         propCmd.m_Object = cmd.m_NewObjectGuid;
         propCmd.m_sProperty = "EditorShortcut";
         propCmd.m_NewValue = 1;
-        PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+        PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
       }
 
       // camera usage hint
@@ -229,7 +224,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
         propCmd.m_Object = cmd.m_NewObjectGuid;
         propCmd.m_sProperty = "UsageHint";
         propCmd.m_NewValue = (int)plCameraUsageHint::Thumbnail;
-        PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+        PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
       }
     }
   }
@@ -240,14 +235,14 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plGameObject");
     cmd.m_NewObjectGuid = meshObjectGuid;
     cmd.m_sParentProperty = "Children";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     {
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "LocalPosition";
       propCmd.m_NewValue = plVec3(3, 0, 0);
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 
@@ -257,14 +252,14 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plGameObject");
     cmd.m_NewObjectGuid = skyObjectGuid;
     cmd.m_sParentProperty = "Children";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     {
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "LocalPosition";
       propCmd.m_NewValue = plVec3(0, 0, 1);
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     {
@@ -272,7 +267,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "Tags";
       propCmd.m_Index = 0; // There is only one value in the set, CastShadow.
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     {
@@ -281,7 +276,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       propCmd.m_sProperty = "Tags";
       propCmd.m_Index = 0;
       propCmd.m_NewValue = "SkyLight";
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 
@@ -291,25 +286,24 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plGameObject");
     cmd.m_NewObjectGuid = lightObjectGuid;
     cmd.m_sParentProperty = "Children";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     {
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "LocalPosition";
       propCmd.m_NewValue = plVec3(0, 0, 2);
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     {
-      plQuat qRot;
-      qRot.SetFromEulerAngles(plAngle::Degree(0), plAngle::Degree(55), plAngle::Degree(90));
+      plQuat qRot = plQuat::MakeFromEulerAngles(plAngle::MakeFromDegree(0), plAngle::MakeFromDegree(55), plAngle::MakeFromDegree(90));
 
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "LocalRotation";
       propCmd.m_NewValue = qRot;
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 
@@ -319,14 +313,14 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plSkyBoxComponent");
     cmd.m_Parent = skyObjectGuid;
     cmd.m_sParentProperty = "Components";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     {
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "CubeMap";
       propCmd.m_NewValue = "{ 0b202e08-a64f-465d-b38e-15b81d161822 }";
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
 
     {
@@ -334,7 +328,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "ExposureBias";
       propCmd.m_NewValue = 1.0f;
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 
@@ -344,7 +338,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plSkyLightComponent");
     cmd.m_Parent = lightObjectGuid;
     cmd.m_sParentProperty = "Components";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
   }
 
   {
@@ -353,7 +347,7 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plDirectionalLightComponent");
     cmd.m_Parent = lightObjectGuid;
     cmd.m_sParentProperty = "Components";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
   }
 
   {
@@ -362,14 +356,14 @@ void plSceneDocumentManager::SetupDefaultScene(plDocument* pDocument)
     cmd.SetType("plMeshComponent");
     cmd.m_Parent = meshObjectGuid;
     cmd.m_sParentProperty = "Components";
-    PLASMA_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
+    PL_VERIFY(history->AddCommand(cmd).m_Result.Succeeded(), "AddCommand failed");
 
     {
       plSetObjectPropertyCommand propCmd;
       propCmd.m_Object = cmd.m_NewObjectGuid;
       propCmd.m_sProperty = "Mesh";
       propCmd.m_NewValue = "{ 618ee743-ed04-4fac-bf5f-572939db2f1d }"; // Base/Meshes/Sphere.plMeshAsset
-      PLASMA_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
+      PL_VERIFY(history->AddCommand(propCmd).m_Result.Succeeded(), "AddCommand failed");
     }
   }
 

@@ -10,51 +10,50 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/SwapChain.h>
 
-PLASMA_IMPLEMENT_SINGLETON(PlasmaEditorEngineProcessApp);
+PL_IMPLEMENT_SINGLETON(plEditorEngineProcessApp);
 
-PlasmaEditorEngineProcessApp::PlasmaEditorEngineProcessApp()
+plEditorEngineProcessApp::plEditorEngineProcessApp()
   : m_SingletonRegistrar(this)
 {
 }
 
-PlasmaEditorEngineProcessApp::~PlasmaEditorEngineProcessApp()
+plEditorEngineProcessApp::~plEditorEngineProcessApp()
 {
   DestroyRemoteWindow();
 }
 
-void PlasmaEditorEngineProcessApp::SetRemoteMode()
+void plEditorEngineProcessApp::SetRemoteMode()
 {
-  m_Mode = PlasmaEditorEngineProcessMode::Remote;
+  m_Mode = plEditorEngineProcessMode::Remote;
 
   CreateRemoteWindow();
 }
 
-void PlasmaEditorEngineProcessApp::CreateRemoteWindow()
+void plEditorEngineProcessApp::CreateRemoteWindow()
 {
-  PLASMA_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
+  PL_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
 
   if (m_pActor != nullptr)
     return;
 
-  plUniquePtr<plActor> pActor = PLASMA_DEFAULT_NEW(plActor, "Engine View", this);
+  plUniquePtr<plActor> pActor = PL_DEFAULT_NEW(plActor, "Engine View", this);
   m_pActor = pActor.Borrow();
 
   // create window
   {
-    plUniquePtr<plRemoteProcessWindow> pWindow = PLASMA_DEFAULT_NEW(plRemoteProcessWindow);
+    plUniquePtr<plRemoteProcessWindow> pWindow = PL_DEFAULT_NEW(plRemoteProcessWindow);
 
     plWindowCreationDesc desc;
     desc.m_uiWindowNumber = 0;
-    desc.m_bClipMouseCursor = true;
+    desc.m_bClipMouseCursor = false;
     desc.m_bShowMouseCursor = true;
-    desc.m_RenderResolution = plSizeU32(1024, 768);
     desc.m_Resolution = plSizeU32(1024, 768);
     desc.m_WindowMode = plWindowMode::WindowFixedResolution;
     desc.m_Title = "Engine View";
 
     pWindow->Initialize(desc).IgnoreResult();
 
-    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PLASMA_DEFAULT_NEW(plActorPluginWindowOwner);
+    plUniquePtr<plActorPluginWindowOwner> pWindowPlugin = PL_DEFAULT_NEW(plActorPluginWindowOwner);
     pWindowPlugin->m_pWindow = std::move(pWindow);
 
     m_pActor->AddPlugin(std::move(pWindowPlugin));
@@ -63,7 +62,7 @@ void PlasmaEditorEngineProcessApp::CreateRemoteWindow()
   plActorManager::GetSingleton()->AddActor(std::move(pActor));
 }
 
-void PlasmaEditorEngineProcessApp::DestroyRemoteWindow()
+void plEditorEngineProcessApp::DestroyRemoteWindow()
 {
   if (!m_hRemoteView.IsInvalidated())
   {
@@ -79,33 +78,31 @@ void PlasmaEditorEngineProcessApp::DestroyRemoteWindow()
   m_pActor = nullptr;
 }
 
-plRenderPipelineResourceHandle PlasmaEditorEngineProcessApp::CreateDefaultMainRenderPipeline()
+plRenderPipelineResourceHandle plEditorEngineProcessApp::CreateDefaultMainRenderPipeline()
 {
   // EditorRenderPipeline.plRenderPipelineAsset
   return plResourceManager::LoadResource<plRenderPipelineResource>("{ da463c4d-c984-4910-b0b7-a0b3891d0448 }");
 }
 
-plRenderPipelineResourceHandle PlasmaEditorEngineProcessApp::CreateDefaultDebugRenderPipeline()
+plRenderPipelineResourceHandle plEditorEngineProcessApp::CreateDefaultDebugRenderPipeline()
 {
   // DebugRenderPipeline.plRenderPipelineAsset
   return plResourceManager::LoadResource<plRenderPipelineResource>("{ 0416eb3e-69c0-4640-be5b-77354e0e37d7 }");
 }
 
-plViewHandle PlasmaEditorEngineProcessApp::CreateRemoteWindowAndView(plCamera* pCamera)
+plViewHandle plEditorEngineProcessApp::CreateRemoteWindowAndView(plCamera* pCamera)
 {
-  PLASMA_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
+  PL_ASSERT_DEV(IsRemoteMode(), "Incorrect app mode");
 
   CreateRemoteWindow();
 
   if (m_hRemoteView.IsInvalidated())
   {
-    plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-
     plActorPluginWindowOwner* pWindowPlugin = m_pActor->GetPlugin<plActorPluginWindowOwner>();
 
     // create output target
     {
-      plUniquePtr<plWindowOutputTargetGAL> pOutput = PLASMA_DEFAULT_NEW(plWindowOutputTargetGAL);
+      plUniquePtr<plWindowOutputTargetGAL> pOutput = PL_DEFAULT_NEW(plWindowOutputTargetGAL);
 
       plGALWindowSwapChainCreationDescription desc;
       desc.m_pWindow = pWindowPlugin->m_pWindow.Borrow();

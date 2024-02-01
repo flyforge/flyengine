@@ -7,14 +7,14 @@
 #include <ParticlePlugin/Finalizer/ParticleFinalizer_LastPosition.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_LastPosition, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_LastPosition>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizerFactory_LastPosition, 1, plRTTIDefaultAllocator<plParticleFinalizerFactory_LastPosition>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_LastPosition, 1, plRTTIDefaultAllocator<plParticleFinalizer_LastPosition>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleFinalizer_LastPosition, 1, plRTTIDefaultAllocator<plParticleFinalizer_LastPosition>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleFinalizerFactory_LastPosition::plParticleFinalizerFactory_LastPosition() {}
+plParticleFinalizerFactory_LastPosition::plParticleFinalizerFactory_LastPosition() = default;
 
 const plRTTI* plParticleFinalizerFactory_LastPosition::GetFinalizerType() const
 {
@@ -44,7 +44,7 @@ void plParticleFinalizer_LastPosition::CreateRequiredStreams()
 
 void plParticleFinalizer_LastPosition::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: LastPosition");
+  PL_PROFILE_SCOPE("PFX: LastPosition");
 
   plProcessingStreamIterator<plVec4> itPosition(m_pStreamPosition, uiNumElements, 0);
   plProcessingStreamIterator<plVec3> itLastPosition(m_pStreamLastPosition, uiNumElements, 0);
@@ -60,3 +60,7 @@ void plParticleFinalizer_LastPosition::Process(plUInt64 uiNumElements)
     itLastPosition.Advance();
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Finalizer_ParticleFinalizer_LastPosition);
+

@@ -1,20 +1,20 @@
 
 #include <xcb/xcb.h>
 
-PlasmaEditorProcessViewWindow::~PlasmaEditorProcessViewWindow()
+plEditorProcessViewWindow::~plEditorProcessViewWindow()
 {
   if (m_hWnd.type == plWindowHandle::Type::XCB)
   {
     plGALDevice::GetDefaultDevice()->WaitIdle();
 
-    PLASMA_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
+    PL_ASSERT_DEV(m_iReferenceCount == 0, "The window is still being referenced, probably by a swapchain. Make sure to destroy all swapchains and call plGALDevice::WaitIdle before destroying a window.");
     xcb_disconnect(m_hWnd.xcbWindow.m_pConnection);
     m_hWnd.xcbWindow.m_pConnection = nullptr;
     m_hWnd.type = plWindowHandle::Type::Invalid;
   }
 }
 
-plResult PlasmaEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow, plUInt16 uiWidth, plUInt16 uiHeight)
+plResult plEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow, plUInt16 uiWidth, plUInt16 uiHeight)
 {
   if (m_hWnd.type == plWindowHandle::Type::Invalid)
   {
@@ -31,7 +31,7 @@ plResult PlasmaEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow
       xcb_disconnect(m_hWnd.xcbWindow.m_pConnection);
       m_hWnd.xcbWindow.m_pConnection = nullptr;
       m_hWnd.type = plWindowHandle::Type::Invalid;
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     m_hWnd.xcbWindow.m_Window = parentWindow.xcbWindow.m_Window;
@@ -39,8 +39,8 @@ plResult PlasmaEditorProcessViewWindow::UpdateWindow(plWindowHandle parentWindow
 
   m_uiWidth = uiWidth;
   m_uiHeight = uiHeight;
-  PLASMA_ASSERT_DEV(parentWindow.type == plWindowHandle::Type::XCB && parentWindow.xcbWindow.m_Window != 0, "Invalid handle passed");
-  PLASMA_ASSERT_DEV(m_hWnd.xcbWindow.m_Window == parentWindow.xcbWindow.m_Window, "Remote window handle should never change. Window must be destroyed and recreated.");
+  PL_ASSERT_DEV(parentWindow.type == plWindowHandle::Type::XCB && parentWindow.xcbWindow.m_Window != 0, "Invalid handle passed");
+  PL_ASSERT_DEV(m_hWnd.xcbWindow.m_Window == parentWindow.xcbWindow.m_Window, "Remote window handle should never change. Window must be destroyed and recreated.");
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

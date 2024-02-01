@@ -18,9 +18,9 @@ struct plHybridString;
 using plString = plHybridString<32, plDefaultAllocatorWrapper>;
 
 /// \brief Interface for binary in (read) streams.
-class PLASMA_FOUNDATION_DLL plStreamReader
+class PL_FOUNDATION_DLL plStreamReader
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plStreamReader);
+  PL_DISALLOW_COPY_AND_ASSIGN(plStreamReader);
 
 public:
   /// \brief Constructor
@@ -99,13 +99,13 @@ public:
     return uiBytesSkipped;
   }
 
-  PLASMA_ALWAYS_INLINE plTypeVersion ReadVersion(plTypeVersion expectedMaxVersion);
+  PL_ALWAYS_INLINE plTypeVersion ReadVersion(plTypeVersion expectedMaxVersion);
 };
 
 /// \brief Interface for binary out (write) streams.
-class PLASMA_FOUNDATION_DLL plStreamWriter
+class PL_FOUNDATION_DLL plStreamWriter
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plStreamWriter);
+  PL_DISALLOW_COPY_AND_ASSIGN(plStreamWriter);
 
 public:
   /// \brief Constructor
@@ -122,7 +122,7 @@ public:
   /// content is written
   virtual plResult Flush() // [tested]
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   /// \brief Helper method to write a word value correctly (copes with potentially different endianess)
@@ -138,7 +138,7 @@ public:
   plResult WriteQWordValue(const T* pQWordValue); // [tested]
 
   /// \brief Writes a type version to the stream
-  PLASMA_ALWAYS_INLINE void WriteVersion(plTypeVersion version);
+  PL_ALWAYS_INLINE void WriteVersion(plTypeVersion version);
 
   /// \brief Writes an array of elements to the stream
   template <typename ArrayType, typename ValueType>

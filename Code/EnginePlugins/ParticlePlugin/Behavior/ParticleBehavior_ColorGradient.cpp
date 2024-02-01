@@ -7,21 +7,21 @@
 #include <ParticlePlugin/Effect/ParticleEffectInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_ColorGradient, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_ColorGradient>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_ColorGradient, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_ColorGradient>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
-    PLASMA_MEMBER_PROPERTY("TintColor", m_TintColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ENUM_MEMBER_PROPERTY("ColorGradientMode", plParticleColorGradientMode, m_GradientMode),
-    PLASMA_MEMBER_PROPERTY("GradientMaxSpeed", m_fMaxSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 100.0f)),
+    PL_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
+    PL_MEMBER_PROPERTY("TintColor", m_TintColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ENUM_MEMBER_PROPERTY("ColorGradientMode", plParticleColorGradientMode, m_GradientMode),
+    PL_MEMBER_PROPERTY("GradientMaxSpeed", m_fMaxSpeed)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 100.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_ColorGradient, 1, plRTTIDefaultAllocator<plParticleBehavior_ColorGradient>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_ColorGradient, 1, plRTTIDefaultAllocator<plParticleBehavior_ColorGradient>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 const plRTTI* plParticleBehaviorFactory_ColorGradient::GetBehaviorType() const
@@ -42,37 +42,37 @@ void plParticleBehaviorFactory_ColorGradient::CopyBehaviorProperties(plParticleB
   pBehavior->m_InitColor = plColor::RebeccaPurple;
 }
 
-void plParticleBehaviorFactory_ColorGradient::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_ColorGradient::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = 4;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_hGradient;
+  inout_stream << m_hGradient;
 
   // version 3
-  stream << m_GradientMode;
-  stream << m_fMaxSpeed;
+  inout_stream << m_GradientMode;
+  inout_stream << m_fMaxSpeed;
 
   // Version 4
-  stream << m_TintColor;
+  inout_stream << m_TintColor;
 }
 
-void plParticleBehaviorFactory_ColorGradient::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_ColorGradient::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  stream >> m_hGradient;
+  inout_stream >> m_hGradient;
 
   if (uiVersion >= 3)
   {
-    stream >> m_GradientMode;
-    stream >> m_fMaxSpeed;
+    inout_stream >> m_GradientMode;
+    inout_stream >> m_fMaxSpeed;
   }
 
   if (uiVersion >= 4)
   {
-    stream >> m_TintColor;
+    inout_stream >> m_TintColor;
   }
 }
 
@@ -118,7 +118,7 @@ void plParticleBehavior_ColorGradient::InitializeElements(plUInt64 uiStartIndex,
   if (!m_hGradient.IsValid())
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Color Gradient Init");
+  PL_PROFILE_SCOPE("PFX: Color Gradient Init");
 
   // query the init color from the gradient
   if (m_InitColor == plColor::RebeccaPurple)
@@ -165,7 +165,7 @@ void plParticleBehavior_ColorGradient::Process(plUInt64 uiNumElements)
   if (!m_hGradient.IsValid())
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Color Gradient");
+  PL_PROFILE_SCOPE("PFX: Color Gradient");
 
   plResourceLock<plColorGradientResource> pGradient(m_hGradient, plResourceAcquireMode::BlockTillLoaded);
 
@@ -256,4 +256,4 @@ void plParticleBehavior_ColorGradient::Process(plUInt64 uiNumElements)
 
 
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_ColorGradient);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_ColorGradient);

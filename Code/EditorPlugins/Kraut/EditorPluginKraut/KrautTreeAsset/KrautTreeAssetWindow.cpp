@@ -78,7 +78,7 @@ plQtKrautTreeAssetDocumentWindow::~plQtKrautTreeAssetDocumentWindow()
 void plQtKrautTreeAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)
@@ -101,12 +101,12 @@ void plQtKrautTreeAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /*= 0*/)
 
 void plQtKrautTreeAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtKrautTreeAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plQtKrautTreeAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
   {

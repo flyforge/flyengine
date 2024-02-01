@@ -12,13 +12,13 @@ plOzzArchiveData::~plOzzArchiveData() = default;
 plResult plOzzArchiveData::FetchRegularFile(const char* szFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(szFile));
+  PL_SUCCEED_OR_RETURN(file.Open(szFile));
 
   m_Storage.Clear();
   m_Storage.Reserve(file.GetFileSize());
   m_Storage.ReadAll(file);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plOzzArchiveData::FetchEmbeddedArchive(plStreamReader& inout_stream)
@@ -29,7 +29,7 @@ plResult plOzzArchiveData::FetchEmbeddedArchive(plStreamReader& inout_stream)
   szTag[7] = '\0';
 
   if (!plStringUtils::IsEqual(szTag, "plOzzAr"))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   /*const plTypeVersion version =*/inout_stream.ReadVersion(1);
 
@@ -41,16 +41,16 @@ plResult plOzzArchiveData::FetchEmbeddedArchive(plStreamReader& inout_stream)
   m_Storage.ReadAll(inout_stream, uiArchiveSize);
 
   if (m_Storage.GetStorageSize64() != uiArchiveSize)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plOzzArchiveData::StoreEmbeddedArchive(plStreamWriter& inout_stream) const
 {
   const char szTag[8] = "plOzzAr";
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteBytes(szTag, 8));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteBytes(szTag, 8));
 
   inout_stream.WriteVersion(1);
 
@@ -78,7 +78,7 @@ size_t plOzzStreamReader::Read(void* pBuffer, size_t uiSize)
 
 size_t plOzzStreamReader::Write(const void* pBuffer, size_t uiSize)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return 0;
 }
 
@@ -96,7 +96,7 @@ int plOzzStreamReader::Seek(int iOffset, Origin origin)
       m_Reader.SetReadPosition(iOffset);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return 0;
@@ -124,7 +124,7 @@ bool plOzzStreamWriter::opened() const
 
 size_t plOzzStreamWriter::Read(void* pBuffer, size_t uiSize)
 {
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return 0;
 }
 
@@ -150,7 +150,7 @@ int plOzzStreamWriter::Seek(int iOffset, Origin origin)
       m_Writer.SetWritePosition(iOffset);
       break;
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return 0;
@@ -187,7 +187,7 @@ void plOzzUtils::CopyAnimation(ozz::animation::Animation* pDst, const ozz::anima
   }
 }
 
-PLASMA_RENDERERCORE_DLL void plOzzUtils::CopySkeleton(ozz::animation::Skeleton* pDst, const ozz::animation::Skeleton* pSrc)
+PL_RENDERERCORE_DLL void plOzzUtils::CopySkeleton(ozz::animation::Skeleton* pDst, const ozz::animation::Skeleton* pSrc)
 {
   plOzzArchiveData ozzArchiveData;
 
@@ -209,4 +209,3 @@ PLASMA_RENDERERCORE_DLL void plOzzUtils::CopySkeleton(ozz::animation::Skeleton* 
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_Implementation_OzzUtils);

@@ -51,14 +51,14 @@ struct plStringView;
 /// would otherwise just use uint32 formatting).
 ///
 /// To implement custom formatting see the various free standing 'BuildString' functions.
-class PLASMA_FOUNDATION_DLL plFormatString
+class PL_FOUNDATION_DLL plFormatString
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFormatString); // pass by reference, never pass by value
+  PL_DISALLOW_COPY_AND_ASSIGN(plFormatString); // pass by reference, never pass by value
 
 public:
-  PLASMA_ALWAYS_INLINE plFormatString() = default;
-  PLASMA_ALWAYS_INLINE plFormatString(const char* szString) { m_sString = szString; }
-  PLASMA_ALWAYS_INLINE plFormatString(plStringView sString) { m_sString = sString; }
+  PL_ALWAYS_INLINE plFormatString() = default;
+  PL_ALWAYS_INLINE plFormatString(const char* szString) { m_sString = szString; }
+  PL_ALWAYS_INLINE plFormatString(plStringView sString) { m_sString = sString; }
   plFormatString(const plStringBuilder& s);
   virtual ~plFormatString() = default;
 
@@ -89,7 +89,7 @@ protected:
 #include <Foundation/Strings/Implementation/FormatStringImpl.h>
 
 template <typename... ARGS>
-PLASMA_ALWAYS_INLINE plFormatStringImpl<ARGS...> plFmt(const char* szFormat, ARGS&&... args)
+PL_ALWAYS_INLINE plFormatStringImpl<ARGS...> plFmt(const char* szFormat, ARGS&&... args)
 {
   return plFormatStringImpl<ARGS...>(szFormat, std::forward<ARGS>(args)...);
 }

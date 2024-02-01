@@ -1,0 +1,30 @@
+# Asset Types
+
+ProcGen Graph;ProcGen Graph
+
+# Component Types
+
+plProcPlacementComponent;Procedural Placement
+plProcVertexColorComponent;Procedural Vertex Color
+plProcVolumeSphereComponent;Procedural Volume Sphere
+plProcVolumeBoxComponent;Procedural Volume Box
+plProcVolumeImageComponent;Procedural Volume Image
+
+# Enums
+
+plProcVertexColorChannelMapping;Vertex Color Channel Mapping
+
+plProcVolumeImageMode::ChannelR;Red Channel
+plProcVolumeImageMode::ChannelG;Green Channel
+plProcVolumeImageMode::ChannelB;Blue Channel
+plProcVolumeImageMode::ChannelA;Alpha Channel
+
+# UI
+
+ProcGen.DumpAST;Dump AST
+ProcGen.DumpDisassembly;Dump Disassembly
+
+# Nodes
+
+plProcGen_ApplyVolumes::ImageVolumeMode;Mode
+plProcGen_ApplyVolumes::RefColor;Reference Color

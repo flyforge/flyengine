@@ -7,7 +7,7 @@
 
 class plLUTAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLUTAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plLUTAssetProperties, plReflectedClass);
 
 public:
   static void PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);

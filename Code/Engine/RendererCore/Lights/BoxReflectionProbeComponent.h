@@ -2,7 +2,7 @@
 
 #include <RendererCore/Lights/ReflectionProbeComponentBase.h>
 
-class PLASMA_RENDERERCORE_DLL plBoxReflectionProbeComponentManager final : public plComponentManager<class plBoxReflectionProbeComponent, plBlockStorageType::Compact>
+class PL_RENDERERCORE_DLL plBoxReflectionProbeComponentManager final : public plComponentManager<class plBoxReflectionProbeComponent, plBlockStorageType::Compact>
 {
 public:
   plBoxReflectionProbeComponentManager(plWorld* pWorld);
@@ -11,9 +11,9 @@ public:
 /// \brief Box reflection probe component.
 ///
 /// The generated reflection cube map is projected on a box defined by this component's extents. The influence volume can be smaller than the projection which is defined by a scale and shift parameter. Each side of the influence volume has a separate falloff parameter to smoothly blend the probe into others.
-class PLASMA_RENDERERCORE_DLL plBoxReflectionProbeComponent : public plReflectionProbeComponentBase
+class PL_RENDERERCORE_DLL plBoxReflectionProbeComponent : public plReflectionProbeComponentBase
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plBoxReflectionProbeComponent, plReflectionProbeComponentBase, plBoxReflectionProbeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plBoxReflectionProbeComponent, plReflectionProbeComponentBase, plBoxReflectionProbeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -70,9 +70,9 @@ protected:
 };
 
 /// \brief A special visualizer attribute for box reflection probes
-class PLASMA_RENDERERCORE_DLL plBoxReflectionProbeVisualizerAttribute : public plVisualizerAttribute
+class PL_RENDERERCORE_DLL plBoxReflectionProbeVisualizerAttribute : public plVisualizerAttribute
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBoxReflectionProbeVisualizerAttribute, plVisualizerAttribute);
+  PL_ADD_DYNAMIC_REFLECTION(plBoxReflectionProbeVisualizerAttribute, plVisualizerAttribute);
 
 public:
   plBoxReflectionProbeVisualizerAttribute();

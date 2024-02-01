@@ -8,15 +8,15 @@
 
 class plSceneDocumentManager : public plAssetDocumentManager
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneDocumentManager, plAssetDocumentManager);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneDocumentManager, plAssetDocumentManager);
 
 public:
   plSceneDocumentManager();
 
 private:
-  virtual void InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
+  virtual void InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext) override;
   virtual void InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const override;
-  virtual void InternalCloneDocument(const char* szPath, const char* szClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes) override;
+  virtual void InternalCloneDocument(plStringView sPath, plStringView sClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* pHeader, plAbstractObjectGraph* pObjects, plAbstractObjectGraph* pTypes) override;
 
   virtual bool GeneratesProfileSpecificAssets() const override { return false; }
 

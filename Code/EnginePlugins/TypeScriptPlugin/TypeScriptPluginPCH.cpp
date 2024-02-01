@@ -6,7 +6,7 @@
 #include <TypeScriptPlugin/TypeScriptPluginDLL.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(TypeScript, TypeScriptPlugin)
+PL_BEGIN_SUBSYSTEM_DECLARATION(TypeScript, TypeScriptPlugin)
 
 BEGIN_SUBSYSTEM_DEPENDENCIES
 "Foundation",
@@ -23,5 +23,5 @@ ON_CORESYSTEMS_SHUTDOWN
   plScriptCompendiumResource::CleanupDynamicPluginReferences();
 }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on

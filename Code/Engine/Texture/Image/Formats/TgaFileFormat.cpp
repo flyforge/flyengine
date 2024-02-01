@@ -6,7 +6,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Texture/Image/ImageConversion.h>
 
-
+// PL_STATICLINK_FORCE
 plTgaFileFormat g_TgaFormat;
 
 struct TgaImageDescriptor
@@ -31,7 +31,7 @@ struct TgaHeader
   TgaImageDescriptor m_ImageDescriptor;
 };
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(TgaHeader) == 18);
+PL_CHECK_AT_COMPILETIME(sizeof(TgaHeader) == 18);
 
 
 static inline plColorLinearUB GetPixelColor(const plImageView& image, plUInt32 x, plUInt32 y, const plUInt32 uiHeight)
@@ -59,7 +59,7 @@ static inline plColorLinearUB GetPixelColor(const plImageView& image, plUInt32 x
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return c;
@@ -82,18 +82,18 @@ plResult plTgaFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
   if (format == plImageFormat::UNKNOWN)
   {
     plLog::Error("No conversion from format '{0}' to a format suitable for TGA files known.", plImageFormat::GetName(image.GetImageFormat()));
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Convert if not already in a compatible format
   if (format != image.GetImageFormat())
   {
     plImage convertedImage;
-    if (plImageConversion::Convert(image, convertedImage, format) != PLASMA_SUCCESS)
+    if (plImageConversion::Convert(image, convertedImage, format) != PL_SUCCESS)
     {
       // This should never happen
-      PLASMA_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
-      return PLASMA_FAILURE;
+      PL_ASSERT_DEV(false, "plImageConversion::Convert failed even though the conversion was to the format returned by FindClosestCompatibleFormat.");
+      return PL_FAILURE;
     }
 
     return WriteImage(inout_stream, convertedImage, sFileExtension);
@@ -281,16 +281,16 @@ plResult plTgaFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
 static plResult ReadBytesChecked(plStreamReader& inout_stream, void* pDest, plUInt32 uiNumBytes)
 {
   if (inout_stream.ReadBytes(pDest, uiNumBytes) == uiNumBytes)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 template <typename TYPE>
@@ -301,18 +301,18 @@ static plResult ReadBytesChecked(plStreamReader& inout_stream, TYPE& ref_dest)
 
 static plResult ReadImageHeaderImpl(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension, TgaHeader& ref_tgaHeader)
 {
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageIDLength));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_Ignored1));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_ImageType));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, &ref_tgaHeader.m_Ignored2, 9));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageWidth));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageHeight));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iBitsPerPixel));
-  PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_ImageDescriptor));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageIDLength));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_Ignored1));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_ImageType));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, &ref_tgaHeader.m_Ignored2, 9));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageWidth));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iImageHeight));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_iBitsPerPixel));
+  PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, ref_tgaHeader.m_ImageDescriptor));
 
   // ignore optional data
   if (inout_stream.SkipBytes(ref_tgaHeader.m_iImageIDLength) != ref_tgaHeader.m_iImageIDLength)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plUInt32 uiBytesPerPixel = ref_tgaHeader.m_iBitsPerPixel / 8;
 
@@ -320,7 +320,7 @@ static plResult ReadImageHeaderImpl(plStreamReader& inout_stream, plImageHeader&
   if ((ref_tgaHeader.m_iImageWidth <= 0) || (ref_tgaHeader.m_iImageHeight <= 0) || ((uiBytesPerPixel != 1) && (uiBytesPerPixel != 3) && (uiBytesPerPixel != 4)) || (ref_tgaHeader.m_ImageType != 2 && ref_tgaHeader.m_ImageType != 3 && ref_tgaHeader.m_ImageType != 10 && ref_tgaHeader.m_ImageType != 11))
   {
     plLog::Error("TGA has an invalid header: Width = {0}, Height = {1}, BPP = {2}, ImageType = {3}", ref_tgaHeader.m_iImageWidth, ref_tgaHeader.m_iImageHeight, ref_tgaHeader.m_iBitsPerPixel, ref_tgaHeader.m_ImageType);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Set image data
@@ -340,12 +340,12 @@ static plResult ReadImageHeaderImpl(plStreamReader& inout_stream, plImageHeader&
   ref_header.SetHeight(ref_tgaHeader.m_iImageHeight);
   ref_header.SetDepth(1);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTgaFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plTgaFileFormat::ReadImageHeader");
+  PL_PROFILE_SCOPE("plTgaFileFormat::ReadImageHeader");
 
   TgaHeader tgaHeader;
   return ReadImageHeaderImpl(inout_stream, ref_header, sFileExtension, tgaHeader);
@@ -353,11 +353,11 @@ plResult plTgaFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageH
 
 plResult plTgaFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_image, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plTgaFileFormat::ReadImage");
+  PL_PROFILE_SCOPE("plTgaFileFormat::ReadImage");
 
   plImageHeader imageHeader;
   TgaHeader tgaHeader;
-  PLASMA_SUCCEED_OR_RETURN(ReadImageHeaderImpl(inout_stream, imageHeader, sFileExtension, tgaHeader));
+  PL_SUCCEED_OR_RETURN(ReadImageHeaderImpl(inout_stream, imageHeader, sFileExtension, tgaHeader));
 
   const plUInt32 uiBytesPerPixel = tgaHeader.m_iBitsPerPixel / 8;
 
@@ -430,14 +430,14 @@ plResult plTgaFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     {
       plUInt8 uiChunkHeader = 0;
 
-      PLASMA_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, uiChunkHeader));
+      PL_SUCCEED_OR_RETURN(ReadBytesChecked(inout_stream, uiChunkHeader));
 
       const plInt32 numToRead = (uiChunkHeader & 127) + 1;
 
       if (iCurrentPixel + numToRead > iPixelCount)
       {
         plLog::Error("TGA contents are invalid");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       if (uiChunkHeader < 128)
@@ -497,7 +497,7 @@ plResult plTgaFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
     } while (iCurrentPixel < iPixelCount);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plTgaFileFormat::CanReadFileType(plStringView sExtension) const
@@ -512,4 +512,6 @@ bool plTgaFileFormat::CanWriteFileType(plStringView sExtension) const
 
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Formats_TgaFileFormat);
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Formats_TgaFileFormat);
+

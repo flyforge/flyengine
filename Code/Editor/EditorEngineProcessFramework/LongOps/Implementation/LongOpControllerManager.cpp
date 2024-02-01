@@ -4,7 +4,7 @@
 #include <EditorEngineProcessFramework/LongOps/LongOpControllerManager.h>
 #include <EditorEngineProcessFramework/LongOps/LongOps.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plLongOpControllerManager);
+PL_IMPLEMENT_SINGLETON(plLongOpControllerManager);
 
 plLongOpControllerManager::plLongOpControllerManager()
   : m_SingletonRegistrar(this)
@@ -17,7 +17,7 @@ void plLongOpControllerManager::ProcessCommunicationChannelEventHandler(const pl
 {
   if (auto pMsg = plDynamicCast<const plLongOpProgressMsg*>(e.m_pMessage))
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     if (auto pOpInfo = GetOperation(pMsg->m_OperationGuid))
     {
@@ -31,7 +31,7 @@ void plLongOpControllerManager::ProcessCommunicationChannelEventHandler(const pl
 
   if (auto pMsg = plDynamicCast<const plLongOpResultMsg*>(e.m_pMessage))
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     if (auto pOpInfo = GetOperation(pMsg->m_OperationGuid))
     {
@@ -39,7 +39,7 @@ void plLongOpControllerManager::ProcessCommunicationChannelEventHandler(const pl
       pOpInfo->m_StartOrDuration = plTime::Now() - pOpInfo->m_StartOrDuration;
       pOpInfo->m_fCompletion = 0.0f;
 
-      pOpInfo->m_pProxyOp->Finalize(pMsg->m_bSuccess ? PLASMA_SUCCESS : PLASMA_FAILURE, pMsg->m_ResultData);
+      pOpInfo->m_pProxyOp->Finalize(pMsg->m_bSuccess ? PL_SUCCESS : PL_FAILURE, pMsg->m_ResultData);
 
       // TODO: show success/failure in UI
       BroadcastProgress(*pOpInfo);
@@ -49,7 +49,7 @@ void plLongOpControllerManager::ProcessCommunicationChannelEventHandler(const pl
 
 void plLongOpControllerManager::StartOperation(plUuid opGuid)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   auto pOpInfo = GetOperation(opGuid);
 
@@ -66,7 +66,7 @@ void plLongOpControllerManager::StartOperation(plUuid opGuid)
 
 void plLongOpControllerManager::CancelOperation(plUuid opGuid)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   auto pOpInfo = GetOperation(opGuid);
 
@@ -82,7 +82,7 @@ void plLongOpControllerManager::CancelOperation(plUuid opGuid)
 
 void plLongOpControllerManager::RemoveOperation(plUuid opGuid)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (plUInt32 i = 0; i < m_ProxyOps.GetCount(); ++i)
   {
@@ -114,12 +114,12 @@ void plLongOpControllerManager::RegisterLongOp(const plUuid& documentGuid, const
   }
 
   auto& opInfoPtr = m_ProxyOps.ExpandAndGetRef();
-  opInfoPtr = PLASMA_DEFAULT_NEW(ProxyOpInfo);
+  opInfoPtr = PL_DEFAULT_NEW(ProxyOpInfo);
 
   auto& opInfo = *opInfoPtr;
   opInfo.m_DocumentGuid = documentGuid;
   opInfo.m_ComponentGuid = componentGuid;
-  opInfo.m_OperationGuid.CreateNewUuid();
+  opInfo.m_OperationGuid = plUuid::MakeUuid();
 
   opInfo.m_pProxyOp = pRtti->GetAllocator()->Allocate<plLongOpProxy>();
   opInfo.m_pProxyOp->InitializeRegistered(documentGuid, componentGuid);
@@ -145,13 +145,13 @@ void plLongOpControllerManager::UnregisterLongOp(const plUuid& documentGuid, con
   }
 }
 
-plLongOpControllerManager::ProxyOpInfo* plLongOpControllerManager::GetOperation(const plUuid& guid)
+plLongOpControllerManager::ProxyOpInfo* plLongOpControllerManager::GetOperation(const plUuid& opGuid)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   for (auto& opInfoPtr : m_ProxyOps)
   {
-    if (opInfoPtr->m_OperationGuid == guid)
+    if (opInfoPtr->m_OperationGuid == opGuid)
       return opInfoPtr.Borrow();
   }
 
@@ -161,7 +161,7 @@ plLongOpControllerManager::ProxyOpInfo* plLongOpControllerManager::GetOperation(
 void plLongOpControllerManager::CancelAndRemoveAllOpsForDocument(const plUuid& documentGuid)
 {
   {
-    PLASMA_LOCK(m_Mutex);
+    PL_LOCK(m_Mutex);
 
     for (auto& opInfoPtr : m_ProxyOps)
     {
@@ -177,7 +177,7 @@ void plLongOpControllerManager::CancelAndRemoveAllOpsForDocument(const plUuid& d
     m_pCommunicationChannel->ProcessMessages();
 
     {
-      PLASMA_LOCK(m_Mutex);
+      PL_LOCK(m_Mutex);
 
       for (plUInt32 i0 = m_ProxyOps.GetCount(); i0 > 0; --i0)
       {
@@ -205,14 +205,14 @@ void plLongOpControllerManager::CancelAndRemoveAllOpsForDocument(const plUuid& d
 
     if (bOperationsStillActive)
     {
-      plThreadUtils::Sleep(plTime::Milliseconds(100));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(100));
     }
   }
 }
 
 void plLongOpControllerManager::ReplicateToWorkerProcess(ProxyOpInfo& opInfo)
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
 
   // send the replication message
   {
@@ -244,10 +244,10 @@ void plLongOpControllerManager::BroadcastProgress(ProxyOpInfo& opInfo)
 
 // void plLongOpManager::AddLongOperation(plUniquePtr<plLongOp>&& pOperation, const plUuid& documentGuid)
 //{
-//  PLASMA_LOCK(m_Mutex);
+//  PL_LOCK(m_Mutex);
 //
 //  auto& opInfoPtr = m_Operations.ExpandAndGetRef();
-//  opInfoPtr = PLASMA_DEFAULT_NEW(LongOpInfo);
+//  opInfoPtr = PL_DEFAULT_NEW(LongOpInfo);
 //
 //  auto& opInfo = *opInfoPtr;
 //  opInfo.m_pOperation = std::move(pOperation);

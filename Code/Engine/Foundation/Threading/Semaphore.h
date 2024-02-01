@@ -13,9 +13,9 @@
 /// Semaphores are quite a bit slower than mutexes (10x or so), so don't use them unless you need the added flexibility.
 ///
 /// \sa plMutex, plConditionVariable
-class PLASMA_FOUNDATION_DLL plSemaphore
+class PL_FOUNDATION_DLL plSemaphore
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSemaphore);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSemaphore);
 
 public:
   plSemaphore();
@@ -44,7 +44,7 @@ public:
   /// AcquireToken() and ReturnToken() may be called from different threads.
   void ReturnToken();
 
-  /// \brief Same as AcquireToken() but returns immediately with PLASMA_FAILURE, if currently not tokens are available.
+  /// \brief Same as AcquireToken() but returns immediately with PL_FAILURE, if currently not tokens are available.
   plResult TryAcquireToken();
 
 private:

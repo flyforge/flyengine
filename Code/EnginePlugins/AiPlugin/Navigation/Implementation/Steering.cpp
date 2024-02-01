@@ -17,28 +17,27 @@ void plAiSteering::Calculate(float fTimeDiff, plDebugRendererContext ctxt)
   else if (m_Info.m_fArrivalDistance < fBrakingDistanceRun)
     m_fMaxSpeed = plMath::Min(m_fMaxSpeed, fJogSpeed);
 
-  if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::Degree(80))
+  if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::MakeFromDegree(80))
     m_fMaxSpeed = 0.0f;
-  else if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::Degree(55))
+  else if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::MakeFromDegree(55))
     m_fMaxSpeed = plMath::Min(m_fMaxSpeed, fWalkSpeed);
-  else if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::Degree(30))
+  else if (m_Info.m_AbsRotationTowardsWaypoint > plAngle::MakeFromDegree(30))
     m_fMaxSpeed = plMath::Min(m_fMaxSpeed, fJogSpeed);
 
   plAngle maxRotation = m_Info.m_AbsRotationTowardsWaypoint;
 
   if (m_Info.m_fDistanceToWaypoint <= fBrakingDistanceRun)
   {
-    if (m_Info.m_MaxAbsRotationAfterWaypoint > plAngle::Degree(40))
+    if (m_Info.m_MaxAbsRotationAfterWaypoint > plAngle::MakeFromDegree(40))
       m_fMaxSpeed = plMath::Min(m_fMaxSpeed, fWalkSpeed);
-    else if (m_Info.m_MaxAbsRotationAfterWaypoint > plAngle::Degree(20))
+    else if (m_Info.m_MaxAbsRotationAfterWaypoint > plAngle::MakeFromDegree(20))
       m_fMaxSpeed = plMath::Min(m_fMaxSpeed, fJogSpeed);
 
     maxRotation = plMath::Max(maxRotation, m_Info.m_MaxAbsRotationAfterWaypoint);
   }
 
-  plVec3 vLookDir = m_qRotation * plVec3::UnitXAxis();
+  plVec3 vLookDir = m_qRotation * plVec3::MakeAxisX();
   vLookDir.z = 0;
-  vLookDir.Normalize();
 
   float fCurSpeed = m_vVelocity.GetAsVec2().GetLength();
 
@@ -47,7 +46,7 @@ void plAiSteering::Calculate(float fTimeDiff, plDebugRendererContext ctxt)
   {
     const float fTurnRadius = 1.0f; // plMath::Clamp(m_Info.m_fWaypointCorridorWidth, 0.5f, 5.0f);
     const float fCircumference = 2.0f * plMath::Pi<float>() * fTurnRadius;
-    const float fCircleFraction = maxRotation / plAngle::Degree(360);
+    const float fCircleFraction = maxRotation / plAngle::MakeFromDegree(360);
     const float fTurnDistance = fCircumference * fCircleFraction;
     const float fTurnDuration = fTurnDistance / fCurSpeed;
 
@@ -61,14 +60,13 @@ void plAiSteering::Calculate(float fTimeDiff, plDebugRendererContext ctxt)
   {
     const plVec3 vTargetDir = m_Info.m_vDirectionTowardsWaypoint.GetAsVec3(0);
     plVec3 vRotAxis = vLookDir.CrossRH(vTargetDir);
-    vRotAxis.NormalizeIfNotZero(plVec3::UnitZAxis()).IgnoreResult();
+    vRotAxis.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
     const plAngle toRotate = plMath::Min(vLookDir.GetAngleBetween(vTargetDir), fTimeDiff * turnSpeed);
-    plQuat qRot;
-    qRot.SetFromAxisAndAngle(vRotAxis, toRotate);
+    const plQuat qRot = plQuat::MakeFromAxisAndAngle(vRotAxis, toRotate);
 
     vLookDir = qRot * vLookDir;
 
-    m_qRotation.SetShortestRotation(plVec3::UnitXAxis(), vLookDir);
+    m_qRotation = plQuat::MakeShortestRotation(plVec3::MakeAxisX(), vLookDir);
   }
 
 

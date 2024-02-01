@@ -19,7 +19,7 @@ class plMiniDumpTool : public plApplication
   plStringBuilder m_sDumpFile;
 
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   plMiniDumpTool()
     : plApplication("MiniDumpTool")
@@ -38,10 +38,10 @@ public:
     if (m_uiProcessID == 0)
     {
       plLog::Error("Missing '-PID' argument");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   virtual void AfterCoreSystemsStartup() override
@@ -84,4 +84,4 @@ public:
   }
 };
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plMiniDumpTool);
+PL_CONSOLEAPP_ENTRY_POINT(plMiniDumpTool);

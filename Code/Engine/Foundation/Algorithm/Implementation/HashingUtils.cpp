@@ -11,7 +11,7 @@ plUInt32 plHashingUtils::MurmurHash32(const void* pKey, size_t uiSizeInByte, plU
   // Initialize the hash to a 'random' value
   plUInt32 h = uiSeed ^ (plUInt32)uiSizeInByte;
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_ARM)
+#if PL_ENABLED(PL_PLATFORM_ARCH_ARM)
   // ARM has strict alignment requirements for reading. Special version which takes care of unaligned inputs.
   if (reinterpret_cast<size_t>(pKey) % 4 != 0)
   {
@@ -88,7 +88,7 @@ plUInt64 plHashingUtils::MurmurHash64(const void* pKey, size_t uiSizeInByte, plU
 
   plUInt64 h = uiSeed ^ (uiSizeInByte * m);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_ARCH_ARM)
+#if PL_ENABLED(PL_PLATFORM_ARCH_ARM)
   if (reinterpret_cast<size_t>(pKey) % 8 != 0)
   {
     const void* pData = static_cast<const plUInt8*>(pKey);
@@ -160,7 +160,7 @@ plUInt64 plHashingUtils::MurmurHash64(const void* pKey, size_t uiSizeInByte, plU
 }
 
 // CRC32 lookup table (precomputed)
-static const plUInt32 uiCRC32Table[256] = {0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3, 0x0EDB8832,
+static constexpr plUInt32 uiCRC32Table[256] = {0x00000000, 0x77073096, 0xEE0E612C, 0x990951BA, 0x076DC419, 0x706AF48F, 0xE963A535, 0x9E6495A3, 0x0EDB8832,
   0x79DCB8A4, 0xE0D5E91E, 0x97D2D988, 0x09B64C2B, 0x7EB17CBD, 0xE7B82D07, 0x90BF1D91, 0x1DB71064, 0x6AB020F2, 0xF3B97148, 0x84BE41DE, 0x1ADAD47D,
   0x6DDDE4EB, 0xF4D4B551, 0x83D385C7, 0x136C9856, 0x646BA8C0, 0xFD62F97A, 0x8A65C9EC, 0x14015C4F, 0x63066CD9, 0xFA0F3D63, 0x8D080DF5, 0x3B6E20C8,
   0x4C69105E, 0xD56041E4, 0xA2677172, 0x3C03E4D1, 0x4B04D447, 0xD20D85FD, 0xA50AB56B, 0x35B5A8FA, 0x42B2986C, 0xDBBBC9D6, 0xACBCF940, 0x32D86CE3,
@@ -197,8 +197,13 @@ plUInt32 plHashingUtils::CRC32Hash(const void* pKey, size_t uiSizeInBytes)
   return static_cast<plUInt32>(uiCRC32 ^ 0xFFFFFFFF);
 }
 
+PL_WARNING_PUSH()
+PL_WARNING_DISABLE_CLANG("-Wunused-function")
+
 #define XXH_INLINE_ALL
 #include <Foundation/ThirdParty/xxHash/xxhash.h>
+
+PL_WARNING_POP()
 
 // static
 plUInt32 plHashingUtils::xxHash32(const void* pKey, size_t uiSizeInByte, plUInt32 uiSeed /*= 0*/)
@@ -212,4 +217,4 @@ plUInt64 plHashingUtils::xxHash64(const void* pKey, size_t uiSizeInByte, plUInt6
   return XXH64(pKey, uiSizeInByte, uiSeed);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Algorithm_Implementation_HashingUtils);
+

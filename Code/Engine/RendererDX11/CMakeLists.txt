@@ -10,9 +10,7 @@ pl_create_target(LIBRARY ${PROJECT_NAME})
 
 pl_link_target_dx11(${PROJECT_NAME})
 
-if(MSVC)
-  target_compile_options(${PROJECT_NAME} PRIVATE /W4 /WX)
-endif()
+pl_enable_strict_warnings(${PROJECT_NAME})
 
 target_link_libraries(${PROJECT_NAME}
   PRIVATE
@@ -24,7 +22,7 @@ target_link_libraries(${PROJECT_NAME}
   RendererFoundation
 )
 
-if(PLASMA_3RDPARTY_GLFW_SUPPORT)
+if(PL_3RDPARTY_GLFW_SUPPORT)
 
   target_link_libraries(${PROJECT_NAME} PRIVATE glfw)
 

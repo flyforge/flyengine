@@ -18,7 +18,7 @@ void plLUTAssetActions::RegisterActions() {}
 
 void plLUTAssetActions::UnregisterActions() {}
 
-void plLUTAssetActions::MapActions(const char* szMapping, const char* szPath) {}
+void plLUTAssetActions::MapActions(plStringView sMapping) {}
 
 
 //////////////////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ plQtLUTAssetDocumentWindow::plQtLUTAssetDocumentWindow(plLUTAssetDocument* pDocu
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("LUTAssetDockWidget");
-    pPropertyPanel->setWindowTitle("LUT PROPERTIES");
+    pPropertyPanel->setWindowTitle("LUT Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);

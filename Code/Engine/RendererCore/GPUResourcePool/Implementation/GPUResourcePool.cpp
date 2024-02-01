@@ -7,7 +7,7 @@
 #include <RendererFoundation/Resources/Buffer.h>
 #include <RendererFoundation/Resources/Texture.h>
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 #  include <Foundation/Utilities/Stats.h>
 #endif
 
@@ -17,12 +17,12 @@ plGPUResourcePool::plGPUResourcePool()
 {
   m_pDevice = plGALDevice::GetDefaultDevice();
 
-  m_GALDeviceEventSubscriptionID = m_pDevice->m_Events.AddEventHandler(plMakeDelegate(&plGPUResourcePool::GALDeviceEventHandler, this));
+  m_GALDeviceEventSubscriptionID = m_pDevice->s_Events.AddEventHandler(plMakeDelegate(&plGPUResourcePool::GALDeviceEventHandler, this));
 }
 
 plGPUResourcePool::~plGPUResourcePool()
 {
-  m_pDevice->m_Events.RemoveEventHandler(m_GALDeviceEventSubscriptionID);
+  m_pDevice->s_Events.RemoveEventHandler(m_GALDeviceEventSubscriptionID);
   if (!m_TexturesInUse.IsEmpty())
   {
     plLog::SeriousWarning("Destructing a GPU resource pool of which textures are still in use!");
@@ -34,7 +34,7 @@ plGPUResourcePool::~plGPUResourcePool()
 
 plGALTextureHandle plGPUResourcePool::GetRenderTarget(const plGALTextureCreationDescription& textureDesc)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
   if (!textureDesc.m_bCreateRenderTarget)
   {
@@ -54,7 +54,7 @@ plGALTextureHandle plGPUResourcePool::GetRenderTarget(const plGALTextureCreation
       plGALTextureHandle hTexture = textures.PeekBack().m_hTexture;
       textures.PopBack();
 
-      PLASMA_ASSERT_DEV(m_pDevice->GetTexture(hTexture) != nullptr, "Invalid texture in resource pool");
+      PL_ASSERT_DEV(m_pDevice->GetTexture(hTexture) != nullptr, "Invalid texture in resource pool");
 
       m_TexturesInUse.Insert(hTexture);
 
@@ -104,9 +104,9 @@ plGALTextureHandle plGPUResourcePool::GetRenderTarget(
 
 void plGPUResourcePool::ReturnRenderTarget(plGALTextureHandle hRenderTarget)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 
   // First check if this texture actually came from the pool
   if (!m_TexturesInUse.Contains(hRenderTarget))
@@ -135,7 +135,7 @@ void plGPUResourcePool::ReturnRenderTarget(plGALTextureHandle hRenderTarget)
 
 plGALBufferHandle plGPUResourcePool::GetBuffer(const plGALBufferCreationDescription& bufferDesc)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
   const plUInt32 uiBufferDescHash = bufferDesc.CalculateHash();
 
@@ -149,7 +149,7 @@ plGALBufferHandle plGPUResourcePool::GetBuffer(const plGALBufferCreationDescript
       plGALBufferHandle hBuffer = buffers.PeekBack().m_hBuffer;
       buffers.PopBack();
 
-      PLASMA_ASSERT_DEV(m_pDevice->GetBuffer(hBuffer) != nullptr, "Invalid buffer in resource pool");
+      PL_ASSERT_DEV(m_pDevice->GetBuffer(hBuffer) != nullptr, "Invalid buffer in resource pool");
 
       m_BuffersInUse.Insert(hBuffer);
 
@@ -182,9 +182,9 @@ plGALBufferHandle plGPUResourcePool::GetBuffer(const plGALBufferCreationDescript
 
 void plGPUResourcePool::ReturnBuffer(plGALBufferHandle hBuffer)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 
   // First check if this texture actually came from the pool
   if (!m_BuffersInUse.Contains(hBuffer))
@@ -213,9 +213,9 @@ void plGPUResourcePool::ReturnBuffer(plGALBufferHandle hBuffer)
 
 void plGPUResourcePool::RunGC(plUInt32 uiMinimumAge)
 {
-  PLASMA_LOCK(m_Lock);
+  PL_LOCK(m_Lock);
 
-  PLASMA_PROFILE_SCOPE("RunGC");
+  PL_PROFILE_SCOPE("RunGC");
   plUInt64 uiCurrentFrame = plRenderWorld::GetFrameCounter();
   // Destroy all available textures older than uiMinimumAge frames
   {
@@ -305,7 +305,7 @@ plGPUResourcePool* plGPUResourcePool::GetDefaultInstance()
 
 void plGPUResourcePool::SetDefaultInstance(plGPUResourcePool* pDefaultInstance)
 {
-  PLASMA_DEFAULT_DELETE(s_pDefaultInstance);
+  PL_DEFAULT_DELETE(s_pDefaultInstance);
   s_pDefaultInstance = pDefaultInstance;
 }
 
@@ -321,14 +321,9 @@ void plGPUResourcePool::CheckAndPotentiallyRunGC()
 
 void plGPUResourcePool::UpdateMemoryStats() const
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   float fMegaBytes = float(m_uiCurrentlyAllocatedMemory) / (1024.0f * 1024.0f);
-
-  plStringBuilder sOut;
-  sOut.Format("{0} (Mb)", plArgF(fMegaBytes, 4));
-  plStats::SetStat("GPU Resource Pool/Memory Consumption", sOut.GetData());
-
+  plStats::SetStat("GPU Resource Pool/Memory Consumption (MB)", fMegaBytes);
 #endif
 }
 
@@ -345,4 +340,4 @@ void plGPUResourcePool::GALDeviceEventHandler(const plGALDeviceEvent& e)
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_GPUResourcePool_Implementation_GPUResourcePool);
+

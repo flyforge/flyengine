@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginRmlUi/DragDropHandlers/RmlUiDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiComponentDragDropHandler, 1, plRTTIDefaultAllocator<plRmlUiComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRmlUiComponentDragDropHandler, 1, plRTTIDefaultAllocator<plRmlUiComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plRmlUiComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const

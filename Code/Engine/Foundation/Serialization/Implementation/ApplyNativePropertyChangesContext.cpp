@@ -74,8 +74,7 @@ plUuid plApplyNativePropertyChangesContext::GenerateObjectGuid(const plUuid& par
     }
   }
 
-  return plUuid::CreateUuid();
+  return plUuid::MakeUuid();
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_ApplyNativePropertyChangesContext);

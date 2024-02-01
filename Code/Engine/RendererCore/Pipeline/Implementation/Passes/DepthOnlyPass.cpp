@@ -9,15 +9,15 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDepthOnlyPass, 1, plRTTIDefaultAllocator<plDepthOnlyPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDepthOnlyPass, 1, plRTTIDefaultAllocator<plDepthOnlyPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
+    PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDepthOnlyPass::plDepthOnlyPass(const char* szName)
@@ -25,7 +25,7 @@ plDepthOnlyPass::plDepthOnlyPass(const char* szName)
 {
 }
 
-plDepthOnlyPass::~plDepthOnlyPass() {}
+plDepthOnlyPass::~plDepthOnlyPass() = default;
 
 bool plDepthOnlyPass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
@@ -68,4 +68,4 @@ void plDepthOnlyPass::Execute(const plRenderViewContext& renderViewContext, cons
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_DepthOnlyPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_DepthOnlyPass);

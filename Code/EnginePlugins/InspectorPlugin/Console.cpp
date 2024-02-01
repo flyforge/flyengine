@@ -9,7 +9,7 @@ static void TelemetryMessage(void* pPassThrough)
   plTelemetryMessage Msg;
   plStringBuilder input;
 
-  while (plTelemetry::RetrieveMessage('CMD', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('CMD', Msg) == PL_SUCCESS)
   {
     if (Msg.GetMessageID() == 'EXEC' || Msg.GetMessageID() == 'COMP')
     {

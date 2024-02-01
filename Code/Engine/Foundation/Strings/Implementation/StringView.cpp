@@ -51,7 +51,9 @@ plInt32 plStringView::CompareN_NoCase(plStringView sOther, plUInt32 uiCharsToCom
 const char* plStringView::ComputeCharacterPosition(plUInt32 uiCharacterIndex) const
 {
   const char* pos = GetStartPointer();
-  plUnicodeUtils::MoveToNextUtf8(pos, GetEndPointer(), uiCharacterIndex);
+  if (plUnicodeUtils::MoveToNextUtf8(pos, GetEndPointer(), uiCharacterIndex).Failed())
+    return nullptr;
+
   return pos;
 }
 
@@ -60,7 +62,7 @@ const char* plStringView::FindSubString(plStringView sStringToFind, const char* 
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetStartPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindSubString(szStartSearchAt, sStringToFind.GetStartPointer(), GetEndPointer(), sStringToFind.GetEndPointer());
 }
@@ -70,7 +72,7 @@ const char* plStringView::FindSubString_NoCase(plStringView sStringToFind, const
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetStartPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindSubString_NoCase(szStartSearchAt, sStringToFind.GetStartPointer(), GetEndPointer(), sStringToFind.GetEndPointer());
 }
@@ -80,7 +82,7 @@ const char* plStringView::FindLastSubString(plStringView sStringToFind, const ch
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetEndPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindLastSubString(GetStartPointer(), sStringToFind.GetStartPointer(), szStartSearchAt, GetEndPointer(), sStringToFind.GetEndPointer());
 }
@@ -90,27 +92,27 @@ const char* plStringView::FindLastSubString_NoCase(plStringView sStringToFind, c
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetEndPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindLastSubString_NoCase(GetStartPointer(), sStringToFind.GetStartPointer(), szStartSearchAt, GetEndPointer(), sStringToFind.GetEndPointer());
 }
 
-const char* plStringView::FindWholeWord(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt /*= nullptr*/) const
+const char* plStringView::FindWholeWord(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt /*= nullptr*/) const
 {
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetStartPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindWholeWord(szStartSearchAt, szSearchFor, isDelimiterCB, GetEndPointer());
 }
 
-const char* plStringView::FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PLASMA_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt /*= nullptr*/) const
+const char* plStringView::FindWholeWord_NoCase(const char* szSearchFor, plStringUtils::PL_CHARACTER_FILTER isDelimiterCB, const char* szStartSearchAt /*= nullptr*/) const
 {
   if (szStartSearchAt == nullptr)
     szStartSearchAt = GetStartPointer();
 
-  PLASMA_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
+  PL_ASSERT_DEV((szStartSearchAt >= GetStartPointer()) && (szStartSearchAt <= GetEndPointer()), "The given pointer to start searching at is not inside this strings valid range.");
 
   return plStringUtils::FindWholeWord_NoCase(szStartSearchAt, szSearchFor, isDelimiterCB, GetEndPointer());
 }
@@ -119,13 +121,23 @@ void plStringView::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBac
 {
   while (IsValid() && (uiShrinkCharsFront > 0))
   {
-    plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1);
+    if (plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1).Failed())
+    {
+      *this = {};
+      return;
+    }
+
     --uiShrinkCharsFront;
   }
 
   while (IsValid() && (uiShrinkCharsBack > 0))
   {
-    plUnicodeUtils::MoveToPriorUtf8(m_pEnd, 1);
+    if (plUnicodeUtils::MoveToPriorUtf8(m_pEnd, m_pStart, 1).Failed())
+    {
+      *this = {};
+      return;
+    }
+
     --uiShrinkCharsBack;
   }
 }
@@ -137,11 +149,30 @@ plStringView plStringView::GetShrunk(plUInt32 uiShrinkCharsFront, plUInt32 uiShr
   return tmp;
 }
 
+plStringView plStringView::GetSubString(plUInt32 uiFirstCharacter, plUInt32 uiNumCharacters) const
+{
+  if (!IsValid())
+  {
+    return {};
+  }
+
+  const char* pStart = m_pStart;
+  if (plUnicodeUtils::MoveToNextUtf8(pStart, m_pEnd, uiFirstCharacter).Failed() || pStart == m_pEnd)
+  {
+    return {};
+  }
+
+  const char* pEnd = pStart;
+  plUnicodeUtils::MoveToNextUtf8(pEnd, m_pEnd, uiNumCharacters).IgnoreResult(); // if it fails, it just points to the end
+
+  return plStringView(pStart, pEnd);
+}
+
 void plStringView::ChopAwayFirstCharacterUtf8()
 {
   if (IsValid())
   {
-    plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1);
+    plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1).AssertSuccess();
   }
 }
 
@@ -149,7 +180,7 @@ void plStringView::ChopAwayFirstCharacterAscii()
 {
   if (IsValid())
   {
-    PLASMA_ASSERT_DEBUG(plUnicodeUtils::IsASCII(*m_pStart), "ChopAwayFirstCharacterAscii() was called on a non-ASCII character.");
+    PL_ASSERT_DEBUG(plUnicodeUtils::IsASCII(*m_pStart), "ChopAwayFirstCharacterAscii() was called on a non-ASCII character.");
 
     m_pStart += 1;
   }
@@ -253,4 +284,32 @@ plStringView plStringView::GetRootedPathRootName() const
   return plPathUtils::GetRootedPathRootName(*this);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Strings_Implementation_StringView);
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+plStringView::plStringView(const std::string_view& rhs)
+{
+  if (!rhs.empty())
+  {
+    m_pStart = rhs.data();
+    m_pEnd = rhs.data() + rhs.size();
+  }
+}
+
+plStringView::plStringView(const std::string& rhs)
+{
+  if (!rhs.empty())
+  {
+    m_pStart = rhs.data();
+    m_pEnd = rhs.data() + rhs.size();
+  }
+}
+
+std::string_view plStringView::GetAsStdView() const
+{
+  return std::string_view(GetStartPointer(), static_cast<size_t>(GetElementCount()));
+}
+
+plStringView::operator std::string_view() const
+{
+  return GetAsStdView();
+}
+#endif

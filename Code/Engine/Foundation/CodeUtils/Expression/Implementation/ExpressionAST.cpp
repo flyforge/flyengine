@@ -148,6 +148,8 @@ namespace
     "Clamp",
     "Select",
     "Lerp",
+    "SmoothStep",
+    "SmootherStep",
     "",
 
     "Constant",
@@ -159,7 +161,7 @@ namespace
     "ConstructorCall",
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szNodeTypeNames) == plExpressionAST::NodeType::Count);
+  static_assert(PL_ARRAY_SIZE(s_szNodeTypeNames) == plExpressionAST::NodeType::Count);
 
   static constexpr plUInt16 BuildSignature(plExpression::RegisterType::Enum returnType, plExpression::RegisterType::Enum a, plExpression::RegisterType::Enum b = plExpression::RegisterType::Unknown, plExpression::RegisterType::Enum c = plExpression::RegisterType::Unknown)
   {
@@ -172,14 +174,14 @@ namespace
 
   static constexpr plExpression::RegisterType::Enum GetReturnTypeFromSignature(plUInt16 uiSignature)
   {
-    plUInt32 uiMask = PLASMA_BIT(plExpression::RegisterType::MaxNumBits) - 1;
+    plUInt32 uiMask = PL_BIT(plExpression::RegisterType::MaxNumBits) - 1;
     return static_cast<plExpression::RegisterType::Enum>(uiSignature & uiMask);
   }
 
   static constexpr plExpression::RegisterType::Enum GetArgumentTypeFromSignature(plUInt16 uiSignature, plUInt32 uiArgumentIndex)
   {
     plUInt32 uiShift = plExpression::RegisterType::MaxNumBits * (uiArgumentIndex + 1);
-    plUInt32 uiMask = PLASMA_BIT(plExpression::RegisterType::MaxNumBits) - 1;
+    plUInt32 uiMask = PL_BIT(plExpression::RegisterType::MaxNumBits) - 1;
     return static_cast<plExpression::RegisterType::Enum>((uiSignature >> uiShift) & uiMask);
   }
 
@@ -262,6 +264,8 @@ namespace
     {SIG3(Float, Float, Float, Float), SIG3(Int, Int, Int, Int)},                               // Clamp,
     {SIG3(Float, Bool, Float, Float), SIG3(Int, Bool, Int, Int), SIG3(Bool, Bool, Bool, Bool)}, // Select,
     {SIG3(Float, Float, Float, Float)},                                                         // Lerp,
+    {SIG3(Float, Float, Float, Float)},                                                         // SmoothStep,
+    {SIG3(Float, Float, Float, Float)},                                                         // SmootherStep,
     {},                                                                                         // LastTernary,
 
     {}, // Constant,
@@ -273,7 +277,7 @@ namespace
     {}, // ConstructorCall,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_NodeTypeOverloads) == plExpressionAST::NodeType::Count);
+  static_assert(PL_ARRAY_SIZE(s_NodeTypeOverloads) == plExpressionAST::NodeType::Count);
 } // namespace
 
 #undef SIG1
@@ -283,7 +287,7 @@ namespace
 // static
 const char* plExpressionAST::NodeType::GetName(Enum nodeType)
 {
-  PLASMA_ASSERT_DEBUG(nodeType >= 0 && nodeType < PLASMA_ARRAY_SIZE(s_szNodeTypeNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(nodeType >= 0 && nodeType < PL_ARRAY_SIZE(s_szNodeTypeNames), "Out of bounds access");
   return s_szNodeTypeNames[nodeType];
 }
 
@@ -312,7 +316,7 @@ namespace
     plVariantType::Vector3, // Float3,
     plVariantType::Vector4, // Float4,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_DataTypeVariantTypes) == (size_t)plExpressionAST::DataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_DataTypeVariantTypes) == (size_t)plExpressionAST::DataType::Count);
 
   static plExpressionAST::DataType::Enum s_DataTypeFromStreamType[] = {
     plExpressionAST::DataType::Float,  // Half,
@@ -340,7 +344,7 @@ namespace
     plExpressionAST::DataType::Int3, // Int3,
     plExpressionAST::DataType::Int4, // Int4,
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_DataTypeFromStreamType) == (size_t)plProcessingStream::DataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_DataTypeFromStreamType) == (size_t)plProcessingStream::DataType::Count);
 
   static_assert(plExpressionAST::DataType::Float >> 2 == plExpression::RegisterType::Float);
   static_assert(plExpressionAST::DataType::Int >> 2 == plExpression::RegisterType::Int);
@@ -369,28 +373,28 @@ namespace
     "Float4", // Float4,
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szDataTypeNames) == plExpressionAST::DataType::Count);
+  static_assert(PL_ARRAY_SIZE(s_szDataTypeNames) == plExpressionAST::DataType::Count);
 } // namespace
 
 
 // static
 plVariantType::Enum plExpressionAST::DataType::GetVariantType(Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_DataTypeVariantTypes), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_DataTypeVariantTypes), "Out of bounds access");
   return s_DataTypeVariantTypes[dataType];
 }
 
 // static
 plExpressionAST::DataType::Enum plExpressionAST::DataType::FromStreamType(plProcessingStream::DataType dataType)
 {
-  PLASMA_ASSERT_DEBUG(static_cast<plUInt32>(dataType) >= 0 && static_cast<plUInt32>(dataType) < PLASMA_ARRAY_SIZE(s_DataTypeFromStreamType), "Out of bounds access");
+  PL_ASSERT_DEBUG(static_cast<plUInt32>(dataType) >= 0 && static_cast<plUInt32>(dataType) < PL_ARRAY_SIZE(s_DataTypeFromStreamType), "Out of bounds access");
   return s_DataTypeFromStreamType[static_cast<plUInt32>(dataType)];
 }
 
 // static
 const char* plExpressionAST::DataType::GetName(Enum dataType)
 {
-  PLASMA_ASSERT_DEBUG(dataType >= 0 && dataType < PLASMA_ARRAY_SIZE(s_szDataTypeNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(dataType >= 0 && dataType < PL_ARRAY_SIZE(s_szDataTypeNames), "Out of bounds access");
   return s_szDataTypeNames[dataType];
 }
 
@@ -412,14 +416,14 @@ namespace
     "a",
   };
 
-  static_assert(PLASMA_ARRAY_SIZE(s_szVectorComponentNames) == plExpressionAST::VectorComponent::Count);
-  static_assert(PLASMA_ARRAY_SIZE(s_szVectorComponentAltNames) == plExpressionAST::VectorComponent::Count);
+  static_assert(PL_ARRAY_SIZE(s_szVectorComponentNames) == plExpressionAST::VectorComponent::Count);
+  static_assert(PL_ARRAY_SIZE(s_szVectorComponentAltNames) == plExpressionAST::VectorComponent::Count);
 } // namespace
 
 // static
 const char* plExpressionAST::VectorComponent::GetName(Enum vectorComponent)
 {
-  PLASMA_ASSERT_DEBUG(vectorComponent >= 0 && vectorComponent < PLASMA_ARRAY_SIZE(s_szVectorComponentNames), "Out of bounds access");
+  PL_ASSERT_DEBUG(vectorComponent >= 0 && vectorComponent < PL_ARRAY_SIZE(s_szVectorComponentNames), "Out of bounds access");
   return s_szVectorComponentNames[vectorComponent];
 }
 
@@ -442,7 +446,7 @@ plExpressionAST::plExpressionAST()
   : m_Allocator("Expression AST", plFoundation::GetAlignedAllocator())
 {
   static_assert(sizeof(Node) == 8);
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
+#if PL_ENABLED(PL_PLATFORM_64BIT)
   static_assert(sizeof(UnaryOperator) == 16);
   static_assert(sizeof(BinaryOperator) == 24);
   static_assert(sizeof(TernaryOperator) == 32);
@@ -459,9 +463,9 @@ plExpressionAST::~plExpressionAST() = default;
 
 plExpressionAST::UnaryOperator* plExpressionAST::CreateUnaryOperator(NodeType::Enum type, Node* pOperand, DataType::Enum returnType /*= DataType::Unknown*/)
 {
-  PLASMA_ASSERT_DEBUG(NodeType::IsUnary(type), "Type '{}' is not an unary operator", NodeType::GetName(type));
+  PL_ASSERT_DEBUG(NodeType::IsUnary(type), "Type '{}' is not an unary operator", NodeType::GetName(type));
 
-  auto pUnaryOperator = PLASMA_NEW(&m_Allocator, UnaryOperator);
+  auto pUnaryOperator = PL_NEW(&m_Allocator, UnaryOperator);
   pUnaryOperator->m_Type = type;
   pUnaryOperator->m_ReturnType = returnType;
   pUnaryOperator->m_pOperand = pOperand;
@@ -473,9 +477,9 @@ plExpressionAST::UnaryOperator* plExpressionAST::CreateUnaryOperator(NodeType::E
 
 plExpressionAST::BinaryOperator* plExpressionAST::CreateBinaryOperator(NodeType::Enum type, Node* pLeftOperand, Node* pRightOperand)
 {
-  PLASMA_ASSERT_DEBUG(NodeType::IsBinary(type), "Type '{}' is not a binary operator", NodeType::GetName(type));
+  PL_ASSERT_DEBUG(NodeType::IsBinary(type), "Type '{}' is not a binary operator", NodeType::GetName(type));
 
-  auto pBinaryOperator = PLASMA_NEW(&m_Allocator, BinaryOperator);
+  auto pBinaryOperator = PL_NEW(&m_Allocator, BinaryOperator);
   pBinaryOperator->m_Type = type;
   pBinaryOperator->m_ReturnType = DataType::Unknown;
   pBinaryOperator->m_pLeftOperand = pLeftOperand;
@@ -488,9 +492,9 @@ plExpressionAST::BinaryOperator* plExpressionAST::CreateBinaryOperator(NodeType:
 
 plExpressionAST::TernaryOperator* plExpressionAST::CreateTernaryOperator(NodeType::Enum type, Node* pFirstOperand, Node* pSecondOperand, Node* pThirdOperand)
 {
-  PLASMA_ASSERT_DEBUG(NodeType::IsTernary(type), "Type '{}' is not a ternary operator", NodeType::GetName(type));
+  PL_ASSERT_DEBUG(NodeType::IsTernary(type), "Type '{}' is not a ternary operator", NodeType::GetName(type));
 
-  auto pTernaryOperator = PLASMA_NEW(&m_Allocator, TernaryOperator);
+  auto pTernaryOperator = PL_NEW(&m_Allocator, TernaryOperator);
   pTernaryOperator->m_Type = type;
   pTernaryOperator->m_ReturnType = DataType::Unknown;
   pTernaryOperator->m_pFirstOperand = pFirstOperand;
@@ -505,14 +509,15 @@ plExpressionAST::TernaryOperator* plExpressionAST::CreateTernaryOperator(NodeTyp
 plExpressionAST::Constant* plExpressionAST::CreateConstant(const plVariant& value, DataType::Enum dataType /*= DataType::Float*/)
 {
   plVariantType::Enum variantType = DataType::GetVariantType(dataType);
-  PLASMA_ASSERT_DEV(variantType != plVariantType::Invalid, "Invalid constant type '{}'", DataType::GetName(dataType));
+  PL_IGNORE_UNUSED(variantType);
+  PL_ASSERT_DEV(variantType != plVariantType::Invalid, "Invalid constant type '{}'", DataType::GetName(dataType));
 
-  auto pConstant = PLASMA_NEW(&m_Allocator, Constant);
+  auto pConstant = PL_NEW(&m_Allocator, Constant);
   pConstant->m_Type = NodeType::Constant;
   pConstant->m_ReturnType = dataType;
   pConstant->m_Value = value.ConvertTo(DataType::GetVariantType(dataType));
 
-  PLASMA_ASSERT_DEV(pConstant->m_Value.IsValid(), "Invalid constant value or conversion to target data type failed");
+  PL_ASSERT_DEV(pConstant->m_Value.IsValid(), "Invalid constant value or conversion to target data type failed");
 
   return pConstant;
 }
@@ -524,7 +529,7 @@ plExpressionAST::Swizzle* plExpressionAST::CreateSwizzle(plStringView sSwizzle, 
 
   for (auto it : sSwizzle)
   {
-    if (numComponents == PLASMA_ARRAY_SIZE(components))
+    if (numComponents == PL_ARRAY_SIZE(components))
       return nullptr;
 
     plEnum<VectorComponent> component = VectorComponent::FromChar(it);
@@ -545,10 +550,10 @@ plExpressionAST::Swizzle* plExpressionAST::CreateSwizzle(plEnum<VectorComponent>
 
 plExpressionAST::Swizzle* plExpressionAST::CreateSwizzle(plArrayPtr<plEnum<VectorComponent>> swizzle, Node* pExpression)
 {
-  PLASMA_ASSERT_DEV(swizzle.GetCount() >= 1 && swizzle.GetCount() <= 4, "Invalid number of vector components for swizzle.");
-  PLASMA_ASSERT_DEV(pExpression->m_ReturnType != DataType::Unknown, "Expression return type must be known.");
+  PL_ASSERT_DEV(swizzle.GetCount() >= 1 && swizzle.GetCount() <= 4, "Invalid number of vector components for swizzle.");
+  PL_ASSERT_DEV(pExpression->m_ReturnType != DataType::Unknown, "Expression return type must be known.");
 
-  auto pSwizzle = PLASMA_NEW(&m_Allocator, Swizzle);
+  auto pSwizzle = PL_NEW(&m_Allocator, Swizzle);
   pSwizzle->m_Type = NodeType::Swizzle;
   pSwizzle->m_ReturnType = DataType::FromRegisterType(DataType::GetRegisterType(pExpression->m_ReturnType), swizzle.GetCount());
 
@@ -561,9 +566,10 @@ plExpressionAST::Swizzle* plExpressionAST::CreateSwizzle(plArrayPtr<plEnum<Vecto
 
 plExpressionAST::Input* plExpressionAST::CreateInput(const plExpression::StreamDesc& desc)
 {
-  auto pInput = PLASMA_NEW(&m_Allocator, Input);
+  auto pInput = PL_NEW(&m_Allocator, Input);
   pInput->m_Type = NodeType::Input;
   pInput->m_ReturnType = DataType::FromStreamType(desc.m_DataType);
+  pInput->m_uiNumInputElements = static_cast<plUInt8>(DataType::GetElementCount(pInput->m_ReturnType));
   pInput->m_Desc = desc;
 
   return pInput;
@@ -571,7 +577,7 @@ plExpressionAST::Input* plExpressionAST::CreateInput(const plExpression::StreamD
 
 plExpressionAST::Output* plExpressionAST::CreateOutput(const plExpression::StreamDesc& desc, Node* pExpression)
 {
-  auto pOutput = PLASMA_NEW(&m_Allocator, Output);
+  auto pOutput = PL_NEW(&m_Allocator, Output);
   pOutput->m_Type = NodeType::Output;
   pOutput->m_ReturnType = DataType::FromStreamType(desc.m_DataType);
   pOutput->m_uiNumInputElements = static_cast<plUInt8>(DataType::GetElementCount(pOutput->m_ReturnType));
@@ -588,7 +594,7 @@ plExpressionAST::FunctionCall* plExpressionAST::CreateFunctionCall(const plExpre
 
 plExpressionAST::FunctionCall* plExpressionAST::CreateFunctionCall(plArrayPtr<const plExpression::FunctionDesc> descs, plArrayPtr<Node*> arguments)
 {
-  auto pFunctionCall = PLASMA_NEW(&m_Allocator, FunctionCall);
+  auto pFunctionCall = PL_NEW(&m_Allocator, FunctionCall);
   pFunctionCall->m_Type = NodeType::FunctionCall;
   pFunctionCall->m_ReturnType = DataType::Unknown;
 
@@ -608,9 +614,9 @@ plExpressionAST::FunctionCall* plExpressionAST::CreateFunctionCall(plArrayPtr<co
 
 plExpressionAST::ConstructorCall* plExpressionAST::CreateConstructorCall(DataType::Enum dataType, plArrayPtr<Node*> arguments)
 {
-  PLASMA_ASSERT_DEV(dataType >= DataType::Bool, "Invalid data type for constructor");
+  PL_ASSERT_DEV(dataType >= DataType::Bool, "Invalid data type for constructor");
 
-  auto pConstructorCall = PLASMA_NEW(&m_Allocator, ConstructorCall);
+  auto pConstructorCall = PL_NEW(&m_Allocator, ConstructorCall);
   pConstructorCall->m_Type = NodeType::ConstructorCall;
   pConstructorCall->m_ReturnType = dataType;
   pConstructorCall->m_Arguments = arguments;
@@ -743,7 +749,7 @@ plArrayPtr<plExpressionAST::Node*> plExpressionAST::GetChildren(Node* pNode)
     return args;
   }
 
-  PLASMA_ASSERT_DEV(NodeType::IsInput(nodeType) || NodeType::IsConstant(nodeType), "Unknown node type");
+  PL_ASSERT_DEV(NodeType::IsInput(nodeType) || NodeType::IsConstant(nodeType), "Unknown node type");
   return plArrayPtr<Node*>();
 }
 
@@ -787,7 +793,7 @@ plArrayPtr<const plExpressionAST::Node*> plExpressionAST::GetChildren(const Node
     return plArrayPtr<const Node*>((const Node**)args.GetData(), args.GetCount());
   }
 
-  PLASMA_ASSERT_DEV(NodeType::IsInput(nodeType) || NodeType::IsConstant(nodeType), "Unknown node type");
+  PL_ASSERT_DEV(NodeType::IsInput(nodeType) || NodeType::IsConstant(nodeType), "Unknown node type");
   return plArrayPtr<const Node*>();
 }
 
@@ -795,7 +801,7 @@ namespace
 {
   struct NodeInfo
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     const plExpressionAST::Node* m_pNode;
     plUInt32 m_uiParentGraphNode;
@@ -909,12 +915,13 @@ void plExpressionAST::ResolveOverloads(Node* pNode)
   const NodeType::Enum nodeType = pNode->m_Type;
   if (nodeType == NodeType::TypeConversion)
   {
-    PLASMA_ASSERT_DEV(pNode->m_ReturnType != DataType::Unknown, "Return type must be specified for conversion nodes");
+    PL_ASSERT_DEV(pNode->m_ReturnType != DataType::Unknown, "Return type must be specified for conversion nodes");
     pNode->m_uiOverloadIndex = 0;
     return;
   }
 
-  auto CalculateMatchDistance = [](plArrayPtr<Node*> children, plArrayPtr<const plEnum<plExpression::RegisterType>> expectedTypes, plUInt32 uiNumRequiredArgs, plUInt32& ref_uiMaxNumElements) {
+  auto CalculateMatchDistance = [](plArrayPtr<Node*> children, plArrayPtr<const plEnum<plExpression::RegisterType>> expectedTypes, plUInt32 uiNumRequiredArgs, plUInt32& ref_uiMaxNumElements)
+  {
     if (children.GetCount() < uiNumRequiredArgs)
     {
       return plInvalidIndex;
@@ -925,7 +932,7 @@ void plExpressionAST::ResolveOverloads(Node* pNode)
     for (plUInt32 i = 0; i < plMath::Min(children.GetCount(), expectedTypes.GetCount()); ++i)
     {
       auto& pChildNode = children[i];
-      PLASMA_ASSERT_DEV(pChildNode != nullptr && pChildNode->m_ReturnType != DataType::Unknown, "Invalid child node");
+      PL_ASSERT_DEV(pChildNode != nullptr && pChildNode->m_ReturnType != DataType::Unknown, "Invalid child node");
 
       auto childType = DataType::GetRegisterType(pChildNode->m_ReturnType);
       int iDistance = expectedTypes[i] - childType;
@@ -946,7 +953,7 @@ void plExpressionAST::ResolveOverloads(Node* pNode)
     plSmallArray<plEnum<plExpression::RegisterType>, 4> expectedTypes;
     plUInt32 uiBestMatchDistance = plInvalidIndex;
 
-    for (plUInt32 uiSigIndex = 0; uiSigIndex < PLASMA_ARRAY_SIZE(Overloads::m_Signatures); ++uiSigIndex)
+    for (plUInt32 uiSigIndex = 0; uiSigIndex < PL_ARRAY_SIZE(Overloads::m_Signatures); ++uiSigIndex)
     {
       const plUInt16 uiSignature = s_NodeTypeOverloads[nodeType].m_Signatures[uiSigIndex];
       if (uiSignature == 0)
@@ -1028,7 +1035,7 @@ void plExpressionAST::ResolveOverloads(Node* pNode)
       if (uiArgumentIndex < args.GetCount())
       {
         auto pArg = args[uiArgumentIndex];
-        PLASMA_ASSERT_DEV(pArg != nullptr && pArg->m_ReturnType != DataType::Unknown, "Invalid argument node");
+        PL_ASSERT_DEV(pArg != nullptr && pArg->m_ReturnType != DataType::Unknown, "Invalid argument node");
 
         const plUInt32 uiArgElementCount = plExpressionAST::DataType::GetElementCount(pArg->m_ReturnType);
         if (uiArgElementCount == 1)
@@ -1057,7 +1064,7 @@ void plExpressionAST::ResolveOverloads(Node* pNode)
       }
     }
 
-    PLASMA_ASSERT_DEBUG(newArguments.GetCount() == uiElementCount, "Not enough arguments");
+    PL_ASSERT_DEBUG(newArguments.GetCount() == uiElementCount, "Not enough arguments");
     pConstructorCall->m_Arguments = newArguments;
   }
 }
@@ -1068,7 +1075,7 @@ plExpressionAST::DataType::Enum plExpressionAST::GetExpectedChildDataType(const 
   const NodeType::Enum nodeType = pNode->m_Type;
   const DataType::Enum returnType = pNode->m_ReturnType;
   const plUInt32 uiOverloadIndex = pNode->m_uiOverloadIndex;
-  PLASMA_ASSERT_DEV(returnType != DataType::Unknown, "Return type must not be unknown");
+  PL_ASSERT_DEV(returnType != DataType::Unknown, "Return type must not be unknown");
 
   if (nodeType == NodeType::TypeConversion || NodeType::IsSwizzle(nodeType))
   {
@@ -1076,7 +1083,7 @@ plExpressionAST::DataType::Enum plExpressionAST::GetExpectedChildDataType(const 
   }
   else if (NodeType::IsUnary(nodeType) || NodeType::IsBinary(nodeType) || NodeType::IsTernary(nodeType))
   {
-    PLASMA_ASSERT_DEV(uiOverloadIndex != 0xFF, "Unresolved overload");
+    PL_ASSERT_DEV(uiOverloadIndex != 0xFF, "Unresolved overload");
     plUInt16 uiSignature = s_NodeTypeOverloads[nodeType].m_Signatures[uiOverloadIndex];
     return DataType::FromRegisterType(GetArgumentTypeFromSignature(uiSignature, uiChildIndex), pNode->m_uiNumInputElements);
   }
@@ -1086,7 +1093,7 @@ plExpressionAST::DataType::Enum plExpressionAST::GetExpectedChildDataType(const 
   }
   else if (NodeType::IsFunctionCall(nodeType))
   {
-    PLASMA_ASSERT_DEV(uiOverloadIndex != 0xFF, "Unresolved overload");
+    PL_ASSERT_DEV(uiOverloadIndex != 0xFF, "Unresolved overload");
 
     auto pDesc = static_cast<const FunctionCall*>(pNode)->m_Descs[uiOverloadIndex];
     return DataType::FromRegisterType(pDesc->m_InputTypes[uiChildIndex], pNode->m_uiNumInputElements);
@@ -1096,7 +1103,7 @@ plExpressionAST::DataType::Enum plExpressionAST::GetExpectedChildDataType(const 
     return DataType::FromRegisterType(DataType::GetRegisterType(returnType));
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return DataType::Unknown;
 }
 
@@ -1173,7 +1180,7 @@ void plExpressionAST::UpdateHash(Node* pNode)
   }
   else
   {
-    PLASMA_ASSERT_NOT_IMPLEMENTED;
+    PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   pNode->m_uiHash = plHashingUtils::xxHash32(valuesToHash.GetData(), valuesToHash.GetCount() * sizeof(plUInt32));
@@ -1257,9 +1264,6 @@ bool plExpressionAST::IsEqual(const Node* pNodeA, const Node* pNodeB)
            pFunctionCallA->m_Arguments == pFunctionCallB->m_Arguments;
   }
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return false;
 }
-
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Expression_Implementation_ExpressionAST);

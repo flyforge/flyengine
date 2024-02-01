@@ -20,7 +20,7 @@ void plReflectionSerializer::WriteObjectToDDL(plStreamWriter& inout_stream, cons
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, false, true);
 
-  context.RegisterObject(plUuid::CreateUuid(), pRtti, const_cast<void*>(pObject));
+  context.RegisterObject(plUuid::MakeUuid(), pRtti, const_cast<void*>(pObject));
   conv.AddObjectToGraph(pRtti, const_cast<void*>(pObject), "root");
 
   plAbstractGraphDdlSerializer::Write(inout_stream, &graph, nullptr, bCompactMmode, typeMode);
@@ -34,7 +34,7 @@ void plReflectionSerializer::WriteObjectToDDL(plOpenDdlWriter& ref_ddl, const pl
 
   if (!guid.IsValid())
   {
-    guid = plUuid::CreateUuid();
+    guid = plUuid::MakeUuid();
   }
 
   context.RegisterObject(guid, pRtti, const_cast<void*>(pObject));
@@ -49,7 +49,7 @@ void plReflectionSerializer::WriteObjectToBinary(plStreamWriter& inout_stream, c
   plRttiConverterContext context;
   plRttiConverterWriter conv(&graph, &context, false, true);
 
-  context.RegisterObject(plUuid::CreateUuid(), pRtti, const_cast<void*>(pObject));
+  context.RegisterObject(plUuid::MakeUuid(), pRtti, const_cast<void*>(pObject));
   conv.AddObjectToGraph(pRtti, const_cast<void*>(pObject), "root");
 
   plAbstractGraphBinarySerializer::Write(inout_stream, &graph);
@@ -77,7 +77,7 @@ void* plReflectionSerializer::ReadObjectFromDDL(const plOpenDdlReaderElement* pR
   plRttiConverterReader convRead(&graph, &context);
   auto* pRootNode = graph.GetNodeByName("root");
 
-  PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
+  PL_ASSERT_DEV(pRootNode != nullptr, "invalid document");
 
   ref_pRtti = plRTTI::FindTypeByName(pRootNode->GetType());
 
@@ -98,7 +98,7 @@ void* plReflectionSerializer::ReadObjectFromBinary(plStreamReader& inout_stream,
   plRttiConverterReader convRead(&graph, &context);
   auto* pRootNode = graph.GetNodeByName("root");
 
-  PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
+  PL_ASSERT_DEV(pRootNode != nullptr, "invalid document");
 
   ref_pRtti = plRTTI::FindTypeByName(pRootNode->GetType());
 
@@ -119,7 +119,7 @@ void plReflectionSerializer::ReadObjectPropertiesFromDDL(plStreamReader& inout_s
   plRttiConverterReader convRead(&graph, &context);
   auto* pRootNode = graph.GetNodeByName("root");
 
-  PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
+  PL_ASSERT_DEV(pRootNode != nullptr, "invalid document");
 
   if (pRootNode == nullptr)
     return;
@@ -137,7 +137,7 @@ void plReflectionSerializer::ReadObjectPropertiesFromBinary(plStreamReader& inou
   plRttiConverterReader convRead(&graph, &context);
   auto* pRootNode = graph.GetNodeByName("root");
 
-  PLASMA_ASSERT_DEV(pRootNode != nullptr, "invalid document");
+  PL_ASSERT_DEV(pRootNode != nullptr, "invalid document");
 
   convRead.ApplyPropertiesToObject(pRootNode, &rtti, pObject);
 }
@@ -353,8 +353,8 @@ namespace
               if (pPropType->GetAllocator()->CanAllocate())
               {
                 void* pValue = pPropType->GetAllocator()->Allocate<void>();
-                PLASMA_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(pValue););
-                PLASMA_VERIFY(pSpecific->GetValue(pObject, keys[i], pValue), "Previously retrieved key does not exist.");
+                PL_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(pValue););
+                PL_VERIFY(pSpecific->GetValue(pObject, keys[i], pValue), "Previously retrieved key does not exist.");
                 pSpecific->Insert(pClone, keys[i], pValue);
               }
               else
@@ -388,14 +388,14 @@ void* plReflectionSerializer::Clone(const void* pObject, const plRTTI* pType)
   if (!pObject)
     return nullptr;
 
-  PLASMA_ASSERT_DEV(pType != nullptr, "invalid type.");
+  PL_ASSERT_DEV(pType != nullptr, "invalid type.");
   if (pType->IsDerivedFrom<plReflectedClass>())
   {
     const plReflectedClass* pRefObject = static_cast<const plReflectedClass*>(pObject);
     pType = pRefObject->GetDynamicRTTI();
   }
 
-  PLASMA_ASSERT_DEV(pType->GetAllocator()->CanAllocate(), "The type '{0}' can't be cloned!", pType->GetTypeName());
+  PL_ASSERT_DEV(pType->GetAllocator()->CanAllocate(), "The type '{0}' can't be cloned!", pType->GetTypeName());
   void* pClone = pType->GetAllocator()->Allocate<void>();
   CloneProperties(pObject, pClone, pType);
   return pClone;
@@ -404,15 +404,15 @@ void* plReflectionSerializer::Clone(const void* pObject, const plRTTI* pType)
 
 void plReflectionSerializer::Clone(const void* pObject, void* pClone, const plRTTI* pType)
 {
-  PLASMA_ASSERT_DEV(pObject && pClone && pType, "invalid type.");
+  PL_ASSERT_DEV(pObject && pClone && pType, "invalid type.");
   if (pType->IsDerivedFrom<plReflectedClass>())
   {
     const plReflectedClass* pRefObject = static_cast<const plReflectedClass*>(pObject);
     pType = pRefObject->GetDynamicRTTI();
-    PLASMA_ASSERT_DEV(pType == static_cast<plReflectedClass*>(pClone)->GetDynamicRTTI(), "Object '{0}' and clone '{1}' have mismatching types!", pType->GetTypeName(), static_cast<plReflectedClass*>(pClone)->GetDynamicRTTI()->GetTypeName());
+    PL_ASSERT_DEV(pType == static_cast<plReflectedClass*>(pClone)->GetDynamicRTTI(), "Object '{0}' and clone '{1}' have mismatching types!", pType->GetTypeName(), static_cast<plReflectedClass*>(pClone)->GetDynamicRTTI()->GetTypeName());
   }
 
   CloneProperties(pObject, pClone, pType);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_ReflectionSerializer);
+

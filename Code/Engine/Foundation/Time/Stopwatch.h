@@ -4,7 +4,7 @@
 #include <Foundation/Time/Time.h>
 
 /// \brief A helper class to time the execution of code or other actions.
-class PLASMA_FOUNDATION_DLL plStopwatch
+class PL_FOUNDATION_DLL plStopwatch
 {
 public:
   /// \brief The constructor will automatically start the stopwatch.

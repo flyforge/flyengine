@@ -5,12 +5,12 @@
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 #include <Foundation/IO/OSFile.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocumentGenerator, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocumentGenerator, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-plAssetDocumentGenerator::plAssetDocumentGenerator() {}
+plAssetDocumentGenerator::plAssetDocumentGenerator() = default;
 
-plAssetDocumentGenerator::~plAssetDocumentGenerator() {}
+plAssetDocumentGenerator::~plAssetDocumentGenerator() = default;
 
 void plAssetDocumentGenerator::AddSupportedFileType(plStringView sExtension)
 {
@@ -23,27 +23,31 @@ void plAssetDocumentGenerator::AddSupportedFileType(plStringView sExtension)
 bool plAssetDocumentGenerator::SupportsFileType(plStringView sFile) const
 {
   plStringBuilder tmp = plPathUtils::GetFileExtension(sFile);
+
+  if (tmp.IsEmpty())
+    tmp = sFile;
+
   tmp.ToLower();
 
   return m_SupportedFileTypes.Contains(tmp);
 }
 
-void plAssetDocumentGenerator::BuildFileDialogFilterString(plStringBuilder& out_Filter) const
+void plAssetDocumentGenerator::BuildFileDialogFilterString(plStringBuilder& out_sFilter) const
 {
   bool semicolon = false;
-  out_Filter.Format("{0} (", GetDocumentExtension());
-  AppendFileFilterStrings(out_Filter, semicolon);
-  out_Filter.Append(")");
+  out_sFilter.SetFormat("{0} (", GetDocumentExtension());
+  AppendFileFilterStrings(out_sFilter, semicolon);
+  out_sFilter.Append(")");
 }
 
-void plAssetDocumentGenerator::AppendFileFilterStrings(plStringBuilder& out_Filter, bool& semicolon) const
+void plAssetDocumentGenerator::AppendFileFilterStrings(plStringBuilder& out_sFilter, bool& ref_bSemicolon) const
 {
-  for (const plString ext : m_SupportedFileTypes)
+  for (const plString& ext : m_SupportedFileTypes)
   {
     plStringBuilder extWithStarDot;
     extWithStarDot.AppendFormat("*.{0}", ext);
 
-    if (const char* pos = out_Filter.FindSubString(extWithStarDot.GetData()))
+    if (const char* pos = out_sFilter.FindSubString(extWithStarDot.GetData()))
     {
       const char afterExt = *(pos + extWithStarDot.GetElementCount());
 
@@ -51,143 +55,72 @@ void plAssetDocumentGenerator::AppendFileFilterStrings(plStringBuilder& out_Filt
         continue;
     }
 
-    if (semicolon)
+    if (ref_bSemicolon)
     {
-      out_Filter.AppendFormat("; {0}", extWithStarDot.GetView());
+      out_sFilter.AppendFormat("; {0}", extWithStarDot.GetView());
     }
     else
     {
-      out_Filter.Append(extWithStarDot.GetView());
-      semicolon = true;
+      out_sFilter.Append(extWithStarDot.GetView());
+      ref_bSemicolon = true;
     }
   }
 }
 
-void plAssetDocumentGenerator::CreateGenerators(plHybridArray<plAssetDocumentGenerator*, 16>& out_Generators)
+void plAssetDocumentGenerator::CreateGenerators(plHybridArray<plAssetDocumentGenerator*, 16>& out_generators)
 {
   plRTTI::ForEachDerivedType<plAssetDocumentGenerator>(
-    [&](const plRTTI* pRtti) {
-      out_Generators.PushBack(pRtti->GetAllocator()->Allocate<plAssetDocumentGenerator>());
+    [&](const plRTTI* pRtti)
+    {
+      out_generators.PushBack(pRtti->GetAllocator()->Allocate<plAssetDocumentGenerator>());
     },
     plRTTI::ForEachOptions::ExcludeNonAllocatable);
-  
+
   // sort by name
-  out_Generators.Sort([](plAssetDocumentGenerator* lhs, plAssetDocumentGenerator* rhs) -> bool { return lhs->GetDocumentExtension().Compare_NoCase(rhs->GetDocumentExtension()) < 0; });
+  out_generators.Sort([](plAssetDocumentGenerator* lhs, plAssetDocumentGenerator* rhs) -> bool
+    { return lhs->GetDocumentExtension().Compare_NoCase(rhs->GetDocumentExtension()) < 0; });
 }
 
-void plAssetDocumentGenerator::DestroyGenerators(plHybridArray<plAssetDocumentGenerator*, 16>& generators)
+void plAssetDocumentGenerator::DestroyGenerators(const plHybridArray<plAssetDocumentGenerator*, 16>& generators)
 {
   for (plAssetDocumentGenerator* pGen : generators)
   {
     pGen->GetDynamicRTTI()->GetAllocator()->Deallocate(pGen);
   }
-
-  generators.Clear();
 }
 
-
-void plAssetDocumentGenerator::ExecuteImport(plDynamicArray<ImportData>& allImports)
-{
-  for (auto& data : allImports)
-  {
-    if (data.m_iSelectedOption < 0)
-      continue;
-
-    PLASMA_LOG_BLOCK("Asset Import", data.m_sInputFileParentRelative);
-
-    auto& option = data.m_ImportOptions[data.m_iSelectedOption];
-
-    if (DetermineInputAndOutputFiles(data, option).Failed())
-      continue;
-
-    plDocument* pGeneratedDoc = nullptr;
-    const plStatus status = option.m_pGenerator->Generate(data.m_sInputFileRelative, option, pGeneratedDoc);
-
-    if (pGeneratedDoc)
-    {
-      pGeneratedDoc->SaveDocument(true).IgnoreResult();
-      pGeneratedDoc->GetDocumentManager()->CloseDocument(pGeneratedDoc);
-    }
-
-    if (status.Failed())
-    {
-      data.m_sImportMessage = status.m_sMessage;
-      plLog::Error("Asset import failed: '{0}'", status.m_sMessage);
-    }
-    else
-    {
-      data.m_sImportMessage.Clear();
-      data.m_bDoNotImport = true;
-      plLog::Success("Generated asset document '{0}'", option.m_sOutputFileAbsolute);
-    }
-  }
-}
-
-
-plResult plAssetDocumentGenerator::DetermineInputAndOutputFiles(ImportData& data, Info& option)
-{
-  auto pApp = plQtEditorApp::GetSingleton();
-
-  plStringBuilder inputFile = data.m_sInputFileParentRelative;
-  if (!pApp->MakeParentDataDirectoryRelativePathAbsolute(inputFile, true))
-  {
-    data.m_sImportMessage = "Input file could not be located";
-    return PLASMA_FAILURE;
-  }
-
-  data.m_sInputFileAbsolute = inputFile;
-
-  if (!pApp->MakePathDataDirectoryRelative(inputFile))
-  {
-    data.m_sImportMessage = "Input file is not in any known data directory";
-    return PLASMA_FAILURE;
-  }
-
-  data.m_sInputFileRelative = inputFile;
-
-  plStringBuilder outputFile = option.m_sOutputFileParentRelative;
-  plStringBuilder fileName = outputFile.GetFileName();
-  fileName.AppendFormat("_{}", option.m_pGenerator->GetNameSuffix());
-  outputFile.ChangeFileName(fileName);
-  if (!pApp->MakeParentDataDirectoryRelativePathAbsolute(outputFile, false))
-  {
-    data.m_sImportMessage = "Target file location could not be found";
-    return PLASMA_FAILURE;
-  }
-
-  option.m_sOutputFileAbsolute = outputFile;
-
-  // don't create it when it already exists
-  //TODO : review as there is now two layers of overwrite protection (import of the original file and this one), which can be confusing
-  // add option to overwrite?
-  if (plOSFile::ExistsFile(outputFile))
-  {
-    data.m_bDoNotImport = true;
-    data.m_sImportMessage = "Target file already exists";
-    return PLASMA_FAILURE;
-  }
-
-  return PLASMA_SUCCESS;
-}
-
-bool plAssetDocumentGenerator::ImportAssets(const plHybridArray<plString, 16>& filesToImport)
+void plAssetDocumentGenerator::ImportAssets(const plDynamicArray<plString>& filesToImport)
 {
   plHybridArray<plAssetDocumentGenerator*, 16> generators;
   CreateGenerators(generators);
 
-  plDynamicArray<plAssetDocumentGenerator::ImportData> allImports;
+  plDynamicArray<plAssetDocumentGenerator::ImportGroupOptions> allImports;
   allImports.Reserve(filesToImport.GetCount());
 
   CreateImportOptionList(filesToImport, allImports, generators);
 
   SortAndSelectBestImportOption(allImports);
 
-  bool imported;
-  plQtAssetImportDlg dlg(QApplication::activeWindow(), allImports, imported);
+  plQtAssetImportDlg dlg(QApplication::activeWindow(), allImports);
   dlg.exec();
 
   DestroyGenerators(generators);
-  return imported;
+}
+
+void plAssetDocumentGenerator::GetSupportsFileTypes(plSet<plString>& out_extensions)
+{
+  out_extensions.Clear();
+
+  plHybridArray<plAssetDocumentGenerator*, 16> generators;
+  CreateGenerators(generators);
+  for (auto pGen : generators)
+  {
+    for (const plString& ext : pGen->m_SupportedFileTypes)
+    {
+      out_extensions.Insert(ext);
+    }
+  }
+  DestroyGenerators(generators);
 }
 
 void plAssetDocumentGenerator::ImportAssets()
@@ -234,35 +167,28 @@ void plAssetDocumentGenerator::ImportAssets()
   ImportAssets(filesToImport);
 }
 
-void plAssetDocumentGenerator::CreateImportOptionList(const plHybridArray<plString, 16>& filesToImport,
-  plDynamicArray<plAssetDocumentGenerator::ImportData>& allImports, const plHybridArray<plAssetDocumentGenerator*, 16>& generators)
+void plAssetDocumentGenerator::CreateImportOptionList(const plDynamicArray<plString>& filesToImport, plDynamicArray<plAssetDocumentGenerator::ImportGroupOptions>& allImports, const plHybridArray<plAssetDocumentGenerator*, 16>& generators)
 {
   plQtEditorApp* pApp = plQtEditorApp::GetSingleton();
-  plStringBuilder sInputParentRelative, sInputRelative, sGroup;
+  plStringBuilder sInputRelative, sGroup;
 
   for (const plString& sInputAbsolute : filesToImport)
   {
-    sInputParentRelative = sInputAbsolute;
     sInputRelative = sInputAbsolute;
 
-    if (!pApp->MakePathDataDirectoryParentRelative(sInputParentRelative) || !pApp->MakePathDataDirectoryRelative(sInputRelative))
+    if (!pApp->MakePathDataDirectoryRelative(sInputRelative))
     {
-      auto& data = allImports.ExpandAndGetRef();
-      data.m_sInputFileAbsolute = sInputAbsolute;
-      data.m_sInputFileParentRelative = sInputParentRelative;
-      data.m_sInputFileRelative = sInputRelative;
-      data.m_sImportMessage = "File is not located in any data directory.";
-      data.m_bDoNotImport = true;
+      // error, file is not in data directory -> skip
       continue;
     }
 
     for (plAssetDocumentGenerator* pGen : generators)
     {
-      if (pGen->SupportsFileType(sInputParentRelative))
+      if (pGen->SupportsFileType(sInputRelative))
       {
         sGroup = pGen->GetGeneratorGroup();
 
-        ImportData* pData = nullptr;
+        ImportGroupOptions* pData = nullptr;
         for (auto& importer : allImports)
         {
           if (importer.m_sGroup == sGroup && importer.m_sInputFileAbsolute == sInputAbsolute)
@@ -276,12 +202,11 @@ void plAssetDocumentGenerator::CreateImportOptionList(const plHybridArray<plStri
           pData = &allImports.ExpandAndGetRef();
           pData->m_sGroup = sGroup;
           pData->m_sInputFileAbsolute = sInputAbsolute;
-          pData->m_sInputFileParentRelative = sInputParentRelative;
           pData->m_sInputFileRelative = sInputRelative;
         }
 
-        plHybridArray<plAssetDocumentGenerator::Info, 4> options;
-        pGen->GetImportModes(sInputParentRelative, options);
+        plHybridArray<plAssetDocumentGenerator::ImportMode, 4> options;
+        pGen->GetImportModes(sInputAbsolute, options);
 
         for (auto& option : options)
         {
@@ -294,16 +219,15 @@ void plAssetDocumentGenerator::CreateImportOptionList(const plHybridArray<plStri
   }
 }
 
-void plAssetDocumentGenerator::SortAndSelectBestImportOption(plDynamicArray<plAssetDocumentGenerator::ImportData>& allImports)
+void plAssetDocumentGenerator::SortAndSelectBestImportOption(plDynamicArray<plAssetDocumentGenerator::ImportGroupOptions>& allImports)
 {
-  allImports.Sort([](const plAssetDocumentGenerator::ImportData& lhs, const plAssetDocumentGenerator::ImportData& rhs) -> bool
-  {
-      return lhs.m_sInputFileParentRelative < rhs.m_sInputFileParentRelative;
-  });
+  allImports.Sort([](const plAssetDocumentGenerator::ImportGroupOptions& lhs, const plAssetDocumentGenerator::ImportGroupOptions& rhs) -> bool
+    { return lhs.m_sInputFileRelative < rhs.m_sInputFileRelative; });
 
   for (auto& singleImport : allImports)
   {
-    singleImport.m_ImportOptions.Sort([](const plAssetDocumentGenerator::Info& lhs, const plAssetDocumentGenerator::Info& rhs) -> bool { return plStringUtils::Compare_NoCase(plTranslate(lhs.m_sName), plTranslate(rhs.m_sName)) < 0; });
+    singleImport.m_ImportOptions.Sort([](const plAssetDocumentGenerator::ImportMode& lhs, const plAssetDocumentGenerator::ImportMode& rhs) -> bool
+      { return plTranslate(lhs.m_sName).Compare_NoCase(plTranslate(rhs.m_sName)) < 0; });
 
     plUInt32 uiNumPrios[(plUInt32)plAssetDocGeneratorPriority::ENUM_COUNT] = {0};
     plUInt32 uiBestPrio[(plUInt32)plAssetDocGeneratorPriority::ENUM_COUNT] = {0};
@@ -327,4 +251,30 @@ void plAssetDocumentGenerator::SortAndSelectBestImportOption(plDynamicArray<plAs
         break;
     }
   }
+}
+
+plStatus plAssetDocumentGenerator::Import(plStringView sInputFileAbs, plStringView sMode, bool bOpenDocument)
+{
+  plStringBuilder ext = sInputFileAbs.GetFileExtension();
+  ext.ToLower();
+
+  if (!m_SupportedFileTypes.Contains(ext))
+    return plStatus(plFmt("Files of type '{}' cannot be imported as '{}' documents.", ext, GetDocumentExtension()));
+
+  plDocument* pGeneratedDoc = nullptr;
+  PL_SUCCEED_OR_RETURN(Generate(sInputFileAbs, sMode, pGeneratedDoc));
+
+  PL_ASSERT_DEV(pGeneratedDoc != nullptr, "");
+
+  const plString sDocPath = pGeneratedDoc->GetDocumentPath();
+
+  pGeneratedDoc->SaveDocument(true).LogFailure();
+  pGeneratedDoc->GetDocumentManager()->CloseDocument(pGeneratedDoc);
+
+  if (bOpenDocument)
+  {
+    plQtEditorApp::GetSingleton()->OpenDocumentQueued(sDocPath);
+  }
+
+  return plStatus(PL_SUCCESS);
 }

@@ -66,45 +66,45 @@ public:
   const CellData& GetCell(plUInt32 uiIndex) const { return m_Cells[uiIndex]; }
 
   /// \brief Gives access to a cell by cell coordinates.
-  CellData& GetCell(const plVec2I32& Coord) { return m_Cells[ConvertCellCoordinateToIndex(Coord)]; }
+  CellData& GetCell(const plVec2I32& vCoord) { return m_Cells[ConvertCellCoordinateToIndex(vCoord)]; }
 
   /// \brief Gives access to a cell by cell coordinates.
-  const CellData& GetCell(const plVec2I32& Coord) const { return m_Cells[ConvertCellCoordinateToIndex(Coord)]; }
+  const CellData& GetCell(const plVec2I32& vCoord) const { return m_Cells[ConvertCellCoordinateToIndex(vCoord)]; }
 
   /// \brief Converts a cell index into a 2D cell coordinate.
   plVec2I32 ConvertCellIndexToCoordinate(plUInt32 uiIndex) const { return plVec2I32(uiIndex % m_uiGridSizeX, uiIndex / m_uiGridSizeX); }
 
   /// \brief Converts a cell coordinate into a cell index.
-  plUInt32 ConvertCellCoordinateToIndex(const plVec2I32& Coord) const { return Coord.y * m_uiGridSizeX + Coord.x; }
+  plUInt32 ConvertCellCoordinateToIndex(const plVec2I32& vCoord) const { return vCoord.y * m_uiGridSizeX + vCoord.x; }
 
   /// \brief Returns the lower left world space position of the cell with the given coordinates.
-  plVec3 GetCellWorldSpaceOrigin(const plVec2I32& Coord) const;
-  plVec3 GetCellLocalSpaceOrigin(const plVec2I32& Coord) const;
+  plVec3 GetCellWorldSpaceOrigin(const plVec2I32& vCoord) const;
+  plVec3 GetCellLocalSpaceOrigin(const plVec2I32& vCoord) const;
 
   /// \brief Returns the center world space position of the cell with the given coordinates.
-  plVec3 GetCellWorldSpaceCenter(const plVec2I32& Coord) const;
-  plVec3 GetCellLocalSpaceCenter(const plVec2I32& Coord) const;
+  plVec3 GetCellWorldSpaceCenter(const plVec2I32& vCoord) const;
+  plVec3 GetCellLocalSpaceCenter(const plVec2I32& vCoord) const;
 
   /// \brief Checks whether the given cell coordinate is inside valid ranges.
-  bool IsValidCellCoordinate(const plVec2I32& Coord) const;
+  bool IsValidCellCoordinate(const plVec2I32& vCoord) const;
 
   /// \brief Casts a world space ray through the grid and determines which cell is hit (if any).
   /// \note The picked cell is determined from where the ray hits the 'ground plane', ie. the plane that goes through the world space
   /// origin.
-  bool PickCell(const plVec3& vRayStartPos, const plVec3& vRayDirNorm, plVec2I32* out_CellCoord, plVec3* out_vIntersection = nullptr) const;
+  bool PickCell(const plVec3& vRayStartPos, const plVec3& vRayDirNorm, plVec2I32* out_pCellCoord, plVec3* out_pIntersection = nullptr) const;
 
   /// \brief Returns the lower left corner position in world space of the grid
   const plVec3& GetWorldSpaceOrigin() const { return m_vWorldSpaceOrigin; }
 
   /// \brief Returns the matrix used to rotate coordinates from grid space to world space
-  const plMat3& GetRotationToWorldSpace() const { return m_RotateToWorldspace; }
+  const plMat3& GetRotationToWorldSpace() const { return m_mRotateToWorldspace; }
 
   /// \brief Returns the matrix used to rotate coordinates from world space to grid space
-  const plMat3& GetRotationToGridSpace() const { return m_RotateToGridspace; }
+  const plMat3& GetRotationToGridSpace() const { return m_mRotateToGridspace; }
 
   /// \brief Tests where and at which cell the given world space ray intersects the grids bounding box
   bool GetRayIntersection(const plVec3& vRayStartWorldSpace, const plVec3& vRayDirNormalizedWorldSpace, float fMaxLength, float& out_fIntersection,
-    plVec2I32& out_CellCoord) const;
+    plVec2I32& out_vCellCoord) const;
 
   /// \brief Tests whether a ray would hit the grid bounding box, if it were expanded by a constant.
   bool GetRayIntersectionExpandedBBox(const plVec3& vRayStartWorldSpace, const plVec3& vRayDirNormalizedWorldSpace, float fMaxLength,
@@ -114,8 +114,8 @@ private:
   plUInt16 m_uiGridSizeX;
   plUInt16 m_uiGridSizeY;
 
-  plMat3 m_RotateToWorldspace;
-  plMat3 m_RotateToGridspace;
+  plMat3 m_mRotateToWorldspace;
+  plMat3 m_mRotateToGridspace;
 
   plVec3 m_vWorldSpaceOrigin;
   plVec3 m_vLocalSpaceCellSize;

@@ -7,36 +7,19 @@
 
 plGALTextureDX11::plGALTextureDX11(const plGALTextureCreationDescription& Description)
   : plGALTexture(Description)
-  , m_pDXTexture(nullptr)
-  , m_pDXStagingTexture(nullptr)
-  , m_pExisitingNativeObject(Description.m_pExisitingNativeObject)
 {
 }
 
-plGALTextureDX11::~plGALTextureDX11() {}
-
-PLASMA_DEFINE_AS_POD_TYPE(D3D11_SUBRESOURCE_DATA);
+plGALTextureDX11::~plGALTextureDX11() = default;
 
 plResult plGALTextureDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSystemMemoryDescription> pInitialData)
 {
   plGALDeviceDX11* pDXDevice = static_cast<plGALDeviceDX11*>(pDevice);
 
-  if (m_pExisitingNativeObject != nullptr)
+  if (m_Description.m_pExisitingNativeObject != nullptr)
   {
-    /// \todo Validation if interface of corresponding texture object exists
-    m_pDXTexture = static_cast<ID3D11Resource*>(m_pExisitingNativeObject);
-    if (!m_Description.m_ResourceAccess.IsImmutable() || m_Description.m_ResourceAccess.m_bReadBack)
-    {
-      plResult res = CreateStagingTexture(pDXDevice);
-      if (res == PLASMA_FAILURE)
-      {
-        m_pDXTexture = nullptr;
-        return res;
-      }
-    }
-    return PLASMA_SUCCESS;
+    return InitFromNativeObject(pDXDevice);
   }
-
 
   switch (m_Description.m_Type)
   {
@@ -44,73 +27,14 @@ plResult plGALTextureDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSy
     case plGALTextureType::TextureCube:
     {
       D3D11_TEXTURE2D_DESC Tex2DDesc;
-      Tex2DDesc.ArraySize = (m_Description.m_Type == plGALTextureType::Texture2D ? m_Description.m_uiArraySize : (m_Description.m_uiArraySize * 6));
-      Tex2DDesc.BindFlags = 0;
-
-      if (m_Description.m_bAllowShaderResourceView || m_Description.m_bAllowDynamicMipGeneration)
-        Tex2DDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-      if (m_Description.m_bAllowUAV)
-        Tex2DDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
-
-      if (m_Description.m_bCreateRenderTarget || m_Description.m_bAllowDynamicMipGeneration)
-        Tex2DDesc.BindFlags |= plGALResourceFormat::IsDepthFormat(m_Description.m_Format) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
-
-      Tex2DDesc.CPUAccessFlags = 0; // We always use staging textures to update the data
-      Tex2DDesc.Usage = m_Description.m_ResourceAccess.IsImmutable() ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DEFAULT;
-
-      if (m_Description.m_bCreateRenderTarget || m_Description.m_bAllowUAV)
-        Tex2DDesc.Usage = D3D11_USAGE_DEFAULT;
-
-      Tex2DDesc.Format = pDXDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eStorage;
-
-      if (Tex2DDesc.Format == DXGI_FORMAT_UNKNOWN)
-      {
-        plLog::Error("No storage format available for given format: {0}", m_Description.m_Format);
-        return PLASMA_FAILURE;
-      }
-
-      Tex2DDesc.Width = m_Description.m_uiWidth;
-      Tex2DDesc.Height = m_Description.m_uiHeight;
-      Tex2DDesc.MipLevels = m_Description.m_uiMipLevelCount;
-
-      Tex2DDesc.MiscFlags = 0;
-
-      if (m_Description.m_bAllowDynamicMipGeneration)
-        Tex2DDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-      if (m_Description.m_Type == plGALTextureType::TextureCube)
-        Tex2DDesc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
-
-      Tex2DDesc.SampleDesc.Count = m_Description.m_SampleCount;
-      Tex2DDesc.SampleDesc.Quality = 0;
+      PL_SUCCEED_OR_RETURN(Create2DDesc(m_Description, pDXDevice, Tex2DDesc));
 
       plHybridArray<D3D11_SUBRESOURCE_DATA, 16> InitialData;
-      if (!pInitialData.IsEmpty())
+      ConvertInitialData(m_Description, pInitialData, InitialData);
+
+      if (FAILED(pDXDevice->GetDXDevice()->CreateTexture2D(&Tex2DDesc, pInitialData.IsEmpty() ? nullptr : &InitialData[0], reinterpret_cast<ID3D11Texture2D**>(&m_pDXTexture))))
       {
-        plUInt32 uiInitialDataCount = (m_Description.m_uiMipLevelCount * Tex2DDesc.ArraySize);
-       // PLASMA_ASSERT_DEV(pInitialData.GetCount() == uiInitialDataCount, "The array of initial data values is not equal to the amount of mip levels!");
-
-        InitialData.SetCountUninitialized(uiInitialDataCount);
-
-        for (plUInt32 i = 0; i < uiInitialDataCount; i++)
-        {
-          InitialData[i].pSysMem = pInitialData[i].m_pData;
-          InitialData[i].SysMemPitch = pInitialData[i].m_uiRowPitch;
-          InitialData[i].SysMemSlicePitch = pInitialData[i].m_uiSlicePitch;
-        }
-      }
-
-      if (FAILED(pDXDevice->GetDXDevice()->CreateTexture2D(
-            &Tex2DDesc, pInitialData.IsEmpty() ? nullptr : &InitialData[0], reinterpret_cast<ID3D11Texture2D**>(&m_pDXTexture))))
-      {
-        return PLASMA_FAILURE;
-      }
-      else
-      {
-        if (!m_Description.m_ResourceAccess.IsImmutable() || m_Description.m_ResourceAccess.m_bReadBack)
-          return CreateStagingTexture(pDXDevice);
-
-        return PLASMA_SUCCESS;
+        return PL_FAILURE;
       }
     }
     break;
@@ -118,88 +42,171 @@ plResult plGALTextureDX11::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSy
     case plGALTextureType::Texture3D:
     {
       D3D11_TEXTURE3D_DESC Tex3DDesc;
-      Tex3DDesc.BindFlags = 0;
-
-      if (m_Description.m_bAllowShaderResourceView)
-        Tex3DDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
-      if (m_Description.m_bAllowUAV)
-        Tex3DDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
-
-      if (m_Description.m_bCreateRenderTarget)
-        Tex3DDesc.BindFlags |= plGALResourceFormat::IsDepthFormat(m_Description.m_Format) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
-
-      Tex3DDesc.CPUAccessFlags = 0; // We always use staging textures to update the data
-      Tex3DDesc.Usage = m_Description.m_ResourceAccess.IsImmutable() ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DEFAULT;
-
-      if (m_Description.m_bCreateRenderTarget || m_Description.m_bAllowUAV)
-        Tex3DDesc.Usage = D3D11_USAGE_DEFAULT;
-
-      Tex3DDesc.Format = pDXDevice->GetFormatLookupTable().GetFormatInfo(m_Description.m_Format).m_eStorage;
-
-      if (Tex3DDesc.Format == DXGI_FORMAT_UNKNOWN)
-      {
-        plLog::Error("No storage format available for given format: {0}", m_Description.m_Format);
-        return PLASMA_FAILURE;
-      }
-
-      Tex3DDesc.Width = m_Description.m_uiWidth;
-      Tex3DDesc.Height = m_Description.m_uiHeight;
-      Tex3DDesc.Depth = m_Description.m_uiDepth;
-      Tex3DDesc.MipLevels = m_Description.m_uiMipLevelCount;
-
-      Tex3DDesc.MiscFlags = 0;
-
-      if (m_Description.m_bAllowDynamicMipGeneration)
-        Tex3DDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
-
-      if (m_Description.m_Type == plGALTextureType::TextureCube)
-        Tex3DDesc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+      PL_SUCCEED_OR_RETURN(Create3DDesc(m_Description, pDXDevice, Tex3DDesc));
 
       plHybridArray<D3D11_SUBRESOURCE_DATA, 16> InitialData;
-      if (!pInitialData.IsEmpty())
+      ConvertInitialData(m_Description, pInitialData, InitialData);
+
+      if (FAILED(pDXDevice->GetDXDevice()->CreateTexture3D(&Tex3DDesc, pInitialData.IsEmpty() ? nullptr : &InitialData[0], reinterpret_cast<ID3D11Texture3D**>(&m_pDXTexture))))
       {
-        const plUInt32 uiInitialDataCount = m_Description.m_uiMipLevelCount;
-        PLASMA_ASSERT_DEV(pInitialData.GetCount() == uiInitialDataCount, "The array of initial data values is not equal to the amount of mip levels!");
-
-        InitialData.SetCountUninitialized(uiInitialDataCount);
-
-        for (plUInt32 i = 0; i < uiInitialDataCount; i++)
-        {
-          InitialData[i].pSysMem = pInitialData[i].m_pData;
-          InitialData[i].SysMemPitch = pInitialData[i].m_uiRowPitch;
-          InitialData[i].SysMemSlicePitch = pInitialData[i].m_uiSlicePitch;
-        }
-      }
-
-      if (FAILED(pDXDevice->GetDXDevice()->CreateTexture3D(
-            &Tex3DDesc, pInitialData.IsEmpty() ? nullptr : &InitialData[0], reinterpret_cast<ID3D11Texture3D**>(&m_pDXTexture))))
-      {
-        return PLASMA_FAILURE;
-      }
-      else
-      {
-        if (!m_Description.m_ResourceAccess.IsImmutable() || m_Description.m_ResourceAccess.m_bReadBack)
-          return CreateStagingTexture(pDXDevice);
-
-        return PLASMA_SUCCESS;
+        return PL_FAILURE;
       }
     }
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      return PLASMA_FAILURE;
+      PL_ASSERT_NOT_IMPLEMENTED;
+      return PL_FAILURE;
   }
 
+  if (!m_Description.m_ResourceAccess.IsImmutable() || m_Description.m_ResourceAccess.m_bReadBack)
+    return CreateStagingTexture(pDXDevice);
 
-  return PLASMA_FAILURE;
+  return PL_SUCCESS;
+}
+
+
+plResult plGALTextureDX11::InitFromNativeObject(plGALDeviceDX11* pDXDevice)
+{
+  /// \todo Validation if interface of corresponding texture object exists
+  m_pDXTexture = static_cast<ID3D11Resource*>(m_Description.m_pExisitingNativeObject);
+  if (!m_Description.m_ResourceAccess.IsImmutable() || m_Description.m_ResourceAccess.m_bReadBack)
+  {
+    plResult res = CreateStagingTexture(pDXDevice);
+    if (res == PL_FAILURE)
+    {
+      m_pDXTexture = nullptr;
+      return res;
+    }
+  }
+  return PL_SUCCESS;
+}
+
+
+plResult plGALTextureDX11::Create2DDesc(const plGALTextureCreationDescription& description, plGALDeviceDX11* pDXDevice, D3D11_TEXTURE2D_DESC& out_Tex2DDesc)
+{
+  out_Tex2DDesc.ArraySize = (description.m_Type == plGALTextureType::Texture2D ? description.m_uiArraySize : (description.m_uiArraySize * 6));
+  out_Tex2DDesc.BindFlags = 0;
+
+  if (description.m_bAllowShaderResourceView || description.m_bAllowDynamicMipGeneration)
+    out_Tex2DDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+  if (description.m_bAllowUAV)
+    out_Tex2DDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+
+  if (description.m_bCreateRenderTarget || description.m_bAllowDynamicMipGeneration)
+    out_Tex2DDesc.BindFlags |= plGALResourceFormat::IsDepthFormat(description.m_Format) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
+
+  out_Tex2DDesc.CPUAccessFlags = 0; // We always use staging textures to update the data
+  out_Tex2DDesc.Usage = description.m_ResourceAccess.IsImmutable() ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DEFAULT;
+
+  if (description.m_bCreateRenderTarget || description.m_bAllowUAV)
+    out_Tex2DDesc.Usage = D3D11_USAGE_DEFAULT;
+
+  out_Tex2DDesc.Format = pDXDevice->GetFormatLookupTable().GetFormatInfo(description.m_Format).m_eStorage;
+
+  if (out_Tex2DDesc.Format == DXGI_FORMAT_UNKNOWN)
+  {
+    plLog::Error("No storage format available for given format: {0}", description.m_Format);
+    return PL_FAILURE;
+  }
+
+  out_Tex2DDesc.Width = description.m_uiWidth;
+  out_Tex2DDesc.Height = description.m_uiHeight;
+  out_Tex2DDesc.MipLevels = description.m_uiMipLevelCount;
+
+  out_Tex2DDesc.MiscFlags = 0;
+
+  if (description.m_bAllowDynamicMipGeneration)
+    out_Tex2DDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+  if (description.m_Type == plGALTextureType::TextureCube)
+    out_Tex2DDesc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+  out_Tex2DDesc.SampleDesc.Count = description.m_SampleCount;
+  out_Tex2DDesc.SampleDesc.Quality = 0;
+  return PL_SUCCESS;
+}
+
+plResult plGALTextureDX11::Create3DDesc(const plGALTextureCreationDescription& description, plGALDeviceDX11* pDXDevice, D3D11_TEXTURE3D_DESC& out_Tex3DDesc)
+{
+  out_Tex3DDesc.BindFlags = 0;
+
+  if (description.m_bAllowShaderResourceView)
+    out_Tex3DDesc.BindFlags |= D3D11_BIND_SHADER_RESOURCE;
+  if (description.m_bAllowUAV)
+    out_Tex3DDesc.BindFlags |= D3D11_BIND_UNORDERED_ACCESS;
+
+  if (description.m_bCreateRenderTarget)
+    out_Tex3DDesc.BindFlags |= plGALResourceFormat::IsDepthFormat(description.m_Format) ? D3D11_BIND_DEPTH_STENCIL : D3D11_BIND_RENDER_TARGET;
+
+  out_Tex3DDesc.CPUAccessFlags = 0; // We always use staging textures to update the data
+  out_Tex3DDesc.Usage = description.m_ResourceAccess.IsImmutable() ? D3D11_USAGE_IMMUTABLE : D3D11_USAGE_DEFAULT;
+
+  if (description.m_bCreateRenderTarget || description.m_bAllowUAV)
+    out_Tex3DDesc.Usage = D3D11_USAGE_DEFAULT;
+
+  out_Tex3DDesc.Format = pDXDevice->GetFormatLookupTable().GetFormatInfo(description.m_Format).m_eStorage;
+
+  if (out_Tex3DDesc.Format == DXGI_FORMAT_UNKNOWN)
+  {
+    plLog::Error("No storage format available for given format: {0}", description.m_Format);
+    return PL_FAILURE;
+  }
+
+  out_Tex3DDesc.Width = description.m_uiWidth;
+  out_Tex3DDesc.Height = description.m_uiHeight;
+  out_Tex3DDesc.Depth = description.m_uiDepth;
+  out_Tex3DDesc.MipLevels = description.m_uiMipLevelCount;
+
+  out_Tex3DDesc.MiscFlags = 0;
+
+  if (description.m_bAllowDynamicMipGeneration)
+    out_Tex3DDesc.MiscFlags |= D3D11_RESOURCE_MISC_GENERATE_MIPS;
+
+  if (description.m_Type == plGALTextureType::TextureCube)
+    out_Tex3DDesc.MiscFlags |= D3D11_RESOURCE_MISC_TEXTURECUBE;
+
+  return PL_SUCCESS;
+}
+
+
+void plGALTextureDX11::ConvertInitialData(const plGALTextureCreationDescription& description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plHybridArray<D3D11_SUBRESOURCE_DATA, 16>& out_InitialData)
+{
+  if (!pInitialData.IsEmpty())
+  {
+    plUInt32 uiArraySize = 1;
+    switch (description.m_Type)
+    {
+      case plGALTextureType::Texture2D:
+        uiArraySize = description.m_uiArraySize;
+        break;
+      case plGALTextureType::TextureCube:
+        uiArraySize = description.m_uiArraySize * 6;
+        break;
+      case plGALTextureType::Texture3D:
+      default:
+        break;
+    }
+    const plUInt32 uiInitialDataCount = (description.m_uiMipLevelCount * uiArraySize);
+
+    PL_ASSERT_DEV(pInitialData.GetCount() == uiInitialDataCount, "The array of initial data values is not equal to the amount of mip levels!");
+
+    out_InitialData.SetCountUninitialized(uiInitialDataCount);
+
+    for (plUInt32 i = 0; i < uiInitialDataCount; i++)
+    {
+      out_InitialData[i].pSysMem = pInitialData[i].m_pData;
+      out_InitialData[i].SysMemPitch = pInitialData[i].m_uiRowPitch;
+      out_InitialData[i].SysMemSlicePitch = pInitialData[i].m_uiSlicePitch;
+    }
+  }
 }
 
 plResult plGALTextureDX11::DeInitPlatform(plGALDevice* pDevice)
 {
-  PLASMA_GAL_DX11_RELEASE(m_pDXTexture);
-  PLASMA_GAL_DX11_RELEASE(m_pDXStagingTexture);
-  return PLASMA_SUCCESS;
+  PL_GAL_DX11_RELEASE(m_pDXTexture);
+  PL_GAL_DX11_RELEASE(m_pDXStagingTexture);
+  return PL_SUCCESS;
 }
 
 void plGALTextureDX11::SetDebugNamePlatform(const char* szName) const
@@ -237,20 +244,19 @@ plResult plGALTextureDX11::CreateStagingTexture(plGALDeviceDX11* pDevice)
       if (FAILED(pDevice->GetDXDevice()->CreateTexture2D(&Desc, nullptr, reinterpret_cast<ID3D11Texture2D**>(&m_pDXStagingTexture))))
       {
         plLog::Error("Couldn't create staging resource for data upload and/or read back!");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
 
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_TextureDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Resources_Implementation_TextureDX11);

@@ -44,7 +44,7 @@ plResult plTypeScriptBinding::Init_Debug()
   m_Duk.RegisterGlobalFunction("__CPP_Debug_RegisterCVar", __CPP_Debug_RegisterCVar, 4);
   m_Duk.RegisterGlobalFunctionWithVarArgs("__CPP_Debug_RegisterCFunc", __CPP_Debug_RegisterCFunc);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static int __CPP_Debug_DrawCross(duk_context* pDuk)
@@ -115,11 +115,11 @@ static int __CPP_Debug_DrawBox(duk_context* pDuk)
   switch (duk.GetFunctionMagicValue())
   {
     case 0:
-      plDebugRenderer::DrawLineBox(pWorld, plBoundingBox(vMin, vMax), color, transform);
+      plDebugRenderer::DrawLineBox(pWorld, plBoundingBox::MakeFromMinMax(vMin, vMax), color, transform);
       break;
 
     case 1:
-      plDebugRenderer::DrawSolidBox(pWorld, plBoundingBox(vMin, vMax), color, transform);
+      plDebugRenderer::DrawSolidBox(pWorld, plBoundingBox::MakeFromMinMax(vMin, vMax), color, transform);
       break;
   }
 
@@ -139,7 +139,7 @@ static int __CPP_Debug_DrawSphere(duk_context* pDuk)
   switch (duk.GetFunctionMagicValue())
   {
     case 0:
-      plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere(vCenter, fRadius), color, transform);
+      plDebugRenderer::DrawLineSphere(pWorld, plBoundingSphere::MakeFromCenterAndRadius(vCenter, fRadius), color, transform);
       break;
   }
 
@@ -194,7 +194,6 @@ static int __CPP_Debug_DrawInfoText(duk_context* pDuk)
 static int __CPP_Debug_GetResolution(duk_context* pDuk)
 {
   plDuktapeFunction duk(pDuk);
-  plWorld* pWorld = plTypeScriptBinding::RetrieveWorld(duk);
 
   plVec2 resolution;
 
@@ -252,7 +251,7 @@ static int __CPP_Debug_ReadCVar(duk_context* pDuk)
     }
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnUndefined();
@@ -303,7 +302,7 @@ static int __CPP_Debug_WriteCVar(duk_context* pDuk)
     }
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
   return duk.ReturnVoid();
@@ -328,16 +327,16 @@ static int __CPP_Debug_RegisterCVar(duk_context* pDuk)
   switch (type)
   {
     case plCVarType::Int:
-      pCVar = PLASMA_DEFAULT_NEW(plCVarInt, szVarName, duk.GetIntValue(2), plCVarFlags::Default, szDesc);
+      pCVar = PL_DEFAULT_NEW(plCVarInt, szVarName, duk.GetIntValue(2), plCVarFlags::Default, szDesc);
       break;
     case plCVarType::Float:
-      pCVar = PLASMA_DEFAULT_NEW(plCVarFloat, szVarName, duk.GetFloatValue(2), plCVarFlags::Default, szDesc);
+      pCVar = PL_DEFAULT_NEW(plCVarFloat, szVarName, duk.GetFloatValue(2), plCVarFlags::Default, szDesc);
       break;
     case plCVarType::Bool:
-      pCVar = PLASMA_DEFAULT_NEW(plCVarBool, szVarName, duk.GetBoolValue(2), plCVarFlags::Default, szDesc);
+      pCVar = PL_DEFAULT_NEW(plCVarBool, szVarName, duk.GetBoolValue(2), plCVarFlags::Default, szDesc);
       break;
     case plCVarType::String:
-      pCVar = PLASMA_DEFAULT_NEW(plCVarString, szVarName, duk.GetStringValue(2), plCVarFlags::Default, szDesc);
+      pCVar = PL_DEFAULT_NEW(plCVarString, szVarName, duk.GetStringValue(2), plCVarFlags::Default, szDesc);
       break;
 
     default:
@@ -369,7 +368,7 @@ public:
   plResult Call(plArrayPtr<plVariant> params) override
   {
     m_pBinding->StoreConsoleFuncCall(this, params);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plResult DoCall(const plArrayPtr<plVariant>& params)
@@ -379,13 +378,13 @@ public:
     const plUInt32 uiNumArgs = params.GetCount();
 
     if (uiNumArgs != m_Args.GetCount())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     plDuktapeContext& duk = m_pBinding->GetDukTapeContext();
 
     // accessing the plWorld is the reason why the function call is stored and delayed
     // otherwise this would hang indefinitely
-    PLASMA_LOCK(m_pBinding->GetWorld()->GetWriteMarker());
+    PL_LOCK(m_pBinding->GetWorld()->GetWriteMarker());
 
     for (auto& reg : cm.m_Registered)
     {
@@ -401,7 +400,7 @@ public:
 
       for (plUInt32 arg = 0; arg < uiNumArgs; ++arg)
       {
-        plResult r = PLASMA_FAILURE;
+        plResult r = PL_FAILURE;
 
         switch (m_Args[arg])
         {
@@ -415,13 +414,13 @@ public:
             duk.PushString(params[arg].ConvertTo<plString>(&r).GetData());
             break;
 
-            PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED
+            PL_DEFAULT_CASE_NOT_IMPLEMENTED
         }
 
         if (r.Failed())
         {
           duk.Error(plFmt("Could not convert cfunc argument {} to expected type {}", arg, (int)m_Args[arg]));
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
 
@@ -429,7 +428,7 @@ public:
       duk.PopStack(2);          // [ ]
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plTypeScriptBinding* m_pBinding = nullptr;
@@ -469,7 +468,7 @@ static int __CPP_Debug_RegisterCFunc(duk_context* pDuk)
 
   if (fb1.m_pFunc == nullptr)
   {
-    auto f = PLASMA_DEFAULT_NEW(TsConsoleFunc, szName, szDesc);
+    auto f = PL_DEFAULT_NEW(TsConsoleFunc, szName, szDesc);
     f->m_pBinding = pBinding;
 
     for (plUInt32 arg = 4; arg < duk.GetNumVarArgFunctionParameters(); ++arg)

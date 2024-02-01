@@ -16,9 +16,9 @@ struct plFileStats;
 /// can provided by implementing it as a data directory type.
 /// Data directories are added through plFileSystem, which uses factories to decide which plDataDirectoryType
 /// to use for handling which data directory.
-class PLASMA_FOUNDATION_DLL plDataDirectoryType
+class PL_FOUNDATION_DLL plDataDirectoryType
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryType);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryType);
 
 public:
   plDataDirectoryType() = default;
@@ -94,7 +94,7 @@ protected:
   /// \brief This function should only be used by a Factory (which should be a static function in the respective plDataDirectoryType).
   ///
   /// It is used to initialize the data directory. If this plDataDirectoryType cannot handle the given type,
-  /// it must return PLASMA_FAILURE and the Factory needs to clean it up properly.
+  /// it must return PL_FAILURE and the Factory needs to clean it up properly.
   virtual plResult InternalInitializeDataDirectory(plStringView sDirectory) = 0;
 
   /// \brief Derived classes can use 'GetDataDirectoryPath' to access this data.
@@ -106,9 +106,9 @@ protected:
 /// \brief This is the base class for all data directory readers/writers.
 ///
 /// Different data directory types (ZIP file, simple folder, etc.) use different reader/writer types.
-class PLASMA_FOUNDATION_DLL plDataDirectoryReaderWriterBase
+class PL_FOUNDATION_DLL plDataDirectoryReaderWriterBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryReaderWriterBase);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryReaderWriterBase);
 
 public:
   /// \brief The derived class should pass along whether it is a reader or writer.
@@ -152,9 +152,9 @@ protected:
 /// \brief A base class for readers that handle reading from a (virtual) file inside a data directory.
 ///
 /// Different data directory types (ZIP file, simple folder, etc.) use different reader/writer types.
-class PLASMA_FOUNDATION_DLL plDataDirectoryReader : public plDataDirectoryReaderWriterBase
+class PL_FOUNDATION_DLL plDataDirectoryReader : public plDataDirectoryReaderWriterBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryReader);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryReader);
 
 public:
   plDataDirectoryReader(plInt32 iDataDirUserData)
@@ -168,9 +168,9 @@ public:
 /// \brief A base class for writers that handle writing to a (virtual) file inside a data directory.
 ///
 /// Different data directory types (ZIP file, simple folder, etc.) use different reader/writer types.
-class PLASMA_FOUNDATION_DLL plDataDirectoryWriter : public plDataDirectoryReaderWriterBase
+class PL_FOUNDATION_DLL plDataDirectoryWriter : public plDataDirectoryReaderWriterBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryWriter);
+  PL_DISALLOW_COPY_AND_ASSIGN(plDataDirectoryWriter);
 
 public:
   plDataDirectoryWriter(plInt32 iDataDirUserData)

@@ -10,26 +10,26 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltShapeBoxComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltShapeBoxComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("HalfExtents", GetHalfExtents, SetHalfExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(0.5f)), new plClampValueAttribute(plVec3(0), plVariant())),
+    PL_ACCESSOR_PROPERTY("HalfExtents", GetHalfExtents, SetHalfExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(0.5f)), new plClampValueAttribute(plVec3(0), plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plBoxManipulatorAttribute("HalfExtents", 2.0f, true),
     new plBoxVisualizerAttribute("HalfExtents", 2.0f),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltShapeBoxComponent::plJoltShapeBoxComponent() = default;
@@ -54,7 +54,7 @@ void plJoltShapeBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 
 void plJoltShapeBoxComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
 {
-  msg.AddBounds(plBoundingBoxSphere(plBoundingBox(-m_vHalfExtents, m_vHalfExtents)), plInvalidSpatialDataCategory);
+  msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vHalfExtents, m_vHalfExtents)), plInvalidSpatialDataCategory);
 }
 
 void plJoltShapeBoxComponent::ExtractGeometry(plMsgExtractGeometry& ref_msg) const
@@ -64,7 +64,7 @@ void plJoltShapeBoxComponent::ExtractGeometry(plMsgExtractGeometry& ref_msg) con
 
 void plJoltShapeBoxComponent::SetHalfExtents(const plVec3& value)
 {
-  m_vHalfExtents = value.CompMax(plVec3::ZeroVector());
+  m_vHalfExtents = value.CompMax(plVec3::MakeZero());
 
   if (IsActiveAndInitialized())
   {
@@ -88,9 +88,9 @@ void plJoltShapeBoxComponent::CreateShapes(plDynamicArray<plJoltSubShape>& out_S
 
   plJoltSubShape& sub = out_Shapes.ExpandAndGetRef();
   sub.m_pShape = pNewShape;
-  sub.m_Transform.SetLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
+  sub.m_Transform = plTransform::MakeLocalTransform(rootTransform, GetOwner()->GetGlobalTransform());
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeBoxComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeBoxComponent);
 

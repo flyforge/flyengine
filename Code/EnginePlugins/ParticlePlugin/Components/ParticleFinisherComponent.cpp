@@ -29,20 +29,20 @@ void plParticleFinisherComponentManager::UpdateBounds()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plParticleFinisherComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plParticleFinisherComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plHiddenAttribute,
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plParticleFinisherComponent::plParticleFinisherComponent() = default;
@@ -55,15 +55,15 @@ void plParticleFinisherComponent::OnDeactivated()
   plRenderComponent::OnDeactivated();
 }
 
-plResult plParticleFinisherComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg)
+plResult plParticleFinisherComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
   if (m_EffectController.IsAlive())
   {
-    m_EffectController.GetBoundingVolume(bounds);
-    return PLASMA_SUCCESS;
+    m_EffectController.GetBoundingVolume(ref_bounds);
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plParticleFinisherComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -89,3 +89,7 @@ void plParticleFinisherComponent::UpdateBounds()
     GetWorld()->DeleteObjectDelayed(GetOwner()->GetHandle());
   }
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Components_ParticleFinisherComponent);
+

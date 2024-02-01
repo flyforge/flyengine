@@ -5,8 +5,8 @@ plArrayBase<T, Derived>::plArrayBase() = default;
 template <typename T, typename Derived>
 plArrayBase<T, Derived>::~plArrayBase()
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount == 0, "The derived class did not destruct all objects. Count is {0}.", m_uiCount);
-  PLASMA_ASSERT_DEBUG(m_pElements == nullptr, "The derived class did not free its memory.");
+  PL_ASSERT_DEBUG(m_uiCount == 0, "The derived class did not destruct all objects. Count is {0}.", m_uiCount);
+  PL_ASSERT_DEBUG(m_pElements == nullptr, "The derived class did not free its memory.");
 }
 
 template <typename T, typename Derived>
@@ -17,7 +17,7 @@ void plArrayBase<T, Derived>::operator=(const plArrayPtr<const T>& rhs)
     if (m_uiCount == rhs.GetCount())
       return;
 
-    PLASMA_ASSERT_DEV(m_uiCount > rhs.GetCount(), "Dangling array pointer. The given array pointer points to invalid memory.");
+    PL_ASSERT_DEV(m_uiCount > rhs.GetCount(), "Dangling array pointer. The given array pointer points to invalid memory.");
     T* pElements = static_cast<Derived*>(this)->GetElementsPtr();
     plMemoryUtils::Destruct(pElements + rhs.GetCount(), m_uiCount - rhs.GetCount());
     m_uiCount = rhs.GetCount();
@@ -45,17 +45,33 @@ void plArrayBase<T, Derived>::operator=(const plArrayPtr<const T>& rhs)
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayBase<T, Derived>::operator plArrayPtr<const T>() const
+PL_ALWAYS_INLINE plArrayBase<T, Derived>::operator plArrayPtr<const T>() const
 {
   return plArrayPtr<const T>(static_cast<const Derived*>(this)->GetElementsPtr(), m_uiCount);
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayBase<T, Derived>::operator plArrayPtr<T>()
+PL_ALWAYS_INLINE plArrayBase<T, Derived>::operator plArrayPtr<T>()
 {
   return plArrayPtr<T>(static_cast<Derived*>(this)->GetElementsPtr(), m_uiCount);
 }
 
+template <typename T, typename Derived>
+bool plArrayBase<T, Derived>::operator==(const plArrayBase<T, Derived>& rhs) const
+{
+  if (m_uiCount != rhs.GetCount())
+    return false;
+
+  return plMemoryUtils::IsEqual(static_cast<const Derived*>(this)->GetElementsPtr(), rhs.GetData(), m_uiCount);
+}
+
+template <typename T, typename Derived>
+PL_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator<(const plArrayBase<T, Derived>& rhs) const
+{
+  return GetArrayPtr() < rhs.GetArrayPtr();
+}
+
+#if PL_DISABLED(PL_USE_CPP20_OPERATORS)
 template <typename T, typename Derived>
 bool plArrayBase<T, Derived>::operator==(const plArrayPtr<const T>& rhs) const
 {
@@ -64,30 +80,25 @@ bool plArrayBase<T, Derived>::operator==(const plArrayPtr<const T>& rhs) const
 
   return plMemoryUtils::IsEqual(static_cast<const Derived*>(this)->GetElementsPtr(), rhs.GetPtr(), m_uiCount);
 }
+#endif
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator!=(const plArrayPtr<const T>& rhs) const
-{
-  return !(*this == rhs);
-}
-
-template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator<(const plArrayPtr<const T>& rhs) const
+PL_ALWAYS_INLINE bool plArrayBase<T, Derived>::operator<(const plArrayPtr<const T>& rhs) const
 {
   return GetArrayPtr() < rhs;
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE const T& plArrayBase<T, Derived>::operator[](const plUInt32 uiIndex) const
+PL_ALWAYS_INLINE const T& plArrayBase<T, Derived>::operator[](const plUInt32 uiIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
   return static_cast<const Derived*>(this)->GetElementsPtr()[uiIndex];
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE T& plArrayBase<T, Derived>::operator[](const plUInt32 uiIndex)
+PL_ALWAYS_INLINE T& plArrayBase<T, Derived>::operator[](const plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEBUG(uiIndex < m_uiCount, "Out of bounds access. Array has {0} elements, trying to access element at index {1}.", m_uiCount, uiIndex);
   return static_cast<Derived*>(this)->GetElementsPtr()[uiIndex];
 }
 
@@ -100,7 +111,7 @@ void plArrayBase<T, Derived>::SetCount(plUInt32 uiCount)
   if (uiNewCount > uiOldCount)
   {
     static_cast<Derived*>(this)->Reserve(uiNewCount);
-    plMemoryUtils::DefaultConstruct(static_cast<Derived*>(this)->GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
+    plMemoryUtils::Construct<ConstructAll>(static_cast<Derived*>(this)->GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
   }
   else if (uiNewCount < uiOldCount)
   {
@@ -150,24 +161,21 @@ void plArrayBase<T, Derived>::SetCountUninitialized(plUInt32 uiCount)
   if (uiNewCount > uiOldCount)
   {
     static_cast<Derived*>(this)->Reserve(uiNewCount);
-    plMemoryUtils::Construct(static_cast<Derived*>(this)->GetElementsPtr() + uiOldCount, uiNewCount - uiOldCount);
-  }
-  else if (uiNewCount < uiOldCount)
-  {
-    plMemoryUtils::Destruct(static_cast<Derived*>(this)->GetElementsPtr() + uiNewCount, uiOldCount - uiNewCount);
+    // we already assert above that T is a POD type
+    // don't construct anything, leave the memory untouched
   }
 
   m_uiCount = uiCount;
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plUInt32 plArrayBase<T, Derived>::GetCount() const
+PL_ALWAYS_INLINE plUInt32 plArrayBase<T, Derived>::GetCount() const
 {
   return m_uiCount;
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE bool plArrayBase<T, Derived>::IsEmpty() const
+PL_ALWAYS_INLINE bool plArrayBase<T, Derived>::IsEmpty() const
 {
   return m_uiCount == 0;
 }
@@ -188,7 +196,7 @@ bool plArrayBase<T, Derived>::Contains(const T& value) const
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::Insert(const T& value, plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
 
   static_cast<Derived*>(this)->Reserve(m_uiCount + 1);
 
@@ -199,7 +207,7 @@ void plArrayBase<T, Derived>::Insert(const T& value, plUInt32 uiIndex)
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::Insert(T&& value, plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
+  PL_ASSERT_DEV(uiIndex <= m_uiCount, "Invalid index. Array has {0} elements, trying to insert element at index {1}.", m_uiCount, uiIndex);
 
   static_cast<Derived*>(this)->Reserve(m_uiCount + 1);
 
@@ -244,7 +252,7 @@ bool plArrayBase<T, Derived>::RemoveAndSwap(const T& value)
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::RemoveAtAndCopy(plUInt32 uiIndex, plUInt32 uiNumElements /*= 1*/)
 {
-  PLASMA_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
+  PL_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
 
   T* pElements = static_cast<Derived*>(this)->GetElementsPtr();
 
@@ -255,7 +263,7 @@ void plArrayBase<T, Derived>::RemoveAtAndCopy(plUInt32 uiIndex, plUInt32 uiNumEl
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::RemoveAtAndSwap(plUInt32 uiIndex, plUInt32 uiNumElements /*= 1*/)
 {
-  PLASMA_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
+  PL_ASSERT_DEV(uiIndex + uiNumElements <= m_uiCount, "Out of bounds access. Array has {0} elements, trying to remove element at index {1}.", m_uiCount, uiIndex + uiNumElements - 1);
 
   T* pElements = static_cast<Derived*>(this)->GetElementsPtr();
 
@@ -305,7 +313,7 @@ T& plArrayBase<T, Derived>::ExpandAndGetRef()
 
   T* pElements = static_cast<Derived*>(this)->GetElementsPtr();
 
-  plMemoryUtils::Construct(pElements + m_uiCount, 1);
+  plMemoryUtils::Construct<SkipTrivialTypes>(pElements + m_uiCount, 1);
 
   T& ReturnRef = *(pElements + m_uiCount);
 
@@ -342,7 +350,7 @@ void plArrayBase<T, Derived>::PushBack(T&& value)
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::PushBackUnchecked(const T& value)
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
+  PL_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
 
   plMemoryUtils::CopyConstruct(static_cast<Derived*>(this)->GetElementsPtr() + m_uiCount, value, 1);
   m_uiCount++;
@@ -351,7 +359,7 @@ void plArrayBase<T, Derived>::PushBackUnchecked(const T& value)
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::PushBackUnchecked(T&& value)
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
+  PL_ASSERT_DEBUG(m_uiCount < m_uiCapacity, "Appending unchecked to array with insufficient capacity.");
 
   plMemoryUtils::MoveConstruct<T>(static_cast<Derived*>(this)->GetElementsPtr() + m_uiCount, std::move(value));
   m_uiCount++;
@@ -370,23 +378,23 @@ void plArrayBase<T, Derived>::PushBackRange(const plArrayPtr<const T>& range)
 template <typename T, typename Derived>
 void plArrayBase<T, Derived>::PopBack(plUInt32 uiCountToRemove /* = 1 */)
 {
-  PLASMA_ASSERT_DEV(m_uiCount >= uiCountToRemove, "Out of bounds access. Array has {0} elements, trying to pop {1} elements.", m_uiCount, uiCountToRemove);
+  PL_ASSERT_DEV(m_uiCount >= uiCountToRemove, "Out of bounds access. Array has {0} elements, trying to pop {1} elements.", m_uiCount, uiCountToRemove);
 
   m_uiCount -= uiCountToRemove;
   plMemoryUtils::Destruct(static_cast<Derived*>(this)->GetElementsPtr() + m_uiCount, uiCountToRemove);
 }
 
 template <typename T, typename Derived>
-PLASMA_FORCE_INLINE T& plArrayBase<T, Derived>::PeekBack()
+PL_FORCE_INLINE T& plArrayBase<T, Derived>::PeekBack()
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
+  PL_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
   return static_cast<Derived*>(this)->GetElementsPtr()[m_uiCount - 1];
 }
 
 template <typename T, typename Derived>
-PLASMA_FORCE_INLINE const T& plArrayBase<T, Derived>::PeekBack() const
+PL_FORCE_INLINE const T& plArrayBase<T, Derived>::PeekBack() const
 {
-  PLASMA_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
+  PL_ASSERT_DEBUG(m_uiCount > 0, "Out of bounds access. Trying to peek into an empty array.");
   return static_cast<const Derived*>(this)->GetElementsPtr()[m_uiCount - 1];
 }
 
@@ -412,7 +420,7 @@ void plArrayBase<T, Derived>::Sort()
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE T* plArrayBase<T, Derived>::GetData()
+PL_ALWAYS_INLINE T* plArrayBase<T, Derived>::GetData()
 {
   if (IsEmpty())
     return nullptr;
@@ -421,7 +429,7 @@ PLASMA_ALWAYS_INLINE T* plArrayBase<T, Derived>::GetData()
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE const T* plArrayBase<T, Derived>::GetData() const
+PL_ALWAYS_INLINE const T* plArrayBase<T, Derived>::GetData() const
 {
   if (IsEmpty())
     return nullptr;
@@ -430,25 +438,25 @@ PLASMA_ALWAYS_INLINE const T* plArrayBase<T, Derived>::GetData() const
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayPtr<T> plArrayBase<T, Derived>::GetArrayPtr()
+PL_ALWAYS_INLINE plArrayPtr<T> plArrayBase<T, Derived>::GetArrayPtr()
 {
   return plArrayPtr<T>(GetData(), GetCount());
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayPtr<const T> plArrayBase<T, Derived>::GetArrayPtr() const
+PL_ALWAYS_INLINE plArrayPtr<const T> plArrayBase<T, Derived>::GetArrayPtr() const
 {
   return plArrayPtr<const T>(GetData(), GetCount());
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<T>::ByteType> plArrayBase<T, Derived>::GetByteArrayPtr()
+PL_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<T>::ByteType> plArrayBase<T, Derived>::GetByteArrayPtr()
 {
   return GetArrayPtr().ToByteArray();
 }
 
 template <typename T, typename Derived>
-PLASMA_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<const T>::ByteType> plArrayBase<T, Derived>::GetByteArrayPtr() const
+PL_ALWAYS_INLINE plArrayPtr<typename plArrayPtr<const T>::ByteType> plArrayBase<T, Derived>::GetByteArrayPtr() const
 {
   return GetArrayPtr().ToByteArray();
 }

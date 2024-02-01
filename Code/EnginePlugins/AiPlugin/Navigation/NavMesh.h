@@ -20,7 +20,7 @@ class dtNavMesh;
 /// \brief Stores indices for a triangle.
 struct plAiNavMeshTriangle final
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plAiNavMeshTriangle() = default;
   plAiNavMeshTriangle(plInt32 a, plInt32 b, plInt32 c)
@@ -66,9 +66,9 @@ struct plAiNavMeshSector final
 /// To do a path search, use plAiNavigation.
 /// Since the navmesh is built in the background, a path search may need to run for multiple frames,
 /// before it can return any result.
-class PLASMA_AIPLUGIN_DLL plAiNavMesh final
+class PL_AIPLUGIN_DLL plAiNavMesh final
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAiNavMesh);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAiNavMesh);
 
 public:
   plAiNavMesh(plUInt32 uiNumSectorsX, plUInt32 uiNumSectorsY, float fSectorMetersXY, const plAiNavmeshConfig& navmeshConfig);

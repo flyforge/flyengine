@@ -3,14 +3,14 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Logging/Log.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
 #endif
 
 
 #define VULKAN_HPP_NO_NODISCARD_WARNINGS // TODO: temporarily disable warnings to make it compile. Need to fix all the warnings later.
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
 #  define VK_USE_PLATFORM_XCB_KHR
 #endif
 

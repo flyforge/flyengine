@@ -9,7 +9,7 @@
 ///
 /// Initialize it using SetCommandLine(). Then query for command line options using GetStringOption(), GetBoolOption(), GetIntOption()
 /// or GetFloatOption()
-class PLASMA_FOUNDATION_DLL plCommandLineUtils
+class PL_FOUNDATION_DLL plCommandLineUtils
 {
 public:
   enum ArgMode
@@ -35,7 +35,7 @@ public:
   /// \brief Initializes plCommandLineUtils from a list of already split up commands.
   void SetCommandLine(plArrayPtr<plString> commands);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   /// \brief Initializes plCommandLineUtils by querying the command line parameters directly from the OS.
   ///
   /// This function is not available on all platforms.

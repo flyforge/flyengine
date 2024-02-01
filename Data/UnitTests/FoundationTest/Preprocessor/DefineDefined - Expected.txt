@@ -1,3 +1,0 @@
-Processing failed
-Preprocessor/DefineDefined.txt: Line 5 [3]: Error: Macro name 'defined' is reserved
-Log: 'File 'Preprocessor/DefineDefined.txt', Line 5 (3): Macro name 'defined' is reserved'

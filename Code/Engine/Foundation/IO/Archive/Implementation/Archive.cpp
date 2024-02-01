@@ -27,7 +27,7 @@ plUInt32 plArchiveTOC::FindEntry(plStringView sFile) const
   if (!m_PathToEntryIndex.TryGetValue(lookup, uiIndex))
     return plInvalidIndex;
 
-  PLASMA_ASSERT_DEBUG(sFile.IsEqual_NoCase(GetEntryPathString(uiIndex)), "Hash table corruption detected.");
+  PL_ASSERT_DEBUG(sFile.IsEqual_NoCase(GetEntryPathString(uiIndex)), "Hash table corruption detected.");
   return uiIndex;
 }
 
@@ -40,17 +40,17 @@ plResult plArchiveTOC::Serialize(plStreamWriter& inout_stream) const
 {
   inout_stream.WriteVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Entries));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Entries));
 
   // write the hash of a known string to the archive, to detect hash function changes
   plUInt64 uiStringHash = plHashingUtils::StringHash("plArchive");
   inout_stream << uiStringHash;
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteHashTable(m_PathToEntryIndex));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteHashTable(m_PathToEntryIndex));
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_AllPathStrings));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_AllPathStrings));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 struct plOldTempHashedString
@@ -60,7 +60,7 @@ struct plOldTempHashedString
   plResult Deserialize(plStreamReader& r)
   {
     r >> m_uiHash;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   bool operator==(const plOldTempHashedString& rhs) const
@@ -82,12 +82,12 @@ struct plHashHelper<plOldTempHashedString>
 
 plResult plArchiveTOC::Deserialize(plStreamReader& inout_stream, plUInt8 uiArchiveVersion)
 {
-  PLASMA_ASSERT_ALWAYS(uiArchiveVersion <= 4, "Unsupported archive version {}", uiArchiveVersion);
+  PL_ASSERT_ALWAYS(uiArchiveVersion <= 4, "Unsupported archive version {}", uiArchiveVersion);
 
   // we don't use the TOC version anymore, but the archive version instead
   const plTypeVersion version = inout_stream.ReadVersion(2);
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Entries));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Entries));
 
   bool bRecreateStringHashes = true;
 
@@ -95,7 +95,7 @@ plResult plArchiveTOC::Deserialize(plStreamReader& inout_stream, plUInt8 uiArchi
   {
     // read and discard the data, it is regenerated below
     plHashTable<plOldTempHashedString, plUInt32> m_PathToIndex;
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(m_PathToIndex));
+    PL_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(m_PathToIndex));
   }
   else
   {
@@ -111,10 +111,10 @@ plResult plArchiveTOC::Deserialize(plStreamReader& inout_stream, plUInt8 uiArchi
       }
     }
 
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(m_PathToEntryIndex));
+    PL_SUCCEED_OR_RETURN(inout_stream.ReadHashTable(m_PathToEntryIndex));
   }
 
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_AllPathStrings));
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_AllPathStrings));
 
   if (bRecreateStringHashes)
   {
@@ -148,7 +148,7 @@ plResult plArchiveTOC::Deserialize(plStreamReader& inout_stream, plUInt8 uiArchi
       m_PathToEntryIndex.Insert(plArchiveStoredString(uiLowerCaseHash, uiSrcStringOffset), i);
 
       // Verify that the conversion worked
-      PLASMA_ASSERT_DEBUG(FindEntry(sEntryString) == i, "Hashed path retrieval did not yield inserted index");
+      PL_ASSERT_DEBUG(FindEntry(sEntryString) == i, "Hashed path retrieval did not yield inserted index");
     }
   }
 
@@ -156,10 +156,10 @@ plResult plArchiveTOC::Deserialize(plStreamReader& inout_stream, plUInt8 uiArchi
   if (m_AllPathStrings.IsEmpty() || m_AllPathStrings.PeekBack() != '\0')
   {
     plLog::Error("Archive is corrupt. Invalid string data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveEntry::Serialize(plStreamWriter& inout_stream) const
@@ -170,7 +170,7 @@ plResult plArchiveEntry::Serialize(plStreamWriter& inout_stream) const
   inout_stream << (plUInt8)m_CompressionMode;
   inout_stream << m_uiPathStringOffset;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plArchiveEntry::Deserialize(plStreamReader& inout_stream)
@@ -183,8 +183,7 @@ plResult plArchiveEntry::Deserialize(plStreamReader& inout_stream)
   m_CompressionMode = (plArchiveCompressionMode)uiCompressionMode;
   inout_stream >> m_uiPathStringOffset;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Archive_Implementation_Archive);

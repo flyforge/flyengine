@@ -7,9 +7,9 @@
 #include <Foundation/Types/UniquePtr.h>
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plAnimGraph
+class PL_RENDERERCORE_DLL plAnimGraph
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plAnimGraph);
+  PL_DISALLOW_COPY_AND_ASSIGN(plAnimGraph);
 
 public:
   plAnimGraph();

@@ -6,7 +6,7 @@
 
 #ifdef BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#  if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 // We compile Lua as C++ under UWP so we need to include the headers directly
 // to prevent the addition of extern "C" done by lua.hpp.
 #    include <Lua/lauxlib.h>
@@ -29,9 +29,9 @@
 ///
 /// \note Lua starts counting at 1, not at 0. However plLuaWrapper does NOT do this, but uses the C++ convention instead!
 /// That means, when you query the first parameter or return-value passed to your function, you need to query for value 0, not for value 1.
-class PLASMA_CORE_DLL plLuaWrapper
+class PL_CORE_DLL plLuaWrapper
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plLuaWrapper);
+  PL_DISALLOW_COPY_AND_ASSIGN(plLuaWrapper);
 
 public:
   /// \name Setting up the Script
@@ -77,7 +77,7 @@ public:
   /// Opens the Lua-Table with the given name for reading and writing.
   ///
   /// All following calls to functions that read/write variables are working in the scope of the last opened table.
-  /// The table to open needs to be in scope itself. Returns PLASMA_FAILURE, if it's not possible (the table does not exist in this scope).
+  /// The table to open needs to be in scope itself. Returns PL_FAILURE, if it's not possible (the table does not exist in this scope).
   plResult OpenTable(const char* szTable); // [tested]
 
   /// Opens the Table n, that was passed to a C-Function on its Parameter-Stack.
@@ -160,7 +160,7 @@ public:
   /// You must pass in how many return values you expect from this function and the function must stick to that, otherwise an assert will
   /// trigger. After you are finished inspecting the return values, you need to call DiscardReturnValues() to clean them up.
   ///
-  /// Returns PLASMA_FAILURE if anything went wrong during function execution. Reports errors via \a pLogInterface.
+  /// Returns PL_FAILURE if anything went wrong during function execution. Reports errors via \a pLogInterface.
   plResult CallPreparedFunction(plUInt32 uiExpectedReturnValues = 0, plLogInterface* pLogInterface = nullptr); // [tested]
 
   /// Call this after you called a prepared Lua-function, that returned some values. If zero values were returned, this function is
@@ -318,25 +318,22 @@ private:
   struct plScriptStates
   {
     plScriptStates()
-      : m_iParametersPushed(0)
-      , m_iOpenTables(0)
-      , m_iLuaReturnValues(0)
-    {
-    }
+
+      = default;
 
     /// How many Parameters were pushed for the next function-call.
-    plInt32 m_iParametersPushed;
+    plInt32 m_iParametersPushed = 0;
 
     /// How many Tables have been opened inside the Lua-Script.
-    plInt32 m_iOpenTables;
+    plInt32 m_iOpenTables = 0;
 
     /// How many values the called Lua-function should return
-    plInt32 m_iLuaReturnValues;
+    plInt32 m_iLuaReturnValues = 0;
   };
 
   plScriptStates m_States;
 
-  static const plInt32 s_iParamOffset = 1; // should be one, to start counting at 0, instead of 1
+  static constexpr plInt32 s_iParamOffset = 1; // should be one, to start counting at 0, instead of 1
 };
 
 #  include <Core/Scripting/LuaWrapper/LuaWrapper.inl>

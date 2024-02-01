@@ -7,6 +7,7 @@ plString64 plOSFile::s_sUserDataPath;
 plString64 plOSFile::s_sTempDataPath;
 plString64 plOSFile::s_sUserDocumentsPath;
 plAtomicInteger32 plOSFile::s_iFileCounter;
+
 plOSFile::Event plOSFile::s_FileEvents;
 
 plFileStats::plFileStats() = default;
@@ -33,8 +34,8 @@ plResult plOSFile::Open(plStringView sFile, plFileOpenMode::Enum openMode, plFil
 {
   m_iFileID = s_iFileCounter.Increment();
 
-  PLASMA_ASSERT_DEV(openMode >= plFileOpenMode::Read && openMode <= plFileOpenMode::Append, "Invalid Mode");
-  PLASMA_ASSERT_DEV(!IsOpen(), "The file has already been opened.");
+  PL_ASSERT_DEV(openMode >= plFileOpenMode::Read && openMode <= plFileOpenMode::Append, "Invalid Mode");
+  PL_ASSERT_DEV(!IsOpen(), "The file has already been opened.");
 
   const plTime t0 = plTime::Now();
 
@@ -42,7 +43,7 @@ plResult plOSFile::Open(plStringView sFile, plFileOpenMode::Enum openMode, plFil
   m_sFileName.MakeCleanPath();
   m_sFileName.MakePathSeparatorsNative();
 
-  plResult Res = PLASMA_FAILURE;
+  plResult Res = PL_FAILURE;
 
   if (!m_sFileName.IsAbsolutePath())
     goto done;
@@ -52,14 +53,14 @@ plResult plOSFile::Open(plStringView sFile, plFileOpenMode::Enum openMode, plFil
 
     if (openMode == plFileOpenMode::Write || openMode == plFileOpenMode::Append)
     {
-      PLASMA_SUCCEED_OR_RETURN(CreateDirectoryStructure(sFolder.GetData()));
+      PL_SUCCEED_OR_RETURN(CreateDirectoryStructure(sFolder.GetData()));
     }
   }
 
-  if (InternalOpen(m_sFileName.GetData(), openMode, fileShareMode) == PLASMA_SUCCESS)
+  if (InternalOpen(m_sFileName.GetData(), openMode, fileShareMode) == PL_SUCCESS)
   {
     m_FileMode = openMode;
-    Res = PLASMA_SUCCESS;
+    Res = PL_SUCCESS;
     goto done;
   }
 
@@ -72,7 +73,7 @@ done:
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_FileMode = openMode;
   e.m_iFileID = m_iFileID;
@@ -116,8 +117,8 @@ void plOSFile::Close()
 
 plResult plOSFile::Write(const void* pBuffer, plUInt64 uiBytes)
 {
-  PLASMA_ASSERT_DEV((m_FileMode == plFileOpenMode::Write) || (m_FileMode == plFileOpenMode::Append), "The file is not opened for writing.");
-  PLASMA_ASSERT_DEV(pBuffer != nullptr, "pBuffer must not be nullptr.");
+  PL_ASSERT_DEV((m_FileMode == plFileOpenMode::Write) || (m_FileMode == plFileOpenMode::Append), "The file is not opened for writing.");
+  PL_ASSERT_DEV(pBuffer != nullptr, "pBuffer must not be nullptr.");
 
   const plTime t0 = plTime::Now();
 
@@ -127,7 +128,7 @@ plResult plOSFile::Write(const void* pBuffer, plUInt64 uiBytes)
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = m_iFileID;
   e.m_sFile = m_sFileName;
@@ -141,8 +142,8 @@ plResult plOSFile::Write(const void* pBuffer, plUInt64 uiBytes)
 
 plUInt64 plOSFile::Read(void* pBuffer, plUInt64 uiBytes)
 {
-  PLASMA_ASSERT_DEV(m_FileMode == plFileOpenMode::Read, "The file is not opened for reading.");
-  PLASMA_ASSERT_DEV(pBuffer != nullptr, "pBuffer must not be nullptr.");
+  PL_ASSERT_DEV(m_FileMode == plFileOpenMode::Read, "The file is not opened for reading.");
+  PL_ASSERT_DEV(pBuffer != nullptr, "pBuffer must not be nullptr.");
 
   const plTime t0 = plTime::Now();
 
@@ -166,7 +167,7 @@ plUInt64 plOSFile::Read(void* pBuffer, plUInt64 uiBytes)
 
 plUInt64 plOSFile::ReadAll(plDynamicArray<plUInt8>& out_fileContent)
 {
-  PLASMA_ASSERT_DEV(m_FileMode == plFileOpenMode::Read, "The file is not opened for reading.");
+  PL_ASSERT_DEV(m_FileMode == plFileOpenMode::Read, "The file is not opened for reading.");
 
   out_fileContent.Clear();
   out_fileContent.SetCountUninitialized((plUInt32)GetFileSize());
@@ -181,22 +182,22 @@ plUInt64 plOSFile::ReadAll(plDynamicArray<plUInt8>& out_fileContent)
 
 plUInt64 plOSFile::GetFilePosition() const
 {
-  PLASMA_ASSERT_DEV(IsOpen(), "The file must be open to tell the file pointer position.");
+  PL_ASSERT_DEV(IsOpen(), "The file must be open to tell the file pointer position.");
 
   return InternalGetFilePosition();
 }
 
 void plOSFile::SetFilePosition(plInt64 iDistance, plFileSeekMode::Enum pos) const
 {
-  PLASMA_ASSERT_DEV(IsOpen(), "The file must be open to tell the file pointer position.");
-  PLASMA_ASSERT_DEV(m_FileMode != plFileOpenMode::Append, "SetFilePosition is not possible on files that were opened for appending.");
+  PL_ASSERT_DEV(IsOpen(), "The file must be open to tell the file pointer position.");
+  PL_ASSERT_DEV(m_FileMode != plFileOpenMode::Append, "SetFilePosition is not possible on files that were opened for appending.");
 
   return InternalSetFilePosition(iDistance, pos);
 }
 
 plUInt64 plOSFile::GetFileSize() const
 {
-  PLASMA_ASSERT_DEV(IsOpen(), "The file must be open to tell the file size.");
+  PL_ASSERT_DEV(IsOpen(), "The file must be open to tell the file size.");
 
   const plInt64 iCurPos = static_cast<plInt64>(GetFilePosition());
 
@@ -259,7 +260,7 @@ bool plOSFile::ExistsDirectory(plStringView sDirectory)
   s.MakeCleanPath();
   s.MakePathSeparatorsNative();
 
-  PLASMA_ASSERT_DEV(s.IsAbsolutePath(), "Path must be absolute");
+  PL_ASSERT_DEV(s.IsAbsolutePath(), "Path must be absolute");
 
   const bool bRes = InternalExistsDirectory(s);
 
@@ -279,6 +280,29 @@ bool plOSFile::ExistsDirectory(plStringView sDirectory)
   return bRes;
 }
 
+void plOSFile::FindFreeFilename(plStringBuilder& inout_sPath, plStringView sSuffix /*= {}*/)
+{
+  PL_ASSERT_DEV(!inout_sPath.IsEmpty() && inout_sPath.IsAbsolutePath(), "Invalid input path.");
+
+  if (!plOSFile::ExistsFile(inout_sPath))
+    return;
+
+  const plString orgName = inout_sPath.GetFileName();
+
+  plStringBuilder newName;
+
+  for (plUInt32 i = 1; i < 100000; ++i)
+  {
+    newName.SetFormat("{}{}{}", orgName, sSuffix, i);
+
+    inout_sPath.ChangeFileName(newName);
+    if (!plOSFile::ExistsFile(inout_sPath))
+      return;
+  }
+
+  PL_REPORT_FAILURE("Something went wrong.");
+}
+
 plResult plOSFile::DeleteFile(plStringView sFile)
 {
   const plTime t0 = plTime::Now();
@@ -293,7 +317,7 @@ plResult plOSFile::DeleteFile(plStringView sFile)
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = s_iFileCounter.Increment();
   e.m_sFile = sFile;
@@ -312,13 +336,13 @@ plResult plOSFile::CreateDirectoryStructure(plStringView sDirectory)
   s.MakeCleanPath();
   s.MakePathSeparatorsNative();
 
-  PLASMA_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
+  PL_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
 
   plStringBuilder sCurPath;
 
   auto it = s.GetIteratorFront();
 
-  plResult Res = PLASMA_SUCCESS;
+  plResult Res = PL_SUCCESS;
 
   while (it.IsValid())
   {
@@ -331,9 +355,9 @@ plResult plOSFile::CreateDirectoryStructure(plStringView sDirectory)
     sCurPath.Append(it.GetCharacter());
     ++it;
 
-    if (InternalCreateDirectory(sCurPath.GetData()) == PLASMA_FAILURE)
+    if (InternalCreateDirectory(sCurPath.GetData()) == PL_FAILURE)
     {
-      Res = PLASMA_FAILURE;
+      Res = PL_FAILURE;
       break;
     }
   }
@@ -342,7 +366,7 @@ plResult plOSFile::CreateDirectoryStructure(plStringView sDirectory)
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = s_iFileCounter.Increment();
   e.m_sFile = sDirectory;
@@ -372,13 +396,13 @@ plResult plOSFile::CopyFile(plStringView sSource, plStringView sDestination)
 
   plOSFile SrcFile, DstFile;
 
-  plResult Res = PLASMA_FAILURE;
+  plResult Res = PL_FAILURE;
 
-  if (SrcFile.Open(sSource, plFileOpenMode::Read) == PLASMA_FAILURE)
+  if (SrcFile.Open(sSource, plFileOpenMode::Read) == PL_FAILURE)
     goto done;
 
   DstFile.m_bRetryOnSharingViolation = false;
-  if (DstFile.Open(sDestination, plFileOpenMode::Write) == PLASMA_FAILURE)
+  if (DstFile.Open(sDestination, plFileOpenMode::Write) == PL_FAILURE)
     goto done;
 
   {
@@ -395,12 +419,12 @@ plResult plOSFile::CopyFile(plStringView sSource, plStringView sDestination)
       if (uiRead == 0)
         break;
 
-      if (DstFile.Write(&TempBuffer[0], uiRead) == PLASMA_FAILURE)
+      if (DstFile.Write(&TempBuffer[0], uiRead) == PL_FAILURE)
         goto done;
     }
   }
 
-  Res = PLASMA_SUCCESS;
+  Res = PL_SUCCESS;
 
 done:
 
@@ -408,7 +432,7 @@ done:
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = s_iFileCounter.Increment();
   e.m_sFile = sSource;
@@ -420,7 +444,7 @@ done:
   return Res;
 }
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
 plResult plOSFile::GetFileStats(plStringView sFileOrFolder, plFileStats& out_stats)
 {
@@ -430,7 +454,7 @@ plResult plOSFile::GetFileStats(plStringView sFileOrFolder, plFileStats& out_sta
   s.MakeCleanPath();
   s.MakePathSeparatorsNative();
 
-  PLASMA_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
+  PL_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
 
   const plResult Res = InternalGetFileStats(s.GetData(), out_stats);
 
@@ -438,7 +462,7 @@ plResult plOSFile::GetFileStats(plStringView sFileOrFolder, plFileStats& out_sta
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = s_iFileCounter.Increment();
   e.m_sFile = sFileOrFolder;
@@ -449,7 +473,7 @@ plResult plOSFile::GetFileStats(plStringView sFileOrFolder, plFileStats& out_sta
   return Res;
 }
 
-#  if PLASMA_ENABLED(PLASMA_SUPPORTS_CASE_INSENSITIVE_PATHS) && PLASMA_ENABLED(PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
+#  if PL_ENABLED(PL_SUPPORTS_CASE_INSENSITIVE_PATHS) && PL_ENABLED(PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS)
 plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& out_sCorrectSpelling)
 {
   /// \todo We should implement this also on plFileSystem, to be able to support stats through virtual filesystems
@@ -460,7 +484,7 @@ plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& ou
   s.MakeCleanPath();
   s.MakePathSeparatorsNative();
 
-  PLASMA_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
+  PL_ASSERT_DEV(s.IsAbsolutePath(), "The path '{0}' is not absolute.", s);
 
   plStringBuilder sCurPath;
 
@@ -468,7 +492,7 @@ plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& ou
 
   out_sCorrectSpelling.Clear();
 
-  plResult Res = PLASMA_SUCCESS;
+  plResult Res = PL_SUCCESS;
 
   while (it.IsValid())
   {
@@ -481,9 +505,9 @@ plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& ou
     if (!sCurPath.IsEmpty())
     {
       plFileStats stats;
-      if (GetFileStats(sCurPath.GetData(), stats) == PLASMA_FAILURE)
+      if (GetFileStats(sCurPath.GetData(), stats) == PL_FAILURE)
       {
-        Res = PLASMA_FAILURE;
+        Res = PL_FAILURE;
         break;
       }
 
@@ -497,7 +521,7 @@ plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& ou
   const plTime tdiff = t1 - t0;
 
   EventData e;
-  e.m_bSuccess = Res == PLASMA_SUCCESS;
+  e.m_bSuccess = Res == PL_SUCCESS;
   e.m_Duration = tdiff;
   e.m_iFileID = s_iFileCounter.Increment();
   e.m_sFile = sFileOrFolder;
@@ -508,11 +532,11 @@ plResult plOSFile::GetFileCasing(plStringView sFileOrFolder, plStringBuilder& ou
   return Res;
 }
 
-#  endif // PLASMA_SUPPORTS_CASE_INSENSITIVE_PATHS && PLASMA_SUPPORTS_UNRESTRICTED_FILE_ACCESS
+#  endif // PL_SUPPORTS_CASE_INSENSITIVE_PATHS && PL_SUPPORTS_UNRESTRICTED_FILE_ACCESS
 
-#endif // PLASMA_SUPPORTS_FILE_STATS
+#endif // PL_SUPPORTS_FILE_STATS
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) && PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS) && PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
 void plOSFile::GatherAllItemsInFolder(plDynamicArray<plFileStats>& out_itemList, plStringView sFolder, plBitflags<plFileSystemIteratorFlags> flags /*= plFileSystemIteratorFlags::All*/)
 {
@@ -551,7 +575,7 @@ plResult plOSFile::CopyFolder(plStringView sSourceFolder, plStringView sDestinat
     relPath = srcPath;
 
     if (relPath.MakeRelativeTo(sSourceFolder).Failed())
-      return PLASMA_FAILURE; // unexpected to ever fail, but don't want to assert on it
+      return PL_FAILURE; // unexpected to ever fail, but don't want to assert on it
 
     dstPath = sDestinationFolder;
     dstPath.AppendPath(relPath);
@@ -559,12 +583,12 @@ plResult plOSFile::CopyFolder(plStringView sSourceFolder, plStringView sDestinat
     if (item.m_bIsDirectory)
     {
       if (plOSFile::CreateDirectoryStructure(dstPath).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
     else
     {
       if (plOSFile::CopyFile(srcPath, dstPath).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (out_pFilesCopied)
       {
@@ -575,7 +599,7 @@ plResult plOSFile::CopyFolder(plStringView sSourceFolder, plStringView sDestinat
     // TODO: make sure to remove read-only flags of copied files ?
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plOSFile::DeleteFolder(plStringView sFolder)
@@ -594,7 +618,7 @@ plResult plOSFile::DeleteFolder(plStringView sFolder)
     fullPath.AppendPath(item.m_sName);
 
     if (plOSFile::DeleteFile(fullPath).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   for (plUInt32 i = items.GetCount(); i > 0; --i)
@@ -608,18 +632,18 @@ plResult plOSFile::DeleteFolder(plStringView sFolder)
     fullPath.AppendPath(item.m_sName);
 
     if (plOSFile::InternalDeleteDirectory(fullPath).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   if (plOSFile::InternalDeleteDirectory(sFolder).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-#endif // PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS) && PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_STATS)
+#endif // PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS) && PL_ENABLED(PL_SUPPORTS_FILE_STATS)
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
 
 void plFileSystemIterator::StartMultiFolderSearch(plArrayPtr<plString> startFolders, plStringView sSearchTerm, plBitflags<plFileSystemIteratorFlags> flags /*= plFileSystemIteratorFlags::Default*/)
 {
@@ -682,8 +706,8 @@ void plFileSystemIterator::Next()
 
 void plFileSystemIterator::SkipFolder()
 {
-  PLASMA_ASSERT_DEBUG(m_Flags.IsSet(plFileSystemIteratorFlags::Recursive), "SkipFolder has no meaning when the iterator is not set to be recursive.");
-  PLASMA_ASSERT_DEBUG(m_CurFile.m_bIsDirectory, "SkipFolder can only be called when the current object is a folder.");
+  PL_ASSERT_DEBUG(m_Flags.IsSet(plFileSystemIteratorFlags::Recursive), "SkipFolder has no meaning when the iterator is not set to be recursive.");
+  PL_ASSERT_DEBUG(m_CurFile.m_bIsDirectory, "SkipFolder can only be called when the current object is a folder.");
 
   m_Flags.Remove(plFileSystemIteratorFlags::Recursive);
 
@@ -695,17 +719,3 @@ void plFileSystemIterator::SkipFolder()
 #endif
 
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
-#  include <Foundation/IO/Implementation/Win/OSFile_win.h>
-
-// For UWP we're currently using a mix of WinRT functions and posix.
-#  if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
-#    include <Foundation/IO/Implementation/Posix/OSFile_posix.h>
-#  endif
-#elif PLASMA_ENABLED(PLASMA_USE_POSIX_FILE_API)
-#  include <Foundation/IO/Implementation/Posix/OSFile_posix.h>
-#else
-#  error "Unknown Platform."
-#endif
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_OSFile);

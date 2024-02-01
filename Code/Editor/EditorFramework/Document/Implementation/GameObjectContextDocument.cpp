@@ -8,13 +8,13 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextDocument, 2, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGameObjectContextDocument, 2, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plGameObjectContextDocument::plGameObjectContextDocument(
-  const char* szDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
-  : plGameObjectDocument(szDocumentPath, pObjectManager, engineConnectionType)
+  plStringView sDocumentPath, plDocumentObjectManager* pObjectManager, plAssetDocEngineConnection engineConnectionType)
+  : plGameObjectDocument(sDocumentPath, pObjectManager, engineConnectionType)
 {
 }
 
@@ -35,7 +35,7 @@ plStatus plGameObjectContextDocument::SetContext(plUuid documentGuid, plUuid obj
       e.m_Type = plGameObjectContextEvent::Type::ContextChanged;
       m_GameObjectContextEvents.Broadcast(e);
     }
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
 
   const plAbstractObjectGraph* pPrefab = plPrefabCache::GetSingleton()->GetCachedPrefabGraph(documentGuid);
@@ -55,14 +55,14 @@ plStatus plGameObjectContextDocument::SetContext(plUuid documentGuid, plUuid obj
   plRttiConverterReader rttiConverter(&graph, &context);
   plDocumentObjectConverterReader objectConverter(&graph, GetObjectManager(), plDocumentObjectConverterReader::Mode::CreateAndAddToDocument);
   {
-    PLASMA_PROFILE_SCOPE("Restoring Objects");
+    PL_PROFILE_SCOPE("Restoring Objects");
     auto* pRootNode = graph.GetNodeByName("ObjectTree");
-    PLASMA_ASSERT_DEV(pRootNode->FindProperty("TempObjects") == nullptr, "TempObjects should not be serialized.");
+    PL_ASSERT_DEV(pRootNode->FindProperty("TempObjects") == nullptr, "TempObjects should not be serialized.");
     pRootNode->RenameProperty("Children", "TempObjects");
     objectConverter.ApplyPropertiesToObject(pRootNode, GetObjectManager()->GetRootObject());
   }
   {
-    PLASMA_PROFILE_SCOPE("Restoring Meta-Data");
+    PL_PROFILE_SCOPE("Restoring Meta-Data");
     RestoreMetaDataAfterLoading(graph, false);
   }
   {
@@ -79,7 +79,7 @@ plStatus plGameObjectContextDocument::SetContext(plUuid documentGuid, plUuid obj
     e.m_Type = plGameObjectContextEvent::Type::ContextChanged;
     m_GameObjectContextEvents.Broadcast(e);
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plUuid plGameObjectContextDocument::GetContextDocumentGuid() const
@@ -118,7 +118,7 @@ void plGameObjectContextDocument::ClearContext()
   m_ContextObject = plUuid();
   plDocumentObject* pRoot = GetObjectManager()->GetRootObject();
   plHybridArray<plVariant, 16> values;
-  GetObjectAccessor()->GetValues(pRoot, "TempObjects", values).IgnoreResult();
+  GetObjectAccessor()->GetValues(pRoot, "TempObjects", values).AssertSuccess();
   for (plInt32 i = (plInt32)values.GetCount() - 1; i >= 0; --i)
   {
     plDocumentObject* pChild = GetObjectManager()->GetObject(values[i].Get<plUuid>());

@@ -11,7 +11,7 @@
 
 struct TagComparer
 {
-  PLASMA_ALWAYS_INLINE bool Less(const plToolsTag* a, const plToolsTag* b) const
+  PL_ALWAYS_INLINE bool Less(const plToolsTag* a, const plToolsTag* b) const
   {
     if (a->m_sCategory != b->m_sCategory)
       return a->m_sCategory < b->m_sCategory;
@@ -41,10 +41,10 @@ void plToolsTagRegistry::Clear()
   }
 }
 
-void plToolsTagRegistry::WriteToDDL(plStreamWriter& stream)
+void plToolsTagRegistry::WriteToDDL(plStreamWriter& inout_stream)
 {
   plOpenDdlWriter writer;
-  writer.SetOutputStream(&stream);
+  writer.SetOutputStream(&inout_stream);
   writer.SetCompactMode(false);
   writer.SetPrimitiveTypeStringMode(plOpenDdlWriter::TypeStringMode::ShortenedUnsignedInt);
 
@@ -64,10 +64,10 @@ void plToolsTagRegistry::WriteToDDL(plStreamWriter& stream)
   }
 }
 
-plStatus plToolsTagRegistry::ReadFromDDL(plStreamReader& stream)
+plStatus plToolsTagRegistry::ReadFromDDL(plStreamReader& inout_stream)
 {
   plOpenDdlReader reader;
-  if (reader.ParseDocument(stream).Failed())
+  if (reader.ParseDocument(inout_stream).Failed())
   {
     return plStatus("Failed to read data from ToolsTagRegistry stream!");
   }
@@ -101,7 +101,7 @@ plStatus plToolsTagRegistry::ReadFromDDL(plStreamReader& stream)
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 bool plToolsTagRegistry::AddTag(const plToolsTag& tag)
@@ -127,9 +127,9 @@ bool plToolsTagRegistry::AddTag(const plToolsTag& tag)
   }
 }
 
-bool plToolsTagRegistry::RemoveTag(const char* szName)
+bool plToolsTagRegistry::RemoveTag(plStringView sName)
 {
-  auto it = s_NameToTags.Find(szName);
+  auto it = s_NameToTags.Find(sName);
   if (it.IsValid())
   {
     s_NameToTags.Remove(it);
@@ -157,7 +157,7 @@ void plToolsTagRegistry::GetTagsByCategory(const plArrayPtr<plStringView>& categ
   out_tags.Clear();
   for (auto it = s_NameToTags.GetIterator(); it.IsValid(); ++it)
   {
-    if (std::any_of(cbegin(categories), cend(categories), [&it](const plStringView& cat) { return it.Value().m_sCategory == cat; }))
+    if (std::any_of(cbegin(categories), cend(categories), [&it](const plStringView& sCat) { return it.Value().m_sCategory == sCat; }))
     {
       out_tags.PushBack(&it.Value());
     }

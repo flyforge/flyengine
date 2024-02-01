@@ -7,7 +7,7 @@
 /// Open Color Goals:
 /// All colors will be beautiful in itself and harmonious
 /// At the same brightness level, the perceived brightness will be constant
-class PLASMA_FOUNDATION_DLL plColorScheme
+class PL_FOUNDATION_DLL plColorScheme
 {
 public:
   enum Enum
@@ -34,9 +34,9 @@ public:
   constexpr static float s_fIndexNormalizer = 1.0f / (Count - 2);
 
   /// \brief Get the scheme color with the given brightness (0..9) and with optional saturation and alpha.
-  PLASMA_FORCE_INLINE static plColor GetColor(Enum schemeColor, plUInt8 uiBrightness, float fSaturation = 1.0f, float fAlpha = 1.0f)
+  PL_FORCE_INLINE static plColor GetColor(Enum schemeColor, plUInt8 uiBrightness, float fSaturation = 1.0f, float fAlpha = 1.0f)
   {
-    PLASMA_ASSERT_DEV(uiBrightness <= 9, "Brightness is too large");
+    PL_ASSERT_DEV(uiBrightness <= 9, "Brightness is too large");
     const plColor c = s_Colors[schemeColor][uiBrightness];
     const float l = c.GetLuminance();
     return plMath::Lerp(plColor(l, l, l), c, fSaturation).WithAlpha(fAlpha);
@@ -46,14 +46,14 @@ public:
   /// Does not include gray.
   static plColor GetColor(float fIndex, plUInt8 uiBrightness, float fSaturation = 1.0f, float fAlpha = 1.0f);
 
-  /// \brief Get a scheme color with predefined brightness and saturation to look good with the PLASMA tools dark UI scheme.
-  PLASMA_ALWAYS_INLINE static plColor DarkUI(Enum schemeColor)
+  /// \brief Get a scheme color with predefined brightness and saturation to look good with the PL tools dark UI scheme.
+  PL_ALWAYS_INLINE static plColor DarkUI(Enum schemeColor)
   {
     return s_DarkUIColors[schemeColor];
   }
 
-  /// \brief Gets a scheme color by index with predefined brightness and saturation to look good with the PLASMA tools dark UI scheme.
-  PLASMA_FORCE_INLINE static plColor DarkUI(float fIndex)
+  /// \brief Gets a scheme color by index with predefined brightness and saturation to look good with the PL tools dark UI scheme.
+  PL_FORCE_INLINE static plColor DarkUI(float fIndex)
   {
     plUInt32 uiIndexA, uiIndexB;
     float fFrac;
@@ -62,14 +62,14 @@ public:
     return plMath::Lerp(s_DarkUIColors[uiIndexA], s_DarkUIColors[uiIndexB], fFrac);
   }
 
-  /// \brief Get a scheme color with predefined brightness and saturation to look good as highlight color in PLASMA tools. Can also be used in a 3D scene for e.g. visualizers etc.
-  PLASMA_ALWAYS_INLINE static plColor LightUI(Enum schemeColor)
+  /// \brief Get a scheme color with predefined brightness and saturation to look good as highlight color in PL tools. Can also be used in a 3D scene for e.g. visualizers etc.
+  PL_ALWAYS_INLINE static plColor LightUI(Enum schemeColor)
   {
     return s_LightUIColors[schemeColor];
   }
 
-  /// \brief Get a scheme color by index with predefined brightness and saturation to look good as highlight color in PLASMA tools. Can also be used in a 3D scene for e.g. visualizers etc.
-  PLASMA_FORCE_INLINE static plColor LightUI(float fIndex)
+  /// \brief Get a scheme color by index with predefined brightness and saturation to look good as highlight color in PL tools. Can also be used in a 3D scene for e.g. visualizers etc.
+  PL_FORCE_INLINE static plColor LightUI(float fIndex)
   {
     plUInt32 uiIndexA, uiIndexB;
     float fFrac;
@@ -108,7 +108,7 @@ public:
   static plColor GetCategoryColor(plStringView sCategory, CategoryColorUsage usage);
 
 private:
-  PLASMA_ALWAYS_INLINE constexpr static void GetInterpolation(float fIndex, plUInt32& out_uiIndexA, plUInt32& out_uiIndexB, float& out_fFrac)
+  PL_ALWAYS_INLINE constexpr static void GetInterpolation(float fIndex, plUInt32& out_uiIndexA, plUInt32& out_uiIndexB, float& out_fFrac)
   {
     fIndex = plMath::Saturate(fIndex);
 

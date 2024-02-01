@@ -10,8 +10,8 @@
 #include <RendererCore/RenderContext/RenderContext.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshRenderer, 1, plRTTIDefaultAllocator<plMeshRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMeshRenderer, 1, plRTTIDefaultAllocator<plMeshRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMeshRenderer::plMeshRenderer() = default;
@@ -26,7 +26,6 @@ void plMeshRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>
 void plMeshRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
   ref_categories.PushBack(plDefaultRenderDataCategories::Sky);
-  ref_categories.PushBack(plDefaultRenderDataCategories::PostSky);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitOpaque);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitMasked);
   ref_categories.PushBack(plDefaultRenderDataCategories::LitTransparent);
@@ -40,7 +39,6 @@ void plMeshRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData
 
 void plMeshRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plRenderContext* pContext = renderViewContext.m_pRenderContext;
 
   const plMeshRenderData* pRenderData = batch.GetFirstData<plMeshRenderData>();
@@ -144,4 +142,4 @@ void plMeshRenderer::FillPerInstanceData(plArrayPtr<plPerInstanceData> instanceD
   out_uiFilteredCount = uiCurrentIndex;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshRenderer);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_MeshRenderer);

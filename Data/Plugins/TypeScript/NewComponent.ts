@@ -1,4 +1,4 @@
-import pl = require("<PATH-TO-PLASMA-TS>")
+import pl = require("<PATH-TO-pl-TS>")
 
 //export class NewComponent extends pl.TypescriptComponent {
 export class NewComponent extends pl.TickedTypescriptComponent {

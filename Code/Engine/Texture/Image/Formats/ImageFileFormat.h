@@ -13,7 +13,7 @@ class plImageView;
 class plStringBuilder;
 class plImageHeader;
 
-class PLASMA_TEXTURE_DLL plImageFileFormat : public plEnumerable<plImageFileFormat>
+class PL_TEXTURE_DLL plImageFileFormat : public plEnumerable<plImageFileFormat>
 {
 public:
   /// \brief Reads only the header information for an image and ignores the data. Much faster than reading the entire image, if the pixel data is not needed.
@@ -39,5 +39,5 @@ public:
 
   static plResult ReadImageHeader(plStringView sFileName, plImageHeader& ref_header);
 
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plImageFileFormat);
+  PL_DECLARE_ENUMERABLE_CLASS(plImageFileFormat);
 };

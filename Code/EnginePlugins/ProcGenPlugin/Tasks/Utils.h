@@ -4,7 +4,7 @@
 
 class plVolumeCollection;
 
-struct PLASMA_PROCGENPLUGIN_DLL plProcGenExpressionFunctions
+struct PL_PROCGENPLUGIN_DLL plProcGenExpressionFunctions
 {
   static plExpressionFunction s_ApplyVolumesFunc;
   static plExpressionFunction s_GetInstanceSeedFunc;
@@ -12,7 +12,7 @@ struct PLASMA_PROCGENPLUGIN_DLL plProcGenExpressionFunctions
 
 namespace plProcGenInternal
 {
-  void ExtractVolumeCollections(const plWorld& world, const plBoundingBox& box, const Output& output, plDeque<plVolumeCollection>& volumeCollections, plExpression::GlobalData& globalData);
+  void ExtractVolumeCollections(const plWorld& world, const plBoundingBox& box, const Output& output, plDeque<plVolumeCollection>& ref_volumeCollections, plExpression::GlobalData& ref_globalData);
 
-  void SetInstanceSeed(plUInt32 uiSeed, plExpression::GlobalData& globalData);
+  void SetInstanceSeed(plUInt32 uiSeed, plExpression::GlobalData& ref_globalData);
 } // namespace plProcGenInternal

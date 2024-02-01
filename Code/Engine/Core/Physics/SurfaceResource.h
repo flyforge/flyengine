@@ -23,11 +23,11 @@ struct plSurfaceResourceEvent
   plSurfaceResource* m_pSurface;
 };
 
-class PLASMA_CORE_DLL plSurfaceResource : public plResource
+class PL_CORE_DLL plSurfaceResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSurfaceResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plSurfaceResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plSurfaceResource, plSurfaceResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plSurfaceResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plSurfaceResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plSurfaceResource, plSurfaceResourceDescriptor);
 
 public:
   plSurfaceResource();

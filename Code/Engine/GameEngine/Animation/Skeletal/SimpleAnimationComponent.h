@@ -19,9 +19,12 @@ using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>
 
 using plSimpleAnimationComponentManager = plComponentManagerSimple<class plSimpleAnimationComponent, plComponentUpdateType::WhenSimulating, plBlockStorageType::FreeList>;
 
-class PLASMA_GAMEENGINE_DLL plSimpleAnimationComponent : public plComponent
+/// \brief Plays a single animation clip on an animated mesh.
+///
+/// \see plAnimatedMeshComponent
+class PL_GAMEENGINE_DLL plSimpleAnimationComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plSimpleAnimationComponent, plComponent, plSimpleAnimationComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plSimpleAnimationComponent, plComponent, plSimpleAnimationComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -46,12 +49,19 @@ public:
   void SetAnimationClipFile(const char* szFile); // [ property ]
   const char* GetAnimationClipFile() const;      // [ property ]
 
+  /// \brief How to play the animation.
   plEnum<plPropertyAnimMode> m_AnimationMode; // [ property ]
-  float m_fSpeed = 1.0f;                      // [ property ]
 
+  /// \brief How quickly or slowly to play the animation.
+  float m_fSpeed = 1.0f; // [ property ]
+
+  /// \brief Sets the current sample position of the animation clip in 0 (start) to 1 (end) range.
   void SetNormalizedPlaybackPosition(float fPosition);
+
+  /// \brief Returns the normalized [0;1] sample position of the animation clip.
   float GetNormalizedPlaybackPosition() const { return m_fNormalizedPlaybackPosition; }
 
+  /// \brief How often to update the animation while the animated mesh is invisible.
   plEnum<plAnimationInvisibleUpdateRate> m_InvisibleUpdateRate; // [ property ]
 
 protected:
@@ -63,7 +73,7 @@ protected:
   plTime m_Duration;
   plAnimationClipResourceHandle m_hAnimationClip;
   plSkeletonResourceHandle m_hSkeleton;
-  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
   ozz::vector<ozz::math::SoaTransform> m_OzzLocalTransforms; // TODO: could be frame allocated
 };

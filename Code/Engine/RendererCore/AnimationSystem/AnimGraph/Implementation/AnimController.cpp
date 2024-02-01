@@ -33,7 +33,6 @@ void plAnimController::GetRootMotion(plVec3& ref_vTranslation, plAngle& ref_rota
 
 void plAnimController::Update(plTime diff, plGameObject* pTarget)
 {
-  PLASMA_PROFILE_SCOPE("AnimController_Update");
   if (!m_hSkeleton.IsValid())
     return;
 
@@ -45,7 +44,7 @@ void plAnimController::Update(plTime diff, plGameObject* pTarget)
 
   m_CurrentLocalTransformOutputs.Clear();
 
-  m_vRootMotion = plVec3::ZeroVector();
+  m_vRootMotion = plVec3::MakeZero();
   m_RootRotationX = {};
   m_RootRotationY = {};
   m_RootRotationZ = {};
@@ -100,13 +99,13 @@ void plAnimController::AddOutputLocalTransforms(plAnimGraphPinDataLocalTransform
 
 plSharedPtr<plAnimGraphSharedBoneWeights> plAnimController::CreateBoneWeights(const char* szUniqueName, const plSkeletonResource& skeleton, plDelegate<void(plAnimGraphSharedBoneWeights&)> fill)
 {
-  PLASMA_LOCK(s_SharedDataMutex);
+  PL_LOCK(s_SharedDataMutex);
 
   plSharedPtr<plAnimGraphSharedBoneWeights>& bw = s_SharedBoneWeights[szUniqueName];
 
   if (bw == nullptr)
   {
-    bw = PLASMA_DEFAULT_NEW(plAnimGraphSharedBoneWeights);
+    bw = PL_DEFAULT_NEW(plAnimGraphSharedBoneWeights);
     bw->m_Weights.SetCountUninitialized(skeleton.GetDescriptor().m_Skeleton.GetOzzSkeleton().num_soa_joints());
     plMemoryUtils::ZeroFill<ozz::math::SimdFloat4>(bw->m_Weights.GetData(), bw->m_Weights.GetCount());
   }
@@ -266,7 +265,7 @@ void plAnimController::GenerateLocalResultProcessors(const plSkeletonResource* p
 
   // model space to output
   {
-    plVec3 rootMotion = plVec3::ZeroVector();
+    plVec3 rootMotion = plVec3::MakeZero();
     plAngle rootRotationX;
     plAngle rootRotationY;
     plAngle rootRotationZ;
@@ -327,7 +326,7 @@ void plAnimController::AddAnimGraph(const plAnimGraphResourceHandle& hGraph)
 
   auto& inst = m_Instances.ExpandAndGetRef();
   inst.m_hAnimGraph = hGraph;
-  inst.m_pInstance = PLASMA_DEFAULT_NEW(plAnimGraphInstance);
+  inst.m_pInstance = PL_DEFAULT_NEW(plAnimGraphInstance);
   inst.m_pInstance->Configure(pAnimGraph->GetAnimationGraph());
 
   for (auto& clip : pAnimGraph->GetAnimationClipMapping())
@@ -354,3 +353,5 @@ const plAnimController::AnimClipInfo& plAnimController::GetAnimationClipInfo(plT
 
   return it.Value();
 }
+
+

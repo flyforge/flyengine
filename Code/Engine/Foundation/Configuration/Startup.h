@@ -4,18 +4,18 @@
 #include <Foundation/Configuration/SubSystem.h>
 #include <Foundation/Containers/Deque.h>
 
-#define PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN "plStartup_StartupCoreSystems_Begin"
-#define PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_END "plStartup_StartupCoreSystems_End"
-#define PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN "plStartup_ShutdownCoreSystems_Begin"
-#define PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END "plStartup_ShutdownCoreSystems_End"
+#define PL_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN "plStartup_StartupCoreSystems_Begin"
+#define PL_GLOBALEVENT_STARTUP_CORESYSTEMS_END "plStartup_StartupCoreSystems_End"
+#define PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN "plStartup_ShutdownCoreSystems_Begin"
+#define PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END "plStartup_ShutdownCoreSystems_End"
 
-#define PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN "plStartup_StartupHighLevelSystems_Begin"
-#define PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END "plStartup_StartupHighLevelSystems_End"
-#define PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN "plStartup_ShutdownHighLevelSystems_Begin"
-#define PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END "plStartup_ShutdownHighLevelSystems_End"
+#define PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN "plStartup_StartupHighLevelSystems_Begin"
+#define PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END "plStartup_StartupHighLevelSystems_End"
+#define PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN "plStartup_ShutdownHighLevelSystems_Begin"
+#define PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END "plStartup_ShutdownHighLevelSystems_End"
 
-#define PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN "plStartup_UnloadPlugin_Begin"
-#define PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_END "plStartup_UnloadPlugin_End"
+#define PL_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN "plStartup_UnloadPlugin_Begin"
+#define PL_GLOBALEVENT_UNLOAD_PLUGIN_END "plStartup_UnloadPlugin_End"
 
 /// \brief The startup system makes sure to initialize and shut down all known subsystems in the proper order.
 ///
@@ -33,7 +33,7 @@
 /// A subsystem startup configuration for a static subsystem needs to be put in some cpp file of the subsystem and looks like this:
 ///
 /// // clang-format off
-/// PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ExampleGroup, ExampleSubSystem)
+/// PL_BEGIN_SUBSYSTEM_DECLARATION(ExampleGroup, ExampleSubSystem)
 ///
 ///   BEGIN_SUBSYSTEM_DEPENDENCIES
 ///     "SomeOtherSubSystem",
@@ -61,7 +61,7 @@
 ///     plExampleSubSystem::EngineShutdown();
 ///   }
 ///
-/// PLASMA_END_SUBSYSTEM_DECLARATION;
+/// PL_END_SUBSYSTEM_DECLARATION;
 /// // clang-format on
 ///
 /// This will automatically register the subsystem, once the code is being loaded (can be dynamically loaded from a DLL).
@@ -73,7 +73,7 @@
 /// its instance is destroyed. Also you should never have two instances of the same subsystem.
 ///
 /// All startup / shutdown procedures broadcast global events before and after they execute.
-class PLASMA_FOUNDATION_DLL plStartup
+class PL_FOUNDATION_DLL plStartup
 {
 public:
   // 'Base Startup' happens even before 'Core Startup', but only really low level stuff should  be done there
@@ -107,14 +107,14 @@ public:
   /// \brief Runs the 'core' startup sequence of all subsystems in the proper order.
   ///
   /// Run this BEFORE any window and graphics context have been created.
-  /// Broadcasts the global event PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN and PLASMA_GLOBALEVENT_STARTUP_CORESYSTEMS_END
+  /// Broadcasts the global event PL_GLOBALEVENT_STARTUP_CORESYSTEMS_BEGIN and PL_GLOBALEVENT_STARTUP_CORESYSTEMS_END
   static void StartupCoreSystems() { Startup(plStartupStage::CoreSystems); }
 
   /// \brief Runs the 'core' shutdown sequence of all subsystems in the proper order (reversed startup order).
   ///
   /// Call this AFTER window and graphics context have been destroyed already, shortly before application exit.
   /// Makes sure that the 'high level' shutdown has been run first.
-  /// Broadcasts the global event PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN and PLASMA_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END
+  /// Broadcasts the global event PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_BEGIN and PL_GLOBALEVENT_SHUTDOWN_CORESYSTEMS_END
   static void ShutdownCoreSystems() { Shutdown(plStartupStage::CoreSystems); }
 
   /// \brief Runs the 'high level' startup sequence of all subsystems in the proper order.
@@ -122,14 +122,14 @@ public:
   /// Run this AFTER a window and graphics context have been created, such that anything that depends on that
   /// can now do its initialization.
   /// Makes sure that the 'core' initialization has been run first.
-  /// Broadcasts the global event PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN and PLASMA_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END
+  /// Broadcasts the global event PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_BEGIN and PL_GLOBALEVENT_STARTUP_HIGHLEVELSYSTEMS_END
   static void StartupHighLevelSystems() { Startup(plStartupStage::HighLevelSystems); }
 
   /// \brief Runs the 'high level' shutdown sequence of all subsystems in the proper order (reversed startup order).
   ///
   /// Run this BEFORE the window and graphics context have been destroyed, such that code that requires those
   /// can do its deinitialization first.
-  /// Broadcasts the global event PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN and PLASMA_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END
+  /// Broadcasts the global event PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_BEGIN and PL_GLOBALEVENT_SHUTDOWN_HIGHLEVELSYSTEMS_END
   static void ShutdownHighLevelSystems() { Shutdown(plStartupStage::HighLevelSystems); }
 
   /// \brief Output info about all known subsystems via the logging system (can change when DLLs are loaded dynamically).
@@ -144,7 +144,7 @@ private:
   /// \brief Unloads all subsystems from the given plugin AND all subsystems that directly or indirectly depend on them.
   ///
   /// This can be used to shutdown all systems from certain DLLs before that DLL is unloaded (and possibly reloaded).
-  /// Broadcasts the global event PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN and PLASMA_GLOBALEVENT_UNLOAD_PLUGIN_END and passes szPluginName in the first event
+  /// Broadcasts the global event PL_GLOBALEVENT_UNLOAD_PLUGIN_BEGIN and PL_GLOBALEVENT_UNLOAD_PLUGIN_END and passes szPluginName in the first event
   /// parameter.
   static void UnloadPluginSubSystems(plStringView sPluginName);
 

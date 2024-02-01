@@ -7,7 +7,7 @@
 
 struct plReflectionProbeMode
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
@@ -17,10 +17,10 @@ struct plReflectionProbeMode
     Default = Static
   };
 };
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plReflectionProbeMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plReflectionProbeMode);
 
 /// \brief Describes how a cube map should be generated.
-struct PLASMA_RENDERERCORE_DLL plReflectionProbeDesc
+struct PL_RENDERERCORE_DLL plReflectionProbeDesc
 {
   plUuid m_uniqueID;
 
@@ -36,23 +36,23 @@ struct PLASMA_RENDERERCORE_DLL plReflectionProbeDesc
   float m_fSaturation = 1.0f;
   float m_fNearPlane = 0.0f;
   float m_fFarPlane = 100.0f;
-  plVec3 m_vCaptureOffset = plVec3::ZeroVector();
+  plVec3 m_vCaptureOffset = plVec3::MakeZero();
 };
 
-typedef plGenericId<24, 8> plReflectionProbeId;
+using plReflectionProbeId = plGenericId<24, 8>;
 
 template <>
 struct plHashHelper<plReflectionProbeId>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plReflectionProbeId value) { return plHashHelper<plUInt32>::Hash(value.m_Data); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(plReflectionProbeId value) { return plHashHelper<plUInt32>::Hash(value.m_Data); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plReflectionProbeId a, plReflectionProbeId b) { return a == b; }
+  PL_ALWAYS_INLINE static bool Equal(plReflectionProbeId a, plReflectionProbeId b) { return a == b; }
 };
 
 /// \brief Render data for a reflection probe.
-class PLASMA_RENDERERCORE_DLL plReflectionProbeRenderData : public plRenderData
+class PL_RENDERERCORE_DLL plReflectionProbeRenderData : public plRenderData
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plReflectionProbeRenderData, plRenderData);
+  PL_ADD_DYNAMIC_REFLECTION(plReflectionProbeRenderData, plRenderData);
 
 public:
   plReflectionProbeRenderData()
@@ -82,28 +82,28 @@ struct plReflectionProbeRef
   plUInt32 m_uiWorldIndex = 0;
   plReflectionProbeId m_Id;
 };
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plReflectionProbeRef) == 8);
+PL_CHECK_AT_COMPILETIME(sizeof(plReflectionProbeRef) == 8);
 
 template <>
 struct plHashHelper<plReflectionProbeRef>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(plReflectionProbeRef value) { return plHashHelper<plUInt64>::Hash(reinterpret_cast<plUInt64&>(value)); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(plReflectionProbeRef value) { return plHashHelper<plUInt64>::Hash(reinterpret_cast<plUInt64&>(value)); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(plReflectionProbeRef a, plReflectionProbeRef b) { return a.m_Id == b.m_Id && a.m_uiWorldIndex == b.m_uiWorldIndex; }
+  PL_ALWAYS_INLINE static bool Equal(plReflectionProbeRef a, plReflectionProbeRef b) { return a.m_Id == b.m_Id && a.m_uiWorldIndex == b.m_uiWorldIndex; }
 };
 
 /// \brief Flags that describe a reflection probe.
 struct plProbeFlags
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
-    SkyLight = PLASMA_BIT(0),
-    HasCustomCubeMap = PLASMA_BIT(1),
-    Sphere = PLASMA_BIT(2),
-    Box = PLASMA_BIT(3),
-    Dynamic = PLASMA_BIT(4),
+    SkyLight = PL_BIT(0),
+    HasCustomCubeMap = PL_BIT(1),
+    Sphere = PL_BIT(2),
+    Box = PL_BIT(3),
+    Dynamic = PL_BIT(4),
     Default = 0
   };
 
@@ -117,6 +117,6 @@ struct plProbeFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plProbeFlags);
+PL_DECLARE_FLAGS_OPERATORS(plProbeFlags);
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_RENDERERCORE_DLL, plProbeFlags);
+PL_DECLARE_REFLECTABLE_TYPE(PL_RENDERERCORE_DLL, plProbeFlags);

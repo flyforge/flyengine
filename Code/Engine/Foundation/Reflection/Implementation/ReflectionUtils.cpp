@@ -9,7 +9,7 @@
 namespace
 {
   // for some reason MSVC does not accept the template keyword here
-#if PLASMA_ENABLED(PLASMA_COMPILER_MSVC_PURE)
+#if PL_ENABLED(PL_COMPILER_MSVC_PURE)
 #  define CALL_FUNCTOR(functor, type) functor.operator()<type>(std::forward<Args>(args)...)
 #else
 #  define CALL_FUNCTOR(functor, type) functor.template operator()<type>(std::forward<Args>(args)...)
@@ -60,31 +60,15 @@ namespace
       return;
     }
 
-    PLASMA_REPORT_FAILURE("Unknown dispatch type");
+    PL_REPORT_FAILURE("Unknown dispatch type");
   }
 
 #undef CALL_FUNCTOR
 
-  plVariantType::Enum GetDispatchType(const plAbstractProperty* pProp)
-  {
-    if (pProp->GetFlags().IsSet(plPropertyFlags::Pointer))
-    {
-      return plVariantType::TypedPointer;
-    }
-    else if (pProp->GetFlags().IsSet(plPropertyFlags::StandardType))
-    {
-      return pProp->GetSpecificType()->GetVariantType();
-    }
-    else
-    {
-      return plVariantType::TypedObject;
-    }
-  }
-
   struct GetTypeFromVariantTypeFunc
   {
     template <typename T>
-    PLASMA_ALWAYS_INLINE void operator()()
+    PL_ALWAYS_INLINE void operator()()
     {
       m_pType = plGetStaticRTTI<T>();
     }
@@ -92,22 +76,12 @@ namespace
   };
 
   template <>
-  PLASMA_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plVariantArray>()
+  PL_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plTypedPointer>()
   {
     m_pType = nullptr;
   }
   template <>
-  PLASMA_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plVariantDictionary>()
-  {
-    m_pType = nullptr;
-  }
-  template <>
-  PLASMA_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plTypedPointer>()
-  {
-    m_pType = nullptr;
-  }
-  template <>
-  PLASMA_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plTypedObject>()
+  PL_ALWAYS_INLINE void GetTypeFromVariantTypeFunc::operator()<plTypedObject>()
   {
     m_pType = nullptr;
   }
@@ -287,7 +261,7 @@ namespace
     plVariantToProperty(const plVariant& value, const plAbstractProperty* pProp)
     {
       m_ptr = value.Get<plTypedPointer>();
-      PLASMA_ASSERT_DEBUG(!m_ptr.m_pType || m_ptr.m_pType->IsDerivedFrom(pProp->GetSpecificType()),
+      PL_ASSERT_DEBUG(!m_ptr.m_pType || m_ptr.m_pType->IsDerivedFrom(pProp->GetSpecificType()),
         "Pointer of type '{0}' does not derive from '{}'", m_ptr.m_pType->GetTypeName(), pProp->GetSpecificType()->GetTypeName());
     }
 
@@ -320,7 +294,7 @@ namespace
   struct GetValueFunc
   {
     template <typename T>
-    PLASMA_ALWAYS_INLINE void operator()(const plAbstractMemberProperty* pProp, const void* pObject, plVariant& value)
+    PL_ALWAYS_INLINE void operator()(const plAbstractMemberProperty* pProp, const void* pObject, plVariant& value)
     {
       plVariantFromProperty<T> getter(value, pProp);
       pProp->GetValuePtr(pObject, getter);
@@ -330,7 +304,7 @@ namespace
   struct SetValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractMemberProperty* pProp, void* pObject, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractMemberProperty* pProp, void* pObject, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->SetValuePtr(pObject, setter);
@@ -340,7 +314,7 @@ namespace
   struct GetArrayValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, const void* pObject, plUInt32 uiIndex, plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, const void* pObject, plUInt32 uiIndex, plVariant& value)
     {
       plVariantFromProperty<T> getter(value, pProp);
       pProp->GetValue(pObject, uiIndex, getter);
@@ -350,7 +324,7 @@ namespace
   struct SetArrayValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->SetValue(pObject, uiIndex, setter);
@@ -360,7 +334,7 @@ namespace
   struct InsertArrayValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->Insert(pObject, uiIndex, setter);
@@ -370,7 +344,7 @@ namespace
   struct InsertSetValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->Insert(pObject, setter);
@@ -380,7 +354,7 @@ namespace
   struct RemoveSetValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->Remove(pObject, setter);
@@ -390,7 +364,7 @@ namespace
   struct GetMapValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractMapProperty* pProp, const void* pObject, const char* szKey, plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractMapProperty* pProp, const void* pObject, const char* szKey, plVariant& value)
     {
       plVariantFromProperty<T> getter(value, pProp);
       getter.m_bSuccess = pProp->GetValue(pObject, szKey, getter);
@@ -400,7 +374,7 @@ namespace
   struct SetMapValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()(const plAbstractMapProperty* pProp, void* pObject, const char* szKey, const plVariant& value)
+    PL_FORCE_INLINE void operator()(const plAbstractMapProperty* pProp, void* pObject, const char* szKey, const plVariant& value)
     {
       plVariantToProperty<T> setter(value, pProp);
       pProp->Insert(pObject, szKey, setter);
@@ -427,13 +401,13 @@ namespace
   template <typename T>
   struct SetComponentValueImpl
   {
-    PLASMA_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue) { PLASMA_ASSERT_DEBUG(false, "plReflectionUtils::SetComponent was called with a non-vector variant '{0}'", pVector->GetType()); }
+    PL_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue) { PL_ASSERT_DEBUG(false, "plReflectionUtils::SetComponent was called with a non-vector variant '{0}'", pVector->GetType()); }
   };
 
   template <typename T>
   struct SetComponentValueImpl<plVec2Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
+    PL_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
     {
       auto vec = pVector->Get<plVec2Template<T>>();
       switch (uiComponent)
@@ -452,7 +426,7 @@ namespace
   template <typename T>
   struct SetComponentValueImpl<plVec3Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
+    PL_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
     {
       auto vec = pVector->Get<plVec3Template<T>>();
       switch (uiComponent)
@@ -474,7 +448,7 @@ namespace
   template <typename T>
   struct SetComponentValueImpl<plVec4Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
+    PL_FORCE_INLINE static void impl(plVariant* pVector, plUInt32 uiComponent, double fValue)
     {
       auto vec = pVector->Get<plVec4Template<T>>();
       switch (uiComponent)
@@ -499,7 +473,7 @@ namespace
   struct SetComponentValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()()
+    PL_FORCE_INLINE void operator()()
     {
       SetComponentValueImpl<T>::impl(m_pVector, m_iComponent, m_fValue);
     }
@@ -511,13 +485,13 @@ namespace
   template <typename T>
   struct GetComponentValueImpl
   {
-    PLASMA_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue) { PLASMA_ASSERT_DEBUG(false, "plReflectionUtils::SetComponent was called with a non-vector variant '{0}'", pVector->GetType()); }
+    PL_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue) { PL_ASSERT_DEBUG(false, "plReflectionUtils::SetComponent was called with a non-vector variant '{0}'", pVector->GetType()); }
   };
 
   template <typename T>
   struct GetComponentValueImpl<plVec2Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
+    PL_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
     {
       const auto& vec = pVector->Get<plVec2Template<T>>();
       switch (uiComponent)
@@ -535,7 +509,7 @@ namespace
   template <typename T>
   struct GetComponentValueImpl<plVec3Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
+    PL_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
     {
       const auto& vec = pVector->Get<plVec3Template<T>>();
       switch (uiComponent)
@@ -556,7 +530,7 @@ namespace
   template <typename T>
   struct GetComponentValueImpl<plVec4Template<T>>
   {
-    PLASMA_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
+    PL_FORCE_INLINE static void impl(const plVariant* pVector, plUInt32 uiComponent, double& ref_fValue)
     {
       const auto& vec = pVector->Get<plVec4Template<T>>();
       switch (uiComponent)
@@ -580,7 +554,7 @@ namespace
   struct GetComponentValueFunc
   {
     template <typename T>
-    PLASMA_FORCE_INLINE void operator()()
+    PL_FORCE_INLINE void operator()()
     {
       GetComponentValueImpl<T>::impl(m_pVector, m_iComponent, m_fValue);
     }
@@ -615,7 +589,7 @@ const plRTTI* plReflectionUtils::GetCommonBaseType(const plRTTI* pRtti1, const p
 
 bool plReflectionUtils::IsBasicType(const plRTTI* pRtti)
 {
-  PLASMA_ASSERT_DEBUG(pRtti != nullptr, "IsBasicType: missing data!");
+  PL_ASSERT_DEBUG(pRtti != nullptr, "IsBasicType: missing data!");
   plVariant::Type::Enum type = pRtti->GetVariantType();
   return type >= plVariant::Type::FirstStandardType && type <= plVariant::Type::LastStandardType;
 }
@@ -656,7 +630,7 @@ plUInt32 plReflectionUtils::GetComponentCount(plVariantType::Enum type)
     case plVariant::Type::Vector4U:
       return 4;
     default:
-      PLASMA_REPORT_FAILURE("Not a vector type: '{0}'", type);
+      PL_REPORT_FAILURE("Not a vector type: '{0}'", type);
       return 0;
   }
 }
@@ -682,7 +656,7 @@ double plReflectionUtils::GetComponent(const plVariant& vector, plUInt32 uiCompo
 plVariant plReflectionUtils::GetMemberPropertyValue(const plAbstractMemberProperty* pProp, const void* pObject)
 {
   plVariant res;
-  PLASMA_ASSERT_DEBUG(pProp != nullptr, "GetMemberPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr, "GetMemberPropertyValue: missing data!");
 
   GetValueFunc func;
   DispatchTo(func, pProp, pProp, pObject, res);
@@ -692,7 +666,7 @@ plVariant plReflectionUtils::GetMemberPropertyValue(const plAbstractMemberProper
 
 void plReflectionUtils::SetMemberPropertyValue(const plAbstractMemberProperty* pProp, void* pObject, const plVariant& value)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "SetMemberPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "SetMemberPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -722,7 +696,7 @@ void plReflectionUtils::SetMemberPropertyValue(const plAbstractMemberProperty* p
 plVariant plReflectionUtils::GetArrayPropertyValue(const plAbstractArrayProperty* pProp, const void* pObject, plUInt32 uiIndex)
 {
   plVariant res;
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetArrayPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetArrayPropertyValue: missing data!");
   auto uiCount = pProp->GetCount(pObject);
   if (uiIndex >= uiCount)
   {
@@ -738,7 +712,7 @@ plVariant plReflectionUtils::GetArrayPropertyValue(const plAbstractArrayProperty
 
 void plReflectionUtils::SetArrayPropertyValue(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex, const plVariant& value)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetArrayPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetArrayPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -756,7 +730,7 @@ void plReflectionUtils::SetArrayPropertyValue(const plAbstractArrayProperty* pPr
 
 void plReflectionUtils::InsertSetPropertyValue(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "InsertSetPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "InsertSetPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -766,7 +740,7 @@ void plReflectionUtils::InsertSetPropertyValue(const plAbstractSetProperty* pPro
 
 void plReflectionUtils::RemoveSetPropertyValue(const plAbstractSetProperty* pProp, void* pObject, const plVariant& value)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "RemoveSetPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "RemoveSetPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -777,7 +751,7 @@ void plReflectionUtils::RemoveSetPropertyValue(const plAbstractSetProperty* pPro
 plVariant plReflectionUtils::GetMapPropertyValue(const plAbstractMapProperty* pProp, const void* pObject, const char* szKey)
 {
   plVariant value;
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetMapPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "GetMapPropertyValue: missing data!");
 
   GetMapValueFunc func;
   DispatchTo(func, pProp, pProp, pObject, szKey, value);
@@ -786,7 +760,7 @@ plVariant plReflectionUtils::GetMapPropertyValue(const plAbstractMapProperty* pP
 
 void plReflectionUtils::SetMapPropertyValue(const plAbstractMapProperty* pProp, void* pObject, const char* szKey, const plVariant& value)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "SetMapPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "SetMapPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -796,7 +770,7 @@ void plReflectionUtils::SetMapPropertyValue(const plAbstractMapProperty* pProp, 
 
 void plReflectionUtils::InsertArrayPropertyValue(const plAbstractArrayProperty* pProp, void* pObject, const plVariant& value, plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "InsertArrayPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "InsertArrayPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -813,7 +787,7 @@ void plReflectionUtils::InsertArrayPropertyValue(const plAbstractArrayProperty* 
 
 void plReflectionUtils::RemoveArrayPropertyValue(const plAbstractArrayProperty* pProp, void* pObject, plUInt32 uiIndex)
 {
-  PLASMA_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "RemoveArrayPropertyValue: missing data!");
+  PL_ASSERT_DEBUG(pProp != nullptr && pObject != nullptr, "RemoveArrayPropertyValue: missing data!");
   if (pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     return;
 
@@ -861,16 +835,14 @@ const plAbstractMemberProperty* plReflectionUtils::GetMemberProperty(const plRTT
 void plReflectionUtils::GatherTypesDerivedFromClass(const plRTTI* pBaseRtti, plSet<const plRTTI*>& out_types)
 {
   plRTTI::ForEachDerivedType(pBaseRtti,
-    [&](const plRTTI* pRtti)
-    {
+    [&](const plRTTI* pRtti) {
       out_types.Insert(pRtti);
     });
 }
 
 void plReflectionUtils::GatherDependentTypes(const plRTTI* pRtti, plSet<const plRTTI*>& inout_typesAsSet, plDynamicArray<const plRTTI*>* out_pTypesAsStack /*= nullptr*/)
 {
-  auto AddType = [&](const plRTTI* pNewRtti)
-  {
+  auto AddType = [&](const plRTTI* pNewRtti) {
     if (pNewRtti != pRtti && pNewRtti->GetTypeFlags().IsSet(plTypeFlags::StandardType) == false && inout_typesAsSet.Contains(pNewRtti) == false)
     {
       inout_typesAsSet.Insert(pNewRtti);
@@ -932,11 +904,11 @@ plResult plReflectionUtils::CreateDependencySortedTypeArray(const plSet<const pl
     while (tmpStack.IsEmpty() == false)
     {
       const plRTTI* pDependentType = tmpStack.PeekBack();
-      PLASMA_ASSERT_DEBUG(pDependentType != pType, "A type must not be reported as dependency of itself");
+      PL_ASSERT_DEBUG(pDependentType != pType, "A type must not be reported as dependency of itself");
       tmpStack.PopBack();
 
       if (types.Contains(pDependentType) == false)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       out_sortedTypes.PushBack(pDependentType);
     }
@@ -945,8 +917,8 @@ plResult plReflectionUtils::CreateDependencySortedTypeArray(const plSet<const pl
     out_sortedTypes.PushBack(pType);
   }
 
-  PLASMA_ASSERT_DEV(types.GetCount() == out_sortedTypes.GetCount(), "Not all types have been sorted or the sorted list contains duplicates");
-  return PLASMA_SUCCESS;
+  PL_ASSERT_DEV(types.GetCount() == out_sortedTypes.GetCount(), "Not all types have been sorted or the sorted list contains duplicates");
+  return PL_SUCCESS;
 }
 
 bool plReflectionUtils::EnumerationToString(const plRTTI* pEnumerationRtti, plInt64 iValue, plStringBuilder& out_sOutput, plEnum<EnumConversionMode> conversionMode)
@@ -986,7 +958,7 @@ bool plReflectionUtils::EnumerationToString(const plRTTI* pEnumerationRtti, plIn
   }
   else
   {
-    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PL_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return false;
   }
 }
@@ -1059,7 +1031,7 @@ bool plReflectionUtils::StringToEnumeration(const plRTTI* pEnumerationRtti, cons
   }
   else
   {
-    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PL_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return false;
   }
 }
@@ -1069,12 +1041,12 @@ plInt64 plReflectionUtils::DefaultEnumerationValue(const plRTTI* pEnumerationRtt
   if (pEnumerationRtti->IsDerivedFrom<plEnumBase>() || pEnumerationRtti->IsDerivedFrom<plBitflagsBase>())
   {
     auto pProp = pEnumerationRtti->GetProperties()[0];
-    PLASMA_ASSERT_DEBUG(pProp->GetCategory() == plPropertyCategory::Constant && plStringUtils::EndsWith(pProp->GetPropertyName(), "::Default"), "First enumeration property must be the default value constant.");
+    PL_ASSERT_DEBUG(pProp->GetCategory() == plPropertyCategory::Constant && plStringUtils::EndsWith(pProp->GetPropertyName(), "::Default"), "First enumeration property must be the default value constant.");
     return static_cast<const plAbstractConstantProperty*>(pProp)->GetConstant().ConvertTo<plInt64>();
   }
   else
   {
-    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PL_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return 0;
   }
 }
@@ -1116,7 +1088,7 @@ plInt64 plReflectionUtils::MakeEnumerationValid(const plRTTI* pEnumerationRtti, 
   }
   else
   {
-    PLASMA_ASSERT_DEV(false, "The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
+    PL_REPORT_FAILURE("The RTTI class '{0}' is not an enum or bitflags class", pEnumerationRtti->GetTypeName());
     return 0;
   }
 }
@@ -1371,9 +1343,9 @@ bool plReflectionUtils::IsEqual(const void* pObject, const void* pObject2, const
             if (pPropType->GetAllocator()->CanAllocate())
             {
               void* value1 = pPropType->GetAllocator()->Allocate<void>();
-              PLASMA_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(value1););
+              PL_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(value1););
               void* value2 = pPropType->GetAllocator()->Allocate<void>();
-              PLASMA_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(value2););
+              PL_SCOPE_EXIT(pPropType->GetAllocator()->Deallocate(value2););
 
               bool bRes1 = pSpecific->GetValue(pObject, keys[i], value1);
               bool bRes2 = pSpecific->GetValue(pObject2, keys[i], value2);
@@ -1397,7 +1369,7 @@ bool plReflectionUtils::IsEqual(const void* pObject, const void* pObject2, const
     break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
   return true;
@@ -1405,7 +1377,7 @@ bool plReflectionUtils::IsEqual(const void* pObject, const void* pObject2, const
 
 bool plReflectionUtils::IsEqual(const void* pObject, const void* pObject2, const plRTTI* pType)
 {
-  PLASMA_ASSERT_DEV(pObject && pObject2 && pType, "invalid type.");
+  PL_ASSERT_DEV(pObject && pObject2 && pType, "invalid type.");
   if (pType->IsDerivedFrom<plReflectedClass>())
   {
     const plReflectedClass* pRefObject = static_cast<const plReflectedClass*>(pObject);
@@ -1492,11 +1464,11 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(plVariant::Type::Enum typ
     case plVariant::Type::Quaternion:
       return plVariant(plQuat(0.0f, 0.0f, 0.0f, 1.0f));
     case plVariant::Type::Matrix3:
-      return plVariant(plMat3::IdentityMatrix());
+      return plVariant(plMat3::MakeIdentity());
     case plVariant::Type::Matrix4:
-      return plVariant(plMat4::IdentityMatrix());
+      return plVariant(plMat4::MakeIdentity());
     case plVariant::Type::Transform:
-      return plVariant(plTransform::IdentityTransform());
+      return plVariant(plTransform::MakeIdentity());
     case plVariant::Type::String:
       return plVariant(plString());
     case plVariant::Type::StringView:
@@ -1521,10 +1493,9 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(plVariant::Type::Enum typ
       return plVariant(static_cast<void*>(nullptr), nullptr);
 
     default:
-      PLASMA_REPORT_FAILURE("Invalid case statement");
+      PL_REPORT_FAILURE("Invalid case statement");
       return plVariant();
   }
-  return plVariant();
 }
 
 plVariant plReflectionUtils::GetDefaultValue(const plAbstractProperty* pProperty, plVariant index)
@@ -1638,7 +1609,7 @@ plVariant plReflectionUtils::GetDefaultValue(const plAbstractProperty* pProperty
       break;
   }
 
-  PLASMA_REPORT_FAILURE("Don't reach here");
+  PL_REPORT_FAILURE("Don't reach here");
   return plVariant();
 }
 
@@ -1658,7 +1629,6 @@ plVariant plReflectionUtils::GetDefaultVariantFromType(const plRTTI* pRtti)
     default:
       return GetDefaultVariantFromType(type);
   }
-  return plVariant();
 }
 
 void plReflectionUtils::SetAllMemberPropertiesToDefault(const plRTTI* pRtti, void* pObject)
@@ -1691,16 +1661,16 @@ namespace
   template <typename T, int V = plClampCategoryType<T>::value>
   struct ClampVariantFuncImpl
   {
-    static PLASMA_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
+    static PL_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   };
 
   template <typename T>
   struct ClampVariantFuncImpl<T, 1> // scalar types
   {
-    static PLASMA_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
+    static PL_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
     {
       if (pAttrib->GetMinValue().CanConvertTo<T>())
       {
@@ -1710,14 +1680,14 @@ namespace
       {
         value = plMath::Min(value.ConvertTo<T>(), pAttrib->GetMaxValue().ConvertTo<T>());
       }
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   };
 
   template <typename T>
   struct ClampVariantFuncImpl<T, 2> // vector types
   {
-    static PLASMA_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
+    static PL_ALWAYS_INLINE plResult Func(plVariant& value, const plClampValueAttribute* pAttrib)
     {
       if (pAttrib->GetMinValue().CanConvertTo<T>())
       {
@@ -1727,14 +1697,14 @@ namespace
       {
         value = value.ConvertTo<T>().CompMin(pAttrib->GetMaxValue().ConvertTo<T>());
       }
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   };
 
   struct ClampVariantFunc
   {
     template <typename T>
-    PLASMA_ALWAYS_INLINE plResult operator()(plVariant& value, const plClampValueAttribute* pAttrib)
+    PL_ALWAYS_INLINE plResult operator()(plVariant& value, const plClampValueAttribute* pAttrib)
     {
       return ClampVariantFuncImpl<T>::Func(value, pAttrib);
     }
@@ -1745,10 +1715,10 @@ plResult plReflectionUtils::ClampValue(plVariant& value, const plClampValueAttri
 {
   plVariantType::Enum type = value.GetType();
   if (type == plVariantType::Invalid || pAttrib == nullptr)
-    return PLASMA_SUCCESS; // If there is nothing to clamp or no clamp attribute we call it a success.
+    return PL_SUCCESS; // If there is nothing to clamp or no clamp attribute we call it a success.
 
   ClampVariantFunc func;
   return plVariant::DispatchTo(func, type, value, pAttrib);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_ReflectionUtils);
+

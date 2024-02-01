@@ -18,7 +18,7 @@
 
 plParticleEffectInstance::plParticleEffectInstance()
 {
-  m_pTask = PLASMA_DEFAULT_NEW(plParticleEffectUpdateTask, this);
+  m_pTask = PL_DEFAULT_NEW(plParticleEffectUpdateTask, this);
   m_pTask->ConfigureTask("Particle Effect Update", plTaskNesting::Maybe);
 
   m_pOwnerModule = nullptr;
@@ -40,15 +40,15 @@ void plParticleEffectInstance::Construct(plParticleEffectHandle hEffectHandle, c
   m_bIsSharedEffect = bIsShared;
   m_bEmitterEnabled = true;
   m_bIsFinishing = false;
-  m_BoundingVolume.SetInvalid();
-  m_ElapsedTimeSinceUpdate.SetZero();
-  m_EffectIsVisible.SetZero();
+  m_BoundingVolume = plBoundingBoxSphere::MakeInvalid();
+  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
+  m_EffectIsVisible = plTime::MakeZero();
   m_iMinSimStepsToDo = 4;
   m_Transform.SetIdentity();
   m_TransformForNextFrame.SetIdentity();
   m_vVelocity.SetZero();
   m_vVelocityForNextFrame.SetZero();
-  m_TotalEffectLifeTime.SetZero();
+  m_TotalEffectLifeTime = plTime::MakeZero();
   m_pVisibleIf = nullptr;
   m_uiRandomSeed = uiRandomSeed;
 
@@ -83,9 +83,9 @@ void plParticleEffectInstance::Interrupt()
   m_bEmitterEnabled = false;
 }
 
-void plParticleEffectInstance::SetEmitterEnabled(bool enable)
+void plParticleEffectInstance::SetEmitterEnabled(bool bEnable)
 {
-  m_bEmitterEnabled = enable;
+  m_bEmitterEnabled = bEnable;
 
   for (plUInt32 i = 0; i < m_ParticleSystems.GetCount(); ++i)
   {
@@ -170,7 +170,7 @@ void plParticleEffectInstance::PreSimulate()
 
   // simulate in large steps to get close
   {
-    const plTime tDiff = plTime::Seconds(0.5);
+    const plTime tDiff = plTime::MakeFromSeconds(0.5);
     while (m_PreSimulateDuration.GetSeconds() > 10.0)
     {
       StepSimulation(tDiff);
@@ -180,7 +180,7 @@ void plParticleEffectInstance::PreSimulate()
 
   // finer steps
   {
-    const plTime tDiff = plTime::Seconds(0.2);
+    const plTime tDiff = plTime::MakeFromSeconds(0.2);
     while (m_PreSimulateDuration.GetSeconds() > 5.0)
     {
       StepSimulation(tDiff);
@@ -190,7 +190,7 @@ void plParticleEffectInstance::PreSimulate()
 
   // even finer
   {
-    const plTime tDiff = plTime::Seconds(0.1);
+    const plTime tDiff = plTime::MakeFromSeconds(0.1);
     while (m_PreSimulateDuration.GetSeconds() >= 0.1)
     {
       StepSimulation(tDiff);
@@ -202,7 +202,7 @@ void plParticleEffectInstance::PreSimulate()
   if (m_PreSimulateDuration.GetSeconds() > 0.0)
   {
     StepSimulation(m_PreSimulateDuration);
-    m_PreSimulateDuration = plTime::Seconds(0);
+    m_PreSimulateDuration = plTime::MakeFromSeconds(0);
   }
 
   if (!IsContinuous())
@@ -223,13 +223,13 @@ void plParticleEffectInstance::SetIsVisible() const
   //    so it may be too small and culling could be imprecise
   //    by just rendering it the next 100ms, no matter what, the bounding volume
   //    does not need to be updated so frequently
-  m_EffectIsVisible = plClock::GetGlobalClock()->GetAccumulatedTime() + plTime::Seconds(0.1);
+  m_EffectIsVisible = plClock::GetGlobalClock()->GetAccumulatedTime() + plTime::MakeFromSeconds(0.1);
 }
 
 
 void plParticleEffectInstance::SetVisibleIf(plParticleEffectInstance* pOtherVisible)
 {
-  PLASMA_ASSERT_DEV(pOtherVisible != this, "Invalid effect");
+  PL_ASSERT_DEV(pOtherVisible != this, "Invalid effect");
   m_pVisibleIf = pOtherVisible;
 }
 
@@ -318,7 +318,7 @@ void plParticleEffectInstance::Reconfigure(bool bFirstTime, plArrayPtr<plParticl
 
   struct MulCount
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     float m_fMultiplier = 1.0f;
     plUInt32 m_uiCount = 0;
@@ -404,11 +404,11 @@ void plParticleEffectInstance::Reconfigure(bool bFirstTime, plArrayPtr<plParticl
   }
 }
 
-bool plParticleEffectInstance::Update(const plTime& tDiff)
+bool plParticleEffectInstance::Update(const plTime& diff)
 {
-  PLASMA_PROFILE_SCOPE("PFX: Effect Update");
+  PL_PROFILE_SCOPE("PFX: Effect Update");
 
-  plTime tMinStep = plTime::Seconds(0);
+  plTime tMinStep = plTime::MakeFromSeconds(0);
 
   if (!IsVisible() && m_iMinSimStepsToDo == 0)
   {
@@ -419,19 +419,19 @@ bool plParticleEffectInstance::Update(const plTime& tDiff)
     switch (m_InvisibleUpdateRate)
     {
       case plEffectInvisibleUpdateRate::FullUpdate:
-        tMinStep = plTime::Seconds(1.0 / 60.0);
+        tMinStep = plTime::MakeFromSeconds(1.0 / 60.0);
         break;
 
       case plEffectInvisibleUpdateRate::Max20fps:
-        tMinStep = plTime::Milliseconds(50);
+        tMinStep = plTime::MakeFromMilliseconds(50);
         break;
 
       case plEffectInvisibleUpdateRate::Max10fps:
-        tMinStep = plTime::Milliseconds(100);
+        tMinStep = plTime::MakeFromMilliseconds(100);
         break;
 
       case plEffectInvisibleUpdateRate::Max5fps:
-        tMinStep = plTime::Milliseconds(200);
+        tMinStep = plTime::MakeFromMilliseconds(200);
         break;
 
       case plEffectInvisibleUpdateRate::Pause:
@@ -443,7 +443,7 @@ bool plParticleEffectInstance::Update(const plTime& tDiff)
         }
 
         // otherwise do infrequent updates to shut the effect down
-        tMinStep = plTime::Milliseconds(200);
+        tMinStep = plTime::MakeFromMilliseconds(200);
         break;
       }
 
@@ -453,12 +453,12 @@ bool plParticleEffectInstance::Update(const plTime& tDiff)
     }
   }
 
-  m_ElapsedTimeSinceUpdate += tDiff;
+  m_ElapsedTimeSinceUpdate += diff;
   PassTransformToSystems();
 
   // if the time step is too big, iterate multiple times
   {
-    const plTime tMaxTimeStep = plTime::Milliseconds(200); // in sync with Max5fps
+    const plTime tMaxTimeStep = plTime::MakeFromMilliseconds(200); // in sync with Max5fps
     while (m_ElapsedTimeSinceUpdate > tMaxTimeStep)
     {
       m_ElapsedTimeSinceUpdate -= tMaxTimeStep;
@@ -473,7 +473,7 @@ bool plParticleEffectInstance::Update(const plTime& tDiff)
 
   // do the remainder
   const plTime tUpdateDiff = m_ElapsedTimeSinceUpdate;
-  m_ElapsedTimeSinceUpdate.SetZero();
+  m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
   return StepSimulation(tUpdateDiff);
 }
@@ -529,7 +529,7 @@ void plParticleEffectInstance::UpdateWindSamples()
   if (m_vSampleWindLocations[uiDataIdx].IsEmpty())
     return;
 
-  m_vSampleWindResults[uiDataIdx].SetCount(m_vSampleWindLocations[uiDataIdx].GetCount(), plVec3::ZeroVector());
+  m_vSampleWindResults[uiDataIdx].SetCount(m_vSampleWindLocations[uiDataIdx].GetCount(), plVec3::MakeZero());
 
   if (auto pWind = GetWorld()->GetModuleReadOnly<plWindWorldModuleInterface>())
   {
@@ -572,29 +572,29 @@ void plParticleEffectInstance::SetTransformForNextFrame(const plTransform& trans
   m_vVelocityForNextFrame = vParticleStartVelocity;
 }
 
-plInt32 plParticleEffectInstance::AddWindSampleLocation(const plVec3& pos)
+plInt32 plParticleEffectInstance::AddWindSampleLocation(const plVec3& vPos)
 {
   const plUInt32 uiDataIdx = plRenderWorld::GetDataIndexForRendering();
 
   if (m_vSampleWindLocations[uiDataIdx].GetCount() < m_vSampleWindLocations[uiDataIdx].GetCapacity())
   {
-    m_vSampleWindLocations[uiDataIdx].PushBack(pos);
+    m_vSampleWindLocations[uiDataIdx].PushBack(vPos);
     return m_vSampleWindLocations[uiDataIdx].GetCount() - 1;
   }
 
   return -1;
 }
 
-plVec3 plParticleEffectInstance::GetWindSampleResult(plInt32 idx) const
+plVec3 plParticleEffectInstance::GetWindSampleResult(plInt32 iIdx) const
 {
   const plUInt32 uiDataIdx = plRenderWorld::GetDataIndexForRendering();
 
-  if (idx >= 0 && m_vSampleWindResults[uiDataIdx].GetCount() > (plUInt32)idx)
+  if (iIdx >= 0 && m_vSampleWindResults[uiDataIdx].GetCount() > (plUInt32)iIdx)
   {
-    return m_vSampleWindResults[uiDataIdx][idx];
+    return m_vSampleWindResults[uiDataIdx][iIdx];
   }
 
-  return plVec3::ZeroVector();
+  return plVec3::MakeZero();
 }
 
 void plParticleEffectInstance::PassTransformToSystems()
@@ -635,28 +635,27 @@ bool plParticleEffectInstance::ShouldBeUpdated() const
   return true;
 }
 
-void plParticleEffectInstance::GetBoundingVolume(plBoundingBoxSphere& volume) const
+void plParticleEffectInstance::GetBoundingVolume(plBoundingBoxSphere& ref_volume) const
 {
   if (!m_BoundingVolume.IsValid())
   {
-    volume = plBoundingSphere(plVec3::ZeroVector(), 0.25f);
+    ref_volume = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 0.25f);
     return;
   }
 
-  volume = m_BoundingVolume;
+  ref_volume = m_BoundingVolume;
 
   if (!m_bSimulateInLocalSpace)
   {
     // transform the bounding volume to local space, unless it was already created there
     const plMat4 invTrans = GetTransform().GetAsMat4().GetInverse();
-    volume.Transform(invTrans);
+    ref_volume.Transform(invTrans);
   }
 }
 
 void plParticleEffectInstance::CombineSystemBoundingVolumes()
 {
-  plBoundingBoxSphere effectVolume;
-  effectVolume.SetInvalid();
+  plBoundingBoxSphere effectVolume = plBoundingBoxSphere::MakeInvalid();
 
   for (plUInt32 i = 0; i < m_ParticleSystems.GetCount(); ++i)
   {
@@ -681,7 +680,7 @@ void plParticleEffectInstance::ProcessEventQueues()
   if (m_EventQueue.IsEmpty())
     return;
 
-  PLASMA_PROFILE_SCOPE("PFX: Effect Event Queue");
+  PL_PROFILE_SCOPE("PFX: Effect Event Queue");
   for (plUInt32 i = 0; i < m_ParticleSystems.GetCount(); ++i)
   {
     if (m_ParticleSystems[i])
@@ -715,7 +714,7 @@ void plParticleEffectInstance::ProcessEventQueues()
 plParticleEffectUpdateTask::plParticleEffectUpdateTask(plParticleEffectInstance* pEffect)
 {
   m_pEffect = pEffect;
-  m_UpdateDiff.SetZero();
+  m_UpdateDiff = plTime::MakeZero();
 }
 
 void plParticleEffectUpdateTask::Execute()
@@ -730,14 +729,14 @@ void plParticleEffectUpdateTask::Execute()
     if (!m_pEffect->Update(m_UpdateDiff))
     {
       const plParticleEffectHandle hEffect = m_pEffect->GetHandle();
-      PLASMA_ASSERT_DEBUG(!hEffect.IsInvalidated(), "Invalid particle effect handle");
+      PL_ASSERT_DEBUG(!hEffect.IsInvalidated(), "Invalid particle effect handle");
 
       m_pEffect->GetOwnerWorldModule()->DestroyEffectInstance(hEffect, true, nullptr);
     }
   }
 }
 
-void plParticleEffectInstance::SetParameter(const plTempHashedString& name, float value)
+void plParticleEffectInstance::SetParameter(const plTempHashedString& sName, float value)
 {
   // shared effects do not support parameters
   if (m_bIsSharedEffect)
@@ -745,7 +744,7 @@ void plParticleEffectInstance::SetParameter(const plTempHashedString& name, floa
 
   for (plUInt32 i = 0; i < m_FloatParameters.GetCount(); ++i)
   {
-    if (m_FloatParameters[i].m_uiNameHash == name.GetHash())
+    if (m_FloatParameters[i].m_uiNameHash == sName.GetHash())
     {
       m_FloatParameters[i].m_fValue = value;
       return;
@@ -753,11 +752,11 @@ void plParticleEffectInstance::SetParameter(const plTempHashedString& name, floa
   }
 
   auto& ref = m_FloatParameters.ExpandAndGetRef();
-  ref.m_uiNameHash = name.GetHash();
+  ref.m_uiNameHash = sName.GetHash();
   ref.m_fValue = value;
 }
 
-void plParticleEffectInstance::SetParameter(const plTempHashedString& name, const plColor& value)
+void plParticleEffectInstance::SetParameter(const plTempHashedString& sName, const plColor& value)
 {
   // shared effects do not support parameters
   if (m_bIsSharedEffect)
@@ -765,7 +764,7 @@ void plParticleEffectInstance::SetParameter(const plTempHashedString& name, cons
 
   for (plUInt32 i = 0; i < m_ColorParameters.GetCount(); ++i)
   {
-    if (m_ColorParameters[i].m_uiNameHash == name.GetHash())
+    if (m_ColorParameters[i].m_uiNameHash == sName.GetHash())
     {
       m_ColorParameters[i].m_Value = value;
       return;
@@ -773,58 +772,58 @@ void plParticleEffectInstance::SetParameter(const plTempHashedString& name, cons
   }
 
   auto& ref = m_ColorParameters.ExpandAndGetRef();
-  ref.m_uiNameHash = name.GetHash();
+  ref.m_uiNameHash = sName.GetHash();
   ref.m_Value = value;
 }
 
-plInt32 plParticleEffectInstance::FindFloatParameter(const plTempHashedString& name) const
+plInt32 plParticleEffectInstance::FindFloatParameter(const plTempHashedString& sName) const
 {
   for (plUInt32 i = 0; i < m_FloatParameters.GetCount(); ++i)
   {
-    if (m_FloatParameters[i].m_uiNameHash == name.GetHash())
+    if (m_FloatParameters[i].m_uiNameHash == sName.GetHash())
       return i;
   }
 
   return -1;
 }
 
-float plParticleEffectInstance::GetFloatParameter(const plTempHashedString& name, float defaultValue) const
+float plParticleEffectInstance::GetFloatParameter(const plTempHashedString& sName, float fDefaultValue) const
 {
-  if (name.IsEmpty())
-    return defaultValue;
+  if (sName.IsEmpty())
+    return fDefaultValue;
 
   for (plUInt32 i = 0; i < m_FloatParameters.GetCount(); ++i)
   {
-    if (m_FloatParameters[i].m_uiNameHash == name.GetHash())
+    if (m_FloatParameters[i].m_uiNameHash == sName.GetHash())
       return m_FloatParameters[i].m_fValue;
   }
 
-  return defaultValue;
+  return fDefaultValue;
 }
 
-plInt32 plParticleEffectInstance::FindColorParameter(const plTempHashedString& name) const
+plInt32 plParticleEffectInstance::FindColorParameter(const plTempHashedString& sName) const
 {
   for (plUInt32 i = 0; i < m_ColorParameters.GetCount(); ++i)
   {
-    if (m_ColorParameters[i].m_uiNameHash == name.GetHash())
+    if (m_ColorParameters[i].m_uiNameHash == sName.GetHash())
       return i;
   }
 
   return -1;
 }
 
-const plColor& plParticleEffectInstance::GetColorParameter(const plTempHashedString& name, const plColor& defaultValue) const
+const plColor& plParticleEffectInstance::GetColorParameter(const plTempHashedString& sName, const plColor& defaultValue) const
 {
-  if (name.IsEmpty())
+  if (sName.IsEmpty())
     return defaultValue;
 
   for (plUInt32 i = 0; i < m_ColorParameters.GetCount(); ++i)
   {
-    if (m_ColorParameters[i].m_uiNameHash == name.GetHash())
+    if (m_ColorParameters[i].m_uiNameHash == sName.GetHash())
       return m_ColorParameters[i].m_Value;
   }
 
   return defaultValue;
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectInstance);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectInstance);

@@ -10,11 +10,11 @@
 
 class plQtCVarWidget;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtCVarPanel : public plQtApplicationPanel
+class PL_EDITORFRAMEWORK_DLL plQtCVarPanel : public plQtApplicationPanel
 {
   Q_OBJECT
 
-  PLASMA_DECLARE_SINGLETON(plQtCVarPanel);
+  PL_DECLARE_SINGLETON(plQtCVarPanel);
 
 public:
   plQtCVarPanel();
@@ -31,7 +31,7 @@ private Q_SLOTS:
   void StringChanged(const char* szCVar, const char* newValue);
 
 private:
-  void EngineProcessMsgHandler(const PlasmaEditorEngineProcessConnection::Event& e);
+  void EngineProcessMsgHandler(const plEditorEngineProcessConnection::Event& e);
 
   plQtCVarWidget* m_pCVarWidget = nullptr;
 

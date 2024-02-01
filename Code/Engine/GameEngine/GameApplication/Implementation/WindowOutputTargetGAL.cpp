@@ -65,15 +65,15 @@ void plWindowOutputTargetGAL::Present(bool bEnableVSync)
   }
 }
 
-plResult plWindowOutputTargetGAL::CaptureImage(plImage& out_Image)
+plResult plWindowOutputTargetGAL::CaptureImage(plImage& out_image)
 {
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
 
   auto pGALPass = pDevice->BeginPass("CaptureImage");
-  PLASMA_SCOPE_EXIT(pDevice->EndPass(pGALPass));
+  PL_SCOPE_EXIT(pDevice->EndPass(pGALPass));
 
   auto pGALCommandEncoder = pGALPass->BeginRendering(plGALRenderingSetup());
-  PLASMA_SCOPE_EXIT(pGALPass->EndRendering(pGALCommandEncoder));
+  PL_SCOPE_EXIT(pGALPass->EndRendering(pGALCommandEncoder));
 
   const plGALSwapChain* pSwapChain = pDevice->GetSwapChain(m_hSwapChain);
   plGALTextureHandle hBackbuffer = pSwapChain ? pSwapChain->GetRenderTargets().m_hRTs[0] : plGALTextureHandle();
@@ -103,14 +103,12 @@ plResult plWindowOutputTargetGAL::CaptureImage(plImage& out_Image)
   header.SetWidth(uiWidth);
   header.SetHeight(uiHeight);
   header.SetImageFormat(plTextureUtils::GalFormatToImageFormat(format, true));
-  out_Image.ResetAndAlloc(header);
-  plUInt8* pData = out_Image.GetPixelPointer<plUInt8>();
+  out_image.ResetAndAlloc(header);
+  plUInt8* pData = out_image.GetPixelPointer<plUInt8>();
 
   plMemoryUtils::Copy(pData, backbufferData.GetData(), backbufferData.GetCount());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_GameApplication_Implementation_WindowOutputTargetGAL);

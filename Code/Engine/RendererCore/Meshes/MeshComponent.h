@@ -3,11 +3,14 @@
 #include <RendererCore/Meshes/MeshComponentBase.h>
 
 struct plMsgExtractGeometry;
-typedef plComponentManager<class plMeshComponent, plBlockStorageType::Compact> plMeshComponentManager;
+using plMeshComponentManager = plComponentManager<class plMeshComponent, plBlockStorageType::Compact>;
 
-class PLASMA_RENDERERCORE_DLL plMeshComponent : public plMeshComponentBase
+/// \brief Renders a single instance of a static mesh.
+///
+/// This is the main component to use for rendering regular meshes.
+class PL_RENDERERCORE_DLL plMeshComponent : public plMeshComponentBase
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plMeshComponent, plMeshComponentBase, plMeshComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plMeshComponent, plMeshComponentBase, plMeshComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plMeshComponent

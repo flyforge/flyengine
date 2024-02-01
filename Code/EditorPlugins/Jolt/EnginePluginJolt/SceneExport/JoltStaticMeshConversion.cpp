@@ -1,14 +1,14 @@
 #include <EnginePluginJolt/EnginePluginJoltPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EnginePluginJolt/SceneExport/JoltStaticMeshConversion.h>
 #include <Foundation/IO/ChunkStream.h>
 #include <Foundation/IO/FileSystem/DeferredFileWriter.h>
 #include <JoltCooking/JoltCooking.h>
 #include <JoltPlugin/Actors/JoltStaticActorComponent.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneExportModifier_JoltStaticMeshConversion, 1, plRTTIDefaultAllocator<plSceneExportModifier_JoltStaticMeshConversion>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSceneExportModifier_JoltStaticMeshConversion, 1, plRTTIDefaultAllocator<plSceneExportModifier_JoltStaticMeshConversion>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 void plSceneExportModifier_JoltStaticMeshConversion::ModifyWorld(plWorld& ref_world, plStringView sDocumentType, const plUuid& documentGuid, bool bForExport)
 {
@@ -25,7 +25,7 @@ void plSceneExportModifier_JoltStaticMeshConversion::ModifyWorld(plWorld& ref_wo
     }
   }
 
-  PLASMA_LOCK(ref_world.GetWriteMarker());
+  PL_LOCK(ref_world.GetWriteMarker());
 
   plSmcDescription desc;
   desc.m_Surfaces.PushBack(); // add a dummy empty material
@@ -94,7 +94,7 @@ void plSceneExportModifier_JoltStaticMeshConversion::ModifyWorld(plWorld& ref_wo
   plStringBuilder sDocGuid, sOutputFile;
   plConversionUtils::ToString(documentGuid, sDocGuid);
 
-  sOutputFile.Format(":project/AssetCache/Generated/{0}.plJoltMesh", sDocGuid);
+  sOutputFile.SetFormat(":project/AssetCache/Generated/{0}.plJoltMesh", sDocGuid);
 
   plDeferredFileWriter file;
   file.SetOutput(sOutputFile);
@@ -105,7 +105,11 @@ void plSceneExportModifier_JoltStaticMeshConversion::ModifyWorld(plWorld& ref_wo
   plChunkStreamWriter chunk(file);
   chunk.BeginStream(1);
 
-  plJoltCooking::WriteResourceToStream(chunk, xMesh, surfaces, plJoltCooking::MeshType::Triangle).IgnoreResult();
+  if (plJoltCooking::WriteResourceToStream(chunk, xMesh, surfaces, plJoltCooking::MeshType::Triangle).LogFailure())
+  {
+    plLog::Error("Could not write to global collision mesh file");
+    return;
+  }
 
   chunk.EndStream();
 

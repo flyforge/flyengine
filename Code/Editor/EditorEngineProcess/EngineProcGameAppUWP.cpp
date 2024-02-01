@@ -4,22 +4,22 @@
 #include <EditorEngineProcessFramework/EngineProcess/EngineProcessAppUWP.h>
 #include <GameEngine/XR/XRInputDevice.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 
-PlasmaEngineProcessGameApplicationUWP::PlasmaEngineProcessGameApplicationUWP() {}
+plEngineProcessGameApplicationUWP::plEngineProcessGameApplicationUWP() {}
 
-PlasmaEngineProcessGameApplicationUWP::~PlasmaEngineProcessGameApplicationUWP() {}
+plEngineProcessGameApplicationUWP::~plEngineProcessGameApplicationUWP() {}
 
-plUniquePtr<PlasmaEditorEngineProcessApp> PlasmaEngineProcessGameApplicationUWP::CreateEngineProcessApp()
+plUniquePtr<plEditorEngineProcessApp> plEngineProcessGameApplicationUWP::CreateEngineProcessApp()
 {
-  plUniquePtr<PlasmaEditorEngineProcessApp> ptr = PLASMA_DEFAULT_NEW(PlasmaEditorEngineProcessAppUWP);
-  m_pEngineProcessApp = static_cast<PlasmaEditorEngineProcessAppUWP*>(ptr.Borrow());
+  plUniquePtr<plEditorEngineProcessApp> ptr = PL_DEFAULT_NEW(plEditorEngineProcessAppUWP);
+  m_pEngineProcessApp = static_cast<plEditorEngineProcessAppUWP*>(ptr.Borrow());
   return ptr;
 }
 
-void PlasmaEngineProcessGameApplicationUWP::Init_ConfigureInput()
+void plEngineProcessGameApplicationUWP::Init_ConfigureInput()
 {
-  PlasmaEngineProcessGameApplication::Init_ConfigureInput();
+  plEngineProcessGameApplication::Init_ConfigureInput();
 
   // Set Anchor
   {
@@ -30,7 +30,7 @@ void PlasmaEngineProcessGameApplicationUWP::Init_ConfigureInput()
   }
 }
 
-bool PlasmaEngineProcessGameApplicationUWP::Run_ProcessApplicationInput()
+bool plEngineProcessGameApplicationUWP::Run_ProcessApplicationInput()
 {
   return SUPER::Run_ProcessApplicationInput();
 }

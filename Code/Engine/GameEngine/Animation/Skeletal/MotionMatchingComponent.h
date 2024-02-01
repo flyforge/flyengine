@@ -8,11 +8,11 @@
 //using plAnimationClipResourceHandle = plTypedResourceHandle<class plAnimationClipResource>;
 //using plSkeletonResourceHandle = plTypedResourceHandle<class plSkeletonResource>;
 //
-//typedef plComponentManagerSimple<class plMotionMatchingComponent, plComponentUpdateType::WhenSimulating> plMotionMatchingComponentManager;
+//using plMotionMatchingComponentManager = plComponentManagerSimple<class plMotionMatchingComponent, plComponentUpdateType::WhenSimulating> ;
 //
-//class PLASMA_GAMEENGINE_DLL plMotionMatchingComponent : public plSkinnedMeshComponent
+//class PL_GAMEENGINE_DLL plMotionMatchingComponent : public plSkinnedMeshComponent
 //{
-//  PLASMA_DECLARE_COMPONENT_TYPE(plMotionMatchingComponent, plSkinnedMeshComponent, plMotionMatchingComponentManager);
+//  PL_DECLARE_COMPONENT_TYPE(plMotionMatchingComponent, plSkinnedMeshComponent, plMotionMatchingComponentManager);
 //
 //  //////////////////////////////////////////////////////////////////////////
 //  // plComponent

@@ -34,36 +34,34 @@ public:
   {
     using iterator_category = std::forward_iterator_tag;
     using value_type = Iterator;
-    using difference_type = ptrdiff_t;
+    using difference_type = std::ptrdiff_t;
     using pointer = Iterator*;
     using reference = Iterator&;
 
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     /// \brief Constructs an invalid iterator.
-    PLASMA_ALWAYS_INLINE Iterator()
+    PL_ALWAYS_INLINE Iterator()
       : m_pElement(nullptr)
     {
     } // [tested]
 
     /// \brief Checks whether this iterator points to a valid element.
-    PLASMA_ALWAYS_INLINE bool IsValid() const { return (m_pElement != nullptr); } // [tested]
+    PL_ALWAYS_INLINE bool IsValid() const { return (m_pElement != nullptr); } // [tested]
 
     /// \brief Checks whether the two iterators point to the same element.
-    PLASMA_ALWAYS_INLINE bool operator==(const typename plSetBase<KeyType, Comparer>::Iterator& it2) const { return (m_pElement == it2.m_pElement); }
-
-    /// \brief Checks whether the two iterators point to the same element.
-    PLASMA_ALWAYS_INLINE bool operator!=(const typename plSetBase<KeyType, Comparer>::Iterator& it2) const { return (m_pElement != it2.m_pElement); }
+    PL_ALWAYS_INLINE bool operator==(const typename plSetBase<KeyType, Comparer>::Iterator& it2) const { return (m_pElement == it2.m_pElement); }
+    PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const typename plSetBase<KeyType, Comparer>::Iterator&);
 
     /// \brief Returns the 'key' of the element that this iterator points to.
-    PLASMA_FORCE_INLINE const KeyType& Key() const
+    PL_FORCE_INLINE const KeyType& Key() const
     {
-      PLASMA_ASSERT_DEBUG(IsValid(), "Cannot access the 'key' of an invalid iterator.");
+      PL_ASSERT_DEBUG(IsValid(), "Cannot access the 'key' of an invalid iterator.");
       return m_pElement->m_Key;
     } // [tested]
 
     /// \brief Returns the 'key' of the element that this iterator points to.
-    PLASMA_ALWAYS_INLINE const KeyType& operator*() { return Key(); }
+    PL_ALWAYS_INLINE const KeyType& operator*() { return Key(); }
 
     /// \brief Advances the iterator to the next element in the set. The iterator will not be valid anymore, if the end is reached.
     void Next(); // [tested]
@@ -72,15 +70,15 @@ public:
     void Prev(); // [tested]
 
     /// \brief Shorthand for 'Next'
-    PLASMA_ALWAYS_INLINE void operator++() { Next(); } // [tested]
+    PL_ALWAYS_INLINE void operator++() { Next(); } // [tested]
 
     /// \brief Shorthand for 'Prev'
-    PLASMA_ALWAYS_INLINE void operator--() { Prev(); } // [tested]
+    PL_ALWAYS_INLINE void operator--() { Prev(); } // [tested]
 
   protected:
     friend class plSetBase<KeyType, Comparer>;
 
-    PLASMA_ALWAYS_INLINE explicit Iterator(Node* pInit)
+    PL_ALWAYS_INLINE explicit Iterator(Node* pInit)
       : m_pElement(pInit)
     {
     }
@@ -90,10 +88,10 @@ public:
 
 protected:
   /// \brief Initializes the set to be empty.
-  plSetBase(const Comparer& comparer, plAllocatorBase* pAllocator); // [tested]
+  plSetBase(const Comparer& comparer, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies all keys from the given set into this one.
-  plSetBase(const plSetBase<KeyType, Comparer>& cc, plAllocatorBase* pAllocator); // [tested]
+  plSetBase(const plSetBase<KeyType, Comparer>& cc, plAllocator* pAllocator); // [tested]
 
   /// \brief Destroys all elements in the set.
   ~plSetBase(); // [tested]
@@ -159,13 +157,11 @@ public:
   void Intersection(const plSetBase<KeyType, Comparer>& operand); // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const { return m_Elements.GetAllocator(); }
+  plAllocator* GetAllocator() const { return m_Elements.GetAllocator(); }
 
   /// \brief Comparison operator
   bool operator==(const plSetBase<KeyType, Comparer>& rhs) const; // [tested]
-
-  /// \brief Comparison operator
-  bool operator!=(const plSetBase<KeyType, Comparer>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plSetBase<KeyType, Comparer>&);
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const { return m_Elements.GetHeapMemoryUsage(); } // [tested]
@@ -236,8 +232,8 @@ class plSet : public plSetBase<KeyType, Comparer>
 {
 public:
   plSet();
-  explicit plSet(plAllocatorBase* pAllocator);
-  plSet(const Comparer& comparer, plAllocatorBase* pAllocator);
+  explicit plSet(plAllocator* pAllocator);
+  plSet(const Comparer& comparer, plAllocator* pAllocator);
 
   plSet(const plSet<KeyType, Comparer, AllocatorWrapper>& other);
   plSet(const plSetBase<KeyType, Comparer>& other);

@@ -61,14 +61,14 @@ inline double plClock::GetSpeed() const
 
 inline void plClock::SetMinimumTimeStep(plTime min)
 {
-  PLASMA_ASSERT_DEV(min >= plTime::Seconds(0.0), "Time flows in one direction only.");
+  PL_ASSERT_DEV(min >= plTime::MakeFromSeconds(0.0), "Time flows in one direction only.");
 
   m_MinTimeStep = min;
 }
 
 inline void plClock::SetMaximumTimeStep(plTime max)
 {
-  PLASMA_ASSERT_DEV(max >= plTime::Seconds(0.0), "Time flows in one direction only.");
+  PL_ASSERT_DEV(max >= plTime::MakeFromSeconds(0.0), "Time flows in one direction only.");
 
   m_MaxTimeStep = max;
 }
@@ -85,14 +85,14 @@ inline plTime plClock::GetMaximumTimeStep() const
 
 inline void plClock::SetFixedTimeStep(plTime diff)
 {
-  PLASMA_ASSERT_DEV(m_FixedTimeStep.GetSeconds() >= 0.0, "Fixed Time Stepping cannot reverse time!");
+  PL_ASSERT_DEV(m_FixedTimeStep.GetSeconds() >= 0.0, "Fixed Time Stepping cannot reverse time!");
 
   m_FixedTimeStep = diff;
 }
 
 inline void plClock::SetSpeed(double fFactor)
 {
-  PLASMA_ASSERT_DEV(fFactor >= 0.0, "Time cannot run backwards.");
+  PL_ASSERT_DEV(fFactor >= 0.0, "Time cannot run backwards.");
 
   m_fSpeed = fFactor;
 }

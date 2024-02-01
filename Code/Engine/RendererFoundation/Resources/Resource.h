@@ -5,12 +5,12 @@
 #include <Foundation/Strings/HashedString.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-class PLASMA_RENDERERFOUNDATION_DLL plGALResourceBase : public plRefCounted
+class PL_RENDERERFOUNDATION_DLL plGALResourceBase : public plRefCounted
 {
 public:
   void SetDebugName(const char* szName) const
   {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     m_sDebugName.Assign(szName);
 #endif
 
@@ -24,17 +24,17 @@ protected:
 
   inline ~plGALResourceBase()
   {
-    PLASMA_ASSERT_DEV(m_hDefaultResourceView.IsInvalidated(), "");
-    PLASMA_ASSERT_DEV(m_hDefaultRenderTargetView.IsInvalidated(), "");
+    PL_ASSERT_DEV(m_hDefaultResourceView.IsInvalidated(), "");
+    PL_ASSERT_DEV(m_hDefaultRenderTargetView.IsInvalidated(), "");
 
-    PLASMA_ASSERT_DEV(m_ResourceViews.IsEmpty(), "Dangling resource views");
-    PLASMA_ASSERT_DEV(m_RenderTargetViews.IsEmpty(), "Dangling render target views");
-    PLASMA_ASSERT_DEV(m_UnorderedAccessViews.IsEmpty(), "Dangling unordered access views");
+    PL_ASSERT_DEV(m_ResourceViews.IsEmpty(), "Dangling resource views");
+    PL_ASSERT_DEV(m_RenderTargetViews.IsEmpty(), "Dangling render target views");
+    PL_ASSERT_DEV(m_UnorderedAccessViews.IsEmpty(), "Dangling unordered access views");
   }
 
   virtual void SetDebugNamePlatform(const char* szName) const = 0;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   mutable plHashedString m_sDebugName;
 #endif
 
@@ -51,12 +51,12 @@ template <typename CreationDescription>
 class plGALResource : public plGALResourceBase
 {
 public:
-  PLASMA_ALWAYS_INLINE plGALResource(const CreationDescription& description)
+  PL_ALWAYS_INLINE plGALResource(const CreationDescription& description)
     : m_Description(description)
   {
   }
 
-  PLASMA_ALWAYS_INLINE const CreationDescription& GetDescription() const { return m_Description; }
+  PL_ALWAYS_INLINE const CreationDescription& GetDescription() const { return m_Description; }
 
 protected:
   const CreationDescription m_Description;

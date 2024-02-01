@@ -7,9 +7,9 @@
 
 class plOpenXR;
 
-class PLASMA_OPENXRPLUGIN_DLL plOpenXRHandTracking : public plXRHandTrackingInterface
+class PL_OPENXRPLUGIN_DLL plOpenXRHandTracking : public plXRHandTrackingInterface
 {
-  PLASMA_DECLARE_SINGLETON_OF_INTERFACE(plOpenXRHandTracking, plXRHandTrackingInterface);
+  PL_DECLARE_SINGLETON_OF_INTERFACE(plOpenXRHandTracking, plXRHandTrackingInterface);
 
 public:
   static bool IsHandTrackingSupported(plOpenXR* pOpenXR);
@@ -28,7 +28,7 @@ private:
 
   struct JointData
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     plXRHandBone m_Bone;
     bool m_bValid;
   };

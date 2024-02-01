@@ -180,7 +180,7 @@ struct DockOverlayCrossPrivate
 	QPixmap createHighDpiDropIndicatorPixmap(const QSizeF& size, DockWidgetArea DockWidgetArea,
 		CDockOverlay::eMode Mode)
 	{
-		QColor borderColor = iconColor(CDockOverlayCross::WindowBackgroundColor);
+		QColor borderColor = iconColor(CDockOverlayCross::FrameColor);
 		QColor backgroundColor = iconColor(CDockOverlayCross::WindowBackgroundColor);
 
 #if QT_VERSION >= 0x050600
@@ -339,7 +339,7 @@ CDockOverlay::CDockOverlay(QWidget* parent, eMode Mode) :
 	setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 #endif
 	setWindowOpacity(1);
-	setWindowTitle("DOCKOVERLAY");
+	setWindowTitle("DockOverlay");
 	setAttribute(Qt::WA_NoSystemBackground);
 	setAttribute(Qt::WA_TranslucentBackground);
 
@@ -599,7 +599,7 @@ CDockOverlayCross::CDockOverlayCross(CDockOverlay* overlay) :
 #else
 	setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
 #endif
-	setWindowTitle("DOCKOVERLAYCROSS");
+	setWindowTitle("DockOverlayCross");
 	setAttribute(Qt::WA_TranslucentBackground);
 
 	d->GridLayout = new QGridLayout();

@@ -7,89 +7,89 @@
 #include <Foundation/Logging/Log.h>
 
 /// \brief Represents a single 'object' in a DDL document, e.g. either a custom type or a primitives list.
-class PLASMA_FOUNDATION_DLL plOpenDdlReaderElement
+class PL_FOUNDATION_DLL plOpenDdlReaderElement
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Whether this is a custom object type that typically contains sub-elements.
-  PLASMA_ALWAYS_INLINE bool IsCustomType() const { return m_PrimitiveType == plOpenDdlPrimitiveType::Custom; } // [tested]
+  PL_ALWAYS_INLINE bool IsCustomType() const { return m_PrimitiveType == plOpenDdlPrimitiveType::Custom; } // [tested]
 
   /// \brief Whether this is a custom object type of the requested type.
-  PLASMA_ALWAYS_INLINE bool IsCustomType(plStringView sTypeName) const
+  PL_ALWAYS_INLINE bool IsCustomType(plStringView sTypeName) const
   {
     return m_PrimitiveType == plOpenDdlPrimitiveType::Custom && m_sCustomType == sTypeName;
   }
 
   /// \brief Returns the string for the custom type name.
-  PLASMA_ALWAYS_INLINE plStringView GetCustomType() const { return m_sCustomType; } // [tested]
+  PL_ALWAYS_INLINE plStringView GetCustomType() const { return m_sCustomType; } // [tested]
 
   /// \brief Whether the name of the object is non-empty.
-  PLASMA_ALWAYS_INLINE bool HasName() const { return !m_sName.IsEmpty(); } // [tested]
+  PL_ALWAYS_INLINE bool HasName() const { return !m_sName.IsEmpty(); } // [tested]
 
   /// \brief Returns the name of the object.
-  PLASMA_ALWAYS_INLINE plStringView GetName() const { return m_sName; } // [tested]
+  PL_ALWAYS_INLINE plStringView GetName() const { return m_sName; } // [tested]
 
   /// \brief Returns whether the element name is a global or a local name.
-  PLASMA_ALWAYS_INLINE bool IsNameGlobal() const { return (m_uiNumChildElements & PLASMA_BIT(31)) != 0; } // [tested]
+  PL_ALWAYS_INLINE bool IsNameGlobal() const { return (m_uiNumChildElements & PL_BIT(31)) != 0; } // [tested]
 
   /// \brief How many sub-elements the object has.
   plUInt32 GetNumChildObjects() const; // [tested]
 
   /// \brief If this is a custom type element, the returned pointer is to the first child element.
-  PLASMA_ALWAYS_INLINE const plOpenDdlReaderElement* GetFirstChild() const
+  PL_ALWAYS_INLINE const plOpenDdlReaderElement* GetFirstChild() const
   {
     return reinterpret_cast<const plOpenDdlReaderElement*>(m_pFirstChild);
   } // [tested]
 
   /// \brief If the parent is a custom type element, the next child after this is returned.
-  PLASMA_ALWAYS_INLINE const plOpenDdlReaderElement* GetSibling() const { return m_pSiblingElement; } // [tested]
+  PL_ALWAYS_INLINE const plOpenDdlReaderElement* GetSibling() const { return m_pSiblingElement; } // [tested]
 
   /// \brief For non-custom types this returns how many primitives are stored at this element.
   plUInt32 GetNumPrimitives() const; // [tested]
 
   /// \brief For non-custom types this returns the type of primitive that is stored at this element.
-  PLASMA_ALWAYS_INLINE plOpenDdlPrimitiveType GetPrimitivesType() const { return m_PrimitiveType; } // [tested]
+  PL_ALWAYS_INLINE plOpenDdlPrimitiveType GetPrimitivesType() const { return m_PrimitiveType; } // [tested]
 
   /// \brief Returns true if the element stores the requested type of primitives AND has at least the desired amount of them, so that accessing the
   /// data array at certain indices is safe.
   bool HasPrimitives(plOpenDdlPrimitiveType type, plUInt32 uiMinNumberOfPrimitives = 1) const;
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const bool* GetPrimitivesBool() const { return reinterpret_cast<const bool*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const bool* GetPrimitivesBool() const { return reinterpret_cast<const bool*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plInt8* GetPrimitivesInt8() const { return reinterpret_cast<const plInt8*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plInt8* GetPrimitivesInt8() const { return reinterpret_cast<const plInt8*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plInt16* GetPrimitivesInt16() const { return reinterpret_cast<const plInt16*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plInt16* GetPrimitivesInt16() const { return reinterpret_cast<const plInt16*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plInt32* GetPrimitivesInt32() const { return reinterpret_cast<const plInt32*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plInt32* GetPrimitivesInt32() const { return reinterpret_cast<const plInt32*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plInt64* GetPrimitivesInt64() const { return reinterpret_cast<const plInt64*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plInt64* GetPrimitivesInt64() const { return reinterpret_cast<const plInt64*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plUInt8* GetPrimitivesUInt8() const { return reinterpret_cast<const plUInt8*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plUInt8* GetPrimitivesUInt8() const { return reinterpret_cast<const plUInt8*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plUInt16* GetPrimitivesUInt16() const { return reinterpret_cast<const plUInt16*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plUInt16* GetPrimitivesUInt16() const { return reinterpret_cast<const plUInt16*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plUInt32* GetPrimitivesUInt32() const { return reinterpret_cast<const plUInt32*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plUInt32* GetPrimitivesUInt32() const { return reinterpret_cast<const plUInt32*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plUInt64* GetPrimitivesUInt64() const { return reinterpret_cast<const plUInt64*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plUInt64* GetPrimitivesUInt64() const { return reinterpret_cast<const plUInt64*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const float* GetPrimitivesFloat() const { return reinterpret_cast<const float*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const float* GetPrimitivesFloat() const { return reinterpret_cast<const float*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const double* GetPrimitivesDouble() const { return reinterpret_cast<const double*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const double* GetPrimitivesDouble() const { return reinterpret_cast<const double*>(m_pFirstChild); } // [tested]
 
   /// \brief Returns a pointer to the primitive data cast to a specific type. Only valid if GetPrimitivesType() actually returns this type.
-  PLASMA_ALWAYS_INLINE const plStringView* GetPrimitivesString() const { return reinterpret_cast<const plStringView*>(m_pFirstChild); } // [tested]
+  PL_ALWAYS_INLINE const plStringView* GetPrimitivesString() const { return reinterpret_cast<const plStringView*>(m_pFirstChild); } // [tested]
 
   /// \brief Searches for a child with the given name. It does not matter whether the object's name is 'local' or 'global'.
   /// \a szName is case-sensitive.
@@ -114,13 +114,13 @@ private:
 };
 
 /// \brief An OpenDDL reader parses an entire DDL document and creates an in-memory representation of the document structure.
-class PLASMA_FOUNDATION_DLL plOpenDdlReader : public plOpenDdlParser
+class PL_FOUNDATION_DLL plOpenDdlReader : public plOpenDdlParser
 {
 public:
   plOpenDdlReader();
   ~plOpenDdlReader();
 
-  /// \brief Parses the given document, returns PLASMA_FAILURE if an unrecoverable parsing error was encountered.
+  /// \brief Parses the given document, returns PL_FAILURE if an unrecoverable parsing error was encountered.
   ///
   /// \param stream is the input data.
   /// \param uiFirstLineOffset allows to adjust the reported line numbers in error messages, in case the given stream represents a sub-section of a
@@ -170,7 +170,7 @@ protected:
   void ClearDataChunks();
   plUInt8* AllocateBytes(plUInt32 uiNumBytes);
 
-  static const plUInt32 s_uiChunkSize = 1000 * 4; // 4 KiB
+  static constexpr plUInt32 s_uiChunkSize = 1000 * 4; // 4 KiB
 
   plHybridArray<plUInt8*, 16> m_DataChunks;
   plUInt8* m_pCurrentChunk;

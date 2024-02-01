@@ -1,10 +1,10 @@
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr() = default;
+PL_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr() = default;
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(const plInternal::NewInstance<U>& instance)
+PL_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(const plInternal::NewInstance<U>& instance)
 {
   m_pInstance = instance.m_pInstance;
   m_pAllocator = instance.m_pAllocator;
@@ -12,7 +12,7 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(const plInternal::NewInstance<U
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(U* pInstance, plAllocatorBase* pAllocator)
+PL_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(U* pInstance, plAllocator* pAllocator)
 {
   m_pInstance = pInstance;
   m_pAllocator = pAllocator;
@@ -20,7 +20,7 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(U* pInstance, plAllocatorBase* 
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(plUniquePtr<U>&& other)
+PL_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(plUniquePtr<U>&& other)
 {
   m_pInstance = other.m_pInstance;
   m_pAllocator = other.m_pAllocator;
@@ -30,19 +30,19 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(plUniquePtr<U>&& other)
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(std::nullptr_t)
+PL_ALWAYS_INLINE plUniquePtr<T>::plUniquePtr(std::nullptr_t)
 {
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::~plUniquePtr()
+PL_ALWAYS_INLINE plUniquePtr<T>::~plUniquePtr()
 {
   Clear();
 }
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(const plInternal::NewInstance<U>& instance)
+PL_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(const plInternal::NewInstance<U>& instance)
 {
   Clear();
 
@@ -54,7 +54,7 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(const plInternal:
 
 template <typename T>
 template <typename U>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(plUniquePtr<U>&& other)
+PL_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(plUniquePtr<U>&& other)
 {
   Clear();
 
@@ -68,7 +68,7 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(plUniquePtr<U>&& 
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(std::nullptr_t)
+PL_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(std::nullptr_t)
 {
   Clear();
 
@@ -76,7 +76,7 @@ PLASMA_ALWAYS_INLINE plUniquePtr<T>& plUniquePtr<T>::operator=(std::nullptr_t)
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::Release()
+PL_ALWAYS_INLINE T* plUniquePtr<T>::Release()
 {
   T* pInstance = m_pInstance;
 
@@ -87,7 +87,7 @@ PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::Release()
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::Release(plAllocatorBase*& out_pAllocator)
+PL_ALWAYS_INLINE T* plUniquePtr<T>::Release(plAllocator*& out_pAllocator)
 {
   T* pInstance = m_pInstance;
   out_pAllocator = m_pAllocator;
@@ -99,106 +99,106 @@ PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::Release(plAllocatorBase*& out_pAllocator
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::Borrow() const
+PL_ALWAYS_INLINE T* plUniquePtr<T>::Borrow() const
 {
   return m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plUniquePtr<T>::Clear()
+PL_ALWAYS_INLINE void plUniquePtr<T>::Clear()
 {
-  PLASMA_DELETE(m_pAllocator, m_pInstance);
+  PL_DELETE(m_pAllocator, m_pInstance);
 
   m_pInstance = nullptr;
   m_pAllocator = nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T& plUniquePtr<T>::operator*() const
+PL_ALWAYS_INLINE T& plUniquePtr<T>::operator*() const
 {
   return *m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE T* plUniquePtr<T>::operator->() const
+PL_ALWAYS_INLINE T* plUniquePtr<T>::operator->() const
 {
   return m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUniquePtr<T>::operator bool() const
+PL_ALWAYS_INLINE plUniquePtr<T>::operator bool() const
 {
   return m_pInstance != nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator==(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator==(const plUniquePtr<T>& rhs) const
 {
   return m_pInstance == rhs.m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator!=(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator!=(const plUniquePtr<T>& rhs) const
 {
   return m_pInstance != rhs.m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator<(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator<(const plUniquePtr<T>& rhs) const
 {
   return m_pInstance < rhs.m_pInstance;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator<=(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator<=(const plUniquePtr<T>& rhs) const
 {
   return !(rhs < *this);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator>(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator>(const plUniquePtr<T>& rhs) const
 {
   return rhs < *this;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator>=(const plUniquePtr<T>& rhs) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator>=(const plUniquePtr<T>& rhs) const
 {
   return !(*this < rhs);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator==(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator==(std::nullptr_t) const
 {
   return m_pInstance == nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator!=(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator!=(std::nullptr_t) const
 {
   return m_pInstance != nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator<(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator<(std::nullptr_t) const
 {
   return m_pInstance < nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator<=(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator<=(std::nullptr_t) const
 {
   return m_pInstance <= nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator>(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator>(std::nullptr_t) const
 {
   return m_pInstance > nullptr;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator>=(std::nullptr_t) const
+PL_ALWAYS_INLINE bool plUniquePtr<T>::operator>=(std::nullptr_t) const
 {
   return m_pInstance >= nullptr;
 }
@@ -207,49 +207,49 @@ PLASMA_ALWAYS_INLINE bool plUniquePtr<T>::operator>=(std::nullptr_t) const
 // free functions
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator==(const plUniquePtr<T>& lhs, const T* rhs)
+PL_ALWAYS_INLINE bool operator==(const plUniquePtr<T>& lhs, const T* rhs)
 {
   return lhs.Borrow() == rhs;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator==(const plUniquePtr<T>& lhs, T* rhs)
+PL_ALWAYS_INLINE bool operator==(const plUniquePtr<T>& lhs, T* rhs)
 {
   return lhs.Borrow() == rhs;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator!=(const plUniquePtr<T>& lhs, const T* rhs)
+PL_ALWAYS_INLINE bool operator!=(const plUniquePtr<T>& lhs, const T* rhs)
 {
   return lhs.Borrow() != rhs;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator!=(const plUniquePtr<T>& lhs, T* rhs)
+PL_ALWAYS_INLINE bool operator!=(const plUniquePtr<T>& lhs, T* rhs)
 {
   return lhs.Borrow() != rhs;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator==(const T* lhs, const plUniquePtr<T>& rhs)
+PL_ALWAYS_INLINE bool operator==(const T* lhs, const plUniquePtr<T>& rhs)
 {
   return lhs == rhs.Borrow();
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator==(T* lhs, const plUniquePtr<T>& rhs)
+PL_ALWAYS_INLINE bool operator==(T* lhs, const plUniquePtr<T>& rhs)
 {
   return lhs == rhs.Borrow();
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator!=(const T* lhs, const plUniquePtr<T>& rhs)
+PL_ALWAYS_INLINE bool operator!=(const T* lhs, const plUniquePtr<T>& rhs)
 {
   return lhs != rhs.Borrow();
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE bool operator!=(T* lhs, const plUniquePtr<T>& rhs)
+PL_ALWAYS_INLINE bool operator!=(T* lhs, const plUniquePtr<T>& rhs)
 {
   return lhs != rhs.Borrow();
 }

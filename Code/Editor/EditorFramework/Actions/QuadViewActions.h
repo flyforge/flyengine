@@ -5,22 +5,22 @@
 #include <GuiFoundation/GuiFoundationDLL.h>
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plQuadViewActions
+class PL_EDITORFRAMEWORK_DLL plQuadViewActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapActions(const char* szMapping, const char* szPath);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hToggleViews;
   static plActionDescriptorHandle s_hSpawnView;
 };
 
 ///
-class PLASMA_EDITORFRAMEWORK_DLL plQuadViewAction : public plButtonAction
+class PL_EDITORFRAMEWORK_DLL plQuadViewAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plQuadViewAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plQuadViewAction, plButtonAction);
 
 public:
   enum class ButtonType

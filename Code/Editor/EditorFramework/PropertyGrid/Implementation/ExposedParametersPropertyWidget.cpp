@@ -45,7 +45,7 @@ plStatus plExposedParameterCommandAccessor::GetValue(
     if (const plExposedParameter* pParam = GetExposedParam(pObject, index.Get<plString>()))
     {
       out_value = pParam->m_DefaultValue;
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
   }
   return res;
@@ -76,7 +76,7 @@ plStatus plExposedParameterCommandAccessor::RemoveValue(
     // It this is one of the exposed params, pretend we removed it successfully to suppress error messages.
     if (const plExposedParameter* pParam = GetExposedParam(pObject, index.Get<plString>()))
     {
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
   }
   return res;
@@ -87,9 +87,9 @@ plStatus plExposedParameterCommandAccessor::GetCount(const plDocumentObject* pOb
   if (m_pParameterProp == pProp)
   {
     plHybridArray<plVariant, 16> keys;
-    GetKeys(pObject, pProp, keys).IgnoreResult();
+    GetKeys(pObject, pProp, keys).AssertSuccess();
     out_iCount = keys.GetCount();
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   return plObjectProxyAccessor::GetCount(pObject, pProp, out_iCount);
 }
@@ -115,7 +115,7 @@ plStatus plExposedParameterCommandAccessor::GetKeys(
           out_keys.PushBack(key);
         }
       }
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
   }
   return plObjectProxyAccessor::GetKeys(pObject, pProp, out_keys);
@@ -127,13 +127,13 @@ plStatus plExposedParameterCommandAccessor::GetValues(
   if (m_pParameterProp == pProp)
   {
     plHybridArray<plVariant, 16> keys;
-    GetKeys(pObject, pProp, keys).IgnoreResult();
+    GetKeys(pObject, pProp, keys).AssertSuccess();
     for (const auto& key : keys)
     {
       auto& var = out_values.ExpandAndGetRef();
-      PLASMA_VERIFY(GetValue(pObject, pProp, var, key).Succeeded(), "GetValue to valid a key should be not fail.");
+      PL_VERIFY(GetValue(pObject, pProp, var, key).Succeeded(), "GetValue to valid a key should be not fail.");
     }
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
   }
   return plObjectProxyAccessor::GetValues(pObject, pProp, out_values);
 }
@@ -212,7 +212,7 @@ bool plExposedParameterCommandAccessor::IsExposedProperty(const plDocumentObject
   if (auto type = GetExposedParamsType(pObject))
   {
     auto props = type->GetProperties();
-    return std::any_of(cbegin(props), cend(props), [pProp](const plAbstractProperty* prop) { return prop == pProp; });
+    return std::any_of(cbegin(props), cend(props), [&](const plAbstractProperty* pOtherProp) { return pOtherProp == pProp; });
   }
   return false;
 }
@@ -222,7 +222,7 @@ bool plExposedParameterCommandAccessor::IsExposedProperty(const plDocumentObject
 void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value)
 {
   plVariantType::Enum commonType = plVariantType::Invalid;
-  const bool sameType = GetCommonVariantSubType(m_Items, m_pProp, commonType);
+  GetCommonVariantSubType(m_Items, m_pProp, commonType);
   const plRTTI* pNewtSubType = commonType != plVariantType::Invalid ? plReflectionUtils::GetTypeFromVariant(commonType) : nullptr;
 
   plExposedParameterCommandAccessor* proxy = static_cast<plExposedParameterCommandAccessor*>(m_pObjectAccessor);
@@ -250,6 +250,7 @@ void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value
           m_pWidget->setParent(this);
           m_pLayout->addWidget(m_pWidget);
           m_pWidget->Init(m_pGrid, m_pObjectAccessor, type, prop);
+
           UpdateTypeListSelection(commonType);
         }
         m_pWidget->SetSelection(m_Items);
@@ -262,7 +263,7 @@ void plQtExposedParameterPropertyWidget::InternalSetValue(const plVariant& value
 
 //////////////////////////////////////////////////////////////////////////
 
-plQtExposedParametersPropertyWidget::plQtExposedParametersPropertyWidget() {}
+plQtExposedParametersPropertyWidget::plQtExposedParametersPropertyWidget() = default;
 
 plQtExposedParametersPropertyWidget::~plQtExposedParametersPropertyWidget()
 {
@@ -282,13 +283,13 @@ void plQtExposedParametersPropertyWidget::OnInit()
   m_pGrid->GetCommandHistory()->m_Events.AddEventHandler(plMakeDelegate(&plQtExposedParametersPropertyWidget::CommandHistoryEventHandler, this));
 
   const auto* pAttrib = m_pProp->GetAttributeByType<plExposedParametersAttribute>();
-  PLASMA_ASSERT_DEV(pAttrib, "plQtExposedParametersPropertyWidget was created for a property that does not have the plExposedParametersAttribute.");
+  PL_ASSERT_DEV(pAttrib, "plQtExposedParametersPropertyWidget was created for a property that does not have the plExposedParametersAttribute.");
   m_sExposedParamProperty = pAttrib->GetParametersSource();
   const plAbstractProperty* pParameterSourceProp = m_pType->FindPropertyByName(m_sExposedParamProperty);
-  PLASMA_ASSERT_DEV(
+  PL_ASSERT_DEV(
     pParameterSourceProp, "The exposed parameter source '{0}' does not exist on type '{1}'", m_sExposedParamProperty, m_pType->GetTypeName());
   m_pSourceObjectAccessor = m_pObjectAccessor;
-  m_pProxy = PLASMA_DEFAULT_NEW(plExposedParameterCommandAccessor, m_pSourceObjectAccessor, m_pProp, pParameterSourceProp);
+  m_pProxy = PL_DEFAULT_NEW(plExposedParameterCommandAccessor, m_pSourceObjectAccessor, m_pProp, pParameterSourceProp);
   m_pObjectAccessor = m_pProxy.Borrow();
 
   plQtPropertyStandardTypeContainerWidget::OnInit();
@@ -307,11 +308,11 @@ void plQtExposedParametersPropertyWidget::OnInit()
       m_pRemoveUnusedAction = pFixMeMenu->addAction(QStringLiteral("Remove unused keys"));
       m_pRemoveUnusedAction->setToolTip(
         QStringLiteral("The map contains keys that are no longer used by the asset's exposed parameters and thus can be removed."));
-      connect(m_pRemoveUnusedAction, &QAction::triggered, this, [this](bool checked) { RemoveUnusedKeys(false); });
+      connect(m_pRemoveUnusedAction, &QAction::triggered, this, [this](bool bChecked) { RemoveUnusedKeys(false); });
     }
     {
       m_pFixTypesAction = pFixMeMenu->addAction(QStringLiteral("Fix keys with wrong types"));
-      connect(m_pFixTypesAction, &QAction::triggered, this, [this](bool checked) { FixKeyTypes(false); });
+      connect(m_pFixTypesAction, &QAction::triggered, this, [this](bool bChecked) { FixKeyTypes(false); });
     }
     m_pFixMeButton->setMenu(pFixMeMenu);
 
@@ -425,7 +426,7 @@ bool plQtExposedParametersPropertyWidget::RemoveUnusedKeys(bool bTestOnly)
     if (const plExposedParameters* pParams = m_pProxy->GetExposedParams(item.m_pObject))
     {
       plHybridArray<plVariant, 16> keys;
-      PLASMA_VERIFY(m_pSourceObjectAccessor->GetKeys(item.m_pObject, m_pProp, keys).Succeeded(), "");
+      PL_VERIFY(m_pSourceObjectAccessor->GetKeys(item.m_pObject, m_pProp, keys).Succeeded(), "");
       for (auto& key : keys)
       {
         if (!pParams->Find(key.Get<plString>()))
@@ -458,14 +459,14 @@ bool plQtExposedParametersPropertyWidget::FixKeyTypes(bool bTestOnly)
     if (const plExposedParameters* pParams = m_pProxy->GetExposedParams(item.m_pObject))
     {
       plHybridArray<plVariant, 16> keys;
-      PLASMA_VERIFY(m_pSourceObjectAccessor->GetKeys(item.m_pObject, m_pProp, keys).Succeeded(), "");
+      PL_VERIFY(m_pSourceObjectAccessor->GetKeys(item.m_pObject, m_pProp, keys).Succeeded(), "");
       for (auto& key : keys)
       {
         if (const auto* pParam = pParams->Find(key.Get<plString>()))
         {
           plVariant value;
           const plRTTI* pType = pParam->m_DefaultValue.GetReflectedType();
-          PLASMA_VERIFY(m_pSourceObjectAccessor->GetValue(item.m_pObject, m_pProp, value, key).Succeeded(), "");
+          PL_VERIFY(m_pSourceObjectAccessor->GetValue(item.m_pObject, m_pProp, value, key).Succeeded(), "");
           if (value.GetReflectedType() != pType)
           {
             if (!bTestOnly)

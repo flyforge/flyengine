@@ -152,7 +152,7 @@ plGALResourceFormat::Enum plTextureUtils::ImageFormatToGalFormat(plImageFormat::
       return plGALResourceFormat::RG11B10Float;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 
@@ -166,9 +166,9 @@ plImageFormat::Enum plTextureUtils::GalFormatToImageFormat(plGALResourceFormat::
     case plGALResourceFormat::RGBAFloat:
       return plImageFormat::R32G32B32A32_FLOAT;
     case plGALResourceFormat::RGBAUInt:
-      return plImageFormat::R8G8B8A8_UINT;
+      return plImageFormat::R32G32B32A32_UINT;
     case plGALResourceFormat::RGBAInt:
-      return plImageFormat::R8G8B8A8_SINT;
+      return plImageFormat::R32G32B32A32_SINT;
     case plGALResourceFormat::RGBFloat:
       return plImageFormat::R32G32B32_FLOAT;
     case plGALResourceFormat::RGBUInt:
@@ -256,7 +256,7 @@ plImageFormat::Enum plTextureUtils::GalFormatToImageFormat(plGALResourceFormat::
     case plGALResourceFormat::AUByteNormalized:
       return plImageFormat::R8_UNORM;
     case plGALResourceFormat::D16:
-      return plImageFormat::R16_FLOAT;
+      return plImageFormat::R16_UINT;
     case plGALResourceFormat::BC1:
       return plImageFormat::BC1_UNORM;
     case plGALResourceFormat::BC1sRGB:
@@ -290,10 +290,10 @@ plImageFormat::Enum plTextureUtils::GalFormatToImageFormat(plGALResourceFormat::
     case plGALResourceFormat::D24S8:
     default:
     {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
       plStringBuilder sFormat;
-      PLASMA_ASSERT_DEBUG(plReflectionUtils::EnumerationToString(plGetStaticRTTI<plGALResourceFormat>(), format, sFormat, plReflectionUtils::EnumConversionMode::ValueNameOnly), "Cannot convert GAL format '{}' to string", format);
-      PLASMA_ASSERT_DEBUG(false, "The GL format: '{}' does not have a matching image format.", sFormat);
+      PL_ASSERT_DEBUG(plReflectionUtils::EnumerationToString(plGetStaticRTTI<plGALResourceFormat>(), format, sFormat, plReflectionUtils::EnumConversionMode::ValueNameOnly), "Cannot convert GAL format '{}' to string", format);
+      PL_ASSERT_DEBUG(false, "The GL format: '{}' does not have a matching image format.", sFormat);
 #endif
     }
   }
@@ -357,5 +357,3 @@ void plTextureUtils::ConfigureSampler(plTextureFilterSetting::Enum filter, plGAL
 }
 
 
-
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Textures_TextureUtils);

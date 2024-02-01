@@ -5,6 +5,6 @@
 
 namespace plModelImporter2
 {
-  PLASMA_MODELIMPORTER2_DLL plUniquePtr<Importer> RequestImporterForFileType(const char* szFile);
+  PL_MODELIMPORTER2_DLL plUniquePtr<Importer> RequestImporterForFileType(const char* szFile);
 
 } // namespace plModelImporter2

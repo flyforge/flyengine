@@ -7,16 +7,16 @@
 #include <Foundation/Types/VarianceTypes.h>
 #include <Foundation/Types/VariantTypeRegistry.h>
 
-// plAllocatorBase::Stats
+// plAllocator::Stats
 
-void operator<<(plStreamWriter& inout_stream, const plAllocatorBase::Stats& rhs)
+void operator<<(plStreamWriter& inout_stream, const plAllocator::Stats& rhs)
 {
   inout_stream << rhs.m_uiNumAllocations;
   inout_stream << rhs.m_uiNumDeallocations;
   inout_stream << rhs.m_uiAllocationSize;
 }
 
-void operator>>(plStreamReader& inout_stream, plAllocatorBase::Stats& rhs)
+void operator>>(plStreamReader& inout_stream, plAllocator::Stats& rhs)
 {
   inout_stream >> rhs.m_uiNumAllocations;
   inout_stream >> rhs.m_uiNumDeallocations;
@@ -35,7 +35,7 @@ void operator>>(plStreamReader& inout_stream, plTime& ref_value)
   double d = 0;
   inout_stream.ReadQWordValue(&d).IgnoreResult();
 
-  ref_value = plTime::Seconds(d);
+  ref_value = plTime::MakeFromSeconds(d);
 }
 
 // plUuid
@@ -85,7 +85,7 @@ void operator>>(plStreamReader& inout_stream, plTempHashedString& ref_sValue)
 struct WriteValueFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()()
+  PL_ALWAYS_INLINE void operator()()
   {
     (*m_pStream) << m_pValue->Get<T>();
   }
@@ -95,7 +95,7 @@ struct WriteValueFunc
 };
 
 template <>
-PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plVariantArray>()
+PL_FORCE_INLINE void WriteValueFunc::operator()<plVariantArray>()
 {
   const plVariantArray& values = m_pValue->Get<plVariantArray>();
   const plUInt32 iCount = values.GetCount();
@@ -107,7 +107,7 @@ PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plVariantArray>()
 }
 
 template <>
-PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plVariantDictionary>()
+PL_FORCE_INLINE void WriteValueFunc::operator()<plVariantDictionary>()
 {
   const plVariantDictionary& values = m_pValue->Get<plVariantDictionary>();
   const plUInt32 iCount = values.GetCount();
@@ -122,7 +122,7 @@ PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plVariantDictionary>()
 template <>
 inline void WriteValueFunc::operator()<plTypedPointer>()
 {
-  PLASMA_REPORT_FAILURE("Type 'plReflectedClass*' not supported in serialization.");
+  PL_REPORT_FAILURE("Type 'plReflectedClass*' not supported in serialization.");
 }
 
 template <>
@@ -136,19 +136,19 @@ inline void WriteValueFunc::operator()<plTypedObject>()
   }
   else
   {
-    PLASMA_REPORT_FAILURE("The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", obj.m_pType->GetTypeName());
+    PL_REPORT_FAILURE("The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", obj.m_pType->GetTypeName());
   }
 }
 
 template <>
-PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plStringView>()
+PL_FORCE_INLINE void WriteValueFunc::operator()<plStringView>()
 {
   plStringBuilder s = m_pValue->Get<plStringView>();
   (*m_pStream) << s;
 }
 
 template <>
-PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plDataBuffer>()
+PL_FORCE_INLINE void WriteValueFunc::operator()<plDataBuffer>()
 {
   const plDataBuffer& data = m_pValue->Get<plDataBuffer>();
   const plUInt32 iCount = data.GetCount();
@@ -159,7 +159,7 @@ PLASMA_FORCE_INLINE void WriteValueFunc::operator()<plDataBuffer>()
 struct ReadValueFunc
 {
   template <typename T>
-  PLASMA_FORCE_INLINE void operator()()
+  PL_FORCE_INLINE void operator()()
   {
     T value;
     (*m_pStream) >> value;
@@ -171,7 +171,7 @@ struct ReadValueFunc
 };
 
 template <>
-PLASMA_FORCE_INLINE void ReadValueFunc::operator()<plVariantArray>()
+PL_FORCE_INLINE void ReadValueFunc::operator()<plVariantArray>()
 {
   plVariantArray values;
   plUInt32 iCount;
@@ -185,7 +185,7 @@ PLASMA_FORCE_INLINE void ReadValueFunc::operator()<plVariantArray>()
 }
 
 template <>
-PLASMA_FORCE_INLINE void ReadValueFunc::operator()<plVariantDictionary>()
+PL_FORCE_INLINE void ReadValueFunc::operator()<plVariantDictionary>()
 {
   plVariantDictionary values;
   plUInt32 iCount;
@@ -204,7 +204,7 @@ PLASMA_FORCE_INLINE void ReadValueFunc::operator()<plVariantDictionary>()
 template <>
 inline void ReadValueFunc::operator()<plTypedPointer>()
 {
-  PLASMA_REPORT_FAILURE("Type 'plTypedPointer' not supported in serialization.");
+  PL_REPORT_FAILURE("Type 'plTypedPointer' not supported in serialization.");
 }
 
 template <>
@@ -213,11 +213,11 @@ inline void ReadValueFunc::operator()<plTypedObject>()
   plStringBuilder sType;
   (*m_pStream) >> sType;
   const plRTTI* pType = plRTTI::FindTypeByName(sType);
-  PLASMA_ASSERT_DEV(pType, "The type '{0}' could not be found.", sType);
+  PL_ASSERT_DEV(pType, "The type '{0}' could not be found.", sType);
   const plVariantTypeInfo* pTypeInfo = plVariantTypeRegistry::GetSingleton()->FindVariantTypeInfo(pType);
-  PLASMA_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", sType);
-  PLASMA_MSVC_ANALYSIS_ASSUME(pType != nullptr);
-  PLASMA_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
+  PL_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable serialization of this variant type.", sType);
+  PL_MSVC_ANALYSIS_ASSUME(pType != nullptr);
+  PL_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
   void* pObject = pType->GetAllocator()->Allocate<void>();
   pTypeInfo->Deserialize(*m_pStream, pObject);
   m_pValue->MoveTypedObject(pObject, pType);
@@ -226,11 +226,11 @@ inline void ReadValueFunc::operator()<plTypedObject>()
 template <>
 inline void ReadValueFunc::operator()<plStringView>()
 {
-  PLASMA_REPORT_FAILURE("Type 'plStringView' not supported in serialization.");
+  PL_REPORT_FAILURE("Type 'plStringView' not supported in serialization.");
 }
 
 template <>
-PLASMA_FORCE_INLINE void ReadValueFunc::operator()<plDataBuffer>()
+PL_FORCE_INLINE void ReadValueFunc::operator()<plDataBuffer>()
 {
   plDataBuffer data;
   plUInt32 iCount;
@@ -265,7 +265,7 @@ void operator>>(plStreamReader& inout_stream, plVariant& ref_value)
 {
   plUInt8 variantVersion;
   inout_stream >> variantVersion;
-  PLASMA_ASSERT_DEBUG(plGetStaticRTTI<plVariant>()->GetTypeVersion() == variantVersion, "Older variant serialization not supported!");
+  PL_ASSERT_DEBUG(plGetStaticRTTI<plVariant>()->GetTypeVersion() == variantVersion, "Older variant serialization not supported!");
 
   plUInt8 typeStorage;
   inout_stream >> typeStorage;
@@ -297,7 +297,7 @@ void operator>>(plStreamReader& inout_stream, plTimestamp& ref_value)
   plInt64 value;
   inout_stream >> value;
 
-  ref_value.SetInt64(value, plSIUnitOfTime::Microsecond);
+  ref_value = plTimestamp::MakeFromInt(value, plSIUnitOfTime::Microsecond);
 }
 
 // plVarianceTypeFloat
@@ -338,4 +338,5 @@ void operator>>(plStreamReader& inout_stream, plVarianceTypeAngle& ref_value)
   inout_stream >> ref_value.m_fVariance;
   inout_stream >> ref_value.m_Value;
 }
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_StreamOperationsOther);
+
+

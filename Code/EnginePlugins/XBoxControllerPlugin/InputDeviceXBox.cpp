@@ -5,8 +5,8 @@
 
 #include <Xinput.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceXBox360, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDeviceXBox360, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plInputDeviceXBox360::plInputDeviceXBox360()
 {
@@ -14,7 +14,7 @@ plInputDeviceXBox360::plInputDeviceXBox360()
     m_bControllerConnected[i] = false;
 }
 
-plInputDeviceXBox360::~plInputDeviceXBox360() {}
+plInputDeviceXBox360::~plInputDeviceXBox360() = default;
 
 void plInputDeviceXBox360::RegisterControllerButton(const char* szButton, const char* szName, plBitflags<plInputSlotFlags> SlotFlags)
 {
@@ -22,8 +22,8 @@ void plInputDeviceXBox360::RegisterControllerButton(const char* szButton, const 
 
   for (plInt32 i = 0; i < MaxControllers; ++i)
   {
-    s.Format("controller{0}_{1}", i, szButton);
-    s2.Format("Cont {0}: {1}", i + 1, szName);
+    s.SetFormat("controller{0}_{1}", i, szButton);
+    s2.SetFormat("Cont {0}: {1}", i + 1, szName);
     RegisterInputSlot(s.GetData(), s2.GetData(), SlotFlags);
   }
 }
@@ -34,7 +34,7 @@ void plInputDeviceXBox360::SetDeadZone(const char* szButton)
 
   for (plInt32 i = 0; i < MaxControllers; ++i)
   {
-    s.Format("controller{0}_{1}", i, szButton);
+    s.SetFormat("controller{0}_{1}", i, szButton);
     plInputManager::SetInputSlotDeadZone(s.GetData(), 0.23f);
   }
 }
@@ -94,7 +94,7 @@ const char* szControllerName[] = {
   "controller7_",
 };
 
-PLASMA_CHECK_AT_COMPILETIME(PLASMA_ARRAY_SIZE(szControllerName) >= plInputDeviceXBox360::MaxControllers);
+PL_CHECK_AT_COMPILETIME(PL_ARRAY_SIZE(szControllerName) >= plInputDeviceXBox360::MaxControllers);
 
 void plInputDeviceXBox360::SetValue(plInt32 iController, const char* szButton, float fValue)
 {
@@ -122,7 +122,7 @@ void plInputDeviceXBox360::UpdateInputSlotValues()
   // even on not connected controllers
   static plTime tLastControllerSearch;
   const plTime tNow = plTime::Now();
-  const bool bSearchControllers = tNow - tLastControllerSearch > plTime::Seconds(0.5);
+  const bool bSearchControllers = tNow - tLastControllerSearch > plTime::MakeFromSeconds(0.5);
 
   if (bSearchControllers)
     tLastControllerSearch = tNow;
@@ -200,7 +200,7 @@ void plInputDeviceXBox360::UpdateInputSlotValues()
 
 bool plInputDeviceXBox360::IsControllerConnected(plUInt8 uiPhysical) const
 {
-  PLASMA_ASSERT_DEV(uiPhysical < MaxControllers, "Invalid Controller Index {0}", uiPhysical);
+  PL_ASSERT_DEV(uiPhysical < MaxControllers, "Invalid Controller Index {0}", uiPhysical);
 
   return m_bControllerConnected[uiPhysical];
 }
@@ -223,6 +223,3 @@ void plInputDeviceXBox360::ApplyVibration(plUInt8 uiPhysicalController, Motor::E
   }
 }
 
-
-
-PLASMA_STATICLINK_FILE(System, System_XBoxController_InputDeviceXBox);

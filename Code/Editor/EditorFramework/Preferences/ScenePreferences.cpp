@@ -3,16 +3,16 @@
 #include <EditorFramework/Preferences/ScenePreferences.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScenePreferencesUser, 1, plRTTIDefaultAllocator<plScenePreferencesUser>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScenePreferencesUser, 1, plRTTIDefaultAllocator<plScenePreferencesUser>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("ShowGrid", m_bShowGrid),
-    PLASMA_MEMBER_PROPERTY("CameraSpeed", m_iCameraSpeed)->AddAttributes(new plDefaultValueAttribute(10), new plClampValueAttribute(1, 30)),
+    PL_MEMBER_PROPERTY("ShowGrid", m_bShowGrid),
+    PL_MEMBER_PROPERTY("CameraSpeed", m_iCameraSpeed)->AddAttributes(new plDefaultValueAttribute(10), new plClampValueAttribute(1, 30)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScenePreferencesUser::plScenePreferencesUser()
@@ -29,9 +29,9 @@ void plScenePreferencesUser::SetCameraSpeed(plInt32 value)
   TriggerPreferencesChangedEvent();
 }
 
-void plScenePreferencesUser::SetShowGrid(bool show)
+void plScenePreferencesUser::SetShowGrid(bool bShow)
 {
-  m_bShowGrid = show;
+  m_bShowGrid = bShow;
 
   TriggerPreferencesChangedEvent();
 }

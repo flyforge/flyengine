@@ -4,14 +4,14 @@
 
 class plBakingScene;
 
-class PLASMA_BAKINGPLUGIN_DLL plTracerInterface
+class PL_BAKINGPLUGIN_DLL plTracerInterface
 {
 public:
   virtual plResult BuildScene(const plBakingScene& scene) = 0;
 
   struct Ray
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_vStartPos;
     plVec3 m_vDir;
@@ -20,7 +20,7 @@ public:
 
   struct Hit
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plVec3 m_vPosition;
     plVec3 m_vNormal;

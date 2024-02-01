@@ -2,7 +2,7 @@
 
 #include <Fileserve/Fileserve.h>
 
-#ifdef PLASMA_USE_QT
+#ifdef PL_USE_QT
 
 #  include <QMainWindow>
 
@@ -13,7 +13,7 @@ class plQtFileserveMainWnd : public QMainWindow
 {
   Q_OBJECT
 public:
-  plQtFileserveMainWnd(plApplication* pApp, QWidget* parent = nullptr);
+  plQtFileserveMainWnd(plApplication* pApp, QWidget* pParent = nullptr);
 
 private Q_SLOTS:
   void UpdateNetworkSlot();
@@ -28,4 +28,3 @@ private:
 void CreateFileserveMainWindow(plApplication* pApp);
 
 #endif
-

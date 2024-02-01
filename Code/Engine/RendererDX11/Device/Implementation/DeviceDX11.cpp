@@ -11,6 +11,7 @@
 #include <RendererDX11/Resources/QueryDX11.h>
 #include <RendererDX11/Resources/RenderTargetViewDX11.h>
 #include <RendererDX11/Resources/ResourceViewDX11.h>
+#include <RendererDX11/Resources/SharedTextureDX11.h>
 #include <RendererDX11/Resources/TextureDX11.h>
 #include <RendererDX11/Resources/UnorderedAccessViewDX11.h>
 #include <RendererDX11/Shader/ShaderDX11.h>
@@ -24,21 +25,21 @@
 #include <d3d11_3.h>
 #include <dxgidebug.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
 #  include <d3d11_1.h>
 #endif
 
-plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& Description)
+plInternal::NewInstance<plGALDevice> CreateDX11Device(plAllocator* pAllocator, const plGALDeviceCreationDescription& description)
 {
-  return PLASMA_NEW(pAllocator, plGALDeviceDX11, Description);
+  return PL_NEW(pAllocator, plGALDeviceDX11, description);
 }
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererDX11, DeviceFactory)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererDX11, DeviceFactory)
 
 ON_CORESYSTEMS_STARTUP
 {
-  plGALDeviceFactory::RegisterCreatorFunc("DX11", &CreateDX11Device, "DX11_SM50", "plasmaShaderCompilerHLSL");
+  plGALDeviceFactory::RegisterCreatorFunc("DX11", &CreateDX11Device, "DX11_SM50", "plShaderCompilerHLSL");
 }
 
 ON_CORESYSTEMS_SHUTDOWN
@@ -46,19 +47,13 @@ ON_CORESYSTEMS_SHUTDOWN
   plGALDeviceFactory::UnregisterCreatorFunc("DX11");
 }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plGALDeviceDX11::plGALDeviceDX11(const plGALDeviceCreationDescription& Description)
   : plGALDevice(Description)
-  , m_pDevice(nullptr)
-  , m_pDevice3(nullptr)
-  , m_pDebug(nullptr)
-  , m_pDXGIFactory(nullptr)
-  , m_pDXGIAdapter(nullptr)
-  , m_pDXGIDevice(nullptr)
+  // NOLINTNEXTLINE
   , m_uiFeatureLevel(D3D_FEATURE_LEVEL_9_1)
-  , m_uiFrameCounter(0)
 {
 }
 
@@ -68,7 +63,7 @@ plGALDeviceDX11::~plGALDeviceDX11() = default;
 
 plResult plGALDeviceDX11::InitPlatform(DWORD dwFlags, IDXGIAdapter* pUsedAdapter)
 {
-  PLASMA_LOG_BLOCK("plGALDeviceDX11::InitPlatform");
+  PL_LOG_BLOCK("plGALDeviceDX11::InitPlatform");
 
 retry:
 
@@ -93,7 +88,7 @@ retry:
   // The create device call will fail even though the 11.0 (or lower) level could've been
   // initialized successfully
   int FeatureLevelIdx = 0;
-  for (FeatureLevelIdx = 0; FeatureLevelIdx < PLASMA_ARRAY_SIZE(FeatureLevels); FeatureLevelIdx++)
+  for (FeatureLevelIdx = 0; FeatureLevelIdx < PL_ARRAY_SIZE(FeatureLevels); FeatureLevelIdx++)
   {
     if (SUCCEEDED(D3D11CreateDevice(pUsedAdapter, driverType, nullptr, dwFlags, &FeatureLevels[FeatureLevelIdx], 1, D3D11_SDK_VERSION, &m_pDevice, (D3D_FEATURE_LEVEL*)&m_uiFeatureLevel, &pImmediateContext)))
     {
@@ -113,7 +108,7 @@ retry:
     }
 
     plLog::Error("Couldn't initialize D3D11 device!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
   else
   {
@@ -121,7 +116,7 @@ retry:
 
     const char* FeatureLevelNames[] = {"11.1", "11.0", "10.1", "10", "9.3"};
 
-    PLASMA_CHECK_AT_COMPILETIME(PLASMA_ARRAY_SIZE(FeatureLevels) == PLASMA_ARRAY_SIZE(FeatureLevelNames));
+    PL_CHECK_AT_COMPILETIME(PL_ARRAY_SIZE(FeatureLevels) == PL_ARRAY_SIZE(FeatureLevelNames));
 
     plLog::Success("Initialized D3D11 device with feature level {0}.", FeatureLevelNames[FeatureLevelIdx]);
   }
@@ -164,13 +159,13 @@ retry:
 
 
   // Create default pass
-  m_pDefaultPass = PLASMA_NEW(&m_Allocator, plGALPassDX11, *this);
+  m_pDefaultPass = PL_NEW(&m_Allocator, plGALPassDX11, *this);
 
   if (FAILED(m_pDevice->QueryInterface(__uuidof(IDXGIDevice1), (void**)&m_pDXGIDevice)))
   {
     plLog::Error("Couldn't get the DXGIDevice1 interface of the D3D11 device - this may happen when running on Windows Vista without SP2 "
                  "installed!");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (FAILED(m_pDevice->QueryInterface(__uuidof(ID3D11Device3), (void**)&m_pDevice3)))
@@ -185,12 +180,12 @@ retry:
 
   if (FAILED(m_pDXGIDevice->GetParent(__uuidof(IDXGIAdapter), (void**)&m_pDXGIAdapter)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (FAILED(m_pDXGIAdapter->GetParent(__uuidof(IDXGIFactory1), (void**)&m_pDXGIFactory)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Fill lookup table
@@ -208,7 +203,7 @@ retry:
   timerQueryDesc.Query = D3D11_QUERY_TIMESTAMP;
   timerQueryDesc.MiscFlags = 0;
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_PerFrameData); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_PerFrameData); ++i)
   {
     auto& perFrameData = m_PerFrameData[i];
 
@@ -220,26 +215,26 @@ retry:
       if (FAILED(m_pDevice->CreateQuery(&disjointQueryDesc, &perFrameData.m_pDisjointTimerQuery)))
       {
         plLog::Error("Creation of native DirectX query for disjoint query has failed!");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
   }
 
-  //#TODO_DX11 Replace ring buffer with proper pool like in Vulkan to prevent buffer overrun.
+  // #TODO_DX11 Replace ring buffer with proper pool like in Vulkan to prevent buffer overrun.
   m_Timestamps.SetCountUninitialized(2048);
   for (plUInt32 i = 0; i < m_Timestamps.GetCount(); ++i)
   {
     if (FAILED(m_pDevice->CreateQuery(&timerQueryDesc, &m_Timestamps[i])))
     {
       plLog::Error("Creation of native DirectX query for timestamp has failed!");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  m_SyncTimeDiff.SetZero();
+  m_SyncTimeDiff = plTime::MakeZero();
 
-  plGALWindowSwapChain::SetFactoryMethod([this](const plGALWindowSwapChainCreationDescription& desc) -> plGALSwapChainHandle { return CreateSwapChain([this, &desc](plAllocatorBase* pAllocator) -> plGALSwapChain* { return PLASMA_NEW(pAllocator, plGALSwapChainDX11, desc); }); });
+  plGALWindowSwapChain::SetFactoryMethod([this](const plGALWindowSwapChainCreationDescription& desc) -> plGALSwapChainHandle { return CreateSwapChain([&desc](plAllocator* pAllocator) -> plGALSwapChain* { return PL_NEW(pAllocator, plGALSwapChainDX11, desc); }); });
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALDeviceDX11::InitPlatform()
@@ -249,7 +244,7 @@ plResult plGALDeviceDX11::InitPlatform()
 
 void plGALDeviceDX11::ReportLiveGpuObjects()
 {
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   // not implemented
   return;
 
@@ -260,7 +255,7 @@ void plGALDeviceDX11::ReportLiveGpuObjects()
   if (hDxgiDebugDLL == nullptr)
     return;
 
-  typedef HRESULT(WINAPI * FnGetDebugInterfacePtr)(REFIID, void**);
+  using FnGetDebugInterfacePtr = HRESULT(WINAPI*)(REFIID, void**);
   FnGetDebugInterfacePtr GetDebugInterfacePtr = (FnGetDebugInterfacePtr)GetProcAddress(hDxgiDebugDLL, "DXGIGetDebugInterface");
 
   if (GetDebugInterfacePtr == nullptr)
@@ -299,35 +294,35 @@ plResult plGALDeviceDX11::ShutdownPlatform()
       plDynamicArray<ID3D11Resource*>& resources = it.Value();
       for (auto pResource : resources)
       {
-        PLASMA_GAL_DX11_RELEASE(pResource);
+        PL_GAL_DX11_RELEASE(pResource);
       }
     }
     m_FreeTempResources[type].Clear();
 
     for (auto& tempResource : m_UsedTempResources[type])
     {
-      PLASMA_GAL_DX11_RELEASE(tempResource.m_pResource);
+      PL_GAL_DX11_RELEASE(tempResource.m_pResource);
     }
     m_UsedTempResources[type].Clear();
   }
 
   for (auto& timestamp : m_Timestamps)
   {
-    PLASMA_GAL_DX11_RELEASE(timestamp);
+    PL_GAL_DX11_RELEASE(timestamp);
   }
   m_Timestamps.Clear();
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_PerFrameData); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_PerFrameData); ++i)
   {
     auto& perFrameData = m_PerFrameData[i];
 
-    PLASMA_GAL_DX11_RELEASE(perFrameData.m_pFence);
+    PL_GAL_DX11_RELEASE(perFrameData.m_pFence);
     perFrameData.m_pFence = nullptr;
 
-    PLASMA_GAL_DX11_RELEASE(perFrameData.m_pDisjointTimerQuery);
+    PL_GAL_DX11_RELEASE(perFrameData.m_pDisjointTimerQuery);
   }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_UWP)
   // Force immediate destruction of all objects destroyed so far.
   // This is necessary if we want to create a new primary swap chain/device right after this.
   // See: https://msdn.microsoft.com/en-us/library/windows/desktop/ff476425(v=vs.85).aspx#Defer_Issues_with_Flip
@@ -342,24 +337,24 @@ plResult plGALDeviceDX11::ShutdownPlatform()
 
   m_pDefaultPass = nullptr;
 
-  PLASMA_GAL_DX11_RELEASE(m_pImmediateContext);
-  PLASMA_GAL_DX11_RELEASE(m_pDevice3);
-  PLASMA_GAL_DX11_RELEASE(m_pDevice);
-  PLASMA_GAL_DX11_RELEASE(m_pDebug);
-  PLASMA_GAL_DX11_RELEASE(m_pDXGIFactory);
-  PLASMA_GAL_DX11_RELEASE(m_pDXGIAdapter);
-  PLASMA_GAL_DX11_RELEASE(m_pDXGIDevice);
+  PL_GAL_DX11_RELEASE(m_pImmediateContext);
+  PL_GAL_DX11_RELEASE(m_pDevice3);
+  PL_GAL_DX11_RELEASE(m_pDevice);
+  PL_GAL_DX11_RELEASE(m_pDebug);
+  PL_GAL_DX11_RELEASE(m_pDXGIFactory);
+  PL_GAL_DX11_RELEASE(m_pDXGIAdapter);
+  PL_GAL_DX11_RELEASE(m_pDXGIDevice);
 
   ReportLiveGpuObjects();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // Pipeline & Pass functions
 
 void plGALDeviceDX11::BeginPipelinePlatform(const char* szName, plGALSwapChain* pSwapChain)
 {
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   m_pPipelineTimingScope = plProfilingScopeAndMarker::Start(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), szName);
 #endif
 
@@ -376,14 +371,14 @@ void plGALDeviceDX11::EndPipelinePlatform(plGALSwapChain* pSwapChain)
     pSwapChain->PresentRenderTarget(this);
   }
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   plProfilingScopeAndMarker::Stop(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), m_pPipelineTimingScope);
 #endif
 }
 
 plGALPass* plGALDeviceDX11::BeginPassPlatform(const char* szName)
 {
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   m_pPassTimingScope = plProfilingScopeAndMarker::Start(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), szName);
 #endif
 
@@ -394,20 +389,25 @@ plGALPass* plGALDeviceDX11::BeginPassPlatform(const char* szName)
 
 void plGALDeviceDX11::EndPassPlatform(plGALPass* pPass)
 {
-  PLASMA_ASSERT_DEV(m_pDefaultPass.Borrow() == pPass, "Invalid pass");
+  PL_ASSERT_DEV(m_pDefaultPass.Borrow() == pPass, "Invalid pass");
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   plProfilingScopeAndMarker::Stop(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), m_pPassTimingScope);
 #endif
 
   m_pDefaultPass->EndPass();
 }
 
+void plGALDeviceDX11::FlushPlatform()
+{
+  m_pImmediateContext->Flush();
+}
+
 // State creation functions
 
 plGALBlendState* plGALDeviceDX11::CreateBlendStatePlatform(const plGALBlendStateCreationDescription& Description)
 {
-  plGALBlendStateDX11* pState = PLASMA_NEW(&m_Allocator, plGALBlendStateDX11, Description);
+  plGALBlendStateDX11* pState = PL_NEW(&m_Allocator, plGALBlendStateDX11, Description);
 
   if (pState->InitPlatform(this).Succeeded())
   {
@@ -415,7 +415,7 @@ plGALBlendState* plGALDeviceDX11::CreateBlendStatePlatform(const plGALBlendState
   }
   else
   {
-    PLASMA_DELETE(&m_Allocator, pState);
+    PL_DELETE(&m_Allocator, pState);
     return nullptr;
   }
 }
@@ -424,12 +424,12 @@ void plGALDeviceDX11::DestroyBlendStatePlatform(plGALBlendState* pBlendState)
 {
   plGALBlendStateDX11* pState = static_cast<plGALBlendStateDX11*>(pBlendState);
   pState->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pState);
+  PL_DELETE(&m_Allocator, pState);
 }
 
 plGALDepthStencilState* plGALDeviceDX11::CreateDepthStencilStatePlatform(const plGALDepthStencilStateCreationDescription& Description)
 {
-  plGALDepthStencilStateDX11* pDX11DepthStencilState = PLASMA_NEW(&m_Allocator, plGALDepthStencilStateDX11, Description);
+  plGALDepthStencilStateDX11* pDX11DepthStencilState = PL_NEW(&m_Allocator, plGALDepthStencilStateDX11, Description);
 
   if (pDX11DepthStencilState->InitPlatform(this).Succeeded())
   {
@@ -437,7 +437,7 @@ plGALDepthStencilState* plGALDeviceDX11::CreateDepthStencilStatePlatform(const p
   }
   else
   {
-    PLASMA_DELETE(&m_Allocator, pDX11DepthStencilState);
+    PL_DELETE(&m_Allocator, pDX11DepthStencilState);
     return nullptr;
   }
 }
@@ -446,12 +446,12 @@ void plGALDeviceDX11::DestroyDepthStencilStatePlatform(plGALDepthStencilState* p
 {
   plGALDepthStencilStateDX11* pDX11DepthStencilState = static_cast<plGALDepthStencilStateDX11*>(pDepthStencilState);
   pDX11DepthStencilState->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11DepthStencilState);
+  PL_DELETE(&m_Allocator, pDX11DepthStencilState);
 }
 
 plGALRasterizerState* plGALDeviceDX11::CreateRasterizerStatePlatform(const plGALRasterizerStateCreationDescription& Description)
 {
-  plGALRasterizerStateDX11* pDX11RasterizerState = PLASMA_NEW(&m_Allocator, plGALRasterizerStateDX11, Description);
+  plGALRasterizerStateDX11* pDX11RasterizerState = PL_NEW(&m_Allocator, plGALRasterizerStateDX11, Description);
 
   if (pDX11RasterizerState->InitPlatform(this).Succeeded())
   {
@@ -459,7 +459,7 @@ plGALRasterizerState* plGALDeviceDX11::CreateRasterizerStatePlatform(const plGAL
   }
   else
   {
-    PLASMA_DELETE(&m_Allocator, pDX11RasterizerState);
+    PL_DELETE(&m_Allocator, pDX11RasterizerState);
     return nullptr;
   }
 }
@@ -468,12 +468,12 @@ void plGALDeviceDX11::DestroyRasterizerStatePlatform(plGALRasterizerState* pRast
 {
   plGALRasterizerStateDX11* pDX11RasterizerState = static_cast<plGALRasterizerStateDX11*>(pRasterizerState);
   pDX11RasterizerState->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11RasterizerState);
+  PL_DELETE(&m_Allocator, pDX11RasterizerState);
 }
 
 plGALSamplerState* plGALDeviceDX11::CreateSamplerStatePlatform(const plGALSamplerStateCreationDescription& Description)
 {
-  plGALSamplerStateDX11* pDX11SamplerState = PLASMA_NEW(&m_Allocator, plGALSamplerStateDX11, Description);
+  plGALSamplerStateDX11* pDX11SamplerState = PL_NEW(&m_Allocator, plGALSamplerStateDX11, Description);
 
   if (pDX11SamplerState->InitPlatform(this).Succeeded())
   {
@@ -481,7 +481,7 @@ plGALSamplerState* plGALDeviceDX11::CreateSamplerStatePlatform(const plGALSample
   }
   else
   {
-    PLASMA_DELETE(&m_Allocator, pDX11SamplerState);
+    PL_DELETE(&m_Allocator, pDX11SamplerState);
     return nullptr;
   }
 }
@@ -490,7 +490,7 @@ void plGALDeviceDX11::DestroySamplerStatePlatform(plGALSamplerState* pSamplerSta
 {
   plGALSamplerStateDX11* pDX11SamplerState = static_cast<plGALSamplerStateDX11*>(pSamplerState);
   pDX11SamplerState->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11SamplerState);
+  PL_DELETE(&m_Allocator, pDX11SamplerState);
 }
 
 
@@ -498,11 +498,11 @@ void plGALDeviceDX11::DestroySamplerStatePlatform(plGALSamplerState* pSamplerSta
 
 plGALShader* plGALDeviceDX11::CreateShaderPlatform(const plGALShaderCreationDescription& Description)
 {
-  plGALShaderDX11* pShader = PLASMA_NEW(&m_Allocator, plGALShaderDX11, Description);
+  plGALShaderDX11* pShader = PL_NEW(&m_Allocator, plGALShaderDX11, Description);
 
   if (!pShader->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pShader);
+    PL_DELETE(&m_Allocator, pShader);
     return nullptr;
   }
 
@@ -513,16 +513,16 @@ void plGALDeviceDX11::DestroyShaderPlatform(plGALShader* pShader)
 {
   plGALShaderDX11* pDX11Shader = static_cast<plGALShaderDX11*>(pShader);
   pDX11Shader->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11Shader);
+  PL_DELETE(&m_Allocator, pDX11Shader);
 }
 
 plGALBuffer* plGALDeviceDX11::CreateBufferPlatform(const plGALBufferCreationDescription& Description, plArrayPtr<const plUInt8> pInitialData)
 {
-  plGALBufferDX11* pBuffer = PLASMA_NEW(&m_Allocator, plGALBufferDX11, Description);
+  plGALBufferDX11* pBuffer = PL_NEW(&m_Allocator, plGALBufferDX11, Description);
 
   if (!pBuffer->InitPlatform(this, pInitialData).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pBuffer);
+    PL_DELETE(&m_Allocator, pBuffer);
     return nullptr;
   }
 
@@ -533,16 +533,16 @@ void plGALDeviceDX11::DestroyBufferPlatform(plGALBuffer* pBuffer)
 {
   plGALBufferDX11* pDX11Buffer = static_cast<plGALBufferDX11*>(pBuffer);
   pDX11Buffer->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11Buffer);
+  PL_DELETE(&m_Allocator, pDX11Buffer);
 }
 
 plGALTexture* plGALDeviceDX11::CreateTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData)
 {
-  plGALTextureDX11* pTexture = PLASMA_NEW(&m_Allocator, plGALTextureDX11, Description);
+  plGALTextureDX11* pTexture = PL_NEW(&m_Allocator, plGALTextureDX11, Description);
 
   if (!pTexture->InitPlatform(this, pInitialData).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pTexture);
+    PL_DELETE(&m_Allocator, pTexture);
     return nullptr;
   }
 
@@ -553,16 +553,36 @@ void plGALDeviceDX11::DestroyTexturePlatform(plGALTexture* pTexture)
 {
   plGALTextureDX11* pDX11Texture = static_cast<plGALTextureDX11*>(pTexture);
   pDX11Texture->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11Texture);
+  PL_DELETE(&m_Allocator, pDX11Texture);
+}
+
+plGALTexture* plGALDeviceDX11::CreateSharedTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plEnum<plGALSharedTextureType> sharedType, plGALPlatformSharedHandle handle)
+{
+  plGALSharedTextureDX11* pTexture = PL_NEW(&m_Allocator, plGALSharedTextureDX11, Description, sharedType, handle);
+
+  if (!pTexture->InitPlatform(this, pInitialData).Succeeded())
+  {
+    PL_DELETE(&m_Allocator, pTexture);
+    return nullptr;
+  }
+
+  return pTexture;
+}
+
+void plGALDeviceDX11::DestroySharedTexturePlatform(plGALTexture* pTexture)
+{
+  plGALSharedTextureDX11* pDX11Texture = static_cast<plGALSharedTextureDX11*>(pTexture);
+  pDX11Texture->DeInitPlatform(this).IgnoreResult();
+  PL_DELETE(&m_Allocator, pDX11Texture);
 }
 
 plGALResourceView* plGALDeviceDX11::CreateResourceViewPlatform(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description)
 {
-  plGALResourceViewDX11* pResourceView = PLASMA_NEW(&m_Allocator, plGALResourceViewDX11, pResource, Description);
+  plGALResourceViewDX11* pResourceView = PL_NEW(&m_Allocator, plGALResourceViewDX11, pResource, Description);
 
   if (!pResourceView->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pResourceView);
+    PL_DELETE(&m_Allocator, pResourceView);
     return nullptr;
   }
 
@@ -573,16 +593,16 @@ void plGALDeviceDX11::DestroyResourceViewPlatform(plGALResourceView* pResourceVi
 {
   plGALResourceViewDX11* pDX11ResourceView = static_cast<plGALResourceViewDX11*>(pResourceView);
   pDX11ResourceView->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11ResourceView);
+  PL_DELETE(&m_Allocator, pDX11ResourceView);
 }
 
 plGALRenderTargetView* plGALDeviceDX11::CreateRenderTargetViewPlatform(plGALTexture* pTexture, const plGALRenderTargetViewCreationDescription& Description)
 {
-  plGALRenderTargetViewDX11* pRTView = PLASMA_NEW(&m_Allocator, plGALRenderTargetViewDX11, pTexture, Description);
+  plGALRenderTargetViewDX11* pRTView = PL_NEW(&m_Allocator, plGALRenderTargetViewDX11, pTexture, Description);
 
   if (!pRTView->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pRTView);
+    PL_DELETE(&m_Allocator, pRTView);
     return nullptr;
   }
 
@@ -593,16 +613,16 @@ void plGALDeviceDX11::DestroyRenderTargetViewPlatform(plGALRenderTargetView* pRe
 {
   plGALRenderTargetViewDX11* pDX11RenderTargetView = static_cast<plGALRenderTargetViewDX11*>(pRenderTargetView);
   pDX11RenderTargetView->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pDX11RenderTargetView);
+  PL_DELETE(&m_Allocator, pDX11RenderTargetView);
 }
 
 plGALUnorderedAccessView* plGALDeviceDX11::CreateUnorderedAccessViewPlatform(plGALResourceBase* pTextureOfBuffer, const plGALUnorderedAccessViewCreationDescription& Description)
 {
-  plGALUnorderedAccessViewDX11* pUnorderedAccessView = PLASMA_NEW(&m_Allocator, plGALUnorderedAccessViewDX11, pTextureOfBuffer, Description);
+  plGALUnorderedAccessViewDX11* pUnorderedAccessView = PL_NEW(&m_Allocator, plGALUnorderedAccessViewDX11, pTextureOfBuffer, Description);
 
   if (!pUnorderedAccessView->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pUnorderedAccessView);
+    PL_DELETE(&m_Allocator, pUnorderedAccessView);
     return nullptr;
   }
 
@@ -613,7 +633,7 @@ void plGALDeviceDX11::DestroyUnorderedAccessViewPlatform(plGALUnorderedAccessVie
 {
   plGALUnorderedAccessViewDX11* pUnorderedAccessViewDX11 = static_cast<plGALUnorderedAccessViewDX11*>(pUnorderedAccessView);
   pUnorderedAccessViewDX11->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pUnorderedAccessViewDX11);
+  PL_DELETE(&m_Allocator, pUnorderedAccessViewDX11);
 }
 
 
@@ -622,11 +642,11 @@ void plGALDeviceDX11::DestroyUnorderedAccessViewPlatform(plGALUnorderedAccessVie
 
 plGALQuery* plGALDeviceDX11::CreateQueryPlatform(const plGALQueryCreationDescription& Description)
 {
-  plGALQueryDX11* pQuery = PLASMA_NEW(&m_Allocator, plGALQueryDX11, Description);
+  plGALQueryDX11* pQuery = PL_NEW(&m_Allocator, plGALQueryDX11, Description);
 
   if (!pQuery->InitPlatform(this).Succeeded())
   {
-    PLASMA_DELETE(&m_Allocator, pQuery);
+    PL_DELETE(&m_Allocator, pQuery);
     return nullptr;
   }
 
@@ -637,12 +657,12 @@ void plGALDeviceDX11::DestroyQueryPlatform(plGALQuery* pQuery)
 {
   plGALQueryDX11* pQueryDX11 = static_cast<plGALQueryDX11*>(pQuery);
   pQueryDX11->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pQueryDX11);
+  PL_DELETE(&m_Allocator, pQueryDX11);
 }
 
 plGALVertexDeclaration* plGALDeviceDX11::CreateVertexDeclarationPlatform(const plGALVertexDeclarationCreationDescription& Description)
 {
-  plGALVertexDeclarationDX11* pVertexDeclaration = PLASMA_NEW(&m_Allocator, plGALVertexDeclarationDX11, Description);
+  plGALVertexDeclarationDX11* pVertexDeclaration = PL_NEW(&m_Allocator, plGALVertexDeclarationDX11, Description);
 
   if (pVertexDeclaration->InitPlatform(this).Succeeded())
   {
@@ -650,7 +670,7 @@ plGALVertexDeclaration* plGALDeviceDX11::CreateVertexDeclarationPlatform(const p
   }
   else
   {
-    PLASMA_DELETE(&m_Allocator, pVertexDeclaration);
+    PL_DELETE(&m_Allocator, pVertexDeclaration);
     return nullptr;
   }
 }
@@ -659,7 +679,7 @@ void plGALDeviceDX11::DestroyVertexDeclarationPlatform(plGALVertexDeclaration* p
 {
   plGALVertexDeclarationDX11* pVertexDeclarationDX11 = static_cast<plGALVertexDeclarationDX11*>(pVertexDeclaration);
   pVertexDeclarationDX11->DeInitPlatform(this).IgnoreResult();
-  PLASMA_DELETE(&m_Allocator, pVertexDeclarationDX11);
+  PL_DELETE(&m_Allocator, pVertexDeclarationDX11);
 }
 
 plGALTimestampHandle plGALDeviceDX11::GetTimestampPlatform()
@@ -675,7 +695,7 @@ plResult plGALDeviceDX11::GetTimestampResultPlatform(plGALTimestampHandle hTimes
   plUInt64 uiFrameCounter = hTimestamp.m_uiFrameCounter;
 
   PerFrameData* pPerFrameData = nullptr;
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_PerFrameData); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_PerFrameData); ++i)
   {
     if (m_PerFrameData[i].m_uiFrame == uiFrameCounter && m_PerFrameData[i].m_fInvTicksPerSecond >= 0.0)
     {
@@ -686,7 +706,7 @@ plResult plGALDeviceDX11::GetTimestampResultPlatform(plGALTimestampHandle hTimes
 
   if (pPerFrameData == nullptr)
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ID3D11Query* pQuery = GetTimestamp(hTimestamp);
@@ -694,18 +714,18 @@ plResult plGALDeviceDX11::GetTimestampResultPlatform(plGALTimestampHandle hTimes
   plUInt64 uiTimestamp;
   if (FAILED(m_pImmediateContext->GetData(pQuery, &uiTimestamp, sizeof(uiTimestamp), D3D11_ASYNC_GETDATA_DONOTFLUSH)))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (pPerFrameData->m_fInvTicksPerSecond == 0.0)
   {
-    result.SetZero();
+    result = plTime::MakeZero();
   }
   else
   {
-    result = plTime::Seconds(double(uiTimestamp) * pPerFrameData->m_fInvTicksPerSecond) + m_SyncTimeDiff;
+    result = plTime::MakeFromSeconds(double(uiTimestamp) * pPerFrameData->m_fInvTicksPerSecond) + m_SyncTimeDiff;
   }
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // Swap chain functions
@@ -718,12 +738,10 @@ void plGALDeviceDX11::PresentPlatform(const plGALSwapChain* pSwapChain, bool bVS
 
 void plGALDeviceDX11::BeginFramePlatform(const plUInt64 uiRenderFrame)
 {
-  auto& pCommandEncoder = m_pDefaultPass->m_pCommandEncoderImpl;
-
   plStringBuilder sb;
-  sb.Format("Frame {}", uiRenderFrame);
+  sb.SetFormat("Frame {}", uiRenderFrame);
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   m_pFrameTimingScope = plProfilingScopeAndMarker::Start(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), sb);
 #endif
 
@@ -751,9 +769,7 @@ void plGALDeviceDX11::BeginFramePlatform(const plUInt64 uiRenderFrame)
 
 void plGALDeviceDX11::EndFramePlatform()
 {
-  auto& pCommandEncoder = m_pDefaultPass->m_pCommandEncoderImpl;
-
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   plProfilingScopeAndMarker::Stop(m_pDefaultPass->m_pRenderCommandEncoder.Borrow(), m_pFrameTimingScope);
 #endif
 
@@ -792,12 +808,12 @@ void plGALDeviceDX11::EndFramePlatform()
               plThreadUtils::YieldTimeSlice();
             }
 
-            m_SyncTimeDiff = plTime::Now() - plTime::Seconds(double(uiTimestamp) * perFrameData.m_fInvTicksPerSecond);
+            m_SyncTimeDiff = plTime::Now() - plTime::MakeFromSeconds(double(uiTimestamp) * perFrameData.m_fInvTicksPerSecond);
             m_bSyncTimeNeeded = false;
           }
         }
 
-        m_uiCurrentPerFrameData = (m_uiCurrentPerFrameData + 1) % PLASMA_ARRAY_SIZE(m_PerFrameData);
+        m_uiCurrentPerFrameData = (m_uiCurrentPerFrameData + 1) % PL_ARRAY_SIZE(m_PerFrameData);
       }
     }
   }
@@ -809,7 +825,7 @@ void plGALDeviceDX11::EndFramePlatform()
     // insert fence
     InsertFencePlatform(GetDXImmediateContext(), perFrameData.m_pFence);
 
-    m_uiNextPerFrameData = (m_uiNextPerFrameData + 1) % PLASMA_ARRAY_SIZE(m_PerFrameData);
+    m_uiNextPerFrameData = (m_uiNextPerFrameData + 1) % PL_ARRAY_SIZE(m_PerFrameData);
   }
 
   ++m_uiFrameCounter;
@@ -833,8 +849,8 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
   switch (m_uiFeatureLevel)
   {
     case D3D_FEATURE_LEVEL_11_1:
-      m_Capabilities.m_bB5G6R5Textures = true;
       m_Capabilities.m_bNoOverwriteBufferUpdate = true;
+      [[fallthrough]];
 
     case D3D_FEATURE_LEVEL_11_0:
       m_Capabilities.m_bShaderStageSupported[plGALShaderStage::VertexShader] = true;
@@ -846,10 +862,10 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = true;
-      m_Capabilities.m_bStreamOut = true;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = true;
       m_Capabilities.m_bCubemapArrays = true;
+      m_Capabilities.m_bSharedTextures = true;
       m_Capabilities.m_uiMaxTextureDimension = D3D11_REQ_TEXTURE2D_U_OR_V_DIMENSION;
       m_Capabilities.m_uiMaxCubemapDimension = D3D11_REQ_TEXTURECUBE_DIMENSION;
       m_Capabilities.m_uiMax3DTextureDimension = D3D11_REQ_TEXTURE3D_U_V_OR_W_DIMENSION;
@@ -870,7 +886,6 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = false;
-      m_Capabilities.m_bStreamOut = true;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = true;
       m_Capabilities.m_bCubemapArrays = (m_uiFeatureLevel == D3D_FEATURE_LEVEL_10_1 ? true : false);
@@ -893,7 +908,6 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bInstancing = true;
       m_Capabilities.m_b32BitIndices = true;
       m_Capabilities.m_bIndirectDraw = false;
-      m_Capabilities.m_bStreamOut = false;
       m_Capabilities.m_uiMaxConstantBuffers = D3D11_COMMONSHADER_CONSTANT_BUFFER_HW_SLOT_COUNT;
       m_Capabilities.m_bTextureArrays = false;
       m_Capabilities.m_bCubemapArrays = false;
@@ -907,7 +921,7 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       break;
   }
 
@@ -925,12 +939,89 @@ void plGALDeviceDX11::FillCapabilitiesPlatform()
       m_Capabilities.m_bVertexShaderRenderTargetArrayIndex = featureOpts3.VPAndRTArrayIndexFromAnyShaderFeedingRasterizer != 0;
     }
   }
+
+  m_Capabilities.m_FormatSupport.SetCount(plGALResourceFormat::ENUM_COUNT);
+  for (plUInt32 i = 0; i < plGALResourceFormat::ENUM_COUNT; i++)
+  {
+    plGALResourceFormat::Enum format = (plGALResourceFormat::Enum)i;
+    const plGALFormatLookupEntryDX11& entry = m_FormatLookupTable.GetFormatInfo(format);
+    const bool bIsDepth = plGALResourceFormat::IsDepthFormat(format);
+    if (bIsDepth)
+    {
+      UINT uiSampleSupport;
+      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eDepthOnlyType, &uiSampleSupport)))
+      {
+        if (uiSampleSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_SAMPLE)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Sample);
+      }
+
+      UINT uiRenderSupport;
+      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eDepthStencilType, &uiRenderSupport)))
+      {
+        if (uiRenderSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_DEPTH_STENCIL)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Render);
+      }
+    }
+    else
+    {
+      UINT uiSampleSupport;
+      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eResourceViewType, &uiSampleSupport)))
+      {
+        UINT uiSampleFlag = plGALResourceFormat::IsIntegerFormat(format) ? D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_LOAD : D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_SHADER_SAMPLE;
+        if (uiSampleSupport & uiSampleFlag)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Sample);
+      }
+
+      UINT uiVertexSupport;
+      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eVertexAttributeType, &uiVertexSupport)))
+      {
+        if (uiVertexSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_IA_VERTEX_BUFFER)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::VertexAttribute);
+      }
+
+      UINT uiRenderSupport;
+      if (SUCCEEDED(m_pDevice3->CheckFormatSupport(entry.m_eRenderTarget, &uiRenderSupport)))
+      {
+        if (uiRenderSupport & D3D11_FORMAT_SUPPORT::D3D11_FORMAT_SUPPORT_RENDER_TARGET)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::Render);
+      }
+
+      UINT uiMSAALevels;
+      if (SUCCEEDED(m_pDevice3->CheckMultisampleQualityLevels(entry.m_eRenderTarget, 2, &uiMSAALevels)))
+      {
+        if (uiMSAALevels > 0)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::MSAA2x);
+      }
+      if (SUCCEEDED(m_pDevice3->CheckMultisampleQualityLevels(entry.m_eRenderTarget, 4, &uiMSAALevels)))
+      {
+        if (uiMSAALevels > 0)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::MSAA4x);
+      }
+      if (SUCCEEDED(m_pDevice3->CheckMultisampleQualityLevels(entry.m_eRenderTarget, 8, &uiMSAALevels)))
+      {
+        if (uiMSAALevels > 0)
+          m_Capabilities.m_FormatSupport[i].Add(plGALResourceFormatSupport::MSAA8x);
+      }
+    }
+  }
 }
 
 void plGALDeviceDX11::WaitIdlePlatform()
 {
   m_pImmediateContext->Flush();
   DestroyDeadObjects();
+}
+
+const plGALSharedTexture* plGALDeviceDX11::GetSharedTexture(plGALTextureHandle hTexture) const
+{
+  auto pTexture = GetTexture(hTexture);
+  if (pTexture == nullptr)
+  {
+    return nullptr;
+  }
+
+  // Resolve proxy texture if any
+  return static_cast<const plGALSharedTextureDX11*>(pTexture->GetParentResource());
 }
 
 ID3D11Resource* plGALDeviceDX11::FindTempBuffer(plUInt32 uiSize)
@@ -1031,7 +1122,7 @@ ID3D11Resource* plGALDeviceDX11::FindTempTexture(plUInt32 uiWidth, plUInt32 uiHe
     }
     else
     {
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
       return nullptr;
     }
   }
@@ -1220,7 +1311,7 @@ bool plGALDeviceDX11::IsFenceReachedPlatform(ID3D11DeviceContext* pContext, ID3D
   BOOL data = FALSE;
   if (pContext->GetData(pFence, &data, sizeof(data), 0) == S_OK)
   {
-    PLASMA_ASSERT_DEV(data == TRUE, "Implementation error");
+    PL_ASSERT_DEV(data != FALSE, "Implementation error");
     return true;
   }
 
@@ -1235,7 +1326,7 @@ void plGALDeviceDX11::WaitForFencePlatform(ID3D11DeviceContext* pContext, ID3D11
     plThreadUtils::YieldTimeSlice();
   }
 
-  PLASMA_ASSERT_DEV(data == TRUE, "Implementation error");
+  PL_ASSERT_DEV(data != FALSE, "Implementation error");
 }
 
-PLASMA_STATICLINK_FILE(RendererDX11, RendererDX11_Device_Implementation_DeviceDX11);
+PL_STATICLINK_FILE(RendererDX11, RendererDX11_Device_Implementation_DeviceDX11);

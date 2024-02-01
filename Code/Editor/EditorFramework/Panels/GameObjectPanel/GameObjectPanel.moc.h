@@ -8,7 +8,7 @@ class plQtSearchWidget;
 class plGameObjectDocument;
 struct plGameObjectEvent;
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectWidget : public QWidget
+class PL_EDITORFRAMEWORK_DLL plQtGameObjectWidget : public QWidget
 {
   Q_OBJECT
 
@@ -32,7 +32,7 @@ protected:
   plString m_sContextMenuMapping;
 };
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtGameObjectPanel : public plQtDocumentPanel
+class PL_EDITORFRAMEWORK_DLL plQtGameObjectPanel : public plQtDocumentPanel
 {
   Q_OBJECT
 

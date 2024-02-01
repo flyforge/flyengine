@@ -3,7 +3,7 @@
 #include <Foundation/Math/Math.h>
 #include <Foundation/Math/Vec4.h>
 
-/// \brief plColor represents and RGBA color in linear color space. Values are stored as float, allowing HDR values and full precision color
+/// \brief plColor represents an RGBA color in linear color space. Values are stored as float, allowing HDR values and full precision color
 /// modifications.
 ///
 /// plColor is the central class to handle colors throughout the engine. With floating point precision it can handle any value, including HDR colors.
@@ -12,7 +12,7 @@
 /// When you need to pass colors to the GPU you have multiple options.
 ///   * If you can spare the bandwidth, you should prefer to use floating point formats, e.g. the same as plColor on the CPU.
 ///   * If you need higher precision and HDR values, you can use plColorLinear16f as a storage format with only half the memory footprint.
-///   * If you need to use preserve memory and LDR values are sufficient, you should use plColorGammaUB. This format uses 8 Bit per pixel
+///   * If you need to preserve memory and LDR values are sufficient, you should use plColorGammaUB. This format uses 8 Bit per pixel
 ///     but stores colors in Gamma space, resulting in higher precision in the range that the human eye can distinguish better.
 ///     However, when you store a color in Gamma space, you need to make sure to convert it back to linear space before doing ANY computations
 ///     with it. E.g. your shader needs to convert the color.
@@ -40,10 +40,10 @@
 ///
 ///
 /// The predefined colors can be seen at http://www.w3schools.com/colors/colors_names.asp
-class PLASMA_FOUNDATION_DLL plColor
+class PL_FOUNDATION_DLL plColor
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   // *** Predefined Colors ***
 public:
@@ -205,8 +205,14 @@ public:
 
   // *** Static Functions ***
 public:
+  /// \brief Returns a color with all four RGBA components set to Not-A-Number (NaN).
+  [[nodiscard]] static plColor MakeNaN();
+
   /// \brief Returns a color with all four RGBA components set to zero. This is different to plColor::Black, which has alpha still set to 1.0.
-  static plColor ZeroColor();
+  [[nodiscard]] static plColor MakeZero();
+
+  /// \brief Returns a color with the given r, g, b, a values. The values must be given in a linear color space.
+  [[nodiscard]] static plColor MakeRGBA(float fLinearRed, float fLinearGreen, float fLinearBlue, float fLinearAlpha = 1.0f);
 
   // *** Constructors ***
 public:
@@ -226,13 +232,13 @@ public:
 
   /// \brief Initializes this color from a plColorGammaUB object.
   ///
-  /// This should be the preferred method when hardcoding colors in source code.
+  /// This should be the preferred method when hard-coding colors in source code.
   plColor(const plColorGammaUB& cc); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please check that "
                                "all code-paths properly initialize this object.");
   }
 #endif
@@ -243,20 +249,22 @@ public:
   /// \brief Sets all four RGBA components.
   void SetRGBA(float fLinearRed, float fLinearGreen, float fLinearBlue, float fLinearAlpha = 1.0f); // [tested]
 
-  /// \brief Sets all four RGBA components to zero.
-  void SetZero();
-
+  /// \brief Returns a color created from the kelvin temperature. https://wikipedia.org/wiki/Color_temperature
+  /// Originally inspired from https://tannerhelland.com/2012/09/18/convert-temperature-rgb-algorithm-code.html
+  /// But with heavy modification to better fit the mapping shown out in https://seblagarde.files.wordpress.com/2015/07/course_notes_moving_frostbite_to_pbr_v32.pdf
+  /// Physically accurate clipping points are 6580K for Red and 6560K for G and B. but approximated to 6570k for all to give a better mapping.
+  static plColor MakeFromKelvin(plUInt32 uiKelvin);
   // *** Conversion Operators/Functions ***
 public:
   /// \brief Sets this color from a HSV (hue, saturation, value) format.
   ///
   /// \a hue is in range [0; 360], \a sat and \a val are in range [0; 1]
-  void SetHSV(float fHue, float fSat, float fVal); // [tested]
+  [[nodiscard]] static plColor MakeHSV(float fHue, float fSat, float fVal); // [tested]
 
   /// \brief Converts the color part to HSV format.
   ///
   /// \a hue is in range [0; 360], \a sat and \a val are in range [0; 1]
-  void GetHSV(float& ref_fHue, float& ref_fSat, float& ref_fVal) const; // [tested]
+  void GetHSV(float& out_fHue, float& out_fSat, float& out_fValue) const; // [tested]
 
   /// \brief Conversion to const float*
   const float* GetData() const { return &r; }
@@ -302,6 +310,9 @@ public:
 
   /// \brief Multiplies the given factor into red, green and blue, but not alpha.
   void ScaleRGB(float fFactor);
+
+  /// \brief Multiplies the given factor into red, green, blue and also alpha.
+  void ScaleRGBA(float fFactor);
 
   /// \brief Returns 1 for an LDR color (all ´RGB components < 1). Otherwise the value of the largest component. Ignores alpha.
   float ComputeHdrMultiplier() const;
@@ -370,6 +381,12 @@ public:
 
   /// \brief Returns the current color but with changes the alpha value to the given value.
   plColor WithAlpha(float fAlpha) const;
+
+  /// \brief Packs the 4 color values as uint8 into a single uint32 with A in the least significant bits and R in the most significant ones.
+  [[nodiscard]] plUInt32 ToRGBA8() const;
+
+  /// \brief Packs the 4 color values as uint8 into a single uint32 with R in the least significant bits and A in the most significant ones.
+  [[nodiscard]] plUInt32 ToABGR8() const;
 };
 
 // *** Operators ***
@@ -407,6 +424,6 @@ bool operator!=(const plColor& c1, const plColor& c2); // [tested]
 /// \brief Strict weak ordering. Useful for sorting colors into a map.
 bool operator<(const plColor& c1, const plColor& c2); // [tested]
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plColor) == 16);
+PL_CHECK_AT_COMPILETIME(sizeof(plColor) == 16);
 
 #include <Foundation/Math/Implementation/Color_inl.h>

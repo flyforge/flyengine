@@ -6,8 +6,8 @@
 #include <RendererCore/ShaderCompiler/ShaderParser.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-plQtShaderTemplateDlg::plQtShaderTemplateDlg(QWidget* parent, const plDocument* pSceneDoc)
-  : QDialog(parent)
+plQtShaderTemplateDlg::plQtShaderTemplateDlg(QWidget* pParent, const plDocument* pSceneDoc)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -128,7 +128,7 @@ void plQtShaderTemplateDlg::on_Buttons_accepted()
   pp.SetFileOpenFunction([code](plStringView sAbsoluteFile, plDynamicArray<plUInt8>& ref_fileContent, plTimestamp& out_fileModification) {
     ref_fileContent.SetCountUninitialized(code.GetElementCount());
     plMemoryUtils::RawByteCopy(ref_fileContent.GetData(), code.GetData(), code.GetElementCount());
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
     //
   });
 
@@ -155,13 +155,13 @@ void plQtShaderTemplateDlg::on_Buttons_accepted()
       plStringBuilder tmp;
       for (const auto& ed : enumDef.m_Values)
       {
-        tmp.Format("{} {}", ed.m_sValueName, ed.m_iValueValue);
+        tmp.SetFormat("{} {}", ed.m_sValueName, ed.m_iValueValue);
         pp.AddCustomDefine(tmp).IgnoreResult();
       }
 
       if (auto pWidget = qobject_cast<QComboBox*>(pTable->cellWidget(row, 1)))
       {
-        tmp.Format("{} {}", enumDef.m_sName, enumDef.m_Values[pWidget->currentIndex()].m_iValueValue);
+        tmp.SetFormat("{} {}", enumDef.m_sName, enumDef.m_Values[pWidget->currentIndex()].m_iValueValue);
         pp.AddCustomDefine(tmp).IgnoreResult();
       }
     }

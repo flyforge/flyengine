@@ -122,4 +122,4 @@ void RemoveInputEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Input);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Input);

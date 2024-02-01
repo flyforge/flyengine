@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/BlackboardTemplateAsset/BlackboardTemplateAssetManager.h>
 #include <EditorPluginAssets/BlackboardTemplateAsset/BlackboardTemplateAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlackboardTemplateAssetDocumentManager, 1, plRTTIDefaultAllocator<plBlackboardTemplateAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlackboardTemplateAssetDocumentManager, 1, plRTTIDefaultAllocator<plBlackboardTemplateAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plBlackboardTemplateAssetDocumentManager::plBlackboardTemplateAssetDocumentManager()
 {
@@ -48,9 +48,9 @@ void plBlackboardTemplateAssetDocumentManager::OnDocumentManagerEvent(const plDo
   }
 }
 
-void plBlackboardTemplateAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plBlackboardTemplateAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plBlackboardTemplateAssetDocument(szPath);
+  out_pDocument = new plBlackboardTemplateAssetDocument(sPath);
 }
 
 void plBlackboardTemplateAssetDocumentManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

@@ -12,36 +12,36 @@
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plSphereReflectionProbeComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plSphereReflectionProbeComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plClampValueAttribute(0.0f, {}), new plDefaultValueAttribute(5.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.1f)),
-    PLASMA_ACCESSOR_PROPERTY("SphereProjection", GetSphereProjection, SetSphereProjection)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plClampValueAttribute(0.0f, {}), new plDefaultValueAttribute(5.0f)),
+    PL_ACCESSOR_PROPERTY("Falloff", GetFalloff, SetFalloff)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f), new plDefaultValueAttribute(0.1f)),
+    PL_ACCESSOR_PROPERTY("SphereProjection", GetSphereProjection, SetSphereProjection)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_FUNCTIONS
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_FUNCTION_PROPERTY(OnObjectCreated),
+    PL_FUNCTION_PROPERTY(OnObjectCreated),
   }
-  PLASMA_END_FUNCTIONS;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_FUNCTIONS;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgTransformChanged, OnTransformChanged),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering/Lighting"),
     new plSphereVisualizerAttribute("Radius", plColorScheme::LightUI(plColorScheme::Blue)),
     new plSphereManipulatorAttribute("Radius"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plSphereReflectionProbeComponentManager::plSphereReflectionProbeComponentManager(plWorld* pWorld)
@@ -190,4 +190,4 @@ public:
 
 plSphereReflectionProbeComponent_1_2 g_plSphereReflectionProbeComponent_1_2;
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SphereReflectionProbeComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_SphereReflectionProbeComponent);

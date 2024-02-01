@@ -11,7 +11,7 @@ class plView;
 struct plRenderWorldExtractionEvent;
 struct plRenderWorldRenderEvent;
 
-class PLASMA_RENDERERCORE_DLL plShadowPool
+class PL_RENDERERCORE_DLL plShadowPool
 {
 public:
   static plUInt32 AddDirectionalLight(const plDirectionalLightComponent* pDirLight, const plView* pReferenceView);
@@ -25,7 +25,7 @@ public:
   static void AddExcludeTagToWhiteList(const plTag& tag);
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, ShadowPool);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(RendererCore, ShadowPool);
 
   static void OnEngineStartup();
   static void OnEngineShutdown();

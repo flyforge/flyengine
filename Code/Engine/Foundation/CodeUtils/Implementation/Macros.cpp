@@ -71,7 +71,7 @@ plResult plPreprocessor::ExtractParameterName(const TokenStream& Tokens, plUInt3
     plUInt32 uiParamToken = uiCurToken;
 
     if (Expect(Tokens, uiCurToken, plTokenType::Identifier, &uiParamToken).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     sIdentifierName = Tokens[uiParamToken]->m_DataView;
   }
@@ -80,13 +80,13 @@ plResult plPreprocessor::ExtractParameterName(const TokenStream& Tokens, plUInt3
   if (Accept(Tokens, uiCurToken, ","))
     SkipWhitespace(Tokens, uiCurToken);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ExtractAllMacroParameters(const TokenStream& Tokens, plUInt32& uiCurToken, plDeque<TokenStream>& AllParameters)
 {
   if (Expect(Tokens, uiCurToken, "(").Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   do
   {
@@ -96,17 +96,17 @@ plResult plPreprocessor::ExtractAllMacroParameters(const TokenStream& Tokens, pl
     AllParameters.SetCount(AllParameters.GetCount() + 1);
 
     if (ExtractParameterValue(Tokens, uiCurToken, AllParameters.PeekBack()).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     // reached the end of the parameter list
     if (Accept(Tokens, uiCurToken, ")"))
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
   } while (Accept(Tokens, uiCurToken, ",")); // continue with the next parameter
 
   plString s = Tokens[uiCurToken]->m_DataView;
   PP_LOG(Error, "',' or ')' expected, got '{0}' instead", Tokens[uiCurToken], s);
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plPreprocessor::ExtractParameterValue(const TokenStream& Tokens, plUInt32& uiCurToken, TokenStream& ParamTokens)
@@ -134,7 +134,7 @@ plResult plPreprocessor::ExtractParameterValue(const TokenStream& Tokens, plUInt
         {
           ParamTokens.PopBack();
         }
-        return PLASMA_SUCCESS;
+        return PL_SUCCESS;
       }
     }
 
@@ -148,7 +148,7 @@ plResult plPreprocessor::ExtractParameterValue(const TokenStream& Tokens, plUInt
 
   // reached the end of the stream without encountering the closing parenthesis first
   PP_LOG0(Error, "Unexpected end of file during macro parameter extraction", Tokens[uiFirstToken]);
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plPreprocessor::StringifyTokens(const TokenStream& Tokens, plStringBuilder& sResult, bool bSurroundWithQuotes)
@@ -201,5 +201,3 @@ void plPreprocessor::StringifyTokens(const TokenStream& Tokens, plStringBuilder&
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Macros);

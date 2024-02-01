@@ -18,34 +18,34 @@
 #include <ozz/base/span.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plAnimatedMeshComponent, 13, plComponentMode::Dynamic); // TODO: why dynamic ? (I guess because the overridden CreateRenderData() has to be called every frame)
+PL_BEGIN_COMPONENT_TYPE(plAnimatedMeshComponent, 13, plComponentMode::Dynamic); // TODO: why dynamic ? (I guess because the overridden CreateRenderData() has to be called every frame)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Mesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skinned")),
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Materials", Materials_GetCount, Materials_GetValue, Materials_SetValue, Materials_Insert, Materials_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_ACCESSOR_PROPERTY("Mesh", GetMeshFile, SetMeshFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Mesh_Skinned")),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ARRAY_ACCESSOR_PROPERTY("Materials", Materials_GetCount, Materials_GetValue, Materials_SetValue, Materials_Insert, Materials_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Rendering/Mesh"),
+      new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
-    PLASMA_MESSAGE_HANDLER(plMsgQueryAnimationSkeleton, OnQueryAnimationSkeleton),
+    PL_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated),
+    PL_MESSAGE_HANDLER(plMsgQueryAnimationSkeleton, OnQueryAnimationSkeleton),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plRootMotionMode, 1)
-  PLASMA_ENUM_CONSTANTS(plRootMotionMode::Ignore, plRootMotionMode::ApplyToOwner, plRootMotionMode::SendMoveCharacterMsg)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plRootMotionMode, 1)
+  PL_ENUM_CONSTANTS(plRootMotionMode::Ignore, plRootMotionMode::ApplyToOwner, plRootMotionMode::SendMoveCharacterMsg)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plAnimatedMeshComponent::plAnimatedMeshComponent() = default;
@@ -63,7 +63,7 @@ void plAnimatedMeshComponent::DeserializeComponent(plWorldReader& inout_stream)
   const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   auto& s = inout_stream.GetStream();
 
-  PLASMA_ASSERT_DEV(uiVersion >= 13, "Unsupported version, delete the file and reexport it");
+  PL_ASSERT_DEV(uiVersion >= 13, "Unsupported version, delete the file and reexport it");
 }
 
 void plAnimatedMeshComponent::OnActivated()
@@ -82,7 +82,7 @@ void plAnimatedMeshComponent::OnDeactivated()
 
 void plAnimatedMeshComponent::InitializeAnimationPose()
 {
-  m_MaxBounds.SetInvalid();
+  m_MaxBounds = plBoundingBox::MakeInvalid();
 
   if (!m_hMesh.IsValid())
     return;
@@ -105,7 +105,7 @@ void plAnimatedMeshComponent::InitializeAnimationPose()
     const ozz::animation::Skeleton* pOzzSkeleton = &pSkeleton->GetDescriptor().m_Skeleton.GetOzzSkeleton();
     const plUInt32 uiNumSkeletonJoints = pOzzSkeleton->num_joints();
 
-    plArrayPtr<plMat4> pPoseMatrices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plMat4, uiNumSkeletonJoints);
+    plArrayPtr<plMat4> pPoseMatrices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plMat4, uiNumSkeletonJoints);
 
     {
       ozz::animation::LocalToModelJob job;
@@ -181,7 +181,7 @@ void plAnimatedMeshComponent::RetrievePose(plDynamicArray<plMat4>& out_modelTran
 
   const plHashTable<plHashedString, plMeshResourceDescriptor::BoneData>& bones = pMesh->m_Bones;
 
-  out_modelTransforms.SetCount(skeleton.GetJointCount(), plMat4::IdentityMatrix());
+  out_modelTransforms.SetCount(skeleton.GetJointCount(), plMat4::MakeIdentity());
 
   for (auto itBone : bones)
   {
@@ -204,7 +204,7 @@ void plAnimatedMeshComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& 
   plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::BlockTillLoaded);
 
   plBoundingBox poseBounds;
-  poseBounds.SetInvalid();
+  poseBounds = plBoundingBox::MakeInvalid();
   MapModelSpacePoseToSkinningSpace(pMesh->m_Bones, *msg.m_pSkeleton, msg.m_ModelTransforms, &poseBounds);
 
   if (poseBounds.IsValid() && (!m_MaxBounds.IsValid() || !m_MaxBounds.Contains(poseBounds)))
@@ -212,7 +212,7 @@ void plAnimatedMeshComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdated& 
     m_MaxBounds.ExpandToInclude(poseBounds);
     TriggerLocalBoundsUpdate();
   }
-  else if (((plRenderWorld::GetFrameCounter() + GetUniqueIdForRendering()) & (PLASMA_BIT(10) - 1)) == 0) // reset the bbox every once in a while
+  else if (((plRenderWorld::GetFrameCounter() + GetUniqueIdForRendering()) & (PL_BIT(10) - 1)) == 0) // reset the bbox every once in a while
   {
     m_MaxBounds = poseBounds;
     TriggerLocalBoundsUpdate();
@@ -238,17 +238,17 @@ void plAnimatedMeshComponent::OnQueryAnimationSkeleton(plMsgQueryAnimationSkelet
 plResult plAnimatedMeshComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg)
 {
   if (!m_MaxBounds.IsValid() || !m_hMesh.IsValid())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plResourceLock<plMeshResource> pMesh(m_hMesh, plResourceAcquireMode::BlockTillLoaded);
   if (pMesh.GetAcquireResult() != plResourceAcquireResult::Final)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plBoundingBox bbox = m_MaxBounds;
   bbox.Grow(plVec3(pMesh->m_fMaxBoneVertexOffset));
-  bounds = bbox;
+  bounds = plBoundingBoxSphere::MakeFromBox(bbox);
   bounds.Transform(m_RootTransform.GetAsMat4());
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRootMotionMode::Apply(plRootMotionMode::Enum mode, plGameObject* pObject, const plVec3& vTranslation, plAngle rotationX, plAngle rotationY, plAngle rotationZ)
@@ -265,8 +265,7 @@ void plRootMotionMode::Apply(plRootMotionMode::Enum mode, plGameObject* pObject,
       pObject->SetLocalPosition(vNewPos);
 
       // not tested whether this is actually correct
-      plQuat rotation;
-      rotation.SetFromEulerAngles(rotationX, rotationY, rotationZ);
+      plQuat rotation = plQuat::MakeFromEulerAngles(rotationX, rotationY, rotationZ);
 
       pObject->SetLocalRotation(rotation * pObject->GetLocalRotation());
 
@@ -296,7 +295,7 @@ void plRootMotionMode::Apply(plRootMotionMode::Enum mode, plGameObject* pObject,
 
 
 plAnimatedMeshComponentManager::plAnimatedMeshComponentManager(plWorld* pWorld)
-  : plComponentManager<ComponentType, plBlockStorageType::Compact>(pWorld)
+  : plComponentManager<ComponentType, plBlockStorageType::FreeList>(pWorld)
 {
   plResourceManager::GetResourceEvents().AddEventHandler(plMakeDelegate(&plAnimatedMeshComponentManager::ResourceEventHandler, this));
 }
@@ -308,7 +307,7 @@ plAnimatedMeshComponentManager::~plAnimatedMeshComponentManager()
 
 void plAnimatedMeshComponentManager::Initialize()
 {
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plAnimatedMeshComponentManager::Update, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plAnimatedMeshComponentManager::Update, this);
 
   RegisterUpdateFunction(desc);
 }
@@ -372,4 +371,4 @@ void plAnimatedMeshComponentManager::AddToUpdateList(plAnimatedMeshComponent* pC
   }
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_AnimatedMeshComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_AnimatedMeshComponent);

@@ -72,7 +72,7 @@ plQtJoltCollisionMeshAssetDocumentWindow::plQtJoltCollisionMeshAssetDocumentWind
 void plQtJoltCollisionMeshAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)
@@ -82,10 +82,10 @@ void plQtJoltCollisionMeshAssetDocumentWindow::SendRedrawMsg()
     pView->SyncToEngine();
   }
 
-  QueryObjectBBox(0);
+  QueryObjectBBox();
 }
 
-void plQtJoltCollisionMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose)
+void plQtJoltCollisionMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /*= 0*/)
 {
   plQuerySelectionBBoxMsgToEngine msg;
   msg.m_uiViewID = 0xFFFFFFFF;
@@ -95,12 +95,12 @@ void plQtJoltCollisionMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose)
 
 void plQtJoltCollisionMeshAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtJoltCollisionMeshAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plQtJoltCollisionMeshAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
   {

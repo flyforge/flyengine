@@ -11,65 +11,64 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleFrameAnimNode, 1, plRTTIDefaultAllocator<plSampleFrameAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSampleFrameAnimNode, 1, plRTTIDefaultAllocator<plSampleFrameAnimNode>)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_ACCESSOR_PROPERTY("Clip", GetClip, SetClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
-      PLASMA_MEMBER_PROPERTY("NormPos", m_fNormalizedSamplePosition)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, 1.0f)),
+      PL_ACCESSOR_PROPERTY("Clip", GetClip, SetClip)->AddAttributes(new plDynamicStringEnumAttribute("AnimationClipMappingEnum")),
+      PL_MEMBER_PROPERTY("NormPos", m_fNormalizedSamplePosition)->AddAttributes(new plDefaultValueAttribute(0.0f), new plClampValueAttribute(0.0f, 1.0f)),
 
-      PLASMA_MEMBER_PROPERTY("InNormPos", m_InNormalizedSamplePosition)->AddAttributes(new plHiddenAttribute()),
-      PLASMA_MEMBER_PROPERTY("InAbsPos", m_InAbsoluteSamplePosition)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InNormPos", m_InNormalizedSamplePosition)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("InAbsPos", m_InAbsoluteSamplePosition)->AddAttributes(new plHiddenAttribute()),
 
-      PLASMA_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
+      PL_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plCategoryAttribute("Pose Generation"),
       new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Blue)),
       new plTitleAttribute("Sample Frame: '{Clip}'"),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plSampleFrameAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_sClip;
   stream << m_fNormalizedSamplePosition;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InNormalizedSamplePosition.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InAbsoluteSamplePosition.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InNormalizedSamplePosition.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InAbsoluteSamplePosition.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSampleFrameAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_sClip;
   stream >> m_fNormalizedSamplePosition;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InNormalizedSamplePosition.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InAbsoluteSamplePosition.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InNormalizedSamplePosition.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InAbsoluteSamplePosition.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSampleFrameAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_SampleFrame");
   if (!m_OutPose.IsConnected())
     return;
 
@@ -138,3 +137,7 @@ const char* plSampleFrameAnimNode::GetClip() const
 {
   return m_sClip.GetData();
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_SampleFrameAnimNode);
+

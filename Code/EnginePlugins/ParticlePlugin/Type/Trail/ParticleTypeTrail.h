@@ -8,16 +8,16 @@
 using plTexture2DResourceHandle = plTypedResourceHandle<class plTexture2DResource>;
 struct plTrailParticleData;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeTrailFactory final : public plParticleTypeFactory
+class PL_PARTICLEPLUGIN_DLL plParticleTypeTrailFactory final : public plParticleTypeFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeTrailFactory, plParticleTypeFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeTrailFactory, plParticleTypeFactory);
 
 public:
   virtual const plRTTI* GetTypeType() const override;
   virtual void CopyTypeProperties(plParticleType* pObject, bool bFirstTime) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   plEnum<plParticleTypeRenderMode> m_RenderMode;
   plUInt16 m_uiMaxPoints;
@@ -31,9 +31,9 @@ public:
   float m_fDistortionStrength = 0;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleTypeTrail final : public plParticleType
+class PL_PARTICLEPLUGIN_DLL plParticleTypeTrail final : public plParticleType
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleTypeTrail, plParticleType);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleTypeTrail, plParticleType);
 
 public:
   plParticleTypeTrail();
@@ -51,7 +51,7 @@ public:
   float m_fDistortionStrength = 0;
 
   virtual void CreateRequiredStreams() override;
-  virtual void ExtractTypeRenderData(plMsgExtractRenderData& msg, const plTransform& instanceTransform) const override;
+  virtual void ExtractTypeRenderData(plMsgExtractRenderData& ref_msg, const plTransform& instanceTransform) const override;
   /// \todo This is a hacky guess, one would actually need to inspect the trail positions
   virtual float GetMaxParticleRadius(float fParticleSize) const override { return fParticleSize + m_uiMaxPoints * 0.05f; }
 

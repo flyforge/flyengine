@@ -44,10 +44,6 @@ void plAnimGraph::AddConnection(const plAnimGraphNode* pSrcNode, plStringView sS
 
   auto& to = m_From[pSrcNode].m_To.ExpandAndGetRef();
   to.m_sSrcPinName = sSrcPinName;
-  if (pDstNode == NULL)
-  {
-    PLASMA_DEBUG_BREAK;
-  }
   to.m_pDstNode = pDstNode;
   to.m_sDstPinName = sDstPinName;
   to.m_pSrcPin = (plAnimGraphPin*)pPinPropSrc->GetPropertyPointer(pSrcNode);
@@ -68,16 +64,12 @@ void plAnimGraph::AddConnection(const plAnimGraphNode* pSrcNode, plStringView sS
     plConversionUtils::StringToUInt(sIdx, uiIdx).AssertSuccess();
 
     to.m_pDstPin = (plAnimGraphPin*)pPinPropDst->GetValuePointer(pDstNode, uiIdx);
-    if (!to.m_pDstPin)
-      PLASMA_DEBUG_BREAK;
   }
   else
   {
     plAbstractMemberProperty* pPinPropDst = (plAbstractMemberProperty*)pDstNode->GetDynamicRTTI()->FindPropertyByName(sDstPinName);
 
     to.m_pDstPin = (plAnimGraphPin*)pPinPropDst->GetPropertyPointer(pDstNode);
-    if (!to.m_pDstPin)
-      PLASMA_DEBUG_BREAK;
   }
 }
 
@@ -176,7 +168,7 @@ plUInt16 plAnimGraph::ComputeNodePriority(const plAnimGraphNode* pNode, plMap<co
     inout_uiOutputPrio -= 64;
   }
 
-  PLASMA_ASSERT_DEBUG(uiOwnPrio != 0xFFFF, "");
+  PL_ASSERT_DEBUG(uiOwnPrio != 0xFFFF, "");
 
   inout_Prios[pNode] = uiOwnPrio;
   return uiOwnPrio;
@@ -200,7 +192,6 @@ void plAnimGraph::SortNodesByPriority()
 
 void plAnimGraph::PrepareForUse()
 {
-  PLASMA_PROFILE_SCOPE("AimGraph_Prepare");
   if (m_bPreparedForUse)
     return;
 
@@ -235,31 +226,31 @@ void plAnimGraph::PrepareForUse()
   // EXTEND THIS if a new type is introduced
   {
     plInstanceDataDesc desc;
-    desc.m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(plInt8);
+    desc.m_uiTypeAlignment = PL_ALIGNMENT_OF(plInt8);
     desc.m_uiTypeSize = sizeof(plInt8) * m_uiInputPinCounts[plAnimGraphPin::Type::Trigger];
     m_uiPinInstanceDataOffset[plAnimGraphPin::Type::Trigger] = m_InstanceDataAllocator.AddDesc(desc);
   }
   {
     plInstanceDataDesc desc;
-    desc.m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(double);
+    desc.m_uiTypeAlignment = PL_ALIGNMENT_OF(double);
     desc.m_uiTypeSize = sizeof(double) * m_uiInputPinCounts[plAnimGraphPin::Type::Number];
     m_uiPinInstanceDataOffset[plAnimGraphPin::Type::Number] = m_InstanceDataAllocator.AddDesc(desc);
   }
   {
     plInstanceDataDesc desc;
-    desc.m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(bool);
+    desc.m_uiTypeAlignment = PL_ALIGNMENT_OF(bool);
     desc.m_uiTypeSize = sizeof(bool) * m_uiInputPinCounts[plAnimGraphPin::Type::Bool];
     m_uiPinInstanceDataOffset[plAnimGraphPin::Type::Bool] = m_InstanceDataAllocator.AddDesc(desc);
   }
   {
     plInstanceDataDesc desc;
-    desc.m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(plUInt16);
+    desc.m_uiTypeAlignment = PL_ALIGNMENT_OF(plUInt16);
     desc.m_uiTypeSize = sizeof(plUInt16) * m_uiInputPinCounts[plAnimGraphPin::Type::BoneWeights];
     m_uiPinInstanceDataOffset[plAnimGraphPin::Type::BoneWeights] = m_InstanceDataAllocator.AddDesc(desc);
   }
   {
     plInstanceDataDesc desc;
-    desc.m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(plUInt16);
+    desc.m_uiTypeAlignment = PL_ALIGNMENT_OF(plUInt16);
     desc.m_uiTypeSize = sizeof(plUInt16) * m_uiInputPinCounts[plAnimGraphPin::Type::ModelPose];
     m_uiPinInstanceDataOffset[plAnimGraphPin::Type::ModelPose] = m_InstanceDataAllocator.AddDesc(desc);
   }
@@ -281,7 +272,7 @@ plResult plAnimGraph::Serialize(plStreamWriter& inout_stream) const
     nodeToIdx[pNode] = n;
 
     inout_stream << pNode->GetDynamicRTTI()->GetTypeName();
-    PLASMA_SUCCEED_OR_RETURN(pNode->SerializeNode(inout_stream));
+    PL_SUCCEED_OR_RETURN(pNode->SerializeNode(inout_stream));
   }
 
   inout_stream << m_From.GetCount();
@@ -300,7 +291,7 @@ plResult plAnimGraph::Serialize(plStreamWriter& inout_stream) const
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plAnimGraph::Deserialize(plStreamReader& inout_stream)
@@ -310,7 +301,7 @@ plResult plAnimGraph::Deserialize(plStreamReader& inout_stream)
   const plTypeVersion version = inout_stream.ReadVersion(10);
 
   if (version < 10)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plUInt32 uiNumNodes = 0;
   inout_stream >> uiNumNodes;
@@ -324,7 +315,7 @@ plResult plAnimGraph::Deserialize(plStreamReader& inout_stream)
   {
     inout_stream >> sTypeName;
     plUniquePtr<plAnimGraphNode> pNode = plRTTI::FindTypeByName(sTypeName)->GetAllocator()->Allocate<plAnimGraphNode>();
-    PLASMA_SUCCEED_OR_RETURN(pNode->DeserializeNode(inout_stream));
+    PL_SUCCEED_OR_RETURN(pNode->DeserializeNode(inout_stream));
 
     idxToNode[n] = AddNode(std::move(pNode));
   }
@@ -357,7 +348,7 @@ plResult plAnimGraph::Deserialize(plStreamReader& inout_stream)
   }
 
   m_bPreparedForUse = false;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_Implementation_AnimGraph);
+

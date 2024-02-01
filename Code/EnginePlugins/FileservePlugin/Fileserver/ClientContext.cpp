@@ -3,8 +3,8 @@
 #include <FileservePlugin/Fileserver/ClientContext.h>
 #include <Foundation/IO/FileSystem/FileReader.h>
 
-plFileserveFileState plFileserveClientContext::GetFileStatus(plUInt16& inout_uiDataDirID, const char* szRequestedFile, FileStatus& inout_Status,
-  plDynamicArray<plUInt8>& out_FileContent, bool bForceThisDataDir) const
+plFileserveFileState plFileserveClientContext::GetFileStatus(plUInt16& inout_uiDataDirID, const char* szRequestedFile, FileStatus& inout_status,
+  plDynamicArray<plUInt8>& out_fileContent, bool bForceThisDataDir) const
 {
   for (plUInt16 i = static_cast<plUInt16>(m_MountedDataDirs.GetCount()); i > 0; --i)
   {
@@ -28,14 +28,14 @@ plFileserveFileState plFileserveClientContext::GetFileStatus(plUInt16& inout_uiD
     if (plOSFile::GetFileStats(sAbsPath, stat).Failed())
       continue;
 
-    inout_Status.m_uiFileSize = stat.m_uiFileSize;
+    inout_status.m_uiFileSize = stat.m_uiFileSize;
 
     const plInt64 iNewTimestamp = stat.m_LastModificationTime.GetInt64(plSIUnitOfTime::Microsecond);
 
-    if (inout_Status.m_iTimestamp == iNewTimestamp && inout_uiDataDirID == uiDataDirID)
+    if (inout_status.m_iTimestamp == iNewTimestamp && inout_uiDataDirID == uiDataDirID)
       return plFileserveFileState::SameTimestamp;
 
-    inout_Status.m_iTimestamp = iNewTimestamp;
+    inout_status.m_iTimestamp = iNewTimestamp;
 
     // read the entire file
     {
@@ -44,33 +44,33 @@ plFileserveFileState plFileserveClientContext::GetFileStatus(plUInt16& inout_uiD
         continue;
 
       plUInt64 uiNewHash = 1;
-      out_FileContent.SetCountUninitialized((plUInt32)inout_Status.m_uiFileSize);
+      out_fileContent.SetCountUninitialized((plUInt32)inout_status.m_uiFileSize);
 
-      if (!out_FileContent.IsEmpty())
+      if (!out_fileContent.IsEmpty())
       {
-        file.ReadBytes(out_FileContent.GetData(), out_FileContent.GetCount());
-        uiNewHash = plHashingUtils::xxHash64(out_FileContent.GetData(), (size_t)out_FileContent.GetCount(), uiNewHash);
+        file.ReadBytes(out_fileContent.GetData(), out_fileContent.GetCount());
+        uiNewHash = plHashingUtils::xxHash64(out_fileContent.GetData(), (size_t)out_fileContent.GetCount(), uiNewHash);
 
         // if the file is empty, the hash will be zero, which could lead to an incorrect assumption that the hash is the same
         // instead always transfer the empty file, so that it properly exists on the client
-        if (inout_Status.m_uiHash == uiNewHash && inout_uiDataDirID == uiDataDirID)
+        if (inout_status.m_uiHash == uiNewHash && inout_uiDataDirID == uiDataDirID)
           return plFileserveFileState::SameHash;
       }
 
-      inout_Status.m_uiHash = uiNewHash;
+      inout_status.m_uiHash = uiNewHash;
     }
 
     inout_uiDataDirID = uiDataDirID;
     return plFileserveFileState::Different;
   }
 
-  inout_Status.m_iTimestamp = 0;
-  inout_Status.m_uiFileSize = 0;
-  inout_Status.m_uiHash = 0;
+  inout_status.m_iTimestamp = 0;
+  inout_status.m_uiFileSize = 0;
+  inout_status.m_uiHash = 0;
 
   // the client doesn't have the file either
   // this is an optimization to prevent redundant file deletions on the client
-  if (inout_Status.m_iTimestamp == 0 && inout_Status.m_uiHash == 0)
+  if (inout_status.m_iTimestamp == 0 && inout_status.m_uiHash == 0)
     return plFileserveFileState::NonExistantEither;
 
   return plFileserveFileState::NonExistant;
@@ -78,4 +78,4 @@ plFileserveFileState plFileserveClientContext::GetFileStatus(plUInt16& inout_uiD
 
 
 
-PLASMA_STATICLINK_FILE(FileservePlugin, FileservePlugin_Fileserver_ClientContext);
+PL_STATICLINK_FILE(FileservePlugin, FileservePlugin_Fileserver_ClientContext);

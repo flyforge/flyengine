@@ -6,7 +6,7 @@
 struct GPUTimingScope;
 
 /// Sets profiling marker and GPU timings for the current scope.
-class PLASMA_RENDERERFOUNDATION_DLL plProfilingScopeAndMarker : public plProfilingScope
+class PL_RENDERERFOUNDATION_DLL plProfilingScopeAndMarker : public plProfilingScope
 {
 public:
   static GPUTimingScope* Start(plGALCommandEncoder* pCommandEncoder, const char* szName);
@@ -21,13 +21,13 @@ protected:
   GPUTimingScope* m_pTimingScope;
 };
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_USE_PROFILING) || defined(PL_DOCS)
 
 /// \brief Profiles the current scope using the given name and also inserts a marker with the given GALContext.
-#  define PLASMA_PROFILE_AND_MARKER(GALContext, szName) plProfilingScopeAndMarker PLASMA_CONCAT(_plProfilingScope, PLASMA_SOURCE_LINE)(GALContext, szName)
+#  define PL_PROFILE_AND_MARKER(GALContext, szName) plProfilingScopeAndMarker PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(GALContext, szName)
 
 #else
 
-#  define PLASMA_PROFILE_AND_MARKER(GALContext, szName) /*empty*/
+#  define PL_PROFILE_AND_MARKER(GALContext, szName) /*empty*/
 
 #endif

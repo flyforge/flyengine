@@ -9,9 +9,9 @@ struct plMsgTransformChanged;
 class plAbstractObjectNode;
 
 /// \brief Base class for all reflection probes.
-class PLASMA_RENDERERCORE_DLL plReflectionProbeComponentBase : public plComponent
+class PL_RENDERERCORE_DLL plReflectionProbeComponentBase : public plComponent
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plReflectionProbeComponentBase, plComponent);
+  PL_ADD_DYNAMIC_REFLECTION(plReflectionProbeComponentBase, plComponent);
 
 public:
   plReflectionProbeComponentBase();

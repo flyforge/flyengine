@@ -4,10 +4,10 @@
 #include <Foundation/Serialization/ReflectionSerializer.h>
 #include <Foundation/Types/VariantTypeRegistry.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plVariant) == 24);
+#if PL_ENABLED(PL_PLATFORM_64BIT)
+PL_CHECK_AT_COMPILETIME(sizeof(plVariant) == 24);
 #else
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plVariant) == 20);
+PL_CHECK_AT_COMPILETIME(sizeof(plVariant) == 20);
 #endif
 
 /// constructors
@@ -58,7 +58,7 @@ plVariant::plVariant(const plDataBuffer& value)
 plVariant::plVariant(const plVariantArray& value)
 {
   using StorageType = typename TypeDeduction<plVariantArray>::StorageType;
-  m_Data.shared = PLASMA_DEFAULT_NEW(TypedSharedData<StorageType>, value, nullptr);
+  m_Data.shared = PL_DEFAULT_NEW(TypedSharedData<StorageType>, value, nullptr);
   m_uiType = TypeDeduction<plVariantArray>::value;
   m_bIsShared = true;
 }
@@ -66,7 +66,7 @@ plVariant::plVariant(const plVariantArray& value)
 plVariant::plVariant(const plVariantDictionary& value)
 {
   using StorageType = typename TypeDeduction<plVariantDictionary>::StorageType;
-  m_Data.shared = PLASMA_DEFAULT_NEW(TypedSharedData<StorageType>, value, nullptr);
+  m_Data.shared = PL_DEFAULT_NEW(TypedSharedData<StorageType>, value, nullptr);
   m_uiType = TypeDeduction<plVariantDictionary>::value;
   m_bIsShared = true;
 }
@@ -79,7 +79,7 @@ plVariant::plVariant(const plTypedPointer& value)
 plVariant::plVariant(const plTypedObject& value)
 {
   void* ptr = plReflectionSerializer::Clone(value.m_pObject, value.m_pType);
-  m_Data.shared = PLASMA_DEFAULT_NEW(RTTISharedData, ptr, value.m_pType);
+  m_Data.shared = PL_DEFAULT_NEW(RTTISharedData, ptr, value.m_pType);
   m_uiType = Type::TypedObject;
   m_bIsShared = true;
 }
@@ -88,7 +88,7 @@ void plVariant::CopyTypedObject(const void* value, const plRTTI* pType)
 {
   Release();
   void* ptr = plReflectionSerializer::Clone(value, pType);
-  m_Data.shared = PLASMA_DEFAULT_NEW(RTTISharedData, ptr, pType);
+  m_Data.shared = PL_DEFAULT_NEW(RTTISharedData, ptr, pType);
   m_uiType = Type::TypedObject;
   m_bIsShared = true;
 }
@@ -96,21 +96,21 @@ void plVariant::CopyTypedObject(const void* value, const plRTTI* pType)
 void plVariant::MoveTypedObject(void* value, const plRTTI* pType)
 {
   Release();
-  m_Data.shared = PLASMA_DEFAULT_NEW(RTTISharedData, value, pType);
+  m_Data.shared = PL_DEFAULT_NEW(RTTISharedData, value, pType);
   m_uiType = Type::TypedObject;
   m_bIsShared = true;
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plVariant::InitShared(const T& value)
+PL_ALWAYS_INLINE void plVariant::InitShared(const T& value)
 {
   using StorageType = typename TypeDeduction<T>::StorageType;
 
-  PLASMA_CHECK_AT_COMPILETIME_MSG((sizeof(StorageType) > sizeof(Data)) || TypeDeduction<T>::forceSharing, "value of this type should be stored inplace");
-  PLASMA_CHECK_AT_COMPILETIME_MSG(TypeDeduction<T>::value != Type::Invalid, "value of this type cannot be stored in a Variant");
+  PL_CHECK_AT_COMPILETIME_MSG((sizeof(StorageType) > sizeof(Data)) || TypeDeduction<T>::forceSharing, "value of this type should be stored inplace");
+  PL_CHECK_AT_COMPILETIME_MSG(TypeDeduction<T>::value != Type::Invalid, "value of this type cannot be stored in a Variant");
   const plRTTI* pType = plGetStaticRTTI<T>();
 
-  m_Data.shared = PLASMA_DEFAULT_NEW(TypedSharedData<StorageType>, value, pType);
+  m_Data.shared = PL_DEFAULT_NEW(TypedSharedData<StorageType>, value, pType);
   m_uiType = TypeDeduction<T>::value;
   m_bIsShared = true;
 }
@@ -120,9 +120,9 @@ PLASMA_ALWAYS_INLINE void plVariant::InitShared(const T& value)
 struct ComputeHashFunc
 {
   template <typename T>
-  PLASMA_FORCE_INLINE plUInt64 operator()(const plVariant& v, const void* pData, plUInt64 uiSeed)
+  PL_FORCE_INLINE plUInt64 operator()(const plVariant& v, const void* pData, plUInt64 uiSeed)
   {
-    PLASMA_CHECK_AT_COMPILETIME_MSG(sizeof(typename plVariant::TypeDeduction<T>::StorageType) <= sizeof(float) * 4 &&
+    PL_CHECK_AT_COMPILETIME_MSG(sizeof(typename plVariant::TypeDeduction<T>::StorageType) <= sizeof(float) * 4 &&
                                   !plVariant::TypeDeduction<T>::forceSharing,
       "This type requires special handling! Add a specialization below.");
     return plHashingUtils::xxHash64(pData, sizeof(T), uiSeed);
@@ -130,7 +130,7 @@ struct ComputeHashFunc
 };
 
 template <>
-PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plString>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plString>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   auto pString = static_cast<const plString*>(pData);
 
@@ -138,25 +138,25 @@ PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plString>(const plVari
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plMat3>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plMat3>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   return plHashingUtils::xxHash64(pData, sizeof(plMat3), uiSeed);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plMat4>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plMat4>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   return plHashingUtils::xxHash64(pData, sizeof(plMat4), uiSeed);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plTransform>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plTransform>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   return plHashingUtils::xxHash64(pData, sizeof(plTransform), uiSeed);
 }
 
 template <>
-PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plDataBuffer>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plDataBuffer>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   auto pDataBuffer = static_cast<const plDataBuffer*>(pData);
 
@@ -164,7 +164,7 @@ PLASMA_ALWAYS_INLINE plUInt64 ComputeHashFunc::operator()<plDataBuffer>(const pl
 }
 
 template <>
-PLASMA_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plVariantArray>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plVariantArray>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   auto pVariantArray = static_cast<const plVariantArray*>(pData);
 
@@ -197,22 +197,22 @@ plUInt64 ComputeHashFunc::operator()<plVariantDictionary>(const plVariant& v, co
 }
 
 template <>
-PLASMA_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plTypedPointer>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plTypedPointer>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
-  PLASMA_IGNORE_UNUSED(pData);
+  PL_IGNORE_UNUSED(pData);
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
   return 0;
 }
 
 template <>
-PLASMA_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plTypedObject>(const plVariant& v, const void* pData, plUInt64 uiSeed)
+PL_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plTypedObject>(const plVariant& v, const void* pData, plUInt64 uiSeed)
 {
   auto pType = v.GetReflectedType();
 
   const plVariantTypeInfo* pTypeInfo = plVariantTypeRegistry::GetSingleton()->FindVariantTypeInfo(pType);
-  PLASMA_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable comparing of this variant type.", pType->GetTypeName());
-  PLASMA_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
+  PL_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable comparing of this variant type.", pType->GetTypeName());
+  PL_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
   plUInt32 uiHash32 = pTypeInfo->Hash(pData);
 
   return plHashingUtils::xxHash64(&uiHash32, sizeof(plUInt32), uiSeed);
@@ -221,7 +221,7 @@ PLASMA_FORCE_INLINE plUInt64 ComputeHashFunc::operator()<plTypedObject>(const pl
 struct CompareFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()()
+  PL_ALWAYS_INLINE void operator()()
   {
     m_bResult = m_pThis->Cast<T>() == m_pOther->Cast<T>();
   }
@@ -232,7 +232,7 @@ struct CompareFunc
 };
 
 template <>
-PLASMA_FORCE_INLINE void CompareFunc::operator()<plTypedObject>()
+PL_FORCE_INLINE void CompareFunc::operator()<plTypedObject>()
 {
   m_bResult = false;
   plTypedObject A = m_pThis->Get<plTypedObject>();
@@ -240,8 +240,8 @@ PLASMA_FORCE_INLINE void CompareFunc::operator()<plTypedObject>()
   if (A.m_pType == B.m_pType)
   {
     const plVariantTypeInfo* pTypeInfo = plVariantTypeRegistry::GetSingleton()->FindVariantTypeInfo(A.m_pType);
-    PLASMA_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PLASMA_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable comparing of this variant type.", A.m_pType->GetTypeName());
-    PLASMA_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
+    PL_ASSERT_DEV(pTypeInfo, "The type '{0}' was declared but not defined, add PL_DEFINE_CUSTOM_VARIANT_TYPE({0}); to a cpp to enable comparing of this variant type.", A.m_pType->GetTypeName());
+    PL_MSVC_ANALYSIS_ASSUME(pTypeInfo != nullptr);
     m_bResult = pTypeInfo->Equal(A.m_pObject, B.m_pObject);
   }
 }
@@ -249,7 +249,7 @@ PLASMA_FORCE_INLINE void CompareFunc::operator()<plTypedObject>()
 struct IndexFunc
 {
   template <typename T>
-  PLASMA_FORCE_INLINE plVariant Impl(plTraitInt<1>)
+  PL_FORCE_INLINE plVariant Impl(plTraitInt<1>)
   {
     const plRTTI* pRtti = m_pThis->GetReflectedType();
     const plAbstractMemberProperty* pProp = plReflectionUtils::GetMemberProperty(pRtti, m_uiIndex);
@@ -268,13 +268,13 @@ struct IndexFunc
   }
 
   template <typename T>
-  PLASMA_ALWAYS_INLINE plVariant Impl(plTraitInt<0>)
+  PL_ALWAYS_INLINE plVariant Impl(plTraitInt<0>)
   {
     return plVariant();
   }
 
   template <typename T>
-  PLASMA_FORCE_INLINE void operator()()
+  PL_FORCE_INLINE void operator()()
   {
     m_Result = Impl<T>(plTraitInt<plVariant::TypeDeduction<T>::hasReflectedMembers>());
   }
@@ -287,7 +287,7 @@ struct IndexFunc
 struct KeyFunc
 {
   template <typename T>
-  PLASMA_FORCE_INLINE plVariant Impl(plTraitInt<1>)
+  PL_FORCE_INLINE plVariant Impl(plTraitInt<1>)
   {
     const plRTTI* pRtti = m_pThis->GetReflectedType();
     const plAbstractMemberProperty* pProp = plReflectionUtils::GetMemberProperty(pRtti, m_szKey);
@@ -305,13 +305,13 @@ struct KeyFunc
   }
 
   template <typename T>
-  PLASMA_ALWAYS_INLINE plVariant Impl(plTraitInt<0>)
+  PL_ALWAYS_INLINE plVariant Impl(plTraitInt<0>)
   {
     return plVariant();
   }
 
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()()
+  PL_ALWAYS_INLINE void operator()()
   {
     m_Result = Impl<T>(plTraitInt<plVariant::TypeDeduction<T>::hasReflectedMembers>());
   }
@@ -324,7 +324,7 @@ struct KeyFunc
 struct ConvertFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()()
+  PL_ALWAYS_INLINE void operator()()
   {
     T result = {};
     plVariantHelper::To(*m_pThis, result, m_bSuccessful);
@@ -467,7 +467,7 @@ bool plVariant::CanConvertTo(Type::Enum type) const
   if (bTargetIsString && m_uiType == Type::Invalid)
     return true;
 
-  if (bTargetIsString && (m_uiType > Type::FirstStandardType && m_uiType < Type::LastStandardType && m_uiType != Type::DataBuffer && m_uiType != Type::TempHashedString))
+  if (bTargetIsString && (m_uiType > Type::FirstStandardType && m_uiType < Type::LastStandardType && m_uiType != Type::DataBuffer))
     return true;
   if (bTargetIsString && (m_uiType == Type::VariantArray || m_uiType == Type::VariantDictionary))
     return true;
@@ -504,7 +504,7 @@ plVariant plVariant::ConvertTo(Type::Enum type, plResult* out_pConversionStatus 
   if (!CanConvertTo(type))
   {
     if (out_pConversionStatus != nullptr)
-      *out_pConversionStatus = PLASMA_FAILURE;
+      *out_pConversionStatus = PL_FAILURE;
 
     return plVariant(); // creates an invalid variant
   }
@@ -512,7 +512,7 @@ plVariant plVariant::ConvertTo(Type::Enum type, plResult* out_pConversionStatus 
   if (m_uiType == type)
   {
     if (out_pConversionStatus != nullptr)
-      *out_pConversionStatus = PLASMA_SUCCESS;
+      *out_pConversionStatus = PL_SUCCESS;
 
     return *this;
   }
@@ -524,7 +524,7 @@ plVariant plVariant::ConvertTo(Type::Enum type, plResult* out_pConversionStatus 
   DispatchTo(convertFunc, type);
 
   if (out_pConversionStatus != nullptr)
-    *out_pConversionStatus = convertFunc.m_bSuccessful ? PLASMA_SUCCESS : PLASMA_FAILURE;
+    *out_pConversionStatus = convertFunc.m_bSuccessful ? PL_SUCCESS : PL_FAILURE;
 
   return convertFunc.m_Result;
 }
@@ -535,14 +535,14 @@ plUInt64 plVariant::ComputeHash(plUInt64 uiSeed) const
     return uiSeed;
 
   ComputeHashFunc obj;
-  return DispatchTo<ComputeHashFunc>(obj, GetType(), *this, GetData(), uiSeed);
+  return DispatchTo<ComputeHashFunc>(obj, GetType(), *this, GetData(), uiSeed + GetType());
 }
 
 
 inline plVariant::RTTISharedData::RTTISharedData(void* pData, const plRTTI* pType)
   : SharedData(pData, pType)
 {
-  PLASMA_ASSERT_DEBUG(pType != nullptr && pType->GetAllocator()->CanAllocate(), "");
+  PL_ASSERT_DEBUG(pType != nullptr && pType->GetAllocator()->CanAllocate(), "");
 }
 
 inline plVariant::RTTISharedData::~RTTISharedData()
@@ -554,13 +554,13 @@ inline plVariant::RTTISharedData::~RTTISharedData()
 plVariant::plVariant::SharedData* plVariant::RTTISharedData::Clone() const
 {
   void* ptr = plReflectionSerializer::Clone(m_Ptr, m_pType);
-  return PLASMA_DEFAULT_NEW(RTTISharedData, ptr, m_pType);
+  return PL_DEFAULT_NEW(RTTISharedData, ptr, m_pType);
 }
 
 struct GetTypeFromVariantFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()()
+  PL_ALWAYS_INLINE void operator()()
   {
     m_pType = plGetStaticRTTI<T>();
   }
@@ -570,22 +570,22 @@ struct GetTypeFromVariantFunc
 };
 
 template <>
-PLASMA_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plVariantArray>()
+PL_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plVariantArray>()
 {
   m_pType = nullptr;
 }
 template <>
-PLASMA_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plVariantDictionary>()
+PL_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plVariantDictionary>()
 {
   m_pType = nullptr;
 }
 template <>
-PLASMA_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plTypedPointer>()
+PL_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plTypedPointer>()
 {
   m_pType = m_pVariant->Cast<plTypedPointer>().m_pType;
 }
 template <>
-PLASMA_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plTypedObject>()
+PL_ALWAYS_INLINE void GetTypeFromVariantFunc::operator()<plTypedObject>()
 {
   m_pType = m_pVariant->m_bIsShared ? m_pVariant->m_Data.shared->m_pType : m_pVariant->m_Data.inlined.m_pType;
 }
@@ -627,37 +627,10 @@ plStringView plVariant::GetTypeName(const plRTTI* pType)
 
 //////////////////////////////////////////////////////////////////////////
 
-struct LerpFunc
-{
-  constexpr static bool CanInterpolate(plVariantType::Enum variantType)
-  {
-    return variantType >= plVariantType::Int8 && variantType <= plVariantType::Vector4;
-  }
-
-  template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, double x, plVariant& out_res)
-  {
-    if constexpr (std::is_same_v<T, plQuat>)
-    {
-      plQuat q;
-      q.SetSlerp(a.Get<plQuat>(), b.Get<plQuat>(), static_cast<float>(x));
-      out_res = q;
-    }
-    else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
-    {
-      out_res = plMath::Lerp(a.Get<T>(), b.Get<T>(), static_cast<float>(x));
-    }
-    else
-    {
-      out_res = (x < 0.5) ? a : b;
-    }
-  }
-};
-
 struct AddFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
+  PL_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
   {
     if constexpr (std::is_same_v<T, plInt8> || std::is_same_v<T, plUInt8> ||
                   std::is_same_v<T, plInt16> || std::is_same_v<T, plUInt16> ||
@@ -718,7 +691,7 @@ plVariant operator+(const plVariant& a, const plVariant& b)
 struct SubFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
+  PL_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
   {
     if constexpr (std::is_same_v<T, plInt8> || std::is_same_v<T, plUInt8> ||
                   std::is_same_v<T, plInt16> || std::is_same_v<T, plUInt16> ||
@@ -764,7 +737,7 @@ plVariant operator-(const plVariant& a, const plVariant& b)
 struct MulFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
+  PL_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
   {
     if constexpr (std::is_same_v<T, plInt8> || std::is_same_v<T, plUInt8> ||
                   std::is_same_v<T, plInt16> || std::is_same_v<T, plUInt16> ||
@@ -816,7 +789,7 @@ plVariant operator*(const plVariant& a, const plVariant& b)
 struct DivFunc
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
+  PL_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, plVariant& out_res)
   {
     if constexpr (std::is_same_v<T, plInt8> || std::is_same_v<T, plUInt8> ||
                   std::is_same_v<T, plInt16> || std::is_same_v<T, plUInt16> ||
@@ -864,6 +837,31 @@ plVariant operator/(const plVariant& a, const plVariant& b)
 
 //////////////////////////////////////////////////////////////////////////
 
+struct LerpFunc
+{
+  constexpr static bool CanInterpolate(plVariantType::Enum variantType)
+  {
+    return variantType >= plVariantType::Int8 && variantType <= plVariantType::Vector4;
+  }
+
+  template <typename T>
+  PL_ALWAYS_INLINE void operator()(const plVariant& a, const plVariant& b, double x, plVariant& out_res)
+  {
+    if constexpr (std::is_same_v<T, plQuat>)
+    {
+      plQuat q = plQuat::MakeSlerp(a.Get<plQuat>(), b.Get<plQuat>(), static_cast<float>(x));
+      out_res = q;
+    }
+    else if constexpr (CanInterpolate(static_cast<plVariantType::Enum>(plVariantTypeDeduction<T>::value)))
+    {
+      out_res = plMath::Lerp(a.Get<T>(), b.Get<T>(), static_cast<float>(x));
+    }
+    else
+    {
+      out_res = (x < 0.5) ? a : b;
+    }
+  }
+};
 
 namespace plMath
 {
@@ -874,6 +872,6 @@ namespace plMath
     plVariant::DispatchTo(func, a.GetType(), a, b, fFactor, result);
     return result;
   }
-}
+} // namespace plMath
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_Variant);
+

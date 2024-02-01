@@ -2,9 +2,9 @@
 
 #include <ParticlePlugin/Behavior/ParticleBehavior.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Flies final : public plParticleBehaviorFactory
+class PL_PARTICLEPLUGIN_DLL plParticleBehaviorFactory_Flies final : public plParticleBehaviorFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Flies, plParticleBehaviorFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehaviorFactory_Flies, plParticleBehaviorFactory);
 
 public:
   plParticleBehaviorFactory_Flies();
@@ -13,21 +13,21 @@ public:
   virtual const plRTTI* GetBehaviorType() const override;
   virtual void CopyBehaviorProperties(plParticleBehavior* pObject, bool bFirstTime) const override;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const override;
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const override;
 
-  virtual void Save(plStreamWriter& stream) const override;
-  virtual void Load(plStreamReader& stream) override;
+  virtual void Save(plStreamWriter& inout_stream) const override;
+  virtual void Load(plStreamReader& inout_stream) override;
 
   float m_fSpeed = 0.2f;
   float m_fPathLength = 0.2f;
   float m_fMaxEmitterDistance = 0.5f;
-  plAngle m_MaxSteeringAngle = plAngle::Degree(30);
+  plAngle m_MaxSteeringAngle = plAngle::MakeFromDegree(30);
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleBehavior_Flies final : public plParticleBehavior
+class PL_PARTICLEPLUGIN_DLL plParticleBehavior_Flies final : public plParticleBehavior
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Flies, plParticleBehavior);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleBehavior_Flies, plParticleBehavior);
 
 public:
   virtual void CreateRequiredStreams() override;
@@ -35,7 +35,7 @@ public:
   float m_fSpeed = 0.2f;
   float m_fPathLength = 0.2f;
   float m_fMaxEmitterDistance = 0.5f;
-  plAngle m_MaxSteeringAngle = plAngle::Degree(30);
+  plAngle m_MaxSteeringAngle = plAngle::MakeFromDegree(30);
 
 protected:
   virtual void Process(plUInt64 uiNumElements) override;

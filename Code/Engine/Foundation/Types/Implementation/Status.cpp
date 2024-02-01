@@ -11,16 +11,16 @@ void plResult::AssertSuccess(const char* szMsg /*= nullptr*/, const char* szDeta
 
   if (szMsg)
   {
-    PLASMA_REPORT_FAILURE(szMsg, szDetails);
+    PL_REPORT_FAILURE(szMsg, szDetails);
   }
   else
   {
-    PLASMA_REPORT_FAILURE("An operation failed unexpectedly.");
+    PL_REPORT_FAILURE("An operation failed unexpectedly.");
   }
 }
 
 plStatus::plStatus(const plFormatString& fmt)
-  : m_Result(PLASMA_FAILURE)
+  : m_Result(PL_FAILURE)
 {
   plStringBuilder sMsg;
   m_sMessage = fmt.GetText(sMsg);
@@ -44,12 +44,12 @@ void plStatus::AssertSuccess(const char* szMsg /*= nullptr*/) const
 
   if (szMsg)
   {
-    PLASMA_REPORT_FAILURE(szMsg, m_sMessage.GetData());
+    PL_REPORT_FAILURE(szMsg, m_sMessage.GetData());
   }
   else
   {
-    PLASMA_REPORT_FAILURE("An operation failed unexpectedly.", m_sMessage.GetData());
+    PL_REPORT_FAILURE("An operation failed unexpectedly.", m_sMessage.GetData());
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Types_Implementation_Status);
+

@@ -5,9 +5,9 @@
 #include <Foundation/Types/RefCounted.h>
 
 /// \brief Base class for custom tasks.
-class PLASMA_FOUNDATION_DLL plTask : public plRefCounted
+class PL_FOUNDATION_DLL plTask : public plRefCounted
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plTask);
+  PL_DISALLOW_COPY_AND_ASSIGN(plTask);
 
 public:
   plTask();

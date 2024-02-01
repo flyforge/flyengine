@@ -8,10 +8,10 @@
 #include <ToolsFoundation/Document/PrefabUtils.h>
 #include <ToolsFoundation/Project/ToolsProject.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plPrefabCache);
+PL_IMPLEMENT_SINGLETON(plPrefabCache);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, plPrefabCache)
+PL_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, plPrefabCache)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -19,13 +19,13 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, plPrefabCache)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plPrefabCache);
+    PL_DEFAULT_NEW(plPrefabCache);
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plPrefabCache* pDummy = plPrefabCache::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
   ON_HIGHLEVELSYSTEMS_STARTUP
@@ -36,7 +36,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, plPrefabCache)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plPrefabCache::plPrefabCache()
@@ -64,7 +64,7 @@ void plPrefabCache::LoadGraph(plAbstractObjectGraph& out_graph, plStringView sGr
   auto it = m_CachedGraphs.Find(uiHash);
   if (!it.IsValid())
   {
-    it = m_CachedGraphs.Insert(uiHash, plUniquePtr<plAbstractObjectGraph>(PLASMA_DEFAULT_NEW(plAbstractObjectGraph)));
+    it = m_CachedGraphs.Insert(uiHash, plUniquePtr<plAbstractObjectGraph>(PL_DEFAULT_NEW(plAbstractObjectGraph)));
 
     plRawMemoryStreamReader stringReader(sGraph.GetStartPointer(), sGraph.GetElementCount());
     plUniquePtr<plAbstractObjectGraph> header;
@@ -88,7 +88,7 @@ plPrefabCache::PrefabData& plPrefabCache::GetOrCreatePrefabCache(const plUuid& d
   }
   else
   {
-    it = m_PrefabData.Insert(documentGuid, plUniquePtr<PrefabData>(PLASMA_DEFAULT_NEW(PrefabData)));
+    it = m_PrefabData.Insert(documentGuid, plUniquePtr<PrefabData>(PL_DEFAULT_NEW(PrefabData)));
 
     it.Value()->m_documentGuid = documentGuid;
     it.Value()->m_sAbsPath = plToolsProject::GetSingleton()->GetPathForDocumentGuid(documentGuid);

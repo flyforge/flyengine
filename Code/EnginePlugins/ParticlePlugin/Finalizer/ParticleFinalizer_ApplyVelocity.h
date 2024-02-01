@@ -2,9 +2,9 @@
 
 #include <ParticlePlugin/Finalizer/ParticleFinalizer.h>
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_ApplyVelocity final : public plParticleFinalizerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_ApplyVelocity final : public plParticleFinalizerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_ApplyVelocity, plParticleFinalizerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_ApplyVelocity, plParticleFinalizerFactory);
 
 public:
   plParticleFinalizerFactory_ApplyVelocity();
@@ -14,9 +14,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizer_ApplyVelocity final : public plParticleFinalizer
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizer_ApplyVelocity final : public plParticleFinalizer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_ApplyVelocity, plParticleFinalizer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_ApplyVelocity, plParticleFinalizer);
 
 public:
   plParticleFinalizer_ApplyVelocity();

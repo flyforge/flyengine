@@ -29,20 +29,20 @@ void OnLoadPlugin()
     // Menu Bar
     {
       plActionMapManager::RegisterActionMap("JoltCollisionMeshAssetMenuBar").IgnoreResult();
-      plStandardMenus::MapActions("JoltCollisionMeshAssetMenuBar", plStandardMenuTypes::File | plStandardMenuTypes::Edit | plStandardMenuTypes::Panels | plStandardMenuTypes::Help);
+      plStandardMenus::MapActions("JoltCollisionMeshAssetMenuBar", plStandardMenuTypes::Default | plStandardMenuTypes::Edit);
       plProjectActions::MapActions("JoltCollisionMeshAssetMenuBar");
-      plDocumentActions::MapActions("JoltCollisionMeshAssetMenuBar", "Menu.File", false);
-      plAssetActions::MapMenuActions("JoltCollisionMeshAssetMenuBar", "Menu.File");
-      plCommandHistoryActions::MapActions("JoltCollisionMeshAssetMenuBar", "Menu.Edit");
+      plDocumentActions::MapMenuActions("JoltCollisionMeshAssetMenuBar");
+      plAssetActions::MapMenuActions("JoltCollisionMeshAssetMenuBar");
+      plCommandHistoryActions::MapActions("JoltCollisionMeshAssetMenuBar");
     }
 
     // Tool Bar
     {
       plActionMapManager::RegisterActionMap("JoltCollisionMeshAssetToolBar").IgnoreResult();
-      plDocumentActions::MapActions("JoltCollisionMeshAssetToolBar", "", true);
+      plDocumentActions::MapToolbarActions("JoltCollisionMeshAssetToolBar");
       plCommandHistoryActions::MapActions("JoltCollisionMeshAssetToolBar", "");
       plAssetActions::MapToolBarActions("JoltCollisionMeshAssetToolBar", true);
-      plCommonAssetActions::MapActions("JoltCollisionMeshAssetToolBar", "", plCommonAssetUiState::Grid);
+      plCommonAssetActions::MapToolbarActions("JoltCollisionMeshAssetToolBar", plCommonAssetUiState::Grid);
     }
   }
 
@@ -67,12 +67,12 @@ void OnUnloadPlugin()
   plPropertyMetaState::GetSingleton()->m_Events.RemoveEventHandler(plJoltCollisionMeshAssetProperties::PropertyMetaStateEventHandler);
 }
 
-PLASMA_PLUGIN_ON_LOADED()
+PL_PLUGIN_ON_LOADED()
 {
   OnLoadPlugin();
 }
 
-PLASMA_PLUGIN_ON_UNLOADED()
+PL_PLUGIN_ON_UNLOADED()
 {
   OnUnloadPlugin();
 }
@@ -91,7 +91,7 @@ void UpdateCollisionLayerDynamicEnumValues()
   // add all names and values that are valid (non-empty)
   for (plInt32 i = 0; i < 32; ++i)
   {
-    if (!plStringUtils::IsNullOrEmpty(cfg.GetGroupName(i)))
+    if (!cfg.GetGroupName(i).IsEmpty())
     {
       cfe.SetValueAndName(i, cfg.GetGroupName(i));
     }
@@ -110,6 +110,7 @@ static void ToolsProjectEventHandler(const plToolsProjectEvent& e)
     UpdateCollisionLayerDynamicEnumValues();
   }
 }
+
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
@@ -135,3 +136,21 @@ public:
 };
 
 plJoltRopeComponentPatch_1_2 g_plJoltRopeComponentPatch_1_2;
+
+//////////////////////////////////////////////////////////////////////////
+
+class plJoltHitboxComponentPatch_1_2 : public plGraphPatch
+{
+public:
+  plJoltHitboxComponentPatch_1_2()
+    : plGraphPatch("plJoltBoneColliderComponent", 2)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    ref_context.RenameClass("plJoltHitboxComponent");
+  }
+};
+
+plJoltHitboxComponentPatch_1_2 g_plJoltHitboxComponentPatch_1_2;

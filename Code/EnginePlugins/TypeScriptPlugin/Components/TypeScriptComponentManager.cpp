@@ -15,7 +15,7 @@ void plTypeScriptComponentManager::Initialize()
 {
   SUPER::Initialize();
 
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plTypeScriptComponentManager::Update, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plTypeScriptComponentManager::Update, this);
   desc.m_bOnlyUpdateWhenSimulating = true;
   desc.m_Phase = UpdateFunctionDesc::Phase::PreAsync;
 
@@ -36,7 +36,7 @@ void plTypeScriptComponentManager::OnSimulationStarted()
 
 void plTypeScriptComponentManager::Update(const plWorldModule::UpdateContext& context)
 {
-  PLASMA_PROFILE_SCOPE("TypeScript Update");
+  PL_PROFILE_SCOPE("TypeScript Update");
 
   m_TsBinding.Update();
 

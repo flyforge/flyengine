@@ -1,40 +1,47 @@
 #pragma once
 
-PLASMA_ALWAYS_INLINE plSimdMat4f::plSimdMat4f() = default;
+PL_ALWAYS_INLINE plSimdMat4f::plSimdMat4f() = default;
 
-PLASMA_ALWAYS_INLINE plSimdMat4f::plSimdMat4f(const float* const pData, plMatrixLayout::Enum layout)
-{
-  SetFromArray(pData, layout);
-}
-
-PLASMA_ALWAYS_INLINE plSimdMat4f::plSimdMat4f(const plSimdVec4f& vCol0, const plSimdVec4f& vCol1, const plSimdVec4f& vCol2, const plSimdVec4f& vCol3)
-  : m_col0(vCol0)
-  , m_col1(vCol1)
-  , m_col2(vCol2)
-  , m_col3(vCol3)
-{
-}
-
-PLASMA_ALWAYS_INLINE plSimdMat4f::plSimdMat4f(float f1r1, float f2r1, float f3r1, float f4r1, float f1r2, float f2r2, float f3r2, float f4r2, float f1r3,
+inline plSimdMat4f plSimdMat4f::MakeFromValues(float f1r1, float f2r1, float f3r1, float f4r1, float f1r2, float f2r2, float f3r2, float f4r2, float f1r3,
   float f2r3, float f3r3, float f4r3, float f1r4, float f2r4, float f3r4, float f4r4)
 {
-  m_col0.Set(f1r1, f1r2, f1r3, f1r4);
-  m_col1.Set(f2r1, f2r2, f2r3, f2r4);
-  m_col2.Set(f3r1, f3r2, f3r3, f3r4);
-  m_col3.Set(f4r1, f4r2, f4r3, f4r4);
+  plSimdMat4f res;
+  res.m_col0.Set(f1r1, f1r2, f1r3, f1r4);
+  res.m_col1.Set(f2r1, f2r2, f2r3, f2r4);
+  res.m_col2.Set(f3r1, f3r2, f3r3, f3r4);
+  res.m_col3.Set(f4r1, f4r2, f4r3, f4r4);
+  return res;
 }
 
-inline void plSimdMat4f::SetFromArray(const float* const pData, plMatrixLayout::Enum layout)
+inline plSimdMat4f plSimdMat4f::MakeFromColumns(const plSimdVec4f& vCol0, const plSimdVec4f& vCol1, const plSimdVec4f& vCol2, const plSimdVec4f& vCol3)
 {
-  m_col0.Load<4>(pData + 0);
-  m_col1.Load<4>(pData + 4);
-  m_col2.Load<4>(pData + 8);
-  m_col3.Load<4>(pData + 12);
+  plSimdMat4f res;
+  res.m_col0 = vCol0;
+  res.m_col1 = vCol1;
+  res.m_col2 = vCol2;
+  res.m_col3 = vCol3;
+  return res;
+}
 
-  if (layout == plMatrixLayout::RowMajor)
-  {
-    Transpose();
-  }
+inline plSimdMat4f plSimdMat4f::MakeFromRowMajorArray(const float* const pData)
+{
+  plSimdMat4f res;
+  res.m_col0.Load<4>(pData + 0);
+  res.m_col1.Load<4>(pData + 4);
+  res.m_col2.Load<4>(pData + 8);
+  res.m_col3.Load<4>(pData + 12);
+  res.Transpose();
+  return res;
+}
+
+inline plSimdMat4f plSimdMat4f::MakeFromColumnMajorArray(const float* const pData)
+{
+  plSimdMat4f res;
+  res.m_col0.Load<4>(pData + 0);
+  res.m_col1.Load<4>(pData + 4);
+  res.m_col2.Load<4>(pData + 8);
+  res.m_col3.Load<4>(pData + 12);
+  return res;
 }
 
 inline void plSimdMat4f::GetAsArray(float* out_pData, plMatrixLayout::Enum layout) const
@@ -52,30 +59,34 @@ inline void plSimdMat4f::GetAsArray(float* out_pData, plMatrixLayout::Enum layou
   tmp.m_col3.Store<4>(out_pData + 12);
 }
 
-PLASMA_ALWAYS_INLINE void plSimdMat4f::SetIdentity()
+PL_ALWAYS_INLINE plSimdMat4f plSimdMat4f::MakeZero()
 {
-  m_col0.Set(1, 0, 0, 0);
-  m_col1.Set(0, 1, 0, 0);
-  m_col2.Set(0, 0, 1, 0);
-  m_col3.Set(0, 0, 0, 1);
+  plSimdMat4f res;
+  res.m_col0.SetZero();
+  res.m_col1.SetZero();
+  res.m_col2.SetZero();
+  res.m_col3.SetZero();
+  return res;
 }
 
-// static
-PLASMA_ALWAYS_INLINE plSimdMat4f plSimdMat4f::IdentityMatrix()
+PL_ALWAYS_INLINE plSimdMat4f plSimdMat4f::MakeIdentity()
 {
-  plSimdMat4f result;
-  result.SetIdentity();
-  return result;
+  plSimdMat4f res;
+  res.m_col0.Set(1, 0, 0, 0);
+  res.m_col1.Set(0, 1, 0, 0);
+  res.m_col2.Set(0, 0, 1, 0);
+  res.m_col3.Set(0, 0, 0, 1);
+  return res;
 }
 
-PLASMA_ALWAYS_INLINE plSimdMat4f plSimdMat4f::GetTranspose() const
+PL_ALWAYS_INLINE plSimdMat4f plSimdMat4f::GetTranspose() const
 {
   plSimdMat4f result = *this;
   result.Transpose();
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdMat4f plSimdMat4f::GetInverse(const plSimdFloat& fEpsilon) const
+PL_ALWAYS_INLINE plSimdMat4f plSimdMat4f::GetInverse(const plSimdFloat& fEpsilon) const
 {
   plSimdMat4f result = *this;
   result.Invert(fEpsilon).IgnoreResult();
@@ -106,7 +117,7 @@ inline bool plSimdMat4f::IsNaN() const
   return m_col0.IsNaN<4>() || m_col1.IsNaN<4>() || m_col2.IsNaN<4>() || m_col3.IsNaN<4>();
 }
 
-PLASMA_ALWAYS_INLINE void plSimdMat4f::SetRows(const plSimdVec4f& vRow0, const plSimdVec4f& vRow1, const plSimdVec4f& vRow2, const plSimdVec4f& vRow3)
+PL_ALWAYS_INLINE void plSimdMat4f::SetRows(const plSimdVec4f& vRow0, const plSimdVec4f& vRow1, const plSimdVec4f& vRow2, const plSimdVec4f& vRow3)
 {
   m_col0 = vRow0;
   m_col1 = vRow1;
@@ -116,7 +127,7 @@ PLASMA_ALWAYS_INLINE void plSimdMat4f::SetRows(const plSimdVec4f& vRow0, const p
   Transpose();
 }
 
-PLASMA_ALWAYS_INLINE void plSimdMat4f::GetRows(plSimdVec4f& ref_vRow0, plSimdVec4f& ref_vRow1, plSimdVec4f& ref_vRow2, plSimdVec4f& ref_vRow3) const
+PL_ALWAYS_INLINE void plSimdMat4f::GetRows(plSimdVec4f& ref_vRow0, plSimdVec4f& ref_vRow1, plSimdVec4f& ref_vRow2, plSimdVec4f& ref_vRow3) const
 {
   plSimdMat4f tmp = *this;
   tmp.Transpose();
@@ -127,7 +138,7 @@ PLASMA_ALWAYS_INLINE void plSimdMat4f::GetRows(plSimdVec4f& ref_vRow0, plSimdVec
   ref_vRow3 = tmp.m_col3;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformPosition(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformPosition(const plSimdVec4f& v) const
 {
   plSimdVec4f result;
   result = m_col0 * v.x();
@@ -138,7 +149,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformPosition(const plSimdVec4
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformDirection(const plSimdVec4f& v) const
+PL_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformDirection(const plSimdVec4f& v) const
 {
   plSimdVec4f result;
   result = m_col0 * v.x();
@@ -148,7 +159,7 @@ PLASMA_ALWAYS_INLINE plSimdVec4f plSimdMat4f::TransformDirection(const plSimdVec
   return result;
 }
 
-PLASMA_ALWAYS_INLINE plSimdMat4f plSimdMat4f::operator*(const plSimdMat4f& rhs) const
+PL_ALWAYS_INLINE plSimdMat4f plSimdMat4f::operator*(const plSimdMat4f& rhs) const
 {
   plSimdMat4f result;
 
@@ -175,17 +186,17 @@ PLASMA_ALWAYS_INLINE plSimdMat4f plSimdMat4f::operator*(const plSimdMat4f& rhs) 
   return result;
 }
 
-PLASMA_ALWAYS_INLINE void plSimdMat4f::operator*=(const plSimdMat4f& rhs)
+PL_ALWAYS_INLINE void plSimdMat4f::operator*=(const plSimdMat4f& rhs)
 {
   *this = *this * rhs;
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdMat4f::operator==(const plSimdMat4f& other) const
+PL_ALWAYS_INLINE bool plSimdMat4f::operator==(const plSimdMat4f& other) const
 {
   return (m_col0 == other.m_col0 && m_col1 == other.m_col1 && m_col2 == other.m_col2 && m_col3 == other.m_col3).AllSet<4>();
 }
 
-PLASMA_ALWAYS_INLINE bool plSimdMat4f::operator!=(const plSimdMat4f& other) const
+PL_ALWAYS_INLINE bool plSimdMat4f::operator!=(const plSimdMat4f& other) const
 {
   return !(*this == other);
 }

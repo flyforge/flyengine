@@ -3,13 +3,14 @@
 #include <Core/World/SpatialSystem_RegularGrid.h>
 #include <Core/World/World.h>
 #include <Foundation/Configuration/CVar.h>
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Debug/DebugRenderer.h>
 #include <RendererCore/Pipeline/ExtractedRenderData.h>
 #include <RendererCore/Pipeline/Extractor.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 plCVarBool cvar_SpatialVisBounds("Spatial.VisBounds", false, plCVarFlags::Default, "Enables debug visualization of object bounds");
 plCVarBool cvar_SpatialVisLocalBBox("Spatial.VisLocalBBox", false, plCVarFlags::Default, "Enables debug visualization of object local bounding box");
 plCVarBool cvar_SpatialVisData("Spatial.VisData", false, plCVarFlags::Default, "Enables debug visualization of the spatial data structure");
@@ -22,7 +23,7 @@ plCVarBool cvar_SpatialExtractionShowStats("Spatial.Extraction.ShowStats", false
 
 namespace
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   void VisualizeSpatialData(const plView& view)
   {
     if (cvar_SpatialVisData && cvar_SpatialVisDataOnlyObject.GetValue().IsEmpty() && !cvar_SpatialVisDataOnlySelected)
@@ -86,21 +87,21 @@ namespace
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plExtractor, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExtractor, 1, plRTTINoAllocator)
   {
-    PLASMA_BEGIN_PROPERTIES
+    PL_BEGIN_PROPERTIES
     {
-      PLASMA_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
-      PLASMA_ACCESSOR_PROPERTY("Name", GetName, SetName),
+      PL_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
+      PL_ACCESSOR_PROPERTY("Name", GetName, SetName),
     }
-    PLASMA_END_PROPERTIES;
-    PLASMA_BEGIN_ATTRIBUTES
+    PL_END_PROPERTIES;
+    PL_BEGIN_ATTRIBUTES
     {
       new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Red)),
     }
-    PLASMA_END_ATTRIBUTES;
+    PL_END_ATTRIBUTES;
   }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format om
 
 plExtractor::plExtractor(const char* szName)
@@ -108,7 +109,7 @@ plExtractor::plExtractor(const char* szName)
   m_bActive = true;
   m_sName.Assign(szName);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   m_uiNumCachedRenderData = 0;
   m_uiNumUncachedRenderData = 0;
 #endif
@@ -158,7 +159,7 @@ void plExtractor::ExtractRenderData(const plView& view, const plGameObject* pObj
       }
     }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     m_uiNumUncachedRenderData += msg.m_ExtractedRenderData.GetCount();
 #endif
   };
@@ -169,13 +170,13 @@ void plExtractor::ExtractRenderData(const plView& view, const plGameObject* pObj
 
     auto cachedRenderData = plRenderWorld::GetCachedRenderData(view, pObject->GetHandle(), uiComponentVersion);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
     for (plUInt32 i = 1; i < cachedRenderData.GetCount(); ++i)
     {
-      PLASMA_ASSERT_DEBUG(cachedRenderData[i - 1].m_uiComponentIndex <= cachedRenderData[i].m_uiComponentIndex, "Cached render data needs to be sorted");
+      PL_ASSERT_DEBUG(cachedRenderData[i - 1].m_uiComponentIndex <= cachedRenderData[i].m_uiComponentIndex, "Cached render data needs to be sorted");
       if (cachedRenderData[i - 1].m_uiComponentIndex == cachedRenderData[i].m_uiComponentIndex)
       {
-        PLASMA_ASSERT_DEBUG(cachedRenderData[i - 1].m_uiPartIndex < cachedRenderData[i].m_uiPartIndex, "Cached render data needs to be sorted");
+        PL_ASSERT_DEBUG(cachedRenderData[i - 1].m_uiPartIndex < cachedRenderData[i].m_uiPartIndex, "Cached render data needs to be sorted");
       }
     }
 #endif
@@ -194,7 +195,7 @@ void plExtractor::ExtractRenderData(const plView& view, const plGameObject* pObj
         {
           extractedRenderData.AddRenderData(cacheEntry.m_pRenderData, msg.m_OverrideCategory != plInvalidRenderDataCategory ? msg.m_OverrideCategory : plRenderData::Category(cacheEntry.m_uiCategory));
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
           ++m_uiNumCachedRenderData;
 #endif
         }
@@ -236,7 +237,7 @@ void plExtractor::ExtractRenderData(const plView& view, const plGameObject* pObj
       }
       else if (pComponent->IsActiveAndInitialized()) // component does not handle extract message at all
       {
-        PLASMA_ASSERT_DEV(pComponent->GetDynamicRTTI()->CanHandleMessage<plMsgExtractRenderData>() == false, "");
+        PL_ASSERT_DEV(pComponent->GetDynamicRTTI()->CanHandleMessage<plMsgExtractRenderData>() == false, "");
 
         // Create a dummy cache entry so we don't call send message next time
         plInternal::RenderDataCacheEntry dummyEntry;
@@ -266,10 +267,29 @@ void plExtractor::PostSortAndBatch(
 {
 }
 
+
+plResult plExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  inout_stream << m_bActive;
+  inout_stream << m_sName;
+  return PL_SUCCESS;
+}
+
+
+plResult plExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_ASSERT_DEBUG(uiVersion == 1, "Unknown version encountered");
+
+  inout_stream >> m_bActive;
+  inout_stream >> m_sName;
+  return PL_SUCCESS;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisibleObjectsExtractor, 1, plRTTIDefaultAllocator<plVisibleObjectsExtractor>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plVisibleObjectsExtractor, 1, plRTTIDefaultAllocator<plVisibleObjectsExtractor>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plVisibleObjectsExtractor::plVisibleObjectsExtractor(const char* szName)
   : plExtractor(szName)
@@ -284,9 +304,9 @@ void plVisibleObjectsExtractor::Extract(
   plMsgExtractRenderData msg;
   msg.m_pView = &view;
 
-  PLASMA_LOCK(view.GetWorld()->GetReadMarker());
+  PL_LOCK(view.GetWorld()->GetReadMarker());
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   VisualizeSpatialData(view);
 
   m_uiNumCachedRenderData = 0;
@@ -297,12 +317,12 @@ void plVisibleObjectsExtractor::Extract(
   {
     ExtractRenderData(view, pObject, msg, ref_extractedRenderData);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     if (cvar_SpatialVisBounds || cvar_SpatialVisLocalBBox || cvar_SpatialVisData)
     {
       if ((cvar_SpatialVisDataOnlyObject.GetValue().IsEmpty() ||
-        pObject->GetName().FindSubString_NoCase(cvar_SpatialVisDataOnlyObject.GetValue()) != nullptr) &&
-        !cvar_SpatialVisDataOnlySelected)
+            pObject->GetName().FindSubString_NoCase(cvar_SpatialVisDataOnlyObject.GetValue()) != nullptr) &&
+          !cvar_SpatialVisDataOnlySelected)
       {
         VisualizeObject(view, pObject);
       }
@@ -310,7 +330,7 @@ void plVisibleObjectsExtractor::Extract(
 #endif
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   const bool bIsMainView = (view.GetCameraUsageHint() == plCameraUsageHint::MainView || view.GetCameraUsageHint() == plCameraUsageHint::EditorView);
 
   if (cvar_SpatialExtractionShowStats && bIsMainView)
@@ -321,19 +341,33 @@ void plVisibleObjectsExtractor::Extract(
 
     plDebugRenderer::DrawInfoText(hView, plDebugTextPlacement::TopLeft, "ExtractionStats", "Extraction Stats:");
 
-    sb.Format("Num Cached Render Data: {0}", m_uiNumCachedRenderData);
+    sb.SetFormat("Num Cached Render Data: {0}", m_uiNumCachedRenderData);
     plDebugRenderer::DrawInfoText(hView, plDebugTextPlacement::TopLeft, "ExtractionStats", sb);
 
-    sb.Format("Num Uncached Render Data: {0}", m_uiNumUncachedRenderData);
+    sb.SetFormat("Num Uncached Render Data: {0}", m_uiNumUncachedRenderData);
     plDebugRenderer::DrawInfoText(hView, plDebugTextPlacement::TopLeft, "ExtractionStats", sb);
   }
 #endif
 }
 
+plResult plVisibleObjectsExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
+
+plResult plVisibleObjectsExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsExtractorBase, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsExtractorBase, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plSelectedObjectsExtractorBase::plSelectedObjectsExtractorBase(const char* szName)
   : plExtractor(szName)
@@ -354,7 +388,7 @@ void plSelectedObjectsExtractorBase::Extract(
   msg.m_pView = &view;
   msg.m_OverrideCategory = m_OverrideCategory;
 
-  PLASMA_LOCK(view.GetWorld()->GetReadMarker());
+  PL_LOCK(view.GetWorld()->GetReadMarker());
 
   for (const auto& hObj : *pSelection)
   {
@@ -364,7 +398,7 @@ void plSelectedObjectsExtractorBase::Extract(
 
     ExtractRenderData(view, pObject, msg, ref_extractedRenderData);
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     if (cvar_SpatialVisBounds || cvar_SpatialVisLocalBBox || cvar_SpatialVisData)
     {
       if (cvar_SpatialVisDataOnlySelected)
@@ -379,18 +413,18 @@ void plSelectedObjectsExtractorBase::Extract(
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsContext, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsContext, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsExtractor, 1, plRTTIDefaultAllocator<plSelectedObjectsExtractor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSelectedObjectsExtractor, 1, plRTTIDefaultAllocator<plSelectedObjectsExtractor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("SelectionContext", GetSelectionContext, SetSelectionContext),
+    PL_ACCESSOR_PROPERTY("SelectionContext", GetSelectionContext, SetSelectionContext),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSelectedObjectsContext::plSelectedObjectsContext() = default;
@@ -449,6 +483,20 @@ const plDeque<plGameObjectHandle>* plSelectedObjectsExtractor::GetSelection()
   return nullptr;
 }
 
+plResult plSelectedObjectsExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
+
+plResult plSelectedObjectsExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
+}
+
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Extractor);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Extractor);

@@ -3,16 +3,16 @@
 #include <Core/Input/DeviceTypes/MouseKeyboard.h>
 #include <Foundation/Basics/Platform/Win/MinWindows.h>
 
-class PLASMA_CORE_DLL plStandardInputDevice : public plInputDeviceMouseKeyboard
+class PL_CORE_DLL plStandardInputDevice : public plInputDeviceMouseKeyboard
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStandardInputDevice, plInputDeviceMouseKeyboard);
+  PL_ADD_DYNAMIC_REFLECTION(plStandardInputDevice, plInputDeviceMouseKeyboard);
 
 public:
   plStandardInputDevice(plUInt32 uiWindowNumber);
   ~plStandardInputDevice();
 
   /// \brief This function needs to be called by all Windows functions, to pass the input information through to this input device.
-  void WindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT Msg, plMinWindows::WPARAM wParam, plMinWindows::LPARAM lParam);
+  void WindowMessage(plMinWindows::HWND hWnd, plMinWindows::UINT msg, plMinWindows::WPARAM wparam, plMinWindows::LPARAM lparam);
 
   /// \brief Calling this function will 'translate' most key names from English to the OS language, by querying that information
   /// from the OS.
@@ -41,7 +41,7 @@ private:
   static bool s_bMainWindowUsed;
   plUInt32 m_uiWindowNumber = 0;
   bool m_bShowCursor = true;
-  plMouseCursorClipMode::Enum m_ClipCursorMode;
+  plMouseCursorClipMode::Enum m_ClipCursorMode = plMouseCursorClipMode::NoClip;
   bool m_bApplyClipRect = false;
   plUInt8 m_uiMouseButtonReceivedDown[5] = {0, 0, 0, 0, 0};
   plUInt8 m_uiMouseButtonReceivedUp[5] = {0, 0, 0, 0, 0};

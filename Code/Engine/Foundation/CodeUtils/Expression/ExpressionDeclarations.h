@@ -3,6 +3,7 @@
 #include <Foundation/Containers/HashTable.h>
 #include <Foundation/Containers/SmallArray.h>
 #include <Foundation/DataProcessing/Stream/ProcessingStream.h>
+#include <Foundation/Reflection/Reflection.h>
 #include <Foundation/SimdMath/SimdVec4f.h>
 #include <Foundation/SimdMath/SimdVec4i.h>
 #include <Foundation/Types/Variant.h>
@@ -14,7 +15,7 @@ namespace plExpression
 {
   struct Register
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     Register(){}; // NOLINT: using = default doesn't work here.
 
@@ -107,8 +108,32 @@ struct plExpressionFunction
   plExpression::ValidateGlobalDataFunction m_ValidateGlobalDataFunc;
 };
 
-struct PLASMA_FOUNDATION_DLL plDefaultExpressionFunctions
+struct PL_FOUNDATION_DLL plDefaultExpressionFunctions
 {
   static plExpressionFunction s_RandomFunc;
   static plExpressionFunction s_PerlinNoiseFunc;
+};
+
+/// \brief Add this attribute a string property that should be interpreted as expression source.
+///
+/// The Inputs/Outputs property reference another array property on the same object that contains objects
+/// with a name and a type property that can be used for real time error checking of the expression source.
+class PL_FOUNDATION_DLL plExpressionWidgetAttribute : public plTypeWidgetAttribute
+{
+  PL_ADD_DYNAMIC_REFLECTION(plExpressionWidgetAttribute, plTypeWidgetAttribute);
+
+public:
+  plExpressionWidgetAttribute() = default;
+  plExpressionWidgetAttribute(const char* szInputsProperty, const char* szOutputProperty)
+    : m_sInputsProperty(szInputsProperty)
+    , m_sOutputsProperty(szOutputProperty)
+  {
+  }
+
+  const char* GetInputsProperty() const { return m_sInputsProperty; }
+  const char* GetOutputsProperty() const { return m_sOutputsProperty; }
+
+private:
+  plUntrackedString m_sInputsProperty;
+  plUntrackedString m_sOutputsProperty;
 };

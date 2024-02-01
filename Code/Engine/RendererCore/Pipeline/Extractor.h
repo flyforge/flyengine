@@ -3,10 +3,12 @@
 #include <Foundation/Strings/HashedString.h>
 #include <RendererCore/Pipeline/RenderData.h>
 
-class PLASMA_RENDERERCORE_DLL plExtractor : public plReflectedClass
+class plStreamWriter;
+
+class PL_RENDERERCORE_DLL plExtractor : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plExtractor, plReflectedClass);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plExtractor, plReflectedClass);
+  PL_DISALLOW_COPY_AND_ASSIGN(plExtractor);
 
 public:
   plExtractor(const char* szName);
@@ -21,6 +23,9 @@ public:
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData);
 
   virtual void PostSortAndBatch(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData);
+
+  virtual plResult Serialize(plStreamWriter& inout_stream) const;
+  virtual plResult Deserialize(plStreamReader& inout_stream);
 
 protected:
   /// \brief returns true if the given object should be filtered by view tags.
@@ -39,34 +44,35 @@ private:
 protected:
   plHybridArray<plHashedString, 4> m_DependsOn;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   mutable plUInt32 m_uiNumCachedRenderData;
   mutable plUInt32 m_uiNumUncachedRenderData;
 #endif
 };
 
 
-class PLASMA_RENDERERCORE_DLL plVisibleObjectsExtractor : public plExtractor
+class PL_RENDERERCORE_DLL plVisibleObjectsExtractor : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plVisibleObjectsExtractor, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plVisibleObjectsExtractor, plExtractor);
 
 public:
   plVisibleObjectsExtractor(const char* szName = "VisibleObjectsExtractor");
   ~plVisibleObjectsExtractor();
 
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 };
 
-class PLASMA_RENDERERCORE_DLL plSelectedObjectsExtractorBase : public plExtractor
+class PL_RENDERERCORE_DLL plSelectedObjectsExtractorBase : public plExtractor
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSelectedObjectsExtractorBase, plExtractor);
+  PL_ADD_DYNAMIC_REFLECTION(plSelectedObjectsExtractorBase, plExtractor);
 
 public:
   plSelectedObjectsExtractorBase(const char* szName = "SelectedObjectsExtractor");
   ~plSelectedObjectsExtractorBase();
 
   virtual void Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData) override;
-
   virtual const plDeque<plGameObjectHandle>* GetSelection() = 0;
 
   plRenderData::Category m_OverrideCategory;
@@ -83,9 +89,9 @@ public:
 ///
 /// As long as there is also an plSelectionHighlightPass in the render pipeline, all objects in this selection will be rendered
 /// with an outline.
-class PLASMA_RENDERERCORE_DLL plSelectedObjectsContext : public plReflectedClass
+class PL_RENDERERCORE_DLL plSelectedObjectsContext : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSelectedObjectsContext, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plSelectedObjectsContext, plReflectedClass);
 
 public:
   plSelectedObjectsContext();
@@ -101,15 +107,17 @@ public:
 /// \brief An extractor that can be instantiated in a render pipeline, to define manually which objects should be rendered with a selection outline.
 ///
 /// \sa plSelectedObjectsContext
-class PLASMA_RENDERERCORE_DLL plSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
+class PL_RENDERERCORE_DLL plSelectedObjectsExtractor : public plSelectedObjectsExtractorBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
+  PL_ADD_DYNAMIC_REFLECTION(plSelectedObjectsExtractor, plSelectedObjectsExtractorBase);
 
 public:
   plSelectedObjectsExtractor(const char* szName = "ExplicitlySelectedObjectsExtractor");
   ~plSelectedObjectsExtractor();
 
   virtual const plDeque<plGameObjectHandle>* GetSelection() override;
+  virtual plResult Serialize(plStreamWriter& inout_stream) const override;
+  virtual plResult Deserialize(plStreamReader& inout_stream) override;
 
   /// \brief The context is typically set through an plView, through plView::SetExtractorProperty("<name>", "SelectionContext", pointer);
   void SetSelectionContext(plSelectedObjectsContext* pSelectionContext) { m_pSelectionContext = pSelectionContext; } // [ property ]

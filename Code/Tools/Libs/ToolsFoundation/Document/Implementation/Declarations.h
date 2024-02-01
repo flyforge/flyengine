@@ -7,15 +7,15 @@ class plAbstractObjectGraph;
 
 struct plDocumentFlags
 {
-  typedef plUInt8 StorageType;
+  using StorageType = plUInt8;
 
   enum Enum
   {
     None = 0,
-    RequestWindow = PLASMA_BIT(0),        ///< Open the document visibly (not just internally)
-    AddToRecentFilesList = PLASMA_BIT(1), ///< Add the document path to the recently used list for users
-    AsyncSave = PLASMA_BIT(2),            ///<
-    EmptyDocument = PLASMA_BIT(3),        ///< Don't populate a new document with default state (templates etc)
+    RequestWindow = PL_BIT(0),        ///< Open the document visibly (not just internally)
+    AddToRecentFilesList = PL_BIT(1), ///< Add the document path to the recently used list for users
+    AsyncSave = PL_BIT(2),            ///<
+    EmptyDocument = PL_BIT(3),        ///< Don't populate a new document with default state (templates etc)
     Default = None,
   };
 
@@ -24,13 +24,14 @@ struct plDocumentFlags
     StorageType RequestWindow : 1;
     StorageType AddToRecentFilesList : 1;
     StorageType AsyncSave : 1;
+    StorageType EmptyDocument : 1;
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plDocumentFlags);
+PL_DECLARE_FLAGS_OPERATORS(plDocumentFlags);
 
 
-struct PLASMA_TOOLSFOUNDATION_DLL plDocumentTypeDescriptor
+struct PL_TOOLSFOUNDATION_DLL plDocumentTypeDescriptor
 {
   plString m_sFileExtension;
   plString m_sDocumentTypeName;
@@ -57,18 +58,19 @@ struct plDocumentEvent
     ReadOnlyChanged,
     EnsureVisible,
     DocumentSaved,
+    DocumentRenamed,
     DocumentStatusMsg,
   };
 
   Type m_Type;
   const plDocument* m_pDocument;
 
-  const char* m_szStatusMsg;
+  plStringView m_sStatusMsg;
 };
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentInfo : public plReflectedClass
+class PL_TOOLSFOUNDATION_DLL plDocumentInfo : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDocumentInfo, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plDocumentInfo, plReflectedClass);
 
 public:
   plDocumentInfo();

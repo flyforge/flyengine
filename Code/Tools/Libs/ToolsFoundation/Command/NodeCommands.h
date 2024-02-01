@@ -6,9 +6,9 @@ class plDocumentObject;
 class plCommandHistory;
 class plPin;
 
-class PLASMA_TOOLSFOUNDATION_DLL plRemoveNodeCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plRemoveNodeCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRemoveNodeCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plRemoveNodeCommand, plCommand);
 
 public:
   plRemoveNodeCommand();
@@ -26,16 +26,16 @@ private:
 };
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plMoveNodeCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plMoveNodeCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plMoveNodeCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plMoveNodeCommand, plCommand);
 
 public:
   plMoveNodeCommand();
 
 public: // Properties
   plUuid m_Object;
-  plVec2 m_NewPos = plVec2::ZeroVector();
+  plVec2 m_NewPos = plVec2::MakeZero();
 
 private:
   virtual plStatus DoInternal(bool bRedo) override;
@@ -44,13 +44,13 @@ private:
 
 private:
   plDocumentObject* m_pObject = nullptr;
-  plVec2 m_vOldPos = plVec2::ZeroVector();
+  plVec2 m_vOldPos = plVec2::MakeZero();
 };
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plConnectNodePinsCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plConnectNodePinsCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plConnectNodePinsCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plConnectNodePinsCommand, plCommand);
 
 public:
   plConnectNodePinsCommand();
@@ -74,9 +74,9 @@ private:
 };
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plDisconnectNodePinsCommand : public plCommand
+class PL_TOOLSFOUNDATION_DLL plDisconnectNodePinsCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plDisconnectNodePinsCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plDisconnectNodePinsCommand, plCommand);
 
 public:
   plDisconnectNodePinsCommand();
@@ -98,9 +98,9 @@ private:
 };
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plNodeCommands
+class PL_TOOLSFOUNDATION_DLL plNodeCommands
 {
 public:
-  static plStatus AddAndConnectCommand(plCommandHistory* history, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin);
-  static plStatus DisconnectAndRemoveCommand(plCommandHistory* history, const plUuid& connectionObject);
+  static plStatus AddAndConnectCommand(plCommandHistory* pHistory, const plRTTI* pConnectionType, const plPin& sourcePin, const plPin& targetPin);
+  static plStatus DisconnectAndRemoveCommand(plCommandHistory* pHistory, const plUuid& connectionObject);
 };

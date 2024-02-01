@@ -3,7 +3,7 @@
 #include <KrautPlugin/Resources/KrautGeneratorResource.h>
 #include <KrautPlugin/Resources/KrautTreeResource.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <Core/ResourceManager/ResourceTypeLoader.h>
 #include <Foundation/Containers/StaticRingBuffer.h>
 #include <Foundation/Math/BoundingSphere.h>
@@ -21,10 +21,10 @@
 using namespace AE_NS_FOUNDATION;
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautGeneratorResource, 1, plRTTIDefaultAllocator<plKrautGeneratorResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautGeneratorResource, 1, plRTTIDefaultAllocator<plKrautGeneratorResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plKrautGeneratorResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plKrautGeneratorResource);
 // clang-format on
 
 plKrautGeneratorResource::plKrautGeneratorResource()
@@ -32,12 +32,12 @@ plKrautGeneratorResource::plKrautGeneratorResource()
 {
 }
 
-static PLASMA_ALWAYS_INLINE plVec3 ToPlasma(const aeVec3& v)
+static PL_ALWAYS_INLINE plVec3 ToPl(const aeVec3& v)
 {
   return plVec3(v.x, v.y, v.z);
 }
 
-static PLASMA_ALWAYS_INLINE plVec3 ToPlasmaSwizzle(const aeVec3& v)
+static PL_ALWAYS_INLINE plVec3 ToPlSwizzle(const aeVec3& v)
 {
   return plVec3(v.x, v.z, v.y);
 }
@@ -90,7 +90,7 @@ static void GenerateAmbientOcclusionSpheres(plDynamicOctree& ref_octree, const p
         const plVec3 pos = reinterpret_cast<const plVec3&>(branch.m_Nodes[n].m_vPosition);
 
         ++uiNumSpheres;
-        spheres.PushBack(plBoundingSphere(pos, fThickness * 1.5f));
+        spheres.PushBack(plBoundingSphere::MakeFromCenterAndRadius(pos, fThickness * 1.5f));
 
         ref_octree.InsertObject(pos, plVec3(fThickness * 2.0f), b, spheres.GetCount() - 1, nullptr, true).IgnoreResult();
 
@@ -155,7 +155,7 @@ public:
 
   virtual plResourceLoadData OpenDataStream(const plResource* pResource) override
   {
-    LoadedData* pData = PLASMA_DEFAULT_NEW(LoadedData);
+    LoadedData* pData = PL_DEFAULT_NEW(LoadedData);
 
     plResourceLock<plKrautGeneratorResource> pGenerator(m_hGeneratorResource, plResourceAcquireMode::BlockTillLoaded);
 
@@ -183,7 +183,7 @@ public:
   {
     LoadedData* pData = (LoadedData*)loaderData.m_pCustomLoaderData;
 
-    PLASMA_DEFAULT_DELETE(pData);
+    PL_DEFAULT_DELETE(pData);
 
     // not needed anymore
     m_hGeneratorResource.Invalidate();
@@ -195,7 +195,7 @@ public:
 
 plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(plUInt32 uiRandomSeed) const
 {
-  PLASMA_PROFILE_SCOPE("Kraut: GenerateTree");
+  PL_PROFILE_SCOPE("Kraut: GenerateTree");
 
   plStringBuilder sResourceID = GetResourceID();
   plStringBuilder sResourceDesc = GetResourceDescription();
@@ -208,7 +208,7 @@ plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(plUInt32 uiRand
     return hTree;
   }
 
-  plUniquePtr<plKrautResourceLoader> pLoader = PLASMA_DEFAULT_NEW(plKrautResourceLoader);
+  plUniquePtr<plKrautResourceLoader> pLoader = PL_DEFAULT_NEW(plKrautResourceLoader);
   pLoader->m_hGeneratorResource = plKrautGeneratorResourceHandle(const_cast<plKrautGeneratorResource*>(this));
   pLoader->m_uiRandomSeed = uiRandomSeed;
 
@@ -225,7 +225,7 @@ plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(plUInt32 uiRand
 
 void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescriptor& ref_dstDesc, plUInt32 uiRandomSeed) const
 {
-  PLASMA_LOG_BLOCK("Generate Kraut Tree");
+  PL_LOG_BLOCK("Generate Kraut Tree");
 
   Kraut::TreeStructure treeStructure;
 
@@ -242,8 +242,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
   GenerateExtraData(extraData, m_pDescriptor->m_TreeStructureDesc, treeStructure, uiRandomSeed, fWoodBendiness, fTwigBendiness);
 
   auto bbox = treeStructure.ComputeBoundingBox();
-  plBoundingBox bbox2;
-  bbox2.SetElements(ToPlasmaSwizzle(bbox.m_vMin), ToPlasmaSwizzle(bbox.m_vMax));
+  plBoundingBox bbox2 = plBoundingBox::MakeFromMinMax(ToPlSwizzle(bbox.m_vMin), ToPlSwizzle(bbox.m_vMax));
 
   // data for ambient occlusion computation
   plDynamicArray<plDynamicArray<plBoundingSphere>> occlusionSpheres;
@@ -391,11 +390,11 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
             const auto& srcVtx = srcMesh.m_Vertices[vidx];
 
             auto& dstVtx = dstMesh.m_Vertices.ExpandAndGetRef();
-            dstVtx.m_vPosition = ToPlasmaSwizzle(srcVtx.m_vPosition) * fVertexScale;
+            dstVtx.m_vPosition = ToPlSwizzle(srcVtx.m_vPosition) * fVertexScale;
             dstVtx.m_uiColorVariation = srcVtx.m_uiColorVariation;
-            dstVtx.m_vNormal = ToPlasmaSwizzle(srcVtx.m_vNormal);
-            dstVtx.m_vTexCoord = ToPlasma(srcVtx.m_vTexCoord);
-            dstVtx.m_vTangent = ToPlasmaSwizzle(srcVtx.m_vTangent);
+            dstVtx.m_vNormal = ToPlSwizzle(srcVtx.m_vNormal);
+            dstVtx.m_vTexCoord = ToPl(srcVtx.m_vTexCoord);
+            dstVtx.m_vTangent = ToPlSwizzle(srcVtx.m_vTangent);
             dstVtx.m_fAmbientOcclusion = CheckOcclusion(branchIdx, reinterpret_cast<const plVec3&>(srcVtx.m_vPosition));
 
             if (geometryType == Kraut::BranchGeometryType::Leaf)
@@ -423,8 +422,8 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
               plUInt32 nodeIdx = srcVtx.m_uiBranchNodeIdx;
               nodeIdx -= treeStructure.m_BranchStructures[branchIdx].m_Nodes.size();
 
-              const plVec3 lastPos = ToPlasmaSwizzle(treeStructure.m_BranchStructures[branchIdx].m_Nodes.back().m_vPosition);
-              const plVec3 tipPos = ToPlasmaSwizzle(treeLod.m_BranchLODs[branchIdx].m_TipNodes[nodeIdx].m_vPosition);
+              const plVec3 lastPos = ToPlSwizzle(treeStructure.m_BranchStructures[branchIdx].m_Nodes.back().m_vPosition);
+              const plVec3 tipPos = ToPlSwizzle(treeLod.m_BranchLODs[branchIdx].m_TipNodes[nodeIdx].m_vPosition);
 
               fBranchDist += (tipPos - lastPos).GetLength() * fTwigBendiness;
             }
@@ -523,13 +522,13 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
       }
     }
 
-    PLASMA_ASSERT_DEV(uiTriangleInSubmeshes == uiMaxTriangles, "Number of triangles is incorrect.");
+    PL_ASSERT_DEV(uiTriangleInSubmeshes == uiMaxTriangles, "Number of triangles is incorrect.");
 
     // compute the leaf center
     if (lodIdx == 0)
     {
       plBoundingBox leafBox;
-      leafBox.SetInvalid();
+      leafBox = plBoundingBox::MakeInvalid();
 
       for (plUInt32 branchIdx = 0; branchIdx < mesh.m_BranchMeshes.size(); ++branchIdx)
       {
@@ -537,7 +536,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
         for (plUInt32 vtxIdx = 0; vtxIdx < srcMesh.m_Vertices.size(); ++vtxIdx)
         {
-          leafBox.ExpandToInclude(ToPlasmaSwizzle(srcMesh.m_Vertices[vtxIdx].m_vPosition));
+          leafBox.ExpandToInclude(ToPlSwizzle(srcMesh.m_Vertices[vtxIdx].m_vPosition));
         }
       }
 
@@ -550,7 +549,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
   plLog::Debug("AO vertices: {}, checks: {}", uiOccVertices, uiOccChecks);
 
-  ref_dstDesc.m_Details.m_Bounds = plBoundingBoxSphere(bbox2);
+  ref_dstDesc.m_Details.m_Bounds = plBoundingBoxSphere::MakeFromBox(bbox2);
   ref_dstDesc.m_Details.m_fStaticColliderRadius = m_pDescriptor->m_fStaticColliderRadius;
   ref_dstDesc.m_Details.m_sSurfaceResource = m_pDescriptor->m_sSurfaceResource;
   ref_dstDesc.m_Details.m_vLeafCenter = ref_dstDesc.m_Details.m_Bounds.m_vCenter;
@@ -624,7 +623,7 @@ plResourceLoadDesc plKrautGeneratorResource::UpdateContent(plStreamReader* Strea
     return res;
   }
 
-  m_pDescriptor = PLASMA_DEFAULT_NEW(plKrautGeneratorResourceDescriptor);
+  m_pDescriptor = PL_DEFAULT_NEW(plKrautGeneratorResourceDescriptor);
   if (m_pDescriptor->Deserialize(*Stream).Failed())
   {
     res.m_State = plResourceState::LoadedResourceMissing;
@@ -820,11 +819,11 @@ plResult plKrautGeneratorResourceDescriptor::Serialize(plStreamWriter& inout_str
   inout_stream << m_fLodDistanceScale;
 
   inout_stream << m_uiDefaultDisplaySeed;
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_GoodRandomSeeds));
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_GoodRandomSeeds));
 
   inout_stream << m_fTreeStiffness;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plKrautGeneratorResourceDescriptor::Deserialize(plStreamReader& inout_stream)
@@ -844,7 +843,7 @@ plResult plKrautGeneratorResourceDescriptor::Deserialize(plStreamReader& inout_s
 
   if (!ts.Deserialize(kstream))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt8 uiNumMaterials = 0;
@@ -881,12 +880,12 @@ plResult plKrautGeneratorResourceDescriptor::Deserialize(plStreamReader& inout_s
   if (version >= 6)
   {
     inout_stream >> m_uiDefaultDisplaySeed;
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_GoodRandomSeeds));
+    PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_GoodRandomSeeds));
   }
   else if (version == 5)
   {
     plHybridArray<plUInt32, 16> dummy;
-    PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(dummy));
+    PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(dummy));
   }
 
   if (version >= 7)
@@ -894,5 +893,5 @@ plResult plKrautGeneratorResourceDescriptor::Deserialize(plStreamReader& inout_s
     inout_stream >> m_fTreeStiffness;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

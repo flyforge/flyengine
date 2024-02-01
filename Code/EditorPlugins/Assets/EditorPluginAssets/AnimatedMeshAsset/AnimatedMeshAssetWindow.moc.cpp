@@ -55,7 +55,7 @@ plQtAnimatedMeshAssetDocumentWindow::plQtAnimatedMeshAssetDocumentWindow(plAnima
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("AnimatedMeshAssetDockWidget");
-    pPropertyPanel->setWindowTitle("PROPERTIES");
+    pPropertyPanel->setWindowTitle("Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -91,7 +91,7 @@ plAnimatedMeshAssetDocument* plQtAnimatedMeshAssetDocumentWindow::GetMeshDocumen
 void plQtAnimatedMeshAssetDocumentWindow::SendRedrawMsg()
 {
   // do not try to redraw while the process is crashed, it is obviously futile
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return;
 
   for (auto pView : m_ViewWidgets)
@@ -104,7 +104,7 @@ void plQtAnimatedMeshAssetDocumentWindow::SendRedrawMsg()
   QueryObjectBBox();
 }
 
-void plQtAnimatedMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose)
+void plQtAnimatedMeshAssetDocumentWindow::QueryObjectBBox(plInt32 iPurpose /* = 0*/)
 {
   plQuerySelectionBBoxMsgToEngine msg;
   msg.m_uiViewID = 0xFFFFFFFF;
@@ -122,7 +122,7 @@ void plQtAnimatedMeshAssetDocumentWindow::PropertyEventHandler(const plDocumentO
 
 bool plQtAnimatedMeshAssetDocumentWindow::UpdatePreview()
 {
-  if (PlasmaEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
+  if (plEditorEngineProcessConnection::GetSingleton()->IsProcessCrashed())
     return false;
 
   if (GetMeshDocument()->GetProperties() == nullptr)
@@ -130,7 +130,7 @@ bool plQtAnimatedMeshAssetDocumentWindow::UpdatePreview()
 
   const auto& materials = GetMeshDocument()->GetProperties()->m_Slots;
 
-  PlasmaEditorEngineSetMaterialsMsg msg;
+  plEditorEngineSetMaterialsMsg msg;
   msg.m_Materials.SetCount(materials.GetCount());
 
   plUInt32 uiSlot = 0;
@@ -159,12 +159,12 @@ bool plQtAnimatedMeshAssetDocumentWindow::UpdatePreview()
 
 void plQtAnimatedMeshAssetDocumentWindow::InternalRedraw()
 {
-  PlasmaEditorInputContext::UpdateActiveInputContext();
+  plEditorInputContext::UpdateActiveInputContext();
   SendRedrawMsg();
   plQtEngineDocumentWindow::InternalRedraw();
 }
 
-void plQtAnimatedMeshAssetDocumentWindow::ProcessMessageEventHandler(const PlasmaEditorEngineDocumentMsg* pMsg)
+void plQtAnimatedMeshAssetDocumentWindow::ProcessMessageEventHandler(const plEditorEngineDocumentMsg* pMsg)
 {
   if (pMsg->GetDynamicRTTI()->IsDerivedFrom<plQuerySelectionBBoxResultMsgToEditor>())
   {
@@ -172,8 +172,6 @@ void plQtAnimatedMeshAssetDocumentWindow::ProcessMessageEventHandler(const Plasm
 
     if (pMessage->m_vCenter.IsValid() && pMessage->m_vHalfExtents.IsValid())
     {
-      const plVec3 vHalfExtents = pMessage->m_vHalfExtents.CompMax(plVec3(0.1f));
-
       m_pViewWidget->SetOrbitVolume(pMessage->m_vCenter, pMessage->m_vHalfExtents.CompMax(plVec3(0.1f)));
     }
     else
@@ -190,12 +188,12 @@ void plQtAnimatedMeshAssetDocumentWindow::ProcessMessageEventHandler(const Plasm
 
 void plQtAnimatedMeshAssetDocumentWindow::HighlightTimer()
 {
-  if (m_uiHighlightSlots & PLASMA_BIT(31))
-    m_uiHighlightSlots &= ~PLASMA_BIT(31);
+  if (m_uiHighlightSlots & PL_BIT(31))
+    m_uiHighlightSlots &= ~PL_BIT(31);
   else
-    m_uiHighlightSlots |= PLASMA_BIT(31);
+    m_uiHighlightSlots |= PL_BIT(31);
 
-  if (m_uiHighlightSlots & PLASMA_BIT(31))
+  if (m_uiHighlightSlots & PL_BIT(31))
   {
     UpdatePreview();
   }
@@ -207,7 +205,7 @@ void plQtAnimatedMeshAssetDocumentWindow::HighlightTimer()
     }
     else
     {
-      m_uiHighlightSlots = PLASMA_BIT(31);
+      m_uiHighlightSlots = PL_BIT(31);
     }
   }
 }

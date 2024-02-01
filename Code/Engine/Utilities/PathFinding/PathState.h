@@ -7,7 +7,7 @@
 /// \brief Base class for all path finding state objects.
 struct plPathState
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plPathState()
   {

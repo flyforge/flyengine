@@ -1,28 +1,29 @@
 #include <EnginePluginScene/EnginePluginScenePCH.h>
 
 #include <EnginePluginScene/Grid/GridRenderer.h>
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/Shader/ShaderResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(PlasmaEditorGridExtractor, 1, plRTTIDefaultAllocator<PlasmaEditorGridExtractor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorGridExtractor, 1, plRTTIDefaultAllocator<plEditorGridExtractor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("SceneContext", GetSceneContext, SetSceneContext),
+    PL_ACCESSOR_PROPERTY("SceneContext", GetSceneContext, SetSceneContext),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderer, 1, plRTTIDefaultAllocator<plGridRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGridRenderer, 1, plRTTIDefaultAllocator<plGridRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-PlasmaEditorGridExtractor::PlasmaEditorGridExtractor(const char* szName)
+plEditorGridExtractor::plEditorGridExtractor(const char* szName)
   : plExtractor(szName)
 {
   m_pSceneContext = nullptr;
@@ -33,14 +34,14 @@ plGridRenderer::plGridRenderer()
   CreateVertexBuffer();
 }
 
-void plGridRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plGridRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plGridRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plGridRenderData>());
 }
 
-void plGridRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
+void plGridRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
-  categories.PushBack(plDefaultRenderDataCategories::SimpleTransparent);
+  ref_categories.PushBack(plDefaultRenderDataCategories::SimpleTransparent);
 }
 
 void plGridRenderer::CreateVertexBuffer()
@@ -188,7 +189,7 @@ void plGridRenderer::RenderBatch(const plRenderViewContext& renderViewContext, c
     while (uiNumLineVertices > 0)
     {
       const plUInt32 uiNumLineVerticesInBatch = plMath::Min<plUInt32>(uiNumLineVertices, s_uiLineVerticesPerBatch);
-      PLASMA_ASSERT_DEBUG(uiNumLineVerticesInBatch % 2 == 0, "Vertex count must be a multiple of 2.");
+      PL_ASSERT_DEBUG(uiNumLineVerticesInBatch % 2 == 0, "Vertex count must be a multiple of 2.");
 
       pRenderContext->GetCommandEncoder()->UpdateBuffer(m_hVertexBuffer, 0, plMakeArrayPtr(pLineData, uiNumLineVerticesInBatch).ToByteArray());
 
@@ -221,7 +222,7 @@ float AdjustGridDensity(float fDensity, plUInt32 uiWindowWidth, float fOrthoDimX
   return fNewDensity;
 }
 
-void PlasmaEditorGridExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
+void plEditorGridExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData)
 {
   if (m_pSceneContext == nullptr || m_pSceneContext->GetGridDensity() == 0.0f)
     return;
@@ -230,7 +231,7 @@ void PlasmaEditorGridExtractor::Extract(const plView& view, const plDynamicArray
   float fDensity = m_pSceneContext->GetGridDensity();
 
   plGridRenderData* pRenderData = plCreateRenderDataForThisFrame<plGridRenderData>(nullptr);
-  pRenderData->m_GlobalBounds.SetInvalid();
+  pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
   pRenderData->m_bOrthoMode = cam->IsOrthographic();
   pRenderData->m_bGlobal = m_pSceneContext->IsGridInGlobalSpace();
 
@@ -250,14 +251,14 @@ void PlasmaEditorGridExtractor::Extract(const plView& view, const plDynamicArray
     mRot.SetColumn(0, cam->GetCenterDirRight());
     mRot.SetColumn(1, cam->GetCenterDirUp());
     mRot.SetColumn(2, cam->GetCenterDirForwards());
-    pRenderData->m_GlobalTransform.m_qRotation.SetFromMat3(mRot);
+    pRenderData->m_GlobalTransform.m_qRotation = plQuat::MakeFromMat3(mRot);
 
     const plVec3 vBottomLeft = cam->GetCenterPosition() - cam->GetCenterDirRight() * fDimX - cam->GetCenterDirUp() * fDimY;
     const plVec3 vTopRight = cam->GetCenterPosition() + cam->GetCenterDirRight() * fDimX + cam->GetCenterDirUp() * fDimY;
 
     plPlane plane1, plane2;
-    plane1.SetFromNormalAndPoint(cam->GetCenterDirRight(), plVec3(0));
-    plane2.SetFromNormalAndPoint(cam->GetCenterDirUp(), plVec3(0));
+    plane1 = plPlane::MakeFromNormalAndPoint(cam->GetCenterDirRight(), plVec3(0));
+    plane2 = plPlane::MakeFromNormalAndPoint(cam->GetCenterDirUp(), plVec3(0));
 
     const float fFirstDist1 = plane1.GetDistanceTo(vBottomLeft) - fDensity;
     const float fLastDist1 = plane1.GetDistanceTo(vTopRight) + fDensity;
@@ -293,5 +294,20 @@ void PlasmaEditorGridExtractor::Extract(const plView& view, const plDynamicArray
     pRenderData->m_iLastLine2 = iNumLines;
   }
 
-  extractedRenderData.AddRenderData(pRenderData, plDefaultRenderDataCategories::SimpleTransparent);
+  ref_extractedRenderData.AddRenderData(pRenderData, plDefaultRenderDataCategories::SimpleTransparent);
+}
+
+plResult plEditorGridExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
+
+
+plResult plEditorGridExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
 }

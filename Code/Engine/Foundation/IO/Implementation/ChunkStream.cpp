@@ -11,8 +11,8 @@ plChunkStreamWriter::plChunkStreamWriter(plStreamWriter& inout_stream)
 
 void plChunkStreamWriter::BeginStream(plUInt16 uiVersion)
 {
-  PLASMA_ASSERT_DEV(!m_bWritingFile, "Already writing the file.");
-  PLASMA_ASSERT_DEV(uiVersion > 0, "The version number must be larger than 0");
+  PL_ASSERT_DEV(!m_bWritingFile, "Already writing the file.");
+  PL_ASSERT_DEV(uiVersion > 0, "The version number must be larger than 0");
 
   m_bWritingFile = true;
 
@@ -23,8 +23,8 @@ void plChunkStreamWriter::BeginStream(plUInt16 uiVersion)
 
 void plChunkStreamWriter::EndStream()
 {
-  PLASMA_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
-  PLASMA_ASSERT_DEV(!m_bWritingChunk, "A chunk is still open for writing: '{0}'", m_sChunkName);
+  PL_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
+  PL_ASSERT_DEV(!m_bWritingChunk, "A chunk is still open for writing: '{0}'", m_sChunkName);
 
   m_bWritingFile = false;
 
@@ -34,8 +34,8 @@ void plChunkStreamWriter::EndStream()
 
 void plChunkStreamWriter::BeginChunk(plStringView sName, plUInt32 uiVersion)
 {
-  PLASMA_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
-  PLASMA_ASSERT_DEV(!m_bWritingChunk, "A chunk is already open for writing: '{0}'", m_sChunkName);
+  PL_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
+  PL_ASSERT_DEV(!m_bWritingChunk, "A chunk is already open for writing: '{0}'", m_sChunkName);
 
   m_sChunkName = sName;
 
@@ -51,8 +51,8 @@ void plChunkStreamWriter::BeginChunk(plStringView sName, plUInt32 uiVersion)
 
 void plChunkStreamWriter::EndChunk()
 {
-  PLASMA_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
-  PLASMA_ASSERT_DEV(m_bWritingChunk, "No chunk is currently open.");
+  PL_ASSERT_DEV(m_bWritingFile, "Not writing to the file.");
+  PL_ASSERT_DEV(m_bWritingChunk, "No chunk is currently open.");
 
   m_bWritingChunk = false;
 
@@ -64,7 +64,7 @@ void plChunkStreamWriter::EndChunk()
   {
     const plUInt32 uiRange = m_Storage.GetContiguousRange(i);
 
-    PLASMA_ASSERT_DEBUG(uiRange > 0, "Invalid contiguous range");
+    PL_ASSERT_DEBUG(uiRange > 0, "Invalid contiguous range");
 
     m_Stream.WriteBytes(&m_Storage[i], uiRange).IgnoreResult();
     i += uiRange;
@@ -75,14 +75,14 @@ void plChunkStreamWriter::EndChunk()
 
 plResult plChunkStreamWriter::WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWrite)
 {
-  PLASMA_ASSERT_DEV(m_bWritingChunk, "No chunk is currently written to");
+  PL_ASSERT_DEV(m_bWritingChunk, "No chunk is currently written to");
 
   const plUInt8* pBytes = (const plUInt8*)pWriteBuffer;
 
   for (plUInt64 i = 0; i < uiBytesToWrite; ++i)
     m_Storage.PushBack(pBytes[i]);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
@@ -96,7 +96,7 @@ plChunkStreamReader::plChunkStreamReader(plStreamReader& inout_stream)
 
 plUInt64 plChunkStreamReader::ReadBytes(void* pReadBuffer, plUInt64 uiBytesToRead)
 {
-  PLASMA_ASSERT_DEV(m_ChunkInfo.m_bValid, "No valid chunk available.");
+  PL_ASSERT_DEV(m_ChunkInfo.m_bValid, "No valid chunk available.");
 
   uiBytesToRead = plMath::Min<plUInt64>(uiBytesToRead, m_ChunkInfo.m_uiUnreadChunkBytes);
   m_ChunkInfo.m_uiUnreadChunkBytes -= (plUInt32)uiBytesToRead;
@@ -121,7 +121,7 @@ plUInt16 plChunkStreamReader::BeginStream()
   else
   {
     // "BGN CHNK" is the old chunk identifier, before a version number was written
-    PLASMA_ASSERT_DEV(plStringUtils::IsEqual(szTag, "BGN CHNK"), "Not a valid chunk file.");
+    PL_ASSERT_DEV(plStringUtils::IsEqual(szTag, "BGN CHNK"), "Not a valid chunk file.");
   }
 
   TryReadChunkHeader();
@@ -160,7 +160,7 @@ void plChunkStreamReader::TryReadChunkHeader()
     return;
   }
 
-  PLASMA_REPORT_FAILURE("Invalid chunk file, tag is '{0}'", szTag);
+  PL_REPORT_FAILURE("Invalid chunk file, tag is '{0}'", szTag);
 }
 
 void plChunkStreamReader::NextChunk()
@@ -170,11 +170,9 @@ void plChunkStreamReader::NextChunk()
 
   const plUInt64 uiToSkip = m_ChunkInfo.m_uiUnreadChunkBytes;
   const plUInt64 uiSkipped = SkipBytes(uiToSkip);
-  PLASMA_VERIFY(uiSkipped == uiToSkip, "Corrupt chunk '{0}' (version {1}), tried to skip {2} bytes, could only read {3} bytes", m_ChunkInfo.m_sChunkName, m_ChunkInfo.m_uiChunkVersion, uiToSkip, uiSkipped);
+  PL_VERIFY(uiSkipped == uiToSkip, "Corrupt chunk '{0}' (version {1}), tried to skip {2} bytes, could only read {3} bytes", m_ChunkInfo.m_sChunkName, m_ChunkInfo.m_uiChunkVersion, uiToSkip, uiSkipped);
 
   TryReadChunkHeader();
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_ChunkStream);

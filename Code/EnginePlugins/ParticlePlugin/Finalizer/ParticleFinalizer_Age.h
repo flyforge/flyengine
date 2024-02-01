@@ -5,9 +5,9 @@
 
 class plPhysicsWorldModuleInterface;
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_Age final : public plParticleFinalizerFactory
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizerFactory_Age final : public plParticleFinalizerFactory
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_Age, plParticleFinalizerFactory);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizerFactory_Age, plParticleFinalizerFactory);
 
 public:
   plParticleFinalizerFactory_Age();
@@ -21,9 +21,9 @@ public:
 };
 
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleFinalizer_Age final : public plParticleFinalizer
+class PL_PARTICLEPLUGIN_DLL plParticleFinalizer_Age final : public plParticleFinalizer
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_Age, plParticleFinalizer);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleFinalizer_Age, plParticleFinalizer);
 
 public:
   plParticleFinalizer_Age();

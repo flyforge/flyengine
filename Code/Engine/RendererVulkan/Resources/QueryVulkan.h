@@ -5,8 +5,8 @@
 class plGALQueryVulkan : public plGALQuery
 {
 public:
-  PLASMA_ALWAYS_INLINE plUInt32 GetID() const;
-  PLASMA_ALWAYS_INLINE vk::QueryPool GetPool() const { return nullptr; } // TODO
+  PL_ALWAYS_INLINE plUInt32 GetID() const;
+  PL_ALWAYS_INLINE vk::QueryPool GetPool() const { return nullptr; } // TODO
 
 protected:
   friend class plGALDeviceVulkan;

@@ -4,9 +4,9 @@
 #include <Core/Scripting/ScriptClassResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptClassResource, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plScriptClassResource);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptClassResource, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plScriptClassResource);
 // clang-format on
 
 plScriptClassResource::plScriptClassResource()
@@ -46,7 +46,7 @@ plSharedPtr<plScriptRTTI> plScriptClassResource::CreateScriptType(plStringView s
     }
   }
 
-  m_pType = PLASMA_DEFAULT_NEW(plScriptRTTI, sName, pBaseType, std::move(sortedFunctions), std::move(messageHandlers));
+  m_pType = PL_SCRIPT_NEW(plScriptRTTI, sName, pBaseType, std::move(sortedFunctions), std::move(messageHandlers));
   return m_pType;
 }
 
@@ -60,7 +60,7 @@ plSharedPtr<plScriptCoroutineRTTI> plScriptClassResource::CreateScriptCoroutineT
   plStringBuilder sCoroutineTypeName;
   sCoroutineTypeName.Set(sScriptClassName, "::", sFunctionName, "<Coroutine>");
 
-  plSharedPtr<plScriptCoroutineRTTI> pCoroutineType = PLASMA_DEFAULT_NEW(plScriptCoroutineRTTI, sCoroutineTypeName, std::move(pAllocator));
+  plSharedPtr<plScriptCoroutineRTTI> pCoroutineType = PL_SCRIPT_NEW(plScriptCoroutineRTTI, sCoroutineTypeName, std::move(pAllocator));
   m_CoroutineTypes.PushBack(pCoroutineType);
 
   return pCoroutineType;
@@ -70,3 +70,7 @@ void plScriptClassResource::DeleteAllScriptCoroutineTypes()
 {
   m_CoroutineTypes.Clear();
 }
+
+
+PL_STATICLINK_FILE(Core, Core_Scripting_Implementation_ScriptClassResource);
+

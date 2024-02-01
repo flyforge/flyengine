@@ -4,16 +4,16 @@
 
 plSimdFloat plImageFilter::GetWidth() const
 {
-  return m_width;
+  return m_fWidth;
 }
 
 plImageFilter::plImageFilter(float width)
-  : m_width(width)
+  : m_fWidth(width)
 {
 }
 
-plImageFilterBox::plImageFilterBox(float width)
-  : plImageFilter(width)
+plImageFilterBox::plImageFilterBox(float fWidth)
+  : plImageFilter(fWidth)
 {
 }
 
@@ -31,8 +31,8 @@ plSimdFloat plImageFilterBox::SamplePoint(const plSimdFloat& x) const
   }
 }
 
-plImageFilterTriangle::plImageFilterTriangle(float width)
-  : plImageFilter(width)
+plImageFilterTriangle::plImageFilterTriangle(float fWidth)
+  : plImageFilter(fWidth)
 {
 }
 
@@ -64,7 +64,7 @@ static plSimdFloat sinc(const plSimdFloat& x)
   }
   else
   {
-    return plMath::Sin(plAngle::Radian(x)) / x;
+    return plMath::Sin(plAngle::MakeFromRadian(x)) / x;
   }
 }
 
@@ -88,10 +88,10 @@ static plSimdFloat modifiedBessel0(const plSimdFloat& x)
   return sum;
 }
 
-plImageFilterSincWithKaiserWindow::plImageFilterSincWithKaiserWindow(float width, float beta)
-  : plImageFilter(width)
-  , m_beta(beta)
-  , m_invBesselBeta(1.0f / modifiedBessel0(m_beta))
+plImageFilterSincWithKaiserWindow::plImageFilterSincWithKaiserWindow(float fWidth, float fBeta)
+  : plImageFilter(fWidth)
+  , m_fBeta(fBeta)
+  , m_fInvBesselBeta(1.0f / modifiedBessel0(m_fBeta))
 {
 }
 
@@ -107,26 +107,26 @@ plSimdFloat plImageFilterSincWithKaiserWindow::SamplePoint(const plSimdFloat& x)
   }
   else
   {
-    return sinc(x * plSimdFloat(plMath::Pi<float>())) * modifiedBessel0(m_beta * xSq.GetSqrt()) * m_invBesselBeta;
+    return sinc(x * plSimdFloat(plMath::Pi<float>())) * modifiedBessel0(m_fBeta * xSq.GetSqrt()) * m_fInvBesselBeta;
   }
 }
 
-plImageFilterWeights::plImageFilterWeights(const plImageFilter& filter, plUInt32 srcSamples, plUInt32 dstSamples)
+plImageFilterWeights::plImageFilterWeights(const plImageFilter& filter, plUInt32 uiSrcSamples, plUInt32 uiDstSamples)
 {
   // Filter weights repeat after the common phase
-  plUInt32 commonPhase = plMath::GreatestCommonDivisor(srcSamples, dstSamples);
+  plUInt32 commonPhase = plMath::GreatestCommonDivisor(uiSrcSamples, uiDstSamples);
 
-  srcSamples /= commonPhase;
-  dstSamples /= commonPhase;
+  uiSrcSamples /= commonPhase;
+  uiDstSamples /= commonPhase;
 
-  m_dstSamplesReduced = dstSamples;
+  m_uiDstSamplesReduced = uiDstSamples;
 
-  m_sourceToDestScale = float(dstSamples) / float(srcSamples);
-  m_destToSourceScale = float(srcSamples) / float(dstSamples);
+  m_fSourceToDestScale = float(uiDstSamples) / float(uiSrcSamples);
+  m_fDestToSourceScale = float(uiSrcSamples) / float(uiDstSamples);
 
   plSimdFloat filterScale, invFilterScale;
 
-  if (dstSamples > srcSamples)
+  if (uiDstSamples > uiSrcSamples)
   {
     // When upsampling, reconstruct the source by applying the filter in source space and resampling
     filterScale = 1.0f;
@@ -136,55 +136,53 @@ plImageFilterWeights::plImageFilterWeights(const plImageFilter& filter, plUInt32
   {
     // When downsampling, widen the filter in order to narrow its frequency spectrum, which effectively combines reconstruction + low-pass
     // filter
-    filterScale = m_destToSourceScale;
-    invFilterScale = m_sourceToDestScale;
+    filterScale = m_fDestToSourceScale;
+    invFilterScale = m_fSourceToDestScale;
   }
 
-  m_widthInSourceSpace = filter.GetWidth() * filterScale;
+  m_fWidthInSourceSpace = filter.GetWidth() * filterScale;
 
-  m_numWeights = plUInt32(plMath::Ceil(m_widthInSourceSpace * plSimdFloat(2.0f))) + 1;
+  m_uiNumWeights = plUInt32(plMath::Ceil(m_fWidthInSourceSpace * plSimdFloat(2.0f))) + 1;
 
-  m_weights.SetCountUninitialized(dstSamples * m_numWeights);
+  m_Weights.SetCountUninitialized(uiDstSamples * m_uiNumWeights);
 
-  for (plUInt32 dstSample = 0; dstSample < dstSamples; ++dstSample)
+  for (plUInt32 dstSample = 0; dstSample < uiDstSamples; ++dstSample)
   {
-    plSimdFloat dstSampleInSourceSpace = (plSimdFloat(dstSample) + plSimdFloat(0.5f)) * m_destToSourceScale;
+    plSimdFloat dstSampleInSourceSpace = (plSimdFloat(dstSample) + plSimdFloat(0.5f)) * m_fDestToSourceScale;
 
     plInt32 firstSourceIdx = GetFirstSourceSampleIndex(dstSample);
 
     plSimdFloat totalWeight = 0.0f;
 
-    for (plUInt32 weightIdx = 0; weightIdx < m_numWeights; ++weightIdx)
+    for (plUInt32 weightIdx = 0; weightIdx < m_uiNumWeights; ++weightIdx)
     {
       plSimdFloat sourceSample = plSimdFloat(firstSourceIdx + plInt32(weightIdx)) + plSimdFloat(0.5f);
 
       plSimdFloat weight = filter.SamplePoint((dstSampleInSourceSpace - sourceSample) * invFilterScale);
       totalWeight += weight;
-      m_weights[dstSample * m_numWeights + weightIdx] = weight;
+      m_Weights[dstSample * m_uiNumWeights + weightIdx] = weight;
     }
 
     // Normalize weights
     plSimdFloat invWeight = 1.0f / totalWeight;
 
-    for (plUInt32 weightIdx = 0; weightIdx < m_numWeights; ++weightIdx)
+    for (plUInt32 weightIdx = 0; weightIdx < m_uiNumWeights; ++weightIdx)
     {
-      m_weights[dstSample * m_numWeights + weightIdx] *= invWeight;
+      m_Weights[dstSample * m_uiNumWeights + weightIdx] *= invWeight;
     }
   }
 }
 
 plUInt32 plImageFilterWeights::GetNumWeights() const
 {
-  return m_numWeights;
+  return m_uiNumWeights;
 }
 
-plSimdFloat plImageFilterWeights::GetWeight(plUInt32 dstSampleIndex, plUInt32 weightIndex) const
+plSimdFloat plImageFilterWeights::GetWeight(plUInt32 uiDstSampleIndex, plUInt32 uiWeightIndex) const
 {
-  PLASMA_ASSERT_DEBUG(weightIndex < m_numWeights, "Invalid weight index {} (should be < {})", weightIndex, m_numWeights);
+  PL_ASSERT_DEBUG(uiWeightIndex < m_uiNumWeights, "Invalid weight index {} (should be < {})", uiWeightIndex, m_uiNumWeights);
 
-  return plSimdFloat(m_weights[(dstSampleIndex % m_dstSamplesReduced) * m_numWeights + weightIndex]);
+  return plSimdFloat(m_Weights[(uiDstSampleIndex % m_uiDstSamplesReduced) * m_uiNumWeights + uiWeightIndex]);
 }
 
 
-
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageFilter);

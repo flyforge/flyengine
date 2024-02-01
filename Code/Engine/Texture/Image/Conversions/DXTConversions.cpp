@@ -6,8 +6,8 @@
 #include <Texture/Image/Conversions/PixelConversions.h>
 #include <Texture/Image/ImageConversion.h>
 
-#if PLASMA_SSE_LEVEL >= PLASMA_SSE_41 && PLASMA_SIMD_IMPLEMENTATION == PLASMA_SIMD_IMPLEMENTATION_SSE
-#  define PLASMA_SUPPORTS_BC4_COMPRESSOR
+#if PL_SSE_LEVEL >= PL_SSE_41 && PL_SIMD_IMPLEMENTATION == PL_SIMD_IMPLEMENTATION_SSE
+#  define PL_SUPPORTS_BC4_COMPRESSOR
 
 #  include <emmintrin.h>
 #  include <smmintrin.h>
@@ -48,19 +48,19 @@ void plDecompressBlockBC1(const plUInt8* pSource, plColorBaseUB* pTarget, bool b
   }
 }
 
-void plDecompressBlockBC4(const plUInt8* pSource, plUInt8* pTarget, plUInt32 uiStride, plUInt8 bias)
+void plDecompressBlockBC4(const plUInt8* pSource, plUInt8* pTarget, plUInt32 uiStride, plUInt8 uiBias)
 {
   plUInt8 inputPalette[2];
-  inputPalette[0] = pSource[0] + bias;
-  inputPalette[1] = pSource[1] + bias;
+  inputPalette[0] = pSource[0] + uiBias;
+  inputPalette[1] = pSource[1] + uiBias;
 
   plUInt32 alphas[8];
 
   plUnpackPaletteBC4(inputPalette[0], inputPalette[1], alphas);
 
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(alphas); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(alphas); ++i)
   {
-    alphas[i] = plUInt8(alphas[i] - bias);
+    alphas[i] = plUInt8(alphas[i] - uiBias);
   }
 
   for (plUInt32 uiTripleIdx = 0; uiTripleIdx < 2; uiTripleIdx++)
@@ -78,45 +78,45 @@ void plDecompressBlockBC4(const plUInt8* pSource, plUInt8* pTarget, plUInt32 uiS
   }
 }
 
-void plUnpackPaletteBC4(plUInt32 a0, plUInt32 a1, plUInt32* alphas)
+void plUnpackPaletteBC4(plUInt32 ui0, plUInt32 ui1, plUInt32* pAlphas)
 {
-  alphas[0] = a0;
-  alphas[1] = a1;
+  pAlphas[0] = ui0;
+  pAlphas[1] = ui1;
 
-  if (a0 > a1)
+  if (ui0 > ui1)
   {
     // Implement division by 7 in range [0, 7 * 255] as (x * 2341) >> 14
-    plUInt32 f0 = a0 * 2341;
-    plUInt32 f1 = a1 * 2341;
+    plUInt32 f0 = ui0 * 2341;
+    plUInt32 f1 = ui1 * 2341;
 
-    alphas[2] = (6 * f0 + 1 * f1 + 3 * 2341) >> 14;
-    alphas[3] = (5 * f0 + 2 * f1 + 3 * 2341) >> 14;
-    alphas[4] = (4 * f0 + 3 * f1 + 3 * 2341) >> 14;
-    alphas[5] = (3 * f0 + 4 * f1 + 3 * 2341) >> 14;
-    alphas[6] = (2 * f0 + 5 * f1 + 3 * 2341) >> 14;
-    alphas[7] = (1 * f0 + 6 * f1 + 3 * 2341) >> 14;
+    pAlphas[2] = (6 * f0 + 1 * f1 + 3 * 2341) >> 14;
+    pAlphas[3] = (5 * f0 + 2 * f1 + 3 * 2341) >> 14;
+    pAlphas[4] = (4 * f0 + 3 * f1 + 3 * 2341) >> 14;
+    pAlphas[5] = (3 * f0 + 4 * f1 + 3 * 2341) >> 14;
+    pAlphas[6] = (2 * f0 + 5 * f1 + 3 * 2341) >> 14;
+    pAlphas[7] = (1 * f0 + 6 * f1 + 3 * 2341) >> 14;
   }
   else
   {
     // Implement division by 5 in range [0, 5 * 255] as (x * 1639) >> 13
-    plUInt32 f0 = a0 * 1639;
-    plUInt32 f1 = a1 * 1639;
+    plUInt32 f0 = ui0 * 1639;
+    plUInt32 f1 = ui1 * 1639;
 
-    alphas[2] = (4 * f0 + 1 * f1 + 2 * 1639) >> 13;
-    alphas[3] = (3 * f0 + 2 * f1 + 2 * 1639) >> 13;
-    alphas[4] = (2 * f0 + 3 * f1 + 2 * 1639) >> 13;
-    alphas[5] = (1 * f0 + 4 * f1 + 2 * 1639) >> 13;
-    alphas[6] = 0x00;
-    alphas[7] = 0xFF;
+    pAlphas[2] = (4 * f0 + 1 * f1 + 2 * 1639) >> 13;
+    pAlphas[3] = (3 * f0 + 2 * f1 + 2 * 1639) >> 13;
+    pAlphas[4] = (2 * f0 + 3 * f1 + 2 * 1639) >> 13;
+    pAlphas[5] = (1 * f0 + 4 * f1 + 2 * 1639) >> 13;
+    pAlphas[6] = 0x00;
+    pAlphas[7] = 0xFF;
   }
 }
 
 namespace
 {
-#if defined(PLASMA_SUPPORTS_BC4_COMPRESSOR)
-  plUInt32 findBestPaletteIndexBC4(plInt32 sourceValue, __m128i p0, __m128i p1)
+#if defined(PL_SUPPORTS_BC4_COMPRESSOR)
+  plUInt32 findBestPaletteIndexBC4(plInt32 iSourceValue, __m128i p0, __m128i p1)
   {
-    __m128i source = _mm_set1_epi32(sourceValue);
+    __m128i source = _mm_set1_epi32(iSourceValue);
 
     __m128i e0 = _mm_abs_epi32(_mm_sub_epi32(p0, source));
     __m128i e1 = _mm_abs_epi32(_mm_sub_epi32(p1, source));
@@ -150,13 +150,13 @@ namespace
     return plMath::FirstBitLow(mask) + offset;
   }
 
-  void packBlockBC4(const plUInt8* sourceData, plUInt32 a0, plUInt32 a1, plUInt8* targetData)
+  void packBlockBC4(const plUInt8* pSourceData, plUInt32 ui0, plUInt32 ui1, plUInt8* pTargetData)
   {
-    targetData[0] = plUInt8(a0);
-    targetData[1] = plUInt8(a1);
+    pTargetData[0] = plUInt8(ui0);
+    pTargetData[1] = plUInt8(ui1);
 
     plUInt32 palette[8];
-    plUnpackPaletteBC4(a0, a1, palette);
+    plUnpackPaletteBC4(ui0, ui1, palette);
 
     __m128i p0, p1;
     p0 = _mm_loadu_si128(reinterpret_cast<__m128i*>(palette + 0));
@@ -165,13 +165,13 @@ namespace
     plUInt64 indices = 0;
     for (plUInt32 idx = 0; idx < 16; ++idx)
     {
-      indices |= plUInt64(findBestPaletteIndexBC4(sourceData[idx], p0, p1)) << (3 * idx);
+      indices |= plUInt64(findBestPaletteIndexBC4(pSourceData[idx], p0, p1)) << (3 * idx);
     }
 
-    memcpy(targetData + 2, &indices, 6);
+    memcpy(pTargetData + 2, &indices, 6);
   }
 
-  plUInt32 getSquaredErrorBC4_SSE(const plUInt8* sourceData, const __m128i* paletteAndCopy)
+  plUInt32 getSquaredErrorBC4_SSE(const plUInt8* pSourceData, const __m128i* pPaletteAndCopy)
   {
     // See getSquaredErrorBC4() for what we want to achieve (sum of lowest squared errors).
     // Instead of converting to 32bit ints and actually computing squares, this function finds lowest absolute differences
@@ -182,8 +182,8 @@ namespace
     // If we'll perform a vector op between src and pal0, src[0] will correspond to color[0] from the palette, src[1] to color[1], etc.
     // Since the palette is stored twice, src[8] will correspond to color[0] again, etc.
     // Below we generate 7 more rotations of this palette so that each input will correspond to each of 8 colors of palettes.
-    const __m128i pal0 = _mm_loadu_si128(paletteAndCopy);
-    const __m128i src = _mm_loadu_si128((__m128i*)sourceData);
+    const __m128i pal0 = _mm_loadu_si128(pPaletteAndCopy);
+    const __m128i src = _mm_loadu_si128((__m128i*)pSourceData);
 
     auto makeDiff = [&](__m128i pal) {
       // Absolute difference is a difference between max and min of two numbers.
@@ -251,11 +251,11 @@ namespace
   // Does the same thing as unpackPaletteBC4(), but stores the 8 result numbers twice as bytes
   // (low 8 bytes of alphasAndAlphasCopy will be equal to high 8 bytes)
   // See unpackPaletteBC4 for the explanation regarding magic numbers
-  void unpackPaletteBC4AsBytesTwice(plUInt32 a0, plUInt32 a1, __m128i* alphasAndAlphasCopy)
+  void unpackPaletteBC4AsBytesTwice(plUInt32 ui0, plUInt32 ui1, __m128i* pAlphasAndAlphasCopy)
   {
-    const __m128i v0 = _mm_set1_epi32(a0);
-    const __m128i v1 = _mm_set1_epi32(a1);
-    if (a0 > a1)
+    const __m128i v0 = _mm_set1_epi32(ui0);
+    const __m128i v1 = _mm_set1_epi32(ui1);
+    if (ui0 > ui1)
     {
       __m128i sumLo0 = _mm_mullo_epi32(v0, div7_a0LoMultiplier);
       __m128i sumLo1 = _mm_mullo_epi32(v1, div7_a1LoMultiplier);
@@ -269,7 +269,7 @@ namespace
       const __m128i resHi = _mm_srli_epi32(sumHi, 14);
 
       const __m128i res16 = _mm_packs_epi32(resLo, resHi);
-      _mm_storeu_si128(alphasAndAlphasCopy, _mm_packus_epi16(res16, res16));
+      _mm_storeu_si128(pAlphasAndAlphasCopy, _mm_packus_epi16(res16, res16));
     }
     else
     {
@@ -286,18 +286,18 @@ namespace
       const __m128i resHi = _mm_add_epi32(resHiIncomplete, lastTwoAlphas_0_255);
 
       const __m128i res16 = _mm_packs_epi32(resLo, resHi);
-      _mm_storeu_si128(alphasAndAlphasCopy, _mm_packus_epi16(res16, res16));
+      _mm_storeu_si128(pAlphasAndAlphasCopy, _mm_packus_epi16(res16, res16));
     }
   }
 
-  plUInt32 getSquaredErrorBC4_SSE(plUInt32 a0, plUInt32 a1, const plUInt8* sourceData)
+  plUInt32 getSquaredErrorBC4_SSE(plUInt32 ui0, plUInt32 ui1, const plUInt8* pSourceData)
   {
     __m128i paletteAndCopy;
-    unpackPaletteBC4AsBytesTwice(plUInt8(a0), plUInt8(a1), &paletteAndCopy);
-    return getSquaredErrorBC4_SSE(sourceData, &paletteAndCopy);
+    unpackPaletteBC4AsBytesTwice(plUInt8(ui0), plUInt8(ui1), &paletteAndCopy);
+    return getSquaredErrorBC4_SSE(pSourceData, &paletteAndCopy);
   }
 
-  void findBestPaletteBC4(const plUInt8* sourceData, plUInt32& bestA0, plUInt32& bestA1)
+  void findBestPaletteBC4(const plUInt8* pSourceData, plUInt32& ref_uiBestA0, plUInt32& ref_uiBestA1)
   {
     plInt32 minA = 255;
     plInt32 maxA = 0;
@@ -307,7 +307,7 @@ namespace
 
     for (plUInt32 idx = 0; idx < 16; ++idx)
     {
-      plUInt32 value = sourceData[idx];
+      plUInt32 value = pSourceData[idx];
       minA = plMath::Min<plUInt32>(minA, value);
       maxA = plMath::Max<plUInt32>(maxA, value);
 
@@ -321,14 +321,14 @@ namespace
     // Palette covers range perfectly
     if (maxA - minA < 8)
     {
-      bestA0 = maxA;
-      bestA1 = minA;
+      ref_uiBestA0 = maxA;
+      ref_uiBestA1 = minA;
       return;
     }
 
     plUInt32 bestError = plUInt32(-1);
-    bestA0 = plUInt32(-1);
-    bestA1 = plUInt32(-1);
+    ref_uiBestA0 = plUInt32(-1);
+    ref_uiBestA1 = plUInt32(-1);
 
     // Try to find optimal values by searching around min and max
     {
@@ -340,13 +340,13 @@ namespace
         plInt32 maxA1 = plMath::Min(a0, minA + 4);
         for (plInt32 a1 = minA1; a1 < maxA1; ++a1)
         {
-          plUInt32 error = getSquaredErrorBC4_SSE(a0, a1, sourceData);
+          plUInt32 error = getSquaredErrorBC4_SSE(a0, a1, pSourceData);
 
           if (error < bestError)
           {
             bestError = error;
-            bestA0 = a0;
-            bestA1 = a1;
+            ref_uiBestA0 = a0;
+            ref_uiBestA1 = a1;
 
             if (error == 0)
             {
@@ -368,13 +368,13 @@ namespace
         plInt32 maxA0 = plMath::Min(a1, minA_greater8 + 4);
         for (plInt32 a0 = minA0; a0 < maxA0; ++a0)
         {
-          plUInt32 error = getSquaredErrorBC4_SSE(a0, a1, sourceData);
+          plUInt32 error = getSquaredErrorBC4_SSE(a0, a1, pSourceData);
 
           if (error < bestError)
           {
             bestError = error;
-            bestA0 = a0;
-            bestA1 = a1;
+            ref_uiBestA0 = a0;
+            ref_uiBestA1 = a1;
 
             if (error == 0)
             {
@@ -1934,47 +1934,47 @@ namespace
     // Mode 7: Color+Alpha, 2 Subsets, RGBAP 55551 (unique P-bit), 2-bit indices, 64 partitions
     {1, 6, 4, 0, 0, 2, 0, plColorBaseUB(5, 5, 5, 5), plColorBaseUB(6, 6, 6, 6)}};
 
-  plUInt8 getBit(const plUInt8* bits, plUInt32& startBit)
+  plUInt8 getBit(const plUInt8* pBits, plUInt32& ref_uiStartBit)
   {
-    PLASMA_ASSERT_DEV(startBit < 128, "");
+    PL_ASSERT_DEV(ref_uiStartBit < 128, "");
 
-    plUInt32 index = startBit >> 3;
-    plUInt8 ret = (bits[index] >> (startBit - (index << 3))) & 0x01;
-    ++startBit;
+    plUInt32 index = ref_uiStartBit >> 3;
+    plUInt8 ret = (pBits[index] >> (ref_uiStartBit - (index << 3))) & 0x01;
+    ++ref_uiStartBit;
     return ret;
   }
 
-  plUInt8 getBits(const plUInt8* bits, plUInt32& startBit, plUInt32 numBits)
+  plUInt8 getBits(const plUInt8* pBits, plUInt32& ref_uiStartBit, plUInt32 uiNumBits)
   {
-    if (numBits == 0)
+    if (uiNumBits == 0)
       return 0;
-    PLASMA_ASSERT_DEV(startBit + numBits <= 128 && numBits <= 8, "");
+    PL_ASSERT_DEV(ref_uiStartBit + uiNumBits <= 128 && uiNumBits <= 8, "");
 
     plUInt8 ret;
-    plUInt32 index = startBit >> 3;
-    plUInt32 base = startBit - (index << 3);
-    if (base + numBits > 8)
+    plUInt32 index = ref_uiStartBit >> 3;
+    plUInt32 base = ref_uiStartBit - (index << 3);
+    if (base + uiNumBits > 8)
     {
       plUInt32 firstIndexBits = 8 - base;
-      plUInt32 nextIndexBits = numBits - firstIndexBits;
-      ret = (bits[index] >> base) | ((bits[index + 1] & ((1 << nextIndexBits) - 1)) << firstIndexBits);
+      plUInt32 nextIndexBits = uiNumBits - firstIndexBits;
+      ret = (pBits[index] >> base) | ((pBits[index + 1] & ((1 << nextIndexBits) - 1)) << firstIndexBits);
     }
     else
     {
-      ret = (bits[index] >> base) & ((1 << numBits) - 1);
+      ret = (pBits[index] >> base) & ((1 << uiNumBits) - 1);
     }
-    PLASMA_ASSERT_DEV(ret < (1 << numBits), "");
-    startBit += numBits;
+    PL_ASSERT_DEV(ret < (1 << uiNumBits), "");
+    ref_uiStartBit += uiNumBits;
     return ret;
   }
 
-  inline bool isFixUpOffset(plUInt32 partitions, plUInt32 shape, plUInt32 offset)
+  inline bool isFixUpOffset(plUInt32 uiPartitions, plUInt32 uiShape, plUInt32 uiOffset)
   {
-    PLASMA_ASSERT_DEV(partitions < 3 && shape < 64 && offset < 16, "");
+    PL_ASSERT_DEV(uiPartitions < 3 && uiShape < 64 && uiOffset < 16, "");
 
-    for (plUInt32 p = 0; p <= partitions; ++p)
+    for (plUInt32 p = 0; p <= uiPartitions; ++p)
     {
-      if (offset == s_bc67FixUp[partitions][shape][p])
+      if (uiOffset == s_bc67FixUp[uiPartitions][uiShape][p])
       {
         return true;
       }
@@ -1982,73 +1982,73 @@ namespace
     return false;
   }
 
-  void interpolateRGB(const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 wc, plUInt32 wcprec, plColorBaseUB& out)
+  void interpolateRGB(const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 uiWc, plUInt32 uiWcprec, plColorBaseUB& ref_out)
   {
     const int* weights = nullptr;
-    switch (wcprec)
+    switch (uiWcprec)
     {
       case 2:
         weights = s_bc67InterpolationWeights2;
-        PLASMA_ASSERT_DEV(wc < 4, "");
+        PL_ASSERT_DEV(uiWc < 4, "");
 
         break;
       case 3:
         weights = s_bc67InterpolationWeights3;
-        PLASMA_ASSERT_DEV(wc < 8, "");
+        PL_ASSERT_DEV(uiWc < 8, "");
 
         break;
       case 4:
         weights = s_bc67InterpolationWeights4;
-        PLASMA_ASSERT_DEV(wc < 16, "");
+        PL_ASSERT_DEV(uiWc < 16, "");
 
         break;
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
-        out.r = out.g = out.b = 0;
+        PL_ASSERT_NOT_IMPLEMENTED;
+        ref_out.r = ref_out.g = ref_out.b = 0;
         return;
     }
-    out.r = plUInt8(
-      (plUInt32(c0.r) * plUInt32(s_bc67WeightMax - weights[wc]) + plUInt32(c1.r) * plUInt32(weights[wc]) + s_bc67WeightRound) >> s_bc67WeightShift);
-    out.g = plUInt8(
-      (plUInt32(c0.g) * plUInt32(s_bc67WeightMax - weights[wc]) + plUInt32(c1.g) * plUInt32(weights[wc]) + s_bc67WeightRound) >> s_bc67WeightShift);
-    out.b = plUInt8(
-      (plUInt32(c0.b) * plUInt32(s_bc67WeightMax - weights[wc]) + plUInt32(c1.b) * plUInt32(weights[wc]) + s_bc67WeightRound) >> s_bc67WeightShift);
+    ref_out.r = plUInt8(
+      (plUInt32(c0.r) * plUInt32(s_bc67WeightMax - weights[uiWc]) + plUInt32(c1.r) * plUInt32(weights[uiWc]) + s_bc67WeightRound) >> s_bc67WeightShift);
+    ref_out.g = plUInt8(
+      (plUInt32(c0.g) * plUInt32(s_bc67WeightMax - weights[uiWc]) + plUInt32(c1.g) * plUInt32(weights[uiWc]) + s_bc67WeightRound) >> s_bc67WeightShift);
+    ref_out.b = plUInt8(
+      (plUInt32(c0.b) * plUInt32(s_bc67WeightMax - weights[uiWc]) + plUInt32(c1.b) * plUInt32(weights[uiWc]) + s_bc67WeightRound) >> s_bc67WeightShift);
   }
 
-  static void interpolateA(const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 wa, plUInt32 waprec, plColorBaseUB& out)
+  static void interpolateA(const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 uiWa, plUInt32 uiWaprec, plColorBaseUB& ref_out)
   {
     const int* weights = nullptr;
-    switch (waprec)
+    switch (uiWaprec)
     {
       case 2:
         weights = s_bc67InterpolationWeights2;
-        PLASMA_ASSERT_DEV(wa < 4, "");
+        PL_ASSERT_DEV(uiWa < 4, "");
 
         break;
       case 3:
         weights = s_bc67InterpolationWeights3;
-        PLASMA_ASSERT_DEV(wa < 8, "");
+        PL_ASSERT_DEV(uiWa < 8, "");
 
         break;
       case 4:
         weights = s_bc67InterpolationWeights4;
-        PLASMA_ASSERT_DEV(wa < 16, "");
+        PL_ASSERT_DEV(uiWa < 16, "");
 
         break;
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
-        out.a = 0;
+        PL_ASSERT_NOT_IMPLEMENTED;
+        ref_out.a = 0;
         return;
     }
-    out.a = plUInt8(
-      (plUInt32(c0.a) * plUInt32(s_bc67WeightMax - weights[wa]) + plUInt32(c1.a) * plUInt32(weights[wa]) + s_bc67WeightRound) >> s_bc67WeightShift);
+    ref_out.a = plUInt8(
+      (plUInt32(c0.a) * plUInt32(s_bc67WeightMax - weights[uiWa]) + plUInt32(c1.a) * plUInt32(weights[uiWa]) + s_bc67WeightRound) >> s_bc67WeightShift);
   }
 
   static void interpolate(
-    const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 wc, plUInt32 wa, plUInt32 wcprec, plUInt32 waprec, plColorBaseUB& out)
+    const plColorBaseUB& c0, const plColorBaseUB& c1, plUInt32 uiWc, plUInt32 uiWa, plUInt32 uiWcprec, plUInt32 uiWaprec, plColorBaseUB& ref_out)
   {
-    interpolateRGB(c0, c1, wc, wcprec, out);
-    interpolateA(c0, c1, wa, waprec, out);
+    interpolateRGB(c0, c1, uiWc, uiWcprec, ref_out);
+    interpolateA(c0, c1, uiWa, uiWaprec, ref_out);
   }
 
   static const plUInt16 s_bc6Float16Sign_Mask = 0x8000; // f16 sign mask
@@ -2058,15 +2058,15 @@ namespace
   {
   public:
     plInt32 r, g, b;
-    plInt32 pad;
+    plInt32 pad = 0;
 
   public:
     BC6IntColor() = default;
-    BC6IntColor(plInt32 nr, plInt32 ng, plInt32 nb)
+    BC6IntColor(plInt32 iNr, plInt32 iNg, plInt32 iNb)
     {
-      r = nr;
-      g = ng;
-      b = nb;
+      r = iNr;
+      g = iNg;
+      b = iNb;
     }
 
     BC6IntColor& operator+=(const BC6IntColor& c)
@@ -2085,11 +2085,11 @@ namespace
       return *this;
     }
 
-    BC6IntColor& clamp(plInt32 min, plInt32 max)
+    BC6IntColor& clamp(plInt32 iMin, plInt32 iMax)
     {
-      r = plMath::Min(max, plMath::Max(min, r));
-      g = plMath::Min(max, plMath::Max(min, g));
-      b = plMath::Min(max, plMath::Max(min, b));
+      r = plMath::Min(iMax, plMath::Max(iMin, r));
+      g = plMath::Min(iMax, plMath::Max(iMin, g));
+      b = plMath::Min(iMax, plMath::Max(iMin, b));
       return *this;
     }
 
@@ -2101,12 +2101,12 @@ namespace
       return *this;
     }
 
-    void toF16(plFloat16 f16[4], bool isSigned) const
+    void toF16(plFloat16 p16[4], bool bIsSigned) const
     {
-      f16[0] = intToF16(r, isSigned);
-      f16[1] = intToF16(g, isSigned);
-      f16[2] = intToF16(b, isSigned);
-      f16[3] = 1.0f;
+      p16[0] = intToF16(r, bIsSigned);
+      p16[1] = intToF16(g, bIsSigned);
+      p16[2] = intToF16(b, bIsSigned);
+      p16[3] = 1.0f;
     }
 
   private:
@@ -2128,7 +2128,7 @@ namespace
       }
       else
       {
-        PLASMA_ASSERT_DEV(input >= 0 && input <= s_bc6Float16Max, "");
+        PL_ASSERT_DEV(input >= 0 && input <= s_bc6Float16Max, "");
         out = (plUInt16)input;
       }
 
@@ -2145,46 +2145,46 @@ namespace
     BC6IntColor B;
   };
 
-  inline void bc6TransformInverse(BC6IntEndPntPair endPts[], const plColorBaseUB& prec, bool isSigned)
+  inline void bc6TransformInverse(BC6IntEndPntPair pEndPts[], const plColorBaseUB& prec, bool bIsSigned)
   {
     BC6IntColor wrapMask((1 << prec.r) - 1, (1 << prec.g) - 1, (1 << prec.b) - 1);
-    endPts[0].B += endPts[0].A;
-    endPts[0].B &= wrapMask;
-    endPts[1].A += endPts[0].A;
-    endPts[1].A &= wrapMask;
-    endPts[1].B += endPts[0].A;
-    endPts[1].B &= wrapMask;
-    if (isSigned)
+    pEndPts[0].B += pEndPts[0].A;
+    pEndPts[0].B &= wrapMask;
+    pEndPts[1].A += pEndPts[0].A;
+    pEndPts[1].A &= wrapMask;
+    pEndPts[1].B += pEndPts[0].A;
+    pEndPts[1].B &= wrapMask;
+    if (bIsSigned)
     {
-      endPts[0].B.signExtend(prec);
-      endPts[1].A.signExtend(prec);
-      endPts[1].B.signExtend(prec);
+      pEndPts[0].B.signExtend(prec);
+      pEndPts[1].A.signExtend(prec);
+      pEndPts[1].B.signExtend(prec);
     }
   }
 
-  static plInt32 bc6Unquantize(plInt32 comp, plUInt8 bitsPerComp, bool isSigned)
+  static plInt32 bc6Unquantize(plInt32 iComp, plUInt8 uiBitsPerComp, bool bIsSigned)
   {
     plInt32 unq = 0, s = 0;
-    if (isSigned)
+    if (bIsSigned)
     {
-      if (bitsPerComp >= 16)
+      if (uiBitsPerComp >= 16)
       {
-        unq = comp;
+        unq = iComp;
       }
       else
       {
-        if (comp < 0)
+        if (iComp < 0)
         {
           s = 1;
-          comp = -comp;
+          iComp = -iComp;
         }
 
-        if (comp == 0)
+        if (iComp == 0)
           unq = 0;
-        else if (comp >= ((1 << (bitsPerComp - 1)) - 1))
+        else if (iComp >= ((1 << (uiBitsPerComp - 1)) - 1))
           unq = 0x7FFF;
         else
-          unq = ((comp << 15) + 0x4000) >> (bitsPerComp - 1);
+          unq = ((iComp << 15) + 0x4000) >> (uiBitsPerComp - 1);
 
         if (s)
           unq = -unq;
@@ -2192,68 +2192,68 @@ namespace
     }
     else
     {
-      if (bitsPerComp >= 15)
-        unq = comp;
-      else if (comp == 0)
+      if (uiBitsPerComp >= 15)
+        unq = iComp;
+      else if (iComp == 0)
         unq = 0;
-      else if (comp == ((1 << bitsPerComp) - 1))
+      else if (iComp == ((1 << uiBitsPerComp) - 1))
         unq = 0xFFFF;
       else
-        unq = ((comp << 16) + 0x8000) >> bitsPerComp;
+        unq = ((iComp << 16) + 0x8000) >> uiBitsPerComp;
     }
 
     return unq;
   }
 
-  static plInt32 bc6FinishUnquantize(plInt32 comp, bool isSigned)
+  static plInt32 bc6FinishUnquantize(plInt32 iComp, bool bIsSigned)
   {
-    if (isSigned)
+    if (bIsSigned)
     {
-      return (comp < 0) ? -(((-comp) * 31) >> 5) : (comp * 31) >> 5; // scale the magnitude by 31/32
+      return (iComp < 0) ? -(((-iComp) * 31) >> 5) : (iComp * 31) >> 5; // scale the magnitude by 31/32
     }
     else
     {
-      return (comp * 31) >> 6; // scale the magnitude by 31/64
+      return (iComp * 31) >> 6; // scale the magnitude by 31/64
     }
   }
 
-  plUInt8 bc7Unquantize(plUInt8 comp, plUInt32 prec)
+  plUInt8 bc7Unquantize(plUInt8 uiComp, plUInt32 uiPrec)
   {
-    PLASMA_ASSERT_DEV(0 < prec && prec <= 8, "");
-    comp = comp << (8 - prec);
-    return comp | (comp >> prec);
+    PL_ASSERT_DEV(0 < uiPrec && uiPrec <= 8, "");
+    uiComp = uiComp << (8 - uiPrec);
+    return uiComp | (uiComp >> uiPrec);
   }
 
-  plColorBaseUB bc7Unquantize(const plColorBaseUB& c, const plColorBaseUB& RGBAPrec)
+  plColorBaseUB bc7Unquantize(const plColorBaseUB& c, const plColorBaseUB& rgbaPrec)
   {
     plColorBaseUB q;
-    q.r = bc7Unquantize(c.r, RGBAPrec.r);
-    q.g = bc7Unquantize(c.g, RGBAPrec.g);
-    q.b = bc7Unquantize(c.b, RGBAPrec.b);
-    q.a = RGBAPrec.a > 0 ? bc7Unquantize(c.a, RGBAPrec.a) : 255;
+    q.r = bc7Unquantize(c.r, rgbaPrec.r);
+    q.g = bc7Unquantize(c.g, rgbaPrec.g);
+    q.b = bc7Unquantize(c.b, rgbaPrec.b);
+    q.a = rgbaPrec.a > 0 ? bc7Unquantize(c.a, rgbaPrec.a) : 255;
     return q;
   }
 
-  void fillWithErrorColors(plColorLinear16f* outputRGBA)
+  void fillWithErrorColors(plColorLinear16f* pOutputRGBA)
   {
     for (plUInt32 i = 0; i < s_bc67NumPixelsPerBlock; ++i)
     {
-      outputRGBA[i] = plColorLinear16f(0.0f, 0.0f, 0.0f, 1.0f);
+      pOutputRGBA[i] = plColorLinear16f(0.0f, 0.0f, 0.0f, 1.0f);
     }
   }
 
-  void fillWithErrorColors(plColorBaseUB* outputRGBA)
+  void fillWithErrorColors(plColorBaseUB* pOutputRGBA)
   {
     for (plUInt32 i = 0; i < s_bc67NumPixelsPerBlock; ++i)
     {
-      outputRGBA[i] = plColorBaseUB(0, 0, 0, 255);
+      pOutputRGBA[i] = plColorBaseUB(0, 0, 0, 255);
     }
   }
 } // namespace
 
-void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, bool isSigned)
+void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, bool bIsSigned)
 {
-  PLASMA_ASSERT_DEV(pTarget, "");
+  PL_ASSERT_DEV(pTarget, "");
 
   plUInt32 startBit = 0;
   plUInt8 mode = getBits(pSource, startBit, 2);
@@ -2262,16 +2262,16 @@ void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, boo
     mode = (getBits(pSource, startBit, 3) << 2) | mode;
   }
 
-  PLASMA_ASSERT_DEV(mode < 32, "");
+  PL_ASSERT_DEV(mode < 32, "");
 
 
   if (s_bc6ModeToInfo[mode] >= 0)
   {
-    PLASMA_ASSERT_DEV(s_bc6ModeToInfo[mode] < PLASMA_ARRAY_SIZE(s_bc6ModeInfos), "");
+    PL_ASSERT_DEV(s_bc6ModeToInfo[mode] < PL_ARRAY_SIZE(s_bc6ModeInfos), "");
 
     const BC6ModeDescriptor* desc = s_bc6ModeDescs[s_bc6ModeToInfo[mode]];
 
-    PLASMA_ASSERT_DEV(s_bc6ModeToInfo[mode] < PLASMA_ARRAY_SIZE(s_bc6ModeDescs), "");
+    PL_ASSERT_DEV(s_bc6ModeToInfo[mode] < PL_ARRAY_SIZE(s_bc6ModeDescs), "");
 
     const BC6ModeInfo& info = s_bc6ModeInfos[s_bc6ModeToInfo[mode]];
 
@@ -2335,17 +2335,17 @@ void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, boo
       }
     }
 
-    PLASMA_ASSERT_DEV(shape < 64, "");
+    PL_ASSERT_DEV(shape < 64, "");
 
 
     // Sign extend necessary end points
-    if (isSigned)
+    if (bIsSigned)
     {
       endPts[0].A.signExtend(info.rgbaPrec[0][0]);
     }
-    if (isSigned || info.transformed)
+    if (bIsSigned || info.transformed)
     {
-      PLASMA_ASSERT_DEV(info.partitions < s_bc6MaxRegions, "");
+      PL_ASSERT_DEV(info.partitions < s_bc6MaxRegions, "");
 
       for (plUInt32 p = 0; p <= info.partitions; ++p)
       {
@@ -2360,7 +2360,7 @@ void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, boo
     // Inverse transform the end points
     if (info.transformed)
     {
-      bc6TransformInverse(endPts, info.rgbaPrec[0][0], isSigned);
+      bc6TransformInverse(endPts, info.rgbaPrec[0][0], bIsSigned);
     }
 
     // Read indices
@@ -2383,24 +2383,24 @@ void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, boo
       }
 
       plUInt32 region = s_bc67PartitionTable[info.partitions][shape][i];
-      PLASMA_ASSERT_DEV(region < s_bc6MaxRegions, "");
+      PL_ASSERT_DEV(region < s_bc6MaxRegions, "");
 
 
       // Unquantize endpoints and interpolate
-      int r1 = bc6Unquantize(endPts[region].A.r, info.rgbaPrec[0][0].r, isSigned);
-      int g1 = bc6Unquantize(endPts[region].A.g, info.rgbaPrec[0][0].g, isSigned);
-      int b1 = bc6Unquantize(endPts[region].A.b, info.rgbaPrec[0][0].b, isSigned);
-      int r2 = bc6Unquantize(endPts[region].B.r, info.rgbaPrec[0][0].r, isSigned);
-      int g2 = bc6Unquantize(endPts[region].B.g, info.rgbaPrec[0][0].g, isSigned);
-      int b2 = bc6Unquantize(endPts[region].B.b, info.rgbaPrec[0][0].b, isSigned);
+      int r1 = bc6Unquantize(endPts[region].A.r, info.rgbaPrec[0][0].r, bIsSigned);
+      int g1 = bc6Unquantize(endPts[region].A.g, info.rgbaPrec[0][0].g, bIsSigned);
+      int b1 = bc6Unquantize(endPts[region].A.b, info.rgbaPrec[0][0].b, bIsSigned);
+      int r2 = bc6Unquantize(endPts[region].B.r, info.rgbaPrec[0][0].r, bIsSigned);
+      int g2 = bc6Unquantize(endPts[region].B.g, info.rgbaPrec[0][0].g, bIsSigned);
+      int b2 = bc6Unquantize(endPts[region].B.b, info.rgbaPrec[0][0].b, bIsSigned);
       const int* weights = info.partitions > 0 ? s_bc67InterpolationWeights3 : s_bc67InterpolationWeights4;
       BC6IntColor fc;
-      fc.r = bc6FinishUnquantize((r1 * (s_bc67WeightMax - weights[index]) + r2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, isSigned);
-      fc.g = bc6FinishUnquantize((g1 * (s_bc67WeightMax - weights[index]) + g2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, isSigned);
-      fc.b = bc6FinishUnquantize((b1 * (s_bc67WeightMax - weights[index]) + b2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, isSigned);
+      fc.r = bc6FinishUnquantize((r1 * (s_bc67WeightMax - weights[index]) + r2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, bIsSigned);
+      fc.g = bc6FinishUnquantize((g1 * (s_bc67WeightMax - weights[index]) + g2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, bIsSigned);
+      fc.b = bc6FinishUnquantize((b1 * (s_bc67WeightMax - weights[index]) + b2 * weights[index] + s_bc67WeightRound) >> s_bc67WeightShift, bIsSigned);
 
       plColorLinear16f outColor;
-      fc.toF16(outColor.GetData(), isSigned);
+      fc.toF16(outColor.GetData(), bIsSigned);
       pTarget[i] = outColor;
     }
   }
@@ -2429,9 +2429,9 @@ void plDecompressBlockBC6(const plUInt8* pSource, plColorLinear16f* pTarget, boo
   }
 }
 
-PLASMA_TEXTURE_DLL void plDecompressBlockBC7(const plUInt8* pSource, plColorBaseUB* pTarget)
+PL_TEXTURE_DLL void plDecompressBlockBC7(const plUInt8* pSource, plColorBaseUB* pTarget)
 {
-  PLASMA_ASSERT_DEV(pTarget, "");
+  PL_ASSERT_DEV(pTarget, "");
 
   plUInt32 first = 0;
   while (first < 128 && !getBit(pSource, first))
@@ -2442,7 +2442,7 @@ PLASMA_TEXTURE_DLL void plDecompressBlockBC7(const plUInt8* pSource, plColorBase
   if (mode < 8)
   {
     const plUInt8 uPartitions = s_bc7ModeInfos[mode].partitions;
-    PLASMA_ASSERT_DEV(uPartitions < s_bc7MaxRegions, "");
+    PL_ASSERT_DEV(uPartitions < s_bc7MaxRegions, "");
 
 
     const plUInt8 numEndPts = (uPartitions + 1) << 1;
@@ -2452,20 +2452,20 @@ PLASMA_TEXTURE_DLL void plDecompressBlockBC7(const plUInt8* pSource, plColorBase
     plUInt32 startBit = mode + 1;
     plUInt8 p[6];
     plUInt8 shape = getBits(pSource, startBit, s_bc7ModeInfos[mode].partitionBits);
-    PLASMA_ASSERT_DEV(shape < s_bc7MaxShapes, "");
+    PL_ASSERT_DEV(shape < s_bc7MaxShapes, "");
 
 
     plUInt8 rotation = getBits(pSource, startBit, s_bc7ModeInfos[mode].rotationBits);
-    PLASMA_ASSERT_DEV(rotation < 4, "");
+    PL_ASSERT_DEV(rotation < 4, "");
 
     plUInt8 indexMode = getBits(pSource, startBit, s_bc7ModeInfos[mode].indexModeBits);
-    PLASMA_ASSERT_DEV(indexMode < 2, "");
+    PL_ASSERT_DEV(indexMode < 2, "");
 
     plColorBaseUB c[s_bc7MaxRegions << 1];
     const plColorBaseUB RGBAPrec = s_bc7ModeInfos[mode].rgbaPrec;
     const plColorBaseUB RGBAPrecWithP = s_bc7ModeInfos[mode].rgbaPrecWithP;
 
-    PLASMA_ASSERT_DEV(numEndPts <= (s_bc7MaxRegions << 1), "");
+    PL_ASSERT_DEV(numEndPts <= (s_bc7MaxRegions << 1), "");
     plUInt32 i = 0;
 
     // Red channel
@@ -2521,7 +2521,7 @@ PLASMA_TEXTURE_DLL void plDecompressBlockBC7(const plUInt8* pSource, plColorBase
     }
 
     // P-bits
-    PLASMA_ASSERT_DEV(s_bc7ModeInfos[mode].pBits <= 6, "");
+    PL_ASSERT_DEV(s_bc7ModeInfos[mode].pBits <= 6, "");
 
     for (i = 0; i < s_bc7ModeInfos[mode].pBits; ++i)
     {
@@ -2642,7 +2642,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 elementsPerBlock = 16;
@@ -2653,7 +2653,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; blockIndex++)
     {
       plDecompressBlockBC1(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plColorBaseUB*>(targetPointer), false);
 
@@ -2661,7 +2661,7 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -2677,7 +2677,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 elementsPerBlock = 16;
@@ -2688,7 +2688,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; blockIndex++)
     {
       decompressBlock(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plColorBaseUB*>(targetPointer));
 
@@ -2696,19 +2696,19 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  static void decompressBlock(const plUInt8* sourcePointer, plColorBaseUB* targetPointer)
+  static void decompressBlock(const plUInt8* pSourcePointer, plColorBaseUB* pTargetPointer)
   {
-    plDecompressBlockBC1(sourcePointer + 8, targetPointer, true);
+    plDecompressBlockBC1(pSourcePointer + 8, pTargetPointer, true);
 
     for (plUInt32 uiByteIdx = 0; uiByteIdx < 8; uiByteIdx++)
     {
-      plUInt8 uiIndices = sourcePointer[uiByteIdx];
+      plUInt8 uiIndices = pSourcePointer[uiByteIdx];
 
-      targetPointer[2 * uiByteIdx + 0].a = (uiIndices & 0x0F) | (uiIndices << 4);
-      targetPointer[2 * uiByteIdx + 1].a = (uiIndices & 0xF0) | (uiIndices >> 4);
+      pTargetPointer[2 * uiByteIdx + 0].a = (uiIndices & 0x0F) | (uiIndices << 4);
+      pTargetPointer[2 * uiByteIdx + 1].a = (uiIndices & 0xF0) | (uiIndices >> 4);
     }
   }
 };
@@ -2725,7 +2725,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 elementsPerBlock = 16;
@@ -2736,7 +2736,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; blockIndex++)
     {
       decompressBlock(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plColorBaseUB*>(targetPointer));
 
@@ -2744,13 +2744,13 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  static void decompressBlock(const plUInt8* sourcePointer, plColorBaseUB* targetPointer)
+  static void decompressBlock(const plUInt8* pSourcePointer, plColorBaseUB* pTargetPointer)
   {
-    plDecompressBlockBC1(sourcePointer + 8, targetPointer, true);
-    plDecompressBlockBC4(sourcePointer, reinterpret_cast<plUInt8*>(targetPointer) + 3, 4, 0);
+    plDecompressBlockBC1(pSourcePointer + 8, pTargetPointer, true);
+    plDecompressBlockBC4(pSourcePointer, reinterpret_cast<plUInt8*>(pTargetPointer) + 3, 4, 0);
   }
 };
 
@@ -2766,7 +2766,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 elementsPerBlock = 16;
@@ -2784,7 +2784,7 @@ public:
       bias = 128;
     }
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; blockIndex++)
     {
       decompressBlock(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plUInt8*>(targetPointer), bias);
 
@@ -2792,12 +2792,12 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  static void decompressBlock(const plUInt8* sourcePointer, plUInt8* targetPointer, plUInt8 bias)
+  static void decompressBlock(const plUInt8* pSourcePointer, plUInt8* pTargetPointer, plUInt8 uiBias)
   {
-    plDecompressBlockBC4(sourcePointer, targetPointer, 1, bias);
+    plDecompressBlockBC4(pSourcePointer, pTargetPointer, 1, uiBias);
   }
 };
 
@@ -2813,7 +2813,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 elementsPerBlock = 16;
@@ -2831,7 +2831,7 @@ public:
       bias = 128;
     }
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; blockIndex++)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; blockIndex++)
     {
       decompressBlock(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plUInt8*>(targetPointer), bias);
 
@@ -2839,13 +2839,13 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  static void decompressBlock(const plUInt8* sourcePointer, plUInt8* targetPointer, plUInt8 bias)
+  static void decompressBlock(const plUInt8* pSourcePointer, plUInt8* pTargetPointer, plUInt8 uiBias)
   {
-    plDecompressBlockBC4(sourcePointer + 0, targetPointer + 0, 2, bias);
-    plDecompressBlockBC4(sourcePointer + 8, targetPointer + 1, 2, bias);
+    plDecompressBlockBC4(pSourcePointer + 0, pTargetPointer + 0, 2, uiBias);
+    plDecompressBlockBC4(pSourcePointer + 8, pTargetPointer + 1, 2, uiBias);
   }
 };
 
@@ -2862,11 +2862,11 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 targetFormatByteSize = plImageFormat::GetBitsPerPixel(targetFormat) / 8;
-    PLASMA_ASSERT_DEV(targetFormatByteSize == sizeof(plColorLinear16f), "");
+    PL_ASSERT_DEV(targetFormatByteSize == sizeof(plColorLinear16f), "");
 
     const plUInt32 sourceStride = s_bc67NumPixelsPerBlock * plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
     const plUInt32 targetStride = s_bc67NumPixelsPerBlock * targetFormatByteSize;
@@ -2876,7 +2876,7 @@ public:
 
     const bool isSourceFormatSigned = sourceFormat == plImageFormat::BC6H_SF16;
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; ++blockIndex)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; ++blockIndex)
     {
       plDecompressBlockBC6(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plColorLinear16f*>(targetPointer), isSourceFormatSigned);
 
@@ -2884,7 +2884,7 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -2899,7 +2899,7 @@ public:
     return supportedConversions;
   }
 
-  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numBlocks, plImageFormat::Enum sourceFormat,
+  virtual plResult DecompressBlocks(plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumBlocks, plImageFormat::Enum sourceFormat,
     plImageFormat::Enum targetFormat) const override
   {
     const plUInt32 sourceStride = s_bc67NumPixelsPerBlock * plImageFormat::GetBitsPerPixel(sourceFormat) / 8;
@@ -2908,7 +2908,7 @@ public:
     const void* sourcePointer = source.GetPtr();
     void* targetPointer = target.GetPtr();
 
-    for (plUInt32 blockIndex = 0; blockIndex < numBlocks; ++blockIndex)
+    for (plUInt32 blockIndex = 0; blockIndex < uiNumBlocks; ++blockIndex)
     {
       plDecompressBlockBC7(reinterpret_cast<const plUInt8*>(sourcePointer), reinterpret_cast<plColorBaseUB*>(targetPointer));
 
@@ -2916,11 +2916,11 @@ public:
       targetPointer = plMemoryUtils::AddByteOffset(targetPointer, targetStride);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
-#if defined(PLASMA_SUPPORTS_BC4_COMPRESSOR)
+#if defined(PL_SUPPORTS_BC4_COMPRESSOR)
 class plImageConversion_CompressBC4 : public plImageConversionStepCompressBlocks
 {
   virtual plArrayPtr<const plImageConversionEntry> GetSupportedConversions() const override
@@ -2976,7 +2976,7 @@ class plImageConversion_CompressBC4 : public plImageConversionStepCompressBlocks
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -3048,7 +3048,7 @@ class plImageConversion_CompressBC5 : public plImageConversionStepCompressBlocks
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 };
 
@@ -3057,6 +3057,7 @@ static plImageConversion_CompressBC5 s_conversion_compressBC5;
 
 #endif
 
+// PL_STATICLINK_FORCE
 static plImageConversion_BC1_RGBA s_conversion_BC1_RGBA;
 static plImageConversion_BC2_RGBA s_conversion_BC2_RGBA;
 static plImageConversion_BC3_RGBA s_conversion_BC3_RGBA;
@@ -3065,4 +3066,8 @@ static plImageConversion_BC5_RG s_conversion_BC5_RG;
 static plImageConversion_BC6_RGB s_conversion_BC6_RGB;
 static plImageConversion_BC7_RGBA s_conversion_BC7_RGBA;
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Conversions_DXTConversions);
+
+
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Conversions_DXTConversions);
+

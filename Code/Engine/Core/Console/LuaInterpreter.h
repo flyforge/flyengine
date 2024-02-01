@@ -4,7 +4,7 @@
 
 #ifdef BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
-class PLASMA_CORE_DLL plCommandInterpreterLua : public plCommandInterpreter
+class PL_CORE_DLL plCommandInterpreterLua : public plCommandInterpreter
 {
 public:
   /// \brief The default interpreter used by plConsole. Uses Lua for parsing and execution.
@@ -26,8 +26,8 @@ public:
   /// Console functions are called simply by appending parentheses and (if required) parameters:
   /// SomeConsoleFunc(2, some_cvar)
   ///
-  /// If there is any kind of error (e.g. a Lua syntax error), the interpreter will return PLASMA_FAILURE;
-  virtual void Interpret(plCommandInterpreterState& inout_State) override;
+  /// If there is any kind of error (e.g. a Lua syntax error), the interpreter will return PL_FAILURE;
+  virtual void Interpret(plCommandInterpreterState& inout_state) override;
 };
 
 #endif // BUILDSYSTEM_ENABLE_LUA_SUPPORT

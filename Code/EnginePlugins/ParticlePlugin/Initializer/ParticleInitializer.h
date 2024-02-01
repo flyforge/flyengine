@@ -12,9 +12,9 @@ class plParticleInitializer;
 class plParticleEffectInstance;
 
 /// \brief Base class for all particle emitters
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializerFactory : public plReflectedClass
+class PL_PARTICLEPLUGIN_DLL plParticleInitializerFactory : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializerFactory, plReflectedClass);
 
 public:
   virtual const plRTTI* GetInitializerType() const = 0;
@@ -23,16 +23,16 @@ public:
 
   plParticleInitializer* CreateInitializer(plParticleSystemInstance* pOwner) const;
 
-  virtual void Save(plStreamWriter& stream) const = 0;
-  virtual void Load(plStreamReader& stream) = 0;
+  virtual void Save(plStreamWriter& inout_stream) const = 0;
+  virtual void Load(plStreamReader& inout_stream) = 0;
 
-  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_FinalizerDeps) const {}
+  virtual void QueryFinalizerDependencies(plSet<const plRTTI*>& inout_finalizerDeps) const {}
 };
 
 /// \brief Base class for stream spawners that are used by plParticleEmitter's
-class PLASMA_PARTICLEPLUGIN_DLL plParticleInitializer : public plParticleModule
+class PL_PARTICLEPLUGIN_DLL plParticleInitializer : public plParticleModule
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleInitializer, plParticleModule);
+  PL_ADD_DYNAMIC_REFLECTION(plParticleInitializer, plParticleModule);
 
   friend class plParticleSystemInstance;
   friend class plParticleInitializerFactory;

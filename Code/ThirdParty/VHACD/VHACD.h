@@ -53,7 +53,7 @@
 // * simpler test console application with some test meshes to work with.
 //
 // * The convex hull generation code has changed. The previous version came from Bullet. 
-// * However, the new version is courtesy of Julio Jerpl, the author of the Newton
+// * However, the new version is courtesy of Julio Jerez, the author of the Newton
 // * physics engine. His new version is faster and more numerically stable.
 //
 // * The code can now detect if the input mesh is, itself, already a convex object and
@@ -3484,7 +3484,7 @@ void ConvexHull::CalculateConvexHull3D(ConvexHullAABBTreeNode* vertexTree,
 }
 
 //***********************************************************************************************
-// End of ConvexHull generation code by Julio Jerpl <jerpljulio0@gmail.com>
+// End of ConvexHull generation code by Julio Jerez <jerezjulio0@gmail.com>
 //***********************************************************************************************
 
 class KdTreeNode;
@@ -5030,29 +5030,29 @@ bool TriBoxOverlap(const VHACD::Vect3& boxCenter,
     /*  test the 9 tests first (this was faster) */
     double fex = fabs(e0[0]);
     double fey = fabs(e0[1]);
-    double fpl = fabs(e0[2]);
+    double fez = fabs(e0[2]);
 
     /*
      * These should use Get*() instead of subscript for consistency, but the function calls are long enough already
      */
-    if (!AxisTest( e0[2], -e0[1], fpl, fey, v0[1], v0[2], v2[1], v2[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X01
-    if (!AxisTest(-e0[2],  e0[0], fpl, fex, v0[0], v0[2], v2[0], v2[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y02
+    if (!AxisTest( e0[2], -e0[1], fez, fey, v0[1], v0[2], v2[1], v2[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X01
+    if (!AxisTest(-e0[2],  e0[0], fez, fex, v0[0], v0[2], v2[0], v2[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y02
     if (!AxisTest( e0[1], -e0[0], fey, fex, v1[0], v1[1], v2[0], v2[1], boxHalfSize[0], boxHalfSize[1])) return 0; // Z12
 
     fex = fabs(e1[0]);
     fey = fabs(e1[1]);
-    fpl = fabs(e1[2]);
+    fez = fabs(e1[2]);
 
-    if (!AxisTest( e1[2], -e1[1], fpl, fey, v0[1], v0[2], v2[1], v2[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X01
-    if (!AxisTest(-e1[2],  e1[0], fpl, fex, v0[0], v0[2], v2[0], v2[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y02
+    if (!AxisTest( e1[2], -e1[1], fez, fey, v0[1], v0[2], v2[1], v2[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X01
+    if (!AxisTest(-e1[2],  e1[0], fez, fex, v0[0], v0[2], v2[0], v2[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y02
     if (!AxisTest( e1[1], -e1[0], fey, fex, v0[0], v0[1], v1[0], v1[1], boxHalfSize[0], boxHalfSize[2])) return 0; // Z0
 
     fex = fabs(e2[0]);
     fey = fabs(e2[1]);
-    fpl = fabs(e2[2]);
+    fez = fabs(e2[2]);
 
-    if (!AxisTest( e2[2], -e2[1], fpl, fey, v0[1], v0[2], v1[1], v1[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X2
-    if (!AxisTest(-e2[2],  e2[0], fpl, fex, v0[0], v0[2], v1[0], v1[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y1
+    if (!AxisTest( e2[2], -e2[1], fez, fey, v0[1], v0[2], v1[1], v1[2], boxHalfSize[1], boxHalfSize[2])) return 0; // X2
+    if (!AxisTest(-e2[2],  e2[0], fez, fex, v0[0], v0[2], v1[0], v1[2], boxHalfSize[0], boxHalfSize[2])) return 0; // Y1
     if (!AxisTest( e2[1], -e2[0], fey, fex, v1[0], v1[1], v2[0], v2[1], boxHalfSize[0], boxHalfSize[1])) return 0; // Z12
 
     /* Bullet 1: */

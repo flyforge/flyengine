@@ -21,15 +21,15 @@ class plDeferredFileWriter;
 class plLayerContext;
 struct plGameApplicationExecutionEvent;
 
-class PLASMA_ENGINEPLUGINSCENE_DLL plSceneContext : public PlasmaEngineProcessDocumentContext
+class PL_ENGINEPLUGINSCENE_DLL plSceneContext : public plEngineProcessDocumentContext
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneContext, PlasmaEngineProcessDocumentContext);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneContext, plEngineProcessDocumentContext);
 
 public:
   plSceneContext();
   ~plSceneContext();
 
-  virtual void HandleMessage(const PlasmaEditorEngineDocumentMsg* pMsg) override;
+  virtual void HandleMessage(const plEditorEngineDocumentMsg* pMsg) override;
 
   const plDeque<plGameObjectHandle>& GetSelection() const { return m_Selection; }
   const plDeque<plGameObjectHandle>& GetSelectionWithChildren() const { return m_SelectionWithChildren; }
@@ -45,11 +45,11 @@ public:
 
   plUInt32 RegisterLayer(plLayerContext* pLayer);
   void UnregisterLayer(plLayerContext* pLayer);
-  void AddLayerIndexTag(const plEntityMsgToEngine& msg, plWorldRttiConverterContext& context, const plTag& layerTag);
+  void AddLayerIndexTag(const plEntityMsgToEngine& msg, plWorldRttiConverterContext& ref_context, const plTag& layerTag);
   const plArrayPtr<const plTag> GetInvisibleLayerTags() const;
 
-  PlasmaEngineProcessDocumentContext* GetActiveDocumentContext();
-  const PlasmaEngineProcessDocumentContext* GetActiveDocumentContext() const;
+  plEngineProcessDocumentContext* GetActiveDocumentContext();
+  const plEngineProcessDocumentContext* GetActiveDocumentContext() const;
   plWorldRttiConverterContext& GetActiveContext();
   const plWorldRttiConverterContext& GetActiveContext() const;
   plWorldRttiConverterContext* GetContextForLayer(const plUuid& layerGuid);
@@ -59,12 +59,12 @@ protected:
   virtual void OnInitialize() override;
   virtual void OnDeinitialize() override;
 
-  virtual PlasmaEngineProcessViewContext* CreateViewContext() override;
-  virtual void DestroyViewContext(PlasmaEngineProcessViewContext* pContext) override;
+  virtual plEngineProcessViewContext* CreateViewContext() override;
+  virtual void DestroyViewContext(plEngineProcessViewContext* pContext) override;
   virtual plStatus ExportDocument(const plExportDocumentMsgToEngine* pMsg) override;
   void ExportExposedParameters(const plWorldWriter& ww, plDeferredFileWriter& file) const;
 
-  virtual bool UpdateThumbnailViewContext(PlasmaEngineProcessViewContext* pThumbnailViewContext) override;
+  virtual bool UpdateThumbnailViewContext(plEngineProcessViewContext* pThumbnailViewContext) override;
   virtual void OnThumbnailViewContextCreated() override;
   virtual void OnDestroyThumbnailViewContext() override;
   virtual void UpdateDocumentContext() override;
@@ -77,7 +77,7 @@ private:
     plTag m_Tag;
   };
 
-  void AddAmbientLight(bool bSetEditorTag);
+  void AddAmbientLight(bool bSetEditorTag, bool bForce);
   void RemoveAmbientLight();
 
   void HandleViewRedrawMsg(const plViewRedrawMsgToEngine* pMsg);
@@ -100,7 +100,7 @@ private:
 
   void UpdateInvisibleLayerTags();
   void InsertSelectedChildren(const plGameObject* pObject);
-  void QuerySelectionBBox(const PlasmaEditorEngineDocumentMsg* pMsg);
+  void QuerySelectionBBox(const plEditorEngineDocumentMsg* pMsg);
   void OnSimulationEnabled();
   void OnSimulationDisabled();
   void OnPlayTheGameModeStarted(const plTransform* pStartPosition);

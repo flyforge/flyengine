@@ -283,7 +283,7 @@ CDockWidget::CDockWidget(const QString &title, QWidget *parent) :
 	d->Layout->setContentsMargins(0, 0, 0, 0);
 	d->Layout->setSpacing(0);
 	setLayout(d->Layout);
-	setWindowTitle(title.toUpper());
+	setWindowTitle(title);
 	setObjectName(title);
 
 	d->TabWidget = componentsFactory()->createDockWidgetTab(this);

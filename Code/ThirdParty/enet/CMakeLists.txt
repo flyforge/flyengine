@@ -1,18 +1,18 @@
 pl_cmake_init()
 
-pl_requires(PLASMA_3RDPARTY_ENET_SUPPORT)
+pl_requires(PL_3RDPARTY_ENET_SUPPORT)
 
 # Get the name of this folder as the project name
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE)
 
-pl_create_target(SHARED_LIBRARY ${PROJECT_NAME} NO_PLASMA_PREFIX ALL_SYMBOLS_VISIBLE)
+pl_create_target(LIBRARY ${PROJECT_NAME} NO_PL_PREFIX ALL_SYMBOLS_VISIBLE)
 
 target_compile_definitions(${PROJECT_NAME} PUBLIC BUILDSYSTEM_ENABLE_ENET_SUPPORT)
 
-if(PLASMA_CMAKE_PLATFORM_WINDOWS)
+if(PL_CMAKE_PLATFORM_WINDOWS)
   target_compile_definitions(${PROJECT_NAME} PRIVATE WIN32 _WINSOCK_DEPRECATED_NO_WARNINGS)
 
-  if(NOT PLASMA_CMAKE_PLATFORM_WINDOWS_UWP)
+  if(NOT PL_CMAKE_PLATFORM_WINDOWS_UWP)
 
     target_link_libraries(${PROJECT_NAME}
       PRIVATE
@@ -24,6 +24,8 @@ if(PLASMA_CMAKE_PLATFORM_WINDOWS)
 
   endif()
   
-  target_compile_options(${PROJECT_NAME} PRIVATE /wd4232 /wd4206 /wd4701)
+  if(PL_CMAKE_COMPILER_MSVC)
+    target_compile_options(${PROJECT_NAME} PRIVATE /wd4232 /wd4206 /wd4701)
+  endif()
 endif()
 

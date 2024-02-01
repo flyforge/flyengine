@@ -5,39 +5,39 @@ plObjectMetaData<KEY, VALUE>::plObjectMetaData()
 {
   m_DefaultValue = VALUE();
 
-  auto pStorage = PLASMA_DEFAULT_NEW(Storage);
+  auto pStorage = PL_DEFAULT_NEW(Storage);
   pStorage->m_AcessingKey = KEY();
   pStorage->m_AccessMode = Storage::AccessMode::Nothing;
   SwapStorage(pStorage);
 }
 
 template <typename KEY, typename VALUE>
-const VALUE* plObjectMetaData<KEY, VALUE>::BeginReadMetaData(const KEY ObjectKey) const
+const VALUE* plObjectMetaData<KEY, VALUE>::BeginReadMetaData(const KEY objectKey) const
 {
   m_pMetaStorage->m_Mutex.Lock();
-  PLASMA_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
+  PL_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
   m_pMetaStorage->m_AccessMode = Storage::AccessMode::Read;
-  m_pMetaStorage->m_AcessingKey = ObjectKey;
+  m_pMetaStorage->m_AcessingKey = objectKey;
 
   const VALUE* pRes = nullptr;
-  if (m_pMetaStorage->m_MetaData.TryGetValue(ObjectKey, pRes)) // TryGetValue is not const correct with the second parameter
+  if (m_pMetaStorage->m_MetaData.TryGetValue(objectKey, pRes)) // TryGetValue is not const correct with the second parameter
     return pRes;
 
   return &m_DefaultValue;
 }
 
 template <typename KEY, typename VALUE>
-void plObjectMetaData<KEY, VALUE>::ClearMetaData(const KEY ObjectKey)
+void plObjectMetaData<KEY, VALUE>::ClearMetaData(const KEY objectKey)
 {
-  PLASMA_LOCK(m_pMetaStorage->m_Mutex);
-  PLASMA_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
+  PL_LOCK(m_pMetaStorage->m_Mutex);
+  PL_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
 
-  if (HasMetaData(ObjectKey))
+  if (HasMetaData(objectKey))
   {
-    m_pMetaStorage->m_MetaData.Remove(ObjectKey);
+    m_pMetaStorage->m_MetaData.Remove(objectKey);
 
     EventData e;
-    e.m_ObjectKey = ObjectKey;
+    e.m_ObjectKey = objectKey;
     e.m_pValue = &m_DefaultValue;
 
     m_pMetaStorage->m_DataModifiedEvent.Broadcast(e);
@@ -45,28 +45,28 @@ void plObjectMetaData<KEY, VALUE>::ClearMetaData(const KEY ObjectKey)
 }
 
 template <typename KEY, typename VALUE>
-bool plObjectMetaData<KEY, VALUE>::HasMetaData(const KEY ObjectKey) const
+bool plObjectMetaData<KEY, VALUE>::HasMetaData(const KEY objectKey) const
 {
-  PLASMA_LOCK(m_pMetaStorage->m_Mutex);
+  PL_LOCK(m_pMetaStorage->m_Mutex);
   const VALUE* pValue = nullptr;
-  return m_pMetaStorage->m_MetaData.TryGetValue(ObjectKey, pValue);
+  return m_pMetaStorage->m_MetaData.TryGetValue(objectKey, pValue);
 }
 
 template <typename KEY, typename VALUE>
-VALUE* plObjectMetaData<KEY, VALUE>::BeginModifyMetaData(const KEY ObjectKey)
+VALUE* plObjectMetaData<KEY, VALUE>::BeginModifyMetaData(const KEY objectKey)
 {
   m_pMetaStorage->m_Mutex.Lock();
-  PLASMA_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
+  PL_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Nothing, "Already accessing some data");
   m_pMetaStorage->m_AccessMode = Storage::AccessMode::Write;
-  m_pMetaStorage->m_AcessingKey = ObjectKey;
+  m_pMetaStorage->m_AcessingKey = objectKey;
 
-  return &m_pMetaStorage->m_MetaData[ObjectKey];
+  return &m_pMetaStorage->m_MetaData[objectKey];
 }
 
 template <typename KEY, typename VALUE>
 void plObjectMetaData<KEY, VALUE>::EndReadMetaData() const
 {
-  PLASMA_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Read, "Not accessing data at the moment");
+  PL_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Read, "Not accessing data at the moment");
 
   m_pMetaStorage->m_AccessMode = Storage::AccessMode::Nothing;
   m_pMetaStorage->m_Mutex.Unlock();
@@ -76,7 +76,7 @@ void plObjectMetaData<KEY, VALUE>::EndReadMetaData() const
 template <typename KEY, typename VALUE>
 void plObjectMetaData<KEY, VALUE>::EndModifyMetaData(plUInt32 uiModifiedFlags /*= 0xFFFFFFFF*/)
 {
-  PLASMA_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Write, "Not accessing data at the moment");
+  PL_ASSERT_DEV(m_pMetaStorage->m_AccessMode == Storage::AccessMode::Write, "Not accessing data at the moment");
   m_pMetaStorage->m_AccessMode = Storage::AccessMode::Nothing;
 
   if (uiModifiedFlags != 0)
@@ -94,11 +94,11 @@ void plObjectMetaData<KEY, VALUE>::EndModifyMetaData(plUInt32 uiModifiedFlags /*
 
 
 template <typename KEY, typename VALUE>
-void plObjectMetaData<KEY, VALUE>::AttachMetaDataToAbstractGraph(plAbstractObjectGraph& graph) const
+void plObjectMetaData<KEY, VALUE>::AttachMetaDataToAbstractGraph(plAbstractObjectGraph& inout_graph) const
 {
-  auto& AllNodes = graph.GetAllNodes();
+  auto& AllNodes = inout_graph.GetAllNodes();
 
-  PLASMA_LOCK(m_pMetaStorage->m_Mutex);
+  PL_LOCK(m_pMetaStorage->m_Mutex);
 
   plHashTable<const char*, plVariant> DefaultValues;
 
@@ -149,7 +149,7 @@ void plObjectMetaData<KEY, VALUE>::AttachMetaDataToAbstractGraph(plAbstractObjec
 template <typename KEY, typename VALUE>
 void plObjectMetaData<KEY, VALUE>::RestoreMetaDataFromAbstractGraph(const plAbstractObjectGraph& graph)
 {
-  PLASMA_LOCK(m_pMetaStorage->m_Mutex);
+  PL_LOCK(m_pMetaStorage->m_Mutex);
 
   plHybridArray<plString, 16> PropertyNames;
 
@@ -187,7 +187,7 @@ void plObjectMetaData<KEY, VALUE>::RestoreMetaDataFromAbstractGraph(const plAbst
 template <typename KEY, typename VALUE>
 plSharedPtr<typename plObjectMetaData<KEY, VALUE>::Storage> plObjectMetaData<KEY, VALUE>::SwapStorage(plSharedPtr<typename plObjectMetaData<KEY, VALUE>::Storage> pNewStorage)
 {
-  PLASMA_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
+  PL_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
 
   auto retVal = m_pMetaStorage;
 

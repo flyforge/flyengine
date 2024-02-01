@@ -4,8 +4,8 @@
 
 void plEndianHelper::SwitchStruct(void* pDataPointer, const char* szFormat)
 {
-  PLASMA_ASSERT_DEBUG(pDataPointer != nullptr, "Data necessary!");
-  PLASMA_ASSERT_DEBUG((szFormat != nullptr) && (szFormat[0] != '\0'), "Struct format description necessary!");
+  PL_ASSERT_DEBUG(pDataPointer != nullptr, "Data necessary!");
+  PL_ASSERT_DEBUG((szFormat != nullptr) && (szFormat[0] != '\0'), "Struct format description necessary!");
 
   plUInt8* pWorkPointer = static_cast<plUInt8*>(pDataPointer);
   char cCurrentElement = *szFormat;
@@ -52,9 +52,9 @@ void plEndianHelper::SwitchStruct(void* pDataPointer, const char* szFormat)
 
 void plEndianHelper::SwitchStructs(void* pDataPointer, const char* szFormat, plUInt32 uiStride, plUInt32 uiCount)
 {
-  PLASMA_ASSERT_DEBUG(pDataPointer != nullptr, "Data necessary!");
-  PLASMA_ASSERT_DEBUG((szFormat != nullptr) && (szFormat[0] != '\0'), "Struct format description necessary!");
-  PLASMA_ASSERT_DEBUG(uiStride > 0, "Struct size necessary!");
+  PL_ASSERT_DEBUG(pDataPointer != nullptr, "Data necessary!");
+  PL_ASSERT_DEBUG((szFormat != nullptr) && (szFormat[0] != '\0'), "Struct format description necessary!");
+  PL_ASSERT_DEBUG(uiStride > 0, "Struct size necessary!");
 
   for (plUInt32 i = 0; i < uiCount; i++)
   {
@@ -63,4 +63,4 @@ void plEndianHelper::SwitchStructs(void* pDataPointer, const char* szFormat, plU
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Memory_Implementation_EndianHelper);
+

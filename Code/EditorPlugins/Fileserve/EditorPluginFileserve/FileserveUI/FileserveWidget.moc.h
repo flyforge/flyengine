@@ -14,19 +14,19 @@ enum class plFileserveActivityType;
 /// \brief A GUI for the plFileServer
 ///
 /// By default the file server does not run at startup. Using the command line option "-fs_start" the server is started immediately.
-class PLASMA_EDITORPLUGINFILESERVE_DLL plQtFileserveWidget : public QWidget, public Ui_plQtFileserveWidget
+class PL_EDITORPLUGINFILESERVE_DLL plQtFileserveWidget : public QWidget, public Ui_plQtFileserveWidget
 {
   Q_OBJECT
 
 public:
-  plQtFileserveWidget(QWidget* parent = nullptr);
+  plQtFileserveWidget(QWidget* pParent = nullptr);
 
-  void FindOwnIP(plStringBuilder& out_Display, plHybridArray<plStringBuilder, 4>* out_AllIPs = nullptr);
+  void FindOwnIP(plStringBuilder& out_sDisplay, plHybridArray<plStringBuilder, 4>* out_pAllIPs = nullptr);
 
   ~plQtFileserveWidget();
 
 Q_SIGNALS:
-  void ServerStarted(const QString& ip, plUInt16 uiPort);
+  void ServerStarted(const QString& sIp, plUInt16 uiPort);
   void ServerStopped();
 
 public Q_SLOTS:

@@ -237,5 +237,3 @@ void plQuakeConsole::DoDefaultInputHandling(bool bConsoleOpen)
 }
 
 
-
-PLASMA_STATICLINK_FILE(Core, Core_Console_Implementation_Input);

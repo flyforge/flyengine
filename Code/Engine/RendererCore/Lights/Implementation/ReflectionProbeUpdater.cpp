@@ -41,18 +41,18 @@ plReflectionProbeUpdater::ProbeUpdateInfo::ProbeUpdateInfo()
   }
 
   plStringBuilder sName;
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hCubemapProxies); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_hCubemapProxies); ++i)
   {
     m_hCubemapProxies[i] = plGALDevice::GetDefaultDevice()->CreateProxyTexture(m_hCubemap, i);
 
-    sName.Format("Reflection Cubemap Proxy {}", i);
+    sName.SetFormat("Reflection Cubemap Proxy {}", i);
     pDevice->GetTexture(m_hCubemapProxies[i])->SetDebugName(sName);
   }
 }
 
 plReflectionProbeUpdater::ProbeUpdateInfo::~ProbeUpdateInfo()
 {
-  for (plUInt32 i = 0; i < PLASMA_ARRAY_SIZE(m_hCubemapProxies); ++i)
+  for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_hCubemapProxies); ++i)
   {
     if (!m_hCubemapProxies[i].IsInvalidated())
     {
@@ -70,9 +70,7 @@ plReflectionProbeUpdater::ProbeUpdateInfo::~ProbeUpdateInfo()
 //////////////////////////////////////////////////////////////////////////
 /// plReflectionProbeUpdater
 
-plReflectionProbeUpdater::plReflectionProbeUpdater()
-{
-}
+plReflectionProbeUpdater::plReflectionProbeUpdater() = default;
 
 plReflectionProbeUpdater::~plReflectionProbeUpdater()
 {
@@ -102,8 +100,8 @@ plUInt32 plReflectionProbeUpdater::GetFreeUpdateSlots(plDynamicArray<plReflectio
 
 plResult plReflectionProbeUpdater::StartDynamicUpdate(const plReflectionProbeRef& probe, const plReflectionProbeDesc& desc, const plTransform& globalTransform, const TargetSlot& target)
 {
-  PLASMA_ASSERT_DEBUG(target.m_hIrradianceOutputTexture.IsInvalidated() == (target.m_iIrradianceOutputIndex == -1), "Invalid irradiance output settings.");
-  PLASMA_ASSERT_DEBUG(!target.m_hSpecularOutputTexture.IsInvalidated() && target.m_iSpecularOutputIndex != -1, "Specular output invalid.");
+  PL_ASSERT_DEBUG(target.m_hIrradianceOutputTexture.IsInvalidated() == (target.m_iIrradianceOutputIndex == -1), "Invalid irradiance output settings.");
+  PL_ASSERT_DEBUG(!target.m_hSpecularOutputTexture.IsInvalidated() && target.m_iSpecularOutputIndex != -1, "Specular output invalid.");
   for (auto& slot : m_DynamicUpdates)
   {
     if (!slot->m_bInUse)
@@ -117,16 +115,16 @@ plResult plReflectionProbeUpdater::StartDynamicUpdate(const plReflectionProbeRef
       slot->m_sourceTexture.Invalidate();
       slot->m_TargetSlot = target;
       slot->m_bInUse = true;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plReflectionProbeUpdater::StartFilterUpdate(const plReflectionProbeRef& probe, const plReflectionProbeDesc& desc, plTextureCubeResourceHandle hSourceTexture, const TargetSlot& target)
 {
-  PLASMA_ASSERT_DEBUG(target.m_hIrradianceOutputTexture.IsInvalidated() == (target.m_iIrradianceOutputIndex == -1), "Invalid irradiance output settings.");
-  PLASMA_ASSERT_DEBUG(!target.m_hSpecularOutputTexture.IsInvalidated() && target.m_iSpecularOutputIndex != -1, "Specular output invalid.");
+  PL_ASSERT_DEBUG(target.m_hIrradianceOutputTexture.IsInvalidated() == (target.m_iIrradianceOutputIndex == -1), "Invalid irradiance output settings.");
+  PL_ASSERT_DEBUG(!target.m_hSpecularOutputTexture.IsInvalidated() && target.m_iSpecularOutputIndex != -1, "Specular output invalid.");
   for (auto& slot : m_DynamicUpdates)
   {
     if (!slot->m_bInUse)
@@ -142,10 +140,10 @@ plResult plReflectionProbeUpdater::StartFilterUpdate(const plReflectionProbeRef&
       slot->m_sourceTexture = hSourceTexture;
       slot->m_TargetSlot = target;
       slot->m_bInUse = true;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plReflectionProbeUpdater::CancelUpdate(const plReflectionProbeRef& probe)
@@ -299,7 +297,7 @@ void plReflectionProbeUpdater::CreateViews(
     {
       auto& renderView = views.ExpandAndGetRef();
 
-      sName.Format("Reflection Probe {} {}", szNameSuffix, i);
+      sName.SetFormat("Reflection Probe {} {}", szNameSuffix, i);
 
       plView* pView = nullptr;
       renderView.m_hView = plRenderWorld::CreateView(sName, pView);
@@ -331,7 +329,7 @@ void plReflectionProbeUpdater::CreateReflectionViewsAndResources()
   {
     for (plUInt32 i = 0; i < 2; i++)
     {
-      m_DynamicUpdates.PushBack(PLASMA_DEFAULT_NEW(ProbeUpdateInfo));
+      m_DynamicUpdates.PushBack(PL_DEFAULT_NEW(ProbeUpdateInfo));
     }
   }
 }
@@ -373,8 +371,6 @@ void plReflectionProbeUpdater::AddViewToRender(const ProbeUpdateInfo::Step& step
     plVec3(0.0f, 0.0f, 1.0f),
   };
 
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-
   // Setup view and camera
   {
     ReflectionView* pReflectionView = nullptr;
@@ -401,7 +397,6 @@ void plReflectionProbeUpdater::AddViewToRender(const ProbeUpdateInfo::Step& step
     plGALRenderTargets renderTargets;
     if (step.m_UpdateStep == UpdateStep::Filter)
     {
-      const plUInt32 uiWorldIndex = pWorld->GetIndex();
       renderTargets.m_hRTs[0] = updateInfo.m_TargetSlot.m_hSpecularOutputTexture;
 
       if (updateInfo.m_flags.IsSet(plReflectionProbeUpdaterFlags::SkyLight))
@@ -462,4 +457,4 @@ void plReflectionProbeUpdater::AddViewToRender(const ProbeUpdateInfo::Step& step
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionProbeUpdater);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ReflectionProbeUpdater);

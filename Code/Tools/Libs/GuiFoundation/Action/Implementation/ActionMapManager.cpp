@@ -7,7 +7,7 @@
 plMap<plString, plActionMap*> plActionMapManager::s_Mappings;
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionMapManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionMapManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ActionManager"
@@ -23,37 +23,37 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, ActionMapManager)
     plActionMapManager::Shutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 ////////////////////////////////////////////////////////////////////////
 // plActionMapManager public functions
 ////////////////////////////////////////////////////////////////////////
 
-plResult plActionMapManager::RegisterActionMap(const char* szMapping)
+plResult plActionMapManager::RegisterActionMap(plStringView sMapping)
 {
-  auto it = s_Mappings.Find(szMapping);
+  auto it = s_Mappings.Find(sMapping);
   if (it.IsValid())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  s_Mappings.Insert(szMapping, PLASMA_DEFAULT_NEW(plActionMap));
-  return PLASMA_SUCCESS;
+  s_Mappings.Insert(sMapping, PL_DEFAULT_NEW(plActionMap));
+  return PL_SUCCESS;
 }
 
-plResult plActionMapManager::UnregisterActionMap(const char* szMapping)
+plResult plActionMapManager::UnregisterActionMap(plStringView sMapping)
 {
-  auto it = s_Mappings.Find(szMapping);
+  auto it = s_Mappings.Find(sMapping);
   if (!it.IsValid())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_DEFAULT_DELETE(it.Value());
+  PL_DEFAULT_DELETE(it.Value());
   s_Mappings.Remove(it);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plActionMap* plActionMapManager::GetActionMap(const char* szMapping)
+plActionMap* plActionMapManager::GetActionMap(plStringView sMapping)
 {
-  auto it = s_Mappings.Find(szMapping);
+  auto it = s_Mappings.Find(sMapping);
   if (!it.IsValid())
     return nullptr;
 
@@ -68,7 +68,7 @@ plActionMap* plActionMapManager::GetActionMap(const char* szMapping)
 void plActionMapManager::Startup()
 {
   plActionMapManager::RegisterActionMap("DocumentWindowTabMenu").IgnoreResult();
-  plDocumentActions::MapActions("DocumentWindowTabMenu", "", false);
+  plDocumentActions::MapMenuActions("DocumentWindowTabMenu", "");
 }
 
 void plActionMapManager::Shutdown()
@@ -78,7 +78,7 @@ void plActionMapManager::Shutdown()
   while (!s_Mappings.IsEmpty())
   {
     plResult res = UnregisterActionMap(s_Mappings.GetIterator().Key());
-    PLASMA_ASSERT_DEV(res == PLASMA_SUCCESS, "Failed to call UnregisterActionMap successfully!");
+    PL_ASSERT_DEV(res == PL_SUCCESS, "Failed to call UnregisterActionMap successfully!");
     res.IgnoreResult();
   }
 }

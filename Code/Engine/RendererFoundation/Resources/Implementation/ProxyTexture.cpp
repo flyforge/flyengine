@@ -18,7 +18,7 @@ plGALProxyTexture::plGALProxyTexture(const plGALTexture& parentTexture)
 {
 }
 
-plGALProxyTexture::~plGALProxyTexture() {}
+plGALProxyTexture::~plGALProxyTexture() = default;
 
 
 const plGALResourceBase* plGALProxyTexture::GetParentResource() const
@@ -28,15 +28,14 @@ const plGALResourceBase* plGALProxyTexture::GetParentResource() const
 
 plResult plGALProxyTexture::InitPlatform(plGALDevice* pDevice, plArrayPtr<plGALSystemMemoryDescription> pInitialData)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plGALProxyTexture::DeInitPlatform(plGALDevice* pDevice)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plGALProxyTexture::SetDebugNamePlatform(const char* szName) const {}
 
 
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_ProxyTexture);

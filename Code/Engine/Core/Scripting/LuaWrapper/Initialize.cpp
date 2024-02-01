@@ -26,7 +26,7 @@ plLuaWrapper::~plLuaWrapper()
 
 void plLuaWrapper::Clear()
 {
-  PLASMA_ASSERT_DEV(m_bReleaseOnExit, "Cannot clear a script that did not create the Lua state itself.");
+  PL_ASSERT_DEV(m_bReleaseOnExit, "Cannot clear a script that did not create the Lua state itself.");
 
   if (m_pState)
     lua_close(m_pState);
@@ -38,7 +38,7 @@ void plLuaWrapper::Clear()
 
 plResult plLuaWrapper::ExecuteString(const char* szString, const char* szDebugChunkName, plLogInterface* pLogInterface) const
 {
-  PLASMA_ASSERT_DEV(m_States.m_iLuaReturnValues == 0,
+  PL_ASSERT_DEV(m_States.m_iLuaReturnValues == 0,
     "plLuaWrapper::ExecuteString: You didn't discard the return-values of the previous script call. {0} Return-values were expected.",
     m_States.m_iLuaReturnValues);
 
@@ -49,27 +49,27 @@ plResult plLuaWrapper::ExecuteString(const char* szString, const char* szDebugCh
 
   if (error != LUA_OK)
   {
-    PLASMA_LOG_BLOCK("plLuaWrapper::ExecuteString");
+    PL_LOG_BLOCK("plLuaWrapper::ExecuteString");
 
     plLog::Error(pLogInterface, "[lua]Lua compile error: {0}", lua_tostring(m_pState, -1));
     plLog::Info(pLogInterface, "[luascript]Script: {0}", szString);
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   error = lua_pcall(m_pState, 0, 0, 0);
 
   if (error != LUA_OK)
   {
-    PLASMA_LOG_BLOCK("plLuaWrapper::ExecuteString");
+    PL_LOG_BLOCK("plLuaWrapper::ExecuteString");
 
     plLog::Error(pLogInterface, "[lua]Lua error: {0}", lua_tostring(m_pState, -1));
     plLog::Info(pLogInterface, "[luascript]Script: {0}", szString);
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void* plLuaWrapper::lua_allocator(void* ud, void* ptr, size_t osize, size_t nsize)
@@ -98,4 +98,3 @@ void* plLuaWrapper::lua_allocator(void* ud, void* ptr, size_t osize, size_t nsiz
 #endif // BUILDSYSTEM_ENABLE_LUA_SUPPORT
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Scripting_LuaWrapper_Initialize);

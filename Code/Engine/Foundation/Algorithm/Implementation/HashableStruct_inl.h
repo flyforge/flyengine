@@ -2,19 +2,19 @@
 #include <Foundation/Memory/MemoryUtils.h>
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plHashableStruct<T>::plHashableStruct()
+PL_ALWAYS_INLINE plHashableStruct<T>::plHashableStruct()
 {
   plMemoryUtils::ZeroFill<T>(static_cast<T*>(this), 1);
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plHashableStruct<T>::plHashableStruct(const plHashableStruct<T>& other)
+PL_ALWAYS_INLINE plHashableStruct<T>::plHashableStruct(const plHashableStruct<T>& other)
 {
   plMemoryUtils::RawByteCopy(this, &other, sizeof(T));
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE void plHashableStruct<T>::operator=(const plHashableStruct<T>& other)
+PL_ALWAYS_INLINE void plHashableStruct<T>::operator=(const plHashableStruct<T>& other)
 {
   if (this != &other)
   {
@@ -23,7 +23,7 @@ PLASMA_ALWAYS_INLINE void plHashableStruct<T>::operator=(const plHashableStruct<
 }
 
 template <typename T>
-PLASMA_ALWAYS_INLINE plUInt32 plHashableStruct<T>::CalculateHash() const
+PL_ALWAYS_INLINE plUInt32 plHashableStruct<T>::CalculateHash() const
 {
   return plHashingUtils::xxHash32(this, sizeof(T));
 }

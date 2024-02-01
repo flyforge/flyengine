@@ -8,64 +8,63 @@
 #include <RendererCore/AnimationSystem/SkeletonResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSwitchPoseAnimNode, 1, plRTTIDefaultAllocator<plSwitchPoseAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSwitchPoseAnimNode, 1, plRTTIDefaultAllocator<plSwitchPoseAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("TransitionDuration", m_TransitionDuration)->AddAttributes(new plDefaultValueAttribute(plTime::Milliseconds(200))),
-    PLASMA_MEMBER_PROPERTY("InIndex", m_InIndex)->AddAttributes(new plHiddenAttribute()),
-    PLASMA_MEMBER_PROPERTY("PosesCount", m_uiPosesCount)->AddAttributes(new plNoTemporaryTransactionsAttribute(), new plDynamicPinAttribute(), new plDefaultValueAttribute(2)),
-    PLASMA_ARRAY_MEMBER_PROPERTY("InPoses", m_InPoses)->AddAttributes(new plHiddenAttribute(), new plDynamicPinAttribute("PosesCount")),
-    PLASMA_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("TransitionDuration", m_TransitionDuration)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromMilliseconds(200))),
+    PL_MEMBER_PROPERTY("InIndex", m_InIndex)->AddAttributes(new plHiddenAttribute()),
+    PL_MEMBER_PROPERTY("PosesCount", m_uiPosesCount)->AddAttributes(new plNoTemporaryTransactionsAttribute(), new plDynamicPinAttribute(), new plDefaultValueAttribute(2)),
+    PL_ARRAY_MEMBER_PROPERTY("InPoses", m_InPoses)->AddAttributes(new plHiddenAttribute(), new plDynamicPinAttribute("PosesCount")),
+    PL_MEMBER_PROPERTY("OutPose", m_OutPose)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Pose Blending"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Yellow)),
     new plTitleAttribute("Pose Switch"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plResult plSwitchPoseAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_TransitionDuration;
   stream << m_uiPosesCount;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InIndex.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(stream.WriteArray(m_InPoses));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InIndex.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(stream.WriteArray(m_InPoses));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plSwitchPoseAnimNode::DeserializeNode(plStreamReader& stream)
 {
   const auto version = stream.ReadVersion(1);
-  PLASMA_IGNORE_UNUSED(version);
+  PL_IGNORE_UNUSED(version);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_TransitionDuration;
   stream >> m_uiPosesCount;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InIndex.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(stream.ReadArray(m_InPoses));
-  PLASMA_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InIndex.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(stream.ReadArray(m_InPoses));
+  PL_SUCCEED_OR_RETURN(m_OutPose.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plSwitchPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_SwitchPose");
   if (!m_OutPose.IsConnected() || !m_InIndex.IsConnected())
     return;
 
@@ -109,7 +108,7 @@ void plSwitchPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphIns
   {
     pInstance->m_iTransitionFromIndex = pInstance->m_iTransitionToIndex;
     pInstance->m_iTransitionToIndex = iDstIdx;
-    pInstance->m_TransitionTime = plTime::Zero();
+    pInstance->m_TransitionTime = plTime::MakeZero();
   }
 
   if (pInstance->m_TransitionTime >= m_TransitionDuration)
@@ -117,8 +116,8 @@ void plSwitchPoseAnimNode::Step(plAnimController& ref_controller, plAnimGraphIns
     pInstance->m_iTransitionFromIndex = pInstance->m_iTransitionToIndex;
   }
 
-  PLASMA_ASSERT_DEBUG(pInstance->m_iTransitionToIndex >= 0 && pInstance->m_iTransitionToIndex < pPins.GetCount(), "Invalid pose index");
-  PLASMA_ASSERT_DEBUG(pInstance->m_iTransitionToIndex >= 0 && pInstance->m_iTransitionToIndex < pPins.GetCount(), "Invalid pose index");
+  PL_ASSERT_DEBUG(pInstance->m_iTransitionToIndex >= 0 && pInstance->m_iTransitionToIndex < pPins.GetCount(), "Invalid pose index");
+  PL_ASSERT_DEBUG(pInstance->m_iTransitionToIndex >= 0 && pInstance->m_iTransitionToIndex < pPins.GetCount(), "Invalid pose index");
 
   plInt8 iTransitionFromIndex = pInstance->m_iTransitionFromIndex;
   plInt8 iTransitionToIndex = pInstance->m_iTransitionToIndex;
@@ -179,3 +178,7 @@ bool plSwitchPoseAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_desc) con
   out_desc.FillFromType<InstanceData>();
   return true;
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_SwitchPoseAnimNode);
+

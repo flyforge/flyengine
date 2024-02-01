@@ -20,36 +20,37 @@ namespace plProcGenInternal
 
   static plTypeVersion s_GraphSharedDataVersion = 1;
 
-  void GraphSharedData::Save(plStreamWriter& stream) const
+  void GraphSharedData::Save(plStreamWriter& inout_stream) const
   {
-    stream.WriteVersion(s_GraphSharedDataVersion);
+    inout_stream.WriteVersion(s_GraphSharedDataVersion);
 
     {
       const plUInt32 uiCount = m_TagSets.GetCount();
-      stream << uiCount;
+      inout_stream << uiCount;
 
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        m_TagSets[i].Save(stream);
+        m_TagSets[i].Save(inout_stream);
       }
     }
   }
 
-  plResult GraphSharedData::Load(plStreamReader& stream)
+  plResult GraphSharedData::Load(plStreamReader& inout_stream)
   {
-    auto version = stream.ReadVersion(s_GraphSharedDataVersion);
+    auto version = inout_stream.ReadVersion(s_GraphSharedDataVersion);
+    PL_IGNORE_UNUSED(version);
 
     {
       plUInt32 uiCount = 0;
-      stream >> uiCount;
+      inout_stream >> uiCount;
 
       for (plUInt32 i = 0; i < uiCount; ++i)
       {
-        m_TagSets.ExpandAndGetRef().Load(stream, plTagRegistry::GetGlobalRegistry());
+        m_TagSets.ExpandAndGetRef().Load(inout_stream, plTagRegistry::GetGlobalRegistry());
       }
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
 } // namespace plProcGenInternal

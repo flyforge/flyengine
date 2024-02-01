@@ -13,7 +13,7 @@
 /// Instance data is allocated through the plInstanceDataAllocator.
 ///
 /// Use the templated Fill() method to fill the desc from a data type.
-struct PLASMA_FOUNDATION_DLL plInstanceDataDesc
+struct PL_FOUNDATION_DLL plInstanceDataDesc
 {
   plUInt32 m_uiTypeSize = 0;
   plUInt32 m_uiTypeAlignment = 0;
@@ -21,17 +21,17 @@ struct PLASMA_FOUNDATION_DLL plInstanceDataDesc
   plMemoryUtils::DestructorFunction m_DestructorFunction = nullptr;
 
   template <typename T>
-  PLASMA_ALWAYS_INLINE void FillFromType()
+  PL_ALWAYS_INLINE void FillFromType()
   {
     m_uiTypeSize = sizeof(T);
-    m_uiTypeAlignment = PLASMA_ALIGNMENT_OF(T);
-    m_ConstructorFunction = plMemoryUtils::MakeConstructorFunction<T>();
+    m_uiTypeAlignment = PL_ALIGNMENT_OF(T);
+    m_ConstructorFunction = plMemoryUtils::MakeConstructorFunction<SkipTrivialTypes, T>();
     m_DestructorFunction = plMemoryUtils::MakeDestructorFunction<T>();
   }
 };
 
 /// \brief Helper class to manager instance data allocation, construction and destruction
-class PLASMA_FOUNDATION_DLL plInstanceDataAllocator
+class PL_FOUNDATION_DLL plInstanceDataAllocator
 {
 public:
   /// \brief Adds the given desc to internal list of data that needs to be allocated and returns the byte offset.
@@ -56,7 +56,7 @@ public:
   plUInt32 GetTotalDataSize() const { return m_uiTotalDataSize; }
 
   /// \brief Retrieves a void pointer to the instance data within the given blob at the given offset, or nullptr if the offset is invalid.
-  PLASMA_ALWAYS_INLINE static void* GetInstanceData(const plByteBlobPtr& blobPtr, plUInt32 uiOffset)
+  PL_ALWAYS_INLINE static void* GetInstanceData(const plByteBlobPtr& blobPtr, plUInt32 uiOffset)
   {
     return (uiOffset != plInvalidIndex) ? blobPtr.GetPtr() + uiOffset : nullptr;
   }

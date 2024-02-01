@@ -5,25 +5,25 @@
 #include <JoltPlugin/Components/JoltSettingsComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJoltSettingsComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plJoltSettingsComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("ObjectGravity", GetObjectGravity, SetObjectGravity)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, -9.81f))),
-    PLASMA_ACCESSOR_PROPERTY("CharacterGravity", GetCharacterGravity, SetCharacterGravity)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, -12.0f))),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("SteppingMode", plJoltSteppingMode, GetSteppingMode, SetSteppingMode),
-    PLASMA_ACCESSOR_PROPERTY("FixedFrameRate", GetFixedFrameRate, SetFixedFrameRate)->AddAttributes(new plDefaultValueAttribute(60.0f), new plClampValueAttribute(1.0f, 1000.0f)),
-    PLASMA_ACCESSOR_PROPERTY("MaxSubSteps", GetMaxSubSteps, SetMaxSubSteps)->AddAttributes(new plDefaultValueAttribute(4), new plClampValueAttribute(1, 100)),
-    PLASMA_ACCESSOR_PROPERTY("MaxBodies", GetMaxBodies, SetMaxBodies)->AddAttributes(new plDefaultValueAttribute(10000), new plClampValueAttribute(500, 1000000)),
+    PL_ACCESSOR_PROPERTY("ObjectGravity", GetObjectGravity, SetObjectGravity)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, -9.81f))),
+    PL_ACCESSOR_PROPERTY("CharacterGravity", GetCharacterGravity, SetCharacterGravity)->AddAttributes(new plDefaultValueAttribute(plVec3(0, 0, -12.0f))),
+    PL_ENUM_ACCESSOR_PROPERTY("SteppingMode", plJoltSteppingMode, GetSteppingMode, SetSteppingMode),
+    PL_ACCESSOR_PROPERTY("FixedFrameRate", GetFixedFrameRate, SetFixedFrameRate)->AddAttributes(new plDefaultValueAttribute(60.0f), new plClampValueAttribute(1.0f, 1000.0f)),
+    PL_ACCESSOR_PROPERTY("MaxSubSteps", GetMaxSubSteps, SetMaxSubSteps)->AddAttributes(new plDefaultValueAttribute(4), new plClampValueAttribute(1, 100)),
+    PL_ACCESSOR_PROPERTY("MaxBodies", GetMaxBodies, SetMaxBodies)->AddAttributes(new plDefaultValueAttribute(10000), new plClampValueAttribute(500, 1000000)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Misc"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plJoltSettingsComponent::plJoltSettingsComponent() = default;
@@ -61,39 +61,39 @@ void plJoltSettingsComponent::DeserializeComponent(plWorldReader& inout_stream)
 void plJoltSettingsComponent::SetObjectGravity(const plVec3& v)
 {
   m_Settings.m_vObjectGravity = v;
-  SetModified(PLASMA_BIT(0));
+  SetModified(PL_BIT(0));
 }
 
 void plJoltSettingsComponent::SetCharacterGravity(const plVec3& v)
 {
   m_Settings.m_vCharacterGravity = v;
-  SetModified(PLASMA_BIT(1));
+  SetModified(PL_BIT(1));
 }
 
 void plJoltSettingsComponent::SetSteppingMode(plJoltSteppingMode::Enum mode)
 {
   m_Settings.m_SteppingMode = mode;
-  SetModified(PLASMA_BIT(3));
+  SetModified(PL_BIT(3));
 }
 
 void plJoltSettingsComponent::SetFixedFrameRate(float fFixedFrameRate)
 {
   m_Settings.m_fFixedFrameRate = fFixedFrameRate;
-  SetModified(PLASMA_BIT(4));
+  SetModified(PL_BIT(4));
 }
 
 void plJoltSettingsComponent::SetMaxSubSteps(plUInt32 uiMaxSubSteps)
 {
   m_Settings.m_uiMaxSubSteps = uiMaxSubSteps;
-  SetModified(PLASMA_BIT(5));
+  SetModified(PL_BIT(5));
 }
 
 void plJoltSettingsComponent::SetMaxBodies(plUInt32 uiMaxBodies)
 {
   m_Settings.m_uiMaxBodies = uiMaxBodies;
-  SetModified(PLASMA_BIT(6));
+  SetModified(PL_BIT(6));
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltSettingsComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Components_Implementation_JoltSettingsComponent);
 

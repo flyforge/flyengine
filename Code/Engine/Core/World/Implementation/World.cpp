@@ -37,24 +37,24 @@ static plGameObjectHandle DefaultGameObjectReferenceResolver(const void* pData, 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plWorld, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plWorld, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(DeleteObjectDelayed, In, "GameObject", In, "DeleteEmptyParents")->AddAttributes(
+    PL_SCRIPT_FUNCTION_PROPERTY(DeleteObjectDelayed, In, "GameObject", In, "DeleteEmptyParents")->AddAttributes(
       new plFunctionArgumentAttributes(1, new plDefaultValueAttribute(true))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_TryGetObjectWithGlobalKey, In, "GlobalKey")->AddFlags(plPropertyFlags::Const),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_GetClock)->AddFlags(plPropertyFlags::Const),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_TryGetObjectWithGlobalKey, In, "GlobalKey")->AddFlags(plPropertyFlags::Const),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_GetClock)->AddFlags(plPropertyFlags::Const),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plWorld::plWorld(plWorldDesc& ref_desc)
   : m_Data(ref_desc)
 {
-  m_pUpdateTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "", plMakeDelegate(&plWorld::UpdateFromThread, this));
+  m_pUpdateTask = PL_DEFAULT_NEW(plDelegateTask<void>, "WorldUpdate", plTaskNesting::Never, plMakeDelegate(&plWorld::UpdateFromThread, this));
   m_Data.m_pCoordinateSystemProvider->m_pOwnerWorld = this;
 
   plStringBuilder sb = ref_desc.m_sName.GetString();
@@ -78,8 +78,8 @@ plWorld::plWorld(plWorldDesc& ref_desc)
   if (m_uiIndex == plInvalidIndex)
   {
     m_uiIndex = s_Worlds.GetCount();
-    PLASMA_ASSERT_DEV(m_uiIndex < GetMaxNumWorlds(), "Max world index reached: {}", GetMaxNumWorlds());
-    static_assert(GetMaxNumWorlds() == PLASMA_MAX_WORLDS);
+    PL_ASSERT_DEV(m_uiIndex < GetMaxNumWorlds(), "Max world index reached: {}", GetMaxNumWorlds());
+    static_assert(GetMaxNumWorlds() == PL_MAX_WORLDS);
 
     s_Worlds.PushBack(this);
   }
@@ -91,7 +91,7 @@ plWorld::~plWorld()
 {
   SetWorldSimulationEnabled(false);
 
-  PLASMA_LOCK(GetWriteMarker());
+  PL_LOCK(GetWriteMarker());
   m_Data.Clear();
 
   s_Worlds[m_uiIndex] = nullptr;
@@ -133,20 +133,10 @@ void plWorld::Clear()
 
 void plWorld::SetCoordinateSystemProvider(const plSharedPtr<plCoordinateSystemProvider>& pProvider)
 {
-  PLASMA_ASSERT_DEV(pProvider != nullptr, "Coordinate System Provider must not be null");
+  PL_ASSERT_DEV(pProvider != nullptr, "Coordinate System Provider must not be null");
 
   m_Data.m_pCoordinateSystemProvider = pProvider;
   m_Data.m_pCoordinateSystemProvider->m_pOwnerWorld = this;
-}
-
-void plWorld::SetGameObjectReferenceResolver(const ReferenceResolver& resolver)
-{
-  m_Data.m_GameObjectReferenceResolver = resolver;
-}
-
-const plWorld::ReferenceResolver& plWorld::GetGameObjectReferenceResolver() const
-{
-  return m_Data.m_GameObjectReferenceResolver;
 }
 
 // a super simple, but also efficient random number generator
@@ -160,7 +150,7 @@ plGameObjectHandle plWorld::CreateObject(const plGameObjectDesc& desc, plGameObj
 {
   CheckForWriteAccess();
 
-  PLASMA_ASSERT_DEV(m_Data.m_Objects.GetCount() < GetMaxNumGameObjects(), "Max number of game objects reached: {}", GetMaxNumGameObjects());
+  PL_ASSERT_DEV(m_Data.m_Objects.GetCount() < GetMaxNumGameObjects(), "Max number of game objects reached: {}", GetMaxNumGameObjects());
 
   plGameObject* pParentObject = nullptr;
   plGameObject::TransformationData* pParentData = nullptr;
@@ -173,7 +163,7 @@ plGameObjectHandle plWorld::CreateObject(const plGameObjectDesc& desc, plGameObj
     pParentData = pParentObject->m_pTransformationData;
     uiParentIndex = desc.m_hParent.m_InternalId.m_InstanceIndex;
     uiHierarchyLevel = pParentObject->m_uiHierarchyLevel + 1; // if there is a parent hierarchy level is parent level + 1
-    PLASMA_ASSERT_DEV(uiHierarchyLevel < GetMaxNumHierarchyLevels(), "Max hierarchy level reached: {}", GetMaxNumHierarchyLevels());
+    PL_ASSERT_DEV(uiHierarchyLevel < GetMaxNumHierarchyLevels(), "Max hierarchy level reached: {}", GetMaxNumHierarchyLevels());
     bDynamic |= pParentObject->IsDynamic();
   }
 
@@ -185,7 +175,7 @@ plGameObjectHandle plWorld::CreateObject(const plGameObjectDesc& desc, plGameObj
 
   // insert the new object into the id mapping table
   plGameObjectId newId = m_Data.m_Objects.Insert(pNewObject);
-  newId.m_WorldIndex = plGameObjectId::StorageType(m_uiIndex & (PLASMA_MAX_WORLDS - 1));
+  newId.m_WorldIndex = plGameObjectId::StorageType(m_uiIndex & (PL_MAX_WORLDS - 1));
 
   // fill out some data
   pNewObject->m_InternalId = newId;
@@ -206,13 +196,13 @@ plGameObjectHandle plWorld::CreateObject(const plGameObjectDesc& desc, plGameObj
   pTransformationData->m_localPosition = plSimdConversion::ToVec3(desc.m_LocalPosition);
   pTransformationData->m_localRotation = plSimdConversion::ToQuat(desc.m_LocalRotation);
   pTransformationData->m_localScaling = plSimdConversion::ToVec4(desc.m_LocalScaling.GetAsVec4(desc.m_LocalUniformScaling));
-  pTransformationData->m_globalTransform.SetIdentity();
-#if PLASMA_ENABLED(PLASMA_GAMEOBJECT_VELOCITY)
-  pTransformationData->m_lastGlobalTransform.SetIdentity();
+  pTransformationData->m_globalTransform = plSimdTransform::MakeIdentity();
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+  pTransformationData->m_lastGlobalTransform = plSimdTransform::MakeIdentity();
   pTransformationData->m_uiLastGlobalTransformUpdateCounter = plInvalidIndex;
 #endif
-  pTransformationData->m_localBounds.SetInvalid();
-  pTransformationData->m_localBounds.m_BoxHalfExtents.SetW(plSimdFloat::Zero());
+  pTransformationData->m_localBounds = plSimdBBoxSphere::MakeInvalid();
+  pTransformationData->m_localBounds.m_BoxHalfExtents.SetW(plSimdFloat::MakeZero());
   pTransformationData->m_globalBounds = pTransformationData->m_localBounds;
   pTransformationData->m_hSpatialData.Invalidate();
   pTransformationData->m_uiSpatialDataCategoryBitmask = 0;
@@ -295,7 +285,7 @@ void plWorld::DeleteObjectNow(const plGameObjectHandle& hObject0, bool bAlsoDele
     plComponent* pComponent = pObject->m_Components[0];
     pComponent->GetOwningManager()->DeleteComponent(pComponent->GetHandle());
   }
-  PLASMA_ASSERT_DEV(pObject->m_Components.GetCount() == 0, "Components should already be removed");
+  PL_ASSERT_DEV(pObject->m_Components.GetCount() == 0, "Components should already be removed");
 
   // fix parent and siblings
   UnlinkFromParent(pObject);
@@ -308,38 +298,39 @@ void plWorld::DeleteObjectNow(const plGameObjectHandle& hObject0, bool bAlsoDele
   pObject->m_InternalId.m_WorldIndex = m_uiIndex;
 
   m_Data.m_DeadObjects.Insert(pObject);
-  PLASMA_VERIFY(m_Data.m_Objects.Remove(hObject), "Implementation error.");
+  PL_VERIFY(m_Data.m_Objects.Remove(hObject), "Implementation error.");
 }
 
 void plWorld::DeleteObjectDelayed(const plGameObjectHandle& hObject, bool bAlsoDeleteEmptyParents /*= true*/)
 {
   plMsgDeleteGameObject msg;
   msg.m_bDeleteEmptyParents = bAlsoDeleteEmptyParents;
-  PostMessage(hObject, msg, plTime::Zero());
+  PostMessage(hObject, msg, plTime::MakeZero());
 }
 
 plComponentInitBatchHandle plWorld::CreateComponentInitBatch(plStringView sBatchName, bool bMustFinishWithinOneFrame /*= true*/)
 {
-  auto pInitBatch = PLASMA_NEW(GetAllocator(), plInternal::WorldData::InitBatch, GetAllocator(), sBatchName, bMustFinishWithinOneFrame);
+  auto pInitBatch = PL_NEW(GetAllocator(), plInternal::WorldData::InitBatch, GetAllocator(), sBatchName, bMustFinishWithinOneFrame);
   return plComponentInitBatchHandle(m_Data.m_InitBatches.Insert(pInitBatch));
 }
 
 void plWorld::DeleteComponentInitBatch(const plComponentInitBatchHandle& hBatch)
 {
   auto& pInitBatch = m_Data.m_InitBatches[hBatch.GetInternalID()];
-  PLASMA_ASSERT_DEV(pInitBatch->m_ComponentsToInitialize.IsEmpty() && pInitBatch->m_ComponentsToStartSimulation.IsEmpty(), "Init batch has not been completely processed");
+  PL_IGNORE_UNUSED(pInitBatch);
+  PL_ASSERT_DEV(pInitBatch->m_ComponentsToInitialize.IsEmpty() && pInitBatch->m_ComponentsToStartSimulation.IsEmpty(), "Init batch has not been completely processed");
   m_Data.m_InitBatches.Remove(hBatch.GetInternalID());
 }
 
 void plWorld::BeginAddingComponentsToInitBatch(const plComponentInitBatchHandle& hBatch)
 {
-  PLASMA_ASSERT_DEV(m_Data.m_pCurrentInitBatch == m_Data.m_pDefaultInitBatch, "Nested init batches are not supported");
+  PL_ASSERT_DEV(m_Data.m_pCurrentInitBatch == m_Data.m_pDefaultInitBatch, "Nested init batches are not supported");
   m_Data.m_pCurrentInitBatch = m_Data.m_InitBatches[hBatch.GetInternalID()].Borrow();
 }
 
 void plWorld::EndAddingComponentsToInitBatch(const plComponentInitBatchHandle& hBatch)
 {
-  PLASMA_ASSERT_DEV(m_Data.m_InitBatches[hBatch.GetInternalID()] == m_Data.m_pCurrentInitBatch, "Init batch with id {} is currently not active", hBatch.GetInternalID().m_Data);
+  PL_ASSERT_DEV(m_Data.m_InitBatches[hBatch.GetInternalID()] == m_Data.m_pCurrentInitBatch, "Init batch with id {} is currently not active", hBatch.GetInternalID().m_Data);
   m_Data.m_pCurrentInitBatch = m_Data.m_pDefaultInitBatch;
 }
 
@@ -352,7 +343,7 @@ void plWorld::SubmitComponentInitBatch(const plComponentInitBatchHandle& hBatch)
 bool plWorld::IsComponentInitBatchCompleted(const plComponentInitBatchHandle& hBatch, double* pCompletionFactor /*= nullptr*/)
 {
   auto& pInitBatch = m_Data.m_InitBatches[hBatch.GetInternalID()];
-  PLASMA_ASSERT_DEV(pInitBatch->m_bIsReady, "Batch is not submitted yet");
+  PL_ASSERT_DEV(pInitBatch->m_bIsReady, "Batch is not submitted yet");
 
   if (pCompletionFactor != nullptr)
   {
@@ -381,7 +372,7 @@ void plWorld::PostMessage(const plGameObjectHandle& receiverObject, const plMess
 {
   // This method is allowed to be called from multiple threads.
 
-  PLASMA_ASSERT_DEBUG((receiverObject.m_InternalId.m_Data >> 62) == 0, "Upper 2 bits in object id must not be set");
+  PL_ASSERT_DEBUG((receiverObject.m_InternalId.m_Data >> 62) == 0, "Upper 2 bits in object id must not be set");
 
   QueuedMsgMetaData metaData;
   metaData.m_uiReceiverObjectOrComponent = receiverObject.m_InternalId.m_Data;
@@ -390,7 +381,7 @@ void plWorld::PostMessage(const plGameObjectHandle& receiverObject, const plMess
 
   if (m_Data.m_ProcessingMessageQueue == queueType)
   {
-    delay = plMath::Max(delay, plTime::Milliseconds(1));
+    delay = plMath::Max(delay, plTime::MakeFromMilliseconds(1));
   }
 
   plRTTIAllocator* pMsgRTTIAllocator = msg.GetDynamicRTTI()->GetAllocator();
@@ -412,7 +403,7 @@ void plWorld::PostMessage(const plComponentHandle& hReceiverComponent, const plM
 {
   // This method is allowed to be called from multiple threads.
 
-  PLASMA_ASSERT_DEBUG((hReceiverComponent.m_InternalId.m_Data >> 62) == 0, "Upper 2 bits in component id must not be set");
+  PL_ASSERT_DEBUG((hReceiverComponent.m_InternalId.m_Data >> 62) == 0, "Upper 2 bits in component id must not be set");
 
   QueuedMsgMetaData metaData;
   metaData.m_uiReceiverObjectOrComponent = hReceiverComponent.m_InternalId.m_Data;
@@ -421,7 +412,7 @@ void plWorld::PostMessage(const plComponentHandle& hReceiverComponent, const plM
 
   if (m_Data.m_ProcessingMessageQueue == queueType)
   {
-    delay = plMath::Max(delay, plTime::Milliseconds(1));
+    delay = plMath::Max(delay, plTime::MakeFromMilliseconds(1));
   }
 
   plRTTIAllocator* pMsgRTTIAllocator = msg.GetDynamicRTTI()->GetAllocator();
@@ -453,11 +444,11 @@ void plWorld::Update()
 {
   CheckForWriteAccess();
 
-  PLASMA_LOG_BLOCK(m_Data.m_sName.GetData());
+  PL_LOG_BLOCK(m_Data.m_sName.GetData());
 
   {
     plStringBuilder sStatName;
-    sStatName.Format("World Update/{0}/Game Object Count", m_Data.m_sName);
+    sStatName.SetFormat("World Update/{0}/Game Object Count", m_Data.m_sName);
 
     plStringBuilder sStatValue;
     plStats::SetStat(sStatName, GetObjectCount());
@@ -485,9 +476,15 @@ void plWorld::Update()
     m_Data.m_pSpatialSystem->StartNewFrame();
   }
 
+  // reload resources
+  {
+    PL_PROFILE_SCOPE("Reload Resources");
+    ProcessResourceReloadFunctions();
+  }
+
   // initialize phase
   {
-    PLASMA_PROFILE_SCOPE("Initialize Phase");
+    PL_PROFILE_SCOPE("Initialize Phase");
     ProcessComponentsToInitialize();
     ProcessUpdateFunctionsToRegister();
 
@@ -496,7 +493,7 @@ void plWorld::Update()
 
   // pre-async phase
   {
-    PLASMA_PROFILE_SCOPE("Pre-Async Phase");
+    PL_PROFILE_SCOPE("Pre-Async Phase");
     ProcessQueuedMessages(plObjectMsgQueueType::NextFrame);
     UpdateSynchronous(m_Data.m_UpdateFunctions[plComponentManagerBase::UpdateFunctionDesc::Phase::PreAsync]);
   }
@@ -506,7 +503,7 @@ void plWorld::Update()
     // remove write marker but keep the read marker. Thus no one can mark the world for writing now. Only reading is allowed in async phase.
     m_Data.m_WriteThreadID = (plThreadID)0;
 
-    PLASMA_PROFILE_SCOPE("Async Phase");
+    PL_PROFILE_SCOPE("Async Phase");
     UpdateAsynchronous();
 
     // restore write marker
@@ -515,37 +512,37 @@ void plWorld::Update()
 
   // post-async phase
   {
-    PLASMA_PROFILE_SCOPE("Post-Async Phase");
+    PL_PROFILE_SCOPE("Post-Async Phase");
     ProcessQueuedMessages(plObjectMsgQueueType::PostAsync);
     UpdateSynchronous(m_Data.m_UpdateFunctions[plComponentManagerBase::UpdateFunctionDesc::Phase::PostAsync]);
   }
 
   // delete dead objects and update the object hierarchy
   {
-    PLASMA_PROFILE_SCOPE("Delete Dead Objects");
+    PL_PROFILE_SCOPE("Delete Dead Objects");
     DeleteDeadObjects();
     DeleteDeadComponents();
   }
 
   // update transforms
   {
-    PLASMA_PROFILE_SCOPE("Update Transforms");
+    PL_PROFILE_SCOPE("Update Transforms");
     m_Data.UpdateGlobalTransforms();
   }
 
   // post-transform phase
   {
-    PLASMA_PROFILE_SCOPE("Post-Transform Phase");
+    PL_PROFILE_SCOPE("Post-Transform Phase");
     ProcessQueuedMessages(plObjectMsgQueueType::PostTransform);
     UpdateSynchronous(m_Data.m_UpdateFunctions[plComponentManagerBase::UpdateFunctionDesc::Phase::PostTransform]);
   }
 
   // Process again so new component can receive render messages, otherwise we introduce a frame delay.
   {
-    PLASMA_PROFILE_SCOPE("Initialize Phase 2");
+    PL_PROFILE_SCOPE("Initialize Phase 2");
     // Only process the default init batch here since it contains the components created at runtime.
     // Also make sure that all initialization is finished after this call by giving it enough time.
-    ProcessInitializationBatch(*m_Data.m_pDefaultInitBatch, plTime::Now() + plTime::Hours(10000));
+    ProcessInitializationBatch(*m_Data.m_pDefaultInitBatch, plTime::Now() + plTime::MakeFromHours(10000));
 
     ProcessQueuedMessages(plObjectMsgQueueType::AfterInitialized);
   }
@@ -594,7 +591,7 @@ void plWorld::DeleteModule(const plRTTI* pRtti)
 
       pModule->Deinitialize();
       DeregisterUpdateFunctions(pModule);
-      PLASMA_DELETE(&m_Data.m_Allocator, pModule);
+      PL_DELETE(&m_Data.m_Allocator, pModule);
     }
   }
 }
@@ -629,7 +626,7 @@ plGameObject* plWorld::Reflection_TryGetObjectWithGlobalKey(plTempHashedString s
 {
   plGameObject* pObject = nullptr;
   bool res = TryGetObjectWithGlobalKey(sGlobalKey, pObject);
-  PLASMA_IGNORE_UNUSED(res);
+  PL_IGNORE_UNUSED(res);
   return pObject;
 }
 
@@ -640,8 +637,8 @@ plClock* plWorld::Reflection_GetClock()
 
 void plWorld::SetParent(plGameObject* pObject, plGameObject* pNewParent, plGameObject::TransformPreservation preserve)
 {
-  PLASMA_ASSERT_DEV(pObject != pNewParent, "Object can't be its own parent!");
-  PLASMA_ASSERT_DEV(pNewParent == nullptr || pObject->IsDynamic() || pNewParent->IsStatic(), "Can't attach a static object to a dynamic parent!");
+  PL_ASSERT_DEV(pObject != pNewParent, "Object can't be its own parent!");
+  PL_ASSERT_DEV(pNewParent == nullptr || pObject->IsDynamic() || pNewParent->IsStatic(), "Can't attach a static object to a dynamic parent!");
   CheckForWriteAccess();
 
   if (GetObjectUnchecked(pObject->m_uiParentIndex) == pNewParent)
@@ -671,7 +668,7 @@ void plWorld::SetParent(plGameObject* pObject, plGameObject* pNewParent, plGameO
 
 void plWorld::LinkToParent(plGameObject* pObject)
 {
-  PLASMA_ASSERT_DEBUG(pObject->m_uiNextSiblingIndex == 0 && pObject->m_uiPrevSiblingIndex == 0, "Object is either still linked to another parent or data was not cleared.");
+  PL_ASSERT_DEBUG(pObject->m_uiNextSiblingIndex == 0 && pObject->m_uiPrevSiblingIndex == 0, "Object is either still linked to another parent or data was not cleared.");
   if (plGameObject* pParentObject = pObject->GetParent())
   {
     const plUInt32 uiIndex = pObject->m_InternalId.m_InstanceIndex;
@@ -777,8 +774,8 @@ void plWorld::SetObjectGlobalKey(plGameObject* pObject, const plHashedString& sG
       return;
     }
 
-    PLASMA_VERIFY(m_Data.m_GlobalKeyToIdTable.Remove(pOldGlobalKey->GetHash()), "Implementation error.");
-    PLASMA_VERIFY(m_Data.m_IdToGlobalKeyTable.Remove(uiId), "Implementation error.");
+    PL_VERIFY(m_Data.m_GlobalKeyToIdTable.Remove(pOldGlobalKey->GetHash()), "Implementation error.");
+    PL_VERIFY(m_Data.m_IdToGlobalKeyTable.Remove(uiId), "Implementation error.");
   }
 
   // Insert new one if key is valid.
@@ -815,7 +812,7 @@ void plWorld::ProcessQueuedMessage(const plInternal::WorldData::MessageQueue::En
     }
     else
     {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
       if (entry.m_pMessage->GetDebugMessageRouting())
       {
         plLog::Warning("plWorld::ProcessQueuedMessage: Receiver plComponent for message of type '{0}' does not exist anymore.", entry.m_pMessage->GetId());
@@ -841,7 +838,7 @@ void plWorld::ProcessQueuedMessage(const plInternal::WorldData::MessageQueue::En
     }
     else
     {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
       if (entry.m_pMessage->GetDebugMessageRouting())
       {
         plLog::Warning("plWorld::ProcessQueuedMessage: Receiver plGameObject for message of type '{0}' does not exist anymore.", entry.m_pMessage->GetId());
@@ -853,11 +850,11 @@ void plWorld::ProcessQueuedMessage(const plInternal::WorldData::MessageQueue::En
 
 void plWorld::ProcessQueuedMessages(plObjectMsgQueueType::Enum queueType)
 {
-  PLASMA_PROFILE_SCOPE("Process Queued Messages");
+  PL_PROFILE_SCOPE("Process Queued Messages");
 
   struct MessageComparer
   {
-    PLASMA_FORCE_INLINE bool Less(const plInternal::WorldData::MessageQueue::Entry& a, const plInternal::WorldData::MessageQueue::Entry& b) const
+    PL_FORCE_INLINE bool Less(const plInternal::WorldData::MessageQueue::Entry& a, const plInternal::WorldData::MessageQueue::Entry& b) const
     {
       if (a.m_MetaData.m_Due != b.m_MetaData.m_Due)
         return a.m_MetaData.m_Due < b.m_MetaData.m_Due;
@@ -920,7 +917,7 @@ void plWorld::ProcessQueuedMessages(plObjectMsgQueueType::Enum queueType)
 
       ProcessQueuedMessage(entry);
 
-      PLASMA_DELETE(&m_Data.m_Allocator, entry.m_pMessage);
+      PL_DELETE(&m_Data.m_Allocator, entry.m_pMessage);
 
       queue.Dequeue();
     }
@@ -1009,9 +1006,9 @@ void plWorld::RegisterUpdateFunction(const plComponentManagerBase::UpdateFunctio
 {
   CheckForWriteAccess();
 
-  PLASMA_ASSERT_DEV(desc.m_Phase == plComponentManagerBase::UpdateFunctionDesc::Phase::Async || desc.m_uiGranularity == 0, "Granularity must be 0 for synchronous update functions");
-  PLASMA_ASSERT_DEV(desc.m_Phase != plComponentManagerBase::UpdateFunctionDesc::Phase::Async || desc.m_DependsOn.GetCount() == 0, "Asynchronous update functions must not have dependencies");
-  PLASMA_ASSERT_DEV(desc.m_Function.IsComparable(), "Delegates with captures are not allowed as plWorld update functions.");
+  PL_ASSERT_DEV(desc.m_Phase == plComponentManagerBase::UpdateFunctionDesc::Phase::Async || desc.m_uiGranularity == 0, "Granularity must be 0 for synchronous update functions");
+  PL_ASSERT_DEV(desc.m_Phase != plComponentManagerBase::UpdateFunctionDesc::Phase::Async || desc.m_DependsOn.GetCount() == 0, "Asynchronous update functions must not have dependencies");
+  PL_ASSERT_DEV(desc.m_Function.IsComparable(), "Delegates with captures are not allowed as plWorld update functions.");
 
   m_Data.m_UpdateFunctionsToRegister.PushBack(desc);
 }
@@ -1056,7 +1053,7 @@ void plWorld::AddComponentToInitialize(plComponentHandle hComponent)
 
 void plWorld::UpdateFromThread()
 {
-  PLASMA_LOCK(GetWriteMarker());
+  PL_LOCK(GetWriteMarker());
 
   Update();
 }
@@ -1073,7 +1070,7 @@ void plWorld::UpdateSynchronous(const plArrayPtr<plInternal::WorldData::Register
       continue;
 
     {
-      PLASMA_PROFILE_SCOPE(updateFunction.m_sFunctionName);
+      PL_PROFILE_SCOPE(updateFunction.m_sFunctionName);
       updateFunction.m_Function(context);
     }
   }
@@ -1109,7 +1106,7 @@ void plWorld::UpdateAsynchronous()
       }
       else
       {
-        pTask = PLASMA_NEW(&m_Data.m_Allocator, plInternal::WorldData::UpdateTask);
+        pTask = PL_NEW(&m_Data.m_Allocator, plInternal::WorldData::UpdateTask);
         m_Data.m_UpdateTasks.PushBack(pTask);
       }
 
@@ -1135,12 +1132,12 @@ bool plWorld::ProcessInitializationBatch(plInternal::WorldData::InitBatch& batch
   // ensure that all components that are created during this batch (e.g. from prefabs)
   // will also get initialized within this batch
   m_Data.m_pCurrentInitBatch = &batch;
-  PLASMA_SCOPE_EXIT(m_Data.m_pCurrentInitBatch = m_Data.m_pDefaultInitBatch);
+  PL_SCOPE_EXIT(m_Data.m_pCurrentInitBatch = m_Data.m_pDefaultInitBatch);
 
   if (!batch.m_ComponentsToInitialize.IsEmpty())
   {
     plStringBuilder profileScopeName("Init ", batch.m_sName);
-    PLASMA_PROFILE_SCOPE(profileScopeName);
+    PL_PROFILE_SCOPE(profileScopeName);
 
     // Reserve for later use
     batch.m_ComponentsToStartSimulation.Reserve(batch.m_ComponentsToInitialize.GetCount());
@@ -1155,7 +1152,7 @@ bool plWorld::ProcessInitializationBatch(plInternal::WorldData::InitBatch& batch
       if (!TryGetComponent(hComponent, pComponent))
         continue;
 
-      PLASMA_ASSERT_DEBUG(pComponent->GetOwner() != nullptr, "Component must have a valid owner");
+      PL_ASSERT_DEBUG(pComponent->GetOwner() != nullptr, "Component must have a valid owner");
 
       // make sure the object's transform is up to date before the component is initialized.
       pComponent->GetOwner()->UpdateGlobalTransform();
@@ -1184,7 +1181,7 @@ bool plWorld::ProcessInitializationBatch(plInternal::WorldData::InitBatch& batch
   if (m_Data.m_bSimulateWorld)
   {
     plStringBuilder startSimName("Start Sim ", batch.m_sName);
-    PLASMA_PROFILE_SCOPE(startSimName);
+    PL_PROFILE_SCOPE(startSimName);
 
     // Can't use foreach here because the array might be resized during iteration.
     for (; batch.m_uiNextComponentToStartSimulation < batch.m_ComponentsToStartSimulation.GetCount(); ++batch.m_uiNextComponentToStartSimulation)
@@ -1222,7 +1219,7 @@ void plWorld::ProcessComponentsToInitialize()
 
   if (m_Data.m_bSimulateWorld)
   {
-    PLASMA_PROFILE_SCOPE("Modules Start Simulation");
+    PL_PROFILE_SCOPE("Modules Start Simulation");
 
     // Can't use foreach here because the array might be resized during iteration.
     for (plUInt32 i = 0; i < m_Data.m_ModulesToStartSimulation.GetCount(); ++i)
@@ -1233,7 +1230,7 @@ void plWorld::ProcessComponentsToInitialize()
     m_Data.m_ModulesToStartSimulation.Clear();
   }
 
-  PLASMA_PROFILE_SCOPE("Initialize Components");
+  PL_PROFILE_SCOPE("Initialize Components");
 
   plTime endTime = plTime::Now() + m_Data.m_MaxInitializationTimePerFrame;
 
@@ -1243,7 +1240,7 @@ void plWorld::ProcessComponentsToInitialize()
     auto& pInitBatch = it.Value();
     if (pInitBatch->m_bIsReady && pInitBatch->m_bMustFinishWithinOneFrame)
     {
-      ProcessInitializationBatch(*pInitBatch, plTime::Now() + plTime::Hours(10000));
+      ProcessInitializationBatch(*pInitBatch, plTime::Now() + plTime::MakeFromHours(10000));
     }
   }
 
@@ -1269,7 +1266,7 @@ void plWorld::ProcessUpdateFunctionsToRegister()
   if (m_Data.m_UpdateFunctionsToRegister.IsEmpty())
     return;
 
-  PLASMA_PROFILE_SCOPE("Register update functions");
+  PL_PROFILE_SCOPE("Register update functions");
 
   while (!m_Data.m_UpdateFunctionsToRegister.IsEmpty())
   {
@@ -1283,7 +1280,7 @@ void plWorld::ProcessUpdateFunctionsToRegister()
       }
     }
 
-    PLASMA_ASSERT_DEV(m_Data.m_UpdateFunctionsToRegister.GetCount() < uiNumFunctionsToRegister, "No functions have been registered because the dependencies could not be found.");
+    PL_ASSERT_DEV(m_Data.m_UpdateFunctionsToRegister.GetCount() < uiNumFunctionsToRegister, "No functions have been registered because the dependencies could not be found.");
   }
 }
 
@@ -1307,7 +1304,7 @@ plResult plWorld::RegisterUpdateFunctionInternal(const plWorldModule::UpdateFunc
 
     if (uiDependencyIndex == plInvalidIndex) // dependency not found
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else
     {
@@ -1331,7 +1328,7 @@ plResult plWorld::RegisterUpdateFunctionInternal(const plWorldModule::UpdateFunc
 
   updateFunctions.Insert(newFunction, uiInsertionIndex);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plWorld::DeleteDeadObjects()
@@ -1428,7 +1425,7 @@ void plWorld::PatchHierarchyData(plGameObject* pObject, plGameObject::TransformP
   {
     PatchHierarchyData(it, preserve);
   }
-  PLASMA_ASSERT_DEBUG(pObject->m_pTransformationData != pObject->m_pTransformationData->m_pParentData, "Hierarchy corrupted!");
+  PL_ASSERT_DEBUG(pObject->m_pTransformationData != pObject->m_pTransformationData->m_pParentData, "Hierarchy corrupted!");
 }
 
 void plWorld::RecreateHierarchyData(plGameObject* pObject, bool bWasDynamic)
@@ -1461,6 +1458,28 @@ void plWorld::RecreateHierarchyData(plGameObject* pObject, bool bWasDynamic)
   }
 }
 
+void plWorld::ProcessResourceReloadFunctions()
+{
+  ResourceReloadContext context;
+  context.m_pWorld = this;
+
+  for (auto& hResource : m_Data.m_NeedReload)
+  {
+    if (m_Data.m_ReloadFunctions.TryGetValue(hResource, m_Data.m_TempReloadFunctions))
+    {
+      for (auto& data : m_Data.m_TempReloadFunctions)
+      {
+        PL_VERIFY(data.m_hComponent.IsInvalidated() || TryGetComponent(data.m_hComponent, context.m_pComponent), "Reload function called on dead component");
+        context.m_pUserData = data.m_pUserData;
+
+        data.m_Func(context);
+      }
+    }
+  }
+
+  m_Data.m_NeedReload.Clear();
+}
+
 void plWorld::SetMaxInitializationTimePerFrame(plTime maxInitTime)
 {
   CheckForWriteAccess();
@@ -1468,4 +1487,46 @@ void plWorld::SetMaxInitializationTimePerFrame(plTime maxInitTime)
   m_Data.m_MaxInitializationTimePerFrame = maxInitTime;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_World);
+void plWorld::SetGameObjectReferenceResolver(const ReferenceResolver& resolver)
+{
+  m_Data.m_GameObjectReferenceResolver = resolver;
+}
+
+const plWorld::ReferenceResolver& plWorld::GetGameObjectReferenceResolver() const
+{
+  return m_Data.m_GameObjectReferenceResolver;
+}
+
+void plWorld::AddResourceReloadFunction(plTypelessResourceHandle hResource, plComponentHandle hComponent, void* pUserData, ResourceReloadFunc function)
+{
+  CheckForWriteAccess();
+
+  if (hResource.IsValid() == false)
+    return;
+
+  auto& data = m_Data.m_ReloadFunctions[hResource].ExpandAndGetRef();
+  data.m_hComponent = hComponent;
+  data.m_pUserData = pUserData;
+  data.m_Func = function;
+}
+
+void plWorld::RemoveResourceReloadFunction(plTypelessResourceHandle hResource, plComponentHandle hComponent, void* pUserData)
+{
+  CheckForWriteAccess();
+
+  plInternal::WorldData::ReloadFunctionList* pReloadFunctions = nullptr;
+  if (m_Data.m_ReloadFunctions.TryGetValue(hResource, pReloadFunctions))
+  {
+    for (plUInt32 i = 0; i < pReloadFunctions->GetCount(); ++i)
+    {
+      auto& data = (*pReloadFunctions)[i];
+      if (data.m_hComponent == hComponent && data.m_pUserData == pUserData)
+      {
+        pReloadFunctions->RemoveAtAndSwap(i);
+        break;
+      }
+    }
+  }
+}
+
+PL_STATICLINK_FILE(Core, Core_World_Implementation_World);

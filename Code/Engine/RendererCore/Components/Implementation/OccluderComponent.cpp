@@ -8,28 +8,28 @@
 #include <RendererCore/Pipeline/RenderData.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plOccluderComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plOccluderComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), {}), new plDefaultValueAttribute(plVec3(1.0f))),
+    PL_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plClampValueAttribute(plVec3(0.0f), {}), new plDefaultValueAttribute(plVec3(1.0f))),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractOccluderData, OnMsgExtractOccluderData),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractOccluderData, OnMsgExtractOccluderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
     new plBoxVisualizerAttribute("Extents", 1.0f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plOccluderComponentManager::plOccluderComponentManager(plWorld* pWorld)
@@ -56,9 +56,9 @@ void plOccluderComponent::SetExtents(const plVec3& vExtents)
 void plOccluderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
   if (GetOwner()->IsStatic())
-    msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plDefaultSpatialDataCategories::OcclusionStatic);
+    msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plDefaultSpatialDataCategories::OcclusionStatic);
   else
-    msg.AddBounds(plBoundingBox(-m_vExtents * 0.5f, m_vExtents * 0.5f), plDefaultSpatialDataCategories::OcclusionDynamic);
+    msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-m_vExtents * 0.5f, m_vExtents * 0.5f)), plDefaultSpatialDataCategories::OcclusionDynamic);
 }
 
 void plOccluderComponent::OnMsgExtractOccluderData(plMsgExtractOccluderData& msg) const
@@ -86,7 +86,7 @@ void plOccluderComponent::SerializeComponent(plWorldWriter& inout_stream) const
 void plOccluderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
-  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
   plStreamReader& s = inout_stream.GetStream();
 
   s >> m_vExtents;
@@ -104,4 +104,4 @@ void plOccluderComponent::OnDeactivated()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_OccluderComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_OccluderComponent);

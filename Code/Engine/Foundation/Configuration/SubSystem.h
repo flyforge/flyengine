@@ -23,12 +23,12 @@ struct plStartupStage
 /// If you have a subsystem that is a non-static class, just derive from this base class and override the
 /// virtual functions as required.
 /// If you have a subsystem that is implemented in a purely static way (there is no class instance),
-/// just use the macros PLASMA_BEGIN_SUBSYSTEM_DECLARATION, PLASMA_END_SUBSYSTEM_DECLARATION etc.
+/// just use the macros PL_BEGIN_SUBSYSTEM_DECLARATION, PL_END_SUBSYSTEM_DECLARATION etc.
 /// Those macros will create a wrapper object (derived from plSubSystem) to handle initialization.
-class PLASMA_FOUNDATION_DLL plSubSystem : public plEnumerable<plSubSystem>
+class PL_FOUNDATION_DLL plSubSystem : public plEnumerable<plSubSystem>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plSubSystem);
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plSubSystem);
+  PL_DECLARE_ENUMERABLE_CLASS(plSubSystem);
+  PL_DISALLOW_COPY_AND_ASSIGN(plSubSystem);
 
 public:
   plSubSystem()

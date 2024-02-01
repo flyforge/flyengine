@@ -17,7 +17,14 @@ IndentPPDirectives: AfterHash
 NamespaceIndentation: All
 BreakConstructorInitializers: BeforeComma
 AlwaysBreakTemplateDeclarations: true
-MacroBlockBegin: "^PLASMA_BEGIN_.*|BEGIN_SUBSYSTEM_DEPENDENCIES$"
-MacroBlockEnd: "^PLASMA_END_.*|END_SUBSYSTEM_DEPENDENCIES$"
-AlignTrailingComments: true
+MacroBlockBegin: "^PL_BEGIN_.*|BEGIN_SUBSYSTEM_DEPENDENCIES$"
+MacroBlockEnd: "^PL_END_.*|END_SUBSYSTEM_DEPENDENCIES$"
 FixNamespaceComments: true
+AlignEscapedNewlines: Left
+CompactNamespaces: true
+SortIncludes: true
+AlignTrailingComments: true
+# needs a clang format update on CI
+#AlignTrailingComments: 
+#  Kind: Always
+#  OverEmptyLines: 2

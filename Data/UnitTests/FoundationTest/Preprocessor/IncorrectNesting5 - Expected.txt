@@ -1,3 +1,0 @@
-Processing failed
-Preprocessor/IncorrectNesting5.txt: Line 15 [2]: Error: Unexpected '#elif'
-Log: 'File 'Preprocessor/IncorrectNesting5.txt', Line 15 (2): Unexpected '#elif''

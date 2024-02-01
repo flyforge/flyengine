@@ -8,15 +8,15 @@
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreferences, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPreferences, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY_READ_ONLY("Name", GetName)->AddAttributes(new plHiddenAttribute()),
+    PL_ACCESSOR_PROPERTY_READ_ONLY("Name", GetName)->AddAttributes(new plHiddenAttribute()),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMap<const plDocument*, plMap<const plRTTI*, plPreferences*>> plPreferences::s_Preferences;
@@ -30,7 +30,7 @@ plPreferences::plPreferences(Domain domain, const char* szUniqueName)
 
 plPreferences* plPreferences::QueryPreferences(const plRTTI* pRtti, const plDocument* pDocument)
 {
-  PLASMA_ASSERT_DEV(plQtEditorApp::GetSingleton() != nullptr, "Editor app is not available in this process");
+  PL_ASSERT_DEV(plQtEditorApp::GetSingleton() != nullptr, "Editor app is not available in this process");
 
   auto it = s_Preferences[pDocument].Find(pRtti);
 
@@ -38,11 +38,11 @@ plPreferences* plPreferences::QueryPreferences(const plRTTI* pRtti, const plDocu
     return it.Value();
 
   auto pAlloc = pRtti->GetAllocator();
-  PLASMA_ASSERT_DEV(pAlloc != nullptr, "Invalid allocator for preferences type");
+  PL_ASSERT_DEV(pAlloc != nullptr, "Invalid allocator for preferences type");
 
   if (!pAlloc->CanAllocate())
   {
-    PLASMA_ASSERT_DEV(pAlloc->CanAllocate(), "Cannot create a preferences object that does not have a proper allocator");
+    PL_ASSERT_DEV(pAlloc->CanAllocate(), "Cannot create a preferences object that does not have a proper allocator");
     return nullptr;
   }
 
@@ -52,11 +52,11 @@ plPreferences* plPreferences::QueryPreferences(const plRTTI* pRtti, const plDocu
 
   if (pPref->m_Domain == Domain::Document)
   {
-    PLASMA_ASSERT_DEV(pDocument != nullptr, "Preferences of this type can only be used per document");
+    PL_ASSERT_DEV(pDocument != nullptr, "Preferences of this type can only be used per document");
   }
   else
   {
-    PLASMA_ASSERT_DEV(pDocument == nullptr, "Preferences of this type cannot be used with a document");
+    PL_ASSERT_DEV(pDocument == nullptr, "Preferences of this type cannot be used with a document");
   }
 
   pPref->Load();
@@ -192,16 +192,16 @@ void plPreferences::ClearApplicationPreferences()
   ClearPreferences(nullptr, Domain::Application);
 }
 
-void plPreferences::GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_AllPreferences)
+void plPreferences::GatherAllPreferences(plHybridArray<plPreferences*, 16>& out_allPreferences)
 {
-  out_AllPreferences.Clear();
-  out_AllPreferences.Reserve(s_Preferences.GetCount() * 2);
+  out_allPreferences.Clear();
+  out_allPreferences.Reserve(s_Preferences.GetCount() * 2);
 
   for (auto itDoc = s_Preferences.GetIterator(); itDoc.IsValid(); ++itDoc)
   {
     for (auto itType = itDoc.Value().GetIterator(); itType.IsValid(); ++itType)
     {
-      out_AllPreferences.PushBack(itType.Value());
+      out_allPreferences.PushBack(itType.Value());
     }
   }
 }

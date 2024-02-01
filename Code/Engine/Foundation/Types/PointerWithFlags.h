@@ -55,7 +55,7 @@ public:
   void SetPtr(PtrType* pPtr)
   {
     const std::uintptr_t isrc = *reinterpret_cast<std::uintptr_t*>(&pPtr);
-    PLASMA_ASSERT_DEBUG(
+    PL_ASSERT_DEBUG(
       (isrc & FlagsMask) == 0, "The given pointer does not have an {} byte alignment and thus cannot be stored lossless.", 1u << NumFlagBits);
 
     std::uintptr_t& iptr = *reinterpret_cast<std::uintptr_t*>(&m_pPtr);
@@ -72,7 +72,7 @@ public:
   /// \brief Changes only the flags value. The given value must fit into the reserved bits.
   void SetFlags(plUInt8 uiFlags)
   {
-    PLASMA_ASSERT_DEBUG(uiFlags <= FlagsMask, "The flag value {} requires more than {} bits", uiFlags, NumFlagBits);
+    PL_ASSERT_DEBUG(uiFlags <= FlagsMask, "The flag value {} requires more than {} bits", uiFlags, NumFlagBits);
 
     std::uintptr_t& iptr = *reinterpret_cast<std::uintptr_t*>(&m_pPtr);
 
@@ -95,24 +95,29 @@ public:
     return GetPtr() == pPtr;
   }
 
+#if PL_DISABLED(PL_USE_CPP20_OPERATORS)
   /// \brief Compares the pointer part for inequality (flags are ignored)
   template <typename = typename std::enable_if<std::is_const<PtrType>::value == false>>
   bool operator!=(const PtrType* pPtr) const
   {
     return !(*this == pPtr);
   }
+#endif
+
+  bool operator==(const plPointerWithFlags<PtrType, NumFlagBits>& rhs) const
+  {
+    return GetPtr() == rhs.GetPtr();
+  }
+
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plPointerWithFlags<PtrType, NumFlagBits>&);
 
   /// \brief Compares the pointer part for equality (flags are ignored)
   bool operator==(PtrType* pPtr) const { return GetPtr() == pPtr; }
-
-  /// \brief Compares the pointer part for inequality (flags are ignored)
-  bool operator!=(PtrType* pPtr) const { return !(*this == pPtr); }
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(PtrType*);
 
   /// \brief Compares the pointer part for equality (flags are ignored)
   bool operator==(std::nullptr_t) const { return GetPtr() == nullptr; }
-
-  /// \brief Compares the pointer part for inequality (flags are ignored)
-  bool operator!=(std::nullptr_t) const { return !(*this == nullptr); }
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(std::nullptr_t);
 
   /// \brief Checks whether the pointer part is not nullptr (flags are ignored)
   explicit operator bool() const { return GetPtr() != nullptr; }

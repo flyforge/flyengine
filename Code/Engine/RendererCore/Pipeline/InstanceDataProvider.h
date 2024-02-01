@@ -8,9 +8,9 @@ struct plPerInstanceData;
 class plInstanceDataProvider;
 class plInstancedMeshComponent;
 
-struct PLASMA_RENDERERCORE_DLL plInstanceData
+struct PL_RENDERERCORE_DLL plInstanceData
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plInstanceData);
+  PL_DISALLOW_COPY_AND_ASSIGN(plInstanceData);
 
 public:
   plInstanceData(plUInt32 uiMaxInstanceCount = 1024);
@@ -32,14 +32,14 @@ private:
   void CreateBuffer(plUInt32 uiSize);
   void Reset();
 
-  plUInt32 m_uiBufferSize;
-  plUInt32 m_uiBufferOffset;
+  plUInt32 m_uiBufferSize = 0;
+  plUInt32 m_uiBufferOffset = 0;
   plDynamicArray<plPerInstanceData, plAlignedAllocatorWrapper> m_PerInstanceData;
 };
 
-class PLASMA_RENDERERCORE_DLL plInstanceDataProvider : public plFrameDataProvider<plInstanceData>
+class PL_RENDERERCORE_DLL plInstanceDataProvider : public plFrameDataProvider<plInstanceData>
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plInstanceDataProvider, plFrameDataProviderBase);
+  PL_ADD_DYNAMIC_REFLECTION(plInstanceDataProvider, plFrameDataProviderBase);
 
 public:
   plInstanceDataProvider();

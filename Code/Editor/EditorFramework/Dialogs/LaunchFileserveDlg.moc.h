@@ -5,13 +5,13 @@
 #include <Foundation/Strings/String.h>
 #include <QDialog>
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtLaunchFileserveDlg : public QDialog, public Ui_plQtLaunchFileserveDlg
+class PL_EDITORFRAMEWORK_DLL plQtLaunchFileserveDlg : public QDialog, public Ui_plQtLaunchFileserveDlg
 {
 public:
   Q_OBJECT
 
 public:
-  plQtLaunchFileserveDlg(QWidget* parent);
+  plQtLaunchFileserveDlg(QWidget* pParent);
   ~plQtLaunchFileserveDlg();
 
   plString m_sFileserveCmdLine;

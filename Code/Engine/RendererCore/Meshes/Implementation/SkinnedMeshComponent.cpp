@@ -4,12 +4,12 @@
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <RendererCore/Meshes/SkinnedMeshComponent.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
-#include <RendererCore/Shader/Types.h>
+#include <RendererFoundation/Shader/Types.h>
 #include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkinnedMeshRenderData, 1, plRTTIDefaultAllocator<plSkinnedMeshRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSkinnedMeshRenderData, 1, plRTTIDefaultAllocator<plSkinnedMeshRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plSkinnedMeshRenderData::FillBatchIdAndSortingKey()
@@ -71,7 +71,7 @@ void plSkinningState::FillSkinnedMeshRenderData(plSkinnedMeshRenderData& ref_ren
 
   if (m_bTransformsUpdated[uiExIdx] && *m_bTransformsUpdated[uiExIdx] == false)
   {
-    auto pSkinningMatrices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plShaderTransform, m_Transforms.GetCount());
+    auto pSkinningMatrices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plShaderTransform, m_Transforms.GetCount());
     pSkinningMatrices.CopyFrom(m_Transforms);
 
     ref_renderData.m_pNewSkinningTransformData = pSkinningMatrices.ToByteArray();
@@ -79,4 +79,4 @@ void plSkinningState::FillSkinnedMeshRenderData(plSkinnedMeshRenderData& ref_ren
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_SkinnedMeshComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Meshes_Implementation_SkinnedMeshComponent);

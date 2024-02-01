@@ -17,7 +17,7 @@ class plRTTI;
 /// functionality.
 class plLongOpsAdapter
 {
-  PLASMA_DECLARE_SINGLETON(plLongOpsAdapter);
+  PL_DECLARE_SINGLETON(plLongOpsAdapter);
 
 public:
   plLongOpsAdapter();

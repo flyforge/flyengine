@@ -5,17 +5,17 @@
 #include <RendererFoundation/RendererFoundationDLL.h>
 
 // \brief This class can be used to define the render targets to be used by an plView.
-struct PLASMA_RENDERERFOUNDATION_DLL plGALRenderTargets
+struct PL_RENDERERFOUNDATION_DLL plGALRenderTargets
 {
   bool operator==(const plGALRenderTargets& other) const;
   bool operator!=(const plGALRenderTargets& other) const;
 
-  plGALTextureHandle m_hRTs[PLASMA_GAL_MAX_RENDERTARGET_COUNT];
+  plGALTextureHandle m_hRTs[PL_GAL_MAX_RENDERTARGET_COUNT];
   plGALTextureHandle m_hDSTarget;
 };
 
 // \brief This class can be used to construct render target setups on the stack.
-class PLASMA_RENDERERFOUNDATION_DLL plGALRenderTargetSetup
+class PL_RENDERERFOUNDATION_DLL plGALRenderTargetSetup
 {
 public:
   plGALRenderTargetSetup();
@@ -34,13 +34,13 @@ public:
   void DestroyAllAttachedViews();
 
 protected:
-  plGALRenderTargetViewHandle m_hRTs[PLASMA_GAL_MAX_RENDERTARGET_COUNT];
+  plGALRenderTargetViewHandle m_hRTs[PL_GAL_MAX_RENDERTARGET_COUNT];
   plGALRenderTargetViewHandle m_hDSTarget;
 
   plUInt8 m_uiRTCount = 0;
 };
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALRenderingSetup
+struct PL_RENDERERFOUNDATION_DLL plGALRenderingSetup
 {
   bool operator==(const plGALRenderingSetup& other) const;
   bool operator!=(const plGALRenderingSetup& other) const;

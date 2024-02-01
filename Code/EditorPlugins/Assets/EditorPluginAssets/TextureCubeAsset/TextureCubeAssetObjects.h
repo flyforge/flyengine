@@ -9,7 +9,7 @@ struct plPropertyMetaStateEvent;
 
 struct plTextureCubeChannelMappingEnum
 {
-  typedef plInt8 StorageType;
+  using StorageType = plInt8;
 
   enum Enum
   {
@@ -23,12 +23,12 @@ struct plTextureCubeChannelMappingEnum
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_NO_LINKAGE, plTextureCubeChannelMappingEnum);
+PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plTextureCubeChannelMappingEnum);
 
 
 class plTextureCubeAssetProperties : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plTextureCubeAssetProperties, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plTextureCubeAssetProperties, plReflectedClass);
 
 public:
   static void PropertyMetaStateEventHandler(plPropertyMetaStateEvent& e);

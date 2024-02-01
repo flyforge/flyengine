@@ -1,3 +1,0 @@
-Processing failed
-Preprocessor/IncorrectNesting1.txt: Line 12 [1]: Error: Expected a preprocessor command
-Log: 'File 'Preprocessor/IncorrectNesting1.txt', Line 12 (1): Expected a preprocessor command'

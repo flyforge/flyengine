@@ -1,3 +1,0 @@
-#define W
-
-#include "Includes\ErrorWarning.txt"

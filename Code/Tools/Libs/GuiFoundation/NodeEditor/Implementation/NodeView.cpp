@@ -4,11 +4,9 @@
 #include <GuiFoundation/NodeEditor/NodeView.moc.h>
 #include <QMouseEvent>
 
-plQtNodeView::plQtNodeView(QWidget* parent)
-  : QGraphicsView(parent)
-  , m_pScene(nullptr)
-  , m_bPanning(false)
-  , m_iPanCounter(0)
+plQtNodeView::plQtNodeView(QWidget* pParent)
+  : QGraphicsView(pParent)
+
 {
   setRenderHints(QPainter::Antialiasing | QPainter::SmoothPixmapTransform);
   setDragMode(QGraphicsView::DragMode::RubberBandDrag);
@@ -17,10 +15,9 @@ plQtNodeView::plQtNodeView(QWidget* parent)
   setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
   m_ViewPos = QPointF(0, 0);
   m_ViewScale = QPointF(1, 1);
-\
 }
 
-plQtNodeView::~plQtNodeView() {}
+plQtNodeView::~plQtNodeView() = default;
 
 void plQtNodeView::SetScene(plQtNodeScene* pScene)
 {
@@ -45,11 +42,7 @@ void plQtNodeView::mousePressEvent(QMouseEvent* event)
   if (event->button() == Qt::RightButton)
   {
     setContextMenuPolicy(Qt::NoContextMenu);
-#if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    m_StartDragView = event->localPos();
-#else
-    m_vStartDragView = event->pos();
-#endif
+    m_StartDragView = event->position();
 
     m_StartDragScene = m_ViewPos;
     viewport()->setCursor(Qt::ClosedHandCursor);
@@ -67,7 +60,7 @@ void plQtNodeView::mouseMoveEvent(QMouseEvent* event)
   {
     m_iPanCounter++;
 #if QT_VERSION >= QT_VERSION_CHECK(5, 15, 0)
-    QPointF vViewDelta = m_StartDragView - event->localPos();
+    QPointF vViewDelta = m_StartDragView - event->position();
 #else
     QPointF vViewDelta = m_vStartDragView - event->pos();
 #endif
@@ -143,13 +136,13 @@ void plQtNodeView::resizeEvent(QResizeEvent* event)
   UpdateView();
 }
 
-void plQtNodeView::drawBackground(QPainter *painter, const QRectF &r)
+void plQtNodeView::drawBackground(QPainter* painter, const QRectF& r)
 {
   QGraphicsView::drawBackground(painter, r);
 
   if(m_ViewScale.manhattanLength() > 1.0)
   {
-    QPen pfine(plToQtColor(plColorScheme::GetColor(plColorScheme::Black, 9)), 1.0);
+    QPen pfine(plToQtColor(plColorScheme::GetColor(plColorScheme::Gray, 0)), 1.0);
 
     painter->setPen(pfine);
     DrawGrid(painter, 15);
@@ -164,8 +157,12 @@ void plQtNodeView::drawBackground(QPainter *painter, const QRectF &r)
     painter->setPen(p);
     DrawGrid(painter, scale);
   }
-
-  UpdateView();
+  
+  // Only force constant redraws when doing the debug animation.
+  if (GetScene()->GetConnectionDecorationFlags().IsSet(plQtNodeScene::ConnectionDecorationFlags::DrawDebugging))
+  {
+    UpdateView();
+  }
 }
 
 void plQtNodeView::UpdateView()
@@ -175,7 +172,7 @@ void plQtNodeView::UpdateView()
   fitInView(sceneRect, Qt::KeepAspectRatio);
 }
 
-void plQtNodeView::DrawGrid(QPainter *painter, const double gridStep)
+void plQtNodeView::DrawGrid(QPainter* painter, const double gridStep)
 {
   const QRectF sceneRect(m_ViewPos.x(), m_ViewPos.y(), width() / m_ViewScale.x(), height() / m_ViewScale.y());
   const QPointF topLeft = sceneRect.topLeft();

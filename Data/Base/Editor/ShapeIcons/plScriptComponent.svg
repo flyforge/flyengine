@@ -1,3 +1,61 @@
-version https://git-lfs.github.com/spec/v1
-oid sha256:927056e6eff16d1cf67e174ff2ba8c6a1da264dfe06438d7b19d440113d4611a
-size 3214
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Transformed by: SVG Repo Mixer Tools -->
+
+<svg
+   width="800px"
+   height="800px"
+   viewBox="0 0 16 16"
+   fill="none"
+   version="1.1"
+   id="svg1"
+   sodipodi:docname="plScriptComponent.svg"
+   inkscape:version="1.3 (0e150ed6c4, 2023-07-21)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <defs
+     id="defs1" />
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:showpageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#505050"
+     inkscape:zoom="0.733125"
+     inkscape:cx="2273.1458"
+     inkscape:cy="629.49702"
+     inkscape:window-width="5120"
+     inkscape:window-height="1369"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="SVGRepo_iconCarrier" />
+  <g
+     id="SVGRepo_bgCarrier"
+     stroke-width="0" />
+  <g
+     id="SVGRepo_tracerCarrier"
+     stroke-linecap="round"
+     stroke-linejoin="round" />
+  <g
+     id="SVGRepo_iconCarrier">
+    <rect
+       style="fill:#b3b3b3;stroke-width:0.0196405"
+       id="rect1"
+       width="15.220778"
+       height="14.031876"
+       x="0.70905834"
+       y="1.4362689" />
+    <path
+       fill-rule="nonzero"
+       clip-rule="nonzero"
+       d="M 0,1.75 C 0,0.783501 0.783502,0 1.75,0 h 12.5 C 15.2165,0 16,0.783502 16,1.75 v 2 C 16,4.16421 15.6642,4.5 15.25,4.5 14.8358,4.5 14.5,4.16421 14.5,3.75 v -2 C 14.5,1.61193 14.3881,1.5 14.25,1.5 H 1.75 C 1.61193,1.5 1.5,1.61193 1.5,1.75 v 12.5 c 0,0.1381 0.11193,0.25 0.25,0.25 h 13.5 C 15.6642,14.5 16,14.8358 16,15.25 16,15.6642 15.6642,16 15.25,16 H 1.75 C 0.783501,16 0,15.2165 0,14.25 Z M 11.2757,6.58011 C 11.6944,6.08164 12.3507,5.75 13.25,5.75 c 0.8349,0 1.4648,0.28567 1.8894,0.73481 0.2845,0.30102 0.2711,0.77571 -0.0299,1.06024 C 14.8085,7.82958 14.3338,7.81621 14.0493,7.51519 13.9394,7.39898 13.7204,7.25 13.25,7.25 12.7493,7.25 12.5306,7.41836 12.4243,7.54489 12.2934,7.70065 12.25,7.896 12.25,8 c 0,0.104 0.0434,0.29935 0.1743,0.45511 0.1063,0.12653 0.325,0.29489 0.8257,0.29489 0.0757,0 0.1488,0.01121 0.2176,0.03207 0.6631,0.09439 1.1643,0.39044 1.5067,0.79804 C 15.3684,10.0493 15.5,10.604 15.5,11 c 0,0.396 -0.1316,0.9507 -0.5257,1.4199 C 14.5556,12.9184 13.8993,13.25 13,13.25 c -0.8349,0 -1.4648,-0.2857 -1.8894,-0.7348 -0.2845,-0.301 -0.2711,-0.7757 0.0299,-1.0603 0.301,-0.2845 0.7757,-0.2711 1.0602,0.0299 0.1099,0.1162 0.3289,0.2652 0.7993,0.2652 0.5007,0 0.7194,-0.1684 0.8257,-0.2949 C 13.9566,11.2993 14,11.104 14,11 14,10.896 13.9566,10.7007 13.8257,10.5449 13.7194,10.4184 13.5007,10.25 13,10.25 12.9243,10.25 12.8512,10.2388 12.7824,10.2179 12.1193,10.1235 11.6181,9.82749 11.2757,9.41989 10.8816,8.95065 10.75,8.396 10.75,8 c 0,-0.396 0.1316,-0.95065 0.5257,-1.41989 z"
+       fill="#ffffff"
+       id="path1"
+       sodipodi:nodetypes="ssssssssssssssssssscscscscscsccscscccscscsccsc" />
+  </g>
+</svg>

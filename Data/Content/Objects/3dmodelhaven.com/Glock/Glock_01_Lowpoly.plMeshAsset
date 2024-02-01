@@ -14,11 +14,18 @@ o
 			s{"Objects/3dmodelhaven.com/Glock/Glock_01_Lowpoly.FBX"}
 		}
 		Uuid %DocumentID{u4{6742989055110145668,5486049412456343846}}
-		u4 %Hash{9275746191240920592}
+		u4 %Hash{13685988991963588562}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
+		VarArray %PackageDeps
+		{
+			s{"{ 2c01e68f-69e0-4170-95b4-b6823bd561ff }"}
+			s{"{ 6e75b773-2235-4f9a-a9fa-192530870fca }"}
+			s{"{ e7ae4a61-432f-406b-a939-e6ce521c572b }"}
+		}
 		VarArray %References
 		{
+			s{"Objects/3dmodelhaven.com/Glock/Glock_01_Lowpoly.FBX"}
 			s{"{ 2c01e68f-69e0-4170-95b4-b6823bd561ff }"}
 			s{"{ 6e75b773-2235-4f9a-a9fa-192530870fca }"}
 			s{"{ e7ae4a61-432f-406b-a939-e6ce521c572b }"}
@@ -114,25 +121,24 @@ Types
 {
 o
 {
-	Uuid %id{u4{11674692945138119280,7958532569312584972}}
+	Uuid %id{u4{3975990526721687754,926589309994965004}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
 	{
 		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
 		VarArray %Functions{}
-		s %ParentTypeName{""}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
-		s %TypeName{"plMaterialResourceSlot"}
-		u3 %TypeSize{136}
+		s %TypeName{"plMeshPrimitive"}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{4572215149935407619,9171673326008965719}}
+	Uuid %id{u4{5578311699685810862,3953450409323753049}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -141,16 +147,15 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plReflectedClass"}
-		s %PluginName{"plasmaEditorPluginAssets"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshAssetProperties"}
-		u3 %TypeSize{1240}
 		u3 %TypeVersion{3}
 	}
 }
 o
 {
-	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	Uuid %id{u4{6089094783765586323,8705960867921430659}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -162,13 +167,12 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plDocumentRoot"}
-		u3 %TypeSize{72}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	Uuid %id{u4{7523378465055293707,11345788873737253128}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -177,52 +181,15 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{""}
-		s %PluginName{"Static"}
+		s %PluginName{"plEditorPluginAssets"}
 		VarArray %Properties{}
-		s %TypeName{"plEnumBase"}
-		u3 %TypeSize{1}
+		s %TypeName{"plMaterialResourceSlot"}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{11264905787349757498,13035192948806003434}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"plasmaEditorPluginAssets"}
-		VarArray %Properties{}
-		s %TypeName{"plMeshPrimitive"}
-		u3 %TypeSize{1}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{4101022314413477917,13769697156274436726}}
-	s %t{"plReflectedTypeDescriptor"}
-	u3 %v{1}
-	p
-	{
-		VarArray %Attributes{}
-		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
-		VarArray %Functions{}
-		s %ParentTypeName{"plEnumBase"}
-		s %PluginName{"Static"}
-		VarArray %Properties{}
-		s %TypeName{"plMeshNormalPrecision"}
-		u3 %TypeSize{1}
-		u3 %TypeVersion{1}
-	}
-}
-o
-{
-	Uuid %id{u4{4664618235186762955,16317954485104532494}}
+	Uuid %id{u4{3437852327385397451,11533535376753039907}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -234,13 +201,29 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plMeshTexCoordPrecision"}
-		u3 %TypeSize{1}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	Uuid %id{u4{3566230308987241816,14467924040829974905}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plMeshNormalPrecision"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2947336711354777548,15013008608905564043}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -251,14 +234,13 @@ o
 		s %ParentTypeName{""}
 		s %PluginName{"Static"}
 		VarArray %Properties{}
-		s %TypeName{"plReflectedClass"}
-		u3 %TypeSize{8}
+		s %TypeName{"plEnumBase"}
 		u3 %TypeVersion{1}
 	}
 }
 o
 {
-	Uuid %id{u4{698364993276436088,17804542439804637414}}
+	Uuid %id{u4{14469700887475489738,16951777026318265606}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -270,7 +252,23 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plBasisAxis"}
-		u3 %TypeSize{1}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{983387834180907111,17935407260904399048}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
 		u3 %TypeVersion{1}
 	}
 }

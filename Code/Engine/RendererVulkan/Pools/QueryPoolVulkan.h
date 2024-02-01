@@ -7,7 +7,7 @@
 class plGALDeviceVulkan;
 
 /// \brief Pool for GPU queries.
-class PLASMA_RENDERERVULKAN_DLL plQueryPoolVulkan
+class PL_RENDERERVULKAN_DLL plQueryPoolVulkan
 {
 public:
   /// \brief Initializes the pool.

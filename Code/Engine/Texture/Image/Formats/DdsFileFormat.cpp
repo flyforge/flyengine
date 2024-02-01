@@ -6,6 +6,7 @@
 #include <Texture/Image/Formats/ImageFormatMappings.h>
 #include <Texture/Image/Image.h>
 
+// PL_STATICLINK_FORCE
 plDdsFileFormat g_ddsFormat;
 
 struct plDdsPixelFormat
@@ -113,8 +114,8 @@ struct plDdsCaps2
     CUBEMAP_NEGATIVEX = 0x000800,
     CUBEMAP_POSITIVEY = 0x001000,
     CUBEMAP_NEGATIVEY = 0x002000,
-    CUBEMAP_POSITIVPLASMA = 0x004000,
-    CUBEMAP_NEGATIVPLASMA = 0x008000,
+    CUBEMAP_POSITIVPL = 0x004000,
+    CUBEMAP_NEGATIVPL = 0x008000,
     VOLUME = 0x200000,
   };
 };
@@ -127,19 +128,19 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
   if (inout_stream.ReadBytes(&ref_ddsHeader, sizeof(plDdsHeader)) != sizeof(plDdsHeader))
   {
     plLog::Error("Failed to read file header.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (ref_ddsHeader.m_uiMagic != plDdsMagic)
   {
     plLog::Error("The file is not a recognized DDS file.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (ref_ddsHeader.m_uiSize != 124)
   {
     plLog::Error("The file header size {0} doesn't match the expected size of 124.", ref_ddsHeader.m_uiSize);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // Required in every .dds file. According to the spec, CAPS and PIXELFORMAT are also required, but D3DX outputs
@@ -147,13 +148,13 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
   if ((ref_ddsHeader.m_uiFlags & plDdsdFlags::WIDTH) == 0 || (ref_ddsHeader.m_uiFlags & plDdsdFlags::HEIGHT) == 0)
   {
     plLog::Error("The file header doesn't specify the mandatory WIDTH or HEIGHT flag.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if ((ref_ddsHeader.m_uiCaps & plDdsCaps::TEXTURE) == 0)
   {
     plLog::Error("The file header doesn't specify the mandatory TEXTURE flag.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ref_imageHeader.SetWidth(ref_ddsHeader.m_uiWidth);
@@ -162,7 +163,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
   if (ref_ddsHeader.m_ddspf.m_uiSize != 32)
   {
     plLog::Error("The pixel format size {0} doesn't match the expected value of 32.", ref_ddsHeader.m_ddspf.m_uiSize);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plDdsHeaderDxt10 headerDxt10;
@@ -182,7 +183,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
         plArgU(ref_ddsHeader.m_ddspf.m_uiRBitMask, 1, false, 16), plArgU(ref_ddsHeader.m_ddspf.m_uiGBitMask, 1, false, 16),
         plArgU(ref_ddsHeader.m_ddspf.m_uiBBitMask, 1, false, 16), plArgU(ref_ddsHeader.m_ddspf.m_uiABitMask, 1, false, 16),
         ref_ddsHeader.m_ddspf.m_uiRGBBitCount);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     // Verify that the format we found is correct
@@ -190,7 +191,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
     {
       plLog::Error("The number of bits per pixel specified in the file ({0}) does not match the expected value of {1} for the format '{2}'.",
         ref_ddsHeader.m_ddspf.m_uiRGBBitCount, plImageFormat::GetBitsPerPixel(format), plImageFormat::GetName(format));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else if ((ref_ddsHeader.m_ddspf.m_uiFlags & plDdpfFlags::FOURCC) != 0)
@@ -200,7 +201,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
       if (inout_stream.ReadBytes(&headerDxt10, sizeof(plDdsHeaderDxt10)) != sizeof(plDdsHeaderDxt10))
       {
         plLog::Error("Failed to read file header.");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       format = plImageFormatMappings::FromDxgiFormat(headerDxt10.m_uiDxgiFormat);
@@ -208,7 +209,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
       if (format == plImageFormat::UNKNOWN)
       {
         plLog::Error("The DXGI format {0} has no equivalent image format.", headerDxt10.m_uiDxgiFormat);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
     else
@@ -220,14 +221,14 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
         plLog::Error("The FourCC code '{0}{1}{2}{3}' was not recognized.", plArgC((char)(ref_ddsHeader.m_ddspf.m_uiFourCC >> 0)),
           plArgC((char)(ref_ddsHeader.m_ddspf.m_uiFourCC >> 8)), plArgC((char)(ref_ddsHeader.m_ddspf.m_uiFourCC >> 16)),
           plArgC((char)(ref_ddsHeader.m_ddspf.m_uiFourCC >> 24)));
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
   else
   {
     plLog::Error("The image format is neither specified as a pixel mask nor as a FourCC code.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   ref_imageHeader.SetImageFormat(format);
@@ -246,7 +247,7 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
   if (bVolume && bCubeMap)
   {
     plLog::Error("The header specifies both the VOLUME and CUBEMAP flags.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (bCubeMap)
@@ -258,12 +259,12 @@ static plResult ReadImageData(plStreamReader& inout_stream, plImageHeader& ref_i
     ref_imageHeader.SetDepth(ref_ddsHeader.m_uiDepth);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDdsFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageHeader& ref_header, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plDdsFileFormat::ReadImageHeader");
+  PL_PROFILE_SCOPE("plDdsFileFormat::ReadImageHeader");
 
   plDdsHeader ddsHeader;
   return ReadImageData(inout_stream, ref_header, ddsHeader);
@@ -271,11 +272,11 @@ plResult plDdsFileFormat::ReadImageHeader(plStreamReader& inout_stream, plImageH
 
 plResult plDdsFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_image, plStringView sFileExtension) const
 {
-  PLASMA_PROFILE_SCOPE("plDdsFileFormat::ReadImage");
+  PL_PROFILE_SCOPE("plDdsFileFormat::ReadImage");
 
   plImageHeader imageHeader;
   plDdsHeader ddsHeader;
-  PLASMA_SUCCEED_OR_RETURN(ReadImageData(inout_stream, imageHeader, ddsHeader));
+  PL_SUCCEED_OR_RETURN(ReadImageData(inout_stream, imageHeader, ddsHeader));
 
   ref_image.ResetAndAlloc(imageHeader);
 
@@ -285,7 +286,7 @@ plResult plDdsFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
   if (bPitch && ref_image.GetRowPitch(0) != ddsHeader.m_uiPitchOrLinearSize)
   {
     plLog::Error("The row pitch specified in the header doesn't match the expected pitch.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt64 uiDataSize = ref_image.GetByteBlobPtr().GetCount();
@@ -293,10 +294,10 @@ plResult plDdsFileFormat::ReadImage(plStreamReader& inout_stream, plImage& ref_i
   if (inout_stream.ReadBytes(ref_image.GetByteBlobPtr().GetPtr(), uiDataSize) != uiDataSize)
   {
     plLog::Error("Failed to read image data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImageView& image, plStringView sFileExtension) const
@@ -345,7 +346,7 @@ plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     if (bArray)
     {
       plLog::Error("The image is both an array and volume texture. This is not supported.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     fileHeader.m_uiFlags |= plDdsdFlags::DEPTH;
@@ -368,7 +369,7 @@ plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
 
     default:
       plLog::Error("Unknown image format type.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
   fileHeader.m_uiCaps = plDdsCaps::TEXTURE;
@@ -378,18 +379,18 @@ plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     if (uiNumFaces != 6)
     {
       plLog::Error("The image is a cubemap, but has {0} faces instead of the expected 6.", uiNumFaces);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (bVolume)
     {
       plLog::Error("The image is both a cubemap and volume texture. This is not supported.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     fileHeader.m_uiCaps |= plDdsCaps::COMPLEX;
     fileHeader.m_uiCaps2 |= plDdsCaps2::CUBEMAP | plDdsCaps2::CUBEMAP_POSITIVEX | plDdsCaps2::CUBEMAP_NEGATIVEX | plDdsCaps2::CUBEMAP_POSITIVEY |
-                            plDdsCaps2::CUBEMAP_NEGATIVEY | plDdsCaps2::CUBEMAP_POSITIVPLASMA | plDdsCaps2::CUBEMAP_NEGATIVPLASMA;
+                            plDdsCaps2::CUBEMAP_NEGATIVEY | plDdsCaps2::CUBEMAP_POSITIVPL | plDdsCaps2::CUBEMAP_NEGATIVPL;
   }
 
   if (bArray)
@@ -455,7 +456,7 @@ plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     if (uiDxgiFormat == 0)
     {
       plLog::Error("The image needs to be written as a DXT10 file, but no matching DXGI format was found for '{0}'.", plImageFormat::GetName(format));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     fileHeader.m_ddspf.m_uiFlags = plDdpfFlags::FOURCC;
@@ -488,28 +489,28 @@ plResult plDdsFileFormat::WriteImage(plStreamWriter& inout_stream, const plImage
     headerDxt10.m_uiMiscFlags2 = 0;
   }
 
-  if (inout_stream.WriteBytes(&fileHeader, sizeof(fileHeader)) != PLASMA_SUCCESS)
+  if (inout_stream.WriteBytes(&fileHeader, sizeof(fileHeader)) != PL_SUCCESS)
   {
     plLog::Error("Failed to write image header.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (bDxt10)
   {
-    if (inout_stream.WriteBytes(&headerDxt10, sizeof(headerDxt10)) != PLASMA_SUCCESS)
+    if (inout_stream.WriteBytes(&headerDxt10, sizeof(headerDxt10)) != PL_SUCCESS)
     {
       plLog::Error("Failed to write image DX10 header.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
-  if (inout_stream.WriteBytes(image.GetByteBlobPtr().GetPtr(), image.GetByteBlobPtr().GetCount()) != PLASMA_SUCCESS)
+  if (inout_stream.WriteBytes(image.GetByteBlobPtr().GetPtr(), image.GetByteBlobPtr().GetCount()) != PL_SUCCESS)
   {
     plLog::Error("Failed to write image data.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plDdsFileFormat::CanReadFileType(plStringView sExtension) const
@@ -524,4 +525,6 @@ bool plDdsFileFormat::CanWriteFileType(plStringView sExtension) const
 
 
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Formats_DdsFileFormat);
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Formats_DdsFileFormat);
+

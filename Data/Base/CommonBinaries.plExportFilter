@@ -1,19 +1,36 @@
 [EXCLUDE]
 
 *.exe
-*.loaded
+*.dll
 *.pdb
+*.loaded
+*.plPluginBundle
 */iconengines/*
 */imageformats/*
 */platforms/*
-*/plasmaEditorPlugin*
-*/PlasmaEnginePlugin*
-*/plSharedPlugin*
-*/Qt5*
-*/Qt6*
+
+// failed shader compilations
+*/_Failed_*
+
 
 [INCLUDE]
 
 #if PLATFORM_PROFILE_PC
 /Player.exe
+/plFoundation.dll
+/plCore.dll
+/plGameEngine.dll
+/plRendererCore.dll
+/plRendererDX11.dll
+/plRendererFoundation.dll
+/plShaderCompilerHLSL.dll
+/plTexture.dll
+/plUtilities.dll
+/Imgui.dll
+/Lua.dll
+/ozz.dll
+/zstd.dll
+/Duktape.dll
+/stb_image.dll
+/enet.dll
 #endif

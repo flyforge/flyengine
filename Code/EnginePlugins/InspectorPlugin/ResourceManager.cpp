@@ -95,7 +95,7 @@ namespace ResourceManagerDetail
         return;
 
       default:
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
     }
   }
 } // namespace ResourceManagerDetail

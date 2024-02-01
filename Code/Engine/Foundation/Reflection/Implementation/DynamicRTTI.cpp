@@ -9,4 +9,3 @@ bool plReflectedClass::IsInstanceOf(const plRTTI* pType) const
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Reflection_Implementation_DynamicRTTI);

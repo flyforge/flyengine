@@ -10,12 +10,12 @@
 namespace
 {
   template <typename T>
-  PLASMA_ALWAYS_INLINE plProcessingStream MakeStream(plArrayPtr<T> data, plUInt32 uiOffset, const plHashedString& sName, plProcessingStream::DataType dataType = plProcessingStream::DataType::Float)
+  PL_ALWAYS_INLINE plProcessingStream MakeStream(plArrayPtr<T> data, plUInt32 uiOffset, const plHashedString& sName, plProcessingStream::DataType dataType = plProcessingStream::DataType::Float)
   {
     return plProcessingStream(sName, data.ToByteArray().GetSubArray(uiOffset), dataType, sizeof(T));
   }
 
-  PLASMA_ALWAYS_INLINE float Remap(plEnum<plProcVertexColorChannelMapping> channelMapping, const plColor& srcColor)
+  PL_ALWAYS_INLINE float Remap(plEnum<plProcVertexColorChannelMapping> channelMapping, const plColor& srcColor)
   {
     if (channelMapping >= plProcVertexColorChannelMapping::R && channelMapping <= plProcVertexColorChannelMapping::A)
     {
@@ -38,15 +38,15 @@ VertexColorTask::VertexColorTask()
 
 VertexColorTask::~VertexColorTask() = default;
 
-void VertexColorTask::Prepare(const plWorld& world, const plMeshBufferResourceDescriptor& mbDesc, const plTransform& transform, plArrayPtr<plSharedPtr<const VertexColorOutput>> outputs, plArrayPtr<plProcVertexColorMapping> outputMappings, plArrayPtr<plUInt32> outputVertexColors)
+void VertexColorTask::Prepare(const plWorld& world, const plMeshBufferResourceDescriptor& desc, const plTransform& transform, plArrayPtr<plSharedPtr<const VertexColorOutput>> outputs, plArrayPtr<plProcVertexColorMapping> outputMappings, plArrayPtr<plUInt32> outputVertexColors)
 {
-  PLASMA_PROFILE_SCOPE("VertexColorPrepare");
+  PL_PROFILE_SCOPE("VertexColorPrepare");
 
   m_InputVertices.Clear();
-  m_InputVertices.Reserve(mbDesc.GetVertexCount());
+  m_InputVertices.Reserve(desc.GetVertexCount());
 
-  const plVertexDeclarationInfo& vdi = mbDesc.GetVertexDeclaration();
-  const plUInt8* pRawVertexData = mbDesc.GetVertexBufferData().GetPtr();
+  const plVertexDeclarationInfo& vdi = desc.GetVertexDeclaration();
+  const plUInt8* pRawVertexData = desc.GetVertexBufferData().GetPtr();
 
   const float* pPositions = nullptr;
   const plUInt8* pNormals = nullptr;
@@ -100,17 +100,17 @@ void VertexColorTask::Prepare(const plWorld& world, const plMeshBufferResourceDe
   normalTransform.Invert(0.0f).IgnoreResult();
   normalTransform.Transpose();
 
-  const plUInt32 uiElementStride = mbDesc.GetVertexDataSize();
+  const plUInt32 uiElementStride = desc.GetVertexDataSize();
 
   // write out all vertices
-  for (plUInt32 i = 0; i < mbDesc.GetVertexCount(); ++i)
+  for (plUInt32 i = 0; i < desc.GetVertexCount(); ++i)
   {
     plMeshBufferUtils::DecodeNormal(plMakeArrayPtr(pNormals, sizeof(plVec3)), normalFormat, vNormal).IgnoreResult();
 
     auto& vert = m_InputVertices.ExpandAndGetRef();
     vert.m_vPosition = transform.TransformPosition(plVec3(pPositions[0], pPositions[1], pPositions[2]));
     vert.m_vNormal = normalTransform.TransformDirection(vNormal).GetNormalized();
-    vert.m_Color = pColors != nullptr ? plColor(*pColors) : plColor::ZeroColor();
+    vert.m_Color = pColors != nullptr ? plColor(*pColors) : plColor::MakeZero();
     vert.m_uiIndex = i;
 
     pPositions = plMemoryUtils::AddByteOffset(pPositions, uiElementStride);
@@ -126,7 +126,7 @@ void VertexColorTask::Prepare(const plWorld& world, const plMeshBufferResourceDe
 
   // TODO:
   // plBoundingBox box = mbDesc.GetBounds();
-  plBoundingBox box = plBoundingBox(plVec3(-1000), plVec3(1000));
+  plBoundingBox box = plBoundingBox::MakeFromMinMax(plVec3(-1000), plVec3(1000));
   box.TransformFromOrigin(transform.GetAsMat4());
 
   m_VolumeCollections.Clear();
@@ -156,7 +156,7 @@ void VertexColorTask::Execute()
     if (pOutput == nullptr || pOutput->m_pByteCode == nullptr)
       continue;
 
-    PLASMA_PROFILE_SCOPE("ExecuteVM");
+    PL_PROFILE_SCOPE("ExecuteVM");
 
     plUInt32 uiNumVertices = m_InputVertices.GetCount();
     m_TempData.SetCountUninitialized(uiNumVertices);
@@ -188,7 +188,10 @@ void VertexColorTask::Execute()
     }
 
     // Execute expression bytecode
-    m_VM.Execute(*(pOutput->m_pByteCode), inputs, outputs, uiNumVertices, m_GlobalData).IgnoreResult();
+    if (m_VM.Execute(*(pOutput->m_pByteCode), inputs, outputs, uiNumVertices, m_GlobalData, plExpressionVM::Flags::BestPerformance).Failed())
+    {
+      continue;
+    }
 
     auto& outputMapping = m_OutputMappings[uiOutputIndex];
     for (plUInt32 i = 0; i < uiNumVertices; ++i)

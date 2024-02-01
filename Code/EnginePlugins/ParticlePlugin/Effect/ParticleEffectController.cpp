@@ -83,24 +83,24 @@ void plParticleEffectController::SetTransform(const plTransform& t, const plVec3
   }
 }
 
-void plParticleEffectController::Tick(const plTime& tDiff) const
+void plParticleEffectController::Tick(const plTime& diff) const
 {
   plParticleEffectInstance* pEffect = GetInstance();
 
   if (pEffect)
   {
     pEffect->PreSimulate();
-    pEffect->Update(tDiff);
+    pEffect->Update(diff);
   }
 }
 
-void plParticleEffectController::ExtractRenderData(plMsgExtractRenderData& msg, const plTransform& systemTransform) const
+void plParticleEffectController::ExtractRenderData(plMsgExtractRenderData& ref_msg, const plTransform& systemTransform) const
 {
   if (const plParticleEffectInstance* pEffect = GetInstance())
   {
     pEffect->SetIsVisible();
 
-    m_pModule->ExtractEffectRenderData(pEffect, msg, systemTransform);
+    m_pModule->ExtractEffectRenderData(pEffect, ref_msg, systemTransform);
   }
 }
 
@@ -115,11 +115,11 @@ void plParticleEffectController::StopImmediate()
   }
 }
 
-void plParticleEffectController::GetBoundingVolume(plBoundingBoxSphere& volume) const
+void plParticleEffectController::GetBoundingVolume(plBoundingBoxSphere& ref_volume) const
 {
   if (plParticleEffectInstance* pEffect = GetInstance())
   {
-    pEffect->GetBoundingVolume(volume);
+    pEffect->GetBoundingVolume(ref_volume);
   }
 }
 
@@ -149,23 +149,23 @@ plUInt64 plParticleEffectController::GetNumActiveParticles() const
   return 0;
 }
 
-void plParticleEffectController::SetParameter(const plTempHashedString& name, float value)
+void plParticleEffectController::SetParameter(const plTempHashedString& sName, float value)
 {
   plParticleEffectInstance* pEffect = GetInstance();
 
   if (pEffect)
   {
-    pEffect->SetParameter(name, value);
+    pEffect->SetParameter(sName, value);
   }
 }
 
-void plParticleEffectController::SetParameter(const plTempHashedString& name, const plColor& value)
+void plParticleEffectController::SetParameter(const plTempHashedString& sName, const plColor& value)
 {
   plParticleEffectInstance* pEffect = GetInstance();
 
   if (pEffect)
   {
-    pEffect->SetParameter(name, value);
+    pEffect->SetParameter(sName, value);
   }
 }
 
@@ -180,4 +180,4 @@ void plParticleEffectController::Invalidate()
   }
 }
 
-PLASMA_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectController);
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Effect_ParticleEffectController);

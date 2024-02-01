@@ -7,13 +7,13 @@
 #include <OpenXRPlugin/OpenXRHandTracking.h>
 #include <OpenXRPlugin/OpenXRSingleton.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plOpenXRHandTracking);
+PL_IMPLEMENT_SINGLETON(plOpenXRHandTracking);
 
 bool plOpenXRHandTracking::IsHandTrackingSupported(plOpenXR* pOpenXR)
 {
   XrSystemHandTrackingPropertiesEXT handTrackingSystemProperties{XR_TYPE_SYSTEM_HAND_TRACKING_PROPERTIES_EXT};
   XrSystemProperties systemProperties{XR_TYPE_SYSTEM_PROPERTIES, &handTrackingSystemProperties};
-  XrResult res = xrGetSystemProperties(pOpenXR->m_instance, pOpenXR->m_systemId, &systemProperties);
+  XrResult res = xrGetSystemProperties(pOpenXR->m_pInstance, pOpenXR->m_SystemId, &systemProperties);
   if (res == XrResult::XR_SUCCESS)
   {
     return handTrackingSystemProperties.supportsHandTracking;
@@ -30,7 +30,7 @@ plOpenXRHandTracking::plOpenXRHandTracking(plOpenXR* pOpenXR)
     const XrHandEXT uiHand = uiSide == 0 ? XR_HAND_LEFT_EXT : XR_HAND_RIGHT_EXT;
     XrHandTrackerCreateInfoEXT createInfo{XR_TYPE_HAND_TRACKER_CREATE_INFO_EXT};
     createInfo.hand = uiHand;
-    XR_LOG_ERROR(m_pOpenXR->m_extensions.pfn_xrCreateHandTrackerEXT(pOpenXR->m_session, &createInfo, &m_HandTracker[uiSide]));
+    XR_LOG_ERROR(m_pOpenXR->m_Extensions.pfn_xrCreateHandTrackerEXT(pOpenXR->m_pSession, &createInfo, &m_HandTracker[uiSide]));
 
     m_Locations[uiSide].type = XR_TYPE_HAND_JOINT_LOCATIONS_EXT;
     m_Locations[uiSide].next = &m_Velocities;
@@ -93,14 +93,14 @@ plOpenXRHandTracking::~plOpenXRHandTracking()
 {
   for (plUInt32 uiSide : {0, 1})
   {
-    XR_LOG_ERROR(m_pOpenXR->m_extensions.pfn_xrDestroyHandTrackerEXT(m_HandTracker[uiSide]));
+    XR_LOG_ERROR(m_pOpenXR->m_Extensions.pfn_xrDestroyHandTrackerEXT(m_HandTracker[uiSide]));
   }
 }
 
 plXRHandTrackingInterface::HandPartTrackingState plOpenXRHandTracking::TryGetBoneTransforms(
   plEnum<plXRHand> hand, plEnum<plXRHandPart> handPart, plEnum<plXRTransformSpace> space, plDynamicArray<plXRHandBone>& out_bones)
 {
-  PLASMA_ASSERT_DEV(handPart <= plXRHandPart::Little, "Invalid hand part.");
+  PL_ASSERT_DEV(handPart <= plXRHandPart::Little, "Invalid hand part.");
   out_bones.Clear();
 
   for (plUInt32 uiJointIndex : m_HandParts[handPart])
@@ -126,7 +126,7 @@ plXRHandTrackingInterface::HandPartTrackingState plOpenXRHandTracking::TryGetBon
         for (plXRHandBone& bone : out_bones)
         {
           plTransform local = bone.m_Transform;
-          bone.m_Transform.SetGlobalTransform(globalStageTransform, local);
+          bone.m_Transform = plTransform::MakeGlobalTransform(globalStageTransform, local);
         }
       }
     }
@@ -136,15 +136,15 @@ plXRHandTrackingInterface::HandPartTrackingState plOpenXRHandTracking::TryGetBon
 
 void plOpenXRHandTracking::UpdateJointTransforms()
 {
-  PLASMA_PROFILE_SCOPE("UpdateJointTransforms");
-  const XrTime time = m_pOpenXR->m_frameState.predictedDisplayTime;
+  PL_PROFILE_SCOPE("UpdateJointTransforms");
+  const XrTime time = m_pOpenXR->m_FrameState.predictedDisplayTime;
   XrHandJointsLocateInfoEXT locateInfo{XR_TYPE_HAND_JOINTS_LOCATE_INFO_EXT};
   locateInfo.baseSpace = m_pOpenXR->GetBaseSpace();
   locateInfo.time = time;
 
   for (plUInt32 uiSide : {0, 1})
   {
-    if (m_pOpenXR->m_extensions.pfn_xrLocateHandJointsEXT(m_HandTracker[uiSide], &locateInfo, &m_Locations[uiSide]) != XrResult::XR_SUCCESS)
+    if (m_pOpenXR->m_Extensions.pfn_xrLocateHandJointsEXT(m_HandTracker[uiSide], &locateInfo, &m_Locations[uiSide]) != XrResult::XR_SUCCESS)
       m_Locations[uiSide].isActive = false;
 
     if (m_Locations[uiSide].isActive)
@@ -176,4 +176,4 @@ void plOpenXRHandTracking::UpdateJointTransforms()
   }
 }
 
-PLASMA_STATICLINK_FILE(OpenXRPlugin, OpenXRPlugin_OpenXRHandTracking);
+PL_STATICLINK_FILE(OpenXRPlugin, OpenXRPlugin_OpenXRHandTracking);

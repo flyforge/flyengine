@@ -12,12 +12,12 @@ plActionDescriptorHandle plViewActions::s_hLinkDeviceCamera;
 
 void plViewActions::RegisterActions()
 {
-  s_hRenderMode = PLASMA_REGISTER_DYNAMIC_MENU("View.RenderMode", plRenderModeAction, ":/EditorFramework/Icons/RenderMode.svg");
-  s_hPerspective = PLASMA_REGISTER_DYNAMIC_MENU("View.RenderPerspective", plPerspectiveAction, ":/EditorFramework/Icons/Perspective.svg");
-  s_hActivateRemoteProcess = PLASMA_REGISTER_ACTION_1(
+  s_hRenderMode = PL_REGISTER_DYNAMIC_MENU("View.RenderMode", plRenderModeAction, ":/EditorFramework/Icons/RenderMode.svg");
+  s_hPerspective = PL_REGISTER_DYNAMIC_MENU("View.RenderPerspective", plPerspectiveAction, ":/EditorFramework/Icons/Perspective.svg");
+  s_hActivateRemoteProcess = PL_REGISTER_ACTION_1(
     "View.ActivateRemoteProcess", plActionScope::Window, "View", "", plViewAction, plViewAction::ButtonType::ActivateRemoteProcess);
   s_hLinkDeviceCamera =
-    PLASMA_REGISTER_ACTION_1("View.LinkDeviceCamera", plActionScope::Window, "View", "", plViewAction, plViewAction::ButtonType::LinkDeviceCamera);
+    PL_REGISTER_ACTION_1("View.LinkDeviceCamera", plActionScope::Window, "View", "", plViewAction, plViewAction::ButtonType::LinkDeviceCamera);
 }
 
 void plViewActions::UnregisterActions()
@@ -28,21 +28,21 @@ void plViewActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLinkDeviceCamera);
 }
 
-void plViewActions::MapActions(const char* szMapping, const char* szPath, plUInt32 flags)
+void plViewActions::MapToolbarActions(plStringView sMapping, plUInt32 uiFlags)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
-  if (flags & Flags::PerspectiveMode)
-    pMap->MapAction(s_hPerspective, szPath, 1.0f);
+  if (uiFlags & Flags::PerspectiveMode)
+    pMap->MapAction(s_hPerspective, "", 1.0f);
 
-  if (flags & Flags::RenderMode)
-    pMap->MapAction(s_hRenderMode, szPath, 2.0f);
+  if (uiFlags & Flags::RenderMode)
+    pMap->MapAction(s_hRenderMode, "", 2.0f);
 
-  if (flags & Flags::ActivateRemoteProcess)
+  if (uiFlags & Flags::ActivateRemoteProcess)
   {
-    pMap->MapAction(s_hActivateRemoteProcess, szPath, 4.0f);
-    pMap->MapAction(s_hLinkDeviceCamera, szPath, 5.0f);
+    pMap->MapAction(s_hActivateRemoteProcess, "", 4.0f);
+    pMap->MapAction(s_hLinkDeviceCamera, "", 5.0f);
   }
 }
 
@@ -50,14 +50,14 @@ void plViewActions::MapActions(const char* szMapping, const char* szPath, plUInt
 // plRenderModeAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderModeAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderModeAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plRenderModeAction::plRenderModeAction(const plActionContext& context, const char* szName, const char* szIconPath)
   : plEnumerationMenuAction(context, szName, szIconPath)
 {
   plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(context.m_pWindow);
-  PLASMA_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtEngineViewWidget'!");
+  PL_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtEngineViewWidget'!");
   InitEnumerationType(plGetStaticRTTI<plViewRenderMode>());
 }
 
@@ -78,15 +78,15 @@ void plRenderModeAction::Execute(const plVariant& value)
 // plPerspectiveAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPerspectiveAction, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPerspectiveAction, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plPerspectiveAction::plPerspectiveAction(const plActionContext& context, const char* szName, const char* szIconPath)
   : plEnumerationMenuAction(context, szName, szIconPath)
 {
   plQtEngineViewWidget* pView = qobject_cast<plQtEngineViewWidget*>(context.m_pWindow);
-  PLASMA_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtEngineViewWidget'!");
+  PL_ASSERT_DEV(pView != nullptr, "context.m_pWindow must be derived from type 'plQtEngineViewWidget'!");
   InitEnumerationType(plGetStaticRTTI<plSceneViewPerspective>());
 }
 
@@ -111,9 +111,9 @@ void plPerspectiveAction::Execute(const plVariant& value)
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewAction, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plViewAction, 1, plRTTINoAllocator)
   ;
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plViewAction::plViewAction(const plActionContext& context, const char* szName, ButtonType button)
   : plButtonAction(context, szName, false, "")
@@ -134,7 +134,7 @@ plViewAction::plViewAction(const plActionContext& context, const char* szName, B
   }
 }
 
-plViewAction::~plViewAction() {}
+plViewAction::~plViewAction() = default;
 
 void plViewAction::Execute(const plVariant& value)
 {
@@ -144,7 +144,7 @@ void plViewAction::Execute(const plVariant& value)
   {
     case plViewAction::ButtonType::ActivateRemoteProcess:
     {
-      PlasmaEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
+      plEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
     }
     break;
 
@@ -152,7 +152,7 @@ void plViewAction::Execute(const plVariant& value)
     {
       pView->m_pViewConfig->m_bUseCameraTransformOnDevice = !pView->m_pViewConfig->m_bUseCameraTransformOnDevice;
       SetChecked(pView->m_pViewConfig->m_bUseCameraTransformOnDevice);
-      PlasmaEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
+      plEditorEngineProcessConnection::GetSingleton()->ActivateRemoteProcess(plDynamicCast<plAssetDocument*>(m_Context.m_pDocument), pView->GetViewID());
     }
     break;
   }

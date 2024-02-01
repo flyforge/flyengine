@@ -65,29 +65,29 @@ void plGeometry::Clear()
   m_Lines.Clear();
 }
 
-plUInt32 plGeometry::AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& boneIndices /*= plVec4U16::ZeroVector()*/, const plColorLinearUB& boneWeights /*= plColorLinearUB(255, 0, 0, 0)*/)
+plUInt32 plGeometry::AddVertex(const plVec3& vPos, const plVec3& vNormal, const plVec2& vTexCoord, const plColor& color, const plVec4U16& vBoneIndices /*= plVec4U16::MakeZero()*/, const plColorLinearUB& boneWeights /*= plColorLinearUB(255, 0, 0, 0)*/)
 {
   Vertex& v = m_Vertices.ExpandAndGetRef();
   v.m_vPosition = vPos;
   v.m_vNormal = vNormal;
   v.m_vTexCoord = vTexCoord;
   v.m_Color = color;
-  v.m_BoneIndices = boneIndices;
+  v.m_BoneIndices = vBoneIndices;
   v.m_BoneWeights = boneWeights;
 
   return m_Vertices.GetCount() - 1;
 }
 
-void plGeometry::AddPolygon(const plArrayPtr<plUInt32>& Vertices, bool bFlipWinding)
+void plGeometry::AddPolygon(const plArrayPtr<plUInt32>& vertices, bool bFlipWinding)
 {
-  PLASMA_ASSERT_DEV(Vertices.GetCount() >= 3, "Polygon must have at least 3 vertices, not {0}", Vertices.GetCount());
+  PL_ASSERT_DEV(vertices.GetCount() >= 3, "Polygon must have at least 3 vertices, not {0}", vertices.GetCount());
 
-  for (plUInt32 v = 0; v < Vertices.GetCount(); ++v)
+  for (plUInt32 v = 0; v < vertices.GetCount(); ++v)
   {
-    PLASMA_ASSERT_DEV(Vertices[v] < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", Vertices[v], m_Vertices.GetCount());
+    PL_ASSERT_DEV(vertices[v] < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", vertices[v], m_Vertices.GetCount());
   }
 
-  m_Polygons.ExpandAndGetRef().m_Vertices = Vertices;
+  m_Polygons.ExpandAndGetRef().m_Vertices = vertices;
 
   if (bFlipWinding)
   {
@@ -97,8 +97,8 @@ void plGeometry::AddPolygon(const plArrayPtr<plUInt32>& Vertices, bool bFlipWind
 
 void plGeometry::AddLine(plUInt32 uiStartVertex, plUInt32 uiEndVertex)
 {
-  PLASMA_ASSERT_DEV(uiStartVertex < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", uiStartVertex, m_Vertices.GetCount());
-  PLASMA_ASSERT_DEV(uiEndVertex < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", uiEndVertex, m_Vertices.GetCount());
+  PL_ASSERT_DEV(uiStartVertex < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", uiStartVertex, m_Vertices.GetCount());
+  PL_ASSERT_DEV(uiEndVertex < m_Vertices.GetCount(), "Invalid vertex index {0}, geometry only has {1} vertices", uiEndVertex, m_Vertices.GetCount());
 
   Line l;
   l.m_uiStartVertex = uiStartVertex;
@@ -110,7 +110,7 @@ void plGeometry::AddLine(plUInt32 uiStartVertex, plUInt32 uiEndVertex)
 
 void plGeometry::TriangulatePolygons(plUInt32 uiMaxVerticesInPolygon /*= 3*/)
 {
-  PLASMA_ASSERT_DEV(uiMaxVerticesInPolygon >= 3, "Can't triangulate polygons that are already triangles.");
+  PL_ASSERT_DEV(uiMaxVerticesInPolygon >= 3, "Can't triangulate polygons that are already triangles.");
   uiMaxVerticesInPolygon = plMath::Max<plUInt32>(uiMaxVerticesInPolygon, 3);
 
   const plUInt32 uiNumPolys = m_Polygons.GetCount();
@@ -195,40 +195,40 @@ struct TangentContext
     TangentContext& context = *static_cast<TangentContext*>(pContext->m_pUserData);
     return context.m_pGeom->GetPolygons()[iFace].m_Vertices.GetCount();
   }
-  static void getPosition(const SMikkTSpaceContext* pContext, float fvPosOut[], const int iFace, const int iVert)
+  static void getPosition(const SMikkTSpaceContext* pContext, float pPosOut[], const int iFace, const int iVert)
   {
     TangentContext& context = *static_cast<TangentContext*>(pContext->m_pUserData);
     plUInt32 iVertexIndex = context.m_pGeom->GetPolygons()[iFace].m_Vertices[iVert];
     const plVec3& pos = context.m_pGeom->GetVertices()[iVertexIndex].m_vPosition;
-    fvPosOut[0] = pos.x;
-    fvPosOut[1] = pos.y;
-    fvPosOut[2] = pos.z;
+    pPosOut[0] = pos.x;
+    pPosOut[1] = pos.y;
+    pPosOut[2] = pos.z;
   }
-  static void getNormal(const SMikkTSpaceContext* pContext, float fvNormOut[], const int iFace, const int iVert)
+  static void getNormal(const SMikkTSpaceContext* pContext, float pNormOut[], const int iFace, const int iVert)
   {
     TangentContext& context = *static_cast<TangentContext*>(pContext->m_pUserData);
     plUInt32 iVertexIndex = context.m_pGeom->GetPolygons()[iFace].m_Vertices[iVert];
     const plVec3& normal = context.m_pGeom->GetVertices()[iVertexIndex].m_vNormal;
-    fvNormOut[0] = normal.x;
-    fvNormOut[1] = normal.y;
-    fvNormOut[2] = normal.z;
+    pNormOut[0] = normal.x;
+    pNormOut[1] = normal.y;
+    pNormOut[2] = normal.z;
   }
-  static void getTexCoord(const SMikkTSpaceContext* pContext, float fvTexcOut[], const int iFace, const int iVert)
+  static void getTexCoord(const SMikkTSpaceContext* pContext, float pTexcOut[], const int iFace, const int iVert)
   {
     TangentContext& context = *static_cast<TangentContext*>(pContext->m_pUserData);
     plUInt32 iVertexIndex = context.m_pGeom->GetPolygons()[iFace].m_Vertices[iVert];
     const plVec2& tex = context.m_pGeom->GetVertices()[iVertexIndex].m_vTexCoord;
-    fvTexcOut[0] = tex.x;
-    fvTexcOut[1] = tex.y;
+    pTexcOut[0] = tex.x;
+    pTexcOut[1] = tex.y;
   }
-  static void setTSpaceBasic(const SMikkTSpaceContext* pContext, const float fvTangent[], const float fSign, const int iFace, const int iVert)
+  static void setTSpaceBasic(const SMikkTSpaceContext* pContext, const float pTangent[], const float fSign, const int iFace, const int iVert)
   {
     TangentContext& context = *static_cast<TangentContext*>(pContext->m_pUserData);
     plUInt32 iVertexIndex = context.m_pGeom->GetPolygons()[iFace].m_Vertices[iVert];
     plGeometry::Vertex v = context.m_pGeom->GetVertices()[iVertexIndex];
-    v.m_vTangent.x = fvTangent[0];
-    v.m_vTangent.y = fvTangent[1];
-    v.m_vTangent.z = fvTangent[2];
+    v.m_vTangent.x = pTangent[0];
+    v.m_vTangent.y = pTangent[1];
+    v.m_vTangent.z = pTangent[2];
     v.m_fBiTangentSign = fSign;
 
     bool existed = false;
@@ -242,7 +242,7 @@ struct TangentContext
     context.m_Polygons[iFace].m_Vertices[iVert] = iNewVertexIndex;
   }
 
-  static void setTSpace(const SMikkTSpaceContext* pContext, const float fvTangent[], const float fvBiTangent[], const float fMagS, const float fMagT, const tbool bIsOrientationPreserving, const int iFace, const int iVert)
+  static void setTSpace(const SMikkTSpaceContext* pContext, const float pTangent[], const float pBiTangent[], const float fMagS, const float fMagT, const tbool isOrientationPreserving, const int iFace, const int iVert)
   {
     int i = 0;
     (void)i;
@@ -284,12 +284,12 @@ void plGeometry::ComputeTangents()
   m_Vertices = std::move(context.m_Vertices);
 }
 
-void plGeometry::ValidateTangents(float epsilon)
+void plGeometry::ValidateTangents(float fEpsilon)
 {
   for (auto& vertex : m_Vertices)
   {
     // checking for orthogonality to the normal and for squared unit length (standard case) or 3 (magic number for binormal inversion)
-    if (!plMath::IsEqual(vertex.m_vNormal.GetLengthSquared(), 1.f, epsilon) || !plMath::IsEqual(vertex.m_vNormal.Dot(vertex.m_vTangent), 0.f, epsilon) || !(plMath::IsEqual(vertex.m_vTangent.GetLengthSquared(), 1.f, epsilon) || plMath::IsEqual(vertex.m_vTangent.GetLengthSquared(), 3.f, epsilon)))
+    if (!plMath::IsEqual(vertex.m_vNormal.GetLengthSquared(), 1.f, fEpsilon) || !plMath::IsEqual(vertex.m_vNormal.Dot(vertex.m_vTangent), 0.f, fEpsilon) || !(plMath::IsEqual(vertex.m_vTangent.GetLengthSquared(), 1.f, fEpsilon) || plMath::IsEqual(vertex.m_vTangent.GetLengthSquared(), 3.f, fEpsilon)))
     {
       vertex.m_vTangent.SetZero();
     }
@@ -309,10 +309,10 @@ plUInt32 plGeometry::CalculateTriangleCount() const
   return numTris;
 }
 
-void plGeometry::SetAllVertexBoneIndices(const plVec4U16& boneIndices, plUInt32 uiFirstVertex)
+void plGeometry::SetAllVertexBoneIndices(const plVec4U16& vBoneIndices, plUInt32 uiFirstVertex)
 {
   for (plUInt32 v = uiFirstVertex; v < m_Vertices.GetCount(); ++v)
-    m_Vertices[v].m_BoneIndices = boneIndices;
+    m_Vertices[v].m_BoneIndices = vBoneIndices;
 }
 
 void plGeometry::SetAllVertexColor(const plColor& color, plUInt32 uiFirstVertex)
@@ -322,10 +322,10 @@ void plGeometry::SetAllVertexColor(const plColor& color, plUInt32 uiFirstVertex)
 }
 
 
-void plGeometry::SetAllVertexTexCoord(const plVec2& texCoord, plUInt32 uiFirstVertex /*= 0*/)
+void plGeometry::SetAllVertexTexCoord(const plVec2& vTexCoord, plUInt32 uiFirstVertex /*= 0*/)
 {
   for (plUInt32 v = uiFirstVertex; v < m_Vertices.GetCount(); ++v)
-    m_Vertices[v].m_vTexCoord = texCoord;
+    m_Vertices[v].m_vTexCoord = vTexCoord;
 }
 
 void plGeometry::TransformVertices(const plMat4& mTransform, plUInt32 uiFirstVertex)
@@ -383,17 +383,17 @@ void plGeometry::Merge(const plGeometry& other)
   }
 }
 
-void plGeometry::AddRectXY(const plVec2& size, plUInt32 uiTesselationX, plUInt32 uiTesselationY, const GeoOptions& options)
+void plGeometry::AddRectXY(const plVec2& vSize, plUInt32 uiTesselationX, plUInt32 uiTesselationY, const GeoOptions& options)
 {
   if (uiTesselationX == 0)
     uiTesselationX = 1;
   if (uiTesselationY == 0)
     uiTesselationY = 1;
 
-  const plVec2 halfSize = size * 0.5f;
+  const plVec2 halfSize = vSize * 0.5f;
   const bool bFlipWinding = options.IsFlipWindingNecessary();
 
-  const plVec2 sizeFraction = size.CompDiv(plVec2(static_cast<float>(uiTesselationX), static_cast<float>(uiTesselationY)));
+  const plVec2 sizeFraction = vSize.CompDiv(plVec2(static_cast<float>(uiTesselationX), static_cast<float>(uiTesselationY)));
 
   for (plUInt32 vy = 0; vy < uiTesselationY + 1; ++vy)
   {
@@ -539,9 +539,9 @@ void plGeometry::AddBox(const plVec3& vFullExtents, bool bExtraVerticesForTextur
   }
 }
 
-void plGeometry::AddLineBox(const plVec3& size, const GeoOptions& options)
+void plGeometry::AddLineBox(const plVec3& vSize, const GeoOptions& options)
 {
-  const plVec3 halfSize = size * 0.5f;
+  const plVec3 halfSize = vSize * 0.5f;
 
   AddVertex(plVec3(-halfSize.x, -halfSize.y, halfSize.z), plVec3(0, 0, 1), plVec2(0), options);
   AddVertex(plVec3(halfSize.x, -halfSize.y, halfSize.z), plVec3(0, 0, 1), plVec2(0), options);
@@ -569,12 +569,12 @@ void plGeometry::AddLineBox(const plVec3& size, const GeoOptions& options)
   AddLine(3, 7);
 }
 
-void plGeometry::AddLineBoxCorners(const plVec3& size, float fCornerFraction, const GeoOptions& options)
+void plGeometry::AddLineBoxCorners(const plVec3& vSize, float fCornerFraction, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(fCornerFraction >= 0.0f && fCornerFraction <= 1.0f, "A fraction value of {0} is invalid", plArgF(fCornerFraction, 2));
+  PL_ASSERT_DEV(fCornerFraction >= 0.0f && fCornerFraction <= 1.0f, "A fraction value of {0} is invalid", plArgF(fCornerFraction, 2));
 
   fCornerFraction *= 0.5f;
-  const plVec3 halfSize = size * 0.5f;
+  const plVec3 halfSize = vSize * 0.5f;
 
   AddVertex(plVec3(-halfSize.x, -halfSize.y, halfSize.z), plVec3(0, 0, 1), plVec2(0), options);
   AddVertex(plVec3(halfSize.x, -halfSize.y, halfSize.z), plVec3(0, 0, 1), plVec2(0), options);
@@ -604,9 +604,9 @@ void plGeometry::AddLineBoxCorners(const plVec3& size, float fCornerFraction, co
   }
 }
 
-void plGeometry::AddPyramid(const plVec3& size, bool bCap, const GeoOptions& options)
+void plGeometry::AddPyramid(const plVec3& vSize, bool bCap, const GeoOptions& options)
 {
-  const plVec3 halfSize = size * 0.5f;
+  const plVec3 halfSize = vSize * 0.5f;
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   plUInt32 quad[4];
 
@@ -615,7 +615,7 @@ void plGeometry::AddPyramid(const plVec3& size, bool bCap, const GeoOptions& opt
   quad[2] = AddVertex(plVec3(halfSize.x, -halfSize.y, 0), plVec3(1, -1, 0).GetNormalized(), plVec2(0), options);
   quad[3] = AddVertex(plVec3(-halfSize.x, -halfSize.y, 0), plVec3(-1, -1, 0).GetNormalized(), plVec2(0), options);
 
-  const plUInt32 tip = AddVertex(plVec3(0, 0, size.z), plVec3(0, 0, 1), plVec2(0), options);
+  const plUInt32 tip = AddVertex(plVec3(0, 0, vSize.z), plVec3(0, 0, 1), plVec2(0), options);
 
   if (bCap)
   {
@@ -650,11 +650,11 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   struct Triangle
   {
-    Triangle(plUInt32 i1, plUInt32 i2, plUInt32 i3)
+    Triangle(plUInt32 ui1, plUInt32 ui2, plUInt32 ui3)
     {
-      m_uiIndex[0] = i1;
-      m_uiIndex[1] = i2;
-      m_uiIndex[2] = i3;
+      m_uiIndex[0] = ui1;
+      m_uiIndex[1] = ui2;
+      m_uiIndex[2] = ui3;
     }
 
     plUInt32 m_uiIndex[3];
@@ -664,10 +664,10 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
   {
     Edge() = default;
 
-    Edge(plUInt32 id1, plUInt32 id2)
+    Edge(plUInt32 uiId1, plUInt32 uiId2)
     {
-      m_uiVertex[0] = plMath::Min(id1, id2);
-      m_uiVertex[1] = plMath::Max(id1, id2);
+      m_uiVertex[0] = plMath::Min(uiId1, uiId2);
+      m_uiVertex[1] = plMath::Max(uiId1, uiId2);
     }
 
     bool operator<(const Edge& rhs) const
@@ -693,22 +693,22 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
   // create icosahedron
   {
     plMat3 mRotX, mRotZ, mRotZh;
-    mRotX.SetRotationMatrixX(plAngle::Degree(360.0f / 6.0f));
-    mRotZ.SetRotationMatrixZ(plAngle::Degree(-360.0f / 5.0f));
-    mRotZh.SetRotationMatrixZ(plAngle::Degree(-360.0f / 10.0f));
+    mRotX = plMat3::MakeRotationX(plAngle::MakeFromDegree(360.0f / 6.0f));
+    mRotZ = plMat3::MakeRotationZ(plAngle::MakeFromDegree(-360.0f / 5.0f));
+    mRotZh = plMat3::MakeRotationZ(plAngle::MakeFromDegree(-360.0f / 10.0f));
 
     plUInt32 vert[12];
     plVec3 vDir(0, 0, 1);
 
     vDir.Normalize();
-    vert[0] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
+    vert[0] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
 
     vDir = mRotX * vDir;
 
     for (plInt32 i = 0; i < 5; ++i)
     {
       vDir.Normalize();
-      vert[1 + i] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
+      vert[1 + i] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
       vDir = mRotZ * vDir;
     }
 
@@ -718,13 +718,13 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
     for (plInt32 i = 0; i < 5; ++i)
     {
       vDir.Normalize();
-      vert[6 + i] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
+      vert[6 + i] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
       vDir = mRotZ * vDir;
     }
 
     vDir.Set(0, 0, -1);
     vDir.Normalize();
-    vert[11] = AddVertex(vDir * fRadius, vDir, plVec2::ZeroVector(), options.m_Color, boneIndices);
+    vert[11] = AddVertex(vDir * fRadius, vDir, plVec2::MakeZero(), options.m_Color, boneIndices);
 
 
     Tris[0].PushBack(Triangle(vert[0], vert[2], vert[1]));
@@ -781,7 +781,7 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
         else
         {
           const plVec3 vCenter = (m_Vertices[Edges[i].m_uiVertex[0]].m_vPosition + m_Vertices[Edges[i].m_uiVertex[1]].m_vPosition).GetNormalized();
-          uiNewVert[i] = AddVertex(vCenter * fRadius, vCenter, plVec2::ZeroVector(), options.m_Color, boneIndices);
+          uiNewVert[i] = AddVertex(vCenter * fRadius, vCenter, plVec2::MakeZero(), options.m_Color, boneIndices);
 
           NewVertices[Edges[i]] = uiNewVert[i];
         }
@@ -806,17 +806,17 @@ void plGeometry::AddGeodesicSphere(float fRadius, plUInt8 uiSubDivisions, const 
   TransformVertices(options.m_Transform, uiFirstVertex);
 }
 
-void plGeometry::AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options, plAngle fraction /*= plAngle::Degree(360.0f)*/)
+void plGeometry::AddCylinder(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, bool bCapTop, bool bCapBottom, plUInt16 uiSegments, const GeoOptions& options, plAngle fraction /*= plAngle::MakeFromDegree(360.0f)*/)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
-  PLASMA_ASSERT_DEV(fraction.GetDegree() >= -0.01f, "A cylinder cannot be built with more less than 0 degree");
-  PLASMA_ASSERT_DEV(fraction.GetDegree() <= 360.01f, "A cylinder cannot be built with more than 360 degree");
+  PL_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
+  PL_ASSERT_DEV(fraction.GetDegree() >= -0.01f, "A cylinder cannot be built with more less than 0 degree");
+  PL_ASSERT_DEV(fraction.GetDegree() <= 360.01f, "A cylinder cannot be built with more than 360 degree");
 
-  fraction = plMath::Clamp(fraction, plAngle(), plAngle::Degree(360.0f));
+  fraction = plMath::Clamp(fraction, plAngle(), plAngle::MakeFromDegree(360.0f));
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   const bool bIsFraction = fraction.GetDegree() < 360.0f;
-  const plAngle fDegStep = plAngle::Degree(fraction.GetDegree() / uiSegments);
+  const plAngle fDegStep = plAngle::MakeFromDegree(fraction.GetDegree() / uiSegments);
 
   const plVec3 vTopCenter(0, 0, fPositiveLength);
   const plVec3 vBottomCenter(0, 0, -fNegativeLength);
@@ -981,10 +981,10 @@ void plGeometry::AddCylinder(float fRadiusTop, float fRadiusBottom, float fPosit
 
 void plGeometry::AddCylinderOnePiece(float fRadiusTop, float fRadiusBottom, float fPositiveLength, float fNegativeLength, plUInt16 uiSegments, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
+  PL_ASSERT_DEV(uiSegments >= 3, "Cannot create a cylinder with only {0} segments", uiSegments);
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegStep = plAngle::Degree(360.0f / uiSegments);
+  const plAngle fDegStep = plAngle::MakeFromDegree(360.0f / uiSegments);
 
   const plVec3 vTopCenter(0, 0, fPositiveLength);
   const plVec3 vBottomCenter(0, 0, -fNegativeLength);
@@ -1027,13 +1027,13 @@ void plGeometry::AddCylinderOnePiece(float fRadiusTop, float fRadiusBottom, floa
 
 void plGeometry::AddCone(float fRadius, float fHeight, bool bCap, plUInt16 uiSegments, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Cannot create a cone with only {0} segments", uiSegments);
+  PL_ASSERT_DEV(uiSegments >= 3, "Cannot create a cone with only {0} segments", uiSegments);
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
 
   plHybridArray<plUInt32, 512> VertsBottom;
 
-  const plAngle fDegStep = plAngle::Degree(360.0f / uiSegments);
+  const plAngle fDegStep = plAngle::MakeFromDegree(360.0f / uiSegments);
 
   const plUInt32 uiTip = AddVertex(plVec3(0, 0, fHeight), plVec3(0, 0, 1), plVec2(0), options);
 
@@ -1068,19 +1068,19 @@ void plGeometry::AddCone(float fRadius, float fHeight, bool bCap, plUInt16 uiSeg
 
 void plGeometry::AddSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiStacks, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Sphere must have at least 3 segments");
-  PLASMA_ASSERT_DEV(uiStacks >= 2, "Sphere must have at least 2 stacks");
+  PL_ASSERT_DEV(uiSegments >= 3, "Sphere must have at least 3 segments");
+  PL_ASSERT_DEV(uiStacks >= 2, "Sphere must have at least 2 stacks");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffSegments = plAngle::Degree(360.0f / (float)(uiSegments));
-  const plAngle fDegreeDiffStacks = plAngle::Degree(180.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffSegments = plAngle::MakeFromDegree(360.0f / (float)(uiSegments));
+  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(180.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
   // first create all the vertex positions
   for (plUInt32 st = 1; st < uiStacks; ++st)
   {
-    const plAngle fDegreeStack = plAngle::Degree(-90.0f + (st * fDegreeDiffStacks.GetDegree()));
+    const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + (st * fDegreeDiffStacks.GetDegree()));
     const float fCosDS = plMath::Cos(fDegreeStack);
     const float fSinDS = plMath::Sin(fDegreeStack);
     const float fY = -fSinDS * fRadius;
@@ -1153,19 +1153,19 @@ void plGeometry::AddSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiStacks
 
 void plGeometry::AddHalfSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiStacks, bool bCap, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Sphere must have at least 3 segments");
-  PLASMA_ASSERT_DEV(uiStacks >= 1, "Sphere must have at least 1 stacks");
+  PL_ASSERT_DEV(uiSegments >= 3, "Sphere must have at least 3 segments");
+  PL_ASSERT_DEV(uiStacks >= 1, "Sphere must have at least 1 stacks");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffSegments = plAngle::Degree(360.0f / (float)(uiSegments));
-  const plAngle fDegreeDiffStacks = plAngle::Degree(90.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffSegments = plAngle::MakeFromDegree(360.0f / (float)(uiSegments));
+  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(90.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
   // first create all the vertex positions
   for (plUInt32 st = 0; st < uiStacks; ++st)
   {
-    const plAngle fDegreeStack = plAngle::Degree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
+    const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
     const float fCosDS = plMath::Cos(fDegreeStack);
     const float fSinDS = plMath::Sin(fDegreeStack);
     const float fY = -fSinDS * fRadius;
@@ -1237,12 +1237,12 @@ void plGeometry::AddHalfSphere(float fRadius, plUInt16 uiSegments, plUInt16 uiSt
 
 void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, plUInt16 uiStacks, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Capsule must have at least 3 segments");
-  PLASMA_ASSERT_DEV(uiStacks >= 1, "Capsule must have at least 1 stacks");
-  PLASMA_ASSERT_DEV(fHeight >= 0.0f, "Height must be positive");
+  PL_ASSERT_DEV(uiSegments >= 3, "Capsule must have at least 3 segments");
+  PL_ASSERT_DEV(uiStacks >= 1, "Capsule must have at least 1 stacks");
+  PL_ASSERT_DEV(fHeight >= 0.0f, "Height must be positive");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
-  const plAngle fDegreeDiffStacks = plAngle::Degree(90.0f / (float)(uiStacks));
+  const plAngle fDegreeDiffStacks = plAngle::MakeFromDegree(90.0f / (float)(uiStacks));
 
   const plUInt32 uiFirstVertex = m_Vertices.GetCount();
 
@@ -1255,14 +1255,14 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
   {
     for (plUInt32 st = 0; st < uiStacks; ++st)
     {
-      const plAngle fDegreeStack = plAngle::Degree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
+      const plAngle fDegreeStack = plAngle::MakeFromDegree(-90.0f + ((st + 1) * fDegreeDiffStacks.GetDegree()));
       const float fCosDS = plMath::Cos(fDegreeStack);
       const float fSinDS = plMath::Sin(fDegreeStack);
       const float fY = -fSinDS * fRadius;
 
       for (plUInt32 sp = 0; sp < uiSegments; ++sp)
       {
-        const plAngle fDegree = plAngle::Degree(sp * fDegreeStepSlices);
+        const plAngle fDegree = plAngle::MakeFromDegree(sp * fDegreeStepSlices);
 
         plVec3 vPos;
         vPos.x = plMath::Cos(fDegree) * fRadius * fCosDS;
@@ -1277,14 +1277,14 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
 
     for (plUInt32 st = 0; st < uiStacks; ++st)
     {
-      const plAngle fDegreeStack = plAngle::Degree(0.0f - (st * fDegreeDiffStacks.GetDegree()));
+      const plAngle fDegreeStack = plAngle::MakeFromDegree(0.0f - (st * fDegreeDiffStacks.GetDegree()));
       const float fCosDS = plMath::Cos(fDegreeStack);
       const float fSinDS = plMath::Sin(fDegreeStack);
       const float fY = fSinDS * fRadius;
 
       for (plUInt32 sp = 0; sp < uiSegments; ++sp)
       {
-        const plAngle fDegree = plAngle::Degree(sp * fDegreeStepSlices);
+        const plAngle fDegree = plAngle::MakeFromDegree(sp * fDegreeStepSlices);
 
         plVec3 vPos;
         vPos.x = plMath::Cos(fDegree) * fRadius * fCosDS;
@@ -1345,16 +1345,16 @@ void plGeometry::AddCapsule(float fRadius, float fHeight, plUInt16 uiSegments, p
 
 void plGeometry::AddTorus(float fInnerRadius, float fOuterRadius, plUInt16 uiSegments, plUInt16 uiSegmentDetail, bool bExtraVerticesForTexturing, const GeoOptions& options)
 {
-  PLASMA_ASSERT_DEV(fInnerRadius < fOuterRadius, "Inner radius must be smaller than outer radius. Doh!");
-  PLASMA_ASSERT_DEV(uiSegments >= 3, "Invalid number of segments.");
-  PLASMA_ASSERT_DEV(uiSegmentDetail >= 3, "Invalid segment detail value.");
+  PL_ASSERT_DEV(fInnerRadius < fOuterRadius, "Inner radius must be smaller than outer radius. Doh!");
+  PL_ASSERT_DEV(uiSegments >= 3, "Invalid number of segments.");
+  PL_ASSERT_DEV(uiSegmentDetail >= 3, "Invalid segment detail value.");
 
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   const float fCylinderRadius = (fOuterRadius - fInnerRadius) * 0.5f;
   const float fLoopRadius = fInnerRadius + fCylinderRadius;
 
-  const plAngle fAngleStepSegment = plAngle::Degree(360.0f / uiSegments);
-  const plAngle fAngleStepCylinder = plAngle::Degree(360.0f / uiSegmentDetail);
+  const plAngle fAngleStepSegment = plAngle::MakeFromDegree(360.0f / uiSegments);
+  const plAngle fAngleStepCylinder = plAngle::MakeFromDegree(360.0f / uiSegmentDetail);
 
   const plUInt16 uiFirstVertex = static_cast<plUInt16>(m_Vertices.GetCount());
 
@@ -1444,9 +1444,9 @@ void plGeometry::AddTorus(float fInnerRadius, float fOuterRadius, plUInt16 uiSeg
   }
 }
 
-void plGeometry::AddTexturedRamp(const plVec3& size, const GeoOptions& options)
+void plGeometry::AddTexturedRamp(const plVec3& vSize, const GeoOptions& options)
 {
-  const plVec3 halfSize = size * 0.5f;
+  const plVec3 halfSize = vSize * 0.5f;
   const bool bFlipWinding = options.IsFlipWindingNecessary();
   plUInt32 idx[4];
   plUInt32 idx3[3];
@@ -1491,23 +1491,23 @@ void plGeometry::AddTexturedRamp(const plVec3& size, const GeoOptions& options)
   }
 }
 
-void plGeometry::AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curvature, bool bSmoothSloped, const GeoOptions& options)
+void plGeometry::AddStairs(const plVec3& vSize, plUInt32 uiNumSteps, plAngle curvature, bool bSmoothSloped, const GeoOptions& options)
 {
   const bool bFlipWinding = options.IsFlipWindingNecessary();
 
-  curvature = plMath::Clamp(curvature, -plAngle::Degree(360), plAngle::Degree(360));
+  curvature = plMath::Clamp(curvature, -plAngle::MakeFromDegree(360), plAngle::MakeFromDegree(360));
   const plAngle curveStep = curvature / (float)uiNumSteps;
 
   const float fStepDiv = 1.0f / uiNumSteps;
-  const float fStepDepth = size.x / uiNumSteps;
-  const float fStepHeight = size.z / uiNumSteps;
+  const float fStepDepth = vSize.x / uiNumSteps;
+  const float fStepHeight = vSize.z / uiNumSteps;
 
   plVec3 vMoveFwd(fStepDepth, 0, 0);
   const plVec3 vMoveUp(0, 0, fStepHeight);
   plVec3 vMoveUpFwd(fStepDepth, 0, fStepHeight);
 
-  plVec3 vBaseL0(-size.x * 0.5f, -size.y * 0.5f, -size.z * 0.5f);
-  plVec3 vBaseL1(-size.x * 0.5f, +size.y * 0.5f, -size.z * 0.5f);
+  plVec3 vBaseL0(-vSize.x * 0.5f, -vSize.y * 0.5f, -vSize.z * 0.5f);
+  plVec3 vBaseL1(-vSize.x * 0.5f, +vSize.y * 0.5f, -vSize.z * 0.5f);
   plVec3 vBaseR0 = vBaseL0 + vMoveFwd;
   plVec3 vBaseR1 = vBaseL1 + vMoveFwd;
 
@@ -1526,8 +1526,7 @@ void plGeometry::AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curv
   plVec3 vSideNormal1(0, 1, 0);
   plVec3 vStepFrontNormal(-1, 0, 0);
 
-  plQuat qRot;
-  qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), curveStep);
+  plQuat qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), curveStep);
 
   for (plUInt32 step = 0; step < uiNumSteps; ++step)
   {
@@ -1625,16 +1624,16 @@ void plGeometry::AddStairs(const plVec3& size, plUInt32 uiNumSteps, plAngle curv
 }
 
 
-void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThickness, plAngle angle, bool bMakeSteps, bool bSmoothBottom, bool bSmoothTop, bool bCapTopAndBottom, const GeoOptions& options)
+void plGeometry::AddArch(const plVec3& vSize, plUInt32 uiNumSegments, float fThickness, plAngle angle, bool bMakeSteps, bool bSmoothBottom, bool bSmoothTop, bool bCapTopAndBottom, const GeoOptions& options)
 {
   // sanitize input values
   {
     if (angle.GetRadian() == 0.0f)
-      angle = plAngle::Degree(360);
+      angle = plAngle::MakeFromDegree(360);
 
-    angle = plMath::Clamp(angle, plAngle::Degree(-360.0f), plAngle::Degree(360.0f));
+    angle = plMath::Clamp(angle, plAngle::MakeFromDegree(-360.0f), plAngle::MakeFromDegree(360.0f));
 
-    fThickness = plMath::Clamp(fThickness, 0.01f, plMath::Min(size.x, size.y) * 0.45f);
+    fThickness = plMath::Clamp(fThickness, 0.01f, plMath::Min(vSize.x, vSize.y) * 0.45f);
 
     bSmoothBottom = bMakeSteps && bSmoothBottom;
     bSmoothTop = bMakeSteps && bSmoothTop;
@@ -1646,10 +1645,10 @@ void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThic
     bFlipWinding = !bFlipWinding;
 
   const plAngle angleStep = angle / (float)uiNumSegments;
-  const float fScaleX = size.x * 0.5f;
-  const float fScaleY = size.y * 0.5f;
-  const float fHalfHeight = size.z * 0.5f;
-  const float fStepHeight = size.z / (float)uiNumSegments;
+  const float fScaleX = vSize.x * 0.5f;
+  const float fScaleY = vSize.y * 0.5f;
+  const float fHalfHeight = vSize.z * 0.5f;
+  const float fStepHeight = vSize.z / (float)uiNumSegments;
 
   float fBottomZ = -fHalfHeight;
   float fTopZ = +fHalfHeight;
@@ -1688,7 +1687,7 @@ void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThic
     }
   }
 
-  const bool isFullCircle = plMath::Abs(angle.GetRadian()) >= plAngle::Degree(360).GetRadian();
+  const bool isFullCircle = plMath::Abs(angle.GetRadian()) >= plAngle::MakeFromDegree(360).GetRadian();
 
   const float fOuterUstep = 3.0f / uiNumSegments;
   for (plUInt32 segment = 0; segment < uiNumSegments; ++segment)
@@ -1810,4 +1809,4 @@ void plGeometry::AddArch(const plVec3& size, plUInt32 uiNumSegments, float fThic
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Graphics_Implementation_Geometry);
+

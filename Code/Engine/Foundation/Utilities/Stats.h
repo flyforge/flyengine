@@ -11,7 +11,7 @@
 /// This can be used by a game to store (and continuously update) information about the internal game state. Other tools can then
 /// display this information in a convenient manner. For example the stats can be shown on screen. The data is also transmitted through
 /// plTelemetry, and the plInspector tool will display the information.
-class PLASMA_FOUNDATION_DLL plStats
+class PL_FOUNDATION_DLL plStats
 {
 public:
   using MapType = plMap<plString, plVariant>;

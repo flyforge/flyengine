@@ -1,10 +1,13 @@
+// for a description of the options see:
+// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
+
 PluginInfo
 {
 	string %DisplayName{"AI Plugin"}
 	string %Description{"Adds support for dynamic navmeshes and other AI functionality."}
-	string %EditorPlugins{"plasmaEditorPluginAi"}
+	string %EditorPlugins{"plEditorPluginAi"}
 	string %EditorEnginePlugins{}
-	string %RuntimePlugins{"plasmaAiPlugin"}
+	string %RuntimePlugins{"plAiPlugin"}
 	string %PackageDependencies{}
 	string %RequiredPlugins{}
 	string %ExclusiveFeatures{}

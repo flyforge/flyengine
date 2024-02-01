@@ -5,45 +5,44 @@
 #include <Foundation/Serialization/AbstractObjectGraph.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plSurfaceInteractionAlignment, 2)
-  PLASMA_ENUM_CONSTANTS(plSurfaceInteractionAlignment::SurfaceNormal, plSurfaceInteractionAlignment::IncidentDirection, plSurfaceInteractionAlignment::ReflectedDirection)
-  PLASMA_ENUM_CONSTANTS(plSurfaceInteractionAlignment::ReverseSurfaceNormal, plSurfaceInteractionAlignment::ReverseIncidentDirection, plSurfaceInteractionAlignment::ReverseReflectedDirection)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plSurfaceInteractionAlignment, 2)
+  PL_ENUM_CONSTANTS(plSurfaceInteractionAlignment::SurfaceNormal, plSurfaceInteractionAlignment::IncidentDirection, plSurfaceInteractionAlignment::ReflectedDirection)
+  PL_ENUM_CONSTANTS(plSurfaceInteractionAlignment::ReverseSurfaceNormal, plSurfaceInteractionAlignment::ReverseIncidentDirection, plSurfaceInteractionAlignment::ReverseReflectedDirection)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plSurfaceInteraction, plNoBase, 1, plRTTIDefaultAllocator<plSurfaceInteraction>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plSurfaceInteraction, plNoBase, 1, plRTTIDefaultAllocator<plSurfaceInteraction>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Type", m_sInteractionType)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
-    PLASMA_ACCESSOR_PROPERTY("Prefab", GetPrefab, SetPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
-    PLASMA_ENUM_MEMBER_PROPERTY("Alignment", plSurfaceInteractionAlignment, m_Alignment),
-    PLASMA_MEMBER_PROPERTY("Deviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plVariant(plAngle::Degree(0.0f)), plVariant(plAngle::Degree(90.0f)))),
-    PLASMA_MEMBER_PROPERTY("ImpulseThreshold", m_fImpulseThreshold),
-    PLASMA_MEMBER_PROPERTY("ImpulseScale", m_fImpulseScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Type", m_sInteractionType)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
+    PL_ACCESSOR_PROPERTY("Prefab", GetPrefab, SetPrefab)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Prefab")),
+    PL_ENUM_MEMBER_PROPERTY("Alignment", plSurfaceInteractionAlignment, m_Alignment),
+    PL_MEMBER_PROPERTY("Deviation", m_Deviation)->AddAttributes(new plClampValueAttribute(plVariant(plAngle::MakeFromDegree(0.0f)), plVariant(plAngle::MakeFromDegree(90.0f)))),
+    PL_MEMBER_PROPERTY("ImpulseThreshold", m_fImpulseThreshold),
+    PL_MEMBER_PROPERTY("ImpulseScale", m_fImpulseScale)->AddAttributes(new plDefaultValueAttribute(1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 3, plRTTIDefaultAllocator<plSurfaceResourceDescriptor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 2, plRTTIDefaultAllocator<plSurfaceResourceDescriptor>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("BaseSurface", GetBaseSurfaceFile, SetBaseSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),
-    PLASMA_MEMBER_PROPERTY("Restitution", m_fPhysicsRestitution)->AddAttributes(new plDefaultValueAttribute(0.25f)),
-    PLASMA_MEMBER_PROPERTY("StaticFriction", m_fPhysicsFrictionStatic)->AddAttributes(new plDefaultValueAttribute(0.6f)),
-    PLASMA_MEMBER_PROPERTY("DynamicFriction", m_fPhysicsFrictionDynamic)->AddAttributes(new plDefaultValueAttribute(0.4f)),
-    PLASMA_MEMBER_PROPERTY("GroundType", m_iGroundType)->AddAttributes(new plDefaultValueAttribute(-1), new plDynamicEnumAttribute("AiGroundType")),
-    PLASMA_MEMBER_PROPERTY("SoundObstruction", m_fSoundObstruction)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("OnCollideInteraction", GetCollisionInteraction, SetCollisionInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
-    PLASMA_ACCESSOR_PROPERTY("SlideReaction", GetSlideReactionPrefabFile, SetSlideReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_ACCESSOR_PROPERTY("RollReaction", GetRollReactionPrefabFile, SetRollReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab")),
-    PLASMA_ARRAY_MEMBER_PROPERTY("Interactions", m_Interactions),
+    PL_ACCESSOR_PROPERTY("BaseSurface", GetBaseSurfaceFile, SetBaseSurfaceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Surface")),// package+thumbnail so that it forbids circular dependencies
+    PL_MEMBER_PROPERTY("Restitution", m_fPhysicsRestitution)->AddAttributes(new plDefaultValueAttribute(0.25f)),
+    PL_MEMBER_PROPERTY("StaticFriction", m_fPhysicsFrictionStatic)->AddAttributes(new plDefaultValueAttribute(0.6f)),
+    PL_MEMBER_PROPERTY("DynamicFriction", m_fPhysicsFrictionDynamic)->AddAttributes(new plDefaultValueAttribute(0.4f)),
+    PL_MEMBER_PROPERTY("GroundType", m_iGroundType)->AddAttributes(new plDefaultValueAttribute(-1), new plDynamicEnumAttribute("AiGroundType")),
+    PL_ACCESSOR_PROPERTY("OnCollideInteraction", GetCollisionInteraction, SetCollisionInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
+    PL_ACCESSOR_PROPERTY("SlideReaction", GetSlideReactionPrefabFile, SetSlideReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("RollReaction", GetRollReactionPrefabFile, SetRollReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
+    PL_ARRAY_MEMBER_PROPERTY("Interactions", m_Interactions),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plSurfaceInteraction::SetPrefab(const char* szPrefab)
@@ -70,8 +69,8 @@ const plRangeView<const char*, plUInt32> plSurfaceInteraction::GetParameters() c
 {
   return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; },
     [this]() -> plUInt32 { return m_Parameters.GetCount(); },
-    [](plUInt32& it) { ++it; },
-    [this](const plUInt32& it) -> const char* { return m_Parameters.GetKey(it).GetString().GetData(); });
+    [](plUInt32& ref_uiIt) { ++ref_uiIt; },
+    [this](const plUInt32& uiIt) -> const char* { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
 }
 
 void plSurfaceInteraction::SetParameter(const char* szKey, const plVariant& value)
@@ -102,38 +101,33 @@ bool plSurfaceInteraction::GetParameter(const char* szKey, plVariant& out_value)
   return true;
 }
 
-void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
+void plSurfaceResourceDescriptor::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
 
-  stream >> uiVersion;
-  PLASMA_ASSERT_DEV(uiVersion <= 9, "Invalid version {0} for surface resource", uiVersion);
+  inout_stream >> uiVersion;
+  PL_ASSERT_DEV(uiVersion <= 8, "Invalid version {0} for surface resource", uiVersion);
 
-  stream >> m_fPhysicsRestitution;
-  stream >> m_fPhysicsFrictionStatic;
-  stream >> m_fPhysicsFrictionDynamic;
-  stream >> m_hBaseSurface;
-
-  if (uiVersion >= 8)
-  {
-    stream >> m_fSoundObstruction;
-  }
+  inout_stream >> m_fPhysicsRestitution;
+  inout_stream >> m_fPhysicsFrictionStatic;
+  inout_stream >> m_fPhysicsFrictionDynamic;
+  inout_stream >> m_hBaseSurface;
 
   if (uiVersion >= 4)
   {
-    stream >> m_sOnCollideInteraction;
+    inout_stream >> m_sOnCollideInteraction;
   }
 
   if (uiVersion >= 7)
   {
-    stream >> m_sSlideInteractionPrefab;
-    stream >> m_sRollInteractionPrefab;
+    inout_stream >> m_sSlideInteractionPrefab;
+    inout_stream >> m_sRollInteractionPrefab;
   }
 
   if (uiVersion > 2)
   {
     plUInt32 count = 0;
-    stream >> count;
+    inout_stream >> count;
     m_Interactions.SetCount(count);
 
     plStringBuilder sTemp;
@@ -141,27 +135,27 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
     {
       auto& ia = m_Interactions[i];
 
-      stream >> sTemp;
+      inout_stream >> sTemp;
       ia.m_sInteractionType = sTemp;
 
-      stream >> ia.m_hPrefab;
-      stream >> ia.m_Alignment;
-      stream >> ia.m_Deviation;
+      inout_stream >> ia.m_hPrefab;
+      inout_stream >> ia.m_Alignment;
+      inout_stream >> ia.m_Deviation;
 
       if (uiVersion >= 4)
       {
-        stream >> ia.m_fImpulseThreshold;
+        inout_stream >> ia.m_fImpulseThreshold;
       }
 
       if (uiVersion >= 5)
       {
-        stream >> ia.m_fImpulseScale;
+        inout_stream >> ia.m_fImpulseScale;
       }
 
       if (uiVersion >= 6)
       {
         plUInt8 uiNumParams;
-        stream >> uiNumParams;
+        inout_stream >> uiNumParams;
 
         ia.m_Parameters.Clear();
         ia.m_Parameters.Reserve(uiNumParams);
@@ -171,8 +165,8 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
 
         for (plUInt32 i2 = 0; i2 < uiNumParams; ++i2)
         {
-          stream >> key;
-          stream >> value;
+          inout_stream >> key;
+          inout_stream >> value;
 
           ia.m_Parameters.Insert(key, value);
         }
@@ -180,58 +174,55 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& stream)
     }
   }
 
-  if (uiVersion >= 9)
+  if (uiVersion >= 8)
   {
-    stream >> m_iGroundType;
+    inout_stream >> m_iGroundType;
   }
 }
 
-void plSurfaceResourceDescriptor::Save(plStreamWriter& stream) const
+void plSurfaceResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
-  const plUInt8 uiVersion = 9;
+  const plUInt8 uiVersion = 8;
 
-  stream << uiVersion;
-  stream << m_fPhysicsRestitution;
-  stream << m_fPhysicsFrictionStatic;
-  stream << m_fPhysicsFrictionDynamic;
-  stream << m_hBaseSurface;
-
-  // version 8
-  stream << m_fSoundObstruction;
+  inout_stream << uiVersion;
+  inout_stream << m_fPhysicsRestitution;
+  inout_stream << m_fPhysicsFrictionStatic;
+  inout_stream << m_fPhysicsFrictionDynamic;
+  inout_stream << m_hBaseSurface;
 
   // version 4
-  stream << m_sOnCollideInteraction;
+  inout_stream << m_sOnCollideInteraction;
 
   // version 7
-  stream << m_sSlideInteractionPrefab;
-  stream << m_sRollInteractionPrefab;
+  inout_stream << m_sSlideInteractionPrefab;
+  inout_stream << m_sRollInteractionPrefab;
 
-  stream << m_Interactions.GetCount();
+  inout_stream << m_Interactions.GetCount();
   for (const auto& ia : m_Interactions)
   {
-    stream << ia.m_sInteractionType;
-    stream << ia.m_hPrefab;
-    stream << ia.m_Alignment;
-    stream << ia.m_Deviation;
+    inout_stream << ia.m_sInteractionType;
+    inout_stream << ia.m_hPrefab;
+    inout_stream << ia.m_Alignment;
+    inout_stream << ia.m_Deviation;
 
     // version 4
-    stream << ia.m_fImpulseThreshold;
+    inout_stream << ia.m_fImpulseThreshold;
 
     // version 5
-    stream << ia.m_fImpulseScale;
+    inout_stream << ia.m_fImpulseScale;
 
     // version 6
     const plUInt8 uiNumParams = static_cast<plUInt8>(ia.m_Parameters.GetCount());
-    stream << uiNumParams;
+    inout_stream << uiNumParams;
     for (plUInt32 i = 0; i < uiNumParams; ++i)
     {
-      stream << ia.m_Parameters.GetKey(i);
-      stream << ia.m_Parameters.GetValue(i);
+      inout_stream << ia.m_Parameters.GetKey(i);
+      inout_stream << ia.m_Parameters.GetValue(i);
     }
   }
 
   // version 8
-  stream << m_iGroundType;
+  inout_stream << m_iGroundType;
 }
 
 void plSurfaceResourceDescriptor::SetBaseSurfaceFile(const char* szFile)
@@ -254,9 +245,9 @@ const char* plSurfaceResourceDescriptor::GetBaseSurfaceFile() const
   return m_hBaseSurface.GetResourceID();
 }
 
-void plSurfaceResourceDescriptor::SetCollisionInteraction(const char* name)
+void plSurfaceResourceDescriptor::SetCollisionInteraction(const char* szName)
 {
-  m_sOnCollideInteraction.Assign(name);
+  m_sOnCollideInteraction.Assign(szName);
 }
 
 const char* plSurfaceResourceDescriptor::GetCollisionInteraction() const
@@ -298,7 +289,7 @@ public:
   {
   }
 
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
     pNode->RenameProperty("Base Surface", "BaseSurface");
     pNode->RenameProperty("Static Friction", "StaticFriction");
@@ -307,3 +298,6 @@ public:
 };
 
 plSurfaceResourceDescriptorPatch_1_2 g_plSurfaceResourceDescriptorPatch_1_2;
+
+
+PL_STATICLINK_FILE(Core, Core_Physics_Implementation_SurfaceResourceDescriptor);

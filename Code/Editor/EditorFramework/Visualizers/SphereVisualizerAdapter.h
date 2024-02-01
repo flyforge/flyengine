@@ -20,6 +20,6 @@ protected:
 
   float m_fScale;
   plVec3 m_vPositionOffset;
-  PlasmaEngineGizmoHandle m_hGizmo;
+  plEngineGizmoHandle m_hGizmo;
   plBitflags<plVisualizerAnchor> m_Anchor;
 };

@@ -14,11 +14,11 @@ struct plImageDataResourceDescriptor
   // plResult Deserialize(plStreamReader& stream);
 };
 
-class PLASMA_GAMEENGINE_DLL plImageDataResource : public plResource
+class PL_GAMEENGINE_DLL plImageDataResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plImageDataResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plImageDataResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plImageDataResource, plImageDataResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plImageDataResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plImageDataResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plImageDataResource, plImageDataResourceDescriptor);
 
 public:
   plImageDataResource();

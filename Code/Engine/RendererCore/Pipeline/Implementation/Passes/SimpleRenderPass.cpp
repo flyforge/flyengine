@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/Passes/SimpleRenderPass.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderContext/RenderContext.h>
@@ -10,17 +11,17 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimpleRenderPass, 1, plRTTIDefaultAllocator<plSimpleRenderPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSimpleRenderPass, 1, plRTTIDefaultAllocator<plSimpleRenderPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Color", m_PinColor),
-    PLASMA_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
-    PLASMA_MEMBER_PROPERTY("Message", m_sMessage),
+    PL_MEMBER_PROPERTY("Color", m_PinColor),
+    PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
+    PL_MEMBER_PROPERTY("Message", m_sMessage),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plSimpleRenderPass::plSimpleRenderPass(const char* szName)
@@ -28,7 +29,7 @@ plSimpleRenderPass::plSimpleRenderPass(const char* szName)
 {
 }
 
-plSimpleRenderPass::~plSimpleRenderPass() {}
+plSimpleRenderPass::~plSimpleRenderPass() = default;
 
 bool plSimpleRenderPass::GetRenderTargetDescriptions(
   const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
@@ -122,6 +123,22 @@ void plSimpleRenderPass::Execute(const plRenderViewContext& renderViewContext, c
   RenderDataWithCategory(renderViewContext, plDefaultRenderDataCategories::GUI);
 }
 
+plResult plSimpleRenderPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_sMessage;
+  return PL_SUCCESS;
+}
+
+plResult plSimpleRenderPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_sMessage;
+  return PL_SUCCESS;
+}
+
 void plSimpleRenderPass::SetMessage(const char* szMessage)
 {
   m_sMessage = szMessage;
@@ -129,4 +146,4 @@ void plSimpleRenderPass::SetMessage(const char* szMessage)
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_SimpleRenderPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_SimpleRenderPass);

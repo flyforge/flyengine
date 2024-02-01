@@ -1,5 +1,0 @@
-Before error
-
-#error Before bad quote ' After bad quote
-
-After error

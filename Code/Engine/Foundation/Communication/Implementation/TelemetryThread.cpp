@@ -28,7 +28,7 @@ private:
       {
         plTime tNow = plTime::Now();
 
-        if (tNow - LastPing > plTime::Milliseconds(500))
+        if (tNow - LastPing > plTime::MakeFromMilliseconds(500))
         {
           LastPing = tNow;
 
@@ -36,7 +36,7 @@ private:
         }
       }
 
-      plThreadUtils::Sleep(plTime::Milliseconds(10));
+      plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
     }
 
     return 0;
@@ -56,7 +56,7 @@ void plTelemetry::StartTelemetryThread()
 {
   if (!g_pBroadcastThread)
   {
-    g_pBroadcastThread = PLASMA_DEFAULT_NEW(plTelemetryThread);
+    g_pBroadcastThread = PL_DEFAULT_NEW(plTelemetryThread);
     g_pBroadcastThread->Start();
   }
 }
@@ -68,10 +68,8 @@ void plTelemetry::StopTelemetryThread()
     g_pBroadcastThread->m_bKeepRunning = false;
     g_pBroadcastThread->Join();
 
-    PLASMA_DEFAULT_DELETE(g_pBroadcastThread);
+    PL_DEFAULT_DELETE(g_pBroadcastThread);
   }
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_TelemetryThread);

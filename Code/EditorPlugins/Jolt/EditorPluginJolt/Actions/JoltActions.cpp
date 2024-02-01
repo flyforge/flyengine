@@ -4,17 +4,16 @@
 #include <EditorPluginJolt/Dialogs/JoltProjectSettingsDlg.moc.h>
 #include <GuiFoundation/Action/ActionMapManager.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltAction, 0, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltAction, 0, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plActionDescriptorHandle plJoltActions::s_hCategoryJolt;
 plActionDescriptorHandle plJoltActions::s_hProjectSettings;
 
 void plJoltActions::RegisterActions()
 {
-  s_hCategoryJolt = PLASMA_REGISTER_CATEGORY("Jolt");
-  s_hProjectSettings =
-    PLASMA_REGISTER_ACTION_1("Jolt.Settings.Project", plActionScope::Document, "Jolt", "", plJoltAction, plJoltAction::ActionType::ProjectSettings);
+  s_hCategoryJolt = PL_REGISTER_CATEGORY("Jolt");
+  s_hProjectSettings = PL_REGISTER_ACTION_1("Jolt.Settings.Project", plActionScope::Document, "Jolt", "", plJoltAction, plJoltAction::ActionType::ProjectSettings);
 }
 
 void plJoltActions::UnregisterActions()
@@ -27,10 +26,10 @@ void plJoltActions::MapMenuActions()
 {
   /// \todo Is there a way to integrate into ALL document types in a specific menu (ie. project settings)
   plActionMap* pMap = plActionMapManager::GetActionMap("EditorPluginScene_Scene2MenuBar");
-  PLASMA_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
+  PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
-  pMap->MapAction(s_hCategoryJolt, "Menu.Editor/ProjectCategory/Menu.ProjectSettings", 10.0f);
-  pMap->MapAction(s_hProjectSettings, "Menu.Editor/ProjectCategory/Menu.ProjectSettings/Jolt", 1.0f);
+  pMap->MapAction(s_hCategoryJolt, "G.Plugins.Settings", 10.0f);
+  pMap->MapAction(s_hProjectSettings, "G.Plugins.Settings", "Jolt", 1.0f);
 }
 
 plJoltAction::plJoltAction(const plActionContext& context, const char* szName, ActionType type)
@@ -41,12 +40,12 @@ plJoltAction::plJoltAction(const plActionContext& context, const char* szName, A
   switch (m_Type)
   {
     case ActionType::ProjectSettings:
-      // SetIconPath(":/EditorPluginScene/Icons/GizmoNone.svg"); /// \todo Icon
+      SetIconPath(":/JoltPlugin/JoltPlugin.svg");
       break;
   }
 }
 
-plJoltAction::~plJoltAction() {}
+plJoltAction::~plJoltAction() = default;
 
 void plJoltAction::Execute(const plVariant& value)
 {

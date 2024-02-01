@@ -17,6 +17,7 @@
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Object/ObjectAccessorBase.h>
 
+#include <GuiFoundation/GuiFoundationDLL.h>
 #include <QClipboard>
 #include <QDragEnterEvent>
 #include <QLabel>
@@ -27,30 +28,29 @@
 #include <QStringBuilder>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plPropertyClipboard, plNoBase, 1, plRTTIDefaultAllocator<plPropertyClipboard>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plPropertyClipboard, plNoBase, 1, plRTTIDefaultAllocator<plPropertyClipboard>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("m_Type", m_Type),
-    PLASMA_MEMBER_PROPERTY("m_Value", m_Value),
+    PL_MEMBER_PROPERTY("m_Type", m_Type),
+    PL_MEMBER_PROPERTY("m_Value", m_Value),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 /// *** BASE ***
 plQtPropertyWidget::plQtPropertyWidget()
   : QWidget(nullptr)
-  , m_pGrid(nullptr)
-  , m_pProp(nullptr)
+
 {
   m_bUndead = false;
   m_bIsDefault = true;
   setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
 }
 
-plQtPropertyWidget::~plQtPropertyWidget() {}
+plQtPropertyWidget::~plQtPropertyWidget() = default;
 
 void plQtPropertyWidget::Init(
   plQtPropertyGridWidget* pGrid, plObjectAccessorBase* pObjectAccessor, const plRTTI* pType, const plAbstractProperty* pProp)
@@ -59,7 +59,7 @@ void plQtPropertyWidget::Init(
   m_pObjectAccessor = pObjectAccessor;
   m_pType = pType;
   m_pProp = pProp;
-  PLASMA_ASSERT_DEBUG(m_pGrid && m_pObjectAccessor && m_pType && m_pProp, "");
+  PL_ASSERT_DEBUG(m_pGrid && m_pObjectAccessor && m_pType && m_pProp, "");
 
   if (pProp->GetAttributeByType<plReadOnlyAttribute>() != nullptr || pProp->GetFlags().IsSet(plPropertyFlags::ReadOnly))
     setEnabled(false);
@@ -96,7 +96,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
         case plPropertyCategory::Enum::Map:
         {
 
-          plStatus res = plStatus(PLASMA_SUCCESS);
+          plStatus res = plStatus(PL_SUCCESS);
           if (!m_Items[0].m_Index.IsValid())
           {
             // Revert container
@@ -153,7 +153,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
       m_pObjectAccessor->FinishTransaction(); });
   }
 
-  const char* szMimeType = "application/PlasmaEditor.Property";
+  const char* szMimeType = "application/plEditor.Property";
   bool bValueType = plReflectionUtils::IsValueType(m_pProp) || m_pProp->GetFlags().IsAnySet(plPropertyFlags::Bitflags | plPropertyFlags::IsEnum);
   // Copy
   {
@@ -217,7 +217,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
     else
     {
       QByteArray ba = mimedata->data(szMimeType);
-      plRawMemoryStreamReader memoryReader(ba.data(), ba.count());
+      plRawMemoryStreamReader memoryReader(ba.data(), ba.size());
 
       plPropertyClipboard content;
       plReflectionSerializer::ReadObjectPropertiesFromDDL(memoryReader, *plGetStaticRTTI<plPropertyClipboard>(), &content);
@@ -232,21 +232,21 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
       {
         pPaste->setEnabled(false);
         plStringBuilder sTemp;
-        sTemp.Format("Cannot convert clipboard and property content between arrays and members.");
+        sTemp.SetFormat("Cannot convert clipboard and property content between arrays and members.");
         pPaste->setToolTip(sTemp.GetData());
       }
-      else if (bEnumerationMissmatch || !content.m_Value.CanConvertTo(m_pProp->GetSpecificType()->GetVariantType()) && content.m_Type != m_pProp->GetSpecificType()->GetTypeName())
+      else if (bEnumerationMissmatch || (!content.m_Value.CanConvertTo(m_pProp->GetSpecificType()->GetVariantType()) && content.m_Type != m_pProp->GetSpecificType()->GetTypeName()))
       {
         pPaste->setEnabled(false);
         plStringBuilder sTemp;
-        sTemp.Format("Cannot convert clipboard of type '{}' to property of type '{}'", content.m_Type, m_pProp->GetSpecificType()->GetTypeName());
+        sTemp.SetFormat("Cannot convert clipboard of type '{}' to property of type '{}'", content.m_Type, m_pProp->GetSpecificType()->GetTypeName());
         pPaste->setToolTip(sTemp.GetData());
       }
       else if (clamped.Failed())
       {
         pPaste->setEnabled(false);
         plStringBuilder sTemp;
-        sTemp.Format("The member property '{}' has an plClampValueAttribute but plReflectionUtils::ClampValue failed.", m_pProp->GetPropertyName());
+        sTemp.SetFormat("The member property '{}' has an plClampValueAttribute but plReflectionUtils::ClampValue failed.", m_pProp->GetPropertyName());
       }
 
       connect(pPaste, &QAction::triggered, this, [this, content]()
@@ -298,7 +298,7 @@ void plQtPropertyWidget::ExtendContextMenu(QMenu& m)
       clipboard->setMimeData(mimeData);
 
       plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(
-        plFmt("Copied Property Name: {}", m_pProp->GetPropertyName()), plTime::Seconds(5));
+        plFmt("Copied Property Name: {}", m_pProp->GetPropertyName()), plTime::MakeFromSeconds(5));
     };
 
     QAction* pAction = m.addAction("Copy Internal Property Name:");
@@ -356,13 +356,13 @@ bool plQtPropertyWidget::GetCommonVariantSubType(
     {
       bFirst = false;
       plVariant value;
-      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).IgnoreResult();
+      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, value, item.m_Index).AssertSuccess();
       out_type = value.GetType();
     }
     else
     {
       plVariant valueNext;
-      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).IgnoreResult();
+      m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).AssertSuccess();
       if (valueNext.GetType() != out_type)
       {
         out_type = plVariantType::Invalid;
@@ -384,12 +384,12 @@ plVariant plQtPropertyWidget::GetCommonValue(const plHybridArray<plPropertySelec
       const auto& item = items[i];
       if (i == 0)
       {
-        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, values).IgnoreResult();
+        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, values).AssertSuccess();
       }
       else
       {
         plVariantArray valuesNext;
-        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, valuesNext).IgnoreResult();
+        m_pObjectAccessor->GetValues(item.m_pObject, pProperty, valuesNext).AssertSuccess();
         if (values != valuesNext)
         {
           return plVariant();
@@ -411,7 +411,7 @@ plVariant plQtPropertyWidget::GetCommonValue(const plHybridArray<plPropertySelec
       else
       {
         plVariant valueNext;
-        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).IgnoreResult();
+        m_pObjectAccessor->GetValue(item.m_pObject, pProperty, valueNext, item.m_Index).AssertSuccess();
         if (value != valueNext)
         {
           value = plVariant();
@@ -425,7 +425,7 @@ plVariant plQtPropertyWidget::GetCommonValue(const plHybridArray<plPropertySelec
 
 void plQtPropertyWidget::PrepareToDie()
 {
-  PLASMA_ASSERT_DEBUG(!m_bUndead, "Object has already been marked for cleanup");
+  PL_ASSERT_DEBUG(!m_bUndead, "Object has already been marked for cleanup");
 
   m_bUndead = true;
 
@@ -463,7 +463,7 @@ void plQtPropertyWidget::PropertyChangedHandler(const plPropertyEvent& ed)
     case plPropertyEvent::Type::SingleValueChanged:
     {
       plStringBuilder sTemp;
-      sTemp.Format("Change Property '{0}'", plTranslate(ed.m_pProperty->GetPropertyName()));
+      sTemp.SetFormat("Change Property '{0}'", plTranslate(ed.m_pProperty->GetPropertyName()));
       m_pObjectAccessor->StartTransaction(sTemp);
 
       plStatus res;
@@ -486,7 +486,7 @@ void plQtPropertyWidget::PropertyChangedHandler(const plPropertyEvent& ed)
     case plPropertyEvent::Type::BeginTemporary:
     {
       plStringBuilder sTemp;
-      sTemp.Format("Change Property '{0}'", plTranslate(ed.m_pProperty->GetPropertyName()));
+      sTemp.SetFormat("Change Property '{0}'", plTranslate(ed.m_pProperty->GetPropertyName()));
       m_pObjectAccessor->BeginTemporaryCommands(sTemp);
     }
     break;
@@ -507,15 +507,15 @@ void plQtPropertyWidget::PropertyChangedHandler(const plPropertyEvent& ed)
 
 bool plQtPropertyWidget::eventFilter(QObject* pWatched, QEvent* pEvent)
 {
-  // if (pEvent->type() == QEvent::Wheel)
-  // {
-  //   if (pWatched->parent())
-  //   {
-  //     pWatched->parent()->event(pEvent);
-  //   }
+  if (pEvent->type() == QEvent::Wheel)
+  {
+    if (pWatched->parent())
+    {
+      pWatched->parent()->event(pEvent);
+    }
 
-  //   return true;
-  // }
+    return true;
+  }
 
   return false;
 }
@@ -757,8 +757,7 @@ void plQtPropertyPointerWidget::StructureEventHandler(const plDocumentObjectStru
 
 plQtEmbeddedClassPropertyWidget::plQtEmbeddedClassPropertyWidget()
   : plQtPropertyWidget()
-  , m_bTemporaryCommand(false)
-  , m_pResolvedType(nullptr)
+
 {
 }
 
@@ -893,7 +892,7 @@ plQtPropertyTypeWidget::plQtPropertyTypeWidget(bool bAddCollapsibleGroup)
   m_pTypeWidget = nullptr;
 }
 
-plQtPropertyTypeWidget::~plQtPropertyTypeWidget() {}
+plQtPropertyTypeWidget::~plQtPropertyTypeWidget() = default;
 
 void plQtPropertyTypeWidget::OnInit()
 {
@@ -968,7 +967,7 @@ void plQtPropertyTypeWidget::DoPrepareToDie()
 
 plQtPropertyContainerWidget::plQtPropertyContainerWidget()
   : plQtPropertyWidget()
-  , m_pAddButton(nullptr)
+
 {
   m_Pal = palette();
   setAutoFillBackground(true);
@@ -1103,7 +1102,7 @@ bool plQtPropertyContainerWidget::updateDropIndex(QDropEvent* pEvent)
         pEvent->accept();
         plInt32 iNewDropTarget = -1;
         // Find closest drop target.
-        const plInt32 iGlobalYPos = mapToGlobal(pEvent->pos()).y();
+        const plInt32 iGlobalYPos = mapToGlobal(pEvent->position().toPoint()).y();
         for (plUInt32 j = 0; j < m_Elements.GetCount(); j++)
         {
           const QRect rect(m_Elements[j].m_pSubGroup->mapToGlobal(QPoint(0, 0)), m_Elements[j].m_pSubGroup->size());
@@ -1218,7 +1217,6 @@ void plQtPropertyContainerWidget::OnCustomElementContextMenu(const QPoint& pt)
 plQtGroupBoxBase* plQtPropertyContainerWidget::CreateElement(QWidget* pParent)
 {
   auto pBox = new plQtCollapsibleGroupBox(pParent);
-  //pBox->SetFillColor(palette().window().color());
   return pBox;
 }
 
@@ -1317,12 +1315,12 @@ plUInt32 plQtPropertyContainerWidget::GetRequiredElementCount() const
   if (m_pProp->GetCategory() == plPropertyCategory::Map)
   {
     m_Keys.Clear();
-    PLASMA_VERIFY(m_pObjectAccessor->GetKeys(m_Items[0].m_pObject, m_pProp, m_Keys).m_Result.Succeeded(), "GetKeys should always succeed.");
+    PL_VERIFY(m_pObjectAccessor->GetKeys(m_Items[0].m_pObject, m_pProp, m_Keys).m_Result.Succeeded(), "GetKeys should always succeed.");
     plHybridArray<plVariant, 16> keys;
     for (plUInt32 i = 1; i < m_Items.GetCount(); i++)
     {
       keys.Clear();
-      PLASMA_VERIFY(m_pObjectAccessor->GetKeys(m_Items[i].m_pObject, m_pProp, keys).m_Result.Succeeded(), "GetKeys should always succeed.");
+      PL_VERIFY(m_pObjectAccessor->GetKeys(m_Items[i].m_pObject, m_pProp, keys).m_Result.Succeeded(), "GetKeys should always succeed.");
       for (plInt32 k = (plInt32)m_Keys.GetCount() - 1; k >= 0; --k)
       {
         if (!keys.Contains(m_Keys[k]))
@@ -1341,10 +1339,10 @@ plUInt32 plQtPropertyContainerWidget::GetRequiredElementCount() const
     for (const auto& item : m_Items)
     {
       plInt32 iCount = 0;
-      PLASMA_VERIFY(m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).m_Result.Succeeded(), "GetCount should always succeed.");
+      PL_VERIFY(m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).m_Result.Succeeded(), "GetCount should always succeed.");
       iElements = plMath::Min(iElements, iCount);
     }
-    PLASMA_ASSERT_DEV(iElements >= 0, "Mismatch between storage and RTTI ({0})", iElements);
+    PL_ASSERT_DEV(iElements >= 0, "Mismatch between storage and RTTI ({0})", iElements);
     m_Keys.Clear();
     for (plUInt32 i = 0; i < (plUInt32)iElements; i++)
     {
@@ -1388,10 +1386,10 @@ void plQtPropertyContainerWidget::UpdatePropertyMetaState()
       element.m_pSubGroup->setEnabled(!bReadOnly && state != plPropertyUiState::Disabled);
       element.m_pSubGroup->SetBoldTitle(!bIsDefault);
 
-      // // If the fill color is invalid that means no border is drawn and we don't want to change the color then.
+      // If the fill color is invalid that means no border is drawn and we don't want to change the color then.
       if (!element.m_pSubGroup->GetFillColor().isValid())
       {
-        element.m_pSubGroup->SetFillColor(Qt::transparent);
+        element.m_pSubGroup->SetFillColor(qColor);
       }
     }
     if (element.m_pWidget)
@@ -1435,7 +1433,7 @@ void plQtPropertyContainerWidget::DeleteItems(plHybridArray<plPropertySelection,
 {
   m_pObjectAccessor->StartTransaction("Delete Object");
 
-  plStatus res(PLASMA_SUCCESS);
+  plStatus res(PL_SUCCESS);
   const bool bIsValueType = plReflectionUtils::IsValueType(m_pProp);
 
   if (bIsValueType)
@@ -1471,11 +1469,11 @@ void plQtPropertyContainerWidget::DeleteItems(plHybridArray<plPropertySelection,
 
 void plQtPropertyContainerWidget::MoveItems(plHybridArray<plPropertySelection, 8>& items, plInt32 iMove)
 {
-  PLASMA_ASSERT_DEV(m_pProp->GetCategory() != plPropertyCategory::Map, "Map entries can't be moved.");
+  PL_ASSERT_DEV(m_pProp->GetCategory() != plPropertyCategory::Map, "Map entries can't be moved.");
 
   m_pObjectAccessor->StartTransaction("Reparent Object");
 
-  plStatus res(PLASMA_SUCCESS);
+  plStatus res(PL_SUCCESS);
   const bool bIsValueType = plReflectionUtils::IsValueType(m_pProp);
   if (bIsValueType)
   {
@@ -1525,7 +1523,7 @@ plQtPropertyStandardTypeContainerWidget::plQtPropertyStandardTypeContainerWidget
 {
 }
 
-plQtPropertyStandardTypeContainerWidget::~plQtPropertyStandardTypeContainerWidget() {}
+plQtPropertyStandardTypeContainerWidget::~plQtPropertyStandardTypeContainerWidget() = default;
 
 plQtGroupBoxBase* plQtPropertyStandardTypeContainerWidget::CreateElement(QWidget* pParent)
 {
@@ -1568,9 +1566,9 @@ void plQtPropertyStandardTypeContainerWidget::UpdateElement(plUInt32 index)
 
   plStringBuilder sTitle;
   if (m_pProp->GetCategory() == plPropertyCategory::Map)
-    sTitle.Format("{0}", m_Keys[index].ConvertTo<plString>());
+    sTitle.SetFormat("{0}", m_Keys[index].ConvertTo<plString>());
   else
-    sTitle.Format("[{0}]", m_Keys[index].ConvertTo<plString>());
+    sTitle.SetFormat("[{0}]", m_Keys[index].ConvertTo<plString>());
 
   elem.m_pSubGroup->SetTitle(sTitle);
   m_pGrid->SetCollapseState(elem.m_pSubGroup);
@@ -1580,9 +1578,8 @@ void plQtPropertyStandardTypeContainerWidget::UpdateElement(plUInt32 index)
 /// *** plQtPropertyTypeContainerWidget ***
 
 plQtPropertyTypeContainerWidget::plQtPropertyTypeContainerWidget()
-  : m_bNeedsUpdate(false)
-{
-}
+
+  = default;
 
 plQtPropertyTypeContainerWidget::~plQtPropertyTypeContainerWidget()
 {
@@ -1633,7 +1630,7 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
     // Label
     {
       plStringBuilder sTitle, tmp;
-      sTitle.Format("{0}", plTranslate(pCommonType->GetTypeName().GetData(tmp)));
+      sTitle.SetFormat("[{0}] - {1}", m_Keys[index].ConvertTo<plString>(), plTranslate(pCommonType->GetTypeName().GetData(tmp)));
 
       if (auto pInDev = pCommonType->GetAttributeByType<plInDevelopmentAttribute>())
       {
@@ -1643,7 +1640,7 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
       elem.m_pSubGroup->SetTitle(sTitle);
     }
 
-    plColor borderIconColor = plColor::ZeroColor();
+    plColor borderIconColor = plColor::MakeZero();
 
     if (const plColorAttribute* pColorAttrib = pCommonType->GetAttributeByType<plColorAttribute>())
     {
@@ -1665,15 +1662,13 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
     {
       plStringBuilder sIconName;
       sIconName.Set(":/TypeIcons/", pCommonType->GetTypeName(), ".svg");
-      elem.m_pSubGroup->SetIcon(plQtUiServices::GetCachedIconResource(sIconName.GetData()));
+      elem.m_pSubGroup->SetIcon(plQtUiServices::GetCachedIconResource(sIconName.GetData(), borderIconColor));
     }
-
 
     // help URL
     {
       plStringBuilder tmp;
-      QString url = plTranslateHelpURL(pCommonType->GetTypeName().GetData(tmp));
-
+      QString url = plMakeQString(plTranslateHelpURL(pCommonType->GetTypeName().GetData(tmp)));
 
       if (!url.isEmpty())
       {
@@ -1755,6 +1750,7 @@ plQtVariantPropertyWidget::plQtVariantPropertyWidget()
   setLayout(m_pLayout);
 
   m_pTypeList = new QComboBox(this);
+  m_pTypeList->installEventFilter(this);
   m_pTypeList->setSizePolicy(QSizePolicy::Ignored, QSizePolicy::Preferred);
   m_pLayout->addWidget(m_pTypeList);
 }
@@ -1769,14 +1765,14 @@ void plQtVariantPropertyWidget::OnInit()
     auto type = static_cast<plVariantType::Enum>(i);
     if (GetVariantTypeDisplayName(type, sName).Succeeded())
     {
-      m_pTypeList->addItem(plTranslate(sName), i);
+      m_pTypeList->addItem(plMakeQString(plTranslate(sName)), i);
     }
   }
 
   connect(m_pTypeList, &QComboBox::currentIndexChanged,
-    [this](int index)
+    [this](int iIndex)
     {
-      ChangeVariantType(static_cast<plVariantType::Enum>(m_pTypeList->itemData(index).toInt()));
+      ChangeVariantType(static_cast<plVariantType::Enum>(m_pTypeList->itemData(iIndex).toInt()));
     });
 }
 
@@ -1844,14 +1840,14 @@ void plQtVariantPropertyWidget::ChangeVariantType(plVariantType::Enum type)
   for (const auto& item : m_Items)
   {
     plVariant value;
-    PLASMA_VERIFY(m_pObjectAccessor->GetValue(item.m_pObject, m_pProp, value, item.m_Index).Succeeded(), "");
+    PL_VERIFY(m_pObjectAccessor->GetValue(item.m_pObject, m_pProp, value, item.m_Index).Succeeded(), "");
     if (value.CanConvertTo(type))
     {
-      PLASMA_VERIFY(m_pObjectAccessor->SetValue(item.m_pObject, m_pProp, value.ConvertTo(type), item.m_Index).Succeeded(), "");
+      PL_VERIFY(m_pObjectAccessor->SetValue(item.m_pObject, m_pProp, value.ConvertTo(type), item.m_Index).Succeeded(), "");
     }
     else
     {
-      PLASMA_VERIFY(
+      PL_VERIFY(
         m_pObjectAccessor->SetValue(item.m_pObject, m_pProp, plReflectionUtils::GetDefaultVariantFromType(type), item.m_Index).Succeeded(), "");
     }
   }
@@ -1862,11 +1858,11 @@ plResult plQtVariantPropertyWidget::GetVariantTypeDisplayName(plVariantType::Enu
 {
   if (type == plVariantType::FirstStandardType || type >= plVariantType::LastStandardType ||
       type == plVariantType::StringView || type == plVariantType::DataBuffer || type == plVariantType::TempHashedString)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plRTTI* pVariantEnum = plGetStaticRTTI<plVariantType>();
   if (plReflectionUtils::EnumerationToString(pVariantEnum, type, out_sName) == false)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }

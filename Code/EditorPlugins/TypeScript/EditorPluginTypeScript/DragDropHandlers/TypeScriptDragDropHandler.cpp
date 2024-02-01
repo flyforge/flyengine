@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginTypeScript/DragDropHandlers/TypeScriptDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptComponentDragDropHandler, 1, plRTTIDefaultAllocator<plTypeScriptComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plTypeScriptComponentDragDropHandler, 1, plRTTIDefaultAllocator<plTypeScriptComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plTypeScriptComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const

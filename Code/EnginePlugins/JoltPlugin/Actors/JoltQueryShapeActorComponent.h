@@ -4,7 +4,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltQueryShapeActorComponentManager : public plComponentManager<class plJoltQueryShapeActorComponent, plBlockStorageType::FreeList>
+class PL_JOLTPLUGIN_DLL plJoltQueryShapeActorComponentManager : public plComponentManager<class plJoltQueryShapeActorComponent, plBlockStorageType::FreeList>
 {
 public:
   plJoltQueryShapeActorComponentManager(plWorld* pWorld);
@@ -27,9 +27,9 @@ private:
 /// This is useful to represent detail shapes (like the collision shapes of animated meshes) that should be pickable,
 /// but that shouldn't interact with the world otherwise.
 /// They are more lightweight at runtime than full kinematic dynamic actors.
-class PLASMA_JOLTPLUGIN_DLL plJoltQueryShapeActorComponent : public plJoltActorComponent
+class PL_JOLTPLUGIN_DLL plJoltQueryShapeActorComponent : public plJoltActorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltQueryShapeActorComponent, plJoltActorComponent, plJoltQueryShapeActorComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltQueryShapeActorComponent, plJoltActorComponent, plJoltQueryShapeActorComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

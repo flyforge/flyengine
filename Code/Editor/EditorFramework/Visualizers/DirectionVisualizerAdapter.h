@@ -18,5 +18,5 @@ protected:
 
   virtual void UpdateGizmoTransform() override;
 
-  PlasmaEngineGizmoHandle m_hGizmo;
+  plEngineGizmoHandle m_hGizmo;
 };

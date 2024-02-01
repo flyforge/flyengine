@@ -5,7 +5,7 @@
 #include <Foundation/Profiling/Profiling.h>
 #include <Texture/Image/ImageConversion.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plImageConversionStep);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plImageConversionStep);
 
 namespace
 {
@@ -104,25 +104,25 @@ namespace
 
   struct IntermediateBuffer
   {
-    IntermediateBuffer(plUInt32 bitsPerBlock)
-      : m_bitsPerBlock(bitsPerBlock)
+    IntermediateBuffer(plUInt32 uiBitsPerBlock)
+      : m_bitsPerBlock(uiBitsPerBlock)
     {
     }
     plUInt32 m_bitsPerBlock;
   };
 
-  plUInt32 allocateScratchBufferIndex(plHybridArray<IntermediateBuffer, 16>& scratchBuffers, plUInt32 bitsPerBlock, plUInt32 excludedIndex)
+  plUInt32 allocateScratchBufferIndex(plHybridArray<IntermediateBuffer, 16>& ref_scratchBuffers, plUInt32 uiBitsPerBlock, plUInt32 uiExcludedIndex)
   {
     int foundIndex = -1;
 
-    for (plUInt32 bufferIndex = 0; bufferIndex < plUInt32(scratchBuffers.GetCount()); ++bufferIndex)
+    for (plUInt32 bufferIndex = 0; bufferIndex < plUInt32(ref_scratchBuffers.GetCount()); ++bufferIndex)
     {
-      if (bufferIndex == excludedIndex)
+      if (bufferIndex == uiExcludedIndex)
       {
         continue;
       }
 
-      if (scratchBuffers[bufferIndex].m_bitsPerBlock == bitsPerBlock)
+      if (ref_scratchBuffers[bufferIndex].m_bitsPerBlock == uiBitsPerBlock)
       {
         foundIndex = bufferIndex;
         break;
@@ -137,8 +137,8 @@ namespace
     else
     {
       // Allocate new scratch buffer
-      scratchBuffers.PushBack(IntermediateBuffer(bitsPerBlock));
-      return scratchBuffers.GetCount() - 1;
+      ref_scratchBuffers.PushBack(IntermediateBuffer(uiBitsPerBlock));
+      return ref_scratchBuffers.GetCount() - 1;
     }
   }
 } // namespace
@@ -154,12 +154,12 @@ plImageConversionStep::~plImageConversionStep()
 }
 
 plResult plImageConversion::BuildPath(plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat, bool bSourceEqualsTarget,
-  plHybridArray<plImageConversion::ConversionPathNode, 16>& path_out, plUInt32& numScratchBuffers_out)
+  plHybridArray<plImageConversion::ConversionPathNode, 16>& ref_path_out, plUInt32& ref_uiNumScratchBuffers_out)
 {
-  PLASMA_LOCK(s_conversionTableLock);
+  PL_LOCK(s_conversionTableLock);
 
-  path_out.Clear();
-  numScratchBuffers_out = 0;
+  ref_path_out.Clear();
+  ref_uiNumScratchBuffers_out = 0;
 
   if (sourceFormat == targetFormat)
   {
@@ -170,8 +170,8 @@ plResult plImageConversion::BuildPath(plImageFormat::Enum sourceFormat, plImageF
     node.m_sourceBufferIndex = 0;
     node.m_targetBufferIndex = 0;
     node.m_step = nullptr;
-    path_out.PushBack(node);
-    return PLASMA_SUCCESS;
+    ref_path_out.PushBack(node);
+    return PL_SUCCESS;
   }
 
   if (!s_conversionTableValid)
@@ -187,7 +187,7 @@ plResult plImageConversion::BuildPath(plImageFormat::Enum sourceFormat, plImageF
 
     if (!s_conversionTable.TryGetValue(currentTableIndex, entry))
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plImageConversion::ConversionPathNode step;
@@ -198,30 +198,30 @@ plResult plImageConversion::BuildPath(plImageFormat::Enum sourceFormat, plImageF
 
     current = entry.m_targetFormat;
 
-    path_out.PushBack(step);
+    ref_path_out.PushBack(step);
   }
 
   plHybridArray<IntermediateBuffer, 16> scratchBuffers;
   scratchBuffers.PushBack(IntermediateBuffer(plImageFormat::GetBitsPerBlock(targetFormat)));
 
-  for (int i = path_out.GetCount() - 1; i >= 0; --i)
+  for (int i = ref_path_out.GetCount() - 1; i >= 0; --i)
   {
-    if (i == path_out.GetCount() - 1)
-      path_out[i].m_targetBufferIndex = 0;
+    if (i == ref_path_out.GetCount() - 1)
+      ref_path_out[i].m_targetBufferIndex = 0;
     else
-      path_out[i].m_targetBufferIndex = path_out[i + 1].m_sourceBufferIndex;
+      ref_path_out[i].m_targetBufferIndex = ref_path_out[i + 1].m_sourceBufferIndex;
 
     if (i > 0)
     {
-      if (path_out[i].m_inPlace)
+      if (ref_path_out[i].m_inPlace)
       {
-        path_out[i].m_sourceBufferIndex = path_out[i].m_targetBufferIndex;
+        ref_path_out[i].m_sourceBufferIndex = ref_path_out[i].m_targetBufferIndex;
       }
       else
       {
-        plUInt32 bitsPerBlock = plImageFormat::GetBitsPerBlock(path_out[i].m_sourceFormat);
+        plUInt32 bitsPerBlock = plImageFormat::GetBitsPerBlock(ref_path_out[i].m_sourceFormat);
 
-        path_out[i].m_sourceBufferIndex = allocateScratchBufferIndex(scratchBuffers, bitsPerBlock, path_out[i].m_targetBufferIndex);
+        ref_path_out[i].m_sourceBufferIndex = allocateScratchBufferIndex(scratchBuffers, bitsPerBlock, ref_path_out[i].m_targetBufferIndex);
       }
     }
   }
@@ -229,48 +229,48 @@ plResult plImageConversion::BuildPath(plImageFormat::Enum sourceFormat, plImageF
   if (bSourceEqualsTarget)
   {
     // Enforce constraint that source == target
-    path_out[0].m_sourceBufferIndex = 0;
+    ref_path_out[0].m_sourceBufferIndex = 0;
 
     // Did we accidentally break the in-place invariant?
-    if (path_out[0].m_sourceBufferIndex == path_out[0].m_targetBufferIndex && !path_out[0].m_inPlace)
+    if (ref_path_out[0].m_sourceBufferIndex == ref_path_out[0].m_targetBufferIndex && !ref_path_out[0].m_inPlace)
     {
-      if (path_out.GetCount() == 1)
+      if (ref_path_out.GetCount() == 1)
       {
         // Only a single step, so we need to add a copy step
         plImageConversion::ConversionPathNode copy;
         copy.m_inPlace = false;
         copy.m_sourceFormat = sourceFormat;
         copy.m_targetFormat = sourceFormat;
-        copy.m_sourceBufferIndex = path_out[0].m_sourceBufferIndex;
+        copy.m_sourceBufferIndex = ref_path_out[0].m_sourceBufferIndex;
         copy.m_targetBufferIndex =
-          allocateScratchBufferIndex(scratchBuffers, plImageFormat::GetBitsPerBlock(path_out[0].m_sourceFormat), path_out[0].m_sourceBufferIndex);
-        path_out[0].m_sourceBufferIndex = copy.m_targetBufferIndex;
+          allocateScratchBufferIndex(scratchBuffers, plImageFormat::GetBitsPerBlock(ref_path_out[0].m_sourceFormat), ref_path_out[0].m_sourceBufferIndex);
+        ref_path_out[0].m_sourceBufferIndex = copy.m_targetBufferIndex;
         copy.m_step = nullptr;
-        path_out.Insert(copy, 0);
+        ref_path_out.Insert(copy, 0);
       }
       else
       {
         // Turn second step to non-inplace
-        path_out[1].m_inPlace = false;
-        path_out[1].m_sourceBufferIndex =
-          allocateScratchBufferIndex(scratchBuffers, plImageFormat::GetBitsPerBlock(path_out[1].m_sourceFormat), path_out[0].m_sourceBufferIndex);
-        path_out[0].m_targetBufferIndex = path_out[1].m_sourceBufferIndex;
+        ref_path_out[1].m_inPlace = false;
+        ref_path_out[1].m_sourceBufferIndex =
+          allocateScratchBufferIndex(scratchBuffers, plImageFormat::GetBitsPerBlock(ref_path_out[1].m_sourceFormat), ref_path_out[0].m_sourceBufferIndex);
+        ref_path_out[0].m_targetBufferIndex = ref_path_out[1].m_sourceBufferIndex;
       }
     }
   }
   else
   {
-    path_out[0].m_sourceBufferIndex = scratchBuffers.GetCount();
+    ref_path_out[0].m_sourceBufferIndex = scratchBuffers.GetCount();
   }
 
-  numScratchBuffers_out = scratchBuffers.GetCount() - 1;
+  ref_uiNumScratchBuffers_out = scratchBuffers.GetCount() - 1;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plImageConversion::RebuildConversionTable()
 {
-  PLASMA_LOCK(s_conversionTableLock);
+  PL_LOCK(s_conversionTableLock);
 
   s_conversionTable.Clear();
 
@@ -285,18 +285,18 @@ void plImageConversion::RebuildConversionTable()
 
       if (subConversion.m_flags.IsAnySet(plImageConversionFlags::InPlace))
       {
-        PLASMA_ASSERT_DEV(plImageFormat::IsCompressed(subConversion.m_sourceFormat) == plImageFormat::IsCompressed(subConversion.m_targetFormat) &&
+        PL_ASSERT_DEV(plImageFormat::IsCompressed(subConversion.m_sourceFormat) == plImageFormat::IsCompressed(subConversion.m_targetFormat) &&
                         plImageFormat::GetBitsPerBlock(subConversion.m_sourceFormat) == plImageFormat::GetBitsPerBlock(subConversion.m_targetFormat),
           "In-place conversions are only allowed between formats of the same number of bits per pixel and compressedness");
       }
 
       if (plImageFormat::GetType(subConversion.m_sourceFormat) == plImageFormatType::PLANAR)
       {
-        PLASMA_ASSERT_DEV(plImageFormat::GetType(subConversion.m_targetFormat) == plImageFormatType::LINEAR, "Conversions from planar formats must target linear formats");
+        PL_ASSERT_DEV(plImageFormat::GetType(subConversion.m_targetFormat) == plImageFormatType::LINEAR, "Conversions from planar formats must target linear formats");
       }
       else if (plImageFormat::GetType(subConversion.m_targetFormat) == plImageFormatType::PLANAR)
       {
-        PLASMA_ASSERT_DEV(plImageFormat::GetType(subConversion.m_sourceFormat) == plImageFormatType::LINEAR, "Conversions to planar formats must sourced from linear formats");
+        PL_ASSERT_DEV(plImageFormat::GetType(subConversion.m_sourceFormat) == plImageFormatType::LINEAR, "Conversions to planar formats must sourced from linear formats");
       }
 
       plUInt32 tableIndex = MakeKey(subConversion.m_sourceFormat, subConversion.m_targetFormat);
@@ -370,40 +370,40 @@ void plImageConversion::RebuildConversionTable()
   s_conversionTableValid = true;
 }
 
-plResult plImageConversion::Convert(const plImageView& source, plImage& target, plImageFormat::Enum targetFormat)
+plResult plImageConversion::Convert(const plImageView& source, plImage& ref_target, plImageFormat::Enum targetFormat)
 {
-  PLASMA_PROFILE_SCOPE("plImageConversion::Convert");
+  PL_PROFILE_SCOPE("plImageConversion::Convert");
 
   plImageFormat::Enum sourceFormat = source.GetImageFormat();
 
   // Trivial copy
   if (sourceFormat == targetFormat)
   {
-    if (&source != &target)
+    if (&source != &ref_target)
     {
       // copy if not already the same
-      target.ResetAndCopy(source);
+      ref_target.ResetAndCopy(source);
     }
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plHybridArray<ConversionPathNode, 16> path;
   plUInt32 numScratchBuffers = 0;
-  if (BuildPath(sourceFormat, targetFormat, &source == &target, path, numScratchBuffers).Failed())
+  if (BuildPath(sourceFormat, targetFormat, &source == &ref_target, path, numScratchBuffers).Failed())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return Convert(source, target, path, numScratchBuffers);
+  return Convert(source, ref_target, path, numScratchBuffers);
 }
 
-plResult plImageConversion::Convert(const plImageView& source, plImage& target, plArrayPtr<ConversionPathNode> path, plUInt32 numScratchBuffers)
+plResult plImageConversion::Convert(const plImageView& source, plImage& ref_target, plArrayPtr<ConversionPathNode> path, plUInt32 uiNumScratchBuffers)
 {
-  PLASMA_ASSERT_DEV(path.GetCount() > 0, "Invalid conversion path");
-  PLASMA_ASSERT_DEV(path[0].m_sourceFormat == source.GetImageFormat(), "Invalid conversion path");
+  PL_ASSERT_DEV(path.GetCount() > 0, "Invalid conversion path");
+  PL_ASSERT_DEV(path[0].m_sourceFormat == source.GetImageFormat(), "Invalid conversion path");
 
   plHybridArray<plImage, 16> intermediates;
-  intermediates.SetCount(numScratchBuffers);
+  intermediates.SetCount(uiNumScratchBuffers);
 
   const plImageView* pSource = &source;
 
@@ -411,67 +411,67 @@ plResult plImageConversion::Convert(const plImageView& source, plImage& target, 
   {
     plUInt32 targetIndex = path[i].m_targetBufferIndex;
 
-    plImage* pTarget = targetIndex == 0 ? &target : &intermediates[targetIndex - 1];
+    plImage* pTarget = targetIndex == 0 ? &ref_target : &intermediates[targetIndex - 1];
 
     if (ConvertSingleStep(path[i].m_step, *pSource, *pTarget, path[i].m_targetFormat).Failed())
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     pSource = pTarget;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plImageConversion::ConvertRaw(
-  plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numElements, plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat)
+  plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumElements, plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat)
 {
-  if (numElements == 0)
+  if (uiNumElements == 0)
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   // Trivial copy
   if (sourceFormat == targetFormat)
   {
     if (target.GetPtr() != source.GetPtr())
-      memcpy(target.GetPtr(), source.GetPtr(), numElements * plUInt64(plImageFormat::GetBitsPerPixel(sourceFormat)) / 8);
-    return PLASMA_SUCCESS;
+      memcpy(target.GetPtr(), source.GetPtr(), uiNumElements * plUInt64(plImageFormat::GetBitsPerPixel(sourceFormat)) / 8);
+    return PL_SUCCESS;
   }
 
   if (plImageFormat::IsCompressed(sourceFormat) || plImageFormat::IsCompressed(targetFormat))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plHybridArray<ConversionPathNode, 16> path;
   plUInt32 numScratchBuffers;
   if (BuildPath(sourceFormat, targetFormat, source.GetPtr() == target.GetPtr(), path, numScratchBuffers).Failed())
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return ConvertRaw(source, target, numElements, path, numScratchBuffers);
+  return ConvertRaw(source, target, uiNumElements, path, numScratchBuffers);
 }
 
 plResult plImageConversion::ConvertRaw(
-  plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 numElements, plArrayPtr<ConversionPathNode> path, plUInt32 numScratchBuffers)
+  plConstByteBlobPtr source, plByteBlobPtr target, plUInt32 uiNumElements, plArrayPtr<ConversionPathNode> path, plUInt32 uiNumScratchBuffers)
 {
-  PLASMA_ASSERT_DEV(path.GetCount() > 0, "Path of length 0 is invalid.");
+  PL_ASSERT_DEV(path.GetCount() > 0, "Path of length 0 is invalid.");
 
-  if (numElements == 0)
+  if (uiNumElements == 0)
   {
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (plImageFormat::IsCompressed(path.GetPtr()->m_sourceFormat) || plImageFormat::IsCompressed((path.GetEndPtr() - 1)->m_targetFormat))
   {
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plHybridArray<plBlob, 16> intermediates;
-  intermediates.SetCount(numScratchBuffers);
+  intermediates.SetCount(uiNumScratchBuffers);
 
   for (plUInt32 i = 0; i < path.GetCount(); ++i)
   {
@@ -485,29 +485,29 @@ plResult plImageConversion::ConvertRaw(
     }
     else
     {
-      plUInt32 expectedSize = static_cast<plUInt32>(targetBpp * numElements / 8);
+      plUInt32 expectedSize = static_cast<plUInt32>(targetBpp * uiNumElements / 8);
       intermediates[targetIndex - 1].SetCountUninitialized(expectedSize);
       stepTarget = intermediates[targetIndex - 1].GetByteBlobPtr();
     }
 
     if (path[i].m_step == nullptr)
     {
-      memcpy(stepTarget.GetPtr(), source.GetPtr(), numElements * targetBpp / 8);
+      memcpy(stepTarget.GetPtr(), source.GetPtr(), uiNumElements * targetBpp / 8);
     }
     else
     {
       if (static_cast<const plImageConversionStepLinear*>(path[i].m_step)
-            ->ConvertPixels(source, stepTarget, numElements, path[i].m_sourceFormat, path[i].m_targetFormat)
+            ->ConvertPixels(source, stepTarget, uiNumElements, path[i].m_sourceFormat, path[i].m_targetFormat)
             .Failed())
       {
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
     source = stepTarget;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plImageConversion::ConvertSingleStep(
@@ -516,7 +516,7 @@ plResult plImageConversion::ConvertSingleStep(
   if (!pStep)
   {
     target.ResetAndCopy(source);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plImageFormat::Enum sourceFormat = source.GetImageFormat();
@@ -548,8 +548,8 @@ plResult plImageConversion::ConvertSingleStep(
       return ConvertSingleStepDeplanarize(source, target, sourceFormat, targetFormat, pStep);
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
-      return PLASMA_FAILURE;
+      PL_ASSERT_NOT_IMPLEMENTED;
+      return PL_FAILURE;
   }
 }
 
@@ -590,7 +590,7 @@ plResult plImageConversion::ConvertSingleStepDecompress(
                     sourceFormat, targetFormat)
                   .Failed())
             {
-              return PLASMA_FAILURE;
+              return PL_FAILURE;
             }
 
             for (plUInt32 blockX = 0; blockX < numBlocksX; blockX++)
@@ -613,7 +613,7 @@ plResult plImageConversion::ConvertSingleStepDecompress(
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plImageConversion::ConvertSingleStepCompress(
@@ -667,14 +667,14 @@ plResult plImageConversion::ConvertSingleStepCompress(
 
           if (result.Failed())
           {
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
         }
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plImageConversion::ConvertSingleStepDeplanarize(
@@ -698,7 +698,7 @@ plResult plImageConversion::ConvertSingleStepDeplanarize(
           if (width % blockSizeX != 0 || height % blockSizeY != 0)
           {
             // Input image must be aligned to block dimensions already.
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
 
           sourcePlanes.PushBack(source.GetPlaneView(mipLevel, face, arrayIndex, planeIndex));
@@ -708,13 +708,13 @@ plResult plImageConversion::ConvertSingleStepDeplanarize(
               ->ConvertPixels(sourcePlanes, target.GetSubImageView(mipLevel, face, arrayIndex), width, height, sourceFormat, targetFormat)
               .Failed())
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plImageConversion::ConvertSingleStepPlanarize(
@@ -738,7 +738,7 @@ plResult plImageConversion::ConvertSingleStepPlanarize(
           if (width % blockSizeX != 0 || height % blockSizeY != 0)
           {
             // Input image must be aligned to block dimensions already.
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
           }
 
           targetPlanes.PushBack(target.GetPlaneView(mipLevel, face, arrayIndex, planeIndex));
@@ -748,18 +748,18 @@ plResult plImageConversion::ConvertSingleStepPlanarize(
               ->ConvertPixels(source.GetSubImageView(mipLevel, face, arrayIndex), targetPlanes, width, height, sourceFormat, targetFormat)
               .Failed())
         {
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
         }
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plImageConversion::IsConvertible(plImageFormat::Enum sourceFormat, plImageFormat::Enum targetFormat)
 {
-  PLASMA_LOCK(s_conversionTableLock);
+  PL_LOCK(s_conversionTableLock);
 
   if (!s_conversionTableValid)
   {
@@ -773,7 +773,7 @@ bool plImageConversion::IsConvertible(plImageFormat::Enum sourceFormat, plImageF
 plImageFormat::Enum plImageConversion::FindClosestCompatibleFormat(
   plImageFormat::Enum format, plArrayPtr<const plImageFormat::Enum> compatibleFormats)
 {
-  PLASMA_LOCK(s_conversionTableLock);
+  PL_LOCK(s_conversionTableLock);
 
   if (!s_conversionTableValid)
   {
@@ -797,4 +797,4 @@ plImageFormat::Enum plImageConversion::FindClosestCompatibleFormat(
   return bestFormat;
 }
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Implementation_ImageConversion);
+

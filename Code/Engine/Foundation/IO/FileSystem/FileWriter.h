@@ -8,9 +8,9 @@
 ///
 /// This file writer buffers writes up to a certain amount of bytes (configurable).
 /// It closes the file automatically once it goes out of scope.
-class PLASMA_FOUNDATION_DLL plFileWriter : public plFileWriterBase
+class PL_FOUNDATION_DLL plFileWriter : public plFileWriterBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFileWriter);
+  PL_DISALLOW_COPY_AND_ASSIGN(plFileWriter);
 
 public:
   /// \brief Constructor, does nothing.
@@ -19,7 +19,7 @@ public:
   /// \brief Destructor, closes the file, if it is still open (RAII).
   ~plFileWriter() { Close(); }
 
-  /// \brief Opens the given file for writing. Returns PLASMA_SUCCESS if the file could be opened. A cache is created to speed up small writes.
+  /// \brief Opens the given file for writing. Returns PL_SUCCESS if the file could be opened. A cache is created to speed up small writes.
   ///
   /// You should typically not disable bAllowFileEvents, unless you need to prevent recursive file events,
   /// which is only the case, if you are doing file accesses from within a File Event Handler.
@@ -29,9 +29,9 @@ public:
   /// \brief Closes the file, if it is open.
   void Close();
 
-  /// \brief Writes the given number of bytes to the file. Returns PLASMA_SUCCESS if all bytes were successfully written.
+  /// \brief Writes the given number of bytes to the file. Returns PL_SUCCESS if all bytes were successfully written.
   ///
-  /// As this class buffers writes with an internal cache, PLASMA_SUCCESS does NOT mean that the data is actually written to disk.
+  /// As this class buffers writes with an internal cache, PL_SUCCESS does NOT mean that the data is actually written to disk.
   virtual plResult WriteBytes(const void* pWriteBuffer, plUInt64 uiBytesToWrite) override;
 
   /// \brief Will write anything that's currently in the write-cache to disk. Will decrease performance if used excessively.

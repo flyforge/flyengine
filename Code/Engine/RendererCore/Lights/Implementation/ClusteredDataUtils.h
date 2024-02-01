@@ -8,10 +8,10 @@
 #include <RendererFoundation/Shader/ShaderUtils.h>
 
 #include <RendererCore/../../../Data/Base/Shaders/Common/LightData.h>
-PLASMA_DEFINE_AS_POD_TYPE(plPerLightData);
-PLASMA_DEFINE_AS_POD_TYPE(plPerDecalData);
-PLASMA_DEFINE_AS_POD_TYPE(plPerReflectionProbeData);
-PLASMA_DEFINE_AS_POD_TYPE(plPerClusterData);
+PL_DEFINE_AS_POD_TYPE(plPerLightData);
+PL_DEFINE_AS_POD_TYPE(plPerDecalData);
+PL_DEFINE_AS_POD_TYPE(plPerReflectionProbeData);
+PL_DEFINE_AS_POD_TYPE(plPerClusterData);
 
 #include <Core/Graphics/Camera.h>
 #include <Foundation/Math/Float16.h>
@@ -28,20 +28,23 @@ namespace
   static float s_fDepthSliceScale = (NUM_CLUSTERS_Z - 1) / (plMath::Log2(s_fMaxLightDistance) - plMath::Log2(s_fMinLightDistance));
   static float s_fDepthSliceBias = -s_fDepthSliceScale * plMath::Log2(s_fMinLightDistance) + 1.0f;
 
-  PLASMA_ALWAYS_INLINE float GetDepthFromSliceIndex(plUInt32 uiSliceIndex)
+  PL_ALWAYS_INLINE float GetDepthFromSliceIndex(plUInt32 uiSliceIndex)
   {
     return plMath::Pow(2.0f, (uiSliceIndex - s_fDepthSliceBias + 1.0f) / s_fDepthSliceScale);
   }
 
-  PLASMA_ALWAYS_INLINE plUInt32 GetSliceIndexFromDepth(float fLinearDepth)
+  PL_ALWAYS_INLINE plUInt32 GetSliceIndexFromDepth(float fLinearDepth)
   {
     return plMath::Clamp((plInt32)(plMath::Log2(fLinearDepth) * s_fDepthSliceScale + s_fDepthSliceBias), 0, NUM_CLUSTERS_Z - 1);
   }
 
-  PLASMA_ALWAYS_INLINE plUInt32 GetClusterIndexFromCoord(plUInt32 x, plUInt32 y, plUInt32 z) { return z * NUM_CLUSTERS_XY + y * NUM_CLUSTERS_X + x; }
+  PL_ALWAYS_INLINE plUInt32 GetClusterIndexFromCoord(plUInt32 x, plUInt32 y, plUInt32 z)
+  {
+    return z * NUM_CLUSTERS_XY + y * NUM_CLUSTERS_X + x;
+  }
 
   // in order: tlf, trf, blf, brf, tln, trn, bln, brn
-  PLASMA_FORCE_INLINE void GetClusterCornerPoints(
+  PL_FORCE_INLINE void GetClusterCornerPoints(
     const plCamera& camera, float fZf, float fZn, float fTanLeft, float fTanRight, float fTanBottom, float fTanTop, plInt32 x, plInt32 y, plInt32 z, plVec3* out_pCorners)
   {
     const plVec3& pos = camera.GetPosition();
@@ -83,7 +86,7 @@ namespace
 
   void FillClusterBoundingSpheres(const plCamera& camera, float fAspectRatio, plArrayPtr<plSimdBSphere> clusterBoundingSpheres)
   {
-    PLASMA_PROFILE_SCOPE("FillClusterBoundingSpheres");
+    PL_PROFILE_SCOPE("FillClusterBoundingSpheres");
 
     ///\todo proper implementation for orthographic views
     if (camera.IsOrthographic())
@@ -119,7 +122,7 @@ namespace
     plSimdVec4f dirUp = plSimdConversion::ToVec3(camera.GetDirUp());
 
 
-    plSimdVec4f fZn = plSimdVec4f::ZeroVector();
+    plSimdVec4f fZn = plSimdVec4f::MakeZero();
     plSimdVec4f cc[8];
 
     for (plInt32 z = 0; z < NUM_CLUSTERS_Z; z++)
@@ -150,10 +153,7 @@ namespace
           cc[6] = cc[4] - dirUp * steps.w();
           cc[7] = cc[6] + dirRight * steps.z();
 
-          plSimdBSphere s;
-          s.SetFromPoints(cc, 8);
-
-          clusterBoundingSpheres[GetClusterIndexFromCoord(x, y, z)] = s;
+          clusterBoundingSpheres[GetClusterIndexFromCoord(x, y, z)] = plSimdBSphere::MakeFromPoints(cc, 8);
         }
       }
 
@@ -161,32 +161,25 @@ namespace
     }
   }
 
-  PLASMA_ALWAYS_INLINE void FillLightData(plPerLightData& ref_perLightData, const plLightRenderData* pLightRenderData, plUInt8 uiType)
+  PL_ALWAYS_INLINE void FillLightData(plPerLightData& ref_perLightData, const plLightRenderData* pLightRenderData, plUInt8 uiType)
   {
     plMemoryUtils::ZeroFill(&ref_perLightData, 1);
 
-    plColorLinearUB lightColor = pLightRenderData->m_LightColor  * plShaderUtils::KelvinToRGB(pLightRenderData->m_fTemperature);
+    plColorLinearUB lightColor = pLightRenderData->m_LightColor;
     lightColor.a = uiType;
 
     ref_perLightData.colorAndType = *reinterpret_cast<plUInt32*>(&lightColor.r);
     ref_perLightData.intensity = pLightRenderData->m_fIntensity;
-    ref_perLightData.specularIntensity = pLightRenderData->m_fSpecularMultiplier;
+    ref_perLightData.specularMultiplier = pLightRenderData->m_fSpecularMultiplier;
     ref_perLightData.shadowDataOffset = pLightRenderData->m_uiShadowDataOffset;
-    ref_perLightData.volumetricIntensity = pLightRenderData->m_fVolumetricIntensity;
   }
 
   void FillPointLightData(plPerLightData& ref_perLightData, const plPointLightRenderData* pPointLightRenderData)
   {
     FillLightData(ref_perLightData, pPointLightRenderData, LIGHT_TYPE_POINT);
 
-    ref_perLightData.direction = plShaderUtils::Float3ToRGB10(pPointLightRenderData->m_GlobalTransform.m_qRotation * plVec3(-1, 0, 0));
-    ref_perLightData.rightDirection = plShaderUtils::Float3ToRGB10(pPointLightRenderData->m_GlobalTransform.m_qRotation * plVec3(0, 1, 0));
-    ref_perLightData.upDirection = plShaderUtils::Float3ToRGB10(pPointLightRenderData->m_GlobalTransform.m_qRotation * plVec3(0, 0, 1));
     ref_perLightData.position = pPointLightRenderData->m_GlobalTransform.m_vPosition;
     ref_perLightData.invSqrAttRadius = 1.0f / (pPointLightRenderData->m_fRange * pPointLightRenderData->m_fRange);
-    ref_perLightData.falloff = pPointLightRenderData->m_fFalloff;
-    ref_perLightData.size = pPointLightRenderData->m_fSize;
-    ref_perLightData.length = pPointLightRenderData->m_fLength;
   }
 
   void FillSpotLightData(plPerLightData& ref_perLightData, const plSpotLightRenderData* pSpotLightRenderData)
@@ -194,20 +187,14 @@ namespace
     FillLightData(ref_perLightData, pSpotLightRenderData, LIGHT_TYPE_SPOT);
 
     ref_perLightData.direction = plShaderUtils::Float3ToRGB10(pSpotLightRenderData->m_GlobalTransform.m_qRotation * plVec3(-1, 0, 0));
-    ref_perLightData.rightDirection = plShaderUtils::Float3ToRGB10(pSpotLightRenderData->m_GlobalTransform.m_qRotation * plVec3(0, 1, 0));
-    ref_perLightData.upDirection = plShaderUtils::Float3ToRGB10(pSpotLightRenderData->m_GlobalTransform.m_qRotation * plVec3(0, 0, 1));
     ref_perLightData.position = pSpotLightRenderData->m_GlobalTransform.m_vPosition;
     ref_perLightData.invSqrAttRadius = 1.0f / (pSpotLightRenderData->m_fRange * pSpotLightRenderData->m_fRange);
-    ref_perLightData.falloff = pSpotLightRenderData->m_fFalloff;
 
     const float fCosInner = plMath::Cos(pSpotLightRenderData->m_InnerSpotAngle * 0.5f);
     const float fCosOuter = plMath::Cos(pSpotLightRenderData->m_OuterSpotAngle * 0.5f);
     const float fSpotParamScale = 1.0f / plMath::Max(0.001f, (fCosInner - fCosOuter));
     const float fSpotParamOffset = -fCosOuter * fSpotParamScale;
     ref_perLightData.spotParams = plShaderUtils::Float2ToRG16F(plVec2(fSpotParamScale, fSpotParamOffset));
-
-    ref_perLightData.size = pSpotLightRenderData->m_fSize;
-    ref_perLightData.length = pSpotLightRenderData->m_fLength;
   }
 
   void FillDirLightData(plPerLightData& ref_perLightData, const plDirectionalLightRenderData* pDirLightRenderData)
@@ -229,8 +216,7 @@ namespace
     scale = plVec3(1.0f).CompDiv(scale.CompMax(plVec3(0.00001f)));
 
     const plMat4 lookAt = plGraphicsUtils::CreateLookAtViewMatrix(position, position + dirForwards, dirUp);
-    plMat4 scaleMat;
-    scaleMat.SetScalingMatrix(plVec3(scale.y, -scale.z, scale.x));
+    plMat4 scaleMat = plMat4::MakeScaling(plVec3(scale.y, -scale.z, scale.x));
 
     ref_perDecalData.worldToDecalMatrix = scaleMat * lookAt;
     ref_perDecalData.applyOnlyToId = pDecalRenderData->m_uiApplyOnlyToId;
@@ -274,7 +260,7 @@ namespace
   }
 
 
-  PLASMA_FORCE_INLINE plSimdBBox GetScreenSpaceBounds(const plSimdBSphere& sphere, const plSimdMat4f& mViewMatrix, const plSimdMat4f& mProjectionMatrix)
+  PL_FORCE_INLINE plSimdBBox GetScreenSpaceBounds(const plSimdBSphere& sphere, const plSimdMat4f& mViewMatrix, const plSimdMat4f& mProjectionMatrix)
   {
     plSimdVec4f viewSpaceCenter = mViewMatrix.TransformPosition(sphere.GetCenter());
     plSimdFloat depth = viewSpaceCenter.z();
@@ -315,8 +301,7 @@ namespace
   }
 
   template <typename Cluster, typename IntersectionFunc>
-  PLASMA_FORCE_INLINE void FillCluster(
-    const plSimdBBox& screenSpaceBounds, plUInt32 uiBlockIndex, plUInt32 uiMask, Cluster* pClusters, IntersectionFunc func)
+  PL_FORCE_INLINE void FillCluster(const plSimdBBox& screenSpaceBounds, plUInt32 uiBlockIndex, plUInt32 uiMask, Cluster* pClusters, IntersectionFunc func)
   {
     plSimdVec4f scale = plSimdVec4f(0.5f * NUM_CLUSTERS_X, -0.5f * NUM_CLUSTERS_Y, 1.0f, 1.0f);
     plSimdVec4f bias = plSimdVec4f(0.5f * NUM_CLUSTERS_X, 0.5f * NUM_CLUSTERS_Y, 0.0f, 0.0f);
@@ -328,7 +313,7 @@ namespace
 
     plSimdVec4i maxClusterIndex = plSimdVec4i(NUM_CLUSTERS_X, NUM_CLUSTERS_Y, NUM_CLUSTERS_X, NUM_CLUSTERS_Y);
     minXY_maxXY = minXY_maxXY.CompMin(maxClusterIndex - plSimdVec4i(1));
-    minXY_maxXY = minXY_maxXY.CompMax(plSimdVec4i::ZeroVector());
+    minXY_maxXY = minXY_maxXY.CompMax(plSimdVec4i::MakeZero());
 
     plUInt32 xMin = minXY_maxXY.x();
     plUInt32 yMin = minXY_maxXY.w();
@@ -419,8 +404,7 @@ namespace
       bool frontCull = projected > clusterRadius + range;
       bool backCull = projected < -clusterRadius;
 
-      return !(angleCull || frontCull || backCull);
-    });
+      return !(angleCull || frontCull || backCull); });
   }
 
   template <typename Cluster>
@@ -443,18 +427,17 @@ namespace
     plSimdMat4f worldToDecal = decalToWorld.GetInverse();
 
     plVec3 corners[8];
-    plBoundingBox(plVec3(-1), plVec3(1)).GetCorners(corners);
+    plBoundingBox::MakeFromMinMax(plVec3(-1), plVec3(1)).GetCorners(corners);
 
     plSimdMat4f decalToScreen = mViewProjectionMatrix * decalToWorld;
-    plSimdBBox screenSpaceBounds;
-    screenSpaceBounds.SetInvalid();
+    plSimdBBox screenSpaceBounds = plSimdBBox::MakeInvalid();
     bool bInsideBox = false;
     for (plUInt32 i = 0; i < 8; ++i)
     {
       plSimdVec4f corner = plSimdConversion::ToVec3(corners[i]);
       plSimdVec4f screenSpaceCorner = decalToScreen.TransformPosition(corner);
       plSimdFloat depth = screenSpaceCorner.w();
-      bInsideBox |= depth < plSimdFloat::Zero();
+      bInsideBox |= depth < plSimdFloat::MakeZero();
 
       screenSpaceCorner /= depth;
       screenSpaceCorner = screenSpaceCorner.GetCombined<plSwizzle::XYZW>(plSimdVec4f(depth));
@@ -479,7 +462,6 @@ namespace
       plSimdBSphere clusterSphere = pClusterBoundingSpheres[uiClusterIndex];
       clusterSphere.Transform(worldToDecal);
 
-      return localDecalBounds.Overlaps(clusterSphere);
-    });
+      return localDecalBounds.Overlaps(clusterSphere); });
   }
 } // namespace

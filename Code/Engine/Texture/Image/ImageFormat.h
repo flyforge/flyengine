@@ -5,7 +5,7 @@
 #include <Texture/TextureDLL.h>
 
 /// \brief Enum describing the type of an image format.
-struct PLASMA_TEXTURE_DLL plImageFormatType
+struct PL_TEXTURE_DLL plImageFormatType
 {
   /// \brief Enum describing the type of an image format.
   enum Enum
@@ -18,7 +18,7 @@ struct PLASMA_TEXTURE_DLL plImageFormatType
 };
 
 /// \brief Enum describing the channel type of an image format.
-struct PLASMA_TEXTURE_DLL plImageFormatDataType
+struct PL_TEXTURE_DLL plImageFormatDataType
 {
   /// \brief Enum describing the channel type of an image format.
   enum Enum
@@ -35,7 +35,7 @@ struct PLASMA_TEXTURE_DLL plImageFormatDataType
 };
 
 /// \brief Enum describing the channel of an image format.
-struct PLASMA_TEXTURE_DLL plImageFormatChannel
+struct PL_TEXTURE_DLL plImageFormatChannel
 {
   /// \brief Enum describing the channel of an image format.
   enum Enum
@@ -51,7 +51,7 @@ struct PLASMA_TEXTURE_DLL plImageFormatChannel
 };
 
 /// \brief Enum describing the encoding format of the pixels of an image.
-struct PLASMA_TEXTURE_DLL plImageFormat
+struct PL_TEXTURE_DLL plImageFormat
 {
   /// \brief Enum describing the encoding format of the pixels of an image.
   ///
@@ -238,13 +238,13 @@ struct PLASMA_TEXTURE_DLL plImageFormat
 
   /// \brief Returns the number of bits per pixel of the given format. If the format's bpp is non-integral, the returned value rounded up to
   /// to the next integer.
-  static plUInt32 GetBitsPerPixel(Enum format, plUInt32 planeIndex = 0);
+  static plUInt32 GetBitsPerPixel(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Exact pixel size in bits. May be non-integral for some compressed formats.
-  static float GetExactBitsPerPixel(Enum format, plUInt32 planeIndex = 0);
+  static float GetExactBitsPerPixel(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Returns the block size in bits. For uncompressed formats, a block is considered a single pixel.
-  static plUInt32 GetBitsPerBlock(Enum format, plUInt32 planeIndex = 0);
+  static plUInt32 GetBitsPerBlock(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Number of channels (r, g, b, a, depth, stencil) supported by this format.
   static plUInt32 GetNumChannels(Enum format);
@@ -268,13 +268,13 @@ struct PLASMA_TEXTURE_DLL plImageFormat
   static plUInt32 GetAlphaMask(Enum format);
 
   /// \brief Block width of a compressed format. Defaults to 1 for uncompressed formats.
-  static plUInt32 GetBlockWidth(Enum format, plUInt32 planeIndex = 0);
+  static plUInt32 GetBlockWidth(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Block height of a compressed format. Defaults to 1 for uncompressed formats.
-  static plUInt32 GetBlockHeight(Enum format, plUInt32 planeIndex = 0);
+  static plUInt32 GetBlockHeight(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Block depth of a compressed format. Defaults to 1 for uncompressed formats.
-  static plUInt32 GetBlockDepth(Enum format, plUInt32 planeIndex = 0);
+  static plUInt32 GetBlockDepth(Enum format, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Returns the data type represented by a format.
   static plImageFormatDataType::Enum GetDataType(Enum format);
@@ -298,19 +298,19 @@ struct PLASMA_TEXTURE_DLL plImageFormat
   static Enum AsLinear(Enum format);
 
   /// \brief Computes the number of blocks in X direction (compressed) or pixels (if uncompressed) for a given width (in pixels).
-  static plUInt32 GetNumBlocksX(Enum format, plUInt32 width, plUInt32 planeIndex = 0);
+  static plUInt32 GetNumBlocksX(Enum format, plUInt32 uiWidth, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Computes the number of blocks in Y direction (compressed) or pixels (if uncompressed) for a given height (in pixels).
-  static plUInt32 GetNumBlocksY(Enum format, plUInt32 height, plUInt32 planeIndex = 0);
+  static plUInt32 GetNumBlocksY(Enum format, plUInt32 uiHeight, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Computes the number of blocks in Z direction (compressed) or pixels (if uncompressed) for a given height (in pixels).
-  static plUInt32 GetNumBlocksZ(Enum format, plUInt32 depth, plUInt32 planeIndex = 0);
+  static plUInt32 GetNumBlocksZ(Enum format, plUInt32 uiDepth, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Computes the size in bytes of a row of blocks (compressed) or pixels (if uncompressed) of the given width.
-  static plUInt64 GetRowPitch(Enum format, plUInt32 width, plUInt32 planeIndex = 0);
+  static plUInt64 GetRowPitch(Enum format, plUInt32 uiWidth, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Computes the size in bytes of a 2D slice of blocks (compressed) or pixels (if uncompressed) of the given width and height.
-  static plUInt64 GetDepthPitch(Enum format, plUInt32 width, plUInt32 height, plUInt32 planeIndex = 0);
+  static plUInt64 GetDepthPitch(Enum format, plUInt32 uiWidth, plUInt32 uiHeight, plUInt32 uiPlaneIndex = 0);
 
   /// \brief Returns the type of the image format.
   static plImageFormatType::Enum GetType(Enum format);
@@ -329,4 +329,4 @@ struct PLASMA_TEXTURE_DLL plImageFormat
   static bool RequiresFirstLevelBlockAlignment(Enum format);
 };
 
-PLASMA_DEFINE_AS_POD_TYPE(plImageFormat::Enum);
+PL_DEFINE_AS_POD_TYPE(plImageFormat::Enum);

@@ -4,14 +4,14 @@
 #include <Foundation/Communication/Message.h>
 
 /// \brief Base class for all messages that are sent as 'events'
-struct PLASMA_CORE_DLL plEventMessage : public plMessage
+struct PL_CORE_DLL plEventMessage : public plMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plEventMessage, plMessage);
+  PL_DECLARE_MESSAGE_TYPE(plEventMessage, plMessage);
 
   plGameObjectHandle m_hSenderObject;
   plComponentHandle m_hSenderComponent;
 
-  PLASMA_ALWAYS_INLINE void FillFromSenderComponent(const plComponent* pSenderComponent)
+  PL_ALWAYS_INLINE void FillFromSenderComponent(const plComponent* pSenderComponent)
   {
     if (pSenderComponent != nullptr)
     {
@@ -23,11 +23,11 @@ struct PLASMA_CORE_DLL plEventMessage : public plMessage
 
 namespace plInternal
 {
-  struct PLASMA_CORE_DLL EventMessageSenderHelper
+  struct PL_CORE_DLL EventMessageSenderHelper
   {
-    static bool SendEventMessage(plMessage& msg, plComponent* pSenderComponent, plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_CachedReceivers);
-    static bool SendEventMessage(plMessage& msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_CachedReceivers);
-    static void PostEventMessage(const plMessage& msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_CachedReceivers, plTime delay, plObjectMsgQueueType::Enum queueType);
+    static bool SendEventMessage(plMessage& ref_msg, plComponent* pSenderComponent, plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_cachedReceivers);
+    static bool SendEventMessage(plMessage& ref_msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_cachedReceivers);
+    static void PostEventMessage(const plMessage& msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject, plSmallArray<plComponentHandle, 1>& inout_cachedReceivers, plTime delay, plObjectMsgQueueType::Enum queueType);
   };
 } // namespace plInternal
 
@@ -38,45 +38,45 @@ template <typename EventMessageType>
 class plEventMessageSender : public plMessageSenderBase<EventMessageType>
 {
 public:
-  PLASMA_ALWAYS_INLINE bool SendEventMessage(EventMessageType& msg, plComponent* pSenderComponent, plGameObject* pSearchObject)
+  PL_ALWAYS_INLINE bool SendEventMessage(EventMessageType& inout_msg, plComponent* pSenderComponent, plGameObject* pSearchObject)
   {
-    if constexpr (PLASMA_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
+    if constexpr (PL_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
     {
-      msg.FillFromSenderComponent(pSenderComponent);
+      inout_msg.FillFromSenderComponent(pSenderComponent);
     }
-    return plInternal::EventMessageSenderHelper::SendEventMessage(msg, pSenderComponent, pSearchObject, m_CachedReceivers);
+    return plInternal::EventMessageSenderHelper::SendEventMessage(inout_msg, pSenderComponent, pSearchObject, m_CachedReceivers);
   }
 
-  PLASMA_ALWAYS_INLINE bool SendEventMessage(EventMessageType& msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject) const
+  PL_ALWAYS_INLINE bool SendEventMessage(EventMessageType& inout_msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject) const
   {
-    if constexpr (PLASMA_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
+    if constexpr (PL_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
     {
-      msg.FillFromSenderComponent(pSenderComponent);
+      inout_msg.FillFromSenderComponent(pSenderComponent);
     }
-    return plInternal::EventMessageSenderHelper::SendEventMessage(msg, pSenderComponent, pSearchObject, m_CachedReceivers);
+    return plInternal::EventMessageSenderHelper::SendEventMessage(inout_msg, pSenderComponent, pSearchObject, m_CachedReceivers);
   }
 
-  PLASMA_ALWAYS_INLINE void PostEventMessage(EventMessageType& msg, plComponent* pSenderComponent, plGameObject* pSearchObject,
+  PL_ALWAYS_INLINE void PostEventMessage(EventMessageType& ref_msg, plComponent* pSenderComponent, plGameObject* pSearchObject,
     plTime delay, plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame)
   {
-    if constexpr (PLASMA_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
+    if constexpr (PL_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
     {
-      msg.FillFromSenderComponent(pSenderComponent);
+      ref_msg.FillFromSenderComponent(pSenderComponent);
     }
-    plInternal::EventMessageSenderHelper::PostEventMessage(msg, pSenderComponent, pSearchObject, m_CachedReceivers, delay, queueType);
+    plInternal::EventMessageSenderHelper::PostEventMessage(ref_msg, pSenderComponent, pSearchObject, m_CachedReceivers, delay, queueType);
   }
 
-  PLASMA_ALWAYS_INLINE void PostEventMessage(EventMessageType& msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject,
+  PL_ALWAYS_INLINE void PostEventMessage(EventMessageType& ref_msg, const plComponent* pSenderComponent, const plGameObject* pSearchObject,
     plTime delay, plObjectMsgQueueType::Enum queueType = plObjectMsgQueueType::NextFrame) const
   {
-    if constexpr (PLASMA_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
+    if constexpr (PL_IS_DERIVED_FROM_STATIC(plEventMessage, EventMessageType))
     {
-      msg.FillFromSenderComponent(pSenderComponent);
+      ref_msg.FillFromSenderComponent(pSenderComponent);
     }
-    plInternal::EventMessageSenderHelper::PostEventMessage(msg, pSenderComponent, pSearchObject, m_CachedReceivers, delay, queueType);
+    plInternal::EventMessageSenderHelper::PostEventMessage(ref_msg, pSenderComponent, pSearchObject, m_CachedReceivers, delay, queueType);
   }
 
-  PLASMA_ALWAYS_INLINE void Invalidate()
+  PL_ALWAYS_INLINE void Invalidate()
   {
     m_CachedReceivers.Clear();
     m_CachedReceivers.GetUserData<plUInt32>() = 0;

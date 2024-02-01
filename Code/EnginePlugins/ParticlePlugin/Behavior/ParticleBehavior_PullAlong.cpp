@@ -10,21 +10,21 @@
 #include <ParticlePlugin/System/ParticleSystemInstance.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_PullAlong, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_PullAlong>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehaviorFactory_PullAlong, 1, plRTTIDefaultAllocator<plParticleBehaviorFactory_PullAlong>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Strength", m_fStrength)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
+    PL_MEMBER_PROPERTY("Strength", m_fStrength)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, 1.0f)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_PullAlong, 1, plRTTIDefaultAllocator<plParticleBehavior_PullAlong>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleBehavior_PullAlong, 1, plRTTIDefaultAllocator<plParticleBehavior_PullAlong>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plParticleBehaviorFactory_PullAlong::plParticleBehaviorFactory_PullAlong() {}
+plParticleBehaviorFactory_PullAlong::plParticleBehaviorFactory_PullAlong() = default;
 
 const plRTTI* plParticleBehaviorFactory_PullAlong::GetBehaviorType() const
 {
@@ -47,22 +47,22 @@ enum class BehaviorPullAlongVersion
   Version_Current = Version_Count - 1
 };
 
-void plParticleBehaviorFactory_PullAlong::Save(plStreamWriter& stream) const
+void plParticleBehaviorFactory_PullAlong::Save(plStreamWriter& inout_stream) const
 {
   const plUInt8 uiVersion = (int)BehaviorPullAlongVersion::Version_Current;
-  stream << uiVersion;
+  inout_stream << uiVersion;
 
-  stream << m_fStrength;
+  inout_stream << m_fStrength;
 }
 
-void plParticleBehaviorFactory_PullAlong::Load(plStreamReader& stream)
+void plParticleBehaviorFactory_PullAlong::Load(plStreamReader& inout_stream)
 {
   plUInt8 uiVersion = 0;
-  stream >> uiVersion;
+  inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion <= (int)BehaviorPullAlongVersion::Version_Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= (int)BehaviorPullAlongVersion::Version_Current, "Invalid version {0}", uiVersion);
 
-  stream >> m_fStrength;
+  inout_stream >> m_fStrength;
 }
 
 void plParticleBehavior_PullAlong::CreateRequiredStreams()
@@ -75,7 +75,7 @@ void plParticleBehavior_PullAlong::CreateRequiredStreams()
 
 void plParticleBehavior_PullAlong::Process(plUInt64 uiNumElements)
 {
-  PLASMA_PROFILE_SCOPE("PFX: PullAlong");
+  PL_PROFILE_SCOPE("PFX: PullAlong");
 
   if (m_vApplyPull.IsZero())
     return;
@@ -108,3 +108,7 @@ void plParticleBehavior_PullAlong::StepParticleSystem(const plTime& tDiff, plUIn
 
   m_vLastEmitterPosition = vPos;
 }
+
+
+PL_STATICLINK_FILE(ParticlePlugin, ParticlePlugin_Behavior_ParticleBehavior_PullAlong);
+

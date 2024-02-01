@@ -18,16 +18,16 @@ struct plRenderPipelineResourceDescriptor
   plString m_sPath;
 };
 
-class PLASMA_RENDERERCORE_DLL plRenderPipelineResource : public plResource
+class PL_RENDERERCORE_DLL plRenderPipelineResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plRenderPipelineResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plRenderPipelineResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plRenderPipelineResource, plRenderPipelineResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plRenderPipelineResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plRenderPipelineResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plRenderPipelineResource, plRenderPipelineResourceDescriptor);
 
 public:
   plRenderPipelineResource();
 
-  PLASMA_ALWAYS_INLINE const plRenderPipelineResourceDescriptor& GetDescriptor() { return m_Desc; }
+  PL_ALWAYS_INLINE const plRenderPipelineResourceDescriptor& GetDescriptor() { return m_Desc; }
 
   plInternal::NewInstance<plRenderPipeline> CreateRenderPipeline() const;
 

@@ -33,7 +33,7 @@ void plTelemetry::UpdateServerPing()
 {
 #ifdef BUILDSYSTEM_ENABLE_ENET_SUPPORT
   enet_peer_ping(g_pConnectionToServer);
-  plTelemetry::s_PingToServer = plTime::Milliseconds(g_pConnectionToServer->lastRoundTripTime);
+  plTelemetry::s_PingToServer = plTime::MakeFromMilliseconds(g_pConnectionToServer->lastRoundTripTime);
 #endif // BUILDSYSTEM_ENABLE_ENET_SUPPORT
 }
 
@@ -52,7 +52,7 @@ void plTelemetry::UpdateNetwork()
 
   while (true)
   {
-    PLASMA_LOCK(GetTelemetryMutex());
+    PL_LOCK(GetTelemetryMutex());
 
     const plInt32 iStatus = enet_host_service(g_pHost, &NetworkEvent, 0);
 
@@ -106,7 +106,7 @@ void plTelemetry::UpdateNetwork()
           s_bConnectedToServer = false;
 
           // First wait a bit to ensure that the Server could shut down, if this was a legitimate disconnect
-          plThreadUtils::Sleep(plTime::Seconds(1));
+          plThreadUtils::Sleep(plTime::MakeFromSeconds(1));
 
           // Now try to reconnect. If the Server still exists, fine, connect to that.
           // If it does not exist anymore, this will connect to the next best Server that can be found.
@@ -195,7 +195,7 @@ void plTelemetry::UpdateNetwork()
 
             Msg.SetMessageID(uiSystemID, uiMsgID);
 
-            PLASMA_ASSERT_DEV((plUInt32)NetworkEvent.packet->dataLength >= 8, "Message Length Invalid: {0}", (plUInt32)NetworkEvent.packet->dataLength);
+            PL_ASSERT_DEV((plUInt32)NetworkEvent.packet->dataLength >= 8, "Message Length Invalid: {0}", (plUInt32)NetworkEvent.packet->dataLength);
 
             Msg.GetWriter().WriteBytes(pData, NetworkEvent.packet->dataLength - 8).IgnoreResult();
           }
@@ -233,26 +233,26 @@ void plTelemetry::SendServerName()
     return;
 
   char data[48];
-  plStringUtils::Copy(data, PLASMA_ARRAY_SIZE(data), s_sServerName.GetData());
+  plStringUtils::Copy(data, PL_ARRAY_SIZE(data), s_sServerName.GetData());
 
-  Broadcast(plTelemetry::Reliable, 'PLBC', 'NAME', data, PLASMA_ARRAY_SIZE(data));
+  Broadcast(plTelemetry::Reliable, 'PLBC', 'NAME', data, PL_ARRAY_SIZE(data));
 }
 
 plResult plTelemetry::RetrieveMessage(plUInt32 uiSystemID, plTelemetryMessage& out_message)
 {
   if (s_SystemMessages[uiSystemID].m_IncomingQueue.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   // check again while inside the lock
   if (s_SystemMessages[uiSystemID].m_IncomingQueue.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   out_message = s_SystemMessages[uiSystemID].m_IncomingQueue.PeekFront();
   s_SystemMessages[uiSystemID].m_IncomingQueue.PopFront();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plTelemetry::InitializeAsServer()
@@ -291,7 +291,7 @@ plResult plTelemetry::InitializeAsClient(plStringView sConnectTo0)
     sConnectTo.Split(false, IP, ".");
 
     if (IP.GetCount() != 4)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const plUInt32 ip1 = atoi(IP[0].GetData()) & 0xFF;
     const plUInt32 ip2 = atoi(IP[1].GetData()) & 0xFF;
@@ -311,12 +311,12 @@ plResult plTelemetry::InitializeAsClient(plStringView sConnectTo0)
   g_pConnectionToServer = enet_host_connect(g_pHost, &g_pServerAddress, 2, 'PLBC');
 
   if (g_pConnectionToServer)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 #else
   plLog::SeriousWarning("Enet is not compiled into this build, plTelemetry::InitializeAsClient() will be ignored.");
 #endif // BUILDSYSTEM_ENABLE_ENET_SUPPORT
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plTelemetry::OpenConnection(ConnectionMode Mode, plStringView sConnectTo)
@@ -329,7 +329,7 @@ plResult plTelemetry::OpenConnection(ConnectionMode Mode, plStringView sConnectT
     if (enet_initialize() != 0)
     {
       plLog::Error("Enet could not be initialized.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     g_bInitialized = true;
@@ -343,10 +343,10 @@ plResult plTelemetry::OpenConnection(ConnectionMode Mode, plStringView sConnectT
       InitializeAsServer();
       break;
     case plTelemetry::Client:
-      if (InitializeAsClient(sConnectTo) == PLASMA_FAILURE)
+      if (InitializeAsClient(sConnectTo) == PL_FAILURE)
       {
         CloseConnection();
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
       break;
     default:
@@ -359,10 +359,10 @@ plResult plTelemetry::OpenConnection(ConnectionMode Mode, plStringView sConnectT
 
   StartTelemetryThread();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 #else
   plLog::SeriousWarning("Enet is not compiled into this build, plTelemetry::OpenConnection() will be ignored.");
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 #endif // BUILDSYSTEM_ENABLE_ENET_SUPPORT
 }
 
@@ -372,7 +372,7 @@ void plTelemetry::Transmit(TransmitMode tm, const void* pData, plUInt32 uiDataBy
   if (!g_pHost)
     return;
 
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   ENetPacket* pPacket = enet_packet_create(pData, uiDataBytes, (tm == Reliable) ? ENET_PACKET_FLAG_RELIABLE : 0);
   enet_host_broadcast(g_pHost, 0, pPacket);
@@ -475,10 +475,10 @@ void plTelemetry::CloseConnection()
   StopTelemetryThread();
 
   // prevent other threads from interfering
-  PLASMA_LOCK(GetTelemetryMutex());
+  PL_LOCK(GetTelemetryMutex());
 
   UpdateNetwork();
-  plThreadUtils::Sleep(plTime::Milliseconds(10));
+  plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
 
   if (g_pHost)
   {
@@ -488,7 +488,7 @@ void plTelemetry::CloseConnection()
 
     // process the network messages (e.g. send the disconnect messages)
     UpdateNetwork();
-    plThreadUtils::Sleep(plTime::Milliseconds(10));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
   }
 
   // finally close the network connection
@@ -514,5 +514,3 @@ void plTelemetry::CloseConnection()
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_Telemetry);

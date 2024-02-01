@@ -1,8 +1,8 @@
 #pragma once
 
 #if defined(_WINDOWS) || defined(_WIN32)
-#  undef PLASMA_PLATFORM_WINDOWS
-#  define PLASMA_PLATFORM_WINDOWS PLASMA_ON
+#  undef PL_PLATFORM_WINDOWS
+#  define PL_PLATFORM_WINDOWS PL_ON
 
 // further distinction between desktop, UWP etc. is done in Platform_win.h
 
@@ -10,26 +10,26 @@
 #  include <TargetConditionals.h>
 
 #  if TARGET_OS_MAC == 1
-#    undef PLASMA_PLATFORM_OSX
-#    define PLASMA_PLATFORM_OSX PLASMA_ON
+#    undef PL_PLATFORM_OSX
+#    define PL_PLATFORM_OSX PL_ON
 #  elif TARGET_OS_IPHONE == 1 || TARGET_IPHONE_SIMULATOR == 1
-#    undef PLASMA_PLATFORM_IOS
-#    define PLASMA_PLATFORM_IOS PLASMA_ON
+#    undef PL_PLATFORM_IOS
+#    define PL_PLATFORM_IOS PL_ON
 #  endif
 
 #elif defined(ANDROID)
 
-#  undef PLASMA_PLATFORM_ANDROID
-#  define PLASMA_PLATFORM_ANDROID PLASMA_ON
+#  undef PL_PLATFORM_ANDROID
+#  define PL_PLATFORM_ANDROID PL_ON
 
 #elif defined(__linux)
 
-#  undef PLASMA_PLATFORM_LINUX
-#  define PLASMA_PLATFORM_LINUX PLASMA_ON
+#  undef PL_PLATFORM_LINUX
+#  define PL_PLATFORM_LINUX PL_ON
 
 //#elif defined(...)
-//  #undef PLASMA_PLATFORM_LINUX
-//  #define PLASMA_PLATFORM_LINUX PLASMA_ON
+//  #undef PL_PLATFORM_LINUX
+//  #define PL_PLATFORM_LINUX PL_ON
 #else
 #  error "Unknown Platform."
 #endif

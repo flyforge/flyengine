@@ -25,10 +25,10 @@ void plTypeScriptTranspiler::StartLoadTranspiler()
   if (m_LoadTaskGroup.IsValid())
     return;
 
-  plSharedPtr<plTask> pTask = PLASMA_DEFAULT_NEW(plDelegateTask<void>, "",
+  plSharedPtr<plTask> pTask = PL_DEFAULT_NEW(plDelegateTask<void>, "Load TypeScript Transpiler", plTaskNesting::Never,
     [this]() //
     {
-      PLASMA_PROFILE_SCOPE("Load TypeScript Transpiler");
+      PL_PROFILE_SCOPE("Load TypeScript Transpiler");
 
       if (m_Transpiler.ExecuteFile("typescriptServices.js").Failed())
       {
@@ -49,13 +49,13 @@ void plTypeScriptTranspiler::FinishLoadTranspiler()
   plTaskSystem::WaitForGroup(m_LoadTaskGroup);
 }
 
-plResult plTypeScriptTranspiler::TranspileString(const char* szString, plStringBuilder& out_Result)
+plResult plTypeScriptTranspiler::TranspileString(const char* szString, plStringBuilder& out_sResult)
 {
-  PLASMA_LOG_BLOCK("TranspileString");
+  PL_LOG_BLOCK("TranspileString");
 
   FinishLoadTranspiler();
 
-  PLASMA_PROFILE_SCOPE("Transpile TypeScript");
+  PL_PROFILE_SCOPE("Transpile TypeScript");
 
   plDuktapeHelper duk(m_Transpiler);
 
@@ -64,14 +64,14 @@ plResult plTypeScriptTranspiler::TranspileString(const char* szString, plStringB
   {
     plLog::Error("'ts' object does not exist");
     duk.PopStack(2); // [ ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_FAILURE, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_FAILURE, 0);
   }
 
   if (m_Transpiler.PrepareObjectFunctionCall("transpile").Failed()) // [ global ts transpile ]
   {
     plLog::Error("'ts.transpile' function does not exist");
     duk.PopStack(3); // [ ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_FAILURE, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_FAILURE, 0);
   }
 
   m_Transpiler.PushString(szString);                // [ global ts transpile source ]
@@ -79,18 +79,18 @@ plResult plTypeScriptTranspiler::TranspileString(const char* szString, plStringB
   {
     plLog::Error("String could not be transpiled");
     duk.PopStack(3); // [ ]
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_FAILURE, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_FAILURE, 0);
   }
 
-  out_Result = m_Transpiler.GetStringValue(-1); // [ global ts result ]
+  out_sResult = m_Transpiler.GetStringValue(-1); // [ global ts result ]
   m_Transpiler.PopStack(3);                     // [ ]
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, PLASMA_SUCCESS, 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, PL_SUCCESS, 0);
 }
 
-plResult plTypeScriptTranspiler::TranspileFile(const char* szFile, plUInt64 uiSkipIfFileHash, plStringBuilder& out_Result, plUInt64& out_uiFileHash)
+plResult plTypeScriptTranspiler::TranspileFile(const char* szFile, plUInt64 uiSkipIfFileHash, plStringBuilder& out_sResult, plUInt64& out_uiFileHash)
 {
-  PLASMA_LOG_BLOCK("TranspileFile", szFile);
+  PL_LOG_BLOCK("TranspileFile", szFile);
 
   FinishLoadTranspiler();
 
@@ -98,7 +98,7 @@ plResult plTypeScriptTranspiler::TranspileFile(const char* szFile, plUInt64 uiSk
   if (file.Open(szFile).Failed())
   {
     plLog::Error("File does not exist: '{}'", szFile);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plStringBuilder source;
@@ -112,16 +112,16 @@ plResult plTypeScriptTranspiler::TranspileFile(const char* szFile, plUInt64 uiSk
   out_uiFileHash = plHashingUtils::xxHash64(source.GetData(), source.GetElementCount());
 
   if (uiSkipIfFileHash == out_uiFileHash)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  return TranspileString(source, out_Result);
+  return TranspileString(source, out_sResult);
 }
 
-plResult plTypeScriptTranspiler::TranspileFileAndStoreJS(const char* szFile, plStringBuilder& out_Result)
+plResult plTypeScriptTranspiler::TranspileFileAndStoreJS(const char* szFile, plStringBuilder& out_sResult)
 {
-  PLASMA_LOG_BLOCK("TranspileFileAndStoreJS", szFile);
+  PL_LOG_BLOCK("TranspileFileAndStoreJS", szFile);
 
-  PLASMA_ASSERT_DEV(!m_sOutputFolder.IsEmpty(), "Output folder has not been set");
+  PL_ASSERT_DEV(!m_sOutputFolder.IsEmpty(), "Output folder has not been set");
 
   plUInt64 uiExpectedFileHash = 0;
   plUInt64 uiActualFileHash = 0;
@@ -135,11 +135,11 @@ plResult plTypeScriptTranspiler::TranspileFileAndStoreJS(const char* szFile, plS
     plFileReader fileIn;
     if (fileIn.Open(sOutFile).Succeeded())
     {
-      out_Result.ReadAll(fileIn);
+      out_sResult.ReadAll(fileIn);
 
-      if (out_Result.StartsWith_NoCase("/*SOURCE-HASH:"))
+      if (out_sResult.StartsWith_NoCase("/*SOURCE-HASH:"))
       {
-        plStringView sHashView = out_Result.GetView();
+        plStringView sHashView = out_sResult.GetView();
         sHashView.Shrink(14, 0);
 
         // try to extract the hash
@@ -151,7 +151,7 @@ plResult plTypeScriptTranspiler::TranspileFileAndStoreJS(const char* szFile, plS
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(TranspileFile(szFile, uiExpectedFileHash, out_Result, uiActualFileHash));
+  PL_SUCCEED_OR_RETURN(TranspileFile(szFile, uiExpectedFileHash, out_sResult, uiActualFileHash));
 
   if (uiExpectedFileHash != uiActualFileHash)
   {
@@ -159,18 +159,18 @@ plResult plTypeScriptTranspiler::TranspileFileAndStoreJS(const char* szFile, plS
     if (fileOut.Open(sOutFile).Failed())
     {
       plLog::Error("Could not write transpiled JS to file '{}'", sOutFile);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plStringBuilder sHashHeader;
-    sHashHeader.Format("/*SOURCE-HASH:{}*/\n", plArgU(uiActualFileHash, 16, true, 16, true));
-    out_Result.Prepend(sHashHeader);
+    sHashHeader.SetFormat("/*SOURCE-HASH:{}*/\n", plArgU(uiActualFileHash, 16, true, 16, true));
+    out_sResult.Prepend(sHashHeader);
 
-    PLASMA_SUCCEED_OR_RETURN(fileOut.WriteBytes(out_Result.GetData(), out_Result.GetElementCount()));
+    PL_SUCCEED_OR_RETURN(fileOut.WriteBytes(out_sResult.GetData(), out_sResult.GetElementCount()));
     plLog::Success("Transpiled '{}'", szFile);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plTypeScriptTranspiler::SetModifyTsBeforeTranspilationCallback(plDelegate<void(plStringBuilder&)> callback)

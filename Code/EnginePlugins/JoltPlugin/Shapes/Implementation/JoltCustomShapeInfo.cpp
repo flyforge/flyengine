@@ -170,4 +170,4 @@ void plJoltCustomShapeInfo::sCastShapeVsUser1(const JPH::ShapeCast& inShapeCast,
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltCustomShapeInfo);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltCustomShapeInfo);

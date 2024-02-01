@@ -7,9 +7,9 @@ struct plMsgUpdateLocalBounds;
 
 using plBakedProbesVolumeComponentManager = plComponentManager<class plBakedProbesVolumeComponent, plBlockStorageType::Compact>;
 
-class PLASMA_RENDERERCORE_DLL plBakedProbesVolumeComponent : public plComponent
+class PL_RENDERERCORE_DLL plBakedProbesVolumeComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plBakedProbesVolumeComponent, plComponent, plBakedProbesVolumeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plBakedProbesVolumeComponent, plComponent, plBakedProbesVolumeComponentManager);
 
 public:
   plBakedProbesVolumeComponent();

@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginParticle/DragDropHandlers/ParticleDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleComponentDragDropHandler, 1, plRTTIDefaultAllocator<plParticleComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleComponentDragDropHandler, 1, plRTTIDefaultAllocator<plParticleComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plParticleComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
@@ -23,7 +23,7 @@ void plParticleComponentDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo
   {
     CreateDropObject(pInfo->m_vDropPosition, "plParticleComponent", "Effect", GetAssetGuidString(pInfo), plUuid(), -1);
 
-    m_vAlignAxisWithNormal = plVec3::UnitZAxis();
+    m_vAlignAxisWithNormal = plVec3::MakeAxisZ();
   }
   else
     CreateDropObject(pInfo->m_vDropPosition, "plParticleComponent", "Effect", GetAssetGuidString(pInfo), pInfo->m_TargetObject, pInfo->m_iTargetObjectInsertChildIndex);

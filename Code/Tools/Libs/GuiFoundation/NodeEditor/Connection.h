@@ -6,10 +6,10 @@
 
 class plPin;
 
-class PLASMA_GUIFOUNDATION_DLL plQtConnection : public QGraphicsPathItem
+class PL_GUIFOUNDATION_DLL plQtConnection : public QGraphicsPathItem
 {
 public:
-  explicit plQtConnection(QGraphicsItem* parent = 0);
+  explicit plQtConnection(QGraphicsItem* pParent = 0);
   ~plQtConnection();
   virtual int type() const override { return plQtNodeScene::Connection; }
 
@@ -30,11 +30,13 @@ public:
 
   bool m_bAdjacentNodeSelected = false;
 
-  virtual void ExtendContextMenu(QMenu& menu) {}
+  virtual void ExtendContextMenu(QMenu& ref_menu) {}
 
 protected:
   virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-  virtual void DrawSubwayPath(QPainterPath& path, const QPointF& startPoint, const QPointF& endPoint);
+
+  // Draws connections following the rules of subway maps (angles of 45 degrees only).
+  void DrawSubwayPath(QPainterPath& path, const QPointF& startPoint, const QPointF& endPoint);
 
   const plDocumentObject* m_pObject = nullptr;
   const plConnection* m_pConnection = nullptr;

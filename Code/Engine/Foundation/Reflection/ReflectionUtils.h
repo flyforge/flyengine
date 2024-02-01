@@ -7,7 +7,7 @@ class plVariant;
 class plAbstractProperty;
 
 /// \brief Helper functions for handling reflection related operations.
-class PLASMA_FOUNDATION_DLL plReflectionUtils
+class PL_FOUNDATION_DLL plReflectionUtils
 {
 public:
   static const plRTTI* GetCommonBaseType(const plRTTI* pRtti1, const plRTTI* pRtti2);

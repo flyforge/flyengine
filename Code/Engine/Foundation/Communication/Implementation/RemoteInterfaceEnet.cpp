@@ -29,9 +29,9 @@ private:
   static bool s_bEnetInitialized;
 };
 
-plInternal::NewInstance<plRemoteInterfaceEnet> plRemoteInterfaceEnet::Make(plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+plInternal::NewInstance<plRemoteInterfaceEnet> plRemoteInterfaceEnet::Make(plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
 {
-  return PLASMA_NEW(pAllocator, plRemoteInterfaceEnetImpl);
+  return PL_NEW(pAllocator, plRemoteInterfaceEnetImpl);
 }
 
 plRemoteInterfaceEnet::plRemoteInterfaceEnet() = default;
@@ -46,7 +46,7 @@ plResult plRemoteInterfaceEnetImpl::InternalCreateConnection(plRemoteMode mode, 
     if (enet_initialize() != 0)
     {
       plLog::Error("Failed to initialize Enet");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     s_bEnetInitialized = true;
@@ -60,7 +60,7 @@ plResult plRemoteInterfaceEnetImpl::InternalCreateConnection(plRemoteMode mode, 
     if (plConversionUtils::StringToInt(sPort, iPort).Failed())
     {
       plLog::Error("Failed to extract port from server address: {0}", sServerAddress);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     m_uiPort = static_cast<plUInt16>(iPort);
   }
@@ -97,7 +97,7 @@ plResult plRemoteInterfaceEnetImpl::InternalCreateConnection(plRemoteMode mode, 
   if (m_pEnetHost == nullptr)
   {
     plLog::Error("Failed to create an Enet server");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (mode == plRemoteMode::Client)
@@ -105,10 +105,10 @@ plResult plRemoteInterfaceEnetImpl::InternalCreateConnection(plRemoteMode mode, 
     m_pEnetConnectionToServer = enet_host_connect(m_pEnetHost, &m_EnetServerAddress, maxChannels, GetConnectionToken());
 
     if (m_pEnetConnectionToServer == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRemoteInterfaceEnetImpl::InternalShutdownConnection()
@@ -123,7 +123,7 @@ void plRemoteInterfaceEnetImpl::InternalShutdownConnection()
 
     // process the network messages (e.g. send the disconnect messages)
     UpdateRemoteInterface();
-    plThreadUtils::Sleep(plTime::Milliseconds(10));
+    plThreadUtils::Sleep(plTime::MakeFromMilliseconds(10));
   }
 
   // finally close the network connection
@@ -139,21 +139,21 @@ void plRemoteInterfaceEnetImpl::InternalShutdownConnection()
 
 plTime plRemoteInterfaceEnetImpl::InternalGetPingToServer()
 {
-  PLASMA_ASSERT_DEV(m_pEnetConnectionToServer != nullptr, "Client has not connected to server");
+  PL_ASSERT_DEV(m_pEnetConnectionToServer != nullptr, "Client has not connected to server");
 
   enet_peer_ping(m_pEnetConnectionToServer);
-  return plTime::Milliseconds(m_pEnetConnectionToServer->lastRoundTripTime);
+  return plTime::MakeFromMilliseconds(m_pEnetConnectionToServer->lastRoundTripTime);
 }
 
 plResult plRemoteInterfaceEnetImpl::InternalTransmit(plRemoteTransmitMode tm, const plArrayPtr<const plUInt8>& data)
 {
   if (m_pEnetHost == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   ENetPacket* pPacket = enet_packet_create(data.GetPtr(), data.GetCount(), (tm == plRemoteTransmitMode::Reliable) ? ENET_PACKET_FLAG_RELIABLE : 0);
   enet_host_broadcast(m_pEnetHost, 0, pPacket);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plRemoteInterfaceEnetImpl::InternalUpdateRemoteInterface()
@@ -165,7 +165,7 @@ void plRemoteInterfaceEnetImpl::InternalUpdateRemoteInterface()
     return;
 
   m_bAllowNetworkUpdates = false;
-  PLASMA_SCOPE_EXIT(m_bAllowNetworkUpdates = true);
+  PL_SCOPE_EXIT(m_bAllowNetworkUpdates = true);
 
   ENetEvent NetworkEvent;
 
@@ -288,5 +288,3 @@ void plRemoteInterfaceEnetImpl::InternalUpdateRemoteInterface()
 #endif
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_RemoteInterfaceEnet);

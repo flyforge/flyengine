@@ -5,14 +5,14 @@
 #include <QPoint>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-class PLASMA_EDITORFRAMEWORK_DLL plNonUniformBoxGizmo : public plGizmo
+class PL_EDITORFRAMEWORK_DLL plNonUniformBoxGizmo : public plGizmo
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plNonUniformBoxGizmo, plGizmo);
+  PL_ADD_DYNAMIC_REFLECTION(plNonUniformBoxGizmo, plGizmo);
 
 public:
   plNonUniformBoxGizmo();
 
-  void SetSize(const plVec3& negSize, const plVec3& posSize, bool bLinkAxis = false);
+  void SetSize(const plVec3& vNegSize, const plVec3& vPosSize, bool bLinkAxis = false);
 
   const plVec3& GetNegSize() const { return m_vNegSize; }
   const plVec3& GetPosSize() const { return m_vPosSize; }
@@ -20,9 +20,9 @@ public:
 protected:
   virtual void DoFocusLost(bool bCancel) override;
 
-  virtual PlasmaEditorInput DoMousePressEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
-  virtual PlasmaEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMousePressEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseReleaseEvent(QMouseEvent* e) override;
+  virtual plEditorInput DoMouseMoveEvent(QMouseEvent* e) override;
 
   virtual void OnSetOwner(plQtEngineDocumentWindow* pOwnerWindow, plQtEngineViewWidget* pOwnerView) override;
   virtual void OnVisibleChanged(bool bVisible) override;
@@ -36,8 +36,8 @@ private:
 
   plVec2I32 m_vLastMousePos;
 
-  PlasmaEngineGizmoHandle m_hOutline;
-  PlasmaEngineGizmoHandle m_Nobs[6];
+  plEngineGizmoHandle m_hOutline;
+  plEngineGizmoHandle m_Nobs[6];
   plVec3 m_vMainAxis[6];
 
   enum ManipulateMode

@@ -14,7 +14,7 @@ namespace ozz::animation
   class Animation;
 }
 
-struct PLASMA_RENDERERCORE_DLL plAnimationClipResourceDescriptor
+struct PL_RENDERERCORE_DLL plAnimationClipResourceDescriptor
 {
 public:
   plAnimationClipResourceDescriptor();
@@ -68,7 +68,7 @@ public:
   plArrayPtr<const KeyframeQuat> GetRotationKeyframes(const JointInfo& jointInfo) const;
   plArrayPtr<const KeyframeVec3> GetScaleKeyframes(const JointInfo& jointInfo) const;
 
-  plVec3 m_vConstantRootMotion = plVec3::ZeroVector();
+  plVec3 m_vConstantRootMotion = plVec3::MakeZero();
 
   plEventTrack m_EventTrack;
 
@@ -90,11 +90,11 @@ private:
 
 using plAnimationClipResourceHandle = plTypedResourceHandle<class plAnimationClipResource>;
 
-class PLASMA_RENDERERCORE_DLL plAnimationClipResource : public plResource
+class PL_RENDERERCORE_DLL plAnimationClipResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAnimationClipResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plAnimationClipResource);
-  PLASMA_RESOURCE_DECLARE_CREATEABLE(plAnimationClipResource, plAnimationClipResourceDescriptor);
+  PL_ADD_DYNAMIC_REFLECTION(plAnimationClipResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plAnimationClipResource);
+  PL_RESOURCE_DECLARE_CREATEABLE(plAnimationClipResource, plAnimationClipResourceDescriptor);
 
 public:
   plAnimationClipResource();

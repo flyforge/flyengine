@@ -12,23 +12,23 @@ static plMutex s_EnvVarMutex;
 
 plString plEnvironmentVariableUtils::GetValueString(plStringView sName, plStringView sDefault /*= nullptr*/)
 {
-  PLASMA_ASSERT_DEV(!sName.IsEmpty(), "Null or empty name passed to plEnvironmentVariableUtils::GetValueString()");
+  PL_ASSERT_DEV(!sName.IsEmpty(), "Null or empty name passed to plEnvironmentVariableUtils::GetValueString()");
 
-  PLASMA_LOCK(s_EnvVarMutex);
+  PL_LOCK(s_EnvVarMutex);
 
   return GetValueStringImpl(sName, sDefault);
 }
 
 plResult plEnvironmentVariableUtils::SetValueString(plStringView sName, plStringView sValue)
 {
-  PLASMA_LOCK(s_EnvVarMutex);
+  PL_LOCK(s_EnvVarMutex);
 
   return SetValueStringImpl(sName, sValue);
 }
 
 plInt32 plEnvironmentVariableUtils::GetValueInt(plStringView sName, plInt32 iDefault /*= -1*/)
 {
-  PLASMA_LOCK(s_EnvVarMutex);
+  PL_LOCK(s_EnvVarMutex);
 
   plString value = GetValueString(sName);
 
@@ -45,32 +45,23 @@ plInt32 plEnvironmentVariableUtils::GetValueInt(plStringView sName, plInt32 iDef
 plResult plEnvironmentVariableUtils::SetValueInt(plStringView sName, plInt32 iValue)
 {
   plStringBuilder sb;
-  sb.Format("{}", iValue);
+  sb.SetFormat("{}", iValue);
 
   return SetValueString(sName, sb);
 }
 
 bool plEnvironmentVariableUtils::IsVariableSet(plStringView sName)
 {
-  PLASMA_LOCK(s_EnvVarMutex);
+  PL_LOCK(s_EnvVarMutex);
 
   return IsVariableSetImpl(sName);
 }
 
 plResult plEnvironmentVariableUtils::UnsetVariable(plStringView sName)
 {
-  PLASMA_LOCK(s_EnvVarMutex);
+  PL_LOCK(s_EnvVarMutex);
 
   return UnsetVariableImpl(sName);
 }
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-#  include <Foundation/System/Implementation/Win/EnvironmentVariableUtils_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_UWP)
-#  include <Foundation/System/Implementation/Win/EnvironmentVariableUtils_win_uwp.h>
-#else
-#  include <Foundation/System/Implementation/Posix/EnvironmentVariableUtils_posix.h>
-#endif
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_System_Implementation_EnvironmentVariableUtils);

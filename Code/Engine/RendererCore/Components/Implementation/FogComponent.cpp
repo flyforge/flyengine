@@ -7,33 +7,33 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plFogRenderData, 1, plRTTIDefaultAllocator<plFogRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plFogRenderData, 1, plRTTIDefaultAllocator<plFogRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plFogComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plFogComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.2f, 0.2f, 0.3f)))),
-    PLASMA_ACCESSOR_PROPERTY("Density", GetDensity, SetDensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("HeightFalloff", GetHeightFalloff, SetHeightFalloff)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(10.0f)),
-    PLASMA_ACCESSOR_PROPERTY("ModulateWithSkyColor", GetModulateWithSkyColor, SetModulateWithSkyColor),
-    PLASMA_ACCESSOR_PROPERTY("SkyDistance", GetSkyDistance, SetSkyDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plDefaultValueAttribute(plColorGammaUB(plColor(0.2f, 0.2f, 0.3f)))),
+    PL_ACCESSOR_PROPERTY("Density", GetDensity, SetDensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("HeightFalloff", GetHeightFalloff, SetHeightFalloff)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(10.0f)),
+    PL_ACCESSOR_PROPERTY("ModulateWithSkyColor", GetModulateWithSkyColor, SetModulateWithSkyColor),
+    PL_ACCESSOR_PROPERTY("SkyDistance", GetSkyDistance, SetSkyDistance)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1000.0f)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plFogComponent::plFogComponent() = default;
@@ -59,7 +59,7 @@ void plFogComponent::OnDeactivated()
 void plFogComponent::SetColor(plColor color)
 {
   m_Color = color;
-  SetModified(PLASMA_BIT(1));
+  SetModified(PL_BIT(1));
 }
 
 plColor plFogComponent::GetColor() const
@@ -70,7 +70,7 @@ plColor plFogComponent::GetColor() const
 void plFogComponent::SetDensity(float fDensity)
 {
   m_fDensity = plMath::Max(fDensity, 0.0f);
-  SetModified(PLASMA_BIT(2));
+  SetModified(PL_BIT(2));
 }
 
 float plFogComponent::GetDensity() const
@@ -81,7 +81,7 @@ float plFogComponent::GetDensity() const
 void plFogComponent::SetHeightFalloff(float fHeightFalloff)
 {
   m_fHeightFalloff = plMath::Max(fHeightFalloff, 0.0f);
-  SetModified(PLASMA_BIT(3));
+  SetModified(PL_BIT(3));
 }
 
 float plFogComponent::GetHeightFalloff() const
@@ -92,7 +92,7 @@ float plFogComponent::GetHeightFalloff() const
 void plFogComponent::SetModulateWithSkyColor(bool bModulate)
 {
   m_bModulateWithSkyColor = bModulate;
-  SetModified(PLASMA_BIT(4));
+  SetModified(PL_BIT(4));
 }
 
 bool plFogComponent::GetModulateWithSkyColor() const
@@ -103,7 +103,7 @@ bool plFogComponent::GetModulateWithSkyColor() const
 void plFogComponent::SetSkyDistance(float fDistance)
 {
   m_fSkyDistance = fDistance;
-  SetModified(PLASMA_BIT(5));
+  SetModified(PL_BIT(5));
 }
 
 float plFogComponent::GetSkyDistance() const
@@ -123,7 +123,6 @@ void plFogComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
 
   auto pRenderData = plCreateRenderDataForThisFrame<plFogRenderData>(GetOwner());
 
-  pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
   pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
   pRenderData->m_Color = m_Color;
   pRenderData->m_fDensity = m_fDensity / 100.0f;
@@ -163,4 +162,4 @@ void plFogComponent::DeserializeComponent(plWorldReader& inout_stream)
   }
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_FogComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_FogComponent);

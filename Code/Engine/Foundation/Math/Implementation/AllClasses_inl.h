@@ -7,13 +7,13 @@
 #include <Foundation/Math/Plane.h>
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool plBoundingBoxTemplate<Type>::Contains(const plBoundingSphereTemplate<Type>& sphere) const
+PL_ALWAYS_INLINE bool plBoundingBoxTemplate<Type>::Contains(const plBoundingSphereTemplate<Type>& sphere) const
 {
   return Contains(sphere.GetBoundingBox());
 }
 
 template <typename Type>
-PLASMA_ALWAYS_INLINE bool plBoundingBoxTemplate<Type>::Overlaps(const plBoundingSphereTemplate<Type>& sphere) const
+PL_ALWAYS_INLINE bool plBoundingBoxTemplate<Type>::Overlaps(const plBoundingSphereTemplate<Type>& sphere) const
 {
   // check whether the closest point between box and sphere is inside the sphere (it is definitely inside the box)
   return sphere.Contains(GetClampedPoint(sphere.m_vCenter));
@@ -28,7 +28,7 @@ inline Type plBoundingBoxTemplate<Type>::GetDistanceTo(const plBoundingSphereTem
 template <typename Type>
 inline const plBoundingSphereTemplate<Type> plBoundingBoxTemplate<Type>::GetBoundingSphere() const
 {
-  return plBoundingSphereTemplate<Type>(GetCenter(), (m_vMax - m_vMin).GetLength() * (Type)0.5);
+  return plBoundingSphereTemplate<Type>::MakeFromCenterAndRadius(GetCenter(), (m_vMax - m_vMin).GetLength() * (Type)0.5);
 }
 
 template <typename Type>
@@ -87,7 +87,7 @@ bool plBoundingSphereTemplate<Type>::Overlaps(const plBoundingBoxTemplate<Type>&
 template <typename Type>
 const plBoundingBoxTemplate<Type> plBoundingSphereTemplate<Type>::GetBoundingBox() const
 {
-  return plBoundingBoxTemplate<Type>(m_vCenter - plVec3Template<Type>(m_fRadius), m_vCenter + plVec3Template<Type>(m_fRadius));
+  return plBoundingBoxTemplate<Type>::MakeFromMinMax(m_vCenter - plVec3Template<Type>(m_fRadius), m_vCenter + plVec3Template<Type>(m_fRadius));
 }
 
 
@@ -184,10 +184,11 @@ Type plPlaneTemplate<Type>::GetMaximumDistanceTo(const plBoundingBoxTemplate<Typ
   return GetDistanceTo(vPos);
 }
 
+
 template <typename Type>
-void plMat3Template<Type>::SetRotationMatrix(const plVec3Template<Type>& vAxis, plAngle angle)
+plMat3Template<Type> plMat3Template<Type>::MakeAxisRotation(const plVec3Template<Type>& vAxis, plAngle angle)
 {
-  PLASMA_ASSERT_DEBUG(vAxis.IsNormalized(0.1f), "vAxis must be normalized.");
+  PL_ASSERT_DEBUG(vAxis.IsNormalized(0.1f), "vAxis must be normalized.");
 
   const Type cos = plMath::Cos(angle);
   const Type sin = plMath::Sin(angle);
@@ -205,20 +206,24 @@ void plMat3Template<Type>::SetRotationMatrix(const plVec3Template<Type>& vAxis, 
   const Type onecos_xz = oneminuscos * xz;
   const Type onecos_yz = oneminuscos * yz;
 
+  plMat3Template<Type> res;
+
   // Column 1
-  Element(0, 0) = cos + (oneminuscos * (vAxis.x * vAxis.x));
-  Element(0, 1) = onecos_xy + zsin;
-  Element(0, 2) = onecos_xz - ysin;
+  res.Element(0, 0) = cos + (oneminuscos * (vAxis.x * vAxis.x));
+  res.Element(0, 1) = onecos_xy + zsin;
+  res.Element(0, 2) = onecos_xz - ysin;
 
   // Column 2  )
-  Element(1, 0) = onecos_xy - zsin;
-  Element(1, 1) = cos + (oneminuscos * (vAxis.y * vAxis.y));
-  Element(1, 2) = onecos_yz + xsin;
+  res.Element(1, 0) = onecos_xy - zsin;
+  res.Element(1, 1) = cos + (oneminuscos * (vAxis.y * vAxis.y));
+  res.Element(1, 2) = onecos_yz + xsin;
 
   // Column 3  )
-  Element(2, 0) = onecos_xz + ysin;
-  Element(2, 1) = onecos_yz - xsin;
-  Element(2, 2) = cos + (oneminuscos * (vAxis.z * vAxis.z));
+  res.Element(2, 0) = onecos_xz + ysin;
+  res.Element(2, 1) = onecos_yz - xsin;
+  res.Element(2, 2) = cos + (oneminuscos * (vAxis.z * vAxis.z));
+
+  return res;
 }
 
 template <typename Type>
@@ -229,7 +234,7 @@ plResult plMat3Template<Type>::Invert(Type fEpsilon)
                     Element(0, 2) * (Element(2, 1) * Element(1, 0) - Element(1, 1) * Element(2, 0));
 
   if (plMath::IsZero(fDet, fEpsilon))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const Type fOneDivDet = (Type)1 / fDet;
 
@@ -248,13 +253,13 @@ plResult plMat3Template<Type>::Invert(Type fEpsilon)
   Inverse.Element(2, 2) = (Element(1, 1) * Element(0, 0) - Element(0, 1) * Element(1, 0));
 
   *this = Inverse * fOneDivDet;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 template <typename Type>
-void plMat4Template<Type>::SetRotationMatrix(const plVec3Template<Type>& vAxis, plAngle angle)
+plMat4Template<Type> plMat4Template<Type>::MakeAxisRotation(const plVec3Template<Type>& vAxis, plAngle angle)
 {
-  PLASMA_ASSERT_DEBUG(vAxis.IsNormalized(), "vAxis must be normalized.");
+  PL_ASSERT_DEBUG(vAxis.IsNormalized(), "vAxis must be normalized.");
 
   const Type cos = plMath::Cos(angle);
   const Type sin = plMath::Sin(angle);
@@ -272,29 +277,33 @@ void plMat4Template<Type>::SetRotationMatrix(const plVec3Template<Type>& vAxis, 
   const Type onecos_xz = oneminuscos * xz;
   const Type onecos_yz = oneminuscos * yz;
 
+  plMat4Template<Type> res;
+
   // Column 1
-  Element(0, 0) = cos + (oneminuscos * (vAxis.x * vAxis.x));
-  Element(0, 1) = onecos_xy + zsin;
-  Element(0, 2) = onecos_xz - ysin;
-  Element(0, 3) = 0;
+  res.Element(0, 0) = cos + (oneminuscos * (vAxis.x * vAxis.x));
+  res.Element(0, 1) = onecos_xy + zsin;
+  res.Element(0, 2) = onecos_xz - ysin;
+  res.Element(0, 3) = 0;
 
   // Column 2
-  Element(1, 0) = onecos_xy - zsin;
-  Element(1, 1) = cos + (oneminuscos * (vAxis.y * vAxis.y));
-  Element(1, 2) = onecos_yz + xsin;
-  Element(1, 3) = 0;
+  res.Element(1, 0) = onecos_xy - zsin;
+  res.Element(1, 1) = cos + (oneminuscos * (vAxis.y * vAxis.y));
+  res.Element(1, 2) = onecos_yz + xsin;
+  res.Element(1, 3) = 0;
 
   // Column 3
-  Element(2, 0) = onecos_xz + ysin;
-  Element(2, 1) = onecos_yz - xsin;
-  Element(2, 2) = cos + (oneminuscos * (vAxis.z * vAxis.z));
-  Element(2, 3) = 0;
+  res.Element(2, 0) = onecos_xz + ysin;
+  res.Element(2, 1) = onecos_yz - xsin;
+  res.Element(2, 2) = cos + (oneminuscos * (vAxis.z * vAxis.z));
+  res.Element(2, 3) = 0;
 
   // Column 4
-  Element(3, 0) = 0;
-  Element(3, 1) = 0;
-  Element(3, 2) = 0;
-  Element(3, 3) = 1;
+  res.Element(3, 0) = 0;
+  res.Element(3, 1) = 0;
+  res.Element(3, 2) = 0;
+  res.Element(3, 3) = 1;
+
+  return res;
 }
 
 template <typename Type>
@@ -305,7 +314,7 @@ plResult plMat4Template<Type>::Invert(Type fEpsilon)
   const Type fDet = GetDeterminantOf4x4Matrix(*this);
 
   if (plMath::IsZero(fDet, fEpsilon))
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Type fOneDivDet = plMath::Invert(fDet);
 
@@ -322,7 +331,7 @@ plResult plMat4Template<Type>::Invert(Type fEpsilon)
   }
 
   *this = Inverse;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -346,7 +355,7 @@ bool plComparisonOperator::Compare(plComparisonOperator::Enum cmp, const T& a, c
     case plComparisonOperator::GreaterEqual:
       return !(a < b);
 
-      PLASMA_DEFAULT_CASE_NOT_IMPLEMENTED;
+      PL_DEFAULT_CASE_NOT_IMPLEMENTED;
   }
 
   return false;

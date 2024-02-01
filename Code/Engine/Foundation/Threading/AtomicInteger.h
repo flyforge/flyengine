@@ -4,12 +4,31 @@
 
 #include <Foundation/Threading/AtomicUtils.h>
 
+template <int T>
+struct plAtomicStorageType
+{
+};
+
+template <>
+struct plAtomicStorageType<0>
+{
+  using Type = plInt32;
+};
+
+template <>
+struct plAtomicStorageType<1>
+{
+  using Type = plInt64;
+};
+
 /// \brief Integer class that can be manipulated in an atomic (i.e. thread-safe) fashion.
 template <typename T>
 class plAtomicInteger
 {
+  using UnderlyingType = typename plAtomicStorageType<sizeof(T) / 32>::Type;
+
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   /// \brief Initializes the value to zero.
   plAtomicInteger(); // [tested]
@@ -61,7 +80,7 @@ public:
   operator T() const; // [tested]
 
 private:
-  volatile T m_value;
+  UnderlyingType m_Value;
 };
 
 /// \brief An atomic boolean variable. This is just a wrapper around an atomic int32 for convenience.

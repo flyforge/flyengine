@@ -38,12 +38,12 @@ namespace plModelImporter2
       if (fileReader.Open(szFileName, 1024 * 1024).Failed())
       {
         plLog::Error("Couldn't open '{}' for voxel import.", szFileName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       plUInt8 Temp[1024 * 4];
 
-      while (plUInt64 uiRead = fileReader.ReadBytes(Temp, PLASMA_ARRAY_SIZE(Temp)))
+      while (plUInt64 uiRead = fileReader.ReadBytes(Temp, PL_ARRAY_SIZE(Temp)))
       {
         fileContent.PushBackRange(plArrayPtr<plUInt8>(Temp, (plUInt32)uiRead));
       }
@@ -51,17 +51,17 @@ namespace plModelImporter2
 
     if (fileContent.IsEmpty())
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     const ogt_vox_scene* scene = ogt_vox_read_scene(fileContent.GetData(), fileContent.GetCount());
     if (!scene)
     {
       plLog::Error("Couldn't open '{}' for voxel import, read_scene failed.", szFileName);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    PLASMA_SCOPE_EXIT(ogt_vox_destroy_scene(scene));
+    PL_SCOPE_EXIT(ogt_vox_destroy_scene(scene));
 
     // Temp storage buffers to build the mesh streams out of
     plDynamicArray<plVec3> positions;
@@ -86,12 +86,12 @@ namespace plModelImporter2
       memset(&ctx, 0, sizeof(ctx));
 
       ogt_mesh* mesh = ogt_mesh_from_paletted_voxels_greedy(&ctx, model->voxel_data, model->size_x, model->size_y, model->size_z, (const ogt_mesh_rgba*)&scene->palette.color[0]);
-      PLASMA_SCOPE_EXIT(ogt_mesh_destroy(&ctx, mesh));
+      PL_SCOPE_EXIT(ogt_mesh_destroy(&ctx, mesh));
 
       if (!mesh)
       {
         plLog::Error("Couldn't generate mesh for voxels in file '{}'.", szFileName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
 
       ogt_mesh_remove_duplicate_vertices(&ctx, mesh);
@@ -151,6 +151,6 @@ namespace plModelImporter2
     m_Options.m_pMeshOutput->AddSubMesh(indices.GetCount() / 3, 0, 0);
     m_Options.m_pMeshOutput->ComputeBounds();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 } // namespace plModelImporter2

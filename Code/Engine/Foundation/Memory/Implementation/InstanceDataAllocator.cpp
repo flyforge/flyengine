@@ -34,7 +34,7 @@ plBlob plInstanceDataAllocator::AllocateAndConstruct() const
 
 void plInstanceDataAllocator::DestructAndDeallocate(plBlob& ref_blob) const
 {
-  PLASMA_ASSERT_DEV(ref_blob.GetByteBlobPtr().GetCount() == m_uiTotalDataSize, "Passed blob has not the expected size");
+  PL_ASSERT_DEV(ref_blob.GetByteBlobPtr().GetCount() == m_uiTotalDataSize, "Passed blob has not the expected size");
   Destruct(ref_blob.GetByteBlobPtr());
 
   ref_blob.Clear();
@@ -71,3 +71,5 @@ void plInstanceDataAllocator::Destruct(plByteBlobPtr blobPtr) const
     uiOffset += desc.m_uiTypeSize;
   }
 }
+
+

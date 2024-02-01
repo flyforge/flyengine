@@ -18,28 +18,28 @@ static plString ToShaderString(const plVariant& value)
     case plVariantType::ColorGamma:
     {
       plColor v = value.ConvertTo<plColor>();
-      temp.Format("float4({0}, {1}, {2}, {3})", v.r, v.g, v.b, v.a);
+      temp.SetFormat("float4({0}, {1}, {2}, {3})", v.r, v.g, v.b, v.a);
     }
     break;
 
     case plVariantType::Vector4:
     {
       plVec4 v = value.Get<plVec4>();
-      temp.Format("float4({0}, {1}, {2}, {3})", v.x, v.y, v.z, v.w);
+      temp.SetFormat("float4({0}, {1}, {2}, {3})", v.x, v.y, v.z, v.w);
     }
     break;
 
     case plVariantType::Vector3:
     {
       plVec3 v = value.Get<plVec3>();
-      temp.Format("float3({0}, {1}, {2})", v.x, v.y, v.z);
+      temp.SetFormat("float3({0}, {1}, {2})", v.x, v.y, v.z);
     }
     break;
 
     case plVariantType::Vector2:
     {
       plVec2 v = value.Get<plVec2>();
-      temp.Format("float2({0}, {1})", v.x, v.y);
+      temp.SetFormat("float2({0}, {1})", v.x, v.y);
     }
     break;
 
@@ -47,21 +47,21 @@ static plString ToShaderString(const plVariant& value)
     case plVariantType::Int32:
     case plVariantType::Bool:
     {
-      temp.Format("{0}", value);
+      temp.SetFormat("{0}", value);
     }
     break;
 
     case plVariantType::Time:
     {
       float v = value.Get<plTime>().GetSeconds();
-      temp.Format("{0}", v);
+      temp.SetFormat("{0}", v);
     }
     break;
 
     case plVariantType::Angle:
     {
       float v = value.Get<plAngle>().GetRadian();
-      temp.Format("{0}", v);
+      temp.SetFormat("{0}", v);
     }
     break;
 
@@ -126,10 +126,10 @@ plStatus plVisualShaderCodeGenerator::GatherAllNodes(const plDocumentObject* pRo
   const auto& children = pRootObj->GetChildren();
   for (plUInt32 i = 0; i < children.GetCount(); ++i)
   {
-    PLASMA_SUCCEED_OR_RETURN(GatherAllNodes(children[i]));
+    PL_SUCCEED_OR_RETURN(GatherAllNodes(children[i]));
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plUInt16 plVisualShaderCodeGenerator::DeterminePinId(const plDocumentObject* pOwner, const plPin& pin) const
@@ -149,13 +149,13 @@ plStatus plVisualShaderCodeGenerator::GenerateVisualShader(const plDocumentNodeM
 {
   out_sCheckPerms.Clear();
 
-  PLASMA_ASSERT_DEBUG(m_pNodeManager == nullptr, "Shader Generator cannot be used twice");
+  PL_ASSERT_DEBUG(m_pNodeManager == nullptr, "Shader Generator cannot be used twice");
 
   m_pNodeManager = pNodeManager;
   m_pTypeRegistry = plVisualShaderTypeRegistry::GetSingleton();
   m_pNodeBaseRtti = m_pTypeRegistry->GetNodeBaseType();
 
-  PLASMA_SUCCEED_OR_RETURN(GatherAllNodes(m_pNodeManager->GetRootObject()));
+  PL_SUCCEED_OR_RETURN(GatherAllNodes(m_pNodeManager->GetRootObject()));
 
   if (m_Nodes.IsEmpty())
     return plStatus("Visual Shader graph is empty");
@@ -163,14 +163,13 @@ plStatus plVisualShaderCodeGenerator::GenerateVisualShader(const plDocumentNodeM
   if (m_pMainNode == nullptr)
     return plStatus("Visual Shader does not contain an output node");
 
-  PLASMA_SUCCEED_OR_RETURN(GenerateNode(m_pMainNode));
+  PL_SUCCEED_OR_RETURN(GenerateNode(m_pMainNode));
 
   const plStringBuilder sMaterialCBDefine("#define VSE_CONSTANTS ", m_sShaderMaterialCB);
 
   m_sFinalShaderCode.Set("[PLATFORMS]\nALL\n\n");
   m_sFinalShaderCode.Append("[PERMUTATIONS]\n\n", m_sShaderPermutations, "\n");
   m_sFinalShaderCode.Append("[MATERIALPARAMETER]\n\n", m_sShaderMaterialParam, "\n");
-  m_sFinalShaderCode.Append("[MATERIALCONFIG]\n\n", m_sShaderRenderConfig, "\n");
   m_sFinalShaderCode.Append("[RENDERSTATE]\n\n", m_sShaderRenderState, "\n");
   m_sFinalShaderCode.Append("[VERTEXSHADER]\n\n", sMaterialCBDefine, "\n\n");
   m_sFinalShaderCode.Append(m_sShaderVertexDefines, "\n", m_sShaderVertex, "\n");
@@ -186,7 +185,7 @@ plStatus plVisualShaderCodeGenerator::GenerateVisualShader(const plDocumentNodeM
     out_sCheckPerms.Append("\n", pDesc->m_sCheckPermutations);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode)
@@ -197,19 +196,19 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
     return plStatus("The shader graph has a circular dependency.");
 
   if (state.m_bCodeGenerated)
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
   state.m_bCodeGenerated = true;
   state.m_bInProgress = true;
 
-  PLASMA_SCOPE_EXIT(state.m_bInProgress = false);
+  PL_SCOPE_EXIT(state.m_bInProgress = false);
 
   const plVisualShaderNodeDescriptor* pDesc = m_pTypeRegistry->GetDescriptorForType(pNode->GetType());
 
-  PLASMA_SUCCEED_OR_RETURN(GenerateInputPinCode(m_pNodeManager->GetInputPins(pNode)));
+  PL_SUCCEED_OR_RETURN(GenerateInputPinCode(m_pNodeManager->GetInputPins(pNode)));
 
   plStringBuilder sConstantsCode, sPsBodyCode, sMaterialParamCode, sPixelSamplersCode, sVsBodyCode, sGsBodyCode, sMaterialCB, sPermutations,
-    sRenderConfig, sRenderStates, sPixelDefines, sPixelIncludes, sVertexDefines, sGeometryDefines;
+    sRenderStates, sPixelDefines, sPixelIncludes, sVertexDefines, sGeometryDefines;
 
   sConstantsCode = pDesc->m_sShaderCodePixelConstants;
   sPsBodyCode = pDesc->m_sShaderCodePixelBody;
@@ -219,27 +218,25 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
   sGsBodyCode = pDesc->m_sShaderCodeGeometryShader;
   sMaterialCB = pDesc->m_sShaderCodeMaterialCB;
   sPermutations = pDesc->m_sShaderCodePermutations;
-  sRenderConfig = pDesc->m_sShaderCodeRenderConfig;
   sRenderStates = pDesc->m_sShaderCodeRenderState;
   sPixelDefines = pDesc->m_sShaderCodePixelDefines;
   sPixelIncludes = pDesc->m_sShaderCodePixelIncludes;
 
-  PLASMA_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sPsBodyCode, sPixelDefines));
-  PLASMA_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sVsBodyCode, sVertexDefines));
-  PLASMA_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sGsBodyCode, sGeometryDefines));
+  PL_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sPsBodyCode, sPixelDefines));
+  PL_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sVsBodyCode, sVertexDefines));
+  PL_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pNode, pDesc, sGsBodyCode, sGeometryDefines));
 
-  PLASMA_SUCCEED_OR_RETURN(CheckPropertyValues(pNode, pDesc));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sConstantsCode));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sVsBodyCode));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sGsBodyCode));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPsBodyCode));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sMaterialParamCode));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPixelDefines));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sMaterialCB));
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPixelSamplersCode));
+  PL_SUCCEED_OR_RETURN(CheckPropertyValues(pNode, pDesc));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sConstantsCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sVsBodyCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sGsBodyCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPsBodyCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sMaterialParamCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPixelDefines));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sMaterialCB));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pNode, pDesc, sPixelSamplersCode));
 
   SetPinDefines(pNode, sPermutations);
-  SetPinDefines(pNode, sRenderConfig);
   SetPinDefines(pNode, sRenderStates);
   SetPinDefines(pNode, sVsBodyCode);
   SetPinDefines(pNode, sGsBodyCode);
@@ -253,7 +250,6 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
 
   {
     AppendStringIfUnique(m_sShaderPermutations, sPermutations);
-    AppendStringIfUnique(m_sShaderRenderConfig, sRenderConfig);
     AppendStringIfUnique(m_sShaderRenderState, sRenderStates);
     AppendStringIfUnique(m_sShaderVertexDefines, sVertexDefines);
     AppendStringIfUnique(m_sShaderVertex, sVsBodyCode);
@@ -268,7 +264,7 @@ plStatus plVisualShaderCodeGenerator::GenerateNode(const plDocumentObject* pNode
     AppendStringIfUnique(m_sShaderMaterialCB, sMaterialCB);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plVisualShaderCodeGenerator::GenerateInputPinCode(plArrayPtr<const plUniquePtr<const plPin>> pins)
@@ -276,7 +272,7 @@ plStatus plVisualShaderCodeGenerator::GenerateInputPinCode(plArrayPtr<const plUn
   for (auto& pPin : pins)
   {
     auto connections = m_pNodeManager->GetConnections(*pPin);
-    PLASMA_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
+    PL_ASSERT_DEBUG(connections.GetCount() <= 1, "Input pin has {0} connections", connections.GetCount());
 
     if (connections.IsEmpty())
       continue;
@@ -291,7 +287,7 @@ plStatus plVisualShaderCodeGenerator::GenerateInputPinCode(plArrayPtr<const plUn
       return resNode;
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plVisualShaderCodeGenerator::GenerateOutputPinCode(const plDocumentObject* pOwnerNode, const plPin& pin)
@@ -299,11 +295,11 @@ plStatus plVisualShaderCodeGenerator::GenerateOutputPinCode(const plDocumentObje
   OutputPinState& ps = m_OutputPins[&pin];
 
   if (ps.m_bCodeGenerated)
-    return plStatus(PLASMA_SUCCESS);
+    return plStatus(PL_SUCCESS);
 
   ps.m_bCodeGenerated = true;
 
-  PLASMA_SUCCEED_OR_RETURN(GenerateNode(pOwnerNode));
+  PL_SUCCEED_OR_RETURN(GenerateNode(pOwnerNode));
 
   const plVisualShaderNodeDescriptor* pDesc = m_pTypeRegistry->GetDescriptorForType(pOwnerNode->GetType());
   const plUInt16 uiPinID = DeterminePinId(pOwnerNode, pin);
@@ -311,14 +307,14 @@ plStatus plVisualShaderCodeGenerator::GenerateOutputPinCode(const plDocumentObje
   plStringBuilder sInlineCode = pDesc->m_OutputPins[uiPinID].m_sShaderCodeInline;
   plStringBuilder ignore; // DefineWhenUsingDefaultValue not used for output pins
 
-  ReplaceInputPinsByCode(pOwnerNode, pDesc, sInlineCode, ignore).IgnoreResult();
+  PL_SUCCEED_OR_RETURN(ReplaceInputPinsByCode(pOwnerNode, pDesc, sInlineCode, ignore));
 
-  PLASMA_SUCCEED_OR_RETURN(InsertPropertyValues(pOwnerNode, pDesc, sInlineCode));
+  PL_SUCCEED_OR_RETURN(InsertPropertyValues(pOwnerNode, pDesc, sInlineCode));
 
   // store the result
   ps.m_sCodeAtPin = sInlineCode;
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -334,7 +330,7 @@ plStatus plVisualShaderCodeGenerator::ReplaceInputPinsByCode(
   {
     const plUInt32 i = i0 - 1;
 
-    sPinName.Format("$in{0}", i);
+    sPinName.SetFormat("$in{0}", i);
 
     auto connections = m_pNodeManager->GetConnections(*inputPins[i]);
     if (connections.IsEmpty())
@@ -369,14 +365,14 @@ plStatus plVisualShaderCodeGenerator::ReplaceInputPinsByCode(
       const plPin& outputPin = connections[0]->GetSourcePin();
 
       const OutputPinState& pinState = m_OutputPins[&outputPin];
-      PLASMA_ASSERT_DEBUG(pinState.m_bCodeGenerated, "Pin code should have been generated at this point");
+      PL_ASSERT_DEBUG(pinState.m_bCodeGenerated, "Pin code should have been generated at this point");
 
       // replace all occurrences of the pin identifier with the code that was generate for the connected output pin
       sInlineCode.ReplaceAll(sPinName, pinState.m_sCodeAtPin);
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 
@@ -389,7 +385,7 @@ void plVisualShaderCodeGenerator::SetPinDefines(const plDocumentObject* pOwnerNo
 
     for (plUInt32 i = 0; i < pins.GetCount(); ++i)
     {
-      sDefineName.Format("INPUT_PIN_{0}_CONNECTED", i);
+      sDefineName.SetFormat("INPUT_PIN_{0}_CONNECTED", i);
 
       if (m_pNodeManager->HasConnections(*pins[i]) == false)
       {
@@ -407,7 +403,7 @@ void plVisualShaderCodeGenerator::SetPinDefines(const plDocumentObject* pOwnerNo
 
     for (plUInt32 i = 0; i < pins.GetCount(); ++i)
     {
-      sDefineName.Format("OUTPUT_PIN_{0}_CONNECTED", i);
+      sDefineName.SetFormat("OUTPUT_PIN_{0}_CONNECTED", i);
 
       if (m_pNodeManager->HasConnections(*pins[i]) == false)
       {
@@ -468,7 +464,7 @@ plStatus plVisualShaderCodeGenerator::CheckPropertyValues(const plDocumentObject
     }
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plVisualShaderCodeGenerator::InsertPropertyValues(
@@ -483,7 +479,7 @@ plStatus plVisualShaderCodeGenerator::InsertPropertyValues(
   {
     const plUInt32 p = p0 - 1;
 
-    sPropName.Format("$prop{0}", p);
+    sPropName.SetFormat("$prop{0}", p);
 
     const plVariant value = TypeAccess.GetValue(props[p].m_sName);
     sPropValue = ToShaderString(value);
@@ -491,5 +487,5 @@ plStatus plVisualShaderCodeGenerator::InsertPropertyValues(
     sString.ReplaceAll(sPropName, sPropValue);
   }
 
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }

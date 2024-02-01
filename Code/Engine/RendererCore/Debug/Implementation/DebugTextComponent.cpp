@@ -8,38 +8,34 @@
 #include <RendererCore/Pipeline/View.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plDebugTextComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plDebugTextComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Text", m_sText)->AddAttributes(new plDefaultValueAttribute("Value0: {0}, Value1: {1}, Value2: {2}, Value3: {3}")),
-    PLASMA_MEMBER_PROPERTY("Value0", m_fValue0),
-    PLASMA_MEMBER_PROPERTY("Value1", m_fValue1),
-    PLASMA_MEMBER_PROPERTY("Value2", m_fValue2),
-    PLASMA_MEMBER_PROPERTY("Value3", m_fValue3),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color),
+    PL_MEMBER_PROPERTY("Text", m_sText)->AddAttributes(new plDefaultValueAttribute("Value0: {0}, Value1: {1}, Value2: {2}, Value3: {3}")),
+    PL_MEMBER_PROPERTY("Value0", m_fValue0),
+    PL_MEMBER_PROPERTY("Value1", m_fValue1),
+    PL_MEMBER_PROPERTY("Value2", m_fValue2),
+    PL_MEMBER_PROPERTY("Value3", m_fValue3),
+    PL_MEMBER_PROPERTY("Color", m_Color),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Debug"),
+    new plCategoryAttribute("Utilities/Debug"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plDebugTextComponent::plDebugTextComponent()
   : m_sText("Value0: {0}, Value1: {1}, Value2: {2}, Value3: {3}")
-  , m_fValue0(0.0f)
-  , m_fValue1(0.0f)
-  , m_fValue2(0.0f)
-  , m_fValue3(0.0f)
   , m_Color(plColor::White)
 {
 }
@@ -82,7 +78,7 @@ void plDebugTextComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
   if (!m_sText.IsEmpty())
   {
     plStringBuilder sb;
-    sb.Format(m_sText, m_fValue0, m_fValue1, m_fValue2, m_fValue3);
+    sb.SetFormat(m_sText, m_fValue0, m_fValue1, m_fValue2, m_fValue3);
 
     plDebugRenderer::Draw3DText(msg.m_pView->GetHandle(), sb, GetOwner()->GetGlobalPosition(), m_Color);
   }
@@ -90,4 +86,4 @@ void plDebugTextComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) c
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Debug_Implementation_DebugTextComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Debug_Implementation_DebugTextComponent);

@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plSetBlackboardNumberAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSetBlackboardNumberAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSetBlackboardNumberAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSetBlackboardNumberAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -34,9 +34,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plGetBlackboardNumberAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plGetBlackboardNumberAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGetBlackboardNumberAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plGetBlackboardNumberAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -63,9 +63,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plCompareBlackboardNumberAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plCompareBlackboardNumberAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCompareBlackboardNumberAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plCompareBlackboardNumberAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -103,9 +103,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plCheckBlackboardBoolAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plCheckBlackboardBoolAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCheckBlackboardBoolAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plCheckBlackboardBoolAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -140,9 +140,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plSetBlackboardBoolAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSetBlackboardBoolAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSetBlackboardBoolAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSetBlackboardBoolAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -172,9 +172,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plGetBlackboardBoolAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plGetBlackboardBoolAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plGetBlackboardBoolAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plGetBlackboardBoolAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -201,9 +201,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plOnBlackboardValueChangedAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plOnBlackboardValueChangedAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plOnBlackboardValueChangedAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plOnBlackboardValueChangedAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

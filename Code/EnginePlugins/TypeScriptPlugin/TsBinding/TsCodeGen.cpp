@@ -58,7 +58,7 @@ void plTypeScriptBinding::GenerateEnumsFile(const char* szFile, const plSet<cons
   {
     const plRTTI* pRtti = sortedItems.GetValue(i);
 
-    sType.Format("export enum {0} { ", sortedItems.GetKey(i));
+    sType.SetFormat("export enum {0} { ", sortedItems.GetKey(i));
 
     for (auto pProp : pRtti->GetProperties().GetSubArray(1))
     {
@@ -93,7 +93,7 @@ void plTypeScriptBinding::InjectEnumImportExport(plStringBuilder& content, const
 {
   plStringBuilder sImportExport, sTypeName;
 
-  sImportExport.Format("import __AllEnums = require(\"{}\")\n", szEnumFile);
+  sImportExport.SetFormat("import __AllEnums = require(\"{}\")\n", szEnumFile);
 
   plDynamicArray<const plRTTI*> sorted;
   sorted.Reserve(s_RequiredEnums.GetCount());
@@ -116,7 +116,7 @@ void plTypeScriptBinding::InjectFlagsImportExport(plStringBuilder& content, cons
 {
   plStringBuilder sImportExport, sTypeName;
 
-  sImportExport.Format("import __AllFlags = require(\"{}\")\n", szFlagsFile);
+  sImportExport.SetFormat("import __AllFlags = require(\"{}\")\n", szFlagsFile);
 
   plDynamicArray<const plRTTI*> sorted;
   sorted.Reserve(s_RequiredFlags.GetCount());

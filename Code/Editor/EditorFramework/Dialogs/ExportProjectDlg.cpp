@@ -18,8 +18,8 @@
 
 bool plQtExportProjectDlg::s_bTransformAll = true;
 
-plQtExportProjectDlg::plQtExportProjectDlg(QWidget* parent)
-  : QDialog(parent)
+plQtExportProjectDlg::plQtExportProjectDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -104,7 +104,7 @@ void plQtExportProjectDlg::on_ExportProjectButton_clicked()
   };
 
   plLogSystemScope logScope(&logFile);
-  PLASMA_SCOPE_EXIT(WriteLogFile());
+  PL_SCOPE_EXIT(WriteLogFile());
 
   if (plProjectExport::ExportProject(szDstFolder, plAssetCurator::GetSingleton()->GetActiveAssetProfile(), plQtEditorApp::GetSingleton()->GetFileSystemConfig()).Failed())
   {

@@ -6,10 +6,10 @@
 
 using plProbeTreeSectorResourceHandle = plTypedResourceHandle<class plProbeTreeSectorResource>;
 
-class PLASMA_RENDERERCORE_DLL plBakedProbesWorldModule : public plWorldModule
+class PL_RENDERERCORE_DLL plBakedProbesWorldModule : public plWorldModule
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plBakedProbesWorldModule, plWorldModule);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plBakedProbesWorldModule, plWorldModule);
 
 public:
   plBakedProbesWorldModule(plWorld* pWorld);

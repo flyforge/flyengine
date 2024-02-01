@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../QtResources/resources.qrc">
-    <normaloff>:/GuiFoundation/PLASMA-logo.svg</normaloff>:/GuiFoundation/PLASMA-logo.svg</iconset>
+    <normaloff>:/GuiFoundation/PL-logo.svg</normaloff>:/GuiFoundation/PL-logo.svg</iconset>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout_6">
    <item>

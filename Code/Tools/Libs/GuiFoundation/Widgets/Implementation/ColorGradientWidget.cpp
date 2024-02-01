@@ -58,7 +58,7 @@ plQtColorGradientWidget::plQtColorGradientWidget(QWidget* pParent)
 }
 
 
-plQtColorGradientWidget::~plQtColorGradientWidget() {}
+plQtColorGradientWidget::~plQtColorGradientWidget() = default;
 
 void plQtColorGradientWidget::SetScrubberPosition(double fPosition)
 {
@@ -68,45 +68,45 @@ void plQtColorGradientWidget::SetScrubberPosition(double fPosition)
   update();
 }
 
-void plQtColorGradientWidget::setColorGradientData(const plColorGradient* gradient)
+void plQtColorGradientWidget::setColorGradientData(const plColorGradient* pGradient)
 {
-  m_pColorGradientData = gradient;
+  m_pColorGradientData = pGradient;
   FrameExtents();
 
   update();
 }
 
 
-void plQtColorGradientWidget::setEditMode(bool edit)
+void plQtColorGradientWidget::setEditMode(bool bEdit)
 {
-  m_bEditMode = edit;
+  m_bEditMode = bEdit;
 
   setMouseTracking(m_bEditMode);
   setCursor(m_bEditMode ? Qt::ArrowCursor : Qt::PointingHandCursor);
 }
 
-void plQtColorGradientWidget::setShowColorCPs(bool show)
+void plQtColorGradientWidget::setShowColorCPs(bool bShow)
 {
-  m_bShowColorCPs = show;
+  m_bShowColorCPs = bShow;
 }
 
 
-void plQtColorGradientWidget::setShowAlphaCPs(bool show)
+void plQtColorGradientWidget::setShowAlphaCPs(bool bShow)
 {
-  m_bShowAlphaCPs = show;
+  m_bShowAlphaCPs = bShow;
 }
 
 
-void plQtColorGradientWidget::setShowIntensityCPs(bool show)
+void plQtColorGradientWidget::setShowIntensityCPs(bool bShow)
 {
-  m_bShowIntensityCPs = show;
+  m_bShowIntensityCPs = bShow;
 }
 
 
-void plQtColorGradientWidget::setShowCoords(bool top, bool bottom)
+void plQtColorGradientWidget::setShowCoords(bool bTop, bool bBottom)
 {
-  m_bShowCoordsTop = top;
-  m_bShowCoordsBottom = bottom;
+  m_bShowCoordsTop = bTop;
+  m_bShowCoordsBottom = bBottom;
 }
 
 void plQtColorGradientWidget::ClearSelectedCP()
@@ -114,7 +114,7 @@ void plQtColorGradientWidget::ClearSelectedCP()
   SelectCP(-1, -1, -1);
 }
 
-void plQtColorGradientWidget::SelectCP(plInt32 colorCP, plInt32 alphaCP, plInt32 intensityCP)
+void plQtColorGradientWidget::SelectCP(plInt32 iColorCP, plInt32 iAlphaCP, plInt32 iIntensityCP)
 {
   m_bDraggingCP = false;
 
@@ -126,21 +126,21 @@ void plQtColorGradientWidget::SelectCP(plInt32 colorCP, plInt32 alphaCP, plInt32
 
   bool changed = false;
 
-  if (colorCP != m_iSelectedColorCP)
+  if (iColorCP != m_iSelectedColorCP)
   {
-    m_iSelectedColorCP = colorCP;
+    m_iSelectedColorCP = iColorCP;
     changed = true;
   }
 
-  if (alphaCP != m_iSelectedAlphaCP)
+  if (iAlphaCP != m_iSelectedAlphaCP)
   {
-    m_iSelectedAlphaCP = alphaCP;
+    m_iSelectedAlphaCP = iAlphaCP;
     changed = true;
   }
 
-  if (intensityCP != m_iSelectedIntensityCP)
+  if (iIntensityCP != m_iSelectedIntensityCP)
   {
-    m_iSelectedIntensityCP = intensityCP;
+    m_iSelectedIntensityCP = iIntensityCP;
     changed = true;
   }
 
@@ -217,9 +217,6 @@ void plQtColorGradientWidget::PaintColorGradient(QPainter& p) const
 
     for (plInt32 posX = 0; posX < width; ++posX)
     {
-
-      const plInt32 xPos = GradientArea.left() + posX;
-
       plColorGammaUB rgba;
       float intensity;
 
@@ -373,7 +370,7 @@ void plQtColorGradientWidget::PaintCoordinateLines(QPainter& p)
     lines.push_back(QLine(QPoint(xPos, area.top()), QPoint(xPos, area.top() + iLineHeight)));
     lines.push_back(QLine(QPoint(xPos, area.bottom()), QPoint(xPos, area.bottom() - iLineHeight)));
   }
-  p.drawLines(lines.data(), lines.size());
+  p.drawLines(lines.data(), static_cast<int>(lines.size()));
   p.restore();
 }
 
@@ -530,7 +527,7 @@ void plQtColorGradientWidget::mousePressEvent(QMouseEvent* event)
   {
     if (event->button() == Qt::MouseButton::RightButton)
     {
-      m_LastMousePosition = event->globalPos();
+      m_LastMousePosition = event->globalPosition();
     }
 
     if (event->buttons() == Qt::MouseButton::LeftButton)
@@ -670,8 +667,8 @@ void plQtColorGradientWidget::mouseMoveEvent(QMouseEvent* event)
         // scroll displayed area
         if (m_fDisplayExtentMinX < m_fDisplayExtentMaxX)
         {
-          const QPoint mouseMove = event->globalPos() - m_LastMousePosition;
-          m_LastMousePosition = event->globalPos();
+          const QPointF mouseMove = event->globalPosition() - m_LastMousePosition;
+          m_LastMousePosition = event->globalPosition();
 
           const double range = m_fDisplayExtentMaxX - m_fDisplayExtentMinX;
 

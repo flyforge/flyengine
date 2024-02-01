@@ -1,7 +1,7 @@
 
 #include <Foundation/SimdMath/SimdRandom.h>
 
-PLASMA_ALWAYS_INLINE plUInt32 plIntervalSchedulerBase::GetHistogramIndex(plTime value)
+PL_ALWAYS_INLINE plUInt32 plIntervalSchedulerBase::GetHistogramIndex(plTime value)
 {
   if (value.IsZero())
     return 0;
@@ -12,10 +12,10 @@ PLASMA_ALWAYS_INLINE plUInt32 plIntervalSchedulerBase::GetHistogramIndex(plTime 
   return plMath::Min(static_cast<plUInt32>(i), maxSlotIndex);
 }
 
-PLASMA_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetHistogramSlotValue(plUInt32 uiIndex)
+PL_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetHistogramSlotValue(plUInt32 uiIndex)
 {
   if (uiIndex == 0)
-    return plTime::Zero();
+    return plTime::MakeZero();
 
   constexpr double norm = 1.0 / (HistogramSize - 2.0);
   const double x = (uiIndex - 1) * norm;
@@ -23,15 +23,15 @@ PLASMA_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetHistogramSlotValue(plUIn
 }
 
 // static
-PLASMA_ALWAYS_INLINE float plIntervalSchedulerBase::GetRandomZeroToOne(int pos, plUInt32& seed)
+PL_ALWAYS_INLINE float plIntervalSchedulerBase::GetRandomZeroToOne(int pos, plUInt32& seed)
 {
   return plSimdRandom::FloatZeroToOne(plSimdVec4i(pos), plSimdVec4u(seed++)).x();
 }
 
-constexpr plTime s_JitterRange = plTime::Microseconds(10);
+constexpr plTime s_JitterRange = plTime::MakeFromMicroseconds(10);
 
 // static
-PLASMA_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetRandomTimeJitter(int pos, plUInt32& seed)
+PL_ALWAYS_INLINE plTime plIntervalSchedulerBase::GetRandomTimeJitter(int pos, plUInt32& seed)
 {
   const float x = plSimdRandom::FloatZeroToOne(plSimdVec4i(pos), plSimdVec4u(seed++)).x();
   return s_JitterRange * (x * 2.0f - 1.0f);
@@ -48,7 +48,7 @@ bool plIntervalScheduler<T>::Data::IsValid() const
 template <typename T>
 void plIntervalScheduler<T>::Data::MarkAsInvalid()
 {
-  m_Interval = plTime::Seconds(-1);
+  m_Interval = plTime::MakeFromSeconds(-1);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -72,7 +72,7 @@ void plIntervalScheduler<T>::AddOrUpdateWork(const T& work, plTime interval)
 
   Data data;
   data.m_Work = work;
-  data.m_Interval = plMath::Max(interval, plTime::Zero());
+  data.m_Interval = plMath::Max(interval, plTime::MakeZero());
   data.m_DueTime = m_CurrentTime + GetRandomZeroToOne(m_Data.GetCount(), m_uiSeed) * data.m_Interval;
   data.m_LastScheduledTime = m_CurrentTime;
 
@@ -101,7 +101,7 @@ template <typename T>
 plTime plIntervalScheduler<T>::GetInterval(const T& work) const
 {
   typename DataMap::Iterator it;
-  PLASMA_VERIFY(m_WorkIdToData.TryGetValue(work, it), "Entry not found");
+  PL_VERIFY(m_WorkIdToData.TryGetValue(work, it), "Entry not found");
   return it.Value().m_Interval;
 }
 
@@ -131,8 +131,7 @@ void plIntervalScheduler<T>::Update(plTime deltaTime, RunWorkCallback runWorkCal
 
     // schedule work
     {
-      auto RunWork = [&](typename DataMap::Iterator it, plUInt32 uiIndex)
-      {
+      auto RunWork = [&](typename DataMap::Iterator it, plUInt32 uiIndex) {
         auto& data = it.Value();
         if (data.IsValid())
         {
@@ -189,7 +188,7 @@ void plIntervalScheduler<T>::Update(plTime deltaTime, RunWorkCallback runWorkCal
 template <typename T>
 void plIntervalScheduler<T>::Clear()
 {
-  m_CurrentTime = plTime::Zero();
+  m_CurrentTime = plTime::MakeZero();
   m_uiSeed = 0;
   plMemoryUtils::ZeroFill(m_Histogram, HistogramSize);
 
@@ -198,7 +197,7 @@ void plIntervalScheduler<T>::Clear()
 }
 
 template <typename T>
-PLASMA_FORCE_INLINE typename plIntervalScheduler<T>::DataMap::Iterator plIntervalScheduler<T>::InsertData(Data& data)
+PL_FORCE_INLINE typename plIntervalScheduler<T>::DataMap::Iterator plIntervalScheduler<T>::InsertData(Data& data)
 {
   // make sure that we have a unique due time since the map can't store multiple keys with the same value
   int pos = 0;

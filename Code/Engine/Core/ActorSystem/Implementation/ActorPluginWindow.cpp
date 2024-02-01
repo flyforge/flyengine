@@ -5,8 +5,8 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindow, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindow, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 void plActorPluginWindow::Update()
@@ -20,8 +20,8 @@ void plActorPluginWindow::Update()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowOwner, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowOwner, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plActorPluginWindowOwner::~plActorPluginWindowOwner()
@@ -44,8 +44,8 @@ plWindowOutputTargetBase* plActorPluginWindowOwner::GetOutputTarget() const
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowShared, 1, plRTTINoAllocator);
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plActorPluginWindowShared, 1, plRTTINoAllocator);
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plWindowBase* plActorPluginWindowShared::GetWindow() const
@@ -59,4 +59,4 @@ plWindowOutputTargetBase* plActorPluginWindowShared::GetOutputTarget() const
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_ActorPluginWindow);
+PL_STATICLINK_FILE(Core, Core_ActorSystem_Implementation_ActorPluginWindow);

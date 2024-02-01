@@ -15,7 +15,7 @@ namespace plProcGenInternal
 
     m_pOutput = nullptr;
     m_uiTileSeed = 0;
-    m_TileBoundingBox.SetInvalid();
+    m_TileBoundingBox = plBoundingBox::MakeInvalid();
     m_GlobalToLocalBoxTransforms.Clear();
 
     m_VolumeCollections.Clear();

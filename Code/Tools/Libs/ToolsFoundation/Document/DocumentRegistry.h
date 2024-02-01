@@ -5,7 +5,7 @@
 #include <ToolsFoundation/Document/Document.h>
 #include <ToolsFoundation/ToolsFoundationDLL.h>
 
-struct PLASMA_TOOLSFOUNDATION_DLL plActiveDocumentChange
+struct PL_TOOLSFOUNDATION_DLL plActiveDocumentChange
 {
   const plDocument* m_pOldDocument;
   const plDocument* m_pNewDocument;
@@ -15,7 +15,7 @@ struct PLASMA_TOOLSFOUNDATION_DLL plActiveDocumentChange
 ///
 /// While the IDocumentManager manages documents of a certain context,
 /// this class simply keeps track of the overall number of documents and the currently active one.
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentRegistry
+class PL_TOOLSFOUNDATION_DLL plDocumentRegistry
 {
 public:
   static bool RegisterDocument(const plDocument* pDocument);
@@ -27,7 +27,7 @@ public:
   static const plDocument* GetActiveDocument();
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, DocumentRegistry);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Core, DocumentRegistry);
 
   static void Startup();
   static void Shutdown();

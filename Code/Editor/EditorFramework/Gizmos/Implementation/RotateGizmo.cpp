@@ -8,33 +8,21 @@
 #include <EditorFramework/Preferences/EditorPreferences.h>
 #include <Foundation/Utilities/GraphicsUtils.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRotateGizmo, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRotateGizmo, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plRotateGizmo::plRotateGizmo()
 {
-  PlasmaEditorPreferencesUser* pPreferences = plPreferences::QueryPreferences<PlasmaEditorPreferencesUser>();
-  m_bUseExperimentalGizmo = !pPreferences->m_bOldGizmos;
+  const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
+  const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
+  const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
 
-  if (m_bUseExperimentalGizmo)
-  {
-    const plColor colr = plColorScheme::LightUI(plColorScheme::Red);
-    const plColor colg = plColorScheme::LightUI(plColorScheme::Green);
-    const plColor colb = plColorScheme::LightUI(plColorScheme::Blue);
-
-    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneX.obj");
-    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneY.obj");
-    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneZ.obj");
-  }
-  else
-  {
-    m_hAxisX.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Ring, plColorLinearUB(128, 0, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAxisY.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Ring, plColorLinearUB(0, 128, 0), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-    m_hAxisZ.ConfigureHandle(this, PlasmaEngineGizmoHandleType::Ring, plColorLinearUB(0, 0, 128), plGizmoFlags::ConstantSize | plGizmoFlags::Pickable);
-  }
+  m_hAxisX.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colr, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneX.obj");
+  m_hAxisY.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colg, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneY.obj");
+  m_hAxisZ.ConfigureHandle(this, plEngineGizmoHandleType::FromFile, colb, plGizmoFlags::ConstantSize | plGizmoFlags::Pickable, "Editor/Meshes/RotatePlaneZ.obj");
 
   SetVisible(false);
-  SetTransformation(plTransform::IdentityTransform());
+  SetTransformation(plTransform::MakeIdentity());
 }
 
 void plRotateGizmo::UpdateStatusBarText(plQtEngineDocumentWindow* pWindow)
@@ -58,26 +46,9 @@ void plRotateGizmo::OnVisibleChanged(bool bVisible)
 
 void plRotateGizmo::OnTransformationChanged(const plTransform& transform)
 {
-  if (m_bUseExperimentalGizmo)
-  {
-    m_hAxisX.SetTransformation(transform);
-    m_hAxisY.SetTransformation(transform);
-    m_hAxisZ.SetTransformation(transform);
-  }
-  else
-  {
-    plTransform m;
-    m.SetIdentity();
-
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(-90));
-    m_hAxisX.SetTransformation(transform * m);
-
-    m.m_qRotation.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(90));
-    m_hAxisY.SetTransformation(transform * m);
-
-    m.SetIdentity();
-    m_hAxisZ.SetTransformation(transform * m);
-  }
+  m_hAxisX.SetTransformation(transform);
+  m_hAxisY.SetTransformation(transform);
+  m_hAxisZ.SetTransformation(transform);
 }
 
 void plRotateGizmo::DoFocusLost(bool bCancel)
@@ -95,13 +66,13 @@ void plRotateGizmo::DoFocusLost(bool bCancel)
   m_hAxisZ.SetVisible(true);
 }
 
-PlasmaEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
+plEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
 {
   if (IsActiveInputContext())
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plQuat gizmoRot = GetTransformation().m_qRotation;
 
@@ -118,7 +89,7 @@ PlasmaEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
     m_vRotationAxis = gizmoRot * plVec3(0, 0, 1);
   }
   else
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   plViewHighlightMsgToEngine msg;
   msg.m_HighlightObject = m_pInteractionGizmoHandle->GetGuid();
@@ -126,7 +97,7 @@ PlasmaEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
 
   m_Rotation = plAngle();
 
-  m_vLastMousePos = SetMouseMode(PlasmaEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
+  m_vLastMousePos = SetMouseMode(plEditorInputContext::MouseMode::HideAndWrapAtScreenBorders);
 
   m_qStartRotation = GetTransformation().m_qRotation;
 
@@ -146,7 +117,7 @@ PlasmaEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
     plGraphicsUtils::ConvertScreenPosToWorldPos(m_mInvViewProj, 0, 0, m_vViewport.x, m_vViewport.y, vMousePos, vPosOnNearPlane, &vRayDir).IgnoreResult();
 
     plPlane plane;
-    plane.SetFromNormalAndPoint(vAxisWS, vGizmoPosWS);
+    plane = plPlane::MakeFromNormalAndPoint(vAxisWS, vGizmoPosWS);
 
     plVec3 vPointOnGizmoWS;
     if (!plane.GetRayIntersection(vPosOnNearPlane, vRayDir, nullptr, &vPointOnGizmoWS))
@@ -185,42 +156,44 @@ PlasmaEditorInput plRotateGizmo::DoMousePressEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::BeginInteractions;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plRotateGizmo::DoMouseReleaseEvent(QMouseEvent* e)
+plEditorInput plRotateGizmo::DoMouseReleaseEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   if (e->button() != Qt::MouseButton::LeftButton)
-    return PlasmaEditorInput::WasExclusivelyHandled;
+    return plEditorInput::WasExclusivelyHandled;
 
   FocusLost(false);
 
   SetActiveInputContext(nullptr);
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }
 
-PlasmaEditorInput plRotateGizmo::DoMouseMoveEvent(QMouseEvent* e)
+plEditorInput plRotateGizmo::DoMouseMoveEvent(QMouseEvent* e)
 {
   if (!IsActiveInputContext())
-    return PlasmaEditorInput::MayBeHandledByOthers;
+    return plEditorInput::MayBeHandledByOthers;
 
   const plTime tNow = plTime::Now();
 
-  if (tNow - m_LastInteraction < plTime::Seconds(1.0 / 25.0))
-    return PlasmaEditorInput::WasExclusivelyHandled;
+  if (tNow - m_LastInteraction < plTime::MakeFromSeconds(1.0 / 25.0))
+    return plEditorInput::WasExclusivelyHandled;
 
   m_LastInteraction = tNow;
 
-  const plVec2 vNewMousePos = plVec2(e->globalPos().x(), e->globalPos().y());
+  const QPoint mousePosition = e->globalPosition().toPoint();
+
+  const plVec2 vNewMousePos = plVec2(mousePosition.x(), mousePosition.y());
   plVec2 vDiff = vNewMousePos - plVec2(m_vLastMousePos.x, m_vLastMousePos.y);
 
   m_vLastMousePos = UpdateMouseMode(e);
 
   const float dv = m_vScreenTangent.Dot(vDiff);
-  m_Rotation += plAngle::Degree(dv);
+  m_Rotation += plAngle::MakeFromDegree(dv);
 
   plAngle rot = m_Rotation;
 
@@ -228,7 +201,7 @@ PlasmaEditorInput plRotateGizmo::DoMouseMoveEvent(QMouseEvent* e)
   if (!e->modifiers().testFlag(Qt::AltModifier))
     plSnapProvider::SnapRotation(rot);
 
-  m_qCurrentRotation.SetFromAxisAndAngle(m_vRotationAxis, rot);
+  m_qCurrentRotation = plQuat::MakeFromAxisAndAngle(m_vRotationAxis, rot);
 
   plTransform mTrans = GetTransformation();
   mTrans.m_qRotation = m_qCurrentRotation * m_qStartRotation;
@@ -242,5 +215,5 @@ PlasmaEditorInput plRotateGizmo::DoMouseMoveEvent(QMouseEvent* e)
   ev.m_Type = plGizmoEvent::Type::Interaction;
   m_GizmoEvents.Broadcast(ev);
 
-  return PlasmaEditorInput::WasExclusivelyHandled;
+  return plEditorInput::WasExclusivelyHandled;
 }

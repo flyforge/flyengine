@@ -3,8 +3,8 @@
 #include <EditorPluginParticle/ParticleEffectAsset/ParticleEffectAssetManager.h>
 #include <EditorPluginParticle/ParticleEffectAsset/ParticleEffectAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectAssetDocumentManager, 1, plRTTIDefaultAllocator<plParticleEffectAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plParticleEffectAssetDocumentManager, 1, plRTTIDefaultAllocator<plParticleEffectAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plParticleEffectAssetDocumentManager::plParticleEffectAssetDocumentManager()
 {
@@ -35,8 +35,7 @@ void plParticleEffectAssetDocumentManager::OnDocumentManagerEvent(const plDocume
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plParticleEffectAssetDocument>())
       {
-        plQtParticleEffectAssetDocumentWindow* pDocWnd =
-          new plQtParticleEffectAssetDocumentWindow(static_cast<plParticleEffectAssetDocument*>(e.m_pDocument));
+        new plQtParticleEffectAssetDocumentWindow(static_cast<plParticleEffectAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -47,9 +46,9 @@ void plParticleEffectAssetDocumentManager::OnDocumentManagerEvent(const plDocume
 }
 
 void plParticleEffectAssetDocumentManager::InternalCreateDocument(
-  const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plParticleEffectAssetDocument(szPath);
+  out_pDocument = new plParticleEffectAssetDocument(sPath);
 }
 
 void plParticleEffectAssetDocumentManager::InternalGetSupportedDocumentTypes(

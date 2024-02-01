@@ -6,16 +6,16 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 plRmlUiViewContext::plRmlUiViewContext(plRmlUiDocumentContext* pRmlUiContext)
-  : PlasmaEngineProcessViewContext(pRmlUiContext)
+  : plEngineProcessViewContext(pRmlUiContext)
 {
   m_pRmlUiContext = pRmlUiContext;
 
   // Start with something valid.
   m_Camera.SetCameraMode(plCameraMode::PerspectiveFixedFovX, 45.0f, 0.01f, 1000.0f);
-  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::ZeroVector(), plVec3(0.0f, 0.0f, 1.0f));
+  m_Camera.LookAt(plVec3(1, 1, 1), plVec3::MakeZero(), plVec3(0.0f, 0.0f, 1.0f));
 }
 
-plRmlUiViewContext::~plRmlUiViewContext() {}
+plRmlUiViewContext::~plRmlUiViewContext() = default;
 
 bool plRmlUiViewContext::UpdateThumbnailCamera(const plBoundingBoxSphere& bounds)
 {
@@ -30,7 +30,7 @@ plViewHandle plRmlUiViewContext::CreateView()
 
   pView->SetRenderPipelineResource(CreateDefaultRenderPipeline());
 
-  PlasmaEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
+  plEngineProcessDocumentContext* pDocumentContext = GetDocumentContext();
   pView->SetWorld(pDocumentContext->GetWorld());
   pView->SetCamera(&m_Camera);
   pView->SetCameraUsageHint(plCameraUsageHint::EditorView);
@@ -39,7 +39,7 @@ plViewHandle plRmlUiViewContext::CreateView()
 
 void plRmlUiViewContext::SetCamera(const plViewRedrawMsgToEngine* pMsg)
 {
-  PlasmaEngineProcessViewContext::SetCamera(pMsg);
+  plEngineProcessViewContext::SetCamera(pMsg);
 
   /*const plUInt32 viewHeight = pMsg->m_uiWindowHeight;
 

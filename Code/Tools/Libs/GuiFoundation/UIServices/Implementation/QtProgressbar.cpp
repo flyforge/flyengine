@@ -59,7 +59,7 @@ void plQtProgressbar::ProgressbarEventHandler(const plProgressEvent& e)
       plStringBuilder sText(e.m_pProgressbar->GetMainDisplayText(), "\n", e.m_pProgressbar->GetStepDisplayText());
 
       m_pDialog->setLabelText(QString::fromUtf8(sText.GetData()));
-      PLASMA_ASSERT_DEV(m_pDialog != nullptr, "Progress dialog was destroyed while being in use");
+      PL_ASSERT_DEV(m_pDialog != nullptr, "Progress dialog was destroyed while being in use");
 
       const plUInt32 uiProMille = plMath::Clamp<plUInt32>((plUInt32)(e.m_pProgressbar->GetCompletion() * 1000.0), 0, 1000);
       m_pDialog->setValue(uiProMille);

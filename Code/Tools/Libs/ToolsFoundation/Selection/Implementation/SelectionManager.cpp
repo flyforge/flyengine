@@ -6,7 +6,7 @@
 
 plSelectionManager::plSelectionManager(const plDocumentObjectManager* pObjectManager)
 {
-  auto pStorage = PLASMA_DEFAULT_NEW(Storage);
+  auto pStorage = PL_DEFAULT_NEW(Storage);
   pStorage->m_pObjectManager = pObjectManager;
   SwapStorage(pStorage);
 }
@@ -66,12 +66,12 @@ void plSelectionManager::Clear()
 
 void plSelectionManager::AddObject(const plDocumentObject* pObject)
 {
-  PLASMA_ASSERT_DEBUG(pObject, "Object must be valid");
+  PL_ASSERT_DEBUG(pObject, "Object must be valid");
 
   if (IsSelected(pObject))
     return;
 
-  PLASMA_ASSERT_DEV(pObject->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
+  PL_ASSERT_DEV(pObject->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
   plStatus res = m_pSelectionStorage->m_pObjectManager->CanSelect(pObject);
   if (res.m_Result.Failed())
   {
@@ -131,36 +131,36 @@ void plSelectionManager::SetSelection(const plDocumentObject* pSingleObject)
   SetSelection(objs);
 }
 
-void plSelectionManager::SetSelection(const plDeque<const plDocumentObject*>& Selection)
+void plSelectionManager::SetSelection(const plDeque<const plDocumentObject*>& selection)
 {
-  if (Selection.IsEmpty())
+  if (selection.IsEmpty())
   {
     Clear();
     return;
   }
 
-  if (m_pSelectionStorage->m_SelectionList == Selection)
+  if (m_pSelectionStorage->m_SelectionList == selection)
     return;
 
   m_pSelectionStorage->m_SelectionList.Clear();
   m_pSelectionStorage->m_SelectionSet.Clear();
 
-  m_pSelectionStorage->m_SelectionList.Reserve(Selection.GetCount());
+  m_pSelectionStorage->m_SelectionList.Reserve(selection.GetCount());
 
-  for (plUInt32 i = 0; i < Selection.GetCount(); ++i)
+  for (plUInt32 i = 0; i < selection.GetCount(); ++i)
   {
-    if (Selection[i] != nullptr)
+    if (selection[i] != nullptr)
     {
-      PLASMA_ASSERT_DEV(Selection[i]->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
-      plStatus res = m_pSelectionStorage->m_pObjectManager->CanSelect(Selection[i]);
+      PL_ASSERT_DEV(selection[i]->GetDocumentObjectManager() == m_pSelectionStorage->m_pObjectManager, "Passed in object does not belong to same object manager.");
+      plStatus res = m_pSelectionStorage->m_pObjectManager->CanSelect(selection[i]);
       if (res.m_Result.Failed())
       {
         plLog::Error("{0}", res.m_sMessage);
         continue;
       }
       // actually == nullptr should never happen, unless we have an error somewhere else
-      m_pSelectionStorage->m_SelectionList.PushBack(Selection[i]);
-      m_pSelectionStorage->m_SelectionSet.Insert(Selection[i]->GetGuid());
+      m_pSelectionStorage->m_SelectionList.PushBack(selection[i]);
+      m_pSelectionStorage->m_SelectionSet.Insert(selection[i]->GetGuid());
     }
   }
 
@@ -214,7 +214,7 @@ const plDocument* plSelectionManager::GetDocument() const
 
 plSharedPtr<plSelectionManager::Storage> plSelectionManager::SwapStorage(plSharedPtr<plSelectionManager::Storage> pNewStorage)
 {
-  PLASMA_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
+  PL_ASSERT_ALWAYS(pNewStorage != nullptr, "Need a valid history storage object");
 
   auto retVal = m_pSelectionStorage;
 
@@ -232,9 +232,9 @@ plSharedPtr<plSelectionManager::Storage> plSelectionManager::SwapStorage(plShare
 struct plObjectHierarchyComparor
 {
   using Tree = plHybridArray<const plDocumentObject*, 4>;
-  plObjectHierarchyComparor(plDeque<const plDocumentObject*>& items)
+  plObjectHierarchyComparor(plDeque<const plDocumentObject*>& ref_items)
   {
-    for (const plDocumentObject* pObject : items)
+    for (const plDocumentObject* pObject : ref_items)
     {
       Tree& tree = lookup[pObject];
       while (pObject)
@@ -246,7 +246,7 @@ struct plObjectHierarchyComparor
     }
   }
 
-  PLASMA_ALWAYS_INLINE bool Less(const plDocumentObject* lhs, const plDocumentObject* rhs) const
+  PL_ALWAYS_INLINE bool Less(const plDocumentObject* lhs, const plDocumentObject* rhs) const
   {
     const Tree& A = *lookup.GetValue(lhs);
     const Tree& B = *lookup.GetValue(rhs);
@@ -266,7 +266,7 @@ struct plObjectHierarchyComparor
     return A.GetCount() < B.GetCount();
   }
 
-  PLASMA_ALWAYS_INLINE bool Equal(const plDocumentObject* lhs, const plDocumentObject* rhs) const { return lhs == rhs; }
+  PL_ALWAYS_INLINE bool Equal(const plDocumentObject* lhs, const plDocumentObject* rhs) const { return lhs == rhs; }
 
   plMap<const plDocumentObject*, Tree> lookup;
 };

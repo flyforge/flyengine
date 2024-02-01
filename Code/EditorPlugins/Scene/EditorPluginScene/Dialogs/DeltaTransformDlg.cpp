@@ -22,8 +22,8 @@ plVec3 plQtDeltaTransformDlg::s_vRotateDeviation(180.0f);
 
 float plQtDeltaTransformDlg::s_fNaturalDeviationZ = 10.0f;
 
-plQtDeltaTransformDlg::plQtDeltaTransformDlg(QWidget* parent, plSceneDocument* pSceneDoc)
-  : QDialog(parent)
+plQtDeltaTransformDlg::plQtDeltaTransformDlg(QWidget* pParent, plSceneDocument* pSceneDoc)
+  : QDialog(pParent)
 {
   m_pSceneDocument = pSceneDoc;
 
@@ -83,14 +83,14 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       if (s_vTranslate == plVec3(0.0f))
         return;
 
-      sAction.Format("Translate: {0} | {1} | {2}", plArgF(s_vTranslate.x, 2), plArgF(s_vTranslate.y, 2), plArgF(s_vTranslate.z, 2));
+      sAction.SetFormat("Translate: {0} | {1} | {2}", plArgF(s_vTranslate.x, 2), plArgF(s_vTranslate.y, 2), plArgF(s_vTranslate.z, 2));
       break;
 
     case Mode::TranslateDeviation:
       if (s_vTranslateDeviation == plVec3(0.0f))
         return;
 
-      sAction.Format("Translate (deviation): {0} | {1} | {2}", plArgF(s_vTranslateDeviation.x, 2), plArgF(s_vTranslateDeviation.y, 2),
+      sAction.SetFormat("Translate (deviation): {0} | {1} | {2}", plArgF(s_vTranslateDeviation.x, 2), plArgF(s_vTranslateDeviation.y, 2),
         plArgF(s_vTranslateDeviation.z, 2));
       break;
 
@@ -98,77 +98,77 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       if (s_vRotate.x == 0.0f)
         return;
 
-      sAction.Format("Rotate X: {0}", plArgF(s_vRotate.x, 1));
+      sAction.SetFormat("Rotate X: {0}", plArgF(s_vRotate.x, 1));
       break;
 
     case Mode::RotateXRandom:
       if (s_vRotateRandom.x == 0.0f)
         return;
 
-      sAction.Format("Rotate X (random): {0}", plArgF(s_vRotateRandom.x, 1));
+      sAction.SetFormat("Rotate X (random): {0}", plArgF(s_vRotateRandom.x, 1));
       break;
 
     case Mode::RotateXDeviation:
       if (s_vRotateDeviation.x == 0.0f)
         return;
 
-      sAction.Format("Rotate X (deviation): {0}", plArgF(s_vRotateDeviation.x, 1));
+      sAction.SetFormat("Rotate X (deviation): {0}", plArgF(s_vRotateDeviation.x, 1));
       break;
 
     case Mode::RotateY:
       if (s_vRotate.y == 0.0f)
         return;
 
-      sAction.Format("Rotate Y: {0}", plArgF(s_vRotate.y, 1));
+      sAction.SetFormat("Rotate Y: {0}", plArgF(s_vRotate.y, 1));
       break;
 
     case Mode::RotateYRandom:
       if (s_vRotateRandom.y == 0.0f)
         return;
 
-      sAction.Format("Rotate Y (random): {0}", plArgF(s_vRotateRandom.y, 1));
+      sAction.SetFormat("Rotate Y (random): {0}", plArgF(s_vRotateRandom.y, 1));
       break;
 
     case Mode::RotateYDeviation:
       if (s_vRotateDeviation.y == 0.0f)
         return;
 
-      sAction.Format("Rotate Y (deviation): {0}", plArgF(s_vRotateDeviation.y, 1));
+      sAction.SetFormat("Rotate Y (deviation): {0}", plArgF(s_vRotateDeviation.y, 1));
       break;
 
     case Mode::RotateZ:
       if (s_vRotate.z == 0.0f)
         return;
 
-      sAction.Format("Rotate Z: {0}", plArgF(s_vRotate.z, 1));
+      sAction.SetFormat("Rotate Z: {0}", plArgF(s_vRotate.z, 1));
       break;
 
     case Mode::RotateZRandom:
       if (s_vRotateRandom.z == 0.0f)
         return;
 
-      sAction.Format("Rotate Z (random): {0}", plArgF(s_vRotateRandom.z, 1));
+      sAction.SetFormat("Rotate Z (random): {0}", plArgF(s_vRotateRandom.z, 1));
       break;
 
     case Mode::RotateZDeviation:
       if (s_vRotateDeviation.z == 0.0f)
         return;
 
-      sAction.Format("Rotate Z (deviation): {0}", plArgF(s_vRotateDeviation.z, 1));
+      sAction.SetFormat("Rotate Z (deviation): {0}", plArgF(s_vRotateDeviation.z, 1));
       break;
 
     case Mode::Scale:
       if (s_vScale == plVec3(1.0f))
         return;
 
-      sAction.Format("Scale: {0} | {1} | {2}", plArgF(s_vScale.x, 2), plArgF(s_vScale.y, 2), plArgF(s_vScale.z, 2));
+      sAction.SetFormat("Scale: {0} | {1} | {2}", plArgF(s_vScale.x, 2), plArgF(s_vScale.y, 2), plArgF(s_vScale.z, 2));
       break;
 
     case Mode::ScaleDeviation:
       if (s_vScaleDeviation == plVec3(1.0f))
         return;
 
-      sAction.Format(
+      sAction.SetFormat(
         "Scale (deviation): {0} | {1} | {2}", plArgF(s_vScaleDeviation.x, 2), plArgF(s_vScaleDeviation.y, 2), plArgF(s_vScaleDeviation.z, 2));
       break;
 
@@ -176,18 +176,18 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       if (s_fUniformScale == 1.0f)
         return;
 
-      sAction.Format("Scale: {0}", plArgF(s_fUniformScale, 2));
+      sAction.SetFormat("Scale: {0}", plArgF(s_fUniformScale, 2));
       break;
 
     case Mode::UniformScaleDeviation:
       if (s_fUniformScaleDeviation == 1.0f)
         return;
 
-      sAction.Format("Scale (deviation): {0}", plArgF(s_fUniformScaleDeviation, 2));
+      sAction.SetFormat("Scale (deviation): {0}", plArgF(s_fUniformScaleDeviation, 2));
       break;
 
     case Mode::NaturalDeviationZ:
-      sAction.Format("Natural Deviation Z: {0}", plArgF(s_fNaturalDeviationZ, 1));
+      sAction.SetFormat("Natural Deviation Z: {0}", plArgF(s_fNaturalDeviationZ, 1));
       break;
   }
 
@@ -305,7 +305,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateX:
       case Mode::RotateXRandom:
       case Mode::RotateXDeviation:
-        qRot.SetFromAxisAndAngle(plVec3(1, 0, 0), plAngle::Degree(vRotate.x));
+        qRot = plQuat::MakeFromAxisAndAngle(plVec3(1, 0, 0), plAngle::MakeFromDegree(vRotate.x));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -316,7 +316,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateY:
       case Mode::RotateYRandom:
       case Mode::RotateYDeviation:
-        qRot.SetFromAxisAndAngle(plVec3(0, 1, 0), plAngle::Degree(vRotate.y));
+        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 1, 0), plAngle::MakeFromDegree(vRotate.y));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -327,7 +327,7 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
       case Mode::RotateZ:
       case Mode::RotateZRandom:
       case Mode::RotateZDeviation:
-        qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), plAngle::Degree(vRotate.z));
+        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), plAngle::MakeFromDegree(vRotate.z));
         localTrans.m_qRotation = qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;
@@ -354,18 +354,18 @@ void plQtDeltaTransformDlg::on_ButtonApply_clicked()
 
       case Mode::NaturalDeviationZ:
       {
-        const plAngle randomRotationZ = plAngle::Degree(rng.DoubleInRange(0, 360));
+        const plAngle randomRotationZ = plAngle::MakeFromDegree(rng.DoubleInRange(0, 360));
 
         plQuat qDeviation;
         qDeviation.SetIdentity();
 
         if (s_fNaturalDeviationZ > 0.0f)
         {
-          const plVec3 vDeviationAxis = plVec3::CreateRandomDeviationZ(rng, plAngle::Degree(s_fNaturalDeviationZ));
-          qDeviation.SetShortestRotation(plVec3(0, 0, 1), vDeviationAxis);
+          const plVec3 vDeviationAxis = plVec3::MakeRandomDeviationZ(rng, plAngle::MakeFromDegree(s_fNaturalDeviationZ));
+          qDeviation = plQuat::MakeShortestRotation(plVec3(0, 0, 1), vDeviationAxis);
         }
 
-        qRot.SetFromAxisAndAngle(plVec3(0, 0, 1), randomRotationZ);
+        qRot = plQuat::MakeFromAxisAndAngle(plVec3(0, 0, 1), randomRotationZ);
         localTrans.m_qRotation = qDeviation * qRot * localTrans.m_qRotation;
         localTrans.m_vPosition = qDeviation * qRot * localTrans.m_vPosition;
         trans = tReference * localTrans;

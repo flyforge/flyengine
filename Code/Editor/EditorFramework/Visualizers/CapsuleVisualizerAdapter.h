@@ -22,7 +22,7 @@ protected:
   float m_fHeight = 0.0f;
   plBitflags<plVisualizerAnchor> m_Anchor;
 
-  PlasmaEngineGizmoHandle m_hSphereTop;
-  PlasmaEngineGizmoHandle m_hSphereBottom;
-  PlasmaEngineGizmoHandle m_hCylinder;
+  plEngineGizmoHandle m_hSphereTop;
+  plEngineGizmoHandle m_hSphereBottom;
+  plEngineGizmoHandle m_hCylinder;
 };

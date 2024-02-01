@@ -9,6 +9,7 @@
 #include <Foundation/Threading/TaskSystem.h>
 #include <Foundation/Threading/Thread.h>
 #include <Foundation/Types/UniquePtr.h>
+#include <ToolsFoundation/FileSystem/DataDirPath.h>
 #include <atomic>
 
 struct plAssetCuratorEvent;
@@ -52,35 +53,46 @@ public:
 class plProcessTask
 {
 public:
+  enum class State
+  {
+    LookingForWork,
+    WaitingForConnection,
+    Ready,
+    Processing,
+    ReportResult
+  };
+
+public:
   plProcessTask();
   ~plProcessTask();
 
-  plAtomicInteger32 m_bDidWork = true;
   plUInt32 m_uiProcessorID;
 
-  bool BeginExecute();
+  bool Tick(bool bStartNewWork); // returns false, if all processing is done, otherwise call Tick again.
 
-  bool FinishExecute();
+  bool IsConnected();
+
+  bool HasProcessCrashed();
+
+  plResult StartProcess();
 
   void ShutdownProcess();
 
 private:
-  void StartProcess();
   void EventHandlerIPC(const plProcessCommunicationChannel::Event& e);
 
-  bool GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath);
-  bool GetNextAssetToProcess(plUuid& out_guid, plStringBuilder& out_sAbsPath, plStringBuilder& out_sRelPath);
-  void OnProcessCrashed();
+  bool GetNextAssetToProcess(plAssetInfo* pInfo, plUuid& out_guid, plDataDirPath& out_path);
+  bool GetNextAssetToProcess(plUuid& out_guid, plDataDirPath& out_path);
+  void OnProcessCrashed(plStringView message);
 
 
+  State m_State = State::LookingForWork;
   plUuid m_AssetGuid;
   plUInt64 m_uiAssetHash = 0;
   plUInt64 m_uiThumbHash = 0;
-  plStringBuilder m_sAssetPath;
-  PlasmaEditorProcessCommunicationChannel* m_pIPC;
-  bool m_bProcessShouldBeRunning;
-  bool m_bProcessCrashed;
-  bool m_bWaiting;
+  plDataDirPath m_AssetPath;
+  plEditorProcessCommunicationChannel* m_pIPC;
+  bool m_bProcessShouldBeRunning = false;
   plTransformStatus m_Status;
   plDynamicArray<plLogEntry> m_LogEntries;
   plDynamicArray<plString> m_TransitiveHull;
@@ -88,9 +100,9 @@ private:
 
 /// \brief Background asset processing is handled by this class.
 /// Creates EditorProcessor processes.
-class PLASMA_EDITORFRAMEWORK_DLL plAssetProcessor
+class PL_EDITORFRAMEWORK_DLL plAssetProcessor
 {
-  PLASMA_DECLARE_SINGLETON(plAssetProcessor);
+  PL_DECLARE_SINGLETON(plAssetProcessor);
 
 public:
   enum class ProcessTaskState : plUInt8
@@ -128,7 +140,7 @@ private:
   plAssetProcessorLog m_CuratorLog;
 
   // Process thread and its state
-  plUniquePtr<plProcessThread> m_Thread;
+  plUniquePtr<plProcessThread> m_pThread;
   std::atomic<bool> m_bForceStop = false; ///< If set, background processes will be killed when stopping without waiting for their current task to finish.
 
   // Locks writes to m_ProcessTaskState to make sure the state machine does not go from running to stopped before having fired stopping.
@@ -136,6 +148,5 @@ private:
   std::atomic<ProcessTaskState> m_ProcessTaskState = ProcessTaskState::Stopped;
 
   // Data owned by the process thread.
-  plDynamicArray<bool> m_ProcessRunning;
   plDynamicArray<plProcessTask> m_ProcessTasks;
 };

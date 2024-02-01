@@ -5,19 +5,17 @@
 #include <SharedPluginScene/Common/Messages.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDocument, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerDocument, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plLayerDocument::plLayerDocument(const char* szDocumentPath, plScene2Document* pParentScene)
-  : plSceneDocument(szDocumentPath, plSceneDocument::DocumentType::Layer)
+plLayerDocument::plLayerDocument(plStringView sDocumentPath, plScene2Document* pParentScene)
+  : plSceneDocument(sDocumentPath, plSceneDocument::DocumentType::Layer)
 {
   m_pHostDocument = pParentScene;
 }
 
-plLayerDocument::~plLayerDocument()
-{
-}
+plLayerDocument::~plLayerDocument() = default;
 
 void plLayerDocument::InitializeAfterLoading(bool bFirstTimeCreation)
 {

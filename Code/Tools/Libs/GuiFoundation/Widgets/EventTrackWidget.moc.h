@@ -12,20 +12,20 @@
 class plQGridBarWidget;
 class QRubberBand;
 
-class PLASMA_GUIFOUNDATION_DLL plQtEventTrackWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtEventTrackWidget : public QWidget
 {
   Q_OBJECT
 
 public:
   struct SelectedPoint
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiCategory;
     plUInt32 m_uiSortedIdx;
   };
 
-  plQtEventTrackWidget(QWidget* parent);
+  plQtEventTrackWidget(QWidget* pParent);
 
   void SetData(const plEventTrackData* pData, double fMinCurveLength);
   void SetGridBarWidget(plQGridBarWidget* pGridBar) { m_pGridBar = pGridBar; }
@@ -38,15 +38,15 @@ public:
   QPointF MapToScene(const QPoint& pos) const;
 
   void ClearSelection();
-  void GetSelection(plHybridArray<plUInt32, 32>& out_Selection) const;
+  void GetSelection(plHybridArray<plUInt32, 32>& out_selection) const;
 
 Q_SIGNALS:
-  void DoubleClickEvent(double scenePosX, double epsilon);
+  void DoubleClickEvent(double fScenePosX, double fEpsilon);
   void DeleteControlPointsEvent();
-  void MoveControlPointsEvent(double moveX);
-  void BeginOperationEvent(QString name);
+  void MoveControlPointsEvent(double fMoveX);
+  void BeginOperationEvent(QString sName);
   void EndOperationEvent(bool bCommit);
-  void ScaleControlPointsEvent(const QPointF& centerPos, double scaleX);
+  void ScaleControlPointsEvent(const QPointF& centerPos, double fScaleX);
   void ContextMenuEvent(QPoint pos, QPointF scenePos);
   void SelectionChangedEvent();
 
@@ -84,7 +84,7 @@ private:
 
   struct Point
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plUInt32 m_uiOrgIndex;
     bool m_bSelected;

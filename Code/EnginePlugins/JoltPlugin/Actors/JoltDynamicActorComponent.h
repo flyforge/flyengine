@@ -4,7 +4,7 @@
 
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_JOLTPLUGIN_DLL plJoltDynamicActorComponentManager : public plComponentManager<class plJoltDynamicActorComponent, plBlockStorageType::FreeList>
+class PL_JOLTPLUGIN_DLL plJoltDynamicActorComponentManager : public plComponentManager<class plJoltDynamicActorComponent, plBlockStorageType::FreeList>
 {
 public:
   plJoltDynamicActorComponentManager(plWorld* pWorld);
@@ -31,9 +31,9 @@ private:
 /// Dynamic actors can also be moved through forces and impulses.
 ///
 /// Dynamic actors must be made up of convex collision meshes. They cannot use concave meshes.
-class PLASMA_JOLTPLUGIN_DLL plJoltDynamicActorComponent : public plJoltActorComponent
+class PL_JOLTPLUGIN_DLL plJoltDynamicActorComponent : public plJoltActorComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltDynamicActorComponent, plJoltActorComponent, plJoltDynamicActorComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltDynamicActorComponent, plJoltActorComponent, plJoltDynamicActorComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -115,7 +115,7 @@ public:
   plBitflags<plOnJoltContact> m_OnContact; // [ property ]
 
   /// \brief A local offset for the center of mass. \see SetUseCustomCoM()
-  plVec3 m_vCenterOfMass = plVec3::ZeroVector(); // [ property ]
+  plVec3 m_vCenterOfMass = plVec3::MakeZero(); // [ property ]
 
   /// \brief Whether a custom center-of-mass shall be used.
   void SetUseCustomCoM(bool b) { SetUserFlag(0, b); }     // [ property ]

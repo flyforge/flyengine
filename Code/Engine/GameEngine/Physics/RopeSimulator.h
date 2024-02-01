@@ -13,13 +13,13 @@
 /// rope distance constraints.
 ///
 /// Based on https://owlree.blog/posts/simulating-a-rope.html
-class PLASMA_GAMEENGINE_DLL plRopeSimulator
+class PL_GAMEENGINE_DLL plRopeSimulator
 {
 public:
   struct Node
   {
-    plSimdVec4f m_vPosition = plSimdVec4f::ZeroVector();
-    plSimdVec4f m_vPreviousPosition = plSimdVec4f::ZeroVector();
+    plSimdVec4f m_vPosition = plSimdVec4f::MakeZero();
+    plSimdVec4f m_vPreviousPosition = plSimdVec4f::MakeZero();
 
     // could add per node acceleration
     // could add per node mass
@@ -46,12 +46,12 @@ public:
   bool m_bFirstNodeIsFixed = true;
   bool m_bLastNodeIsFixed = true;
 
-  void SimulateRope(const plTime& tDiff);
-  void SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError);
+  void SimulateRope(const plTime& diff);
+  void SimulateStep(const plSimdFloat fDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError);
   void SimulateTillEquilibrium(plSimdFloat fAllowedMovement = 0.005f, plUInt32 uiMaxIterations = 1000);
   bool HasEquilibrium(plSimdFloat fAllowedMovement) const;
   float GetTotalLength() const;
-  plSimdVec4f GetPositionAtLength(float length) const;
+  plSimdVec4f GetPositionAtLength(float fLength) const;
 
 private:
   plSimdFloat EnforceDistanceConstraint();

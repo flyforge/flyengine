@@ -1,2 +1,0 @@
-#define INCLUDE(file) <Includes/file.txt>
-#include INCLUDE(Fine)

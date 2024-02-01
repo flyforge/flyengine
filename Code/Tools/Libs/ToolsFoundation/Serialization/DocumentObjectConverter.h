@@ -9,7 +9,7 @@ class plObjectAccessorBase;
 ///
 /// This information can then be applied to another plDocument object through plDocumentObjectConverterReader,
 /// or to entirely different class using plRttiConverterReader.
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentObjectConverterWriter
+class PL_TOOLSFOUNDATION_DLL plDocumentObjectConverterWriter
 {
 public:
   using FilterFunction = plDelegate<bool(const plDocumentObject*, const plAbstractProperty*)>;
@@ -20,13 +20,13 @@ public:
     m_Filter = filter;
   }
 
-  plAbstractObjectNode* AddObjectToGraph(const plDocumentObject* pObject, const char* szNodeName = nullptr);
+  plAbstractObjectNode* AddObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName = nullptr);
 
 private:
   void AddProperty(plAbstractObjectNode* pNode, const plAbstractProperty* pProp, const plDocumentObject* pObject);
   void AddProperties(plAbstractObjectNode* pNode, const plDocumentObject* pObject);
 
-  plAbstractObjectNode* AddSubObjectToGraph(const plDocumentObject* pObject, const char* szNodeName);
+  plAbstractObjectNode* AddSubObjectToGraph(const plDocumentObject* pObject, plStringView sNodeName);
 
   const plDocumentObjectManager* m_pManager;
   plAbstractObjectGraph* m_pGraph;
@@ -35,7 +35,7 @@ private:
 };
 
 
-class PLASMA_TOOLSFOUNDATION_DLL plDocumentObjectConverterReader
+class PL_TOOLSFOUNDATION_DLL plDocumentObjectConverterReader
 {
 public:
   enum class Mode
@@ -51,10 +51,10 @@ public:
   plUInt32 GetNumUnknownObjectCreations() const { return m_uiUnknownTypeInstances; }
   const plSet<plString>& GetUnknownObjectTypes() const { return m_UnknownTypes; }
 
-  static void ApplyDiffToObject(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, plDeque<plAbstractGraphDiffOperation>& diff);
+  static void ApplyDiffToObject(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, plDeque<plAbstractGraphDiffOperation>& ref_diff);
 
 private:
-  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, const char* szParentProperty, plVariant index);
+  void AddObject(plDocumentObject* pObject, plDocumentObject* pParent, plStringView sParentProperty, plVariant index);
   void ApplyProperty(plDocumentObject* pObject, const plAbstractProperty* pProp, const plAbstractObjectNode::Property* pSource);
   static void ApplyDiff(plObjectAccessorBase* pObjectAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp,
     plAbstractGraphDiffOperation& op, plDeque<plAbstractGraphDiffOperation>& diff);

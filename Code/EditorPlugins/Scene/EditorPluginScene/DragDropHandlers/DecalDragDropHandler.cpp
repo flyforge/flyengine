@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginScene/DragDropHandlers/DecalDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalComponentDragDropHandler, 1, plRTTIDefaultAllocator<plDecalComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalComponentDragDropHandler, 1, plRTTIDefaultAllocator<plDecalComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plDecalComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const
@@ -26,7 +26,7 @@ void plDecalComponentDragDropHandler::OnDragBegin(const plDragDropInfo* pInfo)
   {
     CreateDropObject(pInfo->m_vDropPosition, "plDecalComponent", "Decals", var, plUuid(), -1);
 
-    m_vAlignAxisWithNormal = -plVec3::UnitXAxis();
+    m_vAlignAxisWithNormal = -plVec3::MakeAxisX();
   }
   else
     CreateDropObject(pInfo->m_vDropPosition, "plDecalComponent", "Decals", var, pInfo->m_TargetObject, pInfo->m_iTargetObjectInsertChildIndex);

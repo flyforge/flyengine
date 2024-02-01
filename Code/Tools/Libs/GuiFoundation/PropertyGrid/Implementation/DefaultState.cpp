@@ -9,7 +9,7 @@
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, DefaultState)
+PL_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, DefaultState)
   ON_CORESYSTEMS_STARTUP
   {
     plDefaultState::RegisterDefaultStateProvider(plAttributeDefaultStateProvider::CreateProvider);
@@ -21,7 +21,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(GuiFoundation, DefaultState)
     plDefaultState::UnregisterDefaultStateProvider(plAttributeDefaultStateProvider::CreateProvider);
     plDefaultState::UnregisterDefaultStateProvider(plPrefabDefaultStateProvider::CreateProvider);
   }
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 
@@ -104,7 +104,7 @@ plStatus plDefaultObjectState::RevertProperty(const plAbstractProperty* pProp)
     if (res.Failed())
       return res;
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plDefaultObjectState::RevertObject()
@@ -125,7 +125,7 @@ plStatus plDefaultObjectState::RevertObject()
         return res;
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plVariant plDefaultObjectState::GetDefaultValue(const char* szProperty, plUInt32 uiSelectionIndex) const
@@ -136,7 +136,7 @@ plVariant plDefaultObjectState::GetDefaultValue(const char* szProperty, plUInt32
 
 plVariant plDefaultObjectState::GetDefaultValue(const plAbstractProperty* pProp, plUInt32 uiSelectionIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
+  PL_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
   plDefaultStateProvider::SuperArray super = m_Providers[uiSelectionIndex].GetArrayPtr().GetSubArray(1);
   return m_Providers[uiSelectionIndex][0]->GetDefaultValue(super, m_pAccessor, m_Selection[uiSelectionIndex].m_pObject, pProp);
 }
@@ -181,7 +181,7 @@ bool plDefaultContainerState::IsDefaultElement(plVariant index) const
   for (plUInt32 i = 0; i < uiObjects; i++)
   {
     plDefaultStateProvider::SuperArray super = m_Providers[i].GetArrayPtr().GetSubArray(1);
-    PLASMA_ASSERT_DEBUG(index.IsValid() || m_Selection[i].m_Index.IsValid(), "If plDefaultContainerState is constructed without giving an indices in the selection, one must be provided on the IsDefaultElement call.");
+    PL_ASSERT_DEBUG(index.IsValid() || m_Selection[i].m_Index.IsValid(), "If plDefaultContainerState is constructed without giving an indices in the selection, one must be provided on the IsDefaultElement call.");
     const bool bNewDefault = m_Providers[i][0]->IsDefaultValue(super, m_pAccessor, m_Selection[i].m_pObject, m_pProp, index.IsValid() ? index : m_Selection[i].m_Index);
     if (!bNewDefault)
       return false;
@@ -208,12 +208,12 @@ plStatus plDefaultContainerState::RevertElement(plVariant index)
   for (plUInt32 i = 0; i < uiObjects; i++)
   {
     plDefaultStateProvider::SuperArray super = m_Providers[i].GetArrayPtr().GetSubArray(1);
-    PLASMA_ASSERT_DEBUG(index.IsValid() || m_Selection[i].m_Index.IsValid(), "If plDefaultContainerState is constructed without giving an indices in the selection, one must be provided on the RevertElement call.");
+    PL_ASSERT_DEBUG(index.IsValid() || m_Selection[i].m_Index.IsValid(), "If plDefaultContainerState is constructed without giving an indices in the selection, one must be provided on the RevertElement call.");
     plStatus res = m_Providers[i][0]->RevertProperty(super, m_pAccessor, m_Selection[i].m_pObject, m_pProp, index.IsValid() ? index : m_Selection[i].m_Index);
     if (res.Failed())
       return res;
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plDefaultContainerState::RevertContainer()
@@ -226,19 +226,19 @@ plStatus plDefaultContainerState::RevertContainer()
     if (res.Failed())
       return res;
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plVariant plDefaultContainerState::GetDefaultElement(plVariant index, plUInt32 uiSelectionIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
+  PL_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
   plDefaultStateProvider::SuperArray super = m_Providers[uiSelectionIndex].GetArrayPtr().GetSubArray(1);
   return m_Providers[uiSelectionIndex][0]->GetDefaultValue(super, m_pAccessor, m_Selection[uiSelectionIndex].m_pObject, m_pProp, index);
 }
 
 plVariant plDefaultContainerState::GetDefaultContainer(plUInt32 uiSelectionIndex) const
 {
-  PLASMA_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
+  PL_ASSERT_DEBUG(uiSelectionIndex < m_Selection.GetCount(), "Selection index is out of bounds.");
   plDefaultStateProvider::SuperArray super = m_Providers[uiSelectionIndex].GetArrayPtr().GetSubArray(1);
   return m_Providers[uiSelectionIndex][0]->GetDefaultValue(super, m_pAccessor, m_Selection[uiSelectionIndex].m_pObject, m_pProp);
 }
@@ -267,7 +267,7 @@ plStatus plDefaultStateProvider::RevertProperty(SuperArray superPtr, plObjectAcc
   const bool bIsValueType = plReflectionUtils::IsValueType(pProp) || pProp->GetFlags().IsAnySet(plPropertyFlags::IsEnum | plPropertyFlags::Bitflags);
   if (!bIsValueType)
   {
-    PLASMA_ASSERT_DEBUG(!index.IsValid(), "Reverting non-value type container elements is not supported yet. IsDefaultValue should have returned true to prevent this call from being allowed.");
+    PL_ASSERT_DEBUG(!index.IsValid(), "Reverting non-value type container elements is not supported yet. IsDefaultValue should have returned true to prevent this call from being allowed.");
 
     return RevertObjectContainer(superPtr, pAccessor, pObject, pProp);
   }
@@ -286,9 +286,9 @@ plStatus plDefaultStateProvider::RevertProperty(SuperArray superPtr, plObjectAcc
       case plPropertyCategory::Array:
       case plPropertyCategory::Set:
       {
-        PLASMA_ASSERT_DEBUG(index.CanConvertTo<plInt32>(), "Array / Set indices must be integers.");
-        PLASMA_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, op.m_Value));
-        PLASMA_ASSERT_DEBUG(op.m_Value.IsA<plVariantArray>(), "");
+        PL_ASSERT_DEBUG(index.CanConvertTo<plInt32>(), "Array / Set indices must be integers.");
+        PL_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, op.m_Value));
+        PL_ASSERT_DEBUG(op.m_Value.IsA<plVariantArray>(), "");
 
         plVariantArray& currentValue2 = op.m_Value.GetWritable<plVariantArray>();
         currentValue2[index.ConvertTo<plUInt32>()] = def;
@@ -296,9 +296,9 @@ plStatus plDefaultStateProvider::RevertProperty(SuperArray superPtr, plObjectAcc
       break;
       case plPropertyCategory::Map:
       {
-        PLASMA_ASSERT_DEBUG(index.IsString(), "Map indices must be strings.");
-        PLASMA_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, op.m_Value));
-        PLASMA_ASSERT_DEBUG(op.m_Value.IsA<plVariantDictionary>(), "");
+        PL_ASSERT_DEBUG(index.IsString(), "Map indices must be strings.");
+        PL_SUCCEED_OR_RETURN(pAccessor->GetValue(pObject, pProp, op.m_Value));
+        PL_ASSERT_DEBUG(op.m_Value.IsA<plVariantDictionary>(), "");
 
         plVariantDictionary& currentValue2 = op.m_Value.GetWritable<plVariantDictionary>();
         currentValue2[index.ConvertTo<plString>()] = def;
@@ -315,7 +315,7 @@ plStatus plDefaultStateProvider::RevertProperty(SuperArray superPtr, plObjectAcc
   }
 
   plDocumentObjectConverterReader::ApplyDiffToObject(pAccessor, pObject, diff);
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plStatus plDefaultStateProvider::RevertObjectContainer(SuperArray superPtr, plObjectAccessorBase* pAccessor, const plDocumentObject* pObject, const plAbstractProperty* pProp)

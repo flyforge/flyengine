@@ -81,7 +81,7 @@ struct plCurveFunction
   static double GetValue(Enum function, double x, bool bInverse);
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_FOUNDATION_DLL, plCurveFunction);
+PL_DECLARE_REFLECTABLE_TYPE(PL_FOUNDATION_DLL, plCurveFunction);
 
 namespace plMath
 {

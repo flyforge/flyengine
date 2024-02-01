@@ -9,16 +9,17 @@ plActionDescriptorHandle plAssetActions::s_hTransformAllAssets;
 plActionDescriptorHandle plAssetActions::s_hResaveAllAssets;
 plActionDescriptorHandle plAssetActions::s_hCheckFileSystem;
 plActionDescriptorHandle plAssetActions::s_hWriteLookupTable;
-
+plActionDescriptorHandle plAssetActions::s_hWriteDependencyDGML;
 
 void plAssetActions::RegisterActions()
 {
-  s_hAssetCategory = PLASMA_REGISTER_CATEGORY("AssetCategory");
-  s_hTransformAsset = PLASMA_REGISTER_ACTION_1("Asset.Transform", plActionScope::Document, "Assets", "Ctrl+E", plAssetAction, plAssetAction::ButtonType::TransformAsset);
-  s_hTransformAllAssets = PLASMA_REGISTER_ACTION_1("Asset.TransformAll", plActionScope::Global, "Assets", "Ctrl+Shift+E", plAssetAction, plAssetAction::ButtonType::TransformAllAssets);
-  s_hResaveAllAssets = PLASMA_REGISTER_ACTION_1("Asset.ResaveAll", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::ResaveAllAssets);
-  s_hCheckFileSystem = PLASMA_REGISTER_ACTION_1("Asset.CheckFilesystem", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::CheckFileSystem);
-  s_hWriteLookupTable = PLASMA_REGISTER_ACTION_1("Asset.WriteLookupTable", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::WriteLookupTable);
+  s_hAssetCategory = PL_REGISTER_CATEGORY("AssetCategory");
+  s_hTransformAsset = PL_REGISTER_ACTION_1("Asset.Transform", plActionScope::Document, "Assets", "Ctrl+E", plAssetAction, plAssetAction::ButtonType::TransformAsset);
+  s_hTransformAllAssets = PL_REGISTER_ACTION_1("Asset.TransformAll", plActionScope::Global, "Assets", "Ctrl+Shift+E", plAssetAction, plAssetAction::ButtonType::TransformAllAssets);
+  s_hResaveAllAssets = PL_REGISTER_ACTION_1("Asset.ResaveAll", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::ResaveAllAssets);
+  s_hCheckFileSystem = PL_REGISTER_ACTION_1("Asset.CheckFilesystem", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::CheckFileSystem);
+  s_hWriteLookupTable = PL_REGISTER_ACTION_1("Asset.WriteLookupTable", plActionScope::Global, "Assets", "", plAssetAction, plAssetAction::ButtonType::WriteLookupTable);
+  s_hWriteDependencyDGML = PL_REGISTER_ACTION_1("Asset.WriteDependencyDGML", plActionScope::Document, "Assets", "", plAssetAction, plAssetAction::ButtonType::WriteDependencyDGML);
 }
 
 void plAssetActions::UnregisterActions()
@@ -29,23 +30,24 @@ void plAssetActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hResaveAllAssets);
   plActionManager::UnregisterAction(s_hCheckFileSystem);
   plActionManager::UnregisterAction(s_hWriteLookupTable);
+  plActionManager::UnregisterAction(s_hWriteDependencyDGML);
 }
 
-void plAssetActions::MapMenuActions(const char* szMapping, const char* szPath)
+void plAssetActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", szMapping);
+  const plStringView sTargetMenu = "G.AssetDoc";
 
-  pMap->MapAction(s_hAssetCategory, szPath, 1.5f);
-  plStringBuilder sSubPath(szPath, "/AssetCategory");
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the documents actions failed!", sMapping);
 
-  pMap->MapAction(s_hTransformAsset, sSubPath, 1.0f);
+  pMap->MapAction(s_hTransformAsset, sTargetMenu, 1.0f);
+  pMap->MapAction(s_hWriteDependencyDGML, sTargetMenu, 10.0f);
 }
 
-void plAssetActions::MapToolBarActions(const char* szMapping, bool bDocument)
+void plAssetActions::MapToolBarActions(plStringView sMapping, bool bDocument)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
   pMap->MapAction(s_hAssetCategory, "", 10.0f);
 
@@ -55,10 +57,9 @@ void plAssetActions::MapToolBarActions(const char* szMapping, bool bDocument)
   }
   else
   {
-    pMap->MapAction(s_hCheckFileSystem, "AssetCategory", 0.0f);
-    pMap->MapAction(s_hTransformAllAssets, "AssetCategory", 3.0f);
-    pMap->MapAction(s_hResaveAllAssets, "AssetCategory", 4.0f);
-    // pMap->MapAction(s_hWriteLookupTable, "AssetCategory", 5.0f);
+    pMap->MapAction(s_hCheckFileSystem, "AssetCategory", 1.0f);
+    pMap->MapAction(s_hTransformAllAssets, "AssetCategory", 2.0f);
+    pMap->MapAction(s_hResaveAllAssets, "AssetCategory", 3.0f);
   }
 }
 
@@ -66,8 +67,8 @@ void plAssetActions::MapToolBarActions(const char* szMapping, bool bDocument)
 // plAssetAction
 ////////////////////////////////////////////////////////////////////////
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plAssetAction::plAssetAction(const plActionContext& context, const char* szName, ButtonType button)
   : plButtonAction(context, szName, false, "")
@@ -91,10 +92,12 @@ plAssetAction::plAssetAction(const plActionContext& context, const char* szName,
     case plAssetAction::ButtonType::WriteLookupTable:
       SetIconPath(":/EditorFramework/Icons/WriteLookupTable.svg");
       break;
+    case plAssetAction::ButtonType::WriteDependencyDGML:
+      break;
   }
 }
 
-plAssetAction::~plAssetAction() {}
+plAssetAction::~plAssetAction() = default;
 
 void plAssetAction::Execute(const plVariant& value)
 {
@@ -128,7 +131,7 @@ void plAssetAction::Execute(const plVariant& value)
     case plAssetAction::ButtonType::TransformAllAssets:
     {
       plAssetCurator::GetSingleton()->CheckFileSystem();
-      plAssetCurator::GetSingleton()->TransformAllAssets(plTransformFlags::None).LogFailure();
+      plAssetCurator::GetSingleton()->TransformAllAssets(plTransformFlags::None).IgnoreResult();
     }
     break;
 
@@ -148,6 +151,17 @@ void plAssetAction::Execute(const plVariant& value)
     case plAssetAction::ButtonType::WriteLookupTable:
     {
       plAssetCurator::GetSingleton()->WriteAssetTables().IgnoreResult();
+    }
+    break;
+
+    case plAssetAction::ButtonType::WriteDependencyDGML:
+    {
+      plStringBuilder sOutput = QFileDialog::getSaveFileName(QApplication::activeWindow(), "Write to DGML", {}, "DGML (*.dgml)", nullptr, QFileDialog::Option::DontResolveSymlinks).toUtf8().data();
+
+      if (sOutput.IsEmpty())
+        return;
+
+      plAssetCurator::GetSingleton()->WriteDependencyDGML(m_Context.m_pDocument->GetGuid(), sOutput);
     }
     break;
   }

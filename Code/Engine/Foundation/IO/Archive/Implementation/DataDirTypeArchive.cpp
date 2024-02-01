@@ -8,7 +8,7 @@
 #include <Foundation/Logging/Log.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ArchiveDataDirectory)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ArchiveDataDirectory)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "FileSystem", "FolderDataDirectory"
@@ -19,7 +19,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ArchiveDataDirectory)
   plFileSystem::RegisterDataDirectoryFactory(plDataDirectory::ArchiveType::Factory);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plDataDirectory::ArchiveType::ArchiveType() = default;
@@ -27,12 +27,12 @@ plDataDirectory::ArchiveType::~ArchiveType() = default;
 
 plDataDirectoryType* plDataDirectory::ArchiveType::Factory(plStringView sDataDirectory, plStringView sGroup, plStringView sRootName, plFileSystem::DataDirUsage usage)
 {
-  ArchiveType* pDataDir = PLASMA_DEFAULT_NEW(ArchiveType);
+  ArchiveType* pDataDir = PL_DEFAULT_NEW(ArchiveType);
 
-  if (pDataDir->InitializeDataDirectory(sDataDirectory) == PLASMA_SUCCESS)
+  if (pDataDir->InitializeDataDirectory(sDataDirectory) == PL_SUCCESS)
     return pDataDir;
 
-  PLASMA_DEFAULT_DELETE(pDataDir);
+  PL_DEFAULT_DELETE(pDataDir);
   return nullptr;
 }
 
@@ -52,7 +52,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
   ArchiveReaderUncompressed* pReader = nullptr;
 
   {
-    PLASMA_LOCK(m_ReaderMutex);
+    PL_LOCK(m_ReaderMutex);
 
     switch (pEntry->m_CompressionMode)
     {
@@ -65,7 +65,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
         }
         else
         {
-          m_ReadersUncompressed.PushBack(PLASMA_DEFAULT_NEW(ArchiveReaderUncompressed, 0));
+          m_ReadersUncompressed.PushBack(PL_DEFAULT_NEW(ArchiveReaderUncompressed, 0));
           pReader = m_ReadersUncompressed.PeekBack().Borrow();
         }
         break;
@@ -81,7 +81,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
         }
         else
         {
-          m_ReadersZstd.PushBack(PLASMA_DEFAULT_NEW(ArchiveReaderZstd, 1));
+          m_ReadersZstd.PushBack(PL_DEFAULT_NEW(ArchiveReaderZstd, 1));
           pReader = m_ReadersZstd.PeekBack().Borrow();
         }
         break;
@@ -89,7 +89,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
 #endif
 
       default:
-        PLASMA_REPORT_FAILURE("Compression mode {} is unknown (or not compiled in)", (plUInt8)pEntry->m_CompressionMode);
+        PL_REPORT_FAILURE("Compression mode {} is unknown (or not compiled in)", (plUInt8)pEntry->m_CompressionMode);
         return nullptr;
     }
   }
@@ -101,7 +101,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
 
   if (pReader->Open(sArchivePath, this, FileShareMode).Failed())
   {
-    PLASMA_DEFAULT_DELETE(pReader);
+    PL_DEFAULT_DELETE(pReader);
     return nullptr;
   }
 
@@ -111,7 +111,7 @@ plDataDirectoryReader* plDataDirectory::ArchiveType::OpenFileToRead(plStringView
 void plDataDirectory::ArchiveType::RemoveDataDirectory()
 {
   ArchiveType* pThis = this;
-  PLASMA_DEFAULT_DELETE(pThis);
+  PL_DEFAULT_DELETE(pThis);
 }
 
 bool plDataDirectory::ArchiveType::ExistsFile(plStringView sFile, bool bOneSpecificDataDir)
@@ -129,7 +129,7 @@ plResult plDataDirectory::ArchiveType::GetFileStats(plStringView sFileOrFolder, 
   const plUInt32 uiEntryIndex = toc.FindEntry(sArchivePath);
 
   if (uiEntryIndex == plInvalidIndex)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plArchiveEntry* pEntry = &toc.m_Entries[uiEntryIndex];
 
@@ -142,13 +142,13 @@ plResult plDataDirectory::ArchiveType::GetFileStats(plStringView sFileOrFolder, 
   out_Stats.m_sParentPath.PathParentDirectory();
   out_Stats.m_sName = plPathUtils::GetFileNameAndExtension(sPath);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDataDirectory::ArchiveType::InternalInitializeDataDirectory(plStringView sDirectory)
 {
   plStringBuilder sRedirected;
-  PLASMA_SUCCEED_OR_RETURN(plFileSystem::ResolveSpecialDirectory(sDirectory, sRedirected));
+  PL_SUCCEED_OR_RETURN(plFileSystem::ResolveSpecialDirectory(sDirectory, sRedirected));
 
   sRedirected.MakeCleanPath();
   // remove trailing slashes
@@ -158,7 +158,7 @@ plResult plDataDirectory::ArchiveType::InternalInitializeDataDirectory(plStringV
   bool bSupported = false;
   plStringBuilder sArchivePath;
 
-  plHybridArray<plString, 4, plStaticAllocatorWrapper> extensions = plArchiveUtils::GetAcceptedArchiveFileExtensions();
+  plHybridArray<plString, 4, plStaticsAllocatorWrapper> extensions = plArchiveUtils::GetAcceptedArchiveFileExtensions();
 
 
   for (const auto& ext : extensions)
@@ -187,26 +187,27 @@ plResult plDataDirectory::ArchiveType::InternalInitializeDataDirectory(plStringV
   }
 endloop:
   if (!bSupported)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
+#if PL_ENABLED(PL_SUPPORTS_FILE_STATS)
   plFileStats stats;
   if (plOSFile::GetFileStats(sArchivePath, stats).Failed())
-    return PLASMA_FAILURE;
-
-  PLASMA_LOG_BLOCK("plArchiveDataDir", sDirectory);
-
+    return PL_FAILURE;
   m_LastModificationTime = stats.m_LastModificationTime;
+#endif
 
-  PLASMA_SUCCEED_OR_RETURN(m_ArchiveReader.OpenArchive(sArchivePath));
+  PL_LOG_BLOCK("plArchiveDataDir", sDirectory);
+
+  PL_SUCCEED_OR_RETURN(m_ArchiveReader.OpenArchive(sArchivePath));
 
   ReloadExternalConfigs();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plDataDirectory::ArchiveType::OnReaderWriterClose(plDataDirectoryReaderWriterBase* pClosed)
 {
-  PLASMA_LOCK(m_ReaderMutex);
+  PL_LOCK(m_ReaderMutex);
 
   if (pClosed->GetDataDirUserData() == 0)
   {
@@ -223,7 +224,7 @@ void plDataDirectory::ArchiveType::OnReaderWriterClose(plDataDirectoryReaderWrit
 #endif
 
 
-  PLASMA_ASSERT_NOT_IMPLEMENTED;
+  PL_ASSERT_NOT_IMPLEMENTED;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -247,10 +248,10 @@ plUInt64 plDataDirectory::ArchiveReaderUncompressed::GetFileSize() const
 
 plResult plDataDirectory::ArchiveReaderUncompressed::InternalOpen(plFileShareMode::Enum FileShareMode)
 {
-  PLASMA_ASSERT_DEBUG(FileShareMode != plFileShareMode::Exclusive, "Archives only support shared reading of files. Exclusive access cannot be guaranteed.");
+  PL_ASSERT_DEBUG(FileShareMode != plFileShareMode::Exclusive, "Archives only support shared reading of files. Exclusive access cannot be guaranteed.");
 
   // nothing to do
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plDataDirectory::ArchiveReaderUncompressed::InternalClose()
@@ -276,10 +277,10 @@ plUInt64 plDataDirectory::ArchiveReaderZstd::Read(void* pBuffer, plUInt64 uiByte
 
 plResult plDataDirectory::ArchiveReaderZstd::InternalOpen(plFileShareMode::Enum FileShareMode)
 {
-  PLASMA_ASSERT_DEBUG(FileShareMode != plFileShareMode::Exclusive, "Archives only support shared reading of files. Exclusive access cannot be guaranteed.");
+  PL_ASSERT_DEBUG(FileShareMode != plFileShareMode::Exclusive, "Archives only support shared reading of files. Exclusive access cannot be guaranteed.");
 
   m_CompressedStreamReader.SetInputStream(&m_MemStreamReader);
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 #endif
@@ -288,4 +289,4 @@ plResult plDataDirectory::ArchiveReaderZstd::InternalOpen(plFileShareMode::Enum 
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Archive_Implementation_DataDirTypeArchive);
+PL_STATICLINK_FILE(Foundation, Foundation_IO_Archive_Implementation_DataDirTypeArchive);

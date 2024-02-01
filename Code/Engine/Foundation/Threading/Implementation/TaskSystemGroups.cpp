@@ -11,7 +11,7 @@
 
 plTaskGroupID plTaskSystem::CreateTaskGroup(plTaskPriority::Enum priority, plOnTaskGroupFinishedCallback callback)
 {
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 
   plUInt32 i = 0;
 
@@ -40,9 +40,9 @@ foundtaskgroup:
 
 void plTaskSystem::AddTaskToGroup(plTaskGroupID groupID, const plSharedPtr<plTask>& pTask)
 {
-  PLASMA_ASSERT_DEBUG(pTask != nullptr, "Cannot add nullptr tasks.");
-  PLASMA_ASSERT_DEV(pTask->IsTaskFinished(), "The given task is not finished! Cannot reuse a task before it is done.");
-  PLASMA_ASSERT_DEBUG(!pTask->m_sTaskName.IsEmpty(), "Every task should have a name");
+  PL_ASSERT_DEBUG(pTask != nullptr, "Cannot add nullptr tasks.");
+  PL_ASSERT_DEV(pTask->IsTaskFinished(), "The given task is not finished! Cannot reuse a task before it is done.");
+  PL_ASSERT_DEBUG(!pTask->m_sTaskName.IsEmpty(), "Every task should have a name");
 
   plTaskGroup::DebugCheckTaskGroup(groupID, s_TaskSystemMutex);
 
@@ -53,8 +53,8 @@ void plTaskSystem::AddTaskToGroup(plTaskGroupID groupID, const plSharedPtr<plTas
 
 void plTaskSystem::AddTaskGroupDependency(plTaskGroupID groupID, plTaskGroupID dependsOn)
 {
-  PLASMA_ASSERT_DEBUG(dependsOn.IsValid(), "Invalid dependency");
-  PLASMA_ASSERT_DEBUG(groupID.m_pTaskGroup != dependsOn.m_pTaskGroup || groupID.m_uiGroupCounter != dependsOn.m_uiGroupCounter, "Group cannot depend on itselfs");
+  PL_ASSERT_DEBUG(dependsOn.IsValid(), "Invalid dependency");
+  PL_ASSERT_DEBUG(groupID.m_pTaskGroup != dependsOn.m_pTaskGroup || groupID.m_uiGroupCounter != dependsOn.m_uiGroupCounter, "Group cannot depend on itselfs");
 
   plTaskGroup::DebugCheckTaskGroup(groupID, s_TaskSystemMutex);
 
@@ -63,9 +63,9 @@ void plTaskSystem::AddTaskGroupDependency(plTaskGroupID groupID, plTaskGroupID d
 
 void plTaskSystem::AddTaskGroupDependencyBatch(plArrayPtr<const plTaskGroupDependency> batch)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   // lock here once to reduce the overhead of plTaskGroup::DebugCheckTaskGroup inside AddTaskGroupDependency
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 #endif
 
   for (const plTaskGroupDependency& dep : batch)
@@ -76,14 +76,14 @@ void plTaskSystem::AddTaskGroupDependencyBatch(plArrayPtr<const plTaskGroupDepen
 
 void plTaskSystem::StartTaskGroup(plTaskGroupID groupID)
 {
-  PLASMA_ASSERT_DEV(s_pThreadState->m_Workers[plWorkerThreadType::ShortTasks].GetCount() > 0, "No worker threads started.");
+  PL_ASSERT_DEV(s_pThreadState->m_Workers[plWorkerThreadType::ShortTasks].GetCount() > 0, "No worker threads started.");
 
   plTaskGroup::DebugCheckTaskGroup(groupID, s_TaskSystemMutex);
 
   plInt32 iActiveDependencies = 0;
 
   {
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
 
     plTaskGroup& tg = *groupID.m_pTaskGroup;
 
@@ -118,7 +118,7 @@ void plTaskSystem::StartTaskGroup(plTaskGroupID groupID)
 
 void plTaskSystem::StartTaskGroupBatch(plArrayPtr<const plTaskGroupID> batch)
 {
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 
   for (const plTaskGroupID& group : batch)
   {
@@ -147,7 +147,7 @@ void plTaskSystem::ScheduleGroupTasks(plTaskGroup* pGroup, bool bHighPriority)
 
   // add all the tasks to the task list, so that they will be processed
   {
-    PLASMA_LOCK(s_TaskSystemMutex);
+    PL_LOCK(s_TaskSystemMutex);
 
 
     // store how many tasks from this groups still need to be processed
@@ -238,28 +238,28 @@ void plTaskSystem::DependencyHasFinished(plTaskGroup* pGroup)
 plResult plTaskSystem::CancelGroup(plTaskGroupID group, plOnTaskRunning::Enum onTaskRunning)
 {
   if (plTaskSystem::IsTaskGroupFinished(group))
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
-  PLASMA_PROFILE_SCOPE("CancelGroup");
+  PL_PROFILE_SCOPE("CancelGroup");
 
-  PLASMA_LOCK(s_TaskSystemMutex);
+  PL_LOCK(s_TaskSystemMutex);
 
-  plResult res = PLASMA_SUCCESS;
+  plResult res = PL_SUCCESS;
 
   auto TasksCopy = group.m_pTaskGroup->m_Tasks;
 
   // first cancel ALL the tasks in the group, without waiting for anything
   for (plUInt32 task = 0; task < TasksCopy.GetCount(); ++task)
   {
-    if (CancelTask(TasksCopy[task], plOnTaskRunning::ReturnWithoutBlocking) == PLASMA_FAILURE)
+    if (CancelTask(TasksCopy[task], plOnTaskRunning::ReturnWithoutBlocking) == PL_FAILURE)
     {
-      res = PLASMA_FAILURE;
+      res = PL_FAILURE;
     }
   }
 
   // if all tasks could be removed without problems, we do not need to try it again with blocking
 
-  if (onTaskRunning == plOnTaskRunning::WaitTillFinished && res == PLASMA_FAILURE)
+  if (onTaskRunning == plOnTaskRunning::WaitTillFinished && res == PL_FAILURE)
   {
     // now cancel the tasks in the group again, this time wait for those that are already running
     for (plUInt32 task = 0; task < TasksCopy.GetCount(); ++task)
@@ -273,9 +273,9 @@ plResult plTaskSystem::CancelGroup(plTaskGroupID group, plOnTaskRunning::Enum on
 
 void plTaskSystem::WaitForGroup(plTaskGroupID group)
 {
-  PLASMA_PROFILE_SCOPE("WaitForGroup");
+  PL_PROFILE_SCOPE("WaitForGroup");
 
-  PLASMA_ASSERT_DEV(tl_TaskWorkerInfo.m_bAllowNestedTasks, "The executing task '{}' is flagged to never wait for other tasks but does so anyway. Remove the flag or remove the wait-dependency.", tl_TaskWorkerInfo.m_szTaskName);
+  PL_ASSERT_DEV(tl_TaskWorkerInfo.m_bAllowNestedTasks, "The executing task '{}' is flagged to never wait for other tasks but does so anyway. Remove the flag or remove the wait-dependency.", tl_TaskWorkerInfo.m_szTaskName);
 
   const auto ThreadTaskType = tl_TaskWorkerInfo.m_WorkerType;
   const bool bAllowSleep = ThreadTaskType != plWorkerThreadType::MainThread;
@@ -290,7 +290,7 @@ void plTaskSystem::WaitForGroup(plTaskGroupID group)
 
         if (tl_TaskWorkerInfo.m_pWorkerState)
         {
-          PLASMA_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Blocked) == (int)plTaskWorkerState::Active, "Corrupt worker state");
+          PL_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Blocked) == (int)plTaskWorkerState::Active, "Corrupt worker state");
         }
 
         WakeUpThreads(typeToWakeUp, 1);
@@ -299,7 +299,7 @@ void plTaskSystem::WaitForGroup(plTaskGroupID group)
 
         if (tl_TaskWorkerInfo.m_pWorkerState)
         {
-          PLASMA_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Active) == (int)plTaskWorkerState::Blocked, "Corrupt worker state");
+          PL_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Active) == (int)plTaskWorkerState::Blocked, "Corrupt worker state");
         }
 
         break;
@@ -314,9 +314,9 @@ void plTaskSystem::WaitForGroup(plTaskGroupID group)
 
 void plTaskSystem::WaitForCondition(plDelegate<bool()> condition)
 {
-  PLASMA_PROFILE_SCOPE("WaitForCondition");
+  PL_PROFILE_SCOPE("WaitForCondition");
 
-  PLASMA_ASSERT_DEV(tl_TaskWorkerInfo.m_bAllowNestedTasks, "The executing task '{}' is flagged to never wait for other tasks but does so anyway. Remove the flag or remove the wait-dependency.", tl_TaskWorkerInfo.m_szTaskName);
+  PL_ASSERT_DEV(tl_TaskWorkerInfo.m_bAllowNestedTasks, "The executing task '{}' is flagged to never wait for other tasks but does so anyway. Remove the flag or remove the wait-dependency.", tl_TaskWorkerInfo.m_szTaskName);
 
   const auto ThreadTaskType = tl_TaskWorkerInfo.m_WorkerType;
   const bool bAllowSleep = ThreadTaskType != plWorkerThreadType::MainThread;
@@ -331,7 +331,7 @@ void plTaskSystem::WaitForCondition(plDelegate<bool()> condition)
 
         if (tl_TaskWorkerInfo.m_pWorkerState)
         {
-          PLASMA_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Blocked) == (int)plTaskWorkerState::Active, "Corrupt worker state");
+          PL_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Blocked) == (int)plTaskWorkerState::Active, "Corrupt worker state");
         }
 
         WakeUpThreads(typeToWakeUp, 1);
@@ -344,7 +344,7 @@ void plTaskSystem::WaitForCondition(plDelegate<bool()> condition)
 
         if (tl_TaskWorkerInfo.m_pWorkerState)
         {
-          PLASMA_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Active) == (int)plTaskWorkerState::Blocked, "Corrupt worker state");
+          PL_VERIFY(tl_TaskWorkerInfo.m_pWorkerState->Set((int)plTaskWorkerState::Active) == (int)plTaskWorkerState::Blocked, "Corrupt worker state");
         }
 
         break;
@@ -357,4 +357,4 @@ void plTaskSystem::WaitForCondition(plDelegate<bool()> condition)
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Threading_Implementation_TaskSystemGroups);
+

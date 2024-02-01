@@ -17,7 +17,7 @@ namespace plCompressionUtils
     if (uiSizeBound > plMath::MaxValue<plUInt32>())
     {
       plLog::Error("Can't compress since the output container can't hold enough elements ({0})", static_cast<plUInt64>(uiSizeBound));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     out_data.SetCountUninitialized(static_cast<plUInt32>(uiSizeBound));
@@ -26,12 +26,12 @@ namespace plCompressionUtils
     if (ZSTD_isError(cSize))
     {
       plLog::Error("Compression failed with error: '{0}'.", ZSTD_getErrorName(cSize));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     out_data.SetCount(static_cast<plUInt32>(cSize));
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   static plResult DecompressZStd(plArrayPtr<const plUInt8> compressedData, plDynamicArray<plUInt8>& out_data)
@@ -41,18 +41,18 @@ namespace plCompressionUtils
     if (uiSize == ZSTD_CONTENTSIZE_ERROR)
     {
       plLog::Error("Can't decompress since it wasn't compressed with ZStd");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
     else if (uiSize == ZSTD_CONTENTSIZE_UNKNOWN)
     {
       plLog::Error("Can't decompress since the original size can't be determined, was the data compressed using the streaming variant?");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (uiSize > plMath::MaxValue<plUInt32>())
     {
       plLog::Error("Can't compress since the output container can't hold enough elements ({0})", uiSize);
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     out_data.SetCountUninitialized(static_cast<plUInt32>(uiSize));
@@ -62,10 +62,10 @@ namespace plCompressionUtils
     if (uiActualSize != uiSize)
     {
       plLog::Error("Error during ZStd decompression: '{0}'.", ZSTD_getErrorName(uiActualSize));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 #endif
 
@@ -75,7 +75,7 @@ namespace plCompressionUtils
 
     if (uncompressedData.IsEmpty())
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     switch (method)
@@ -85,11 +85,11 @@ namespace plCompressionUtils
         return CompressZStd(uncompressedData, out_data);
 #else
         plLog::Error("ZStd compression disabled in build settings!");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 #endif
       default:
         plLog::Error("Unsupported compression method {0}!", static_cast<plUInt32>(method));
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
   }
 
@@ -99,7 +99,7 @@ namespace plCompressionUtils
 
     if (compressedData.IsEmpty())
     {
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     switch (method)
@@ -109,14 +109,13 @@ namespace plCompressionUtils
         return DecompressZStd(compressedData, out_data);
 #else
         plLog::Error("ZStd compression disabled in build settings!");
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 #endif
       default:
         plLog::Error("Unsupported compression method {0}!", static_cast<plUInt32>(method));
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
     }
   }
 } // namespace plCompressionUtils
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Utilities_Implementation_Compression);

@@ -10,32 +10,32 @@
 #include <TypeScriptPlugin/Components/TypeScriptComponent.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgTypeScriptMsgProxy);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTypeScriptMsgProxy, 1, plRTTIDefaultAllocator<plMsgTypeScriptMsgProxy>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgTypeScriptMsgProxy);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgTypeScriptMsgProxy, 1, plRTTIDefaultAllocator<plMsgTypeScriptMsgProxy>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plTypeScriptComponent, 4, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plTypeScriptComponent, 4, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Script", GetTypeScriptComponentFile, SetTypeScriptComponentFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Code_TypeScript")),
-    PLASMA_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Script")),
+    PL_ACCESSOR_PROPERTY("Script", GetTypeScriptComponentFile, SetTypeScriptComponentFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Code_TypeScript", plDependencyFlags::Package)),
+    PL_MAP_ACCESSOR_PROPERTY("Parameters", GetParameters, GetParameter, SetParameter, RemoveParameter)->AddAttributes(new plExposedParametersAttribute("Script")),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Scripting"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgTypeScriptMsgProxy, OnMsgTypeScriptMsgProxy)
+    PL_MESSAGE_HANDLER(plMsgTypeScriptMsgProxy, OnMsgTypeScriptMsgProxy)
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plTypeScriptComponent::plTypeScriptComponent() = default;
@@ -125,22 +125,22 @@ bool plTypeScriptComponent::HandleUnhandledMessage(plMessage& msg, bool bWasPost
   return binding.DeliverMessage(m_ComponentTypeInfo, this, msg, bWasPostedMsg == false);
 }
 
-void plTypeScriptComponent::BroadcastEventMsg(plEventMessage& msg)
+void plTypeScriptComponent::BroadcastEventMsg(plEventMessage& ref_msg)
 {
-  const plRTTI* pType = msg.GetDynamicRTTI();
+  const plRTTI* pType = ref_msg.GetDynamicRTTI();
 
   for (auto& sender : m_EventSenders)
   {
     if (sender.m_pMsgType == pType)
     {
-      sender.m_Sender.SendEventMessage(msg, this, GetOwner()->GetParent());
+      sender.m_Sender.SendEventMessage(ref_msg, this, GetOwner()->GetParent());
       return;
     }
   }
 
   auto& sender = m_EventSenders.ExpandAndGetRef();
   sender.m_pMsgType = pType;
-  sender.m_Sender.SendEventMessage(msg, this, GetOwner()->GetParent());
+  sender.m_Sender.SendEventMessage(ref_msg, this, GetOwner()->GetParent());
 }
 
 bool plTypeScriptComponent::CallTsFunc(const char* szFuncName)
@@ -159,14 +159,14 @@ bool plTypeScriptComponent::CallTsFunc(const char* szFuncName)
     duk.CallPreparedMethod().IgnoreResult(); // [ comp result ]
     duk.PopStack(2);                         // [ ]
 
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, true, 0);
   }
   else
   {
     // remove 'this'   [ comp ]
     duk.PopStack(); // [ ]
 
-    PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
+    PL_DUK_RETURN_AND_VERIFY_STACK(duk, false, 0);
   }
 }
 
@@ -187,7 +187,7 @@ void plTypeScriptComponent::SetExposedVariables()
 
   duk.PopStack(); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plTypeScriptComponent::Initialize()
@@ -209,7 +209,7 @@ void plTypeScriptComponent::Deinitialize()
 {
   // mirror what plComponent::Deinitialize does, but make sure to CallTsFunc at the right time
 
-  PLASMA_ASSERT_DEV(GetOwner() != nullptr, "Owner must still be valid");
+  PL_ASSERT_DEV(GetOwner() != nullptr, "Owner must still be valid");
 
   if (IsActive())
   {
@@ -294,7 +294,7 @@ void plTypeScriptComponent::Update(plTypeScriptBinding& binding)
   if (m_LastUpdate + m_UpdateInterval > tNow)
     return;
 
-  PLASMA_PROFILE_SCOPE(GetOwner()->GetName());
+  PL_PROFILE_SCOPE(GetOwner()->GetName());
 
   m_LastUpdate = tNow;
 
@@ -315,7 +315,7 @@ void plTypeScriptComponent::Update(plTypeScriptBinding& binding)
     SetUserFlag(UserFlag::NoTsTick, true);
   }
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plTypeScriptComponent::SetTypeScriptComponentFile(const char* szFile)
@@ -341,9 +341,9 @@ const char* plTypeScriptComponent::GetTypeScriptComponentFile() const
   return "";
 }
 
-void plTypeScriptComponent::SetTypeScriptComponentGuid(const plUuid& hResource)
+void plTypeScriptComponent::SetTypeScriptComponentGuid(const plUuid& resource)
 {
-  m_TypeScriptComponentGuid = hResource;
+  m_TypeScriptComponentGuid = resource;
 }
 
 const plUuid& plTypeScriptComponent::GetTypeScriptComponentGuid() const
@@ -363,13 +363,10 @@ void plTypeScriptComponent::OnMsgTypeScriptMsgProxy(plMsgTypeScriptMsgProxy& msg
 
 const plRangeView<const char*, plUInt32> plTypeScriptComponent::GetParameters() const
 {
-  return plRangeView<const char*, plUInt32>([]() -> plUInt32
-    { return 0; },
-    [this]() -> plUInt32
-    { return m_Parameters.GetCount(); },
-    [](plUInt32& it)
-    { ++it; },
-    [this](const plUInt32& it) -> const char* { return m_Parameters.GetKey(it).GetString().GetData(); });
+  return plRangeView<const char*, plUInt32>([]() -> plUInt32 { return 0; },
+    [this]() -> plUInt32 { return m_Parameters.GetCount(); },
+    [](plUInt32& ref_uiIt) { ++ref_uiIt; },
+    [this](const plUInt32& uiIt) -> const char* { return m_Parameters.GetKey(uiIt).GetString().GetData(); });
 }
 
 void plTypeScriptComponent::SetParameter(const char* szKey, const plVariant& value)

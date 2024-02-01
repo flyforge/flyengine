@@ -6,35 +6,35 @@
 #include <GameEngine/StateMachine/StateMachineComponent.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_MESSAGE_TYPE(plMsgStateMachineStateChanged);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgStateMachineStateChanged, 1, plRTTIDefaultAllocator<plMsgStateMachineStateChanged>)
+PL_IMPLEMENT_MESSAGE_TYPE(plMsgStateMachineStateChanged);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsgStateMachineStateChanged, 1, plRTTIDefaultAllocator<plMsgStateMachineStateChanged>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("OldStateName", GetOldStateName, SetOldStateName),
-    PLASMA_ACCESSOR_PROPERTY("NewStateName", GetNewStateName, SetNewStateName),
+    PL_ACCESSOR_PROPERTY("OldStateName", GetOldStateName, SetOldStateName),
+    PL_ACCESSOR_PROPERTY("NewStateName", GetNewStateName, SetNewStateName),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_SendMsg, 1, plRTTIDefaultAllocator<plStateMachineState_SendMsg>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_SendMsg, 1, plRTTIDefaultAllocator<plStateMachineState_SendMsg>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("MessageDelay", m_MessageDelay),
-    PLASMA_MEMBER_PROPERTY("SendMessageOnEnter", m_bSendMessageOnEnter)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("SendMessageOnExit", m_bSendMessageOnExit),
-    PLASMA_MEMBER_PROPERTY("LogOnEnter", m_bLogOnEnter),
-    PLASMA_MEMBER_PROPERTY("LogOnExit", m_bLogOnExit),
+    PL_MEMBER_PROPERTY("MessageDelay", m_MessageDelay),
+    PL_MEMBER_PROPERTY("SendMessageOnEnter", m_bSendMessageOnEnter)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("SendMessageOnExit", m_bSendMessageOnExit),
+    PL_MEMBER_PROPERTY("LogOnEnter", m_bLogOnEnter),
+    PL_MEMBER_PROPERTY("LogOnExit", m_bLogOnExit),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState_SendMsg::plStateMachineState_SendMsg(plStringView sName)
@@ -44,13 +44,13 @@ plStateMachineState_SendMsg::plStateMachineState_SendMsg(plStringView sName)
 
 plStateMachineState_SendMsg::~plStateMachineState_SendMsg() = default;
 
-void plStateMachineState_SendMsg::OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const
+void plStateMachineState_SendMsg::OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const
 {
   plHashedString sFromState = (pFromState != nullptr) ? pFromState->GetNameHashed() : plHashedString();
 
   if (m_bSendMessageOnEnter)
   {
-    if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&instance.GetOwner()))
+    if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&ref_instance.GetOwner()))
     {
       plMsgStateMachineStateChanged msg;
       msg.m_sOldStateName = sFromState;
@@ -66,13 +66,13 @@ void plStateMachineState_SendMsg::OnEnter(plStateMachineInstance& instance, void
   }
 }
 
-void plStateMachineState_SendMsg::OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const
+void plStateMachineState_SendMsg::OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const
 {
   plHashedString sToState = (pToState != nullptr) ? pToState->GetNameHashed() : plHashedString();
 
   if (m_bSendMessageOnExit)
   {
-    if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&instance.GetOwner()))
+    if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&ref_instance.GetOwner()))
     {
       plMsgStateMachineStateChanged msg;
       msg.m_sOldStateName = GetNameHashed();
@@ -88,44 +88,44 @@ void plStateMachineState_SendMsg::OnExit(plStateMachineInstance& instance, void*
   }
 }
 
-plResult plStateMachineState_SendMsg::Serialize(plStreamWriter& stream) const
+plResult plStateMachineState_SendMsg::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
-  stream << m_MessageDelay;
-  stream << m_bSendMessageOnEnter;
-  stream << m_bSendMessageOnExit;
-  stream << m_bLogOnEnter;
-  stream << m_bLogOnExit;
-  return PLASMA_SUCCESS;
+  inout_stream << m_MessageDelay;
+  inout_stream << m_bSendMessageOnEnter;
+  inout_stream << m_bSendMessageOnExit;
+  inout_stream << m_bLogOnEnter;
+  inout_stream << m_bLogOnExit;
+  return PL_SUCCESS;
 }
 
-plResult plStateMachineState_SendMsg::Deserialize(plStreamReader& stream)
+plResult plStateMachineState_SendMsg::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
 
-  stream >> m_MessageDelay;
-  stream >> m_bSendMessageOnEnter;
-  stream >> m_bSendMessageOnExit;
-  stream >> m_bLogOnEnter;
-  stream >> m_bLogOnExit;
-  return PLASMA_SUCCESS;
+  inout_stream >> m_MessageDelay;
+  inout_stream >> m_bSendMessageOnEnter;
+  inout_stream >> m_bSendMessageOnExit;
+  inout_stream >> m_bLogOnEnter;
+  inout_stream >> m_bLogOnExit;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_SwitchObject, 1, plRTTIDefaultAllocator<plStateMachineState_SwitchObject>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_SwitchObject, 1, plRTTIDefaultAllocator<plStateMachineState_SwitchObject>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("PathToGroup", m_sGroupPath),
-    PLASMA_MEMBER_PROPERTY("ObjectToEnable", m_sObjectToEnable),
-    PLASMA_MEMBER_PROPERTY("DeactivateOthers", m_bDeactivateOthers)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("PathToGroup", m_sGroupPath),
+    PL_MEMBER_PROPERTY("ObjectToEnable", m_sObjectToEnable),
+    PL_MEMBER_PROPERTY("DeactivateOthers", m_bDeactivateOthers)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState_SwitchObject::plStateMachineState_SwitchObject(plStringView sName)
@@ -135,9 +135,9 @@ plStateMachineState_SwitchObject::plStateMachineState_SwitchObject(plStringView 
 
 plStateMachineState_SwitchObject::~plStateMachineState_SwitchObject() = default;
 
-void plStateMachineState_SwitchObject::OnEnter(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pFromState) const
+void plStateMachineState_SwitchObject::OnEnter(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pFromState) const
 {
-  if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&instance.GetOwner()))
+  if (auto pOwner = plDynamicCast<plStateMachineComponent*>(&ref_instance.GetOwner()))
   {
     if (plGameObject* pOwnerGO = pOwner->GetOwner()->FindChildByPath(m_sGroupPath))
     {
@@ -156,24 +156,24 @@ void plStateMachineState_SwitchObject::OnEnter(plStateMachineInstance& instance,
   }
 }
 
-plResult plStateMachineState_SwitchObject::Serialize(plStreamWriter& stream) const
+plResult plStateMachineState_SwitchObject::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Serialize(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
 
-  stream << m_sGroupPath;
-  stream << m_sObjectToEnable;
-  stream << m_bDeactivateOthers;
-  return PLASMA_SUCCESS;
+  inout_stream << m_sGroupPath;
+  inout_stream << m_sObjectToEnable;
+  inout_stream << m_bDeactivateOthers;
+  return PL_SUCCESS;
 }
 
-plResult plStateMachineState_SwitchObject::Deserialize(plStreamReader& stream)
+plResult plStateMachineState_SwitchObject::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(SUPER::Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
 
-  stream >> m_sGroupPath;
-  stream >> m_sObjectToEnable;
-  stream >> m_bDeactivateOthers;
-  return PLASMA_SUCCESS;
+  inout_stream >> m_sGroupPath;
+  inout_stream >> m_sObjectToEnable;
+  inout_stream >> m_bDeactivateOthers;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -191,7 +191,7 @@ plStateMachineComponentManager::~plStateMachineComponentManager()
 
 void plStateMachineComponentManager::Initialize()
 {
-  auto desc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plStateMachineComponentManager::Update, this);
+  auto desc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plStateMachineComponentManager::Update, this);
 
   RegisterUpdateFunction(desc);
 }
@@ -244,36 +244,38 @@ void plStateMachineComponentManager::ResourceEventHandler(const plResourceEvent&
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plStateMachineComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plStateMachineComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_StateMachine")),
-    PLASMA_ACCESSOR_PROPERTY("InitialState", GetInitialState, SetInitialState),
-    PLASMA_ACCESSOR_PROPERTY("BlackboardName", GetBlackboardName, SetBlackboardName),
+    PL_ACCESSOR_PROPERTY("Resource", GetResourceFile, SetResourceFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_StateMachine", plDependencyFlags::Package)),
+    PL_ACCESSOR_PROPERTY("InitialState", GetInitialState, SetInitialState),
+    PL_ACCESSOR_PROPERTY("BlackboardName", GetBlackboardName, SetBlackboardName)->AddAttributes(new plDynamicStringEnumAttribute("BlackboardNamesEnum")),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_MESSAGESENDERS
+  PL_BEGIN_MESSAGESENDERS
   {
-    PLASMA_MESSAGE_SENDER(m_StateChangedSender)
+    PL_MESSAGE_SENDER(m_StateChangedSender)
   }
-  PLASMA_END_MESSAGESENDERS;
+  PL_END_MESSAGESENDERS;
 
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(SetState, In, "Name"),
+    PL_SCRIPT_FUNCTION_PROPERTY(SetState, In, "Name"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetCurrentState),
+    PL_SCRIPT_FUNCTION_PROPERTY(FireTransitionEvent, In, "Name"),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Gameplay/Logic"),
+    new plCategoryAttribute("Logic"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
 
-PLASMA_END_DYNAMIC_REFLECTED_TYPE
+PL_END_DYNAMIC_REFLECTED_TYPE
 // clang-format on
 
 plStateMachineComponent::plStateMachineComponent() = default;
@@ -281,22 +283,22 @@ plStateMachineComponent::plStateMachineComponent(plStateMachineComponent&& other
 plStateMachineComponent::~plStateMachineComponent() = default;
 plStateMachineComponent& plStateMachineComponent::operator=(plStateMachineComponent&& other) = default;
 
-void plStateMachineComponent::SerializeComponent(plWorldWriter& stream) const
+void plStateMachineComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
+  SUPER::SerializeComponent(inout_stream);
 
-  plStreamWriter& s = stream.GetStream();
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_hResource;
   s << m_sInitialState;
   s << m_sBlackboardName;
 }
 
-void plStateMachineComponent::DeserializeComponent(plWorldReader& stream)
+void plStateMachineComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_hResource;
   s >> m_sInitialState;
@@ -363,7 +365,7 @@ void plStateMachineComponent::SetInitialState(const char* szName)
   if (m_sInitialState == sInitialState)
     return;
 
-  m_sInitialState = sInitialState;
+  m_sInitialState = std::move(sInitialState);
 
   if (IsActiveAndInitialized())
   {
@@ -379,7 +381,7 @@ void plStateMachineComponent::SetBlackboardName(const char* szName)
   if (m_sBlackboardName == sBlackboardName)
     return;
 
-  m_sBlackboardName = sBlackboardName;
+  m_sBlackboardName = std::move(sBlackboardName);
 
   if (IsActiveAndInitialized())
   {
@@ -400,10 +402,27 @@ bool plStateMachineComponent::SetState(plStringView sName)
   return false;
 }
 
+plStringView plStateMachineComponent::GetCurrentState() const
+{
+  if (m_pStateMachineInstance != nullptr && m_pStateMachineInstance->GetCurrentState())
+  {
+    return m_pStateMachineInstance->GetCurrentState()->GetName();
+  }
+
+  return {};
+}
+
+void plStateMachineComponent::FireTransitionEvent(plStringView sEvent)
+{
+  if (m_pStateMachineInstance != nullptr)
+  {
+    m_pStateMachineInstance->FireTransitionEvent(sEvent);
+  }
+}
 
 void plStateMachineComponent::SendStateChangedMsg(plMsgStateMachineStateChanged& msg, plTime delay)
 {
-  if (delay > plTime::Zero())
+  if (delay > plTime::MakeZero())
   {
     m_StateChangedSender.PostEventMessage(msg, this, GetOwner(), delay, plObjectMsgQueueType::NextFrame);
   }
@@ -439,3 +458,6 @@ void plStateMachineComponent::Update()
     m_pStateMachineInstance->Update(GetWorld()->GetClock().GetTimeDiff());
   }
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachineComponent);

@@ -10,7 +10,7 @@ template <typename Type>
 class plMat4Template
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   using ComponentType = Type;
 
@@ -23,8 +23,8 @@ public:
   /// \brief The matrix as a 16-element Type array (column-major)
   Type m_fElementsCM[16];
 
-  PLASMA_ALWAYS_INLINE Type& Element(plInt32 iColumn, plInt32 iRow) { return m_fElementsCM[iColumn * 4 + iRow]; }
-  PLASMA_ALWAYS_INLINE Type Element(plInt32 iColumn, plInt32 iRow) const { return m_fElementsCM[iColumn * 4 + iRow]; }
+  PL_ALWAYS_INLINE Type& Element(plInt32 iColumn, plInt32 iRow) { return m_fElementsCM[iColumn * 4 + iRow]; }
+  PL_ALWAYS_INLINE Type Element(plInt32 iColumn, plInt32 iRow) const { return m_fElementsCM[iColumn * 4 + iRow]; }
 
   // *** Constructors ***
 public:
@@ -47,30 +47,53 @@ public:
   /// \brief Creates a transformation matrix from a rotation and a translation.
   plMat4Template(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation); // [tested]
 
-#if PLASMA_ENABLED(PLASMA_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
   void AssertNotNaN() const
   {
-    PLASMA_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
+    PL_ASSERT_ALWAYS(!IsNaN(), "This object contains NaN values. This can happen when you forgot to initialize it before using it. Please "
                                "check that all code-paths properly initialize this object.");
   }
 #endif
 
-  /// \brief Copies 16 values from pData into the matrix. Can handle the data in row-major or column-major order.
-  ///
-  /// \param pData
-  ///   The array of Type values from which to set the matrix data.
-  /// \param layout
-  ///   The layout in which pData stores the matrix. The data will get transposed, if necessary.
-  ///   The data should be in column-major format, if you want to prevent unnecessary transposes.
-  void SetFromArray(const Type* const pData, plMatrixLayout::Enum layout); // [tested]
+  /// \brief Returns a zero matrix.
+  [[nodiscard]] static plMat4Template<Type> MakeZero();
+
+  /// \brief Returns an identity matrix.
+  [[nodiscard]] static plMat4Template<Type> MakeIdentity();
+
+  /// \brief Creates a matrix from 16 values that are in row-major layout.
+  [[nodiscard]] static plMat4Template<Type> MakeFromRowMajorArray(const Type* const pData);
+
+  /// \brief Creates a matrix from 16 values that are in column-major layout.
+  [[nodiscard]] static plMat4Template<Type> MakeFromColumnMajorArray(const Type* const pData);
+
+  /// \brief Creates a matrix from 16 values. Naming is "column-n row-m"
+  [[nodiscard]] static plMat4Template<Type> MakeFromValues(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3, Type c3r3, Type c4r3, Type c1r4, Type c2r4, Type c3r4, Type c4r4);
+
+  /// \brief Creates a matrix with all zero values, except the last column, which is set to x, y, z, 1
+  [[nodiscard]] static plMat4Template<Type> MakeTranslation(const plVec3Template<Type>& vTranslation);
+
+  /// \brief Creates a transformation matrix from a rotation and a translation.
+  [[nodiscard]] static plMat4Template<Type> MakeTransformation(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation);
+
+  /// \brief Creates a matrix with all zero values, except along the diagonal, which is set to x, y, z, 1
+  [[nodiscard]] static plMat4Template<Type> MakeScaling(const plVec3Template<Type>& vScale);
+
+  /// \brief Creates a matrix that is a rotation matrix around the X-axis.
+  [[nodiscard]] static plMat4Template<Type> MakeRotationX(plAngle angle);
+
+  /// \brief Creates a matrix that is a rotation matrix around the Y-axis.
+  [[nodiscard]] static plMat4Template<Type> MakeRotationY(plAngle angle);
+
+  /// \brief Creates a matrix that is a rotation matrix around the Z-axis.
+  [[nodiscard]] static plMat4Template<Type> MakeRotationZ(plAngle angle);
+
+  /// \brief Creates a matrix that is a rotation matrix around the given axis.
+  [[nodiscard]] static plMat4Template<Type> MakeAxisRotation(const plVec3Template<Type>& vAxis, plAngle angle);
 
   /// \brief Copies the 16 values of this matrix into the given array. 'layout' defines whether the data should end up in column-major or
   /// row-major format.
   void GetAsArray(Type* out_pData, plMatrixLayout::Enum layout) const; // [tested]
-
-  /// \brief Sets each element manually: Naming is "column-n row-m"
-  void SetElements(Type c1r1, Type c2r1, Type c3r1, Type c4r1, Type c1r2, Type c2r2, Type c3r2, Type c4r2, Type c1r3, Type c2r3, Type c3r3, Type c4r3,
-    Type c1r4, Type c2r4, Type c3r4, Type c4r4); // [tested]
 
   /// \brief Sets a transformation matrix from a rotation and a translation.
   void SetTransformationMatrix(const plMat3Template<Type>& mRotation, const plVec3Template<Type>& vTranslation); // [tested]
@@ -83,31 +106,8 @@ public:
   /// \brief Sets all elements to zero, except the diagonal, which is set to one.
   void SetIdentity(); // [tested]
 
-  /// \brief Sets the matrix to all zero, except the last column, which is set to x,y,z,1
-  void SetTranslationMatrix(const plVec3Template<Type>& vTranslation); // [tested]
-
-  /// \brief Sets the matrix to all zero, except the diagonal, which is set to x,y,z,1
-  void SetScalingMatrix(const plVec3Template<Type>& vScale); // [tested]
-
-  /// \brief Sets this matrix to be a rotation matrix around the X-axis.
-  void SetRotationMatrixX(plAngle angle); // [tested]
-
-  /// \brief Sets this matrix to be a rotation matrix around the Y-axis.
-  void SetRotationMatrixY(plAngle angle); // [tested]
-
-  /// \brief Sets this matrix to be a rotation matrix around the Z-axis.
-  void SetRotationMatrixZ(plAngle angle); // [tested]
-
-  /// \brief Sets this matrix to be a rotation matrix around the given axis.
-  void SetRotationMatrix(const plVec3Template<Type>& vAxis, plAngle angle); // [tested]
-
   // *** Common Matrix Operations ***
 public:
-  /// \brief Returns an Identity Matrix.
-  static const plMat4Template<Type> IdentityMatrix(); // [tested]
-
-  /// \brief Returns a Zero Matrix.
-  static const plMat4Template<Type> ZeroMatrix(); // [tested]
 
   /// \brief Transposes this matrix.
   void Transpose(); // [tested]
@@ -170,7 +170,7 @@ public:
   /// \brief Returns the 3 scaling factors that are encoded in the matrix.
   const plVec3Template<Type> GetScalingFactors() const; // [tested]
 
-  /// \brief Tries to set the three scaling factors in the matrix. Returns PLASMA_FAILURE if the matrix columns cannot be normalized and thus no
+  /// \brief Tries to set the three scaling factors in the matrix. Returns PL_FAILURE if the matrix columns cannot be normalized and thus no
   /// rescaling is possible.
   plResult SetScalingFactors(const plVec3Template<Type>& vXYZ, Type fEpsilon = plMath::DefaultEpsilon<Type>()); // [tested]
 
@@ -208,7 +208,6 @@ public:
   /// \brief Equality Check with epsilon
   bool IsEqual(const plMat4Template<Type>& rhs, Type fEpsilon) const; // [tested]
 };
-
 
 // *** free functions ***
 

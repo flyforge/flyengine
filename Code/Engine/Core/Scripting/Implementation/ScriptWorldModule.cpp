@@ -4,37 +4,25 @@
 #include <Core/Scripting/ScriptWorldModule.h>
 
 // clang-format off
-PLASMA_IMPLEMENT_WORLD_MODULE(plScriptWorldModule);
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptWorldModule, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_IMPLEMENT_WORLD_MODULE(plScriptWorldModule);
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plScriptWorldModule, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plScriptWorldModule::plScriptWorldModule(plWorld* pWorld)
   : plWorldModule(pWorld)
 {
-  plResourceManager::GetResourceEvents().AddEventHandler(plMakeDelegate(&plScriptWorldModule::ResourceEventHandler, this));
 }
 
-plScriptWorldModule::~plScriptWorldModule()
-{
-  plResourceManager::GetResourceEvents().RemoveEventHandler(plMakeDelegate(&plScriptWorldModule::ResourceEventHandler, this));
-}
+plScriptWorldModule::~plScriptWorldModule() = default;
 
 void plScriptWorldModule::Initialize()
 {
   SUPER::Initialize();
 
   {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plScriptWorldModule::CallUpdateFunctions, this);
+    auto updateDesc = PL_CREATE_MODULE_UPDATE_FUNCTION_DESC(plScriptWorldModule::CallUpdateFunctions, this);
     updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
-
-    RegisterUpdateFunction(updateDesc);
-  }
-
-  {
-    auto updateDesc = PLASMA_CREATE_MODULE_UPDATE_FUNCTION_DESC(plScriptWorldModule::ReloadScripts, this);
-    updateDesc.m_Phase = plWorldModule::UpdateFunctionDesc::Phase::PreAsync;
-    updateDesc.m_fPriority = 10000.0f;
 
     RegisterUpdateFunction(updateDesc);
   }
@@ -93,12 +81,12 @@ plScriptCoroutineHandle plScriptWorldModule::CreateCoroutine(const plRTTI* pCoro
       }
       else
       {
-        PLASMA_ASSERT_NOT_IMPLEMENTED;
+        PL_ASSERT_NOT_IMPLEMENTED;
       }
     }
   }
 
-  auto pCoroutine = pCoroutineType->GetAllocator()->Allocate<plScriptCoroutine>(plFoundation::GetDefaultAllocator());
+  auto pCoroutine = pCoroutineType->GetAllocator()->Allocate<plScriptCoroutine>(plScriptAllocator::GetAllocator());
 
   plScriptCoroutineId id = m_RunningScriptCoroutines.Insert(pCoroutine);
   pCoroutine->Initialize(id, sName, inout_instance, *this);
@@ -114,7 +102,7 @@ void plScriptWorldModule::StartCoroutine(plScriptCoroutineHandle hCoroutine, plA
   plUniquePtr<plScriptCoroutine>* pCoroutine = nullptr;
   if (m_RunningScriptCoroutines.TryGetValue(hCoroutine.GetInternalID(), pCoroutine))
   {
-    (*pCoroutine)->Start(arguments);
+    (*pCoroutine)->StartWithVarargs(arguments);
     (*pCoroutine)->UpdateAndSchedule();
   }
 }
@@ -167,33 +155,6 @@ bool plScriptWorldModule::IsCoroutineFinished(plScriptCoroutineHandle hCoroutine
   return m_RunningScriptCoroutines.Contains(hCoroutine.GetInternalID()) == false;
 }
 
-void plScriptWorldModule::AddScriptReloadFunction(plScriptClassResourceHandle hScript, ReloadFunction function)
-{
-  if (hScript.IsValid() == false)
-    return;
-
-  PLASMA_ASSERT_DEV(function.IsComparable(), "Function must be comparable otherwise it can't be removed");
-  m_ReloadFunctions[hScript].PushBack(function);
-}
-
-void plScriptWorldModule::RemoveScriptReloadFunction(plScriptClassResourceHandle hScript, ReloadFunction function)
-{
-  PLASMA_ASSERT_DEV(function.IsComparable(), "Function must be comparable otherwise it can't be removed");
-
-  ReloadFunctionList* pReloadFunctions = nullptr;
-  if (m_ReloadFunctions.TryGetValue(hScript, pReloadFunctions))
-  {
-    for (plUInt32 i = 0; i < pReloadFunctions->GetCount(); ++i)
-    {
-      if ((*pReloadFunctions)[i].IsEqualIfComparable(function))
-      {
-        pReloadFunctions->RemoveAtAndSwap(i);
-        break;
-      }
-    }
-  }
-}
-
 void plScriptWorldModule::CallUpdateFunctions(const plWorldModule::UpdateContext& context)
 {
   plWorld* pWorld = GetWorld();
@@ -201,7 +162,7 @@ void plScriptWorldModule::CallUpdateFunctions(const plWorldModule::UpdateContext
   plTime deltaTime;
   if (pWorld->GetWorldSimulationEnabled())
   {
-    deltaTime = GetWorld()->GetClock().GetTimeDiff();
+    deltaTime = pWorld->GetClock().GetTimeDiff();
   }
   else
   {
@@ -224,7 +185,7 @@ void plScriptWorldModule::CallUpdateFunctions(const plWorldModule::UpdateContext
     auto& pCoroutine = m_DeadScriptCoroutines[i];
     plScriptInstance* pInstance = pCoroutine->GetScriptInstance();
     auto pCoroutines = m_InstanceToScriptCoroutines.GetValue(pInstance);
-    PLASMA_ASSERT_DEV(pCoroutines != nullptr, "Implementation error");
+    PL_ASSERT_DEV(pCoroutines != nullptr, "Implementation error");
 
     pCoroutines->RemoveAndSwap(pCoroutine->GetHandle());
     if (pCoroutines->IsEmpty())
@@ -237,33 +198,6 @@ void plScriptWorldModule::CallUpdateFunctions(const plWorldModule::UpdateContext
   m_DeadScriptCoroutines.Clear();
 }
 
-void plScriptWorldModule::ReloadScripts(const plWorldModule::UpdateContext& context)
-{
-  for (const auto hScript : m_NeedReload)
-  {
-    if (m_ReloadFunctions.TryGetValue(hScript, m_TempReloadFunctions))
-    {
-      for (auto& reloadFunction : m_TempReloadFunctions)
-      {
-        reloadFunction();
-      }
-    }
-  }
 
-  m_NeedReload.Clear();
-}
+PL_STATICLINK_FILE(Core, Core_Scripting_Implementation_ScriptWorldModule);
 
-void plScriptWorldModule::ResourceEventHandler(const plResourceEvent& e)
-{
-  if (e.m_Type != plResourceEvent::Type::ResourceContentUnloading)
-    return;
-
-  if (auto pResource = plDynamicCast<const plScriptClassResource*>(e.m_pResource))
-  {
-    if (pResource->GetReferenceCount() > 0)
-    {
-      plScriptClassResourceHandle hScript = pResource->GetResourceHandle();
-      m_NeedReload.Insert(hScript);
-    }
-  }
-}

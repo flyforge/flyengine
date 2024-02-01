@@ -1,76 +1,70 @@
 #include <GameEngine/GameEnginePCH.h>
 
+#include <Core/Messages/UpdateLocalBoundsMessage.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <GameEngine/Gameplay/GrabbableItemComponent.h>
+#include <RendererCore/Debug/DebugRenderer.h>
+#include <RendererCore/Pipeline/RenderData.h>
+#include <RendererCore/Pipeline/View.h>
+
+struct GICFlags
+{
+  enum Enum
+  {
+    DebugShowPoints = 0,
+  };
+};
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plGrabbableItemGrabPoint, plNoBase, 1, plRTTIDefaultAllocator<plGrabbableItemGrabPoint>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plGrabbableItemGrabPoint, plNoBase, 1, plRTTIDefaultAllocator<plGrabbableItemGrabPoint>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("LocalPosition", m_vLocalPosition),
-    PLASMA_MEMBER_PROPERTY("LocalRotation", m_qLocalRotation),
+    PL_MEMBER_PROPERTY("LocalPosition", m_vLocalPosition),
+    PL_MEMBER_PROPERTY("LocalRotation", m_qLocalRotation),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plTransformManipulatorAttribute("LocalPosition", "LocalRotation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE
+PL_END_STATIC_REFLECTED_TYPE
 
 
-PLASMA_BEGIN_COMPONENT_TYPE(plGrabbableItemComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plGrabbableItemComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("GrabPoints", GrabPoints_GetCount, GrabPoints_GetValue, GrabPoints_SetValue, GrabPoints_Insert, GrabPoints_Remove),
+    PL_ACCESSOR_PROPERTY("DebugShowPoints", GetDebugShowPoints, SetDebugShowPoints),
+    PL_ARRAY_MEMBER_PROPERTY("GrabPoints", m_GrabPoints),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    new plCategoryAttribute("Gameplay"),
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnExtractRenderData),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
+  {
+    new plCategoryAttribute("Input"),
+  }
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plGrabbableItemComponent::plGrabbableItemComponent() = default;
 plGrabbableItemComponent::~plGrabbableItemComponent() = default;
 
-plUInt32 plGrabbableItemComponent::GrabPoints_GetCount() const
+void plGrabbableItemComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  return m_GrabPoints.GetCount();
-}
-
-plGrabbableItemGrabPoint plGrabbableItemComponent::GrabPoints_GetValue(plUInt32 uiIndex) const
-{
-  return m_GrabPoints[uiIndex];
-}
-
-void plGrabbableItemComponent::GrabPoints_SetValue(plUInt32 uiIndex, plGrabbableItemGrabPoint value)
-{
-  m_GrabPoints[uiIndex] = value;
-}
-
-void plGrabbableItemComponent::GrabPoints_Insert(plUInt32 uiIndex, plGrabbableItemGrabPoint value)
-{
-  m_GrabPoints.Insert(value, uiIndex);
-}
-
-void plGrabbableItemComponent::GrabPoints_Remove(plUInt32 uiIndex)
-{
-  m_GrabPoints.RemoveAtAndCopy(uiIndex);
-}
-
-void plGrabbableItemComponent::SerializeComponent(plWorldWriter& stream) const
-{
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   const plUInt8 uiNumGrabPoints = static_cast<plUInt8>(m_GrabPoints.GetCount());
   s << uiNumGrabPoints;
@@ -81,11 +75,11 @@ void plGrabbableItemComponent::SerializeComponent(plWorldWriter& stream) const
   }
 }
 
-void plGrabbableItemComponent::DeserializeComponent(plWorldReader& stream)
+void plGrabbableItemComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
+  SUPER::DeserializeComponent(inout_stream);
   // const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  auto& s = inout_stream.GetStream();
 
   plUInt8 uiNumGrabPoints;
   s >> uiNumGrabPoints;
@@ -97,5 +91,57 @@ void plGrabbableItemComponent::DeserializeComponent(plWorldReader& stream)
   }
 }
 
+void plGrabbableItemComponent::SetDebugShowPoints(bool bShow)
+{
+  SetUserFlag(GICFlags::DebugShowPoints, bShow);
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_GrabbableItemComponent);
+  if (IsActiveAndInitialized())
+  {
+    GetOwner()->UpdateLocalBounds();
+  }
+}
+
+bool plGrabbableItemComponent::GetDebugShowPoints() const
+{
+  return GetUserFlag(GICFlags::DebugShowPoints);
+}
+
+void plGrabbableItemComponent::DebugDrawGrabPoint(const plWorld& world, const plTransform& globalGrabPointTransform)
+{
+  plDebugRenderer::DrawArrow(&world, 0.75f, plColorScheme::LightUI(plColorScheme::Red), globalGrabPointTransform, plVec3::MakeAxisX());
+  plDebugRenderer::DrawArrow(&world, 0.3f, plColorScheme::LightUI(plColorScheme::Green), globalGrabPointTransform, plVec3::MakeAxisY());
+  plDebugRenderer::DrawArrow(&world, 0.3f, plColorScheme::LightUI(plColorScheme::Blue), globalGrabPointTransform, plVec3::MakeAxisZ());
+}
+
+void plGrabbableItemComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg) const
+{
+  if (GetDebugShowPoints())
+  {
+    msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), 1.0f), plDefaultSpatialDataCategories::RenderDynamic);
+  }
+}
+
+void plGrabbableItemComponent::OnExtractRenderData(plMsgExtractRenderData& msg) const
+{
+  if (!GetDebugShowPoints() || m_GrabPoints.IsEmpty())
+    return;
+
+  if (msg.m_pView->GetCameraUsageHint() != plCameraUsageHint::MainView &&
+      msg.m_pView->GetCameraUsageHint() != plCameraUsageHint::EditorView)
+    return;
+
+  // Don't extract render data for selection.
+  if (msg.m_OverrideCategory != plInvalidRenderDataCategory)
+    return;
+
+  const plTransform globalTransform = GetOwner()->GetGlobalTransform();
+
+  for (auto& grabPoint : m_GrabPoints)
+  {
+    plTransform grabPointTransform = plTransform::MakeGlobalTransform(globalTransform, plTransform(grabPoint.m_vLocalPosition, grabPoint.m_qLocalRotation));
+    DebugDrawGrabPoint(*GetWorld(), grabPointTransform);
+  }
+}
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_GrabbableItemComponent);

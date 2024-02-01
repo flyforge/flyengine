@@ -3,8 +3,8 @@
 #include <EditorFramework/Dialogs/TagsDlg.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
 
-plQtTagsDlg::plQtTagsDlg(QWidget* parent)
-  : QDialog(parent)
+plQtTagsDlg::plQtTagsDlg(QWidget* pParent)
+  : QDialog(pParent)
 {
   setupUi(this);
 
@@ -155,7 +155,7 @@ void plQtTagsDlg::SaveTags()
     }
   }
 
-  plQtEditorApp::GetSingleton()->SaveTagRegistry().IgnoreResult();
+  plQtEditorApp::GetSingleton()->SaveTagRegistry().LogFailure();
 }
 
 void plQtTagsDlg::FillList()

@@ -4,16 +4,16 @@
 #include <Foundation/Basics.h>
 #include <Foundation/Logging/Log.h>
 
-static LRESULT CALLBACK plWindowsMessageFuncTrampoline(HWND hWnd, UINT Msg, WPARAM WParam, LPARAM LParam)
+static LRESULT CALLBACK plWindowsMessageFuncTrampoline(HWND hWnd, UINT msg, WPARAM wparam, LPARAM lparam)
 {
   plWindow* pWindow = reinterpret_cast<plWindow*>(GetWindowLongPtrW(hWnd, GWLP_USERDATA));
 
   if (pWindow != nullptr && pWindow->IsInitialized())
   {
     if (pWindow->GetInputDevice())
-      pWindow->GetInputDevice()->WindowMessage(plMinWindows::FromNative(hWnd), Msg, WParam, LParam);
+      pWindow->GetInputDevice()->WindowMessage(plMinWindows::FromNative(hWnd), msg, wparam, lparam);
 
-    switch (Msg)
+    switch (msg)
     {
       case WM_CLOSE:
         pWindow->OnClickClose();
@@ -29,7 +29,7 @@ static LRESULT CALLBACK plWindowsMessageFuncTrampoline(HWND hWnd, UINT Msg, WPAR
 
       case WM_SIZE:
       {
-        plSizeU32 size(LOWORD(LParam), HIWORD(LParam));
+        plSizeU32 size(LOWORD(lparam), HIWORD(lparam));
         pWindow->OnResize(size);
       }
       break;
@@ -43,27 +43,27 @@ static LRESULT CALLBACK plWindowsMessageFuncTrampoline(HWND hWnd, UINT Msg, WPAR
 
       case WM_MOVE:
       {
-        pWindow->OnWindowMove((int)(short)LOWORD(LParam), (int)(short)HIWORD(LParam));
+        pWindow->OnWindowMove((int)(short)LOWORD(lparam), (int)(short)HIWORD(lparam));
       }
       break;
     }
 
-    pWindow->OnWindowMessage(plMinWindows::FromNative(hWnd), Msg, WParam, LParam);
+    pWindow->OnWindowMessage(plMinWindows::FromNative(hWnd), msg, wparam, lparam);
   }
 
-  return DefWindowProcW(hWnd, Msg, WParam, LParam);
+  return DefWindowProcW(hWnd, msg, wparam, lparam);
 }
 
 plResult plWindow::Initialize()
 {
-  PLASMA_LOG_BLOCK("plWindow::Initialize", m_CreationDescription.m_Title.GetData());
+  PL_LOG_BLOCK("plWindow::Initialize", m_CreationDescription.m_Title.GetData());
 
   if (m_bInitialized)
   {
     Destroy().IgnoreResult();
   }
 
-  PLASMA_ASSERT_RELEASE(m_CreationDescription.m_Resolution.HasNonZeroArea(), "The client area size can't be zero sized!");
+  PL_ASSERT_RELEASE(m_CreationDescription.m_Resolution.HasNonZeroArea(), "The client area size can't be zero sized!");
 
   // Initialize window class
   WNDCLASSEXW windowClass = {};
@@ -83,7 +83,7 @@ plResult plWindow::Initialize()
     if (error != ERROR_CLASS_ALREADY_EXISTS)
     {
       plLog::Error("Failed to create plWindow window class! (error code '{0}')", plArgU(error));
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
 
@@ -102,7 +102,7 @@ plResult plWindow::Initialize()
     if (ChangeDisplaySettingsW(&dmScreenSettings, CDS_FULLSCREEN) != DISP_CHANGE_SUCCESSFUL)
     {
       m_CreationDescription.m_WindowMode = plWindowMode::FullscreenBorderlessNativeResolution;
-      PLASMA_SUCCEED_OR_RETURN(m_CreationDescription.AdjustWindowSizeAndPosition());
+      PL_SUCCEED_OR_RETURN(m_CreationDescription.AdjustWindowSizeAndPosition());
 
       plLog::Error("Failed to change display resolution for fullscreen window. Falling back to borderless window.");
     }
@@ -174,7 +174,7 @@ plResult plWindow::Initialize()
   if (m_hWindowHandle == INVALID_HANDLE_VALUE)
   {
     plLog::Error("Failed to create window.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   auto windowHandle = plMinWindows::ToNative(m_hWindowHandle);
@@ -183,7 +183,7 @@ plResult plWindow::Initialize()
   SetWindowLongPtrW(windowHandle, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(this));
 
   // show window and activate if required
-  ShowWindow(windowHandle, m_CreationDescription.m_bSetForegroundOnInit ? SW_SHOWNORMAL : SW_SHOWNOACTIVATE);
+  ShowWindow(windowHandle, m_CreationDescription.m_bSetForegroundOnInit ? SW_SHOWDEFAULT : SW_SHOWNOACTIVATE);
   if (m_CreationDescription.m_bSetForegroundOnInit)
   {
     SetActiveWindow(windowHandle);
@@ -209,26 +209,26 @@ plResult plWindow::Initialize()
   m_bInitialized = true;
   plLog::Success("Created window successfully. Resolution is {0}*{1}", GetClientAreaSize().width, GetClientAreaSize().height);
 
-  m_pInputDevice = PLASMA_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber);
+  m_pInputDevice = PL_DEFAULT_NEW(plStandardInputDevice, m_CreationDescription.m_uiWindowNumber);
   m_pInputDevice->SetClipMouseCursor(m_CreationDescription.m_bClipMouseCursor ? plMouseCursorClipMode::ClipToWindowImmediate : plMouseCursorClipMode::NoClip);
   m_pInputDevice->SetShowMouseCursor(m_CreationDescription.m_bShowMouseCursor);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plWindow::Destroy()
 {
   if (!m_bInitialized)
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
 
   if (GetInputDevice() && GetInputDevice()->GetClipMouseCursor() != plMouseCursorClipMode::NoClip)
   {
     GetInputDevice()->SetClipMouseCursor(plMouseCursorClipMode::NoClip);
   }
 
-  PLASMA_LOG_BLOCK("plWindow::Destroy");
+  PL_LOG_BLOCK("plWindow::Destroy");
 
-  plResult Res = PLASMA_SUCCESS;
+  plResult Res = PL_SUCCESS;
 
   m_pInputDevice = nullptr;
 
@@ -245,7 +245,7 @@ plResult plWindow::Destroy()
   if (!DestroyWindow(hWindow))
   {
     plLog::SeriousWarning("DestroyWindow failed.");
-    Res = PLASMA_FAILURE;
+    Res = PL_FAILURE;
   }
 
 
@@ -256,13 +256,13 @@ plResult plWindow::Destroy()
   // if (!UnregisterClassW(L"plWin32Window", GetModuleHandleW(nullptr)))
   //{
   //  plLog::SeriousWarning("UnregisterClassW failed.");
-  //  Res = PLASMA_FAILURE;
+  //  Res = PL_FAILURE;
   //}
 
   m_bInitialized = false;
   m_hWindowHandle = INVALID_WINDOW_HANDLE_VALUE;
 
-  if (Res == PLASMA_SUCCESS)
+  if (Res == PL_SUCCESS)
     plLog::Success("Window destroyed.");
   else
     plLog::SeriousWarning("There were problems to destroy the window properly.");
@@ -274,7 +274,7 @@ plResult plWindow::Resize(const plSizeU32& newWindowSize)
 {
   auto windowHandle = plMinWindows::ToNative(m_hWindowHandle);
   BOOL res = ::SetWindowPos(windowHandle, HWND_NOTOPMOST, 0, 0, newWindowSize.width, newWindowSize.height, SWP_NOSENDCHANGING | SWP_NOOWNERZORDER | SWP_NOMOVE | SWP_NOZORDER);
-  return res != FALSE ? PLASMA_SUCCESS : PLASMA_FAILURE;
+  return res != FALSE ? PL_SUCCESS : PL_FAILURE;
 }
 
 void plWindow::ProcessWindowMessages()

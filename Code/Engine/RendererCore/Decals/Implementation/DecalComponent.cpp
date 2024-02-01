@@ -29,52 +29,52 @@ void plDecalComponentManager::Initialize()
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalRenderData, 1, plRTTIDefaultAllocator<plDecalRenderData>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDecalRenderData, 1, plRTTIDefaultAllocator<plDecalRenderData>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plDecalComponent, 8, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ARRAY_ACCESSOR_PROPERTY("Decals", DecalFile_GetCount, DecalFile_Get, DecalFile_Set, DecalFile_Insert, DecalFile_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Decal")),
-    PLASMA_ENUM_ACCESSOR_PROPERTY("ProjectionAxis", plBasisAxis, GetProjectionAxis, SetProjectionAxis),
-    PLASMA_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.01f), plVariant(25.0f))),
-    PLASMA_ACCESSOR_PROPERTY("SizeVariance", GetSizeVariance, SetSizeVariance)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
-    PLASMA_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("EmissiveColor", GetEmissiveColor, SetEmissiveColor)->AddAttributes(new plDefaultValueAttribute(plColor::Black)),
-    PLASMA_ACCESSOR_PROPERTY("SortOrder", GetSortOrder, SetSortOrder)->AddAttributes(new plClampValueAttribute(-64.0f, 64.0f)),
-    PLASMA_ACCESSOR_PROPERTY("WrapAround", GetWrapAround, SetWrapAround),
-    PLASMA_ACCESSOR_PROPERTY("MapNormalToGeometry", GetMapNormalToGeometry, SetMapNormalToGeometry)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("InnerFadeAngle", GetInnerFadeAngle, SetInnerFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(89.0f)), new plDefaultValueAttribute(plAngle::Degree(50.0f))),
-    PLASMA_ACCESSOR_PROPERTY("OuterFadeAngle", GetOuterFadeAngle, SetOuterFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::Degree(0.0f), plAngle::Degree(89.0f)), new plDefaultValueAttribute(plAngle::Degree(80.0f))),
-    PLASMA_MEMBER_PROPERTY("FadeOutDelay", m_FadeOutDelay),
-    PLASMA_MEMBER_PROPERTY("FadeOutDuration", m_FadeOutDuration),
-    PLASMA_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
-    PLASMA_ACCESSOR_PROPERTY("ApplyToDynamic", DummyGetter, SetApplyToRef)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ARRAY_ACCESSOR_PROPERTY("Decals", DecalFile_GetCount, DecalFile_Get, DecalFile_Set, DecalFile_Insert, DecalFile_Remove)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Decal")),
+    PL_ENUM_ACCESSOR_PROPERTY("ProjectionAxis", plBasisAxis, GetProjectionAxis, SetProjectionAxis),
+    PL_ACCESSOR_PROPERTY("Extents", GetExtents, SetExtents)->AddAttributes(new plDefaultValueAttribute(plVec3(1.0f)), new plClampValueAttribute(plVec3(0.01f), plVariant(25.0f))),
+    PL_ACCESSOR_PROPERTY("SizeVariance", GetSizeVariance, SetSizeVariance)->AddAttributes(new plClampValueAttribute(0.0f, 1.0f)),
+    PL_ACCESSOR_PROPERTY("Color", GetColor, SetColor)->AddAttributes(new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("EmissiveColor", GetEmissiveColor, SetEmissiveColor)->AddAttributes(new plDefaultValueAttribute(plColor::Black)),
+    PL_ACCESSOR_PROPERTY("SortOrder", GetSortOrder, SetSortOrder)->AddAttributes(new plClampValueAttribute(-64.0f, 64.0f)),
+    PL_ACCESSOR_PROPERTY("WrapAround", GetWrapAround, SetWrapAround),
+    PL_ACCESSOR_PROPERTY("MapNormalToGeometry", GetMapNormalToGeometry, SetMapNormalToGeometry)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("InnerFadeAngle", GetInnerFadeAngle, SetInnerFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(89.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(50.0f))),
+    PL_ACCESSOR_PROPERTY("OuterFadeAngle", GetOuterFadeAngle, SetOuterFadeAngle)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(0.0f), plAngle::MakeFromDegree(89.0f)), new plDefaultValueAttribute(plAngle::MakeFromDegree(80.0f))),
+    PL_MEMBER_PROPERTY("FadeOutDelay", m_FadeOutDelay),
+    PL_MEMBER_PROPERTY("FadeOutDuration", m_FadeOutDuration),
+    PL_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
+    PL_ACCESSOR_PROPERTY("ApplyToDynamic", DummyGetter, SetApplyToRef)->AddAttributes(new plGameObjectReferenceAttribute()),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects"),
     new plDirectionVisualizerAttribute("ProjectionAxis", 0.5f, plColorScheme::LightUI(plColorScheme::Blue)),
     new plBoxManipulatorAttribute("Extents", 1.0f, true),
     new plBoxVisualizerAttribute("Extents"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
-    PLASMA_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
-    PLASMA_MESSAGE_HANDLER(plMsgOnlyApplyToObject, OnMsgOnlyApplyToObject),
-    PLASMA_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
+    PL_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
+    PL_MESSAGE_HANDLER(plMsgOnlyApplyToObject, OnMsgOnlyApplyToObject),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
-plDecalComponent::plDecalComponent() {}
+plDecalComponent::plDecalComponent() = default;
 
 plDecalComponent::~plDecalComponent() = default;
 
@@ -186,14 +186,14 @@ void plDecalComponent::DeserializeComponent(plWorldReader& inout_stream)
 plResult plDecalComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAlwaysVisible, plMsgUpdateLocalBounds& msg)
 {
   if (m_Decals.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   m_uiRandomDecalIdx = (GetOwner()->GetStableRandomSeed() % m_Decals.GetCount()) & 0xFF;
 
   const plUInt32 uiDecalIndex = plMath::Min<plUInt32>(m_uiRandomDecalIdx, m_Decals.GetCount() - 1);
 
   if (!m_Decals[uiDecalIndex].IsValid() || m_vExtents.IsZero())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   float fAspectRatio = 1.0f;
 
@@ -227,13 +227,13 @@ plResult plDecalComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& bAl
   const plQuat axisRotation = plBasisAxis::GetBasisRotation_PosX(m_ProjectionAxis);
   plVec3 vHalfExtents = (axisRotation * vAspectCorrection).Abs().CompMul(m_vExtents * 0.5f);
 
-  bounds = plBoundingBox(-vHalfExtents, vHalfExtents);
-  return PLASMA_SUCCESS;
+  bounds = plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-vHalfExtents, vHalfExtents));
+  return PL_SUCCESS;
 }
 
 void plDecalComponent::SetExtents(const plVec3& value)
 {
-  m_vExtents = value.CompMax(plVec3::ZeroVector());
+  m_vExtents = value.CompMax(plVec3::MakeZero());
 
   TriggerLocalBoundsUpdate();
 }
@@ -275,7 +275,7 @@ plColor plDecalComponent::GetEmissiveColor() const
 
 void plDecalComponent::SetInnerFadeAngle(plAngle spotAngle)
 {
-  m_InnerFadeAngle = plMath::Clamp(spotAngle, plAngle::Degree(0.0f), m_OuterFadeAngle);
+  m_InnerFadeAngle = plMath::Clamp(spotAngle, plAngle::MakeFromDegree(0.0f), m_OuterFadeAngle);
 }
 
 plAngle plDecalComponent::GetInnerFadeAngle() const
@@ -285,7 +285,7 @@ plAngle plDecalComponent::GetInnerFadeAngle() const
 
 void plDecalComponent::SetOuterFadeAngle(plAngle spotAngle)
 {
-  m_OuterFadeAngle = plMath::Clamp(spotAngle, m_InnerFadeAngle, plAngle::Degree(90.0f));
+  m_OuterFadeAngle = plMath::Clamp(spotAngle, m_InnerFadeAngle, plAngle::MakeFromDegree(90.0f));
 }
 
 plAngle plDecalComponent::GetOuterFadeAngle() const
@@ -325,6 +325,7 @@ bool plDecalComponent::GetMapNormalToGeometry() const
 
 void plDecalComponent::SetDecal(plUInt32 uiIndex, const plDecalResourceHandle& hDecal)
 {
+  m_Decals.EnsureCount(uiIndex + 1);
   m_Decals[uiIndex] = hDecal;
 
   TriggerLocalBoundsUpdate();
@@ -389,7 +390,7 @@ void plDecalComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
   if (finalColor.a <= 0.0f)
     return;
 
-  const bool bNoFade = m_InnerFadeAngle == plAngle::Radian(0.0f) && m_OuterFadeAngle == plAngle::Radian(0.0f);
+  const bool bNoFade = m_InnerFadeAngle == plAngle::MakeFromRadian(0.0f) && m_OuterFadeAngle == plAngle::MakeFromRadian(0.0f);
   const float fCosInner = plMath::Cos(m_InnerFadeAngle);
   const float fCosOuter = plMath::Cos(m_OuterFadeAngle);
   const float fFadeParamScale = bNoFade ? 0.0f : (1.0f / plMath::Max(0.001f, (fCosInner - fCosOuter)));
@@ -529,11 +530,11 @@ void plDecalComponent::OnSimulationStarted()
   plWorld* pWorld = GetWorld();
 
   // no fade out -> fade out pretty late
-  m_StartFadeOutTime = plTime::Hours(24.0 * 365.0 * 100.0); // 100 years should be enough for everybody (ignoring leap years)
+  m_StartFadeOutTime = plTime::MakeFromHours(24.0 * 365.0 * 100.0); // 100 years should be enough for everybody (ignoring leap years)
 
   if (m_FadeOutDelay.m_Value.GetSeconds() > 0.0 || m_FadeOutDuration.GetSeconds() > 0.0)
   {
-    const plTime tFadeOutDelay = plTime::Seconds(pWorld->GetRandomNumberGenerator().DoubleVariance(m_FadeOutDelay.m_Value.GetSeconds(), m_FadeOutDelay.m_fVariance));
+    const plTime tFadeOutDelay = plTime::MakeFromSeconds(pWorld->GetRandomNumberGenerator().DoubleVariance(m_FadeOutDelay.m_Value.GetSeconds(), m_FadeOutDelay.m_fVariance));
     m_StartFadeOutTime = pWorld->GetClock().GetAccumulatedTime() + tFadeOutDelay;
 
     if (m_OnFinishedAction != plOnComponentFinishedAction::None)
@@ -653,4 +654,4 @@ public:
 
 plDecalComponent_6_7 g_plDecalComponent_6_7;
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Decals_Implementation_DecalComponent);

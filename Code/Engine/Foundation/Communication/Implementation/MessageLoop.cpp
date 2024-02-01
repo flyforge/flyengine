@@ -5,18 +5,18 @@
 #include <Foundation/Communication/RemoteMessage.h>
 #include <Foundation/Configuration/Startup.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plMessageLoop);
+PL_IMPLEMENT_SINGLETON(plMessageLoop);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-#  include <Foundation/Communication/Implementation/Win/MessageLoop_win.h>
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-#  include <Foundation/Communication/Implementation/Linux/MessageLoop_linux.h>
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+#  include <Foundation/Platform/Win/MessageLoop_Win.h>
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+#  include <Foundation/Platform/Linux/MessageLoop_Linux.h>
 #else
-#  include <Foundation/Communication/Implementation/Mobile/MessageLoop_mobile.h>
+#  include <Foundation/Communication/Implementation/MessageLoop_Fallback.h>
 #endif
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, MessageLoop)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, MessageLoop)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "TaskSystem",
@@ -25,22 +25,25 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Foundation, MessageLoop)
 
   ON_CORESYSTEMS_STARTUP
   {
-    #if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
-      PLASMA_DEFAULT_NEW(plMessageLoop_win);
-    #elif PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
-      PLASMA_DEFAULT_NEW(plMessageLoop_linux);
+    if (plStartup::HasApplicationTag("NoMessageLoop"))
+      return;
+
+    #if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+      PL_DEFAULT_NEW(plMessageLoop_win);
+    #elif PL_ENABLED(PL_PLATFORM_LINUX)
+      PL_DEFAULT_NEW(plMessageLoop_linux);
     #else
-      PLASMA_DEFAULT_NEW(plMessageLoop_mobile);
+      PL_DEFAULT_NEW(plMessageLoop_Fallback);
     #endif
   }
 
   ON_CORESYSTEMS_SHUTDOWN
   {
     plMessageLoop* pDummy = plMessageLoop::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 class plLoopThread : public plThread
@@ -65,10 +68,10 @@ plMessageLoop::plMessageLoop()
 
 void plMessageLoop::StartUpdateThread()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (m_pUpdateThread == nullptr)
   {
-    m_pUpdateThread = PLASMA_DEFAULT_NEW(plLoopThread);
+    m_pUpdateThread = PL_DEFAULT_NEW(plLoopThread);
     m_pUpdateThread->m_pRemoteInterface = this;
     m_pUpdateThread->Start();
   }
@@ -76,20 +79,20 @@ void plMessageLoop::StartUpdateThread()
 
 void plMessageLoop::StopUpdateThread()
 {
-  PLASMA_LOCK(m_Mutex);
+  PL_LOCK(m_Mutex);
   if (m_pUpdateThread != nullptr)
   {
     m_bShouldQuit = true;
     WakeUp();
     m_pUpdateThread->Join();
 
-    PLASMA_DEFAULT_DELETE(m_pUpdateThread);
+    PL_DEFAULT_DELETE(m_pUpdateThread);
   }
 }
 
 void plMessageLoop::RunLoop()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   m_ThreadId = plThreadUtils::GetCurrentThreadID();
 #endif
 
@@ -129,7 +132,7 @@ void plMessageLoop::RunLoop()
 bool plMessageLoop::ProcessTasks()
 {
   {
-    PLASMA_LOCK(m_TasksMutex);
+    PL_LOCK(m_TasksMutex);
     // Swap out the queues under the lock so we can process them without holding the lock
     m_ConnectQueueTask.Swap(m_ConnectQueue);
     m_SendQueueTask.Swap(m_SendQueue);
@@ -164,7 +167,7 @@ void plMessageLoop::Quit()
 void plMessageLoop::AddChannel(plIpcChannel* pChannel)
 {
   {
-    PLASMA_LOCK(m_TasksMutex);
+    PL_LOCK(m_TasksMutex);
     m_AllAddedChannels.PushBack(pChannel);
 
     m_bCallTickFunction = false;
@@ -180,12 +183,11 @@ void plMessageLoop::AddChannel(plIpcChannel* pChannel)
 
   StartUpdateThread();
   pChannel->m_pOwner = this;
-  pChannel->AddToMessageLoop(this);
 }
 
 void plMessageLoop::RemoveChannel(plIpcChannel* pChannel)
 {
-  PLASMA_LOCK(m_TasksMutex);
+  PL_LOCK(m_TasksMutex);
 
   m_AllAddedChannels.RemoveAndSwap(pChannel);
   m_ConnectQueue.RemoveAndSwap(pChannel);
@@ -193,4 +195,4 @@ void plMessageLoop::RemoveChannel(plIpcChannel* pChannel)
   m_SendQueue.RemoveAndSwap(pChannel);
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_MessageLoop);
+PL_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_MessageLoop);

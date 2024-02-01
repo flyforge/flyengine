@@ -9,25 +9,25 @@
 struct plSubAsset;
 class plPlatformProfile;
 
-class PLASMA_EDITORFRAMEWORK_DLL plAssetDocumentManager : public plDocumentManager
+class PL_EDITORFRAMEWORK_DLL plAssetDocumentManager : public plDocumentManager
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plAssetDocumentManager, plDocumentManager);
+  PL_ADD_DYNAMIC_REFLECTION(plAssetDocumentManager, plDocumentManager);
 
 public:
   plAssetDocumentManager();
   ~plAssetDocumentManager();
 
   /// \brief Opens the asset file and reads the "Header" into the given plAssetDocumentInfo.
-  virtual plStatus ReadAssetDocumentInfo(plUniquePtr<plAssetDocumentInfo>& out_pInfo, plStreamReader& stream) const;
-  virtual void FillOutSubAssetList(const plAssetDocumentInfo& assetInfo, plDynamicArray<plSubAssetData>& out_SubAssets) const {}
+  virtual plStatus ReadAssetDocumentInfo(plUniquePtr<plAssetDocumentInfo>& out_pInfo, plStreamReader& inout_stream) const;
+  virtual void FillOutSubAssetList(const plAssetDocumentInfo& assetInfo, plDynamicArray<plSubAssetData>& out_subAssets) const {}
 
   /// If this asset type has additional output files that need to be generated (like a texture atlas that combines outputs from multiple assets)
   /// this function should make sure those files are all generated and return the list of relative file paths (from the data directory root).
-  virtual plStatus GetAdditionalOutputs(plDynamicArray<plString>& files) { return plStatus(PLASMA_SUCCESS); }
+  virtual plStatus GetAdditionalOutputs(plDynamicArray<plString>& ref_files) { return plStatus(PL_SUCCESS); }
 
   // plDocumentManager overrides:
 public:
-  virtual plStatus CloneDocument(const char* szPath, const char* szClonePath, plUuid& inout_cloneGuid) override;
+  virtual plStatus CloneDocument(plStringView sPath, plStringView sClonePath, plUuid& inout_cloneGuid) override;
 
   /// \name Asset Profile Functions
   ///@{
@@ -36,7 +36,7 @@ public:
   void ComputeAssetProfileHash(const plPlatformProfile* pAssetProfile);
 
   /// \brief Returns the hash that was previously computed through ComputeAssetProfileHash().
-  PLASMA_ALWAYS_INLINE plUInt64 GetAssetProfileHash() const { return m_uiAssetProfileHash; }
+  PL_ALWAYS_INLINE plUInt64 GetAssetProfileHash() const { return m_uiAssetProfileHash; }
 
   /// \brief Returns pAssetProfile, or if that is null, plAssetCurator::GetSingleton()->GetActiveAssetProfile().
   static const plPlatformProfile* DetermineFinalTargetProfile(const plPlatformProfile* pAssetProfile);
@@ -63,34 +63,48 @@ public:
   /// \name Output Functions
   ///@{
 
-  virtual void AddEntriesToAssetTable(
-    const char* szDataDirectory, const plPlatformProfile* pAssetProfile, plMap<plString, plString>& inout_GuidToPath) const;
-  virtual plString GetAssetTableEntry(const plSubAsset* pSubAsset, const char* szDataDirectory, const plPlatformProfile* pAssetProfile) const;
+  virtual void AddEntriesToAssetTable(plStringView sDataDirectory, const plPlatformProfile* pAssetProfile, plDelegate<void(plStringView sGuid, plStringView sPath, plStringView sType)> addEntry) const;
+  virtual plString GetAssetTableEntry(const plSubAsset* pSubAsset, plStringView sDataDirectory, const plPlatformProfile* pAssetProfile) const;
 
   /// \brief Calls GetRelativeOutputFileName and prepends [DataDir]/AssetCache/ .
-  plString GetAbsoluteOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, const char* szDocumentPath, const char* szOutputTag,
-    const plPlatformProfile* pAssetProfile = nullptr) const;
+  plString GetAbsoluteOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile = nullptr) const;
 
   /// \brief Relative to 'AssetCache' folder.
-  virtual plString GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, const char* szDataDirectory, const char* szDocumentPath,
-    const char* szOutputTag, const plPlatformProfile* pAssetProfile = nullptr) const;
+  virtual plString GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, plStringView sDataDirectory, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile = nullptr) const;
   virtual bool GeneratesProfileSpecificAssets() const = 0;
 
-  bool IsOutputUpToDate(
-    const char* szDocumentPath, const plDynamicArray<plString>& outputs, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor);
-  virtual bool IsOutputUpToDate(
-    const char* szDocumentPath, const char* szOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor);
+  bool IsOutputUpToDate(plStringView sDocumentPath, const plDynamicArray<plString>& outputs, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor);
+  virtual bool IsOutputUpToDate(plStringView sDocumentPath, plStringView sOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor);
+
+  /// Describes how likely it is that a generated file is 'corrupted', due to dependency issues and such.
+  /// For example a prefab may not work correctly, if it was written with a very different C++ plugin state, but this can't be detected later.
+  /// Whereas a texture always produces exactly the same output and is thus perfectly reliable.
+  /// This is used to clear asset caches selectively, and keep things that are unlikely to be in a broken state.
+  enum OutputReliability : plUInt8
+  {
+    Unknown = 0,
+    Good = 1,
+    Perfect = 2,
+  };
+
+  /// \see OutputReliability
+  virtual OutputReliability GetAssetTypeOutputReliability() const { return OutputReliability::Unknown; }
 
   ///@}
 
 
   /// \brief Called by the editor to try to open a document for the matching picking result
-  virtual plResult OpenPickedDocument(const plDocumentObject* pPickedComponent, plUInt32 uiPartIndex) { return PLASMA_FAILURE; }
+  virtual plResult OpenPickedDocument(const plDocumentObject* pPickedComponent, plUInt32 uiPartIndex) { return PL_FAILURE; }
 
   plResult TryOpenAssetDocument(const char* szPathOrGuid);
 
+  /// In case this manager deals with types that need to be force transformed on scene export, it can add the asset type names to this list.
+  /// This is only needed for assets that have such special dependencies for their transform step, that the regular dependency tracking doesn't work for them.
+  /// Currently the only known case are Collection assets, because they have to manually go through the Package dependencies transitively, which means
+  /// that the asset curator can't know when they need to be updated.
+  virtual void GetAssetTypesRequiringTransformForSceneExport(plSet<plTempHashedString>& inout_assetTypes){};
+
 protected:
   static bool IsResourceUpToDate(const char* szResourceFile, plUInt64 uiHash, plUInt16 uiTypeVersion);
-  static void GenerateOutputFilename(
-    plStringBuilder& inout_sRelativeDocumentPath, const plPlatformProfile* pAssetProfile, const char* szExtension, bool bPlatformSpecific);
+  static void GenerateOutputFilename(plStringBuilder& inout_sRelativeDocumentPath, const plPlatformProfile* pAssetProfile, const char* szExtension, bool bPlatformSpecific);
 };

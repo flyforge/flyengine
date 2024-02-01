@@ -25,8 +25,8 @@ void plShaderStateResourceDescriptor::Save(plStreamWriter& inout_stream) const
     inout_stream << m_BlendDesc.m_bAlphaToCoverage;
     inout_stream << m_BlendDesc.m_bIndependentBlend;
 
-    const plUInt8 iBlends = m_BlendDesc.m_bIndependentBlend ? PLASMA_GAL_MAX_RENDERTARGET_COUNT : 1;
-    inout_stream << iBlends; // in case PLASMA_GAL_MAX_RENDERTARGET_COUNT ever changes
+    const plUInt8 iBlends = m_BlendDesc.m_bIndependentBlend ? PL_GAL_MAX_RENDERTARGET_COUNT : 1;
+    inout_stream << iBlends; // in case PL_GAL_MAX_RENDERTARGET_COUNT ever changes
 
     for (plUInt32 b = 0; b < iBlends; ++b)
     {
@@ -78,7 +78,7 @@ void plShaderStateResourceDescriptor::Load(plStreamReader& inout_stream)
   plUInt32 uiVersion = 0;
   inout_stream >> uiVersion;
 
-  PLASMA_ASSERT_DEV(uiVersion >= plShaderStateVersion::Version1 && uiVersion <= plShaderStateVersion::Current, "Invalid version {0}", uiVersion);
+  PL_ASSERT_DEV(uiVersion >= plShaderStateVersion::Version1 && uiVersion <= plShaderStateVersion::Current, "Invalid version {0}", uiVersion);
 
   // Blend State
   {
@@ -86,7 +86,7 @@ void plShaderStateResourceDescriptor::Load(plStreamReader& inout_stream)
     inout_stream >> m_BlendDesc.m_bIndependentBlend;
 
     plUInt8 iBlends = 0;
-    inout_stream >> iBlends; // in case PLASMA_GAL_MAX_RENDERTARGET_COUNT ever changes
+    inout_stream >> iBlends; // in case PL_GAL_MAX_RENDERTARGET_COUNT ever changes
 
     for (plUInt32 b = 0; b < iBlends; ++b)
     {
@@ -178,17 +178,17 @@ plUInt32 plShaderStateResourceDescriptor::CalculateHash() const
 
 static const char* InsertNumber(const char* szString, plUInt32 uiNumber, plStringBuilder& ref_sTemp)
 {
-  ref_sTemp.Format(szString, uiNumber);
+  ref_sTemp.SetFormat(szString, uiNumber);
   return ref_sTemp.GetData();
 }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 static plSet<plString> s_AllAllowedVariables;
 #endif
 
 static bool GetBoolStateVariable(const plMap<plString, plString>& variables, const char* szVariable, bool bDefValue)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   s_AllAllowedVariables.Insert(szVariable);
 #endif
 
@@ -209,7 +209,7 @@ static bool GetBoolStateVariable(const plMap<plString, plString>& variables, con
 static plInt32 GetEnumStateVariable(
   const plMap<plString, plString>& variables, const plMap<plString, plInt32>& values, const char* szVariable, plInt32 iDefValue)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   s_AllAllowedVariables.Insert(szVariable);
 #endif
 
@@ -236,7 +236,7 @@ static plInt32 GetEnumStateVariable(
 
 static float GetFloatStateVariable(const plMap<plString, plString>& variables, const char* szVariable, float fDefValue)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   s_AllAllowedVariables.Insert(szVariable);
 #endif
 
@@ -257,7 +257,7 @@ static float GetFloatStateVariable(const plMap<plString, plString>& variables, c
 
 static plInt32 GetIntStateVariable(const plMap<plString, plString>& variables, const char* szVariable, plInt32 iDefValue)
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   s_AllAllowedVariables.Insert(szVariable);
 #endif
 
@@ -449,7 +449,7 @@ plResult plShaderStateResourceDescriptor::Parse(const char* szSource)
     m_DepthStencilDesc.m_uiStencilWriteMask = static_cast<plUInt8>(GetIntStateVariable(VariableValues, "StencilWriteMask", m_DepthStencilDesc.m_uiStencilWriteMask));
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   // check for invalid variable names
   {
     for (auto it = VariableValues.GetIterator(); it.IsValid(); ++it)
@@ -463,7 +463,7 @@ plResult plShaderStateResourceDescriptor::Parse(const char* szSource)
 #endif
 
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Shader_Implementation_ShaderStateDescriptor);
+

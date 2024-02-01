@@ -18,7 +18,7 @@ class plStreamReader;
 /// Note however that tags which were registered with one registry shouldn't be used with tag sets filled
 /// with tags from another registry since there may be conflicting tag assignments.
 /// The tag registry registration and tag retrieval functions are thread safe due to a mutex.
-class PLASMA_FOUNDATION_DLL plTagRegistry
+class PL_FOUNDATION_DLL plTagRegistry
 {
 public:
   plTagRegistry();

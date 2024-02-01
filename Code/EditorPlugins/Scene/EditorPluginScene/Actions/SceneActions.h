@@ -8,15 +8,15 @@
 class plPreferences;
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plSceneActions
+class PL_EDITORPLUGINSCENE_DLL plSceneActions
 {
 public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping);
-  static void MapToolbarActions(const char* szMapping);
-  static void MapViewContextMenuActions(const char* szMapping, const char* szPath);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapToolbarActions(plStringView sMapping);
+  static void MapViewContextMenuActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hSceneCategory;
   static plActionDescriptorHandle s_hSceneUtilsMenu;
@@ -36,9 +36,9 @@ public:
 };
 
 ///
-class PLASMA_EDITORPLUGINSCENE_DLL plSceneAction : public plButtonAction
+class PL_EDITORPLUGINSCENE_DLL plSceneAction : public plButtonAction
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSceneAction, plButtonAction);
+  PL_ADD_DYNAMIC_REFLECTION(plSceneAction, plButtonAction);
 
 public:
   enum class ActionType
@@ -103,7 +103,7 @@ public:
   virtual void Execute(const plVariant& value) override;
 
   void LaunchPlayer(const char* szPlayerApp);
-  QStringList GetPlayerCommandLine(plStringBuilder& out_SingleLine) const;
+  QStringList GetPlayerCommandLine(plStringBuilder& out_sSingleLine) const;
 
 private:
   void SceneEventHandler(const plGameObjectEvent& e);

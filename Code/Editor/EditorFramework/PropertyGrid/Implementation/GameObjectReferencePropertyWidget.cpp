@@ -26,8 +26,8 @@ plQtGameObjectReferencePropertyWidget::plQtGameObjectReferencePropertyWidget()
   m_pButton->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
   m_pButton->setCursor(Qt::WhatsThisCursor);
 
-  PLASMA_VERIFY(connect(m_pButton, SIGNAL(clicked()), this, SLOT(on_PickObject_clicked())) != nullptr, "signal/slot connection failed");
-  PLASMA_VERIFY(
+  PL_VERIFY(connect(m_pButton, SIGNAL(clicked()), this, SLOT(on_PickObject_clicked())) != nullptr, "signal/slot connection failed");
+  PL_VERIFY(
     connect(m_pButton, &QWidget::customContextMenuRequested, this, &plQtGameObjectReferencePropertyWidget::on_customContextMenuRequested) != nullptr,
     "signal/slot connection failed");
 
@@ -38,7 +38,7 @@ plQtGameObjectReferencePropertyWidget::plQtGameObjectReferencePropertyWidget()
 
 void plQtGameObjectReferencePropertyWidget::OnInit()
 {
-  PLASMA_ASSERT_DEV(m_pProp->GetAttributeByType<plGameObjectReferenceAttribute>() != nullptr,
+  PL_ASSERT_DEV(m_pProp->GetAttributeByType<plGameObjectReferenceAttribute>() != nullptr,
     "plQtGameObjectReferencePropertyWidget was created without a plGameObjectReferenceAttribute!");
 }
 
@@ -71,6 +71,7 @@ void plQtGameObjectReferencePropertyWidget::FillContextMenu(QMenu& menu)
     menu.addAction(QIcon(":/GuiFoundation/Icons/Go.svg"), QLatin1String("Select Referenced Object"), this, SLOT(OnSelectReferencedObject()));
   QAction* pClearAction =
     menu.addAction(QIcon(":/GuiFoundation/Icons/Delete.svg"), QLatin1String("Clear Reference"), this, SLOT(OnClearReference()));
+  PL_IGNORE_UNUSED(pClearAction);
 
   pCopyAction->setEnabled(!m_sInternalValue.isEmpty());
   pSelectAction->setEnabled(!m_sInternalValue.isEmpty());
@@ -101,8 +102,12 @@ void plQtGameObjectReferencePropertyWidget::PickObjectOverride(const plDocumentO
 
 void plQtGameObjectReferencePropertyWidget::ClearPicking()
 {
-  m_pGrid->GetDocument()->GetSelectionManager()->m_Events.RemoveEventHandler(
-    plMakeDelegate(&plQtGameObjectReferencePropertyWidget::SelectionManagerEventHandler, this));
+  auto dele = plMakeDelegate(&plQtGameObjectReferencePropertyWidget::SelectionManagerEventHandler, this);
+
+  if (!m_pGrid->GetDocument()->GetSelectionManager()->m_Events.HasEventHandler(dele))
+    return;
+
+  m_pGrid->GetDocument()->GetSelectionManager()->m_Events.RemoveEventHandler(dele);
 
   for (auto pContext : m_SelectionContextsToUnsubscribe)
   {
@@ -171,6 +176,7 @@ void plQtGameObjectReferencePropertyWidget::on_PickObject_clicked()
   {
     // this happens when clicking the 'pick' button twice
     ClearPicking();
+    return;
   }
 
   plQtDocumentWindow* pWindow = plQtDocumentWindow::FindWindowByDocument(m_pGrid->GetDocument());
@@ -224,7 +230,7 @@ void plQtGameObjectReferencePropertyWidget::OnCopyReference()
   clipboard->setText(m_sInternalValue);
 
   plQtUiServices::GetSingleton()->ShowAllDocumentsTemporaryStatusBarMessage(
-    plFmt("Copied Object Reference: {}", m_sInternalValue.toUtf8().data()), plTime::Seconds(5));
+    plFmt("Copied Object Reference: {}", m_sInternalValue.toUtf8().data()), plTime::MakeFromSeconds(5));
 }
 
 

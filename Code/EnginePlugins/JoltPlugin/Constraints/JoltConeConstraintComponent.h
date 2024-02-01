@@ -7,9 +7,9 @@ using plJoltConeConstraintComponentManager = plComponentManager<class plJoltCone
 /// \brief Implements a conical physics constraint.
 ///
 /// The child actor can swing in a cone with a given angle around the anchor point on the parent actor.
-class PLASMA_JOLTPLUGIN_DLL plJoltConeConstraintComponent : public plJoltConstraintComponent
+class PL_JOLTPLUGIN_DLL plJoltConeConstraintComponent : public plJoltConstraintComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plJoltConeConstraintComponent, plJoltConstraintComponent, plJoltConeConstraintComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plJoltConeConstraintComponent, plJoltConstraintComponent, plJoltConeConstraintComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent

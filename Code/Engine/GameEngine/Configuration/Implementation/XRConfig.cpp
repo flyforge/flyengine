@@ -4,42 +4,42 @@
 #include <GameEngine/Configuration/XRConfig.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plXRConfig, 2, plRTTIDefaultAllocator<plXRConfig>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plXRConfig, 2, plRTTIDefaultAllocator<plXRConfig>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("EnableXR", m_bEnableXR),
+    PL_MEMBER_PROPERTY("EnableXR", m_bEnableXR),
     // HololensRenderPipeline.plRenderPipelineAsset
-    PLASMA_MEMBER_PROPERTY("XRRenderPipeline", m_sXRRenderPipeline)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_RenderPipeline"), new plDefaultValueAttribute(plStringView("{ 2fe25ded-776c-7f9e-354f-e4c52a33d125 }"))),
+    PL_MEMBER_PROPERTY("XRRenderPipeline", m_sXRRenderPipeline)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_RenderPipeline"), new plDefaultValueAttribute(plStringView("{ 2fe25ded-776c-7f9e-354f-e4c52a33d125 }"))),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-void plXRConfig::SaveRuntimeData(plChunkStreamWriter& stream) const
+void plXRConfig::SaveRuntimeData(plChunkStreamWriter& inout_stream) const
 {
-  stream.BeginChunk("plXRConfig", 2);
+  inout_stream.BeginChunk("plXRConfig", 2);
 
-  stream << m_bEnableXR;
-  stream << m_sXRRenderPipeline;
+  inout_stream << m_bEnableXR;
+  inout_stream << m_sXRRenderPipeline;
 
-  stream.EndChunk();
+  inout_stream.EndChunk();
 }
 
-void plXRConfig::LoadRuntimeData(plChunkStreamReader& stream)
+void plXRConfig::LoadRuntimeData(plChunkStreamReader& inout_stream)
 {
-  const auto& chunk = stream.GetCurrentChunk();
+  const auto& chunk = inout_stream.GetCurrentChunk();
 
   if (chunk.m_sChunkName == "plVRConfig" && chunk.m_uiChunkVersion == 1)
   {
-    stream >> m_bEnableXR;
-    stream >> m_sXRRenderPipeline;
+    inout_stream >> m_bEnableXR;
+    inout_stream >> m_sXRRenderPipeline;
   }
   else if (chunk.m_sChunkName == "plXRConfig" && chunk.m_uiChunkVersion == 2)
   {
-    stream >> m_bEnableXR;
-    stream >> m_sXRRenderPipeline;
+    inout_stream >> m_bEnableXR;
+    inout_stream >> m_sXRRenderPipeline;
   }
 }
 
@@ -56,9 +56,9 @@ public:
     : plGraphPatch("plVRConfig", 5)
   {
   }
-  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
   {
-    context.RenameClass("plXRConfig");
+    ref_context.RenameClass("plXRConfig");
     pNode->RenameProperty("EnableVR", "EnableXR");
     pNode->RenameProperty("VRRenderPipeline", "XRRenderPipeline");
   }
@@ -66,4 +66,4 @@ public:
 
 plVRConfig_1_2 g_plVRConfig_1_2;
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Configuration_Implementation_XRConfig);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Configuration_Implementation_XRConfig);

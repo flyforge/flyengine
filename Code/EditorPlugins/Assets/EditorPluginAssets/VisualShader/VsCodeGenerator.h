@@ -71,7 +71,6 @@ private:
   plStringBuilder m_sShaderGeometry;
   plStringBuilder m_sShaderMaterialParam;
   plStringBuilder m_sShaderMaterialCB;
-  plStringBuilder m_sShaderRenderConfig;
   plStringBuilder m_sShaderRenderState;
   plStringBuilder m_sShaderPermutations;
   plStringBuilder m_sFinalShaderCode;

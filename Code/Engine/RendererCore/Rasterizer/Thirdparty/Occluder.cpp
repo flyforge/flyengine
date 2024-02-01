@@ -2,18 +2,18 @@
 #include <RendererCore/Rasterizer/Thirdparty/Occluder.h>
 #include <cassert>
 
-#if PLASMA_ENABLED(PLASMA_RASTERIZER_SUPPORTED)
+#if PL_ENABLED(PL_RASTERIZER_SUPPORTED)
 
 #  include "VectorMath.h"
 
 Occluder::~Occluder()
 {
-  PLASMA_DELETE_RAW_BUFFER(plFoundation::GetAlignedAllocator(), m_vertexData);
+  PL_DELETE_RAW_BUFFER(plFoundation::GetAlignedAllocator(), m_vertexData);
   m_vertexData = nullptr;
 }
 
 // needed for plHybridArray below
-PLASMA_DEFINE_AS_POD_TYPE(__m128);
+PL_DEFINE_AS_POD_TYPE(__m128);
 
 void Occluder::bake(const __m128* vertices, plUInt32 numVertices, __m128 refMin, __m128 refMax)
 {
@@ -114,7 +114,7 @@ void Occluder::bake(const __m128* vertices, plUInt32 numVertices, __m128 refMin,
   __m128 half = _mm_set1_ps(0.5f);
 
   occluder->m_packetCount = 0;
-  occluder->m_vertexData = PLASMA_NEW_RAW_BUFFER(plFoundation::GetAlignedAllocator(), __m256i, orderedVertices.GetCount() * 4);
+  occluder->m_vertexData = PL_NEW_RAW_BUFFER(plFoundation::GetAlignedAllocator(), __m256i, orderedVertices.GetCount() * 4);
 
   for (plUInt32 i = 0; i < orderedVertices.GetCount(); i += 32)
   {
@@ -192,4 +192,3 @@ void Occluder::bake(const __m128* vertices, plUInt32 numVertices, __m128 refMin,
 #endif
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Rasterizer_Thirdparty_Occluder);

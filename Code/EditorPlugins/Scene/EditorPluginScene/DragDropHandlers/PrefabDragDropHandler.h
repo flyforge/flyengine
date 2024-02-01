@@ -4,7 +4,7 @@
 
 class plPrefabComponentDragDropHandler : public plComponentDragDropHandler
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plPrefabComponentDragDropHandler, plComponentDragDropHandler);
+  PL_ADD_DYNAMIC_REFLECTION(plPrefabComponentDragDropHandler, plComponentDragDropHandler);
 
 protected:
   virtual float CanHandle(const plDragDropInfo* pInfo) const override;

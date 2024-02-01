@@ -3,11 +3,11 @@
 #include <Foundation/Types/Delegate.h>
 #include <RendererFoundation/RendererFoundationDLL.h>
 
-struct PLASMA_RENDERERFOUNDATION_DLL plGALDeviceFactory
+struct PL_RENDERERFOUNDATION_DLL plGALDeviceFactory
 {
-  using CreatorFunc = plDelegate<plInternal::NewInstance<plGALDevice>(plAllocatorBase*, const plGALDeviceCreationDescription&)>;
+  using CreatorFunc = plDelegate<plInternal::NewInstance<plGALDevice>(plAllocator*, const plGALDeviceCreationDescription&)>;
 
-  static plInternal::NewInstance<plGALDevice> CreateDevice(plStringView sRendererName, plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& desc);
+  static plInternal::NewInstance<plGALDevice> CreateDevice(plStringView sRendererName, plAllocator* pAllocator, const plGALDeviceCreationDescription& desc);
 
   static void GetShaderModelAndCompiler(plStringView sRendererName, const char*& ref_szShaderModel, const char*& ref_szShaderCompiler);
 

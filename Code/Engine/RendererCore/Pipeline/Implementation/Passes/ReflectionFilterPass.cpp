@@ -1,5 +1,6 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Lights/Implementation/ReflectionPool.h>
 #include <RendererCore/Pipeline/Passes/ReflectionFilterPass.h>
 #include <RendererCore/Pipeline/View.h>
@@ -11,38 +12,36 @@
 #include <RendererCore/../../../Data/Base/Shaders/Pipeline/ReflectionIrradianceConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionFilterPass, 1, plRTTIDefaultAllocator<plReflectionFilterPass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plReflectionFilterPass, 1, plRTTIDefaultAllocator<plReflectionFilterPass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("FilteredSpecular", m_PinFilteredSpecular),
-    PLASMA_MEMBER_PROPERTY("AvgLuminance", m_PinAvgLuminance),
-    PLASMA_MEMBER_PROPERTY("IrradianceData", m_PinIrradianceData),
-    PLASMA_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("Saturation", m_fSaturation)->AddAttributes(new plDefaultValueAttribute(1.0f)),
-    PLASMA_MEMBER_PROPERTY("SpecularOutputIndex", m_uiSpecularOutputIndex),
-    PLASMA_MEMBER_PROPERTY("IrradianceOutputIndex", m_uiIrradianceOutputIndex),
-    PLASMA_ACCESSOR_PROPERTY("InputCubemap", GetInputCubemap, SetInputCubemap)
+    PL_MEMBER_PROPERTY("FilteredSpecular", m_PinFilteredSpecular),
+    PL_MEMBER_PROPERTY("AvgLuminance", m_PinAvgLuminance),
+    PL_MEMBER_PROPERTY("IrradianceData", m_PinIrradianceData),
+    PL_MEMBER_PROPERTY("Intensity", m_fIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("Saturation", m_fSaturation)->AddAttributes(new plDefaultValueAttribute(1.0f)),
+    PL_MEMBER_PROPERTY("SpecularOutputIndex", m_uiSpecularOutputIndex),
+    PL_MEMBER_PROPERTY("IrradianceOutputIndex", m_uiIrradianceOutputIndex),
+    PL_ACCESSOR_PROPERTY("InputCubemap", GetInputCubemap, SetInputCubemap)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plReflectionFilterPass::plReflectionFilterPass()
   : plRenderPipelinePass("ReflectionFilterPass")
-  , m_fIntensity(1.0f)
-  , m_fSaturation(1.0f)
-  , m_uiIrradianceOutputIndex(0)
+
 {
   {
     m_hFilteredSpecularConstantBuffer = plRenderContext::CreateConstantBufferStorage<plReflectionFilteredSpecularConstants>();
     m_hFilteredSpecularShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/ReflectionFilteredSpecular.plShader");
-    PLASMA_ASSERT_DEV(m_hFilteredSpecularShader.IsValid(), "Could not load ReflectionFilteredSpecular shader!");
+    PL_ASSERT_DEV(m_hFilteredSpecularShader.IsValid(), "Could not load ReflectionFilteredSpecular shader!");
 
     m_hIrradianceConstantBuffer = plRenderContext::CreateConstantBufferStorage<plReflectionIrradianceConstants>();
     m_hIrradianceShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/ReflectionIrradiance.plShader");
-    PLASMA_ASSERT_DEV(m_hIrradianceShader.IsValid(), "Could not load ReflectionIrradiance shader!");
+    PL_ASSERT_DEV(m_hIrradianceShader.IsValid(), "Could not load ReflectionIrradiance shader!");
   }
 }
 
@@ -85,7 +84,7 @@ void plReflectionFilterPass::Execute(const plRenderViewContext& renderViewContex
   renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(false);
 
   plGALPass* pGALPass = pDevice->BeginPass(GetName());
-  PLASMA_SCOPE_EXIT(
+  PL_SCOPE_EXIT(
     pDevice->EndPass(pGALPass);
     renderViewContext.m_pRenderContext->SetAllowAsyncShaderLoading(bAllowAsyncShaderLoading));
 
@@ -161,6 +160,29 @@ void plReflectionFilterPass::Execute(const plRenderViewContext& renderViewContex
   }
 }
 
+plResult plReflectionFilterPass::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  inout_stream << m_fIntensity;
+  inout_stream << m_fSaturation;
+  inout_stream << m_uiSpecularOutputIndex;
+  inout_stream << m_uiIrradianceOutputIndex;
+  // inout_stream << m_hInputCubemap; Runtime only property
+  return PL_SUCCESS;
+}
+
+plResult plReflectionFilterPass::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  inout_stream >> m_fIntensity;
+  inout_stream >> m_fSaturation;
+  inout_stream >> m_uiSpecularOutputIndex;
+  inout_stream >> m_uiIrradianceOutputIndex;
+  return PL_SUCCESS;
+}
+
 plUInt32 plReflectionFilterPass::GetInputCubemap() const
 {
   return m_hInputCubemap.GetInternalID().m_Data;
@@ -189,4 +211,4 @@ void plReflectionFilterPass::UpdateIrradianceConstantBuffer()
 }
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_ReflectionFilterPass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_ReflectionFilterPass);

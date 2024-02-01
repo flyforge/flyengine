@@ -1,6 +1,6 @@
 #include <EditorFramework/EditorFrameworkPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorFramework/Assets/AssetDocument.h>
 #include <EditorFramework/Assets/AssetDocumentManager.h>
@@ -8,19 +8,19 @@
 #include <Foundation/IO/FileSystem/FileReader.h>
 #include <Foundation/Serialization/DdlSerializer.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocumentManager, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAssetDocumentManager, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plAssetDocumentManager::plAssetDocumentManager() = default;
 plAssetDocumentManager::~plAssetDocumentManager() = default;
 
-plStatus plAssetDocumentManager::CloneDocument(const char* szPath, const char* szClonePath, plUuid& inout_cloneGuid)
+plStatus plAssetDocumentManager::CloneDocument(plStringView sPath, plStringView sClonePath, plUuid& inout_cloneGuid)
 {
-  plStatus res = SUPER::CloneDocument(szPath, szClonePath, inout_cloneGuid);
+  plStatus res = SUPER::CloneDocument(sPath, sClonePath, inout_cloneGuid);
   if (res.Succeeded())
   {
     // Cloned documents are usually opened right after cloning. To make sure this does not fail we need to inform the asset curator of the newly added asset document.
-    plAssetCurator::GetSingleton()->NotifyOfFileChange(szClonePath);
+    plAssetCurator::GetSingleton()->NotifyOfFileChange(sClonePath);
   }
   return res;
 }
@@ -31,11 +31,11 @@ void plAssetDocumentManager::ComputeAssetProfileHash(const plPlatformProfile* pA
 
   if (GeneratesProfileSpecificAssets())
   {
-    PLASMA_ASSERT_DEBUG(m_uiAssetProfileHash != 0, "Assets that generate a profile-specific output must compute a hash for the profile settings.");
+    PL_ASSERT_DEBUG(m_uiAssetProfileHash != 0, "Assets that generate a profile-specific output must compute a hash for the profile settings.");
   }
   else
   {
-    PLASMA_ASSERT_DEBUG(m_uiAssetProfileHash == 0, "Only assets that generate per-profile outputs may specify an asset profile hash.");
+    PL_ASSERT_DEBUG(m_uiAssetProfileHash == 0, "Only assets that generate per-profile outputs may specify an asset profile hash.");
     m_uiAssetProfileHash = 0;
   }
 }
@@ -45,11 +45,11 @@ plUInt64 plAssetDocumentManager::ComputeAssetProfileHashImpl(const plPlatformPro
   return 0;
 }
 
-plStatus plAssetDocumentManager::ReadAssetDocumentInfo(plUniquePtr<plAssetDocumentInfo>& out_pInfo, plStreamReader& stream) const
+plStatus plAssetDocumentManager::ReadAssetDocumentInfo(plUniquePtr<plAssetDocumentInfo>& out_pInfo, plStreamReader& inout_stream) const
 {
   plAbstractObjectGraph graph;
 
-  if (plAbstractGraphDdlSerializer::ReadHeader(stream, &graph).Failed())
+  if (plAbstractGraphDdlSerializer::ReadHeader(inout_stream, &graph).Failed())
     return plStatus("Failed to read asset document");
 
   plRttiConverterContext context;
@@ -61,9 +61,9 @@ plStatus plAssetDocumentManager::ReadAssetDocumentInfo(plUniquePtr<plAssetDocume
     return plStatus("Document does not contain a 'Header'");
 
   plAssetDocumentInfo* pEntry = rttiConverter.CreateObjectFromNode(pHeaderNode).Cast<plAssetDocumentInfo>();
-  PLASMA_ASSERT_DEBUG(pEntry != nullptr, "Failed to deserialize plAssetDocumentInfo!");
+  PL_ASSERT_DEBUG(pEntry != nullptr, "Failed to deserialize plAssetDocumentInfo!");
   out_pInfo = plUniquePtr<plAssetDocumentInfo>(pEntry, plFoundation::GetDefaultAllocator());
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
 plString plAssetDocumentManager::GenerateResourceThumbnailPath(plStringView sDocumentPath, plStringView sSubAssetName)
@@ -76,10 +76,13 @@ plString plAssetDocumentManager::GenerateResourceThumbnailPath(plStringView sDoc
   else
   {
     sRelativePath = sDocumentPath.GetFileDirectory();
-    sRelativePath.AppendPath(sSubAssetName);
+
+    plStringBuilder sValidFileName;
+    plPathUtils::MakeValidFilename(sSubAssetName, '_', sValidFileName);
+    sRelativePath.AppendPath(sValidFileName);
   }
 
-  plString sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(sRelativePath);  
+  plString sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(sRelativePath);
 
   sRelativePath.MakeRelativeTo(sProjectDir).IgnoreResult();
   sRelativePath.Append(".jpg");
@@ -116,53 +119,53 @@ bool plAssetDocumentManager::IsThumbnailUpToDate(plStringView sDocumentPath, plS
   return thumbnailInfo.IsThumbnailUpToDate(uiThumbnailHash, uiTypeVersion);
 }
 
-void plAssetDocumentManager::AddEntriesToAssetTable(const char* szDataDirectory, const plPlatformProfile* pAssetProfile, plMap<plString, plString>& inout_GuidToPath) const {}
+void plAssetDocumentManager::AddEntriesToAssetTable(plStringView sDataDirectory, const plPlatformProfile* pAssetProfile, plDelegate<void(plStringView sGuid, plStringView sPath, plStringView sType)> addEntry) const {}
 
-plString plAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, const char* szDataDirectory, const plPlatformProfile* pAssetProfile) const
+plString plAssetDocumentManager::GetAssetTableEntry(const plSubAsset* pSubAsset, plStringView sDataDirectory, const plPlatformProfile* pAssetProfile) const
 {
-  return GetRelativeOutputFileName(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor, szDataDirectory, pSubAsset->m_pAssetInfo->m_sAbsolutePath, "", pAssetProfile);
+  return GetRelativeOutputFileName(pSubAsset->m_pAssetInfo->m_pDocumentTypeDescriptor, sDataDirectory, pSubAsset->m_pAssetInfo->m_Path, "", pAssetProfile);
 }
 
-plString plAssetDocumentManager::GetAbsoluteOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, const char* szDocumentPath, const char* szOutputTag, const plPlatformProfile* pAssetProfile) const
+plString plAssetDocumentManager::GetAbsoluteOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile) const
 {
-  plStringBuilder sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(szDocumentPath);
+  plStringBuilder sProjectDir = plAssetCurator::GetSingleton()->FindDataDirectoryForAsset(sDocumentPath);
 
-  plString sRelativePath = GetRelativeOutputFileName(pTypeDesc, sProjectDir, szDocumentPath, szOutputTag, pAssetProfile);
+  plString sRelativePath = GetRelativeOutputFileName(pTypeDesc, sProjectDir, sDocumentPath, sOutputTag, pAssetProfile);
   plStringBuilder sFinalPath(sProjectDir, "/AssetCache/", sRelativePath);
   sFinalPath.MakeCleanPath();
 
   return sFinalPath;
 }
 
-plString plAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, const char* szDataDirectory, const char* szDocumentPath, const char* szOutputTag, const plPlatformProfile* pAssetProfile) const
+plString plAssetDocumentManager::GetRelativeOutputFileName(const plAssetDocumentTypeDescriptor* pTypeDesc, plStringView sDataDirectory, plStringView sDocumentPath, plStringView sOutputTag, const plPlatformProfile* pAssetProfile) const
 {
-  const plPlatformProfile* sPlatform = plAssetDocumentManager::DetermineFinalTargetProfile(pAssetProfile);
-  PLASMA_ASSERT_DEBUG(plStringUtils::IsNullOrEmpty(szOutputTag), "The output tag '{}' for '{}' is not supported, override GetRelativeOutputFileName", szOutputTag, szDocumentPath);
+  const plPlatformProfile* pPlatform = plAssetDocumentManager::DetermineFinalTargetProfile(pAssetProfile);
+  PL_ASSERT_DEBUG(sOutputTag.IsEmpty(), "The output tag '{}' for '{}' is not supported, override GetRelativeOutputFileName", sOutputTag, sDocumentPath);
 
-  plStringBuilder sRelativePath(szDocumentPath);
-  sRelativePath.MakeRelativeTo(szDataDirectory).IgnoreResult();
-  GenerateOutputFilename(sRelativePath, sPlatform, pTypeDesc->m_sResourceFileExtension, GeneratesProfileSpecificAssets());
+  plStringBuilder sRelativePath(sDocumentPath);
+  sRelativePath.MakeRelativeTo(sDataDirectory).IgnoreResult();
+  GenerateOutputFilename(sRelativePath, pPlatform, pTypeDesc->m_sResourceFileExtension, GeneratesProfileSpecificAssets());
 
   return sRelativePath;
 }
 
-bool plAssetDocumentManager::IsOutputUpToDate(const char* szDocumentPath, const plDynamicArray<plString>& outputs, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
+bool plAssetDocumentManager::IsOutputUpToDate(plStringView sDocumentPath, const plDynamicArray<plString>& outputs, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
 {
-  CURATOR_PROFILE(szDocumentPath);
-  if (!IsOutputUpToDate(szDocumentPath, "", uiHash, pTypeDescriptor))
+  CURATOR_PROFILE(sDocumentPath);
+  if (!IsOutputUpToDate(sDocumentPath, "", uiHash, pTypeDescriptor))
     return false;
 
   for (const plString& sOutput : outputs)
   {
-    if (!IsOutputUpToDate(szDocumentPath, sOutput, uiHash, pTypeDescriptor))
+    if (!IsOutputUpToDate(sDocumentPath, sOutput, uiHash, pTypeDescriptor))
       return false;
   }
   return true;
 }
 
-bool plAssetDocumentManager::IsOutputUpToDate(const char* szDocumentPath, const char* szOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
+bool plAssetDocumentManager::IsOutputUpToDate(plStringView sDocumentPath, plStringView sOutputTag, plUInt64 uiHash, const plAssetDocumentTypeDescriptor* pTypeDescriptor)
 {
-  const plString sTargetFile = GetAbsoluteOutputFileName(pTypeDescriptor, szDocumentPath, szOutputTag);
+  const plString sTargetFile = GetAbsoluteOutputFileName(pTypeDescriptor, sDocumentPath, sOutputTag);
   return plAssetDocumentManager::IsResourceUpToDate(sTargetFile, uiHash, pTypeDescriptor->m_pDocumentType->GetTypeVersion());
 }
 
@@ -196,11 +199,11 @@ plResult plAssetDocumentManager::TryOpenAssetDocument(const char* szPathOrGuid)
 
   if (pSubAsset)
   {
-    plQtEditorApp::GetSingleton()->OpenDocumentQueued(pSubAsset->m_pAssetInfo->m_sAbsolutePath);
-    return PLASMA_SUCCESS;
+    plQtEditorApp::GetSingleton()->OpenDocumentQueued(pSubAsset->m_pAssetInfo->m_Path.GetAbsolutePath());
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 bool plAssetDocumentManager::IsResourceUpToDate(const char* szResourceFile, plUInt64 uiHash, plUInt16 uiTypeVersion)
@@ -226,7 +229,10 @@ void plAssetDocumentManager::GenerateOutputFilename(plStringBuilder& inout_sRela
   inout_sRelativeDocumentPath.MakeCleanPath();
 
   if (bPlatformSpecific)
-    inout_sRelativeDocumentPath.Prepend(pAssetProfile->GetConfigName(), "/");
+  {
+    const plPlatformProfile* pPlatform = plAssetDocumentManager::DetermineFinalTargetProfile(pAssetProfile);
+    inout_sRelativeDocumentPath.Prepend(pPlatform->GetConfigName(), "/");
+  }
   else
     inout_sRelativeDocumentPath.Prepend("Common/");
 }

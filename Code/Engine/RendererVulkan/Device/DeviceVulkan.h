@@ -5,11 +5,40 @@
 #include <Foundation/Types/Bitflags.h>
 #include <Foundation/Types/UniquePtr.h>
 #include <RendererFoundation/Device/Device.h>
+#include <RendererVulkan/Device/DispatchContext.h>
 #include <RendererVulkan/RendererVulkanDLL.h>
 
 #include <vulkan/vulkan.hpp>
 
-using plGALFormatLookupEntryVulkan = plGALFormatLookupEntry<vk::Format, (vk::Format)0>;
+PL_DEFINE_AS_POD_TYPE(vk::Format);
+
+struct plGALFormatLookupEntryVulkan
+{
+  plGALFormatLookupEntryVulkan() = default;
+  plGALFormatLookupEntryVulkan(vk::Format format)
+  {
+    m_format = format;
+    m_readback = format;
+  }
+
+  plGALFormatLookupEntryVulkan(vk::Format format, plArrayPtr<vk::Format> mutableFormats)
+  {
+    m_format = format;
+    m_readback = format;
+    m_mutableFormats = mutableFormats;
+  }
+
+  inline plGALFormatLookupEntryVulkan& R(vk::Format readbackType)
+  {
+    m_readback = readbackType;
+    return *this;
+  }
+
+  vk::Format m_format = vk::Format::eUndefined;
+  vk::Format m_readback = vk::Format::eUndefined;
+  plHybridArray<vk::Format, 6> m_mutableFormats;
+};
+
 using plGALFormatLookupTableVulkan = plGALFormatLookupTable<plGALFormatLookupEntryVulkan>;
 
 class plGALBufferVulkan;
@@ -22,20 +51,39 @@ class plQueryPoolVulkan;
 class plInitContextVulkan;
 
 /// \brief The Vulkan device implementation of the graphics abstraction layer.
-class PLASMA_RENDERERVULKAN_DLL plGALDeviceVulkan : public plGALDevice
+class PL_RENDERERVULKAN_DLL plGALDeviceVulkan : public plGALDevice
 {
 private:
-  friend plInternal::NewInstance<plGALDevice> CreateVulkanDevice(plAllocatorBase* pAllocator, const plGALDeviceCreationDescription& Description);
+  friend plInternal::NewInstance<plGALDevice> CreateVulkanDevice(plAllocator* pAllocator, const plGALDeviceCreationDescription& Description);
   plGALDeviceVulkan(const plGALDeviceCreationDescription& Description);
 
 public:
   virtual ~plGALDeviceVulkan();
 
 public:
+  struct PendingDeletionFlags
+  {
+    using StorageType = plUInt32;
+
+    enum Enum
+    {
+      UsesExternalMemory = PL_BIT(0),
+      IsFileDescriptor = PL_BIT(1),
+      Default = 0
+    };
+
+    struct Bits
+    {
+      StorageType UsesExternalMemory : 1;
+      StorageType IsFileDescriptor : 1;
+    };
+  };
+
   struct PendingDeletion
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     vk::ObjectType m_type;
+    plBitflags<PendingDeletionFlags> m_flags;
     void* m_pObject;
     union
     {
@@ -46,7 +94,7 @@ public:
 
   struct ReclaimResource
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     vk::ObjectType m_type;
     void* m_pObject;
     void* m_pContext = nullptr;
@@ -57,12 +105,13 @@ public:
     bool m_bSurface = false;
 #if defined(VK_USE_PLATFORM_WIN32_KHR)
     bool m_bWin32Surface = false;
-#elif PLASMA_ENABLED(PLASMA_SUPPORTS_GLFW)
+#elif PL_ENABLED(PL_SUPPORTS_GLFW)
 #else
 #  error "Vulkan Platform not supported"
 #endif
 
     bool m_bDebugUtils = false;
+    bool m_bDebugUtilsMarkers = false;
     PFN_vkCreateDebugUtilsMessengerEXT pfn_vkCreateDebugUtilsMessengerEXT = nullptr;
     PFN_vkDestroyDebugUtilsMessengerEXT pfn_vkDestroyDebugUtilsMessengerEXT = nullptr;
     PFN_vkSetDebugUtilsObjectNameEXT pfn_vkSetDebugUtilsObjectNameEXT = nullptr;
@@ -72,6 +121,16 @@ public:
 
     vk::PhysicalDeviceCustomBorderColorFeaturesEXT m_borderColorEXT;
     bool m_bBorderColorFloat = false;
+
+    bool m_bImageFormatList = false;
+    vk::PhysicalDeviceTimelineSemaphoreFeatures m_timelineSemaphoresEXT;
+    bool m_bTimelineSemaphore = false;
+
+    bool m_bExternalMemoryFd = false;
+    bool m_bExternalSemaphoreFd = false;
+
+    bool m_bExternalMemoryWin32 = false;
+    bool m_bExternalSemaphoreWin32 = false;
   };
 
   struct Queue
@@ -92,6 +151,7 @@ public:
   vk::PhysicalDevice GetVulkanPhysicalDevice() const;
   const vk::PhysicalDeviceProperties& GetPhysicalDeviceProperties() const { return m_properties; }
   const Extensions& GetExtensions() const { return m_extensions; }
+  const plVulkanDispatchContext& GetDispatchContext() const { return m_dispatchContext; }
   vk::PipelineStageFlags GetSupportedStages() const;
 
   vk::CommandBuffer& GetCurrentCommandBuffer();
@@ -101,23 +161,35 @@ public:
   plInitContextVulkan& GetInitContext() const;
   plProxyAllocator& GetAllocator();
 
-  plGALTextureHandle CreateTextureInternal(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, vk::Format OverrideFormat, bool bLinearCPU = false);
+  plGALTextureHandle CreateTextureInternal(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, bool bLinearCPU = false, bool bStaging = false);
   plGALBufferHandle CreateBufferInternal(const plGALBufferCreationDescription& Description, plArrayPtr<const plUInt8> pInitialData, bool bCPU = false);
 
   const plGALFormatLookupTableVulkan& GetFormatLookupTable() const;
 
   plInt32 GetMemoryIndex(vk::MemoryPropertyFlags properties, const vk::MemoryRequirements& requirements) const;
 
-  vk::Fence Submit(vk::Semaphore waitSemaphore, vk::PipelineStageFlags waitStage, vk::Semaphore signalSemaphore);
+  vk::Fence Submit();
 
-  void DeleteLater(const PendingDeletion& deletion);
+  void DeleteLaterImpl(const PendingDeletion& deletion);
+
+  void DeleteLater(vk::Image& image, vk::DeviceMemory& externalMemory)
+  {
+    if (image)
+    {
+      PendingDeletion del = {vk::ObjectType::eImage, {PendingDeletionFlags::UsesExternalMemory}, (void*)image, nullptr};
+      del.m_pContext = (void*)externalMemory;
+      DeleteLaterImpl(del);
+    }
+    image = nullptr;
+    externalMemory = nullptr;
+  }
 
   template <typename T>
   void DeleteLater(T& object, plVulkanAllocation& allocation)
   {
     if (object)
     {
-      DeleteLater({object.objectType, (void*)object, allocation});
+      DeleteLaterImpl({object.objectType, {}, (void*)object, allocation});
     }
     object = nullptr;
     allocation = nullptr;
@@ -128,9 +200,9 @@ public:
   {
     if (object)
     {
-      PendingDeletion del = {object.objectType, (void*)object, nullptr};
+      PendingDeletion del = {object.objectType, {}, (void*)object, nullptr};
       del.m_pContext = pContext;
-      DeleteLater(static_cast<const PendingDeletion&>(del));
+      DeleteLaterImpl(static_cast<const PendingDeletion&>(del));
     }
     object = nullptr;
   }
@@ -140,7 +212,7 @@ public:
   {
     if (object)
     {
-      DeleteLater({object.objectType, (void*)object, nullptr});
+      DeleteLaterImpl({object.objectType, {}, (void*)object, nullptr});
     }
     object = nullptr;
   }
@@ -159,7 +231,7 @@ public:
   template <typename T>
   void SetDebugName(const char* szName, T& object, plVulkanAllocation allocation = nullptr)
   {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
     if (object)
     {
       vk::DebugUtilsObjectNameInfoEXT nameInfo;
@@ -184,6 +256,27 @@ public:
   };
   plEvent<OnBeforeImageDestroyedData> OnBeforeImageDestroyed;
 
+  virtual const plGALSharedTexture* GetSharedTexture(plGALTextureHandle hTexture) const override;
+
+  struct SemaphoreInfo
+  {
+    static SemaphoreInfo MakeWaitSemaphore(vk::Semaphore semaphore, vk::PipelineStageFlagBits waitStage = vk::PipelineStageFlagBits::eAllCommands, vk::SemaphoreType type = vk::SemaphoreType::eBinary, plUInt64 uiValue = 0)
+    {
+      return SemaphoreInfo{semaphore, type, waitStage, uiValue};
+    }
+
+    static SemaphoreInfo MakeSignalSemaphore(vk::Semaphore semaphore, vk::SemaphoreType type = vk::SemaphoreType::eBinary, plUInt64 uiValue = 0)
+    {
+      return SemaphoreInfo{semaphore, type, vk::PipelineStageFlagBits::eNone, uiValue};
+    }
+
+    vk::Semaphore m_semaphore;
+    vk::SemaphoreType m_type = vk::SemaphoreType::eBinary;
+    vk::PipelineStageFlagBits m_waitStage = vk::PipelineStageFlagBits::eAllCommands;
+    plUInt64 m_uiValue = 0;
+  };
+  void AddWaitSemaphore(const SemaphoreInfo& waitSemaphore);
+  void AddSignalSemaphore(const SemaphoreInfo& signalSemaphore);
 
   // These functions need to be implemented by a render API abstraction
 protected:
@@ -202,6 +295,8 @@ protected:
 
   virtual plGALPass* BeginPassPlatform(const char* szName) override;
   virtual void EndPassPlatform(plGALPass* pPass) override;
+
+  virtual void FlushPlatform() override;
 
 
   // State creation functions
@@ -229,6 +324,9 @@ protected:
 
   virtual plGALTexture* CreateTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData) override;
   virtual void DestroyTexturePlatform(plGALTexture* pTexture) override;
+
+  virtual plGALTexture* CreateSharedTexturePlatform(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, plEnum<plGALSharedTextureType> sharedType, plGALPlatformSharedHandle handle) override;
+  virtual void DestroySharedTexturePlatform(plGALTexture* pTexture) override;
 
   virtual plGALResourceView* CreateResourceViewPlatform(plGALResourceBase* pResource, const plGALResourceViewCreationDescription& Description) override;
   virtual void DestroyResourceViewPlatform(plGALResourceView* pResourceView) override;
@@ -316,16 +414,19 @@ private:
 
   PerFrameData m_PerFrameData[4];
 
-#if PLASMA_ENABLED(PLASMA_USE_PROFILING)
+#if PL_ENABLED(PL_USE_PROFILING)
   struct GPUTimingScope* m_pFrameTimingScope = nullptr;
   struct GPUTimingScope* m_pPipelineTimingScope = nullptr;
   struct GPUTimingScope* m_pPassTimingScope = nullptr;
 #endif
 
   Extensions m_extensions;
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+  plVulkanDispatchContext m_dispatchContext;
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   VkDebugUtilsMessengerEXT m_debugMessenger = VK_NULL_HANDLE;
 #endif
+  plHybridArray<SemaphoreInfo, 3> m_waitSemaphores;
+  plHybridArray<SemaphoreInfo, 3> m_signalSemaphores;
 };
 
 #include <RendererVulkan/Device/Implementation/DeviceVulkan_inl.h>

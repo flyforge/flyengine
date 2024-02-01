@@ -5,7 +5,7 @@ PluginInfo
 {
 	string %DisplayName{"Substance Integration"}
 	string %Description{"Export textures from sbs files directly in the plEditor"}
-	string %EditorPlugins{"plasmaEditorPluginSubstance"}
+	string %EditorPlugins{"plEditorPluginSubstance"}
 	string %EditorEnginePlugins{}
 	string %RuntimePlugins{}
 	string %PackageDependencies{}

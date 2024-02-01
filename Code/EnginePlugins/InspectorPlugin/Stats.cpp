@@ -96,10 +96,10 @@ static void PerFrameUpdateHandler(const plGameApplicationExecutionEvent& e)
           plUInt32 uiNumTasks = 0;
           const double Utilization = plTaskSystem::GetThreadUtilization(plWorkerThreadType::ShortTasks, t, &uiNumTasks);
 
-          s.Format("Utilization/Short{0}_Load[%%]", plArgI(t, 2, true));
+          s.SetFormat("Utilization/Short{0}_Load[%%]", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), Utilization * 100.0);
 
-          s.Format("Utilization/Short{0}_Tasks", plArgI(t, 2, true));
+          s.SetFormat("Utilization/Short{0}_Tasks", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), uiNumTasks);
         }
 
@@ -108,10 +108,10 @@ static void PerFrameUpdateHandler(const plGameApplicationExecutionEvent& e)
           plUInt32 uiNumTasks = 0;
           const double Utilization = plTaskSystem::GetThreadUtilization(plWorkerThreadType::LongTasks, t, &uiNumTasks);
 
-          s.Format("Utilization/Long{0}_Load[%%]", plArgI(t, 2, true));
+          s.SetFormat("Utilization/Long{0}_Load[%%]", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), Utilization * 100.0);
 
-          s.Format("Utilization/Long{0}_Tasks", plArgI(t, 2, true));
+          s.SetFormat("Utilization/Long{0}_Tasks", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), uiNumTasks);
         }
 
@@ -120,10 +120,10 @@ static void PerFrameUpdateHandler(const plGameApplicationExecutionEvent& e)
           plUInt32 uiNumTasks = 0;
           const double Utilization = plTaskSystem::GetThreadUtilization(plWorkerThreadType::FileAccess, t, &uiNumTasks);
 
-          s.Format("Utilization/File{0}_Load[%%]", plArgI(t, 2, true));
+          s.SetFormat("Utilization/File{0}_Load[%%]", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), Utilization * 100.0);
 
-          s.Format("Utilization/File{0}_Tasks", plArgI(t, 2, true));
+          s.SetFormat("Utilization/File{0}_Tasks", plArgI(t, 2, true));
           plStats::SetStat(s.GetData(), uiNumTasks);
         }
       }
@@ -164,4 +164,4 @@ void RemoveStatsEventHandler()
 
 
 
-PLASMA_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Stats);
+PL_STATICLINK_FILE(InspectorPlugin, InspectorPlugin_Stats);

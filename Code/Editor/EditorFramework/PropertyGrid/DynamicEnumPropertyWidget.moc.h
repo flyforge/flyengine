@@ -8,7 +8,7 @@ class QComboBox;
 
 /// *** Asset Browser ***
 
-class PLASMA_EDITORFRAMEWORK_DLL plQtDynamicEnumPropertyWidget : public plQtStandardPropertyWidget
+class PL_EDITORFRAMEWORK_DLL plQtDynamicEnumPropertyWidget : public plQtStandardPropertyWidget
 {
   Q_OBJECT
 

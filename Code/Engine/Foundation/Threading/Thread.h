@@ -10,14 +10,14 @@
 // Warning: 'this' used in member initialization list (is fine here since it is just stored and not
 // accessed in the constructor (so no operations on a not completely initialized object happen)
 
-#define PLASMA_MSVC_WARNING_NUMBER 4355
-#include <Foundation/Basics/Compiler/MSVC/DisableWarning_MSVC.h>
+PL_WARNING_PUSH()
+PL_WARNING_DISABLE_MSVC(4355)
 
-#ifndef PLASMA_THREAD_CLASS_ENTRY_POINT
+#ifndef PL_THREAD_CLASS_ENTRY_POINT
 #  error "Definition for plThreadClassEntryPoint is missing on this platform!"
 #endif
 
-PLASMA_THREAD_CLASS_ENTRY_POINT;
+PL_THREAD_CLASS_ENTRY_POINT;
 
 struct plThreadEvent
 {
@@ -36,7 +36,7 @@ struct plThreadEvent
 /// \brief This class is the base class for platform independent long running threads
 ///
 /// Used by deriving from this class and overriding the Run() method.
-class PLASMA_FOUNDATION_DLL plThread : public plOSThread
+class PL_FOUNDATION_DLL plThread : public plOSThread
 {
 public:
   /// \brief Describes the thread status
@@ -80,4 +80,4 @@ private:
   friend plUInt32 RunThread(plThread* pThread);
 };
 
-#include <Foundation/Basics/Compiler/MSVC/RestoreWarning_MSVC.h>
+PL_WARNING_POP()

@@ -1,19 +1,19 @@
 pl_cmake_init()
 
-pl_requires(PLASMA_3RDPARTY_ADS_SUPPORT)
+pl_requires(PL_3RDPARTY_ADS_SUPPORT)
 
 pl_requires_qt()
 
 # Get the name of this folder as the project name
 get_filename_component(PROJECT_NAME ${CMAKE_CURRENT_SOURCE_DIR} NAME_WE)
 
-pl_create_target(SHARED_LIBRARY ${PROJECT_NAME} NO_PLASMA_PREFIX)
+pl_create_target(LIBRARY ${PROJECT_NAME} NO_PL_PREFIX)
 
 target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR})
 
 pl_link_target_qt(TARGET ${PROJECT_NAME} COMPONENTS Core Gui Widgets Svg)
 
-if (PLASMA_COMPILE_ENGINE_AS_DLL)
+if (PL_COMPILE_ENGINE_AS_DLL)
   target_compile_definitions(${PROJECT_NAME} PRIVATE ADS_SHARED_EXPORT)
 else()
   target_compile_definitions(${PROJECT_NAME} PUBLIC ADS_STATIC)
@@ -38,10 +38,11 @@ set (MOC_FILES
   )
 pl_qt_wrap_target_moc_files(${PROJECT_NAME} "${MOC_FILES}")
 
-if(PLASMA_CMAKE_PLATFORM_WINDOWS)
-  target_compile_options(${PROJECT_NAME} PRIVATE /wd4458 /wd4996 /wd4456 /wd4702)
+if(PL_CMAKE_COMPILER_MSVC)
+  target_compile_options(${PROJECT_NAME} PRIVATE /wd4458 /wd4456 /wd4702)
 endif()
 
-if(PLASMA_CMAKE_PLATFORM_LINUX)
+if(PL_CMAKE_PLATFORM_LINUX)
   target_link_libraries(${PROJECT_NAME} PRIVATE xcb Qt6::GuiPrivate)
+  target_compile_definitions(${PROJECT_NAME} PUBLIC Q_OS_LINUX)
 endif()

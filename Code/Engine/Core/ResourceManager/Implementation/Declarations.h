@@ -52,22 +52,22 @@ struct plResourceManagerEvent
 /// \brief The flags of an plResource instance.
 struct plResourceFlags
 {
-  typedef plUInt16 StorageType;
+  using StorageType = plUInt16;
 
   /// \brief The flags of an plResource instance.
   enum Enum
   {
-    UpdateOnMainThread      = PLASMA_BIT(0),  ///< After loading the resource data on a thread, it must be uploaded on the main thread. Use this for resources which require a context that is only available on the main thread.
-    NoFileAccessRequired    = PLASMA_BIT(1),  ///< The resource 'loading' does not require file accesses and can therefore be done on one or several non-file-loading threads. Use this for procedurally generated data.
+    UpdateOnMainThread      = PL_BIT(0),  ///< After loading the resource data on a thread, it must be uploaded on the main thread. Use this for resources which require a context that is only available on the main thread.
+    NoFileAccessRequired    = PL_BIT(1),  ///< The resource 'loading' does not require file accesses and can therefore be done on one or several non-file-loading threads. Use this for procedurally generated data.
     /// \todo implement NoFileAccessRequired
-    ResourceHasFallback     = PLASMA_BIT(2),  ///< Specifies whether this resource has a valid fallback resource that could be used. Automatically updated in plResource::SetFallbackResource.
-    ResourceHasTypeFallback = PLASMA_BIT(3),  ///< Specifies whether this resource has a valid type fallback that could be used.
-    IsReloadable            = PLASMA_BIT(4),  ///< The resource was created, not loaded from file
-    IsQueuedForLoading      = PLASMA_BIT(5),
-    HasCustomDataLoader     = PLASMA_BIT(6),  ///< True if someone wants to update a resource with custom data and has created a resource loader to update this specific resource
-    PreventFileReload       = PLASMA_BIT(7),  ///< Once this flag is set, no reloading from file is done, until the flag is manually removed. Automatically set when a custom loader is used. To restore a file to the disk state, this flag must be removed and then the resource can be reloaded.
-    HasLowResData           = PLASMA_BIT(8),  ///< Whether low resolution data was set on a resource once before
-    IsCreatedResource       = PLASMA_BIT(9),  ///< When this is set, the resource was created and not loaded from file
+    ResourceHasFallback     = PL_BIT(2),  ///< Specifies whether this resource has a valid fallback resource that could be used. Automatically updated in plResource::SetFallbackResource.
+    ResourceHasTypeFallback = PL_BIT(3),  ///< Specifies whether this resource has a valid type fallback that could be used.
+    IsReloadable            = PL_BIT(4),  ///< The resource was created, not loaded from file
+    IsQueuedForLoading      = PL_BIT(5),
+    HasCustomDataLoader     = PL_BIT(6),  ///< True if someone wants to update a resource with custom data and has created a resource loader to update this specific resource
+    PreventFileReload       = PL_BIT(7),  ///< Once this flag is set, no reloading from file is done, until the flag is manually removed. Automatically set when a custom loader is used. To restore a file to the disk state, this flag must be removed and then the resource can be reloaded.
+    HasLowResData           = PL_BIT(8),  ///< Whether low resolution data was set on a resource once before
+    IsCreatedResource       = PL_BIT(9),  ///< When this is set, the resource was created and not loaded from file
     Default                 = 0,
   };
 
@@ -86,7 +86,7 @@ struct plResourceFlags
   };
 };
 
-PLASMA_DECLARE_FLAGS_OPERATORS(plResourceFlags);
+PL_DECLARE_FLAGS_OPERATORS(plResourceFlags);
 
 /// \brief Describes the state in which a resource can be in.
 enum class plResourceState

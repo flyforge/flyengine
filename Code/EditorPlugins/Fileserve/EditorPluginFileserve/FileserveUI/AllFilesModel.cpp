@@ -2,8 +2,8 @@
 
 #include <EditorPluginFileserve/FileserveUI/AllFilesModel.moc.h>
 
-plQtFileserveAllFilesModel::plQtFileserveAllFilesModel(QWidget* parent)
-  : QAbstractListModel(parent)
+plQtFileserveAllFilesModel::plQtFileserveAllFilesModel(QWidget* pParent)
+  : QAbstractListModel(pParent)
 {
 }
 
@@ -17,14 +17,14 @@ int plQtFileserveAllFilesModel::columnCount(const QModelIndex& parent /*= QModel
   return 2;
 }
 
-QVariant plQtFileserveAllFilesModel::data(const QModelIndex& index, int role /*= Qt::DisplayRole*/) const
+QVariant plQtFileserveAllFilesModel::data(const QModelIndex& index, int iRole /*= Qt::DisplayRole*/) const
 {
   if (!index.isValid())
     return QVariant();
 
   if (index.column() == 0)
   {
-    if (role == Qt::DisplayRole)
+    if (iRole == Qt::DisplayRole)
     {
       return QString::number(m_IndexedFiles[index.row()].Value());
     }
@@ -32,7 +32,7 @@ QVariant plQtFileserveAllFilesModel::data(const QModelIndex& index, int role /*=
 
   if (index.column() == 1)
   {
-    if (role == Qt::DisplayRole)
+    if (iRole == Qt::DisplayRole)
     {
       return m_IndexedFiles[index.row()].Key().GetData();
     }
@@ -91,16 +91,16 @@ void plQtFileserveAllFilesModel::UpdateViewSlot()
   UpdateView();
 }
 
-QVariant plQtFileserveAllFilesModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant plQtFileserveAllFilesModel::headerData(int iSection, Qt::Orientation orientation, int iRole /*= Qt::DisplayRole*/) const
 {
-  if (role == Qt::DisplayRole)
+  if (iRole == Qt::DisplayRole)
   {
-    if (section == 0)
+    if (iSection == 0)
     {
       return "Accesses";
     }
 
-    if (section == 1)
+    if (iSection == 1)
     {
       return "File";
     }

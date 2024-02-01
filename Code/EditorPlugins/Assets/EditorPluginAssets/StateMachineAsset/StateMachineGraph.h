@@ -7,7 +7,7 @@ class plStateMachineTransition;
 
 class plStateMachinePin : public plPin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachinePin, plPin);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachinePin, plPin);
 
 public:
   plStateMachinePin(Type type, const plDocumentObject* pObject);
@@ -17,7 +17,7 @@ public:
 /// types in the Editor we allow the user to switch the type in the properties.
 class plStateMachineConnection : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineConnection, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineConnection, plReflectedClass);
 
 public:
   plStateMachineTransition* m_pType = nullptr;
@@ -26,14 +26,14 @@ public:
 /// \brief Base class for nodes in the state machine graph
 class plStateMachineNodeBase : public plReflectedClass
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineNodeBase, plReflectedClass);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineNodeBase, plReflectedClass);
 };
 
 /// \brief A node that represents a state machine state. We don't use plStateMachineState directly to allow
 /// the user to switch the type in the properties similar to what we do with transitions.
 class plStateMachineNode : public plStateMachineNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineNode, plStateMachineNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineNode, plStateMachineNodeBase);
 
 public:
   plString m_sName;
@@ -47,7 +47,7 @@ public:
 /// Note that there is no "any" state at runtime but rather only the transition is stored.
 class plStateMachineNodeAny : public plStateMachineNodeBase
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachineNodeAny, plStateMachineNodeBase);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachineNodeAny, plStateMachineNodeBase);
 };
 
 class plStateMachineNodeManager : public plDocumentNodeManager
@@ -79,7 +79,7 @@ private:
 
 class plStateMachine_SetInitialStateCommand : public plCommand
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plStateMachine_SetInitialStateCommand, plCommand);
+  PL_ADD_DYNAMIC_REFLECTION(plStateMachine_SetInitialStateCommand, plCommand);
 
 public:
   plStateMachine_SetInitialStateCommand();

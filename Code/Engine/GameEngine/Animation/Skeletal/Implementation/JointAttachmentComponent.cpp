@@ -8,49 +8,49 @@
 #include <RendererCore/Debug/DebugRenderer.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plJointAttachmentComponent, 1, plComponentMode::Dynamic);
+PL_BEGIN_COMPONENT_TYPE(plJointAttachmentComponent, 1, plComponentMode::Dynamic);
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("JointName", GetJointName, SetJointName),
-    PLASMA_MEMBER_PROPERTY("PositionOffset", m_vLocalPositionOffset),
-    PLASMA_MEMBER_PROPERTY("RotationOffset", m_vLocalRotationOffset),
+    PL_ACCESSOR_PROPERTY("JointName", GetJointName, SetJointName),
+    PL_MEMBER_PROPERTY("PositionOffset", m_vLocalPositionOffset),
+    PL_MEMBER_PROPERTY("RotationOffset", m_vLocalRotationOffset),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Animation"),
+      new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated)
+    PL_MESSAGE_HANDLER(plMsgAnimationPoseUpdated, OnAnimationPoseUpdated)
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plJointAttachmentComponent::plJointAttachmentComponent() = default;
 plJointAttachmentComponent::~plJointAttachmentComponent() = default;
 
-void plJointAttachmentComponent::SerializeComponent(plWorldWriter& stream) const
+void plJointAttachmentComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_sJointToAttachTo;
   s << m_vLocalPositionOffset;
   s << m_vLocalRotationOffset;
 }
 
-void plJointAttachmentComponent::DeserializeComponent(plWorldReader& stream)
+void plJointAttachmentComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_sJointToAttachTo;
   s >> m_vLocalPositionOffset;
@@ -90,4 +90,4 @@ void plJointAttachmentComponent::OnAnimationPoseUpdated(plMsgAnimationPoseUpdate
   pOwner->SetLocalRotation(boneRot * m_vLocalRotationOffset);
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_JointAttachmentComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Skeletal_Implementation_JointAttachmentComponent);

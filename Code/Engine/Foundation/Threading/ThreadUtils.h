@@ -7,7 +7,7 @@ struct plTime;
 class plThread;
 
 /// \brief Contains general thread functions.
-class PLASMA_FOUNDATION_DLL plThreadUtils
+class PL_FOUNDATION_DLL plThreadUtils
 {
 public:
   /// \brief Suspends execution of the current thread.
@@ -26,7 +26,7 @@ public:
   static plThreadID GetCurrentThreadID();
 
 private:
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, ThreadUtils);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(Foundation, ThreadUtils);
 
   /// \brief Initialization functionality of the threading system (called by foundation startup and thus private)
   static void Initialize();

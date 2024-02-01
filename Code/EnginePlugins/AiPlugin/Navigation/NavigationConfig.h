@@ -7,7 +7,7 @@
 
 static constexpr plUInt32 plAiNumGroundTypes = 32;
 
-struct PLASMA_AIPLUGIN_DLL plAiNavmeshConfig
+struct PL_AIPLUGIN_DLL plAiNavmeshConfig
 {
   plString m_sName;
 
@@ -21,7 +21,7 @@ struct PLASMA_AIPLUGIN_DLL plAiNavmeshConfig
   float m_fAgentHeight = 1.5f;
   float m_fAgentStepHeight = 0.6f;
 
-  plAngle m_WalkableSlope = plAngle::Degree(45);
+  plAngle m_WalkableSlope = plAngle::MakeFromDegree(45);
 
   float m_fMaxEdgeLength = 4.0f;
   float m_fMaxSimplificationError = 1.3f;
@@ -31,7 +31,7 @@ struct PLASMA_AIPLUGIN_DLL plAiNavmeshConfig
   float m_fDetailMeshSampleErrorFactor = 1.0f;
 };
 
-struct PLASMA_AIPLUGIN_DLL plAiPathSearchConfig
+struct PL_AIPLUGIN_DLL plAiPathSearchConfig
 {
   plAiPathSearchConfig();
 
@@ -40,7 +40,7 @@ struct PLASMA_AIPLUGIN_DLL plAiPathSearchConfig
   bool m_bGroundTypeAllowed[plAiNumGroundTypes]; // = true
 };
 
-struct PLASMA_AIPLUGIN_DLL plAiNavigationConfig
+struct PL_AIPLUGIN_DLL plAiNavigationConfig
 {
   plAiNavigationConfig();
 

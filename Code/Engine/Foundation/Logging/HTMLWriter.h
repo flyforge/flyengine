@@ -10,7 +10,7 @@ namespace plLogWriter
   ///
   /// Create an instance of this class, register the LogMessageHandler at plLog and pass the pointer
   /// to the instance as the pPassThrough argument to it.
-  class PLASMA_FOUNDATION_DLL HTML
+  class PL_FOUNDATION_DLL HTML
   {
   public:
     ~HTML();

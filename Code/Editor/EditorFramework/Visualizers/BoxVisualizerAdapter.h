@@ -22,5 +22,5 @@ protected:
   plVec3 m_vPositionOffset;
   plQuat m_qRotation;
   plBitflags<plVisualizerAnchor> m_Anchor;
-  PlasmaEngineGizmoHandle m_hGizmo;
+  plEngineGizmoHandle m_hGizmo;
 };

@@ -9,8 +9,8 @@
 
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerAction, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plLayerAction, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plActionDescriptorHandle plLayerActions::s_hLayerCategory;
@@ -23,19 +23,19 @@ plActionDescriptorHandle plLayerActions::s_hLayerVisible;
 
 void plLayerActions::RegisterActions()
 {
-  s_hLayerCategory = PLASMA_REGISTER_CATEGORY("LayerCategory");
+  s_hLayerCategory = PL_REGISTER_CATEGORY("LayerCategory");
 
-  s_hCreateLayer = PLASMA_REGISTER_ACTION_1("Layer.CreateLayer", plActionScope::Document, "Scene - Layer", "",
+  s_hCreateLayer = PL_REGISTER_ACTION_1("Layer.CreateLayer", plActionScope::Document, "Scene - Layer", "",
     plLayerAction, plLayerAction::ActionType::CreateLayer);
-  s_hDeleteLayer = PLASMA_REGISTER_ACTION_1("Layer.DeleteLayer", plActionScope::Document, "Scene - Layer", "",
+  s_hDeleteLayer = PL_REGISTER_ACTION_1("Layer.DeleteLayer", plActionScope::Document, "Scene - Layer", "",
     plLayerAction, plLayerAction::ActionType::DeleteLayer);
-  s_hSaveLayer = PLASMA_REGISTER_ACTION_1("Layer.SaveLayer", plActionScope::Document, "Scene - Layer", "",
+  s_hSaveLayer = PL_REGISTER_ACTION_1("Layer.SaveLayer", plActionScope::Document, "Scene - Layer", "",
     plLayerAction, plLayerAction::ActionType::SaveLayer);
-  s_hSaveActiveLayer = PLASMA_REGISTER_ACTION_1("Layer.SaveActiveLayer", plActionScope::Document, "Scene - Layer", "Ctrl+S",
+  s_hSaveActiveLayer = PL_REGISTER_ACTION_1("Layer.SaveActiveLayer", plActionScope::Document, "Scene - Layer", "Ctrl+S",
     plLayerAction, plLayerAction::ActionType::SaveActiveLayer);
-  s_hLayerLoaded = PLASMA_REGISTER_ACTION_1("Layer.LayerLoaded", plActionScope::Document, "Scene - Layer", "",
+  s_hLayerLoaded = PL_REGISTER_ACTION_1("Layer.LayerLoaded", plActionScope::Document, "Scene - Layer", "",
     plLayerAction, plLayerAction::ActionType::LayerLoaded);
-  s_hLayerVisible = PLASMA_REGISTER_ACTION_1("Layer.LayerVisible", plActionScope::Document, "Scene - Layer", "",
+  s_hLayerVisible = PL_REGISTER_ACTION_1("Layer.LayerVisible", plActionScope::Document, "Scene - Layer", "",
     plLayerAction, plLayerAction::ActionType::LayerVisible);
 }
 
@@ -50,14 +50,15 @@ void plLayerActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hLayerVisible);
 }
 
-void plLayerActions::MapContextMenuActions(const char* szMapping, const char* szPath)
+void plLayerActions::MapContextMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
-  PLASMA_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
+  PL_ASSERT_DEV(pMap != nullptr, "The given mapping ('{0}') does not exist, mapping the actions failed!", sMapping);
 
 
   pMap->MapAction(s_hLayerCategory, "", 0.0f);
-  plStringBuilder sSubPath(szPath, "/LayerCategory");
+
+  const plStringView sSubPath = "LayerCategory";
   pMap->MapAction(s_hCreateLayer, sSubPath, 1.0f);
   pMap->MapAction(s_hDeleteLayer, sSubPath, 2.0f);
   pMap->MapAction(s_hSaveLayer, sSubPath, 3.0f);
@@ -127,7 +128,7 @@ void plLayerAction::ToggleLayerLoaded(plScene2Document* pSceneDocument, plUuid l
           sLayerName = subAsset->GetName();
         }
       }
-      sMsg.Format("The layer '{}' has been modified.\nSave before unloading?", sLayerName);
+      sMsg.SetFormat("The layer '{}' has been modified.\nSave before unloading?", sLayerName);
       QMessageBox::StandardButton res = plQtUiServices::MessageBoxQuestion(sMsg, QMessageBox::StandardButton::Yes | QMessageBox::StandardButton::No | QMessageBox::StandardButton::Cancel, QMessageBox::StandardButton::No);
       switch (res)
       {
@@ -152,13 +153,11 @@ void plLayerAction::ToggleLayerLoaded(plScene2Document* pSceneDocument, plUuid l
   }
 
   pSceneDocument->SetLayerLoaded(layerGuid, bLoad).LogFailure();
-  pSceneDocument->SetActiveLayer(layerGuid).IgnoreResult();
+  pSceneDocument->SetActiveLayer(layerGuid).LogFailure();
 }
 
 void plLayerAction::Execute(const plVariant& value)
 {
-  plUuid layerGuid = GetCurrentSelectedLayer();
-
   switch (m_Type)
   {
     case ActionType::CreateLayer:

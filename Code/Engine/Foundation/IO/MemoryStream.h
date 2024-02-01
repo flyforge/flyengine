@@ -14,7 +14,7 @@ class plMemoryStreamWriter;
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief Instances of this class act as storage for memory streams
-class PLASMA_FOUNDATION_DLL plMemoryStreamStorageInterface
+class PL_FOUNDATION_DLL plMemoryStreamStorageInterface
 {
 public:
   plMemoryStreamStorageInterface();
@@ -23,7 +23,7 @@ public:
   /// \brief Returns the number of bytes that are currently stored. Asserts that the stored amount is less than 4GB.
   plUInt32 GetStorageSize32() const
   {
-    PLASMA_ASSERT_ALWAYS(GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "The memory stream storage object has grown beyond 4GB. The code using it has to be adapted to support this.");
+    PL_ASSERT_ALWAYS(GetStorageSize64() <= plMath::MaxValue<plUInt32>(), "The memory stream storage object has grown beyond 4GB. The code using it has to be adapted to support this.");
     return (plUInt32)GetStorageSize64();
   }
 
@@ -80,7 +80,7 @@ class plMemoryStreamContainerStorage : public plMemoryStreamStorageInterface
 {
 public:
   /// \brief Creates the storage object for a memory stream. Use \a uiInitialCapacity to reserve some memory up front.
-  plMemoryStreamContainerStorage(plUInt32 uiInitialCapacity = 0, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator())
+  plMemoryStreamContainerStorage(plUInt32 uiInitialCapacity = 0, plAllocator* pAllocator = plFoundation::GetDefaultAllocator())
     : m_Storage(pAllocator)
   {
     m_Storage.Reserve(uiInitialCapacity);
@@ -93,7 +93,7 @@ public:
 
   virtual void Reserve(plUInt64 uiBytes) override
   {
-    PLASMA_ASSERT_DEV(uiBytes <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerStorage only supports 32 bit addressable sizes.");
+    PL_ASSERT_DEV(uiBytes <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerStorage only supports 32 bit addressable sizes.");
     m_Storage.Reserve(static_cast<plUInt32>(uiBytes));
   }
 
@@ -124,7 +124,7 @@ public:
 private:
   virtual void SetInternalSize(plUInt64 uiSize) override
   {
-    PLASMA_ASSERT_DEV(uiSize <= plMath::MaxValue<plUInt32>(), "Storage that large is not supported.");
+    PL_ASSERT_DEV(uiSize <= plMath::MaxValue<plUInt32>(), "Storage that large is not supported.");
     m_Storage.SetCountUninitialized(static_cast<plUInt32>(uiSize));
   }
 
@@ -141,10 +141,10 @@ private:
 /// are needed. That means it will have a memory overhead of that size.
 /// Also it reallocates memory on demand, and the data is guaranteed to be contiguous. This may be desirable,
 /// but can have a high performance overhead when data grows very large.
-class PLASMA_FOUNDATION_DLL plContiguousMemoryStreamStorage : public plMemoryStreamContainerStorage<plHybridArray<plUInt8, 256>>
+class PL_FOUNDATION_DLL plContiguousMemoryStreamStorage : public plMemoryStreamContainerStorage<plHybridArray<plUInt8, 256>>
 {
 public:
-  plContiguousMemoryStreamStorage(plUInt32 uiInitialCapacity = 0, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator())
+  plContiguousMemoryStreamStorage(plUInt32 uiInitialCapacity = 0, plAllocator* pAllocator = plFoundation::GetDefaultAllocator())
     : plMemoryStreamContainerStorage<plHybridArray<plUInt8, 256>>(uiInitialCapacity, pAllocator)
   {
   }
@@ -157,10 +157,10 @@ public:
 /// To grow, additional chunks of data are allocated. No memory ever needs to be copied to grow the container.
 /// However, that also means that the memory isn't stored in one contiguous array, therefore data has to be accessed piece-wise
 /// through GetContiguousMemoryRange().
-class PLASMA_FOUNDATION_DLL plDefaultMemoryStreamStorage final : public plMemoryStreamStorageInterface
+class PL_FOUNDATION_DLL plDefaultMemoryStreamStorage final : public plMemoryStreamStorageInterface
 {
 public:
-  plDefaultMemoryStreamStorage(plUInt32 uiInitialCapacity = 0, plAllocatorBase* pAllocator = plFoundation::GetDefaultAllocator());
+  plDefaultMemoryStreamStorage(plUInt32 uiInitialCapacity = 0, plAllocator* pAllocator = plFoundation::GetDefaultAllocator());
   ~plDefaultMemoryStreamStorage();
 
   virtual void Reserve(plUInt64 uiBytes) override; // [tested]
@@ -211,7 +211,7 @@ public:
 
   virtual void Reserve(plUInt64 uiBytes) override
   {
-    PLASMA_ASSERT_DEV(uiBytes <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerWrapperStorage only supports 32 bit addressable sizes.");
+    PL_ASSERT_DEV(uiBytes <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerWrapperStorage only supports 32 bit addressable sizes.");
     m_pStorage->Reserve(static_cast<plUInt32>(uiBytes));
   }
 
@@ -239,7 +239,7 @@ public:
 private:
   virtual void SetInternalSize(plUInt64 uiSize) override
   {
-    PLASMA_ASSERT_DEV(uiSize <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerWrapperStorage only supports up to 4GB sizes.");
+    PL_ASSERT_DEV(uiSize <= plMath::MaxValue<plUInt32>(), "plMemoryStreamContainerWrapperStorage only supports up to 4GB sizes.");
     m_pStorage->SetCountUninitialized(static_cast<plUInt32>(uiSize));
   }
 
@@ -255,7 +255,7 @@ private:
 ///
 /// Please note that the functions exposed by this object are not thread safe! If access to the same plMemoryStreamStorage object from
 /// multiple threads is desired please create one instance of plMemoryStreamReader per thread.
-class PLASMA_FOUNDATION_DLL plMemoryStreamReader : public plStreamReader
+class PL_FOUNDATION_DLL plMemoryStreamReader : public plStreamReader
 {
 public:
   /// \brief Pass the memory storage object from which to read from.
@@ -309,7 +309,7 @@ private:
 /// \brief A writer which can access a memory stream
 ///
 /// Please note that the functions exposed by this object are not thread safe!
-class PLASMA_FOUNDATION_DLL plMemoryStreamWriter : public plStreamWriter
+class PL_FOUNDATION_DLL plMemoryStreamWriter : public plStreamWriter
 {
 public:
   /// \brief Pass the memory storage object to which to write to.
@@ -354,7 +354,7 @@ private:
 //////////////////////////////////////////////////////////////////////////
 
 /// \brief Maps a raw chunk of memory to the plStreamReader interface.
-class PLASMA_FOUNDATION_DLL plRawMemoryStreamReader : public plStreamReader
+class PL_FOUNDATION_DLL plRawMemoryStreamReader : public plStreamReader
 {
 public:
   plRawMemoryStreamReader();
@@ -415,7 +415,7 @@ private:
 
 
 /// \brief Maps a raw chunk of memory to the plStreamReader interface.
-class PLASMA_FOUNDATION_DLL plRawMemoryStreamWriter : public plStreamWriter
+class PL_FOUNDATION_DLL plRawMemoryStreamWriter : public plStreamWriter
 {
 public:
   plRawMemoryStreamWriter(); // [tested]

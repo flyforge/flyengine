@@ -27,13 +27,13 @@ namespace MemoryWidgetDetail
 void FormatSize(plStringBuilder& s, plStringView sPrefix, plUInt64 uiSize)
 {
   if (uiSize < 1024)
-    s.Format("{0}{1} Bytes", sPrefix, uiSize);
+    s.SetFormat("{0}{1} Bytes", sPrefix, uiSize);
   else if (uiSize < 1024 * 1024)
-    s.Format("{0}{1} KB", sPrefix, plArgF(uiSize / 1024.0, 1));
+    s.SetFormat("{0}{1} KB", sPrefix, plArgF(uiSize / 1024.0, 1));
   else if (uiSize < 1024 * 1024 * 1024)
-    s.Format("{0}{1} MB", sPrefix, plArgF(uiSize / 1024.0 / 1024.0, 2));
+    s.SetFormat("{0}{1} MB", sPrefix, plArgF(uiSize / 1024.0 / 1024.0, 2));
   else
-    s.Format("{0}{1} GB", sPrefix, plArgF(uiSize / 1024.0 / 1024.0 / 1024.0, 2));
+    s.SetFormat("{0}{1} GB", sPrefix, plArgF(uiSize / 1024.0 / 1024.0 / 1024.0, 2));
 }
 
 plQtMemoryWidget::plQtMemoryWidget(QWidget* pParent)
@@ -175,7 +175,7 @@ void plQtMemoryWidget::UpdateStats()
       sText.AppendFormat(" [{0}]", sSize);
 
       plStringBuilder sTooltip;
-      sTooltip.Format("<p>Allocator: <b>{}</b><br>Current Memory Used: <b>{}</b><br>Max Memory Used: <b>{}</b><br>Live Allocations: <b>{}</b><br>Allocations: "
+      sTooltip.SetFormat("<p>Allocator: <b>{}</b><br>Current Memory Used: <b>{}</b><br>Max Memory Used: <b>{}</b><br>Live Allocations: <b>{}</b><br>Allocations: "
                       "<b>{}</b><br>Deallocations: <b>{}</b><br>",
         it.Value().m_sName,
         sSize.GetData(), sMaxSize.GetData(), it.Value().m_uiLiveAllocs, it.Value().m_uiAllocs, it.Value().m_uiDeallocs);
@@ -196,7 +196,7 @@ void plQtMemoryWidget::UpdateStats()
       sText.AppendFormat(" [{0}]", sSize);
 
       plStringBuilder sTooltip;
-      sTooltip.Format("<p>Current Memory Used: <b>{0}</b><br>Max Memory Used: <b>{1}</b><br>Live Allocations: <b>{2}</b><br>Allocations: "
+      sTooltip.SetFormat("<p>Current Memory Used: <b>{0}</b><br>Max Memory Used: <b>{1}</b><br>Live Allocations: <b>{2}</b><br>Allocations: "
                       "<b>{3}</b><br>Deallocations: <b>{4}</b><br>",
         sSize.GetData(), sMaxSize.GetData(), m_Accu.m_uiLiveAllocs, m_Accu.m_uiAllocs, m_Accu.m_uiDeallocs);
 
@@ -261,7 +261,7 @@ void plQtMemoryWidget::UpdateStats()
     plUInt64 uiMaxUsedMemoryThis = 0;
 
     const plUInt32 uiColorPath = it.Value().m_uiColor % s_uiMaxColors;
-    PLASMA_ASSERT_DEV(uiColorPath < s_uiMaxColors, "Invalid color index: {}", uiColorPath);
+    PL_ASSERT_DEV(uiColorPath < s_uiMaxColors, "Invalid color index: {}", uiColorPath);
 
     uiUsedMemory += it.Value().m_UsedMemory.PeekBack();
     uiLiveAllocs += it.Value().m_uiLiveAllocs;
@@ -342,14 +342,14 @@ void plQtMemoryWidget::UpdateStats()
     FormatSize(s, "Min: ", uiMinUsedMemory);
     LabelMinMemory->setText(QString::fromUtf8(s.GetData()));
 
-    s.Format("<p>Recent Minimum Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiMinUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
+    s.SetFormat("<p>Recent Minimum Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiMinUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
       plArgF(uiMinUsedMemory / 1024.0 / 1024.0, 2), plArgF(uiMinUsedMemory / 1024.0, 2), uiMinUsedMemory);
     LabelMinMemory->setToolTip(QString::fromUtf8(s.GetData()));
 
     FormatSize(s, "Max: ", uiMaxUsedMemory);
     LabelMaxMemory->setText(QString::fromUtf8(s.GetData()));
 
-    s.Format("<p>Recent Maximum Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiMaxUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
+    s.SetFormat("<p>Recent Maximum Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiMaxUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
       plArgF(uiMaxUsedMemory / 1024.0 / 1024.0, 2), plArgF(uiMaxUsedMemory / 1024.0, 2), uiMaxUsedMemory);
     LabelMaxMemory->setToolTip(QString::fromUtf8(s.GetData()));
 
@@ -358,17 +358,17 @@ void plQtMemoryWidget::UpdateStats()
     FormatSize(s, "Sum: ", uiCurUsedMemory);
     LabelCurMemory->setText(QString::fromUtf8(s.GetData()));
 
-    s.Format("<p>Current Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiCurUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
+    s.SetFormat("<p>Current Memory Usage:<br>{0} GB<br>{1} MB<br>{2} KB<br>{3} Byte</p>", plArgF(uiCurUsedMemory / 1024.0 / 1024.0 / 1024.0, 2),
       plArgF(uiCurUsedMemory / 1024.0 / 1024.0, 2), plArgF(uiCurUsedMemory / 1024.0, 2), uiCurUsedMemory);
     LabelCurMemory->setToolTip(QString::fromUtf8(s.GetData()));
 
-    s.Format("Allocs: {0}", uiLiveAllocs);
+    s.SetFormat("Allocs: {0}", uiLiveAllocs);
     LabelNumLiveAllocs->setText(QString::fromUtf8(s.GetData()));
 
-    s.Format("Counter: {0} / {1}", uiAllocs, uiDeallocs);
+    s.SetFormat("Counter: {0} / {1}", uiAllocs, uiDeallocs);
     LabelNumAllocs->setText(QString::fromUtf8(s.GetData()));
 
-    s.Format("<p>Allocations: <b>{0}</b><br>Deallocations: <b>{1}</b></p>", uiAllocs, uiDeallocs);
+    s.SetFormat("<p>Allocations: <b>{0}</b><br>Deallocations: <b>{1}</b></p>", uiAllocs, uiDeallocs);
     LabelNumAllocs->setToolTip(QString::fromUtf8(s.GetData()));
   }
 }
@@ -397,7 +397,7 @@ void plQtMemoryWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage(' MEM', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage(' MEM', Msg) == PL_SUCCESS)
   {
     if (Msg.GetMessageID() == 'BGN')
     {
@@ -429,7 +429,7 @@ void plQtMemoryWidget::ProcessTelemetry(void* pUnuseed)
       plUInt32 uiAllocatorId;
       plUInt32 uiParentId;
 
-      plAllocatorBase::Stats MemStat;
+      plAllocator::Stats MemStat;
       Msg.GetReader() >> uiAllocatorId;
       Msg.GetReader() >> sAllocatorName;
       Msg.GetReader() >> uiParentId;

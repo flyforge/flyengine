@@ -2,14 +2,14 @@
 namespace plInternal
 {
   // static
-  PLASMA_ALWAYS_INLINE WorldData::HierarchyType::Enum WorldData::GetHierarchyType(bool bIsDynamic)
+  PL_ALWAYS_INLINE WorldData::HierarchyType::Enum WorldData::GetHierarchyType(bool bIsDynamic)
   {
     return bIsDynamic ? HierarchyType::Dynamic : HierarchyType::Static;
   }
 
   // static
   template <typename VISITOR>
-  PLASMA_FORCE_INLINE plVisitorExecution::Enum WorldData::TraverseHierarchyLevel(Hierarchy::DataBlockArray& blocks, void* pUserData /* = nullptr*/)
+  PL_FORCE_INLINE plVisitorExecution::Enum WorldData::TraverseHierarchyLevel(Hierarchy::DataBlockArray& blocks, void* pUserData /* = nullptr*/)
   {
     for (WorldData::Hierarchy::DataBlock& block : blocks)
     {
@@ -31,7 +31,7 @@ namespace plInternal
 
   // static
   template <typename VISITOR>
-  PLASMA_FORCE_INLINE plVisitorExecution::Enum WorldData::TraverseHierarchyLevelMultiThreaded(
+  PL_FORCE_INLINE plVisitorExecution::Enum WorldData::TraverseHierarchyLevelMultiThreaded(
     Hierarchy::DataBlockArray& blocks, void* pUserData /* = nullptr*/)
   {
     plParallelForParams parallelForParams;
@@ -41,8 +41,7 @@ namespace plInternal
 
     plTaskSystem::ParallelFor(
       blocks.GetArrayPtr(),
-      [pUserData](plArrayPtr<WorldData::Hierarchy::DataBlock> blocksSlice)
-      {
+      [pUserData](plArrayPtr<WorldData::Hierarchy::DataBlock> blocksSlice) {
         for (WorldData::Hierarchy::DataBlock& block : blocksSlice)
         {
           plGameObject::TransformationData* pCurrentData = block.m_pData;
@@ -61,28 +60,28 @@ namespace plInternal
   }
 
   // static
-  PLASMA_FORCE_INLINE void WorldData::UpdateGlobalTransform(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter)
+  PL_FORCE_INLINE void WorldData::UpdateGlobalTransform(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter)
   {
     pData->UpdateGlobalTransformWithoutParent(uiUpdateCounter);
     pData->UpdateGlobalBounds();
   }
 
   // static
-  PLASMA_FORCE_INLINE void WorldData::UpdateGlobalTransformWithParent(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter)
+  PL_FORCE_INLINE void WorldData::UpdateGlobalTransformWithParent(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter)
   {
     pData->UpdateGlobalTransformWithParent(uiUpdateCounter);
     pData->UpdateGlobalBounds();
   }
 
   // static
-  PLASMA_FORCE_INLINE void WorldData::UpdateGlobalTransformAndSpatialData(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter, plSpatialSystem& spatialSystem)
+  PL_FORCE_INLINE void WorldData::UpdateGlobalTransformAndSpatialData(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter, plSpatialSystem& spatialSystem)
   {
     pData->UpdateGlobalTransformWithoutParent(uiUpdateCounter);
     pData->UpdateGlobalBoundsAndSpatialData(spatialSystem);
   }
 
   // static
-  PLASMA_FORCE_INLINE void WorldData::UpdateGlobalTransformWithParentAndSpatialData(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter, plSpatialSystem& spatialSystem)
+  PL_FORCE_INLINE void WorldData::UpdateGlobalTransformWithParentAndSpatialData(plGameObject::TransformationData* pData, plUInt32 uiUpdateCounter, plSpatialSystem& spatialSystem)
   {
     pData->UpdateGlobalTransformWithParent(uiUpdateCounter);
     pData->UpdateGlobalBoundsAndSpatialData(spatialSystem);
@@ -90,22 +89,22 @@ namespace plInternal
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_ALWAYS_INLINE const plGameObject& WorldData::ConstObjectIterator::operator*() const
+  PL_ALWAYS_INLINE const plGameObject& WorldData::ConstObjectIterator::operator*() const
   {
     return *m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE const plGameObject* WorldData::ConstObjectIterator::operator->() const
+  PL_ALWAYS_INLINE const plGameObject* WorldData::ConstObjectIterator::operator->() const
   {
     return m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE WorldData::ConstObjectIterator::operator const plGameObject*() const
+  PL_ALWAYS_INLINE WorldData::ConstObjectIterator::operator const plGameObject*() const
   {
     return m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE void WorldData::ConstObjectIterator::Next()
+  PL_ALWAYS_INLINE void WorldData::ConstObjectIterator::Next()
   {
     m_Iterator.Next();
 
@@ -115,17 +114,17 @@ namespace plInternal
     }
   }
 
-  PLASMA_ALWAYS_INLINE bool WorldData::ConstObjectIterator::IsValid() const
+  PL_ALWAYS_INLINE bool WorldData::ConstObjectIterator::IsValid() const
   {
     return m_Iterator.IsValid();
   }
 
-  PLASMA_ALWAYS_INLINE void WorldData::ConstObjectIterator::operator++()
+  PL_ALWAYS_INLINE void WorldData::ConstObjectIterator::operator++()
   {
     Next();
   }
 
-  PLASMA_ALWAYS_INLINE WorldData::ConstObjectIterator::ConstObjectIterator(ObjectStorage::ConstIterator iterator)
+  PL_ALWAYS_INLINE WorldData::ConstObjectIterator::ConstObjectIterator(ObjectStorage::ConstIterator iterator)
     : m_Iterator(iterator)
   {
     while (m_Iterator.IsValid() && m_Iterator->GetHandle().IsInvalidated())
@@ -136,22 +135,22 @@ namespace plInternal
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_ALWAYS_INLINE plGameObject& WorldData::ObjectIterator::operator*()
+  PL_ALWAYS_INLINE plGameObject& WorldData::ObjectIterator::operator*()
   {
     return *m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE plGameObject* WorldData::ObjectIterator::operator->()
+  PL_ALWAYS_INLINE plGameObject* WorldData::ObjectIterator::operator->()
   {
     return m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE WorldData::ObjectIterator::operator plGameObject*()
+  PL_ALWAYS_INLINE WorldData::ObjectIterator::operator plGameObject*()
   {
     return m_Iterator;
   }
 
-  PLASMA_ALWAYS_INLINE void WorldData::ObjectIterator::Next()
+  PL_ALWAYS_INLINE void WorldData::ObjectIterator::Next()
   {
     m_Iterator.Next();
 
@@ -161,17 +160,17 @@ namespace plInternal
     }
   }
 
-  PLASMA_ALWAYS_INLINE bool WorldData::ObjectIterator::IsValid() const
+  PL_ALWAYS_INLINE bool WorldData::ObjectIterator::IsValid() const
   {
     return m_Iterator.IsValid();
   }
 
-  PLASMA_ALWAYS_INLINE void WorldData::ObjectIterator::operator++()
+  PL_ALWAYS_INLINE void WorldData::ObjectIterator::operator++()
   {
     Next();
   }
 
-  PLASMA_ALWAYS_INLINE WorldData::ObjectIterator::ObjectIterator(ObjectStorage::Iterator iterator)
+  PL_ALWAYS_INLINE WorldData::ObjectIterator::ObjectIterator(ObjectStorage::Iterator iterator)
     : m_Iterator(iterator)
   {
     while (m_Iterator.IsValid() && m_Iterator->GetHandle().IsInvalidated())
@@ -182,7 +181,7 @@ namespace plInternal
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_FORCE_INLINE WorldData::InitBatch::InitBatch(plAllocatorBase* pAllocator, plStringView sName, bool bMustFinishWithinOneFrame)
+  PL_FORCE_INLINE WorldData::InitBatch::InitBatch(plAllocator* pAllocator, plStringView sName, bool bMustFinishWithinOneFrame)
     : m_bMustFinishWithinOneFrame(bMustFinishWithinOneFrame)
     , m_ComponentsToInitialize(pAllocator)
     , m_ComponentsToStartSimulation(pAllocator)
@@ -192,7 +191,7 @@ namespace plInternal
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_FORCE_INLINE void WorldData::RegisteredUpdateFunction::FillFromDesc(const plWorldModule::UpdateFunctionDesc& desc)
+  PL_FORCE_INLINE void WorldData::RegisteredUpdateFunction::FillFromDesc(const plWorldModule::UpdateFunctionDesc& desc)
   {
     m_Function = desc.m_Function;
     m_sFunctionName = desc.m_sFunctionName;
@@ -201,7 +200,7 @@ namespace plInternal
     m_bOnlyUpdateWhenSimulating = desc.m_bOnlyUpdateWhenSimulating;
   }
 
-  PLASMA_FORCE_INLINE bool WorldData::RegisteredUpdateFunction::operator<(const RegisteredUpdateFunction& other) const
+  PL_FORCE_INLINE bool WorldData::RegisteredUpdateFunction::operator<(const RegisteredUpdateFunction& other) const
   {
     // higher priority comes first
     if (m_fPriority != other.m_fPriority)
@@ -209,43 +208,43 @@ namespace plInternal
 
     // sort by function name to ensure determinism
     plInt32 iNameComp = plStringUtils::Compare(m_sFunctionName, other.m_sFunctionName);
-    PLASMA_ASSERT_DEV(iNameComp != 0, "An update function with the same name and same priority is already registered. This breaks determinism.");
+    PL_ASSERT_DEV(iNameComp != 0, "An update function with the same name and same priority is already registered. This breaks determinism.");
     return iNameComp < 0;
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_ALWAYS_INLINE WorldData::ReadMarker::ReadMarker(const WorldData& data)
+  PL_ALWAYS_INLINE WorldData::ReadMarker::ReadMarker(const WorldData& data)
     : m_Data(data)
   {
   }
 
-  PLASMA_FORCE_INLINE void WorldData::ReadMarker::Lock()
+  PL_FORCE_INLINE void WorldData::ReadMarker::Lock()
   {
-    PLASMA_ASSERT_DEV(m_Data.m_WriteThreadID == (plThreadID)0 || m_Data.m_WriteThreadID == plThreadUtils::GetCurrentThreadID(),
+    PL_ASSERT_DEV(m_Data.m_WriteThreadID == (plThreadID)0 || m_Data.m_WriteThreadID == plThreadUtils::GetCurrentThreadID(),
       "World '{0}' cannot be marked for reading because it is already marked for writing by another thread.", m_Data.m_sName);
     m_Data.m_iReadCounter.Increment();
   }
 
-  PLASMA_ALWAYS_INLINE void WorldData::ReadMarker::Unlock()
+  PL_ALWAYS_INLINE void WorldData::ReadMarker::Unlock()
   {
     m_Data.m_iReadCounter.Decrement();
   }
 
   ///////////////////////////////////////////////////////////////////////////////////////////////////
 
-  PLASMA_ALWAYS_INLINE WorldData::WriteMarker::WriteMarker(WorldData& data)
+  PL_ALWAYS_INLINE WorldData::WriteMarker::WriteMarker(WorldData& data)
     : m_Data(data)
   {
   }
 
-  PLASMA_FORCE_INLINE void WorldData::WriteMarker::Lock()
+  PL_FORCE_INLINE void WorldData::WriteMarker::Lock()
   {
     // already locked by this thread?
     if (m_Data.m_WriteThreadID != plThreadUtils::GetCurrentThreadID())
     {
-      PLASMA_ASSERT_DEV(m_Data.m_iReadCounter == 0, "World '{0}' cannot be marked for writing because it is already marked for reading.", m_Data.m_sName);
-      PLASMA_ASSERT_DEV(m_Data.m_WriteThreadID == (plThreadID)0,
+      PL_ASSERT_DEV(m_Data.m_iReadCounter == 0, "World '{0}' cannot be marked for writing because it is already marked for reading.", m_Data.m_sName);
+      PL_ASSERT_DEV(m_Data.m_WriteThreadID == (plThreadID)0,
         "World '{0}' cannot be marked for writing because it is already marked for writing by another thread.", m_Data.m_sName);
 
       m_Data.m_WriteThreadID = plThreadUtils::GetCurrentThreadID();
@@ -255,7 +254,7 @@ namespace plInternal
     m_Data.m_iWriteCounter++;
   }
 
-  PLASMA_FORCE_INLINE void WorldData::WriteMarker::Unlock()
+  PL_FORCE_INLINE void WorldData::WriteMarker::Unlock()
   {
     m_Data.m_iWriteCounter--;
 

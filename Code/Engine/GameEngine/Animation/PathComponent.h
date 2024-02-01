@@ -12,14 +12,14 @@ struct plMsgParentChanged;
 
 //////////////////////////////////////////////////////////////////////////
 
-PLASMA_DECLARE_FLAGS(plUInt32, plPathComponentFlags, VisualizePath, VisualizeUpDir);
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plPathComponentFlags);
+PL_DECLARE_FLAGS(plUInt32, plPathComponentFlags, VisualizePath, VisualizeUpDir);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plPathComponentFlags);
 
 //////////////////////////////////////////////////////////////////////////
 
-struct PLASMA_GAMEENGINE_DLL plMsgPathChanged : public plEventMessage
+struct PL_GAMEENGINE_DLL plMsgPathChanged : public plEventMessage
 {
-  PLASMA_DECLARE_MESSAGE_TYPE(plMsgPathChanged, plEventMessage);
+  PL_DECLARE_MESSAGE_TYPE(plMsgPathChanged, plEventMessage);
 };
 
 //////////////////////////////////////////////////////////////////////////
@@ -51,9 +51,9 @@ protected:
 ///
 /// During scene export, typically the child objects are automatically deleted (if they have no children and no other components).
 /// Instead, the plPathComponent stores all necessary information in a more compact representation.
-class PLASMA_GAMEENGINE_DLL plPathComponent : public plComponent
+class PL_GAMEENGINE_DLL plPathComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plPathComponent, plComponent, plPathComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plPathComponent, plComponent, plPathComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plComponent
@@ -87,9 +87,9 @@ public:
   /// \brief The 'raw' data for a single path control point
   struct ControlPoint
   {
-    plVec3 m_vPosition = plVec3::ZeroVector();
-    plVec3 m_vTangentIn = plVec3::ZeroVector();
-    plVec3 m_vTangentOut = plVec3::ZeroVector();
+    plVec3 m_vPosition = plVec3::MakeZero();
+    plVec3 m_vTangentIn = plVec3::MakeZero();
+    plVec3 m_vTangentOut = plVec3::MakeZero();
     plAngle m_Roll;
 
     plResult Serialize(plStreamWriter& ref_writer) const;
@@ -106,8 +106,8 @@ public:
   /// \brief If the path is linearized, this represents a single sample point
   struct LinearizedElement
   {
-    plVec3 m_vPosition = plVec3::ZeroVector();
-    plVec3 m_vUpDirection = plVec3::UnitZAxis();
+    plVec3 m_vPosition = plVec3::MakeZero();
+    plVec3 m_vUpDirection = plVec3::MakeAxisZ();
   };
 
   /// \brief If the control points changed recently, this makes sure the linearized representation gets recreated. Call this before GetLinearizedRepresentation(), if necessary.
@@ -204,7 +204,7 @@ struct plPathNodeTangentMode
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plPathNodeTangentMode);
+PL_DECLARE_REFLECTABLE_TYPE(PL_GAMEENGINE_DLL, plPathNodeTangentMode);
 
 
 /// \brief Attach this to child object of an plPathComponent to turn them into viable path nodes.
@@ -213,9 +213,9 @@ PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_GAMEENGINE_DLL, plPathNodeTangentMode);
 ///
 /// This component allows to specify the mode of the tangents (linear, curved),
 /// and also to adjust the 'roll' that the path will have at this location (rotation around the forward axis).
-class PLASMA_GAMEENGINE_DLL plPathNodeComponent : public plComponent
+class PL_GAMEENGINE_DLL plPathNodeComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plPathNodeComponent, plComponent, plPathNodeComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plPathNodeComponent, plComponent, plPathNodeComponentManager);
 
   //////////////////////////////////////////////////////////////////////////
   // plPathNodeComponent

@@ -40,7 +40,7 @@ plQtTypeScriptAssetDocumentWindow::plQtTypeScriptAssetDocumentWindow(plAssetDocu
   {
     plQtDocumentPanel* pPropertyPanel = new plQtDocumentPanel(this, pDocument);
     pPropertyPanel->setObjectName("TypeScriptAssetDockWidget");
-    pPropertyPanel->setWindowTitle("TYPESCRIPT PROPERTIES");
+    pPropertyPanel->setWindowTitle("TypeScript Properties");
     pPropertyPanel->show();
 
     plQtPropertyGridWidget* pPropertyGrid = new plQtPropertyGridWidget(pPropertyPanel, pDocument);
@@ -55,11 +55,10 @@ plQtTypeScriptAssetDocumentWindow::plQtTypeScriptAssetDocumentWindow(plAssetDocu
 
   // central widget
   {
-//    QFont font;
-//    font.setFamily("Courier");
-//    font.setFixedPitch(true);
-//    font.setPointSize(10);
-    QFont font = QApplication::font();
+    QFont font;
+    font.setFamily("Courier");
+    font.setFixedPitch(true);
+    font.setPointSize(10);
 
     m_pSourceLabel = new QTextEdit(this);
     m_pSourceLabel->setFont(font);
@@ -124,8 +123,8 @@ void plQtTypeScriptAssetDocumentWindow::TsDocumentEventHandler(const plTypeScrip
 
 //////////////////////////////////////////////////////////////////////////
 
-JSHighlighter::JSHighlighter(QTextDocument* parent)
-  : QSyntaxHighlighter(parent)
+JSHighlighter::JSHighlighter(QTextDocument* pParent)
+  : QSyntaxHighlighter(pParent)
 {
   // default color scheme
   m_Colors[JSEdit::Comment] = QColor("#6A8A35");

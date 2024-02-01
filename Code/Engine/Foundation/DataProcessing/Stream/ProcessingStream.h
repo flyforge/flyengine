@@ -4,7 +4,7 @@
 #include <Foundation/Strings/HashedString.h>
 
 /// \brief A single stream in a stream group holding contiguous data of a given type.
-class PLASMA_FOUNDATION_DLL plProcessingStream
+class PL_FOUNDATION_DLL plProcessingStream
 {
 public:
   /// \brief The data types which can be stored in the stream.

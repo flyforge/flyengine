@@ -14,22 +14,22 @@ namespace plRmlUiInternal
 
   BlackboardDataBinding::~BlackboardDataBinding() = default;
 
-  plResult BlackboardDataBinding::Initialize(Rml::Context& context)
+  plResult BlackboardDataBinding::Initialize(Rml::Context& ref_context)
   {
     if (m_pBlackboard == nullptr)
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     const char* szModelName = m_pBlackboard->GetName();
     if (plStringUtils::IsNullOrEmpty(szModelName))
     {
       plLog::Error("Can't bind a blackboard without a valid name");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
-    Rml::DataModelConstructor constructor = context.CreateDataModel(szModelName);
+    Rml::DataModelConstructor constructor = ref_context.CreateDataModel(szModelName);
     if (!constructor)
     {
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     for (auto it : m_pBlackboard->GetAllEntries())
@@ -41,7 +41,7 @@ namespace plRmlUiInternal
     {
       constructor.BindFunc(
         wrapper.m_sName.GetData(),
-        [&](Rml::Variant& out_Value) { wrapper.GetValue(out_Value); },
+        [&](Rml::Variant& out_value) { wrapper.GetValue(out_value); },
         [&](const Rml::Variant& value) { wrapper.SetValue(value); });
     }
 
@@ -50,14 +50,14 @@ namespace plRmlUiInternal
     m_uiBlackboardChangeCounter = m_pBlackboard->GetBlackboardChangeCounter();
     m_uiBlackboardEntryChangeCounter = m_pBlackboard->GetBlackboardEntryChangeCounter();
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  void BlackboardDataBinding::Deinitialize(Rml::Context& context)
+  void BlackboardDataBinding::Deinitialize(Rml::Context& ref_context)
   {
     if (m_pBlackboard != nullptr)
     {
-      context.RemoveDataModel(m_pBlackboard->GetName());
+      ref_context.RemoveDataModel(m_pBlackboard->GetName());
     }
   }
 
@@ -96,15 +96,12 @@ namespace plRmlUiInternal
       targetType = pEntry->m_Value.GetType();
     }
 
-    if (m_Blackboard.SetEntryValue(m_sName, plRmlUiConversionUtils::ToVariant(value, targetType)).Failed())
-    {
-      plLog::Error("RmlUI: Can't set blackboard entry '{}', because it doesn't exist.", m_sName);
-    }
+    m_Blackboard.SetEntryValue(m_sName, plRmlUiConversionUtils::ToVariant(value, targetType));
   }
 
-  void BlackboardDataBinding::EntryWrapper::GetValue(Rml::Variant& out_Value) const
+  void BlackboardDataBinding::EntryWrapper::GetValue(Rml::Variant& out_value) const
   {
-    out_Value = plRmlUiConversionUtils::ToVariant(m_Blackboard.GetEntryValue(m_sName));
+    out_value = plRmlUiConversionUtils::ToVariant(m_Blackboard.GetEntryValue(m_sName));
   }
 
 } // namespace plRmlUiInternal

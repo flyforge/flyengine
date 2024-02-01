@@ -31,7 +31,7 @@ plResult plPreprocessor::CopyTokensAndEvaluateDefined(const TokenStream& Source,
 
         plUInt32 uiIdentifier = uiCurToken;
         if (Expect(Source, uiCurToken, plTokenType::Identifier, &uiIdentifier).Failed())
-          return PLASMA_FAILURE;
+          return PL_FAILURE;
 
         plToken* pReplacement = nullptr;
 
@@ -53,7 +53,7 @@ plResult plPreprocessor::CopyTokensAndEvaluateDefined(const TokenStream& Source,
         if (bParenthesis)
         {
           if (Expect(Source, uiCurToken, ")").Failed())
-            return PLASMA_FAILURE;
+            return PL_FAILURE;
         }
       }
       else
@@ -68,7 +68,7 @@ plResult plPreprocessor::CopyTokensAndEvaluateDefined(const TokenStream& Source,
   while (!Destination.IsEmpty() && Destination.PeekBack()->m_iType == plTokenType::Whitespace)
     Destination.PopBack();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::EvaluateCondition(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
@@ -77,22 +77,22 @@ plResult plPreprocessor::EvaluateCondition(const TokenStream& Tokens, plUInt32& 
 
   TokenStream Copied(&m_ClassAllocator);
   if (CopyTokensAndEvaluateDefined(Tokens, uiCurToken, Copied).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   TokenStream Expanded(&m_ClassAllocator);
 
   if (Expand(Copied, Expanded).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (Expanded.IsEmpty())
   {
     PP_LOG0(Error, "After expansion the condition is empty", Tokens[uiCurToken]);
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   plUInt32 uiCurToken2 = 0;
   if (ParseExpressionOr(Expanded, uiCurToken2, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   return ExpectEndOfLine(Expanded, uiCurToken2);
 }
@@ -106,28 +106,28 @@ plResult plPreprocessor::ParseFactor(const TokenStream& Tokens, plUInt32& uiCurT
   if (Accept(Tokens, uiCurToken, "-"))
   {
     if (ParseFactor(Tokens, uiCurToken, iResult).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult = -iResult;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (Accept(Tokens, uiCurToken, "~"))
   {
     if (ParseFactor(Tokens, uiCurToken, iResult).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult = ~iResult;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   if (Accept(Tokens, uiCurToken, "!"))
   {
     if (ParseFactor(Tokens, uiCurToken, iResult).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult = (iResult != 0) ? 0 : 1;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plUInt32 uiValueToken = uiCurToken;
@@ -158,12 +158,12 @@ plResult plPreprocessor::ParseFactor(const TokenStream& Tokens, plUInt32& uiCurT
 
     iResult = (plInt64)iResult32;
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   else if (Accept(Tokens, uiCurToken, "("))
   {
     if (ParseExpressionOr(Tokens, uiCurToken, iResult).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     return Expect(Tokens, uiCurToken, ")");
   }
@@ -171,13 +171,13 @@ plResult plPreprocessor::ParseFactor(const TokenStream& Tokens, plUInt32& uiCurT
   uiCurToken = plMath::Min(uiCurToken, Tokens.GetCount() - 1);
   PP_LOG0(Error, "Syntax error, expected identifier, number or '('", Tokens[uiCurToken]);
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plPreprocessor::ParseExpressionPlus(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionMul(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (true)
   {
@@ -185,7 +185,7 @@ plResult plPreprocessor::ParseExpressionPlus(const TokenStream& Tokens, plUInt32
     {
       plInt64 iNextValue = 0;
       if (ParseExpressionMul(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult += iNextValue;
     }
@@ -193,7 +193,7 @@ plResult plPreprocessor::ParseExpressionPlus(const TokenStream& Tokens, plUInt32
     {
       plInt64 iNextValue = 0;
       if (ParseExpressionMul(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult -= iNextValue;
     }
@@ -201,13 +201,13 @@ plResult plPreprocessor::ParseExpressionPlus(const TokenStream& Tokens, plUInt32
       break;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionShift(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionPlus(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (true)
   {
@@ -215,7 +215,7 @@ plResult plPreprocessor::ParseExpressionShift(const TokenStream& Tokens, plUInt3
     {
       plInt64 iNextValue = 0;
       if (ParseExpressionPlus(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult >>= iNextValue;
     }
@@ -223,7 +223,7 @@ plResult plPreprocessor::ParseExpressionShift(const TokenStream& Tokens, plUInt3
     {
       plInt64 iNextValue = 0;
       if (ParseExpressionPlus(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult <<= iNextValue;
     }
@@ -231,97 +231,97 @@ plResult plPreprocessor::ParseExpressionShift(const TokenStream& Tokens, plUInt3
       break;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionOr(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionAnd(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (Accept(Tokens, uiCurToken, "|", "|"))
   {
     plInt64 iNextValue = 0;
     if (ParseExpressionAnd(Tokens, uiCurToken, iNextValue).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult = (iResult != 0 || iNextValue != 0) ? 1 : 0;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionAnd(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionBitOr(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (Accept(Tokens, uiCurToken, "&", "&"))
   {
     plInt64 iNextValue = 0;
     if (ParseExpressionBitOr(Tokens, uiCurToken, iNextValue).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult = (iResult != 0 && iNextValue != 0) ? 1 : 0;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionBitOr(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionBitXor(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (AcceptUnless(Tokens, uiCurToken, "|", "|"))
   {
     plInt64 iNextValue = 0;
     if (ParseExpressionBitXor(Tokens, uiCurToken, iNextValue).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult |= iNextValue;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionBitAnd(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseCondition(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (AcceptUnless(Tokens, uiCurToken, "&", "&"))
   {
     plInt64 iNextValue = 0;
     if (ParseCondition(Tokens, uiCurToken, iNextValue).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult &= iNextValue;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPreprocessor::ParseExpressionBitXor(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseExpressionBitAnd(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (Accept(Tokens, uiCurToken, "^"))
   {
     plInt64 iNextValue = 0;
     if (ParseExpressionBitAnd(Tokens, uiCurToken, iNextValue).Failed())
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
 
     iResult ^= iNextValue;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 plResult plPreprocessor::ParseExpressionMul(const TokenStream& Tokens, plUInt32& uiCurToken, plInt64& iResult)
 {
   if (ParseFactor(Tokens, uiCurToken, iResult).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   while (true)
   {
@@ -329,7 +329,7 @@ plResult plPreprocessor::ParseExpressionMul(const TokenStream& Tokens, plUInt32&
     {
       plInt64 iNextValue = 0;
       if (ParseFactor(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult *= iNextValue;
     }
@@ -337,7 +337,7 @@ plResult plPreprocessor::ParseExpressionMul(const TokenStream& Tokens, plUInt32&
     {
       plInt64 iNextValue = 0;
       if (ParseFactor(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult /= iNextValue;
     }
@@ -345,7 +345,7 @@ plResult plPreprocessor::ParseExpressionMul(const TokenStream& Tokens, plUInt32&
     {
       plInt64 iNextValue = 0;
       if (ParseFactor(Tokens, uiCurToken, iNextValue).Failed())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       iResult %= iNextValue;
     }
@@ -353,7 +353,7 @@ plResult plPreprocessor::ParseExpressionMul(const TokenStream& Tokens, plUInt32&
       break;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 enum class Comparison
@@ -371,7 +371,7 @@ plResult plPreprocessor::ParseCondition(const TokenStream& Tokens, plUInt32& uiC
 {
   plInt64 iResult1 = 0;
   if (ParseExpressionShift(Tokens, uiCurToken, iResult1).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   Comparison Operator = Comparison::None;
 
@@ -390,41 +390,39 @@ plResult plPreprocessor::ParseCondition(const TokenStream& Tokens, plUInt32& uiC
   else
   {
     iResult = iResult1;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plInt64 iResult2 = 0;
   if (ParseExpressionShift(Tokens, uiCurToken, iResult2).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   switch (Operator)
   {
     case Comparison::Equal:
       iResult = (iResult1 == iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::GreaterThan:
       iResult = (iResult1 > iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::GreaterThanEqual:
       iResult = (iResult1 >= iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::LessThan:
       iResult = (iResult1 < iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::LessThanEqual:
       iResult = (iResult1 <= iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::Unequal:
       iResult = (iResult1 != iResult2) ? 1 : 0;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     case Comparison::None:
       plLog::Error(m_pLog, "Unknown operator");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Conditions);

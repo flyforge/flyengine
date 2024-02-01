@@ -13,7 +13,7 @@ class plStaticArray : public plArrayBase<T, plStaticArray<T, Capacity>>
 {
 public:
   // Only if the stored type is either POD or relocatable the hybrid array itself is also relocatable.
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
+  PL_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
 
   /// \brief Creates an empty array.
   plStaticArray(); // [tested]
@@ -54,7 +54,7 @@ private:
   const T* GetStaticArray() const;
 
   /// \brief The fixed size array.
-  struct alignas(PLASMA_ALIGNMENT_OF(T))
+  struct alignas(PL_ALIGNMENT_OF(T))
   {
     plUInt8 m_Data[Capacity * sizeof(T)];
   };
@@ -62,7 +62,7 @@ private:
   friend class plArrayBase<T, plStaticArray<T, Capacity>>;
 };
 
-// TODO PLASMA_CHECK_AT_COMPILETIME_MSG with a ',' in the expression does not work
-// PLASMA_CHECK_AT_COMPILETIME_MSG(plGetTypeClass< plStaticArray<int, 4> >::value == 2, "static array is not memory relocatable");
+// TODO PL_CHECK_AT_COMPILETIME_MSG with a ',' in the expression does not work
+// PL_CHECK_AT_COMPILETIME_MSG(plGetTypeClass< plStaticArray<int, 4> >::value == 2, "static array is not memory relocatable");
 
 #include <Foundation/Containers/Implementation/StaticArray_inl.h>

@@ -1,7 +1,7 @@
 #pragma once
 
 #include <Core/CoreInternal.h>
-PLASMA_CORE_INTERNAL_HEADER
+PL_CORE_INTERNAL_HEADER
 
 #include <Core/ResourceManager/ResourceManager.h>
 
@@ -98,8 +98,8 @@ private:
   plUInt32 m_uiNextResourceID = 0;
 
   // Resource Unloading
-  plTime m_AutoFreeUnusedTimeout = plTime::Zero();
-  plTime m_AutoFreeUnusedThreshold = plTime::Zero();
+  plTime m_AutoFreeUnusedTimeout = plTime::MakeZero();
+  plTime m_AutoFreeUnusedThreshold = plTime::MakeZero();
 
   plMap<const plRTTI*, plResourceManager::ResourceTypeInfo> m_TypeInfo;
 };

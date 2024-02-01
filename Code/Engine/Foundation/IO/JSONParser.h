@@ -9,7 +9,7 @@ class plLogInterface;
 /// \brief A low level JSON parser that can incrementally parse the structure of a JSON document.
 ///
 /// The document structure is returned through virtual functions that need to be overridden.
-class PLASMA_FOUNDATION_DLL plJSONParser
+class PL_FOUNDATION_DLL plJSONParser
 {
 public:
   /// \brief Constructor.

@@ -10,8 +10,8 @@
 #include <GuiFoundation/PropertyGrid/ManipulatorManager.h>
 #include <ToolsFoundation/Command/TreeCommands.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGreyBoxEditTool, 1, plRTTIDefaultAllocator<plGreyBoxEditTool>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGreyBoxEditTool, 1, plRTTIDefaultAllocator<plGreyBoxEditTool>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plGreyBoxEditTool::plGreyBoxEditTool()
 {
@@ -23,7 +23,7 @@ plGreyBoxEditTool::~plGreyBoxEditTool()
   m_DrawBoxGizmo.m_GizmoEvents.RemoveEventHandler(plMakeDelegate(&plGreyBoxEditTool::GizmoEventHandler, this));
 }
 
-PlasmaEditorInputContext* plGreyBoxEditTool::GetEditorInputContextOverride()
+plEditorInputContext* plGreyBoxEditTool::GetEditorInputContextOverride()
 {
   if (IsActive())
     return &m_DrawBoxGizmo;
@@ -42,49 +42,48 @@ bool plGreyBoxEditTool::GetSupportsMoveParentOnly() const
 }
 
 
-void plGreyBoxEditTool::GetGridSettings(plGridSettingsMsgToEngine& msg)
+void plGreyBoxEditTool::GetGridSettings(plGridSettingsMsgToEngine& ref_msg)
 {
-  auto pSceneDoc = GetDocument();
   plScenePreferencesUser* pPreferences = plPreferences::QueryPreferences<plScenePreferencesUser>(GetDocument());
 
-  msg.m_fGridDensity = plSnapProvider::GetTranslationSnapValue(); // negative density = local space
-  msg.m_vGridTangent1.SetZero();
-  msg.m_vGridTangent2.SetZero();
+  ref_msg.m_fGridDensity = plSnapProvider::GetTranslationSnapValue(); // negative density = local space
+  ref_msg.m_vGridTangent1.SetZero();
+  ref_msg.m_vGridTangent2.SetZero();
 
   if (pPreferences->GetShowGrid())
   {
     if (m_DrawBoxGizmo.GetCurrentMode() == plDrawBoxGizmo::ManipulateMode::DrawBase)
     {
-      msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
+      ref_msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
 
-      msg.m_vGridTangent1 = plVec3(1, 0, 0);
-      msg.m_vGridTangent2 = plVec3(0, 1, 0);
+      ref_msg.m_vGridTangent1 = plVec3(1, 0, 0);
+      ref_msg.m_vGridTangent2 = plVec3(0, 1, 0);
     }
     else if (m_DrawBoxGizmo.GetCurrentMode() == plDrawBoxGizmo::ManipulateMode::DrawHeight)
     {
       const plVec3 vCamDir = GetWindow()->GetFocusedViewWidget()->m_pViewConfig->m_Camera.GetDirForwards();
 
-      msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
+      ref_msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
 
       if (plMath::Abs(plVec3(1, 0, 0).Dot(vCamDir)) < plMath::Abs(plVec3(0, 1, 0).Dot(vCamDir)))
       {
-        msg.m_vGridTangent1 = plVec3(1, 0, 0);
-        msg.m_vGridTangent2 = plVec3(0, 0, 1);
+        ref_msg.m_vGridTangent1 = plVec3(1, 0, 0);
+        ref_msg.m_vGridTangent2 = plVec3(0, 0, 1);
       }
       else
       {
-        msg.m_vGridTangent1 = plVec3(0, 1, 0);
-        msg.m_vGridTangent2 = plVec3(0, 0, 1);
+        ref_msg.m_vGridTangent1 = plVec3(0, 1, 0);
+        ref_msg.m_vGridTangent2 = plVec3(0, 0, 1);
       }
     }
     else if (m_DrawBoxGizmo.GetCurrentMode() == plDrawBoxGizmo::ManipulateMode::None)
     {
       if (m_DrawBoxGizmo.GetDisplayGrid())
       {
-        msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
+        ref_msg.m_vGridCenter = m_DrawBoxGizmo.GetStartPosition();
 
-        msg.m_vGridTangent1 = plVec3(1, 0, 0);
-        msg.m_vGridTangent2 = plVec3(0, 1, 0);
+        ref_msg.m_vGridTangent1 = plVec3(1, 0, 0);
+        ref_msg.m_vGridTangent2 = plVec3(0, 1, 0);
       }
     }
   }
@@ -95,7 +94,7 @@ void plGreyBoxEditTool::UpdateGizmoState()
   plManipulatorManager::GetSingleton()->HideActiveManipulator(GetDocument(), GetDocument()->GetActiveEditTool() != nullptr);
 
   m_DrawBoxGizmo.SetVisible(IsActive());
-  m_DrawBoxGizmo.SetTransformation(plTransform::IdentityTransform());
+  m_DrawBoxGizmo.SetTransformation(plTransform::MakeIdentity());
 }
 
 void plGreyBoxEditTool::GameObjectEventHandler(const plGameObjectEvent& e)
@@ -171,22 +170,22 @@ void plGreyBoxEditTool::GizmoEventHandler(const plGizmoEvent& e)
     pHistory->StartTransaction("Add Grey-Box");
 
     plUuid objGuid, compGuid;
-    objGuid.CreateNewUuid();
-    compGuid.CreateNewUuid();
+    objGuid = plUuid::MakeUuid();
+    compGuid = plUuid::MakeUuid();
 
     {
       plAddObjectCommand cmdAdd;
       cmdAdd.m_NewObjectGuid = objGuid;
       cmdAdd.m_pType = plGetStaticRTTI<plGameObject>();
       cmdAdd.m_sParentProperty = "Children";
-      pHistory->AddCommand(cmdAdd).IgnoreResult();
+      pHistory->AddCommand(cmdAdd).AssertSuccess();
     }
     {
       plSetObjectPropertyCommand cmdPos;
       cmdPos.m_NewValue = vCenter;
       cmdPos.m_Object = objGuid;
       cmdPos.m_sProperty = "LocalPosition";
-      pHistory->AddCommand(cmdPos).IgnoreResult();
+      pHistory->AddCommand(cmdPos).AssertSuccess();
     }
     {
       plAddObjectCommand cmdComp;
@@ -195,7 +194,7 @@ void plGreyBoxEditTool::GizmoEventHandler(const plGizmoEvent& e)
       cmdComp.m_sParentProperty = "Components";
       cmdComp.m_Parent = objGuid;
       cmdComp.m_Index = -1;
-      pHistory->AddCommand(cmdComp).IgnoreResult();
+      pHistory->AddCommand(cmdComp).AssertSuccess();
     }
     if (materialGuid.IsValid())
     {
@@ -204,7 +203,7 @@ void plGreyBoxEditTool::GizmoEventHandler(const plGizmoEvent& e)
       cmdMat.m_NewValue = plConversionUtils::ToString(materialGuid, tmp).GetData();
       cmdMat.m_Object = compGuid;
       cmdMat.m_sProperty = "Material";
-      pHistory->AddCommand(cmdMat).IgnoreResult();
+      pHistory->AddCommand(cmdMat).AssertSuccess();
     }
     {
       plSetObjectPropertyCommand cmdSize;
@@ -212,27 +211,27 @@ void plGreyBoxEditTool::GizmoEventHandler(const plGizmoEvent& e)
 
       cmdSize.m_NewValue = negx;
       cmdSize.m_sProperty = "SizeNegX";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
 
       cmdSize.m_NewValue = posx;
       cmdSize.m_sProperty = "SizePosX";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
 
       cmdSize.m_NewValue = negy;
       cmdSize.m_sProperty = "SizeNegY";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
 
       cmdSize.m_NewValue = posy;
       cmdSize.m_sProperty = "SizePosY";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
 
       cmdSize.m_NewValue = negz;
       cmdSize.m_sProperty = "SizeNegZ";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
 
       cmdSize.m_NewValue = posz;
       cmdSize.m_sProperty = "SizePosZ";
-      pHistory->AddCommand(cmdSize).IgnoreResult();
+      pHistory->AddCommand(cmdSize).AssertSuccess();
     }
 
     pHistory->FinishTransaction();

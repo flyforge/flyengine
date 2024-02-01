@@ -25,7 +25,7 @@ struct plKrautMaterialDescriptor
   plMaterialResourceHandle m_hMaterial;
 };
 
-struct PLASMA_KRAUTPLUGIN_DLL plKrautGeneratorResourceDescriptor
+struct PL_KRAUTPLUGIN_DLL plKrautGeneratorResourceDescriptor
 {
   Kraut::TreeStructureDesc m_TreeStructureDesc;
   Kraut::LodDesc m_LodDesc[5];
@@ -45,10 +45,10 @@ struct PLASMA_KRAUTPLUGIN_DLL plKrautGeneratorResourceDescriptor
   plResult Deserialize(plStreamReader& inout_stream);
 };
 
-class PLASMA_KRAUTPLUGIN_DLL plKrautGeneratorResource : public plResource
+class PL_KRAUTPLUGIN_DLL plKrautGeneratorResource : public plResource
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plKrautGeneratorResource, plResource);
-  PLASMA_RESOURCE_DECLARE_COMMON_CODE(plKrautGeneratorResource);
+  PL_ADD_DYNAMIC_REFLECTION(plKrautGeneratorResource, plResource);
+  PL_RESOURCE_DECLARE_COMMON_CODE(plKrautGeneratorResource);
 
 public:
   plKrautGeneratorResource();

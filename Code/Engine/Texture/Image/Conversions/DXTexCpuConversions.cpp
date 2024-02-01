@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
 
 #  include <Texture/DirectXTex/BC.h>
 #  include <Texture/Image/ImageConversion.h>
@@ -59,7 +59,7 @@ public:
         }
       });
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else if (targetFormat == plImageFormat::BC1_UNORM || targetFormat == plImageFormat::BC1_UNORM_SRGB)
     {
@@ -91,7 +91,7 @@ public:
         }
       });
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else if (targetFormat == plImageFormat::BC6H_UF16)
     {
@@ -123,15 +123,20 @@ public:
         }
       });
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 };
 
+// PL_STATICLINK_FORCE
 static plImageConversion_CompressDxTexCpu s_conversion_compressDxTexCpu;
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_Image_Conversions_DXTexCpuConversions);
+
+
+
+PL_STATICLINK_FILE(Texture, Texture_Image_Conversions_DXTexCpuConversions);
+

@@ -2,6 +2,7 @@
 
 #ifdef BUILDSYSTEM_ENABLE_IMGUI_SUPPORT
 
+#  include <Foundation/IO/TypeVersionContext.h>
 #  include <GameEngine/DearImgui/DearImgui.h>
 #  include <GameEngine/DearImgui/DearImguiRenderer.h>
 #  include <Imgui/imgui_internal.h>
@@ -13,14 +14,14 @@
 #  include <RendererFoundation/Device/Device.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiRenderData, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiRenderData, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiExtractor, 1, plRTTIDefaultAllocator<plImguiExtractor>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiExtractor, 1, plRTTIDefaultAllocator<plImguiExtractor>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiRenderer, 1, plRTTIDefaultAllocator<plImguiRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plImguiRenderer, 1, plRTTIDefaultAllocator<plImguiRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plImguiExtractor::plImguiExtractor(const char* szName)
@@ -29,7 +30,7 @@ plImguiExtractor::plImguiExtractor(const char* szName)
   m_DependsOn.PushBack(plMakeHashedString("plVisibleObjectsExtractor"));
 }
 
-void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& extractedRenderData)
+void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const plGameObject*>& visibleObjects, plExtractedRenderData& ref_extractedRenderData)
 {
   plImgui* pImGui = plImgui::GetSingleton();
   if (pImGui == nullptr)
@@ -38,7 +39,7 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
   }
 
   {
-    PLASMA_LOCK(pImGui->m_ViewToContextTableMutex);
+    PL_LOCK(pImGui->m_ViewToContextTableMutex);
     plImgui::Context context;
     if (!pImGui->m_ViewToContextTable.TryGetValue(view.GetHandle(), context))
     {
@@ -69,14 +70,14 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
       plImguiRenderData* pRenderData = plCreateRenderDataForThisFrame<plImguiRenderData>(nullptr);
       pRenderData->m_uiSortingKey = draw;
       pRenderData->m_GlobalTransform.SetIdentity();
-      pRenderData->m_GlobalBounds.SetInvalid();
+      pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
 
       // copy the vertex data
       // uses the frame allocator to prevent unnecessary deallocations
       {
         const ImDrawList* pCmdList = pDrawData->CmdLists[draw];
 
-        pRenderData->m_Vertices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plImguiVertex, pCmdList->VtxBuffer.size());
+        pRenderData->m_Vertices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plImguiVertex, pCmdList->VtxBuffer.size());
         for (plUInt32 vtx = 0; vtx < pRenderData->m_Vertices.GetCount(); ++vtx)
         {
           const auto& vert = pCmdList->VtxBuffer[vtx];
@@ -86,7 +87,7 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
           pRenderData->m_Vertices[vtx].m_Color = *reinterpret_cast<const plColorGammaUB*>(&vert.col);
         }
 
-        pRenderData->m_Indices = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), ImDrawIdx, pCmdList->IdxBuffer.size());
+        pRenderData->m_Indices = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), ImDrawIdx, pCmdList->IdxBuffer.size());
         for (plUInt32 i = 0; i < pRenderData->m_Indices.GetCount(); ++i)
         {
           pRenderData->m_Indices[i] = pCmdList->IdxBuffer[i];
@@ -97,7 +98,7 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
       {
         const ImDrawList* pCommands = pDrawData->CmdLists[draw];
 
-        pRenderData->m_Batches = PLASMA_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plImguiBatch, pCommands->CmdBuffer.Size);
+        pRenderData->m_Batches = PL_NEW_ARRAY(plFrameAllocator::GetCurrentAllocator(), plImguiBatch, pCommands->CmdBuffer.Size);
 
         for (int cmdIdx = 0; cmdIdx < pCommands->CmdBuffer.Size; cmdIdx++)
         {
@@ -111,9 +112,23 @@ void plImguiExtractor::Extract(const plView& view, const plDynamicArray<const pl
         }
       }
 
-      extractedRenderData.AddRenderData(pRenderData, plDefaultRenderDataCategories::GUI);
+      ref_extractedRenderData.AddRenderData(pRenderData, plDefaultRenderDataCategories::GUI);
     }
   }
+}
+
+plResult plImguiExtractor::Serialize(plStreamWriter& inout_stream) const
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Serialize(inout_stream));
+  return PL_SUCCESS;
+}
+
+plResult plImguiExtractor::Deserialize(plStreamReader& inout_stream)
+{
+  PL_SUCCEED_OR_RETURN(SUPER::Deserialize(inout_stream));
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -140,14 +155,14 @@ plImguiRenderer::~plImguiRenderer()
   }
 }
 
-void plImguiRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plImguiRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& ref_types) const
 {
-  types.PushBack(plGetStaticRTTI<plImguiRenderData>());
+  ref_types.PushBack(plGetStaticRTTI<plImguiRenderData>());
 }
 
-void plImguiRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
+void plImguiRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& ref_categories) const
 {
-  categories.PushBack(plDefaultRenderDataCategories::GUI);
+  ref_categories.PushBack(plDefaultRenderDataCategories::GUI);
 }
 
 void plImguiRenderer::RenderBatch(const plRenderViewContext& renderContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -166,8 +181,8 @@ void plImguiRenderer::RenderBatch(const plRenderViewContext& renderContext, cons
   {
     const plImguiRenderData* pRenderData = it;
 
-    PLASMA_ASSERT_DEV(pRenderData->m_Vertices.GetCount() < s_uiVertexBufferSize, "GUI has too many elements to render in one drawcall");
-    PLASMA_ASSERT_DEV(pRenderData->m_Indices.GetCount() < s_uiIndexBufferSize, "GUI has too many elements to render in one drawcall");
+    PL_ASSERT_DEV(pRenderData->m_Vertices.GetCount() < s_uiVertexBufferSize, "GUI has too many elements to render in one drawcall");
+    PL_ASSERT_DEV(pRenderData->m_Indices.GetCount() < s_uiIndexBufferSize, "GUI has too many elements to render in one drawcall");
 
     pCommandEncoder->UpdateBuffer(m_hVertexBuffer, 0, plMakeArrayPtr(pRenderData->m_Vertices.GetPtr(), pRenderData->m_Vertices.GetCount()).ToByteArray());
     pCommandEncoder->UpdateBuffer(m_hIndexBuffer, 0, plMakeArrayPtr(pRenderData->m_Indices.GetPtr(), pRenderData->m_Indices.GetCount()).ToByteArray());
@@ -254,4 +269,4 @@ void plImguiRenderer::SetupRenderer()
 
 #endif
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_DearImgui_Implementation_DearImguiRenderer);
+PL_STATICLINK_FILE(GameEngine, GameEngine_DearImgui_Implementation_DearImguiRenderer);

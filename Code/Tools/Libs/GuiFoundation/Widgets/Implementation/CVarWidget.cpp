@@ -11,8 +11,8 @@
 #include <QSortFilterProxyModel>
 #include <QStandardItemModel>
 
-plQtCVarWidget::plQtCVarWidget(QWidget* parent)
-  : QWidget(parent)
+plQtCVarWidget::plQtCVarWidget(QWidget* pParent)
+  : QWidget(pParent)
 {
   setupUi(this);
 
@@ -40,7 +40,7 @@ plQtCVarWidget::plQtCVarWidget(QWidget* parent)
   ConsoleInput->setPlaceholderText("> TAB to auto-complete");
 }
 
-plQtCVarWidget::~plQtCVarWidget() {}
+plQtCVarWidget::~plQtCVarWidget() = default;
 
 void plQtCVarWidget::Clear()
 {
@@ -97,10 +97,10 @@ void plQtCVarWidget::UpdateCVarUI(const plMap<plString, plCVarWidgetData>& cvars
   CVarsView->resizeColumnToContents(1);
 }
 
-void plQtCVarWidget::AddConsoleStrings(const plStringBuilder& encoded)
+void plQtCVarWidget::AddConsoleStrings(const plStringBuilder& sEncoded)
 {
   plHybridArray<plStringView, 64> lines;
-  encoded.Split(false, lines, ";;");
+  sEncoded.Split(false, lines, ";;");
 
   plStringBuilder tmp;
 
@@ -195,10 +195,10 @@ void plQtCVarWidget::OnConsoleEvent(const plConsoleEvent& e)
   }
 }
 
-plQtCVarModel::plQtCVarModel(plQtCVarWidget* owner)
-  : QAbstractItemModel(owner)
+plQtCVarModel::plQtCVarModel(plQtCVarWidget* pOwner)
+  : QAbstractItemModel(pOwner)
 {
-  m_pOwner = owner;
+  m_pOwner = pOwner;
 }
 
 plQtCVarModel::~plQtCVarModel() = default;
@@ -215,11 +215,11 @@ void plQtCVarModel::EndResetModel()
   endResetModel();
 }
 
-QVariant plQtCVarModel::headerData(int section, Qt::Orientation orientation, int role /*= Qt::DisplayRole*/) const
+QVariant plQtCVarModel::headerData(int iSection, Qt::Orientation orientation, int iRole /*= Qt::DisplayRole*/) const
 {
-  if (role == Qt::DisplayRole)
+  if (iRole == Qt::DisplayRole)
   {
-    switch (section)
+    switch (iSection)
     {
       case 0:
         return "Name";
@@ -235,12 +235,12 @@ QVariant plQtCVarModel::headerData(int section, Qt::Orientation orientation, int
     }
   }
 
-  return QAbstractItemModel::headerData(section, orientation, role);
+  return QAbstractItemModel::headerData(iSection, orientation, iRole);
 }
 
-bool plQtCVarModel::setData(const QModelIndex& index, const QVariant& value, int role /*= Qt::EditRole*/)
+bool plQtCVarModel::setData(const QModelIndex& index, const QVariant& value, int iRole /*= Qt::EditRole*/)
 {
-  if (index.column() == 1 && role == Qt::EditRole)
+  if (index.column() == 1 && iRole == Qt::EditRole)
   {
     plQtCVarModel::Entry* e = reinterpret_cast<plQtCVarModel::Entry*>(index.internalId());
 
@@ -267,22 +267,22 @@ bool plQtCVarModel::setData(const QModelIndex& index, const QVariant& value, int
     }
   }
 
-  return QAbstractItemModel::setData(index, value, role);
+  return QAbstractItemModel::setData(index, value, iRole);
 }
 
-QVariant plQtCVarModel::data(const QModelIndex& index, int role) const
+QVariant plQtCVarModel::data(const QModelIndex& index, int iRole) const
 {
   if (!index.isValid())
     return QVariant();
 
   plQtCVarModel::Entry* e = reinterpret_cast<plQtCVarModel::Entry*>(index.internalId());
 
-  if (role == Qt::UserRole)
+  if (iRole == Qt::UserRole)
   {
     return e->m_sFullName.GetData();
   }
 
-  if (role == Qt::DisplayRole)
+  if (iRole == Qt::DisplayRole)
   {
     switch (index.column())
     {
@@ -290,14 +290,17 @@ QVariant plQtCVarModel::data(const QModelIndex& index, int role) const
         return e->m_sDisplayString;
 
       case 1:
-        return e->m_Value.ConvertTo<plString>().GetData();
+        if (e->m_Value.IsValid())
+          return e->m_Value.ConvertTo<plString>().GetData();
+        else
+          return QVariant();
 
       case 2:
         return e->m_sDescription;
     }
   }
 
-  if (role == Qt::DecorationRole && index.column() == 0)
+  if (iRole == Qt::DecorationRole && index.column() == 0)
   {
     if (e->m_Value.IsValid())
     {
@@ -305,7 +308,7 @@ QVariant plQtCVarModel::data(const QModelIndex& index, int role) const
     }
   }
 
-  if (role == Qt::ToolTipRole)
+  if (iRole == Qt::ToolTipRole)
   {
     if (e->m_Value.IsValid())
     {
@@ -321,7 +324,7 @@ QVariant plQtCVarModel::data(const QModelIndex& index, int role) const
     }
   }
 
-  if (role == Qt::EditRole && index.column() == 1)
+  if (iRole == Qt::EditRole && index.column() == 1)
   {
     switch (e->m_Value.GetType())
     {
@@ -355,16 +358,16 @@ Qt::ItemFlags plQtCVarModel::flags(const QModelIndex& index) const
   return Qt::ItemFlag::ItemIsSelectable | Qt::ItemFlag::ItemIsEnabled;
 }
 
-QModelIndex plQtCVarModel::index(int row, int column, const QModelIndex& parent /*= QModelIndex()*/) const
+QModelIndex plQtCVarModel::index(int iRow, int iColumn, const QModelIndex& parent /*= QModelIndex()*/) const
 {
   if (parent.isValid())
   {
     plQtCVarModel::Entry* e = reinterpret_cast<plQtCVarModel::Entry*>(parent.internalId());
-    return createIndex(row, column, const_cast<plQtCVarModel::Entry*>(e->m_ChildEntries[row]));
+    return createIndex(iRow, iColumn, const_cast<plQtCVarModel::Entry*>(e->m_ChildEntries[iRow]));
   }
   else
   {
-    return createIndex(row, column, const_cast<plQtCVarModel::Entry*>(m_RootEntries[row]));
+    return createIndex(iRow, iColumn, const_cast<plQtCVarModel::Entry*>(m_RootEntries[iRow]));
   }
 }
 
@@ -426,9 +429,9 @@ int plQtCVarModel::columnCount(const QModelIndex& index /*= QModelIndex()*/) con
   return 3;
 }
 
-plQtCVarModel::Entry* plQtCVarModel::CreateEntry(const char* name)
+plQtCVarModel::Entry* plQtCVarModel::CreateEntry(const char* szName)
 {
-  plStringBuilder tmp = name;
+  plStringBuilder tmp = szName;
   plStringBuilder tmp2;
 
   plHybridArray<plStringView, 8> pieces;
@@ -452,7 +455,7 @@ plQtCVarModel::Entry* plQtCVarModel::CreateEntry(const char* name)
 
     {
       auto& newItem = m_AllEntries.ExpandAndGetRef();
-      newItem.m_sFullName = name;
+      newItem.m_sFullName = szName;
       newItem.m_sDisplayString = piece;
       newItem.m_pParentEntry = parentEntry;
 
@@ -467,7 +470,7 @@ plQtCVarModel::Entry* plQtCVarModel::CreateEntry(const char* name)
   return parentEntry;
 }
 
-QWidget* plQtCVarItemDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& idx) const
+QWidget* plQtCVarItemDelegate::createEditor(QWidget* pParent, const QStyleOptionViewItem& option, const QModelIndex& idx) const
 {
   m_Index = static_cast<const QSortFilterProxyModel*>(idx.model())->mapToSource(idx);
   plQtCVarModel::Entry* e = reinterpret_cast<plQtCVarModel::Entry*>(m_Index.internalPointer());
@@ -477,7 +480,7 @@ QWidget* plQtCVarItemDelegate::createEditor(QWidget* parent, const QStyleOptionV
 
   if (e->m_Value.IsA<bool>())
   {
-    QComboBox* ret = new QComboBox(parent);
+    QComboBox* ret = new QComboBox(pParent);
     ret->addItem("true");
     ret->addItem("false");
 
@@ -487,14 +490,14 @@ QWidget* plQtCVarItemDelegate::createEditor(QWidget* parent, const QStyleOptionV
 
   if (e->m_Value.IsA<plInt32>())
   {
-    QLineEdit* ret = new QLineEdit(parent);
+    QLineEdit* ret = new QLineEdit(pParent);
     ret->setValidator(new QIntValidator(ret));
     return ret;
   }
 
   if (e->m_Value.IsA<float>())
   {
-    QLineEdit* ret = new QLineEdit(parent);
+    QLineEdit* ret = new QLineEdit(pParent);
     auto val = new QDoubleValidator(ret);
     val->setDecimals(3);
     ret->setValidator(val);
@@ -503,20 +506,20 @@ QWidget* plQtCVarItemDelegate::createEditor(QWidget* parent, const QStyleOptionV
 
   if (e->m_Value.IsA<plString>())
   {
-    QLineEdit* ret = new QLineEdit(parent);
+    QLineEdit* ret = new QLineEdit(pParent);
     return ret;
   }
 
   return nullptr;
 }
 
-void plQtCVarItemDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const
+void plQtCVarItemDelegate::setEditorData(QWidget* pEditor, const QModelIndex& index) const
 {
   QVariant value = index.model()->data(index, Qt::EditRole);
 
-  if (QLineEdit* pLine = qobject_cast<QLineEdit*>(editor))
+  if (QLineEdit* pLine = qobject_cast<QLineEdit*>(pEditor))
   {
-    if (value.type() == QVariant::Type::Double)
+    if (value.typeId() == QMetaType::Double)
     {
       double f = value.toDouble();
 
@@ -530,23 +533,23 @@ void plQtCVarItemDelegate::setEditorData(QWidget* editor, const QModelIndex& ind
     pLine->selectAll();
   }
 
-  if (QComboBox* pLine = qobject_cast<QComboBox*>(editor))
+  if (QComboBox* pLine = qobject_cast<QComboBox*>(pEditor))
   {
     pLine->setCurrentIndex(value.toBool() ? 0 : 1);
     pLine->showPopup();
   }
 }
 
-void plQtCVarItemDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const
+void plQtCVarItemDelegate::setModelData(QWidget* pEditor, QAbstractItemModel* pModel, const QModelIndex& index) const
 {
-  if (QLineEdit* pLine = qobject_cast<QLineEdit*>(editor))
+  if (QLineEdit* pLine = qobject_cast<QLineEdit*>(pEditor))
   {
-    model->setData(index, pLine->text(), Qt::EditRole);
+    pModel->setData(index, pLine->text(), Qt::EditRole);
   }
 
-  if (QComboBox* pLine = qobject_cast<QComboBox*>(editor))
+  if (QComboBox* pLine = qobject_cast<QComboBox*>(pEditor))
   {
-    model->setData(index, pLine->currentText(), Qt::EditRole);
+    pModel->setData(index, pLine->currentText(), Qt::EditRole);
   }
 }
 

@@ -3,10 +3,10 @@
 #include <EditorFramework/Visualizers/VisualizerAdapterRegistry.h>
 #include <GuiFoundation/PropertyGrid/VisualizerManager.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plVisualizerAdapterRegistry);
+PL_IMPLEMENT_SINGLETON(plVisualizerAdapterRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, VisualizerAdapterRegistry)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, VisualizerAdapterRegistry)
  
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "VisualizerManager"
@@ -14,16 +14,16 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, VisualizerAdapterRegistry)
  
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plVisualizerAdapterRegistry);
+    PL_DEFAULT_NEW(plVisualizerAdapterRegistry);
   }
  
   ON_CORESYSTEMS_SHUTDOWN
   {
     auto ptr = plVisualizerAdapterRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(ptr);
+    PL_DEFAULT_DELETE(ptr);
   }
  
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plVisualizerAdapterRegistry::plVisualizerAdapterRegistry()
@@ -81,7 +81,7 @@ void plVisualizerAdapterRegistry::ClearAdapters(const plDocument* pDocument)
 {
   for (auto& adapt : m_DocumentAdapters[pDocument].m_Adapters)
   {
-    PLASMA_DEFAULT_DELETE(adapt);
+    PL_DEFAULT_DELETE(adapt);
   }
 
   m_DocumentAdapters[pDocument].m_Adapters.Clear();

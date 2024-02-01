@@ -1,8 +1,10 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Core/GameApplication/GameApplicationBase.h>
 #include <Core/Graphics/Camera.h>
 #include <Foundation/Configuration/CVar.h>
 #include <Foundation/Configuration/Startup.h>
+#include <Foundation/Math/Math.h>
 #include <Foundation/Math/Rect.h>
 #include <Foundation/Profiling/Profiling.h>
 #include <RendererCore/Debug/DebugRenderer.h>
@@ -12,6 +14,7 @@
 #include <RendererCore/Lights/SpotLightComponent.h>
 #include <RendererCore/Pipeline/View.h>
 #include <RendererCore/RenderWorld/RenderWorld.h>
+#include <RendererCore/Utils/CoreRenderProfile.h>
 #include <RendererFoundation/CommandEncoder/RenderCommandEncoder.h>
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/Pass.h>
@@ -20,36 +23,38 @@
 #include <RendererCore/../../../Data/Base/Shaders/Common/LightData.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, ShadowPool)
-BEGIN_SUBSYSTEM_DEPENDENCIES
-"Foundation",
-"Core",
-"RenderWorld"
-END_SUBSYSTEM_DEPENDENCIES
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, ShadowPool)
+  BEGIN_SUBSYSTEM_DEPENDENCIES
+    "Foundation",
+    "Core",
+    "RenderWorld"
+  END_SUBSYSTEM_DEPENDENCIES
 
-ON_HIGHLEVELSYSTEMS_STARTUP
-{
-  plShadowPool::OnEngineStartup();
-}
+  ON_HIGHLEVELSYSTEMS_STARTUP
+  {
+    plShadowPool::OnEngineStartup();
+  }
 
-ON_HIGHLEVELSYSTEMS_SHUTDOWN
-{
-  plShadowPool::OnEngineShutdown();
-}
+  ON_HIGHLEVELSYSTEMS_SHUTDOWN
+  {
+    plShadowPool::OnEngineShutdown();
+  }
+PL_END_SUBSYSTEM_DECLARATION;
+// clang-format on
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
-  // clang-format on
-
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
 plCVarBool cvar_RenderingShadowsShowPoolStats("Rendering.Shadows.ShowPoolStats", false, plCVarFlags::Default, "Display same stats of the shadow pool");
 #endif
 
-static plUInt32 s_uiShadowAtlasTextureWidth = 4096; ///\todo make this configurable
-static plUInt32 s_uiShadowAtlasTextureHeight = 4096;
-static plUInt32 s_uiShadowMapSize = 1024;
-static plUInt32 s_uiMinShadowMapSize = 64;
-static float s_fFadeOutScaleStart = (s_uiMinShadowMapSize + 1.0f) / s_uiShadowMapSize;
-static float s_fFadeOutScaleEnd = s_fFadeOutScaleStart * 0.5f;
+/// NOTE: The default values for these are defined in plCoreRenderProfileConfig
+///       but they can also be overwritten in custom game states at startup.
+PL_RENDERERCORE_DLL plCVarInt cvar_RenderingShadowsAtlasSize("Rendering.Shadows.AtlasSize", 4096, plCVarFlags::RequiresDelayedSync, "The size of the shadow atlas texture.");
+PL_RENDERERCORE_DLL plCVarInt cvar_RenderingShadowsMaxShadowMapSize("Rendering.Shadows.MaxShadowMapSize", 1024, plCVarFlags::RequiresDelayedSync, "The max shadow map size used.");
+PL_RENDERERCORE_DLL plCVarInt cvar_RenderingShadowsMinShadowMapSize("Rendering.Shadows.MinShadowMapSize", 64, plCVarFlags::RequiresDelayedSync, "The min shadow map size used.");
+
+static plUInt32 s_uiLastConfigModification = 0;
+static float s_fFadeOutScaleStart = 0.0f;
+static float s_fFadeOutScaleEnd = 0.0f;
 
 struct ShadowView
 {
@@ -72,7 +77,7 @@ struct ShadowData
 
 struct LightAndRefView
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   const plLightComponent* m_pLight;
   const plView* m_pReferenceView;
@@ -80,12 +85,12 @@ struct LightAndRefView
 
 struct SortedShadowData
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt32 m_uiIndex;
   float m_fShadowMapScale;
 
-  PLASMA_ALWAYS_INLINE bool operator<(const SortedShadowData& other) const
+  PL_ALWAYS_INLINE bool operator<(const SortedShadowData& other) const
   {
     if (m_fShadowMapScale > other.m_fShadowMapScale) // we want to sort descending (higher scale first)
       return true;
@@ -98,16 +103,16 @@ static plDynamicArray<SortedShadowData> s_SortedShadowData;
 
 struct AtlasCell
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
-  PLASMA_ALWAYS_INLINE AtlasCell()
+  PL_ALWAYS_INLINE AtlasCell()
     : m_Rect(0, 0, 0, 0)
   {
     m_uiChildIndices[0] = m_uiChildIndices[1] = m_uiChildIndices[2] = m_uiChildIndices[3] = 0xFFFF;
     m_uiDataIndex = plInvalidIndex;
   }
 
-  PLASMA_ALWAYS_INLINE bool IsLeaf() const
+  PL_ALWAYS_INLINE bool IsLeaf() const
   {
     return m_uiChildIndices[0] == 0xFFFF && m_uiChildIndices[1] == 0xFFFF && m_uiChildIndices[2] == 0xFFFF && m_uiChildIndices[3] == 0xFFFF;
   }
@@ -172,12 +177,12 @@ static AtlasCell* Insert(AtlasCell* pCell, plUInt32 uiShadowMapSize, plUInt32 ui
 
 static plRectU32 FindAtlasRect(plUInt32 uiShadowMapSize, plUInt32 uiDataIndex)
 {
-  PLASMA_ASSERT_DEBUG(plMath::IsPowerOf2(uiShadowMapSize), "Size must be power of 2");
+  PL_ASSERT_DEBUG(plMath::IsPowerOf2(uiShadowMapSize), "Size must be power of 2");
 
   AtlasCell* pCell = Insert(&s_AtlasCells[0], uiShadowMapSize, uiDataIndex);
   if (pCell != nullptr)
   {
-    PLASMA_ASSERT_DEBUG(pCell->IsLeaf() && pCell->m_uiDataIndex == uiDataIndex, "Implementation error");
+    PL_ASSERT_DEBUG(pCell->IsLeaf() && pCell->m_uiDataIndex == uiDataIndex, "Implementation error");
     return pCell->m_Rect;
   }
 
@@ -212,9 +217,9 @@ static void CopyExcludeTagsOnWhiteList(const plTagSet& referenceTags, plTagSet& 
 template <>
 struct plHashHelper<LightAndRefView>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(LightAndRefView value) { return plHashingUtils::xxHash32(&value.m_pLight, sizeof(LightAndRefView)); }
+  PL_ALWAYS_INLINE static plUInt32 Hash(LightAndRefView value) { return plHashingUtils::xxHash32(&value.m_pLight, sizeof(LightAndRefView)); }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const LightAndRefView& a, const LightAndRefView& b)
+  PL_ALWAYS_INLINE static bool Equal(const LightAndRefView& a, const LightAndRefView& b)
   {
     return a.m_pLight == b.m_pLight && a.m_pReferenceView == b.m_pReferenceView;
   }
@@ -256,10 +261,58 @@ struct plShadowPool::Data
   {
     if (m_hShadowAtlasTexture.IsInvalidated())
     {
+      // use the current CVar values to initialize the values
+      plUInt32 uiAtlas = cvar_RenderingShadowsAtlasSize;
+      plUInt32 uiMax = cvar_RenderingShadowsMaxShadowMapSize;
+      plUInt32 uiMin = cvar_RenderingShadowsMinShadowMapSize;
+
+      // if the platform profile has changed, use it to reset the defaults
+      if (s_uiLastConfigModification != plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetLastModificationCounter())
+      {
+        s_uiLastConfigModification = plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetLastModificationCounter();
+
+        const auto* pConfig = plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetTypeConfig<plCoreRenderProfileConfig>();
+
+        uiAtlas = pConfig->m_uiShadowAtlasTextureSize;
+        uiMax = pConfig->m_uiMaxShadowMapSize;
+        uiMin = pConfig->m_uiMinShadowMapSize;
+      }
+
+      // if the CVars were modified recently (e.g. during game startup), use those values to override the default
+      if (cvar_RenderingShadowsAtlasSize.HasDelayedSyncValueChanged())
+        uiAtlas = cvar_RenderingShadowsAtlasSize.GetValue(plCVarValue::DelayedSync);
+
+      if (cvar_RenderingShadowsMaxShadowMapSize.HasDelayedSyncValueChanged())
+        uiMax = cvar_RenderingShadowsMaxShadowMapSize.GetValue(plCVarValue::DelayedSync);
+
+      if (cvar_RenderingShadowsMinShadowMapSize.HasDelayedSyncValueChanged())
+        uiMin = cvar_RenderingShadowsMinShadowMapSize.GetValue(plCVarValue::DelayedSync);
+
+      // make sure the values are valid
+      uiAtlas = plMath::Clamp(plMath::PowerOfTwo_Floor(uiAtlas), 512u, 8192u);
+      uiMax = plMath::Clamp(plMath::PowerOfTwo_Floor(uiMax), 64u, 2048u);
+      uiMin = plMath::Clamp(plMath::PowerOfTwo_Floor(uiMin), 8u, 512u);
+
+      uiMax = plMath::Min(uiMax, uiAtlas);
+      uiMin = plMath::Min(uiMin, uiMax);
+
+      // write back the clamped values, so that everyone sees the valid values
+      cvar_RenderingShadowsAtlasSize = uiAtlas;
+      cvar_RenderingShadowsMaxShadowMapSize = uiMax;
+      cvar_RenderingShadowsMinShadowMapSize = uiMin;
+
+      // apply the new values
+      cvar_RenderingShadowsAtlasSize.SetToDelayedSyncValue();
+      cvar_RenderingShadowsMaxShadowMapSize.SetToDelayedSyncValue();
+      cvar_RenderingShadowsMinShadowMapSize.SetToDelayedSyncValue();
+
       plGALTextureCreationDescription desc;
-      desc.SetAsRenderTarget(s_uiShadowAtlasTextureWidth, s_uiShadowAtlasTextureHeight, plGALResourceFormat::D16);
+      desc.SetAsRenderTarget(cvar_RenderingShadowsAtlasSize, cvar_RenderingShadowsAtlasSize, plGALResourceFormat::D16);
 
       m_hShadowAtlasTexture = plGALDevice::GetDefaultDevice()->CreateTexture(desc);
+
+      s_fFadeOutScaleStart = (cvar_RenderingShadowsMinShadowMapSize + 1.0f) / cvar_RenderingShadowsMaxShadowMapSize;
+      s_fFadeOutScaleEnd = s_fFadeOutScaleStart * 0.5f;
     }
   }
 
@@ -293,7 +346,7 @@ struct plShadowPool::Data
     renderTargets.m_hDSTarget = m_hShadowAtlasTexture;
     pView->SetRenderTargets(renderTargets);
 
-    PLASMA_ASSERT_DEV(m_ShadowViewsMutex.IsLocked(), "m_ShadowViewsMutex must be locked at this point.");
+    PL_ASSERT_DEV(m_ShadowViewsMutex.IsLocked(), "m_ShadowViewsMutex must be locked at this point.");
     m_ShadowViewsMutex.Unlock(); // if the resource gets loaded in the call below, his could lead to a deadlock
 
     // ShadowMapRenderPipeline.plRenderPipelineAsset
@@ -315,7 +368,7 @@ struct plShadowPool::Data
 
   ShadowView& GetShadowView(plView*& out_pView)
   {
-    PLASMA_LOCK(m_ShadowViewsMutex);
+    PL_LOCK(m_ShadowViewsMutex);
 
     if (m_uiUsedViews == m_ShadowViews.GetCount())
     {
@@ -335,7 +388,7 @@ struct plShadowPool::Data
 
   bool GetDataForExtraction(const plLightComponent* pLight, const plView* pReferenceView, float fShadowMapScale, plUInt32 uiPackedDataSizeInBytes, ShadowData*& out_pData)
   {
-    PLASMA_LOCK(m_ShadowDataMutex);
+    PL_LOCK(m_ShadowDataMutex);
 
     LightAndRefView key = {pLight, pReferenceView};
 
@@ -399,7 +452,7 @@ plShadowPool::Data* plShadowPool::s_pData = nullptr;
 // static
 plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pDirLight, const plView* pReferenceView)
 {
-  PLASMA_ASSERT_DEBUG(pDirLight->GetCastShadows(), "Implementation error");
+  PL_ASSERT_DEBUG(pDirLight->GetCastShadows(), "Implementation error");
 
   // No shadows in orthographic views
   if (pReferenceView->GetCullingCamera()->IsOrthographic())
@@ -408,7 +461,7 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
   }
 
   float fMaxReferenceSize = plMath::Max(pReferenceView->GetViewport().width, pReferenceView->GetViewport().height);
-  float fShadowMapScale = fMaxReferenceSize / s_uiShadowMapSize;
+  float fShadowMapScale = fMaxReferenceSize / cvar_RenderingShadowsMaxShadowMapSize;
 
   ShadowData* pData = nullptr;
   if (s_pData->GetDataForExtraction(pDirLight, pReferenceView, fShadowMapScale, sizeof(plDirShadowData), pData))
@@ -441,8 +494,8 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
   const char* viewNames[4] = {"DirLightViewC0", "DirLightViewC1", "DirLightViewC2", "DirLightViewC3"};
 
   const plGameObject* pOwner = pDirLight->GetOwner();
-  plVec3 vForward = pOwner->GetGlobalDirForwards();
-  plVec3 vUp = pOwner->GetGlobalDirUp();
+  const plVec3 vLightDirForwards = pOwner->GetGlobalDirForwards();
+  const plVec3 vLightDirUp = pOwner->GetGlobalDirUp();
 
   float fAspectRatio = pReferenceView->GetViewport().width / pReferenceView->GetViewport().height;
 
@@ -499,21 +552,21 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
 
       if (false)
       {
-        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere(center, radius), plColor::OrangeRed);
+        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere::MakeFromCenterAndRadius(center, radius), plColor::OrangeRed);
       }
 
       float fCameraToCenterDistance = radius + fNearPlaneOffset;
-      plVec3 shadowCameraPos = center - vForward * fCameraToCenterDistance;
+      plVec3 shadowCameraPos = center - vLightDirForwards * fCameraToCenterDistance;
       float fFarPlane = radius + fCameraToCenterDistance;
 
       plCamera& camera = shadowView.m_Camera;
-      camera.LookAt(shadowCameraPos, center, vUp);
+      camera.LookAt(shadowCameraPos, center, vLightDirUp);
       camera.SetCameraMode(plCameraMode::OrthoFixedWidth, radius * 2.0f, 0.0f, fFarPlane);
 
       // stabilize
       plMat4 worldToLightMatrix = pView->GetViewMatrix(plCameraEye::Left);
-      plVec3 offset = worldToLightMatrix.TransformPosition(plVec3::ZeroVector());
-      float texelInWorld = (2.0f * radius) / s_uiShadowMapSize;
+      plVec3 offset = worldToLightMatrix.TransformPosition(plVec3::MakeZero());
+      float texelInWorld = (2.0f * radius) / cvar_RenderingShadowsMaxShadowMapSize;
       offset.x -= plMath::Floor(offset.x / texelInWorld) * texelInWorld;
       offset.y -= plMath::Floor(offset.y / texelInWorld) * texelInWorld;
 
@@ -529,7 +582,7 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
 // static
 plUInt32 plShadowPool::AddPointLight(const plPointLightComponent* pPointLight, float fScreenSpaceSize, const plView* pReferenceView)
 {
-  PLASMA_ASSERT_DEBUG(pPointLight->GetCastShadows(), "Implementation error");
+  PL_ASSERT_DEBUG(pPointLight->GetCastShadows(), "Implementation error");
 
   if (fScreenSpaceSize < s_fFadeOutScaleEnd * 2.0f)
   {
@@ -567,11 +620,11 @@ plUInt32 plShadowPool::AddPointLight(const plPointLightComponent* pPointLight, f
   plVec3 vPosition = pOwner->GetGlobalPosition();
   plVec3 vUp = plVec3(0.0f, 0.0f, 1.0f);
 
-  float fPenumbraSize = plMath::Max(pPointLight->GetPenumbraSize(), (0.5f / s_uiMinShadowMapSize)); // at least one texel for hardware pcf
-  float fFov = AddSafeBorder(plAngle::Degree(90.0f), fPenumbraSize);
+  float fPenumbraSize = plMath::Max(pPointLight->GetPenumbraSize(), (0.5f / cvar_RenderingShadowsMinShadowMapSize)); // at least one texel for hardware pcf
+  float fFov = AddSafeBorder(plAngle::MakeFromDegree(90.0f), fPenumbraSize);
 
   float fNearPlane = 0.1f; ///\todo expose somewhere
-  float fFarPlane = pPointLight->GetRange();
+  float fFarPlane = pPointLight->GetEffectiveRange();
 
   for (plUInt32 i = 0; i < 6; ++i)
   {
@@ -604,7 +657,7 @@ plUInt32 plShadowPool::AddPointLight(const plPointLightComponent* pPointLight, f
 // static
 plUInt32 plShadowPool::AddSpotLight(const plSpotLightComponent* pSpotLight, float fScreenSpaceSize, const plView* pReferenceView)
 {
-  PLASMA_ASSERT_DEBUG(pSpotLight->GetCastShadows(), "Implementation error");
+  PL_ASSERT_DEBUG(pSpotLight->GetCastShadows(), "Implementation error");
 
   if (fScreenSpaceSize < s_fFadeOutScaleEnd)
   {
@@ -640,7 +693,7 @@ plUInt32 plShadowPool::AddSpotLight(const plSpotLightComponent* pSpotLight, floa
 
     float fFov = AddSafeBorder(pSpotLight->GetOuterSpotAngle(), pSpotLight->GetPenumbraSize());
     float fNearPlane = 0.1f; ///\todo expose somewhere
-    float fFarPlane = pSpotLight->GetRange();
+    float fFarPlane = pSpotLight->GetEffectiveRange();
 
     plCamera& camera = shadowView.m_Camera;
     camera.LookAt(vPosition, vPosition + vForward, vUp);
@@ -673,7 +726,7 @@ void plShadowPool::AddExcludeTagToWhiteList(const plTag& tag)
 // static
 void plShadowPool::OnEngineStartup()
 {
-  s_pData = PLASMA_DEFAULT_NEW(plShadowPool::Data);
+  s_pData = PL_DEFAULT_NEW(plShadowPool::Data);
 
   plRenderWorld::GetExtractionEvent().AddEventHandler(OnExtractionEvent);
   plRenderWorld::GetRenderEvent().AddEventHandler(OnRenderEvent);
@@ -685,7 +738,7 @@ void plShadowPool::OnEngineShutdown()
   plRenderWorld::GetExtractionEvent().RemoveEventHandler(OnExtractionEvent);
   plRenderWorld::GetRenderEvent().RemoveEventHandler(OnRenderEvent);
 
-  PLASMA_DEFAULT_DELETE(s_pData);
+  PL_DEFAULT_DELETE(s_pData);
 }
 
 // static
@@ -694,7 +747,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
   if (e.m_Type != plRenderWorldExtractionEvent::Type::EndExtraction)
     return;
 
-  PLASMA_PROFILE_SCOPE("Shadow Pool Update");
+  PL_PROFILE_SCOPE("Shadow Pool Update");
 
   plUInt32 uiDataIndex = plRenderWorld::GetDataIndexForExtraction();
   auto& packedShadowData = s_pData->m_PackedShadowData[uiDataIndex];
@@ -719,13 +772,13 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
 
   // Prepare atlas
   s_AtlasCells.Clear();
-  s_AtlasCells.ExpandAndGetRef().m_Rect = plRectU32(0, 0, s_uiShadowAtlasTextureWidth, s_uiShadowAtlasTextureHeight);
+  s_AtlasCells.ExpandAndGetRef().m_Rect = plRectU32(0, 0, cvar_RenderingShadowsAtlasSize, cvar_RenderingShadowsAtlasSize);
 
-  float fAtlasInvWidth = 1.0f / s_uiShadowAtlasTextureWidth;
-  float fAtlasInvHeight = 1.0f / s_uiShadowAtlasTextureWidth;
+  float fAtlasInvWidth = 1.0f / cvar_RenderingShadowsAtlasSize;
+  float fAtlasInvHeight = 1.0f / cvar_RenderingShadowsAtlasSize;
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
-  plUInt32 uiTotalAtlasSize = s_uiShadowAtlasTextureWidth * s_uiShadowAtlasTextureHeight;
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
+  plUInt32 uiTotalAtlasSize = cvar_RenderingShadowsAtlasSize * cvar_RenderingShadowsAtlasSize;
   plUInt32 uiUsedAtlasSize = 0;
 
   plDebugRendererContext debugContext(plWorld::GetWorld(0));
@@ -747,7 +800,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
     plUInt32 uiShadowDataIndex = sorted.m_uiIndex;
     auto& shadowData = s_pData->m_ShadowData[uiShadowDataIndex];
 
-    plUInt32 uiShadowMapSize = s_uiShadowMapSize;
+    plUInt32 uiShadowMapSize = cvar_RenderingShadowsMaxShadowMapSize;
     float fadeOutStart = s_fFadeOutScaleStart;
     float fadeOutEnd = s_fFadeOutScaleEnd;
 
@@ -771,14 +824,14 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
       plRenderWorld::TryGetView(shadowData.m_Views[uiViewIndex], pShadowView);
       shadowViews.PushBack(pShadowView);
 
-      PLASMA_ASSERT_DEV(pShadowView != nullptr, "Implementation error");
+      PL_ASSERT_DEV(pShadowView != nullptr, "Implementation error");
 
       plRectU32 atlasRect = FindAtlasRect(uiShadowMapSize, uiShadowDataIndex);
       atlasRects.PushBack(atlasRect);
 
       pShadowView->SetViewport(plRectFloat((float)atlasRect.x, (float)atlasRect.y, (float)atlasRect.width, (float)atlasRect.height));
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
       if (cvar_RenderingShadowsShowPoolStats)
       {
         plDebugRenderer::DrawInfoText(debugContext, plDebugTextPlacement::TopLeft, "ShadowPoolStats", plFmt("{0}: {1} - {2}x{3}", pShadowView->GetName(), atlasRect.width, atlasRect.x, atlasRect.y), plColor::LightSteelBlue);
@@ -910,7 +963,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
       for (plUInt32 uiViewIndex = 0; uiViewIndex < shadowData.m_Views.GetCount(); ++uiViewIndex)
       {
         plView* pShadowView = shadowViews[uiViewIndex];
-        PLASMA_ASSERT_DEV(pShadowView != nullptr, "Implementation error");
+        PL_ASSERT_DEV(pShadowView != nullptr, "Implementation error");
 
         plUInt32 uiMatrixIndex = GET_WORLD_TO_LIGHT_MATRIX_INDEX(shadowData.m_uiPackedDataOffset, uiViewIndex);
         plMat4& worldToLightMatrix = *reinterpret_cast<plMat4*>(&packedShadowData[uiMatrixIndex]);
@@ -943,7 +996,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
       float relativeShadowSize = uiShadowMapSize * fAtlasInvHeight;
 
       float slopeBias = shadowData.m_fSlopeBias * penumbraSize * plMath::Tan(fov * 0.5f);
-      float constantBias = shadowData.m_fConstantBias * s_uiShadowMapSize / uiShadowMapSize;
+      float constantBias = shadowData.m_fConstantBias * cvar_RenderingShadowsMaxShadowMapSize / uiShadowMapSize;
       float fadeOut = plMath::Clamp((shadowData.m_fShadowMapScale - fadeOutEnd) / (fadeOutStart - fadeOutEnd), 0.0f, 1.0f);
 
       plUInt32 uiParamsIndex = GET_SHADOW_PARAMS_INDEX(shadowData.m_uiPackedDataOffset);
@@ -955,7 +1008,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
     }
   }
 
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   if (cvar_RenderingShadowsShowPoolStats)
   {
     plDebugRenderer::DrawInfoText(debugContext, plDebugTextPlacement::TopLeft, "ShadowPoolStats", plFmt("Atlas Utilization: {0}%%", plArgF(100.0 * (double)uiUsedAtlasSize / uiTotalAtlasSize, 2)), plColor::LightSteelBlue);
@@ -974,6 +1027,12 @@ void plShadowPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
   if (s_pData->m_hShadowAtlasTexture.IsInvalidated() || s_pData->m_hShadowDataBuffer.IsInvalidated())
     return;
 
+  if (cvar_RenderingShadowsAtlasSize.HasDelayedSyncValueChanged() || cvar_RenderingShadowsMinShadowMapSize.HasDelayedSyncValueChanged() || cvar_RenderingShadowsMaxShadowMapSize.HasDelayedSyncValueChanged() || s_uiLastConfigModification != plGameApplicationBase::GetGameApplicationBaseInstance()->GetPlatformProfile().GetLastModificationCounter())
+  {
+    OnEngineShutdown();
+    OnEngineStartup();
+  }
+
   plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
   plGALPass* pGALPass = pDevice->BeginPass("Shadow Atlas");
 
@@ -987,7 +1046,7 @@ void plShadowPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
   auto& packedShadowData = s_pData->m_PackedShadowData[uiDataIndex];
   if (!packedShadowData.IsEmpty())
   {
-    PLASMA_PROFILE_SCOPE("Shadow Data Buffer Update");
+    PL_PROFILE_SCOPE("Shadow Data Buffer Update");
 
     pCommandEncoder->UpdateBuffer(s_pData->m_hShadowDataBuffer, 0, packedShadowData.GetByteArrayPtr());
   }
@@ -996,4 +1055,4 @@ void plShadowPool::OnRenderEvent(const plRenderWorldRenderEvent& e)
   pDevice->EndPass(pGALPass);
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ShadowPool);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Lights_Implementation_ShadowPool);

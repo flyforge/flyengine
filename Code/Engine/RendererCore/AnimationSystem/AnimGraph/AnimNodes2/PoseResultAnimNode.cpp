@@ -6,29 +6,29 @@
 #include <RendererCore/AnimationSystem/AnimGraph/AnimNodes2/PoseResultAnimNode.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plPoseResultAnimNode, 1, plRTTIDefaultAllocator<plPoseResultAnimNode>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPoseResultAnimNode, 1, plRTTIDefaultAllocator<plPoseResultAnimNode>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("FadeDuration", m_FadeDuration)->AddAttributes(new plDefaultValueAttribute(plTime::Milliseconds(200)), new plClampValueAttribute(plTime::Zero(), plTime::Seconds(10))),
-    PLASMA_MEMBER_PROPERTY("InPose", m_InPose)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("InTargetWeight", m_InTargetWeight)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("InFadeDuration", m_InFadeDuration)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("InWeights", m_InWeights)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("OutOnFadedOut", m_OutOnFadedOut)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("OutOnFadedIn", m_OutOnFadedIn)->AddAttributes(new plHiddenAttribute),
-    PLASMA_MEMBER_PROPERTY("OutCurrentWeight", m_OutCurrentWeight)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("FadeDuration", m_FadeDuration)->AddAttributes(new plDefaultValueAttribute(plTime::MakeFromMilliseconds(200)), new plClampValueAttribute(plTime::MakeZero(), plTime::MakeFromSeconds(10))),
+    PL_MEMBER_PROPERTY("InPose", m_InPose)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("InTargetWeight", m_InTargetWeight)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("InFadeDuration", m_InFadeDuration)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("InWeights", m_InWeights)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("OutOnFadedOut", m_OutOnFadedOut)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("OutOnFadedIn", m_OutOnFadedIn)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("OutCurrentWeight", m_OutCurrentWeight)->AddAttributes(new plHiddenAttribute),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Output"),
     new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Grape)),
     new plTitleAttribute("Pose Result"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plPoseResultAnimNode::plPoseResultAnimNode() = default;
@@ -38,43 +38,42 @@ plResult plPoseResultAnimNode::SerializeNode(plStreamWriter& stream) const
 {
   stream.WriteVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
 
   stream << m_FadeDuration;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InPose.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InTargetWeight.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InFadeDuration.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InWeights.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFadedOut.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFadedIn.Serialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutCurrentWeight.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InPose.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InTargetWeight.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InFadeDuration.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InWeights.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFadedOut.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFadedIn.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutCurrentWeight.Serialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plPoseResultAnimNode::DeserializeNode(plStreamReader& stream)
 {
   stream.ReadVersion(1);
 
-  PLASMA_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
 
   stream >> m_FadeDuration;
 
-  PLASMA_SUCCEED_OR_RETURN(m_InPose.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InTargetWeight.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InFadeDuration.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_InWeights.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFadedOut.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutOnFadedIn.Deserialize(stream));
-  PLASMA_SUCCEED_OR_RETURN(m_OutCurrentWeight.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InPose.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InTargetWeight.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InFadeDuration.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_InWeights.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFadedOut.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFadedIn.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutCurrentWeight.Deserialize(stream));
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plPoseResultAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
 {
-  PLASMA_PROFILE_SCOPE("AnimNode_PoseResults");
   if (!m_InPose.IsConnected())
     return;
 
@@ -110,8 +109,8 @@ void plPoseResultAnimNode::Step(plAnimController& ref_controller, plAnimGraphIns
   {
     pInstance->m_fStartWeight = fCurrentWeight;
     pInstance->m_fEndWeight = fNewTargetWeight;
-    pInstance->m_PlayTime = plTime::Zero();
-    pInstance->m_EndTime = plTime::Seconds(m_InFadeDuration.GetNumber(ref_graph, m_FadeDuration.GetSeconds()));
+    pInstance->m_PlayTime = plTime::MakeZero();
+    pInstance->m_EndTime = plTime::MakeFromSeconds(m_InFadeDuration.GetNumber(ref_graph, m_FadeDuration.GetSeconds()));
   }
 
   m_OutCurrentWeight.SetNumber(ref_graph, fCurrentWeight);
@@ -161,3 +160,7 @@ bool plPoseResultAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_desc) con
   out_desc.FillFromType<InstanceData>();
   return true;
 }
+
+
+PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes2_PoseResultAnimNode);
+

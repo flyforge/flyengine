@@ -2,16 +2,16 @@
 
 #include <Core/Input/InputManager.h>
 
-PLASMA_ENUMERABLE_CLASS_IMPLEMENTATION(plInputDevice);
+PL_ENUMERABLE_CLASS_IMPLEMENTATION(plInputDevice);
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDevice, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plInputDevice, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plKeyState::Enum plKeyState::GetNewKeyState(plKeyState::Enum PrevState, bool bKeyDown)
+plKeyState::Enum plKeyState::GetNewKeyState(plKeyState::Enum prevState, bool bKeyDown)
 {
-  switch (PrevState)
+  switch (prevState)
   {
     case plKeyState::Down:
     case plKeyState::Pressed:
@@ -40,7 +40,7 @@ void plInputDevice::Initialize()
   if (m_bInitialized)
     return;
 
-  PLASMA_LOG_BLOCK("Initializing Input Device", GetDynamicRTTI()->GetTypeName());
+  PL_LOG_BLOCK("Initializing Input Device", GetDynamicRTTI()->GetTypeName());
 
   plLog::Dev("Input Device Type: {0}, Device Name: {1}", GetDynamicRTTI()->GetParentType()->GetTypeName(), GetDynamicRTTI()->GetTypeName());
 
@@ -111,4 +111,4 @@ bool plInputDevice::HasDeviceBeenUsedLastFrame() const
   return m_bGeneratedInputRecently;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_InputDevice);
+PL_STATICLINK_FILE(Core, Core_Input_Implementation_InputDevice);

@@ -1,0 +1,34 @@
+# Asset Types
+
+StateMachine;State Machine
+
+# Component Types
+
+plStateMachineComponent;State Machinep
+
+# Properties
+
+plComparisonOperator::Equal;==
+plComparisonOperator::NotEqual;!=
+plComparisonOperator::Less;<
+plComparisonOperator::LessEqual;<=
+plComparisonOperator::Greater;>
+plComparisonOperator::GreaterEqual;>=
+
+plStateMachineLogicOperator::And;AND
+plStateMachineLogicOperator::Or;OR
+
+plStateMachineNode;New State
+plStateMachineNodeAny;New Any State
+
+plStateMachineTransition_Timeout;Timeout Transition
+plStateMachineTransition_Compound;Compound Transition
+plStateMachineTransition_BlackboardConditions;Blackboard Conditions
+plStateMachineTransition_TransitionEvent;Transition Event
+
+plStateMachineState_NestedStateMachine;Nested State Machine
+plStateMachineState_Compound;Compound State
+plStateMachineState_SendMsg;Send Message
+plStateMachineState_SwitchObject;Switch Object
+plStateMachineState_Script;Script
+

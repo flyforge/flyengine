@@ -9,9 +9,9 @@ class plActor;
 class plWindowOutputTargetBase;
 class plWindowBase;
 
-class PLASMA_CORE_DLL plActorPluginWindow : public plActorPlugin
+class PL_CORE_DLL plActorPluginWindow : public plActorPlugin
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActorPluginWindow, plActorPlugin);
+  PL_ADD_DYNAMIC_REFLECTION(plActorPluginWindow, plActorPlugin);
 
 public:
   virtual plWindowBase* GetWindow() const = 0;
@@ -21,9 +21,9 @@ protected:
   virtual void Update() override;
 };
 
-class PLASMA_CORE_DLL plActorPluginWindowOwner : public plActorPluginWindow
+class PL_CORE_DLL plActorPluginWindowOwner : public plActorPluginWindow
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActorPluginWindowOwner, plActorPluginWindow);
+  PL_ADD_DYNAMIC_REFLECTION(plActorPluginWindowOwner, plActorPluginWindow);
 
 public:
   virtual ~plActorPluginWindowOwner();
@@ -34,9 +34,9 @@ public:
   plUniquePtr<plWindowOutputTargetBase> m_pWindowOutputTarget;
 };
 
-class PLASMA_CORE_DLL plActorPluginWindowShared : public plActorPluginWindow
+class PL_CORE_DLL plActorPluginWindowShared : public plActorPluginWindow
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plActorPluginWindowShared, plActorPluginWindow);
+  PL_ADD_DYNAMIC_REFLECTION(plActorPluginWindowShared, plActorPluginWindow);
 
 public:
   virtual plWindowBase* GetWindow() const override;

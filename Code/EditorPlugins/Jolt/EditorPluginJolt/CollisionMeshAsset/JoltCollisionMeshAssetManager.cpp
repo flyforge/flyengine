@@ -3,8 +3,8 @@
 #include <EditorPluginJolt/CollisionMeshAsset/JoltCollisionMeshAssetManager.h>
 #include <EditorPluginJolt/CollisionMeshAsset/JoltCollisionMeshAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltCollisionMeshAssetDocumentManager, 1, plRTTIDefaultAllocator<plJoltCollisionMeshAssetDocumentManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plJoltCollisionMeshAssetDocumentManager, 1, plRTTIDefaultAllocator<plJoltCollisionMeshAssetDocumentManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plJoltCollisionMeshAssetDocumentManager::plJoltCollisionMeshAssetDocumentManager()
 {
@@ -47,7 +47,7 @@ void plJoltCollisionMeshAssetDocumentManager::OnDocumentManagerEvent(const plDoc
     {
       if (e.m_pDocument->GetDynamicRTTI() == plGetStaticRTTI<plJoltCollisionMeshAssetDocument>())
       {
-        plQtJoltCollisionMeshAssetDocumentWindow* pDocWnd = new plQtJoltCollisionMeshAssetDocumentWindow(static_cast<plAssetDocument*>(e.m_pDocument));
+        new plQtJoltCollisionMeshAssetDocumentWindow(static_cast<plAssetDocument*>(e.m_pDocument)); // NOLINT: Not a memory leak
       }
     }
     break;
@@ -56,15 +56,15 @@ void plJoltCollisionMeshAssetDocumentManager::OnDocumentManagerEvent(const plDoc
   }
 }
 
-void plJoltCollisionMeshAssetDocumentManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plJoltCollisionMeshAssetDocumentManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  if (plStringUtils::IsEqual(szDocumentTypeName, "Jolt_Colmesh_Convex"))
+  if (sDocumentTypeName.IsEqual("Jolt_Colmesh_Convex"))
   {
-    out_pDocument = new plJoltCollisionMeshAssetDocument(szPath, true);
+    out_pDocument = new plJoltCollisionMeshAssetDocument(sPath, true);
   }
   else
   {
-    out_pDocument = new plJoltCollisionMeshAssetDocument(szPath, false);
+    out_pDocument = new plJoltCollisionMeshAssetDocument(sPath, false);
   }
 }
 

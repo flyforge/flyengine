@@ -11,14 +11,14 @@ plString plInputManager::s_sExclusiveInputSet;
 plInputManager::InternalData& plInputManager::GetInternals()
 {
   if (s_pData == nullptr)
-    s_pData = PLASMA_DEFAULT_NEW(InternalData);
+    s_pData = PL_DEFAULT_NEW(InternalData);
 
   return *s_pData;
 }
 
 void plInputManager::DeallocateInternals()
 {
-  PLASMA_DEFAULT_DELETE(s_pData);
+  PL_DEFAULT_DELETE(s_pData);
 }
 
 plInputManager::plInputSlot::plInputSlot()
@@ -39,7 +39,7 @@ void plInputManager::RegisterInputSlot(plStringView sInputSlot, plStringView sDe
       if ((it.Value().m_SlotFlags != plInputSlotFlags::Default) && (SlotFlags != plInputSlotFlags::Default))
       {
         plStringBuilder tmp, tmp2;
-        tmp.Printf("Different devices register Input Slot '%s' with different Slot Flags: %16b vs. %16b",
+        tmp.SetPrintf("Different devices register Input Slot '%s' with different Slot Flags: %16b vs. %16b",
           sInputSlot.GetData(tmp2), it.Value().m_SlotFlags.GetValue(), SlotFlags.GetValue());
 
         plLog::Warning(tmp);
@@ -340,7 +340,7 @@ plStringView plInputManager::GetInputSlotTouchPoint(plUInt32 uiIndex)
     case 9:
       return plInputSlot_TouchPoint9;
     default:
-      PLASMA_REPORT_FAILURE("Maximum number of supported input touch points is 10");
+      PL_REPORT_FAILURE("Maximum number of supported input touch points is 10");
       return "";
   }
 }
@@ -370,7 +370,7 @@ plStringView plInputManager::GetInputSlotTouchPointPositionX(plUInt32 uiIndex)
     case 9:
       return plInputSlot_TouchPoint9_PositionX;
     default:
-      PLASMA_REPORT_FAILURE("Maximum number of supported input touch points is 10");
+      PL_REPORT_FAILURE("Maximum number of supported input touch points is 10");
       return "";
   }
 }
@@ -400,9 +400,9 @@ plStringView plInputManager::GetInputSlotTouchPointPositionY(plUInt32 uiIndex)
     case 9:
       return plInputSlot_TouchPoint9_PositionY;
     default:
-      PLASMA_REPORT_FAILURE("Maximum number of supported input touch points is 10");
+      PL_REPORT_FAILURE("Maximum number of supported input touch points is 10");
       return "";
   }
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_InputManager);
+

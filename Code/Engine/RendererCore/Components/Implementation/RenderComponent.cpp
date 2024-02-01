@@ -4,20 +4,20 @@
 #include <RendererCore/RenderWorld/RenderWorld.h>
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plRenderComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plRenderComponent, 1)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Rendering"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
 plRenderComponent::plRenderComponent() = default;
@@ -43,8 +43,7 @@ void plRenderComponent::OnDeactivated()
 
 void plRenderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
-  plBoundingBoxSphere bounds;
-  bounds.SetInvalid();
+  plBoundingBoxSphere bounds = plBoundingBoxSphere::MakeInvalid();
 
   bool bAlwaysVisible = false;
 
@@ -81,12 +80,12 @@ void plRenderComponent::TriggerLocalBoundsUpdate()
 }
 
 // static
-plUInt32 plRenderComponent::GetUniqueIdForRendering(const plComponent* pComponent, plUInt32 uiInnerIndex /*= 0*/, plUInt32 uiInnerIndexShift /*= 24*/)
+plUInt32 plRenderComponent::GetUniqueIdForRendering(const plComponent& component, plUInt32 uiInnerIndex /*= 0*/, plUInt32 uiInnerIndexShift /*= 24*/)
 {
-  plUInt32 uniqueId = pComponent->GetUniqueID();
+  plUInt32 uniqueId = component.GetUniqueID();
   if (uniqueId == plInvalidIndex)
   {
-    uniqueId = pComponent->GetOwner()->GetHandle().GetInternalID().m_InstanceIndex;
+    uniqueId = component.GetOwner()->GetHandle().GetInternalID().m_InstanceIndex;
   }
   else
   {
@@ -95,7 +94,7 @@ plUInt32 plRenderComponent::GetUniqueIdForRendering(const plComponent* pComponen
 
   const plUInt32 dynamicBit = (1 << 31);
   const plUInt32 dynamicBitMask = ~dynamicBit;
-  return (uniqueId & dynamicBitMask) | (pComponent->GetOwner()->IsDynamic() ? dynamicBit : 0);
+  return (uniqueId & dynamicBitMask) | (component.GetOwner()->IsDynamic() ? dynamicBit : 0);
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RenderComponent);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Components_Implementation_RenderComponent);

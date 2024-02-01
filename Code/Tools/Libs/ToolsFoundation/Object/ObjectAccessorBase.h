@@ -4,7 +4,7 @@
 
 class plDocumentObject;
 
-class PLASMA_TOOLSFOUNDATION_DLL plObjectAccessorBase
+class PL_TOOLSFOUNDATION_DLL plObjectAccessorBase
 {
 public:
   virtual ~plObjectAccessorBase();
@@ -13,10 +13,10 @@ public:
   /// \name Transaction Operations
   ///@{
 
-  virtual void StartTransaction(const char* szDisplayString);
+  virtual void StartTransaction(plStringView sDisplayString);
   virtual void CancelTransaction();
   virtual void FinishTransaction();
-  virtual void BeginTemporaryCommands(const char* szDisplayString, bool bFireEventsWhenUndoingTempCommands = false);
+  virtual void BeginTemporaryCommands(plStringView sDisplayString, bool bFireEventsWhenUndoingTempCommands = false);
   virtual void CancelTemporaryCommands();
   virtual void FinishTemporaryCommands();
 
@@ -49,28 +49,29 @@ public:
   /// \name Object Access Convenience Functions
   ///@{
 
-  plStatus GetValue(const plDocumentObject* pObject, const char* szProp, plVariant& out_value, plVariant index = plVariant());
-  plStatus SetValue(const plDocumentObject* pObject, const char* szProp, const plVariant& newValue, plVariant index = plVariant());
-  plStatus InsertValue(const plDocumentObject* pObject, const char* szProp, const plVariant& newValue, plVariant index = plVariant());
-  plStatus RemoveValue(const plDocumentObject* pObject, const char* szProp, plVariant index = plVariant());
-  plStatus MoveValue(const plDocumentObject* pObject, const char* szProp, const plVariant& oldIndex, const plVariant& newIndex);
-  plStatus GetCount(const plDocumentObject* pObject, const char* szProp, plInt32& out_iCount);
+  plStatus GetValue(const plDocumentObject* pObject, plStringView sProp, plVariant& out_value, plVariant index = plVariant());
+  plStatus SetValue(const plDocumentObject* pObject, plStringView sProp, const plVariant& newValue, plVariant index = plVariant());
+  plStatus InsertValue(const plDocumentObject* pObject, plStringView sProp, const plVariant& newValue, plVariant index = plVariant());
+  plStatus RemoveValue(const plDocumentObject* pObject, plStringView sProp, plVariant index = plVariant());
+  plStatus MoveValue(const plDocumentObject* pObject, plStringView sProp, const plVariant& oldIndex, const plVariant& newIndex);
+  plStatus GetCount(const plDocumentObject* pObject, plStringView sProp, plInt32& out_iCount);
 
   plStatus AddObject(
-    const plDocumentObject* pParent, const char* szParentProp, const plVariant& index, const plRTTI* pType, plUuid& inout_objectGuid);
-  plStatus MoveObject(const plDocumentObject* pObject, const plDocumentObject* pNewParent, const char* szParentProp, const plVariant& index);
+    const plDocumentObject* pParent, plStringView sParentProp, const plVariant& index, const plRTTI* pType, plUuid& inout_objectGuid);
+  plStatus MoveObject(const plDocumentObject* pObject, const plDocumentObject* pNewParent, plStringView sParentProp, const plVariant& index);
 
-  plStatus GetKeys(const plDocumentObject* pObject, const char* szProp, plDynamicArray<plVariant>& out_keys);
-  plStatus GetValues(const plDocumentObject* pObject, const char* szProp, plDynamicArray<plVariant>& out_values);
-  const plDocumentObject* GetChildObject(const plDocumentObject* pObject, const char* szProp, plVariant index);
+  plStatus GetKeys(const plDocumentObject* pObject, plStringView sProp, plDynamicArray<plVariant>& out_keys);
+  plStatus GetValues(const plDocumentObject* pObject, plStringView sProp, plDynamicArray<plVariant>& out_values);
+  const plDocumentObject* GetChildObject(const plDocumentObject* pObject, plStringView sProp, plVariant index);
 
-  plStatus Clear(const plDocumentObject* pObject, const char* szProp);
+  plStatus Clear(const plDocumentObject* pObject, plStringView sProp);
 
   template <typename T>
   T Get(const plDocumentObject* pObject, const plAbstractProperty* pProp, plVariant index = plVariant());
   template <typename T>
-  T Get(const plDocumentObject* pObject, const char* szProp, plVariant index = plVariant());
+  T Get(const plDocumentObject* pObject, plStringView sProp, plVariant index = plVariant());
   plInt32 GetCount(const plDocumentObject* pObject, const plAbstractProperty* pProp);
+  plInt32 GetCount(const plDocumentObject* pObject, plStringView sProp);
 
   ///@}
 

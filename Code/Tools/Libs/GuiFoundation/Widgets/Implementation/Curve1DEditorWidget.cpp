@@ -182,7 +182,7 @@ void plQtCurve1DEditorWidget::NormalizeCurveX(plUInt32 uiActiveCurve)
     pos.x -= minX;
     pos.x *= rangeNorm;
 
-    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::Seconds(pos.x)), pos.y);
+    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::MakeFromSeconds(pos.x)), pos.y);
 
     plVec2 lt = cp.m_LeftTangent;
     lt.x *= rangeNorm;
@@ -233,7 +233,7 @@ void plQtCurve1DEditorWidget::NormalizeCurveY(plUInt32 uiActiveCurve)
     pos.y -= minY;
     pos.y *= rangeNorm;
 
-    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::Seconds(pos.x)), pos.y);
+    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::MakeFromSeconds(pos.x)), pos.y);
 
     plVec2 lt = cp.m_LeftTangent;
     lt.y *= rangeNorm;
@@ -251,7 +251,7 @@ void plQtCurve1DEditorWidget::NormalizeCurveY(plUInt32 uiActiveCurve)
 
 struct PtToDelete
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plUInt32 m_uiCurveIdx;
   plUInt32 m_uiPointIdx;
@@ -321,7 +321,7 @@ void plQtCurve1DEditorWidget::MirrorHorizontally(plUInt32 uiActiveCurve)
     plVec2d pos = cp.m_Position;
     pos.x = centerX - (pos.x - centerX);
 
-    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::Seconds(pos.x)), pos.y);
+    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::MakeFromSeconds(pos.x)), pos.y);
 
     plVec2 lt = cp.m_RightTangent;
     plVec2 rt = cp.m_LeftTangent;
@@ -372,7 +372,7 @@ void plQtCurve1DEditorWidget::MirrorVertically(plUInt32 uiActiveCurve)
     plVec2d pos = cp.m_Position;
     pos.y = centerY - (pos.y - centerY);
 
-    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::Seconds(pos.x)), pos.y);
+    Q_EMIT CpMovedEvent(uiActiveCurve, i, m_Curves.TickFromTime(plTime::MakeFromSeconds(pos.x)), pos.y);
 
     plVec2 lt = cp.m_LeftTangent;
     plVec2 rt = cp.m_RightTangent;
@@ -446,7 +446,7 @@ void plQtCurve1DEditorWidget::onMoveControlPoints(double x, double y)
 
     ClampPoint(newPos.x, newPos.y);
 
-    Q_EMIT CpMovedEvent(cpSel.m_uiCurve, cpSel.m_uiPoint, m_Curves.TickFromTime(plTime::Seconds(newPos.x)), newPos.y);
+    Q_EMIT CpMovedEvent(cpSel.m_uiCurve, cpSel.m_uiPoint, m_Curves.TickFromTime(plTime::MakeFromSeconds(newPos.x)), newPos.y);
   }
 
   Q_EMIT EndCpChangesEvent();
@@ -471,7 +471,7 @@ void plQtCurve1DEditorWidget::onScaleControlPoints(QPointF refPt, double scaleX,
 
     ClampPoint(newPos.x, newPos.y);
 
-    Q_EMIT CpMovedEvent(cpSel.m_uiCurve, cpSel.m_uiPoint, m_Curves.TickFromTime(plTime::Seconds(newPos.x)), newPos.y);
+    Q_EMIT CpMovedEvent(cpSel.m_uiCurve, cpSel.m_uiPoint, m_Curves.TickFromTime(plTime::MakeFromSeconds(newPos.x)), newPos.y);
   }
 
   Q_EMIT EndCpChangesEvent();
@@ -540,14 +540,17 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
   if (bIsCurveNonEmpty)
   {
     QMenu* cmSel = m.addMenu("Selection");
-    cmSel->addAction("Select All\tCtrl+A", this, [this]() { CurveEdit->SelectAll(); });
+    cmSel->addAction("Select All\tCtrl+A", this, [this]()
+      { CurveEdit->SelectAll(); });
 
     if (!selection.IsEmpty())
     {
-      cmSel->addAction("Clear Selection\tESC", this, [this]() { CurveEdit->ClearSelection(); });
+      cmSel->addAction("Clear Selection\tESC", this, [this]()
+        { CurveEdit->ClearSelection(); });
 
       cmSel->addAction(
-        "Frame Selection\tShift+F", this, [this]() { FrameSelection(); });
+        "Frame Selection\tShift+F", this, [this]()
+        { FrameSelection(); });
 
       cmSel->addSeparator();
 
@@ -563,7 +566,7 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
 
       cmLT->addAction("Auto", this, [this]()
         { SetTangentMode(plCurveTangentMode::Auto, true, false); });
-      cmLT->addAction("Bplier", this, [this]()
+      cmLT->addAction("Bezier", this, [this]()
         { SetTangentMode(plCurveTangentMode::Bezier, true, false); });
       cmLT->addAction("Fixed Length", this, [this]()
         { SetTangentMode(plCurveTangentMode::FixedLength, true, false); });
@@ -572,7 +575,7 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
 
       cmRT->addAction("Auto", this, [this]()
         { SetTangentMode(plCurveTangentMode::Auto, false, true); });
-      cmRT->addAction("Bplier", this, [this]()
+      cmRT->addAction("Bezier", this, [this]()
         { SetTangentMode(plCurveTangentMode::Bezier, false, true); });
       cmRT->addAction("Fixed Length", this, [this]()
         { SetTangentMode(plCurveTangentMode::FixedLength, false, true); });
@@ -581,7 +584,7 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
 
       cmBT->addAction("Auto", this, [this]()
         { SetTangentMode(plCurveTangentMode::Auto, true, true); });
-      cmBT->addAction("Bplier", this, [this]()
+      cmBT->addAction("Bezier", this, [this]()
         { SetTangentMode(plCurveTangentMode::Bezier, true, true); });
       cmBT->addAction("Fixed Length", this, [this]()
         { SetTangentMode(plCurveTangentMode::FixedLength, true, true); });
@@ -592,15 +595,23 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
     {
       QMenu* cm = m.addMenu("Curve");
       cm->addSeparator();
-      cm->addAction("Mirror Horizontally", this, [this]() { MirrorHorizontally(0); });
-      cm->addAction("Mirror Vertically", this, [this]() { MirrorVertically(0); });
-      cm->addAction("Normalize X", this, [this]() { NormalizeCurveX(0); });
-      cm->addAction("Normalize Y", this, [this]() { NormalizeCurveY(0); });
-      cm->addAction("Loop: Adjust Last Point", this, [this]() { MakeRepeatable(true); });
-      cm->addAction("Loop: Adjust First Point", this, [this]() { MakeRepeatable(false); });
-      cm->addAction("Clear Curve", this, [this]() { ClearAllPoints(); });
+      cm->addAction("Mirror Horizontally", this, [this]()
+        { MirrorHorizontally(0); });
+      cm->addAction("Mirror Vertically", this, [this]()
+        { MirrorVertically(0); });
+      cm->addAction("Normalize X", this, [this]()
+        { NormalizeCurveX(0); });
+      cm->addAction("Normalize Y", this, [this]()
+        { NormalizeCurveY(0); });
+      cm->addAction("Loop: Adjust Last Point", this, [this]()
+        { MakeRepeatable(true); });
+      cm->addAction("Loop: Adjust First Point", this, [this]()
+        { MakeRepeatable(false); });
+      cm->addAction("Clear Curve", this, [this]()
+        { ClearAllPoints(); });
 
-      cm->addAction("Frame Curve\tCtrl+F", this, [this]() { FrameCurve(); });
+      cm->addAction("Frame Curve\tCtrl+F", this, [this]()
+        { FrameCurve(); });
     }
   }
 
@@ -732,7 +743,8 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
     plMap<plString, QMenu*> subMenus;
     subMenus[""] = presentsMenu;
 
-    auto GetSubMenu = [&](const plStringBuilder& sPath, auto getSubMenu2) {
+    auto GetSubMenu = [&](const plStringBuilder& sPath, auto getSubMenu2)
+    {
       auto it = subMenus.Find(sPath);
       if (it.IsValid())
         return it.Value();
@@ -756,7 +768,8 @@ void plQtCurve1DEditorWidget::onContextMenu(QPoint pos, QPointF scenePos)
 
       sPresetPath.Trim("/");
 
-      GetSubMenu(sPresetPath, GetSubMenu)->addAction(sPresetName.GetData(), [this, preset]() { LoadCurvePreset(preset).IgnoreResult(); });
+      GetSubMenu(sPresetPath, GetSubMenu)->addAction(sPresetName.GetData(), [this, preset]()
+        { LoadCurvePreset(preset).IgnoreResult(); });
     }
   }
 
@@ -767,7 +780,7 @@ void plQtCurve1DEditorWidget::onAddPoint()
 {
   Q_EMIT BeginCpChangesEvent("Add Control Point");
 
-  InsertCpAt(m_ContextMenuScenePos.x(), m_ContextMenuScenePos.y(), plVec2d::ZeroVector());
+  InsertCpAt(m_ContextMenuScenePos.x(), m_ContextMenuScenePos.y(), plVec2d::MakeZero());
 
   Q_EMIT EndCpChangesEvent();
 }
@@ -837,7 +850,7 @@ void plQtCurve1DEditorWidget::InsertCpAt(double posX, double value, plVec2d epsi
     curveIdx = 0;
   }
 
-  Q_EMIT InsertCpEvent(curveIdx, m_Curves.TickFromTime(plTime::Seconds(posX)), value);
+  Q_EMIT InsertCpEvent(curveIdx, m_Curves.TickFromTime(plTime::MakeFromSeconds(posX)), value);
 }
 
 
@@ -957,13 +970,14 @@ void plQtCurve1DEditorWidget::onGenerateCurve(plCurveFunction::Enum function, bo
     samples[i].m_fCorrectValue = plCurveFunction::GetValue(function, x, inverse);
   }
 
-  auto AddPt = [&](plUInt32 uiIdx) {
+  auto AddPt = [&](plUInt32 uiIdx)
+  {
     samples[uiIdx].m_bInserted = true;
     const double x = samples[uiIdx].m_fPos;
     const double y = samples[uiIdx].m_fCorrectValue;
 
     cmp.AddControlPoint(x).m_Position.y = y;
-    InsertCpAt(x, y, plVec2d::ZeroVector());
+    InsertCpAt(x, y, plVec2d::MakeZero());
   };
 
   AddPt(0);
@@ -1042,7 +1056,7 @@ void plQtCurve1DEditorWidget::SaveCurvePreset(const char* szFile) const
   file << m_Curves.m_uiFramesPerSecond;
   file << m_Curves.m_Curves.GetCount();
 
-  PLASMA_ASSERT_DEBUG(m_Curves.m_Curves.GetCount() == 1, "Only one curve at a time is currently supported.");
+  PL_ASSERT_DEBUG(m_Curves.m_Curves.GetCount() == 1, "Only one curve at a time is currently supported.");
 
   for (plUInt32 curveIdx = 0; curveIdx < m_Curves.m_Curves.GetCount(); ++curveIdx)
   {
@@ -1100,9 +1114,10 @@ plResult plQtCurve1DEditorWidget::LoadCurvePreset(const char* szFile)
 
   plFileReader file;
   if (file.Open(sPath).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plTypeVersion version = file.ReadVersion(1);
+  PL_IGNORE_UNUSED(version);
 
   Q_EMIT BeginCpChangesEvent("Load Preset");
 
@@ -1114,7 +1129,7 @@ plResult plQtCurve1DEditorWidget::LoadCurvePreset(const char* szFile)
   plUInt32 uiNumCurves = 0;
   file >> uiNumCurves;
 
-  PLASMA_ASSERT_DEBUG(uiNumCurves == 1, "Only one curve at a time is currently supported.");
+  PL_ASSERT_DEBUG(uiNumCurves == 1, "Only one curve at a time is currently supported.");
   uiNumCurves = 1;
 
   for (plUInt32 curveIdx = 0; curveIdx < uiNumCurves; ++curveIdx)
@@ -1153,14 +1168,14 @@ plResult plQtCurve1DEditorWidget::LoadCurvePreset(const char* szFile)
 
   Q_EMIT EndCpChangesEvent();
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plQtCurve1DEditorWidget::FindAllPresets()
 {
   s_CurvePresets.Clear();
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_FILE_ITERATORS)
+#if PL_ENABLED(PL_SUPPORTS_FILE_ITERATORS)
 
   plFileSystemIterator fsIt;
 
@@ -1260,7 +1275,7 @@ void plQtCurve1DEditorWidget::on_LinePosition_editingFinished()
   {
     const auto& cp = m_Curves.m_Curves[cpSel.m_uiCurve]->m_ControlPoints[cpSel.m_uiPoint];
 
-    plInt32 iTick = m_Curves.TickFromTime(plTime::Seconds(value));
+    const plInt64 iTick = m_Curves.TickFromTime(plTime::MakeFromSeconds(value));
     if (cp.m_iTick != iTick)
       Q_EMIT CpMovedEvent(cpSel.m_uiCurve, cpSel.m_uiPoint, iTick, cp.m_fValue);
   }

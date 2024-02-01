@@ -5,9 +5,9 @@
 struct plMemoryMappedFileImpl;
 
 /// \brief Allows to map an entire file into memory for random access
-class PLASMA_FOUNDATION_DLL plMemoryMappedFile
+class PL_FOUNDATION_DLL plMemoryMappedFile
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plMemoryMappedFile);
+  PL_DISALLOW_COPY_AND_ASSIGN(plMemoryMappedFile);
 
 public:
   plMemoryMappedFile();
@@ -28,7 +28,7 @@ public:
            ///< of the memory.
   };
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_MEMORY_MAPPED_FILE) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_SUPPORTS_MEMORY_MAPPED_FILE) || defined(PL_DOCS)
   /// \brief Attempts to open the given file and map it into memory
   ///
   /// \param szAbsolutePath must be an absolute path to the file that should be mapped.
@@ -37,7 +37,7 @@ public:
   plResult Open(plStringView sAbsolutePath, Mode mode);
 #endif
 
-#if PLASMA_ENABLED(PLASMA_SUPPORTS_SHARED_MEMORY) || defined(PLASMA_DOCS)
+#if PL_ENABLED(PL_SUPPORTS_SHARED_MEMORY) || defined(PL_DOCS)
   /// \brief Attempts to open or create the given shared memory block addressed by szSharedName
   ///
   /// \param szSharedName The name of the shared memory region.

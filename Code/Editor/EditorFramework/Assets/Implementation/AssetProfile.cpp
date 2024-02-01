@@ -25,13 +25,13 @@ plUInt32 plAssetCurator::GetActiveAssetProfileIndex() const
 
 plUInt32 plAssetCurator::FindAssetProfileByName(const char* szPlatform)
 {
-  PLASMA_LOCK(m_CuratorMutex);
+  PL_LOCK(m_CuratorMutex);
 
-  PLASMA_ASSERT_DEV(!m_AssetProfiles.IsEmpty(), "Need to have a valid asset platform config");
+  PL_ASSERT_DEV(!m_AssetProfiles.IsEmpty(), "Need to have a valid asset platform config");
 
   for (plUInt32 i = 0; i < m_AssetProfiles.GetCount(); ++i)
   {
-    if (m_AssetProfiles[i]->m_sName.IsEqual_NoCase(szPlatform))
+    if (m_AssetProfiles[i]->GetConfigName().IsEqual_NoCase(szPlatform))
     {
       return i;
     }
@@ -45,25 +45,25 @@ plUInt32 plAssetCurator::GetNumAssetProfiles() const
   return m_AssetProfiles.GetCount();
 }
 
-const plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 index) const
+const plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 uiIndex) const
 {
-  if (index >= m_AssetProfiles.GetCount())
+  if (uiIndex >= m_AssetProfiles.GetCount())
     return m_AssetProfiles[0]; // fall back to default platform
 
-  return m_AssetProfiles[index];
+  return m_AssetProfiles[uiIndex];
 }
 
-plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 index)
+plPlatformProfile* plAssetCurator::GetAssetProfile(plUInt32 uiIndex)
 {
-  if (index >= m_AssetProfiles.GetCount())
+  if (uiIndex >= m_AssetProfiles.GetCount())
     return m_AssetProfiles[0]; // fall back to default platform
 
-  return m_AssetProfiles[index];
+  return m_AssetProfiles[uiIndex];
 }
 
 plPlatformProfile* plAssetCurator::CreateAssetProfile()
 {
-  plPlatformProfile* pProfile = PLASMA_DEFAULT_NEW(plPlatformProfile);
+  plPlatformProfile* pProfile = PL_DEFAULT_NEW(plPlatformProfile);
   m_AssetProfiles.PushBack(pProfile);
 
   return pProfile;
@@ -72,7 +72,7 @@ plPlatformProfile* plAssetCurator::CreateAssetProfile()
 plResult plAssetCurator::DeleteAssetProfile(plPlatformProfile* pProfile)
 {
   if (m_AssetProfiles.GetCount() <= 1)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   // do not allow to delete element 0 !
 
@@ -81,32 +81,32 @@ plResult plAssetCurator::DeleteAssetProfile(plPlatformProfile* pProfile)
     if (m_AssetProfiles[i] == pProfile)
     {
       if (m_uiActiveAssetProfile == i)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       if (i < m_uiActiveAssetProfile)
         --m_uiActiveAssetProfile;
 
-      PLASMA_DEFAULT_DELETE(pProfile);
+      PL_DEFAULT_DELETE(pProfile);
       m_AssetProfiles.RemoveAtAndCopy(i);
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
-void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 index, bool bForceReevaluation /*= false*/)
+void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 uiIndex, bool bForceReevaluation /*= false*/)
 {
-  if (index >= m_AssetProfiles.GetCount())
-    index = 0; // fall back to default platform
+  if (uiIndex >= m_AssetProfiles.GetCount())
+    uiIndex = 0; // fall back to default platform
 
-  if (!bForceReevaluation && m_uiActiveAssetProfile == index)
+  if (!bForceReevaluation && m_uiActiveAssetProfile == uiIndex)
     return;
 
-  PLASMA_LOG_BLOCK("Switch Active Asset Platform", m_AssetProfiles[index]->GetConfigName());
+  PL_LOG_BLOCK("Switch Active Asset Platform", m_AssetProfiles[uiIndex]->GetConfigName());
 
-  m_uiActiveAssetProfile = index;
+  m_uiActiveAssetProfile = uiIndex;
 
   CheckFileSystem();
 
@@ -120,7 +120,7 @@ void plAssetCurator::SetActiveAssetProfileByIndex(plUInt32 index, bool bForceRee
     plSimpleConfigMsgToEngine msg;
     msg.m_sWhatToDo = "ChangeActivePlatform";
     msg.m_sPayload = GetActiveAssetProfile()->GetConfigName();
-    PlasmaEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
+    plEditorEngineProcessConnection::GetSingleton()->SendMessage(&msg);
   }
 }
 
@@ -150,10 +150,10 @@ plResult plAssetCurator::SaveAssetProfiles()
 
   for (const auto* pCfg : m_AssetProfiles)
   {
-    ddl.BeginObject("Config", pCfg->m_sName);
+    ddl.BeginObject("Config", pCfg->GetConfigName());
 
     // make sure to create the same GUID every time, otherwise the serialized file changes all the time
-    const plUuid guid = plUuid::StableUuidForString(pCfg->GetConfigName());
+    const plUuid guid = plUuid::MakeStableUuidFromString(pCfg->GetConfigName());
 
     plReflectionSerializer::WriteObjectToDDL(ddl, pCfg->GetDynamicRTTI(), pCfg, guid);
 
@@ -167,23 +167,23 @@ plResult plAssetCurator::SaveAssetProfiles()
 
 plResult plAssetCurator::LoadAssetProfiles()
 {
-  PLASMA_LOG_BLOCK("LoadAssetProfiles", ":project/Editor/PlatformProfiles.ddl");
+  PL_LOG_BLOCK("LoadAssetProfiles", ":project/Editor/PlatformProfiles.ddl");
 
   plFileReader file;
   if (file.Open(":project/Editor/AssetProfiles.ddl").Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlReader ddl;
   if (ddl.ParseDocument(file).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   const plOpenDdlReaderElement* pRootElement = ddl.GetRootElement()->FindChildOfType("AssetProfiles");
 
   if (!pRootElement)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   if (pRootElement->FindChildOfType("Config") == nullptr)
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   ClearAssetProfiles();
 
@@ -202,7 +202,7 @@ plResult plAssetCurator::LoadAssetProfiles()
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plAssetCurator::ClearAssetProfiles()
@@ -220,8 +220,8 @@ void plAssetCurator::SetupDefaultAssetProfiles()
   ClearAssetProfiles();
 
   {
-    plPlatformProfile* pCfg = PLASMA_DEFAULT_NEW(plPlatformProfile);
-    pCfg->m_sName = "PC";
+    plPlatformProfile* pCfg = PL_DEFAULT_NEW(plPlatformProfile);
+    pCfg->SetConfigName("PC");
     pCfg->AddMissingConfigs();
     m_AssetProfiles.PushBack(pCfg);
   }

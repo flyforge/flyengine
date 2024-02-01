@@ -11,59 +11,59 @@
 #include <RendererCore/Utils/WorldGeoExtractionUtil.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plGreyBoxShape, 1)
-  PLASMA_ENUM_CONSTANTS(plGreyBoxShape::Box, plGreyBoxShape::RampX, plGreyBoxShape::RampY, plGreyBoxShape::Column)
-  PLASMA_ENUM_CONSTANTS(plGreyBoxShape::StairsX, plGreyBoxShape::StairsY, plGreyBoxShape::ArchX, plGreyBoxShape::ArchY, plGreyBoxShape::SpiralStairs)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plGreyBoxShape, 1)
+  PL_ENUM_CONSTANTS(plGreyBoxShape::Box, plGreyBoxShape::RampX, plGreyBoxShape::RampY, plGreyBoxShape::Column)
+  PL_ENUM_CONSTANTS(plGreyBoxShape::StairsX, plGreyBoxShape::StairsY, plGreyBoxShape::ArchX, plGreyBoxShape::ArchY, plGreyBoxShape::SpiralStairs)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plGreyBoxComponent, 5, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plGreyBoxComponent, 5, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("Shape", plGreyBoxShape, GetShape, SetShape),
-    PLASMA_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
-    PLASMA_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("SizeNegX", GetSizeNegX, SetSizeNegX)->AddAttributes(new plGroupAttribute("Size", "Size")),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizePosX", GetSizePosX, SetSizePosX),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizeNegY", GetSizeNegY, SetSizeNegY),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizePosY", GetSizePosY, SetSizePosY),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizeNegZ", GetSizeNegZ, SetSizeNegZ),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SizePosZ", GetSizePosZ, SetSizePosZ),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("Detail", GetDetail, SetDetail)->AddAttributes(new plGroupAttribute("Misc"), new plDefaultValueAttribute(16), new plClampValueAttribute(3, 32)),
-    PLASMA_ACCESSOR_PROPERTY("Curvature", GetCurvature, SetCurvature),
-    PLASMA_ACCESSOR_PROPERTY("Thickness", GetThickness, SetThickness)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("SlopedTop", GetSlopedTop, SetSlopedTop),
-    PLASMA_ACCESSOR_PROPERTY("SlopedBottom", GetSlopedBottom, SetSlopedBottom),
-    PLASMA_ACCESSOR_PROPERTY("GenerateCollision", GetGenerateCollision, SetGenerateCollision)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("IncludeInNavmesh", GetIncludeInNavmesh, SetIncludeInNavmesh)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_MEMBER_PROPERTY("UseAsOccluder", m_bUseAsOccluder)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ENUM_ACCESSOR_PROPERTY("Shape", plGreyBoxShape, GetShape, SetShape),
+    PL_ACCESSOR_PROPERTY("Material", GetMaterialFile, SetMaterialFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Material")),
+    PL_MEMBER_PROPERTY("Color", m_Color)->AddAttributes(new plDefaultValueAttribute(plColor::White), new plExposeColorAlphaAttribute()),
+    PL_ACCESSOR_PROPERTY("SizeNegX", GetSizeNegX, SetSizeNegX)->AddAttributes(new plGroupAttribute("Size", "Size")),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizePosX", GetSizePosX, SetSizePosX),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizeNegY", GetSizeNegY, SetSizeNegY),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizePosY", GetSizePosY, SetSizePosY),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizeNegZ", GetSizeNegZ, SetSizeNegZ),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SizePosZ", GetSizePosZ, SetSizePosZ),//->AddAttributes(new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Detail", GetDetail, SetDetail)->AddAttributes(new plGroupAttribute("Misc"), new plDefaultValueAttribute(16), new plClampValueAttribute(3, 32)),
+    PL_ACCESSOR_PROPERTY("Curvature", GetCurvature, SetCurvature)->AddAttributes(new plClampValueAttribute(plAngle::MakeFromDegree(-360), plAngle::MakeFromDegree(360))),
+    PL_ACCESSOR_PROPERTY("Thickness", GetThickness, SetThickness)->AddAttributes(new plDefaultValueAttribute(0.5f), new plClampValueAttribute(0.0f, plVariant())),
+    PL_ACCESSOR_PROPERTY("SlopedTop", GetSlopedTop, SetSlopedTop),
+    PL_ACCESSOR_PROPERTY("SlopedBottom", GetSlopedBottom, SetSlopedBottom),
+    PL_ACCESSOR_PROPERTY("GenerateCollision", GetGenerateCollision, SetGenerateCollision)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("IncludeInNavmesh", GetIncludeInNavmesh, SetIncludeInNavmesh)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_MEMBER_PROPERTY("UseAsOccluder", m_bUseAsOccluder)->AddAttributes(new plDefaultValueAttribute(true)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Construction"),
     new plNonUniformBoxManipulatorAttribute("SizeNegX", "SizePosX", "SizeNegY", "SizePosY", "SizeNegZ", "SizePosZ"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
-    PLASMA_MESSAGE_HANDLER(plMsgBuildStaticMesh, OnBuildStaticMesh),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
-    PLASMA_MESSAGE_HANDLER(plMsgExtractOccluderData, OnMsgExtractOccluderData),
+    PL_MESSAGE_HANDLER(plMsgExtractRenderData, OnMsgExtractRenderData),
+    PL_MESSAGE_HANDLER(plMsgBuildStaticMesh, OnBuildStaticMesh),
+    PL_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
+    PL_MESSAGE_HANDLER(plMsgExtractOccluderData, OnMsgExtractOccluderData),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plGreyBoxComponent::plGreyBoxComponent() = default;
 plGreyBoxComponent::~plGreyBoxComponent() = default;
 
-void plGreyBoxComponent::SerializeComponent(plWorldWriter& stream) const
+void plGreyBoxComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  plStreamWriter& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  plStreamWriter& s = inout_stream.GetStream();
 
   s << m_Shape;
   s << m_hMaterial;
@@ -92,11 +92,11 @@ void plGreyBoxComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_bUseAsOccluder;
 }
 
-void plGreyBoxComponent::DeserializeComponent(plWorldReader& stream)
+void plGreyBoxComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  plStreamReader& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  plStreamReader& s = inout_stream.GetStream();
 
   s >> m_Shape;
   s >> m_hMaterial;
@@ -156,10 +156,10 @@ plResult plGreyBoxComponent::GetLocalBounds(plBoundingBoxSphere& bounds, bool& b
       msg.AddBounds(bounds, GetOwner()->IsStatic() ? plDefaultSpatialDataCategories::OcclusionStatic : plDefaultSpatialDataCategories::OcclusionDynamic);
     }
 
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plGreyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
@@ -180,7 +180,6 @@ void plGreyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) con
 
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
     {
-      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
       pRenderData->m_hMesh = m_hMesh;
@@ -285,7 +284,7 @@ void plGreyBoxComponent::SetDetail(plUInt32 uiDetail)
 
 void plGreyBoxComponent::SetCurvature(plAngle curvature)
 {
-  m_Curvature = plAngle::Degree(plMath::RoundToMultiple(curvature.GetDegree(), 5.0f));
+  m_Curvature = plAngle::MakeFromDegree(plMath::RoundToMultiple(curvature.GetDegree(), 5.0f));
   InvalidateMesh();
 }
 
@@ -436,10 +435,20 @@ void plGreyBoxComponent::InvalidateMesh()
 
 void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> shape, bool bOnlyRoughDetails) const
 {
+  plGeometry::GeoOptions opt;
+  opt.m_Color = m_Color;
+
   plVec3 size;
   size.x = m_fSizeNegX + m_fSizePosX;
   size.y = m_fSizeNegY + m_fSizePosY;
   size.z = m_fSizeNegZ + m_fSizePosZ;
+
+  if (size.x == 0 || size.y == 0 || size.z == 0)
+  {
+    // create a tiny dummy box, so that we have valid geometry
+    geom.AddBox(plVec3(0.01f), true, opt);
+    return;
+  }
 
   plVec3 offset(0);
   offset.x = (m_fSizePosX - m_fSizeNegX) * 0.5f;
@@ -448,9 +457,7 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
   plMat4 t2, t3;
 
-  plGeometry::GeoOptions opt;
-  opt.m_Color = m_Color;
-  opt.m_Transform.SetTranslationMatrix(offset);
+  opt.m_Transform = plMat4::MakeTranslation(offset);
 
   switch (shape)
   {
@@ -464,14 +471,14 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::RampY:
       plMath::Swap(size.x, size.y);
-      opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90.0f));
+      opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90.0f));
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddTexturedRamp(size, opt);
       break;
 
     case plGreyBoxShape::Column:
       opt.m_Transform.SetScalingFactors(size).IgnoreResult();
-      geom.AddCylinder(0.5f, 0.5f, 0.5f, 0.5f, true, true, static_cast<plUInt16>(m_uiDetail), opt);
+      geom.AddCylinder(0.5f, 0.5f, 0.5f, 0.5f, true, true, plMath::Min<plUInt16>(bOnlyRoughDetails ? 14 : 32, static_cast<plUInt16>(m_uiDetail)), opt);
       break;
 
     case plGreyBoxShape::StairsX:
@@ -480,7 +487,7 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::StairsY:
       plMath::Swap(size.x, size.y);
-      opt.m_Transform.SetRotationMatrixZ(plAngle::Degree(-90.0f));
+      opt.m_Transform = plMat4::MakeRotationZ(plAngle::MakeFromDegree(-90.0f));
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddStairs(size, m_uiDetail, m_Curvature, m_bSlopedTop, opt);
       break;
@@ -491,8 +498,8 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
       size.z = size.x;
       size.x = size.y;
       size.y = tmp;
-      opt.m_Transform.SetRotationMatrixY(plAngle::Degree(-90));
-      t2.SetRotationMatrixX(plAngle::Degree(90));
+      opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(-90));
+      t2 = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
       opt.m_Transform = t2 * opt.m_Transform;
       opt.m_Transform.SetTranslationVector(offset);
       geom.AddArch(size, m_uiDetail, m_fThickness, m_Curvature, false, false, false, !bOnlyRoughDetails, opt);
@@ -501,9 +508,9 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
 
     case plGreyBoxShape::ArchY:
     {
-      opt.m_Transform.SetRotationMatrixY(plAngle::Degree(-90));
-      t2.SetRotationMatrixX(plAngle::Degree(90));
-      t3.SetRotationMatrixZ(plAngle::Degree(90));
+      opt.m_Transform = plMat4::MakeRotationY(plAngle::MakeFromDegree(-90));
+      t2 = plMat4::MakeRotationX(plAngle::MakeFromDegree(90));
+      t3 = plMat4::MakeRotationZ(plAngle::MakeFromDegree(90));
       plMath::Swap(size.y, size.z);
       opt.m_Transform = t3 * t2 * opt.m_Transform;
       opt.m_Transform.SetTranslationVector(offset);
@@ -516,7 +523,7 @@ void plGreyBoxComponent::BuildGeometry(plGeometry& geom, plEnum<plGreyBoxShape> 
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
@@ -525,45 +532,45 @@ void plGreyBoxComponent::GenerateMeshName(plStringBuilder& out_sName) const
   switch (m_Shape)
   {
     case plGreyBoxShape::Box:
-      out_sName.Format("Grey-Box:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
+      out_sName.SetFormat("Grey-Box:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
       break;
 
     case plGreyBoxShape::RampX:
-      out_sName.Format("Grey-RampX:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
+      out_sName.SetFormat("Grey-RampX:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
       break;
 
     case plGreyBoxShape::RampY:
-      out_sName.Format("Grey-RampY:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
+      out_sName.SetFormat("Grey-RampY:{0}-{1},{2}-{3},{4}-{5}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ);
       break;
 
     case plGreyBoxShape::Column:
-      out_sName.Format("Grey-Column:{0}-{1},{2}-{3},{4}-{5}-d{6}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail);
+      out_sName.SetFormat("Grey-Column:{0}-{1},{2}-{3},{4}-{5}-d{6}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail);
       break;
 
     case plGreyBoxShape::StairsX:
-      out_sName.Format("Grey-StairsX:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-st{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_bSlopedTop);
+      out_sName.SetFormat("Grey-StairsX:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-st{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_bSlopedTop);
       break;
 
     case plGreyBoxShape::StairsY:
-      out_sName.Format("Grey-StairsY:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-st{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_bSlopedTop);
+      out_sName.SetFormat("Grey-StairsY:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-st{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_bSlopedTop);
       break;
 
     case plGreyBoxShape::ArchX:
-      out_sName.Format("Grey-ArchX:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness);
+      out_sName.SetFormat("Grey-ArchX:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness);
       break;
 
     case plGreyBoxShape::ArchY:
-      out_sName.Format("Grey-ArchY:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness);
+      out_sName.SetFormat("Grey-ArchY:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness);
       break;
 
     case plGreyBoxShape::SpiralStairs:
-      out_sName.Format("Grey-Spiral:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}-st{9}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness, m_bSlopedTop);
+      out_sName.SetFormat("Grey-Spiral:{0}-{1},{2}-{3},{4}-{5}-d{6}-c{7}-t{8}-st{9}", m_fSizeNegX, m_fSizePosX, m_fSizeNegY, m_fSizePosY, m_fSizeNegZ, m_fSizePosZ, m_uiDetail, m_Curvature.GetDegree(), m_fThickness, m_bSlopedTop);
       out_sName.AppendFormat("-sb{0}", m_bSlopedBottom);
       break;
 
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 }
 
@@ -571,6 +578,23 @@ void plGreyBoxComponent::GenerateMeshResourceDescriptor(plMeshResourceDescriptor
 {
   plGeometry geom;
   BuildGeometry(geom, m_Shape, false);
+
+  bool bInvertedGeo = false;
+
+  if (-m_fSizeNegX > m_fSizePosX)
+    bInvertedGeo = !bInvertedGeo;
+  if (-m_fSizeNegY > m_fSizePosY)
+    bInvertedGeo = !bInvertedGeo;
+  if (-m_fSizeNegZ > m_fSizePosZ)
+    bInvertedGeo = !bInvertedGeo;
+
+  if (bInvertedGeo)
+  {
+    for (auto vert : geom.GetVertices())
+    {
+      vert.m_vNormal = -vert.m_vNormal;
+    }
+  }
 
   geom.TriangulatePolygons();
   geom.ComputeTangents();
@@ -603,4 +627,4 @@ plTypedResourceHandle<ResourceType> plGreyBoxComponent::GenerateMesh() const
 }
 
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_GreyBoxComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Gameplay_Implementation_GreyBoxComponent);

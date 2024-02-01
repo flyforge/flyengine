@@ -13,7 +13,7 @@ plResult plTypeScriptBinding::Init_Clock()
   m_Duk.RegisterGlobalFunction("__CPP_Clock_GetTimeDiff", __CPP_Clock_Get, 0, 1);
   m_Duk.RegisterGlobalFunction("__CPP_Clock_GetAccumulatedTime", __CPP_Clock_Get, 0, 2);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 static int __CPP_Clock_Get(duk_context* pDuk)
@@ -34,10 +34,10 @@ static int __CPP_Clock_Get(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, 1, +1);
 }
 
 static int __CPP_Clock_Set(duk_context* pDuk)
@@ -52,8 +52,8 @@ static int __CPP_Clock_Set(duk_context* pDuk)
       break;
 
     default:
-      PLASMA_ASSERT_NOT_IMPLEMENTED;
+      PL_ASSERT_NOT_IMPLEMENTED;
   }
 
-  PLASMA_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
+  PL_DUK_RETURN_AND_VERIFY_STACK(duk, duk.ReturnVoid(), 0);
 }

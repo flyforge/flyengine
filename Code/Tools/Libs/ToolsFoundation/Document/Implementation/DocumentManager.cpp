@@ -12,10 +12,10 @@
 #include <ToolsFoundation/Project/ToolsProject.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plDocumentManager, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plDocumentManager, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, DocumentManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, DocumentManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
   "Foundation"
@@ -31,7 +31,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(ToolsFoundation, DocumentManager)
     plPlugin::Events().RemoveEventHandler(plDocumentManager::OnPluginEvent);
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plSet<const plRTTI*> plDocumentManager::s_KnownManagers;
@@ -95,27 +95,27 @@ void plDocumentManager::UpdatedAfterLoadingPlugins()
   bool bChanges = false;
 
   plRTTI::ForEachDerivedType<plDocumentManager>(
-  [&](const plRTTI* pRtti) {
-    // add the ones that we don't know yet
-    if (!s_KnownManagers.Find(pRtti).IsValid())
-    {
-      // add it as 'known' even if we cannot allocate it
-      s_KnownManagers.Insert(pRtti);
-      if (pRtti->GetAllocator()->CanAllocate())
+    [&](const plRTTI* pRtti) {
+      // add the ones that we don't know yet
+      if (!s_KnownManagers.Find(pRtti).IsValid())
       {
-        // create one instance of each manager type
-        plDocumentManager* pManager = pRtti->GetAllocator()->Allocate<plDocumentManager>();
-        s_AllDocumentManagers.PushBack(pManager);
+        // add it as 'known' even if we cannot allocate it
+        s_KnownManagers.Insert(pRtti);
 
-        bChanges = true;
+        if (pRtti->GetAllocator()->CanAllocate())
+        {
+          // create one instance of each manager type
+          plDocumentManager* pManager = pRtti->GetAllocator()->Allocate<plDocumentManager>();
+          s_AllDocumentManagers.PushBack(pManager);
+
+          bChanges = true;
+        }
       }
-    }
-  });
+    });
 
   // triggers a reevaluation next time
   s_AllDocumentDescriptors.Clear();
   GetAllDocumentDescriptors();
-
 
   if (bChanges)
   {
@@ -125,24 +125,24 @@ void plDocumentManager::UpdatedAfterLoadingPlugins()
   }
 }
 
-void plDocumentManager::GetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const
+void plDocumentManager::GetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_documentTypes) const
 {
-  InternalGetSupportedDocumentTypes(inout_DocumentTypes);
+  InternalGetSupportedDocumentTypes(inout_documentTypes);
 
-  for (auto& dt : inout_DocumentTypes)
+  for (auto& dt : inout_documentTypes)
   {
-    PLASMA_ASSERT_DEBUG(dt->m_bCanCreate == false || dt->m_pDocumentType != nullptr, "No document type is set");
-    PLASMA_ASSERT_DEBUG(!dt->m_sFileExtension.IsEmpty(), "File extension must be valid");
-    PLASMA_ASSERT_DEBUG(dt->m_pManager != nullptr, "Document manager must be set");
+    PL_ASSERT_DEBUG(dt->m_bCanCreate == false || dt->m_pDocumentType != nullptr, "No document type is set");
+    PL_ASSERT_DEBUG(!dt->m_sFileExtension.IsEmpty(), "File extension must be valid");
+    PL_ASSERT_DEBUG(dt->m_pManager != nullptr, "Document manager must be set");
   }
 }
 
-plStatus plDocumentManager::CanOpenDocument(const char* szFilePath) const
+plStatus plDocumentManager::CanOpenDocument(plStringView sFilePath) const
 {
   plHybridArray<const plDocumentTypeDescriptor*, 4> DocumentTypes;
   GetSupportedDocumentTypes(DocumentTypes);
 
-  plStringBuilder sPath = szFilePath;
+  plStringBuilder sPath = sFilePath;
   plStringBuilder sExt = sPath.GetFileExtension();
 
   // check whether the file extension is in the list of possible extensions
@@ -151,7 +151,7 @@ plStatus plDocumentManager::CanOpenDocument(const char* szFilePath) const
   {
     if (DocumentTypes[i]->m_sFileExtension.IsEqual_NoCase(sExt))
     {
-      return plStatus(PLASMA_SUCCESS);
+      return plStatus(PL_SUCCESS);
     }
   }
 
@@ -163,7 +163,7 @@ void plDocumentManager::EnsureWindowRequested(plDocument* pDocument, const plDoc
   if (pDocument->m_bWindowRequested)
     return;
 
-  PLASMA_PROFILE_SCOPE("EnsureWindowRequested");
+  PL_PROFILE_SCOPE("EnsureWindowRequested");
   pDocument->m_bWindowRequested = true;
 
   Event e;
@@ -178,11 +178,11 @@ void plDocumentManager::EnsureWindowRequested(plDocument* pDocument, const plDoc
   s_Events.Broadcast(e);
 }
 
-plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument,
+plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, plStringView sDocumentTypeName, plStringView sPath2, plDocument*& out_pDocument,
   plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext /*= nullptr*/)
 {
   plFileStats fs;
-  plStringBuilder sPath = szPath;
+  plStringBuilder sPath = sPath2;
   sPath.MakeCleanPath();
   if (!bCreate && plOSFile::GetFileStats(sPath, fs).Failed())
   {
@@ -191,8 +191,8 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
 
   Request r;
   r.m_Type = Request::Type::DocumentAllowedToOpen;
-  r.m_RequestStatus.m_Result = PLASMA_SUCCESS;
-  r.m_sDocumentType = szDocumentTypeName;
+  r.m_RequestStatus.m_Result = PL_SUCCESS;
+  r.m_sDocumentType = sDocumentTypeName;
   r.m_sDocumentPath = sPath;
   s_Requests.Broadcast(r);
 
@@ -209,7 +209,7 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
 
   for (plUInt32 i = 0; i < DocumentTypes.GetCount(); ++i)
   {
-    if (DocumentTypes[i]->m_sDocumentTypeName == szDocumentTypeName)
+    if (DocumentTypes[i]->m_sDocumentTypeName == sDocumentTypeName)
     {
       // See if there is a default asset document registered for the type, if so clone
       // it and use that as the new document instead of creating one from scratch.
@@ -223,9 +223,9 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
           plUuid CloneUuid;
           if (CloneDocument(sTemplateDoc, sPath, CloneUuid).Succeeded())
           {
-            if (OpenDocument(szDocumentTypeName, sPath, out_pDocument, flags, pOpenContext).Succeeded())
+            if (OpenDocument(sDocumentTypeName, sPath, out_pDocument, flags, pOpenContext).Succeeded())
             {
-              return plStatus(PLASMA_SUCCESS);
+              return plStatus(PL_SUCCESS);
             }
           }
 
@@ -233,12 +233,12 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
         }
       }
 
-      PLASMA_ASSERT_DEV(DocumentTypes[i]->m_bCanCreate, "This document manager cannot create the document type '{0}'", szDocumentTypeName);
+      PL_ASSERT_DEV(DocumentTypes[i]->m_bCanCreate, "This document manager cannot create the document type '{0}'", sDocumentTypeName);
 
       {
-        PLASMA_PROFILE_SCOPE(szDocumentTypeName);
-        status = plStatus(PLASMA_SUCCESS);
-        InternalCreateDocument(szDocumentTypeName, sPath, bCreate, out_pDocument, pOpenContext);
+        PL_PROFILE_SCOPE(sDocumentTypeName);
+        status = plStatus(PL_SUCCESS);
+        InternalCreateDocument(sDocumentTypeName, sPath, bCreate, out_pDocument, pOpenContext);
       }
       out_pDocument->SetAddToResetFilesList(flags.IsSet(plDocumentFlags::AddToRecentFilesList));
 
@@ -255,7 +255,7 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
         }
 
         {
-          PLASMA_PROFILE_SCOPE("InitializeAfterLoading");
+          PL_PROFILE_SCOPE("InitializeAfterLoading");
           out_pDocument->InitializeAfterLoading(bCreate);
         }
 
@@ -265,7 +265,7 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
           if (flags.IsSet(plDocumentFlags::AsyncSave))
           {
             out_pDocument->SaveDocumentAsync({});
-            status = plStatus(PLASMA_SUCCESS);
+            status = plStatus(PL_SUCCESS);
           }
           else
           {
@@ -274,7 +274,7 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
         }
 
         {
-          PLASMA_PROFILE_SCOPE("InitializeAfterLoadingAndSaving");
+          PL_PROFILE_SCOPE("InitializeAfterLoadingAndSaving");
           out_pDocument->InitializeAfterLoadingAndSaving();
         }
 
@@ -292,27 +292,27 @@ plStatus plDocumentManager::CreateOrOpenDocument(bool bCreate, const char* szDoc
     }
   }
 
-  PLASMA_REPORT_FAILURE("This document manager does not support the document type '{0}'", szDocumentTypeName);
+  PL_REPORT_FAILURE("This document manager does not support the document type '{0}'", sDocumentTypeName);
   return status;
 }
 
 plStatus plDocumentManager::CreateDocument(
-  const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
+  plStringView sDocumentTypeName, plStringView sPath, plDocument*& out_pDocument, plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
 {
-  return CreateOrOpenDocument(true, szDocumentTypeName, szPath, out_pDocument, flags, pOpenContext);
+  return CreateOrOpenDocument(true, sDocumentTypeName, sPath, out_pDocument, flags, pOpenContext);
 }
 
-plStatus plDocumentManager::OpenDocument(const char* szDocumentTypeName, const char* szPath, plDocument*& out_pDocument,
+plStatus plDocumentManager::OpenDocument(plStringView sDocumentTypeName, plStringView sPath, plDocument*& out_pDocument,
   plBitflags<plDocumentFlags> flags, const plDocumentObject* pOpenContext)
 {
-  return CreateOrOpenDocument(false, szDocumentTypeName, szPath, out_pDocument, flags, pOpenContext);
+  return CreateOrOpenDocument(false, sDocumentTypeName, sPath, out_pDocument, flags, pOpenContext);
 }
 
 
-plStatus plDocumentManager::CloneDocument(const char* szPath, const char* szClonePath, plUuid& inout_cloneGuid)
+plStatus plDocumentManager::CloneDocument(plStringView sPath, plStringView sClonePath, plUuid& inout_cloneGuid)
 {
   const plDocumentTypeDescriptor* pTypeDesc = nullptr;
-  plStatus res = plDocumentUtils::IsValidSaveLocationForDocument(szClonePath, &pTypeDesc);
+  plStatus res = plDocumentUtils::IsValidSaveLocationForDocument(sClonePath, &pTypeDesc);
   if (res.Failed())
     return res;
 
@@ -320,7 +320,7 @@ plStatus plDocumentManager::CloneDocument(const char* szPath, const char* szClon
   plUniquePtr<plAbstractObjectGraph> objects;
   plUniquePtr<plAbstractObjectGraph> types;
 
-  res = plDocument::ReadDocument(szPath, header, objects, types);
+  res = plDocument::ReadDocument(sPath, header, objects, types);
   if (res.Failed())
     return res;
 
@@ -328,9 +328,9 @@ plStatus plDocumentManager::CloneDocument(const char* szPath, const char* szClon
   plAbstractObjectNode::Property* documentIdProp = nullptr;
   {
     auto* pHeaderNode = header->GetNodeByName("Header");
-    PLASMA_ASSERT_DEV(pHeaderNode, "No header found, document '{0}' is corrupted.", szPath);
+    PL_ASSERT_DEV(pHeaderNode, "No header found, document '{0}' is corrupted.", sPath);
     documentIdProp = pHeaderNode->FindProperty("DocumentID");
-    PLASMA_ASSERT_DEV(documentIdProp, "No document ID property found in header, document document '{0}' is corrupted.", szPath);
+    PL_ASSERT_DEV(documentIdProp, "No document ID property found in header, document document '{0}' is corrupted.", sPath);
     documentId = documentIdProp->m_Value.Get<plUuid>();
   }
 
@@ -342,30 +342,30 @@ plStatus plDocumentManager::CloneDocument(const char* szPath, const char* szClon
 
     plUuid test = documentId;
     test.CombineWithSeed(seedGuid);
-    PLASMA_ASSERT_DEV(test == inout_cloneGuid, "");
+    PL_ASSERT_DEV(test == inout_cloneGuid, "");
   }
   else
   {
-    seedGuid.CreateNewUuid();
+    seedGuid = plUuid::MakeUuid();
     inout_cloneGuid = documentId;
     inout_cloneGuid.CombineWithSeed(seedGuid);
   }
 
-  InternalCloneDocument(szPath, szClonePath, documentId, seedGuid, inout_cloneGuid, header.Borrow(), objects.Borrow(), types.Borrow());
+  InternalCloneDocument(sPath, sClonePath, documentId, seedGuid, inout_cloneGuid, header.Borrow(), objects.Borrow(), types.Borrow());
 
   {
     plDeferredFileWriter file;
-    file.SetOutput(szClonePath);
+    file.SetOutput(sClonePath);
     plAbstractGraphDdlSerializer::WriteDocument(file, header.Borrow(), objects.Borrow(), types.Borrow(), false);
-    if (file.Close() == PLASMA_FAILURE)
+    if (file.Close() == PL_FAILURE)
     {
-      return plStatus(plFmt("Unable to open file '{0}' for writing!", szClonePath));
+      return plStatus(plFmt("Unable to open file '{0}' for writing!", sClonePath));
     }
   }
-  return plStatus(PLASMA_SUCCESS);
+  return plStatus(PL_SUCCESS);
 }
 
-void plDocumentManager::InternalCloneDocument(const char* szPath, const char* szClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* header, plAbstractObjectGraph* objects, plAbstractObjectGraph* types)
+void plDocumentManager::InternalCloneDocument(plStringView sPath, plStringView sClonePath, const plUuid& documentId, const plUuid& seedGuid, const plUuid& cloneGuid, plAbstractObjectGraph* header, plAbstractObjectGraph* objects, plAbstractObjectGraph* types)
 {
   // Remap
   header->ReMapNodeGuids(seedGuid);
@@ -393,24 +393,23 @@ void plDocumentManager::InternalCloneDocument(const char* szPath, const char* sz
 
 void plDocumentManager::CloseDocument(plDocument* pDocument)
 {
-  PLASMA_ASSERT_DEV(pDocument != nullptr, "Invalid document pointer");
+  PL_ASSERT_DEV(pDocument != nullptr, "Invalid document pointer");
 
   if (!m_AllOpenDocuments.RemoveAndCopy(pDocument))
     return;
 
   Event e;
   e.m_pDocument = pDocument;
+
   e.m_Type = Event::Type::DocumentClosing;
   s_Events.Broadcast(e);
 
-  e.m_pDocument = pDocument;
   e.m_Type = Event::Type::DocumentClosing2;
   s_Events.Broadcast(e);
 
   pDocument->BeforeClosing();
-  delete pDocument;
+  delete pDocument; // the pointer in e.m_pDocument won't be valid anymore at broadcast time, it is only sent for comparison purposes, not to be dereferenced
 
-  e.m_pDocument = pDocument;
   e.m_Type = Event::Type::DocumentClosed;
   s_Events.Broadcast(e);
 }
@@ -431,14 +430,14 @@ void plDocumentManager::CloseAllDocuments()
   }
 }
 
-plDocument* plDocumentManager::GetDocumentByPath(const char* szPath) const
+plDocument* plDocumentManager::GetDocumentByPath(plStringView sPath) const
 {
-  plStringBuilder sPath = szPath;
-  sPath.MakeCleanPath();
+  plStringBuilder sPath2 = sPath;
+  sPath2.MakeCleanPath();
 
   for (plDocument* pDoc : m_AllOpenDocuments)
   {
-    if (sPath.IsEqual_NoCase(pDoc->GetDocumentPath()))
+    if (sPath2.IsEqual_NoCase(pDoc->GetDocumentPath()))
       return pDoc;
   }
 
@@ -461,21 +460,21 @@ plDocument* plDocumentManager::GetDocumentByGuid(const plUuid& guid)
 }
 
 
-bool plDocumentManager::EnsureDocumentIsClosedInAllManagers(const char* szPath)
+bool plDocumentManager::EnsureDocumentIsClosedInAllManagers(plStringView sPath)
 {
   bool bClosedAny = false;
   for (auto man : s_AllDocumentManagers)
   {
-    if (man->EnsureDocumentIsClosed(szPath))
+    if (man->EnsureDocumentIsClosed(sPath))
       bClosedAny = true;
   }
 
   return bClosedAny;
 }
 
-bool plDocumentManager::EnsureDocumentIsClosed(const char* szPath)
+bool plDocumentManager::EnsureDocumentIsClosed(plStringView sPath)
 {
-  auto pDoc = GetDocumentByPath(szPath);
+  auto pDoc = GetDocumentByPath(sPath);
 
   if (pDoc == nullptr)
     return false;
@@ -485,9 +484,9 @@ bool plDocumentManager::EnsureDocumentIsClosed(const char* szPath)
   return true;
 }
 
-plResult plDocumentManager::FindDocumentTypeFromPath(const char* szPath, bool bForCreation, const plDocumentTypeDescriptor*& out_pTypeDesc)
+plResult plDocumentManager::FindDocumentTypeFromPath(plStringView sPath, bool bForCreation, const plDocumentTypeDescriptor*& out_pTypeDesc)
 {
-  const plString sFileExt = plPathUtils::GetFileExtension(szPath);
+  const plString sFileExt = plPathUtils::GetFileExtension(sPath);
 
   const auto& allDesc = GetAllDocumentDescriptors();
 
@@ -501,11 +500,11 @@ plResult plDocumentManager::FindDocumentTypeFromPath(const char* szPath, bool bF
     if (desc->m_sFileExtension.IsEqual_NoCase(sFileExt))
     {
       out_pTypeDesc = desc;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 const plMap<plString, const plDocumentTypeDescriptor*>& plDocumentManager::GetAllDocumentDescriptors()
@@ -527,9 +526,9 @@ const plMap<plString, const plDocumentTypeDescriptor*>& plDocumentManager::GetAl
   return s_AllDocumentDescriptors;
 }
 
-const plDocumentTypeDescriptor* plDocumentManager::GetDescriptorForDocumentType(const char* szDocumentType)
+const plDocumentTypeDescriptor* plDocumentManager::GetDescriptorForDocumentType(plStringView sDocumentType)
 {
-  return GetAllDocumentDescriptors().GetValueOrDefault(szDocumentType, nullptr);
+  return GetAllDocumentDescriptors().GetValueOrDefault(sDocumentType, nullptr);
 }
 
 /// \todo on close doc: remove from m_AllDocuments

@@ -1,34 +1,35 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererCore/Pipeline/RenderPipeline.h>
 #include <RendererCore/Pipeline/RenderPipelinePass.h>
 #include <RendererCore/Pipeline/Renderer.h>
 #include <RendererCore/RenderContext/RenderContext.h>
 
+#include <Foundation/IO/TypeVersionContext.h>
 #include <RendererFoundation/Profiling/Profiling.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelinePass, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelinePass, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("Name", GetName, SetName),
+    PL_MEMBER_PROPERTY("Active", m_bActive)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("Name", GetName, SetName),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
-    new plColorAttribute(plColorScheme::DarkUI(plColorScheme::PlasmaBranding))
+    new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Grape))
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRenderPipelinePass::plRenderPipelinePass(const char* szName, bool bIsStereoAware)
-  : m_bActive(true)
-  , m_bIsStereoAware(bIsStereoAware)
-  , m_pPipeline(nullptr)
+  : m_bIsStereoAware(bIsStereoAware)
+
 {
   m_sName.Assign(szName);
 }
@@ -54,9 +55,26 @@ void plRenderPipelinePass::ExecuteInactive(const plRenderViewContext& renderView
 
 void plRenderPipelinePass::ReadBackProperties(plView* pView) {}
 
+plResult plRenderPipelinePass::Serialize(plStreamWriter& inout_stream) const
+{
+  inout_stream << m_bActive;
+  inout_stream << m_sName;
+  return PL_SUCCESS;
+}
+
+plResult plRenderPipelinePass::Deserialize(plStreamReader& inout_stream)
+{
+  const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_ASSERT_DEBUG(uiVersion == 1, "Unknown version encountered");
+
+  inout_stream >> m_bActive;
+  inout_stream >> m_sName;
+  return PL_SUCCESS;
+}
+
 void plRenderPipelinePass::RenderDataWithCategory(const plRenderViewContext& renderViewContext, plRenderData::Category category, plRenderDataBatch::Filter filter)
 {
-  PLASMA_PROFILE_AND_MARKER(renderViewContext.m_pRenderContext->GetCommandEncoder(), plRenderData::GetCategoryName(category));
+  PL_PROFILE_AND_MARKER(renderViewContext.m_pRenderContext->GetCommandEncoder(), plRenderData::GetCategoryName(category));
 
   auto batchList = m_pPipeline->GetRenderDataBatchesWithCategory(category, filter);
   const plUInt32 uiBatchCount = batchList.GetBatchCount();
@@ -78,4 +96,4 @@ void plRenderPipelinePass::RenderDataWithCategory(const plRenderViewContext& ren
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelinePass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_RenderPipelinePass);

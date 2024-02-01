@@ -14,18 +14,18 @@ class plDynamicArrayBase : public plArrayBase<T, plDynamicArrayBase<T>>
 {
 protected:
   /// \brief Creates an empty array. Does not allocate any data yet.
-  explicit plDynamicArrayBase(plAllocatorBase* pAllocator); // [tested]
+  explicit plDynamicArrayBase(plAllocator* pAllocator); // [tested]
 
-  plDynamicArrayBase(T* pInplaceStorage, plUInt32 uiCapacity, plAllocatorBase* pAllocator); // [tested]
+  plDynamicArrayBase(T* pInplaceStorage, plUInt32 uiCapacity, plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given array.
-  plDynamicArrayBase(const plDynamicArrayBase<T>& other, plAllocatorBase* pAllocator); // [tested]
+  plDynamicArrayBase(const plDynamicArrayBase<T>& other, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves the given array into this one.
-  plDynamicArrayBase(plDynamicArrayBase<T>&& other, plAllocatorBase* pAllocator); // [tested]
+  plDynamicArrayBase(plDynamicArrayBase<T>&& other, plAllocator* pAllocator); // [tested]
 
   /// \brief Creates a copy of the given array.
-  plDynamicArrayBase(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator); // [tested]
+  plDynamicArrayBase(const plArrayPtr<const T>& other, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plDynamicArrayBase(); // [tested]
@@ -50,7 +50,7 @@ public:
   void Compact(); // [tested]
 
   /// \brief Returns the allocator that is used by this instance.
-  plAllocatorBase* GetAllocator() const { return const_cast<plAllocatorBase*>(m_pAllocator.GetPtr()); }
+  plAllocator* GetAllocator() const { return const_cast<plAllocator*>(m_pAllocator.GetPtr()); }
 
   /// \brief Returns the amount of bytes that are currently allocated on the heap.
   plUInt64 GetHeapMemoryUsage() const; // [tested]
@@ -65,7 +65,7 @@ private:
     External = 1
   };
 
-  plPointerWithFlags<plAllocatorBase, 1> m_pAllocator;
+  plPointerWithFlags<plAllocator, 1> m_pAllocator;
 
   enum
   {
@@ -80,11 +80,11 @@ template <typename T, typename AllocatorWrapper = plDefaultAllocatorWrapper>
 class plDynamicArray : public plDynamicArrayBase<T>
 {
 public:
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE();
+  PL_DECLARE_MEM_RELOCATABLE_TYPE();
 
 
   plDynamicArray();
-  explicit plDynamicArray(plAllocatorBase* pAllocator);
+  explicit plDynamicArray(plAllocator* pAllocator);
 
   plDynamicArray(const plDynamicArray<T, AllocatorWrapper>& other);
   plDynamicArray(const plDynamicArrayBase<T>& other);
@@ -101,7 +101,7 @@ public:
   void operator=(plDynamicArrayBase<T>&& rhs) noexcept;
 
 protected:
-  plDynamicArray(T* pInplaceStorage, plUInt32 uiCapacity, plAllocatorBase* pAllocator)
+  plDynamicArray(T* pInplaceStorage, plUInt32 uiCapacity, plAllocator* pAllocator)
     : plDynamicArrayBase<T>(pInplaceStorage, uiCapacity, pAllocator)
   {
   }
@@ -120,6 +120,6 @@ template <typename T, typename AllocatorWrapper>
 plArrayPtr<T> plMakeArrayPtr(plDynamicArray<T, AllocatorWrapper>& in_dynArray);
 
 
-PLASMA_CHECK_AT_COMPILETIME_MSG(plGetTypeClass<plDynamicArray<int>>::value == 2, "dynamic array is not memory relocatable");
+PL_CHECK_AT_COMPILETIME_MSG(plGetTypeClass<plDynamicArray<int>>::value == 2, "dynamic array is not memory relocatable");
 
 #include <Foundation/Containers/Implementation/DynamicArray_inl.h>

@@ -6,12 +6,12 @@
 
 class QPaintEvent;
 
-class PLASMA_GUIFOUNDATION_DLL plQGridBarWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQGridBarWidget : public QWidget
 {
   Q_OBJECT
 
 public:
-  plQGridBarWidget(QWidget* parent);
+  plQGridBarWidget(QWidget* pParent);
 
   void SetConfig(const QRectF& viewportSceneRect, double fTextGridStops, double fFineGridStops, plDelegate<QPointF(const QPointF&)> mapFromSceneFunc);
 

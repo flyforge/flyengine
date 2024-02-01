@@ -8,18 +8,18 @@
 #include <Foundation/Types/Status.h>
 
 // Only saved in editor preferences, does not have to work cross-platform
-struct PLASMA_EDITORFRAMEWORK_DLL plIDE
+struct PL_EDITORFRAMEWORK_DLL plIDE
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
     VisualStudioCode,
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
     VisualStudio,
 #endif
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
     Default = VisualStudio
 #else
     Default = VisualStudioCode
@@ -27,23 +27,23 @@ struct PLASMA_EDITORFRAMEWORK_DLL plIDE
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORFRAMEWORK_DLL, plIDE);
+PL_DECLARE_REFLECTABLE_TYPE(PL_EDITORFRAMEWORK_DLL, plIDE);
 
 // Only saved in editor preferences, does not have to work cross-platform
-struct PLASMA_EDITORFRAMEWORK_DLL plCompiler
+struct PL_EDITORFRAMEWORK_DLL plCompiler
 {
   using StorageType = plUInt8;
 
   enum Enum
   {
     Clang,
-#if PLASMA_ENABLED(PLASMA_PLATFORM_LINUX)
+#if PL_ENABLED(PL_PLATFORM_LINUX)
     Gcc,
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#elif PL_ENABLED(PL_PLATFORM_WINDOWS)
     Vs2022,
 #endif
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
     Default = Vs2022
 #else
     Default = Gcc
@@ -51,9 +51,9 @@ struct PLASMA_EDITORFRAMEWORK_DLL plCompiler
   };
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORFRAMEWORK_DLL, plCompiler);
+PL_DECLARE_REFLECTABLE_TYPE(PL_EDITORFRAMEWORK_DLL, plCompiler);
 
-struct PLASMA_EDITORFRAMEWORK_DLL plCompilerPreferences
+struct PL_EDITORFRAMEWORK_DLL plCompilerPreferences
 {
   plEnum<plCompiler> m_Compiler;
   bool m_bCustomCompiler;
@@ -62,11 +62,11 @@ struct PLASMA_EDITORFRAMEWORK_DLL plCompilerPreferences
   plString m_sRcCompiler;
 };
 
-PLASMA_DECLARE_REFLECTABLE_TYPE(PLASMA_EDITORFRAMEWORK_DLL, plCompilerPreferences);
+PL_DECLARE_REFLECTABLE_TYPE(PL_EDITORFRAMEWORK_DLL, plCompilerPreferences);
 
-struct PLASMA_EDITORFRAMEWORK_DLL plCppProject : public plPreferences
+struct PL_EDITORFRAMEWORK_DLL plCppProject : public plPreferences
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plCppProject, plPreferences);
+  PL_ADD_DYNAMIC_REFLECTION(plCppProject, plPreferences);
 
   struct MachineSpecificCompilerPaths
   {
@@ -159,3 +159,4 @@ private:
 
   static plDynamicArray<MachineSpecificCompilerPaths> s_MachineSpecificCompilers;
 };
+

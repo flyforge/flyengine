@@ -27,30 +27,6 @@ plEvent<const plRenderWorldExtractionEvent&, plMutex> plRenderWorld::s_Extractio
 plEvent<const plRenderWorldRenderEvent&, plMutex> plRenderWorld::s_RenderEvent;
 plUInt64 plRenderWorld::s_uiFrameCounter;
 
-bool plRenderWorld::s_bOverridePipelineSettings = false;
-
-// TAA
-bool plRenderWorld::s_bTAAEnabled = false;
-bool plRenderWorld::s_bTAAUpscaleEnabled = false;
-// Depth of field
-bool plRenderWorld::s_bDOFEnabled = false;
-float plRenderWorld::s_bDOFRadius = 5.5;
-
-// Motion blur
-bool plRenderWorld::s_bMotionBlurEnabled = false;
-float plRenderWorld::s_MotionBlurSamples = 32.0f;
-float plRenderWorld::s_MotionBlurStrength = 0.1f;
-plEnum<plMotionBlurMode> plRenderWorld::s_eMotionBlurMode = plMotionBlurMode::ObjectBased;
-
-// Bloom
-bool plRenderWorld::s_bBloomEnabled = false;
-float plRenderWorld::s_BloomThreshold = 1.0;
-float plRenderWorld::s_BloomIntensity = 1.0;
-int plRenderWorld::s_BloomMipCount = 10;
-
-// Tonemapping
-plEnum<plTonemapMode> plRenderWorld::s_eTonemapMode = plTonemapMode::AMD;
-
 namespace
 {
   static bool s_bInExtract;
@@ -71,7 +47,7 @@ namespace
 
   struct PipelineToRebuild
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
 
     plRenderPipeline* m_pPipeline;
     plViewHandle m_hView;
@@ -83,7 +59,7 @@ namespace
   static plProxyAllocator* s_pCacheAllocator;
 
   static plMutex s_CachedRenderDataMutex;
-  typedef plHybridArray<const plRenderData*, 4> CachedRenderDataPerComponent;
+  using CachedRenderDataPerComponent = plHybridArray<const plRenderData*, 4>;
   static plHashTable<plComponentHandle, CachedRenderDataPerComponent> s_CachedRenderData;
   static plDynamicArray<const plRenderData*> s_DeletedRenderData;
 
@@ -100,7 +76,7 @@ namespace plInternal
 {
   struct RenderDataCache
   {
-    RenderDataCache(plAllocatorBase* pAllocator)
+    RenderDataCache(plAllocator* pAllocator)
       : m_PerObjectCaches(pAllocator)
     {
       for (plUInt32 i = 0; i < MaxNumNewCacheEntries; ++i)
@@ -111,9 +87,9 @@ namespace plInternal
 
     struct PerObjectCache
     {
-      PerObjectCache() {}
+      PerObjectCache() = default;
 
-      PerObjectCache(plAllocatorBase* pAllocator)
+      PerObjectCache(plAllocator* pAllocator)
         : m_Entries(pAllocator)
       {
       }
@@ -126,7 +102,7 @@ namespace plInternal
 
     struct NewEntryPerComponent
     {
-      NewEntryPerComponent(plAllocatorBase* pAllocator)
+      NewEntryPerComponent(plAllocator* pAllocator)
         : m_Cache(pAllocator)
       {
       }
@@ -140,13 +116,13 @@ namespace plInternal
     plAtomicInteger32 m_NewEntriesCount;
   };
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
-  PLASMA_CHECK_AT_COMPILETIME(sizeof(RenderDataCacheEntry) == 16);
+#if PL_ENABLED(PL_PLATFORM_64BIT)
+  PL_CHECK_AT_COMPILETIME(sizeof(RenderDataCacheEntry) == 16);
 #endif
 } // namespace plInternal
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderWorld)
+PL_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderWorld)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation",
@@ -163,22 +139,22 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(RendererCore, RenderWorld)
     plRenderWorld::OnEngineShutdown();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 plViewHandle plRenderWorld::CreateView(const char* szName, plView*& out_pView)
 {
-  plView* pView = PLASMA_DEFAULT_NEW(plView);
+  plView* pView = PL_DEFAULT_NEW(plView);
 
   {
-    PLASMA_LOCK(s_ViewsMutex);
+    PL_LOCK(s_ViewsMutex);
     pView->m_InternalId = s_Views.Insert(pView);
   }
 
   pView->SetName(szName);
   pView->InitializePins();
 
-  pView->m_pRenderDataCache = PLASMA_NEW(s_pCacheAllocator, plInternal::RenderDataCache, s_pCacheAllocator);
+  pView->m_pRenderDataCache = PL_NEW(s_pCacheAllocator, plInternal::RenderDataCache, s_pCacheAllocator);
 
   s_ViewCreatedEvent.Broadcast(pView);
 
@@ -191,17 +167,17 @@ void plRenderWorld::DeleteView(const plViewHandle& hView)
   plView* pView = nullptr;
 
   {
-    PLASMA_LOCK(s_ViewsMutex);
+    PL_LOCK(s_ViewsMutex);
     if (!s_Views.Remove(hView, &pView))
       return;
   }
 
   s_ViewDeletedEvent.Broadcast(pView);
 
-  PLASMA_DELETE(s_pCacheAllocator, pView->m_pRenderDataCache);
+  PL_DELETE(s_pCacheAllocator, pView->m_pRenderDataCache);
 
   {
-    PLASMA_LOCK(s_PipelinesToRebuildMutex);
+    PL_LOCK(s_PipelinesToRebuildMutex);
 
     for (plUInt32 i = s_PipelinesToRebuild.GetCount(); i-- > 0;)
     {
@@ -214,18 +190,18 @@ void plRenderWorld::DeleteView(const plViewHandle& hView)
 
   RemoveMainView(hView);
 
-  PLASMA_DEFAULT_DELETE(pView);
+  PL_DEFAULT_DELETE(pView);
 }
 
 bool plRenderWorld::TryGetView(const plViewHandle& hView, plView*& out_pView)
 {
-  PLASMA_LOCK(s_ViewsMutex);
+  PL_LOCK(s_ViewsMutex);
   return s_Views.TryGetValue(hView, out_pView);
 }
 
 plView* plRenderWorld::GetViewByUsageHint(plCameraUsageHint::Enum usageHint, plCameraUsageHint::Enum alternativeUsageHint /*= plCameraUsageHint::None*/, const plWorld* pWorld /*= nullptr*/)
 {
-  PLASMA_LOCK(s_ViewsMutex);
+  PL_LOCK(s_ViewsMutex);
 
   plView* pAlternativeView = nullptr;
 
@@ -250,7 +226,7 @@ plView* plRenderWorld::GetViewByUsageHint(plCameraUsageHint::Enum usageHint, plC
 
 void plRenderWorld::AddMainView(const plViewHandle& hView)
 {
-  PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot add main view during extraction");
+  PL_ASSERT_DEV(!s_bInExtract, "Cannot add main view during extraction");
 
   if (!s_MainViews.Contains(hView))
     s_MainViews.PushBack(hView);
@@ -261,14 +237,14 @@ void plRenderWorld::RemoveMainView(const plViewHandle& hView)
   plUInt32 uiIndex = s_MainViews.IndexOf(hView);
   if (uiIndex != plInvalidIndex)
   {
-    PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot remove main view during extraction");
+    PL_ASSERT_DEV(!s_bInExtract, "Cannot remove main view during extraction");
     s_MainViews.RemoveAtAndCopy(uiIndex);
   }
 }
 
 void plRenderWorld::ClearMainViews()
 {
-  PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot clear main views during extraction");
+  PL_ASSERT_DEV(!s_bInExtract, "Cannot clear main views during extraction");
 
   s_MainViews.Clear();
 }
@@ -302,12 +278,12 @@ void plRenderWorld::CacheRenderData(const plView& view, const plGameObjectHandle
 
 void plRenderWorld::DeleteAllCachedRenderData()
 {
-  PLASMA_PROFILE_SCOPE("DeleteAllCachedRenderData");
+  PL_PROFILE_SCOPE("DeleteAllCachedRenderData");
 
-  PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
+  PL_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
 
   {
-    PLASMA_LOCK(s_ViewsMutex);
+    PL_LOCK(s_ViewsMutex);
 
     for (auto it = s_Views.GetIterator(); it.IsValid(); ++it)
     {
@@ -317,7 +293,7 @@ void plRenderWorld::DeleteAllCachedRenderData()
   }
 
   {
-    PLASMA_LOCK(s_CachedRenderDataMutex);
+    PL_LOCK(s_CachedRenderDataMutex);
 
     for (auto it = s_CachedRenderData.GetIterator(); it.IsValid(); ++it)
     {
@@ -335,11 +311,11 @@ void plRenderWorld::DeleteAllCachedRenderData()
 
 void plRenderWorld::DeleteCachedRenderData(const plGameObjectHandle& hOwnerObject, const plComponentHandle& hOwnerComponent)
 {
-  PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
+  PL_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
 
   DeleteCachedRenderDataInternal(hOwnerObject);
 
-  PLASMA_LOCK(s_CachedRenderDataMutex);
+  PL_LOCK(s_CachedRenderDataMutex);
 
   CachedRenderDataPerComponent* pCachedRenderDataPerComponent = nullptr;
   if (s_CachedRenderData.TryGetValue(hOwnerComponent, pCachedRenderDataPerComponent))
@@ -369,11 +345,11 @@ void plRenderWorld::ResetRenderDataCache(plView& ref_view)
 
 void plRenderWorld::DeleteCachedRenderDataForObject(const plGameObject* pOwnerObject)
 {
-  PLASMA_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
+  PL_ASSERT_DEV(!s_bInExtract, "Cannot delete cached render data during extraction");
 
   DeleteCachedRenderDataInternal(pOwnerObject->GetHandle());
 
-  PLASMA_LOCK(s_CachedRenderDataMutex);
+  PL_LOCK(s_CachedRenderDataMutex);
 
   auto components = pOwnerObject->GetComponents();
   for (auto pComponent : components)
@@ -432,8 +408,8 @@ void plRenderWorld::AddViewToRender(const plViewHandle& hView)
     return;
 
   {
-    PLASMA_LOCK(s_ViewsToRenderMutex);
-    PLASMA_ASSERT_DEV(s_bInExtract, "Render views need to be collected during extraction");
+    PL_LOCK(s_ViewsToRenderMutex);
+    PL_ASSERT_DEV(s_bInExtract, "Render views need to be collected during extraction");
 
     // make sure the view is put at the end of the array, if it is already there, reorder it
     // this ensures that the views that have been referenced by the last other view, get rendered first
@@ -453,7 +429,7 @@ void plRenderWorld::AddViewToRender(const plViewHandle& hView)
     plTaskGroupID extractTaskID = plTaskSystem::StartSingleTask(pView->GetExtractTask(), plTaskPriority::EarlyThisFrame);
 
     {
-      PLASMA_LOCK(s_ExtractTasksMutex);
+      PL_LOCK(s_ExtractTasksMutex);
       s_ExtractTasks.PushBack(extractTaskID);
     }
   }
@@ -465,7 +441,7 @@ void plRenderWorld::AddViewToRender(const plViewHandle& hView)
 
 void plRenderWorld::ExtractMainViews()
 {
-  PLASMA_ASSERT_DEV(!s_bInExtract, "ExtractMainViews must not be called from multiple threads.");
+  PL_ASSERT_DEV(!s_bInExtract, "ExtractMainViews must not be called from multiple threads.");
 
   s_bInExtract = true;
 
@@ -482,7 +458,7 @@ void plRenderWorld::ExtractMainViews()
     s_ExtractTasks.PushBack(extractTaskID);
 
     {
-      PLASMA_LOCK(s_ViewsMutex);
+      PL_LOCK(s_ViewsMutex);
 
       for (plUInt32 i = 0; i < s_MainViews.GetCount(); ++i)
       {
@@ -498,14 +474,14 @@ void plRenderWorld::ExtractMainViews()
     plTaskSystem::StartTaskGroup(extractTaskID);
 
     {
-      PLASMA_PROFILE_SCOPE("Wait for Extraction");
+      PL_PROFILE_SCOPE("Wait for Extraction");
 
       while (true)
       {
         plTaskGroupID taskID;
 
         {
-          PLASMA_LOCK(s_ExtractTasksMutex);
+          PL_LOCK(s_ExtractTasksMutex);
           if (s_ExtractTasks.IsEmpty())
             break;
 
@@ -555,13 +531,13 @@ void plRenderWorld::ExtractMainViews()
 
 void plRenderWorld::Render(plRenderContext* pRenderContext)
 {
-  PLASMA_PROFILE_SCOPE("plRenderWorld::Render");
+  PL_PROFILE_SCOPE("plRenderWorld::Render");
 
   plRenderWorldRenderEvent renderEvent;
   renderEvent.m_Type = plRenderWorldRenderEvent::Type::BeginRender;
   renderEvent.m_uiFrameCounter = s_uiFrameCounter;
   {
-    PLASMA_PROFILE_SCOPE("BeginRender");
+    PL_PROFILE_SCOPE("BeginRender");
     s_RenderEvent.Broadcast(renderEvent);
   }
 
@@ -576,7 +552,7 @@ void plRenderWorld::Render(plRenderContext* pRenderContext)
   {
     // Executed via WriteRenderPipelineDgml console command.
     s_bWriteRenderPipelineDgml = false;
-    const plDateTime dt = plTimestamp::CurrentTimestamp();
+    const plDateTime dt = plDateTime::MakeFromTimestamp(plTimestamp::CurrentTimestamp());
     for (plUInt32 i = 0; i < filteredRenderPipelines.GetCount(); ++i)
     {
       auto& pRenderPipeline = filteredRenderPipelines[i];
@@ -605,13 +581,13 @@ void plRenderWorld::Render(plRenderContext* pRenderContext)
   filteredRenderPipelines.Clear();
 
   renderEvent.m_Type = plRenderWorldRenderEvent::Type::EndRender;
-  PLASMA_PROFILE_SCOPE("EndRender");
+  PL_PROFILE_SCOPE("EndRender");
   s_RenderEvent.Broadcast(renderEvent);
 }
 
 void plRenderWorld::BeginFrame()
 {
-  PLASMA_PROFILE_SCOPE("BeginFrame");
+  PL_PROFILE_SCOPE("BeginFrame");
 
   s_RenderingThreadID = plThreadUtils::GetCurrentThreadID();
 
@@ -626,7 +602,7 @@ void plRenderWorld::BeginFrame()
 
 void plRenderWorld::EndFrame()
 {
-  PLASMA_PROFILE_SCOPE("EndFrame");
+  PL_PROFILE_SCOPE("EndFrame");
 
   ++s_uiFrameCounter;
 
@@ -661,7 +637,7 @@ void plRenderWorld::DeleteCachedRenderDataInternal(const plGameObjectHandle& hOw
   plUInt32 uiCacheIndex = hOwnerObject.GetInternalID().m_InstanceIndex;
   plWorld* pWorld = plWorld::GetWorld(hOwnerObject);
 
-  PLASMA_LOCK(s_ViewsMutex);
+  PL_LOCK(s_ViewsMutex);
 
   for (auto it = s_Views.GetIterator(); it.IsValid(); ++it)
   {
@@ -681,12 +657,12 @@ void plRenderWorld::DeleteCachedRenderDataInternal(const plGameObjectHandle& hOw
 
 void plRenderWorld::ClearRenderDataCache()
 {
-  PLASMA_PROFILE_SCOPE("Clear Render Data Cache");
+  PL_PROFILE_SCOPE("Clear Render Data Cache");
 
   for (auto pRenderData : s_DeletedRenderData)
   {
     plRenderData* ptr = const_cast<plRenderData*>(pRenderData);
-    PLASMA_DELETE(s_pCacheAllocator, ptr);
+    PL_DELETE(s_pCacheAllocator, ptr);
   }
 
   s_DeletedRenderData.Clear();
@@ -694,7 +670,7 @@ void plRenderWorld::ClearRenderDataCache()
 
 void plRenderWorld::UpdateRenderDataCache()
 {
-  PLASMA_PROFILE_SCOPE("Update Render Data Cache");
+  PL_PROFILE_SCOPE("Update Render Data Cache");
 
   for (auto it = s_Views.GetIterator(); it.IsValid(); ++it)
   {
@@ -707,7 +683,7 @@ void plRenderWorld::UpdateRenderDataCache()
     for (plUInt32 uiNewEntryIndex = 0; uiNewEntryIndex < uiNumNewEntries; ++uiNewEntryIndex)
     {
       auto& newEntries = pView->m_pRenderDataCache->m_NewEntriesPerComponent[uiNewEntryIndex];
-      PLASMA_ASSERT_DEV(!newEntries.m_hOwnerObject.IsInvalidated(), "Implementation error");
+      PL_ASSERT_DEV(!newEntries.m_hOwnerObject.IsInvalidated(), "Implementation error");
 
       // find or create cached render data
       auto& cachedRenderDataPerComponent = s_CachedRenderData[newEntries.m_hOwnerComponent];
@@ -768,7 +744,7 @@ void plRenderWorld::UpdateRenderDataCache()
 // static
 void plRenderWorld::AddRenderPipelineToRebuild(plRenderPipeline* pRenderPipeline, const plViewHandle& hView)
 {
-  PLASMA_LOCK(s_PipelinesToRebuildMutex);
+  PL_LOCK(s_PipelinesToRebuildMutex);
 
   for (auto& pipelineToRebuild : s_PipelinesToRebuild)
   {
@@ -787,7 +763,7 @@ void plRenderWorld::AddRenderPipelineToRebuild(plRenderPipeline* pRenderPipeline
 // static
 void plRenderWorld::RebuildPipelines()
 {
-  PLASMA_PROFILE_SCOPE("RebuildPipelines");
+  PL_PROFILE_SCOPE("RebuildPipelines");
 
   for (auto& pipelineToRebuild : s_PipelinesToRebuild)
   {
@@ -806,27 +782,27 @@ void plRenderWorld::RebuildPipelines()
 
 void plRenderWorld::OnEngineStartup()
 {
-  s_pCacheAllocator = PLASMA_DEFAULT_NEW(plProxyAllocator, "Cached Render Data", plFoundation::GetDefaultAllocator());
+  s_pCacheAllocator = PL_DEFAULT_NEW(plProxyAllocator, "Cached Render Data", plFoundation::GetDefaultAllocator());
 
   s_CachedRenderData = plHashTable<plComponentHandle, CachedRenderDataPerComponent>(s_pCacheAllocator);
 }
 
 void plRenderWorld::OnEngineShutdown()
 {
-#if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEVELOPMENT)
+#if PL_ENABLED(PL_COMPILE_FOR_DEVELOPMENT)
   for (auto it : s_CachedRenderData)
   {
     auto& cachedRenderDataPerComponent = it.Value();
     if (cachedRenderDataPerComponent.IsEmpty() == false)
     {
-      PLASMA_REPORT_FAILURE("Leaked cached render data of type '{}'", cachedRenderDataPerComponent[0]->GetDynamicRTTI()->GetTypeName());
+      PL_REPORT_FAILURE("Leaked cached render data of type '{}'", cachedRenderDataPerComponent[0]->GetDynamicRTTI()->GetTypeName());
     }
   }
 #endif
 
   ClearRenderDataCache();
 
-  PLASMA_DEFAULT_DELETE(s_pCacheAllocator);
+  PL_DEFAULT_DELETE(s_pCacheAllocator);
 
   s_FilteredRenderPipelines[0].Clear();
   s_FilteredRenderPipelines[1].Clear();
@@ -836,7 +812,7 @@ void plRenderWorld::OnEngineShutdown()
   for (auto it = s_Views.GetIterator(); it.IsValid(); ++it)
   {
     plView* pView = it.Value();
-    PLASMA_DEFAULT_DELETE(pView);
+    PL_DEFAULT_DELETE(pView);
   }
 
   s_Views.Clear();
@@ -844,26 +820,26 @@ void plRenderWorld::OnEngineShutdown()
 
 void plRenderWorld::BeginModifyCameraConfigs()
 {
-  PLASMA_ASSERT_DEBUG(!s_bModifyingCameraConfigs, "Recursive call not allowed.");
+  PL_ASSERT_DEBUG(!s_bModifyingCameraConfigs, "Recursive call not allowed.");
   s_bModifyingCameraConfigs = true;
 }
 
 void plRenderWorld::EndModifyCameraConfigs()
 {
-  PLASMA_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
+  PL_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
   s_bModifyingCameraConfigs = false;
   s_CameraConfigsModifiedEvent.Broadcast(nullptr);
 }
 
 void plRenderWorld::ClearCameraConfigs()
 {
-  PLASMA_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
+  PL_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
   s_CameraConfigs.Clear();
 }
 
 void plRenderWorld::SetCameraConfig(const char* szName, const CameraConfig& config)
 {
-  PLASMA_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
+  PL_ASSERT_DEBUG(s_bModifyingCameraConfigs, "You have to call plRenderWorld::BeginModifyCameraConfigs first");
   s_CameraConfigs[szName] = config;
 }
 
@@ -877,4 +853,4 @@ const plRenderWorld::CameraConfig* plRenderWorld::FindCameraConfig(const char* s
   return &it.Value();
 }
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_RenderWorld_Implementation_RenderWorld);
+PL_STATICLINK_FILE(RendererCore, RendererCore_RenderWorld_Implementation_RenderWorld);

@@ -33,13 +33,13 @@
 /// The first string is the name with which the function is exposed, which is also used for auto-completion.
 /// The second string is the description of the function. Here we inserted the parameter list with types, so that the user knows how to
 /// use it. Finally the last parameter is the actual function to expose.
-class PLASMA_CORE_DLL plConsoleFunctionBase : public plEnumerable<plConsoleFunctionBase>
+class PL_CORE_DLL plConsoleFunctionBase : public plEnumerable<plConsoleFunctionBase>
 {
-  PLASMA_DECLARE_ENUMERABLE_CLASS(plConsoleFunctionBase);
+  PL_DECLARE_ENUMERABLE_CLASS(plConsoleFunctionBase);
 
 public:
   /// \brief The constructor takes the function name and description as it should appear in the console.
-  plConsoleFunctionBase(plStringView sFunctionName, plStringView sDescription)    
+  plConsoleFunctionBase(plStringView sFunctionName, plStringView sDescription)
     : m_sFunctionName(sFunctionName)
     , m_sDescription(sDescription)
   {
@@ -59,7 +59,7 @@ public:
 
   /// \brief Calls the function. Each parameter must be put into an plVariant and all of them are passed along as an array.
   ///
-  /// Returns PLASMA_FAILURE, if the number of parameters did not match, or any parameter was not convertible to the actual type that
+  /// Returns PL_FAILURE, if the number of parameters did not match, or any parameter was not convertible to the actual type that
   /// the function expects.
   virtual plResult Call(plArrayPtr<plVariant> params) = 0;
 

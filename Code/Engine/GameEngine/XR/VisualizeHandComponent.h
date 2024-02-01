@@ -4,11 +4,11 @@
 #include <Core/World/World.h>
 #include <GameEngine/GameEngineDLL.h>
 
-typedef plComponentManagerSimple<class plVisualizeHandComponent, plComponentUpdateType::WhenSimulating> plVisualizeHandComponentManager;
+using plVisualizeHandComponentManager = plComponentManagerSimple<class plVisualizeHandComponent, plComponentUpdateType::WhenSimulating>;
 
-class PLASMA_GAMEENGINE_DLL plVisualizeHandComponent : public plComponent
+class PL_GAMEENGINE_DLL plVisualizeHandComponent : public plComponent
 {
-  PLASMA_DECLARE_COMPONENT_TYPE(plVisualizeHandComponent, plComponent, plVisualizeHandComponentManager);
+  PL_DECLARE_COMPONENT_TYPE(plVisualizeHandComponent, plComponent, plVisualizeHandComponentManager);
 
 public:
   plVisualizeHandComponent();

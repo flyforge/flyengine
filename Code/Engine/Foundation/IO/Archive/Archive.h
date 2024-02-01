@@ -15,7 +15,7 @@ enum class plArchiveCompressionMode : plUInt8
 };
 
 /// \brief Data for a single file entry in an plArchive file
-class PLASMA_FOUNDATION_DLL plArchiveEntry
+class PL_FOUNDATION_DLL plArchiveEntry
 {
 public:
   plUInt64 m_uiDataStartOffset = 0;      ///< Byte offset for where the file's (compressed) data stream starts in the plArchive
@@ -34,10 +34,10 @@ public:
 /// Additionally stores an offset into the plArchiveTOC::m_AllPathStrings array for final validation, to prevent hash collisions.
 /// The proper string lookup with hash collision check only works together with plArchiveLookupString, which has the necessary context
 /// to index the plArchiveTOC::m_AllPathStrings array.
-class PLASMA_FOUNDATION_DLL plArchiveStoredString
+class PL_FOUNDATION_DLL plArchiveStoredString
 {
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plArchiveStoredString() = default;
 
@@ -59,10 +59,10 @@ void operator>>(plStreamReader& inout_stream, plArchiveStoredString& value);
 /// Only works together with plArchiveStoredString.
 class plArchiveLookupString
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plArchiveLookupString);
+  PL_DISALLOW_COPY_AND_ASSIGN(plArchiveLookupString);
 
 public:
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plArchiveLookupString(plUInt64 uiLowerCaseHash, plStringView sString, const plDynamicArray<plUInt8>& archiveAllPathStrings)
     : m_uiLowerCaseHash(plHashingUtils::StringHashTo32(uiLowerCaseHash))
@@ -80,12 +80,12 @@ public:
 template <>
 struct plHashHelper<plArchiveStoredString>
 {
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plArchiveStoredString& hs) { return hs.m_uiLowerCaseHash; }
-  PLASMA_ALWAYS_INLINE static plUInt32 Hash(const plArchiveLookupString& hs) { return hs.m_uiLowerCaseHash; }
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plArchiveStoredString& hs) { return hs.m_uiLowerCaseHash; }
+  PL_ALWAYS_INLINE static plUInt32 Hash(const plArchiveLookupString& hs) { return hs.m_uiLowerCaseHash; }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plArchiveStoredString& a, const plArchiveStoredString& b) { return a.m_uiSrcStringOffset == b.m_uiSrcStringOffset; }
+  PL_ALWAYS_INLINE static bool Equal(const plArchiveStoredString& a, const plArchiveStoredString& b) { return a.m_uiSrcStringOffset == b.m_uiSrcStringOffset; }
 
-  PLASMA_ALWAYS_INLINE static bool Equal(const plArchiveStoredString& a, const plArchiveLookupString& b)
+  PL_ALWAYS_INLINE static bool Equal(const plArchiveStoredString& a, const plArchiveLookupString& b)
   {
     // in case that we want to lookup a string using a plArchiveLookupString, we validate
     // that the stored string is actually equal to the lookup string, to enable handling of hash collisions
@@ -94,7 +94,7 @@ struct plHashHelper<plArchiveStoredString>
 };
 
 /// \brief Table-of-contents for an plArchive file
-class PLASMA_FOUNDATION_DLL plArchiveTOC
+class PL_FOUNDATION_DLL plArchiveTOC
 {
 public:
   /// all files stored in the plArchive

@@ -5,7 +5,6 @@
 #include <QLayout>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QSizePolicy>
 
 plQtSearchWidget::plQtSearchWidget(QWidget* pParent)
 {
@@ -30,23 +29,16 @@ plQtSearchWidget::plQtSearchWidget(QWidget* pParent)
     setFocusProxy(m_pLineEdit);
   }
 
-  QSpacerItem* spacer1 = new QSpacerItem(8, 24, QSizePolicy::Minimum, QSizePolicy::Minimum);
-  QSpacerItem* spacer2 = new QSpacerItem(8, 24, QSizePolicy::Minimum, QSizePolicy::Minimum);
-  QSpacerItem* spacer3 = new QSpacerItem(8, 24, QSizePolicy::Minimum, QSizePolicy::Minimum);
-
-  layout()->addItem(spacer1);
   layout()->addWidget(m_pLineEdit);
-  layout()->addItem(spacer2);
   layout()->addWidget(m_pClearButton);
-  layout()->addItem(spacer3);
 
   connect(m_pLineEdit, &QLineEdit::textChanged, this, &plQtSearchWidget::onLineEditTextChanged);
   connect(m_pClearButton, &QPushButton::clicked, this, &plQtSearchWidget::onClearButtonClicked);
 }
 
-void plQtSearchWidget::setText(const QString& text)
+void plQtSearchWidget::setText(const QString& sText)
 {
-  m_pLineEdit->setText(text);
+  m_pLineEdit->setText(sText);
 }
 
 QString plQtSearchWidget::text() const
@@ -54,9 +46,14 @@ QString plQtSearchWidget::text() const
   return m_pLineEdit->text();
 }
 
-void plQtSearchWidget::setPlaceholderText(const QString& text)
+void plQtSearchWidget::setPlaceholderText(const QString& sText)
 {
-  m_pLineEdit->setPlaceholderText(text);
+  m_pLineEdit->setPlaceholderText(sText);
+}
+
+void plQtSearchWidget::selectAll()
+{
+  QTimer::singleShot(0, m_pLineEdit, &QLineEdit::selectAll);
 }
 
 void plQtSearchWidget::onLineEditTextChanged(const QString& text)

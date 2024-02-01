@@ -7,43 +7,43 @@
 #include <Foundation/Reflection/Reflection.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_BITFLAGS(plBlackboardEntryFlags, 1)
-  PLASMA_BITFLAGS_CONSTANTS(plBlackboardEntryFlags::Save, plBlackboardEntryFlags::OnChangeEvent,
+PL_BEGIN_STATIC_REFLECTED_BITFLAGS(plBlackboardEntryFlags, 1)
+  PL_BITFLAGS_CONSTANTS(plBlackboardEntryFlags::Save, plBlackboardEntryFlags::OnChangeEvent,
     plBlackboardEntryFlags::UserFlag0, plBlackboardEntryFlags::UserFlag1, plBlackboardEntryFlags::UserFlag2, plBlackboardEntryFlags::UserFlag3, plBlackboardEntryFlags::UserFlag4, plBlackboardEntryFlags::UserFlag5, plBlackboardEntryFlags::UserFlag6, plBlackboardEntryFlags::UserFlag7)
-PLASMA_END_STATIC_REFLECTED_BITFLAGS;
+PL_END_STATIC_REFLECTED_BITFLAGS;
 // clang-format on
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plBlackboard, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plBlackboard, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_GetOrCreateGlobal, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardNamesEnum"))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_FindGlobal, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardNamesEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_GetOrCreateGlobal, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardNamesEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_FindGlobal, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardNamesEnum"))),
 
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetName),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetEntryValue, In, "Name", In, "Value")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetEntryValue, In, "Name", In, "Fallback")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(IncrementEntryValue, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(DecrementEntryValue, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetBlackboardChangeCounter),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetBlackboardEntryChangeCounter)
+    PL_SCRIPT_FUNCTION_PROPERTY(GetName),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetEntryValue, In, "Name", In, "Value")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetEntryValue, In, "Name", In, "Fallback")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(IncrementEntryValue, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(DecrementEntryValue, In, "Name")->AddAttributes(new plFunctionArgumentAttributes(0, new plDynamicStringEnumAttribute("BlackboardKeysEnum"))),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetBlackboardChangeCounter),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetBlackboardEntryChangeCounter)
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, Blackboard)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, Blackboard)
 
   ON_CORESYSTEMS_SHUTDOWN
   {
-    PLASMA_LOCK(plBlackboard::s_GlobalBlackboardsMutex);
+    PL_LOCK(plBlackboard::s_GlobalBlackboardsMutex);
     plBlackboard::s_GlobalBlackboards.Clear();
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 // static
@@ -51,15 +51,15 @@ plMutex plBlackboard::s_GlobalBlackboardsMutex;
 plHashTable<plHashedString, plSharedPtr<plBlackboard>> plBlackboard::s_GlobalBlackboards;
 
 // static
-plSharedPtr<plBlackboard> plBlackboard::Create(plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+plSharedPtr<plBlackboard> plBlackboard::Create(plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
 {
-  return PLASMA_NEW(pAllocator, plBlackboard);
+  return PL_NEW(pAllocator, plBlackboard, false);
 }
 
 // static
-plSharedPtr<plBlackboard> plBlackboard::GetOrCreateGlobal(const plHashedString& sBlackboardName, plAllocatorBase* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
+plSharedPtr<plBlackboard> plBlackboard::GetOrCreateGlobal(const plHashedString& sBlackboardName, plAllocator* pAllocator /*= plFoundation::GetDefaultAllocator()*/)
 {
-  PLASMA_LOCK(s_GlobalBlackboardsMutex);
+  PL_LOCK(s_GlobalBlackboardsMutex);
 
   auto it = s_GlobalBlackboards.Find(sBlackboardName);
 
@@ -68,7 +68,7 @@ plSharedPtr<plBlackboard> plBlackboard::GetOrCreateGlobal(const plHashedString& 
     return it.Value();
   }
 
-  plSharedPtr<plBlackboard> pShrd = PLASMA_NEW(pAllocator, plBlackboard);
+  plSharedPtr<plBlackboard> pShrd = PL_NEW(pAllocator, plBlackboard, true);
   pShrd->m_sName = sBlackboardName;
   s_GlobalBlackboards.Insert(sBlackboardName, pShrd);
 
@@ -78,43 +78,27 @@ plSharedPtr<plBlackboard> plBlackboard::GetOrCreateGlobal(const plHashedString& 
 // static
 plSharedPtr<plBlackboard> plBlackboard::FindGlobal(const plTempHashedString& sBlackboardName)
 {
-  PLASMA_LOCK(s_GlobalBlackboardsMutex);
+  PL_LOCK(s_GlobalBlackboardsMutex);
 
   plSharedPtr<plBlackboard> pBlackboard;
   s_GlobalBlackboards.TryGetValue(sBlackboardName, pBlackboard);
   return pBlackboard;
 }
 
-plBlackboard::plBlackboard() = default;
+plBlackboard::plBlackboard(bool bIsGlobal)
+{
+  m_bIsGlobal = bIsGlobal;
+}
+
 plBlackboard::~plBlackboard() = default;
 
 void plBlackboard::SetName(plStringView sName)
 {
-  PLASMA_LOCK(s_GlobalBlackboardsMutex);
+  PL_LOCK(s_GlobalBlackboardsMutex);
   m_sName.Assign(sName);
 }
 
-void plBlackboard::RegisterEntry(const plHashedString& sName, const plVariant& initialValue, plBitflags<plBlackboardEntryFlags> flags /*= plBlackboardEntryFlags::None*/)
-{
-  PLASMA_ASSERT_ALWAYS(!flags.IsSet(plBlackboardEntryFlags::Invalid), "The invalid flag is reserved for internal use.");
-
-  bool bExisted = false;
-  Entry& entry = m_Entries.FindOrAdd(sName, &bExisted);
-
-  if (!bExisted || entry.m_Flags != flags)
-  {
-    ++m_uiBlackboardChangeCounter;
-    entry.m_Flags |= flags;
-  }
-
-  if (!bExisted && entry.m_Value != initialValue)
-  {
-    // broadcasts the change event, in case we overwrite an existing entry
-    SetEntryValue(sName, initialValue).IgnoreResult();
-  }
-}
-
-void plBlackboard::UnregisterEntry(const plHashedString& sName)
+void plBlackboard::RemoveEntry(const plHashedString& sName)
 {
   if (m_Entries.Remove(sName))
   {
@@ -122,7 +106,7 @@ void plBlackboard::UnregisterEntry(const plHashedString& sName)
   }
 }
 
-void plBlackboard::UnregisterAllEntries()
+void plBlackboard::RemoveAllEntries()
 {
   if (m_Entries.IsEmpty() == false)
   {
@@ -132,40 +116,85 @@ void plBlackboard::UnregisterAllEntries()
   m_Entries.Clear();
 }
 
-plResult plBlackboard::SetEntryValue(const plTempHashedString& sName, const plVariant& value, bool bForce /*= false*/)
+void plBlackboard::ImplSetEntryValue(const plHashedString& sName, Entry& entry, const plVariant& value)
+{
+  if (entry.m_Value != value)
+  {
+    ++m_uiBlackboardEntryChangeCounter;
+    ++entry.m_uiChangeCounter;
+
+    if (entry.m_Flags.IsSet(plBlackboardEntryFlags::OnChangeEvent))
+    {
+      EntryEvent e;
+      e.m_sName = sName;
+      e.m_OldValue = entry.m_Value;
+      e.m_pEntry = &entry;
+
+      entry.m_Value = value;
+
+      m_EntryEvents.Broadcast(e, 1); // limited recursion is allowed
+    }
+    else
+    {
+      entry.m_Value = value;
+    }
+  }
+}
+
+void plBlackboard::SetEntryValue(plStringView sName, const plVariant& value)
+{
+  const plTempHashedString sNameTH(sName);
+
+  auto itEntry = m_Entries.Find(sNameTH);
+
+  if (!itEntry.IsValid())
+  {
+    plHashedString sNameHS;
+    sNameHS.Assign(sName);
+    m_Entries[sNameHS].m_Value = value;
+
+    ++m_uiBlackboardChangeCounter;
+  }
+  else
+  {
+    ImplSetEntryValue(itEntry.Key(), itEntry.Value(), value);
+  }
+}
+
+void plBlackboard::SetEntryValue(const plHashedString& sName, const plVariant& value)
 {
   auto itEntry = m_Entries.Find(sName);
 
   if (!itEntry.IsValid())
   {
-    return PLASMA_FAILURE;
-  }
+    m_Entries[sName].m_Value = value;
 
-  Entry& entry = itEntry.Value();
-
-  if (!bForce && entry.m_Value == value)
-    return PLASMA_SUCCESS;
-
-  ++m_uiBlackboardEntryChangeCounter;
-  ++entry.m_uiChangeCounter;
-
-  if (entry.m_Flags.IsSet(plBlackboardEntryFlags::OnChangeEvent))
-  {
-    EntryEvent e;
-    e.m_sName = itEntry.Key();
-    e.m_OldValue = entry.m_Value;
-    e.m_pEntry = &entry;
-
-    entry.m_Value = value;
-
-    m_EntryEvents.Broadcast(e, 1); // limited recursion is allowed
+    ++m_uiBlackboardChangeCounter;
   }
   else
   {
-    entry.m_Value = value;
+    ImplSetEntryValue(itEntry.Key(), itEntry.Value(), value);
   }
+}
 
-  return PLASMA_SUCCESS;
+void plBlackboard::Reflection_SetEntryValue(plStringView sName, const plVariant& value)
+{
+  SetEntryValue(sName, value);
+}
+
+bool plBlackboard::HasEntry(const plTempHashedString& sName) const
+{
+  return m_Entries.Find(sName).IsValid();
+}
+
+plResult plBlackboard::SetEntryFlags(const plTempHashedString& sName, plBitflags<plBlackboardEntryFlags> flags)
+{
+  auto itEntry = m_Entries.Find(sName);
+  if (!itEntry.IsValid())
+    return PL_FAILURE;
+
+  itEntry.Value().m_Flags = flags;
+  return PL_SUCCESS;
 }
 
 const plBlackboard::Entry* plBlackboard::GetEntry(const plTempHashedString& sName) const
@@ -250,7 +279,7 @@ plResult plBlackboard::Serialize(plStreamWriter& inout_stream) const
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plBlackboard::Deserialize(plStreamReader& inout_stream)
@@ -271,10 +300,11 @@ plResult plBlackboard::Deserialize(plStreamReader& inout_stream)
     plVariant value;
     inout_stream >> value;
 
-    RegisterEntry(name, value, flags);
+    SetEntryValue(name, value);
+    SetEntryFlags(name, flags).AssertSuccess();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 // static
@@ -289,34 +319,20 @@ plBlackboard* plBlackboard::Reflection_FindGlobal(plTempHashedString sName)
   return FindGlobal(sName);
 }
 
-void plBlackboard::Reflection_RegisterEntry(const plHashedString& sName, const plVariant& initialValue, bool bSave, bool bOnChangeEvent)
-{
-  plBitflags<plBlackboardEntryFlags> flags;
-  flags.AddOrRemove(plBlackboardEntryFlags::Save, bSave);
-  flags.AddOrRemove(plBlackboardEntryFlags::OnChangeEvent, bOnChangeEvent);
-
-  RegisterEntry(sName, initialValue, flags);
-}
-
-bool plBlackboard::Reflection_SetEntryValue(plTempHashedString sName, const plVariant& value)
-{
-  return SetEntryValue(sName, value).Succeeded();
-}
-
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plBlackboardCondition, plNoBase, 1, plRTTIDefaultAllocator<plBlackboardCondition>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plBlackboardCondition, plNoBase, 1, plRTTIDefaultAllocator<plBlackboardCondition>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("EntryName", GetEntryName, SetEntryName),
-    PLASMA_ENUM_MEMBER_PROPERTY("Operator", plComparisonOperator, m_Operator),
-    PLASMA_MEMBER_PROPERTY("ComparisonValue", m_fComparisonValue),
+    PL_MEMBER_PROPERTY("EntryName", m_sEntryName)->AddAttributes(new plDynamicStringEnumAttribute("BlackboardKeysEnum")),
+    PL_ENUM_MEMBER_PROPERTY("Operator", plComparisonOperator, m_Operator),
+    PL_MEMBER_PROPERTY("ComparisonValue", m_fComparisonValue),
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 bool plBlackboardCondition::IsConditionMet(const plBlackboard& blackboard) const
@@ -340,18 +356,18 @@ plResult plBlackboardCondition::Serialize(plStreamWriter& inout_stream) const
   inout_stream << m_sEntryName;
   inout_stream << m_Operator;
   inout_stream << m_fComparisonValue;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plBlackboardCondition::Deserialize(plStreamReader& inout_stream)
 {
   const plTypeVersion uiVersion = inout_stream.ReadVersion(s_BlackboardConditionVersion);
-  PLASMA_IGNORE_UNUSED(uiVersion);
+  PL_IGNORE_UNUSED(uiVersion);
 
   inout_stream >> m_sEntryName;
   inout_stream >> m_Operator;
   inout_stream >> m_fComparisonValue;
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-PLASMA_STATICLINK_FILE(Core, Core_Utils_Implementation_Blackboard);
+PL_STATICLINK_FILE(Core, Core_Utils_Implementation_Blackboard);

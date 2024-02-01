@@ -6,7 +6,7 @@
 #include <GuiFoundation/UIServices/UIServices.moc.h>
 
 
-PLASMA_IMPLEMENT_SINGLETON(plQtLongOpsPanel);
+PL_IMPLEMENT_SINGLETON(plQtLongOpsPanel);
 
 constexpr int COL_DOCUMENT = 0;
 constexpr int COL_OPERATION = 1;
@@ -25,7 +25,7 @@ plQtLongOpsPanel ::plQtLongOpsPanel()
 
   setWidget(pDummy);
   setIcon(plQtUiServices::GetCachedIconResource(":/GuiFoundation/Icons/Background.svg"));
-  setWindowTitle(QString::fromUtf8(plTranslate("Panel.LongOps")));
+  setWindowTitle(plMakeQString(plTranslate("Panel.LongOps")));
 
   // setup table
   {
@@ -76,7 +76,7 @@ void plQtLongOpsPanel::LongOpsEventHandler(const plLongOpControllerEvent& e)
 void plQtLongOpsPanel::RebuildTable()
 {
   auto* opMan = plLongOpControllerManager::GetSingleton();
-  PLASMA_LOCK(opMan->m_Mutex);
+  PL_LOCK(opMan->m_Mutex);
 
   m_bRebuildTable = false;
   m_bUpdateTable = false;
@@ -138,7 +138,7 @@ void plQtLongOpsPanel::RebuildTable()
 void plQtLongOpsPanel::UpdateTable()
 {
   auto* opMan = plLongOpControllerManager::GetSingleton();
-  PLASMA_LOCK(opMan->m_Mutex);
+  PL_LOCK(opMan->m_Mutex);
 
   m_bUpdateTable = false;
 
@@ -202,7 +202,7 @@ void plQtLongOpsPanel::UpdateUI()
 void plQtLongOpsPanel::OnClickButton(bool)
 {
   auto* opMan = plLongOpControllerManager::GetSingleton();
-  PLASMA_LOCK(opMan->m_Mutex);
+  PL_LOCK(opMan->m_Mutex);
 
   QPushButton* pButton = qobject_cast<QPushButton*>(sender());
   const plUuid opGuid = pButton->property("opGuid").value<plUuid>();
@@ -219,7 +219,7 @@ void plQtLongOpsPanel::OnCellDoubleClicked(int row, int column)
   const plUuid opGuid = pButton->property("opGuid").value<plUuid>();
 
   auto* opMan = plLongOpControllerManager::GetSingleton();
-  PLASMA_LOCK(opMan->m_Mutex);
+  PL_LOCK(opMan->m_Mutex);
 
   auto opInfoPtr = opMan->GetOperation(opGuid);
   if (opInfoPtr == nullptr)

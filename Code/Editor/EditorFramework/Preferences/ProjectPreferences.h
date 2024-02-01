@@ -4,9 +4,9 @@
 #include <Foundation/Strings/String.h>
 
 /// \brief Stores project specific preferences for the current user
-class PLASMA_EDITORFRAMEWORK_DLL plProjectPreferencesUser : public plPreferences
+class PL_EDITORFRAMEWORK_DLL plProjectPreferencesUser : public plPreferences
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plProjectPreferencesUser, plPreferences);
+  PL_ADD_DYNAMIC_REFLECTION(plProjectPreferencesUser, plPreferences);
 
 public:
   plProjectPreferencesUser();

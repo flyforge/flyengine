@@ -3,8 +3,8 @@
 #include <EditorFramework/DragDrop/DragDropInfo.h>
 #include <EditorPluginKraut/DragDropHandlers/KrautTreeDragDropHandler.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeComponentDragDropHandler, 1, plRTTIDefaultAllocator<plKrautTreeComponentDragDropHandler>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plKrautTreeComponentDragDropHandler, 1, plRTTIDefaultAllocator<plKrautTreeComponentDragDropHandler>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 
 float plKrautTreeComponentDragDropHandler::CanHandle(const plDragDropInfo* pInfo) const

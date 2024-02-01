@@ -18,7 +18,7 @@ public:
   plAdobeCUBEReader();
   ~plAdobeCUBEReader();
 
-  plStatus ParseFile(plStreamReader& Stream, plLogInterface* pLog = nullptr);
+  plStatus ParseFile(plStreamReader& inout_stream, plLogInterface* pLog = nullptr);
 
   plVec3 GetDomainMin() const;
   plVec3 GetDomainMax() const;
@@ -32,8 +32,8 @@ protected:
   plUInt32 m_uiLUTSize = 0;
   plString m_sTitle = "<UNTITLED>";
 
-  plVec3 m_vDomainMin = plVec3::ZeroVector();
-  plVec3 m_vDomainMax = plVec3::OneVector();
+  plVec3 m_vDomainMin = plVec3::MakeZero();
+  plVec3 m_vDomainMax = plVec3(1.0f);
 
   plDynamicArray<plVec3> m_LUTValues;
 

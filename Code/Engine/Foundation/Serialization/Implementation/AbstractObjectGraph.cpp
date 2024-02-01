@@ -6,27 +6,27 @@
 #include <Foundation/Serialization/RttiConverter.h>
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plObjectChangeType, 1)
-  PLASMA_ENUM_CONSTANTS(plObjectChangeType::NodeAdded, plObjectChangeType::NodeRemoved)
-  PLASMA_ENUM_CONSTANTS(plObjectChangeType::PropertySet, plObjectChangeType::PropertyInserted, plObjectChangeType::PropertyRemoved)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plObjectChangeType, 1)
+  PL_ENUM_CONSTANTS(plObjectChangeType::NodeAdded, plObjectChangeType::NodeRemoved)
+  PL_ENUM_CONSTANTS(plObjectChangeType::PropertySet, plObjectChangeType::PropertyInserted, plObjectChangeType::PropertyRemoved)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plAbstractObjectNode, plNoBase, 1, plRTTIDefaultAllocator<plAbstractObjectNode>)
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_BEGIN_STATIC_REFLECTED_TYPE(plAbstractObjectNode, plNoBase, 1, plRTTIDefaultAllocator<plAbstractObjectNode>)
+PL_END_STATIC_REFLECTED_TYPE;
 
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plDiffOperation, plNoBase, 1, plRTTIDefaultAllocator<plDiffOperation>)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plDiffOperation, plNoBase, 1, plRTTIDefaultAllocator<plDiffOperation>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Operation", plObjectChangeType, m_Operation),
-    PLASMA_MEMBER_PROPERTY("Node", m_Node),
-    PLASMA_MEMBER_PROPERTY("Property", m_sProperty),
-    PLASMA_MEMBER_PROPERTY("Index", m_Index),
-    PLASMA_MEMBER_PROPERTY("Value", m_Value),
+    PL_ENUM_MEMBER_PROPERTY("Operation", plObjectChangeType, m_Operation),
+    PL_MEMBER_PROPERTY("Node", m_Node),
+    PL_MEMBER_PROPERTY("Property", m_sProperty),
+    PL_MEMBER_PROPERTY("Index", m_Index),
+    PL_MEMBER_PROPERTY("Value", m_Value),
   }
-    PLASMA_END_PROPERTIES;
+    PL_END_PROPERTIES;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
 plAbstractObjectGraph::~plAbstractObjectGraph()
@@ -38,7 +38,7 @@ void plAbstractObjectGraph::Clear()
 {
   for (auto it = m_Nodes.GetIterator(); it.IsValid(); ++it)
   {
-    PLASMA_DEFAULT_DELETE(it.Value());
+    PL_DEFAULT_DELETE(it.Value());
   }
   m_Nodes.Clear();
   m_NodesByName.Clear();
@@ -67,7 +67,7 @@ plAbstractObjectNode* plAbstractObjectGraph::Clone(plAbstractObjectGraph& ref_cl
   }
   else
   {
-    PLASMA_ASSERT_DEV(pRootNode->GetOwner() == this, "The given root node must be part of this document");
+    PL_ASSERT_DEV(pRootNode->GetOwner() == this, "The given root node must be part of this document");
     plSet<plUuid> reachableNodes;
     FindTransitiveHull(pRootNode->GetGuid(), reachableNodes);
 
@@ -93,7 +93,7 @@ plAbstractObjectNode* plAbstractObjectGraph::Clone(plAbstractObjectGraph& ref_cl
 plStringView plAbstractObjectGraph::RegisterString(plStringView sString)
 {
   auto it = m_Strings.Insert(sString);
-  PLASMA_ASSERT_DEV(it.IsValid(), "");
+  PL_ASSERT_DEV(it.IsValid(), "");
   return it.Key();
 }
 
@@ -119,7 +119,7 @@ plAbstractObjectNode* plAbstractObjectGraph::GetNodeByName(plStringView sName)
 
 plAbstractObjectNode* plAbstractObjectGraph::AddNode(const plUuid& guid, plStringView sType, plUInt32 uiTypeVersion, plStringView sNodeName)
 {
-  PLASMA_ASSERT_DEV(!m_Nodes.Contains(guid), "object {0} must not yet exist", guid);
+  PL_ASSERT_DEV(!m_Nodes.Contains(guid), "object {0} must not yet exist", guid);
   if (!sNodeName.IsEmpty())
   {
     sNodeName = RegisterString(sNodeName);
@@ -129,7 +129,7 @@ plAbstractObjectNode* plAbstractObjectGraph::AddNode(const plUuid& guid, plStrin
     sNodeName = {};
   }
 
-  plAbstractObjectNode* pNode = PLASMA_DEFAULT_NEW(plAbstractObjectNode);
+  plAbstractObjectNode* pNode = PL_DEFAULT_NEW(plAbstractObjectNode);
   pNode->m_Guid = guid;
   pNode->m_pOwner = this;
   pNode->m_sType = RegisterString(sType);
@@ -157,7 +157,7 @@ void plAbstractObjectGraph::RemoveNode(const plUuid& guid)
       m_NodesByName.Remove(pNode->m_sNodeName);
 
     m_Nodes.Remove(guid);
-    PLASMA_DEFAULT_DELETE(pNode);
+    PL_DEFAULT_DELETE(pNode);
   }
 }
 
@@ -179,7 +179,7 @@ void plAbstractObjectNode::ChangeProperty(plStringView sName, const plVariant& v
     }
   }
 
-  PLASMA_REPORT_FAILURE("Property '{0}' is unknown", sName);
+  PL_REPORT_FAILURE("Property '{0}' is unknown", sName);
 }
 
 void plAbstractObjectNode::RenameProperty(plStringView sOldName, plStringView sNewName)
@@ -207,12 +207,12 @@ plResult plAbstractObjectNode::InlineProperty(plStringView sName)
     if (prop.m_sPropertyName == sName)
     {
       if (!prop.m_Value.IsA<plUuid>())
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       plUuid guid = prop.m_Value.Get<plUuid>();
       plAbstractObjectNode* pNode = m_pOwner->GetNode(guid);
       if (!pNode)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       class InlineContext : public plRttiConverterContext
       {
@@ -228,7 +228,7 @@ plResult plAbstractObjectNode::InlineProperty(plStringView sName)
       plRttiConverterReader reader(m_pOwner, &context);
       void* pObject = reader.CreateObjectFromNode(pNode);
       if (!pObject)
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
 
       prop.m_Value.MoveTypedObject(pObject, plRTTI::FindTypeByName(pNode->GetType()));
 
@@ -237,10 +237,10 @@ plResult plAbstractObjectNode::InlineProperty(plStringView sName)
       {
         m_pOwner->RemoveNode(uuid);
       }
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
   }
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 void plAbstractObjectNode::RemoveProperty(plStringView sName)
@@ -327,7 +327,7 @@ void plAbstractObjectGraph::ReMapNodeGuids(const plUuid& seedGuid, bool bRemapIn
 void plAbstractObjectGraph::ReMapNodeGuidsToMatchGraph(plAbstractObjectNode* pRoot, const plAbstractObjectGraph& rhsGraph, const plAbstractObjectNode* pRhsRoot)
 {
   plHashTable<plUuid, plUuid> guidMap;
-  PLASMA_ASSERT_DEV(pRoot->GetType() == pRhsRoot->GetType(), "Roots must have the same type to be able re-map guids!");
+  PL_ASSERT_DEV(pRoot->GetType() == pRhsRoot->GetType(), "Roots must have the same type to be able re-map guids!");
 
   ReMapNodeGuidsToMatchGraphRecursive(guidMap, pRoot, rhsGraph, pRhsRoot);
 
@@ -537,7 +537,7 @@ void plAbstractObjectGraph::PruneGraph(const plUuid& rootGuid)
 
 void plAbstractObjectGraph::ModifyNodeViaNativeCounterpart(plAbstractObjectNode* pRootNode, plDelegate<void(void*, const plRTTI*)> callback)
 {
-  PLASMA_ASSERT_DEV(pRootNode->GetOwner() == this, "Node must be from this graph.");
+  PL_ASSERT_DEV(pRootNode->GetOwner() == this, "Node must be from this graph.");
 
   // Clone sub graph
   plAbstractObjectGraph origGraph;
@@ -551,7 +551,7 @@ void plAbstractObjectGraph::ModifyNodeViaNativeCounterpart(plAbstractObjectNode*
   plRttiConverterReader convRead(&origGraph, &context);
   void* pNativeRoot = convRead.CreateObjectFromNode(pOrigRootNode);
   const plRTTI* pType = plRTTI::FindTypeByName(pOrigRootNode->GetType());
-  PLASMA_SCOPE_EXIT(pType->GetAllocator()->Deallocate(pNativeRoot););
+  PL_SCOPE_EXIT(pType->GetAllocator()->Deallocate(pNativeRoot););
 
   // Make changes to native object
   if (callback.IsValid())
@@ -1156,4 +1156,4 @@ void plAbstractObjectGraph::MergeArrays(const plDynamicArray<plVariant>& baseArr
   }
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_AbstractObjectGraph);
+PL_STATICLINK_FILE(Foundation, Foundation_Serialization_Implementation_AbstractObjectGraph);

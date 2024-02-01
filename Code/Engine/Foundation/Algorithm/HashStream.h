@@ -6,7 +6,7 @@
 /// \brief A stream writer that hashes the data written to it.
 ///
 /// This stream writer allows to conveniently generate a 32 bit hash value for any kind of data.
-class PLASMA_FOUNDATION_DLL plHashStreamWriter32 : public plStreamWriter
+class PL_FOUNDATION_DLL plHashStreamWriter32 : public plStreamWriter
 {
 public:
   /// \brief Pass an initial seed for the hash calculation.
@@ -28,7 +28,7 @@ private:
 /// \brief A stream writer that hashes the data written to it.
 ///
 /// This stream writer allows to conveniently generate a 64 bit hash value for any kind of data.
-class PLASMA_FOUNDATION_DLL plHashStreamWriter64 : public plStreamWriter
+class PL_FOUNDATION_DLL plHashStreamWriter64 : public plStreamWriter
 {
 public:
   /// \brief Pass an initial seed for the hash calculation.

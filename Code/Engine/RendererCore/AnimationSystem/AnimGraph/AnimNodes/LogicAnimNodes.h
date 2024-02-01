@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plLogicAndAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLogicAndAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogicAndAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogicAndAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -29,9 +29,9 @@ private:
   plAnimGraphBoolOutputPin m_OutIsFalse;              // [ property ]
 };
 
-class PLASMA_RENDERERCORE_DLL plLogicEventAndAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLogicEventAndAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogicEventAndAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogicEventAndAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -59,9 +59,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plLogicOrAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLogicOrAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogicOrAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogicOrAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode
@@ -90,9 +90,9 @@ private:
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////
 
-class PLASMA_RENDERERCORE_DLL plLogicNotAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plLogicNotAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plLogicNotAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plLogicNotAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

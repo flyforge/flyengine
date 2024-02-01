@@ -4,8 +4,8 @@
 #include <GuiFoundation/ActionViews/QtProxy.moc.h>
 #include <GuiFoundation/Models/TreeSearchFilterModel.moc.h>
 
-plQtDocumentTreeView::plQtDocumentTreeView(QWidget* parent)
-  : plQtItemView<QTreeView>(parent)
+plQtDocumentTreeView::plQtDocumentTreeView(QWidget* pParent)
+  : plQtItemView<QTreeView>(pParent)
 {
 }
 
@@ -40,7 +40,7 @@ void plQtDocumentTreeView::Initialize(plDocument* pDocument, std::unique_ptr<plQ
   setEditTriggers(QAbstractItemView::EditTrigger::EditKeyPressed);
   setUniformRowHeights(true);
 
-  PLASMA_VERIFY(connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this,
+  PL_VERIFY(connect(selectionModel(), SIGNAL(selectionChanged(const QItemSelection&, const QItemSelection&)), this,
               SLOT(on_selectionChanged_triggered(const QItemSelection&, const QItemSelection&))) != nullptr,
     "signal/slot connection failed");
   m_pSelectionManager->m_Events.AddEventHandler(plMakeDelegate(&plQtDocumentTreeView::SelectionEventHandler, this));
@@ -128,7 +128,7 @@ void plQtDocumentTreeView::EnsureLastSelectedItemVisible()
     return;
 
   const plDocumentObject* pObject = m_pSelectionManager->GetSelection().PeekBack();
-  PLASMA_ASSERT_DEBUG(m_pModel->GetDocumentTree()->GetDocument() == pObject->GetDocumentObjectManager()->GetDocument(), "Selection is from a different document.");
+  PL_ASSERT_DEBUG(m_pModel->GetDocumentTree()->GetDocument() == pObject->GetDocumentObjectManager()->GetDocument(), "Selection is from a different document.");
 
   auto index = m_pModel->ComputeModelIndex(pObject);
   index = m_pFilterModel->mapFromSource(index);
@@ -147,20 +147,24 @@ void plQtDocumentTreeView::SetAllowDeleteObjects(bool bAllow)
   m_bAllowDeleteObjects = bAllow;
 }
 
-void plQtDocumentTreeView::keyPressEvent(QKeyEvent* e)
+bool plQtDocumentTreeView::event(QEvent* pEvent)
 {
-  if (plQtProxy::TriggerDocumentAction(m_pDocument, e))
-    return;
-
-  if (e == QKeySequence::Delete)
+  if (pEvent->type() == QEvent::ShortcutOverride || pEvent->type() == QEvent::KeyPress)
   {
-    if (m_bAllowDeleteObjects)
+    QKeyEvent* keyEvent = static_cast<QKeyEvent*>(pEvent);
+    if (plQtProxy::TriggerDocumentAction(m_pDocument, keyEvent, pEvent->type() == QEvent::ShortcutOverride))
+      return true;
+
+    if (pEvent->type() == QEvent::KeyPress && keyEvent == QKeySequence::Delete)
     {
-      m_pDocument->DeleteSelectedObjects();
+      if (m_bAllowDeleteObjects)
+      {
+        m_pDocument->DeleteSelectedObjects();
+      }
+      pEvent->accept();
+      return true;
     }
   }
-  else
-  {
-    QTreeView::keyPressEvent(e);
-  }
+
+  return QTreeView::event(pEvent);
 }

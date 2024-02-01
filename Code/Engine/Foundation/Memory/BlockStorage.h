@@ -55,7 +55,7 @@ public:
     Iterator(const plBlockStorage<T, BlockSizeInByte, StorageType>& storage, plUInt32 uiStartIndex, plUInt32 uiCount);
   };
 
-  plBlockStorage(plLargeBlockAllocator<BlockSizeInByte>* pBlockAllocator, plAllocatorBase* pAllocator);
+  plBlockStorage(plLargeBlockAllocator<BlockSizeInByte>* pBlockAllocator, plAllocator* pAllocator);
   ~plBlockStorage();
 
   void Clear();

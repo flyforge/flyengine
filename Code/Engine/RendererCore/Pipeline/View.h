@@ -17,9 +17,9 @@ class plRenderPipeline;
 
 /// \brief Encapsulates a view on the given world through the given camera
 /// and rendered with the specified RenderPipeline into the given render target setup.
-class PLASMA_RENDERERCORE_DLL plView : public plRenderPipelineNode
+class PL_RENDERERCORE_DLL plView : public plRenderPipelineNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plView, plRenderPipelineNode);
+  PL_ADD_DYNAMIC_REFLECTION(plView, plRenderPipelineNode);
 
 private:
   /// \brief Use plRenderLoop::CreateView to create a view.
@@ -75,9 +75,6 @@ public:
   void SetViewport(const plRectFloat& viewport);
   const plRectFloat& GetViewport() const;
 
-  void SetTargetViewport(const plRectFloat& viewport);
-  const plRectFloat& GetTargetViewport() const;
-
   /// \brief Forces the render pipeline to be rebuilt.
   void ForceUpdate();
 
@@ -95,8 +92,8 @@ public:
   /// \brief Returns the start position and direction (in world space) of the picking ray through the screen position in this view.
   ///
   /// fScreenPosX and fScreenPosY are expected to be in [0; 1] range (normalized pixel coordinates).
-  /// If no ray can be computed, PLASMA_FAILURE is returned.
-  plResult ComputePickingRay(float fScreenPosX, float fScreenPosY, plVec3& out_RayStartPos, plVec3& out_RayDir) const;
+  /// If no ray can be computed, PL_FAILURE is returned.
+  plResult ComputePickingRay(float fScreenPosX, float fScreenPosY, plVec3& out_vRayStartPos, plVec3& out_vRayDir) const;
 
   plResult ComputeScreenSpacePos(const plVec3& vPoint, plVec3& out_vScreenPos) const;
 
@@ -119,12 +116,15 @@ public:
   const plMat4& GetInverseViewProjectionMatrix(plCameraEye eye) const;
 
   /// \brief Returns the frustum that should be used for determine visible objects for this view.
-  void ComputeCullingFrustum(plFrustum& out_Frustum) const;
+  void ComputeCullingFrustum(plFrustum& out_frustum) const;
 
   void SetShaderPermutationVariable(const char* szName, const char* szValue);
 
   void SetRenderPassProperty(const char* szPassName, const char* szPropertyName, const plVariant& value);
   void SetExtractorProperty(const char* szPassName, const char* szPropertyName, const plVariant& value);
+
+  void ResetRenderPassProperties();
+  void ResetExtractorProperties();
 
   void SetRenderPassReadBackProperty(const char* szPassName, const char* szPropertyName, const plVariant& value);
   plVariant GetRenderPassReadBackProperty(const char* szPassName, const char* szPropertyName);
@@ -188,7 +188,8 @@ private:
   {
     plString m_sObjectName;
     plString m_sPropertyName;
-    plVariant m_Value;
+    plVariant m_DefaultValue;
+    plVariant m_CurrentValue;
     bool m_bIsValid;
     bool m_bIsDirty;
   };
@@ -203,7 +204,7 @@ private:
   void ApplyRenderPassProperties();
   void ApplyExtractorProperties();
 
-  void ApplyProperty(plReflectedClass* pClass, PropertyValue& data, const char* szTypeName);
+  void ApplyProperty(plReflectedClass* pObject, PropertyValue& data, const char* szTypeName);
 
   plMap<plString, PropertyValue> m_PassProperties;
   plMap<plString, PropertyValue> m_PassReadBackProperties;

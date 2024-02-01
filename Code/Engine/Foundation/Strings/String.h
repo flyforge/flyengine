@@ -28,28 +28,28 @@ struct plHybridStringBase : public plStringBase<plHybridStringBase<Size>>
 {
 protected:
   /// \brief Creates an empty string.
-  plHybridStringBase(plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(plAllocator* pAllocator); // [tested]
 
   /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const plHybridStringBase& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(const plHybridStringBase& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves the data from \a rhs.
-  plHybridStringBase(plHybridStringBase&& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(plHybridStringBase&& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const char* rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(const char* rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const wchar_t* rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(const wchar_t* rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const plStringView& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(const plStringView& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Copies the data from \a rhs.
-  plHybridStringBase(const plStringBuilder& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(const plStringBuilder& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves the data from \a rhs.
-  plHybridStringBase(plStringBuilder&& rhs, plAllocatorBase* pAllocator); // [tested]
+  plHybridStringBase(plStringBuilder&& rhs, plAllocator* pAllocator); // [tested]
 
   /// \brief Destructor.
   ~plHybridStringBase(); // [tested]
@@ -75,8 +75,21 @@ protected:
   /// \brief Moves the data from \a rhs.
   void operator=(plStringBuilder&& rhs); // [tested]
 
-public:
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+  /// \brief Copies the data from \a rhs.
+  plHybridStringBase(const std::string_view& rhs, plAllocator* pAllocator);
 
+  /// \brief Copies the data from \a rhs.
+  plHybridStringBase(const std::string& rhs, plAllocator* pAllocator);
+
+  /// \brief Copies the data from \a rhs.
+  void operator=(const std::string_view& rhs);
+
+  /// \brief Copies the data from \a rhs.
+  void operator=(const std::string& rhs);
+#endif
+
+public:
   /// \brief Resets this string to an empty string.
   ///
   /// This will not deallocate any previously allocated data, but reuse that memory.
@@ -88,7 +101,11 @@ public:
   /// \brief Returns the amount of bytes that this string takes (excluding the '\0' terminator).
   plUInt32 GetElementCount() const; // [tested]
 
-  /// \brief Returns the number of characters in this string.
+  /// \brief Returns the number of characters in this string. Might be less than GetElementCount, if it contains Utf8
+  /// multi-byte characters.
+  ///
+  /// \note This is a slow operation, as it has to run through the entire string to count the Unicode characters.
+  /// Only call this once and use the result as long as the string doesn't change. Don't call this in a loop.
   plUInt32 GetCharacterCount() const; // [tested]
 
   /// \brief Returns a view to a sub-string of this string, starting at character uiFirstCharacter, up until uiFirstCharacter +
@@ -120,7 +137,6 @@ private:
   friend class plStringBuilder;
 
   plHybridArray<char, Size> m_Data;
-  plUInt32 m_uiCharacterCount = 0;
 };
 
 
@@ -130,7 +146,7 @@ struct plHybridString : public plHybridStringBase<Size>
 {
 public:
   plHybridString();
-  plHybridString(plAllocatorBase* pAllocator);
+  plHybridString(plAllocator* pAllocator);
 
   plHybridString(const plHybridString<Size, AllocatorWrapper>& other);
   plHybridString(const plHybridStringBase<Size>& other);
@@ -139,10 +155,8 @@ public:
   plHybridString(const plStringView& rhs);
   plHybridString(const plStringBuilder& rhs);
   plHybridString(plStringBuilder&& rhs);
-
   plHybridString(plHybridString<Size, AllocatorWrapper>&& other);
   plHybridString(plHybridStringBase<Size>&& other);
-
 
   void operator=(const plHybridString<Size, AllocatorWrapper>& rhs);
   void operator=(const plHybridStringBase<Size>& rhs);
@@ -151,14 +165,21 @@ public:
   void operator=(const plStringView& rhs);
   void operator=(const plStringBuilder& rhs);
   void operator=(plStringBuilder&& rhs);
-
   void operator=(plHybridString<Size, AllocatorWrapper>&& rhs);
   void operator=(plHybridStringBase<Size>&& rhs);
+
+#if PL_ENABLED(PL_INTEROP_STL_STRINGS)
+  plHybridString(const std::string_view& rhs);
+  plHybridString(const std::string& rhs);
+  void operator=(const std::string_view& rhs);
+  void operator=(const std::string& rhs);
+#endif
 };
 
-using plDynamicString = plHybridString<1>;
 /// \brief String that uses the static allocator to prevent leak reports in RTTI attributes.
-using plUntrackedString = plHybridString<32, plStaticAllocatorWrapper>;
+using plUntrackedString = plHybridString<32, plStaticsAllocatorWrapper>;
+
+using plDynamicString = plHybridString<1>;
 using plString = plHybridString<32>;
 using plString16 = plHybridString<16>;
 using plString24 = plHybridString<24>;
@@ -173,12 +194,12 @@ static_assert(plGetTypeClass<plString>::value == plTypeIsClass::value);
 template <plUInt16 Size>
 struct plCompareHelper<plHybridString<Size>>
 {
-  PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs) const
+  static PL_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs)
   {
     return lhs.Compare(rhs) < 0;
   }
 
-  PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs) const
+  static PL_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs)
   {
     return lhs.IsEqual(rhs);
   }
@@ -186,12 +207,12 @@ struct plCompareHelper<plHybridString<Size>>
 
 struct plCompareString_NoCase
 {
-  PLASMA_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs) const
+  static PL_ALWAYS_INLINE bool Less(plStringView lhs, plStringView rhs)
   {
     return lhs.Compare_NoCase(rhs) < 0;
   }
 
-  PLASMA_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs) const
+  static PL_ALWAYS_INLINE bool Equal(plStringView lhs, plStringView rhs)
   {
     return lhs.IsEqual_NoCase(rhs);
   }
@@ -200,14 +221,14 @@ struct plCompareString_NoCase
 struct CompareConstChar
 {
   /// \brief Returns true if a is less than b
-  PLASMA_ALWAYS_INLINE bool Less(const char* a, const char* b) const { return plStringUtils::Compare(a, b) < 0; }
+  static PL_ALWAYS_INLINE bool Less(const char* a, const char* b) { return plStringUtils::Compare(a, b) < 0; }
 
   /// \brief Returns true if a is equal to b
-  PLASMA_ALWAYS_INLINE bool Equal(const char* a, const char* b) const { return plStringUtils::IsEqual(a, b); }
+  static PL_ALWAYS_INLINE bool Equal(const char* a, const char* b) { return plStringUtils::IsEqual(a, b); }
 };
 
 // For plFormatString
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plString& sArg);
-PLASMA_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plUntrackedString& sArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plString& sArg);
+PL_FOUNDATION_DLL plStringView BuildString(char* szTmp, plUInt32 uiLength, const plUntrackedString& sArg);
 
 #include <Foundation/Strings/Implementation/String_inl.h>

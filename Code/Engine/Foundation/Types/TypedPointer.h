@@ -11,7 +11,7 @@ class plRTTI;
 /// \sa plVariant
 struct plTypedPointer
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
   void* m_pObject = nullptr;
   const plRTTI* m_pType = nullptr;
 

@@ -7,11 +7,9 @@ plGALRenderTargetView::plGALRenderTargetView(plGALTexture* pTexture, const plGAL
   : plGALObject(description)
   , m_pTexture(pTexture)
 {
-  PLASMA_ASSERT_DEV(m_pTexture != nullptr, "Texture must not be null");
+  PL_ASSERT_DEV(m_pTexture != nullptr, "Texture must not be null");
 }
 
-plGALRenderTargetView::~plGALRenderTargetView() {}
+plGALRenderTargetView::~plGALRenderTargetView() = default;
 
 
-
-PLASMA_STATICLINK_FILE(RendererFoundation, RendererFoundation_Resources_Implementation_RenderTargetView);

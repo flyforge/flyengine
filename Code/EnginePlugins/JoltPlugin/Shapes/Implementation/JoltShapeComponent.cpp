@@ -8,15 +8,15 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltShapeComponent, 1)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltShapeComponent, 1)
 {
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Shapes"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 // clang-format on
 
 plJoltShapeComponent::plJoltShapeComponent() = default;
@@ -66,5 +66,5 @@ plUInt32 plJoltShapeComponent::GetUserDataIndex()
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Shapes_Implementation_JoltShapeComponent);
 

@@ -7,17 +7,17 @@
 #  include <Duktape/duktape.h>
 #  include <Foundation/IO/FileSystem/FileReader.h>
 
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::None == DUK_TYPE_MASK_NONE);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Undefined == DUK_TYPE_MASK_UNDEFINED);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Null == DUK_TYPE_MASK_NULL);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Bool == DUK_TYPE_MASK_BOOLEAN);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Number == DUK_TYPE_MASK_NUMBER);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::String == DUK_TYPE_MASK_STRING);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Object == DUK_TYPE_MASK_OBJECT);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Buffer == DUK_TYPE_MASK_BUFFER);
-PLASMA_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Pointer == DUK_TYPE_MASK_POINTER);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::None == DUK_TYPE_MASK_NONE);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Undefined == DUK_TYPE_MASK_UNDEFINED);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Null == DUK_TYPE_MASK_NULL);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Bool == DUK_TYPE_MASK_BOOLEAN);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Number == DUK_TYPE_MASK_NUMBER);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::String == DUK_TYPE_MASK_STRING);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Object == DUK_TYPE_MASK_OBJECT);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Buffer == DUK_TYPE_MASK_BUFFER);
+PL_CHECK_AT_COMPILETIME(plDuktapeTypeMask::Pointer == DUK_TYPE_MASK_POINTER);
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 
 
 void plDuktapeHelper::EnableStackChangeVerification() const
@@ -30,7 +30,7 @@ void plDuktapeHelper::EnableStackChangeVerification() const
 plDuktapeHelper::plDuktapeHelper(duk_context* pContext)
   : m_pContext(pContext)
 {
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   if (m_pContext)
   {
     m_bVerifyStackChange = false;
@@ -54,7 +54,7 @@ void plDuktapeHelper::operator=(const plDuktapeHelper& rhs)
   *this = plDuktapeHelper(rhs.GetContext());
 }
 
-#  if PLASMA_ENABLED(PLASMA_COMPILE_FOR_DEBUG)
+#  if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 void plDuktapeHelper::VerifyExpectedStackChange(plInt32 iExpectedStackChange, const char* szFile, plUInt32 uiLine, const char* szFunction) const
 {
   if (m_bVerifyStackChange && m_pContext)
@@ -80,7 +80,7 @@ void plDuktapeHelper::LogStackTrace(plInt32 iErrorObjIdx)
 {
   if (duk_is_error(m_pContext, iErrorObjIdx))
   {
-    PLASMA_LOG_BLOCK("Stack Trace");
+    PL_LOG_BLOCK("Stack Trace");
 
     duk_get_prop_string(m_pContext, iErrorObjIdx, "stack");
 
@@ -119,11 +119,11 @@ plResult plDuktapeHelper::PushLocalObject(const char* szName, plInt32 iParentObj
   if (duk_get_prop_string(m_pContext, iParentObjectIndex, szName) == false) // [ obj/undef ]
   {
     duk_pop(m_pContext); // [ ]
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // [ object ]
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plDuktapeHelper::HasProperty(const char* szPropertyName, plInt32 iParentObjectIndex /*= -1*/) const
@@ -232,7 +232,7 @@ void plDuktapeHelper::SetBoolProperty(const char* szPropertyName, bool value, pl
   else
     duk_put_prop_string(m_pContext, iParentObjectIndex - 1, szPropertyName); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plDuktapeHelper::SetNumberProperty(const char* szPropertyName, double value, plInt32 iParentObjectIndex /*= -1*/) const
@@ -246,7 +246,7 @@ void plDuktapeHelper::SetNumberProperty(const char* szPropertyName, double value
   else
     duk_put_prop_string(m_pContext, iParentObjectIndex - 1, szPropertyName); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plDuktapeHelper::SetStringProperty(const char* szPropertyName, const char* value, plInt32 iParentObjectIndex /*= -1*/) const
@@ -260,7 +260,7 @@ void plDuktapeHelper::SetStringProperty(const char* szPropertyName, const char* 
   else
     duk_put_prop_string(m_pContext, iParentObjectIndex - 1, szPropertyName); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, 0);
 }
 
 void plDuktapeHelper::SetCustomProperty(const char* szPropertyName, plInt32 iParentObjectIndex /*= -1*/) const
@@ -272,7 +272,7 @@ void plDuktapeHelper::SetCustomProperty(const char* szPropertyName, plInt32 iPar
   else
     duk_put_prop_string(m_pContext, iParentObjectIndex - 1, szPropertyName); // [ ]
 
-  PLASMA_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, -1);
+  PL_DUK_RETURN_VOID_AND_VERIFY_STACK(duk, -1);
 }
 
 void plDuktapeHelper::StorePointerInStash(const char* szKey, void* pPointer)
@@ -291,7 +291,7 @@ void* plDuktapeHelper::RetrievePointerFromStash(const char* szKey) const
 
   if (duk_get_prop_string(m_pContext, -1, szKey)) // [ stash obj/undef ]
   {
-    PLASMA_ASSERT_DEBUG(duk_is_buffer(m_pContext, -1), "Object '{}' in stash is not a buffer", szKey);
+    PL_ASSERT_DEBUG(duk_is_buffer(m_pContext, -1), "Object '{}' in stash is not a buffer", szKey);
 
     pPointer = *reinterpret_cast<void**>(duk_get_buffer(m_pContext, -1, nullptr)); // [ stash obj/undef ]
   }
@@ -380,29 +380,29 @@ void plDuktapeHelper::RegisterGlobalFunction(
 {
   // TODO: could store iFuncIdx for faster function calls
 
-  duk_push_global_object(m_pContext);                                                 // [ global ]
-  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, uiNumArguments);  // [ global func ]
-  duk_set_magic(m_pContext, -1, iMagicValue);                                         // [ global func ]
-  duk_put_prop_string(m_pContext, -2, szFunctionName);                                // [ global ]
-  duk_pop(m_pContext);                                                                // [ ]
+  duk_push_global_object(m_pContext);                                                // [ global ]
+  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, uiNumArguments); // [ global func ]
+  duk_set_magic(m_pContext, -1, iMagicValue);                                        // [ global func ]
+  duk_put_prop_string(m_pContext, -2, szFunctionName);                               // [ global ]
+  duk_pop(m_pContext);                                                               // [ ]
 }
 
 void plDuktapeHelper::RegisterGlobalFunctionWithVarArgs(const char* szFunctionName, duk_c_function function, plInt16 iMagicValue /*= 0*/)
 {
   // TODO: could store iFuncIdx for faster function calls
 
-  duk_push_global_object(m_pContext);                                              // [ global ]
-  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, DUK_VARARGS);  // [ global func ]
-  duk_set_magic(m_pContext, -1, iMagicValue);                                      // [ global func ]
-  duk_put_prop_string(m_pContext, -2, szFunctionName);                             // [ global ]
-  duk_pop(m_pContext);                                                             // [ ]
+  duk_push_global_object(m_pContext);                                             // [ global ]
+  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, DUK_VARARGS); // [ global func ]
+  duk_set_magic(m_pContext, -1, iMagicValue);                                     // [ global func ]
+  duk_put_prop_string(m_pContext, -2, szFunctionName);                            // [ global ]
+  duk_pop(m_pContext);                                                            // [ ]
 }
 
 void plDuktapeHelper::RegisterObjectFunction(
   const char* szFunctionName, duk_c_function function, plUInt8 uiNumArguments, plInt32 iParentObjectIndex /*= -1*/, plInt16 iMagicValue /*= 0*/)
 {
-  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, uiNumArguments);  // [ func ]
-  duk_set_magic(m_pContext, -1, iMagicValue);                                         // [ func ]
+  /*const int iFuncIdx =*/duk_push_c_function(m_pContext, function, uiNumArguments); // [ func ]
+  duk_set_magic(m_pContext, -1, iMagicValue);                                        // [ func ]
 
   if (iParentObjectIndex < 0)
   {
@@ -423,11 +423,11 @@ plResult plDuktapeHelper::PrepareGlobalFunctionCall(const char* szFunctionName)
     goto failure;
 
   m_iPushedValues = 0;
-  return PLASMA_SUCCESS; // [ func ]
+  return PL_SUCCESS; // [ func ]
 
 failure:
   duk_pop(m_pContext); // [ ]
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plDuktapeHelper::PrepareObjectFunctionCall(const char* szFunctionName, plInt32 iParentObjectIndex /*= -1*/)
@@ -441,18 +441,18 @@ plResult plDuktapeHelper::PrepareObjectFunctionCall(const char* szFunctionName, 
     goto failure;
 
   m_iPushedValues = 0;
-  return PLASMA_SUCCESS; // [ func ]
+  return PL_SUCCESS; // [ func ]
 
 failure:
   duk_pop(m_pContext); // [ ]
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plDuktapeHelper::CallPreparedFunction()
 {
   if (duk_pcall(m_pContext, m_iPushedValues) == DUK_EXEC_SUCCESS) // [ func n-args ] -> [ result/error ]
   {
-    return PLASMA_SUCCESS; // [ result ]
+    return PL_SUCCESS; // [ result ]
   }
   else
   {
@@ -460,7 +460,7 @@ plResult plDuktapeHelper::CallPreparedFunction()
 
     LogStackTrace(-1);
 
-    return PLASMA_FAILURE; // [ error ]
+    return PL_FAILURE; // [ error ]
   }
 }
 
@@ -482,18 +482,18 @@ plResult plDuktapeHelper::PrepareMethodCall(const char* szMethodName, plInt32 iP
   }
 
   m_iPushedValues = 0;
-  return PLASMA_SUCCESS; // [ func this ]
+  return PL_SUCCESS; // [ func this ]
 
 failure:
   duk_pop(m_pContext); // [ ]
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plDuktapeHelper::CallPreparedMethod()
 {
   if (duk_pcall_method(m_pContext, m_iPushedValues) == DUK_EXEC_SUCCESS) // [ func this n-args ] -> [ result/error ]
   {
-    return PLASMA_SUCCESS; // [ result ]
+    return PL_SUCCESS; // [ result ]
   }
   else
   {
@@ -501,7 +501,7 @@ plResult plDuktapeHelper::CallPreparedMethod()
 
     LogStackTrace(-1);
 
-    return PLASMA_FAILURE; // [ error ]
+    return PL_FAILURE; // [ error ]
   }
 }
 
@@ -587,7 +587,7 @@ plResult plDuktapeHelper::ExecuteString(const char* szString, const char* szDebu
   duk_push_string(m_pContext, szDebugName);                       // [ filename ]
   if (duk_pcompile_string_filename(m_pContext, 0, szString) != 0) // [ function/error ]
   {
-    PLASMA_LOG_BLOCK("DukTape::ExecuteString", "Compilation failed");
+    PL_LOG_BLOCK("DukTape::ExecuteString", "Compilation failed");
 
     plLog::Error("[duktape]{}", duk_safe_to_string(m_pContext, -1)); // [ error ]
 
@@ -597,14 +597,14 @@ plResult plDuktapeHelper::ExecuteString(const char* szString, const char* szDebu
     plLog::Info("[duktape]Source: {0}", szString);
 
     duk_pop(m_pContext); // [ ]
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   // [ function ]
 
   if (duk_pcall(m_pContext, 0) != DUK_EXEC_SUCCESS) // [ result/error ]
   {
-    PLASMA_LOG_BLOCK("DukTape::ExecuteString", "Execution failed");
+    PL_LOG_BLOCK("DukTape::ExecuteString", "Execution failed");
 
     plLog::Error("[duktape]{}", duk_safe_to_string(m_pContext, -1)); // [ error ]
 
@@ -614,11 +614,11 @@ plResult plDuktapeHelper::ExecuteString(const char* szString, const char* szDebu
     plLog::Info("[duktape]Source: {0}", szString);
 
     duk_pop(m_pContext); // [ ]
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   duk_pop(m_pContext); // [ ]
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plDuktapeHelper::ExecuteStream(plStreamReader& inout_stream, const char* szDebugName)
@@ -632,7 +632,7 @@ plResult plDuktapeHelper::ExecuteStream(plStreamReader& inout_stream, const char
 plResult plDuktapeHelper::ExecuteFile(const char* szFile)
 {
   plFileReader file;
-  PLASMA_SUCCEED_OR_RETURN(file.Open(szFile));
+  PL_SUCCEED_OR_RETURN(file.Open(szFile));
 
   return ExecuteStream(file, szFile);
 }
@@ -640,4 +640,3 @@ plResult plDuktapeHelper::ExecuteFile(const char* szFile)
 #endif
 
 
-PLASMA_STATICLINK_FILE(Core, Core_Scripting_Duktape_DuktapeHelper);

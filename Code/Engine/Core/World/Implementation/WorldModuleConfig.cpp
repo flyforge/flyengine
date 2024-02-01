@@ -17,7 +17,7 @@ plResult plWorldModuleConfig::Save()
 
   plFileWriter file;
   if (file.Open(sPath).Failed())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
   plOpenDdlWriter writer;
   writer.SetOutputStream(&file);
@@ -34,14 +34,14 @@ plResult plWorldModuleConfig::Save()
     writer.EndObject();
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plWorldModuleConfig::Load()
 {
   const char* szPath = ":project/WorldModules.ddl";
 
-  PLASMA_LOG_BLOCK("plWorldModuleConfig::Load()", szPath);
+  PL_LOG_BLOCK("plWorldModuleConfig::Load()", szPath);
 
   m_InterfaceImpls.Clear();
 
@@ -81,7 +81,7 @@ void plWorldModuleConfig::Load()
 
 void plWorldModuleConfig::Apply()
 {
-  PLASMA_LOG_BLOCK("plWorldModuleConfig::Apply");
+  PL_LOG_BLOCK("plWorldModuleConfig::Apply");
 
   for (const auto& interfaceImpl : m_InterfaceImpls)
   {
@@ -116,4 +116,3 @@ void plWorldModuleConfig::RemoveInterfaceImplementation(plStringView sInterfaceN
 }
 
 
-PLASMA_STATICLINK_FILE(Core, Core_World_Implementation_WorldModuleConfig);

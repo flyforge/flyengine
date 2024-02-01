@@ -5,7 +5,6 @@
 #include <GuiFoundation/NodeEditor/NodeScene.moc.h>
 #include <GuiFoundation/NodeEditor/Pin.h>
 #include <VisualScriptPlugin/Runtime/VisualScriptDataType.h>
-#include <EditorFramework/Document/GameObjectDocument.h>
 
 class plQtVisualScriptPin : public plQtPin
 {
@@ -47,7 +46,6 @@ public:
   const QPixmap& GetLoopIcon() const { return m_LoopIcon; }
 
 private:
-  void GameObjectDocumentEventHandler(const plGameObjectDocumentEvent& e);
   void NodeChangedHandler(const plDocumentObject* pObject);
 
   QPixmap m_CoroutineIcon;

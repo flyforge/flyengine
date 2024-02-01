@@ -60,7 +60,7 @@ void plQtFileWidget::ProcessTelemetry(void* pUnuseed)
 
   plTelemetryMessage Msg;
 
-  while (plTelemetry::RetrieveMessage('FILE', Msg) == PLASMA_SUCCESS)
+  while (plTelemetry::RetrieveMessage('FILE', Msg) == PL_SUCCESS)
   {
     s_pWidget->m_bUpdateTable = true;
 
@@ -94,7 +94,7 @@ void plQtFileWidget::ProcessTelemetry(void* pUnuseed)
             data.m_State = bSuccess ? OpenReading : OpenReadingFailed;
             break;
           default:
-            PLASMA_REPORT_FAILURE("Unknown File Open Mode {0}", uiMode);
+            PL_REPORT_FAILURE("Unknown File Open Mode {0}", uiMode);
             break;
         }
       }
@@ -189,7 +189,7 @@ void plQtFileWidget::ProcessTelemetry(void* pUnuseed)
         Msg.GetReader() >> bSuccess;
 
         plStringBuilder s;
-        s.Format("'{0}' -> '{1}'", sFile1, sFile2);
+        s.SetFormat("'{0}' -> '{1}'", sFile1, sFile2);
         data.m_sFile = s.GetData();
 
         data.m_State = bSuccess ? FileCopy : FileCopyFailed;
@@ -313,7 +313,7 @@ QTableWidgetItem* plQtFileWidget::GetStateString(FileOpState State) const
       pItem->setForeground(Qt::red);
       break;
     default:
-      PLASMA_REPORT_FAILURE("Unknown File Operation {0}", (plInt32)State);
+      PL_REPORT_FAILURE("Unknown File Operation {0}", (plInt32)State);
       break;
   }
 

@@ -17,12 +17,12 @@ class plSmallArrayBase
 {
 public:
   // Only if the stored type is either POD or relocatable the hybrid array itself is also relocatable.
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
+  PL_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
 
   plSmallArrayBase();                                                                    // [tested]
-  plSmallArrayBase(const plSmallArrayBase<T, Size>& other, plAllocatorBase* pAllocator); // [tested]
-  plSmallArrayBase(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator);       // [tested]
-  plSmallArrayBase(plSmallArrayBase<T, Size>&& other, plAllocatorBase* pAllocator);      // [tested]
+  plSmallArrayBase(const plSmallArrayBase<T, Size>& other, plAllocator* pAllocator); // [tested]
+  plSmallArrayBase(const plArrayPtr<const T>& other, plAllocator* pAllocator);       // [tested]
+  plSmallArrayBase(plSmallArrayBase<T, Size>&& other, plAllocator* pAllocator);      // [tested]
 
   ~plSmallArrayBase(); // [tested]
 
@@ -31,10 +31,10 @@ public:
   void operator=(plSmallArrayBase<T, Size>&& rhs) = delete;
 
   /// \brief Copies the data from some other array into this one.
-  void CopyFrom(const plArrayPtr<const T>& other, plAllocatorBase* pAllocator); // [tested]
+  void CopyFrom(const plArrayPtr<const T>& other, plAllocator* pAllocator); // [tested]
 
   /// \brief Moves the data from some other array into this one.
-  void MoveFrom(plSmallArrayBase<T, Size>&& other, plAllocatorBase* pAllocator); // [tested]
+  void MoveFrom(plSmallArrayBase<T, Size>&& other, plAllocator* pAllocator); // [tested]
 
   /// \brief Conversion to const plArrayPtr.
   operator plArrayPtr<const T>() const; // [tested]
@@ -44,12 +44,12 @@ public:
 
   /// \brief Compares this array to another contiguous array type.
   bool operator==(const plSmallArrayBase<T, Size>& rhs) const; // [tested]
-  bool operator==(const plArrayPtr<const T>& rhs) const;       // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plSmallArrayBase<T, Size>&);
 
-  /// \brief Compares this array to another contiguous array type.
-  bool operator!=(const plSmallArrayBase<T, Size>& rhs) const; // [tested]
-  bool operator!=(const plArrayPtr<const T>& rhs) const;       // [tested]
-
+#if PL_DISABLED(PL_USE_CPP20_OPERATORS)
+  bool operator==(const plArrayPtr<const T>& rhs) const; // [tested]
+  PL_ADD_DEFAULT_OPERATOR_NOTEQUAL(const plArrayPtr<const T>&);
+#endif
   /// \brief Returns the element at the given index. Does bounds checks in debug builds.
   const T& operator[](plUInt32 uiIndex) const; // [tested]
 
@@ -57,18 +57,18 @@ public:
   T& operator[](plUInt32 uiIndex); // [tested]
 
   /// \brief Resizes the array to have exactly uiCount elements. Default constructs extra elements if the array is grown.
-  void SetCount(plUInt16 uiCount, plAllocatorBase* pAllocator); // [tested]
+  void SetCount(plUInt16 uiCount, plAllocator* pAllocator); // [tested]
 
   /// \brief Resizes the array to have exactly uiCount elements. Constructs all new elements by copying the FillValue.
-  void SetCount(plUInt16 uiCount, const T& fillValue, plAllocatorBase* pAllocator); // [tested]
+  void SetCount(plUInt16 uiCount, const T& fillValue, plAllocator* pAllocator); // [tested]
 
   /// \brief Resizes the array to have exactly uiCount elements. Extra elements might be uninitialized.
   template <typename = void>                                                 // Template is used to only conditionally compile this function in when it is actually used.
-  void SetCountUninitialized(plUInt16 uiCount, plAllocatorBase* pAllocator); // [tested]
+  void SetCountUninitialized(plUInt16 uiCount, plAllocator* pAllocator); // [tested]
 
   /// \brief Ensures the container has at least \a uiCount elements. Ie. calls SetCount() if the container has fewer elements, does nothing
   /// otherwise.
-  void EnsureCount(plUInt16 uiCount, plAllocatorBase* pAllocator); // [tested]
+  void EnsureCount(plUInt16 uiCount, plAllocator* pAllocator); // [tested]
 
   /// \brief Returns the number of active elements in the array.
   plUInt32 GetCount() const; // [tested]
@@ -83,10 +83,10 @@ public:
   bool Contains(const T& value) const; // [tested]
 
   /// \brief Inserts value at index by shifting all following elements.
-  void Insert(const T& value, plUInt32 uiIndex, plAllocatorBase* pAllocator); // [tested]
+  void Insert(const T& value, plUInt32 uiIndex, plAllocator* pAllocator); // [tested]
 
   /// \brief Inserts value at index by shifting all following elements.
-  void Insert(T&& value, plUInt32 uiIndex, plAllocatorBase* pAllocator); // [tested]
+  void Insert(T&& value, plUInt32 uiIndex, plAllocator* pAllocator); // [tested]
 
   /// \brief Removes the first occurrence of value and fills the gap by shifting all following elements
   bool RemoveAndCopy(const T& value); // [tested]
@@ -95,10 +95,10 @@ public:
   bool RemoveAndSwap(const T& value); // [tested]
 
   /// \brief Removes the element at index and fills the gap by shifting all following elements
-  void RemoveAtAndCopy(plUInt32 uiIndex, plUInt32 uiNumElements = 1); // [tested]
+  void RemoveAtAndCopy(plUInt32 uiIndex, plUInt16 uiNumElements = 1); // [tested]
 
   /// \brief Removes the element at index and fills the gap by swapping in the last element
-  void RemoveAtAndSwap(plUInt32 uiIndex, plUInt32 uiNumElements = 1); // [tested]
+  void RemoveAtAndSwap(plUInt32 uiIndex, plUInt16 uiNumElements = 1); // [tested]
 
   /// \brief Searches for the first occurrence of the given value and returns its index or plInvalidIndex if not found.
   plUInt32 IndexOf(const T& value, plUInt32 uiStartIndex = 0) const; // [tested]
@@ -107,13 +107,13 @@ public:
   plUInt32 LastIndexOf(const T& value, plUInt32 uiStartIndex = plSmallInvalidIndex) const; // [tested]
 
   /// \brief Grows the array by one element and returns a reference to the newly created element.
-  T& ExpandAndGetRef(plAllocatorBase* pAllocator); // [tested]
+  T& ExpandAndGetRef(plAllocator* pAllocator); // [tested]
 
   /// \brief Pushes value at the end of the array.
-  void PushBack(const T& value, plAllocatorBase* pAllocator); // [tested]
+  void PushBack(const T& value, plAllocator* pAllocator); // [tested]
 
   /// \brief Pushes value at the end of the array.
-  void PushBack(T&& value, plAllocatorBase* pAllocator); // [tested]
+  void PushBack(T&& value, plAllocator* pAllocator); // [tested]
 
   /// \brief Pushes value at the end of the array. Does NOT ensure capacity.
   void PushBackUnchecked(const T& value); // [tested]
@@ -122,7 +122,7 @@ public:
   void PushBackUnchecked(T&& value); // [tested]
 
   /// \brief Pushes all elements in range at the end of the array. Increases the capacity if necessary.
-  void PushBackRange(const plArrayPtr<const T>& range, plAllocatorBase* pAllocator); // [tested]
+  void PushBackRange(const plArrayPtr<const T>& range, plAllocator* pAllocator); // [tested]
 
   /// \brief Removes count elements from the end of the array.
   void PopBack(plUInt32 uiCountToRemove = 1); // [tested]
@@ -159,11 +159,11 @@ public:
   plArrayPtr<typename plArrayPtr<const T>::ByteType> GetByteArrayPtr() const; // [tested]
 
   /// \brief Expands the array so it can at least store the given capacity.
-  void Reserve(plUInt16 uiCapacity, plAllocatorBase* pAllocator); // [tested]
+  void Reserve(plUInt16 uiCapacity, plAllocator* pAllocator); // [tested]
 
   /// \brief Tries to compact the array to avoid wasting memory. The resulting capacity is at least 'GetCount' (no elements get removed). Will
   /// deallocate all data, if the array is empty.
-  void Compact(plAllocatorBase* pAllocator); // [tested]
+  void Compact(plAllocator* pAllocator); // [tested]
 
   /// \brief Returns the reserved number of elements that the array can hold without reallocating.
   plUInt32 GetCapacity() const { return m_uiCapacity; }
@@ -188,7 +188,7 @@ protected:
     CAPACITY_ALIGNMENT = 4
   };
 
-  void SetCapacity(plUInt16 uiCapacity, plAllocatorBase* pAllocator);
+  void SetCapacity(plUInt16 uiCapacity, plAllocator* pAllocator);
 
   T* GetElementsPtr();
   const T* GetElementsPtr() const;
@@ -200,7 +200,7 @@ protected:
 
   union
   {
-    struct alignas(PLASMA_ALIGNMENT_OF(T))
+    struct alignas(PL_ALIGNMENT_OF(T))
     {
       plUInt8 m_StaticData[Size * sizeof(T)];
     };
@@ -219,7 +219,7 @@ class plSmallArray : public plSmallArrayBase<T, Size>
 
 public:
   // Only if the stored type is either POD or relocatable the hybrid array itself is also relocatable.
-  PLASMA_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
+  PL_DECLARE_MEM_RELOCATABLE_TYPE_CONDITIONAL(T);
 
   plSmallArray();
 

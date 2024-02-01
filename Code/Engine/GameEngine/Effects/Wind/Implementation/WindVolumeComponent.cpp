@@ -11,29 +11,29 @@
 plSpatialData::Category plWindVolumeComponent::SpatialDataCategory = plSpatialData::RegisterCategory("WindVolumes", plSpatialData::Flags::None);
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 2)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 2)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_MEMBER_PROPERTY("Strength", plWindStrength, m_Strength),
-    PLASMA_MEMBER_PROPERTY("ReverseDirection", m_bReverseDirection),
-    PLASMA_MEMBER_PROPERTY("BurstDuration", m_BurstDuration),
-    PLASMA_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
+    PL_ENUM_MEMBER_PROPERTY("Strength", plWindStrength, m_Strength),
+    PL_MEMBER_PROPERTY("ReverseDirection", m_bReverseDirection),
+    PL_MEMBER_PROPERTY("BurstDuration", m_BurstDuration),
+    PL_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
-    PLASMA_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
+    PL_MESSAGE_HANDLER(plMsgComponentInternalTrigger, OnTriggered),
+    PL_MESSAGE_HANDLER(plMsgDeleteGameObject, OnMsgDeleteGameObject),
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Effects/Wind"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE;
+PL_END_ABSTRACT_COMPONENT_TYPE;
 // clang-format on
 
 plWindVolumeComponent::plWindVolumeComponent() = default;
@@ -66,10 +66,10 @@ void plWindVolumeComponent::OnSimulationStarted()
   }
 }
 
-void plWindVolumeComponent::SerializeComponent(plWorldWriter& stream) const
+void plWindVolumeComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_BurstDuration;
   s << m_OnFinishedAction;
@@ -77,11 +77,11 @@ void plWindVolumeComponent::SerializeComponent(plWorldWriter& stream) const
   s << m_bReverseDirection;
 }
 
-void plWindVolumeComponent::DeserializeComponent(plWorldReader& stream)
+void plWindVolumeComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_BurstDuration;
   s >> m_OnFinishedAction;
@@ -93,11 +93,11 @@ void plWindVolumeComponent::DeserializeComponent(plWorldReader& stream)
   }
 }
 
-plSimdVec4f plWindVolumeComponent::ComputeForceAtGlobalPosition(const plSimdVec4f& globalPos) const
+plSimdVec4f plWindVolumeComponent::ComputeForceAtGlobalPosition(const plSimdVec4f& vGlobalPos) const
 {
   const plSimdTransform t = GetOwner()->GetGlobalTransformSimd();
   const plSimdTransform tInv = t.GetInverse();
-  const plSimdVec4f localPos = tInv.TransformPosition(globalPos);
+  const plSimdVec4f localPos = tInv.TransformPosition(vGlobalPos);
 
   const plSimdVec4f force = ComputeForceAtLocalPosition(localPos);
 
@@ -132,68 +132,68 @@ float plWindVolumeComponent::GetWindInMetersPerSecond() const
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plWindVolumeSphereComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plWindVolumeSphereComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plSphereVisualizerAttribute("Radius", plColor::CornflowerBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plWindVolumeSphereComponent::plWindVolumeSphereComponent() = default;
 plWindVolumeSphereComponent::~plWindVolumeSphereComponent() = default;
 
-void plWindVolumeSphereComponent::SerializeComponent(plWorldWriter& stream) const
+void plWindVolumeSphereComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fRadius;
 }
 
-void plWindVolumeSphereComponent::DeserializeComponent(plWorldReader& stream)
+void plWindVolumeSphereComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_fRadius;
   m_fOneDivRadius = 1.0f / m_fRadius;
 }
 
-plSimdVec4f plWindVolumeSphereComponent::ComputeForceAtLocalPosition(const plSimdVec4f& localPos) const
+plSimdVec4f plWindVolumeSphereComponent::ComputeForceAtLocalPosition(const plSimdVec4f& vLocalPos) const
 {
   // TODO: could do this computation in global space
 
-  plSimdFloat lenScaled = localPos.GetLength<3>() * m_fOneDivRadius;
+  plSimdFloat lenScaled = vLocalPos.GetLength<3>() * m_fOneDivRadius;
 
   // inverse quadratic falloff to have sharper edges
   plSimdFloat forceFactor = plSimdFloat(1.0f) - (lenScaled * lenScaled);
 
   const plSimdFloat force = GetWindInMetersPerSecond() * forceFactor.Max(0.0f);
 
-  plSimdVec4f dir = localPos;
+  plSimdVec4f dir = vLocalPos;
   dir.NormalizeIfNotZero<3>();
 
   return dir * force;
 }
 
-void plWindVolumeSphereComponent::SetRadius(float val)
+void plWindVolumeSphereComponent::SetRadius(float fVal)
 {
-  m_fRadius = plMath::Max(val, 0.1f);
+  m_fRadius = plMath::Max(fVal, 0.1f);
   m_fOneDivRadius = 1.0f / m_fRadius;
 
   if (IsActiveAndInitialized())
@@ -204,7 +204,7 @@ void plWindVolumeSphereComponent::SetRadius(float val)
 
 void plWindVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
 {
-  msg.AddBounds(plBoundingSphere(plVec3::ZeroVector(), m_fRadius), plWindVolumeComponent::SpatialDataCategory);
+  msg.AddBounds(plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fRadius), plWindVolumeComponent::SpatialDataCategory);
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -212,52 +212,52 @@ void plWindVolumeSphereComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& ms
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plWindVolumeCylinderMode, 1)
-  PLASMA_ENUM_CONSTANTS(plWindVolumeCylinderMode::Directional, plWindVolumeCylinderMode::Vortex)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plWindVolumeCylinderMode, 1)
+  PL_ENUM_CONSTANTS(plWindVolumeCylinderMode::Directional, plWindVolumeCylinderMode::Vortex)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_COMPONENT_TYPE(plWindVolumeCylinderComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plWindVolumeCylinderComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.1f, plVariant())),
-    PLASMA_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
-    PLASMA_ENUM_MEMBER_PROPERTY("Mode", plWindVolumeCylinderMode, m_Mode),
+    PL_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plDefaultValueAttribute(5.0f), new plClampValueAttribute(0.1f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Radius", GetRadius, SetRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
+    PL_ENUM_MEMBER_PROPERTY("Mode", plWindVolumeCylinderMode, m_Mode),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCylinderVisualizerAttribute(plBasisAxis::PositiveX, "Length", "Radius", plColor::CornflowerBlue),
     new plDirectionVisualizerAttribute(plBasisAxis::PositiveX, 1.0f, plColor::DeepSkyBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plWindVolumeCylinderComponent::plWindVolumeCylinderComponent() = default;
 plWindVolumeCylinderComponent::~plWindVolumeCylinderComponent() = default;
 
-void plWindVolumeCylinderComponent::SerializeComponent(plWorldWriter& stream) const
+void plWindVolumeCylinderComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fRadius;
   s << m_fLength;
   s << m_Mode;
 }
 
-void plWindVolumeCylinderComponent::DeserializeComponent(plWorldReader& stream)
+void plWindVolumeCylinderComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_fRadius;
   m_fOneDivRadius = 1.0f / m_fRadius;
@@ -266,18 +266,18 @@ void plWindVolumeCylinderComponent::DeserializeComponent(plWorldReader& stream)
   s >> m_Mode;
 }
 
-plSimdVec4f plWindVolumeCylinderComponent::ComputeForceAtLocalPosition(const plSimdVec4f& localPos) const
+plSimdVec4f plWindVolumeCylinderComponent::ComputeForceAtLocalPosition(const plSimdVec4f& vLocalPos) const
 {
-  const plSimdFloat fCylDist = localPos.x();
+  const plSimdFloat fCylDist = vLocalPos.x();
 
   if (fCylDist <= -m_fLength * 0.5f || fCylDist >= m_fLength * 0.5f)
-    return plSimdVec4f::ZeroVector();
+    return plSimdVec4f::MakeZero();
 
-  plSimdVec4f orthoDir = localPos;
+  plSimdVec4f orthoDir = vLocalPos;
   orthoDir.SetX(0.0f);
 
   if (orthoDir.GetLengthSquared<3>() >= plMath::Square(m_fRadius))
-    return plSimdVec4f::ZeroVector();
+    return plSimdVec4f::MakeZero();
 
   if (m_Mode == plWindVolumeCylinderMode::Vortex)
   {
@@ -289,9 +289,9 @@ plSimdVec4f plWindVolumeCylinderComponent::ComputeForceAtLocalPosition(const plS
   return plSimdVec4f(GetWindInMetersPerSecond(), 0, 0);
 }
 
-void plWindVolumeCylinderComponent::SetRadius(float val)
+void plWindVolumeCylinderComponent::SetRadius(float fVal)
 {
-  m_fRadius = plMath::Max(val, 0.1f);
+  m_fRadius = plMath::Max(fVal, 0.1f);
   m_fOneDivRadius = 1.0f / m_fRadius;
 
   if (IsActiveAndInitialized())
@@ -300,9 +300,9 @@ void plWindVolumeCylinderComponent::SetRadius(float val)
   }
 }
 
-void plWindVolumeCylinderComponent::SetLength(float val)
+void plWindVolumeCylinderComponent::SetLength(float fVal)
 {
-  m_fLength = plMath::Max(val, 0.1f);
+  m_fLength = plMath::Max(fVal, 0.1f);
 
   if (IsActiveAndInitialized())
   {
@@ -314,7 +314,7 @@ void plWindVolumeCylinderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& 
 {
   const plVec3 corner(m_fLength * 0.5f, m_fRadius, m_fRadius);
 
-  msg.AddBounds(plBoundingBox(-corner, corner), plWindVolumeComponent::SpatialDataCategory);
+  msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(-corner, corner)), plWindVolumeComponent::SpatialDataCategory);
 }
 
 
@@ -323,56 +323,56 @@ void plWindVolumeCylinderComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plWindVolumeConeComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plWindVolumeConeComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Angle", GetAngle, SetAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::Degree(45)), new plClampValueAttribute(plAngle::Degree(1), plAngle::Degree(179))),
-    PLASMA_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
+    PL_ACCESSOR_PROPERTY("Angle", GetAngle, SetAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(45)), new plClampValueAttribute(plAngle::MakeFromDegree(1), plAngle::MakeFromDegree(179))),
+    PL_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.1f, plVariant())),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_PROPERTIES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
+    PL_MESSAGE_HANDLER(plMsgUpdateLocalBounds, OnUpdateLocalBounds)
   }
-  PLASMA_END_MESSAGEHANDLERS;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_MESSAGEHANDLERS;
+  PL_BEGIN_ATTRIBUTES
   {
     new plConeVisualizerAttribute(plBasisAxis::PositiveX, "Angle", 1.0f, "Length", plColor::CornflowerBlue),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE;
+PL_END_COMPONENT_TYPE;
 // clang-format on
 
 plWindVolumeConeComponent::plWindVolumeConeComponent() = default;
 plWindVolumeConeComponent::~plWindVolumeConeComponent() = default;
 
-void plWindVolumeConeComponent::SerializeComponent(plWorldWriter& stream) const
+void plWindVolumeConeComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_fLength;
   s << m_Angle;
 }
 
-void plWindVolumeConeComponent::DeserializeComponent(plWorldReader& stream)
+void plWindVolumeConeComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  // const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_fLength;
   s >> m_Angle;
 }
 
-plSimdVec4f plWindVolumeConeComponent::ComputeForceAtLocalPosition(const plSimdVec4f& localPos) const
+plSimdVec4f plWindVolumeConeComponent::ComputeForceAtLocalPosition(const plSimdVec4f& vLocalPos) const
 {
-  const plSimdFloat fConeDist = localPos.x();
+  const plSimdFloat fConeDist = vLocalPos.x();
 
-  if (fConeDist <= plSimdFloat::Zero() || fConeDist >= m_fLength)
-    return plSimdVec4f::ZeroVector();
+  if (fConeDist <= plSimdFloat::MakeZero() || fConeDist >= m_fLength)
+    return plSimdVec4f::MakeZero();
 
   // TODO: precompute base radius
   const float fBaseRadius = plMath::Tan(m_Angle * 0.5f) * m_fLength;
@@ -380,18 +380,18 @@ plSimdVec4f plWindVolumeConeComponent::ComputeForceAtLocalPosition(const plSimdV
   // TODO: precompute 1/length
   const plSimdFloat fConeRadius = (fConeDist / plSimdFloat(m_fLength)) * plSimdFloat(fBaseRadius);
 
-  plSimdVec4f orthoDir = localPos;
+  plSimdVec4f orthoDir = vLocalPos;
   orthoDir.SetX(0.0f);
 
   if (orthoDir.GetLengthSquared<3>() >= fConeRadius * fConeRadius)
-    return plSimdVec4f::ZeroVector();
+    return plSimdVec4f::MakeZero();
 
-  return localPos.GetNormalized<3>() * GetWindInMetersPerSecond();
+  return vLocalPos.GetNormalized<3>() * GetWindInMetersPerSecond();
 }
 
-void plWindVolumeConeComponent::SetLength(float val)
+void plWindVolumeConeComponent::SetLength(float fVal)
 {
-  m_fLength = plMath::Max(val, 0.1f);
+  m_fLength = plMath::Max(fVal, 0.1f);
 
   if (IsActiveAndInitialized())
   {
@@ -401,7 +401,7 @@ void plWindVolumeConeComponent::SetLength(float val)
 
 void plWindVolumeConeComponent::SetAngle(plAngle val)
 {
-  m_Angle = plMath::Max(val, plAngle::Degree(1.0f));
+  m_Angle = plMath::Max(val, plAngle::MakeFromDegree(1.0f));
 
   if (IsActiveAndInitialized())
   {
@@ -420,5 +420,8 @@ void plWindVolumeConeComponent::OnUpdateLocalBounds(plMsgUpdateLocalBounds& msg)
   c1.y = plMath::Tan(m_Angle * 0.5f) * m_fLength;
   c1.z = c1.y;
 
-  msg.AddBounds(plBoundingBox(c0, c1), plWindVolumeComponent::SpatialDataCategory);
+  msg.AddBounds(plBoundingBoxSphere::MakeFromBox(plBoundingBox::MakeFromMinMax(c0, c1)), plWindVolumeComponent::SpatialDataCategory);
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Effects_Wind_Implementation_WindVolumeComponent);

@@ -4,7 +4,7 @@
 #include <Foundation/Configuration/Startup.h>
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, InputManager)
+PL_BEGIN_SUBSYSTEM_DECLARATION(Core, InputManager)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "Foundation"
@@ -27,7 +27,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(Core, InputManager)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
-PLASMA_STATICLINK_FILE(Core, Core_Input_Implementation_Startup);
+PL_STATICLINK_FILE(Core, Core_Input_Implementation_Startup);

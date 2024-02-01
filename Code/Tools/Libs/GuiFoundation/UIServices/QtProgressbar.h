@@ -15,7 +15,7 @@ struct plProgressEvent;
 ///
 /// Create a single instance of this at application startup and link it to an plProgress instance.
 /// Whenever the instance's progress state changes, this class will display a simple progress bar.
-class PLASMA_GUIFOUNDATION_DLL plQtProgressbar
+class PL_GUIFOUNDATION_DLL plQtProgressbar
 {
 public:
   plQtProgressbar();

@@ -7,21 +7,21 @@
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plStageSpaceComponent, 1, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plStageSpaceComponent, 1, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ENUM_ACCESSOR_PROPERTY("StageSpace", plXRStageSpace, GetStageSpace, SetStageSpace)->AddAttributes(new plDefaultValueAttribute((plInt32)plXRStageSpace::Enum::Standing)),
+    PL_ENUM_ACCESSOR_PROPERTY("StageSpace", plXRStageSpace, GetStageSpace, SetStageSpace)->AddAttributes(new plDefaultValueAttribute((plInt32)plXRStageSpace::Enum::Standing)),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("XR"),
     new plInDevelopmentAttribute(plInDevelopmentAttribute::Phase::Beta),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_COMPONENT_TYPE
+PL_END_COMPONENT_TYPE
 // clang-format on
 
 plStageSpaceComponent::plStageSpaceComponent() = default;
@@ -58,4 +58,4 @@ void plStageSpaceComponent::OnActivated() {}
 
 void plStageSpaceComponent::OnDeactivated() {}
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_StageSpaceComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_XR_Implementation_StageSpaceComponent);

@@ -3,8 +3,8 @@
 #include <Foundation/Communication/RemoteMessage.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcessMessage, 1, plRTTIDefaultAllocator<plProcessMessage>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcessMessage, 1, plRTTIDefaultAllocator<plProcessMessage>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plRemoteMessage::plRemoteMessage()
@@ -48,4 +48,4 @@ plRemoteMessage::~plRemoteMessage()
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_RemoteMessage);
+PL_STATICLINK_FILE(Foundation, Foundation_Communication_Implementation_RemoteMessage);

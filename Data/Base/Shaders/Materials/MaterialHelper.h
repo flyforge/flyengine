@@ -34,10 +34,6 @@ float GetOpacity();
   float GetOcclusion();
 #endif
 
-#if defined(USE_MATERIAL_CAVITY)
-  float GetCavity();
-#endif
-
 #if defined(USE_MATERIAL_SUBSURFACE_COLOR)
   float3 GetSubsurfaceColor();
 #endif
@@ -58,6 +54,7 @@ float GetOpacity();
   void GetSpecularSheenParams(out float sheen, out float tintFactor);
 #endif
 
+
 struct PS_GLOBALS
 {
   PS_IN Input;
@@ -73,25 +70,25 @@ static PS_GLOBALS G;
 
 uint CalculateCoverage()
 {
-  #if defined(USE_ALPHA_TEST_SUPER_SAMPLING)
-    uint coverage = 0;
+#if defined(USE_ALPHA_TEST_SUPER_SAMPLING) && defined(USE_TEXCOORD0)
+  uint coverage = 0;
 
-    float2 texCoords = G.Input.TexCoord0;
-    
-    for (uint i = 0; i < NumMsaaSamples; ++i)
-    {
-      G.Input.TexCoord0 = plEvaluateAttributeAtSample(texCoords, i, NumMsaaSamples);
+  float2 texCoords = G.Input.TexCoord0;
 
-      float opacity = GetOpacity();
-      coverage |= (opacity > 0.0) ? (1U << i) : 0;
-    }
-    
-    G.Input.TexCoord0 = texCoords;
+  for (uint i = 0; i < NumMsaaSamples; ++i)
+  {
+    G.Input.TexCoord0 = plEvaluateAttributeAtSample(texCoords, i, NumMsaaSamples);
 
-    return coverage;
-  #else
-    return GetOpacity() > 0.0;
-  #endif
+    float opacity = GetOpacity();
+    coverage |= (opacity > 0.0) ? (1U << i) : 0;
+  }
+
+  G.Input.TexCoord0 = texCoords;
+
+  return coverage;
+#else
+  return GetOpacity() > 0.0;
+#endif
 }
 
 plMaterialData FillMaterialData()
@@ -107,8 +104,7 @@ plMaterialData FillMaterialData()
 #if SHADING_MODE == SHADING_MODE_FULLBRIGHT
     matData.worldNormal = float3(0, 0, 1);
 #else
-    float3 worldNormal = GetNormal();
-
+    float3 worldNormal = normalize(GetNormal());
 #  if TWO_SIDED == TRUE && defined(USE_TWO_SIDED_LIGHTING)
 #    if FLIP_WINDING == TRUE
     matData.worldNormal = G.Input.FrontFace ? -worldNormal : worldNormal;
@@ -169,89 +165,64 @@ plMaterialData FillMaterialData()
     matData.perceptualRoughness = max(GetRoughness(), MIN_PERCEPTUAL_ROUGHNESS);
 #endif
 
-    matData.roughness = RoughnessFromPerceptualRoughness(matData.perceptualRoughness, matData.worldNormal);
+    matData.roughness = RoughnessFromPerceptualRoughness(matData.perceptualRoughness);
     matData.metalness = GetMetallic();
 
 #if defined(USE_MATERIAL_OCCLUSION)
-    matData.occlusion = GetOcclusion();
-#else
+#  if defined(USE_NORMAL)
+    float3 viewVector = normalize(GetCameraPosition() - matData.worldPosition);
+    float occlusionFade = saturate(dot(matData.vertexNormal, viewVector));
+#  else
+    float occlusionFade = 1.0f;
+#  endif
+    matData.occlusion = lerp(1.0f, GetOcclusion(), occlusionFade);
+  #else
     matData.occlusion = 1.0f;
-#endif
-
-#if defined(USE_MATERIAL_CAVITY)
-    matData.cavity = GetCavity();
-#else
-    matData.cavity = 1.0f;
-#endif
+  #endif
   
-#if BLEND_MODE != BLEND_MODE_OPAQUE && BLEND_MODE != BLEND_MODE_MASKED
-  matData.opacity = GetOpacity();
-#else
-  matData.opacity = 1.0f;
-#endif
+  #if BLEND_MODE != BLEND_MODE_OPAQUE && BLEND_MODE != BLEND_MODE_MASKED
+    matData.opacity = GetOpacity();
+  #else
+    matData.opacity = 1.0f;
+  #endif
 
-#if defined(USE_MATERIAL_SUBSURFACE_COLOR)
-  matData.subsurfaceColor = GetSubsurfaceColor() * matData.diffuseColor;
-#else
-  matData.subsurfaceColor = 0.0;
-#endif
+  #if defined(USE_MATERIAL_SUBSURFACE_COLOR)
+    matData.subsurfaceColor = GetSubsurfaceColor() * matData.diffuseColor;
+  #else
+    matData.subsurfaceColor = 0.0;
+  #endif
 
-#if defined(USE_VELOCITY)
-  float2 uv_current  = NDC2UV(G.Input.ScreenPosition.xy / G.Input.ScreenPosition.w);
-  float2 uv_previous = NDC2UV(G.Input.LastScreenPosition.xy / max(0.0001, G.Input.LastScreenPosition.w));
+  #if defined(USE_MATERIAL_SUBSURFACE_PARAMS)
+    GetSubsurfaceParams(matData.subsurfaceScatterPower, matData.subsurfaceShadowFalloff);
+  #else
+    matData.subsurfaceScatterPower = 9.0;
+    matData.subsurfaceShadowFalloff = 0.0;
+  #endif
 
-  matData.velocity = ((uv_previous - (TAAJitterPrevious * 0.5)) - (uv_current - (TAAJitterCurrent * 0.5 ))) * float2(0.5, -0.5);
-#else 
-  matData.velocity = float2(0, 0);
-#endif
+  #if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
+    GetSpecularClearCoatParams(matData.clearcoat, matData.clearcoatRoughness, matData.clearcoatNormal);
+  #endif
 
-#if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
-  GetSpecularClearCoatParams(matData.clearcoat, matData.clearcoatRoughness, matData.clearcoatNormal);
-#else
-  matData.clearcoat = 0;
-  matData.clearcoatRoughness = 0;
-#if defined(USE_NORMAL)
-  matData.clearcoatNormal = normalize(G.Input.Normal);
-#else
-  matData.clearcoatNormal = float3(0, 0, 1);
-#endif
-#endif
+  #if defined(USE_MATERIAL_SPECULAR_ANISOTROPIC)
+    GetSpecularAnisotopicParams(matData.anisotropic, matData.anisotropicRotation);
+  #endif
 
-#if defined(USE_MATERIAL_SPECULAR_ANISOTROPIC)
-  GetSpecularAnisotopicParams(matData.anisotropic, matData.anisotropicRotation);
-#else
-  matData.anisotropic = 0;
-  matData.anisotropicRotation = 0;
-#endif
-
-#if defined(USE_MATERIAL_SPECULAR_SHEEN)
-  GetSpecularSheenParams(matData.sheen, matData.sheenTintFactor);
-#else
-  matData.sheen = 0;
-  matData.sheenTintFactor = 0;
-#endif
-
-#if defined(USE_MATERIAL_SUBSURFACE_PARAMS)
-  GetSubsurfaceParams(matData.subsurfaceScatterPower, matData.subsurfaceStrength);
-#else
-  matData.subsurfaceScatterPower = 9.0;
-  matData.subsurfaceStrength = 0.0;
-#endif
+  #if defined(USE_MATERIAL_SPECULAR_SHEEN)
+    GetSpecularSheenParams(matData.sheen, matData.sheenTintFactor);
+  #endif
 
   return matData;
 }
 
 #if defined(USE_NORMAL)
-float3 TangentToWorldSpace(float3 normalTS)
-{
-#if defined(USE_TANGENT)
-  return normalTS.x * G.Input.Tangent + normalTS.y * G.Input.BiTangent + normalTS.z * G.Input.Normal;
-#elif defined(USE_NORMAL)
-  return normalTS.z * G.Input.Normal;
-#else
-  return normalTS;
-#endif
-}
+  float3 TangentToWorldSpace(float3 normalTS)
+  {
+    #if defined(USE_TANGENT)
+	  return normalTS.x * G.Input.Tangent + normalTS.y * G.Input.BiTangent + normalTS.z * G.Input.Normal;
+	#else
+	  return normalTS.z * G.Input.Normal;
+	#endif
+  }
 #endif
 
 float3 BlendNormals(float3 baseNormal, float3 detailNormal)

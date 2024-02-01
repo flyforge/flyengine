@@ -2,7 +2,7 @@
 
 #include <Foundation/Containers/Blob.h>
 
-#include <Foundation/Memory/Allocator.h>
+#include <Foundation/Memory/AllocatorWithPolicy.h>
 
 plBlob::plBlob() = default;
 
@@ -67,4 +67,3 @@ void plBlob::ZeroFill()
 }
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_Containers_Implementation_Blob);

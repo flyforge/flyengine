@@ -6,33 +6,33 @@
 #include <GameEngine/Animation/ColorAnimationComponent.h>
 
 // clang-format off
-PLASMA_BEGIN_COMPONENT_TYPE(plColorAnimationComponent, 2, plComponentMode::Static)
+PL_BEGIN_COMPONENT_TYPE(plColorAnimationComponent, 2, plComponentMode::Static)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
-    PLASMA_MEMBER_PROPERTY("Duration", m_Duration),
-    PLASMA_ENUM_MEMBER_PROPERTY("SetColorMode", plSetColorMode, m_SetColorMode),
-    PLASMA_ENUM_MEMBER_PROPERTY("AnimationMode", plPropertyAnimMode, m_AnimationMode),
-    PLASMA_ACCESSOR_PROPERTY("RandomStartOffset", GetRandomStartOffset, SetRandomStartOffset)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("ApplyToChildren", GetApplyRecursive, SetApplyRecursive),
+    PL_ACCESSOR_PROPERTY("Gradient", GetColorGradientFile, SetColorGradientFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Data_Gradient")),
+    PL_MEMBER_PROPERTY("Duration", m_Duration),
+    PL_ENUM_MEMBER_PROPERTY("SetColorMode", plSetColorMode, m_SetColorMode),
+    PL_ENUM_MEMBER_PROPERTY("AnimationMode", plPropertyAnimMode, m_AnimationMode),
+    PL_ACCESSOR_PROPERTY("RandomStartOffset", GetRandomStartOffset, SetRandomStartOffset)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("ApplyToChildren", GetApplyRecursive, SetApplyRecursive),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Animation"),
   }
-  PLASMA_END_ATTRIBUTES;
+  PL_END_ATTRIBUTES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plColorAnimationComponent::plColorAnimationComponent() = default;
 
-void plColorAnimationComponent::SerializeComponent(plWorldWriter& stream) const
+void plColorAnimationComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
-  SUPER::SerializeComponent(stream);
-  auto& s = stream.GetStream();
+  SUPER::SerializeComponent(inout_stream);
+  auto& s = inout_stream.GetStream();
 
   s << m_hGradient;
   s << m_Duration;
@@ -44,11 +44,11 @@ void plColorAnimationComponent::SerializeComponent(plWorldWriter& stream) const
   s << GetApplyRecursive();
 }
 
-void plColorAnimationComponent::DeserializeComponent(plWorldReader& stream)
+void plColorAnimationComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
-  SUPER::DeserializeComponent(stream);
-  const plUInt32 uiVersion = stream.GetComponentTypeVersion(GetStaticRTTI());
-  auto& s = stream.GetStream();
+  SUPER::DeserializeComponent(inout_stream);
+  const plUInt32 uiVersion = inout_stream.GetComponentTypeVersion(GetStaticRTTI());
+  auto& s = inout_stream.GetStream();
 
   s >> m_hGradient;
   s >> m_Duration;
@@ -71,7 +71,7 @@ void plColorAnimationComponent::OnSimulationStarted()
 
   if (GetRandomStartOffset())
   {
-    m_CurAnimTime = plTime::Seconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_Duration.GetSeconds()));
+    m_CurAnimTime = plTime::MakeFromSeconds(GetWorld()->GetRandomNumberGenerator().DoubleInRange(0.0, m_Duration.GetSeconds()));
   }
 }
 
@@ -122,7 +122,7 @@ void plColorAnimationComponent::SetRandomStartOffset(bool value)
 
 void plColorAnimationComponent::Update()
 {
-  if (!m_hGradient.IsValid() || m_Duration <= plTime::Zero())
+  if (!m_hGradient.IsValid() || m_Duration <= plTime::MakeZero())
     return;
 
   plTime tDiff = GetWorld()->GetClock().GetTimeDiff();
@@ -160,7 +160,7 @@ void plColorAnimationComponent::Update()
 
         m_CurAnimTime = m_Duration - tOver;
       }
-      else if (m_CurAnimTime < plTime::Zero())
+      else if (m_CurAnimTime < plTime::MakeZero())
       {
         SetUserFlag(0, !bReverse);
 
@@ -186,4 +186,4 @@ void plColorAnimationComponent::Update()
     GetOwner()->SendMessage(msg);
 }
 
-PLASMA_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_ColorAnimationComponent);
+PL_STATICLINK_FILE(GameEngine, GameEngine_Animation_Implementation_ColorAnimationComponent);

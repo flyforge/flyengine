@@ -8,36 +8,33 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsaaResolvePass, 1, plRTTIDefaultAllocator<plMsaaResolvePass>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plMsaaResolvePass, 1, plRTTIDefaultAllocator<plMsaaResolvePass>)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_MEMBER_PROPERTY("Input", m_PinInput),
-    PLASMA_MEMBER_PROPERTY("Output", m_PinOutput)
+    PL_MEMBER_PROPERTY("Input", m_PinInput),
+    PL_MEMBER_PROPERTY("Output", m_PinOutput)
   }
-  PLASMA_END_PROPERTIES;
+  PL_END_PROPERTIES;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plMsaaResolvePass::plMsaaResolvePass()
   : plRenderPipelinePass("MsaaResolvePass", true)
-  , m_bIsDepth(false)
-  , m_MsaaSampleCount(plGALMSAASampleCount::None)
+
 {
   {
     // Load shader.
     m_hDepthResolveShader = plResourceManager::LoadResource<plShaderResource>("Shaders/Pipeline/MsaaDepthResolve.plShader");
-    PLASMA_ASSERT_DEV(m_hDepthResolveShader.IsValid(), "Could not load depth resolve shader!");
+    PL_ASSERT_DEV(m_hDepthResolveShader.IsValid(), "Could not load depth resolve shader!");
   }
 }
 
-plMsaaResolvePass::~plMsaaResolvePass() {}
+plMsaaResolvePass::~plMsaaResolvePass() = default;
 
 bool plMsaaResolvePass::GetRenderTargetDescriptions(const plView& view, const plArrayPtr<plGALTextureCreationDescription* const> inputs, plArrayPtr<plGALTextureCreationDescription> outputs)
 {
-  plGALDevice* pDevice = plGALDevice::GetDefaultDevice();
-
   auto pInput = inputs[m_PinInput.m_uiInputIndex];
   if (pInput != nullptr)
   {
@@ -113,4 +110,4 @@ void plMsaaResolvePass::Execute(const plRenderViewContext& renderViewContext, co
 
 
 
-PLASMA_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_MsaaResolvePass);
+PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_MsaaResolvePass);

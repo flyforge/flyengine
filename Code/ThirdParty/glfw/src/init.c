@@ -112,7 +112,7 @@ static void terminate(void)
 //////////////////////////////////////////////////////////////////////////
 
 // Encode a Unicode code point to a UTF-8 stream
-// Based on cutef8 by Jeff Bplanson (Public Domain)
+// Based on cutef8 by Jeff Bezanson (Public Domain)
 //
 size_t _glfwEncodeUTF8(char* s, uint32_t codepoint)
 {

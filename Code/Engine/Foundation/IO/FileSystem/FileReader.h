@@ -8,9 +8,9 @@
 ///
 /// This file reader buffers reads up to a certain amount of bytes (configurable).
 /// It closes the file automatically once it goes out of scope.
-class PLASMA_FOUNDATION_DLL plFileReader : public plFileReaderBase
+class PL_FOUNDATION_DLL plFileReader : public plFileReaderBase
 {
-  PLASMA_DISALLOW_COPY_AND_ASSIGN(plFileReader);
+  PL_DISALLOW_COPY_AND_ASSIGN(plFileReader);
 
 public:
   /// \brief Constructor, does nothing.
@@ -21,7 +21,7 @@ public:
   /// \brief Destructor, closes the file, if it is still open (RAII).
   ~plFileReader() { Close(); }
 
-  /// \brief Opens the given file for reading. Returns PLASMA_SUCCESS if the file could be opened. A cache is created to speed up small reads.
+  /// \brief Opens the given file for reading. Returns PL_SUCCESS if the file could be opened. A cache is created to speed up small reads.
   ///
   /// You should typically not disable bAllowFileEvents, unless you need to prevent recursive file events,
   /// which is only the case, if you are doing file accesses from within a File Event Handler.

@@ -22,7 +22,7 @@ private:
   plParticleEffectInstance* m_pEffect;
 };
 
-class PLASMA_PARTICLEPLUGIN_DLL plParticleEffectInstance
+class PL_PARTICLEPLUGIN_DLL plParticleEffectInstance
 {
   friend class plParticleWorldModule;
   friend class plParticleEffectUpdateTask;
@@ -38,7 +38,7 @@ public:
 
   const plParticleEffectHandle& GetHandle() const { return m_hEffectHandle; }
 
-  void SetEmitterEnabled(bool enable);
+  void SetEmitterEnabled(bool bEnable);
   bool GetEmitterEnabled() const { return m_bEmitterEnabled; }
 
   bool HasActiveParticles() const;
@@ -92,12 +92,12 @@ public:
   /// In the next frame, the result can be retrieved via GetWindSampleResult() with the returned index.
   ///
   /// Only a very limited amount of locations can be sampled (4) across all behaviors.
-  plInt32 AddWindSampleLocation(const plVec3& pos);
+  plInt32 AddWindSampleLocation(const plVec3& vPos);
 
   /// \brief Returns the wind result sampled at the previously specified location (see AddWindSampleLocation()).
   ///
   /// Returns a zero vector, if no wind value is available (invalid index).
-  plVec3 GetWindSampleResult(plInt32 idx) const;
+  plVec3 GetWindSampleResult(plInt32 iIdx) const;
 
 private:
   void PassTransformToSystems();
@@ -117,7 +117,7 @@ private:
 
 public:
   /// \brief Returns false when the effect is finished.
-  bool Update(const plTime& tDiff);
+  bool Update(const plTime& diff);
 
   /// \brief Returns the total (game) time that the effect is alive and has been updated.
   ///
@@ -141,8 +141,8 @@ private: // friend plParticleEffectUpdateTask
   bool StepSimulation(const plTime& tDiff);
 
 private:
-  plTime m_TotalEffectLifeTime = plTime::Zero();
-  plTime m_ElapsedTimeSinceUpdate = plTime::Zero();
+  plTime m_TotalEffectLifeTime = plTime::MakeZero();
+  plTime m_ElapsedTimeSinceUpdate = plTime::MakeZero();
 
 
   /// @}
@@ -174,7 +174,7 @@ public:
 
   /// \brief Returns the bounding volume of the effect.
   /// The volume is in the local space of the effect.
-  void GetBoundingVolume(plBoundingBoxSphere& volume) const;
+  void GetBoundingVolume(plBoundingBoxSphere& ref_volume) const;
 
 private:
   void CombineSystemBoundingVolumes();
@@ -189,29 +189,29 @@ private:
   /// \name Effect Parameters
   /// @{
 public:
-  void SetParameter(const plTempHashedString& name, float value);
-  void SetParameter(const plTempHashedString& name, const plColor& value);
+  void SetParameter(const plTempHashedString& sName, float value);
+  void SetParameter(const plTempHashedString& sName, const plColor& value);
 
-  plInt32 FindFloatParameter(const plTempHashedString& name) const;
-  float GetFloatParameter(const plTempHashedString& name, float defaultValue) const;
-  float GetFloatParameter(plUInt32 idx) const { return m_FloatParameters[idx].m_fValue; }
+  plInt32 FindFloatParameter(const plTempHashedString& sName) const;
+  float GetFloatParameter(const plTempHashedString& sName, float fDefaultValue) const;
+  float GetFloatParameter(plUInt32 uiIdx) const { return m_FloatParameters[uiIdx].m_fValue; }
 
-  plInt32 FindColorParameter(const plTempHashedString& name) const;
-  const plColor& GetColorParameter(const plTempHashedString& name, const plColor& defaultValue) const;
-  const plColor& GetColorParameter(plUInt32 idx) const { return m_ColorParameters[idx].m_Value; }
+  plInt32 FindColorParameter(const plTempHashedString& sName) const;
+  const plColor& GetColorParameter(const plTempHashedString& sName, const plColor& defaultValue) const;
+  const plColor& GetColorParameter(plUInt32 uiIdx) const { return m_ColorParameters[uiIdx].m_Value; }
 
 
 private:
   struct FloatParameter
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     plUInt64 m_uiNameHash;
     float m_fValue;
   };
 
   struct ColorParameter
   {
-    PLASMA_DECLARE_POD_TYPE();
+    PL_DECLARE_POD_TYPE();
     plUInt64 m_uiNameHash;
     plColor m_Value;
   };

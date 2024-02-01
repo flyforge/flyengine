@@ -7,10 +7,10 @@
 #include <Foundation/IO/OpenDdlUtils.h>
 #include <ToolsFoundation/Application/ApplicationServices.h>
 
-PLASMA_IMPLEMENT_SINGLETON(plVisualShaderTypeRegistry);
+PL_IMPLEMENT_SINGLETON(plVisualShaderTypeRegistry);
 
 // clang-format off
-PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, VisualShader)
+PL_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, VisualShader)
 
   BEGIN_SUBSYSTEM_DEPENDENCIES
     "ReflectedTypeManager"
@@ -18,7 +18,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, VisualShader)
 
   ON_CORESYSTEMS_STARTUP
   {
-    PLASMA_DEFAULT_NEW(plVisualShaderTypeRegistry);
+    PL_DEFAULT_NEW(plVisualShaderTypeRegistry);
 
     plVisualShaderTypeRegistry::GetSingleton()->LoadNodeData();
     const plRTTI* pBaseType = plVisualShaderTypeRegistry::GetSingleton()->GetNodeBaseType();
@@ -35,7 +35,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, VisualShader)
     plQtNodeScene::GetNodeFactory().UnregisterCreator(pBaseType);
 
     plVisualShaderTypeRegistry* pDummy = plVisualShaderTypeRegistry::GetSingleton();
-    PLASMA_DEFAULT_DELETE(pDummy);
+    PL_DEFAULT_DELETE(pDummy);
   }
 
   ON_HIGHLEVELSYSTEMS_STARTUP
@@ -46,7 +46,7 @@ PLASMA_BEGIN_SUBSYSTEM_DECLARATION(EditorPluginAssets, VisualShader)
   {
   }
 
-PLASMA_END_SUBSYSTEM_DECLARATION;
+PL_END_SUBSYSTEM_DECLARATION;
 // clang-format on
 
 namespace
@@ -68,9 +68,9 @@ namespace
     "Plasma",
     "Black",
   };
-  static_assert(PLASMA_ARRAY_SIZE(s_szColorNames) == plColorScheme::Count);
+  static_assert(PL_ARRAY_SIZE(s_szColorNames) == plColorScheme::Count);
 
-  static void GetColorFromDdl(const plOpenDdlReaderElement* pElement, plColorGammaUB& out_Color)
+  static void GetColorFromDdl(const plOpenDdlReaderElement* pElement, plColorGammaUB& out_color)
   {
     if (pElement->GetPrimitivesType() == plOpenDdlPrimitiveType::String)
     {
@@ -85,11 +85,11 @@ namespace
         }
       }
 
-      out_Color = plColorScheme::DarkUI(color);
+      out_color = plColorScheme::DarkUI(color);
     }
     else
     {
-      plOpenDdlUtils::ConvertToColorGamma(pElement, out_Color).IgnoreResult();
+      plOpenDdlUtils::ConvertToColorGamma(pElement, out_color).IgnoreResult();
     }
   }
 } // namespace
@@ -196,7 +196,7 @@ const plRTTI* plVisualShaderTypeRegistry::GenerateTypeFromDesc(const plVisualSha
 
 void plVisualShaderTypeRegistry::LoadConfigFile(const char* szFile)
 {
-  PLASMA_LOG_BLOCK("Loading Visual Shader Config", szFile);
+  PL_LOG_BLOCK("Loading Visual Shader Config", szFile);
 
   plLog::Debug("Loading VSE node config '{0}'", szFile);
 
@@ -221,7 +221,7 @@ void plVisualShaderTypeRegistry::LoadConfigFile(const char* szFile)
 
     while (pNode != nullptr)
     {
-      if (!pNode->IsCustomType() || (pNode->GetCustomType() != "Node"))
+      if (!pNode->IsCustomType() || pNode->GetCustomType() != "Node")
       {
         plLog::Error("Top-Level object is not a 'Node' type");
         continue;
@@ -397,7 +397,7 @@ void plVisualShaderTypeRegistry::ExtractNodePins(const plOpenDdlReaderElement* p
 
         if (def.IsValid())
         {
-          pin.m_PropertyDesc.m_Attributes.PushBack(PLASMA_DEFAULT_NEW(plDefaultValueAttribute, def));
+          pin.m_PropertyDesc.m_Attributes.PushBack(PL_DEFAULT_NEW(plDefaultValueAttribute, def));
         }
       }
 
@@ -506,7 +506,7 @@ void plVisualShaderTypeRegistry::ExtractNodeProperties(const plOpenDdlReaderElem
 
         if (def.IsValid())
         {
-          prop.m_Attributes.PushBack(PLASMA_DEFAULT_NEW(plDefaultValueAttribute, def));
+          prop.m_Attributes.PushBack(PL_DEFAULT_NEW(plDefaultValueAttribute, def));
         }
       }
 
@@ -541,7 +541,7 @@ void plVisualShaderTypeRegistry::ExtractNodeConfig(const plOpenDdlReaderElement*
       }
       else if (pElement->GetName() == "Category")
       {
-        nd.m_sCategory = pElement->GetPrimitivesString()[0];
+        nd.m_sCategory.Assign(pElement->GetPrimitivesString()[0]);
       }
       else if (pElement->GetName() == "CheckPermutations")
       {
@@ -558,13 +558,6 @@ void plVisualShaderTypeRegistry::ExtractNodeConfig(const plOpenDdlReaderElement*
         if (!temp.IsEmpty() && !temp.EndsWith("\n"))
           temp.Append("\n");
         nd.m_sShaderCodePermutations = temp;
-      }
-      else if (pElement->GetName() == "CodeRenderConfig")
-      {
-        temp = pElement->GetPrimitivesString()[0];
-        if (!temp.IsEmpty() && !temp.EndsWith("\n"))
-          temp.Append("\n");
-        nd.m_sShaderCodeRenderState = temp;
       }
       else if (pElement->GetName() == "CodeRenderStates")
       {

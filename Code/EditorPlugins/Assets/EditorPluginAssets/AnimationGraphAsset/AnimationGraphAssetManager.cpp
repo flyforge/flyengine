@@ -4,8 +4,8 @@
 #include <EditorPluginAssets/AnimationGraphAsset/AnimationGraphAssetManager.h>
 #include <EditorPluginAssets/AnimationGraphAsset/AnimationGraphAssetWindow.moc.h>
 
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetManager, 1, plRTTIDefaultAllocator<plAnimationGraphAssetManager>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plAnimationGraphAssetManager, 1, plRTTIDefaultAllocator<plAnimationGraphAssetManager>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 plAnimationGraphAssetManager::plAnimationGraphAssetManager()
 {
@@ -48,9 +48,9 @@ void plAnimationGraphAssetManager::OnDocumentManagerEvent(const plDocumentManage
   }
 }
 
-void plAnimationGraphAssetManager::InternalCreateDocument(const char* szDocumentTypeName, const char* szPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
+void plAnimationGraphAssetManager::InternalCreateDocument(plStringView sDocumentTypeName, plStringView sPath, bool bCreateNewDocument, plDocument*& out_pDocument, const plDocumentObject* pOpenContext)
 {
-  out_pDocument = new plAnimationGraphAssetDocument(szPath);
+  out_pDocument = new plAnimationGraphAssetDocument(sPath);
 }
 
 void plAnimationGraphAssetManager::InternalGetSupportedDocumentTypes(plDynamicArray<const plDocumentTypeDescriptor*>& inout_DocumentTypes) const

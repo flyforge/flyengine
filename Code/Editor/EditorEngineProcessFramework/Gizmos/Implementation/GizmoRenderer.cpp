@@ -10,8 +10,8 @@
 #include <RendererCore/../../../Data/Base/Shaders/Editor/GizmoConstants.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmoRenderer, 1, plRTTIDefaultAllocator<plGizmoRenderer>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGizmoRenderer, 1, plRTTIDefaultAllocator<plGizmoRenderer>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 float plGizmoRenderer::s_fGizmoScale = 1.0f;
@@ -19,15 +19,15 @@ float plGizmoRenderer::s_fGizmoScale = 1.0f;
 plGizmoRenderer::plGizmoRenderer() = default;
 plGizmoRenderer::~plGizmoRenderer() = default;
 
-void plGizmoRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& types) const
+void plGizmoRenderer::GetSupportedRenderDataTypes(plHybridArray<const plRTTI*, 8>& inout_types) const
 {
-  types.PushBack(plGetStaticRTTI<plGizmoRenderData>());
+  inout_types.PushBack(plGetStaticRTTI<plGizmoRenderData>());
 }
 
-void plGizmoRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& categories) const
+void plGizmoRenderer::GetSupportedRenderDataCategories(plHybridArray<plRenderData::Category, 8>& inout_categories) const
 {
-  categories.PushBack(plDefaultRenderDataCategories::SimpleOpaque);
-  categories.PushBack(plDefaultRenderDataCategories::SimpleForeground);
+  inout_categories.PushBack(plDefaultRenderDataCategories::SimpleOpaque);
+  inout_categories.PushBack(plDefaultRenderDataCategories::SimpleForeground);
 }
 
 void plGizmoRenderer::RenderBatch(const plRenderViewContext& renderViewContext, const plRenderPipelinePass* pPass, const plRenderDataBatch& batch) const
@@ -65,7 +65,7 @@ void plGizmoRenderer::RenderBatch(const plRenderViewContext& renderViewContext, 
 
   plConstantBufferStorage<plGizmoConstants>* pGizmoConstantBuffer;
   plConstantBufferStorageHandle hGizmoConstantBuffer = plRenderContext::CreateConstantBufferStorage(pGizmoConstantBuffer);
-  PLASMA_SCOPE_EXIT(plRenderContext::DeleteConstantBufferStorage(hGizmoConstantBuffer));
+  PL_SCOPE_EXIT(plRenderContext::DeleteConstantBufferStorage(hGizmoConstantBuffer));
 
   renderViewContext.m_pRenderContext->BindConstantBuffer("plGizmoConstants", hGizmoConstantBuffer);
 
@@ -79,9 +79,9 @@ void plGizmoRenderer::RenderBatch(const plRenderViewContext& renderViewContext, 
     if (bOnlyPickable && !pRenderData->m_bIsPickable)
       continue;
 
-    PLASMA_ASSERT_DEV(pRenderData->m_hMesh == hMesh, "Invalid batching (mesh)");
-    PLASMA_ASSERT_DEV(pRenderData->m_hMaterial == hMaterial, "Invalid batching (material)");
-    PLASMA_ASSERT_DEV(pRenderData->m_uiSubMeshIndex == uiSubMeshIndex, "Invalid batching (part)");
+    PL_ASSERT_DEV(pRenderData->m_hMesh == hMesh, "Invalid batching (mesh)");
+    PL_ASSERT_DEV(pRenderData->m_hMaterial == hMaterial, "Invalid batching (material)");
+    PL_ASSERT_DEV(pRenderData->m_uiSubMeshIndex == uiSubMeshIndex, "Invalid batching (part)");
 
     plGizmoConstants& cb = pGizmoConstantBuffer->GetDataForWriting();
     cb.ObjectToWorldMatrix = pRenderData->m_GlobalTransform.GetAsMat4();

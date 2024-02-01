@@ -5,8 +5,8 @@
 #include <Foundation/DataProcessing/Stream/ProcessingStreamProcessor.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcessingStreamProcessor, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProcessingStreamProcessor, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plProcessingStreamProcessor::plProcessingStreamProcessor()
@@ -20,4 +20,4 @@ plProcessingStreamProcessor::~plProcessingStreamProcessor()
 
 
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_DataProcessing_Stream_Implementation_ProcessingStreamProcessor);
+PL_STATICLINK_FILE(Foundation, Foundation_DataProcessing_Stream_Implementation_ProcessingStreamProcessor);

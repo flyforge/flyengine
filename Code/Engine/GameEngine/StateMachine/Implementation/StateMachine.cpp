@@ -8,18 +8,30 @@
 #include <GameEngine/StateMachine/StateMachine.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetName),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_OnEnter, In, "StateMachineInstance", In, "FromState")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::OnEnter)),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_OnExit, In, "StateMachineInstance", In, "ToState")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::OnExit)),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_Update, In, "StateMachineInstance", In, "DeltaTime")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::Update)),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetName),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_OnEnter, In, "StateMachineInstance", In, "FromState")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::OnEnter)),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_OnExit, In, "StateMachineInstance", In, "ToState")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::OnExit)),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_Update, In, "StateMachineInstance", In, "DeltaTime")->AddAttributes(new plScriptBaseClassFunctionAttribute(plStateMachineState_ScriptBaseClassFunctions::Update)),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
+
+// clang-format off
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineState_Empty, 1, plRTTIDefaultAllocator<plStateMachineState_Empty>)
+{
+  PL_BEGIN_ATTRIBUTES
+  {
+    new plHiddenAttribute(),
+  }
+  PL_END_ATTRIBUTES;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
 plStateMachineState::plStateMachineState(plStringView sName)
@@ -29,30 +41,31 @@ plStateMachineState::plStateMachineState(plStringView sName)
 
 void plStateMachineState::SetName(plStringView sName)
 {
-  PLASMA_ASSERT_DEV(m_sName.IsEmpty(), "Name can't be changed afterwards");
+  PL_ASSERT_DEV(m_sName.IsEmpty(), "Name can't be changed afterwards");
   m_sName.Assign(sName);
 }
 
-void plStateMachineState::OnExit(plStateMachineInstance& instance, void* pInstanceData, const plStateMachineState* pToState) const
+void plStateMachineState::OnExit(plStateMachineInstance& ref_instance, void* pInstanceData, const plStateMachineState* pToState) const
 {
 }
 
-void plStateMachineState::Update(plStateMachineInstance& instance, void* pInstanceData, plTime deltaTime) const
+void plStateMachineState::Update(plStateMachineInstance& ref_instance, void* pInstanceData, plTime deltaTime) const
 {
 }
 
-plResult plStateMachineState::Serialize(plStreamWriter& stream) const
+plResult plStateMachineState::Serialize(plStreamWriter& inout_stream) const
 {
-  stream << m_sName;
-  return PLASMA_SUCCESS;
+  inout_stream << m_sName;
+  return PL_SUCCESS;
 }
 
-plResult plStateMachineState::Deserialize(plStreamReader& stream)
+plResult plStateMachineState::Deserialize(plStreamReader& inout_stream)
 {
   const plUInt32 uiVersion = plTypeVersionReadContext::GetContext()->GetTypeVersion(GetStaticRTTI());
+  PL_IGNORE_UNUSED(uiVersion);
 
-  stream >> m_sName;
-  return PLASMA_SUCCESS;
+  inout_stream >> m_sName;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineState::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -72,21 +85,26 @@ void plStateMachineState::Reflection_Update(plStateMachineInstance* pStateMachin
 {
 }
 
+plStateMachineState_Empty::plStateMachineState_Empty(plStringView sName)
+  : plStateMachineState(sName)
+{
+}
+
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition, 1, plRTTINoAllocator)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plStateMachineTransition, 1, plRTTINoAllocator)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plResult plStateMachineTransition::Serialize(plStreamWriter& stream) const
+plResult plStateMachineTransition::Serialize(plStreamWriter& inout_stream) const
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plStateMachineTransition::Deserialize(plStreamReader& stream)
+plResult plStateMachineTransition::Deserialize(plStreamReader& inout_stream)
 {
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 bool plStateMachineTransition::GetInstanceDataDesc(plInstanceDataDesc& out_desc)
@@ -106,7 +124,7 @@ plUInt32 plStateMachineDescription::AddState(plUniquePtr<plStateMachineState>&& 
   auto& sStateName = pState->GetNameHashed();
   if (sStateName.IsEmpty() == false)
   {
-    PLASMA_VERIFY(m_StateNameToIndexTable.Contains(sStateName) == false, "A state with name '{}' already exists.", sStateName);
+    PL_VERIFY(m_StateNameToIndexTable.Contains(sStateName) == false, "A state with name '{}' already exists.", sStateName);
     m_StateNameToIndexTable.Insert(sStateName, uiIndex);
   }
 
@@ -125,7 +143,7 @@ plUInt32 plStateMachineDescription::AddState(plUniquePtr<plStateMachineState>&& 
 
 void plStateMachineDescription::AddTransition(plUInt32 uiFromStateIndex, plUInt32 uiToStateIndex, plUniquePtr<plStateMachineTransition>&& pTransistion)
 {
-  PLASMA_ASSERT_DEV(uiFromStateIndex != uiToStateIndex, "Can't add a transition to itself");
+  PL_ASSERT_DEV(uiFromStateIndex != uiToStateIndex, "Can't add a transition to itself");
 
   TransitionArray* pTransitions = nullptr;
   if (uiFromStateIndex == plInvalidIndex)
@@ -134,11 +152,11 @@ void plStateMachineDescription::AddTransition(plUInt32 uiFromStateIndex, plUInt3
   }
   else
   {
-    PLASMA_ASSERT_DEV(uiFromStateIndex < m_States.GetCount(), "Invalid from state index {}", uiFromStateIndex);
+    PL_ASSERT_DEV(uiFromStateIndex < m_States.GetCount(), "Invalid from state index {}", uiFromStateIndex);
     pTransitions = &m_States[uiFromStateIndex].m_Transitions;
   }
 
-  PLASMA_ASSERT_DEV(uiToStateIndex < m_States.GetCount(), "Invalid to state index {}", uiToStateIndex);
+  PL_ASSERT_DEV(uiToStateIndex < m_States.GetCount(), "Invalid to state index {}", uiToStateIndex);
 
   TransitionContext& transitionContext = pTransitions->ExpandAndGetRef();
 
@@ -154,11 +172,11 @@ void plStateMachineDescription::AddTransition(plUInt32 uiFromStateIndex, plUInt3
 
 constexpr plTypeVersion s_StateMachineDescriptionVersion = 1;
 
-plResult plStateMachineDescription::Serialize(plStreamWriter& originalStream) const
+plResult plStateMachineDescription::Serialize(plStreamWriter& ref_originalStream) const
 {
-  originalStream.WriteVersion(s_StateMachineDescriptionVersion);
+  ref_originalStream.WriteVersion(s_StateMachineDescriptionVersion);
 
-  plStringDeduplicationWriteContext stringDeduplicationWriteContext(originalStream);
+  plStringDeduplicationWriteContext stringDeduplicationWriteContext(ref_originalStream);
   plTypeVersionWriteContext typeVersionWriteContext;
   auto& stream = typeVersionWriteContext.Begin(stringDeduplicationWriteContext.Begin());
 
@@ -175,7 +193,7 @@ plResult plStateMachineDescription::Serialize(plStreamWriter& originalStream) co
       typeVersionWriteContext.AddType(pStateType);
 
       stream << pStateType->GetTypeName();
-      PLASMA_SUCCEED_OR_RETURN(stateContext.m_pState->Serialize(stream));
+      PL_SUCCEED_OR_RETURN(stateContext.m_pState->Serialize(stream));
 
       uiNumTransitions += stateContext.m_Transitions.GetCount();
     }
@@ -185,8 +203,7 @@ plResult plStateMachineDescription::Serialize(plStreamWriter& originalStream) co
   {
     stream << uiNumTransitions;
 
-    auto SerializeTransitions = [&](const TransitionArray& transitions, plUInt32 uiFromStateIndex) -> plResult
-    {
+    auto SerializeTransitions = [&](const TransitionArray& transitions, plUInt32 uiFromStateIndex) -> plResult {
       for (auto& transitionContext : transitions)
       {
         const plUInt32 uiToStateIndex = transitionContext.m_uiToStateIndex;
@@ -198,56 +215,57 @@ plResult plStateMachineDescription::Serialize(plStreamWriter& originalStream) co
         typeVersionWriteContext.AddType(pTransitionType);
 
         stream << pTransitionType->GetTypeName();
-        PLASMA_SUCCEED_OR_RETURN(transitionContext.m_pTransition->Serialize(stream));
+        PL_SUCCEED_OR_RETURN(transitionContext.m_pTransition->Serialize(stream));
       }
 
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     };
 
-    PLASMA_SUCCEED_OR_RETURN(SerializeTransitions(m_FromAnyTransitions, plInvalidIndex));
+    PL_SUCCEED_OR_RETURN(SerializeTransitions(m_FromAnyTransitions, plInvalidIndex));
 
     for (plUInt32 uiFromStateIndex = 0; uiFromStateIndex < m_States.GetCount(); ++uiFromStateIndex)
     {
       auto& transitions = m_States[uiFromStateIndex].m_Transitions;
 
-      PLASMA_SUCCEED_OR_RETURN(SerializeTransitions(transitions, uiFromStateIndex));
+      PL_SUCCEED_OR_RETURN(SerializeTransitions(transitions, uiFromStateIndex));
     }
   }
 
-  PLASMA_SUCCEED_OR_RETURN(typeVersionWriteContext.End());
-  PLASMA_SUCCEED_OR_RETURN(stringDeduplicationWriteContext.End());
+  PL_SUCCEED_OR_RETURN(typeVersionWriteContext.End());
+  PL_SUCCEED_OR_RETURN(stringDeduplicationWriteContext.End());
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
-plResult plStateMachineDescription::Deserialize(plStreamReader& stream)
+plResult plStateMachineDescription::Deserialize(plStreamReader& inout_stream)
 {
-  const auto uiVersion = stream.ReadVersion(s_StateMachineDescriptionVersion);
+  const auto uiVersion = inout_stream.ReadVersion(s_StateMachineDescriptionVersion);
+  PL_IGNORE_UNUSED(uiVersion);
 
-  plStringDeduplicationReadContext stringDeduplicationReadContext(stream);
-  plTypeVersionReadContext typeVersionReadContext(stream);
+  plStringDeduplicationReadContext stringDeduplicationReadContext(inout_stream);
+  plTypeVersionReadContext typeVersionReadContext(inout_stream);
 
   plStringBuilder sTypeName;
 
   // states
   {
     plUInt32 uiNumStates = 0;
-    stream >> uiNumStates;
+    inout_stream >> uiNumStates;
 
     for (plUInt32 i = 0; i < uiNumStates; ++i)
     {
-      stream >> sTypeName;
+      inout_stream >> sTypeName;
       if (const plRTTI* pType = plRTTI::FindTypeByName(sTypeName))
       {
         plUniquePtr<plStateMachineState> pState = pType->GetAllocator()->Allocate<plStateMachineState>();
-        PLASMA_SUCCEED_OR_RETURN(pState->Deserialize(stream));
+        PL_SUCCEED_OR_RETURN(pState->Deserialize(inout_stream));
 
-        PLASMA_VERIFY(AddState(std::move(pState)) == i, "Implementation error");
+        PL_VERIFY(AddState(std::move(pState)) == i, "Implementation error");
       }
       else
       {
         plLog::Error("Unknown state machine state type '{}'", sTypeName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
@@ -255,55 +273,55 @@ plResult plStateMachineDescription::Deserialize(plStreamReader& stream)
   // transitions
   {
     plUInt32 uiNumTransitions = 0;
-    stream >> uiNumTransitions;
+    inout_stream >> uiNumTransitions;
 
     for (plUInt32 i = 0; i < uiNumTransitions; ++i)
     {
       plUInt32 uiFromStateIndex = 0;
       plUInt32 uiToStateIndex = 0;
 
-      stream >> uiFromStateIndex;
-      stream >> uiToStateIndex;
+      inout_stream >> uiFromStateIndex;
+      inout_stream >> uiToStateIndex;
 
-      stream >> sTypeName;
+      inout_stream >> sTypeName;
       if (const plRTTI* pType = plRTTI::FindTypeByName(sTypeName))
       {
         plUniquePtr<plStateMachineTransition> pTransition = pType->GetAllocator()->Allocate<plStateMachineTransition>();
-        PLASMA_SUCCEED_OR_RETURN(pTransition->Deserialize(stream));
+        PL_SUCCEED_OR_RETURN(pTransition->Deserialize(inout_stream));
 
         AddTransition(uiFromStateIndex, uiToStateIndex, std::move(pTransition));
       }
       else
       {
         plLog::Error("Unknown state machine transition type '{}'", sTypeName);
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PLASMA_BEGIN_STATIC_REFLECTED_TYPE(plStateMachineInstance, plNoBase, 1, plRTTINoAllocator)
+PL_BEGIN_STATIC_REFLECTED_TYPE(plStateMachineInstance, plNoBase, 1, plRTTINoAllocator)
 {
-  PLASMA_BEGIN_FUNCTIONS
+  PL_BEGIN_FUNCTIONS
   {
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_SetState, In, "StateName"),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetCurrentState),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(GetTimeInCurrentState),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_GetOwnerComponent),
-    PLASMA_SCRIPT_FUNCTION_PROPERTY(Reflection_GetBlackboard),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_SetState, In, "StateName"),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetCurrentState),
+    PL_SCRIPT_FUNCTION_PROPERTY(GetTimeInCurrentState),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_GetOwnerComponent),
+    PL_SCRIPT_FUNCTION_PROPERTY(Reflection_GetBlackboard),
   }
-  PLASMA_END_FUNCTIONS;
+  PL_END_FUNCTIONS;
 }
-PLASMA_END_STATIC_REFLECTED_TYPE;
+PL_END_STATIC_REFLECTED_TYPE;
 // clang-format on
 
-plStateMachineInstance::plStateMachineInstance(plReflectedClass& owner, const plSharedPtr<const plStateMachineDescription>& pDescription /*= nullptr*/)
-  : m_Owner(owner)
+plStateMachineInstance::plStateMachineInstance(plReflectedClass& ref_owner, const plSharedPtr<const plStateMachineDescription>& pDescription /*= nullptr*/)
+  : m_Owner(ref_owner)
   , m_pDescription(pDescription)
 {
   if (pDescription != nullptr)
@@ -327,6 +345,9 @@ plStateMachineInstance::~plStateMachineInstance()
 
 plResult plStateMachineInstance::SetState(plStateMachineState* pState)
 {
+  if (m_pCurrentState == pState)
+    return PL_SUCCESS;
+
   if (pState != nullptr && m_pDescription != nullptr)
   {
     return SetState(pState->GetNameHashed());
@@ -343,34 +364,34 @@ plResult plStateMachineInstance::SetState(plStateMachineState* pState)
 
   EnterCurrentState(pFromState);
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plStateMachineInstance::SetState(const plHashedString& sStateName)
 {
-  PLASMA_ASSERT_DEV(m_pDescription != nullptr, "Must have a description to set state by name");
+  PL_ASSERT_DEV(m_pDescription != nullptr, "Must have a description to set state by name");
 
   plUInt32 uiStateIndex = 0;
   if (m_pDescription->m_StateNameToIndexTable.TryGetValue(sStateName, uiStateIndex))
   {
     SetStateInternal(uiStateIndex);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plStateMachineInstance::SetState(plUInt32 uiStateIndex)
 {
-  PLASMA_ASSERT_DEV(m_pDescription != nullptr, "Must have a description to set state by index");
+  PL_ASSERT_DEV(m_pDescription != nullptr, "Must have a description to set state by index");
 
   if (uiStateIndex < m_pDescription->m_States.GetCount())
   {
     SetStateInternal(uiStateIndex);
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 plResult plStateMachineInstance::SetStateOrFallback(const plHashedString& sStateName, plUInt32 uiFallbackStateIndex /*= 0*/)
@@ -380,7 +401,7 @@ plResult plStateMachineInstance::SetStateOrFallback(const plHashedString& sState
     return SetState(uiFallbackStateIndex);
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 void plStateMachineInstance::Update(plTime deltaTime)
@@ -410,9 +431,22 @@ plWorld* plStateMachineInstance::GetOwnerWorld()
   return nullptr;
 }
 
-void plStateMachineInstance::SetBlackboard(const plSharedPtr<plBlackboard>& blackboard)
+void plStateMachineInstance::SetBlackboard(const plSharedPtr<plBlackboard>& pBlackboard)
 {
-  m_pBlackboard = blackboard;
+  m_pBlackboard = pBlackboard;
+}
+
+void plStateMachineInstance::FireTransitionEvent(plStringView sEvent)
+{
+  m_sCurrentTransitionEvent = sEvent;
+
+  plUInt32 uiNewStateIndex = FindNewStateToTransitionTo();
+  if (uiNewStateIndex != plInvalidIndex)
+  {
+    SetState(uiNewStateIndex).IgnoreResult();
+  }
+
+  m_sCurrentTransitionEvent = {};
 }
 
 bool plStateMachineInstance::Reflection_SetState(const plHashedString& sStateName)
@@ -450,7 +484,7 @@ void plStateMachineInstance::EnterCurrentState(const plStateMachineState* pFromS
     void* pInstanceData = GetCurrentStateInstanceData();
     m_pCurrentState->OnEnter(*this, pInstanceData, pFromState);
 
-    m_TimeInCurrentState.SetZero();
+    m_TimeInCurrentState = plTime::MakeZero();
   }
 }
 
@@ -491,3 +525,6 @@ plUInt32 plStateMachineInstance::FindNewStateToTransitionTo()
 
   return plInvalidIndex;
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_StateMachine_Implementation_StateMachine);

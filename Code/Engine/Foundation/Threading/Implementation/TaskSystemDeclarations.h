@@ -13,7 +13,7 @@ class plTaskWorkerThread;
 class plTaskSystemState;
 class plTaskSystemThreadState;
 class plDGMLGraph;
-class plAllocatorBase;
+class plAllocator;
 
 /// \brief Describes the priority with which to execute a task.
 ///
@@ -99,27 +99,27 @@ struct plWorkerThreadType
 };
 
 /// \brief Given out by plTaskSystem::CreateTaskGroup to identify a task group.
-class PLASMA_FOUNDATION_DLL plTaskGroupID
+class PL_FOUNDATION_DLL plTaskGroupID
 {
 public:
-  PLASMA_ALWAYS_INLINE plTaskGroupID() = default;
-  PLASMA_ALWAYS_INLINE ~plTaskGroupID() = default;
+  PL_ALWAYS_INLINE plTaskGroupID() = default;
+  PL_ALWAYS_INLINE ~plTaskGroupID() = default;
 
   /// \brief Returns false, if the GroupID does not reference a valid plTaskGroup
-  PLASMA_ALWAYS_INLINE bool IsValid() const { return m_pTaskGroup != nullptr; }
+  PL_ALWAYS_INLINE bool IsValid() const { return m_pTaskGroup != nullptr; }
 
   /// \brief Resets the GroupID into an invalid state.
-  PLASMA_ALWAYS_INLINE void Invalidate() { m_pTaskGroup = nullptr; }
+  PL_ALWAYS_INLINE void Invalidate() { m_pTaskGroup = nullptr; }
 
-  PLASMA_ALWAYS_INLINE bool operator==(const plTaskGroupID& other) const
+  PL_ALWAYS_INLINE bool operator==(const plTaskGroupID& other) const
   {
     return m_pTaskGroup == other.m_pTaskGroup && m_uiGroupCounter == other.m_uiGroupCounter;
   }
-  PLASMA_ALWAYS_INLINE bool operator!=(const plTaskGroupID& other) const
+  PL_ALWAYS_INLINE bool operator!=(const plTaskGroupID& other) const
   {
     return m_pTaskGroup != other.m_pTaskGroup || m_uiGroupCounter != other.m_uiGroupCounter;
   }
-  PLASMA_ALWAYS_INLINE bool operator<(const plTaskGroupID& other) const
+  PL_ALWAYS_INLINE bool operator<(const plTaskGroupID& other) const
   {
     return m_pTaskGroup < other.m_pTaskGroup || (m_pTaskGroup == other.m_pTaskGroup && m_uiGroupCounter < other.m_uiGroupCounter);
   }
@@ -144,7 +144,7 @@ using plOnTaskFinishedCallback = plDelegate<void(const plSharedPtr<plTask>&)>;
 
 struct plTaskGroupDependency
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plTaskGroupID m_TaskGroup;
   plTaskGroupID m_DependsOn;
@@ -163,7 +163,7 @@ enum class plTaskNesting
 };
 
 /// \brief Settings for plTaskSystem::ParallelFor invocations.
-struct PLASMA_FOUNDATION_DLL plParallelForParams
+struct PL_FOUNDATION_DLL plParallelForParams
 {
   plParallelForParams() = default; // do not remove, needed for Clang
 
@@ -183,7 +183,7 @@ struct PLASMA_FOUNDATION_DLL plParallelForParams
   plTaskNesting m_NestingMode = plTaskNesting::Never;
 
   /// The allocator used to for the tasks that the parallel-for uses internally. If null, will use the default allocator.
-  plAllocatorBase* m_pTaskAllocator = nullptr;
+  plAllocator* m_pTaskAllocator = nullptr;
 
   void DetermineThreading(plUInt64 uiNumItemsToExecute, plUInt32& out_uiNumTasksToRun, plUInt64& out_uiNumItemsPerTask) const;
 };

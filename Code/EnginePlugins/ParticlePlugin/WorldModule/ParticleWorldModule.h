@@ -20,10 +20,10 @@ class plParticleStreamFactory;
 /// When an effect is stopped, it only stops emitting new particles, but it lives on until all particles are dead.
 /// Therefore particle effects need to be managed outside of components. When a component dies, it only tells the
 /// world module to 'destroy' it's effect, the rest is handled behind the scenes.
-class PLASMA_PARTICLEPLUGIN_DLL plParticleWorldModule final : public plWorldModule
+class PL_PARTICLEPLUGIN_DLL plParticleWorldModule final : public plWorldModule
 {
-  PLASMA_DECLARE_WORLD_MODULE();
-  PLASMA_ADD_DYNAMIC_REFLECTION(plParticleWorldModule, plWorldModule);
+  PL_DECLARE_WORLD_MODULE();
+  PL_ADD_DYNAMIC_REFLECTION(plParticleWorldModule, plWorldModule);
 
 public:
   plParticleWorldModule(plWorld* pWorld);
@@ -41,7 +41,7 @@ public:
   bool TryGetEffectInstance(const plParticleEffectHandle& hEffect, const plParticleEffectInstance*& out_pEffect) const;
 
   /// \brief Extracts render data for the given effect.
-  void ExtractEffectRenderData(const plParticleEffectInstance* pEffect, plMsgExtractRenderData& msg, const plTransform& systemTransform) const;
+  void ExtractEffectRenderData(const plParticleEffectInstance* pEffect, plMsgExtractRenderData& ref_msg, const plTransform& systemTransform) const;
 
   plParticleSystemInstance* CreateSystemInstance(plUInt32 uiMaxParticles, plWorld* pWorld, plParticleEffectInstance* pOwnerEffect, float fSpawnMultiplier);
   void DestroySystemInstance(plParticleSystemInstance* pInstance);

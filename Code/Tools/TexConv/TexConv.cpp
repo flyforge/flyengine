@@ -1,10 +1,11 @@
 #include <TexConv/TexConvPCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
 #include <Foundation/IO/FileSystem/DeferredFileWriter.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <TexConv/TexConv.h>
 #include <Texture/Image/Formats/DdsFileFormat.h>
 #include <Texture/Image/Formats/StbImageFileFormats.h>
+#include <Texture/Image/ImageUtils.h>
 #include <Texture/plTexFormat/plTexFormat.h>
 
 plTexConv::plTexConv()
@@ -41,7 +42,7 @@ plResult plTexConv::DetectOutputFormat()
   if (m_sOutputFile.IsEmpty())
   {
     m_Processor.m_Descriptor.m_OutputType = plTexConvOutputType::None;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plStringBuilder sExt = plPathUtils::GetFileExtension(m_sOutputFile);
@@ -56,7 +57,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = true;
     m_bOutputSupportsFiltering = false;
     m_bOutputSupportsCompression = true;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "TGA" || sExt == "PNG")
   {
@@ -67,7 +68,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = false;
     m_bOutputSupportsFiltering = false;
     m_bOutputSupportsCompression = false;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "PLTEXTURE2D")
   {
@@ -78,7 +79,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = true;
     m_bOutputSupportsFiltering = true;
     m_bOutputSupportsCompression = true;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "PLTEXTURE3D")
   {
@@ -89,7 +90,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = true;
     m_bOutputSupportsFiltering = true;
     m_bOutputSupportsCompression = true;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "PLTEXTURECUBE")
   {
@@ -100,7 +101,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = true;
     m_bOutputSupportsFiltering = true;
     m_bOutputSupportsCompression = true;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "PLTEXTUREATLAS")
   {
@@ -111,7 +112,7 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = true;
     m_bOutputSupportsFiltering = true;
     m_bOutputSupportsCompression = true;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
   if (sExt == "PLIMAGEDATA")
   {
@@ -122,11 +123,11 @@ plResult plTexConv::DetectOutputFormat()
     m_bOutputSupportsMipmaps = false;
     m_bOutputSupportsFiltering = false;
     m_bOutputSupportsCompression = false;
-    return PLASMA_SUCCESS;
+    return PL_SUCCESS;
   }
 
   plLog::Error("Output file uses unsupported file format '{}'", sExt);
-  return PLASMA_FAILURE;
+  return PL_FAILURE;
 }
 
 bool plTexConv::IsTexFormat() const
@@ -136,12 +137,12 @@ bool plTexConv::IsTexFormat() const
   return ext.StartsWith_NoCase("pl");
 }
 
-plResult plTexConv::WriteTexFile(plStreamWriter& stream, const plImage& image)
+plResult plTexConv::WriteTexFile(plStreamWriter& inout_stream, const plImage& image)
 {
   plAssetFileHeader asset;
   asset.SetFileHashAndVersion(m_Processor.m_Descriptor.m_uiAssetHash, m_Processor.m_Descriptor.m_uiAssetVersion);
 
-  PLASMA_SUCCEED_OR_RETURN(asset.Write(stream));
+  PL_SUCCEED_OR_RETURN(asset.Write(inout_stream));
 
   plTexFormat texFormat;
   texFormat.m_bSRGB = plImageFormat::IsSrgb(image.GetImageFormat());
@@ -150,16 +151,16 @@ plResult plTexConv::WriteTexFile(plStreamWriter& stream, const plImage& image)
   texFormat.m_AddressModeW = m_Processor.m_Descriptor.m_AddressModeW;
   texFormat.m_TextureFilter = m_Processor.m_Descriptor.m_FilterMode;
 
-  texFormat.WriteTextureHeader(stream);
+  texFormat.WriteTextureHeader(inout_stream);
 
   plDdsFileFormat ddsWriter;
-  if (ddsWriter.WriteImage(stream, image, "dds").Failed())
+  if (ddsWriter.WriteImage(inout_stream, image, "dds").Failed())
   {
     plLog::Error("Failed to write DDS image chunk to plTex file.");
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plTexConv::WriteOutputFile(plStringView sFile, const plImage& image)
@@ -175,7 +176,7 @@ plResult plTexConv::WriteOutputFile(plStringView sFile, const plImage& image)
     if (asset.Write(file).Failed())
     {
       plLog::Error("Failed to write asset header to file.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     plUInt8 uiVersion = 1;
@@ -188,7 +189,7 @@ plResult plTexConv::WriteOutputFile(plStringView sFile, const plImage& image)
     if (pngWriter.WriteImage(file, image, "png").Failed())
     {
       plLog::Error("Failed to write data as PNG to plImageData file.");
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     return file.Close();
@@ -198,7 +199,7 @@ plResult plTexConv::WriteOutputFile(plStringView sFile, const plImage& image)
     plDeferredFileWriter file;
     file.SetOutput(sFile);
 
-    PLASMA_SUCCEED_OR_RETURN(WriteTexFile(file, image));
+    PL_SUCCEED_OR_RETURN(WriteTexFile(file, image));
 
     return file.Close();
   }
@@ -215,74 +216,116 @@ plApplication::Execution plTexConv::Run()
   if (ParseCommandLine().Failed())
     return plApplication::Execution::Quit;
 
-  if (m_Processor.Process().Failed())
-    return plApplication::Execution::Quit;
-
-  if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
+  if (m_Mode == plTexConvMode::Compare)
   {
-    plDeferredFileWriter file;
-    file.SetOutput(m_sOutputFile);
-
-    plAssetFileHeader header;
-    header.SetFileHashAndVersion(m_Processor.m_Descriptor.m_uiAssetHash, m_Processor.m_Descriptor.m_uiAssetVersion);
-
-    header.Write(file).IgnoreResult();
-
-    m_Processor.m_TextureAtlas.CopyToStream(file).IgnoreResult();
-
-    if (file.Close().Succeeded())
-    {
-      SetReturnCode(0);
-    }
-    else
-    {
-      plLog::Error("Failed to write atlas output image.");
-    }
-
-    return plApplication::Execution::Quit;
-  }
-
-  if (!m_sOutputFile.IsEmpty() && m_Processor.m_OutputImage.IsValid())
-  {
-    if (WriteOutputFile(m_sOutputFile, m_Processor.m_OutputImage).Failed())
-    {
-      plLog::Error("Failed to write main result to '{}'", m_sOutputFile);
+    if (m_Comparer.Compare().Failed())
       return plApplication::Execution::Quit;
-    }
 
-    plLog::Success("Wrote main result to '{}'", m_sOutputFile);
-  }
+    SetReturnCode(0);
 
-  if (!m_sOutputThumbnailFile.IsEmpty() && m_Processor.m_ThumbnailOutputImage.IsValid())
-  {
-    if (m_Processor.m_ThumbnailOutputImage.SaveTo(m_sOutputThumbnailFile).Failed())
+    if (m_Comparer.m_bExceededMSE)
     {
-      plLog::Error("Failed to write thumbnail result to '{}'", m_sOutputThumbnailFile);
-      return plApplication::Execution::Quit;
-    }
+      SetReturnCode(m_Comparer.m_OutputMSE);
 
-    plLog::Success("Wrote thumbnail to '{}'", m_sOutputThumbnailFile);
-  }
-
-  if (!m_sOutputLowResFile.IsEmpty())
-  {
-    // the image may not exist, if we do not have enough mips, so make sure any old low-res file is cleaned up
-    plOSFile::DeleteFile(m_sOutputLowResFile).IgnoreResult();
-
-    if (m_Processor.m_LowResOutputImage.IsValid())
-    {
-      if (WriteOutputFile(m_sOutputLowResFile, m_Processor.m_LowResOutputImage).Failed())
+      if (!m_sOutputFile.IsEmpty())
       {
-        plLog::Error("Failed to write low-res result to '{}'", m_sOutputLowResFile);
+        plStringBuilder tmp;
+
+        tmp.Set(m_sOutputFile, "-rgb.png");
+        m_Comparer.m_OutputImageDiffRgb.SaveTo(tmp).IgnoreResult();
+
+        tmp.Set(m_sOutputFile, "-alpha.png");
+        m_Comparer.m_OutputImageDiffAlpha.SaveTo(tmp).IgnoreResult();
+
+        if (!m_sHtmlTitle.IsEmpty())
+        {
+          tmp.Set(m_sOutputFile, ".htm");
+
+          plFileWriter file;
+          if (file.Open(tmp).Succeeded())
+          {
+            plStringBuilder html;
+
+            plImageUtils::CreateImageDiffHtml(html, m_sHtmlTitle, m_Comparer.m_ExtractedExpectedRgb, m_Comparer.m_ExtractedExpectedAlpha, m_Comparer.m_ExtractedActualRgb, m_Comparer.m_ExtractedActualAlpha, m_Comparer.m_OutputImageDiffRgb, m_Comparer.m_OutputImageDiffAlpha, m_Comparer.m_OutputMSE, m_Comparer.m_Descriptor.m_MeanSquareErrorThreshold, m_Comparer.m_uiOutputMinDiffRgb, m_Comparer.m_uiOutputMaxDiffRgb, m_Comparer.m_uiOutputMinDiffAlpha, m_Comparer.m_uiOutputMaxDiffAlpha);
+
+            file.WriteBytes(html.GetData(), html.GetElementCount()).AssertSuccess();
+          }
+        }
+      }
+    }
+  }
+  else
+  {
+    if (m_Processor.Process().Failed())
+      return plApplication::Execution::Quit;
+
+    if (m_Processor.m_Descriptor.m_OutputType == plTexConvOutputType::Atlas)
+    {
+      plDeferredFileWriter file;
+      file.SetOutput(m_sOutputFile);
+
+      plAssetFileHeader header;
+      header.SetFileHashAndVersion(m_Processor.m_Descriptor.m_uiAssetHash, m_Processor.m_Descriptor.m_uiAssetVersion);
+
+      header.Write(file).IgnoreResult();
+
+      m_Processor.m_TextureAtlas.CopyToStream(file).IgnoreResult();
+
+      if (file.Close().Succeeded())
+      {
+        SetReturnCode(0);
+      }
+      else
+      {
+        plLog::Error("Failed to write atlas output image.");
+      }
+
+      return plApplication::Execution::Quit;
+    }
+
+    if (!m_sOutputFile.IsEmpty() && m_Processor.m_OutputImage.IsValid())
+    {
+      if (WriteOutputFile(m_sOutputFile, m_Processor.m_OutputImage).Failed())
+      {
+        plLog::Error("Failed to write main result to '{}'", m_sOutputFile);
         return plApplication::Execution::Quit;
       }
 
-      plLog::Success("Wrote low-res result to '{}'", m_sOutputLowResFile);
+      plLog::Success("Wrote main result to '{}'", m_sOutputFile);
     }
+
+    if (!m_sOutputThumbnailFile.IsEmpty() && m_Processor.m_ThumbnailOutputImage.IsValid())
+    {
+      if (m_Processor.m_ThumbnailOutputImage.SaveTo(m_sOutputThumbnailFile).Failed())
+      {
+        plLog::Error("Failed to write thumbnail result to '{}'", m_sOutputThumbnailFile);
+        return plApplication::Execution::Quit;
+      }
+
+      plLog::Success("Wrote thumbnail to '{}'", m_sOutputThumbnailFile);
+    }
+
+    if (!m_sOutputLowResFile.IsEmpty())
+    {
+      // the image may not exist, if we do not have enough mips, so make sure any old low-res file is cleaned up
+      plOSFile::DeleteFile(m_sOutputLowResFile).IgnoreResult();
+
+      if (m_Processor.m_LowResOutputImage.IsValid())
+      {
+        if (WriteOutputFile(m_sOutputLowResFile, m_Processor.m_LowResOutputImage).Failed())
+        {
+          plLog::Error("Failed to write low-res result to '{}'", m_sOutputLowResFile);
+          return plApplication::Execution::Quit;
+        }
+
+        plLog::Success("Wrote low-res result to '{}'", m_sOutputLowResFile);
+      }
+    }
+
+    SetReturnCode(0);
   }
 
-  SetReturnCode(0);
   return plApplication::Execution::Quit;
 }
 
-PLASMA_CONSOLEAPP_ENTRY_POINT(plTexConv);
+PL_CONSOLEAPP_ENTRY_POINT(plTexConv);

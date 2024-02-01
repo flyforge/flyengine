@@ -1,6 +1,6 @@
 #include <Texture/TexturePCH.h>
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_WINDOWS_DESKTOP)
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 //-------------------------------------------------------------------------------------
 // DirectXTexHDR.cpp
@@ -1303,5 +1303,4 @@ HRESULT DirectX::SaveToHDRFile(const Image& image, const wchar_t* szFile) noexce
 
 #endif
 
-PLASMA_STATICLINK_FILE(Texture, Texture_DirectXTex_DirectXTexHDR);
 

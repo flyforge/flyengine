@@ -12,15 +12,15 @@
 /// Uses Verlet Integration to update the cloth positions from velocities, and the "Jakobsen method" to enforce distance constraints.
 ///
 /// Based on https://owlree.blog/posts/simulating-a-rope.html
-class PLASMA_GAMEENGINE_DLL plClothSimulator
+class PL_GAMEENGINE_DLL plClothSimulator
 {
 public:
   struct Node
   {
     /// Whether this node can swing freely or will remain fixed in place.
     bool m_bFixed = false;
-    plSimdVec4f m_vPosition = plSimdVec4f::ZeroVector();
-    plSimdVec4f m_vPreviousPosition = plSimdVec4f::ZeroVector();
+    plSimdVec4f m_vPosition = plSimdVec4f::MakeZero();
+    plSimdVec4f m_vPreviousPosition = plSimdVec4f::MakeZero();
   };
 
   /// Resolution of the cloth along X
@@ -41,8 +41,8 @@ public:
   /// All cloth nodes.
   plDynamicArray<Node, plAlignedAllocatorWrapper> m_Nodes;
 
-  void SimulateCloth(const plTime& tDiff);
-  void SimulateStep(const plSimdFloat tDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError);
+  void SimulateCloth(const plTime& diff);
+  void SimulateStep(const plSimdFloat fDiffSqr, plUInt32 uiMaxIterations, plSimdFloat fAllowedError);
   bool HasEquilibrium(plSimdFloat fAllowedMovement) const;
 
 private:

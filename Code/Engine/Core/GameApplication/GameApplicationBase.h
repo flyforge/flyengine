@@ -47,10 +47,10 @@ struct plGameApplicationExecutionEvent
 
 // TODO: document this and update plGameApplication comments
 
-class PLASMA_CORE_DLL plGameApplicationBase : public plApplication
+class PL_CORE_DLL plGameApplicationBase : public plApplication
 {
 public:
-  typedef plApplication SUPER;
+  using SUPER = plApplication;
 
   plGameApplicationBase(plStringView sAppName);
   ~plGameApplicationBase();
@@ -106,11 +106,11 @@ public:
   /// currently in progress. If continuous frame capture is disabled, CaptureFrame() will capture and persist the next frame.
   /// Note that continuous capture mode comes with a performance cost, but allows the user to decide on-the-fly if the current
   /// frame capture is to be persisted, e.g., when a unit test image comparison fails.
-  void SetContinuousFrameCapture(bool enable);
+  void SetContinuousFrameCapture(bool bEnable);
   bool GetContinousFrameCapture() const;
 
   /// \brief Get the absolute base output path for frame captures.
-  virtual plResult GetAbsFrameCaptureOutputPath(plStringBuilder& sOutputPath);
+  virtual plResult GetAbsFrameCaptureOutputPath(plStringBuilder& ref_sOutputPath);
 
 protected:
   void ExecuteFrameCapture(plWindowHandle targetWindowHandle, plStringView sContext = {});
@@ -250,6 +250,8 @@ protected:
 
 public:
   virtual plApplication::Execution Run() override;
+
+  void RunOneFrame();
 
   plCopyOnBroadcastEvent<const plGameApplicationExecutionEvent&> m_ExecutionEvents;
 

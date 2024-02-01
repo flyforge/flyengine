@@ -2,9 +2,9 @@
 
 #include <RendererCore/AnimationSystem/AnimGraph/AnimGraphNode.h>
 
-class PLASMA_RENDERERCORE_DLL plSwitchBoneWeightsAnimNode : public plAnimGraphNode
+class PL_RENDERERCORE_DLL plSwitchBoneWeightsAnimNode : public plAnimGraphNode
 {
-  PLASMA_ADD_DYNAMIC_REFLECTION(plSwitchBoneWeightsAnimNode, plAnimGraphNode);
+  PL_ADD_DYNAMIC_REFLECTION(plSwitchBoneWeightsAnimNode, plAnimGraphNode);
 
   //////////////////////////////////////////////////////////////////////////
   // plAnimGraphNode

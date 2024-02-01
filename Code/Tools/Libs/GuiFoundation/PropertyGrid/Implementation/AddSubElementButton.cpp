@@ -68,7 +68,7 @@ void plQtAddSubElementButton::OnInit()
 
 struct TypeComparer
 {
-  PLASMA_FORCE_INLINE bool Less(const plRTTI* a, const plRTTI* b) const
+  PL_FORCE_INLINE bool Less(const plRTTI* a, const plRTTI* b) const
   {
     const plCategoryAttribute* pCatA = a->GetAttributeByType<plCategoryAttribute>();
     const plCategoryAttribute* pCatB = b->GetAttributeByType<plCategoryAttribute>();
@@ -117,7 +117,7 @@ QMenu* plQtAddSubElementButton::CreateCategoryMenu(const char* szCategory, plMap
   sPath = szCategory;
   sPath = sPath.GetFileName();
 
-  QMenu* pNewMenu = pParentMenu->addMenu(plTranslate(sPath.GetData()));
+  QMenu* pNewMenu = pParentMenu->addMenu(plMakeQString(plTranslate(sPath)));
   existingMenus[szCategory] = pNewMenu;
 
   return pNewMenu;
@@ -139,11 +139,23 @@ void plQtAddSubElementButton::onMenuAboutToShow()
     }
     m_SupportedTypes.Insert(pProp->GetSpecificType());
 
+    plHybridArray<const plAbstractProperty*, 32> properties;
+
     // remove all types that are marked as hidden
     for (auto it = m_SupportedTypes.GetIterator(); it.IsValid();)
     {
       if (it.Key()->GetAttributeByType<plHiddenAttribute>() != nullptr)
       {
+        it = m_SupportedTypes.Remove(it);
+        continue;
+      }
+
+      it.Key()->GetAllProperties(properties);
+      if (properties.IsEmpty())
+      {
+        // types that have zero properties are typically base classes that should not be shown
+        // TODO: unclear how many such types exist and which ones should show up anyway
+        // though all components have at least the 'Active' property
         it = m_SupportedTypes.Remove(it);
         continue;
       }
@@ -210,31 +222,33 @@ void plQtAddSubElementButton::onMenuAboutToShow()
       const plInDevelopmentAttribute* pInDev = pRtti->GetAttributeByType<plInDevelopmentAttribute>();
       const plColorAttribute* pColA = pRtti->GetAttributeByType<plColorAttribute>();
 
-      plColor iconColor = plColor::ZeroColor();
+      plColor iconColor = plColor::MakeZero();
 
       if (pColA)
       {
         iconColor = pColA->GetColor();
       }
-      else if (pCatA && iconColor == plColor::ZeroColor())
+      else if (pCatA && iconColor == plColor::MakeZero())
       {
         iconColor = plColorScheme::GetCategoryColor(pCatA->GetCategory(), plColorScheme::CategoryColorUsage::MenuEntryIcon);
       }
 
       const QIcon actionIcon = plQtUiServices::GetCachedIconResource(sIconName.GetData(), iconColor);
 
+
       if (m_pSearchableMenu != nullptr)
       {
-        plStringBuilder fullName;
-        fullName = pCatA ? pCatA->GetCategory() : "";
-        fullName.AppendPath(plTranslate(pRtti->GetTypeName().GetData(tmp)));
+        plStringBuilder sFullPath;
+        sFullPath = pCatA ? pCatA->GetCategory() : "";
+        sFullPath.AppendPath(pRtti->GetTypeName());
 
+        plStringBuilder sDisplayName = plTranslate(pRtti->GetTypeName().GetData(tmp));
         if (pInDev)
         {
-          fullName.AppendFormat(" [ {} ]", pInDev->GetString());
+          sDisplayName.AppendFormat(" [ {} ]", pInDev->GetString());
         }
 
-        m_pSearchableMenu->AddItem(fullName, QVariant::fromValue((void*)pRtti), actionIcon);
+        m_pSearchableMenu->AddItem(sDisplayName, sFullPath, QVariant::fromValue((void*)pRtti), actionIcon);
       }
       else
       {
@@ -250,7 +264,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
         // Add type action to current menu
         QAction* pAction = new QAction(fullName.GetData(), m_pMenu);
         pAction->setProperty("type", QVariant::fromValue((void*)pRtti));
-        PLASMA_VERIFY(connect(pAction, SIGNAL(triggered()), this, SLOT(OnMenuAction())) != nullptr, "connection failed");
+        PL_VERIFY(connect(pAction, SIGNAL(triggered()), this, SLOT(OnMenuAction())) != nullptr, "connection failed");
 
         pAction->setIcon(actionIcon);
 
@@ -260,14 +274,16 @@ void plQtAddSubElementButton::onMenuAboutToShow()
 
     if (m_pSearchableMenu != nullptr)
     {
-      connect(m_pSearchableMenu, &plQtSearchableMenu::MenuItemTriggered, m_pMenu, [this](const QString& sName, const QVariant& variant) {
+      connect(m_pSearchableMenu, &plQtSearchableMenu::MenuItemTriggered, m_pMenu, [this](const QString& sName, const QVariant& variant)
+        {
         const plRTTI* pRtti = static_cast<const plRTTI*>(variant.value<void*>());
 
         OnAction(pRtti);
         m_pMenu->close(); });
 
       connect(m_pSearchableMenu, &plQtSearchableMenu::SearchTextChanged, m_pMenu,
-        [this](const QString& text) { s_sLastMenuSearch = text.toUtf8().data(); });
+        [this](const QString& sText)
+        { s_sLastMenuSearch = sText.toUtf8().data(); });
 
       m_pMenu->addAction(m_pSearchableMenu);
 
@@ -283,7 +299,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
     for (auto& item : m_Items)
     {
       plInt32 iCount = 0;
-      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).IgnoreResult();
+      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).AssertSuccess();
 
       if (iCount >= (plInt32)m_uiMaxElements)
       {
@@ -323,7 +339,7 @@ void plQtAddSubElementButton::onMenuAboutToShow()
     for (auto& item : m_Items)
     {
       plInt32 iCount = 0;
-      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).IgnoreResult();
+      m_pObjectAccessor->GetCount(item.m_pObject, m_pProp, iCount).AssertSuccess();
 
       for (plInt32 i = 0; i < iCount; ++i)
       {
@@ -365,7 +381,7 @@ void plQtAddSubElementButton::OnMenuAction()
 
 void plQtAddSubElementButton::OnAction(const plRTTI* pRtti)
 {
-  PLASMA_ASSERT_DEV(pRtti != nullptr, "user data retrieval failed");
+  PL_ASSERT_DEV(pRtti != nullptr, "user data retrieval failed");
   plVariant index = (plInt32)-1;
 
   if (m_pProp->GetCategory() == plPropertyCategory::Map)
@@ -421,7 +437,7 @@ void plQtAddSubElementButton::OnAction(const plRTTI* pRtti)
       plHybridArray<plPropertySelection, 1> selection;
       selection.PushBack({m_pObjectAccessor->GetObject(guid), plVariant()});
       plDefaultObjectState defaultState(m_pObjectAccessor, selection);
-      defaultState.RevertObject().IgnoreResult();
+      defaultState.RevertObject().AssertSuccess();
     }
   }
 

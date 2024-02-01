@@ -5,7 +5,7 @@
 #include <Foundation/IO/Stream.h>
 #include <Foundation/Math/Vec3.h>
 
-struct PLASMA_CORE_DLL plAmbientCubeBasis
+struct PL_CORE_DLL plAmbientCubeBasis
 {
   enum
   {
@@ -25,7 +25,7 @@ struct PLASMA_CORE_DLL plAmbientCubeBasis
 template <typename T>
 struct plAmbientCube
 {
-  PLASMA_DECLARE_POD_TYPE();
+  PL_DECLARE_POD_TYPE();
 
   plAmbientCube();
 
@@ -42,8 +42,8 @@ struct plAmbientCube
 
   T Evaluate(const plVec3& vNormal) const;
 
-  plResult Serialize(plStreamWriter& stream) const;
-  plResult Deserialize(plStreamReader& stream);
+  plResult Serialize(plStreamWriter& inout_stream) const;
+  plResult Deserialize(plStreamReader& inout_stream);
 
   T m_Values[plAmbientCubeBasis::NumDirs];
 };

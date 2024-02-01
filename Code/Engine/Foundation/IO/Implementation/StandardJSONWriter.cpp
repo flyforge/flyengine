@@ -12,8 +12,8 @@ plStandardJSONWriter::JSONState::JSONState()
 plStandardJSONWriter::CommaWriter::CommaWriter(plStandardJSONWriter* pWriter)
 {
   const plStandardJSONWriter::State state = pWriter->m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV(state == plStandardJSONWriter::Array || state == plStandardJSONWriter::NamedArray || state == plStandardJSONWriter::Variable,
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV(state == plStandardJSONWriter::Array || state == plStandardJSONWriter::NamedArray || state == plStandardJSONWriter::Variable,
     "Values can only be written inside BeginVariable() / EndVariable() and BeginArray() / EndArray().");
 
   m_pWriter = pWriter;
@@ -75,7 +75,7 @@ plStandardJSONWriter::~plStandardJSONWriter()
 {
   if (!HadWriteError())
   {
-    PLASMA_ASSERT_DEV(m_StateStack.PeekBack().m_State == plStandardJSONWriter::Empty, "The JSON stream must be closed properly.");
+    PL_ASSERT_DEV(m_StateStack.PeekBack().m_State == plStandardJSONWriter::Empty, "The JSON stream must be closed properly.");
   }
 }
 
@@ -86,7 +86,7 @@ void plStandardJSONWriter::SetOutputStream(plStreamWriter* pOutput)
 
 void plStandardJSONWriter::OutputString(plStringView s)
 {
-  PLASMA_ASSERT_DEBUG(m_pOutput != nullptr, "No output stream has been set yet.");
+  PL_ASSERT_DEBUG(m_pOutput != nullptr, "No output stream has been set yet.");
 
   if (m_pOutput->WriteBytes(s.GetStartPointer(), s.GetElementCount()).Failed())
   {
@@ -122,7 +122,7 @@ void plStandardJSONWriter::OutputIndentation()
     iIndentation = m_iIndentation;
 
   plStringBuilder s;
-  s.Printf("%*s", iIndentation, "");
+  s.SetPrintf("%*s", iIndentation, "");
 
   OutputString(s.GetData());
 }
@@ -142,7 +142,7 @@ void plStandardJSONWriter::WriteInt32(plInt32 value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -152,7 +152,7 @@ void plStandardJSONWriter::WriteUInt32(plUInt32 value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -162,7 +162,7 @@ void plStandardJSONWriter::WriteInt64(plInt64 value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -172,7 +172,7 @@ void plStandardJSONWriter::WriteUInt64(plUInt64 value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -182,7 +182,7 @@ void plStandardJSONWriter::WriteFloat(float value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -192,7 +192,7 @@ void plStandardJSONWriter::WriteDouble(double value)
   CommaWriter cw(this);
 
   plStringBuilder s;
-  s.Format("{0}", value);
+  s.SetFormat("{0}", value);
 
   OutputString(s.GetData());
 }
@@ -225,9 +225,9 @@ void plStandardJSONWriter::WriteColor(const plColor& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2},{3})", plArgF(value.r, 4), plArgF(value.g, 4), plArgF(value.b, 4), plArgF(value.a, 4));
+    s.SetFormat("({0},{1},{2},{3})", plArgF(value.r, 4), plArgF(value.g, 4), plArgF(value.b, 4), plArgF(value.a, 4));
   else
-    s.Format("({0}, {1}, {2}, {3})", plArgF(value.r, 4), plArgF(value.g, 4), plArgF(value.b, 4), plArgF(value.a, 4));
+    s.SetFormat("({0}, {1}, {2}, {3})", plArgF(value.r, 4), plArgF(value.g, 4), plArgF(value.b, 4), plArgF(value.a, 4));
 
   WriteBinaryData("color", &temp, sizeof(temp), s.GetData());
 }
@@ -237,9 +237,9 @@ void plStandardJSONWriter::WriteColorGamma(const plColorGammaUB& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2},{3})", value.r, value.g, value.b, value.a);
+    s.SetFormat("({0},{1},{2},{3})", value.r, value.g, value.b, value.a);
   else
-    s.Format("({0}, {1}, {2}, {3})", value.r, value.g, value.b, value.a);
+    s.SetFormat("({0}, {1}, {2}, {3})", value.r, value.g, value.b, value.a);
 
   WriteBinaryData("gamma", value.GetData(), sizeof(plColorGammaUB), s.GetData());
 }
@@ -253,9 +253,9 @@ void plStandardJSONWriter::WriteVec2(const plVec2& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1})", plArgF(value.x, 4), plArgF(value.y, 4));
+    s.SetFormat("({0},{1})", plArgF(value.x, 4), plArgF(value.y, 4));
   else
-    s.Format("({0}, {1})", plArgF(value.x, 4), plArgF(value.y, 4));
+    s.SetFormat("({0}, {1})", plArgF(value.x, 4), plArgF(value.y, 4));
 
   WriteBinaryData("vec2", &temp, sizeof(temp), s.GetData());
 }
@@ -269,9 +269,9 @@ void plStandardJSONWriter::WriteVec3(const plVec3& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4));
+    s.SetFormat("({0},{1},{2})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4));
   else
-    s.Format("({0}, {1}, {2})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4));
+    s.SetFormat("({0}, {1}, {2})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4));
 
   WriteBinaryData("vec3", &temp, sizeof(temp), s.GetData());
 }
@@ -285,9 +285,9 @@ void plStandardJSONWriter::WriteVec4(const plVec4& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2},{3})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4), plArgF(value.w, 4));
+    s.SetFormat("({0},{1},{2},{3})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4), plArgF(value.w, 4));
   else
-    s.Format("({0}, {1}, {2}, {3})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4), plArgF(value.w, 4));
+    s.SetFormat("({0}, {1}, {2}, {3})", plArgF(value.x, 4), plArgF(value.y, 4), plArgF(value.z, 4), plArgF(value.w, 4));
 
   WriteBinaryData("vec4", &temp, sizeof(temp), s.GetData());
 }
@@ -303,9 +303,9 @@ void plStandardJSONWriter::WriteVec2I32(const plVec2I32& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1})", value.x, value.y);
+    s.SetFormat("({0},{1})", value.x, value.y);
   else
-    s.Format("({0}, {1})", value.x, value.y);
+    s.SetFormat("({0}, {1})", value.x, value.y);
 
   WriteBinaryData("vec2i", &temp, sizeof(temp), s.GetData());
 }
@@ -321,9 +321,9 @@ void plStandardJSONWriter::WriteVec3I32(const plVec3I32& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2})", value.x, value.y, value.z);
+    s.SetFormat("({0},{1},{2})", value.x, value.y, value.z);
   else
-    s.Format("({0}, {1}, {2})", value.x, value.y, value.z);
+    s.SetFormat("({0}, {1}, {2})", value.x, value.y, value.z);
 
   WriteBinaryData("vec3i", &temp, sizeof(temp), s.GetData());
 }
@@ -339,9 +339,9 @@ void plStandardJSONWriter::WriteVec4I32(const plVec4I32& value)
   plStringBuilder s;
 
   if (m_WhitespaceMode >= plJSONWriter::WhitespaceMode::NewlinesOnly)
-    s.Format("({0},{1},{2},{3})", value.x, value.y, value.z, value.w);
+    s.SetFormat("({0},{1},{2},{3})", value.x, value.y, value.z, value.w);
   else
-    s.Format("({0}, {1}, {2}, {3})", value.x, value.y, value.z, value.w);
+    s.SetFormat("({0}, {1}, {2}, {3})", value.x, value.y, value.z, value.w);
 
   WriteBinaryData("vec4i", &temp, sizeof(temp), s.GetData());
 }
@@ -397,8 +397,8 @@ void plStandardJSONWriter::WriteDataBuffer(const plDataBuffer& value)
 void plStandardJSONWriter::BeginVariable(plStringView sName)
 {
   const plStandardJSONWriter::State state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV(state == plStandardJSONWriter::Empty || state == plStandardJSONWriter::Object || state == plStandardJSONWriter::NamedObject,
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV(state == plStandardJSONWriter::Empty || state == plStandardJSONWriter::Object || state == plStandardJSONWriter::NamedObject,
     "Variables can only be written inside objects.");
 
   if (m_StateStack.PeekBack().m_bRequireComma)
@@ -425,8 +425,8 @@ void plStandardJSONWriter::BeginVariable(plStringView sName)
 
 void plStandardJSONWriter::EndVariable()
 {
-  PLASMA_ASSERT_DEV(m_StateStack.PeekBack().m_State == plStandardJSONWriter::Variable, "EndVariable() must be called in sync with BeginVariable().");
-  PLASMA_ASSERT_DEV(m_StateStack.PeekBack().m_bValueWasWritten, "EndVariable() cannot be called without writing any value in between.");
+  PL_ASSERT_DEV(m_StateStack.PeekBack().m_State == plStandardJSONWriter::Variable, "EndVariable() must be called in sync with BeginVariable().");
+  PL_ASSERT_DEV(m_StateStack.PeekBack().m_bValueWasWritten, "EndVariable() cannot be called without writing any value in between.");
 
   End();
 }
@@ -434,8 +434,8 @@ void plStandardJSONWriter::EndVariable()
 void plStandardJSONWriter::BeginArray(plStringView sName)
 {
   const plStandardJSONWriter::State state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV((state == plStandardJSONWriter::Empty) ||
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV((state == plStandardJSONWriter::Empty) ||
                   ((state == plStandardJSONWriter::Object || state == plStandardJSONWriter::NamedObject) && !sName.IsEmpty()) ||
                   ((state == plStandardJSONWriter::Array || state == plStandardJSONWriter::NamedArray) && sName.IsEmpty()) ||
                   (state == plStandardJSONWriter::Variable && sName == nullptr),
@@ -470,8 +470,8 @@ void plStandardJSONWriter::BeginArray(plStringView sName)
 void plStandardJSONWriter::EndArray()
 {
   const plStandardJSONWriter::State state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV(
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV(
     state == plStandardJSONWriter::Array || state == plStandardJSONWriter::NamedArray, "EndArray() must be called in sync with BeginArray().");
 
 
@@ -486,8 +486,8 @@ void plStandardJSONWriter::EndArray()
 void plStandardJSONWriter::BeginObject(plStringView sName)
 {
   const plStandardJSONWriter::State state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV((state == plStandardJSONWriter::Empty) ||
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV((state == plStandardJSONWriter::Empty) ||
                   ((state == plStandardJSONWriter::Object || state == plStandardJSONWriter::NamedObject) && !sName.IsEmpty()) ||
                   ((state == plStandardJSONWriter::Array || state == plStandardJSONWriter::NamedArray) && sName.IsEmpty()) ||
                   (state == plStandardJSONWriter::Variable && sName == nullptr),
@@ -526,8 +526,8 @@ void plStandardJSONWriter::BeginObject(plStringView sName)
 void plStandardJSONWriter::EndObject()
 {
   const plStandardJSONWriter::State state = m_StateStack.PeekBack().m_State;
-  PLASMA_IGNORE_UNUSED(state);
-  PLASMA_ASSERT_DEV(
+  PL_IGNORE_UNUSED(state);
+  PL_ASSERT_DEV(
     state == plStandardJSONWriter::Object || state == plStandardJSONWriter::NamedObject, "EndObject() must be called in sync with BeginObject().");
 
   const State CurState = m_StateStack.PeekBack().m_State;
@@ -601,7 +601,7 @@ void plStandardJSONWriter::WriteBinaryData(plStringView sDataType, const void* p
 
   for (plUInt32 i = 0; i < uiBytes; ++i)
   {
-    s.Format("{0}", plArgU((plUInt32)*pBytes, 2, true, 16, true));
+    s.SetFormat("{0}", plArgU((plUInt32)*pBytes, 2, true, 16, true));
     ++pBytes;
 
     OutputString(s.GetData());
@@ -613,4 +613,4 @@ void plStandardJSONWriter::WriteBinaryData(plStringView sDataType, const void* p
     OutputString("\" }");
 }
 
-PLASMA_STATICLINK_FILE(Foundation, Foundation_IO_Implementation_StandardJSONWriter);
+

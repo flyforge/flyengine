@@ -5,7 +5,7 @@
 
 #include <QWidget>
 
-class PLASMA_GUIFOUNDATION_DLL plQtEventTrackEditorWidget : public QWidget, public Ui_EventTrackEditorWidget
+class PL_GUIFOUNDATION_DLL plQtEventTrackEditorWidget : public QWidget, public Ui_EventTrackEditorWidget
 {
   Q_OBJECT
 
@@ -21,15 +21,15 @@ public:
   void FrameCurve();
 
 Q_SIGNALS:
-  void CpMovedEvent(plUInt32 cpIdx, plInt64 iTickX);
-  void CpDeletedEvent(plUInt32 cpIdx);
-  void InsertCpEvent(plInt64 tickX, const char* value);
+  void CpMovedEvent(plUInt32 uiIdx, plInt64 iTickX);
+  void CpDeletedEvent(plUInt32 uiIdx);
+  void InsertCpEvent(plInt64 iTickX, const char* value);
 
-  void BeginCpChangesEvent(QString name);
+  void BeginCpChangesEvent(QString sName);
   void EndCpChangesEvent();
 
-  void BeginOperationEvent(QString name);
-  void EndOperationEvent(bool commit);
+  void BeginOperationEvent(QString sName);
+  void EndOperationEvent(bool bCommit);
 
 private Q_SLOTS:
   void on_LinePosition_editingFinished();

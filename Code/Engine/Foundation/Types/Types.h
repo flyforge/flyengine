@@ -15,39 +15,40 @@ using plInt64 = long long;
 // no float-types, since those are well portable
 
 // Do some compile-time checks on the types
-PLASMA_CHECK_AT_COMPILETIME(sizeof(bool) == 1);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(char) == 1);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(float) == 4);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(double) == 8);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plInt8) == 1);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plInt16) == 2);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plInt32) == 4);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plInt64) == 8); // must be defined in the specific compiler header
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt8) == 1);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt16) == 2);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt32) == 4);
-PLASMA_CHECK_AT_COMPILETIME(sizeof(plUInt64) == 8); // must be defined in the specific compiler header
-PLASMA_CHECK_AT_COMPILETIME(sizeof(long long int) == 8);
+PL_CHECK_AT_COMPILETIME(sizeof(bool) == 1);
+PL_CHECK_AT_COMPILETIME(sizeof(char) == 1);
+PL_CHECK_AT_COMPILETIME(sizeof(float) == 4);
+PL_CHECK_AT_COMPILETIME(sizeof(double) == 8);
+PL_CHECK_AT_COMPILETIME(sizeof(plInt8) == 1);
+PL_CHECK_AT_COMPILETIME(sizeof(plInt16) == 2);
+PL_CHECK_AT_COMPILETIME(sizeof(plInt32) == 4);
+PL_CHECK_AT_COMPILETIME(sizeof(plInt64) == 8); // must be defined in the specific compiler header
+PL_CHECK_AT_COMPILETIME(sizeof(plUInt8) == 1);
+PL_CHECK_AT_COMPILETIME(sizeof(plUInt16) == 2);
+PL_CHECK_AT_COMPILETIME(sizeof(plUInt32) == 4);
+PL_CHECK_AT_COMPILETIME(sizeof(plUInt64) == 8); // must be defined in the specific compiler header
+PL_CHECK_AT_COMPILETIME(sizeof(long long int) == 8);
 
-#if PLASMA_ENABLED(PLASMA_PLATFORM_64BIT)
-#  define PLASMA_ALIGNMENT_MINIMUM 8
-#elif PLASMA_ENABLED(PLASMA_PLATFORM_32BIT)
-#  define PLASMA_ALIGNMENT_MINIMUM 4
+#if PL_ENABLED(PL_PLATFORM_64BIT)
+#  define PL_ALIGNMENT_MINIMUM 8
+#elif PL_ENABLED(PL_PLATFORM_32BIT)
+#  define PL_ALIGNMENT_MINIMUM 4
 #else
 #  error "Unknown pointer size."
 #endif
 
-PLASMA_CHECK_AT_COMPILETIME(sizeof(void*) == PLASMA_ALIGNMENT_MINIMUM);
+PL_CHECK_AT_COMPILETIME(sizeof(void*) == PL_ALIGNMENT_MINIMUM);
+PL_CHECK_AT_COMPILETIME(alignof(void*) == PL_ALIGNMENT_MINIMUM);
 
 /// \brief Enum values for success and failure. To be used by functions as return values mostly, instead of bool.
 enum plResultEnum
 {
-  PLASMA_FAILURE,
-  PLASMA_SUCCESS
+  PL_FAILURE,
+  PL_SUCCESS
 };
 
 /// \brief Default enum for returning failure or success, instead of using a bool.
-struct [[nodiscard]] PLASMA_FOUNDATION_DLL plResult
+struct [[nodiscard]] PL_FOUNDATION_DLL plResult
 {
 public:
   plResult(plResultEnum res)
@@ -59,11 +60,11 @@ public:
   bool operator==(plResultEnum cmp) const { return m_E == cmp; }
   bool operator!=(plResultEnum cmp) const { return m_E != cmp; }
 
-  [[nodiscard]] PLASMA_ALWAYS_INLINE bool Succeeded() const { return m_E == PLASMA_SUCCESS; }
-  [[nodiscard]] PLASMA_ALWAYS_INLINE bool Failed() const { return m_E == PLASMA_FAILURE; }
+  [[nodiscard]] PL_ALWAYS_INLINE bool Succeeded() const { return m_E == PL_SUCCESS; }
+  [[nodiscard]] PL_ALWAYS_INLINE bool Failed() const { return m_E == PL_FAILURE; }
 
   /// \brief Used to silence compiler warnings, when success or failure doesn't matter.
-  PLASMA_ALWAYS_INLINE void IgnoreResult()
+  PL_ALWAYS_INLINE void IgnoreResult()
   {
     /* dummy to be called when a return value is [[nodiscard]] but the result is not needed */
   }
@@ -81,14 +82,14 @@ private:
 ///
 /// This is intentionally not done via casting operator overload (or even additional constructors) since this usually comes with a
 /// considerable data loss.
-PLASMA_ALWAYS_INLINE plResult plToResult(plResult result)
+PL_ALWAYS_INLINE plResult plToResult(plResult result)
 {
   return result;
 }
 
 /// \brief Helper macro to call functions that return plStatus or plResult in a function that returns plStatus (or plResult) as well.
 /// If the called function fails, its return value is returned from the calling scope.
-#define PLASMA_SUCCEED_OR_RETURN(code) \
+#define PL_SUCCEED_OR_RETURN(code) \
   do                               \
   {                                \
     auto s = (code);               \
@@ -96,26 +97,26 @@ PLASMA_ALWAYS_INLINE plResult plToResult(plResult result)
       return s;                    \
   } while (false)
 
-/// \brief Like PLASMA_SUCCEED_OR_RETURN, but with error logging.
-#define PLASMA_SUCCEED_OR_RETURN_LOG(code)                                    \
+/// \brief Like PL_SUCCEED_OR_RETURN, but with error logging.
+#define PL_SUCCEED_OR_RETURN_LOG(code)                                    \
   do                                                                      \
   {                                                                       \
     auto s = (code);                                                      \
     if (plToResult(s).Failed())                                           \
     {                                                                     \
-      plLog::Error("Call '{0}' failed with: {1}", PLASMA_STRINGIZE(code), s); \
+      plLog::Error("Call '{0}' failed with: {1}", PL_STRINGIZE(code), s); \
       return s;                                                           \
     }                                                                     \
   } while (false)
 
-/// \brief Like PLASMA_SUCCEED_OR_RETURN, but with custom error logging.
-#define PLASMA_SUCCEED_OR_RETURN_CUSTOM_LOG(code, log)                          \
+/// \brief Like PL_SUCCEED_OR_RETURN, but with custom error logging.
+#define PL_SUCCEED_OR_RETURN_CUSTOM_LOG(code, log)                          \
   do                                                                        \
   {                                                                         \
     auto s = (code);                                                        \
     if (plToResult(s).Failed())                                             \
     {                                                                       \
-      plLog::Error("Call '{0}' failed with: {1}", PLASMA_STRINGIZE(code), log); \
+      plLog::Error("Call '{0}' failed with: {1}", PL_STRINGIZE(code), log); \
       return s;                                                             \
     }                                                                       \
   } while (false)

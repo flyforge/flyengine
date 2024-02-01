@@ -1,13 +1,13 @@
 #include <GameEngine/GameEnginePCH.h>
 
-#include <Core/Assets/AssetFileHeader.h>
+#include <Foundation/Utilities/AssetFileHeader.h>
 #include <GameEngine/Utils/BlackboardTemplateResource.h>
 
 // clang-format off
-PLASMA_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlackboardTemplateResource, 1, plRTTIDefaultAllocator<plBlackboardTemplateResource>)
-PLASMA_END_DYNAMIC_REFLECTED_TYPE;
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBlackboardTemplateResource, 1, plRTTIDefaultAllocator<plBlackboardTemplateResource>)
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
-PLASMA_RESOURCE_IMPLEMENT_COMMON_CODE(plBlackboardTemplateResource);
+PL_RESOURCE_IMPLEMENT_COMMON_CODE(plBlackboardTemplateResource);
 // clang-format on
 
 plBlackboardTemplateResource::plBlackboardTemplateResource()
@@ -29,7 +29,7 @@ plResourceLoadDesc plBlackboardTemplateResource::UnloadData(Unload WhatToUnload)
 
 plResourceLoadDesc plBlackboardTemplateResource::UpdateContent(plStreamReader* Stream)
 {
-  PLASMA_LOG_BLOCK("plBlackboardTemplateResource::UpdateContent", GetResourceIdOrDescription());
+  PL_LOG_BLOCK("plBlackboardTemplateResource::UpdateContent", GetResourceIdOrDescription());
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -69,7 +69,7 @@ void plBlackboardTemplateResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryU
   out_NewMemoryUsage.m_uiMemoryCPU += m_Descriptor.m_Entries.GetHeapMemoryUsage();
 }
 
-PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plBlackboardTemplateResource, plBlackboardTemplateResourceDescriptor)
+PL_RESOURCE_IMPLEMENT_CREATEABLE(plBlackboardTemplateResource, plBlackboardTemplateResourceDescriptor)
 {
   m_Descriptor = std::move(descriptor);
 
@@ -83,12 +83,16 @@ PLASMA_RESOURCE_IMPLEMENT_CREATEABLE(plBlackboardTemplateResource, plBlackboardT
 
 plResult plBlackboardTemplateResourceDescriptor::Serialize(plStreamWriter& inout_stream) const
 {
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Entries));
-  return PLASMA_SUCCESS;
+  PL_SUCCEED_OR_RETURN(inout_stream.WriteArray(m_Entries));
+  return PL_SUCCESS;
 }
 
 plResult plBlackboardTemplateResourceDescriptor::Deserialize(plStreamReader& inout_stream)
 {
-  PLASMA_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Entries));
-  return PLASMA_SUCCESS;
+  PL_SUCCEED_OR_RETURN(inout_stream.ReadArray(m_Entries));
+  return PL_SUCCESS;
 }
+
+
+PL_STATICLINK_FILE(GameEngine, GameEngine_Utils_Implementation_BlackboardTemplateResource);
+

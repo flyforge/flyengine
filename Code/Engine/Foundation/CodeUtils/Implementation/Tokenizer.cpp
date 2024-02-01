@@ -15,19 +15,22 @@ const char* plTokenType::EnumNames[plTokenType::ENUM_COUNT] = {
   "String2",
   "Integer",
   "Float",
-};
+  "RawString1",
+  "RawString1Prefix",
+  "RawString1Postfix",
+  "EndOfFile"};
 
 namespace
 {
   // This allocator is used to get rid of some of the memory allocation tracking
   // that would otherwise occur for allocations made by the tokenizer.
-  thread_local plAllocator<plMemoryPolicies::plHeapAllocation, plMemoryTrackingFlags::None> s_ClassAllocator("plTokenizer", plFoundation::GetDefaultAllocator());
+  thread_local plAllocatorWithPolicy<plAllocPolicyHeap, plAllocatorTrackingMode::Nothing> s_ClassAllocator("plTokenizer", plFoundation::GetDefaultAllocator());
 } // namespace
 
 
-plTokenizer::plTokenizer(plAllocatorBase* pAllocator)
-  : m_Data(pAllocator != nullptr ? pAllocator : &s_ClassAllocator)
-  , m_Tokens(pAllocator != nullptr ? pAllocator : &s_ClassAllocator)
+plTokenizer::plTokenizer(plAllocator* pAllocator)
+  : m_Tokens(pAllocator != nullptr ? pAllocator : &s_ClassAllocator)
+  , m_Data(pAllocator != nullptr ? pAllocator : &s_ClassAllocator)
 {
 }
 
@@ -45,7 +48,7 @@ void plTokenizer::NextChar()
     m_uiCurColumn = 0;
   }
 
-  if (!m_sIterator.IsValid())
+  if (!m_sIterator.IsValid() || m_sIterator.IsEmpty())
   {
     m_szNextCharStart = m_sIterator.GetEndPointer();
     m_uiNextChar = '\0';
@@ -78,8 +81,18 @@ void plTokenizer::AddToken()
   m_CurMode = plTokenType::Unknown;
 }
 
-void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
+void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog, bool bCopyData)
 {
+  if (bCopyData)
+  {
+    m_Data = data;
+    data = m_Data;
+  }
+  else
+  {
+    m_Data.Clear();
+  }
+
   if (data.GetCount() >= 3)
   {
     const char* dataStart = reinterpret_cast<const char*>(data.GetPtr());
@@ -93,13 +106,6 @@ void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
       data = plArrayPtr<const plUInt8>((const plUInt8*)dataStart, data.GetCount() - 3);
     }
   }
-
-  m_Data.Clear();
-  m_Data.Reserve(m_Data.GetCount() + 1);
-  m_Data = data;
-
-  if (m_Data.IsEmpty() || m_Data[m_Data.GetCount() - 1] != 0)
-    m_Data.PushBack('\0'); // make sure the string is zero terminated
 
   m_Tokens.Clear();
   m_pLog = pLog;
@@ -118,9 +124,13 @@ void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
     m_szTokenStart = nullptr;
   }
 
-  m_sIterator = plStringView((const char*)&m_Data[0], (const char*)&m_Data[0] + m_Data.GetCount() - 1);
+  m_sIterator = {};
+  if (!data.IsEmpty())
+  {
+    m_sIterator = plStringView((const char*)&data[0], (const char*)&data[0] + data.GetCount());
+  }
 
-  if (!m_sIterator.IsValid())
+  if (!m_sIterator.IsValid() || m_sIterator.IsEmpty())
   {
     plToken t;
     t.m_uiLine = 1;
@@ -134,7 +144,7 @@ void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
 
   m_szTokenStart = m_szCurCharStart;
 
-  while (m_szTokenStart != nullptr && *m_szTokenStart != '\0')
+  while (m_szTokenStart != nullptr && m_szTokenStart != m_sIterator.GetEndPointer())
   {
     switch (m_CurMode)
     {
@@ -144,6 +154,10 @@ void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
 
       case plTokenType::String1:
         HandleString('\"');
+        break;
+
+      case plTokenType::RawString1:
+        HandleRawString();
         break;
 
       case plTokenType::String2:
@@ -175,6 +189,8 @@ void plTokenizer::Tokenize(plArrayPtr<const plUInt8> data, plLogInterface* pLog)
         HandleNonIdentifier();
         break;
 
+      case plTokenType::RawString1Prefix:
+      case plTokenType::RawString1Postfix:
       case plTokenType::Newline:
       case plTokenType::EndOfFile:
       case plTokenType::ENUM_COUNT:
@@ -218,6 +234,14 @@ void plTokenizer::HandleUnknown()
   if (m_uiCurChar == '\"')
   {
     m_CurMode = plTokenType::String1;
+    NextChar();
+    return;
+  }
+
+  if (m_uiCurChar == 'R' && m_uiNextChar == '\"')
+  {
+    m_CurMode = plTokenType::RawString1;
+    NextChar();
     NextChar();
     return;
   }
@@ -344,6 +368,71 @@ void plTokenizer::HandleString(char terminator)
   AddToken();
 }
 
+void plTokenizer::HandleRawString()
+{
+  const char* markerStart = m_szCurCharStart;
+  while (m_uiCurChar != '\0')
+  {
+    if (m_uiCurChar == '(')
+    {
+      m_sRawStringMarker = plStringView(markerStart, m_szCurCharStart);
+      NextChar(); // consume '('
+      break;
+    }
+    NextChar();
+  }
+  if (m_uiCurChar == '\0')
+  {
+    plLog::Error(m_pLog, "Failed to find '(' for raw string before end of file");
+    AddToken();
+    return;
+  }
+
+  m_CurMode = plTokenType::RawString1Prefix;
+  AddToken();
+
+  m_CurMode = plTokenType::RawString1;
+
+  while (m_uiCurChar != '\0')
+  {
+    if (m_uiCurChar == ')')
+    {
+      if (m_sRawStringMarker.GetElementCount() == 0 && m_uiNextChar == '\"')
+      {
+        AddToken();
+        NextChar();
+        NextChar();
+        m_CurMode = plTokenType::RawString1Postfix;
+        AddToken();
+        return;
+      }
+      else if (m_szCurCharStart + m_sRawStringMarker.GetElementCount() + 2 <= m_sIterator.GetEndPointer())
+      {
+        if (plStringUtils::CompareN(m_szCurCharStart + 1, m_sRawStringMarker.GetStartPointer(), m_sRawStringMarker.GetElementCount()) == 0 &&
+            m_szCurCharStart[m_sRawStringMarker.GetElementCount() + 1] == '\"')
+        {
+          AddToken();
+          for (plUInt32 i = 0; i < m_sRawStringMarker.GetElementCount() + 2; ++i) // consume )marker"
+          {
+            NextChar();
+          }
+          m_CurMode = plTokenType::RawString1Postfix;
+          AddToken();
+          return;
+        }
+      }
+      NextChar();
+    }
+    else
+    {
+      NextChar();
+    }
+  }
+
+  plLog::Error(m_pLog, "Raw string not closed at end of file");
+  AddToken();
+}
+
 void plTokenizer::HandleNumber()
 {
   if (m_uiCurChar == '0' && (m_uiNextChar == 'x' || m_uiNextChar == 'X'))
@@ -367,7 +456,7 @@ void plTokenizer::HandleNumber()
   {
     NextChar();
 
-    while (plStringUtils::IsDecimalDigit(m_uiCurChar))
+    while (plStringUtils::IsDecimalDigit(m_uiCurChar) || m_uiCurChar == '\'') // integer literal: 100'000
     {
       NextChar();
     }
@@ -497,7 +586,18 @@ void plTokenizer::HandleNonIdentifier()
   AddToken();
 }
 
-void plTokenizer::GetAllLines(plHybridArray<const plToken*, 32>& ref_tokens) const
+void plTokenizer::GetAllTokens(plDynamicArray<const plToken*>& ref_tokens) const
+{
+  ref_tokens.Clear();
+  ref_tokens.Reserve(m_Tokens.GetCount());
+
+  for (const plToken& curToken : m_Tokens)
+  {
+    ref_tokens.PushBack(&curToken);
+  }
+}
+
+void plTokenizer::GetAllLines(plDynamicArray<const plToken*>& ref_tokens) const
 {
   ref_tokens.Clear();
   ref_tokens.Reserve(m_Tokens.GetCount());
@@ -569,18 +669,16 @@ plResult plTokenizer::GetNextLine(plUInt32& ref_uiFirstToken, plHybridArray<cons
     if (m_Tokens[ref_uiFirstToken].m_iType == plTokenType::Newline)
     {
       ++ref_uiFirstToken;
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
 
     ++ref_uiFirstToken;
   }
 
   if (ref_tokens.IsEmpty())
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 
-
-PLASMA_STATICLINK_FILE(Foundation, Foundation_CodeUtils_Implementation_Tokenizer);

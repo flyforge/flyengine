@@ -25,7 +25,7 @@ struct plObjectAccessorChangeEvent;
 struct plPropertyDefaultEvent;
 struct plContainerElementMetaStateEvent;
 
-class PLASMA_GUIFOUNDATION_DLL plQtPropertyGridWidget : public QWidget
+class PL_GUIFOUNDATION_DLL plQtPropertyGridWidget : public QWidget
 {
   Q_OBJECT
 public:
@@ -49,14 +49,14 @@ public:
   void SetCollapseState(plQtGroupBoxBase* pBox);
 
 Q_SIGNALS:
-  void ExtendContextMenu(QMenu& menu, const plHybridArray<plPropertySelection, 8>& items, const plAbstractProperty* pProp);
+  void ExtendContextMenu(QMenu& ref_menu, const plHybridArray<plPropertySelection, 8>& items, const plAbstractProperty* pProp);
 
 public Q_SLOTS:
   void OnCollapseStateChanged(bool bCollapsed);
 
 private:
   static plRttiMappedObjectFactory<plQtPropertyWidget> s_Factory;
-  PLASMA_MAKE_SUBSYSTEM_STARTUP_FRIEND(GuiFoundation, PropertyGrid);
+  PL_MAKE_SUBSYSTEM_STARTUP_FRIEND(GuiFoundation, PropertyGrid);
 
 private:
   void ObjectAccessorChangeEventHandler(const plObjectAccessorChangeEvent& e);

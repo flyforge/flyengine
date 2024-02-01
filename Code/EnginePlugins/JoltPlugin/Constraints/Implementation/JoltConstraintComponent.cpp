@@ -11,38 +11,38 @@
 #include <JoltPlugin/Utilities/JoltConversionUtils.h>
 
 // clang-format off
-PLASMA_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, 2)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plJoltConstraintComponent, 2)
 {
-  PLASMA_BEGIN_PROPERTIES
+  PL_BEGIN_PROPERTIES
   {
-    PLASMA_ACCESSOR_PROPERTY("PairCollision", GetPairCollision, SetPairCollision)->AddAttributes(new plDefaultValueAttribute(true)),
-    PLASMA_ACCESSOR_PROPERTY("ParentActor", DummyGetter, SetParentActorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("ChildActor", DummyGetter, SetChildActorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("ChildActorAnchor", DummyGetter, SetChildActorAnchorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
-    PLASMA_ACCESSOR_PROPERTY("BreakForce", GetBreakForce, SetBreakForce),
-    PLASMA_ACCESSOR_PROPERTY("BreakTorque", GetBreakTorque, SetBreakTorque),
+    PL_ACCESSOR_PROPERTY("PairCollision", GetPairCollision, SetPairCollision)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ACCESSOR_PROPERTY("ParentActor", DummyGetter, SetParentActorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ACCESSOR_PROPERTY("ChildActor", DummyGetter, SetChildActorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ACCESSOR_PROPERTY("ChildActorAnchor", DummyGetter, SetChildActorAnchorReference)->AddAttributes(new plGameObjectReferenceAttribute()),
+    PL_ACCESSOR_PROPERTY("BreakForce", GetBreakForce, SetBreakForce),
+    PL_ACCESSOR_PROPERTY("BreakTorque", GetBreakTorque, SetBreakTorque),
   }
-  PLASMA_END_PROPERTIES;
-  PLASMA_BEGIN_ATTRIBUTES
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Physics/Jolt/Constraints"),
   }
-  PLASMA_END_ATTRIBUTES;
-  PLASMA_BEGIN_MESSAGEHANDLERS
+  PL_END_ATTRIBUTES;
+  PL_BEGIN_MESSAGEHANDLERS
   {
-    PLASMA_MESSAGE_HANDLER(plJoltMsgDisconnectConstraints, OnJoltMsgDisconnectConstraints),
+    PL_MESSAGE_HANDLER(plJoltMsgDisconnectConstraints, OnJoltMsgDisconnectConstraints),
   }
-  PLASMA_END_MESSAGEHANDLERS;
+  PL_END_MESSAGEHANDLERS;
 }
-PLASMA_END_ABSTRACT_COMPONENT_TYPE
+PL_END_ABSTRACT_COMPONENT_TYPE
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plJoltConstraintLimitMode, 1)
-  PLASMA_ENUM_CONSTANTS(plJoltConstraintLimitMode::NoLimit, plJoltConstraintLimitMode::HardLimit/*, plJoltConstraintLimitMode::SoftLimit*/)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plJoltConstraintLimitMode, 1)
+  PL_ENUM_CONSTANTS(plJoltConstraintLimitMode::NoLimit, plJoltConstraintLimitMode::HardLimit/*, plJoltConstraintLimitMode::SoftLimit*/)
+PL_END_STATIC_REFLECTED_ENUM;
 
-PLASMA_BEGIN_STATIC_REFLECTED_ENUM(plJoltConstraintDriveMode, 1)
-  PLASMA_ENUM_CONSTANTS(plJoltConstraintDriveMode::NoDrive, plJoltConstraintDriveMode::DriveVelocity, plJoltConstraintDriveMode::DrivePosition)
-PLASMA_END_STATIC_REFLECTED_ENUM;
+PL_BEGIN_STATIC_REFLECTED_ENUM(plJoltConstraintDriveMode, 1)
+  PL_ENUM_CONSTANTS(plJoltConstraintDriveMode::NoDrive, plJoltConstraintDriveMode::DriveVelocity, plJoltConstraintDriveMode::DrivePosition)
+PL_END_STATIC_REFLECTED_ENUM;
 // clang-format on
 
 plJoltConstraintComponent::plJoltConstraintComponent() = default;
@@ -329,14 +329,14 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
     if (!GetWorld()->TryGetObject(m_hActorA, pObject) || !pObject->IsActive())
     {
       plLog::Error("{0} '{1}' parent reference is a non-existing object. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     if (!pObject->TryGetComponentOfBaseType(pRbComp))
     {
       plLog::Error("{0} '{1}' parent reference is an object without a plJoltDynamicActorComponent. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(),
         GetOwner()->GetName());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
   }
   else
@@ -361,18 +361,18 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
         SetUserFlag(0, true);
         m_LocalFrameA = GetOwner()->GetGlobalTransform();
       }
-      return PLASMA_SUCCESS;
+      return PL_SUCCESS;
     }
     else
     {
-      PLASMA_ASSERT_DEBUG(pObject != nullptr, "pRbComp and pObject should always be valid together");
+      PL_ASSERT_DEBUG(pObject != nullptr, "pRbComp and pObject should always be valid together");
       if (GetUserFlag(0) == true)
       {
         plTransform globalFrame = m_LocalFrameA;
 
         // m_localFrameA is already valid
         // assume it was in global space and move it into local space of the found parent
-        m_LocalFrameA.SetLocalTransform(pRbComp->GetOwner()->GetGlobalTransform(), globalFrame);
+        m_LocalFrameA = plTransform::MakeLocalTransform(pRbComp->GetOwner()->GetGlobalTransform(), globalFrame);
         m_LocalFrameA.m_vPosition = m_LocalFrameA.m_vPosition.CompMul(pObject->GetGlobalScaling());
       }
     }
@@ -385,7 +385,7 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
   {
     plLog::Error("{0} '{1}' parent reference is an object with an invalid plJoltDynamicActorComponent. Constraint is ignored.",
       GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_hActorA = pObject->GetHandle();
@@ -394,11 +394,11 @@ plResult plJoltConstraintComponent::FindParentBody(plUInt32& out_uiJoltBodyID, p
   {
     // m_localFrameA is now valid
     SetUserFlag(0, true);
-    m_LocalFrameA.SetLocalTransform(pObject->GetGlobalTransform(), GetOwner()->GetGlobalTransform());
+    m_LocalFrameA = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), GetOwner()->GetGlobalTransform());
     m_LocalFrameA.m_vPosition = m_LocalFrameA.m_vPosition.CompMul(pObject->GetGlobalScaling());
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, plJoltDynamicActorComponent*& pRbComp)
@@ -409,13 +409,13 @@ plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, pl
   if (m_hActorB.IsInvalidated())
   {
     plLog::Error("{0} '{1}' has no child reference. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!GetWorld()->TryGetObject(m_hActorB, pObject) || !pObject->IsActive())
   {
     plLog::Error("{0} '{1}' child reference is a non-existing object. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   if (!pObject->TryGetComponentOfBaseType(pRbComp))
@@ -427,7 +427,7 @@ plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, pl
     {
       plLog::Error("{0} '{1}' child reference is an object without a plJoltDynamicActorComponent. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(),
         GetOwner()->GetName());
-      return PLASMA_FAILURE;
+      return PL_FAILURE;
     }
 
     pObject->TryGetComponentOfBaseType(pRbComp);
@@ -440,7 +440,7 @@ plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, pl
   {
     plLog::Error("{0} '{1}' child reference is an object with an invalid plJoltDynamicActorComponent. Constraint is ignored.",
       GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-    return PLASMA_FAILURE;
+    return PL_FAILURE;
   }
 
   m_hActorB = pObject->GetHandle();
@@ -454,17 +454,17 @@ plResult plJoltConstraintComponent::FindChildBody(plUInt32& out_uiJoltBodyID, pl
       if (!GetWorld()->TryGetObject(m_hActorBAnchor, pAnchorObject))
       {
         plLog::Error("{0} '{1}' anchor reference is a non-existing object. Constraint is ignored.", GetDynamicRTTI()->GetTypeName(), GetOwner()->GetName());
-        return PLASMA_FAILURE;
+        return PL_FAILURE;
       }
     }
 
     // m_localFrameB is now valid
     SetUserFlag(1, true);
-    m_LocalFrameB.SetLocalTransform(pObject->GetGlobalTransform(), pAnchorObject->GetGlobalTransform());
+    m_LocalFrameB = plTransform::MakeLocalTransform(pObject->GetGlobalTransform(), pAnchorObject->GetGlobalTransform());
     m_LocalFrameB.m_vPosition = m_LocalFrameB.m_vPosition.CompMul(pObject->GetGlobalScaling());
   }
 
-  return PLASMA_SUCCESS;
+  return PL_SUCCESS;
 }
 
 plTransform plJoltConstraintComponent::ComputeParentBodyGlobalFrame() const
@@ -475,7 +475,7 @@ plTransform plJoltConstraintComponent::ComputeParentBodyGlobalFrame() const
     if (GetWorld()->TryGetObject(m_hActorA, pObject))
     {
       plTransform res;
-      res.SetGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameA);
+      res = plTransform::MakeGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameA);
       return res;
     }
   }
@@ -491,7 +491,7 @@ plTransform plJoltConstraintComponent::ComputeChildBodyGlobalFrame() const
     if (GetWorld()->TryGetObject(m_hActorB, pObject))
     {
       plTransform res;
-      res.SetGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameB);
+      res = plTransform::MakeGlobalTransform(pObject->GetGlobalTransform(), m_LocalFrameB);
       return res;
     }
   }
@@ -515,4 +515,4 @@ void plJoltConstraintComponent::QueueApplySettings()
 }
 
 
-PLASMA_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltConstraintComponent);
+PL_STATICLINK_FILE(JoltPlugin, JoltPlugin_Constraints_Implementation_JoltConstraintComponent);

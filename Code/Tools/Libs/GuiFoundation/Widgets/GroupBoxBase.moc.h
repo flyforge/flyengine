@@ -6,13 +6,13 @@
 
 class QMimeData;
 
-class PLASMA_GUIFOUNDATION_DLL plQtGroupBoxBase : public QWidget
+class PL_GUIFOUNDATION_DLL plQtGroupBoxBase : public QWidget
 {
   Q_OBJECT
 public:
   plQtGroupBoxBase(QWidget* pParent, bool bCollapsible);
 
-  virtual void SetTitle(const char* szTitle);
+  virtual void SetTitle(plStringView sTitle);
   QString GetTitle() const;
 
   virtual void SetBoldTitle(bool bBold);
@@ -35,13 +35,13 @@ public:
 
 Q_SIGNALS:
   void CollapseStateChanged(bool bCollapsed);
-  void DragStarted(QMimeData& mimeData);
+  void DragStarted(QMimeData& ref_mimeData);
 
 protected:
   enum Constants
   {
-    Rounding = 8,
-    Spacing = 8,
+    Rounding = 4,
+    Spacing = 1,
   };
 
   void DrawHeader(QPainter& p, const QRect& rect);
