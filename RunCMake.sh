@@ -2,7 +2,7 @@
 
 # read arguments
 opts=$(getopt \
-  --longoptions help,clang,setup,no-cmake,no-unity,build-type: \
+  --longoptions help,clang,setup,no-cmake,no-unity,build-type,skip-platform-check: \
   --name "$(basename "$0")" \
   --options "" \
   -- "$@"
@@ -13,6 +13,7 @@ eval set --$opts
 RunCMake=true
 BuildType="Dev"
 NoUnity=""
+PlatformChecks=true
 
 
 while [[ $# -gt 0 ]]; do
@@ -24,6 +25,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-cmake    Do not invoke cmake (usefull when only --setup is needed)"
       echo "  --build-type  Which build type cmake should be invoked with Debug|Dev|Shipping"
       echo "  --no-unity    Disable unity builds. This might help to improve code completion in various editors"
+      echo " --skip-platform-check Disables the platform compatability checks
       exit 0
       ;;
 
@@ -39,6 +41,11 @@ while [[ $# -gt 0 ]]; do
 
     --no-cmake)
       RunCMake=false
+      shift 1
+      ;;
+
+    --skip-platform-check)
+      PlatformChecks=false
       shift 1
       ;;
 
@@ -91,7 +98,7 @@ verlt() {
     [ "$1" = "$2" ] && return 1 || verlte $1 $2
 }
 
-if [ "$Distribution" = "Ubuntu" -a "$Version" = "22" ] || [ "$Distribution" = "Mint" -a "$Version" = "21" ]; then
+if [ "$Distribution" = "Ubuntu" -a "$Version" = "22" ] || [ "$Distribution" = "Mint" -a "$Version" = "21" ] || "$PlatformChecks" = false; then
   packages=(cmake build-essential ninja-build libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev uuid-dev mold libfreetype-dev libtinfo5)
 
   if [ "$UseClang" = true ]; then
