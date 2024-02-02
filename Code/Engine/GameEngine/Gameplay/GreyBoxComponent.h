@@ -14,6 +14,8 @@ struct plMsgExtractRenderData;
 struct plMsgBuildStaticMesh;
 struct plMsgExtractGeometry;
 struct plMsgExtractOccluderData;
+struct plMsgSetMeshMaterial;
+struct plMsgSetColor;
 struct plMsgTransformChanged;
 class plMeshResourceDescriptor;
 using plMeshResourceHandle = plTypedResourceHandle<class plMeshResource>;
@@ -143,6 +145,8 @@ protected:
   void OnBuildStaticMesh(plMsgBuildStaticMesh& msg) const;
   void OnMsgExtractGeometry(plMsgExtractGeometry& msg) const;
   void OnMsgExtractOccluderData(plMsgExtractOccluderData& msg) const;
+  void OnMsgSetMeshMaterial(plMsgSetMeshMaterial& ref_msg); // [ msg handler ]
+  void OnMsgSetColor(plMsgSetColor& ref_msg);               // [ msg handler ]
 
   plEnum<plGreyBoxShape> m_Shape;
   plMaterialResourceHandle m_hMaterial;

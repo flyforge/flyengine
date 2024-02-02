@@ -548,29 +548,31 @@ plUInt32 plShadowPool::AddDirectionalLight(const plDirectionalLightComponent* pD
       center.z = plMath::Clamp(center.z, -1000000.0f, +1000000.0f);
 
       endCorner.z -= x;
-      float radius = endCorner.GetLength();
+      const float radius = endCorner.GetLength();
 
-      if (false)
-      {
-        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere::MakeFromCenterAndRadius(center, radius), plColor::OrangeRed);
-      }
-
-      float fCameraToCenterDistance = radius + fNearPlaneOffset;
-      plVec3 shadowCameraPos = center - vLightDirForwards * fCameraToCenterDistance;
-      float fFarPlane = radius + fCameraToCenterDistance;
+      const float fCameraToCenterDistance = radius + fNearPlaneOffset;
+      const plVec3 shadowCameraPos = center - vLightDirForwards * fCameraToCenterDistance;
+      const float fFarPlane = radius + fCameraToCenterDistance;
 
       plCamera& camera = shadowView.m_Camera;
       camera.LookAt(shadowCameraPos, center, vLightDirUp);
       camera.SetCameraMode(plCameraMode::OrthoFixedWidth, radius * 2.0f, 0.0f, fFarPlane);
 
       // stabilize
-      plMat4 worldToLightMatrix = pView->GetViewMatrix(plCameraEye::Left);
+      const plMat4 worldToLightMatrix = pView->GetViewMatrix(plCameraEye::Left);
+      const float texelInWorld = (2.0f * radius) / cvar_RenderingShadowsMaxShadowMapSize;
       plVec3 offset = worldToLightMatrix.TransformPosition(plVec3::MakeZero());
-      float texelInWorld = (2.0f * radius) / cvar_RenderingShadowsMaxShadowMapSize;
       offset.x -= plMath::Floor(offset.x / texelInWorld) * texelInWorld;
       offset.y -= plMath::Floor(offset.y / texelInWorld) * texelInWorld;
 
       camera.MoveLocally(0.0f, offset.x, offset.y);
+
+      if (false)
+      {
+        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere::MakeFromCenterAndRadius(center, radius), plColor::OrangeRed);
+
+        plDebugRenderer::DrawLineSphere(pReferenceView->GetHandle(), plBoundingSphere::MakeFromCenterAndRadius(plVec3(0, 0, fCameraToCenterDistance), radius), plColor::OrangeRed, plTransform::MakeFromMat4(camera.GetViewMatrix().GetInverse()));
+      }
     }
 
     plRenderWorld::AddViewToRender(shadowView.m_hView);
@@ -927,7 +929,7 @@ void plShadowPool::OnExtractionEvent(const plRenderWorldExtractionEvent& e)
 
         plUInt32 uiParams2Index = GET_SHADOW_PARAMS2_INDEX(shadowData.m_uiPackedDataOffset);
         plVec4& shadowParams2 = packedShadowData[uiParams2Index];
-        shadowParams2.x = 1.0f - (plMath::Max(penumbraSize, goodPenumbraSize) + texelSize) * 2.0f;
+        shadowParams2.x = 1.0f - plMath::Max(penumbraSize, goodPenumbraSize);
         shadowParams2.y = ditherMultiplier;
         shadowParams2.z = ditherMultiplier * zRange;
         shadowParams2.w = penumbraSizeIncrement * relativeShadowSize;

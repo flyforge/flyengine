@@ -2,6 +2,7 @@
 
 #include <Core/Graphics/Geometry.h>
 #include <Core/Interfaces/PhysicsWorldModule.h>
+#include <Core/Messages/SetColorMessage.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
 #include <GameEngine/Gameplay/GreyBoxComponent.h>
@@ -51,6 +52,8 @@ PL_BEGIN_COMPONENT_TYPE(plGreyBoxComponent, 5, plComponentMode::Static)
     PL_MESSAGE_HANDLER(plMsgBuildStaticMesh, OnBuildStaticMesh),
     PL_MESSAGE_HANDLER(plMsgExtractGeometry, OnMsgExtractGeometry),
     PL_MESSAGE_HANDLER(plMsgExtractOccluderData, OnMsgExtractOccluderData),
+    PL_MESSAGE_HANDLER(plMsgSetMeshMaterial, OnMsgSetMeshMaterial),
+    PL_MESSAGE_HANDLER(plMsgSetColor, OnMsgSetColor),
   }
   PL_END_MESSAGEHANDLERS;
 }
@@ -417,6 +420,20 @@ void plGreyBoxComponent::OnMsgExtractOccluderData(plMsgExtractOccluderData& msg)
   }
 
   msg.AddOccluder(m_pOccluderObject.Borrow(), GetOwner()->GetGlobalTransform());
+}
+
+void plGreyBoxComponent::OnMsgSetMeshMaterial(plMsgSetMeshMaterial& ref_msg)
+{
+  m_hMaterial = ref_msg.m_hMaterial;
+
+  InvalidateCachedRenderData();
+}
+
+void plGreyBoxComponent::OnMsgSetColor(plMsgSetColor& ref_msg)
+{
+  ref_msg.ModifyColor(m_Color);
+
+  InvalidateCachedRenderData();
 }
 
 void plGreyBoxComponent::InvalidateMesh()
