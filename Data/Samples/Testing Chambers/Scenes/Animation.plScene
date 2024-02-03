@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{9942389368597704355,5056955079846159374}}
-		u4 %Hash{16598608164534686023}
+		u4 %Hash{18095951808727870470}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
@@ -32,6 +32,7 @@ o
 			s{"{ 94d8dc0c-60c8-4fd3-ae7e-4f3799e7fb89 }"}
 			s{"{ 9a8ebd2a-dd92-4ea9-8dbe-ad1ad6feda14 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
+			s{"{ aa3be7d1-d9e2-4ddc-b6fc-6deaa22696eb }"}
 			s{"{ b9c6b09a-66be-4c96-9d5c-9019b9b5430e }"}
 			s{"{ d63193e0-3e77-4960-a51a-9c8a45393450 }"}
 			s{"{ e00262e8-58f5-42f5-880d-569257047201 }"}
@@ -56,6 +57,7 @@ o
 			s{"{ 94d8dc0c-60c8-4fd3-ae7e-4f3799e7fb89 }"}
 			s{"{ 9a8ebd2a-dd92-4ea9-8dbe-ad1ad6feda14 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
+			s{"{ aa3be7d1-d9e2-4ddc-b6fc-6deaa22696eb }"}
 			s{"{ d63193e0-3e77-4960-a51a-9c8a45393450 }"}
 			s{"{ e00262e8-58f5-42f5-880d-569257047201 }"}
 			s{"{ ec2d7b9a-6f2a-421e-bc57-5b589c66a0a5 }"}
@@ -713,6 +715,32 @@ o
 }
 o
 {
+	Uuid %id{u4{13889251126284301185,4834316787162374319}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{17331980948162552494,4973353294322715126}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x25C66DC1,0x277B38C1,0x2F506740}}
+		Quat %LocalRotation{f{0,0x0B09353F,0x7083F5B9,0xD800353F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
 	Uuid %id{u4{11958716632546957014,4847360541642988938}}
 	s %t{"plGameObject"}
 	u3 %v{1}
@@ -873,6 +901,38 @@ o
 		f %Value1{0}
 		f %Value2{0}
 		f %Value3{0}
+	}
+}
+o
+{
+	Uuid %id{u4{17331980948162552494,4973353294322715126}}
+	s %t{"plDecalComponent"}
+	u3 %v{8}
+	p
+	{
+		b %Active{1}
+		s %ApplyToDynamic{""}
+		ColorGamma %Color{u1{255,255,255,255}}
+		VarArray %Decals
+		{
+			s{"{ aa3be7d1-d9e2-4ddc-b6fc-6deaa22696eb }"}
+		}
+		Color %EmissiveColor{f{0,0,0,0x0000803F}}
+		Vec3 %Extents{f{0x0000803F,0x0000803F,0x0000803F}}
+		plVarianceTypeTime %FadeOutDelay
+		{
+			f %Variance{0}
+			Time %Value{d{0}}
+		}
+		Time %FadeOutDuration{d{0}}
+		Angle %InnerFadeAngle{f{0xF3665F3F}}
+		b %MapNormalToGeometry{1}
+		s %OnFinishedAction{"plOnComponentFinishedAction::None"}
+		Angle %OuterFadeAngle{f{0xC2B8B23F}}
+		s %ProjectionAxis{"plBasisAxis::PositiveX"}
+		f %SizeVariance{0}
+		f %SortOrder{0}
+		b %WrapAround{0}
 	}
 }
 o
@@ -1877,6 +1937,7 @@ o
 			Uuid{u4{13102665823260780598,10395193144561511314}}
 			Uuid{u4{2370582970120980703,15181957159360090340}}
 			Uuid{u4{579611923524634592,16318104803921398191}}
+			Uuid{u4{13889251126284301185,4834316787162374319}}
 		}
 		Uuid %Settings{u4{12518859769286275017,4712398715231436096}}
 	}
@@ -4359,6 +4420,23 @@ o
 }
 o
 {
+	Uuid %id{u4{5029820202441089334,225222788418309325}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plManipulatorAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxManipulatorAttribute"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{11538464635628493600,530491051274225601}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -4647,6 +4725,23 @@ o
 	p
 	{
 		Vec2 %Value{f{0x00004842,0x00004842}}
+	}
+}
+o
+{
+	Uuid %id{u4{12485413893421258756,3989414361314950576}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualizerAttribute"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plBoxVisualizerAttribute"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -5244,6 +5339,23 @@ o
 }
 o
 {
+	Uuid %id{u4{10520482323893588041,11455680270028436560}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plOnComponentFinishedAction"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{10799938453523757431,11702988725276979427}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -5465,6 +5577,23 @@ o
 	p
 	{
 		s %Category{"Editing"}
+	}
+}
+o
+{
+	Uuid %id{u4{14914882495862036790,14215567099844400741}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVarianceTypeBase"}
+		u3 %TypeVersion{1}
 	}
 }
 o
@@ -5729,6 +5858,40 @@ o
 	p
 	{
 		Vec2u %Value{u3{64,64}}
+	}
+}
+o
+{
+	Uuid %id{u4{1066394464403686282,17573563886947607708}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVarianceTypeBase"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plVarianceTypeTime"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14833756162262539472,17680663102663396398}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderComponent"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDecalComponent"}
+		u3 %TypeVersion{8}
 	}
 }
 o

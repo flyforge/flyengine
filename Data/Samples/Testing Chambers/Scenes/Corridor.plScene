@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{7297922959506964864,5177324930371449723}}
-		u4 %Hash{51456711238728801}
+		u4 %Hash{16799074028610189337}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
@@ -4441,10 +4441,10 @@ o
 	u3 %v{2}
 	p
 	{
-		b %Active{0}
+		b %Active{1}
 		Angle %MaxDeviation{f{0xDB0FC93F}}
 		s %MaxWindStrength{"plWindStrength::GentleBreple"}
-		s %MinWindStrength{"plWindStrength::Calm"}
+		s %MinWindStrength{"plWindStrength::LightBreple"}
 	}
 }
 o
@@ -4695,7 +4695,7 @@ o
 	p
 	{
 		b %Active{1}
-		b %CastShadows{0}
+		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %Intensity{0x00004842}
 		ColorGamma %LightColor{u1{250,172,62,255}}
@@ -7348,7 +7348,7 @@ o
 	p
 	{
 		b %Active{1}
-		b %CastShadows{0}
+		b %CastShadows{1}
 		f %ConstantBias{0xCDCCCC3D}
 		f %Intensity{0x0000FA43}
 		ColorGamma %LightColor{u1{250,69,69,255}}

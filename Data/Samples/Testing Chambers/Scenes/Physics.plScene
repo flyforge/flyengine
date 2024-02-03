@@ -11,7 +11,7 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{16033299415433335720,5748835052109362040}}
-		u4 %Hash{7648815520889883009}
+		u4 %Hash{14592256149080237964}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
@@ -2080,19 +2080,20 @@ o
 {
 	Uuid %id{u4{6911316822843827559,2390714394058165656}}
 	s %t{"plJoltClothSheetComponent"}
-	u3 %v{1}
+	u3 %v{2}
 	p
 	{
 		b %Active{1}
 		u1 %CollisionLayer{0}
 		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		f %Damping{0xCDCC4C3E}
+		f %Damping{0x0000003F}
 		s %Flags{"plJoltClothSheetFlags::FixedEdgeTop"}
-		f %GravityFactor{0x0000803F}
+		f %GravityFactor{0x00000040}
 		s %Material{"{ d9eadd9a-e1e3-488b-9ede-ded29ebcb522 }"}
 		Vec2u %Segments{u3{16,16}}
 		Vec2 %Size{f{0x00000040,0x00008040}}
 		Vec2 %TextureScale{f{0x0000803F,0x0000803F}}
+		f %Thickness{0xCDCCCC3D}
 		f %WindInfluence{0x0000803F}
 	}
 }
@@ -9737,6 +9738,32 @@ o
 }
 o
 {
+	Uuid %id{u4{6012018963150601883,5272853870230273368}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{13551858397373434763,5707123842652671372}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0xA1453FC1,0xA22B18C1,0x7D561040}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000803F,0x0000803F,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
 	Uuid %id{u4{16996444949911002540,5274580211478089382}}
 	s %t{"plGreyBoxComponent"}
 	u3 %v{5}
@@ -13185,6 +13212,22 @@ o
 }
 o
 {
+	Uuid %id{u4{13551858397373434763,5707123842652671372}}
+	s %t{"plJoltSettingsComponent"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		Vec3 %CharacterGravity{f{0,0,0x000040C1}}
+		f %FixedFrameRate{0x00007042}
+		u3 %MaxBodies{10000}
+		u3 %MaxSubSteps{4}
+		Vec3 %ObjectGravity{f{0,0,0x000040C1}}
+		s %SteppingMode{"plJoltSteppingMode::Variable"}
+	}
+}
+o
+{
 	Uuid %id{u4{4742786474178939175,5708477175092987937}}
 	s %t{"plPrefabReferenceComponent"}
 	u3 %v{4}
@@ -14297,6 +14340,7 @@ o
 			Uuid{u4{10576720244930297211,2665903565745907028}}
 			Uuid{u4{12362985929092581296,2185430148223437860}}
 			Uuid{u4{10607337670232843571,7624401889646398409}}
+			Uuid{u4{6012018963150601883,5272853870230273368}}
 		}
 		Uuid %Settings{u4{17165472681167466672,5590908592681332920}}
 	}
@@ -14836,19 +14880,20 @@ o
 {
 	Uuid %id{u4{12206127436411266847,7053418198699295655}}
 	s %t{"plJoltClothSheetComponent"}
-	u3 %v{1}
+	u3 %v{2}
 	p
 	{
 		b %Active{1}
 		u1 %CollisionLayer{0}
 		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		f %Damping{0xCDCC4C3E}
+		f %Damping{0x0000003F}
 		s %Flags{"plJoltClothSheetFlags::FixedEdgeTop"}
-		f %GravityFactor{0x0000803F}
+		f %GravityFactor{0x00000040}
 		s %Material{"{ d9eadd9a-e1e3-488b-9ede-ded29ebcb522 }"}
 		Vec2u %Segments{u3{16,16}}
 		Vec2 %Size{f{0x00000040,0x00008040}}
 		Vec2 %TextureScale{f{0x0000803F,0x0000803F}}
+		f %Thickness{0xCDCCCC3D}
 		f %WindInfluence{0x0000803F}
 	}
 }
@@ -22637,7 +22682,7 @@ o
 {
 	Uuid %id{u4{10694604022372291703,12001071366380503754}}
 	s %t{"plJoltClothSheetComponent"}
-	u3 %v{1}
+	u3 %v{2}
 	p
 	{
 		b %Active{1}
@@ -22650,6 +22695,7 @@ o
 		Vec2u %Segments{u3{16,16}}
 		Vec2 %Size{f{0x00004040,0x00008040}}
 		Vec2 %TextureScale{f{0x0000803F,0x0000803F}}
+		f %Thickness{0xCDCC4C3D}
 		f %WindInfluence{0x9A99993E}
 	}
 }
@@ -37203,6 +37249,53 @@ o
 }
 o
 {
+	Uuid %id{u4{17090450669598961091,80182672492759660}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4375927616953309961,8032621296943777388}}
+			Uuid{u4{3217354318626001727,13607308470824328971}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MaxSubSteps"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{3662948374443274946,135351360075284356}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i3 %Value{10000}
+	}
+}
+o
+{
+	Uuid %id{u4{15317266707907478652,140637356826072730}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{17915543451299601587,3688190030054222678}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"ObjectGravity"}
+		s %Type{"plVec3"}
+	}
+}
+o
+{
 	Uuid %id{u4{7697819670466120001,174457405079484773}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -37271,11 +37364,12 @@ o
 o
 {
 	Uuid %id{u4{11334428030917178598,243316305468639402}}
-	s %t{"plDefaultValueAttribute"}
+	s %t{"plAssetBrowserAttribute"}
 	u3 %v{1}
 	p
 	{
-		Vec2 %Value{f{0x0000803F,0x0000803F}}
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Material;"}
 	}
 }
 o
@@ -37332,6 +37426,24 @@ o
 	{
 		s %DependencyFlags{"plDependencyFlags::Package"}
 		s %Filter{";CompatibleAsset_Jolt_Colmesh_Triangle;"}
+	}
+}
+o
+{
+	Uuid %id{u4{3598904263104289719,553417922950902371}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{9296336109142334906,1438051571237321576}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"CharacterGravity"}
+		s %Type{"plVec3"}
 	}
 }
 o
@@ -37397,6 +37509,21 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
 		s %Name{"plOnJoltContact::RollZReactions"}
 		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{9705315306440015348,985130286413251634}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::IsEnum|plPropertyFlags::Phantom"}
+		s %Name{"SteppingMode"}
+		s %Type{"plJoltSteppingMode"}
 	}
 }
 o
@@ -37499,6 +37626,16 @@ o
 		s %Property3{""}
 		s %Property4{""}
 		s %Property5{""}
+	}
+}
+o
+{
+	Uuid %id{u4{9296336109142334906,1438051571237321576}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0,0,0x000040C1}}
 	}
 }
 o
@@ -37610,9 +37747,10 @@ o
 			Uuid{u4{7451986952950169770,14220596372050898378}}
 			Uuid{u4{13359223243478087934,12353338403085895990}}
 			Uuid{u4{543832367317831998,7043810729315018193}}
+			Uuid{u4{51172704524408416,4108755137431574894}}
 		}
 		s %TypeName{"plJoltClothSheetComponent"}
-		u3 %TypeVersion{1}
+		u3 %TypeVersion{2}
 	}
 }
 o
@@ -37678,6 +37816,21 @@ o
 	{
 		Angle %Max{f{0x147A4340}}
 		Angle %Min{f{0}}
+	}
+}
+o
+{
+	Uuid %id{u4{14917809404742968134,2163226231439967025}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{2}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"plJoltSteppingMode::SemiFixed"}
+		s %Type{"plUInt32"}
 	}
 }
 o
@@ -37839,6 +37992,17 @@ o
 	p
 	{
 		f %Max{0x0000803F}
+		f %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{2777343086991454336,2653564713545775847}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Max{0x0000003F}
 		f %Min{0}
 	}
 }
@@ -38105,6 +38269,16 @@ o
 }
 o
 {
+	Uuid %id{u4{17915543451299601587,3688190030054222678}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0,0,0xC3F51CC1}}
+	}
+}
+o
+{
 	Uuid %id{u4{14322535830521457347,3703313291926644506}}
 	s %t{"plDefaultValueAttribute"}
 	u3 %v{1}
@@ -38162,6 +38336,24 @@ o
 }
 o
 {
+	Uuid %id{u4{51172704524408416,4108755137431574894}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{13821804702010674944,4509478986594583778}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Color"}
+		s %Type{"plColor"}
+	}
+}
+o
+{
 	Uuid %id{u4{3476504569682976126,4142094656406938069}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -38215,6 +38407,16 @@ o
 	s %t{"plGameObjectReferenceAttribute"}
 	u3 %v{1}
 	p{}
+}
+o
+{
+	Uuid %id{u4{13821804702010674944,4509478986594583778}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+	}
 }
 o
 {
@@ -38819,7 +39021,7 @@ o
 	u3 %v{1}
 	p
 	{
-		Color %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Vec2 %Value{f{0x0000803F,0x0000803F}}
 	}
 }
 o
@@ -38952,8 +39154,8 @@ o
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"Color"}
-		s %Type{"plColor"}
+		s %Name{"TextureScale"}
+		s %Type{"plVec2"}
 	}
 }
 o
@@ -39077,6 +39279,21 @@ o
 }
 o
 {
+	Uuid %id{u4{368230403278189664,7565208337164763227}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{1}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"plJoltSteppingMode::Fixed"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
 	Uuid %id{u4{9174418188135270681,7612131575038885983}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -39113,17 +39330,6 @@ o
 	{
 		Invalid %Max{}
 		f %Min{0}
-	}
-}
-o
-{
-	Uuid %id{u4{11182891094190614257,7797376815386138246}}
-	s %t{"plAssetBrowserAttribute"}
-	u3 %v{1}
-	p
-	{
-		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
-		s %Filter{";CompatibleAsset_Material;"}
 	}
 }
 o
@@ -39167,6 +39373,16 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plSkyBoxComponent"}
 		u3 %TypeVersion{4}
+	}
+}
+o
+{
+	Uuid %id{u4{4375927616953309961,8032621296943777388}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i3 %Value{4}
 	}
 }
 o
@@ -39549,12 +39765,16 @@ o
 	u3 %v{2}
 	p
 	{
-		VarArray %Attributes{}
+		VarArray %Attributes
+		{
+			Uuid{u4{13874404211790006483,10865735298852512964}}
+			Uuid{u4{2777343086991454336,2653564713545775847}}
+		}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::Bitflags|plPropertyFlags::Phantom"}
-		s %Name{"Flags"}
-		s %Type{"plJoltClothSheetFlags"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Thickness"}
+		s %Type{"float"}
 	}
 }
 o
@@ -39696,6 +39916,16 @@ o
 }
 o
 {
+	Uuid %id{u4{13890570886374449622,10483625160463202664}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Physics/Jolt/Misc"}
+	}
+}
+o
+{
 	Uuid %id{u4{8772170675800591874,10490065977640219433}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -39762,6 +39992,16 @@ o
 	p
 	{
 		f %Value{0x0000803F}
+	}
+}
+o
+{
+	Uuid %id{u4{13874404211790006483,10865735298852512964}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0xCDCC4C3D}
 	}
 }
 o
@@ -39846,6 +40086,17 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plDebugTextComponent"}
 		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15310835646966940693,11156031514794540737}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i3 %Max{1000000}
+		i3 %Min{500}
 	}
 }
 o
@@ -40079,6 +40330,25 @@ o
 }
 o
 {
+	Uuid %id{u4{342119817558806006,12090710062424139293}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{3662948374443274946,135351360075284356}}
+			Uuid{u4{15310835646966940693,11156031514794540737}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MaxBodies"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
 	Uuid %id{u4{13359223243478087934,12353338403085895990}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -40090,9 +40360,9 @@ o
 		}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"TextureScale"}
-		s %Type{"plVec2"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
+		s %Name{"Material"}
+		s %Type{"plConstCharPtr"}
 	}
 }
 o
@@ -40263,12 +40533,66 @@ o
 }
 o
 {
+	Uuid %id{u4{8999517728430759047,13323096605313117506}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{13890570886374449622,10483625160463202664}}
+		}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plSettingsComponent"}
+		s %PluginName{"plJoltPlugin"}
+		VarArray %Properties
+		{
+			Uuid{u4{15317266707907478652,140637356826072730}}
+			Uuid{u4{3598904263104289719,553417922950902371}}
+			Uuid{u4{9705315306440015348,985130286413251634}}
+			Uuid{u4{17169938656181935155,16085536238158797612}}
+			Uuid{u4{17090450669598961091,80182672492759660}}
+			Uuid{u4{342119817558806006,12090710062424139293}}
+		}
+		s %TypeName{"plJoltSettingsComponent"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
 	Uuid %id{u4{3046758297013850585,13482339641996674343}}
 	s %t{"plDefaultValueAttribute"}
 	u3 %v{1}
 	p
 	{
 		f %Value{0x0000803E}
+	}
+}
+o
+{
+	Uuid %id{u4{14603291252312003475,13486699171256017134}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"plJoltSteppingMode::Variable"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{3217354318626001727,13607308470824328971}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		i3 %Max{100}
+		i3 %Min{1}
 	}
 }
 o
@@ -40321,6 +40645,16 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
 		s %Name{"ParentActor"}
 		s %Type{"plConstCharPtr"}
+	}
+}
+o
+{
+	Uuid %id{u4{14845518768890651852,13684865016670626269}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x00007042}
 	}
 }
 o
@@ -40386,15 +40720,12 @@ o
 	u3 %v{2}
 	p
 	{
-		VarArray %Attributes
-		{
-			Uuid{u4{11182891094190614257,7797376815386138246}}
-		}
+		VarArray %Attributes{}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
-		s %Name{"Material"}
-		s %Type{"plConstCharPtr"}
+		s %Flags{"plPropertyFlags::Bitflags|plPropertyFlags::Phantom"}
+		s %Name{"Flags"}
+		s %Type{"plJoltClothSheetFlags"}
 	}
 }
 o
@@ -40432,6 +40763,21 @@ o
 	p
 	{
 		s %Suffix{" kg"}
+	}
+}
+o
+{
+	Uuid %id{u4{1530163414344645866,14554908406679001705}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{2}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"plJoltSteppingMode::Default"}
+		s %Type{"plUInt32"}
 	}
 }
 o
@@ -40814,6 +41160,25 @@ o
 }
 o
 {
+	Uuid %id{u4{17169938656181935155,16085536238158797612}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{14845518768890651852,13684865016670626269}}
+			Uuid{u4{2650501445341403426,18058068512248498105}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"FixedFrameRate"}
+		s %Type{"float"}
+	}
+}
+o
+{
 	Uuid %id{u4{7627547865090240548,16091610417288627589}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -40905,6 +41270,29 @@ o
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plCameraMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4369906223170261251,16510173020267648012}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plJoltPlugin"}
+		VarArray %Properties
+		{
+			Uuid{u4{1530163414344645866,14554908406679001705}}
+			Uuid{u4{14603291252312003475,13486699171256017134}}
+			Uuid{u4{368230403278189664,7565208337164763227}}
+			Uuid{u4{14917809404742968134,2163226231439967025}}
+		}
+		s %TypeName{"plJoltSteppingMode"}
 		u3 %TypeVersion{1}
 	}
 }
@@ -41322,6 +41710,17 @@ o
 		VarArray %Properties{}
 		s %TypeName{"plBasisAxis"}
 		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{2650501445341403426,18058068512248498105}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Max{0x00007A44}
+		f %Min{0x0000803F}
 	}
 }
 o
