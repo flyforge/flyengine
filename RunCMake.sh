@@ -25,7 +25,7 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-cmake    Do not invoke cmake (usefull when only --setup is needed)"
       echo "  --build-type  Which build type cmake should be invoked with Debug|Dev|Shipping"
       echo "  --no-unity    Disable unity builds. This might help to improve code completion in various editors"
-      echo " --skip-platform-check Disables the platform compatability checks
+      echo " --skip-platform-check Disables the platform compatability checks"
       exit 0
       ;;
 
