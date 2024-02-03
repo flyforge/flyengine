@@ -1,0 +1,2225 @@
+HeaderV2
+{
+o
+{
+	Uuid %id{u4{8991250395416778381,5524739600337817759}}
+	s %t{"plAssetDocumentInfo"}
+	u3 %v{2}
+	s %n{"Header"}
+	p
+	{
+		s %AssetType{"Material"}
+		VarArray %Dependencies
+		{
+			s{"{ 2806d24a-d8ae-4f2a-b77a-39c1df02ef27 }"}
+		}
+		Uuid %DocumentID{u4{8991250395416778381,5524739600337817759}}
+		u4 %Hash{8150853489083310991}
+		VarArray %MetaInfo{}
+		VarArray %Outputs{}
+		VarArray %PackageDeps
+		{
+			s{"{ 2806d24a-d8ae-4f2a-b77a-39c1df02ef27 }"}
+			s{"{ 7b626370-02ee-4c54-a86c-27470958d4b5 }"}
+			s{"{ ac49f52b-70b6-468e-b934-af2373a806bc }"}
+			s{"{ b088e0da-a26d-4894-9eef-0cd28472ac03 }"}
+			s{"{ f207c20e-dfa0-418c-973d-204aba4077ae }"}
+		}
+		VarArray %References
+		{
+			s{"{ 2806d24a-d8ae-4f2a-b77a-39c1df02ef27 }"}
+			s{"{ 7b626370-02ee-4c54-a86c-27470958d4b5 }"}
+			s{"{ b088e0da-a26d-4894-9eef-0cd28472ac03 }"}
+			s{"{ f207c20e-dfa0-418c-973d-204aba4077ae }"}
+		}
+	}
+}
+}
+Objects
+{
+o
+{
+	Uuid %id{u4{14642463430667555335,4648933048211269634}}
+	s %t{"Shaders/Materials/ClearCoatMaterial.plShader"}
+	u3 %v{2}
+	p
+	{
+		s %BLEND_MODE{"BLEND_MODE::BLEND_MODE_OPAQUE"}
+		Color %BaseColor{f{0x0000803F,0x0000803F,0x0000803F,0xFCFA7A3F}}
+		s %BaseTexture{"{ b088e0da-a26d-4894-9eef-0cd28472ac03 }"}
+		f %Clearcoat{0x0000803F}
+		f %ClearcoatRoughness{0x0000003F}
+		s %ClearcoatTexture{""}
+		Color %EmissiveColor{f{0,0,0,0x0000803F}}
+		s %EmissiveTexture{""}
+		f %MaskThreshold{0x0000803E}
+		s %MetallicTexture{""}
+		f %MetallicValue{0x0000803F}
+		s %NormalTexture{"{ 7b626370-02ee-4c54-a86c-27470958d4b5 }"}
+		s %OcclusionTexture{""}
+		s %OrmTexture{""}
+		s %RoughnessTexture{"{ f207c20e-dfa0-418c-973d-204aba4077ae }"}
+		f %RoughnessValue{0x0000803F}
+		s %SHADING_MODE{"SHADING_MODE::SHADING_MODE_LIT"}
+		b %TWO_SIDED{0}
+		b %UseBaseTexture{1}
+		b %UseClearcoatInfluenceTexture{0}
+		b %UseClearcoatNormalTexture{0}
+		b %UseClearcoatRoughnessTexture{0}
+		b %UseEmissiveTexture{0}
+		b %UseMetallicTexture{0}
+		b %UseNormalTexture{1}
+		b %UseOcclusionTexture{0}
+		b %UseOrmTexture{0}
+		b %UseRoughnessTexture{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4442556435602264961,4712406888433471890}}
+	s %t{"ShaderNode::RoughnessTexture"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0xEE299F44,0x96168443}}
+		s %Texture{"{ f207c20e-dfa0-418c-973d-204aba4077ae }"}
+	}
+}
+o
+{
+	Uuid %id{u4{15300215563199959955,4736941646390956527}}
+	s %t{"ShaderNode::NormalTexture"}
+	u3 %v{1}
+	p
+	{
+		s %Name{"NormalTexture"}
+		Vec2 %Node::Pos{f{0xE312A244,0xB1DC1A43}}
+		s %Texture{"{ 7b626370-02ee-4c54-a86c-27470958d4b5 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{18214763650773206403,4775500323051394213}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{1835883126650468778,5211182637224752247}}
+		s %Connection::SourcePin{"RGBA"}
+		Uuid %Connection::Target{u4{13785748936382107008,5101763498737384680}}
+		s %Connection::TargetPin{"BaseColor"}
+	}
+}
+o
+{
+	Uuid %id{u4{9254631687227051703,5015897373109426805}}
+	s %t{"plMaterialAssetProperties"}
+	u3 %v{4}
+	p
+	{
+		s %BaseMaterial{"{ 2806d24a-d8ae-4f2a-b77a-39c1df02ef27 }"}
+		s %MetaBasePrefab{"HeaderV2\n{\no\n{\n\tUuid %id{u4{2877521846955768503,5704610120525599306}}\n\ts %t{\"plAssetDocumentInfo\"}\n\tu3 %v{2}\n\ts %n{\"Header\"}\n\tp\n\t{\n\t\ts %AssetType{\"Material\"}\n\t\tVarArray %Dependencies\n\t\t{\n\t\t\ts{\"Shaders/Materials/ClearCoatMaterial.plShader\"}\n\t\t}\n\t\tUuid %DocumentID{u4{2877521846955768503,5704610120525599306}}\n\t\tu4 %Hash{4468526429688314377}\n\t\tVarArray %MetaInfo{}\n\t\tVarArray %Outputs{}\n\t\tVarArray %PackageDeps{}\n\t\tVarArray %References\n\t\t{\n\t\t\ts{\"Shaders/Materials/ClearCoatMaterial.plShader\"}\n\t\t}\n\t}\n}\n}\nObjects\n{\no\n{\n\tUuid %id{u4{2609456611399800321,5112407272665409771}}\n\ts %t{\"Shaders/Materials/ClearCoatMaterial.plShader\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\ts %BLEND_MODE{\"BLEND_MODE::BLEND_MODE_OPAQUE\"}\n\t\ts %BRDF_DIFFUSE{\"BRDF_DIFFUSE::BRDF_DIFFUSE_BURLEY\"}\n\t\ts %BRDF_SHADING_MODEL{\"BRDF_SHADING_MODEL::BRDF_SHADING_MODEL_NEW\"}\n\t\tColor %BaseColor{f{0x9018783E,0x64C56C3D,0,0x0000803F}}\n\t\ts %BaseTexture{\"\"}\n\t\tf %Clearcoat{0x0000803F}\n\t\tf %ClearcoatRoughness{0}\n\t\ts %ClearcoatTexture{\"\"}\n\t\tColor %EmissiveColor{f{0,0,0,0x0000803F}}\n\t\ts %EmissiveTexture{\"\"}\n\t\tf %MaskThreshold{0x0000803E}\n\t\ts %MetallicTexture{\"\"}\n\t\tf %MetallicValue{0x0000803F}\n\t\ts %NormalTexture{\"\"}\n\t\ts %OcclusionTexture{\"\"}\n\t\ts %OrmTexture{\"\"}\n\t\ts %RoughnessTexture{\"\"}\n\t\tf %RoughnessValue{0xAE47E13E}\n\t\ts %SHADING_MODE{\"SHADING_MODE::SHADING_MODE_LIT\"}\n\t\tb %TWO_SIDED{0}\n\t\tb %UseBaseTexture{0}\n\t\tb %UseClearcoatInfluenceTexture{0}\n\t\tb %UseClearcoatNormalTexture{0}\n\t\tb %UseClearcoatRoughnessTexture{0}\n\t\tb %UseEmissiveTexture{0}\n\t\tb %UseMetallicTexture{0}\n\t\tb %UseNormalTexture{0}\n\t\tb %UseOcclusionTexture{0}\n\t\tb %UseOrmTexture{0}\n\t\tb %UseRoughnessTexture{0}\n\t}\n}\no\n{\n\tUuid %id{u4{15668368941668848305,5479371597563566942}}\n\ts %t{\"plMaterialAssetProperties\"}\n\tu3 %v{4}\n\tp\n\t{\n\t\ts %BaseMaterial{\"\"}\n\t\ts %Shader{\"Shaders/Materials/ClearCoatMaterial.plShader\"}\n\t\ts %ShaderMode{\"plMaterialShaderMode::File\"}\n\t\tUuid %ShaderProperties{u4{2609456611399800321,5112407272665409771}}\n\t\ts %Surface{\"\"}\n\t}\n}\no\n{\n\tUuid %id{u4{18096612296587978288,6449934965513159559}}\n\ts %t{\"plDocumentRoot\"}\n\tu3 %v{1}\n\ts %n{\"ObjectTree\"}\n\tp\n\t{\n\t\tVarArray %Children\n\t\t{\n\t\t\tUuid{u4{15668368941668848305,5479371597563566942}}\n\t\t}\n\t}\n}\n}\nTypes\n{\no\n{\n\tUuid %id{u4{13025675774036522914,178539161063913447}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Permutation\"}\n\t}\n}\no\n{\n\tUuid %id{u4{2970233472159334357,183415488801713689}}\n\ts %t{\"plClampValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Max{0x000000000000F03F}\n\t\td %Min{0}\n\t}\n}\no\n{\n\tUuid %id{u4{11087575948715492439,255898596269185005}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{1203642026690332078,15101580887436545826}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::IsEnum|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"SHADING_MODE\"}\n\t\ts %Type{\"SHADING_MODE\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17444608020555010555,1033166313901964260}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{1105720951681637003,13838811859635060806}}\n\t\t\tUuid{u4{9443393213341022139,11885027882754373814}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"BaseTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7967738185455168090,1434677727083564259}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9284656664729545892,1437014135968733403}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{9010007308876012200,17966469909514281310}}\n\t\t\tUuid{u4{8924664706896813172,13429559202770879681}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"MaskThreshold\"}\n\t\ts %Type{\"float\"}\n\t}\n}\no\n{\n\tUuid %id{u4{18311245008988910186,1895067994934075466}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::IsEnum|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plEnumBase\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties\n\t\t{\n\t\t\tUuid{u4{773668148553828920,15966949596821666881}}\n\t\t\tUuid{u4{540429536914844576,8213819539779215949}}\n\t\t\tUuid{u4{15543418230834458689,5548684801941186544}}\n\t\t\tUuid{u4{16393153594407016602,3744118329769567614}}\n\t\t\tUuid{u4{7757084663128585029,8011669779036733373}}\n\t\t\tUuid{u4{5650026407490086663,5768478847879086899}}\n\t\t}\n\t\ts %TypeName{\"BLEND_MODE\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{11037827202624015284,1925519495835559011}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{10793763337634546695,1975718206753884957}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{5118449172519025235,2641259575829298708}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseOrmTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9879232354459438313,1999763649172113478}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9182498974977327514,2041274447054354959}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"SHADING_MODE::SHADING_MODE_LIT\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13881293285848612145,2137008032697415039}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16570074282340939241,2341841143748214712}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11726923431664554437,2628021211892730034}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5118449172519025235,2641259575829298708}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11687799145559836153,2822935065470456370}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{4612434544853817024,2831097819763808976}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{7611608864582599945,7660518995420021919}}\n\t\t\tUuid{u4{13881293285848612145,2137008032697415039}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"MetallicTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16480826338970191300,2970196487778694069}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{9879232354459438313,1999763649172113478}}\n\t\t\tUuid{u4{8081319031201063240,15094729913834879573}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"OrmTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{83958611770233312,3067795990182735602}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Permutation\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7463627651526273103,3093814149555424820}}\n\ts %t{\"plClampValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Max{0x000000000000F03F}\n\t\td %Min{0}\n\t}\n}\no\n{\n\tUuid %id{u4{12228567843067125142,3184620475284723336}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{2}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_DIFFUSE::BRDF_DIFFUSE_OREN_NAYAR\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13219607680396534480,3261698056788142570}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{7967738185455168090,1434677727083564259}}\n\t\t\tUuid{u4{2330233027580604878,7123877597952370674}}\n\t\t\tUuid{u4{15523680654850709138,5519626395046079872}}\n\t\t\tUuid{u4{9519347288481559260,14402515654234856971}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"RoughnessValue\"}\n\t\ts %Type{\"float\"}\n\t}\n}\no\n{\n\tUuid %id{u4{10996169117308578917,3309627853593346823}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{16298644303464023681,7304990142018533363}}\n\t\t\tUuid{u4{6291536187212911918,3480011715771731642}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"EmissiveTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{6291536187212911918,3480011715771731642}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{3775283611673881637,3509040248086180003}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5073546952166048434,3572326078561087968}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{11046541093660033055,9126781731638290163}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseOcclusionTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16393153594407016602,3744118329769567614}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{2}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::BLEND_MODE_TRANSPARENT\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9164349476555017991,4024990243760075210}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{9381038261967139510,17051135505866632133}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseClearcoatRoughnessTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7837475672027497616,4255011011923948482}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16242808528805502349,4543851921895884503}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"Normal\"}\n\t}\n}\no\n{\n\tUuid %id{u4{15523680654850709138,5519626395046079872}}\n\ts %t{\"plClampValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Max{0x000000000000F03F}\n\t\td %Min{0}\n\t}\n}\no\n{\n\tUuid %id{u4{15543418230834458689,5548684801941186544}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{1}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::BLEND_MODE_MASKED\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7576552443382683546,5746442091687404394}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5650026407490086663,5768478847879086899}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{4}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::BLEND_MODE_MODULATE\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{12060069740318875107,5925239950654232766}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plShaderTypeBase\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties\n\t\t{\n\t\t\tUuid{u4{9117204902330641702,17894270457098550655}}\n\t\t\tUuid{u4{11087575948715492439,255898596269185005}}\n\t\t\tUuid{u4{17984670944634904594,10139602655519432068}}\n\t\t\tUuid{u4{16209525481033595805,11597264962360728910}}\n\t\t\tUuid{u4{11829687444029326147,15978767232835819478}}\n\t\t\tUuid{u4{1854302773120106561,16764529522856272143}}\n\t\t\tUuid{u4{5748812145929982335,11827030644904880911}}\n\t\t\tUuid{u4{17444608020555010555,1033166313901964260}}\n\t\t\tUuid{u4{9284656664729545892,1437014135968733403}}\n\t\t\tUuid{u4{17784499110260414375,11514807277900692719}}\n\t\t\tUuid{u4{14077095036957242194,13083156819007680928}}\n\t\t\tUuid{u4{5073546952166048434,3572326078561087968}}\n\t\t\tUuid{u4{1143169040409468340,14770363159306177010}}\n\t\t\tUuid{u4{13219607680396534480,3261698056788142570}}\n\t\t\tUuid{u4{5031556800297964158,9425912039103334408}}\n\t\t\tUuid{u4{7120784364169260860,15690859701620428974}}\n\t\t\tUuid{u4{7329094185521021343,16563320104546607775}}\n\t\t\tUuid{u4{17860272011932590913,14169701068407758914}}\n\t\t\tUuid{u4{4612434544853817024,2831097819763808976}}\n\t\t\tUuid{u4{10793763337634546695,1975718206753884957}}\n\t\t\tUuid{u4{16480826338970191300,2970196487778694069}}\n\t\t\tUuid{u4{8909041861987987791,6832556186187067510}}\n\t\t\tUuid{u4{16505044017199937254,13254825029027327726}}\n\t\t\tUuid{u4{10996169117308578917,3309627853593346823}}\n\t\t\tUuid{u4{4680907105772268742,17854134328908472407}}\n\t\t\tUuid{u4{13295822016948294160,15879052151250142112}}\n\t\t\tUuid{u4{3320787234161706780,13492177599004982595}}\n\t\t\tUuid{u4{9164349476555017991,4024990243760075210}}\n\t\t\tUuid{u4{17720489799449692433,16928038340667068830}}\n\t\t\tUuid{u4{8903365210819693372,6522370189773342947}}\n\t\t}\n\t\ts %TypeName{\"Shaders/Materials/ClearCoatMaterial.plShader\"}\n\t\tu3 %TypeVersion{2}\n\t}\n}\no\n{\n\tUuid %id{u4{12229320588463705528,5994101378664246306}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{8903365210819693372,6522370189773342947}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{12702527516101515937,9693727516933503099}}\n\t\t\tUuid{u4{11742479551693153035,9392043239479605390}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"ClearcoatTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11695727463527673381,6549777581474058039}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::IsEnum|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plEnumBase\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties\n\t\t{\n\t\t\tUuid{u4{1155205217496153151,16062411953539633064}}\n\t\t\tUuid{u4{9182498974977327514,2041274447054354959}}\n\t\t\tUuid{u4{14201946371216656691,8983156218640221597}}\n\t\t}\n\t\ts %TypeName{\"SHADING_MODE\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{8909041861987987791,6832556186187067510}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{8000089486504368680,14124994553729478883}}\n\t\t\tUuid{u4{9177405937057562782,7679551767530652643}}\n\t\t\tUuid{u4{2595329849163230276,17543256244955827420}}\n\t\t\tUuid{u4{12734985641876984632,9208810217198964570}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"EmissiveColor\"}\n\t\ts %Type{\"plColor\"}\n\t}\n}\no\n{\n\tUuid %id{u4{4778682412054107746,7059579196409123244}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{2330233027580604878,7123877597952370674}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Value{0x666666666666E63F}\n\t}\n}\no\n{\n\tUuid %id{u4{16298644303464023681,7304990142018533363}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11903277445073296175,7475609833162571045}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{1}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_DIFFUSE::BRDF_DIFFUSE_BURLEY\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7611608864582599945,7660518995420021919}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9177405937057562782,7679551767530652643}}\n\ts %t{\"plExposeColorAlphaAttribute\"}\n\tu3 %v{1}\n\tp{}\n}\no\n{\n\tUuid %id{u4{7757084663128585029,8011669779036733373}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{3}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::BLEND_MODE_ADDITIVE\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{540429536914844576,8213819539779215949}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::BLEND_MODE_OPAQUE\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{6089094783765586323,8705960867921430659}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Minimal\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plReflectedClass\"}\n\t\ts %PluginName{\"Static\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plDocumentRoot\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{14201946371216656691,8983156218640221597}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{1}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"SHADING_MODE::SHADING_MODE_FULLBRIGHT\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17717897218099796308,9033184167245688007}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plReflectedClass\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plShaderTypeBase\"}\n\t\tu3 %TypeVersion{2}\n\t}\n}\no\n{\n\tUuid %id{u4{11046541093660033055,9126781731638290163}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{12734985641876984632,9208810217198964570}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"Emissive\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11742479551693153035,9392043239479605390}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{4762811900026734035,9407654934452827719}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Value{0}\n\t}\n}\no\n{\n\tUuid %id{u4{5031556800297964158,9425912039103334408}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{814434002270669059,12167490041138230335}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseRoughnessTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1965425602511886299,9530829676078266204}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_SHADING_MODEL::BRDF_SHADING_MODEL_OLD\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{12702527516101515937,9693727516933503099}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16948559732247695797,10089566713780117235}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"Albedo\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17984670944634904594,10139602655519432068}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{630842294129636203,11672805575566733168}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"TWO_SIDED\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{10451230661840302757,11480631508808027338}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\tu3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_SHADING_MODEL::Default\"}\n\t\ts %Type{\"plUInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17784499110260414375,11514807277900692719}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{7576552443382683546,5746442091687404394}}\n\t\t\tUuid{u4{16242808528805502349,4543851921895884503}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseNormalTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16209525481033595805,11597264962360728910}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{83958611770233312,3067795990182735602}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::IsEnum|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"BRDF_SHADING_MODEL\"}\n\t\ts %Type{\"BRDF_SHADING_MODEL\"}\n\t}\n}\no\n{\n\tUuid %id{u4{2110101729550490267,11649741134546377873}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"ClearCoat\"}\n\t}\n}\no\n{\n\tUuid %id{u4{630842294129636203,11672805575566733168}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Permutation\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5748812145929982335,11827030644904880911}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{18046141493307789,17226281021160997147}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseBaseTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9443393213341022139,11885027882754373814}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{814434002270669059,12167490041138230335}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7616748468322897189,12337125377318694650}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_DIFFUSE::BRDF_DIFFUSE_LAMBERT\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11857612581115064124,12941700317181137787}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\tu3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_DIFFUSE::Default\"}\n\t\ts %Type{\"plUInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{14077095036957242194,13083156819007680928}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{11726923431664554437,2628021211892730034}}\n\t\t\tUuid{u4{5795100611316863252,15898708184795351714}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"NormalTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{16505044017199937254,13254825029027327726}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{3775283611673881637,3509040248086180003}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseEmissiveTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1814533322299701892,13284421998022635011}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::IsEnum|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plEnumBase\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties\n\t\t{\n\t\t\tUuid{u4{11857612581115064124,12941700317181137787}}\n\t\t\tUuid{u4{7616748468322897189,12337125377318694650}}\n\t\t\tUuid{u4{11903277445073296175,7475609833162571045}}\n\t\t\tUuid{u4{12228567843067125142,3184620475284723336}}\n\t\t\tUuid{u4{5279089859340986528,18391027878968821145}}\n\t\t}\n\t\ts %TypeName{\"BRDF_DIFFUSE\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{8924664706896813172,13429559202770879681}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Value{0x000000000000D03F}\n\t}\n}\no\n{\n\tUuid %id{u4{3320787234161706780,13492177599004982595}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{4172991366012785699,16952118898302500635}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseClearcoatInfluenceTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13211056075536068166,13583271087199732376}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{1}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_SHADING_MODEL::BRDF_SHADING_MODEL_NEW\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1105720951681637003,13838811859635060806}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{12535715115818015407,14092450438473701035}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{8000089486504368680,14124994553729478883}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17860272011932590913,14169701068407758914}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{16570074282340939241,2341841143748214712}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseMetallicTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1587943831499589397,14326655693425355227}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tColor %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}\n\t}\n}\no\n{\n\tUuid %id{u4{9519347288481559260,14402515654234856971}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"Roughness\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1143169040409468340,14770363159306177010}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{12229320588463705528,5994101378664246306}}\n\t\t\tUuid{u4{12535715115818015407,14092450438473701035}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"OcclusionTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{2947336711354777548,15013008608905564043}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Minimal\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"\"}\n\t\ts %PluginName{\"Static\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plEnumBase\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{8081319031201063240,15094729913834879573}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1203642026690332078,15101580887436545826}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Permutation\"}\n\t}\n}\no\n{\n\tUuid %id{u4{528484390822357153,15514189103654207934}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5562190725714960803,15610295624722624816}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{7120784364169260860,15690859701620428974}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{6203991145451047150,16462028233506074248}}\n\t\t\tUuid{u4{11687799145559836153,2822935065470456370}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"RoughnessTexture\"}\n\t\ts %Type{\"plString\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13295822016948294160,15879052151250142112}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{4778682412054107746,7059579196409123244}}\n\t\t\tUuid{u4{13093272957599156640,16562856130291334766}}\n\t\t\tUuid{u4{9430462758398598094,18230383640272338620}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"ClearcoatRoughness\"}\n\t\ts %Type{\"float\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5795100611316863252,15898708184795351714}}\n\ts %t{\"plAssetBrowserAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %DependencyFlags{\"plDependencyFlags::Package|plDependencyFlags::Thumbnail\"}\n\t\ts %Filter{\";CompatibleAsset_Texture_2D;\"}\n\t}\n}\no\n{\n\tUuid %id{u4{773668148553828920,15966949596821666881}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\tu3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BLEND_MODE::Default\"}\n\t\ts %Type{\"plUInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{11829687444029326147,15978767232835819478}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{13957338967036076717,16099042536892789789}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::IsEnum|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"BRDF_DIFFUSE\"}\n\t\ts %Type{\"BRDF_DIFFUSE\"}\n\t}\n}\no\n{\n\tUuid %id{u4{15242136241360332451,16017342788519348714}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::IsEnum|plTypeFlags::Phantom\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plEnumBase\"}\n\t\ts %PluginName{\"ShaderTypes\"}\n\t\tVarArray %Properties\n\t\t{\n\t\t\tUuid{u4{10451230661840302757,11480631508808027338}}\n\t\t\tUuid{u4{1965425602511886299,9530829676078266204}}\n\t\t\tUuid{u4{13211056075536068166,13583271087199732376}}\n\t\t}\n\t\ts %TypeName{\"BRDF_SHADING_MODEL\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{1155205217496153151,16062411953539633064}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\tu3 %ConstantValue{0}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"SHADING_MODE::Default\"}\n\t\ts %Type{\"plUInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13957338967036076717,16099042536892789789}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Permutation\"}\n\t}\n}\no\n{\n\tUuid %id{u4{6203991145451047150,16462028233506074248}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Texture 2D\"}\n\t}\n}\no\n{\n\tUuid %id{u4{13093272957599156640,16562856130291334766}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Value{0}\n\t}\n}\no\n{\n\tUuid %id{u4{7329094185521021343,16563320104546607775}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{5562190725714960803,15610295624722624816}}\n\t\t\tUuid{u4{4762811900026734035,9407654934452827719}}\n\t\t\tUuid{u4{2970233472159334357,183415488801713689}}\n\t\t\tUuid{u4{1494285748130596957,16682508652728510893}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"MetallicValue\"}\n\t\ts %Type{\"float\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1494285748130596957,16682508652728510893}}\n\ts %t{\"plGroupAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Group{\"Metallic\"}\n\t}\n}\no\n{\n\tUuid %id{u4{1854302773120106561,16764529522856272143}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{7837475672027497616,4255011011923948482}}\n\t\t\tUuid{u4{8371380643262731358,17690553385922443691}}\n\t\t\tUuid{u4{1587943831499589397,14326655693425355227}}\n\t\t\tUuid{u4{16948559732247695797,10089566713780117235}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"BaseColor\"}\n\t\ts %Type{\"plColor\"}\n\t}\n}\no\n{\n\tUuid %id{u4{17720489799449692433,16928038340667068830}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{528484390822357153,15514189103654207934}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"UseClearcoatNormalTexture\"}\n\t\ts %Type{\"bool\"}\n\t}\n}\no\n{\n\tUuid %id{u4{8452372282122820528,16931927103031590403}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Value{0}\n\t}\n}\no\n{\n\tUuid %id{u4{4172991366012785699,16952118898302500635}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9381038261967139510,17051135505866632133}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{18046141493307789,17226281021160997147}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{2595329849163230276,17543256244955827420}}\n\ts %t{\"plDefaultValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tColor %Value{f{0,0,0,0x0000803F}}\n\t}\n}\no\n{\n\tUuid %id{u4{8721322561248882817,17579066505604714242}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::IsEnum|plTypeFlags::Minimal\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plEnumBase\"}\n\t\ts %PluginName{\"plEditorPluginAssets\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plMaterialShaderMode\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{8371380643262731358,17690553385922443691}}\n\ts %t{\"plExposeColorAlphaAttribute\"}\n\tu3 %v{1}\n\tp{}\n}\no\n{\n\tUuid %id{u4{4680907105772268742,17854134328908472407}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{11037827202624015284,1925519495835559011}}\n\t\t\tUuid{u4{8452372282122820528,16931927103031590403}}\n\t\t\tUuid{u4{7463627651526273103,3093814149555424820}}\n\t\t\tUuid{u4{2110101729550490267,11649741134546377873}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"Clearcoat\"}\n\t\ts %Type{\"float\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9117204902330641702,17894270457098550655}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes\n\t\t{\n\t\t\tUuid{u4{13025675774036522914,178539161063913447}}\n\t\t}\n\t\ts %Category{\"plPropertyCategory::Member\"}\n\t\tInvalid %ConstantValue{}\n\t\ts %Flags{\"plPropertyFlags::IsEnum|plPropertyFlags::Phantom\"}\n\t\ts %Name{\"BLEND_MODE\"}\n\t\ts %Type{\"BLEND_MODE\"}\n\t}\n}\no\n{\n\tUuid %id{u4{983387834180907111,17935407260904399048}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Minimal\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"\"}\n\t\ts %PluginName{\"Static\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plReflectedClass\"}\n\t\tu3 %TypeVersion{1}\n\t}\n}\no\n{\n\tUuid %id{u4{9010007308876012200,17966469909514281310}}\n\ts %t{\"plCategoryAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\ts %Category{\"Constant\"}\n\t}\n}\no\n{\n\tUuid %id{u4{9430462758398598094,18230383640272338620}}\n\ts %t{\"plClampValueAttribute\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\td %Max{0x000000000000F03F}\n\t\td %Min{0}\n\t}\n}\no\n{\n\tUuid %id{u4{5279089859340986528,18391027878968821145}}\n\ts %t{\"plReflectedPropertyDescriptor\"}\n\tu3 %v{2}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Category{\"plPropertyCategory::Constant\"}\n\t\ti3 %ConstantValue{3}\n\t\ts %Flags{\"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly\"}\n\t\ts %Name{\"BRDF_DIFFUSE::BRDF_DIFFUSE_CHAN\"}\n\t\ts %Type{\"plInt32\"}\n\t}\n}\no\n{\n\tUuid %id{u4{5030680158680079231,18410952876772242771}}\n\ts %t{\"plReflectedTypeDescriptor\"}\n\tu3 %v{1}\n\tp\n\t{\n\t\tVarArray %Attributes{}\n\t\ts %Flags{\"plTypeFlags::Class|plTypeFlags::Minimal\"}\n\t\tVarArray %Functions{}\n\t\ts %ParentTypeName{\"plReflectedClass\"}\n\t\ts %PluginName{\"plEditorPluginAssets\"}\n\t\tVarArray %Properties{}\n\t\ts %TypeName{\"plMaterialAssetProperties\"}\n\t\tu3 %TypeVersion{4}\n\t}\n}\n}\n"}
+		Uuid %MetaFromPrefab{u4{2877521846955768503,5704610120525599306}}
+		Uuid %MetaPrefabSeed{u4{12033006819267755014,17983269849255411479}}
+		s %Shader{"Shaders/Materials/ClearCoatMaterial.plShader"}
+		s %ShaderMode{"plMaterialShaderMode::BaseMaterial"}
+		Uuid %ShaderProperties{u4{14642463430667555335,4648933048211269634}}
+		s %Surface{"{ ac49f52b-70b6-468e-b934-af2373a806bc }"}
+	}
+}
+o
+{
+	Uuid %id{u4{13785748936382107008,5101763498737384680}}
+	s %t{"ShaderNode::MaterialOutput"}
+	u3 %v{1}
+	p
+	{
+		b %ApplyFog{1}
+		Vec3 %BaseColor{f{0x0000803F,0x0000803F,0x0000803F}}
+		Vec3 %Emissive{f{0,0,0}}
+		f %MaskThreshold{0x0000803E}
+		f %Metallic{0}
+		Vec2 %Node::Pos{f{0x532BED44,0xAE6D0341}}
+		f %Occlusion{0x0000803F}
+		f %Opacity{0x0000803F}
+		f %Reflectance{0x0000803E}
+		Vec4 %RefractionColor{f{0,0,0,0x0000803F}}
+		f %Roughness{0xCDCC4C3E}
+		Vec3 %SubsurfaceColor{f{0,0,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{1835883126650468778,5211182637224752247}}
+	s %t{"ShaderNode::BaseTexture"}
+	u3 %v{1}
+	p
+	{
+		Vec2 %Node::Pos{f{0x39D5A244,0x80F221C1}}
+		s %Texture{"{ b088e0da-a26d-4894-9eef-0cd28472ac03 }"}
+	}
+}
+o
+{
+	Uuid %id{u4{10345598163253350042,5297632244028471454}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{1835883126650468778,5211182637224752247}}
+		s %Connection::SourcePin{"Red"}
+		Uuid %Connection::Target{u4{13785748936382107008,5101763498737384680}}
+		s %Connection::TargetPin{"Opacity"}
+	}
+}
+o
+{
+	Uuid %id{u4{12585185852992707770,5368559710372145276}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{15300215563199959955,4736941646390956527}}
+		s %Connection::SourcePin{"Normal"}
+		Uuid %Connection::Target{u4{13785748936382107008,5101763498737384680}}
+		s %Connection::TargetPin{"Normal"}
+	}
+}
+o
+{
+	Uuid %id{u4{2440069369650471346,5426503572004066826}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{4442556435602264961,4712406888433471890}}
+		s %Connection::SourcePin{"Roughness"}
+		Uuid %Connection::Target{u4{13785748936382107008,5101763498737384680}}
+		s %Connection::TargetPin{"Roughness"}
+	}
+}
+o
+{
+	Uuid %id{u4{18096612296587978288,6449934965513159559}}
+	s %t{"plDocumentRoot"}
+	u3 %v{1}
+	s %n{"ObjectTree"}
+	p
+	{
+		VarArray %Children
+		{
+			Uuid{u4{9254631687227051703,5015897373109426805}}
+			Uuid{u4{13785748936382107008,5101763498737384680}}
+			Uuid{u4{1835883126650468778,5211182637224752247}}
+			Uuid{u4{18214763650773206403,4775500323051394213}}
+			Uuid{u4{15300215563199959955,4736941646390956527}}
+			Uuid{u4{12585185852992707770,5368559710372145276}}
+			Uuid{u4{4442556435602264961,4712406888433471890}}
+			Uuid{u4{2440069369650471346,5426503572004066826}}
+			Uuid{u4{10345598163253350042,5297632244028471454}}
+		}
+	}
+}
+}
+Types
+{
+o
+{
+	Uuid %id{u4{4490245039293690899,130472355999051079}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{18338006008130260519,5264293523198007536}}
+			Uuid{u4{13911828245239086138,1295907678458557124}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"BaseTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{7916831883279084734,813045665232947949}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{9085441563967676689,919763714516251399}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Permutation"}
+	}
+}
+o
+{
+	Uuid %id{u4{13295308469688945573,1132481478511489091}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Max{0x000000000000F03F}
+		d %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{526929105251506007,1186244861238906913}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plShaderTypeBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{422590337593304699,4479533784254106330}}
+			Uuid{u4{14933902142536957109,1837904706146774569}}
+			Uuid{u4{14336353597125006581,4648146001161127721}}
+			Uuid{u4{10458810361227351702,5424912048791170857}}
+			Uuid{u4{518970084183462262,3931302917352042956}}
+			Uuid{u4{4490245039293690899,130472355999051079}}
+			Uuid{u4{16097281670914489541,11730231110336070197}}
+			Uuid{u4{11525762894309955973,11639632157159660095}}
+			Uuid{u4{8939207288401866220,7647375142563578244}}
+			Uuid{u4{12222805502643143250,6693349123914088106}}
+			Uuid{u4{2296946922332771495,7190370827243514595}}
+			Uuid{u4{3366668866235991846,13594800310019635764}}
+			Uuid{u4{6770305311844020329,8505672515839423282}}
+			Uuid{u4{16934412640142903465,15862940269409283328}}
+			Uuid{u4{13458008219093836041,5808188647578853557}}
+			Uuid{u4{4598680583136617786,9662010833707560129}}
+			Uuid{u4{2087457336850333644,17989681770114301389}}
+			Uuid{u4{831883491862311934,8883035043229023330}}
+			Uuid{u4{1519759806234899510,7555211482523023316}}
+			Uuid{u4{10713148227245449690,9988521447223380732}}
+			Uuid{u4{4352948669286656709,1327687680044485540}}
+			Uuid{u4{14808257580832902436,2185111669090670063}}
+			Uuid{u4{1998336575605544704,6960243596562075325}}
+			Uuid{u4{7553267747781270635,9956678965173935959}}
+			Uuid{u4{3260616301946770723,12637666833210069974}}
+			Uuid{u4{3371927097788266867,2610346799525877633}}
+			Uuid{u4{10769118482795124514,6835321480403185495}}
+			Uuid{u4{4312664890034499565,9534342697674296228}}
+		}
+		s %TypeName{"Shaders/Materials/ClearCoatMaterial.plShader"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{9344191879250414299,1229837076476391175}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{13911828245239086138,1295907678458557124}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{4352948669286656709,1327687680044485540}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{7175192685850338374,6170577092500437672}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseEmissiveTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{6361709611924820416,1582719439327867668}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{11040065101175624628,1662539785884692449}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualShaderNodeBase"}
+		s %PluginName{"VisualShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{2589033904860476140,2941600109649901427}}
+			Uuid{u4{16804715233058764794,16291563085247070494}}
+			Uuid{u4{18411837506060015951,13397631608945770603}}
+			Uuid{u4{8531456234757106898,9843359760009772741}}
+			Uuid{u4{10978509386339080603,6055180187630064684}}
+			Uuid{u4{2493142764329470971,4237250110264931902}}
+			Uuid{u4{11381554768749103056,5747586724112780390}}
+			Uuid{u4{15388913065968328453,11188089115316402371}}
+			Uuid{u4{13652862081152275637,1931931446829192038}}
+			Uuid{u4{4737060376990519197,5534452074735684677}}
+			Uuid{u4{17888293823252574217,5278584362329602531}}
+		}
+		s %TypeName{"ShaderNode::MaterialOutput"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{14831359824912569370,1828982774811006507}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialAssetProperties"}
+		u3 %TypeVersion{4}
+	}
+}
+o
+{
+	Uuid %id{u4{14933902142536957109,1837904706146774569}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4170578663697483386,5446148823812251029}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::IsEnum|plPropertyFlags::Phantom"}
+		s %Name{"SHADING_MODE"}
+		s %Type{"SHADING_MODE"}
+	}
+}
+o
+{
+	Uuid %id{u4{18311245008988910186,1895067994934075466}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{773668148553828920,15966949596821666881}}
+			Uuid{u4{540429536914844576,8213819539779215949}}
+			Uuid{u4{15543418230834458689,5548684801941186544}}
+			Uuid{u4{16393153594407016602,3744118329769567614}}
+			Uuid{u4{7757084663128585029,8011669779036733373}}
+			Uuid{u4{5650026407490086663,5768478847879086899}}
+		}
+		s %TypeName{"BLEND_MODE"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{1076872442101956005,1921938610318806016}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"Metallic"}
+	}
+}
+o
+{
+	Uuid %id{u4{13652862081152275637,1931931446829192038}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{8648126710299805379,15926322808980556731}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Occlusion"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{2201760272416365502,1934478535310089709}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{17270981834161743269,1997417624989165758}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Value{""}
+	}
+}
+o
+{
+	Uuid %id{u4{9182498974977327514,2041274447054354959}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"SHADING_MODE::SHADING_MODE_LIT"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{10169649258222508442,2102600582392461804}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{""}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{14808257580832902436,2185111669090670063}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{3979275459096406378,17388411514907346672}}
+			Uuid{u4{7916831883279084734,813045665232947949}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"EmissiveTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{1054794733032828287,2438447403533577768}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{7497676083067615229,2528326346683056498}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualShaderNodeBase"}
+		s %PluginName{"VisualShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{5209672733705578675,16372237526820862863}}
+		}
+		s %TypeName{"ShaderNode::RoughnessTexture"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17344310748169204018,2571715988155223854}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"VisualShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plVisualShaderNodeBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3371927097788266867,2610346799525877633}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{5523050057645972799,14228731547413242491}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseClearcoatRoughnessTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{2589033904860476140,2941600109649901427}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{107023027798387058,15125524156854853544}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MaskThreshold"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{3812965172610691669,3116145565407530309}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualShaderNodeBase"}
+		s %PluginName{"VisualShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{1575573045492154548,13197194552899721336}}
+			Uuid{u4{4736972359144118335,5244096162907300111}}
+		}
+		s %TypeName{"ShaderNode::NormalTexture"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{11022831719161331952,3319743205690531957}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{10546328178433928928,3538178021212683011}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		b %Value{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4157724942468472247,3569359198259493444}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{14094546126919005526,3611337744088009905}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{16393153594407016602,3744118329769567614}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{2}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_TRANSPARENT"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{1187097818350157749,3916026496545596680}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Value{"RebeccaPurple.color"}
+	}
+}
+o
+{
+	Uuid %id{u4{518970084183462262,3931302917352042956}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{11515764754089495779,17285295521580324992}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseBaseTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{2395528364335109631,4122376202426576234}}
+	s %t{"plExposeColorAlphaAttribute"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{2493142764329470971,4237250110264931902}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{12975893279928312590,7112828226212987324}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Roughness"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{4085023801481947262,4424431816763648179}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{422590337593304699,4479533784254106330}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{9085441563967676689,919763714516251399}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::IsEnum|plPropertyFlags::Phantom"}
+		s %Name{"BLEND_MODE"}
+		s %Type{"BLEND_MODE"}
+	}
+}
+o
+{
+	Uuid %id{u4{14336353597125006581,4648146001161127721}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{2025127698341774474,16819179593000152942}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"TWO_SIDED"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{2183855956458635313,5003458738419716574}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{6214732270881823743,5014894249523521314}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{4736972359144118335,5244096162907300111}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{10169649258222508442,2102600582392461804}}
+			Uuid{u4{17523931883222954915,11019633592439028378}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Texture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{18338006008130260519,5264293523198007536}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{17888293823252574217,5278584362329602531}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{13542406804441022416,9548951225033578222}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"SubsurfaceColor"}
+		s %Type{"plVec3"}
+	}
+}
+o
+{
+	Uuid %id{u4{10458810361227351702,5424912048791170857}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4157724942468472247,3569359198259493444}}
+			Uuid{u4{7757038296873893050,9131237697314404689}}
+			Uuid{u4{11003542448440202925,9189228992058575384}}
+			Uuid{u4{12187963545258549767,8200706875762047195}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"BaseColor"}
+		s %Type{"plColor"}
+	}
+}
+o
+{
+	Uuid %id{u4{4170578663697483386,5446148823812251029}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Permutation"}
+	}
+}
+o
+{
+	Uuid %id{u4{18200256455121510126,5460019644832151135}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties{}
+		s %TypeName{"plShaderTypeBase"}
+		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{4737060376990519197,5534452074735684677}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{12496807453269888305,16412205064812982056}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"RefractionColor"}
+		s %Type{"plVec4"}
+	}
+}
+o
+{
+	Uuid %id{u4{15543418230834458689,5548684801941186544}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{1}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_MASKED"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{12714164492891217967,5611009265493262825}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{""}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{11381554768749103056,5747586724112780390}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{1263665986699366714,7795821215980672176}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Opacity"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{5650026407490086663,5768478847879086899}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{4}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_MODULATE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{13458008219093836041,5808188647578853557}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{14349343135197503841,7105247881003771126}}
+			Uuid{u4{3099737794653237576,11496387684121556986}}
+			Uuid{u4{16514164482110121609,14085934724834291631}}
+			Uuid{u4{1076872442101956005,1921938610318806016}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MetallicValue"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{15086417638570853597,5965488147210968713}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{10978509386339080603,6055180187630064684}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{11154057802738083180,8940345913792219569}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Reflectance"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{5211478104292576261,6090662052327141260}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"Normal"}
+	}
+}
+o
+{
+	Uuid %id{u4{7175192685850338374,6170577092500437672}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{11695727463527673381,6549777581474058039}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"ShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{1155205217496153151,16062411953539633064}}
+			Uuid{u4{9182498974977327514,2041274447054354959}}
+			Uuid{u4{14201946371216656691,8983156218640221597}}
+		}
+		s %TypeName{"SHADING_MODE"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12222805502643143250,6693349123914088106}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{14094546126919005526,3611337744088009905}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseOcclusionTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{12123694589359637393,6797358509465135799}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::IsEnum|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plEnumBase"}
+		s %PluginName{"plEditorPluginAssets"}
+		VarArray %Properties{}
+		s %TypeName{"plMaterialShaderMode"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{10769118482795124514,6835321480403185495}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{2183855956458635313,5003458738419716574}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseClearcoatNormalTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{1998336575605544704,6960243596562075325}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{12975935354449825936,13136814479237112316}}
+			Uuid{u4{6214732270881823743,5014894249523521314}}
+			Uuid{u4{9539504112414662354,18093489537782633714}}
+			Uuid{u4{15345194198330702058,13897859343499059378}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Clearcoat"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{14349343135197503841,7105247881003771126}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{12975893279928312590,7112828226212987324}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x0000003F}
+	}
+}
+o
+{
+	Uuid %id{u4{2296946922332771495,7190370827243514595}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{16916918118113908340,14348437682655235170}}
+			Uuid{u4{12051834263606111372,16360987061715948558}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"OcclusionTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{1519759806234899510,7555211482523023316}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{8540638708132660812,15254613029758114095}}
+			Uuid{u4{2201760272416365502,1934478535310089709}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"OrmTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{8939207288401866220,7647375142563578244}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{11022831719161331952,3319743205690531957}}
+			Uuid{u4{15416696681073454927,8797109092183815677}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"NormalTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{1263665986699366714,7795821215980672176}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x0000803F}
+	}
+}
+o
+{
+	Uuid %id{u4{7757084663128585029,8011669779036733373}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{3}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_ADDITIVE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{9109950903083719533,8030260442681675182}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{12187963545258549767,8200706875762047195}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"Albedo"}
+	}
+}
+o
+{
+	Uuid %id{u4{540429536914844576,8213819539779215949}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::BLEND_MODE_OPAQUE"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{12342552086788463532,8359568708856794856}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{6770305311844020329,8505672515839423282}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{1054794733032828287,2438447403533577768}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseRoughnessTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{4648436191147758491,8657853350541870184}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"Emissive"}
+	}
+}
+o
+{
+	Uuid %id{u4{15416696681073454927,8797109092183815677}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{831883491862311934,8883035043229023330}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{3729383817522846584,12964596319522225307}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseOrmTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{11154057802738083180,8940345913792219569}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x0000003F}
+	}
+}
+o
+{
+	Uuid %id{u4{14201946371216656691,8983156218640221597}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		i3 %ConstantValue{1}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"SHADING_MODE::SHADING_MODE_FULLBRIGHT"}
+		s %Type{"plInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{7757038296873893050,9131237697314404689}}
+	s %t{"plExposeColorAlphaAttribute"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{11003542448440202925,9189228992058575384}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{4312664890034499565,9534342697674296228}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{9344191879250414299,1229837076476391175}}
+			Uuid{u4{16298823957294589057,15043250833985801124}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"ClearcoatTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{13542406804441022416,9548951225033578222}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0,0,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{7009381072334277535,9659459603664967231}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plDocumentRoot"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{4598680583136617786,9662010833707560129}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{1382843091070701801,11375833487281680894}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseMetallicTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{8907094334953621914,9741013989145803045}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{12714164492891217967,5611009265493262825}}
+			Uuid{u4{1187097818350157749,3916026496545596680}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Texture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{8531456234757106898,9843359760009772741}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4085023801481947262,4424431816763648179}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Metallic"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{7553267747781270635,9956678965173935959}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4106500802381973664,16021837702347635661}}
+			Uuid{u4{12342552086788463532,8359568708856794856}}
+			Uuid{u4{13295308469688945573,1132481478511489091}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"ClearcoatRoughness"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{10713148227245449690,9988521447223380732}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{11158225257640395059,11475727819140586359}}
+			Uuid{u4{2395528364335109631,4122376202426576234}}
+			Uuid{u4{17281164335798689078,16498828946918554957}}
+			Uuid{u4{4648436191147758491,8657853350541870184}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"EmissiveColor"}
+		s %Type{"plColor"}
+	}
+}
+o
+{
+	Uuid %id{u4{1988646526571382668,10729334715299371304}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plReflectedClass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"DocumentNodeManager_DefaultConnection"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{17523931883222954915,11019633592439028378}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Value{"{ 4dc82890-39e3-4bfc-a97d-86a984d4d3db }"}
+	}
+}
+o
+{
+	Uuid %id{u4{16819636187740221814,11089501717885464587}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plEnumBase"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{15388913065968328453,11188089115316402371}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{6649753934969554305,13791166057793731169}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Emissive"}
+		s %Type{"plVec3"}
+	}
+}
+o
+{
+	Uuid %id{u4{1382843091070701801,11375833487281680894}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{11158225257640395059,11475727819140586359}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{3099737794653237576,11496387684121556986}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0}
+	}
+}
+o
+{
+	Uuid %id{u4{11525762894309955973,11639632157159660095}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{659039953846775943,18220096665184815912}}
+			Uuid{u4{5211478104292576261,6090662052327141260}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseNormalTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{16097281670914489541,11730231110336070197}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{9109950903083719533,8030260442681675182}}
+			Uuid{u4{15153249647974825769,16936855822483986976}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MaskThreshold"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{3260616301946770723,12637666833210069974}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{4790688711213137285,14043340876861876116}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"UseClearcoatInfluenceTexture"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{6635381797498314163,12733118324867479014}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Value{"NormalTexture"}
+	}
+}
+o
+{
+	Uuid %id{u4{3729383817522846584,12964596319522225307}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{12975935354449825936,13136814479237112316}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{1575573045492154548,13197194552899721336}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{6635381797498314163,12733118324867479014}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Name"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{5084061046237204050,13385781945507335679}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Phantom"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plVisualShaderNodeBase"}
+		s %PluginName{"VisualShaderTypes"}
+		VarArray %Properties
+		{
+			Uuid{u4{8907094334953621914,9741013989145803045}}
+		}
+		s %TypeName{"ShaderNode::BaseTexture"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{18411837506060015951,13397631608945770603}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{2531204913114908651,14636118749865147444}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"BaseColor"}
+		s %Type{"plVec3"}
+	}
+}
+o
+{
+	Uuid %id{u4{9545541505141570906,13403101519728878241}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Max{0x000000000000F03F}
+		d %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{3366668866235991846,13594800310019635764}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{1004707091160033982,15934369922292729851}}
+			Uuid{u4{4530616962912267360,15281888702869039212}}
+			Uuid{u4{9545541505141570906,13403101519728878241}}
+			Uuid{u4{1564335158712613672,15841129917598934359}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"RoughnessValue"}
+		s %Type{"float"}
+	}
+}
+o
+{
+	Uuid %id{u4{6649753934969554305,13791166057793731169}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0,0,0}}
+	}
+}
+o
+{
+	Uuid %id{u4{6727929536000607410,13813243250762041815}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{15345194198330702058,13897859343499059378}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"ClearCoat"}
+	}
+}
+o
+{
+	Uuid %id{u4{4790688711213137285,14043340876861876116}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{16514164482110121609,14085934724834291631}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Max{0x000000000000F03F}
+		d %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{5523050057645972799,14228731547413242491}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{16916918118113908340,14348437682655235170}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{12155033277374142283,14619132781736813338}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{""}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{2531204913114908651,14636118749865147444}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec3 %Value{f{0x0000803F,0x0000803F,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{16298823957294589057,15043250833985801124}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{107023027798387058,15125524156854853544}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x0000803E}
+	}
+}
+o
+{
+	Uuid %id{u4{8540638708132660812,15254613029758114095}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{4530616962912267360,15281888702869039212}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0x666666666666E63F}
+	}
+}
+o
+{
+	Uuid %id{u4{1564335158712613672,15841129917598934359}}
+	s %t{"plGroupAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Group{"Roughness"}
+	}
+}
+o
+{
+	Uuid %id{u4{16934412640142903465,15862940269409283328}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{6361709611924820416,1582719439327867668}}
+			Uuid{u4{15086417638570853597,5965488147210968713}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"RoughnessTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{8648126710299805379,15926322808980556731}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0x0000803F}
+	}
+}
+o
+{
+	Uuid %id{u4{1004707091160033982,15934369922292729851}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{773668148553828920,15966949596821666881}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"BLEND_MODE::Default"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{4106500802381973664,16021837702347635661}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{1155205217496153151,16062411953539633064}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes{}
+		s %Category{"plPropertyCategory::Constant"}
+		u3 %ConstantValue{0}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::ReadOnly"}
+		s %Name{"SHADING_MODE::Default"}
+		s %Type{"plUInt32"}
+	}
+}
+o
+{
+	Uuid %id{u4{16804715233058764794,16291563085247070494}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{10546328178433928928,3538178021212683011}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"ApplyFog"}
+		s %Type{"bool"}
+	}
+}
+o
+{
+	Uuid %id{u4{12051834263606111372,16360987061715948558}}
+	s %t{"plAssetBrowserAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Texture_2D;"}
+	}
+}
+o
+{
+	Uuid %id{u4{5209672733705578675,16372237526820862863}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{12155033277374142283,14619132781736813338}}
+			Uuid{u4{17270981834161743269,1997417624989165758}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Texture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{12496807453269888305,16412205064812982056}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Vec4 %Value{f{0,0,0,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{17281164335798689078,16498828946918554957}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Value{f{0,0,0,0x0000803F}}
+	}
+}
+o
+{
+	Uuid %id{u4{2025127698341774474,16819179593000152942}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Permutation"}
+	}
+}
+o
+{
+	Uuid %id{u4{15153249647974825769,16936855822483986976}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0x000000000000D03F}
+	}
+}
+o
+{
+	Uuid %id{u4{11515764754089495779,17285295521580324992}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
+	Uuid %id{u4{13033624727069548121,17368468367984449402}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{""}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plReflectedClass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{3979275459096406378,17388411514907346672}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{17017844639854237809,17534473135277175842}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Texture 2D"}
+	}
+}
+o
+{
+	Uuid %id{u4{2087457336850333644,17989681770114301389}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{17017844639854237809,17534473135277175842}}
+			Uuid{u4{6727929536000607410,13813243250762041815}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MetallicTexture"}
+		s %Type{"plString"}
+	}
+}
+o
+{
+	Uuid %id{u4{9539504112414662354,18093489537782633714}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Max{0x000000000000F03F}
+		d %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{659039953846775943,18220096665184815912}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+}

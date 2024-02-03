@@ -395,11 +395,6 @@ float GetRoughness()
   }
 }
 
-float GetMetallic()
-{
-  return 0.0f;
-}
-
 float GetOpacity()
 {
   float opacity = BaseTexture.Sample(BaseTexture_AutoSampler, GetTexCoord()).a;
