@@ -28,6 +28,10 @@ CullMode = CullMode_None
 #include <Shaders/Common/GlobalConstants.h>
 #include "TonemapConstants.h"
 
+// ==========================================================
+// Filmic
+// ==========================================================
+
 // From http://filmicgames.com/archives/75
 float3 FilmicTonemap(float3 x)
 {
@@ -51,6 +55,70 @@ float3 AdjustContrast(float3 x)
   float c = ContrastParams.z;
 
   return a*x3 + b*x2 + c*x;
+}
+
+
+// ==========================================================
+// AMD
+// ==========================================================
+
+float ColToneB(float hdrMax, float contrast, float shoulder, float midIn, float midOut)
+{
+  return -((-pow(midIn, contrast) + (midOut * (pow(hdrMax, contrast * shoulder) * pow(midIn, contrast) -
+                                                pow(hdrMax, contrast) * pow(midIn, contrast * shoulder) * midOut)) /
+                                      (pow(hdrMax, contrast * shoulder) * midOut - pow(midIn, contrast * shoulder) * midOut)) /
+           (pow(midIn, contrast * shoulder) * midOut));
+}
+
+// General tonemapping operator, build 'c' term.
+float ColToneC(float hdrMax, float contrast, float shoulder, float midIn, float midOut)
+{
+  return (pow(hdrMax, contrast * shoulder) * pow(midIn, contrast) - pow(hdrMax, contrast) * pow(midIn, contrast * shoulder) * midOut) /
+         (pow(hdrMax, contrast * shoulder) * midOut - pow(midIn, contrast * shoulder) * midOut);
+}
+
+// General tonemapping operator, p := {contrast,shoulder,b,c}.
+float ColTone(float x, float4 p)
+{
+  float z = pow(x, p.r);
+  return z / (pow(z, p.g) * p.b + p.a);
+}
+
+float3 ToneMapping_AMD(float3 color)
+{
+  const float hdrMax = 16.0;        // How much HDR range before clipping. HDR modes likely need this pushed up to say 25.0.
+  const float contrast = 2.0;       // Use as a baseline to tune the amount of contrast the tonemapper has.
+  const float shoulder = 1.0;       // Likely don't need to mess with this factor, unless matching existing tonemapper is not working well..
+  const float midIn = 0.18;         // most games will have a {0.0 to 1.0} range for LDR so midIn should be 0.18.
+  const float midOut = 0.18 / 16.0; // Use for LDR. For HDR10 10:10:10:2 use maybe 0.18/25.0 to start. For scRGB, I forget what a good starting point is, need to re-calculate.
+
+  float b = ColToneB(hdrMax, contrast, shoulder, midIn, midOut);
+  float c = ColToneC(hdrMax, contrast, shoulder, midIn, midOut);
+
+  float peak = max(color.r, max(color.g, color.b));
+  peak = max(FLT_MIN, peak);
+
+  float3 ratio = color / peak;
+  peak = ColTone(peak, float4(contrast, shoulder, b, c));
+  // then process ratio
+
+  // probably want send these pre-computed (so send over saturation/crossSaturation as a constant)
+  float crosstalk = 4.0;                   // controls amount of channel crosstalk
+  float saturation = contrast;             // full tonal range saturation control
+  float crossSaturation = contrast * 16.0; // crosstalk saturation
+
+  float white = 1.0;
+
+  // wrap crosstalk in transform
+  float ratio_temp = saturation / crossSaturation;
+  float pow_temp = pow(peak, crosstalk);
+  ratio = pow(abs(ratio), float3(ratio_temp, ratio_temp, ratio_temp));
+  ratio = lerp(ratio, float3(white, white, white), float3(pow_temp, pow_temp, pow_temp));
+  ratio = pow(abs(ratio), float3(crossSaturation, crossSaturation, crossSaturation));
+
+  // then apply ratio to peak
+  color = peak * saturate(ratio);
+  return LinearToSrgb(color);
 }
 
 Texture2D VignettingTexture;
@@ -91,8 +159,10 @@ float4 main(PS_IN Input) : SV_Target
   float3 vignetting = VignettingTexture.SampleLevel(LinearClampSampler, Input.TexCoord0.xy, 0.0).rgb;
   sceneColor.rgb *= vignetting;
 
+  float3 color = float3(0, 0, 0);
+
   // Tonemapping
-  float3 color = FilmicTonemap(sceneColor.rgb);
+  color = ToneMapping_AMD(sceneColor.rgb);
 
   float3 whiteScale = 1.0 / FilmicTonemap(11.2);
   color = saturate(color * whiteScale);
