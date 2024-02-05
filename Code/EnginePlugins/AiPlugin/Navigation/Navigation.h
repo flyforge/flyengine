@@ -15,8 +15,8 @@ struct plAiSteeringInfo
   float m_fDistanceToWaypoint = 0;
   float m_fArrivalDistance = plMath::HighValue<float>();
   plVec2 m_vDirectionTowardsWaypoint = plVec2::MakeZero();
-  plAngle m_AbsRotationTowardsWaypoint = plAngle::MakeZero();
-  plAngle m_MaxAbsRotationAfterWaypoint = plAngle::MakeZero();
+  plAngle m_AbsRotationTowardsWaypoint = plAngle();
+  plAngle m_MaxAbsRotationAfterWaypoint = plAngle();
   // float m_fWaypointCorridorWidth = plMath::HighValue<float>();
 };
 
@@ -66,6 +66,7 @@ public:
 
   void SetCurrentPosition(const plVec3& vPosition);
   void SetTargetPosition(const plVec3& vPosition);
+  const plVec3& GetTargetPosition() const;
   void SetNavmesh(plAiNavMesh& ref_navmesh);
   void SetQueryFilter(const dtQueryFilter& filter);
 
@@ -83,7 +84,7 @@ public:
   // otherwise a character that barely left the navmesh area may not know where it is, anymore
   float m_fPolySearchRadius = 0.5f;
   float m_fPolySearchUp = 1.5f;
-  float m_fPolySearchDown = 0.5f;
+  float m_fPolySearchDown = 1.5f;
 
   // when a path search is started, all tiles in a rectangle around the start and end point are loaded first
   // this is the amount to increase that rectangle size, to overestimate which sectors may be needed during the path search

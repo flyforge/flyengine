@@ -5,7 +5,7 @@
 
 plRcPos::plRcPos()
 {
-#if PL_ENABLED(PL_MATH_CHECK_FOR_NAN)
+#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
   m_Pos[0] = plMath::NaN<float>();
   m_Pos[1] = plMath::NaN<float>();
   m_Pos[2] = plMath::NaN<float>();

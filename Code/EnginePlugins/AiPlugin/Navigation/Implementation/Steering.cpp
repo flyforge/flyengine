@@ -38,6 +38,7 @@ void plAiSteering::Calculate(float fTimeDiff, plDebugRendererContext ctxt)
 
   plVec3 vLookDir = m_qRotation * plVec3::MakeAxisX();
   vLookDir.z = 0;
+  vLookDir.Normalize();
 
   float fCurSpeed = m_vVelocity.GetAsVec2().GetLength();
 
@@ -62,7 +63,7 @@ void plAiSteering::Calculate(float fTimeDiff, plDebugRendererContext ctxt)
     plVec3 vRotAxis = vLookDir.CrossRH(vTargetDir);
     vRotAxis.NormalizeIfNotZero(plVec3::MakeAxisZ()).IgnoreResult();
     const plAngle toRotate = plMath::Min(vLookDir.GetAngleBetween(vTargetDir), fTimeDiff * turnSpeed);
-    const plQuat qRot = plQuat::MakeFromAxisAndAngle(vRotAxis, toRotate);
+    plQuat qRot = plQuat::MakeFromAxisAndAngle(vRotAxis, toRotate);
 
     vLookDir = qRot * vLookDir;
 

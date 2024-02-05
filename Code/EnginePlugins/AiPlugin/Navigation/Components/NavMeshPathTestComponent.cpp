@@ -1,5 +1,5 @@
 #include <AiPlugin/AiPluginPCH.h>
-#include <AiPlugin/Components/NavMeshPathTestComponent.h>
+#include <AiPlugin/Navigation/Components/NavMeshPathTestComponent.h>
 #include <AiPlugin/Navigation/NavMesh.h>
 #include <AiPlugin/Navigation/NavMeshWorldModule.h>
 #include <AiPlugin/Navigation/Navigation.h>
