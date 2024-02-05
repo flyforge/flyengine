@@ -30,6 +30,12 @@ $aapt = "$BuildToolsPath/aapt.exe"
 $apksigner = "$BuildToolsPath/apksigner.bat"
 $zipalign = "$BuildToolsPath/zipalign.exe"
 
+if ($IsLinux) {
+    $aapt = "$BuildToolsPath/aapt"
+    $apksigner = "$BuildToolsPath/apksigner"
+    $zipalign = "$BuildToolsPath/zipalign"
+}
+
 if(-not (Test-Path $aapt))
 {
 	Write-Host "Failed to find aapt.exe. Expected location $aapt."

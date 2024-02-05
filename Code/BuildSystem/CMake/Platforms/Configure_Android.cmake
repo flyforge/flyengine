@@ -4,6 +4,7 @@ message(STATUS "Configuring Platform: Android")
 
 set_property(GLOBAL PROPERTY PL_CMAKE_PLATFORM_ANDROID ON)
 set_property(GLOBAL PROPERTY PL_CMAKE_PLATFORM_POSIX ON)
+set_property(GLOBAL PROPERTY PL_CMAKE_PLATFORM_SUPPORTS_VULKAN ON)
 
 macro(pl_platform_pull_properties)
 
