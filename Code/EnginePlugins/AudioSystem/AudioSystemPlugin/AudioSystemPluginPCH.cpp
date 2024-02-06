@@ -1,0 +1,29 @@
+#include <AudioSystemPlugin/AudioSystemPluginPCH.h>
+
+#include <AudioSystemPlugin/AudioSystemPluginDLL.h>
+
+#include <Foundation/Configuration/Plugin.h>
+#include <Foundation/Strings/TranslationLookup.h>
+
+PL_STATICLINK_LIBRARY(AudioSystemPlugin)
+{
+  if (bReturn)
+    return;
+
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_AudioSystemStartup);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_AudioSystem);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_AudioSystemAllocator);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_AudioSystemData);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_AudioSystemMessages);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_ATL_AudioTranslationLayer);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioBoxEnvironmentComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioAnimationComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioListenerComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioProxyComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioRtpcComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioSphereEnvironmentComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioSwitchStateComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioSystemComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Components_AudioTriggerComponent);
+  PL_STATICLINK_REFERENCE(AudioSystemPlugin_Implementation_Core_AudioWorldModule);
+}
