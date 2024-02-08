@@ -113,6 +113,11 @@ PL_ALWAYS_INLINE bool plGALDevice::HasDefaultDevice()
   return s_pDefaultDevice != nullptr;
 }
 
+PL_ALWAYS_INLINE bool plGALDevice::GetRayTracingSupported()
+{
+  return false;
+}
+
 template <typename HandleType>
 PL_FORCE_INLINE void plGALDevice::AddDeadObject(plUInt32 uiType, HandleType handle)
 {

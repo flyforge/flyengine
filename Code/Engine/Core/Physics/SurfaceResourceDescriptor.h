@@ -80,6 +80,7 @@ public:
   float m_fPhysicsRestitution;
   float m_fPhysicsFrictionStatic;
   float m_fPhysicsFrictionDynamic;
+  float m_fSoundObstruction;
   plHashedString m_sOnCollideInteraction;
   plHashedString m_sSlideInteractionPrefab;
   plHashedString m_sRollInteractionPrefab;

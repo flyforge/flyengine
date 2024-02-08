@@ -50,6 +50,7 @@ public:
 
   plUInt64 GetCategorySortingKey(Category category, const plCamera& camera) const;
 
+  plTransform m_LastGlobalTransform = plTransform::MakeIdentity();
   plTransform m_GlobalTransform = plTransform::MakeIdentity();
   plBoundingBoxSphere m_GlobalBounds;
 

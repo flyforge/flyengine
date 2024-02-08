@@ -1,5 +1,17 @@
 PluginState
 {
+	string %ID{"AI"}
+	bool %Selected{true}
+	bool %LoadCopy{false}
+}
+PluginState
+{
+	string %ID{"AudioSystem"}
+	bool %Selected{true}
+	bool %LoadCopy{false}
+}
+PluginState
+{
 	string %ID{"GameComponents"}
 	bool %Selected{true}
 	bool %LoadCopy{false}

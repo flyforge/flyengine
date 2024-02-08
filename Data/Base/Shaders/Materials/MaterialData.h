@@ -34,6 +34,8 @@ struct plMaterialData
   float sheenTintFactor;
 #endif
 
+  float2 velocity;
+
   float3 subsurfaceColor;
   float subsurfaceScatterPower;
   float subsurfaceShadowFalloff;

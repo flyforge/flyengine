@@ -186,6 +186,7 @@ void plCustomMeshComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
 
   plCustomMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plCustomMeshRenderData>(GetOwner());
   {
+    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
     pRenderData->m_hMesh = m_hDynamicMesh;
@@ -335,9 +336,16 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
     instanceData[0].Color = pRenderData->m_Color;
     instanceData[0].ObjectToWorld = pRenderData->m_GlobalTransform;
 
+    #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+      instanceData[0].LastObjectToWorld = pRenderData->m_LastGlobalTransform;
+    #endif
+
     if (pRenderData->m_uiUniformScale)
     {
       instanceData[0].ObjectToWorldNormal = instanceData[0].ObjectToWorld;
+      #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+        instanceData[0].LastObjectToWorldNormal = instanceData[0].LastObjectToWorld;
+      #endif
     }
     else
     {
@@ -348,6 +356,16 @@ void plCustomMeshRenderer::RenderBatch(const plRenderViewContext& renderViewCont
       // we explicitly ignore the return value here (success / failure)
       // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
       instanceData[0].ObjectToWorldNormal = mInverse.GetTranspose();
+
+      #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+        objectToWorld = pRenderData->m_LastGlobalTransform.GetAsMat4();
+
+        mInverse = objectToWorld.GetRotationalPart();
+        mInverse.Invert(0.0f).IgnoreResult();
+        // we explicitly ignore the return value here (success / failure)
+        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
+        instanceData[0].LastObjectToWorldNormal = mInverse.GetTranspose();
+      #endif
     }
 
     pInstanceData->UpdateInstanceData(pRenderContext, 1);

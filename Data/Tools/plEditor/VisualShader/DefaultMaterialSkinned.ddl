@@ -14,7 +14,8 @@ MSAA
 SHADING_QUALITY
 CAMERA_MODE
 VERTEX_SKINNING
-VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX" }
+VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY" }
 
   string %CheckPermutations
   {"
@@ -29,10 +30,14 @@ SHADING_QUALITY=SHADING_QUALITY_NORMAL
 CAMERA_MODE=CAMERA_MODE_PERSPECTIVE
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX=TRUE
 VERTEX_SKINNING=FALSE
+GAMEOBJECT_VELOCITY=TRUE
 "}
 
   string %CodeRenderStates { "#include <Shaders/Materials/MaterialState.h>" }
   string %CodeVertexShader { "
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if VERTEX_SKINNING
   #define USE_SKINNING
@@ -56,7 +61,7 @@ VERTEX_SKINNING=FALSE
   #define USE_OBJECT_POSITION_OFFSET
 #endif
 
-#if INPUT_PIN_11_CONNECTED
+#if INPUT_PIN_11_CONNECTED 
   #define USE_WORLD_POSITION_OFFSET
 #endif
 
@@ -93,6 +98,10 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 " }
 
   string %CodeGeometryShader { "
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
+
 #if VERTEX_SKINNING
   #define USE_SKINNING
 #endif
@@ -105,6 +114,7 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 Permutation BLEND_MODE;
 Permutation SHADING_MODE;
 Permutation TWO_SIDED;
+Permutation GAMEOBJECT_VELOCITY;
 float MaskThreshold @Default($prop0);
 " }
 
@@ -114,6 +124,10 @@ float MaskThreshold @Default($prop0);
 #define USE_MATERIAL_OCCLUSION
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
+
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if VERTEX_SKINNING
   #define USE_SKINNING

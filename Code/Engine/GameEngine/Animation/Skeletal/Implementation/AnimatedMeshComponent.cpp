@@ -161,6 +161,7 @@ void plAnimatedMeshComponent::MapModelSpacePoseToSkinningSpace(const plHashTable
 plMeshRenderData* plAnimatedMeshComponent::CreateRenderData() const
 {
   auto pRenderData = plCreateRenderDataForThisFrame<plSkinnedMeshRenderData>(GetOwner());
+  pRenderData->m_LastGlobalTransform = m_RootTransform;
   pRenderData->m_GlobalTransform = m_RootTransform;
 
   m_SkinningState.FillSkinnedMeshRenderData(*pRenderData);

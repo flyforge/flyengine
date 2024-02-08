@@ -420,24 +420,40 @@ void plQtAddSubElementButton::OnAction(const plRTTI* pRtti)
   {
     for (auto& item : m_Items)
     {
-      res = m_pObjectAccessor->InsertValue(item.m_pObject, m_pProp, plReflectionUtils::GetDefaultValue(GetProperty(), index), index);
-      if (res.m_Result.Failed())
+      if (m_uiMaxElements > 0 && m_pObjectAccessor->GetCount(item.m_pObject, m_pProp) >= m_uiMaxElements)
+      {
+        res = plStatus("Maximum number of allowed elements reached.");
         break;
+      }
+      else
+      {
+        res = m_pObjectAccessor->InsertValue(item.m_pObject, m_pProp, plReflectionUtils::GetDefaultValue(GetProperty(), index), index);
+        if (res.m_Result.Failed())
+          break;
+      }
     }
   }
   else if (GetProperty()->GetFlags().IsSet(plPropertyFlags::Class))
   {
     for (auto& item : m_Items)
     {
-      plUuid guid;
-      res = m_pObjectAccessor->AddObject(item.m_pObject, m_pProp, index, pRtti, guid);
-      if (res.m_Result.Failed())
+      if (m_uiMaxElements > 0 && m_pObjectAccessor->GetCount(item.m_pObject, m_pProp) >= m_uiMaxElements)
+      {
+        res = plStatus("Maximum number of allowed elements reached.");
         break;
+      }
+      else
+      {
+        plUuid guid;
+        res = m_pObjectAccessor->AddObject(item.m_pObject, m_pProp, index, pRtti, guid);
+        if (res.m_Result.Failed())
+          break;
 
-      plHybridArray<plPropertySelection, 1> selection;
-      selection.PushBack({m_pObjectAccessor->GetObject(guid), plVariant()});
-      plDefaultObjectState defaultState(m_pObjectAccessor, selection);
-      defaultState.RevertObject().AssertSuccess();
+        plHybridArray<plPropertySelection, 1> selection;
+        selection.PushBack({m_pObjectAccessor->GetObject(guid), plVariant()});
+        plDefaultObjectState defaultState(m_pObjectAccessor, selection);
+        defaultState.RevertObject().AssertSuccess();
+      }
     }
   }
 

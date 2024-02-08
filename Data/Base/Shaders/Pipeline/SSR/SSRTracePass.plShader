@@ -1,0 +1,368 @@
+[PLATFORMS]
+ALL
+DEBUG
+
+[PERMUTATIONS]
+SHADING_QUALITY = SHADING_QUALITY_NORMAL
+SSR_TRACING_MODE
+
+[COMPUTESHADER]
+
+#include <Shaders/Common/Common.h>
+#include <Shaders/Common/PostprocessCommon.h>
+#include <Shaders/Pipeline/SSRConstants.h>
+#include <Shaders/Pipeline/SSR/SSR.h>
+#include <Shaders/Pipeline/Utils.h>
+
+// /#define DEBUG_TRACING
+
+Texture2D<float2> DepthHierarchy;
+Texture2D<float4> Input;
+Texture2D<float4> MaterialInput;
+Texture2D<float4> VelocityInput;
+Texture2D<float4> DepthInput;
+Texture2D<float4> BlueNoise;
+StructuredBuffer<uint> tiles;
+
+RWTexture2D<float4> OutputIndirectSpecular;
+RWTexture2D<float4> OutputRayDirectionPDF;
+RWTexture2D<float> OutputRayLengths;
+
+static const float traceThickness = 1.5;
+static const float blendScreenEdgeFade = 5.0f;
+
+static const float HiZTraceMostDetailedLevel = 0.0;
+static const float HiZTraceIterationsMax = 64;
+
+inline float4 blue_noise(uint2 pixel)
+{
+	return frac(BlueNoise[pixel % 128] + BlueNoisePhase);
+}
+
+void InitialAdvanceRay(float3 origin, float3 direction, float2 currentMipResolution, float2 currentMipResolution_rcp, float2 floorOffset, float2 uvOffset, out float3 position, out float tCurrent)
+{
+  float2 currentMipPosition = currentMipResolution * origin.xy;
+
+  // Intersect ray with the half box that is pointing away from the ray origin.
+  float2 xyPlane = floor(currentMipPosition) + floorOffset;
+  xyPlane = xyPlane * currentMipResolution_rcp + uvOffset;
+
+  // o + d * t = p' => t = (p' - o) / d
+  float2 t = (xyPlane - origin.xy) / direction.xy;
+  tCurrent = min(t.x, t.y);
+  position = origin + tCurrent * direction;
+}
+
+bool AdvanceRay(float3 origin, float3 direction, float2 currentMipPosition, float2 currentMipResolution_rcp, float2 floorOffset, float2 uvOffset, float surfaceZ, inout float3 position, inout float tCurrent)
+{
+  // Create boundary planes
+  float2 xyPlane = floor(currentMipPosition) + floorOffset;
+  xyPlane = xyPlane * currentMipResolution_rcp + uvOffset;
+  float3 boundaryPlanes = float3(xyPlane, surfaceZ);
+
+  // Intersect ray with the half box that is pointing away from the ray origin.
+  // o + d * t = p' => t = (p' - o) / d
+  float3 t = (boundaryPlanes - origin) / direction;
+
+  // Prevent using z plane when shooting out of the depth buffer.
+  t.z = direction.z < 0 ? t.z : FLT_MAX_16;
+
+  // Choose nearest intersection with a boundary.
+  float tMin = min(min(t.x, t.y), t.z);
+
+  // Larger z means closer to the camera.
+  bool aboveSurface = surfaceZ < position.z;
+
+  // Decide whether we are able to advance the ray until we hit the xy boundaries or if we had to clamp it at the surface.
+  // We use the asuint comparison to avoid NaN / Inf logic, also we actually care about bitwise equality here to see if t_min is the t.z we fed into the min3 above.
+  bool skippedTile = asuint(tMin) != asuint(t.z) && aboveSurface;
+
+  // Make sure to only advance the ray if we're still above the surface.
+  tCurrent = aboveSurface ? tMin : tCurrent;
+
+  // Advance ray
+  position = origin + tCurrent * direction;
+
+  return skippedTile;
+}
+
+float2 GetMipResolution(float2 screenDimensions, int mipLevel)
+{
+  return screenDimensions * pow(0.5, mipLevel);
+}
+
+// Based on: https://github.com/GPUOpen-Effects/FidelityFX-SSSR/tree/master
+// Requires origin and direction of the ray to be in screen space [0, 1] x [0, 1]
+float3 HierarchicalRaymarch(float3 origin, float3 direction, float2 screenSize, out bool validHit)
+{
+  // Start on mip with highest detail.
+  int currentMip = HiZTraceMostDetailedLevel;
+
+  // Could recompute these every iteration, but it's faster to hoist them out and update them.
+  float2 currentMipResolution = GetMipResolution(screenSize, currentMip);
+  float2 currentMipResolution_rcp = rcp(currentMipResolution);
+
+  // Offset to the bounding boxes uv space to intersect the ray with the center of the next pixel.
+  // This means we ever so slightly over shoot into the next region.
+  float2 uvOffset = 0.005 * exp2(HiZTraceMostDetailedLevel) / screenSize;
+    uvOffset = select(direction.xy < 0, -uvOffset, uvOffset);
+
+  // Offset applied depending on current mip resolution to move the boundary to the left/right upper/lower border depending on ray direction.
+    float2 floorOffset = select(direction.xy < 0, 0, 1);
+
+  // Initially advance ray to avoid immediate self intersections.
+  float tCurrent;
+  float3 position;
+  InitialAdvanceRay(origin, direction, currentMipResolution, currentMipResolution_rcp, floorOffset, uvOffset, position, tCurrent);
+
+  int i = 0;
+  while (i < HiZTraceIterationsMax && currentMip >= HiZTraceMostDetailedLevel)
+  {
+    if (any(position.xy < 0.0) || any(position.xy > 1.0))
+    {
+      validHit = false;
+      return position;
+    }
+
+    float2 currentMipPosition = currentMipResolution * position.xy;
+    float surfaceZ = DepthHierarchy.Load(int3(currentMipPosition, currentMip)).r;
+
+    bool skippedTile = AdvanceRay(origin, direction, currentMipPosition, currentMipResolution_rcp, floorOffset, uvOffset, surfaceZ, position, tCurrent);
+
+    currentMip += skippedTile ? 1 : -1;
+    currentMipResolution *= skippedTile ? 0.5 : 2;
+    currentMipResolution_rcp *= skippedTile ? 2 : 0.5;
+
+    i++;
+  }
+
+  validHit = (i <= HiZTraceIterationsMax);
+
+  return position;
+}
+
+static const uint rayMarchIterationsMax = 60; // primary ray march step count (higher will find more in distance, but slower)
+static const float rayMarchStepIncrease = 1.05f; // primary ray march step increase (higher will travel more distance, but can miss details)
+static const uint rayMarchFineIterationsMax = 2; // binary step count (higher is nicer but slower)
+static const float rayMarchTolerance = 0.000002; // early exit factor for binary search (smaller is nicer but slower)
+static const float rayMarchLevelIncrement = 0.3; // level increment based on ray travel distance and roughness (higher values improves performance, but traces at lower resolution)
+
+float3 BinarySearch(float3 samplePos, float3 V, float level)
+{
+  for (uint i = 0; i < rayMarchFineIterationsMax; i++)
+  {
+    float sampleDepth = DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
+
+    if (abs(samplePos.z - sampleDepth) < rayMarchTolerance)
+    {
+      return samplePos;
+    }
+
+    if (samplePos.z >= sampleDepth)
+    {
+      samplePos += V;
+    }
+
+    V *= 0.5f;
+    samplePos -= V;
+  }
+
+  return samplePos;
+}
+
+// P and V in screen space [0, 1] x [0, 1]
+float3 RayMarch(float3 P, float3 V, float roughness, float jitter, out bool validHit)
+{
+  float3 samplePos = P + V;
+  float sampleDepth = 0;
+  float level = 1;
+
+  uint iterations = 0;
+
+  while (iterations <= rayMarchIterationsMax)
+  {
+    if (any(samplePos.xy < 0.0) || any(samplePos.xy > 1.0))
+    {
+      validHit = false;
+      return samplePos;
+    }
+
+    samplePos += V;
+
+    sampleDepth = 1.0 - DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
+
+    if (sampleDepth > samplePos.z)
+    {
+      samplePos = BinarySearch(samplePos, V, level);
+      break;
+    }
+
+    V *= rayMarchStepIncrease;
+    level += rayMarchLevelIncrement * roughness;
+
+    iterations++;
+  }
+
+  validHit = (iterations <= rayMarchIterationsMax);
+  return float3(samplePos.xy, sampleDepth);
+}
+
+float CalculateEdgeVignette(float2 hitPixel)
+{
+  float2 hitPixelNDC = hitPixel * 2.0 - 1.0;
+
+  //float maxDimension = min(1.0, max(abs(hitPixelNDC.x), abs(hitPixelNDC.y)));
+  //float attenuation = 1.0 - max(0.0, maxDimension - blendScreenEdgeFade) / (1.0 - blendScreenEdgeFade);
+
+  float2 vignette = saturate(abs(hitPixelNDC) * blendScreenEdgeFade - (blendScreenEdgeFade - 1.0f));
+  float attenuation = saturate(1.0 - dot(vignette, vignette));
+
+  return attenuation;
+}
+
+float ValidateHit(float3 hit, float hitDepth, float2 prevHitUV)
+{
+  float vignetteHit = CalculateEdgeVignette(hit.xy);
+  float vignetteHitPrev = CalculateEdgeVignette(prevHitUV);
+  float vignette = min(vignetteHit, vignetteHitPrev);
+
+  float3 surfaceViewPosition = ScreenCoordToViewSpace(hit.xy, hitDepth);
+  float3 hitViewPosition = ScreenCoordToViewSpace(hit.xy, hit.z);
+
+  float distance = length(surfaceViewPosition - hitViewPosition);
+  float confidence = 1.0 - smoothstep(0.0, traceThickness, distance);
+
+  return vignette * confidence;
+}
+
+float get_linear_depth(float z, float near, float far)
+{
+  float z_b = z;
+  float z_n = 2.0f * z_b - 1.0f;
+  return 2.0f * far * near / (near + far - z_n * (near - far));
+}
+
+float get_linear_depth(float z)
+{
+  return get_linear_depth(z, ClipPlanes.x, ClipPlanes.y);
+}
+
+[numthreads(POSTPROCESS_BLOCKSIZE, POSTPROCESS_BLOCKSIZE, 1)]
+void main(uint3 Gid : SV_GroupID, uint3 GTid : SV_GroupThreadID)
+{
+   const uint downsampleFactor = 2;
+
+   const uint2 pixel = GetReflectionIndirectDispatchCoord(Gid, GTid, tiles, downsampleFactor);
+   const float2 uv = (pixel + 0.5f) * resolution.zw;
+
+//#if SSR_TRACING_MODE == SSR_TRACING_MODE_EARLYEXIT
+//  OutputIndirectSpecular[pixel] = 0;
+//  OutputRayDirectionPDF[pixel] = 0;
+//  OutputRayLengths[pixel] = 0;
+//#else
+
+  uint2 screenJitter = floor(blue_noise(uint2(0, 0)).xy * downsampleFactor);
+  uint2 jitterPixel = screenJitter + pixel * downsampleFactor;
+  float2 jitterUV = (screenJitter + pixel + 0.5f) * resolution.zw;
+
+  float depth = DepthHierarchy[screenJitter + pixel].r;
+  float roughness = MaterialInput[jitterPixel].a;
+
+ // if (!NeedReflection(roughness, depth, RoughnessCutoff))
+	//{
+	//	OutputIndirectSpecular[pixel] = 0.0;
+	//	OutputRayDirectionPDF[pixel] = 0.0;
+	//	OutputRayLengths[pixel] = 0.0;
+	//	return;
+	//}
+
+  float3 N = normalize(MaterialInput[jitterPixel].xyz);
+  float3 P = ScreenCoordToWorldSpace(jitterUV,  depth);
+  float3 V = normalize(GetCameraPosition() - P);
+
+ 	float4 H;
+	float3 L;
+	if (roughness > 0.05f)
+	{
+		float3x3 tangentBasis = GetTangentBasis(N);
+		float3 tangentV = mul(tangentBasis, V);
+
+		const float2 bluenoise = blue_noise(pixel).xy;
+
+		float2 Xi = bluenoise.xy;
+
+		Xi.y = lerp(Xi.y, 0.0f, GGX_IMPORTANCE_SAMPLE_BIAS);
+
+		H = ImportanceSampleVisibleGGX(SampleDisk(Xi), roughness, tangentV);
+
+		// Tangent to world
+		H.xyz = mul(H.xyz, tangentBasis);
+    
+        L = reflect(-V, H.xyz);
+
+	}
+    else
+	{
+		H = float4(N.xyz, 1.0f);
+		L = reflect(-V, H.xyz);
+	}
+
+ 	float4 rayStartClip = mul(GetWorldToScreenMatrix(), float4(P, 1)); // World to Clip
+	float4 rayEndClip = mul(GetWorldToScreenMatrix(), float4(P + L, 1));
+
+	float3 rayStartScreen = rayStartClip.xyz * rcp(rayStartClip.w);
+	float3 rayEndScreen = rayEndClip.xyz * rcp(rayEndClip.w);
+
+	rayStartScreen.xy = rayStartScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
+	rayEndScreen.xy = rayEndScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
+
+ // #if SSR_TRACING_MODE == SSR_TRACING_MODE_CHEAP
+    rayStartScreen.xy *= params1.xy; // Ratio factor between hierarchy and pass
+    rayEndScreen.xy *= params1.xy;
+
+    float3 rayDirectionScreen = rayEndScreen - rayStartScreen;
+
+    // The ray marching benefits from jittering to create a smoother transition between samples and LOD
+    float jitter = InterleavedGradientNoise(pixel, Frame % 8u); // Temporally stabilize
+
+    bool validHit = false;
+    float3 hit = RayMarch(rayStartScreen, rayDirectionScreen, roughness, 0, validHit);
+
+    hit.xy *= params1.zw; // Undo ratio
+  //#else
+  //  float3 rayDirectionScreen = rayEndScreen - rayStartScreen;
+
+  //  bool validHit = false;
+  //  float3 hit = HierarchicalRaymarch(rayStartScreen, rayDirectionScreen, resolution.xy, validHit);
+  //#endif
+
+  // float2 prevHitUV = VelocityInput.SampleLevel(PointClampSampler, hit.xy, 0).xy + hit.xy;
+    float2 prevHitUV = hit.xy;
+
+	float hitDepth = 1.0 - DepthInput.SampleLevel(PointClampSampler, hit.xy, 0);
+	float confidence = validHit ? ValidateHit(hit, hitDepth, prevHitUV) : 0;
+
+	float4 indirectSpecular;
+	indirectSpecular.rgb = Input.SampleLevel(PointClampSampler, prevHitUV, 0).rgb;
+
+  // if(!validHit)
+  // {
+  //   indirectSpecular.rgb = float3(1,0,0)
+  // }
+	indirectSpecular.a = confidence;
+
+  #ifdef DEBUG_TRACING
+    #if SSR_TRACING_MODE == SSR_TRACING_MODE_EARLYEXIT
+      OutputIndirectSpecular[pixel] = float4(lerp(indirectSpecular.rgb, float3(0, 0, 1), 0.5f), 1.0);
+    #elif SSR_TRACING_MODE == SSR_TRACING_MODE_CHEAP
+      OutputIndirectSpecular[pixel] = float4(lerp(indirectSpecular.rgb, float3(0, 1, 0), 0.5f), 1.0);
+    #else
+      OutputIndirectSpecular[pixel] = float4(lerp(indirectSpecular.rgb, float3(1, 0, 0), 0.5f), 1.0);
+    #endif
+  #endif
+
+	OutputIndirectSpecular[pixel] = indirectSpecular;
+//#endif
+
+
+}

@@ -20,7 +20,7 @@ o
 			s{":app/VisualShader/Textures.ddl"}
 		}
 		Uuid %DocumentID{u4{15150418825657775493,4791833822222609996}}
-		u4 %Hash{528798717016514125}
+		u4 %Hash{16749838918332853231}
 		VarArray %MetaInfo{}
 		VarArray %Outputs
 		{
@@ -209,6 +209,7 @@ o
 		s %BLEND_MODE{"BLEND_MODE::BLEND_MODE_OPAQUE"}
 		s %BaseTexture{"{ f962fc28-661b-485c-a527-c997e239a3f0 }"}
 		Color %Color{f{0x9818A33E,0x9818A33E,0x9818A33E,0x0000803F}}
+		b %GAMEOBJECT_VELOCITY{1}
 		f %MaskThreshold{0x0000803E}
 		s %SHADING_MODE{"SHADING_MODE::SHADING_MODE_LIT"}
 		b %TWO_SIDED{0}
@@ -576,16 +577,6 @@ o
 }
 o
 {
-	Uuid %id{u4{7671631817351374497,2778318069461674066}}
-	s %t{"plDefaultValueAttribute"}
-	u3 %v{1}
-	p
-	{
-		d %Value{0x000000000000D03F}
-	}
-}
-o
-{
 	Uuid %id{u4{7999768391447710917,2784851377566841839}}
 	s %t{"plDefaultValueAttribute"}
 	u3 %v{1}
@@ -824,6 +815,25 @@ o
 }
 o
 {
+	Uuid %id{u4{7467877220830731371,6438319967331786590}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{7062902118608167791,15557118917134838612}}
+			Uuid{u4{12394697028999013816,8865153246485961586}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"MaskThreshold"}
+		s %Type{"float"}
+	}
+}
+o
+{
 	Uuid %id{u4{11695727463527673381,6549777581474058039}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
@@ -881,6 +891,7 @@ o
 			Uuid{u4{12451191933407898520,17975289221793653054}}
 			Uuid{u4{1910819999206280778,4165964945221443865}}
 			Uuid{u4{11636160549462287641,16082808227521126081}}
+			Uuid{u4{7467877220830731371,6438319967331786590}}
 		}
 		s %TypeName{"AssetCache/Common/Materials/Common/Pattern.autogen.plShader"}
 		u3 %TypeVersion{2}
@@ -1021,6 +1032,16 @@ o
 }
 o
 {
+	Uuid %id{u4{12394697028999013816,8865153246485961586}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		d %Value{0x000000000000D03F}
+	}
+}
+o
+{
 	Uuid %id{u4{16160446333513365635,8909415978113679638}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -1122,7 +1143,7 @@ o
 	u3 %v{1}
 	p
 	{
-		s %Category{"Constant"}
+		s %Category{"Permutation"}
 	}
 }
 o
@@ -1446,6 +1467,16 @@ o
 }
 o
 {
+	Uuid %id{u4{7062902118608167791,15557118917134838612}}
+	s %t{"plCategoryAttribute"}
+	u3 %v{1}
+	p
+	{
+		s %Category{"Constant"}
+	}
+}
+o
+{
 	Uuid %id{u4{773668148553828920,15966949596821666881}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -1484,13 +1515,12 @@ o
 		VarArray %Attributes
 		{
 			Uuid{u4{4347592306969364151,10015477350630114740}}
-			Uuid{u4{7671631817351374497,2778318069461674066}}
 		}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"MaskThreshold"}
-		s %Type{"float"}
+		s %Name{"GAMEOBJECT_VELOCITY"}
+		s %Type{"bool"}
 	}
 }
 o

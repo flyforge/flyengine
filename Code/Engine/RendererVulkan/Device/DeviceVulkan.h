@@ -131,6 +131,10 @@ public:
 
     bool m_bExternalMemoryWin32 = false;
     bool m_bExternalSemaphoreWin32 = false;
+
+    bool m_bAccelerationStructure = false;
+    bool m_bRayTracing = false;
+    bool m_bRayQuery = false;
   };
 
   struct Queue
@@ -163,6 +167,8 @@ public:
 
   plGALTextureHandle CreateTextureInternal(const plGALTextureCreationDescription& Description, plArrayPtr<plGALSystemMemoryDescription> pInitialData, bool bLinearCPU = false, bool bStaging = false);
   plGALBufferHandle CreateBufferInternal(const plGALBufferCreationDescription& Description, plArrayPtr<const plUInt8> pInitialData, bool bCPU = false);
+
+  virtual bool GetRayTracingSupported() override;
 
   const plGALFormatLookupTableVulkan& GetFormatLookupTable() const;
 

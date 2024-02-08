@@ -40,6 +40,8 @@ protected:
   virtual void RenderObjects(const plRenderViewContext& renderViewContext) = 0;
 
   plRenderPipelineNodePassThrougPin m_PinColor;
+  plRenderPipelineNodePassThrougPin m_PinVelocity;
+  plRenderPipelineNodePassThrougPin m_PinMaterial;
   plRenderPipelineNodePassThrougPin m_PinDepthStencil;
 
   plEnum<plForwardRenderShadingQuality> m_ShadingQuality;

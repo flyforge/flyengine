@@ -1,4 +1,4 @@
-//11567276230520348136|7
+//12905983484679937236|7
 [PLATFORMS]
 ALL
 
@@ -14,8 +14,8 @@ FORWARD_PASS_WRITE_DEPTH
 MSAA
 SHADING_QUALITY
 CAMERA_MODE
-VERTEX_SKINNING
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY
 
 [MATERIALPARAMETER]
 
@@ -40,9 +40,8 @@ float MaskThreshold @Default(0);
 #endif
 
 
-
-#if VERTEX_SKINNING
-  #define USE_SKINNING
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
 #endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
@@ -107,11 +106,12 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #endif
 
 
-#if VERTEX_SKINNING
-  #define USE_SKINNING
-#endif
 
 #include <Shaders/Materials/MaterialStereoGeometryShader.h>
+
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 
 [PIXELSHADER]
@@ -128,8 +128,8 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
 
-#if VERTEX_SKINNING
-  #define USE_SKINNING
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
 #endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR

@@ -12,6 +12,31 @@ float4x4 GetCameraToWorldMatrix()   { return CameraToWorldMatrix[s_ActiveCameraE
 float4x4 GetWorldToScreenMatrix()   { return WorldToScreenMatrix[s_ActiveCameraEyeIndex]; }
 float4x4 GetScreenToWorldMatrix()   { return ScreenToWorldMatrix[s_ActiveCameraEyeIndex]; }
 
+float4x4 GetLastCameraToScreenMatrix()
+{
+  return LastCameraToScreenMatrix[s_ActiveCameraEyeIndex];
+}
+float4x4 GetLastScreenToCameraMatrix()
+{
+  return LastScreenToCameraMatrix[s_ActiveCameraEyeIndex];
+}
+float4x4 GetLastWorldToCameraMatrix()
+{
+  return LastWorldToCameraMatrix[s_ActiveCameraEyeIndex];
+}
+float4x4 GetLastCameraToWorldMatrix()
+{
+  return LastCameraToWorldMatrix[s_ActiveCameraEyeIndex];
+}
+float4x4 GetLastWorldToScreenMatrix()
+{
+  return LastWorldToScreenMatrix[s_ActiveCameraEyeIndex];
+}
+float4x4 GetLastScreenToWorldMatrix()
+{
+  return LastScreenToWorldMatrix[s_ActiveCameraEyeIndex];
+}
+
 float3 GetCameraPosition()     { return GetCameraToWorldMatrix()._m03_m13_m23; };
 float3 GetCameraDirForwards()  { return GetCameraToWorldMatrix()._m02_m12_m22; };
 float3 GetCameraDirRight()     { return GetCameraToWorldMatrix()._m00_m10_m20; };
@@ -26,6 +51,25 @@ float LinearizeZBufferDepth(float depthFromZBuffer)
 {
   return 1.0f / (depthFromZBuffer * GetScreenToCameraMatrix()._43 + GetScreenToCameraMatrix()._44);
 }
+
+float3 ScreenCoordToWorldSpace(float2 uv, float depth)
+{
+  float x = uv.x * 2.0f - 1.0f;
+  float y = (1.0 - uv.y) * 2.0f - 1.0f;
+  float4 pos_clip = float4(x, y, depth, 1.0f);
+  float4 pos_world = mul(GetScreenToWorldMatrix(), pos_clip);
+  return pos_world.xyz / pos_world.w;
+}
+
+float3 ScreenCoordToViewSpace(float2 uv, float depth)
+{
+  float x = uv.x * 2.0f - 1.0f;
+  float y = (1.0 - uv.y) * 2.0f - 1.0f;
+  float4 pos_clip = float4(x, y, depth, 1.0f);
+  float4 pos_world = mul(GetScreenToCameraMatrix(), pos_clip);
+  return pos_world.xyz / pos_world.w;
+}
+
 
 #else
 

@@ -192,6 +192,19 @@ plMaterialData FillMaterialData()
     matData.subsurfaceColor = 0.0;
   #endif
 
+  #if defined(USE_VELOCITY)
+    // TODO: Set these values in the global constants buffer when implementing TAA
+    float2 CurrentTAAJitter = 0.0f;
+    float2 PreviousTAAJitter = 0.0f;
+
+    float2 uv_current = Ndc2Uv((G.Input.ScreenPosition.xy / G.Input.ScreenPosition.w) - CurrentTAAJitter);
+    float2 uv_previous = Ndc2Uv((G.Input.LastScreenPosition.xy / G.Input.LastScreenPosition.w) - PreviousTAAJitter);
+
+    matData.velocity = uv_current - uv_previous;
+  #else
+    matData.velocity = float2(0, 0);
+  #endif
+
   #if defined(USE_MATERIAL_SUBSURFACE_PARAMS)
     GetSubsurfaceParams(matData.subsurfaceScatterPower, matData.subsurfaceShadowFalloff);
   #else

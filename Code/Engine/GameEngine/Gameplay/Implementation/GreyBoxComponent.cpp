@@ -183,6 +183,7 @@ void plGreyBoxComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) con
 
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(GetOwner());
     {
+      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
       pRenderData->m_hMesh = m_hMesh;

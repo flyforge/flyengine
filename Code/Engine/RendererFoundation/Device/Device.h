@@ -152,6 +152,8 @@ public:
   static plGALDevice* GetDefaultDevice();
   static bool HasDefaultDevice();
 
+  virtual bool GetRayTracingSupported();
+
   // Sends the queued up commands to the GPU
   void Flush();
   /// \brief Waits for the GPU to be idle and destroys any pending resources and GPU objects.

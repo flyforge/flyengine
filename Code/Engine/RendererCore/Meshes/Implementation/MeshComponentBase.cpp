@@ -179,6 +179,7 @@ void plMeshComponentBase::OnMsgExtractRenderData(plMsgExtractRenderData& msg) co
 
     plMeshRenderData* pRenderData = CreateRenderData();
     {
+      pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform() * pRenderData->m_LastGlobalTransform;
       pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform() * pRenderData->m_GlobalTransform;
       pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
       pRenderData->m_fSortingDepthOffset = m_fSortingDepthOffset;

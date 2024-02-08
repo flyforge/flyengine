@@ -26,7 +26,7 @@ PL_BEGIN_STATIC_REFLECTED_TYPE(plSurfaceInteraction, plNoBase, 1, plRTTIDefaultA
 }
 PL_END_STATIC_REFLECTED_TYPE;
 
-PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 2, plRTTIDefaultAllocator<plSurfaceResourceDescriptor>)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 3, plRTTIDefaultAllocator<plSurfaceResourceDescriptor>)
 {
   PL_BEGIN_PROPERTIES
   {
@@ -35,6 +35,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 2, plRTTIDefaultAll
     PL_MEMBER_PROPERTY("StaticFriction", m_fPhysicsFrictionStatic)->AddAttributes(new plDefaultValueAttribute(0.6f)),
     PL_MEMBER_PROPERTY("DynamicFriction", m_fPhysicsFrictionDynamic)->AddAttributes(new plDefaultValueAttribute(0.4f)),
     PL_MEMBER_PROPERTY("GroundType", m_iGroundType)->AddAttributes(new plDefaultValueAttribute(-1), new plDynamicEnumAttribute("AiGroundType")),
+    PL_MEMBER_PROPERTY("SoundObstruction", m_fSoundObstruction)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
     PL_ACCESSOR_PROPERTY("OnCollideInteraction", GetCollisionInteraction, SetCollisionInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
     PL_ACCESSOR_PROPERTY("SlideReaction", GetSlideReactionPrefabFile, SetSlideReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
     PL_ACCESSOR_PROPERTY("RollReaction", GetRollReactionPrefabFile, SetRollReactionPrefabFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Prefab", plDependencyFlags::Package)),
@@ -106,12 +107,17 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& inout_stream)
   plUInt8 uiVersion = 0;
 
   inout_stream >> uiVersion;
-  PL_ASSERT_DEV(uiVersion <= 8, "Invalid version {0} for surface resource", uiVersion);
+  PL_ASSERT_DEV(uiVersion <= 9, "Invalid version {0} for surface resource", uiVersion);
 
   inout_stream >> m_fPhysicsRestitution;
   inout_stream >> m_fPhysicsFrictionStatic;
   inout_stream >> m_fPhysicsFrictionDynamic;
   inout_stream >> m_hBaseSurface;
+
+  if (uiVersion >= 9)
+  {
+    inout_stream >> m_fSoundObstruction;
+  }
 
   if (uiVersion >= 4)
   {
@@ -182,13 +188,16 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& inout_stream)
 
 void plSurfaceResourceDescriptor::Save(plStreamWriter& inout_stream) const
 {
-  const plUInt8 uiVersion = 8;
+  const plUInt8 uiVersion = 9;
 
   inout_stream << uiVersion;
   inout_stream << m_fPhysicsRestitution;
   inout_stream << m_fPhysicsFrictionStatic;
   inout_stream << m_fPhysicsFrictionDynamic;
   inout_stream << m_hBaseSurface;
+
+  // version 9
+  inout_stream << m_fSoundObstruction;
 
   // version 4
   inout_stream << m_sOnCollideInteraction;
