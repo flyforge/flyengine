@@ -1,0 +1,107 @@
+[PLATFORMS]
+ALL
+DEBUG
+
+[PERMUTATIONS]
+SHADING_QUALITY = SHADING_QUALITY_NORMAL
+
+[COMPUTESHADER]
+
+#include <Shaders/Common/Common.h>
+#include <Shaders/Common/Utils.h>
+#include <Shaders/Common/Lighting.h>
+
+// TODO: rename
+Texture2D tex;
+Texture2D tex_velocity;
+Texture2D tex_normal;
+Texture2D tex_material;
+Texture2D tex_depth;
+RWTexture2D<float4> tex_uav;
+
+  float get_depth(uint2 position)
+{
+  // out of bounds check
+  position = clamp(position, uint2(0, 0), uint2(ViewportSize.xy) - uint2(1, 1));
+  return tex_depth[position].r;
+}
+
+float get_depth(float2 uv)
+{
+  // effects like screen space shadows, can get artefacts if a point sampler is used
+  return tex_depth.SampleLevel(LinearClampSampler, uv, 0).r;
+}
+
+float get_linear_depth(float z, float near, float far)
+{
+  float z_b = z;
+  float z_n = 2.0f * z_b - 1.0f;
+  return 2.0f * far * near / (near + far - z_n * (near - far));
+}
+
+float get_linear_depth(float z)
+{
+  return get_linear_depth(z, ClipPlanes.x, ClipPlanes.y);
+}
+
+float get_linear_depth(uint2 pos)
+{
+  return get_linear_depth(get_depth(pos));
+}
+
+float get_linear_depth(float2 uv)
+{
+  return get_linear_depth(get_depth(uv));
+}
+
+#define screen_fade ScreenFade
+
+float2 view_to_uv(float3 x, bool isPosition = true)
+{
+  float4 uv = mul(GetCameraToScreenMatrix(), float4(x, (float)isPosition));
+  return (uv.xy / uv.w) * float2(0.5f, -0.5f) + 0.5f;
+}
+
+float3 world_to_view(float3 x, bool isPosition = true)
+{
+  return mul(GetWorldToCameraMatrix(), float4(x, (float)isPosition)).xyz;
+}
+
+
+#define get_noise_interleaved_gradient InterleavedGradientNoise
+
+#define resolution_rt                 ViewportSize.xy
+
+float3 FastScreenCoordToViewSpace(float2 uv, float depth)
+{
+  float x          = uv.x * 2.0f - 1.0f;
+  float y          = (1.0 - uv.y) * 2.0f - 1.0f;
+  float4 pos_clip  = float4(x, y, depth, 1.0f);
+  float4 pos_world = mul(GetScreenToWorldMatrix(), pos_clip);
+  return            pos_world.xyz / pos_world.w;
+}
+
+struct Surface
+{
+  bool is_opaque() { return  true; }
+
+  void Build(float2 threadID)
+  {
+      unpack_floats(roughness, metalic, tex_material[threadID].x);
+      normal = tex_normal[threadID].xyz;
+      uv = (threadID.xy + 0.5f) / ViewportSize.xy;
+      uv.y = 1.0 - uv.y;
+      depth = get_depth(uv);
+
+      position = FastScreenCoordToViewSpace(uv, depth);
+  }
+
+  float roughness;
+  float metalic;
+  float3 normal;
+  float3 position;
+  float depth;
+  float2 uv;
+};
+
+#include <Shaders/ThirdParty/SSR.h>

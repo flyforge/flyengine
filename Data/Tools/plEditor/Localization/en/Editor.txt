@@ -31,7 +31,7 @@ G.View;&View
 G.Help;&Help
 G.Project.Settings;Project Settings
 G.Plugins.Settings;Plugin Settings
-
+G.Plugins.Settings.AudioSystem;AudioSystem
 # Engine
 
 Engine.ReloadResources;Reload Resources;Reloads resources, such as textures, if they have changed on disk.

@@ -26,6 +26,8 @@ struct PS_OUT
 {
   #if RENDER_PASS != RENDER_PASS_DEPTH_ONLY
     float4 Color : SV_Target;
+    float2 Velocity : SV_Target1;
+    float4 Material : SV_Target2;
   #endif
 
   #if defined(USE_ALPHA_TEST_SUPER_SAMPLING)
@@ -110,6 +112,8 @@ PS_OUT main(PS_IN Input)
     #endif
 
     Output.Color = float4(litColor, matData.opacity);
+    Output.Velocity = matData.velocity;
+    Output.Material = float4(matData.worldNormal, matData.roughness);
 
   #elif RENDER_PASS == RENDER_PASS_EDITOR
     if (RenderPass == EDITOR_RENDER_PASS_DIFFUSE_LIT_ONLY)

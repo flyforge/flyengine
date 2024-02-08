@@ -169,6 +169,14 @@ PL_ALWAYS_INLINE plUInt32 plGameObject::GetChildCount() const
   return m_uiChildCount;
 }
 
+//PL_ALWAYS_INLINE plTransform plGameObject::GetLastGlobalTransform() const
+//{
+//#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+//  return plSimdConversion::ToTransform(m_pTransformationData->m_lastGlobalTransform);
+//#else
+//  return plSimdConversion::ToTransform(m_pTransformationData->m_globalTransform);
+//#endif
+//}
 
 PL_ALWAYS_INLINE void plGameObject::SetLocalPosition(plVec3 vPosition)
 {
@@ -254,6 +262,10 @@ PL_ALWAYS_INLINE plVec3 plGameObject::GetGlobalScaling() const
 
 PL_ALWAYS_INLINE void plGameObject::SetGlobalTransform(const plTransform& transform)
 {
+#if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+  m_pTransformationData->m_lastGlobalTransform = m_pTransformationData->m_globalTransform;
+#endif
+
   SetGlobalTransform(plSimdConversion::ToTransform(transform));
 }
 

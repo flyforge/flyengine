@@ -1,4 +1,4 @@
-//4468359987103289813|7
+//12755354389008332907|7
 [PLATFORMS]
 ALL
 
@@ -16,6 +16,7 @@ SHADING_QUALITY
 CAMERA_MODE
 VERTEX_SKINNING
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY
 
 [MATERIALPARAMETER]
 
@@ -26,6 +27,7 @@ Texture2D BaseTexture @Default("{ f962fc28-661b-485c-a527-c997e239a3f0 }");
 Permutation BLEND_MODE;
 Permutation SHADING_MODE;
 Permutation TWO_SIDED;
+Permutation GAMEOBJECT_VELOCITY;
 float MaskThreshold @Default(0.25);
 
 [RENDERSTATE]
@@ -41,6 +43,9 @@ float MaskThreshold @Default(0.25);
 #endif
 
 
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if VERTEX_SKINNING
   #define USE_SKINNING
@@ -64,7 +69,7 @@ float MaskThreshold @Default(0.25);
   #define USE_OBJECT_POSITION_OFFSET
 #endif
 
-#if 0
+#if 0 
   #define USE_WORLD_POSITION_OFFSET
 #endif
 
@@ -108,6 +113,10 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #endif
 
 
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
+
 #if VERTEX_SKINNING
   #define USE_SKINNING
 #endif
@@ -128,6 +137,10 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #define USE_MATERIAL_OCCLUSION
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
+
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if VERTEX_SKINNING
   #define USE_SKINNING

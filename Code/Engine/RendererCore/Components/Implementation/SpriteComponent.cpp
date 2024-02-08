@@ -99,6 +99,7 @@ void plSpriteComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) cons
 
   plSpriteRenderData* pRenderData = plCreateRenderDataForThisFrame<plSpriteRenderData>(GetOwner());
   {
+    pRenderData->m_LastGlobalTransform = GetOwner()->GetLastGlobalTransform();
     pRenderData->m_GlobalTransform = GetOwner()->GetGlobalTransform();
     pRenderData->m_GlobalBounds = GetOwner()->GetGlobalBounds();
     pRenderData->m_hTexture = m_hTexture;

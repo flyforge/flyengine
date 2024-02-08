@@ -1,0 +1,50 @@
+[PLATFORMS]
+ALL
+
+[PERMUTATIONS]
+SHADING_QUALITY = SHADING_QUALITY_NORMAL
+SSR_DEPTH_MODE
+
+[COMPUTESHADER]
+
+#include <Shaders/Common/Common.h>
+#include <Shaders/Common/PostprocessCommon.h>
+#include <Shaders/Pipeline/SSRConstants.h>
+
+#if SSR_DEPTH_MODE == SSR_DEPTH_MODE_SECOND_PASS
+Texture2D<float2> Input;
+#else
+Texture2D DepthBuffer;
+#endif
+RWTexture2D<float2> Output;
+
+[numthreads(POSTPROCESS_BLOCKSIZE, POSTPROCESS_BLOCKSIZE, 1)]
+  void main(uint3 DTid : SV_DispatchThreadID)
+{
+  if (all(DTid.xy < params0.xy))
+  {
+    #if SSR_DEPTH_MODE == SSR_DEPTH_MODE_FIRST_PASS
+      uint2 dim;
+      DepthBuffer.GetDimensions(dim.x, dim.y);
+
+      float2 uv = (DTid.xy + 0.5) / dim * 2; // Account for half-res
+
+      float4 depths = DepthBuffer.GatherRed(PointClampSampler, uv);
+
+      float depthMax = max(max(depths.x, depths.y), max(depths.z, depths.w));
+      float depthMin = min(min(depths.x, depths.y), min(depths.z, depths.w));
+
+      Output[DTid.xy] = float2(depthMax, depthMin);
+    #else
+      float2 uv = (DTid.xy + 0.5) / params0.xy;
+
+      float4 depthsRed = Input.GatherRed(PointClampSampler, uv);
+      float4 depthsGreen = Input.GatherGreen(PointClampSampler, uv);
+
+      float depthMax = max(max(depthsRed.x, depthsRed.y), max(depthsRed.z, depthsRed.w));
+      float depthMin = min(min(depthsGreen.x, depthsGreen.y), min(depthsGreen.z, depthsGreen.w));
+
+      Output[DTid.xy] = float2(depthMax, depthMin);
+    #endif
+  }
+}

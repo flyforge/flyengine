@@ -20,6 +20,8 @@ static const float FLT_MAX_14          = 8191.0f;
 static const float FLT_MAX_16          = 32767.0f;
 static const float FLT_MAX_16U         = 65535.0f;
 
+#define sqr(a) ((a) * (a))
+
 float4 RGBA8ToFloat4(uint x)
 {
   float4 result;
@@ -102,6 +104,15 @@ float InterleavedGradientNoise(float2 screenSpacePosition)
 {
   float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
   return frac(magic.z * frac(dot(screenSpacePosition, magic.xy)));
+}
+
+float InterleavedGradientNoise(float2 uv, uint frameCount)
+{
+  const float2 magicFrameScale = float2(47, 17) * 0.695;
+  uv += frameCount * magicFrameScale;
+
+  const float3 magic = float3(0.06711056, 0.00583715, 52.9829189);
+  return frac(magic.z * frac(dot(uv, magic.xy)));
 }
 
 float3 NormalizeAndGetLength(float3 v, out float len)
@@ -212,4 +223,19 @@ float3 saturate_16(float3 x)
 float4 saturate_16(float4 x)
 {
   return clamp(x, FLT_MIN, FLT_MAX_16);
+}
+
+float2 Ndc2Uv(float2 x)
+{
+  return x * float2(0.5f, -0.5f) + 0.5f;
+}
+
+inline uint flatten2D(uint2 coord, uint2 dim)
+{
+  return coord.x + coord.y * dim.x;
+}
+// flattened array index to 2D array index
+inline uint2 unflatten2D(uint idx, uint2 dim)
+{
+  return uint2(idx % dim.x, idx / dim.x);
 }

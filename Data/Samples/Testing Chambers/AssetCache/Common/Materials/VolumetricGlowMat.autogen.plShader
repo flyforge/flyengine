@@ -1,4 +1,4 @@
-//2561042020820155800|7
+//8509307016609969279|7
 [PLATFORMS]
 ALL
 
@@ -15,6 +15,7 @@ MSAA
 SHADING_QUALITY
 CAMERA_MODE
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY
 
 [MATERIALPARAMETER]
 
@@ -37,6 +38,12 @@ float MaskThreshold @Default(0.25);
 #endif
 
 
+<<<<<<< Development
+=======
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
+>>>>>>> WIP
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
@@ -100,9 +107,14 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #endif
 
 
+<<<<<<< Development
+=======
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
+>>>>>>> WIP
 
 #include <Shaders/Materials/MaterialStereoGeometryShader.h>
-
 
 [PIXELSHADER]
 
@@ -115,6 +127,13 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
 
+<<<<<<< Development
+=======
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
+
+>>>>>>> WIP
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
 #endif

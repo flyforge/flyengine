@@ -307,6 +307,10 @@ vk::Result plGALDeviceVulkan::SelectDeviceExtensions(vk::DeviceCreateInfo& devic
   AddExtIfSupported(VK_KHR_EXTERNAL_SEMAPHORE_WIN32_EXTENSION_NAME, m_extensions.m_bExternalSemaphoreWin32);
 #endif
 
+  AddExtIfSupported(VK_KHR_ACCELERATION_STRUCTURE_EXTENSION_NAME, m_extensions.m_bAccelerationStructure);
+  AddExtIfSupported(VK_KHR_RAY_TRACING_PIPELINE_EXTENSION_NAME, m_extensions.m_bRayTracing);
+  AddExtIfSupported(VK_KHR_RAY_QUERY_EXTENSION_NAME, m_extensions.m_bRayQuery);
+
   return vk::Result::eSuccess;
 }
 
@@ -782,6 +786,11 @@ plGALBufferHandle plGALDeviceVulkan::CreateBufferInternal(const plGALBufferCreat
   }
 
   return FinalizeBufferInternal(Description, pBuffer);
+}
+
+bool plGALDeviceVulkan::GetRayTracingSupported()
+{
+  return m_extensions.m_bAccelerationStructure && m_extensions.m_bRayTracing && m_extensions.m_bRayQuery;
 }
 
 void plGALDeviceVulkan::BeginPipelinePlatform(const char* szName, plGALSwapChain* pSwapChain)

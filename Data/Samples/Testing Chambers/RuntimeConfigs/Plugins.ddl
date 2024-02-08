@@ -1,5 +1,15 @@
 Plugin
 {
+	string %Path{"plAiPlugin"}
+	bool %LoadCopy{false}
+}
+Plugin
+{
+	string %Path{"plAudioSystemPlugin"}
+	bool %LoadCopy{false}
+}
+Plugin
+{
 	string %Path{"plGameComponentsPlugin"}
 	bool %LoadCopy{false}
 }

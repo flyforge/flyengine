@@ -28,11 +28,11 @@
 #include <RendererFoundation/Device/Device.h>
 #include <RendererFoundation/Device/DeviceFactory.h>
 
-#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
-constexpr const char* szDefaultRenderer = "Vulkan";
-#else
+//#ifdef BUILDSYSTEM_ENABLE_VULKAN_SUPPORT
+//constexpr const char* szDefaultRenderer = "Vulkan";
+//#else
 constexpr const char* szDefaultRenderer = "DX11";
-#endif
+//#endif
 
 plCommandLineOptionString opt_Renderer("app", "-renderer", "The renderer implementation to use.", szDefaultRenderer);
 

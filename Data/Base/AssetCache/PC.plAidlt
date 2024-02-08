@@ -1,6 +1,7 @@
 { 0416eb3e-69c0-4640-be5b-77354e0e37d7 };Common/RenderPipelines/DebugRenderPipeline.plRenderPipelineBin
 { 05176e4f-20eb-4af2-895c-69f2868087ec };PC/Textures/PlasmaMetallic.plTexture2D
 { 05af8d07-0b38-44a6-8d50-49731ae2625d };Common/Materials/BaseMaterials/Fullbright.plMaterialBin
+{ 067011cd-acb1-43b2-828a-346e3ef9e7fd };PC/Textures/CloudDetailNoise.plTexture2D
 { 0b202e08-a64f-465d-b38e-15b81d161822 };PC/Textures/Sky.plTextureCube
 { 1c32434e-14e8-43f3-a00e-22030a83d2b2 };PC/Textures/PlasmaNormal.plTexture2D
 { 1c47ee4c-0379-4280-85f5-b8cda61941d2 };Common/Materials/Common/Pattern.plMaterialBin
@@ -10,6 +11,7 @@
 { 2fe25ded-776c-7f9e-354f-e4c52a33d125 };Common/RenderPipelines/HololensRenderPipeline.plRenderPipelineBin
 { 3283e65f-79e2-ec9d-3f50-f14c56bac25f };Common/Materials/Prototyping/PrototypeOrange.plMaterialBin
 { 3437db17-ddf1-4b67-b80f-9999d6b0c352 };Common/RenderPipelines/ReflectionFilterPipeline.plRenderPipelineBin
+{ 35c3cc9f-4dff-4a14-8bf0-e3649790549c };PC/Textures/Grid-1.plTexture2D
 { 3834b7d0-5a3f-140d-31d8-3a2bf48b09bd };Common/Textures/BlackWhiteGradient.plColorGradient
 { 3edf10b3-36d2-434f-9683-c653909abe7e };PC/Textures/Vignetting.plTexture2D
 { 4009b113-9eed-4a5c-aad7-816d61d20e12 };Common/Meshes/MissingMesh.plMesh
@@ -20,7 +22,9 @@
 { 4dc82890-39e3-4bfc-a97d-86a984d4d3db };PC/Textures/NeutralNormal.plTexture2D
 { 4f4d9f16-3d47-4c67-b821-a778f11dcaf5 };Common/RenderPipelines/ShadowMapRenderPipeline.plRenderPipelineBin
 { 56f21c92-d6e4-4d2b-80c1-a923f2d1fed5 };Common/Materials/BaseMaterials/Anisotopic.plMaterialBin
+{ 59b3d588-53cf-4ca5-978e-89d1c94123f2 };PC/Textures/MissingMesh_D.plTexture2D
 { 5d5a512f-e171-4868-9a82-41dc2cfcf356 };Common/Materials/BaseMaterials/Sheen.plMaterialBin
+{ 5e39fb78-c25b-428d-88f2-84918d739932 };PC/Textures/MissingPrefab_D.plTexture2D
 { 618ee743-ed04-4fac-bf5f-572939db2f1d };Common/Meshes/Sphere.plMesh
 { 61a3decd-9f20-4a16-bb93-0e92b7c2ba73 };PC/Textures/MissingMaterial_D.plTexture2D
 { 6449d7e0-a8ff-4b43-9f84-df1c870a4748 };PC/Textures/studio_small_08_2k_texture_cube.plTextureCube
@@ -32,15 +36,22 @@
 { 752d13b5-f643-45a4-a345-89fefd4832c8 };Common/Meshes/SM_PlasmaBall_mesh_data/Ball.plMaterialBin
 { 7c71fc2d-2a1a-4938-9305-f3a0f26d73cc };Common/Materials/BaseMaterials/Lit.plMaterialBin
 { 7e42491b-1a9b-4300-9827-a7332e256f70 };PC/Meshes/SM_PlasmaBall_conv_collision.plJoltMesh
+{ 897404db-0d49-499b-b3bb-9e9e18877194 };PC/Textures/CloudNoise.plTexture2D
 { 8aecce46-752d-472b-8720-872abe148728 };Common/Editor/DocumentTemplates/Default.plObjectGraph
+{ 8b09e669-2b91-4995-8f46-cc474367c233 };PC/Textures/LoadingMaterial_D.plTexture2D
+{ 9689e1e6-13f1-40db-b5b3-d6dfe3750996 };PC/Textures/SSAONoise.plTexture2D
+{ 96de2aec-6d2f-491e-8107-688251abb5bc };PC/Textures/TestBricks_normal.plTexture2D
+{ 9d48cf31-5700-47b9-98f3-173e08000fab };PC/Textures/MissingTexture_D.plTexture2D
 { 9fc82cb4-e800-cc3d-feed-61a7c88e2a20 };Common/Materials/Prototyping/PrototypeGreen.plMaterialBin
 { a3ce5d3d-be5e-4bda-8820-b1ce3b3d33fd };Common/Prefabs/Sphere.plObjectGraph
 { aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 };Common/Materials/Prototyping/PrototypeBlue.plMaterialBin
 { aa700289-9aae-4ec5-81ea-9c381ec8309e };PC/Textures/Reference.plTexture2D
+{ ab5e263e-c8d0-46f5-bf95-ef71da3717f5 };PC/Textures/LoadingTexture_D.plTexture2D
 { ab7ebb2f-4c96-4aef-adb6-6f9e8792e15a };PC/Textures/PlasmaRoughness.plTexture2D
 { abb5f06e-f4f2-4fb1-94e9-eed4a51e4490 };Common/Materials/BaseMaterials/LitAlphaTest.plMaterialBin
 { abf38e0f-af01-4f2d-a167-d95defc809b7 };Common/Meshes/Box.plMesh
 { ac614d7c-2b31-4a7b-aa0c-c5d8200b7b89 };PC/Textures/BlueNoise.plTexture2D
+{ aff096fe-9338-4912-aee5-7118dd67584b };PC/Textures/TestBricks_roughness.plTexture2D
 { b03df0e4-98b7-49ba-8413-d981014a77be };Common/Materials/Common/PhysicsCollidersSoft.plMaterialBin
 { b4b75b1c-c2c8-4a0e-8076-780bdd46d18b };Common/Materials/BaseMaterials/Sky.plMaterialBin
 { b93a6e80-5bf7-48f0-b7b3-2097d0133159 };Common/Materials/Prototyping/FullbrightWhite.plMaterialBin
@@ -55,6 +66,7 @@
 { d615cd66-0904-00ca-81f9-768ff4fc24ee };Common/Materials/Prototyping/PrototypeBlack.plMaterialBin
 { da307f05-9ef4-4a09-81d4-b86f5be99412 };PC/Textures/DebugCubeMap.plTextureCube
 { da463c4d-c984-4910-b0b7-a0b3891d0448 };Common/RenderPipelines/EditorRenderPipeline.plRenderPipelineBin
+{ df37f69b-986e-4320-bdcf-1fcf4c7ea682 };PC/Textures/TestBricks_ao.plTexture2D
 { e00262e8-58f5-42f5-880d-569257047201 };PC/Textures/Flare.plTexture2D
 { e19df82d-f16b-48c3-bc52-0b66f5ebe45e };PC/Textures/PlasmaAlbedo.plTexture2D
 { e6367876-ddb5-4149-ba80-180af553d463 };Common/Materials/Common/PhysicsColliders.plMaterialBin

@@ -12,9 +12,18 @@ namespace plInternal
 
     ref_perInstanceData.ObjectToWorld = objectToWorld;
 
+    #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+      plMat4 lastObjectToWorld = pRenderData->m_LastGlobalTransform.GetAsMat4();
+      ref_perInstanceData.LastObjectToWorld = lastObjectToWorld;
+    #endif
+
     if (pRenderData->m_uiUniformScale)
     {
       ref_perInstanceData.ObjectToWorldNormal = objectToWorld;
+
+      #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+        ref_perInstanceData.LastObjectToWorldNormal = lastObjectToWorld;
+      #endif
     }
     else
     {
@@ -26,6 +35,16 @@ namespace plInternal
       plShaderTransform shaderT;
       shaderT = mInverse.GetTranspose();
       ref_perInstanceData.ObjectToWorldNormal = shaderT;
+
+      #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+        mInverse = lastObjectToWorld.GetRotationalPart();
+        mInverse.Invert(0.0f).IgnoreResult();
+        // we explicitly ignore the return value here (success / failure)
+        // because when we have a scale of 0 (which happens temporarily during editing) that would be annoying
+
+        shaderT = mInverse.GetTranspose();
+        ref_perInstanceData.LastObjectToWorldNormal = shaderT;
+      #endif
     }
 
     ref_perInstanceData.BoundingSphereRadius = pRenderData->m_GlobalBounds.m_fSphereRadius;

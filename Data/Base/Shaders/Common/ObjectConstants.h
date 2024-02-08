@@ -7,6 +7,10 @@ struct PL_SHADER_STRUCT plPerInstanceData
 {
   TRANSFORM(ObjectToWorld);
   TRANSFORM(ObjectToWorldNormal);
+
+  TRANSFORM(LastObjectToWorld);
+  TRANSFORM(LastObjectToWorldNormal);
+
   FLOAT1(BoundingSphereRadius);
   UINT1(GameObjectID);
   UINT1(VertexColorAccessData);
@@ -28,7 +32,7 @@ Buffer<uint> perInstanceVertexColors;
 
 PL_DEFINE_AS_POD_TYPE(plPerInstanceData);
 
-PL_CHECK_AT_COMPILETIME(sizeof(plPerInstanceData) == 128);
+PL_CHECK_AT_COMPILETIME(sizeof(plPerInstanceData) == 224);
 #endif
 
 CONSTANT_BUFFER(plObjectConstants, 2)

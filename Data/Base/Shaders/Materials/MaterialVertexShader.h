@@ -85,6 +85,25 @@ VS_OUT FillVertexData(VS_IN Input)
 
   Output.Position.z = max(Output.Position.z, MaxZValue);
 
+  #if defined(USE_VELOCITY)
+    float4x4 lastObjectToWorld = TransformToMatrix(data.LastObjectToWorld);
+
+    float3 lastWorldPosition = mul(lastObjectToWorld, float4(objectPosition, 1.0)).xyz;
+    #if defined(USE_WORLD_POSITION_OFFSET)
+      lastWorldPosition += GetWorldPositionOffset(data, lastWorldPosition);
+    #endif
+
+    Output.LastScreenPosition = mul(GetLastWorldToScreenMatrix(), float4(lastWorldPosition, 1.0));
+
+    #if defined(USE_VERTEX_DEPTH_BIAS)
+      float depthBiasScale = 1.5f / (1 << 16);
+      Output.LastScreenPosition.z += GetVertexDepthBias() * depthBiasScale * Output.LastScreenPosition.w;
+    #endif
+
+    Output.LastScreenPosition.z = max(Output.LastScreenPosition.z, MaxZValue);
+    Output.ScreenPosition = Output.Position;
+  #endif
+
 #if defined(USE_NORMAL)
   float3 normal = Input.Normal * 2.0 - 1.0;
 

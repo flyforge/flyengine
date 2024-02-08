@@ -308,6 +308,7 @@ void plBakedProbesComponent::OnExtractRenderData(plMsgExtractRenderData& ref_msg
 
     plMeshRenderData* pRenderData = plCreateRenderDataForThisFrame<plMeshRenderData>(pOwner);
     {
+      pRenderData->m_LastGlobalTransform = transform;
       pRenderData->m_GlobalTransform = transform;
       pRenderData->m_GlobalBounds = plBoundingBoxSphere::MakeInvalid();
       pRenderData->m_hMesh = pManager->m_hDebugSphere;

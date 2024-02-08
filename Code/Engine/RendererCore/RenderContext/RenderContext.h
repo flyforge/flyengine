@@ -196,6 +196,8 @@ public:
   plResult DrawMeshBuffer(plUInt32 uiPrimitiveCount = 0xFFFFFFFF, plUInt32 uiFirstPrimitive = 0, plUInt32 uiInstanceCount = 1);
 
   plResult Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThreadGroupCountY = 1, plUInt32 uiThreadGroupCountZ = 1);
+  plResult DispatchIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes);
+
 
   plResult ApplyContextStates(bool bForce = false);
   void ResetContextState();

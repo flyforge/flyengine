@@ -11,7 +11,7 @@ o
 		s %AssetType{"Layer"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{15036442609172644244,4759523109657735372}}
-		u4 %Hash{14402660571143887036}
+		u4 %Hash{10715876142428826445}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
@@ -249,7 +249,7 @@ o
 	p
 	{
 		b %Active{1}
-		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Color %Color{f{0x16079C3D,0x16079C3D,0x16079C3D,0x0000803F}}
 		Angle %Curvature{f{0}}
 		u3 %Detail{16}
 		b %GenerateCollision{1}

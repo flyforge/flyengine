@@ -11,7 +11,7 @@ o
 		s %AssetType{"RenderPipeline"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{9340082855766888863,4792825339744186213}}
-		u4 %Hash{6102090515799025131}
+		u4 %Hash{2456993087768397544}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps{}
@@ -96,7 +96,7 @@ o
 		b %Active{1}
 		Uuid %DepthStencil{u4{14034198369995003864,10700101904229972968}}
 		s %Name{"DepthPrePass"}
-		Vec2 %Node::Pos{f{0xC14DB643,0x283FF443}}
+		Vec2 %Node::Pos{f{0x74BFAD43,0x17CAFA43}}
 	}
 }
 o
@@ -178,6 +178,19 @@ o
 		s %Connection::SourcePin{"Color"}
 		Uuid %Connection::Target{u4{13766159566503031479,5378026105745909468}}
 		s %Connection::TargetPin{"Color"}
+	}
+}
+o
+{
+	Uuid %id{u4{2817676562812640158,5290950069389596840}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
+	u3 %v{1}
+	p
+	{
+		Uuid %Connection::Source{u4{14015861933268748453,4832101727536707722}}
+		s %Connection::SourcePin{"DepthStencil"}
+		Uuid %Connection::Target{u4{9856094339113373593,5642869285856684943}}
+		s %Connection::TargetPin{"DepthInput"}
 	}
 }
 o
@@ -301,6 +314,29 @@ o
 }
 o
 {
+	Uuid %id{u4{9856094339113373593,5642869285856684943}}
+	s %t{"plAOPass"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		f %Contrast{0x00000040}
+		f %DepthBlurThreshold{0x00000040}
+		Uuid %DepthInput{u4{2714355300029776005,8675174035102541396}}
+		f %FadeOutEnd{0x0000C842}
+		f %FadeOutStart{0x0000A042}
+		f %Intensity{0x3333333F}
+		f %MaxScreenSpaceRadius{0x0000803F}
+		f %MipLevelScale{0x00002041}
+		s %Name{""}
+		Vec2 %Node::Pos{f{0xB41EF843,0x3E821A44}}
+		Uuid %Output{u4{6794293473391502014,11528580456463923121}}
+		f %PositionBias{0x0000A040}
+		f %Radius{0x0000803F}
+	}
+}
+o
+{
 	Uuid %id{u4{6728452850495430079,5725267199525040572}}
 	s %t{"plSourcePass"}
 	u3 %v{3}
@@ -342,6 +378,8 @@ o
 			Uuid{u4{512915061983796121,5365784718666821168}}
 			Uuid{u4{16542229199765245622,5423285714566994399}}
 			Uuid{u4{1179936157229825171,5616477709668064136}}
+			Uuid{u4{9856094339113373593,5642869285856684943}}
+			Uuid{u4{2817676562812640158,5290950069389596840}}
 		}
 	}
 }
@@ -356,6 +394,13 @@ o
 {
 	Uuid %id{u4{7642371703623570691,6852461079880770907}}
 	s %t{"plRenderPipelineNodeOutputPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{2714355300029776005,8675174035102541396}}
+	s %t{"plRenderPipelineNodeInputPin"}
 	u3 %v{1}
 	p{}
 }
@@ -391,6 +436,13 @@ o
 {
 	Uuid %id{u4{14221510315544340884,11413729483061947107}}
 	s %t{"plRenderPipelineNodeInputPin"}
+	u3 %v{1}
+	p{}
+}
+o
+{
+	Uuid %id{u4{6794293473391502014,11528580456463923121}}
+	s %t{"plRenderPipelineNodeOutputPin"}
 	u3 %v{1}
 	p{}
 }
@@ -570,7 +622,7 @@ o
 }
 o
 {
-	Uuid %id{u4{12314481390803671537,9045816041467439465}}
+	Uuid %id{u4{6825163161494779424,8995009657139898352}}
 	s %t{"plReflectedTypeDescriptor"}
 	u3 %v{1}
 	p
@@ -579,6 +631,23 @@ o
 		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
 		VarArray %Functions{}
 		s %ParentTypeName{"plRenderPipelinePass"}
+		s %PluginName{"Static"}
+		VarArray %Properties{}
+		s %TypeName{"plAOPass"}
+		u3 %TypeVersion{1}
+	}
+}
+o
+{
+	Uuid %id{u4{12314481390803671537,9045816041467439465}}
+	s %t{"plReflectedTypeDescriptor"}
+	u3 %v{1}
+	p
+	{
+		VarArray %Attributes{}
+		s %Flags{"plTypeFlags::Class|plTypeFlags::Abstract|plTypeFlags::Minimal"}
+		VarArray %Functions{}
+		s %ParentTypeName{"plRenderPipelineNodePin"}
 		s %PluginName{"Static"}
 		VarArray %Properties{}
 		s %TypeName{"plForwardRenderPass"}

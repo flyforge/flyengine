@@ -4,6 +4,7 @@
 
 // defines:
 // USE_WORLDPOS
+// USE_VELOCITY
 // USE_NORMAL
 // USE_TANGENT
 // USE_TEXCOORD0

@@ -165,6 +165,12 @@ plGALRenderCommandEncoder* plRenderContext::BeginRendering(plGALPass* pGALPass, 
     SetShaderPermutationVariable("MSAA", "FALSE");
   }
 
+  #if PL_ENABLED(PL_GAMEOBJECT_VELOCITY)
+    SetShaderPermutationVariable("GAMEOBJECT_VELOCITY", "TRUE");
+  #else
+    SetShaderPermutationVariable("GAMEOBJECT_VELOCITY", "FALSE");
+  #endif
+
   auto& gc = WriteGlobalConstants();
   gc.ViewportSize = plVec4(viewport.width, viewport.height, 1.0f / viewport.width, 1.0f / viewport.height);
   gc.NumMsaaSamples = msaaSampleCount;
@@ -587,6 +593,17 @@ plResult plRenderContext::Dispatch(plUInt32 uiThreadGroupCountX, plUInt32 uiThre
   }
 
   return GetComputeCommandEncoder()->Dispatch(uiThreadGroupCountX, uiThreadGroupCountY, uiThreadGroupCountZ);
+}
+
+plResult plRenderContext::DispatchIndirect(plGALBufferHandle hIndirectArgumentBuffer, plUInt32 uiArgumentOffsetInBytes)
+{
+  if (ApplyContextStates().Failed())
+  {
+    m_Statistics.m_uiFailedDrawcalls++;
+    return PL_FAILURE;
+  }
+
+  return GetComputeCommandEncoder()->DispatchIndirect(hIndirectArgumentBuffer, uiArgumentOffsetInBytes);
 }
 
 plResult plRenderContext::ApplyContextStates(bool bForce)

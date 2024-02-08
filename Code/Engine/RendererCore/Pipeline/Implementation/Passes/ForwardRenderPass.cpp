@@ -13,11 +13,13 @@
 #include <RendererFoundation/Resources/Texture.h>
 
 // clang-format off
-PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plForwardRenderPass, 1, plRTTINoAllocator)
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plForwardRenderPass, 3, plRTTINoAllocator)
 {
   PL_BEGIN_PROPERTIES
   {
     PL_MEMBER_PROPERTY("Color", m_PinColor),
+    PL_MEMBER_PROPERTY("Velocity", m_PinVelocity),
+    PL_MEMBER_PROPERTY("Material", m_PinMaterial),
     PL_MEMBER_PROPERTY("DepthStencil", m_PinDepthStencil),
     PL_ENUM_MEMBER_PROPERTY("ShadingQuality", plForwardRenderShadingQuality, m_ShadingQuality)->AddAttributes(new plDefaultValueAttribute((int)plForwardRenderShadingQuality::Normal)),
   }
@@ -49,6 +51,18 @@ bool plForwardRenderPass::GetRenderTargetDescriptions(const plView& view, const 
   {
     plLog::Error("No color input connected to pass '{0}'!", GetName());
     return false;
+  }
+
+  // Velocity
+  if (inputs[m_PinVelocity.m_uiInputIndex])
+  {
+    outputs[m_PinVelocity.m_uiOutputIndex] = *inputs[m_PinVelocity.m_uiInputIndex];
+  }
+
+  // Material
+  if (inputs[m_PinMaterial.m_uiInputIndex])
+  {
+    outputs[m_PinMaterial.m_uiOutputIndex] = *inputs[m_PinMaterial.m_uiInputIndex];
   }
 
   // DepthStencil
@@ -108,6 +122,17 @@ void plForwardRenderPass::SetupResources(plGALPass* pGALPass, const plRenderView
     renderingSetup.m_RenderTargetSetup.SetRenderTarget(0, pDevice->GetDefaultRenderTargetView(inputs[m_PinColor.m_uiInputIndex]->m_TextureHandle));
   }
 
+  if (inputs[m_PinVelocity.m_uiInputIndex])
+  {
+    renderingSetup.m_RenderTargetSetup.SetRenderTarget(1, pDevice->GetDefaultRenderTargetView(inputs[m_PinVelocity.m_uiInputIndex]->m_TextureHandle));
+  }
+
+  if (inputs[m_PinMaterial.m_uiInputIndex])
+  {
+    renderingSetup.m_RenderTargetSetup.SetRenderTarget(2, pDevice->GetDefaultRenderTargetView(inputs[m_PinMaterial.m_uiInputIndex]->m_TextureHandle));
+  }
+
+
   if (inputs[m_PinDepthStencil.m_uiInputIndex])
   {
     renderingSetup.m_RenderTargetSetup.SetDepthStencilTarget(pDevice->GetDefaultRenderTargetView(inputs[m_PinDepthStencil.m_uiInputIndex]->m_TextureHandle));
@@ -164,5 +189,49 @@ void plForwardRenderPass::SetupLighting(const plRenderViewContext& renderViewCon
     // todo
   }
 }
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+#include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
+
+class plForwardRenderPassPatch_1_2 : public plGraphPatch
+{
+public:
+  plForwardRenderPassPatch_1_2()
+    : plGraphPatch("plForwardRenderPass", 2)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    pNode->AddProperty("Velocity", {});
+  }
+};
+
+plForwardRenderPassPatch_1_2 g_plForwardRenderPassPatch_1_2;
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+class plForwardRenderPassPatch_2_3 : public plGraphPatch
+{
+public:
+  plForwardRenderPassPatch_2_3()
+    : plGraphPatch("plForwardRenderPass", 3)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    pNode->AddProperty("Material", {});
+  }
+};
+
+plForwardRenderPassPatch_2_3 g_plForwardRenderPassPatch_2_3;
+
 
 PL_STATICLINK_FILE(RendererCore, RendererCore_Pipeline_Implementation_Passes_ForwardRenderPass);

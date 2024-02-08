@@ -11,13 +11,14 @@ o
 		s %AssetType{"Scene"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{7297922959506964864,5177324930371449723}}
-		u4 %Hash{16799074028610189337}
+		u4 %Hash{8481541840721419275}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
 		{
 			s{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
 			s{"{ 0c8dd872-9e75-4ea9-955e-442f9e2c2323 }"}
+			s{"{ 0ff17408-ff78-4ad3-bbac-0f2bc5da7612 }"}
 			s{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
 			s{"{ 237f7b84-879d-4946-a823-b4451e698d94 }"}
 			s{"{ 2aab509f-d165-4cab-8d56-68d19856c77c }"}
@@ -58,6 +59,7 @@ o
 			s{"{ 9aa28393-3f8b-490b-b7eb-49749997b143 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
 			s{"{ aa3be7d1-d9e2-4ddc-b6fc-6deaa22696eb }"}
+			s{"{ abf38e0f-af01-4f2d-a167-d95defc809b7 }"}
 			s{"{ ac49f52b-70b6-468e-b934-af2373a806bc }"}
 			s{"{ afb2a2a5-e863-4c47-a2f7-002d7dea6162 }"}
 			s{"{ b93a6e80-5bf7-48f0-b7b3-2097d0133159 }"}
@@ -86,6 +88,7 @@ o
 		{
 			s{"{ 0b202e08-a64f-465d-b38e-15b81d161822 }"}
 			s{"{ 0c8dd872-9e75-4ea9-955e-442f9e2c2323 }"}
+			s{"{ 0ff17408-ff78-4ad3-bbac-0f2bc5da7612 }"}
 			s{"{ 1c47ee4c-0379-4280-85f5-b8cda61941d2 }"}
 			s{"{ 2aab509f-d165-4cab-8d56-68d19856c77c }"}
 			s{"{ 2d50dee8-5549-4755-bbce-4cc39624919c }"}
@@ -117,6 +120,7 @@ o
 			s{"{ 9aa28393-3f8b-490b-b7eb-49749997b143 }"}
 			s{"{ aa1c5601-bc43-fbf8-4e07-6a3df3af51e7 }"}
 			s{"{ aa3be7d1-d9e2-4ddc-b6fc-6deaa22696eb }"}
+			s{"{ abf38e0f-af01-4f2d-a167-d95defc809b7 }"}
 			s{"{ afb2a2a5-e863-4c47-a2f7-002d7dea6162 }"}
 			s{"{ b93a6e80-5bf7-48f0-b7b3-2097d0133159 }"}
 			s{"{ c36c4d88-1fd7-4049-8b57-698b8fb7e753 }"}
@@ -4833,6 +4837,32 @@ o
 }
 o
 {
+	Uuid %id{u4{2821334635900168378,4722707666573445855}}
+	s %t{"plGameObject"}
+	u3 %v{1}
+	p
+	{
+		b %Active{1}
+		VarArray %Children{}
+		VarArray %Components
+		{
+			Uuid{u4{5289290684069933233,5247127778164414310}}
+		}
+		s %GlobalKey{""}
+		Vec3 %LocalPosition{f{0x98C9D140,0xB1EB6C3E,0x109B583D}}
+		Quat %LocalRotation{f{0,0,0,0x0000803F}}
+		Vec3 %LocalScaling{f{0x0000C842,0x0000C842,0x0000803F}}
+		f %LocalUniformScaling{0x0000803F}
+		s %Mode{"plObjectMode::Automatic"}
+		s %Name{""}
+		VarArray %Tags
+		{
+			s{"CastShadow"}
+		}
+	}
+}
+o
+{
 	Uuid %id{u4{6901218708791995038,4726714664285598441}}
 	s %t{"plGreyBoxComponent"}
 	u3 %v{5}
@@ -8334,7 +8364,7 @@ o
 {
 	Uuid %id{u4{18071063215955627701,5141673975987575368}}
 	s %t{"plJoltClothSheetComponent"}
-	u3 %v{1}
+	u3 %v{2}
 	p
 	{
 		b %Active{1}
@@ -8347,6 +8377,7 @@ o
 		Vec2u %Segments{u3{16,16}}
 		Vec2 %Size{f{0x00000040,0x00004040}}
 		Vec2 %TextureScale{f{0x0000803F,0x0000803F}}
+		f %Thickness{0xCDCC4C3D}
 		f %WindInfluence{0xCDCC4C3E}
 	}
 }
@@ -9179,6 +9210,23 @@ o
 			s{"CastShadow"}
 			s{"AutoColMesh"}
 		}
+	}
+}
+o
+{
+	Uuid %id{u4{5289290684069933233,5247127778164414310}}
+	s %t{"plMeshComponent"}
+	u3 %v{3}
+	p
+	{
+		b %Active{1}
+		Color %Color{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		VarArray %Materials
+		{
+			s{"{ 0ff17408-ff78-4ad3-bbac-0f2bc5da7612 }"}
+		}
+		s %Mesh{"{ abf38e0f-af01-4f2d-a167-d95defc809b7 }"}
+		f %SortingDepthOffset{0}
 	}
 }
 o
@@ -10774,7 +10822,7 @@ o
 {
 	Uuid %id{u4{4552023024081365672,5446432919526559743}}
 	s %t{"plJoltClothSheetComponent"}
-	u3 %v{1}
+	u3 %v{2}
 	p
 	{
 		b %Active{1}
@@ -10787,6 +10835,7 @@ o
 		Vec2u %Segments{u3{16,16}}
 		Vec2 %Size{f{0x00000040,0x00004040}}
 		Vec2 %TextureScale{f{0x0000803F,0x0000803F}}
+		f %Thickness{0xCDCC4C3D}
 		f %WindInfluence{0xCDCC4C3E}
 	}
 }
@@ -11532,7 +11581,7 @@ o
 	u3 %v{1}
 	p
 	{
-		Color %DefaultValue{f{0xB6AEE93E,0xB6AEE93E,0xB6AEE93E,0x0000803F}}
+		Color %DefaultValue{f{0xF395483F,0xB5C9A93B,0xB5C9A93B,0x0000803F}}
 		Time %InterpolationDuration{d{0}}
 		HashedString %Property{s{"MoodColor"}}
 		HashedString %RenderPass{s{"TonemapPass"}}
@@ -14105,6 +14154,7 @@ o
 			Uuid{u4{1172313384781028535,16337097420684725227}}
 			Uuid{u4{9616601475446977452,4753305133286341451}}
 			Uuid{u4{4656057195403548042,5480615887265037466}}
+			Uuid{u4{2821334635900168378,4722707666573445855}}
 		}
 		Uuid %Settings{u4{11204937990389899402,5417500911553874876}}
 	}
@@ -32748,11 +32798,12 @@ o
 o
 {
 	Uuid %id{u4{11334428030917178598,243316305468639402}}
-	s %t{"plDefaultValueAttribute"}
+	s %t{"plAssetBrowserAttribute"}
 	u3 %v{1}
 	p
 	{
-		Vec2 %Value{f{0x0000803F,0x0000803F}}
+		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
+		s %Filter{";CompatibleAsset_Material;"}
 	}
 }
 o
@@ -33105,9 +33156,10 @@ o
 			Uuid{u4{7451986952950169770,14220596372050898378}}
 			Uuid{u4{13359223243478087934,12353338403085895990}}
 			Uuid{u4{543832367317831998,7043810729315018193}}
+			Uuid{u4{51172704524408416,4108755137431574894}}
 		}
 		s %TypeName{"plJoltClothSheetComponent"}
-		u3 %TypeVersion{1}
+		u3 %TypeVersion{2}
 	}
 }
 o
@@ -33268,6 +33320,17 @@ o
 	p
 	{
 		f %Max{0x0000803F}
+		f %Min{0}
+	}
+}
+o
+{
+	Uuid %id{u4{2777343086991454336,2653564713545775847}}
+	s %t{"plClampValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Max{0x0000003F}
 		f %Min{0}
 	}
 }
@@ -33586,6 +33649,24 @@ o
 }
 o
 {
+	Uuid %id{u4{51172704524408416,4108755137431574894}}
+	s %t{"plReflectedPropertyDescriptor"}
+	u3 %v{2}
+	p
+	{
+		VarArray %Attributes
+		{
+			Uuid{u4{13821804702010674944,4509478986594583778}}
+		}
+		s %Category{"plPropertyCategory::Member"}
+		Invalid %ConstantValue{}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Color"}
+		s %Type{"plColor"}
+	}
+}
+o
+{
 	Uuid %id{u4{3476504569682976126,4142094656406938069}}
 	s %t{"plReflectedPropertyDescriptor"}
 	u3 %v{2}
@@ -33678,6 +33759,16 @@ o
 		}
 		s %TypeName{"plJoltRopeComponent"}
 		u3 %TypeVersion{2}
+	}
+}
+o
+{
+	Uuid %id{u4{13821804702010674944,4509478986594583778}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		Color %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
 	}
 }
 o
@@ -34113,7 +34204,7 @@ o
 	u3 %v{1}
 	p
 	{
-		Color %Value{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
+		Vec2 %Value{f{0x0000803F,0x0000803F}}
 	}
 }
 o
@@ -34288,8 +34379,8 @@ o
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"Color"}
-		s %Type{"plColor"}
+		s %Name{"TextureScale"}
+		s %Type{"plVec2"}
 	}
 }
 o
@@ -34409,17 +34500,6 @@ o
 	p
 	{
 		s %DynamicEnum{"PhysicsCollisionLayer"}
-	}
-}
-o
-{
-	Uuid %id{u4{11182891094190614257,7797376815386138246}}
-	s %t{"plAssetBrowserAttribute"}
-	u3 %v{1}
-	p
-	{
-		s %DependencyFlags{"plDependencyFlags::Package|plDependencyFlags::Thumbnail"}
-		s %Filter{";CompatibleAsset_Material;"}
 	}
 }
 o
@@ -34865,12 +34945,16 @@ o
 	u3 %v{2}
 	p
 	{
-		VarArray %Attributes{}
+		VarArray %Attributes
+		{
+			Uuid{u4{13874404211790006483,10865735298852512964}}
+			Uuid{u4{2777343086991454336,2653564713545775847}}
+		}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::Bitflags|plPropertyFlags::Phantom"}
-		s %Name{"Flags"}
-		s %Type{"plJoltClothSheetFlags"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
+		s %Name{"Thickness"}
+		s %Type{"float"}
 	}
 }
 o
@@ -35089,6 +35173,16 @@ o
 		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
 		s %Name{"Anchor1"}
 		s %Type{"plConstCharPtr"}
+	}
+}
+o
+{
+	Uuid %id{u4{13874404211790006483,10865735298852512964}}
+	s %t{"plDefaultValueAttribute"}
+	u3 %v{1}
+	p
+	{
+		f %Value{0xCDCC4C3D}
 	}
 }
 o
@@ -35560,9 +35654,9 @@ o
 		}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Phantom"}
-		s %Name{"TextureScale"}
-		s %Type{"plVec2"}
+		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
+		s %Name{"Material"}
+		s %Type{"plConstCharPtr"}
 	}
 }
 o
@@ -35794,15 +35888,12 @@ o
 	u3 %v{2}
 	p
 	{
-		VarArray %Attributes
-		{
-			Uuid{u4{11182891094190614257,7797376815386138246}}
-		}
+		VarArray %Attributes{}
 		s %Category{"plPropertyCategory::Member"}
 		Invalid %ConstantValue{}
-		s %Flags{"plPropertyFlags::StandardType|plPropertyFlags::Const|plPropertyFlags::Phantom"}
-		s %Name{"Material"}
-		s %Type{"plConstCharPtr"}
+		s %Flags{"plPropertyFlags::Bitflags|plPropertyFlags::Phantom"}
+		s %Name{"Flags"}
+		s %Type{"plJoltClothSheetFlags"}
 	}
 }
 o

@@ -13,7 +13,8 @@ FORWARD_PASS_WRITE_DEPTH
 MSAA
 SHADING_QUALITY
 CAMERA_MODE
-VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX" }
+VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX
+GAMEOBJECT_VELOCITY" }
 
   string %CheckPermutations
   {"
@@ -27,10 +28,14 @@ MSAA=FALSE
 SHADING_QUALITY=SHADING_QUALITY_NORMAL
 CAMERA_MODE=CAMERA_MODE_PERSPECTIVE
 VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX=TRUE
+GAMEOBJECT_VELOCITY=TRUE
 "}
 
   string %CodeRenderStates { "#include <Shaders/Materials/MaterialState.h>" }
   string %CodeVertexShader { "
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
@@ -87,9 +92,11 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 " }
 
   string %CodeGeometryShader { "
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #include <Shaders/Materials/MaterialStereoGeometryShader.h>
-
 " }
 
   string %CodeMaterialParams { "
@@ -105,6 +112,10 @@ float MaskThreshold @Default($prop0);
 #define USE_MATERIAL_OCCLUSION
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
+
+#if GAMEOBJECT_VELOCITY
+  #define USE_VELOCITY
+#endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
