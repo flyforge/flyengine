@@ -149,62 +149,63 @@ static const float rayMarchLevelIncrement = 0.3; // level increment based on ray
 
 float3 BinarySearch(float3 samplePos, float3 V, float level)
 {
-  for (uint i = 0; i < rayMarchFineIterationsMax; i++)
-  {
-    float sampleDepth = DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
-
-    if (abs(samplePos.z - sampleDepth) < rayMarchTolerance)
+    for (uint i = 0; i < rayMarchFineIterationsMax; i++)
     {
-      return samplePos;
+        float sampleDepth = DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
+
+        if (abs(samplePos.z - sampleDepth) < rayMarchTolerance)
+        {
+            return samplePos;
+        }
+
+        if (samplePos.z >= sampleDepth)
+        {
+            samplePos += V;
+        }
+
+        V *= 0.5f;
+        samplePos -= V;
     }
 
-    if (samplePos.z >= sampleDepth)
-    {
-      samplePos += V;
-    }
-
-    V *= 0.5f;
-    samplePos -= V;
-  }
-
-  return samplePos;
+    return samplePos;
 }
 
 // P and V in screen space [0, 1] x [0, 1]
 float3 RayMarch(float3 P, float3 V, float roughness, float jitter, out bool validHit)
 {
-  float3 samplePos = P + V;
-  float sampleDepth = 0;
-  float level = 1;
+    float3 samplePos = P + V * jitter;
+    
+    float sampleDepth = 0;
+    float level = 1;
 
-  uint iterations = 0;
+    uint iterations = 0;
 
-  while (iterations <= rayMarchIterationsMax)
-  {
-    if (any(samplePos.xy < 0.0) || any(samplePos.xy > 1.0))
+    while (iterations <= rayMarchIterationsMax)
     {
-      validHit = false;
-      return samplePos;
+        if (any(samplePos.xy < 0.0) || any(samplePos.xy > 1.0))
+        {
+            validHit = false;
+            return samplePos;
+        }
+
+        samplePos += V;
+
+        sampleDepth = DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
+
+        if (sampleDepth > samplePos.z)
+        {
+            samplePos = BinarySearch(samplePos, V, level);
+            break;
+        }
+
+        V *= rayMarchStepIncrease;
+        level += rayMarchLevelIncrement * roughness;
+
+        iterations++;
     }
 
-    samplePos += V;
-
-    sampleDepth = 1.0 - DepthHierarchy.SampleLevel(PointClampSampler, samplePos.xy, level).g;
-
-    if (sampleDepth > samplePos.z)
-    {
-      samplePos = BinarySearch(samplePos, V, level);
-      break;
-    }
-
-    V *= rayMarchStepIncrease;
-    level += rayMarchLevelIncrement * roughness;
-
-    iterations++;
-  }
-
-  validHit = (iterations <= rayMarchIterationsMax);
-  return float3(samplePos.xy, sampleDepth);
+    validHit = (iterations <= rayMarchIterationsMax);
+    return float3(samplePos.xy, sampleDepth);
 }
 
 float CalculateEdgeVignette(float2 hitPixel)
@@ -250,73 +251,73 @@ float get_linear_depth(float z)
 [numthreads(POSTPROCESS_BLOCKSIZE, POSTPROCESS_BLOCKSIZE, 1)]
 void main(uint3 Gid : SV_GroupID, uint3 GTid : SV_GroupThreadID)
 {
-   const uint downsampleFactor = 2;
+    const uint downsampleFactor = 2;
 
-   const uint2 pixel = GetReflectionIndirectDispatchCoord(Gid, GTid, tiles, downsampleFactor);
-   const float2 uv = (pixel + 0.5f) * resolution.zw;
+    const uint2 pixel = GetReflectionIndirectDispatchCoord(Gid, GTid, tiles, downsampleFactor);
+    const float2 uv = (pixel + 0.5f) * resolution.zw;
 
-//#if SSR_TRACING_MODE == SSR_TRACING_MODE_EARLYEXIT
-//  OutputIndirectSpecular[pixel] = 0;
-//  OutputRayDirectionPDF[pixel] = 0;
-//  OutputRayLengths[pixel] = 0;
-//#else
+    //#if SSR_TRACING_MODE == SSR_TRACING_MODE_EARLYEXIT
+    //  OutputIndirectSpecular[pixel] = 0;
+    //  OutputRayDirectionPDF[pixel] = 0;
+    //  OutputRayLengths[pixel] = 0;
+    //#else
 
-  uint2 screenJitter = floor(blue_noise(uint2(0, 0)).xy * downsampleFactor);
-  uint2 jitterPixel = screenJitter + pixel * downsampleFactor;
-  float2 jitterUV = (screenJitter + pixel + 0.5f) * resolution.zw;
+    uint2 screenJitter = floor(blue_noise(uint2(0, 0)).xy * downsampleFactor);
+    uint2 jitterPixel = screenJitter + pixel * downsampleFactor;
+    float2 jitterUV = (screenJitter + pixel + 0.5f) * resolution.zw;
 
-  float depth = DepthHierarchy[screenJitter + pixel].r;
-  float roughness = MaterialInput[jitterPixel].a;
+    float depth = DepthHierarchy[screenJitter + pixel].r;
+    float roughness = MaterialInput[jitterPixel].a;
 
- // if (!NeedReflection(roughness, depth, RoughnessCutoff))
-	//{
-	//	OutputIndirectSpecular[pixel] = 0.0;
-	//	OutputRayDirectionPDF[pixel] = 0.0;
-	//	OutputRayLengths[pixel] = 0.0;
-	//	return;
-	//}
+    // if (!NeedReflection(roughness, depth, RoughnessCutoff))
+    //{
+    //	OutputIndirectSpecular[pixel] = 0.0;
+    //	OutputRayDirectionPDF[pixel] = 0.0;
+    //	OutputRayLengths[pixel] = 0.0;
+    //	return;
+    //}
 
-  float3 N = normalize(MaterialInput[jitterPixel].xyz);
-  float3 P = ScreenCoordToWorldSpace(jitterUV,  depth);
-  float3 V = normalize(GetCameraPosition() - P);
+    float3 N = normalize(MaterialInput[jitterPixel].xyz);
+    float3 P = ScreenCoordToWorldSpace(jitterUV,  depth);
+    float3 V = normalize(GetCameraPosition() - P);
 
- 	float4 H;
-	float3 L;
-	if (roughness > 0.05f)
-	{
-		float3x3 tangentBasis = GetTangentBasis(N);
-		float3 tangentV = mul(tangentBasis, V);
+    float4 H;
+    float3 L;
+    if (roughness > 0.05f)
+    {
+	    float3x3 tangentBasis = GetTangentBasis(N);
+	    float3 tangentV = mul(tangentBasis, V);
 
-		const float2 bluenoise = blue_noise(pixel).xy;
+	    const float2 bluenoise = blue_noise(pixel).xy;
 
-		float2 Xi = bluenoise.xy;
+	    float2 Xi = bluenoise.xy;
 
-		Xi.y = lerp(Xi.y, 0.0f, GGX_IMPORTANCE_SAMPLE_BIAS);
+	    Xi.y = lerp(Xi.y, 0.0f, GGX_IMPORTANCE_SAMPLE_BIAS);
 
-		H = ImportanceSampleVisibleGGX(SampleDisk(Xi), roughness, tangentV);
+	    H = ImportanceSampleVisibleGGX(SampleDisk(Xi), roughness, tangentV);
 
-		// Tangent to world
-		H.xyz = mul(H.xyz, tangentBasis);
+	    // Tangent to world
+	    H.xyz = mul(H.xyz, tangentBasis);
     
         L = reflect(-V, H.xyz);
 
-	}
+    }
     else
-	{
-		H = float4(N.xyz, 1.0f);
-		L = reflect(-V, H.xyz);
-	}
+    {
+	    H = float4(N.xyz, 1.0f);
+	    L = reflect(-V, H.xyz);
+    }
 
- 	float4 rayStartClip = mul(GetWorldToScreenMatrix(), float4(P, 1)); // World to Clip
-	float4 rayEndClip = mul(GetWorldToScreenMatrix(), float4(P + L, 1));
+    float4 rayStartClip = mul(GetWorldToScreenMatrix(), float4(P, 1)); // World to Clip
+    float4 rayEndClip = mul(GetWorldToScreenMatrix(), float4(P + L, 1));
 
-	float3 rayStartScreen = rayStartClip.xyz * rcp(rayStartClip.w);
-	float3 rayEndScreen = rayEndClip.xyz * rcp(rayEndClip.w);
+    float3 rayStartScreen = rayStartClip.xyz * rcp(rayStartClip.w);
+    float3 rayEndScreen = rayEndClip.xyz * rcp(rayEndClip.w);
 
-	rayStartScreen.xy = rayStartScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
-	rayEndScreen.xy = rayEndScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
+    rayStartScreen.xy = rayStartScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
+    rayEndScreen.xy = rayEndScreen.xy * float2(0.5, -0.5) + float2(0.5, 0.5);
 
- // #if SSR_TRACING_MODE == SSR_TRACING_MODE_CHEAP
+#if SSR_TRACING_MODE == SSR_TRACING_MODE_CHEAP
     rayStartScreen.xy *= params1.xy; // Ratio factor between hierarchy and pass
     rayEndScreen.xy *= params1.xy;
 
@@ -326,29 +327,25 @@ void main(uint3 Gid : SV_GroupID, uint3 GTid : SV_GroupThreadID)
     float jitter = InterleavedGradientNoise(pixel, Frame % 8u); // Temporally stabilize
 
     bool validHit = false;
-    float3 hit = RayMarch(rayStartScreen, rayDirectionScreen, roughness, 0, validHit);
+    float3 hit = RayMarch(rayStartScreen, rayDirectionScreen, roughness, jitter, validHit);
 
     hit.xy *= params1.zw; // Undo ratio
-  //#else
-  //  float3 rayDirectionScreen = rayEndScreen - rayStartScreen;
+  #else
+    float3 rayDirectionScreen = rayEndScreen - rayStartScreen;
 
-  //  bool validHit = false;
-  //  float3 hit = HierarchicalRaymarch(rayStartScreen, rayDirectionScreen, resolution.xy, validHit);
-  //#endif
+    bool validHit = false;
+    float3 hit = HierarchicalRaymarch(rayStartScreen, rayDirectionScreen, resolution.xy, validHit);
+  #endif
 
-  // float2 prevHitUV = VelocityInput.SampleLevel(PointClampSampler, hit.xy, 0).xy + hit.xy;
+  //  float2 prevHitUV = VelocityInput.SampleLevel(PointClampSampler, hit.xy, 0).xy + hit.xy;
     float2 prevHitUV = hit.xy;
 
-	float hitDepth = 1.0 - DepthInput.SampleLevel(PointClampSampler, hit.xy, 0);
+	float hitDepth = DepthInput.SampleLevel(PointClampSampler, hit.xy, 0);
 	float confidence = validHit ? ValidateHit(hit, hitDepth, prevHitUV) : 0;
 
 	float4 indirectSpecular;
 	indirectSpecular.rgb = Input.SampleLevel(PointClampSampler, prevHitUV, 0).rgb;
 
-  // if(!validHit)
-  // {
-  //   indirectSpecular.rgb = float3(1,0,0)
-  // }
 	indirectSpecular.a = confidence;
 
   #ifdef DEBUG_TRACING
