@@ -1,0 +1,1 @@
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/2868cee7a922470e966c244aca8e3118)](https://app.codacy.com/gh/flyforge/flyengine/dashboard?utm_source=gh&utm_medium=referral&utm_content=&utm_campaign=Badge_grade) [![Build status](https://ci.appveyor.com/api/projects/status/9po9okbe91x8jwga?svg=true)](https://ci.appveyor.com/project/PlasmaDev5/flyengine) 
