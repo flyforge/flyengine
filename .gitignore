@@ -353,7 +353,8 @@ MigrationBackup/
 # pl specific
 /Workspace
 /Output
-AssetCache
+**/AssetCache/**
 /build/
 /buildUWP/
 Code/Engine/plBuildInfo.h
+git
