@@ -107,6 +107,7 @@ elif [ $Distribution = "Arch Linux" ]\
   PackageInstall="pacman -S"
   PackageQuery="pacman -Ss"
 elif [ $Distribution = "Ubuntu" ]\
+  || [ $Distribution = "Pop!_OS" ]\
   || [ $Distribution = "Mint" ]; then
   PackageManager="Apt"
   PackageInstall="apt install"
@@ -116,7 +117,7 @@ echo "Package Manager is $PackageManager"
 
 #Checking here so the old detection code can still be used
 case $Distribution in
-  "Ubuntu" | "Mint" | "Void" | "Arch Linux" | "SteamOS")
+  "Ubuntu" | "Pop!_OS" | "Mint" | "Void" | "Arch Linux" | "SteamOS")
     if [ $PackageManager = "" ]; then
       >&2 echo "Unable to determine the package manager"
       exit 1
@@ -146,6 +147,7 @@ verlt() {
 
 #Figure out package names and compiler for this system
 if [ "$Distribution" = "Ubuntu" ]\
+|| [ "$Distribution" = "Pop!_OS" ]\
 || [ "$Distribution" = "Mint" ]; then
   echo "Using made up Debian fantasy package names..."
   packages=(cmake build-essential ninja-build libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev uuid-dev mold libfreetype-dev libtinfo5)
@@ -176,7 +178,7 @@ fi
 
 if [ "$Setup" = true ]; then
   #TODO: need to verify package names for Arch and SteamOS - they should be the same as Void though
-  if [[ $Distribution != "Ubuntu" && $Distribution != "Mint" ]]; then
+  if [[ $Distribution != "Ubuntu" && $Distribution != "Mint" && $Distribution != "Pop!_OS" ]]; then
     echo "Using upstream QT6 package names..."
     qtVer=$($PackageQuery qt6-base-devel 2>/dev/null | grep -o "6\.[0-9]*\.[0-9]")
     qtPackages=(qt6-base-devel qt6-svg-devel)
