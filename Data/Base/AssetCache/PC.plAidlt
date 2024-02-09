@@ -60,6 +60,6 @@
 { e6367876-ddb5-4149-ba80-180af553d463 };Common/Materials/Common/PhysicsColliders.plMaterialBin
 { f8db76ca-3341-490a-b497-6d54333d20d1 };PC/Textures/White.plTexture2D
 { f962fc28-661b-485c-a527-c997e239a3f0 };PC/Textures/Grid.plTexture2D
-{ fb9f1d24-c011-4da1-aac4-8a1a32aaae1c };Common/Base.plCollection
+{ fb9f1d24-c011-4da1-aac4-8a1a32aaae1c };Common/base.plCollection
 { fbaa0bd9-1c56-4e34-b591-da974b617146 };PC/Textures/Black.plTexture2D
 { ff8eeff0-a3c6-48cf-bec4-76a17bb5d098 };Common/Meshes/SM_PlasmaBall_mesh_data/Base.plMaterialBin

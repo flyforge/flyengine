@@ -43,8 +43,3 @@ Plugin
 	string %Path{"plVisualScriptPlugin"}
 	bool %LoadCopy{false}
 }
-Plugin
-{
-	string %Path{"plXBoxControllerPlugin"}
-	bool %LoadCopy{false}
-}
