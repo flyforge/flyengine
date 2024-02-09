@@ -63,11 +63,6 @@ if [ "$BuildType" != "Debug" -a "$BuildType" != "Dev" -a "$BuildType" != "Releas
   exit 1
 fi
 
-if [ ! -f "/etc/issue" ]; then
-	>&2 echo "/etc/issue does not exist. Failed distribution detection"
-	exit 1
-fi
-
 #Hot new distro-detector
 PackageManager=""
 PackageInstall=""
@@ -75,15 +70,18 @@ PackageQuery=""
 if [ -f /etc/os-release ]; then
   . /etc/os-release
 
-  #Grab distro name
   if [ $NAME = "Linux-Mint" ]; then
     Distribution="Mint"
   else
     Distribution=$NAME
   fi
-  echo "Distro is $Distribution"
 else
   echo "Using ancient distro finding code... caveat emptor"
+
+  if [ ! -f "/etc/issue" ]; then
+    >&2 echo "/etc/issue does not exist. Failed distribution detection"
+    exit 1
+  fi
   Issue=$(cat /etc/issue)
 
   UbuntuPattern="Ubuntu ([0-9][0-9])"
@@ -96,6 +94,7 @@ else
     Version=${BASH_REMATCH[1]}
   fi
 fi
+echo "Distro is $Distribution"
 
 #Set the package manager stuff
 if [ $Distribution = "Void" ]; then
