@@ -544,6 +544,7 @@ void plSSRPass::Execute(const plRenderViewContext& renderViewContext, const plAr
       renderViewContext.m_pRenderContext->BindTexture2D("MaterialInput", pDevice->GetDefaultResourceView(pInputMaterial->m_TextureHandle));
       renderViewContext.m_pRenderContext->BindTexture2D("VelocityInput", pDevice->GetDefaultResourceView(pInputVelocity->m_TextureHandle));
       renderViewContext.m_pRenderContext->BindTexture2D("DepthInput", pDevice->GetDefaultResourceView(pInputDepth->m_TextureHandle));
+      renderViewContext.m_pRenderContext->BindTexture2D("DepthHierarchy", pDevice->GetDefaultResourceView(m_hDepthHierarchyTmp));
       renderViewContext.m_pRenderContext->BindConstantBuffer("plPostProcessingConstants", m_hPostProcessConstantBuffer);
 
       renderViewContext.m_pRenderContext->SetShaderPermutationVariable("SSR_TRACING_MODE", "SSR_TRACING_MODE_EARLYEXIT");
