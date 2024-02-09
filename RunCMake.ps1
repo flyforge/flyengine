@@ -2,6 +2,7 @@ param
 (
     [Parameter(Mandatory = $True)] [ValidateSet('Win64vs2022', 'Uwp64vs2022')][string] $Target,
     [switch]$NoUnityBuild,
+    [switch]$NoVulkan,
     [switch]$NoSubmoduleUpdate,
     [string]$SolutionName
 )
@@ -45,6 +46,13 @@ if ($NoUnityBuild) {
 }
 else {
     $CMAKE_ARGS += "-DPL_ENABLE_FOLDER_UNITY_FILES:BOOL=ON"
+}
+
+if ($NoVulkan) {
+    $CMAKE_ARGS += "-DPL_BUILD_EXPERIMENTAL_VULKAN:BOOL=OFF"
+}
+else {
+    $CMAKE_ARGS += "-DPL_BUILD_EXPERIMENTAL_VULKAN:BOOL=ON"
 }
 
 if ($SolutionName -ne "") {
