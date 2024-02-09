@@ -207,7 +207,7 @@ plBoundingBox plAiNavMesh::GetSectorBounds(plVec2I32 vCoord, float fMinZ /*= 0.0
   const plVec3 min = GetSectorPositionOffset(vCoord).GetAsVec3(fMinZ);
   const plVec3 max = min + plVec3(m_fSectorMetersXY, m_fSectorMetersXY, fMaxZ - fMinZ);
 
-  return plBoundingBox::MakeFromMinMax(min, max);
+  return plBoundingBox(min, max);
 }
 
 void plAiNavMesh::DebugDraw(plDebugRendererContext context, const plAiNavigationConfig& config)

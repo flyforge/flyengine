@@ -1,6 +1,3 @@
-// for a description of the options see:
-// Code/EditorPlugins/Assets/EditorPluginAssets/Assets.plPluginBundle
-
 PluginInfo
 {
 	string %DisplayName{"AI Plugin"}

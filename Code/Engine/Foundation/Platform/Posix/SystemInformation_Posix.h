@@ -98,9 +98,10 @@ float plSystemInformation::GetCPUUtilization() const
   return 0.0f;
 }
 
+#if PL_ENABLED(PL_PLATFORM_ARCH_X86)
 namespace cpu_x86
 {
-#include <cpuid.h>
+  #include <cpuid.h>
 
   void cpuid(int32_t out[4], int32_t eax, int32_t ecx)
   {
@@ -123,3 +124,4 @@ namespace cpu_x86
   }
 
 } // namespace cpu_x86
+#endif

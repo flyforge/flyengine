@@ -228,6 +228,11 @@ void plAiNavigation::SetTargetPosition(const plVec3& vPosition)
   m_uiTargetPositionChangedBit = 1;
 }
 
+const plVec3& plAiNavigation::GetTargetPosition() const
+{
+  return m_vTargetPosition;
+}
+
 void plAiNavigation::SetNavmesh(plAiNavMesh& ref_navmesh)
 {
   if (m_pNavmesh == &ref_navmesh)
@@ -478,8 +483,8 @@ void plAiNavigation::ComputeSteeringInfo(plAiSteeringInfo& out_info, const plVec
   out_info.m_fArrivalDistance = plMath::HighValue<float>();
   out_info.m_vNextWaypoint = m_vCurrentPosition;
   out_info.m_vDirectionTowardsWaypoint = vForwardDir;
-  out_info.m_AbsRotationTowardsWaypoint = plAngle::MakeZero();
-  out_info.m_MaxAbsRotationAfterWaypoint = plAngle::MakeZero();
+  out_info.m_AbsRotationTowardsWaypoint = plAngle();
+  out_info.m_MaxAbsRotationAfterWaypoint = plAngle();
   // out_info.m_fWaypointCorridorWidth = plMath::HighValue<float>();
 
   plVec3 vPrevPos = m_vCurrentPosition;
@@ -511,10 +516,11 @@ void plAiNavigation::ComputeSteeringInfo(plAiSteeringInfo& out_info, const plVec
     {
       const plVec3 vNextPt = straightPath[idx];
       plVec2 vNextDir = (vNextPt - out_info.m_vNextWaypoint).GetAsVec2();
-      vNextDir.Normalize();
-
-      plAngle absDir = vNextDir.GetAngleBetween(out_info.m_vDirectionTowardsWaypoint);
-      out_info.m_MaxAbsRotationAfterWaypoint = plMath::Max(absDir, out_info.m_MaxAbsRotationAfterWaypoint);
+      if (vNextDir.NormalizeIfNotZero(plVec2::MakeZero()).Succeeded())
+      {
+        plAngle absDir = vNextDir.GetAngleBetween(out_info.m_vDirectionTowardsWaypoint);
+        out_info.m_MaxAbsRotationAfterWaypoint = plMath::Max(absDir, out_info.m_MaxAbsRotationAfterWaypoint);
+      }
     }
   }
 }
