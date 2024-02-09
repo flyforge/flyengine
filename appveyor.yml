@@ -1,0 +1,18 @@
+version: 1.0.{build}
+image: Visual Studio 2022
+install:
+- cmd: GenerateWin64vs2022NoVulkan.bat
+build:
+  project: Workspace\vs2022x64\flyengine_vs2022x64.sln
+  parallel: true
+  verbosity: minimal
+artifacts:
+- path: Output
+- path: Data
+- path: version.txt
+on_success:
+  - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+  - ps: ./send.ps1 success $env:WEBHOOK_URL
+on_failure:
+  - ps: Invoke-RestMethod https://raw.githubusercontent.com/DiscordHooks/appveyor-discord-webhook/master/send.ps1 -o send.ps1
+  - ps: ./send.ps1 failure $env:WEBHOOK_URL
