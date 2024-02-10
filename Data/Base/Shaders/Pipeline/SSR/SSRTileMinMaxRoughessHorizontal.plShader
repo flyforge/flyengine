@@ -38,7 +38,7 @@ void main(uint3 DTid : SV_DispatchThreadID)
       }
       else
       {
-        float roughness = MaterialParamsBuffer[pixel].z;
+        float roughness = MaterialParamsBuffer[pixel].a;
         maxRoughness = max(maxRoughness, roughness);
         minRoughness = min(minRoughness, roughness);
       }
