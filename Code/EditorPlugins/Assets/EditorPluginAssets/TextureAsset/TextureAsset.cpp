@@ -388,8 +388,6 @@ plTransformStatus plTextureAssetDocument::InternalTransformAsset(const char* szT
     return plTransformStatus();
   }
 
-  // PL_ASSERT_DEV(plStringUtils::IsEqual(szPlatform, "PC"), "Platform '{0}' is not supported", szPlatform);
-
   const auto* pAssetConfig = pAssetProfile->GetTypeConfig<plTextureAssetProfileConfig>();
 
   const auto props = GetProperties();

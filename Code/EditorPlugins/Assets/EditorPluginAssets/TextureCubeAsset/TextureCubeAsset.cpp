@@ -195,7 +195,6 @@ void plTextureCubeAssetDocument::UpdateAssetDocumentInfo(plAssetDocumentInfo* pI
 
 plTransformStatus plTextureCubeAssetDocument::InternalTransformAsset(const char* szTargetFile, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags)
 {
-  // PL_ASSERT_DEV(plStringUtils::IsEqual(szPlatform, "PC"), "Platform '{0}' is not supported", szPlatform);
   const bool bUpdateThumbnail = pAssetProfile == plAssetCurator::GetSingleton()->GetDevelopmentAssetProfile();
 
   plTransformStatus result = RunTexConv(szTargetFile, AssetHeader, bUpdateThumbnail);

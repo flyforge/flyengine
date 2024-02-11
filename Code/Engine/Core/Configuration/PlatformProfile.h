@@ -6,24 +6,6 @@
 class plChunkStreamWriter;
 class plChunkStreamReader;
 
-struct plProfileTargetPlatform
-{
-  enum Enum
-  {
-    PC,
-    UWP,
-    Android,
-
-    Default = PC
-  };
-
-  using StorageType = plUInt8;
-};
-
-PL_DECLARE_REFLECTABLE_TYPE(PL_CORE_DLL, plProfileTargetPlatform);
-
-//////////////////////////////////////////////////////////////////////////
-
 /// \brief Base class for configuration objects that store e.g. asset transform settings or runtime configuration information
 class PL_CORE_DLL plProfileConfigData : public plReflectedClass
 {
@@ -39,7 +21,7 @@ public:
 
 //////////////////////////////////////////////////////////////////////////
 
-class PL_CORE_DLL plPlatformProfile : public plReflectedClass
+class PL_CORE_DLL plPlatformProfile final : public plReflectedClass
 {
   PL_ADD_DYNAMIC_REFLECTION(plPlatformProfile, plReflectedClass);
 
@@ -49,6 +31,9 @@ public:
 
   void SetConfigName(plStringView sName) { m_sName = sName; }
   plStringView GetConfigName() const { return m_sName; }
+
+  void SetTargetPlatform(plStringView sPlatform) { m_sTargetPlatform = sPlatform; }
+  plStringView GetTargetPlatform() const { return m_sTargetPlatform; }
 
   void Clear();
   void AddMissingConfigs();
@@ -77,7 +62,7 @@ public:
 private:
   plUInt32 m_uiLastModificationCounter = 0;
   plString m_sName;
-  plEnum<plProfileTargetPlatform> m_TargetPlatform;
+  plString m_sTargetPlatform = "Windows";
   plDynamicArray<plProfileConfigData*> m_Configs;
 };
 

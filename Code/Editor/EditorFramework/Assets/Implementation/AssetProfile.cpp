@@ -202,6 +202,23 @@ plResult plAssetCurator::LoadAssetProfiles()
     }
   }
 
+  if (m_AssetProfiles.IsEmpty() || m_AssetProfiles[0]->GetConfigName() != "Default")
+  {
+    plPlatformProfile* pCfg = PL_DEFAULT_NEW(plPlatformProfile);
+    pCfg->SetConfigName("Default");
+
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+    pCfg->SetTargetPlatform("Windows");
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+    pCfg->SetTargetPlatform("Linux");
+#elif PL_ENABLED(PL_PLATFORM_OSX)
+    pCfg->SetTargetPlatform("OSX");
+#endif
+
+    pCfg->AddMissingConfigs();
+    m_AssetProfiles.Insert(pCfg, 0);
+  }
+
   return PL_SUCCESS;
 }
 
@@ -221,7 +238,16 @@ void plAssetCurator::SetupDefaultAssetProfiles()
 
   {
     plPlatformProfile* pCfg = PL_DEFAULT_NEW(plPlatformProfile);
-    pCfg->SetConfigName("PC");
+    pCfg->SetConfigName("Default");
+
+#if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
+    pCfg->SetTargetPlatform("Windows");
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+    pCfg->SetTargetPlatform("Linux");
+#elif PL_ENABLED(PL_PLATFORM_OSX)
+    pCfg->SetTargetPlatform("OSX");
+#endif
+
     pCfg->AddMissingConfigs();
     m_AssetProfiles.PushBack(pCfg);
   }

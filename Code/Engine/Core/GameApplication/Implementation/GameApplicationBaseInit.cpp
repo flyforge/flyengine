@@ -14,12 +14,13 @@
 #include <Foundation/IO/OpenDdlReader.h>
 #include <Foundation/Logging/ConsoleWriter.h>
 #include <Foundation/Logging/VisualStudioWriter.h>
+#include <Foundation/Platform/PlatformDesc.h>
 #include <Foundation/Types/TagRegistry.h>
 #include <Foundation/Utilities/CommandLineOptions.h>
 
 plCommandLineOptionBool opt_DisableConsoleOutput("app", "-disableConsoleOutput", "Disables logging to the standard console window.", false);
 plCommandLineOptionInt opt_TelemetryPort("app", "-TelemetryPort", "The network port over which telemetry is sent.", plTelemetry::s_uiPort);
-plCommandLineOptionString opt_Profile("app", "-profile", "The platform profile to use.", "PC");
+plCommandLineOptionString opt_Profile("app", "-profile", "The platform profile to use.", "Default");
 
 plString plGameApplicationBase::GetBaseDataDirectoryPath() const
 {
@@ -51,7 +52,24 @@ void plGameApplicationBase::ExecuteInitFunctions()
 
 void plGameApplicationBase::Init_PlatformProfile_SetPreferred()
 {
-  m_PlatformProfile.SetConfigName(opt_Profile.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
+  if (opt_Profile.IsOptionSpecified())
+  {
+    m_PlatformProfile.SetConfigName(opt_Profile.GetOptionValue(plCommandLineOption::LogMode::AlwaysIfSpecified));
+  }
+  else
+  {
+    m_PlatformProfile.SetConfigName(plPlatformDesc::GetThisPlatformDesc().GetName());
+
+    const plStringBuilder sRuntimeProfileFile(":project/RuntimeConfigs/", m_PlatformProfile.GetConfigName(), ".plProfile");
+
+    if (!plFileSystem::ExistsFile(sRuntimeProfileFile))
+    {
+      plLog::Info("Platform profile '{}' doesn't exist, switching to 'Default'", m_PlatformProfile.GetConfigName());
+
+      m_PlatformProfile.SetConfigName("Default");
+    }
+  }
+
   m_PlatformProfile.AddMissingConfigs();
 }
 

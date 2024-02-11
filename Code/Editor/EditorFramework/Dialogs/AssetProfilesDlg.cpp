@@ -3,6 +3,8 @@
 #include <EditorFramework/Assets/AssetCurator.h>
 #include <EditorFramework/Dialogs/AssetProfilesDlg.moc.h>
 #include <EditorFramework/EditorApp/EditorApp.moc.h>
+#include <Foundation/Platform/PlatformDesc.h>
+#include <GuiFoundation/UIServices/DynamicStringEnum.h>
 #include <ToolsFoundation/Command/TreeCommands.h>
 #include <ToolsFoundation/Serialization/DocumentObjectConverter.h>
 
@@ -44,19 +46,11 @@ public:
     {
       if (iRole == Qt::DecorationRole)
       {
-        const plInt32 iPlatform = pObject->GetTypeAccessor().GetValue("Platform").ConvertTo<plInt32>();
+        const plString sTargetPlatform = pObject->GetTypeAccessor().GetValue("TargetPlatform").ConvertTo<plString>();
 
-        switch (iPlatform)
-        {
-          case plProfileTargetPlatform::PC:
-            return plQtUiServices::GetSingleton()->GetCachedIconResource(":EditorFramework/Icons/PlatformWindows.svg");
+        const plStringBuilder sIconName(":Platforms/Icons/Platform", sTargetPlatform, ".svg");
 
-          case plProfileTargetPlatform::UWP:
-            return plQtUiServices::GetSingleton()->GetCachedIconResource(":EditorFramework/Icons/PlatformWindows.svg"); // TODO: icon
-
-          case plProfileTargetPlatform::Android:
-            return plQtUiServices::GetSingleton()->GetCachedIconResource(":/EditorFramework/Icons/PlatformAndroid.svg");
-        }
+        return plQtUiServices::GetSingleton()->GetCachedIconResource(sIconName);
       }
 
       if (iRole == Qt::DisplayRole)
@@ -94,6 +88,16 @@ plQtAssetProfilesDlg::plQtAssetProfilesDlg(QWidget* pParent)
   // do not allow to delete or rename the first item
   DeleteButton->setEnabled(false);
   RenameButton->setEnabled(false);
+
+  {
+    auto& platEnum = plDynamicStringEnum::CreateDynamicEnum("TargetPlatformNames");
+    platEnum.Clear();
+
+    for (auto pDesc = plPlatformDesc::GetFirstInstance(); pDesc != nullptr; pDesc = pDesc->GetNextInstance())
+    {
+      platEnum.AddValidValue(pDesc->GetName(), true);
+    }
+  }
 
   m_pDocument = PL_DEFAULT_NEW(plAssetProfilesDocument, "<none>");
   m_pDocument->GetSelectionManager()->m_Events.AddEventHandler(plMakeDelegate(&plQtAssetProfilesDlg::SelectionEventHandler, this));

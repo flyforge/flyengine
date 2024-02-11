@@ -1,6 +1,5 @@
 #include <Foundation/FoundationPCH.h>
 
-#include <Foundation/System/PlatformFeatures.h>
 #include <Foundation/System/Screen.h>
 
 void plScreen::PrintScreenInfo(const plHybridArray<plScreenInfo, 2>& screens, plLogInterface* pLog /*= plLog::GetThreadLocalLogSystem()*/)

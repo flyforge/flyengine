@@ -3,7 +3,6 @@
 #if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
 
 #  include <Foundation/Basics/Platform/Win/IncludeWindows.h>
-#  include <Foundation/System/PlatformFeatures.h>
 #  include <Foundation/System/Screen.h>
 
 BOOL CALLBACK plMonitorEnumProc(HMONITOR pMonitor, HDC pHdcMonitor, LPRECT pLprcMonitor, LPARAM data)

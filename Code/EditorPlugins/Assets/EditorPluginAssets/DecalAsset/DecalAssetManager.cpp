@@ -50,7 +50,7 @@ void plDecalAssetDocumentManager::AddEntriesToAssetTable(plStringView sDataDirec
 
   if (projectDir.StartsWith_NoCase(sDataDirectory))
   {
-    addEntry("{ ProjectDecalAtlas }", "PC/Decals.plTextureAtlas", "Decal Atlas");
+    addEntry("{ ProjectDecalAtlas }", "Default/Decals.plTextureAtlas", "Decal Atlas");
   }
 }
 

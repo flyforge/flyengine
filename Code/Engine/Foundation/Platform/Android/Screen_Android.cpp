@@ -1,7 +1,5 @@
 #include <Foundation/FoundationPCH.h>
 
-#include <Foundation/System/PlatformFeatures.h>
-
 #if PL_ENABLED(PL_PLATFORM_ANDROID)
 
 #  if PL_ENABLED(PL_SUPPORTS_GLFW)

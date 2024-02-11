@@ -9,14 +9,6 @@
 #include <Core/ResourceManager/ResourceManager.h>
 
 // clang-format off
-PL_BEGIN_STATIC_REFLECTED_ENUM(plProfileTargetPlatform, 1)
-  PL_ENUM_CONSTANTS(plProfileTargetPlatform::PC, plProfileTargetPlatform::UWP, plProfileTargetPlatform::Android)
-PL_END_STATIC_REFLECTED_ENUM;
-// clang-format on
-
-//////////////////////////////////////////////////////////////////////////
-
-// clang-format off
 PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plProfileConfigData, 1, plRTTINoAllocator)
 PL_END_DYNAMIC_REFLECTED_TYPE
 // clang-format on
@@ -35,7 +27,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plPlatformProfile, 1, plRTTIDefaultAllocator<plP
   PL_BEGIN_PROPERTIES
   {
     PL_MEMBER_PROPERTY("Name", m_sName)->AddAttributes(new plHiddenAttribute()),
-    PL_ENUM_MEMBER_PROPERTY("Platform", plProfileTargetPlatform, m_TargetPlatform),
+    PL_MEMBER_PROPERTY("TargetPlatform", m_sTargetPlatform)->AddAttributes(new plDynamicStringEnumAttribute("TargetPlatformNames"), new plDefaultValueAttribute("Windows")),
     PL_ARRAY_MEMBER_PROPERTY("Configs", m_Configs)->AddFlags(plPropertyFlags::PointerOwner)->AddAttributes(new plContainerAttribute(false, false, false)),
   }
   PL_END_PROPERTIES;

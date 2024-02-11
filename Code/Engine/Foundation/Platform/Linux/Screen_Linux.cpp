@@ -1,7 +1,5 @@
 #include <Foundation/FoundationPCH.h>
 
-#include <Foundation/System/PlatformFeatures.h>
-
 #if PL_ENABLED(PL_PLATFORM_LINUX)
 
 #  if PL_ENABLED(PL_SUPPORTS_GLFW)
