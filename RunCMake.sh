@@ -13,8 +13,6 @@ eval set --$opts
 RunCMake=true
 BuildType="Dev"
 NoUnity=""
-PlatformChecks=true
-
 
 while [[ $# -gt 0 ]]; do
   case "$1" in
@@ -25,7 +23,6 @@ while [[ $# -gt 0 ]]; do
       echo "  --no-cmake    Do not invoke cmake (usefull when only --setup is needed)"
       echo "  --build-type  Which build type cmake should be invoked with Debug|Dev|Shipping"
       echo "  --no-unity    Disable unity builds. This might help to improve code completion in various editors"
-      echo " --skip-platform-check Disables the platform compatability checks"
       exit 0
       ;;
 
@@ -41,11 +38,6 @@ while [[ $# -gt 0 ]]; do
 
     --no-cmake)
       RunCMake=false
-      shift 1
-      ;;
-
-    --skip-platform-check)
-      PlatformChecks=false
       shift 1
       ;;
 
@@ -71,23 +63,78 @@ if [ "$BuildType" != "Debug" -a "$BuildType" != "Dev" -a "$BuildType" != "Releas
   exit 1
 fi
 
-if [ ! -f "/etc/issue" ]; then
-	>&2 echo "/etc/issue does not exist. Failed distribution detection"
-	exit 1
+#Hot new distro-detector
+PackageManager=""
+PackageInstall=""
+PackageQuery=""
+if [ -f /etc/os-release ]; then
+  . /etc/os-release
+
+  if [ $NAME = "Linux-Mint" ]; then
+    Distribution="Mint"
+  else
+    Distribution=$NAME
+  fi
+else
+  echo "Using ancient distro finding code... caveat emptor"
+
+  if [ ! -f "/etc/issue" ]; then
+    >&2 echo "/etc/issue does not exist. Failed distribution detection"
+    exit 1
+  fi
+  Issue=$(cat /etc/issue)
+
+  UbuntuPattern="Ubuntu ([0-9][0-9])"
+  MintPattern="Linux Mint ([0-9][0-9])"
+  if [[ $Issue =~ $UbuntuPattern ]]; then
+    Distribution="Ubuntu"
+    Version=${BASH_REMATCH[1]}
+  elif [[ $Issue =~ $MintPattern ]]; then
+    Distribution="Mint"
+    Version=${BASH_REMATCH[1]}
+  fi
 fi
+echo "Distro is $Distribution"
 
-Issue=$(cat /etc/issue)
-
-UbuntuPattern="Ubuntu ([0-9][0-9])"
-MintPattern="Linux Mint ([0-9][0-9])"
-
-if [[ $Issue =~ $UbuntuPattern ]]; then
-  Distribution="Ubuntu"
-  Version=${BASH_REMATCH[1]}
-elif [[ $Issue =~ $MintPattern ]]; then
-  Distribution="Mint"
-  Version=${BASH_REMATCH[1]}
+#Set the package manager stuff
+if [ $Distribution = "Void" ]; then
+  PackageManager="Xbps"
+  PackageInstall="xbps-install"
+  PackageQuery="xbps-query -s"
+elif [ $Distribution = "Arch Linux" ]\
+  || [ $Distribution = "SteamOS" ]; then
+  PackageManager="Pacman"
+  PackageInstall="pacman -S"
+  PackageQuery="pacman -Ss"
+elif [ $Distribution = "Ubuntu" ]\
+  || [ $Distribution = "Pop!_OS" ]\
+  || [ $Distribution = "Mint" ]; then
+  PackageManager="Apt"
+  PackageInstall="apt install"
+  PackageQuery="apt list"
 fi
+echo "Package Manager is $PackageManager"
+
+#Checking here so the old detection code can still be used
+case $Distribution in
+  "Ubuntu" | "Pop!_OS" | "Mint" | "Void" | "Arch Linux" | "SteamOS")
+    if [ $PackageManager = "" ]; then
+      >&2 echo "Unable to determine the package manager"
+      exit 1
+    fi
+    echo "This distribution + package manager is supported. Congratulations!"
+    ;;
+  *)
+    >&2 echo "Your Distribution or Distribution version is not supported by this script"
+    >&2 echo "Currently supported are:"
+    >&2 echo "  * Ubuntu 22"
+    >&2 echo "  * Linux Mint 21"
+    >&2 echo "  * Void Linux"
+    >&2 echo "  * Arch Linux"
+    >&2 echo "  * SteamOS"
+    exit 1
+    ;;
+esac
 
 # This requires a 'sort' that supports '-V'
 verlte() {
@@ -98,7 +145,11 @@ verlt() {
     [ "$1" = "$2" ] && return 1 || verlte $1 $2
 }
 
-if [ "$Distribution" = "Ubuntu" -a "$Version" = "22" ] || [ "$Distribution" = "Mint" -a "$Version" = "21" ] || "$PlatformChecks" = false; then
+#Figure out package names and compiler for this system
+if [ "$Distribution" = "Ubuntu" ]\
+|| [ "$Distribution" = "Pop!_OS" ]\
+|| [ "$Distribution" = "Mint" ]; then
+  echo "Using made up Debian fantasy package names..."
   packages=(cmake build-essential ninja-build libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev uuid-dev mold libfreetype-dev libtinfo5)
 
   if [ "$UseClang" = true ]; then
@@ -111,28 +162,44 @@ if [ "$Distribution" = "Ubuntu" -a "$Version" = "22" ] || [ "$Distribution" = "M
     cxx_compiler=g++-12
   fi
 else
-  >&2 echo "Your Distribution or Distribution version is not supported by this script"
-  >&2 echo "Currently supported are:"
-  >&2 echo "  * Ubuntu 22"
-  >&2 echo "  * Linux Mint 21"
-  exit 1
+  echo "Using upstream package names..."
+  packages=(cmake ninja qt6-base-devel qt6-svg-devel libXrandr-devel libXinerama-devel libXcursor-devel libXi-devel libuuid-devel mold freetype-devel ncurses-libtinfo-devel)
+
+  if [ "$UseClang" = true ]; then
+    packages+=(clang libstdc++-devel)
+    c_compiler=clang
+    cxx_compiler=clang++
+  else
+    packages+=(gcc)
+    c_compiler=gcc
+    cxx_compiler=g++
+  fi
 fi
 
 if [ "$Setup" = true ]; then
-  qtVer=$(apt list qt6-base-dev 2>/dev/null | grep -o "6\.[0-9]*\.[0-9]")
-  echo $qtVer
+  #TODO: need to verify package names for Arch and SteamOS - they should be the same as Void though
+  if [[ $Distribution != "Ubuntu" && $Distribution != "Mint" && $Distribution != "Pop!_OS" ]]; then
+    echo "Using upstream QT6 package names..."
+    qtVer=$($PackageQuery qt6-base-devel 2>/dev/null | grep -o "6\.[0-9]*\.[0-9]")
+    qtPackages=(qt6-base-devel qt6-svg-devel)
+  else
+    echo "Using made up Debian fantasy QT6 package names..."
+    qtVer=$($PackageQuery qt6-base-dev 2>/dev/null | grep -o "6\.[0-9]*\.[0-9]")
+    qtPackages=(qt6-base-dev libqt6svg6-dev qt6-base-private-dev)
+  fi
 
+  echo "QT version is $qtVer"
   if verlt $qtVer "6.3.0"; then
     >&2 echo -e "\033[0;33mYour distributions package manager does not provide Qt 6.3.0 or newer. Please install Qt manually."
     >&2 echo -e "See https://plasmaengine.github.io/PlasmaDocs/#Plasma2/build/build-linux/#automatic-setup"
   else
-    packages+=(qt6-base-dev libqt6svg6-dev qt6-base-private-dev)
+    packages+=($qtPackages)
   fi
 
   git submodule update --init
   echo "Attempting to install the following packages through the package manager:"
   echo ${packages[@]}
-  sudo apt install ${packages[@]}
+  sudo $PackageInstall ${packages[@]}
 fi
 
 CompilerShort=gcc

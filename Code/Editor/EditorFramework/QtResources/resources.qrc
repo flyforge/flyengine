@@ -1,11 +1,5 @@
 <RCC>
   <qresource prefix="EditorFramework">
-    <file>Theme/checkbox_checked.png</file>
-    <file>Theme/checkbox_checked_hover.png</file>
-    <file>Theme/checkbox_checked_pressed.png</file>
-    <file>Theme/checkbox_unchecked.png</file>
-    <file>Theme/checkbox_unchecked_hover.png</file>
-    <file>Theme/checkbox_unchecked_pressed.png</file>
     <file>Icons/Connection.svg</file>
     <file>Icons/Tag.svg</file>
     <file>Icons/Perspective.svg</file>
@@ -25,17 +19,17 @@
     <file>Icons/DataDirectory.svg</file>
     <file>Icons/Folder.svg</file>
     <file>Icons/ImportableFileType.svg</file>
-	<file>Icons/ImportableFile.svg</file>
+	  <file>Icons/ImportableFile.svg</file>
     <file>Icons/ImportedFile.svg</file>
     <file>Icons/StoredSettings.svg</file>
     <file>Icons/Input.svg</file>
     <file>Icons/AssetUnknown.svg</file>
     <file>Icons/AssetNeedsTransform.svg</file>
     <file>Icons/AssetNeedsThumbnail.svg</file>
-	<file>Icons/AssetNeedsImport.svg</file>
+	  <file>Icons/AssetNeedsImport.svg</file>
     <file>Icons/AssetProcessingPause.svg</file>
     <file>Icons/AssetProcessingStart.svg</file>
-	<file>Icons/AssetProcessingForceStop.svg</file>
+	  <file>Icons/AssetProcessingForceStop.svg</file>
     <file>Icons/AssetOk.svg</file>
     <file>Icons/ResavAllAssets.svg</file>
     <file>Icons/AssetMissingDependency.svg</file>
@@ -67,7 +61,24 @@
     <file>Icons/GitHub.svg</file>
     <file>Icons/GitHub-Light.svg</file>
     <file>Icons/ViewLightMenu.svg</file>
-	<file>Icons/VisualStudio.svg</file>
+	  <file>Icons/VisualStudio.svg</file>
+  </qresource>
+  <qresource prefix="Theme">
+    <file>Theme/checkbox_checked.png</file>
+    <file>Theme/checkbox_checked_hover.png</file>
+    <file>Theme/checkbox_checked_pressed.png</file>
+    <file>Theme/checkbox_unchecked.png</file>
+    <file>Theme/checkbox_unchecked_hover.png</file>
+    <file>Theme/checkbox_unchecked_pressed.png</file>
+    <file>Theme/LeftArrow.png</file>
+    <file>Theme/RightArrow.png</file>
+    <file>Theme/DownArrow.png</file>
+    <file>Theme/LeftArrow_Highlight.png</file>
+    <file>Theme/RightArrow_Highlight.png</file>
+    <file>Theme/DownArrow_Highlight.png</file>
+    <file>Theme/LeftArrow_Pressed.png</file>
+    <file>Theme/RightArrow_Pressed.png</file>
+    <file>Theme/DownArrow_Pressed.png</file>
   </qresource>
   <qresource prefix="TypeIcons">
     <file>plDragToPositionGizmoEditTool.svg</file>

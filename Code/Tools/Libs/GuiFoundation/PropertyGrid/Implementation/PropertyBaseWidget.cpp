@@ -1630,7 +1630,7 @@ void plQtPropertyTypeContainerWidget::UpdateElement(plUInt32 index)
     // Label
     {
       plStringBuilder sTitle, tmp;
-      sTitle.SetFormat("[{0}] - {1}", m_Keys[index].ConvertTo<plString>(), plTranslate(pCommonType->GetTypeName().GetData(tmp)));
+      sTitle.SetFormat(" {0}",plTranslate(pCommonType->GetTypeName().GetData(tmp)));
 
       if (auto pInDev = pCommonType->GetAttributeByType<plInDevelopmentAttribute>())
       {

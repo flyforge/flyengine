@@ -30,7 +30,7 @@ plQtAssetPropertyWidget::plQtAssetPropertyWidget()
     "signal/slot connection failed");
 
   m_pButton = new QToolButton(this);
-  m_pButton->setText(QStringLiteral("... "));
+  m_pButton->setText(QStringLiteral("...   "));
   m_pButton->setToolButtonStyle(Qt::ToolButtonStyle::ToolButtonTextOnly);
   m_pButton->setPopupMode(QToolButton::InstantPopup);
 

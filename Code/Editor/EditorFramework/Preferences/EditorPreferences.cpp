@@ -32,7 +32,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plEditorPreferencesUser, 1, plRTTIDefaultAllocat
     // START GROUP Engine View Light Settings
     PL_MEMBER_PROPERTY("SkyBox", m_bSkyBox)->AddAttributes(new plDefaultValueAttribute(true), new plGroupAttribute("Engine View Light Settings")),
     PL_MEMBER_PROPERTY("SkyLight", m_bSkyLight)->AddAttributes(new plDefaultValueAttribute(true), new plClampValueAttribute(0.0f, 2.0f)),
-    PL_MEMBER_PROPERTY("SkyLightCubeMap", m_sSkyLightCubeMap)->AddAttributes(new plDefaultValueAttribute(plStringView("{ 0b202e08-a64f-465d-b38e-15b81d161822 }")), new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
+    PL_MEMBER_PROPERTY("SkyLightCubeMap", m_sSkyLightCubeMap)->AddAttributes(new plDefaultValueAttribute(plStringView("{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }")), new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
     PL_MEMBER_PROPERTY("SkyLightIntensity", m_fSkyLightIntensity)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 20.0f)),
     PL_MEMBER_PROPERTY("DirectionalLight", m_bDirectionalLight)->AddAttributes(new plDefaultValueAttribute(true)),
     PL_MEMBER_PROPERTY("DirectionalLightAngle", m_DirectionalLightAngle)->AddAttributes(new plDefaultValueAttribute(plAngle::MakeFromDegree(30.0f)), new plClampValueAttribute(plAngle::MakeFromDegree(-90.0f), plAngle::MakeFromDegree(90.0f))),

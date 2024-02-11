@@ -123,6 +123,14 @@ void plQtCollapsibleGroupBox::paintEvent(QPaintEvent* event)
     path.addRoundedRect(crAdjusted, Rounding, Rounding);
     p.fillPath(path, colorGradient);
   }
+  else
+  {
+    QRectF wrAdjusted = wr;
+    wrAdjusted.adjust(0.8, 0.8, Rounding, -0.8);
+    QPainterPath oPath;
+    oPath.addRoundedRect(wrAdjusted, Rounding, Rounding);
+    p.fillPath(oPath, pal.alternateBase());
+  }
 
   if (!Header->isHidden())
   {

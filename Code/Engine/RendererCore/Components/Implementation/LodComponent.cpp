@@ -1,22 +1,54 @@
 #include <RendererCore/RendererCorePCH.h>
 
+#include <Core/Graphics/Camera.h>
 #include <Core/Messages/TriggerMessage.h>
 #include <Core/WorldSerializer/WorldReader.h>
 #include <Core/WorldSerializer/WorldWriter.h>
+#include <Foundation/Math/BoundingSphere.h>
+#include <Foundation/Utilities/GraphicsUtils.h>
 #include <RendererCore/Components/LodComponent.h>
+#include <RendererCore/Debug/DebugRenderer.h>
+#include <RendererCore/Pipeline/RenderData.h>
+#include <RendererCore/Pipeline/View.h>
 
+float CalculateSphereScreenSpaceCoverage(const plBoundingSphere& sphere, const plCamera& camera)
+{
+  if (camera.IsPerspective())
+  {
+    return plGraphicsUtils::CalculateSphereScreenCoverage(sphere, camera.GetCenterPosition(), camera.GetFovY(1.0f));
+  }
+  else
+  {
+    return plGraphicsUtils::CalculateSphereScreenCoverage(sphere.m_fRadius, camera.GetDimensionY(1.0f));
+  }
+}
+
+struct LodCompFlags
+{
+  enum Enum
+  {
+    ShowDebugInfo = 0,
+    OverlapRanges = 1,
+  };
+};
 
 // clang-format off
 PL_BEGIN_COMPONENT_TYPE(plLodComponent, 1, plComponentMode::Static)
 {
   PL_BEGIN_PROPERTIES
   {
-    PL_ARRAY_MEMBER_PROPERTY("LodThresholds", m_LodThresholds)->AddAttributes(new plMaxArraySizeAttribute(4))
+    PL_MEMBER_PROPERTY("BoundsOffset", m_vBoundsOffset),
+    PL_MEMBER_PROPERTY("BoundsRadius", m_fBoundsRadius)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.01f, 100.0f)),
+    PL_ACCESSOR_PROPERTY("ShowDebugInfo", GetShowDebugInfo, SetShowDebugInfo),
+    PL_ACCESSOR_PROPERTY("OverlapRanges", GetOverlapRanges, SetOverlapRanges)->AddAttributes(new plDefaultValueAttribute(true)),
+    PL_ARRAY_MEMBER_PROPERTY("LodThresholds", m_LodThresholds)->AddAttributes(new plMaxArraySizeAttribute(4), new plClampValueAttribute(0.0f, 1.0f)),
   }
   PL_END_PROPERTIES;
   PL_BEGIN_ATTRIBUTES
   {
-    new plCategoryAttribute("Effects"),
+    new plCategoryAttribute("Rendering"),
+    new plSphereVisualizerAttribute("BoundsRadius", plColor::MediumVioletRed, nullptr, plVisualizerAnchor::Center, plVec3(1.0f), "BoundsOffset"),
+    new plTransformManipulatorAttribute("BoundsOffset"),
   }
   PL_END_ATTRIBUTES;
   PL_BEGIN_MESSAGEHANDLERS
@@ -29,13 +61,47 @@ PL_BEGIN_COMPONENT_TYPE(plLodComponent, 1, plComponentMode::Static)
 PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
-plLodComponent::plLodComponent() = default;
+static const plTempHashedString sLod0("LOD0");
+static const plTempHashedString sLod1("LOD1");
+static const plTempHashedString sLod2("LOD2");
+static const plTempHashedString sLod3("LOD3");
+static const plTempHashedString sLod4("LOD4");
+
+plLodComponent::plLodComponent()
+{
+  SetOverlapRanges(true);
+}
+
 plLodComponent::~plLodComponent() = default;
+
+void plLodComponent::SetShowDebugInfo(bool bShow)
+{
+  SetUserFlag(LodCompFlags::ShowDebugInfo, bShow);
+}
+
+bool plLodComponent::GetShowDebugInfo() const
+{
+  return GetUserFlag(LodCompFlags::ShowDebugInfo);
+}
+
+void plLodComponent::SetOverlapRanges(bool bShow)
+{
+  SetUserFlag(LodCompFlags::OverlapRanges, bShow);
+}
+
+bool plLodComponent::GetOverlapRanges() const
+{
+  return GetUserFlag(LodCompFlags::OverlapRanges);
+}
 
 void plLodComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
   SUPER::SerializeComponent(inout_stream);
   auto& s = inout_stream.GetStream();
+
+  s << m_vBoundsOffset;
+  s << m_fBoundsRadius;
+
   s.WriteArray(m_LodThresholds).AssertSuccess();
 }
 
@@ -43,12 +109,17 @@ void plLodComponent::DeserializeComponent(plWorldReader& inout_stream)
 {
   SUPER::DeserializeComponent(inout_stream);
   auto& s = inout_stream.GetStream();
+
+  s >> m_vBoundsOffset;
+  s >> m_fBoundsRadius;
+
   s.ReadArray(m_LodThresholds).AssertSuccess();
 }
 
-plResult plLodComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
+plResult plLodComponent::GetLocalBounds(plBoundingBoxSphere& out_bounds, bool& out_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  ref_bounds = m_ChildBounds;
+  out_bounds = plBoundingSphere::MakeFromCenterAndRadius(m_vBoundsOffset, m_fBoundsRadius);
+  out_bAlwaysVisible = false;
   return PL_SUCCESS;
 }
 
@@ -56,23 +127,27 @@ void plLodComponent::OnActivated()
 {
   SUPER::OnActivated();
 
-  m_iCurState = -1;
+  // start with the highest LOD (lowest detail)
+  m_iCurLod = m_LodThresholds.GetCount();
 
   plMsgComponentInternalTrigger trig;
-  trig.m_iPayload = 0;
+  trig.m_iPayload = m_iCurLod;
   OnMsgComponentInternalTrigger(trig);
-
-  TriggerLocalBoundsUpdate();
 }
 
 void plLodComponent::OnDeactivated()
 {
+  // when the component gets deactivated, activate all LOD children
+  // this is important for editing to not behave weirdly
+  // not sure whether this can have unintended side-effects at runtime
+  // but there this should only be called for objects that get deleted anyway
+
   plGameObject* pLod[5];
-  pLod[0] = GetOwner()->FindChildByName("LOD0");
-  pLod[1] = GetOwner()->FindChildByName("LOD1");
-  pLod[2] = GetOwner()->FindChildByName("LOD2");
-  pLod[3] = GetOwner()->FindChildByName("LOD3");
-  pLod[4] = GetOwner()->FindChildByName("LOD4");
+  pLod[0] = GetOwner()->FindChildByName(sLod0);
+  pLod[1] = GetOwner()->FindChildByName(sLod1);
+  pLod[2] = GetOwner()->FindChildByName(sLod2);
+  pLod[3] = GetOwner()->FindChildByName(sLod3);
+  pLod[4] = GetOwner()->FindChildByName(sLod4);
 
   for (plUInt32 i = 0; i < PL_ARRAY_SIZE(pLod); ++i)
   {
@@ -93,65 +168,95 @@ void plLodComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) const
     return;
   }
 
-  // TODO: figure out how to get this message
-  // currently it is only sent when the LOD object is selected
+  // Don't extract render data for selection.
+  if (msg.m_OverrideCategory != plInvalidRenderDataCategory)
+    return;
 
+  const plInt32 iNumLods = (plInt32)m_LodThresholds.GetCount();
 
-  // TODO: use projected screen size to determine LOD
-  // we can't use the actual LOD bounds, because they can be drastically different, ie if one LOD contains a light source, it may be huge
-  // but we can just use a unit sphere as reference, since we are probably only talking about percentages of screen coverage anyway
-  // TODO: I have no idea how to calculate that, so distance it is for now !
+  const plVec3 vScale = GetOwner()->GetGlobalScaling();
+  const float fScale = plMath::Max(vScale.x, vScale.y, vScale.z);
+  const plVec3 vCenter = GetOwner()->GetGlobalTransform() * m_vBoundsOffset;
 
-  const plUInt32 uiNumLods = m_LodThresholds.GetCount();
-  const float fDistSqr = (msg.m_pView->GetCamera()->GetCenterPosition() - GetOwner()->GetGlobalPosition()).GetLengthSquared();
+  const float fCoverage = CalculateSphereScreenSpaceCoverage(plBoundingSphere::MakeFromCenterAndRadius(vCenter, fScale * m_fBoundsRadius), *msg.m_pView->GetCullingCamera());
 
-  plInt32 iNewState = 0;
+  // clamp the input value, this is to prevent issues while editing the threshold array
+  plInt32 iNewLod = plMath::Clamp<plInt32>(m_iCurLod, 0, iNumLods);
 
-  if (uiNumLods < 1 || fDistSqr < plMath::Square(m_LodThresholds[0]))
-    iNewState = 0;
-  else if (uiNumLods < 2 || fDistSqr < plMath::Square(m_LodThresholds[1]))
-    iNewState = 1;
-  else if (uiNumLods < 3 || fDistSqr < plMath::Square(m_LodThresholds[2]))
-    iNewState = 2;
-  else if (uiNumLods < 4 || fDistSqr < plMath::Square(m_LodThresholds[3]))
-    iNewState = 3;
-  else if (uiNumLods < 5)
-    iNewState = 4;
+  float fCoverageP = 1;
+  float fCoverageN = 0;
 
-  if (iNewState == m_iCurState)
+  if (iNewLod > 0)
+  {
+    fCoverageP = m_LodThresholds[iNewLod - 1];
+  }
+
+  if (iNewLod < iNumLods)
+  {
+    fCoverageN = m_LodThresholds[iNewLod];
+  }
+
+  if (GetOverlapRanges())
+  {
+    const float fLodRangeOverlap = 0.40f;
+
+    if (iNewLod + 1 < iNumLods)
+    {
+      float range = (fCoverageN - m_LodThresholds[iNewLod + 1]);
+      fCoverageN -= range * fLodRangeOverlap; // overlap into the next range
+    }
+    else
+    {
+      float range = (fCoverageN - 0.0f);
+      fCoverageN -= range * fLodRangeOverlap; // overlap into the next range
+    }
+  }
+
+  if (fCoverage < fCoverageN)
+  {
+    ++iNewLod;
+  }
+  else if (fCoverage > fCoverageP)
+  {
+    --iNewLod;
+  }
+
+  iNewLod = plMath::Clamp(iNewLod, 0, iNumLods);
+
+  if (GetShowDebugInfo())
+  {
+    plStringBuilder sb;
+    sb.SetFormat("Coverage: {}\nLOD {}\nRange: {} - {}", plArgF(fCoverage, 3), iNewLod, plArgF(fCoverageP, 3), plArgF(fCoverageN, 3));
+    plDebugRenderer::Draw3DText(msg.m_pView->GetHandle(), sb, GetOwner()->GetGlobalPosition(), plColor::White);
+  }
+
+  if (iNewLod == m_iCurLod)
     return;
 
   plMsgComponentInternalTrigger trig;
-  trig.m_iPayload = iNewState;
+  trig.m_iPayload = iNewLod;
 
   PostMessage(trig);
 }
 
 void plLodComponent::OnMsgComponentInternalTrigger(plMsgComponentInternalTrigger& msg)
 {
-  m_iCurState = msg.m_iPayload;
+  m_iCurLod = msg.m_iPayload;
 
+  // search for direct children named LODn, don't waste performance searching recursively
   plGameObject* pLod[5];
-  pLod[0] = GetOwner()->FindChildByName("LOD0");
-  pLod[1] = GetOwner()->FindChildByName("LOD1");
-  pLod[2] = GetOwner()->FindChildByName("LOD2");
-  pLod[3] = GetOwner()->FindChildByName("LOD3");
-  pLod[4] = GetOwner()->FindChildByName("LOD4");
+  pLod[0] = GetOwner()->FindChildByName(sLod0, false);
+  pLod[1] = GetOwner()->FindChildByName(sLod1, false);
+  pLod[2] = GetOwner()->FindChildByName(sLod2, false);
+  pLod[3] = GetOwner()->FindChildByName(sLod3, false);
+  pLod[4] = GetOwner()->FindChildByName(sLod4, false);
 
-
+  // activate the selected LOD, deactivate all others
   for (plUInt32 i = 0; i < PL_ARRAY_SIZE(pLod); ++i)
   {
     if (pLod[i])
     {
-      if (m_iCurState == i)
-      {
-        m_ChildBounds = pLod[i]->GetLocalBounds();
-        pLod[i]->SetActiveFlag(true);
-      }
-      else
-      {
-        pLod[i]->SetActiveFlag(false);
-      }
+      pLod[i]->SetActiveFlag(m_iCurLod == i);
     }
   }
 }

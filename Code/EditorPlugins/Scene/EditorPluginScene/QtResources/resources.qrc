@@ -90,10 +90,11 @@
     <file>plPathNodeComponent.svg</file>
     <file>plFollowPathComponent.svg</file>
     <file>plLocalBlackboardComponent.svg</file>
-	<file>plGlobalBlackboardComponent.svg</file>
+	  <file>plGlobalBlackboardComponent.svg</file>
     <file>plPostProcessingComponent.svg</file>
     <file>plVolumeBoxComponent.svg</file>
     <file>plVolumeSphereComponent.svg</file>
+    <file>plLodComponent.svg</file>
   </qresource>
   <qresource prefix="GroupIcons">
     <file>Size.svg</file>

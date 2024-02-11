@@ -34,6 +34,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plSurfaceResourceDescriptor, 3, plRTTIDefaultAll
     PL_MEMBER_PROPERTY("Restitution", m_fPhysicsRestitution)->AddAttributes(new plDefaultValueAttribute(0.25f)),
     PL_MEMBER_PROPERTY("StaticFriction", m_fPhysicsFrictionStatic)->AddAttributes(new plDefaultValueAttribute(0.6f)),
     PL_MEMBER_PROPERTY("DynamicFriction", m_fPhysicsFrictionDynamic)->AddAttributes(new plDefaultValueAttribute(0.4f)),
+    PL_MEMBER_PROPERTY("SoundObstruction", m_fSoundObstruction)->AddAttributes(new plDefaultValueAttribute(0.5f)),
     PL_MEMBER_PROPERTY("GroundType", m_iGroundType)->AddAttributes(new plDefaultValueAttribute(-1), new plDynamicEnumAttribute("AiGroundType")),
     PL_MEMBER_PROPERTY("SoundObstruction", m_fSoundObstruction)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(0.0f, 1.0f)),
     PL_ACCESSOR_PROPERTY("OnCollideInteraction", GetCollisionInteraction, SetCollisionInteraction)->AddAttributes(new plDynamicStringEnumAttribute("SurfaceInteractionTypeEnum")),
@@ -112,6 +113,7 @@ void plSurfaceResourceDescriptor::Load(plStreamReader& inout_stream)
   inout_stream >> m_fPhysicsRestitution;
   inout_stream >> m_fPhysicsFrictionStatic;
   inout_stream >> m_fPhysicsFrictionDynamic;
+  inout_stream >> m_fSoundObstruction;
   inout_stream >> m_hBaseSurface;
 
   if (uiVersion >= 9)
@@ -194,6 +196,7 @@ void plSurfaceResourceDescriptor::Save(plStreamWriter& inout_stream) const
   inout_stream << m_fPhysicsRestitution;
   inout_stream << m_fPhysicsFrictionStatic;
   inout_stream << m_fPhysicsFrictionDynamic;
+  inout_stream << m_fSoundObstruction;
   inout_stream << m_hBaseSurface;
 
   // version 9

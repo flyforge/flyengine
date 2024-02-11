@@ -47,7 +47,7 @@ struct plMaterialAssetPreview
     Box,
     Plane,
 
-    Default = Ball
+    Default = Sphere
   };
 };
 PL_DECLARE_REFLECTABLE_TYPE(PL_NO_LINKAGE, plMaterialAssetPreview);

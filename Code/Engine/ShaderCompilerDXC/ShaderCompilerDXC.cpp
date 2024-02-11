@@ -567,6 +567,7 @@ plGALShaderTextureType::Enum plShaderCompilerDXC::GetTextureType(const SpvReflec
       return plGALShaderTextureType::Unknown;
 
     case SpvDim::SpvDimMax:
+    default:
       PL_ASSERT_DEV(false, "Invalid enum value");
       break;
   }

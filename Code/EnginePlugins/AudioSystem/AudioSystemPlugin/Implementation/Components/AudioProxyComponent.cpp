@@ -5,7 +5,7 @@
 #include <AudioSystemPlugin/Core/AudioSystemRequests.h>
 #include <AudioSystemPlugin/Core/AudioWorldModule.h>
 
-static plAudioSystemDataID s_uiNextEntityId = 2; // 1 is reserved for the global entity.
+plAudioSystemDataID s_uiNextEntityId = 2; // 1 is reserved for the global entity.
 
 // clang-format off
 PL_BEGIN_COMPONENT_TYPE(plAudioProxyComponent, 1, plComponentMode::Static)

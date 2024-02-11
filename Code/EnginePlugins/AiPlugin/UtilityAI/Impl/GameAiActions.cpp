@@ -626,6 +626,10 @@ plAiActionResult plAiActionNavigateTo::Execute(plGameObject& owner, plTime tDiff
     case plAiNavigationComponent::Failed:
       plLog::Error(pLog, "Path navigation failed.");
       return plAiActionResult::Failed;
+    
+    default:
+      plLog::Dev (pLog, "Unhandled plAiNavigationComponent case!");
+      break;
   }
 
   pNav->m_fReachedDistance = m_fReachedDist;

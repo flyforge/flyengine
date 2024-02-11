@@ -104,9 +104,9 @@ public:
 private:
   void SetModifiedInternal(plEngineViewLightSettingsEvent::Type type);
 
-  bool m_bSkyBox = true;
+  bool m_bSkyBox = false;
   bool m_bSkyLight = true;
-  plString m_sSkyLightCubeMap = "{ 0b202e08-a64f-465d-b38e-15b81d161822 }";
+  plString m_sSkyLightCubeMap = "{ 6449d7e0-a8ff-4b43-9f84-df1c870a4748 }";
   float m_fSkyLightIntensity = 1.0f;
 
   bool m_bDirectionalLight = true;

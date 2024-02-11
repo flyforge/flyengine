@@ -8,6 +8,7 @@
 
 #include <cmath>
 #include <numeric>
+#include <cstdint>
 
 using namespace lunasvg;
 

@@ -148,9 +148,9 @@ void plQtNodeView::drawBackground(QPainter* painter, const QRectF& r)
     DrawGrid(painter, 15);
   }
 
-  if(m_ViewScale.manhattanLength() > 0.1)
+  if(m_ViewScale.manhattanLength() > 0.2)
   {
-    double scale = m_ViewScale.manhattanLength() < 0.25 ? 150.0 : 300.0;
+    double scale = m_ViewScale.manhattanLength() < 0.5 ? 300.0 : 150.0;
 
     QPen p(plToQtColor(plColorScheme::GetColor(plColorScheme::Gray, 1)), 1.0);
 

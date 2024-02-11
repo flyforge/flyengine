@@ -618,7 +618,7 @@ void plJoltClothSheetComponent::ApplyWind()
 
       // randomize which vertices get the wind velocity applied,
       // both to save performance and also to introduce a nice ripple effect
-      const plUInt32 uiStart = GetWorld()->GetRandomNumberGenerator().UIntInRange(plMath::Min<plUInt32>(16u, particles.size()));
+      const plUInt32 uiStart = GetWorld()->GetRandomNumberGenerator().UIntInRange(plMath::Min<plUInt32>(16u, static_cast<plUInt32>(particles.size())));
       const plUInt32 uiStep = GetWorld()->GetRandomNumberGenerator().IntInRange(16, 32);
 
       for (plUInt32 i = uiStart; i < particles.size(); i += uiStep)

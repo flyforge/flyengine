@@ -11,7 +11,7 @@ o
 		s %AssetType{"RenderPipeline"}
 		VarArray %Dependencies{}
 		Uuid %DocumentID{u4{5189305147899033520,5264929536831011917}}
-		u4 %Hash{7028134202352237202}
+		u4 %Hash{4241459809219717567}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
@@ -777,7 +777,7 @@ o
 	{
 		b %Active{1}
 		b %Clear{1}
-		Color %ClearColor{f{0x7DD3AD3C,0x7DD3AD3C,0x7DD3AD3C,0x0000803F}}
+		Color %ClearColor{f{0xB2D2113D,0xB2D2113D,0xB2D2113D,0x0000803F}}
 		s %Format{"plSourceFormat::Color4Channel16BitFloat"}
 		s %MSAA_Mode{"plGALMSAASampleCount::None"}
 		s %Name{"ColorSource"}

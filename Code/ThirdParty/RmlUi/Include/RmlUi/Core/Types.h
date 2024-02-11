@@ -33,6 +33,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <cstdint>
 
 #include "Traits.h"
 

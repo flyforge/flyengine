@@ -225,7 +225,7 @@ void plMaterialContext::OnInitialize()
 
     plMeshComponent* pMesh;
     m_hMeshComponent = plMeshComponent::CreateComponent(pObj, pMesh);
-    pMesh->SetMesh(m_hBallMesh);
+    pMesh->SetMesh(m_hSphereMesh);
     plStringBuilder sMaterialGuid;
     plConversionUtils::ToString(GetDocumentGuid(), sMaterialGuid);
     m_hMaterial = plResourceManager::LoadResource<plMaterialResource>(sMaterialGuid);

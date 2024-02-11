@@ -505,11 +505,11 @@ void plQtEditorApp::CreatePanels()
 
   plQtContainerWindow* pMainWnd = plQtContainerWindow::GetContainerWindow();
   ads::CDockManager* pDockManager = pMainWnd->GetDockManager();
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetBrowserPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLogPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pAssetCuratorPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pCVarPanel);
-  pDockManager->addDockWidgetTab(ads::RightDockWidgetArea, pLongOpsPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pAssetBrowserPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLogPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pAssetCuratorPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pCVarPanel);
+  pDockManager->addDockWidgetTab(ads::BottomDockWidgetArea, pLongOpsPanel);
 
   pAssetBrowserPanel->raise();
 }

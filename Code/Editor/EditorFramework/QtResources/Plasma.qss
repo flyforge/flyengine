@@ -5,12 +5,35 @@ QAbstractSpinBox:hover:!focus, QLineEdit:hover:!focus, QPushButton:hover:!focus,
 QAbstractSpinBox{
     border: 0.5px solid palette(Button);
     border-radius: 5px;
-    margin-bottom:2px;
 }
-
 
 QToolBar{
     border: 0.0px
+}
+
+QSlider::groove:horizontal {
+    height: 10px;
+    background: palette(Base);
+}
+
+QSlider::handle:horizontal {
+        background: palette(highlight);
+        border: 0.5px solid palette(highlight);
+        width: 14px;
+        border-radius: 6px;
+}
+
+QSlider::add-page:horizontal {
+    height: 10px;
+    background: palette(Base);
+    border-radius: 12px;
+}
+
+QSlider::sub-page:horizontal {
+    background: palette(highlight);
+    height: 6px;
+    border: 0.5px solid palette(highlight);
+    border-radius: 12px;
 }
 
 QAbstractSpinBox:focus, QLineEdit:focus, QPushButton:focus, QComboBox:focus{
@@ -18,10 +41,57 @@ QAbstractSpinBox:focus, QLineEdit:focus, QPushButton:focus, QComboBox:focus{
 }
 
 QAbstractSpinBox::down-button{
-    width: 0px;
+    subcontrol-origin: content;
+    subcontrol-position: left center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/LeftArrow.png);
 }
+
 QAbstractSpinBox::up-button{
-    width: 0px;
+    subcontrol-origin: content;
+    subcontrol-position: right center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/RightArrow.png);
+}
+
+QAbstractSpinBox::down-button:hover{
+    subcontrol-origin: content;
+    subcontrol-position: left center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/LeftArrow_Highlight.png);
+}
+
+QAbstractSpinBox::up-button:hover{
+    subcontrol-origin: content;
+    subcontrol-position: right center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/RightArrow_Highlight.png);
+}
+
+QAbstractSpinBox::down-button:pressed{
+    subcontrol-origin: content;
+    subcontrol-position: left center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/LeftArrow_Pressed.png);
+}
+
+QAbstractSpinBox::up-button:pressed{
+    subcontrol-origin: content;
+    subcontrol-position: right center;
+    width: 12px;
+    height: 12px;
+    background: transparent;
+    image: url(:/Theme/Theme/LeftArrow_Pressed.png);
 }
 
 QPushButton {
@@ -113,6 +183,30 @@ QCheckBox::indicator {
     height: 13px;
 }
 
+QCheckBox::indicator:unchecked {
+    image: url(:/Theme/Theme/checkbox_unchecked.png);
+}
+
+QCheckBox::indicator:unchecked:hover {
+    image: url(:/Theme/Theme/checkbox_unchecked_hover.png);
+}
+
+QCheckBox::indicator:unchecked:pressed {
+    image: url(:/Theme/Theme/checkbox_unchecked_pressed.png);
+}
+
+QCheckBox::indicator:checked {
+    image: url(:/Theme/Theme/checkbox_checked.png);
+}
+
+QCheckBox::indicator:checked:hover {
+    image: url(:/Theme/Theme/checkbox_checked_hover.png);
+}
+
+QCheckBox::indicator:checked:pressed {
+    image: url(:/Theme/Theme/checkbox_checked_pressed.png);
+}
+
 QLineEdit{
     margin-bottom:2px;
     border: 0.5px solid palette(Button);
@@ -122,4 +216,85 @@ QLineEdit{
 QLabel{
     border: 0.5px solid transparent;
     border-radius: 5px;
+}
+
+QComboBox {
+    border-style: solid;
+    border-width: 0px;
+    background-color: palette(Base);
+    height: 25px;
+    border-radius: 3px;
+}
+
+QComboBox::drop-down {
+    image: url(:/Theme/Theme/DownArrow.png);
+    width: 8px;
+    height: 25px;
+    padding: 0px 8px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+QComboBox::drop-down:hover {
+    image: url(:/Theme/Theme/DownArrow_Highlight.png);
+    background-color: palette(button);
+}
+
+QComboBox::drop-down:on {
+    image: url(:/Theme/Theme/DownArrow_Pressed.png);
+    background-color: palette(high);
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+QComboBox:on {
+    border-bottom-right-radius: 0px;
+    border-bottom-left-radius: 0px;
+}
+
+QToolButton { /* all types of tool button */
+    border: 0.5px solid transparent;
+    border-radius: 6px;
+    background-color: palette(Window);
+}
+
+QToolButton:hover { /* all types of tool button */
+    border: 0.5px solid transparent;
+    border-radius: 6px;
+    background-color: palette(highlight);
+}
+
+QToolButton:pressed { /* all types of tool button */
+    border: 0.5px solid transparent;
+    border-radius: 6px;
+    background-color: palette(mid);
+}
+
+QToolButton:on { /* all types of tool button */
+    border: 0.5px solid transparent;
+    border-radius: 6px;
+    background-color: palette(light);
+}
+/* the subcontrols below are used only in the MenuButtonPopup mode */
+QToolButton::menu-button {
+    border: 0.5px solid palette(transparent);
+    width: 8px;
+    height: 25px;
+    padding: 0px 8px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+}
+
+QToolButton::menu-button:hover {
+    border: 0.5px solid palette(transparent);
+    width: 8px;
+    height: 25px;
+    padding: 0px 8px;
+    border-top-right-radius: 3px;
+    border-bottom-right-radius: 3px;
+    background-color: palette(button);
+}
+
+QToolButton::menu-arrow {
+    image: url(none);
 }

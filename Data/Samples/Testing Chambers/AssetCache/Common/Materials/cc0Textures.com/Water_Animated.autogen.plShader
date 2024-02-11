@@ -44,9 +44,6 @@ float MaskThreshold @Default(0.25);
 #endif
 
 
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
@@ -110,9 +107,6 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #endif
 
 
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
 
 #include <Shaders/Materials/MaterialStereoGeometryShader.h>
 
@@ -129,10 +123,6 @@ float3 GetWorldPositionOffset(plPerInstanceData data, float3 worldPosition)
 #define USE_MATERIAL_OCCLUSION
 #define USE_TWO_SIDED_LIGHTING
 #define USE_DECALS
-
-#if GAMEOBJECT_VELOCITY
-  #define USE_VELOCITY
-#endif
 
 #if RENDER_PASS == RENDER_PASS_EDITOR
   #define USE_DEBUG_INTERPOLATOR
