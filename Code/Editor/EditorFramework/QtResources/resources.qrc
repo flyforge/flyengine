@@ -72,6 +72,13 @@
     <file>Theme/checkbox_unchecked_pressed.png</file>
     <file>Theme/LeftArrow.png</file>
     <file>Theme/RightArrow.png</file>
+    <file>Theme/DownArrow.png</file>
+    <file>Theme/LeftArrow_Highlight.png</file>
+    <file>Theme/RightArrow_Highlight.png</file>
+    <file>Theme/DownArrow_Highlight.png</file>
+    <file>Theme/LeftArrow_Pressed.png</file>
+    <file>Theme/RightArrow_Pressed.png</file>
+    <file>Theme/DownArrow_Pressed.png</file>
   </qresource>
   <qresource prefix="TypeIcons">
     <file>plDragToPositionGizmoEditTool.svg</file>
