@@ -335,8 +335,6 @@ void plQtNode::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
   }
   else
   {
-    painter->setPen(pen());
-
     labelColor = palette.buttonText().color();
   }
 

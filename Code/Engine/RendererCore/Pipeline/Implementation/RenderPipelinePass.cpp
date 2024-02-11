@@ -20,7 +20,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plRenderPipelinePass, 1, plRTTINoAllocator)
   PL_END_PROPERTIES;
   PL_BEGIN_ATTRIBUTES
   {
-    new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Grape))
+    new plColorAttribute(plColorScheme::DarkUI(plColorScheme::Gray))
   }
   PL_END_ATTRIBUTES;
 }

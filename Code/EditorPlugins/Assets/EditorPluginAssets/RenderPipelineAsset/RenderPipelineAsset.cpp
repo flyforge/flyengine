@@ -41,11 +41,17 @@ void plRenderPipelineNodeManager::InternalCreatePins(const plDocumentObject* pOb
     }
     else
     {
-      plColorScheme::Enum color = plColorScheme::Gray;
       if (plStringUtils::IsEqual(pProp->GetPropertyName(), "DepthStencil"))
-        color = plColorScheme::Pink;
+      {
+        plColorScheme::Enum color = plColorScheme::Pink;
+        pinColor = plColorScheme::GetColor(color, 2);
+      }
+      else
+      {
+        plColorScheme::Enum color = plColorScheme::Gray;
+        pinColor = plColorScheme::GetColor(color, 7);
+      }
 
-      pinColor = plColorScheme::DarkUI(color);
     }
 
     if (pProp->GetSpecificType()->IsDerivedFrom<plRenderPipelineNodeInputPin>())
