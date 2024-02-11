@@ -6,7 +6,7 @@
 
 PL_WARNING_PUSH()
 PL_WARNING_DISABLE_CLANG("-Wunused-local-typedef")
-PL_WARNING_DISABLE_GCC("-Wunused-local-typedef")
+PL_WARNING_DISABLE_GCC("-Wunused-local-typedefs")
 
 /// \brief Casts the given object to the given type with no runtime cost (like C++ static_cast).
 /// This function will assert when the object is not an instance of the given type.
