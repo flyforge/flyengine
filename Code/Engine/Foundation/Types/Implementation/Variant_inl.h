@@ -12,7 +12,7 @@ PL_WARNING_POP()
 
 PL_WARNING_PUSH()
 PL_WARNING_DISABLE_CLANG("-Wunused-local-typedef")
-PL_WARNING_DISABLE_GCC("-Wunused-local-typedef")
+PL_WARNING_DISABLE_GCC("-Wunused-local-typedefs")
 
 PL_ALWAYS_INLINE plVariant::plVariant(const plVariant& other)
 {

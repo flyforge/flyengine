@@ -238,7 +238,8 @@ plResult plOSFile::InternalDeleteFile(plStringView sFile)
 {
   if (DeleteFileW(plDosDevicePath(sFile)) == FALSE)
   {
-    if (GetLastError() == ERROR_FILE_NOT_FOUND)
+    DWORD error = GetLastError();
+    if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND)
       return PL_SUCCESS;
 
     return PL_FAILURE;
@@ -251,7 +252,8 @@ plResult plOSFile::InternalDeleteDirectory(plStringView sDirectory)
 {
   if (RemoveDirectoryW(plDosDevicePath(sDirectory)) == FALSE)
   {
-    if (GetLastError() == ERROR_FILE_NOT_FOUND)
+    DWORD error = GetLastError();
+    if (error == ERROR_FILE_NOT_FOUND || error == ERROR_PATH_NOT_FOUND)
       return PL_SUCCESS;
 
     return PL_FAILURE;
