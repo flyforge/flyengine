@@ -271,28 +271,28 @@ void plQtDoubleSpinBox::mouseMoveEvent(QMouseEvent* event)
   {
     if (m_bDragging)
     {
-      int iDelta = m_LastDragPos.y() - event->globalPosition().toPoint().y();
+      int iDelta = m_LastDragPos.x() - event->globalPosition().toPoint().x();
       m_iDragDelta += iDelta;
       {
         m_LastDragPos = event->globalPosition().toPoint();
         const QRect dsize = plWidgetUtils::GetClosestScreen(event->globalPosition().toPoint()).availableGeometry();
-        if (m_LastDragPos.y() < (dsize.top() + 10))
+        if (m_LastDragPos.x() < (dsize.left() + 10))
         {
-          m_LastDragPos.setY(dsize.bottom() - 10);
+          m_LastDragPos.setX(dsize.right() - 10);
           QCursor::setPos(m_LastDragPos);
         }
-        else if (m_LastDragPos.y() > (dsize.bottom() - 10))
+        else if (m_LastDragPos.x() > (dsize.right() - 10))
         {
-          m_LastDragPos.setY(dsize.top() + 10);
+          m_LastDragPos.setX(dsize.left() + 10);
           QCursor::setPos(m_LastDragPos);
         }
       }
 
       double fValue = m_fStartDragValue;
       if (m_bIntMode)
-        fValue += ((double)m_iDragDelta / 8.0);
+        fValue -= ((double)m_iDragDelta / 8.0);
       else
-        fValue += ((double)m_iDragDelta * 0.01);
+        fValue -= ((double)m_iDragDelta * 0.01);
 
       setValue(fValue);
       m_bModified = true;
