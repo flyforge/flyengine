@@ -14,17 +14,17 @@ o
 			s{"Shaders/Materials/DefaultMaterial.plShader"}
 		}
 		Uuid %DocumentID{u4{7786599345500559246,5730498518612774703}}
-		u4 %Hash{14835484141067735684}
+		u4 %Hash{9398266585835209407}
 		VarArray %MetaInfo{}
 		VarArray %Outputs{}
 		VarArray %PackageDeps
 		{
-			s{"{ 61a3decd-9f20-4a16-bb93-0e92b7c2ba73 }"}
+			s{"{ 6c71e837-3845-4a40-982a-97a105f8737d }"}
 		}
 		VarArray %References
 		{
 			s{"Shaders/Materials/DefaultMaterial.plShader"}
-			s{"{ 61a3decd-9f20-4a16-bb93-0e92b7c2ba73 }"}
+			s{"{ 6c71e837-3845-4a40-982a-97a105f8737d }"}
 		}
 	}
 }
@@ -40,7 +40,7 @@ o
 	{
 		s %BLEND_MODE{"BLEND_MODE::BLEND_MODE_OPAQUE"}
 		Color %BaseColor{f{0x0000803F,0x0000803F,0x0000803F,0x0000803F}}
-		s %BaseTexture{"{ 61a3decd-9f20-4a16-bb93-0e92b7c2ba73 }"}
+		s %BaseTexture{"{ 6c71e837-3845-4a40-982a-97a105f8737d }"}
 		Color %EmissiveColor{f{0,0,0,0x0000803F}}
 		s %EmissiveTexture{""}
 		f %MaskThreshold{0x0000803E}
