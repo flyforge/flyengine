@@ -1,0 +1,15 @@
+AudioSystem.Mute;Mute Audio
+AudioSystem.MasterVolume;Master Volume
+AudioSystem.Settings.Project;Audio System Project Settings...
+
+plAudioAnimationComponent;Audio Animation
+plAudioBoxEnvironmentComponent;Audio Box Environment
+plAudioListenerComponent;Audio Listener
+plAudioProxyComponent;Audio Proxy
+plAudioRtpcComponent;Audio Rtpc
+plAudioSphereEnvironmentComponent;Audio Sphere Environment
+plAudioSwitchStateComponent;Audio Switch
+plAudioTriggerComponent;Audio Trigger
+plAudioSystemSoundObstructionType::None;None
+plAudioSystemSoundObstructionType::SingleRay;SingleRay
+plAudioSystemSoundObstructionType::MultipleRay;MultipleRay

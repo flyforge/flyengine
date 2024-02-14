@@ -1,0 +1,72 @@
+// Copyright (c) 2021-present Sparky Studios. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+include "common.fbs";
+
+namespace SparkyStudios.Audio.Amplitude;
+
+/// The type of action to perform during an event.
+enum EventActionType: byte {
+  /// Do nothing.
+  None,
+  /// Plays the sound object with the given ID.
+  Play,
+  /// Pauses the sound object with the given ID.
+  Pause,
+  /// Resumes the sound object with the given ID.
+  Resume,
+  /// Stops playing the sound object with the given ID.
+  Stop,
+  /// Seeks the sound object with the given ID at the given position.
+  Seek,
+  /// Mutes the bus with the given ID.
+  MuteBus,
+  /// Unmute the bus with the given ID.
+  UnmuteBus,
+}
+
+/// An action in an event. Actions are applied when an event is triggered.
+table EventActionDefinition {
+  /// The action type.
+  type:EventActionType = None;
+
+  /// Defines if the action is active o not.
+  active:bool = true;
+
+  /// The list of targets on which apply the action.
+  /// Each target ID should be in the same group (Sound, Collection or Bus).
+  targets:[uint64];
+
+  /// The scope where the action is applied.
+  scope:Scope = Entity;
+}
+
+/// An Amplitude Event.
+/// An event is a way to trigger a sequence of actions during the game. Those
+/// actions can change the playback of a given sound object or bus.
+table EventDefinition {
+  /// The event ID.
+  id:uint64 = 0;
+
+  /// The name of the event.
+  name:string;
+
+  /// The list of actions to apply when this event is triggered.
+  actions:[EventActionDefinition];
+}
+
+root_type EventDefinition;
+
+file_identifier "AMEV";
+file_extension "amevent";

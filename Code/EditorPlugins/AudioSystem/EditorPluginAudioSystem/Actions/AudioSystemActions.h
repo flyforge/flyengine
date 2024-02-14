@@ -15,8 +15,8 @@ public:
   static void RegisterActions();
   static void UnregisterActions();
 
-  static void MapMenuActions(const char* szMapping);
-  static void MapToolbarActions(const char* szMapping);
+  static void MapMenuActions(plStringView sMapping);
+  static void MapToolbarActions(plStringView sMapping);
 
   static plActionDescriptorHandle s_hCatAudioSettings;
   static plActionDescriptorHandle s_hCategoryAudioSystem;

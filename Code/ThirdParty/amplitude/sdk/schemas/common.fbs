@@ -1,0 +1,213 @@
+// Copyright (c) 2021-present Sparky Studios. All rights reserved.
+//
+// Licensed under the Apache License, Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//     http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+
+namespace SparkyStudios.Audio.Amplitude;
+
+/// The type of value a parameter have.
+enum ValueKind: byte {
+  /// The parameter doesn't have a value yet. This is an internal case used by the SDK
+  /// during initialization. Having this case in runtime is surely due to an error.
+  None,
+
+  /// The parameter has a static value which never changes.
+  Static,
+
+  /// The parameter has a value that changes dynamically following a curve and a RTPC object.
+  RTPC,
+}
+
+/// Specifies the 3D spatialization to apply on the sound.
+enum Spatialization: byte {
+  /// Sounds are always played at their regular gain.
+  None,
+  /// Sounds have their gain adjusted based on the attenuation.
+  Position,
+  /// Sounds have their gain adjusted based on the attenuation and following their orientation.
+  PositionOrientation,
+}
+
+/// Scopes allow specifying how playback data are shared between each instance
+/// of collections.
+enum Scope: byte {
+  /// All instances of the collection will be treated as one object so
+  /// that the repetition across entities is avoided.
+  World,
+  /// Each instance of the collection will be treated as a single object
+  /// and therefore no data will be shared across entities.
+  Entity,
+}
+
+/// Faders allow to progressively update a value
+/// to a given target during the specified period of time.
+enum FaderAlgorithm: byte {
+  /// Fades linearly from the initial value to the final value.
+  Linear = 0,
+  /// Keeps returning the initial value until the transition is complete.
+  Constant = 1,
+  /// Returns values using an S-shaped curve from the initial value to the final value with a smooth transition.
+  S_Curve_Smooth = 2,
+  /// Returns values using an exponential growth algorithm from the initial value to the final value with a smooth transition.
+  Exponential_Smooth = 3,
+  /// Returns values using an S-shaped curve from the initial value to the final value with a sharp transition.
+  S_Curve_Sharp = 4,
+  /// Returns values using an exponential growth algorithm from the initial value to the final value with a sharp transition.
+  Exponential_Sharp = 5,
+}
+
+/// A point coordinates in a curve.
+struct CurvePointDefinition {
+  x:double;
+  y:float;
+}
+
+/// A part of a curve. This is materialized by a start point, an end point,
+/// and the fader algorithm between them.
+struct CurvePartDefinition {
+  /// The curve part start point.
+  start:CurvePointDefinition;
+
+  /// The curve part end point.
+  end:CurvePointDefinition;
+
+  /// The fader algorithm.
+  fader:FaderAlgorithm = Linear;
+}
+
+/// A curve. Mainly used by attenuators.
+table CurveDefinition {
+  /// The parts of the curve.
+  parts:[CurvePartDefinition];
+}
+
+/// Defines the settings fo a fade transition.
+table FadeTransitionSettings {
+  /// The transition duration in seconds.
+  duration:double = 0;
+
+  /// The fader algorithm to use during the transition.
+  fader:FaderAlgorithm = Linear;
+}
+
+/// The parameter used to create RTPC compatible values.
+table RtpcParameter {
+  /// The ID of the RTPC object.
+  id:uint64 = 0;
+
+  /// The curve to apply on the value.
+  curve:CurveDefinition;
+}
+
+/// A value which can hold a static value or RTPC compatible value.
+table RtpcCompatibleValue {
+  /// The type of the value.
+  kind:ValueKind = Static;
+
+  /// The static value.
+  value:float;
+
+  /// The RTPC compatible value.
+  rtpc:RtpcParameter;
+}
+
+/// Available settings for a cone shape.
+struct ConeShapeDefinition {
+  /// The radius of the cone.
+  radius:float;
+
+  /// The height of the cone.
+  height:float;
+}
+
+/// Available settings for a spherical attenuation shape.
+struct SphereShapeDefinition {
+  /// The sphere radius.
+  radius:float;
+}
+
+/// Available settings for a box shape.
+struct BoxShapeDefinition {
+  /// The box width.
+  half_width:float;
+
+  /// The box height.
+  half_height:float;
+
+  /// The box depth.
+  half_depth:float;
+}
+
+/// Available settings for a capsule shape.
+struct CapsuleShapeDefinition {
+  /// The capsule radius.
+  radius:float;
+
+  /// The capsule height.
+  half_height:float;
+}
+
+union AbstractShapeDefinition {
+  Box:BoxShapeDefinition,
+  Capsule:CapsuleShapeDefinition,
+  Cone:ConeShapeDefinition,
+  Sphere:SphereShapeDefinition,
+}
+
+table ShapeDefinition {
+  /// The shape definition. The
+  shape: AbstractShapeDefinition;
+}
+
+/// Available settings for a cone zones shape.
+table ConeZoneSettings {
+  /// The inner cone.
+  inner:ConeShapeDefinition;
+
+  /// The outer cone.
+  outer:ConeShapeDefinition;
+}
+
+/// Available settings for a spherical zone shape.
+table SphereZoneSettings {
+  /// The inner sphere.
+  inner:SphereShapeDefinition;
+
+  /// The outer sphere.
+  outer:SphereShapeDefinition;
+}
+
+/// Available settings for a box zone shape.
+table BoxZoneSettings {
+  /// The inner box.
+  inner:BoxShapeDefinition;
+
+  /// The outer box.
+  outer:BoxShapeDefinition;
+}
+
+/// Available settings for a capsule zone shape.
+table CapsuleZoneSettings {
+  /// The inner capsule.
+  inner:CapsuleShapeDefinition;
+
+  /// The outer capsule.
+  outer:CapsuleShapeDefinition;
+}
+
+/// Merges the settings from Zone shapes.
+union ZoneDefinition {
+  Box:BoxZoneSettings,
+  Capsule:CapsuleZoneSettings,
+  Cone:ConeZoneSettings,
+  Sphere:SphereZoneSettings,
+}

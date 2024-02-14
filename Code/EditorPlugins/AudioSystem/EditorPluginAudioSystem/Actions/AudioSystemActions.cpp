@@ -46,19 +46,23 @@ void plAudioSystemActions::UnregisterActions()
   plActionManager::UnregisterAction(s_hMasterVolume);
 }
 
-void plAudioSystemActions::MapMenuActions(const char* szMapping)
+void plAudioSystemActions::MapMenuActions(plStringView sMapping)
 {
-  plActionMap* pMap = plActionMapManager::GetActionMap(szMapping);
+  plActionMap* pMap = plActionMapManager::GetActionMap(sMapping);
   PL_ASSERT_DEV(pMap != nullptr, "Mapping the actions failed!");
 
-  pMap->MapAction(s_hCategoryAudioSystem, "G.Plugins.Settings", 5.0f);
-  pMap->MapAction(s_hMuteSound, "G.Plugins.Settings", 0.0f);
-  pMap->MapAction(s_hMasterVolume, "G.Plugins.Settings", 2.0f);
+
+  pMap->MapAction(s_hCategoryAudioSystem, "G.Scene", 5.0f);
+
+  const plStringView sSubPath = "AudioSystem";
+  pMap->MapAction(s_hMuteSound, sSubPath, 1.0f);
+  pMap->MapAction(s_hMasterVolume, sSubPath, 2.0f);
+
 }
 
-void plAudioSystemActions::MapToolbarActions(const char* szMapping)
+void plAudioSystemActions::MapToolbarActions(plStringView sMapping)
 {
-  plActionMap* pSceneMap = plActionMapManager::GetActionMap(szMapping);
+  plActionMap* pSceneMap = plActionMapManager::GetActionMap(sMapping);
   PL_ASSERT_DEV(pSceneMap != nullptr, "Mapping the actions failed!");
 
   pSceneMap->MapAction(s_hCategoryAudioSystem, "", 12.0f);
