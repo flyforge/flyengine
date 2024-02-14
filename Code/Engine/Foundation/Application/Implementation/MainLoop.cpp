@@ -3,6 +3,8 @@
 #include <Foundation/Application/Application.h>
 #include <Foundation/Configuration/Startup.h>
 
+#include <Foundation/Profiling/Profiling.h>
+
 plResult plRun_Startup(plApplication* pApplicationInstance)
 {
   PL_ASSERT_ALWAYS(pApplicationInstance != nullptr, "plRun() requires a valid non-null application instance pointer.");
@@ -24,9 +26,22 @@ plResult plRun_Startup(plApplication* pApplicationInstance)
 
 void plRun_MainLoop(plApplication* pApplicationInstance)
 {
+#ifdef USE_OPTICK
+  while (true)
+  {
+    OPTICK_FRAME("MainThread");
+
+    plApplication::Execution pResult = pApplicationInstance->Run();
+    if (pResult == plApplication::plApplication::Execution::Quit)
+    {
+      break;
+    }
+  }
+#else
   while (pApplicationInstance->Run() == plApplication::Execution::Continue)
   {
   }
+#endif
 }
 
 void plRun_Shutdown(plApplication* pApplicationInstance)

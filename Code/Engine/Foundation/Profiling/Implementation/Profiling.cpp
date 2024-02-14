@@ -791,6 +791,8 @@ void plProfilingSystem::SetThreadName(plStringView sThreadName)
   ThreadInfo& info = s_ThreadInfos.ExpandAndGetRef();
   info.m_uiThreadId = (plUInt64)plThreadUtils::GetCurrentThreadID();
   info.m_sName = sThreadName;
+
+  PL_OPTICK_THREAD(info.m_sName);
 }
 
 // static

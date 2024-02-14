@@ -4,6 +4,23 @@
 #include <Foundation/Containers/DynamicArray.h>
 #include <Foundation/Containers/StaticRingBuffer.h>
 #include <Foundation/System/Process.h>
+
+#ifdef USE_OPTICK
+#  include <Optick/optick.h>
+
+/// CPU Profiling
+
+/// \brief Basic scoped performance counter. Use this counter 99% of the time. It automatically extracts the name
+/// of the current function. Users can also pass an optional name for this macro to override the name
+/// - PL_OPTICK_PROFILE_EVENT("szScopeName");. Useful for marking multiple scopes within one function.
+#  define PL_OPTICK_PROFILE_EVENT(...) OPTICK_EVENT(__VA_ARGS__)
+#  define PL_OPTICK_THREAD(...) OPTICK_THREAD(__VA_ARGS__)
+#  define PL_OPTICK_FRAME(...) OPTICK_FRAME(__VA_ARGS__)
+#else
+#  define PL_OPTICK_PROFILE_EVENT(...)
+#  define PL_OPTICK_THREAD(...)
+#  define PL_OPTICK_FRAME(...)
+#endif
 #include <Foundation/Time/Time.h>
 
 class plStreamWriter;
@@ -174,7 +191,9 @@ public:
 ///
 /// \sa plProfilingScope
 /// \sa PL_PROFILE_LIST_SCOPE
-#  define PL_PROFILE_SCOPE(szScopeName) plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, plTime::MakeZero())
+#  define PL_PROFILE_SCOPE(szScopeName)                                                                             \
+    plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, plTime::MakeZero()); \
+    PL_OPTICK_PROFILE_EVENT(szScopeName)
 
 
 /// \brief Same as PL_PROFILE_SCOPE but if the scope takes longer than 'Timeout', the plProfilingSystem's timeout callback is executed.
@@ -182,7 +201,9 @@ public:
 /// This can be used to log an error or save a callstack, etc. when a scope exceeds an expected amount of time.
 /// 
 /// \sa plProfilingSystem::SetScopeTimeoutCallback()
-#  define PL_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, Timeout)
+#  define PL_PROFILE_SCOPE_WITH_TIMEOUT(szScopeName, Timeout) \
+    plProfilingScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szScopeName, PL_SOURCE_FUNCTION, Timeout); \
+    PL_OPTICK_PROFILE_EVENT(szScopeName)
 
 /// \brief Profiles the current scope using the given name as the overall list scope name and the section name for the first section in the list.
 ///
@@ -196,13 +217,16 @@ public:
 /// \sa plProfilingListScope
 /// \sa PL_PROFILE_LIST_NEXT_SECTION
 #  define PL_PROFILE_LIST_SCOPE(szListName, szFirstSectionName) \
-    plProfilingListScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szListName, szFirstSectionName, PL_SOURCE_FUNCTION)
+    plProfilingListScope PL_CONCAT(_plProfilingScope, PL_SOURCE_LINE)(szListName, szFirstSectionName, PL_SOURCE_FUNCTION);\
+    PL_OPTICK_PROFILE_EVENT(szFirstSectionName)
 
 /// \brief Starts a new section in a PL_PROFILE_LIST_SCOPE
 ///
 /// \sa plProfilingListScope
 /// \sa PL_PROFILE_LIST_SCOPE
-#  define PL_PROFILE_LIST_NEXT_SECTION(szNextSectionName) plProfilingListScope::StartNextSection(szNextSectionName)
+#  define PL_PROFILE_LIST_NEXT_SECTION(szNextSectionName)      \
+    plProfilingListScope::StartNextSection(szNextSectionName); \
+    PL_OPTICK_PROFILE_EVENT(szNextSectionName)
 
 #else
 

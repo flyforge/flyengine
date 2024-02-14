@@ -73,3 +73,7 @@ if(PL_3RDPARTY_TRACELOGGING_LTTNG_SUPPORT)
 endif()
 
 
+if(PL_BUILD_OPTICK)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Optick)
+endif()
+
