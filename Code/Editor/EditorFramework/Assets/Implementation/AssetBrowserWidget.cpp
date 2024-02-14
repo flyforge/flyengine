@@ -34,6 +34,9 @@ plQtAssetBrowserWidget::plQtAssetBrowserWidget(QWidget* pParent)
   ListAssets->setModel(m_pModel);
   ListAssets->SetIconScale(IconSizeSlider->value());
   ListAssets->setContextMenuPolicy(Qt::ContextMenuPolicy::CustomContextMenu);
+  ListAssets->setDragEnabled(true);
+  ListAssets->setAcceptDrops(true);
+  ListAssets->setDropIndicatorShown(true);
   on_ButtonIconMode_clicked();
 
   splitter->setStretchFactor(0, 0);
@@ -76,6 +79,152 @@ plQtAssetBrowserWidget::~plQtAssetBrowserWidget()
 
   ListAssets->setModel(nullptr);
 }
+
+void plQtAssetBrowserWidget::dragEnterEvent(QDragEnterEvent* event)
+{
+  if (!event->source())
+    event->acceptProposedAction();
+}
+
+void plQtAssetBrowserWidget::dragMoveEvent(QDragMoveEvent* event)
+{
+  event->acceptProposedAction();
+}
+
+void plQtAssetBrowserWidget::dragLeaveEvent(QDragLeaveEvent* event)
+{
+  event->accept();
+}
+
+void plQtAssetBrowserWidget::dropEvent(QDropEvent* event)
+{
+  const QMimeData* mime = event->mimeData();
+  if (mime->hasUrls())
+  {
+    QList<QUrl> urlList = mime->urls();
+    plHybridArray<plString, 16> assetsToImport;
+
+    plString pDir = plToolsProject::GetSingleton()->GetProjectDirectory();
+
+    bool overWriteAll = false;
+    for (qsizetype i = 0, count = qMin(urlList.size(), qsizetype(32)); i < count; ++i)
+    {
+      QUrl url = urlList.at(i);
+      QFileInfo fileinfo = QFileInfo(url.toLocalFile());
+
+      if (fileinfo.exists())
+      {
+        // build source and destination paths info ===================================================================
+        plStringBuilder srcPath = urlList.at(i).path().toUtf8().constData();
+        srcPath.Shrink(1, 0); // remove a "/" at the beginning of the sourcepath that keeps it from opening
+
+        plStringBuilder dstPath = plStringBuilder();
+        dstPath.Append(pDir);
+        dstPath.ReplaceFirst(plToolsProject::GetSingleton()->GetProjectName(false), "");
+        dstPath.Append(m_pFilter->GetPathFilter());
+        if (!dstPath.EndsWith("/"))
+          dstPath.Append("/");
+        dstPath.Append(fileinfo.fileName().toUtf8().constData());
+
+        // Move the file/folder ==============================================
+        if (fileinfo.isDir())
+        {
+
+          if (!overWriteAll && plOSFile::ExistsDirectory(dstPath))
+          {
+            QMessageBox msgBox;
+            msgBox.setText("Overwrite folder?");
+            msgBox.setInformativeText("The folder you are copying already exists, overwrite the existing one?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Cancel);
+            int res = msgBox.exec();
+            switch (res)
+            {
+              case QMessageBox::Yes:
+                break;
+              case QMessageBox::YesToAll:
+                overWriteAll = true;
+                break;
+              case QMessageBox::Cancel:
+              default:
+                for (auto file : assetsToImport)
+                {
+                  if (plOSFile::DeleteFile(file) == PL_FAILURE)
+                  {
+                    plLog::Error("failed to delete temp file {}", file);
+                  }
+                }
+                return;
+            }
+          }
+
+          if (plOSFile::CopyFolder(srcPath, dstPath) != PL_SUCCESS)
+          {
+            plLog::Error("Failed to copy the folder in the project directory");
+            return;
+          }
+
+          plDynamicArray<plFileStats> movedFiles = plDynamicArray<plFileStats>();
+          plOSFile::GatherAllItemsInFolder(movedFiles, dstPath);
+          for (int i = 0; i < movedFiles.GetCount(); i++)
+          {
+            movedFiles[i].GetFullPath(dstPath);
+            assetsToImport.PushBack(dstPath);
+          }
+        }
+        else if (fileinfo.isFile())
+        {
+          if (!overWriteAll && plOSFile::ExistsFile(dstPath))
+          {
+            QMessageBox msgBox;
+            msgBox.setText("Overwrite file?");
+            msgBox.setInformativeText("The file you are copying already exists, overwrite the existing one?");
+            msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::YesToAll | QMessageBox::Cancel);
+            msgBox.setDefaultButton(QMessageBox::Cancel);
+            int res = msgBox.exec();
+            switch (res)
+            {
+              case QMessageBox::Yes:
+                break;
+              case QMessageBox::YesToAll:
+                overWriteAll = true;
+                break;
+              case QMessageBox::Cancel:
+              default:
+                for (auto file : assetsToImport)
+                {
+                  if (plOSFile::DeleteFile(file) == PL_FAILURE)
+                  {
+                    plLog::Error("failed to delete temp file {}", file);
+                  }
+                }
+                return;
+            }
+          }
+          if (plOSFile::CopyFile(srcPath, dstPath) != PL_SUCCESS)
+          {
+            plLog::Error("Failed to copy the file in the project directory");
+            return;
+          }
+          assetsToImport.PushBack(dstPath);
+        }
+      }
+      else
+      {
+        plLog::Error("Couldn't find file at {} for copying", urlList.at(i).path().toUtf8().constData());
+        return;
+      }
+    }
+
+    plAssetDocumentGenerator::ImportAssets(assetsToImport);
+  }
+  else
+    plLog::Dev("Ignoring unhandled MIME data received");
+
+
+  event->acceptProposedAction();
+}
+
 
 void plQtAssetBrowserWidget::UpdateAssetTypes()
 {
@@ -594,7 +743,7 @@ void plQtAssetBrowserWidget::OnImportAsClicked()
         {
           if (pGen->SupportsFileType(file))
           {
-            pGen->Import(file, sMode, true).LogFailure();
+            pGen->Import(file, sMode, false).LogFailure();
           }
         }
 

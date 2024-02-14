@@ -90,7 +90,7 @@
   <qresource prefix="Font">
     <file>Font/Montserrat-Medium.ttf</file>
     <file>Font/Montserrat-ExtraBold.ttf</file>
-    <file>Font/JetBrainsMono-Regular.ttf</file>
+    <file>Font/Montserrat-SemiBold.ttf</file>
   </qresource>
   <qresource prefix="StyleSheet">
     <file>Plasma.qss</file>

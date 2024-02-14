@@ -192,7 +192,7 @@ void plQtEditorApp::InitQt(int iArgc, char** pArgv)
     m_pQtApplication = new QApplication(m_iArgc, pArgv);
     m_pQtApplication->setProperty("Shared", QVariant::fromValue((int)1));
 
-    int fontId = QFontDatabase::addApplicationFont(":Font/Font/Montserrat-Medium.ttf");
+    int fontId = QFontDatabase::addApplicationFont(":Font/Font/Montserrat-SemiBold.ttf");
     QString fontFamily = QFontDatabase::applicationFontFamilies(fontId).at(0);
     QFont font(fontFamily);
     font.setPixelSize(11);
