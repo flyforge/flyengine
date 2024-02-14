@@ -83,6 +83,7 @@ pl_uwp_mark_import_as_content(plAmplitude::libsamplerate)
 
 macro(pl_requires_amplitude)
     pl_requires(PL_3RDPARTY_AMPLITUDE_SUPPORT)
+	pl_requires(PL_CMAKE_PLATFORM_WINDOWS)
 endmacro()
 
 ######################################
