@@ -31,23 +31,4 @@ if (PL_CMAKE_PLATFORM_WINDOWS_UWP)
     PRIVATE
     InspectorPlugin
   )
-
-  if (PL_BUILD_FMOD)
-
-    target_link_libraries(${PROJECT_NAME}
-      PRIVATE
-      FmodPlugin
-    )
-
-  endif()
-
-  if (PL_BUILD_PHYSX)
-
-    target_link_libraries(${PROJECT_NAME}
-      PRIVATE
-      PhysXPlugin
-      PhysXCooking
-    )
-
-  endif()
 endif()

@@ -341,7 +341,7 @@ plColor plColorScheme::GetCategoryColor(plStringView sCategory, CategoryColorUsa
   if (sCategory.IsEqual_NoCase("Scripting"))
     return plColorScheme::GetColor(plColorScheme::Green, uiBrightness, fSaturation) * DarkUIFactor;
 
-  if (sCategory.IsEqual_NoCase("Sound"))
+  if (sCategory.IsEqual_NoCase("Sound") || sCategory.IsEqual_NoCase("Audio"))
     return plColorScheme::GetColor(plColorScheme::Blue, uiBrightness, fSaturation) * DarkUIFactor;
 
   if (sCategory.IsEqual_NoCase("Utilities") || sCategory.IsEqual_NoCase("Editing"))

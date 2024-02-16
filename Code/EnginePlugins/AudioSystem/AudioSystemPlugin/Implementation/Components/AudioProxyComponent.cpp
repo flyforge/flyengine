@@ -22,8 +22,6 @@ void plAudioProxyComponent::Initialize()
   request.m_sName = GetOwner()->GetName();
 
   plAudioSystem::GetSingleton()->SendRequestSync(request);
-
-  plLog::Info("Audio Proxy Component Initialized ({0})", m_uiEntityId);
 }
 
 void plAudioProxyComponent::Deinitialize()
