@@ -55,13 +55,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <unordered_map>
 
 using namespace Assimp;
-// ------------------------------------------------------------------------------------------------
-// Constructor to be privately used by Importer
-JoinVerticesProcess::JoinVerticesProcess() = default;
-
-// ------------------------------------------------------------------------------------------------
-// Destructor, private as well
-JoinVerticesProcess::~JoinVerticesProcess() = default;
 
 // ------------------------------------------------------------------------------------------------
 // Returns whether the processing step is present in the given flag field.
@@ -95,7 +88,7 @@ void JoinVerticesProcess::Execute( aiScene* pScene) {
             ASSIMP_LOG_DEBUG("JoinVerticesProcess finished ");
             return;
         }
-        
+
         // Show statistics
         ASSIMP_LOG_INFO("JoinVerticesProcess finished | Verts in: ", iNumOldVertices,
             " out: ", iNumVertices, " | ~",
@@ -234,7 +227,7 @@ struct std::hash<Vertex> {
     std::size_t operator()(Vertex const& v) const noexcept {
         size_t seed = 0;
         hash_combine(seed, v.position.x ,v.position.y,v.position.z);
-        return seed; 
+        return seed;
     }
 };
 //template specialization for std::equal_to for Vertex
@@ -251,6 +244,9 @@ private:
     unsigned mNumUVChannels;
     unsigned mNumColorChannels;
 };
+
+static constexpr size_t JOINED_VERTICES_MARK = 0x80000000u;
+
 // now start the JoinVerticesProcess
 int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     static_assert( AI_MAX_NUMBER_OF_COLOR_SETS    == 8, "AI_MAX_NUMBER_OF_COLOR_SETS    == 8");
@@ -264,12 +260,12 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     // We should care only about used vertices, not all of them
     // (this can happen due to original file vertices buffer being used by
     // multiple meshes)
-    std::unordered_set<unsigned int> usedVertexIndices;
-    usedVertexIndices.reserve(pMesh->mNumVertices);
-    for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
+    std::vector<bool> usedVertexIndicesMask;
+    usedVertexIndicesMask.resize(pMesh->mNumVertices, false);
+    for (unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
-        for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            usedVertexIndices.insert(face.mIndices[b]);
+        for (unsigned int b = 0; b < face.mNumIndices; b++) {
+            usedVertexIndicesMask[face.mIndices[b]] = true;
         }
     }
 
@@ -335,7 +331,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     int newIndex = 0;
     for( unsigned int a = 0; a < pMesh->mNumVertices; a++)  {
         // if the vertex is unused Do nothing
-        if (usedVertexIndices.find(a) == usedVertexIndices.end()) {
+        if (!usedVertexIndicesMask[a]) {
             continue;
         }
         // collect the vertex data
@@ -357,7 +353,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             }
         } else{
             // if the vertex is already there just find the replace index that is appropriate to it
-            replaceIndex[a] = it->second;
+			// mark it with JOINED_VERTICES_MARK
+            replaceIndex[a] = it->second | JOINED_VERTICES_MARK;
         }
     }
 
@@ -386,7 +383,7 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
     for( unsigned int a = 0; a < pMesh->mNumFaces; a++) {
         aiFace& face = pMesh->mFaces[a];
         for( unsigned int b = 0; b < face.mNumIndices; b++) {
-            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~0x80000000;
+            face.mIndices[b] = replaceIndex[face.mIndices[b]] & ~JOINED_VERTICES_MARK;
         }
     }
 
@@ -400,17 +397,8 @@ int JoinVerticesProcess::ProcessMesh( aiMesh* pMesh, unsigned int meshIndex) {
             for ( unsigned int b = 0; b < bone->mNumWeights; b++ ) {
                 const aiVertexWeight& ow = bone->mWeights[ b ];
                 // if the vertex is a unique one, translate it
-                if ( !( replaceIndex[ ow.mVertexId ] & 0x80000000 ) ) {
-                    bool weightAlreadyExists = false;
-                    for (std::vector<aiVertexWeight>::iterator vit = newWeights.begin(); vit != newWeights.end(); ++vit) {
-                        if (vit->mVertexId == replaceIndex[ow.mVertexId]) {
-                            weightAlreadyExists = true;
-                            break;
-                        }
-                    }
-                    if (weightAlreadyExists) {
-                        continue;
-                    }                    
+				// filter out joined vertices by JOINED_VERTICES_MARK.
+                if ( !( replaceIndex[ ow.mVertexId ] & JOINED_VERTICES_MARK ) ) {
                     aiVertexWeight nw;
                     nw.mVertexId = replaceIndex[ ow.mVertexId ];
                     nw.mWeight = ow.mWeight;
