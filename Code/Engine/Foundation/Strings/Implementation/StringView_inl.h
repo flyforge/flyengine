@@ -4,14 +4,14 @@ PL_ALWAYS_INLINE constexpr plStringView::plStringView() = default;
 
 PL_ALWAYS_INLINE plStringView::plStringView(char* pStart)
   : m_pStart(pStart)
-  , m_pEnd(pStart + plStringUtils::GetStringElementCount(pStart))
+  , m_uiElementCount(plStringUtils::GetStringElementCount(pStart))
 {
 }
 
 template <typename T>
 constexpr PL_ALWAYS_INLINE plStringView::plStringView(T pStart, typename std::enable_if<std::is_same<T, const char*>::value, int>::type*)
   : m_pStart(pStart)
-  , m_pEnd(pStart + plStringUtils::GetStringElementCount(pStart))
+  , m_uiElementCount(plStringUtils::GetStringElementCount(pStart))
 {
 }
 
@@ -19,7 +19,7 @@ template <typename T>
 PL_ALWAYS_INLINE plStringView::plStringView(const T&& str, typename std::enable_if<std::is_same<T, const char*>::value == false && std::is_convertible<T, const char*>::value, int>::type*)
 {
   m_pStart = str;
-  m_pEnd = m_pStart + plStringUtils::GetStringElementCount(m_pStart);
+  m_uiElementCount = plStringUtils::GetStringElementCount(m_pStart);
 }
 
 PL_ALWAYS_INLINE plStringView::plStringView(const char* pStart, const char* pEnd)
@@ -27,19 +27,19 @@ PL_ALWAYS_INLINE plStringView::plStringView(const char* pStart, const char* pEnd
   PL_ASSERT_DEV(pStart <= pEnd, "It should start BEFORE it ends.");
 
   m_pStart = pStart;
-  m_pEnd = pEnd;
+  m_uiElementCount = static_cast<plUInt32>(pEnd - pStart);
 }
 
 constexpr PL_ALWAYS_INLINE plStringView::plStringView(const char* pStart, plUInt32 uiLength)
   : m_pStart(pStart)
-  , m_pEnd(pStart + uiLength)
+  , m_uiElementCount(uiLength)
 {
 }
 
 template <size_t N>
 PL_ALWAYS_INLINE plStringView::plStringView(const char (&str)[N])
   : m_pStart(str)
-  , m_pEnd(str + N - 1)
+  , m_uiElementCount(N - 1)
 {
   static_assert(N > 0, "Not a string literal");
   PL_ASSERT_DEBUG(str[N - 1] == '\0', "Not a string literal. Manually cast to 'const char*' if you are trying to pass a const char fixed size array.");
@@ -49,7 +49,7 @@ template <size_t N>
 PL_ALWAYS_INLINE plStringView::plStringView(char (&str)[N])
 {
   m_pStart = str;
-  m_pEnd = m_pStart + plStringUtils::GetStringElementCount(str, str + N);
+  m_uiElementCount = plStringUtils::GetStringElementCount(str, str + N);
 }
 
 inline void plStringView::operator++()
@@ -57,58 +57,65 @@ inline void plStringView::operator++()
   if (!IsValid())
     return;
 
-  plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd).IgnoreResult(); // if it fails, the string is just empty
+  const char* pEnd = m_pStart + m_uiElementCount;
+  plUnicodeUtils::MoveToNextUtf8(m_pStart, pEnd).IgnoreResult(); // if it fails, the string is just empty
+  m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
 }
 
 inline void plStringView::operator+=(plUInt32 d)
 {
-  plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, d).IgnoreResult(); // if it fails, the string is just empty
+  const char* pEnd = m_pStart + m_uiElementCount;
+  plUnicodeUtils::MoveToNextUtf8(m_pStart, pEnd, d).IgnoreResult(); // if it fails, the string is just empty
+  m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
 }
+
 PL_ALWAYS_INLINE bool plStringView::IsValid() const
 {
-  return (m_pStart != nullptr) && (m_pStart < m_pEnd);
+  return (m_pStart != nullptr) && (m_uiElementCount > 0);
 }
 
 PL_ALWAYS_INLINE void plStringView::SetStartPosition(const char* szCurPos)
 {
-  PL_ASSERT_DEV((szCurPos >= m_pStart) && (szCurPos <= m_pEnd), "New start position must still be inside the view's range.");
+  PL_ASSERT_DEV((szCurPos >= m_pStart) && (szCurPos <= m_pStart + m_uiElementCount), "New start position must still be inside the view's range.");
 
+  const char* pEnd = m_pStart + m_uiElementCount;
   m_pStart = szCurPos;
+  m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
 }
 
 PL_ALWAYS_INLINE bool plStringView::IsEmpty() const
 {
-  return m_pStart == m_pEnd || plStringUtils::IsNullOrEmpty(m_pStart);
+  return m_uiElementCount == 0;
 }
 
 PL_ALWAYS_INLINE bool plStringView::IsEqual(plStringView sOther) const
 {
-  return plStringUtils::IsEqual(m_pStart, sOther.GetStartPointer(), m_pEnd, sOther.GetEndPointer());
+  return plStringUtils::IsEqual(m_pStart, sOther.GetStartPointer(), m_pStart + m_uiElementCount, sOther.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE bool plStringView::IsEqual_NoCase(plStringView sOther) const
 {
-  return plStringUtils::IsEqual_NoCase(m_pStart, sOther.GetStartPointer(), m_pEnd, sOther.GetEndPointer());
+  return plStringUtils::IsEqual_NoCase(m_pStart, sOther.GetStartPointer(), m_pStart + m_uiElementCount, sOther.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE bool plStringView::StartsWith(plStringView sStartsWith) const
 {
-  return plStringUtils::StartsWith(m_pStart, sStartsWith.GetStartPointer(), m_pEnd, sStartsWith.GetEndPointer());
+  return plStringUtils::StartsWith(m_pStart, sStartsWith.GetStartPointer(), m_pStart + m_uiElementCount, sStartsWith.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE bool plStringView::StartsWith_NoCase(plStringView sStartsWith) const
 {
-  return plStringUtils::StartsWith_NoCase(m_pStart, sStartsWith.GetStartPointer(), m_pEnd, sStartsWith.GetEndPointer());
+  return plStringUtils::StartsWith_NoCase(m_pStart, sStartsWith.GetStartPointer(), m_pStart + m_uiElementCount, sStartsWith.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE bool plStringView::EndsWith(plStringView sEndsWith) const
 {
-  return plStringUtils::EndsWith(m_pStart, sEndsWith.GetStartPointer(), m_pEnd, sEndsWith.GetEndPointer());
+  return plStringUtils::EndsWith(m_pStart, sEndsWith.GetStartPointer(), m_pStart + m_uiElementCount, sEndsWith.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE bool plStringView::EndsWith_NoCase(plStringView sEndsWith) const
 {
-  return plStringUtils::EndsWith_NoCase(m_pStart, sEndsWith.GetStartPointer(), m_pEnd, sEndsWith.GetEndPointer());
+  return plStringUtils::EndsWith_NoCase(m_pStart, sEndsWith.GetStartPointer(), m_pStart + m_uiElementCount, sEndsWith.GetEndPointer());
 }
 
 PL_ALWAYS_INLINE void plStringView::Trim(const char* szTrimChars)
@@ -120,7 +127,9 @@ PL_ALWAYS_INLINE void plStringView::Trim(const char* szTrimCharsStart, const cha
 {
   if (IsValid())
   {
-    plStringUtils::Trim(m_pStart, m_pEnd, szTrimCharsStart, szTrimCharsEnd);
+    const char* pEnd = m_pStart + m_uiElementCount;
+    plStringUtils::Trim(m_pStart, pEnd, szTrimCharsStart, szTrimCharsEnd);
+    m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
   }
 }
 
