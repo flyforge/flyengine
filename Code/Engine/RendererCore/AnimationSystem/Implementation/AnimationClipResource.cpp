@@ -294,7 +294,7 @@ const ozz::animation::Animation& plAnimationClipResourceDescriptor::GetMappedOzz
 
       const auto& fallbackJoint = skeleton.GetDescriptor().m_Skeleton.GetJointByIndex(uiFallbackIdx);
 
-      const plTransform& fallbackTransform = fallbackJoint.GetRestPoseLocalTransform();
+      const plTransform& fallbackTransform = m_bAdditive ? plTransform::MakeIdentity() : fallbackJoint.GetRestPoseLocalTransform();
 
       auto& dstT = dstTrack.translations[0];
       auto& dstR = dstTrack.rotations[0];
@@ -471,14 +471,14 @@ plArrayPtr<const plAnimationClipResourceDescriptor::KeyframeVec3> plAnimationCli
 //{
 //  plUInt16 jointIdx = 0;
 //
-//#if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
+// #if PL_ENABLED(PL_COMPILE_FOR_DEBUG)
 //
 //  const plUInt32 idx = m_JointNameToIndex.Find(plTempHashedString("plRootMotionTransform"));
 //  PL_ASSERT_DEBUG(idx != plInvalidIndex, "Animation Clip has no root motion transforms");
 //
 //  jointIdx = m_JointNameToIndex.GetValue(idx);
 //  PL_ASSERT_DEBUG(jointIdx == 0, "The root motion joint should always be at index 0");
-//#endif
+// #endif
 //
 //  return jointIdx;
 //}
