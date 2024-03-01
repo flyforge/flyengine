@@ -30,6 +30,7 @@ float MaskThreshold @Default(0.25);
 bool UseNormalTexture;
 Texture2D NormalTexture;
 
+bool InvertOcclusion;
 bool UseOcclusionTexture;
 Texture2D OcclusionTexture;
 
@@ -41,7 +42,8 @@ float MetallicValue @Default(0.0) @Clamp(0.0, 1.0);
 bool UseMetallicTexture;
 Texture2D MetallicTexture;
 
-bool UseOrmTexture;
+bool UseRMATexture;
+bool UseORMTexture;
 Texture2D OrmTexture;
 
 Color EmissiveColor @Default(Color(0.0, 0.0, 0.0));
@@ -171,13 +173,17 @@ float3 GetBaseColor()
 float GetMetallic()
 {
   [branch]
-  if (UseOrmTexture)
+  if (UseRMATexture)
   {
-    return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b;
+    return MetallicValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).g;
+  }
+  else if (UseORMTexture)
+  {
+    return MetallicValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b;
   }
   else if (UseMetallicTexture)
   {
-    return MetallicTexture.Sample(MetallicTexture_AutoSampler, G.Input.TexCoord0.xy).r;
+    return MetallicValue * MetallicTexture.Sample(MetallicTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else
   {
@@ -193,7 +199,11 @@ float GetReflectance()
 float GetRoughness()
 {
   [branch]
-  if (UseOrmTexture)
+  if (UseRMATexture)
+  {
+    return RoughnessValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r;
+  }
+  else if (UseORMTexture)
   {
     return RoughnessValue * OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).g;
   }
@@ -239,17 +249,29 @@ float3 GetEmissiveColor()
 
 float GetOcclusion()
 {
+  float occlusion = 1.0;
   [branch]
-  if (UseOrmTexture)
+  if (UseRMATexture)
   {
-    return OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r;
+    occlusion =  OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).b;
+  }
+  else if (UseORMTexture)
+  {
+    occlusion = OrmTexture.Sample(OrmTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else if (UseOcclusionTexture)
   {
-    return OcclusionTexture.Sample(OcclusionTexture_AutoSampler, G.Input.TexCoord0.xy).r;
+    occlusion = OcclusionTexture.Sample(OcclusionTexture_AutoSampler, G.Input.TexCoord0.xy).r;
   }
   else
   {
     return 1.0f;
   }
+
+  if(InvertOcclusion)
+  {
+    occlusion = 1.0 - occlusion; 
+  }
+
+  return occlusion;
 }

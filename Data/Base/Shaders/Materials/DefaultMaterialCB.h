@@ -14,5 +14,7 @@ CONSTANT_BUFFER(plMaterialConstants, 1)
   BOOL1(UseMetallicTexture);
   BOOL1(UseEmissiveTexture);
   BOOL1(UseOcclusionTexture);
-  BOOL1(UseOrmTexture);
+  BOOL1(UseORMTexture);
+  BOOL1(UseRMATexture);
+  BOOL1(InvertOcclusion);
 };
