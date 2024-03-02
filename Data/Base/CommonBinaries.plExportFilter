@@ -46,4 +46,6 @@
 /enet.dll
 /Optick.dll
 /Jolt.dll
+/Recast.dll
+/RmlCore.dll
 #endif
