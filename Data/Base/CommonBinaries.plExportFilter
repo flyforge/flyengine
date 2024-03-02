@@ -45,4 +45,5 @@
 /stb_image.dll
 /enet.dll
 /Optick.dll
+/Jolt.dll
 #endif
