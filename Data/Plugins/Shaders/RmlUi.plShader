@@ -88,6 +88,9 @@ float4 GetScreenPosition(float4 inputPos)
 
   float4 main(PS_IN Input) : SV_Target
   {
-    return BaseTexture.Sample(BaseTexture_AutoSampler, Input.TexCoord0.xy) * Input.Color0;
+    float4 output = BaseTexture.Sample(BaseTexture_AutoSampler, Input.TexCoord0.xy);
+    output.xyz = (output.xyz * Input.Color0.xyz) * 0.5;
+
+    return output;
   }
 #endif
