@@ -49,5 +49,6 @@ plSampleAnimClipSequenceAnimNode;Sample Clip Sequence
 plRestPoseAnimNode;Rest Pose
 
 plBoolToNumberAnimNode;Bool To Number
+plBoolToTriggerAnimNode;Bool To Trigger
 
 plRootRotationAnimNode;Root Rotation

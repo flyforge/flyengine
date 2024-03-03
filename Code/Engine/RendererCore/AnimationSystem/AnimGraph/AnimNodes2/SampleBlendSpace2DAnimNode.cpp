@@ -182,19 +182,21 @@ void plSampleBlendSpace2DAnimNode::Step(plAnimController& ref_controller, plAnim
 
   plUInt32 uiMaxWeightClip = 0;
   plHybridArray<ClipToPlay, 8> clips;
-  ComputeClipsAndWeights(centerInfo, plVec2(pState->m_fLastValueX, pState->m_fLastValueY), clips, uiMaxWeightClip);
+  ComputeClipsAndWeights(ref_controller, centerInfo, plVec2(pState->m_fLastValueX, pState->m_fLastValueY), clips, uiMaxWeightClip);
 
   PlayClips(ref_controller, centerInfo, pState, ref_graph, tDiff, clips, uiMaxWeightClip);
 }
 
-void plSampleBlendSpace2DAnimNode::ComputeClipsAndWeights(const plAnimController::AnimClipInfo& centerInfo, const plVec2& p, plDynamicArray<ClipToPlay>& clips, plUInt32& out_uiMaxWeightClip) const
+void plSampleBlendSpace2DAnimNode::ComputeClipsAndWeights(plAnimController& ref_controller, const plAnimController::AnimClipInfo& centerInfo, const plVec2& p, plDynamicArray<ClipToPlay>& clips, plUInt32& out_uiMaxWeightClip) const
 {
   out_uiMaxWeightClip = 0;
   float fMaxWeight = -1.0f;
 
   if (m_Clips.GetCount() == 1 && !centerInfo.m_hClip.IsValid())
   {
-    clips.ExpandAndGetRef().m_uiIndex = 0;
+    auto& clip = clips.ExpandAndGetRef();
+    clip.m_uiIndex = 0;
+    clip.m_pClipInfo = &centerInfo;
   }
   else
   {
@@ -205,6 +207,10 @@ void plSampleBlendSpace2DAnimNode::ComputeClipsAndWeights(const plAnimController
 
     for (plUInt32 i = 0; i < m_Clips.GetCount(); ++i)
     {
+      const auto& clipInfo = ref_controller.GetAnimationClipInfo(m_Clips[i].m_sClip);
+      if (!clipInfo.m_hClip.IsValid())
+        continue;
+
       const plVec2 pi = m_Clips[i].m_vPosition;
       float fMinWeight = 1.0f;
 
@@ -242,6 +248,7 @@ void plSampleBlendSpace2DAnimNode::ComputeClipsAndWeights(const plAnimController
         auto& c = clips.ExpandAndGetRef();
         c.m_uiIndex = i;
         c.m_fWeight = fMinWeight;
+        c.m_pClipInfo = &clipInfo;
 
         fWeightNormalization += fMinWeight;
       }
@@ -272,6 +279,7 @@ void plSampleBlendSpace2DAnimNode::ComputeClipsAndWeights(const plAnimController
         auto& c = clips.ExpandAndGetRef();
         c.m_uiIndex = 0xFFFFFFFF;
         c.m_fWeight = fMinWeight;
+        c.m_pClipInfo = &centerInfo;
 
         fWeightNormalization += fMinWeight;
       }
@@ -313,7 +321,7 @@ void plSampleBlendSpace2DAnimNode::PlayClips(plAnimController& ref_controller, c
 
     const plHashedString sClip = c.m_uiIndex >= 0xFF ? m_sCenterClip : m_Clips[c.m_uiIndex].m_sClip;
 
-    const auto& clipInfo = ref_controller.GetAnimationClipInfo(sClip);
+    const auto& clipInfo = *clips[i].m_pClipInfo;
 
     plResourceLock<plAnimationClipResource> pClip(clipInfo.m_hClip, plResourceAcquireMode::BlockTillLoaded);
 
