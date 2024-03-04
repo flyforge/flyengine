@@ -66,6 +66,7 @@ public:
   plStatus CreateEmptyObject(bool bAttachToParent, bool bAtPickedPosition);
 
   void DuplicateSelection();
+  void ToggleHideSelectedObjects();
   void ShowOrHideSelectedObjects(ShowOrHide action);
   void ShowOrHideAllObjects(ShowOrHide action);
   void HideUnselectedObjects();
