@@ -19,8 +19,12 @@ class plKrautTreeAssetDocument : public plSimpleAssetDocument<plKrautTreeAssetPr
 public:
   plKrautTreeAssetDocument(plStringView sDocumentPath);
 
+  plStatus WriteKrautAsset(plStreamWriter& stream) const;
+
 protected:
   virtual plTransformStatus InternalTransformAsset(plStreamWriter& stream, plStringView sOutputTag, const plPlatformProfile* pAssetProfile, const plAssetFileHeader& AssetHeader, plBitflags<plTransformFlags> transformFlags) override;
+
+  void AssignMaterials(plKrautGeneratorResourceDescriptor& desc, const plKrautTreeAssetProperties* pProp) const;
 
   void SyncBackAssetProperties(plKrautTreeAssetProperties*& pProp, const plKrautGeneratorResourceDescriptor& desc);
 

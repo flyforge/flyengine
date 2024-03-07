@@ -59,6 +59,11 @@ struct AoPositionResult
 
 static void GenerateAmbientOcclusionSpheres(plDynamicOctree& ref_octree, const plBoundingBox& bbox, plDynamicArray<plDynamicArray<plBoundingSphere>>& ref_occlusionSpheres, const Kraut::TreeStructure& treeStructure)
 {
+  ref_occlusionSpheres.Clear();
+
+  if (!bbox.IsValid())
+    return;
+
   plStopwatch swAO;
 
   ref_octree.CreateTree(bbox.GetCenter(), bbox.GetHalfExtents() + plVec3(1.0f), 0.1f);
@@ -128,15 +133,15 @@ static bool FindAoSpheres(void* pPassThrough, plDynamicTreeObjectConst object)
   return true;
 };
 
-plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTreeWithGoodSeed(plUInt16 uiGoodSeedIndex) const
+plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTreeWithGoodSeed(const plSharedPtr<plKrautGeneratorResourceDescriptor>& descriptor, plUInt16 uiGoodSeedIndex) const
 {
-  if (uiGoodSeedIndex == 0xFFFF || m_pDescriptor->m_GoodRandomSeeds.IsEmpty())
+  if (uiGoodSeedIndex == 0xFFFF || descriptor->m_GoodRandomSeeds.IsEmpty())
   {
-    return GenerateTree(m_pDescriptor->m_uiDefaultDisplaySeed);
+    return GenerateTree(descriptor, descriptor->m_uiDefaultDisplaySeed);
   }
 
-  uiGoodSeedIndex %= m_pDescriptor->m_GoodRandomSeeds.GetCount();
-  return GenerateTree(m_pDescriptor->m_GoodRandomSeeds[uiGoodSeedIndex]);
+  uiGoodSeedIndex %= descriptor->m_GoodRandomSeeds.GetCount();
+  return GenerateTree(descriptor, descriptor->m_GoodRandomSeeds[uiGoodSeedIndex]);
 }
 
 class plKrautResourceLoader : public plResourceTypeLoader
@@ -161,7 +166,8 @@ public:
 
     plKrautTreeResourceDescriptor desc;
 
-    pGenerator->GenerateTreeDescriptor(desc, m_uiRandomSeed);
+    auto genDesc = pGenerator->GetDescriptor();
+    pGenerator->GenerateTreeDescriptor(genDesc, desc, m_uiRandomSeed);
 
     plMemoryStreamWriter writer(&pData->m_Storage);
 
@@ -193,7 +199,7 @@ public:
   plKrautGeneratorResourceHandle m_hGeneratorResource;
 };
 
-plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(plUInt32 uiRandomSeed) const
+plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(const plSharedPtr<plKrautGeneratorResourceDescriptor>& descriptor, plUInt32 uiRandomSeed) const
 {
   PL_PROFILE_SCOPE("Kraut: GenerateTree");
 
@@ -223,26 +229,30 @@ plKrautTreeResourceHandle plKrautGeneratorResource::GenerateTree(plUInt32 uiRand
   return hRes;
 }
 
-void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescriptor& ref_dstDesc, plUInt32 uiRandomSeed) const
+void plKrautGeneratorResource::GenerateTreeDescriptor(const plSharedPtr<plKrautGeneratorResourceDescriptor>& ref_descriptor, plKrautTreeResourceDescriptor& ref_dstDesc, plUInt32 uiRandomSeed) const
 {
   PL_LOG_BLOCK("Generate Kraut Tree");
 
   Kraut::TreeStructure treeStructure;
 
   Kraut::TreeStructureGenerator gen;
-  gen.m_pTreeStructureDesc = &m_pDescriptor->m_TreeStructureDesc;
+  gen.m_pTreeStructureDesc = &ref_descriptor->m_TreeStructureDesc;
   gen.m_pTreeStructure = &treeStructure;
 
   gen.GenerateTreeStructure(uiRandomSeed);
 
-  const float fWoodBendiness = 0.1f / m_pDescriptor->m_fTreeStiffness;
+  const float fWoodBendiness = 0.1f / ref_descriptor->m_fTreeStiffness;
   const float fTwigBendiness = 0.1f * fWoodBendiness;
 
   TreeStructureExtraData extraData;
-  GenerateExtraData(extraData, m_pDescriptor->m_TreeStructureDesc, treeStructure, uiRandomSeed, fWoodBendiness, fTwigBendiness);
+  GenerateExtraData(extraData, ref_descriptor->m_TreeStructureDesc, treeStructure, uiRandomSeed, fWoodBendiness, fTwigBendiness);
 
   auto bbox = treeStructure.ComputeBoundingBox();
-  plBoundingBox bbox2 = plBoundingBox::MakeFromMinMax(ToPlSwizzle(bbox.m_vMin), ToPlSwizzle(bbox.m_vMax));
+  plBoundingBox bbox2;
+  if (bbox.IsInvalid())
+    bbox2 = plBoundingBox::MakeInvalid();
+  else
+    bbox2 = plBoundingBox::MakeFromMinMax(ToPlSwizzle(bbox.m_vMin), ToPlSwizzle(bbox.m_vMax));
 
   // data for ambient occlusion computation
   plDynamicArray<plDynamicArray<plBoundingSphere>> occlusionSpheres;
@@ -301,7 +311,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
   for (plUInt32 lodIdx = 0; lodIdx < ref_dstDesc.m_Lods.GetCapacity(); ++lodIdx)
   {
-    const auto& lodDesc = m_pDescriptor->m_LodDesc[lodIdx];
+    const auto& lodDesc = ref_descriptor->m_LodDesc[lodIdx];
 
     if (lodDesc.m_Mode != Kraut::LodMode::Full)
     {
@@ -314,7 +324,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
     Kraut::TreeStructureLodGenerator lodGen;
     lodGen.m_pLodDesc = &lodDesc;
     lodGen.m_pTreeStructure = &treeStructure;
-    lodGen.m_pTreeStructureDesc = &m_pDescriptor->m_TreeStructureDesc;
+    lodGen.m_pTreeStructureDesc = &ref_descriptor->m_TreeStructureDesc;
     lodGen.m_pTreeStructureLod = &treeLod;
 
     lodGen.GenerateTreeStructureLod();
@@ -334,10 +344,10 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
     dstMesh.m_LodType = plKrautLodType::Mesh;
 
     dstMesh.m_fMinLodDistance = fPrevMaxLodDistance;
-    dstMesh.m_fMaxLodDistance = lodDesc.m_uiLodDistance * m_pDescriptor->m_fLodDistanceScale * m_pDescriptor->m_fUniformScaling;
+    dstMesh.m_fMaxLodDistance = lodDesc.m_uiLodDistance * ref_descriptor->m_fLodDistanceScale * ref_descriptor->m_fUniformScaling;
     fPrevMaxLodDistance = dstMesh.m_fMaxLodDistance;
 
-    const float fVertexScale = m_pDescriptor->m_fUniformScaling;
+    const float fVertexScale = ref_descriptor->m_fUniformScaling;
 
     plUInt32 uiMaxVertices = 0;
     plUInt32 uiMaxTriangles = 0;
@@ -497,7 +507,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
         uiTriangleInSubmeshes += subMesh.m_uiNumTriangles;
 
-        for (const auto& srcMat : m_pDescriptor->m_Materials)
+        for (const auto& srcMat : ref_descriptor->m_Materials)
         {
           if ((plUInt32)srcMat.m_BranchType == branchType && (plUInt32)srcMat.m_MaterialType == geometryType)
           {
@@ -507,7 +517,7 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
               auto& mat = ref_dstDesc.m_Materials.ExpandAndGetRef();
               mat.m_MaterialType = static_cast<plKrautMaterialType>(geometryType);
-              mat.m_VariationColor = plColor::White;
+              //mat.m_VariationColor = plColor::White;
               mat.m_sMaterial = srcMat.m_hMaterial.GetResourceID(); // TODO: could just pass on the material handle
             }
 
@@ -550,8 +560,8 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
   plLog::Debug("AO vertices: {}, checks: {}", uiOccVertices, uiOccChecks);
 
   ref_dstDesc.m_Details.m_Bounds = plBoundingBoxSphere::MakeFromBox(bbox2);
-  ref_dstDesc.m_Details.m_fStaticColliderRadius = m_pDescriptor->m_fStaticColliderRadius;
-  ref_dstDesc.m_Details.m_sSurfaceResource = m_pDescriptor->m_sSurfaceResource;
+  ref_dstDesc.m_Details.m_fStaticColliderRadius = ref_descriptor->m_fStaticColliderRadius;
+  ref_dstDesc.m_Details.m_sSurfaceResource = ref_descriptor->m_sSurfaceResource;
   ref_dstDesc.m_Details.m_vLeafCenter = ref_dstDesc.m_Details.m_Bounds.m_vCenter;
 
   if (!vLeafCenter.IsZero())
@@ -562,7 +572,8 @@ void plKrautGeneratorResource::GenerateTreeDescriptor(plKrautTreeResourceDescrip
 
 plResourceLoadDesc plKrautGeneratorResource::UnloadData(Unload WhatToUnload)
 {
-  m_pDescriptor.Clear();
+  PL_LOCK(m_DataMutex);
+  m_GeneratorDesc.Clear();
 
   plResourceLoadDesc res;
   res.m_uiQualityLevelsDiscardable = 0;
@@ -623,11 +634,18 @@ plResourceLoadDesc plKrautGeneratorResource::UpdateContent(plStreamReader* Strea
     return res;
   }
 
-  m_pDescriptor = PL_DEFAULT_NEW(plKrautGeneratorResourceDescriptor);
-  if (m_pDescriptor->Deserialize(*Stream).Failed())
+  auto desc = PL_DEFAULT_NEW(plKrautGeneratorResourceDescriptor);
+  if (desc->Deserialize(*Stream).Failed())
   {
+    PL_LOCK(m_DataMutex);
+    m_GeneratorDesc.Clear();
     res.m_State = plResourceState::LoadedResourceMissing;
     return res;
+  }
+
+  {
+    PL_LOCK(m_DataMutex);
+    m_GeneratorDesc = desc;
   }
 
   return res;
@@ -638,9 +656,11 @@ void plKrautGeneratorResource::UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage
   out_NewMemoryUsage.m_uiMemoryGPU = sizeof(*this);
   out_NewMemoryUsage.m_uiMemoryCPU = 0;
 
-  if (m_pDescriptor != nullptr)
+  auto desc = m_GeneratorDesc;
+
+  if (desc != nullptr)
   {
-    out_NewMemoryUsage.m_uiMemoryCPU += sizeof(plKrautGeneratorResourceDescriptor) + m_pDescriptor->m_Materials.GetHeapMemoryUsage();
+    out_NewMemoryUsage.m_uiMemoryCPU += sizeof(plKrautGeneratorResourceDescriptor) + desc->m_Materials.GetHeapMemoryUsage();
   }
 }
 

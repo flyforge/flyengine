@@ -111,6 +111,9 @@ PL_RESOURCE_IMPLEMENT_CREATEABLE(plKrautTreeResource, plKrautTreeResourceDescrip
     const plUInt32 uiNumTriangles = lodSrc.m_Triangles.GetCount();
     const plUInt32 uiSubMeshes = lodSrc.m_SubMeshes.GetCount();
 
+    if (uiNumVertices == 0 || uiNumTriangles == 0 || uiSubMeshes == 0)
+       continue;
+
     buffer.AddStream(plGALVertexAttributeSemantic::Position, plGALResourceFormat::XYZFloat);                                                // 0
     buffer.AddStream(plGALVertexAttributeSemantic::TexCoord0, plGALResourceFormat::XYFloat);                                                // 1
     buffer.AddStream(plGALVertexAttributeSemantic::TexCoord1, plGALResourceFormat::XYFloat);                                                // 2

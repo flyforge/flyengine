@@ -25,7 +25,7 @@ struct plKrautMaterialDescriptor
   plMaterialResourceHandle m_hMaterial;
 };
 
-struct PL_KRAUTPLUGIN_DLL plKrautGeneratorResourceDescriptor
+struct PL_KRAUTPLUGIN_DLL plKrautGeneratorResourceDescriptor : public plRefCounted
 {
   Kraut::TreeStructureDesc m_TreeStructureDesc;
   Kraut::LodDesc m_LodDesc[5];
@@ -53,17 +53,25 @@ class PL_KRAUTPLUGIN_DLL plKrautGeneratorResource : public plResource
 public:
   plKrautGeneratorResource();
 
-  plKrautTreeResourceHandle GenerateTree(plUInt32 uiRandomSeed) const;
-  plKrautTreeResourceHandle GenerateTreeWithGoodSeed(plUInt16 uiGoodSeedIndex) const;
+  const plSharedPtr<plKrautGeneratorResourceDescriptor>& GetDescriptor() const
+  {
+    return m_GeneratorDesc;
+  }
 
-  void GenerateTreeDescriptor(plKrautTreeResourceDescriptor& ref_dstDesc, plUInt32 uiRandomSeed) const;
+  plKrautTreeResourceHandle GenerateTree(const plSharedPtr<plKrautGeneratorResourceDescriptor>& descriptor, plUInt32 uiRandomSeed) const;
+  plKrautTreeResourceHandle GenerateTreeWithGoodSeed(const plSharedPtr<plKrautGeneratorResourceDescriptor>& descriptor, plUInt16 uiGoodSeedIndex) const;
+
+  void GenerateTreeDescriptor(const plSharedPtr<plKrautGeneratorResourceDescriptor>& descriptor, plKrautTreeResourceDescriptor& dstDesc, plUInt32 uiRandomSeed) const;
+
 
 private:
   virtual plResourceLoadDesc UnloadData(Unload WhatToUnload) override;
   virtual plResourceLoadDesc UpdateContent(plStreamReader* Stream) override;
   virtual void UpdateMemoryUsage(MemoryUsage& out_NewMemoryUsage) override;
 
-  plUniquePtr<plKrautGeneratorResourceDescriptor> m_pDescriptor;
+  plMutex m_DataMutex;
+  plSharedPtr<plKrautGeneratorResourceDescriptor> m_GeneratorDesc;
+
 
   struct BranchNodeExtraData
   {
