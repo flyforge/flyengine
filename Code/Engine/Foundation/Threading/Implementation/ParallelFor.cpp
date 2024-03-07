@@ -40,7 +40,7 @@ private:
 };
 
 template <typename IndexType, typename Callback>
-void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, Callback&& taskCallback, const char* szTaskName, const plParallelForParams& params)
+void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, const Callback&& taskCallback, const char* szTaskName, const plParallelForParams& params, plTaskNesting taskNesting)
 {
   typedef IndexedTask<IndexType, Callback> Task;
 
@@ -54,7 +54,7 @@ void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, Ca
     // If we have not exceeded the threading threshold we use serial execution
 
     Task indexedTask(uiStartIndex, uiNumItems, std::move(taskCallback), uiNumItems);
-    indexedTask.ConfigureTask(szTaskName, plTaskNesting::Never);
+    indexedTask.ConfigureTask(szTaskName, taskNesting);
 
     PL_PROFILE_SCOPE(szTaskName);
     indexedTask.Execute();
@@ -68,7 +68,7 @@ void ParallelForIndexedInternal(IndexType uiStartIndex, IndexType uiNumItems, Ca
     plAllocator* pAllocator = (params.m_pTaskAllocator != nullptr) ? params.m_pTaskAllocator : plFoundation::GetDefaultAllocator();
 
     plSharedPtr<Task> pIndexedTask = PL_NEW(pAllocator, Task, uiStartIndex, uiNumItems, std::move(taskCallback), static_cast<IndexType>(uiItemsPerInvocation));
-    pIndexedTask->ConfigureTask(szTaskName, plTaskNesting::Never);
+    pIndexedTask->ConfigureTask(szTaskName, taskNesting);
 
     pIndexedTask->SetMultiplicity(uiMultiplicity);
     plTaskGroupID taskGroupId = plTaskSystem::StartSingleTask(pIndexedTask, plTaskPriority::EarlyThisFrame);
@@ -129,14 +129,13 @@ void plParallelForParams::DetermineThreading(plUInt64 uiNumItemsToExecute, plUIn
   }
 }
 
-void plTaskSystem::ParallelForIndexed(plUInt32 uiStartIndex, plUInt32 uiNumItems, plParallelForIndexedFunction32 taskCallback, const char* szTaskName, const plParallelForParams& params)
+void plTaskSystem::ParallelForIndexed(plUInt32 uiStartIndex, plUInt32 uiNumItems, plParallelForIndexedFunction32 taskCallback, const char* szTaskName, plTaskNesting taskNesting, const plParallelForParams& params)
 {
-  ParallelForIndexedInternal<plUInt32, plParallelForIndexedFunction32>(uiStartIndex, uiNumItems, std::move(taskCallback), szTaskName, params);
+  ParallelForIndexedInternal<plUInt32, plParallelForIndexedFunction32>(uiStartIndex, uiNumItems, std::move(taskCallback), szTaskName, params, taskNesting);
 }
 
-void plTaskSystem::ParallelForIndexed(plUInt64 uiStartIndex, plUInt64 uiNumItems, plParallelForIndexedFunction64 taskCallback, const char* szTaskName, const plParallelForParams& params)
+void plTaskSystem::ParallelForIndexed(plUInt64 uiStartIndex, plUInt64 uiNumItems, plParallelForIndexedFunction64 taskCallback, const char* szTaskName, plTaskNesting taskNesting, const plParallelForParams& params)
 {
-  ParallelForIndexedInternal<plUInt64, plParallelForIndexedFunction64>(uiStartIndex, uiNumItems, std::move(taskCallback), szTaskName, params);
+  ParallelForIndexedInternal<plUInt64, plParallelForIndexedFunction64>(uiStartIndex, uiNumItems, std::move(taskCallback), szTaskName, params, taskNesting);
 }
-
 

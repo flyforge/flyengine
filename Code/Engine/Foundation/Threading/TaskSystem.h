@@ -240,11 +240,11 @@ private:
 public:
   /// A helper function to process task items in a parallel fashion by having per-worker index ranges generated.
   static void ParallelForIndexed(plUInt32 uiStartIndex, plUInt32 uiNumItems, plParallelForIndexedFunction32 taskCallback,
-    const char* szTaskName = nullptr, const plParallelForParams& params = plParallelForParams());
+    const char* szTaskName = nullptr, plTaskNesting taskNesting = plTaskNesting::Never, const plParallelForParams& params = plParallelForParams());
 
   /// A helper function to process task items in a parallel fashion by having per-worker index ranges generated.
   static void ParallelForIndexed(plUInt64 uiStartIndex, plUInt64 uiNumItems, plParallelForIndexedFunction64 taskCallback,
-    const char* szTaskName = nullptr, const plParallelForParams& params = plParallelForParams());
+    const char* szTaskName = nullptr, plTaskNesting taskNesting = plTaskNesting::Never, const plParallelForParams& params = plParallelForParams());
 
   /// A helper function to process task items in a parallel fashion by generating per-worker sub-ranges
   /// from an initial item array pointer.

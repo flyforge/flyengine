@@ -382,10 +382,14 @@ plResult plProcess::ResumeSuspended()
   if (m_pImpl->m_ProcessHandle == nullptr || m_pImpl->m_MainThreadHandle == nullptr)
     return PL_FAILURE;
 
-  ResumeThread(m_pImpl->m_MainThreadHandle);
+  const DWORD prevSuspendCount = ResumeThread(m_pImpl->m_MainThreadHandle);
+  if (prevSuspendCount != 1)
+    plLog::Warning("plProcess::ResumeSuspended: Unexpected ResumeThread result ({})", plUInt64(prevSuspendCount));
 
   // invalidate the thread handle, so that we cannot resume the process twice
-  CloseHandle(m_pImpl->m_MainThreadHandle);
+  if (!CloseHandle(m_pImpl->m_MainThreadHandle))
+    plLog::Warning("plProcess::ResumeSuspended: Failed to close handle");
+
   m_pImpl->m_MainThreadHandle = nullptr;
 
   return PL_SUCCESS;
