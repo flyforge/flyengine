@@ -28,6 +28,8 @@ public:
 
   const dtQueryFilter& GetPathSearchFilter(plStringView sName) const;
 
+  const plAiNavigationConfig& GetConfig() const { return m_Config; }
+
 private:
   void Update(const UpdateContext& ctxt);
 

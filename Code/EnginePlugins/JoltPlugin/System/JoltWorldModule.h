@@ -79,6 +79,8 @@ public:
 
   virtual void AddFixedJointComponent(plGameObject* pOwner, const plPhysicsWorldModuleInterface::FixedJointConfig& cfg) override;
 
+  virtual plBoundingBoxSphere GetWorldSpaceBounds(plGameObject* pOwner, plUInt32 uiCollisionLayer, plBitflags<plPhysicsShapeType> shapeTypes, bool bIncludeChildObjects) const override;
+
   plDeque<plComponentHandle> m_RequireUpdate;
 
   const plSet<plJoltDynamicActorComponent*>& GetActiveActors() const { return m_ActiveActors; }

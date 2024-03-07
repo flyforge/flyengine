@@ -115,20 +115,47 @@ bool plAiNavMesh::RequestSector(const plVec2& vCenter, const plVec2& vHalfExtent
   return res;
 }
 
-// void plNavMesh::InvalidateSector(SectorID sectorID)
-//{
-//   auto it = m_Sectors.Find(sectorID);
-//   if (!it.IsValid())
-//     return;
-//
-//   auto& sector = it.Value();
-//
-//   if (sector.m_FlagInvalidate == 0 && (sector.m_FlagUsable == 1 || sector.m_FlagUpdateAvailable == 1))
-//   {
-//     sector.m_FlagInvalidate = 1;
-//     m_InvalidatedSectors.PushBack(sectorID);
-//   }
-// }
+void plAiNavMesh::InvalidateSector(const plVec2& vCenter, const plVec2& vHalfExtents, bool bRebuildAsSoonAsPossible)
+{
+  plVec2I32 coordMin = CalculateSectorCoord(vCenter.x - vHalfExtents.x, vCenter.y - vHalfExtents.y);
+  plVec2I32 coordMax = CalculateSectorCoord(vCenter.x + vHalfExtents.x, vCenter.y + vHalfExtents.y);
+
+  coordMin.x = plMath::Clamp<plInt32>(coordMin.x, 0, m_uiNumSectorsX - 1);
+  coordMax.x = plMath::Clamp<plInt32>(coordMax.x, 0, m_uiNumSectorsX - 1);
+  coordMin.y = plMath::Clamp<plInt32>(coordMin.y, 0, m_uiNumSectorsY - 1);
+  coordMax.y = plMath::Clamp<plInt32>(coordMax.y, 0, m_uiNumSectorsY - 1);
+
+  for (plInt32 y = coordMin.y; y <= coordMax.y; ++y)
+  {
+    for (plInt32 x = coordMin.x; x <= coordMax.x; ++x)
+    {
+      InvalidateSector(CalculateSectorID(plVec2I32(x, y)), bRebuildAsSoonAsPossible);
+    }
+  }
+}
+
+void plAiNavMesh::InvalidateSector(SectorID sectorID, bool bRebuildAsSoonAsPossible)
+{
+  auto it = m_Sectors.Find(sectorID);
+  if (!it.IsValid())
+    return;
+
+  auto& sector = it.Value();
+
+  if (sector.m_FlagInvalidate == 0 && (sector.m_FlagUsable == 1 || sector.m_FlagUpdateAvailable == 1))
+  {
+    if (bRebuildAsSoonAsPossible)
+    {
+      sector.m_FlagInvalidate = 1;
+      m_RequestedSectors.PushBack(sectorID);
+    }
+    else
+    {
+      sector.m_FlagRequested = 0;
+      m_UnloadingSectors.PushBack(sectorID);
+    }
+  }
+}
 
 void plAiNavMesh::FinalizeSectorUpdates()
 {
@@ -184,6 +211,35 @@ void plAiNavMesh::FinalizeSectorUpdates()
   }
 
   m_UpdatingSectors.Clear();
+
+  for (auto sectorID : m_UnloadingSectors)
+  {
+    auto& sector = m_Sectors[sectorID];
+
+    // Sector has been requested since then, don't unload it.
+    if (sector.m_FlagRequested == 1)
+      continue;
+
+    if (!sector.m_NavmeshDataCur.IsEmpty())
+    {
+      const auto res = m_pNavMesh->removeTile(sector.m_TileRef, nullptr, nullptr);
+
+      if (res != DT_SUCCESS)
+      {
+        plLog::Error("NavMesh removeTile error: {}", res);
+      }
+
+      sector.m_NavmeshDataCur.Clear();
+      sector.m_NavmeshDataCur.Compact();
+    }
+
+    sector.m_FlagRequested = 0;
+    sector.m_FlagInvalidate = 0;
+    sector.m_FlagUpdateAvailable = 0;
+    sector.m_FlagUsable = 0;
+  }
+
+  m_UnloadingSectors.Clear();
 }
 
 plAiNavMesh::SectorID plAiNavMesh::RetrieveRequestedSector()
