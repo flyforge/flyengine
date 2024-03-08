@@ -2,7 +2,7 @@ HeaderV2
 {
 o
 {
-	Uuid %id{u4{9039841580132280984,5350338228139452471}}
+	Uuid %id{u4{17447861716423118487,5522912668068074888}}
 	s %t{"plAssetDocumentInfo"}
 	u3 %v{2}
 	s %n{"Header"}
@@ -13,8 +13,8 @@ o
 		{
 			s{"Textures/MissingMesh_D.dds"}
 		}
-		Uuid %DocumentID{u4{9039841580132280984,5350338228139452471}}
-		u4 %Hash{8374248099332085404}
+		Uuid %DocumentID{u4{17447861716423118487,5522912668068074888}}
+		u4 %Hash{6946949151092001442}
 		VarArray %MetaInfo{}
 		VarArray %Outputs
 		{
@@ -32,7 +32,7 @@ Objects
 {
 o
 {
-	Uuid %id{u4{2217165140515635368,5720466175093959938}}
+	Uuid %id{u4{7162488676537281412,4879021883569140049}}
 	s %t{"plTextureAssetProperties"}
 	u3 %v{5}
 	p
@@ -71,7 +71,7 @@ o
 	{
 		VarArray %Children
 		{
-			Uuid{u4{2217165140515635368,5720466175093959938}}
+			Uuid{u4{7162488676537281412,4879021883569140049}}
 		}
 	}
 }
