@@ -186,7 +186,7 @@ plResult plProjectExport::CreateExportFilterFile(const char* szExpectedFile, con
 plResult plProjectExport::ReadExportFilters(plPathPatternFilter& out_DataFilter, plPathPatternFilter& out_BinariesFilter, const plPlatformProfile* pPlatformProfile)
 {
   plStringBuilder sDefine;
-  sDefine.SetFormat("PLATFORM_PROFILE_{} 1", pPlatformProfile->GetConfigName());
+  sDefine.SetFormat("PLATFORM_PROFILE_{} 1", pPlatformProfile->GetTargetPlatform());
   sDefine.ToUpper();
 
   plHybridArray<plString, 1> ppDefines;

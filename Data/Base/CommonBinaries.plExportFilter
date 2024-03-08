@@ -15,7 +15,7 @@
 
 [INCLUDE]
 
-#if PLATFORM_PROFILE_PC
+#if PLATFORM_PROFILE_WINDOWS
 /Player.exe
 /plFoundation.dll
 /plCore.dll
@@ -24,6 +24,17 @@
 /plRendererDX11.dll
 /plRendererFoundation.dll
 /plShaderCompilerHLSL.dll
+/plAmplitudeAudioPlugin.dll
+/plAudioSystemPlugin.dll
+/plGameComponentsPlugin.dll
+/plJoltPlugin.dll
+/plParticlePlugin.dll
+/plAiPlugin.dll
+/plRmlUiPlugin.dll
+/plXBoxControllerPlugin.dll
+/plVisualScriptPlugin.dll
+/plTypeScriptPlugin.dll
+/plInspectorPlugin.dll
 /plTexture.dll
 /plUtilities.dll
 /Imgui.dll
@@ -33,4 +44,8 @@
 /Duktape.dll
 /stb_image.dll
 /enet.dll
+/Optick.dll
+/Jolt.dll
+/Recast.dll
+/RmlCore.dll
 #endif

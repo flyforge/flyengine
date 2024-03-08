@@ -104,3 +104,39 @@ private:
   plAnimGraphBoolInputPin m_InValue;      // [ property ]
   plAnimGraphNumberOutputPin m_OutNumber; // [ property ]
 };
+
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+
+class PL_RENDERERCORE_DLL plBoolToTriggerAnimNode : public plAnimGraphNode
+{
+  PL_ADD_DYNAMIC_REFLECTION(plBoolToTriggerAnimNode, plAnimGraphNode);
+
+  //////////////////////////////////////////////////////////////////////////
+  // plAnimGraphNode
+
+protected:
+  virtual plResult SerializeNode(plStreamWriter& stream) const override;
+  virtual plResult DeserializeNode(plStreamReader& stream) override;
+
+  virtual void Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const override;
+  virtual bool GetInstanceDataDesc(plInstanceDataDesc& out_desc) const override;
+
+  //////////////////////////////////////////////////////////////////////////
+  // plBoolToNumberAnimNode
+
+public:
+  plBoolToTriggerAnimNode();
+  ~plBoolToTriggerAnimNode();
+
+private:
+  plAnimGraphBoolInputPin m_InValue;        // [ property ]
+  plAnimGraphTriggerOutputPin m_OutOnTrue;  // [ property ]
+  plAnimGraphTriggerOutputPin m_OutOnFalse; // [ property ]
+
+  struct InstanceData
+  {
+    plInt8 m_iIsTrue = -1; // -1 == undefined, 0 == false, 1 == true
+  };
+};

@@ -63,6 +63,7 @@ private:
 
     plUInt32 m_uiIndex;
     float m_fWeight = 1.0f;
+    const plAnimController::AnimClipInfo* m_pClipInfo = nullptr;
   };
 
   struct InstanceState
@@ -76,5 +77,5 @@ private:
 
   void UpdateCenterClipPlaybackTime(const plAnimController::AnimClipInfo& centerInfo, InstanceState* pState, plAnimGraphInstance& ref_graph, plTime tDiff, plAnimPoseEventTrackSampleMode& out_eventSamplingCenter) const;
   void PlayClips(plAnimController& ref_controller, const plAnimController::AnimClipInfo& centerInfo, InstanceState* pState, plAnimGraphInstance& ref_graph, plTime tDiff, plArrayPtr<ClipToPlay> clips, plUInt32 uiMaxWeightClip) const;
-  void ComputeClipsAndWeights(const plAnimController::AnimClipInfo& centerInfo, const plVec2& p, plDynamicArray<ClipToPlay>& out_Clips, plUInt32& out_uiMaxWeightClip) const;
+  void ComputeClipsAndWeights(plAnimController& ref_controller, const plAnimController::AnimClipInfo& centerInfo, const plVec2& p, plDynamicArray<ClipToPlay>& out_Clips, plUInt32& out_uiMaxWeightClip) const;
 };

@@ -31,6 +31,7 @@ public:
   void SetGridBarWidget(plQGridBarWidget* pGridBar) { m_pGridBar = pGridBar; }
 
   void SetScrubberPosition(double fPosition);
+  double GetScrubberPosition() const { return m_fScrubberPosition; }
 
   void FrameCurve();
 

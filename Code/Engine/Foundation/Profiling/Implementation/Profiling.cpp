@@ -30,6 +30,20 @@ private:
 
 static plProfileCaptureDataTransfer s_ProfileCaptureDataTransfer;
 
+namespace
+{
+  static plEventSubscriptionID s_PluginEventSubscription = 0;
+  void PluginEvent(const plPluginEvent& e)
+  {
+    if (e.m_EventType == plPluginEvent::AfterUnloading)
+    {
+      // When a plugin is unloaded we need to clear all profiling data
+      // since they can contain pointers to function names that don't exist anymore.
+      plProfilingSystem::Clear();
+    }
+  }
+}
+
 // clang-format off
 PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ProfilingSystem)
 
@@ -38,11 +52,17 @@ PL_BEGIN_SUBSYSTEM_DECLARATION(Foundation, ProfilingSystem)
   ON_BASESYSTEMS_STARTUP
   {
     plProfilingSystem::Initialize();
+  }
+  
+  ON_CORESYSTEMS_STARTUP
+  { 
+    s_PluginEventSubscription = plPlugin::Events().AddEventHandler(&PluginEvent);
     s_ProfileCaptureDataTransfer.EnableDataTransfer("Profiling Capture");
   }
   ON_CORESYSTEMS_SHUTDOWN
   {
     s_ProfileCaptureDataTransfer.DisableDataTransfer();
+    plPlugin::Events().RemoveEventHandler(s_PluginEventSubscription);
     plProfilingSystem::Reset();
   }
 
@@ -112,17 +132,6 @@ namespace
   static plProfilingSystem::ScopeTimeoutDelegate s_ScopeTimeoutCallback;
 
   static plDynamicArray<plUniquePtr<GPUScopesBuffer>> s_GPUScopes;
-
-  static plEventSubscriptionID s_PluginEventSubscription = 0;
-  void PluginEvent(const plPluginEvent& e)
-  {
-    if (e.m_EventType == plPluginEvent::AfterUnloading)
-    {
-      // When a plugin is unloaded we need to clear all profiling data
-      // since they can contain pointers to function names that don't exist anymore.
-      plProfilingSystem::Clear();
-    }
-  }
 } // namespace
 
 void plProfilingSystem::ProfilingData::Clear()
@@ -744,8 +753,6 @@ void plProfilingSystem::Initialize()
   SetThreadName("Main Thread");
 
   s_MainThreadId = (plUInt64)plThreadUtils::GetCurrentThreadID();
-
-  s_PluginEventSubscription = plPlugin::Events().AddEventHandler(&PluginEvent);
 }
 
 // static
@@ -779,8 +786,6 @@ void plProfilingSystem::Reset()
     }
   }
   s_DeadThreadIDs.Clear();
-
-  plPlugin::Events().RemoveEventHandler(s_PluginEventSubscription);
 }
 
 // static

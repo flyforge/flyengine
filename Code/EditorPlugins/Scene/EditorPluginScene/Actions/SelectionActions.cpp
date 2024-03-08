@@ -264,7 +264,7 @@ void plSelectionAction::Execute(const plVariant& value)
       return;
     }
     case ActionType::HideSelectedObjects:
-      m_pSceneDocument->ShowOrHideSelectedObjects(plSceneDocument::ShowOrHide::Hide);
+      m_pSceneDocument->ToggleHideSelectedObjects();
       m_pSceneDocument->ShowDocumentStatus("Hiding selected objects");
       break;
     case ActionType::HideUnselectedObjects:

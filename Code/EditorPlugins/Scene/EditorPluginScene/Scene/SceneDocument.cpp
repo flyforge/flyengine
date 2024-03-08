@@ -498,6 +498,24 @@ void plSceneDocument::DuplicateSelection()
     history->FinishTransaction();
 }
 
+void plSceneDocument::ToggleHideSelectedObjects()
+{
+  auto sel = GetSelectionManager()->GetSelection();
+
+  for (auto pItem : sel)
+  {
+    if (!pItem->GetTypeAccessor().GetType()->IsDerivedFrom<plGameObject>())
+      continue;
+
+    ApplyRecursive(pItem, [this](const plDocumentObject* pObj)
+    {
+      auto pMeta = m_DocumentObjectMetaData->BeginModifyMetaData(pObj->GetGuid());
+      pMeta->m_bHidden = !pMeta->m_bHidden;
+      m_DocumentObjectMetaData->EndModifyMetaData(plDocumentObjectMetaData::HiddenFlag);
+    });
+  }
+}
+
 void plSceneDocument::ShowOrHideSelectedObjects(ShowOrHide action)
 {
   const bool bHide = action == ShowOrHide::Hide;

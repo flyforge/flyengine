@@ -10,13 +10,25 @@ struct plAtomicStorageType
 };
 
 template <>
-struct plAtomicStorageType<0>
+struct plAtomicStorageType<1>
 {
   using Type = plInt32;
 };
 
 template <>
-struct plAtomicStorageType<1>
+struct plAtomicStorageType<2>
+{
+  using Type = plInt32;
+};
+
+template <>
+struct plAtomicStorageType<4>
+{
+  using Type = plInt32;
+};
+
+template <>
+struct plAtomicStorageType<8>
 {
   using Type = plInt64;
 };
@@ -25,7 +37,7 @@ struct plAtomicStorageType<1>
 template <typename T>
 class plAtomicInteger
 {
-  using UnderlyingType = typename plAtomicStorageType<sizeof(T) / 32>::Type;
+  using UnderlyingType = typename plAtomicStorageType<sizeof(T)>::Type;
 
 public:
   PL_DECLARE_POD_TYPE();
@@ -122,3 +134,5 @@ private:
 
 using plAtomicInteger32 = plAtomicInteger<plInt32>; // [tested]
 using plAtomicInteger64 = plAtomicInteger<plInt64>; // [tested]
+static_assert(sizeof(plAtomicInteger32) == sizeof(plInt32));
+static_assert(sizeof(plAtomicInteger64) == sizeof(plInt64));

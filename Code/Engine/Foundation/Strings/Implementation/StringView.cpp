@@ -119,9 +119,11 @@ const char* plStringView::FindWholeWord_NoCase(const char* szSearchFor, plString
 
 void plStringView::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack)
 {
+  const char* pEnd = m_pStart + m_uiElementCount;
+
   while (IsValid() && (uiShrinkCharsFront > 0))
   {
-    if (plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1).Failed())
+    if (plUnicodeUtils::MoveToNextUtf8(m_pStart, pEnd, 1).Failed())
     {
       *this = {};
       return;
@@ -132,7 +134,7 @@ void plStringView::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBac
 
   while (IsValid() && (uiShrinkCharsBack > 0))
   {
-    if (plUnicodeUtils::MoveToPriorUtf8(m_pEnd, m_pStart, 1).Failed())
+    if (plUnicodeUtils::MoveToPriorUtf8(pEnd, m_pStart, 1).Failed())
     {
       *this = {};
       return;
@@ -140,6 +142,8 @@ void plStringView::Shrink(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBac
 
     --uiShrinkCharsBack;
   }
+
+  m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
 }
 
 plStringView plStringView::GetShrunk(plUInt32 uiShrinkCharsFront, plUInt32 uiShrinkCharsBack) const
@@ -156,23 +160,27 @@ plStringView plStringView::GetSubString(plUInt32 uiFirstCharacter, plUInt32 uiNu
     return {};
   }
 
-  const char* pStart = m_pStart;
-  if (plUnicodeUtils::MoveToNextUtf8(pStart, m_pEnd, uiFirstCharacter).Failed() || pStart == m_pEnd)
+  const char* pEnd = m_pStart + m_uiElementCount;
+
+  const char* pSubStart = m_pStart;
+  if (plUnicodeUtils::MoveToNextUtf8(pSubStart, pEnd, uiFirstCharacter).Failed() || pSubStart == pEnd)
   {
     return {};
   }
 
-  const char* pEnd = pStart;
-  plUnicodeUtils::MoveToNextUtf8(pEnd, m_pEnd, uiNumCharacters).IgnoreResult(); // if it fails, it just points to the end
+  const char* pSubEnd = pSubStart;
+  plUnicodeUtils::MoveToNextUtf8(pSubEnd, pEnd, uiNumCharacters).IgnoreResult(); // if it fails, it just points to the end
 
-  return plStringView(pStart, pEnd);
+  return plStringView(pSubStart, pSubEnd);
 }
 
 void plStringView::ChopAwayFirstCharacterUtf8()
 {
   if (IsValid())
   {
-    plUnicodeUtils::MoveToNextUtf8(m_pStart, m_pEnd, 1).AssertSuccess();
+    const char* pEnd = m_pStart + m_uiElementCount;
+    plUnicodeUtils::MoveToNextUtf8(m_pStart, pEnd, 1).AssertSuccess();
+    m_uiElementCount = static_cast<plUInt32>(pEnd - m_pStart);
   }
 }
 
@@ -183,6 +191,7 @@ void plStringView::ChopAwayFirstCharacterAscii()
     PL_ASSERT_DEBUG(plUnicodeUtils::IsASCII(*m_pStart), "ChopAwayFirstCharacterAscii() was called on a non-ASCII character.");
 
     m_pStart += 1;
+    m_uiElementCount--;
   }
 }
 
@@ -290,7 +299,7 @@ plStringView::plStringView(const std::string_view& rhs)
   if (!rhs.empty())
   {
     m_pStart = rhs.data();
-    m_pEnd = rhs.data() + rhs.size();
+    m_uiElementCount = static_cast<plUInt32>(rhs.size());
   }
 }
 
@@ -299,13 +308,13 @@ plStringView::plStringView(const std::string& rhs)
   if (!rhs.empty())
   {
     m_pStart = rhs.data();
-    m_pEnd = rhs.data() + rhs.size();
+    m_uiElementCount = static_cast<plUInt32>(rhs.size());
   }
 }
 
 std::string_view plStringView::GetAsStdView() const
 {
-  return std::string_view(GetStartPointer(), static_cast<size_t>(GetElementCount()));
+  return std::string_view(m_pStart, static_cast<size_t>(m_uiElementCount));
 }
 
 plStringView::operator std::string_view() const

@@ -11,12 +11,12 @@
 plSpatialData::Category plWindVolumeComponent::SpatialDataCategory = plSpatialData::RegisterCategory("WindVolumes", plSpatialData::Flags::None);
 
 // clang-format off
-PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 2)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plWindVolumeComponent, 3)
 {
   PL_BEGIN_PROPERTIES
   {
     PL_ENUM_MEMBER_PROPERTY("Strength", plWindStrength, m_Strength),
-    PL_MEMBER_PROPERTY("ReverseDirection", m_bReverseDirection),
+    PL_MEMBER_PROPERTY("StrengthFactor", m_fStrengthFactor)->AddAttributes(new plDefaultValueAttribute(1.0f), new plClampValueAttribute(-10, 10)),
     PL_MEMBER_PROPERTY("BurstDuration", m_BurstDuration),
     PL_ENUM_MEMBER_PROPERTY("OnFinishedAction", plOnComponentFinishedAction, m_OnFinishedAction),
   }
@@ -74,7 +74,7 @@ void plWindVolumeComponent::SerializeComponent(plWorldWriter& inout_stream) cons
   s << m_BurstDuration;
   s << m_OnFinishedAction;
   s << m_Strength;
-  s << m_bReverseDirection;
+  s << m_fStrengthFactor;
 }
 
 void plWindVolumeComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -87,9 +87,16 @@ void plWindVolumeComponent::DeserializeComponent(plWorldReader& inout_stream)
   s >> m_OnFinishedAction;
   s >> m_Strength;
 
-  if (uiVersion >= 2)
+  if (uiVersion == 2)
   {
-    s >> m_bReverseDirection;
+    bool bReverse = false;
+    s >> bReverse;
+    m_fStrengthFactor = bReverse ? -1 : 1;
+  }
+
+  if (uiVersion >= 3)
+  {
+    s >> m_fStrengthFactor;
   }
 }
 
@@ -124,8 +131,34 @@ void plWindVolumeComponent::OnMsgDeleteGameObject(plMsgDeleteGameObject& msg)
 
 float plWindVolumeComponent::GetWindInMetersPerSecond() const
 {
-  return m_bReverseDirection ? -plWindStrength::GetInMetersPerSecond(m_Strength) : plWindStrength::GetInMetersPerSecond(m_Strength);
+  return plWindStrength::GetInMetersPerSecond(m_Strength) * m_fStrengthFactor;
 }
+
+//////////////////////////////////////////////////////////////////////////
+
+#include <Foundation/Serialization/AbstractObjectGraph.h>
+#include <Foundation/Serialization/GraphPatch.h>
+
+class plWindVolumeComponentPatch_2_3 : public plGraphPatch
+{
+public:
+  plWindVolumeComponentPatch_2_3()
+    : plGraphPatch("plWindVolumeComponent", 3)
+  {
+  }
+
+  virtual void Patch(plGraphPatchContext& ref_context, plAbstractObjectGraph* pGraph, plAbstractObjectNode* pNode) const override
+  {
+    auto pReverseDirection = pNode->FindProperty("ReverseDirection");
+    if (pReverseDirection && pReverseDirection->m_Value.IsA<bool>())
+    {
+      float fFactor = pReverseDirection->m_Value.Get<bool>() ? -1 : 1;
+      pNode->AddProperty("StrengthFactor", fFactor);
+    }
+  }
+};
+
+plWindVolumeComponentPatch_2_3 g_plWindVolumeComponentPatch_2_3;
 
 //////////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////

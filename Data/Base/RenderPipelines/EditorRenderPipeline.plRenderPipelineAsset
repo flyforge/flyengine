@@ -414,7 +414,7 @@ o
 		Uuid %DepthStencil{u4{14781329720410134245,9401591029305841606}}
 		s %Message{""}
 		s %Name{"SimplePass"}
-		Vec2 %Node::Pos{f{0x23920B44,0xBB238CC3}}
+		Vec2 %Node::Pos{f{0xC5FDE843,0x39597AC3}}
 	}
 }
 o
@@ -517,14 +517,15 @@ o
 }
 o
 {
-	Uuid %id{u4{639789027250908043,5272197286589729626}}
-	s %t{"plVisibleObjectsExtractor"}
+	Uuid %id{u4{6897661997986903480,5304678722976394240}}
+	s %t{"DocumentNodeManager_DefaultConnection"}
 	u3 %v{1}
 	p
 	{
-		b %Active{1}
-		s %Name{""}
-		Vec2 %Node::Pos{f{0x3C4A86C3,0x6FCB52C4}}
+		Uuid %Connection::Source{u4{12025421613094468508,5132296434815839289}}
+		s %Connection::SourcePin{"Color"}
+		Uuid %Connection::Target{u4{5337417953507971717,4998845232377556947}}
+		s %Connection::TargetPin{"Color"}
 	}
 }
 o
@@ -758,14 +759,14 @@ o
 		b %Active{1}
 		ColorGamma %InnerTintColor{u1{255,255,255,255}}
 		Uuid %Input{u4{14875504142847411101,10765359602908898676}}
-		f %Intensity{0xCDCC4C3E}
+		f %Intensity{0xB81E053E}
 		ColorGamma %MidTintColor{u1{255,255,255,255}}
 		s %Name{""}
-		Vec2 %Node::Pos{f{0x8B9644C1,0x4C529AC3}}
+		Vec2 %Node::Pos{f{0x4DDB15C3,0xF80785C3}}
 		ColorGamma %OuterTintColor{u1{225,231,255,255}}
 		Uuid %Output{u4{4866503527658670639,15345668804944135890}}
 		f %Radius{0xCDCC4C3E}
-		f %Threshold{0x0000803F}
+		f %Threshold{0x00004844}
 	}
 }
 o

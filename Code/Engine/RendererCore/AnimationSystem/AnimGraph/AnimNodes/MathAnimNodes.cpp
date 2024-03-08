@@ -243,6 +243,87 @@ void plBoolToNumberAnimNode::Step(plAnimController& ref_controller, plAnimGraphI
   m_OutNumber.SetNumber(ref_graph, m_InValue.GetBool(ref_graph) ? m_fTrueValue : m_fFalseValue);
 }
 
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////
 
+
+// clang-format off
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plBoolToTriggerAnimNode, 1, plRTTIDefaultAllocator<plBoolToTriggerAnimNode>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("InValue", m_InValue)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("OutOnTrue", m_OutOnTrue)->AddAttributes(new plHiddenAttribute),
+    PL_MEMBER_PROPERTY("OutOnFalse", m_OutOnFalse)->AddAttributes(new plHiddenAttribute),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_ATTRIBUTES
+  {
+    new plCategoryAttribute("Logic"),
+    new plTitleAttribute("Bool To Event"),
+  }
+  PL_END_ATTRIBUTES;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
+// clang-format on
+
+plBoolToTriggerAnimNode::plBoolToTriggerAnimNode() = default;
+plBoolToTriggerAnimNode::~plBoolToTriggerAnimNode() = default;
+
+plResult plBoolToTriggerAnimNode::SerializeNode(plStreamWriter& stream) const
+{
+  stream.WriteVersion(1);
+
+  PL_SUCCEED_OR_RETURN(SUPER::SerializeNode(stream));
+
+  PL_SUCCEED_OR_RETURN(m_InValue.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Serialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Serialize(stream));
+
+  return PL_SUCCESS;
+}
+
+plResult plBoolToTriggerAnimNode::DeserializeNode(plStreamReader& stream)
+{
+  stream.ReadVersion(1);
+
+  PL_SUCCEED_OR_RETURN(SUPER::DeserializeNode(stream));
+
+  PL_SUCCEED_OR_RETURN(m_InValue.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnTrue.Deserialize(stream));
+  PL_SUCCEED_OR_RETURN(m_OutOnFalse.Deserialize(stream));
+
+  return PL_SUCCESS;
+}
+
+bool plBoolToTriggerAnimNode::GetInstanceDataDesc(plInstanceDataDesc& out_desc) const
+{
+  out_desc.FillFromType<InstanceData>();
+  return true;
+}
+
+void plBoolToTriggerAnimNode::Step(plAnimController& ref_controller, plAnimGraphInstance& ref_graph, plTime tDiff, const plSkeletonResource* pSkeleton, plGameObject* pTarget) const
+{
+  InstanceData* pInstance = ref_graph.GetAnimNodeInstanceData<InstanceData>(*this);
+
+  const bool bIsTrueNow = m_InValue.GetBool(ref_graph);
+  const plInt8 iIsTrueNow = bIsTrueNow ? 1 : 0;
+
+  // we use a tri-state bool here to ensure that OnTrue or OnFalse get fired right away
+  if (pInstance->m_iIsTrue != iIsTrueNow)
+  {
+    pInstance->m_iIsTrue = iIsTrueNow;
+
+    if (bIsTrueNow)
+    {
+      m_OutOnTrue.SetTriggered(ref_graph);
+    }
+    else
+    {
+      m_OutOnFalse.SetTriggered(ref_graph);
+    }
+  }
+}
 
 PL_STATICLINK_FILE(RendererCore, RendererCore_AnimationSystem_AnimGraph_AnimNodes_MathAnimNodes);

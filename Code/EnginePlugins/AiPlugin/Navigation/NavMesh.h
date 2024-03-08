@@ -95,7 +95,19 @@ public:
   /// Returns true, if all the sectors are already available, false when any of them needs to be built first.
   bool RequestSector(const plVec2& vCenter, const plVec2& vHalfExtents);
 
-  // void InvalidateSector(SectorID sectorID);
+  /// \brief Marks the sector as invalidated.
+  ///
+  /// Invalidated sectors are considered out of date and must be rebuilt before they can be used again.
+  /// If bRebuildAsSoonAsPossible is true, the sector is queued to be rebuilt as soon as possible.
+  /// Otherwise, it will be unloaded and will not be rebuilt until it is requested again.
+  void InvalidateSector(SectorID sectorID, bool bRebuildAsSoonAsPossible);
+
+  /// \brief Marks all sectors within the given rectangle as invalidated.
+  ///
+  /// Invalidated sectors are considered out of date and must be rebuilt before they can be used again.
+  /// If bRebuildAsSoonAsPossible is true, the sector is queued to be rebuilt as soon as possible.
+  /// Otherwise, it will be unloaded and will not be rebuilt until it is requested again.
+  void InvalidateSector(const plVec2& vCenter, const plVec2& vHalfExtents, bool bRebuildAsSoonAsPossible);
 
   void FinalizeSectorUpdates();
 
@@ -106,6 +118,7 @@ public:
 
   void DebugDraw(plDebugRendererContext context, const plAiNavigationConfig& config);
 
+  const plAiNavmeshConfig& GetConfig() const { return m_NavmeshConfig; }
 private:
   void DebugDrawSector(plDebugRendererContext context, const plAiNavigationConfig& config, int iTileIdx);
 
@@ -119,8 +132,9 @@ private:
   dtNavMesh* m_pNavMesh = nullptr;
   plMap<SectorID, plAiNavMeshSector> m_Sectors;
   plDeque<SectorID> m_RequestedSectors;
-  // plHybridArray<SectorID, 32> m_InvalidatedSectors;
 
   plMutex m_Mutex;
   plDynamicArray<SectorID> m_UpdatingSectors;
+
+  plDynamicArray<SectorID> m_UnloadingSectors;
 };

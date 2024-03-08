@@ -17,6 +17,9 @@ plQtEventTrackEditorWidget::plQtEventTrackEditorWidget(QWidget* pParent)
 
   EventTrackEdit->SetGridBarWidget(GridBarWidget);
 
+  // make sure the track is visible and not completely squashed
+  EventTrackEdit->setMinimumHeight(50);
+
   connect(EventTrackEdit, &plQtEventTrackWidget::DeleteControlPointsEvent, this, &plQtEventTrackEditorWidget::onDeleteControlPoints);
   connect(EventTrackEdit, &plQtEventTrackWidget::DoubleClickEvent, this, &plQtEventTrackEditorWidget::onDoubleClick);
   connect(EventTrackEdit, &plQtEventTrackWidget::MoveControlPointsEvent, this, &plQtEventTrackEditorWidget::onMoveControlPoints);
@@ -76,6 +79,14 @@ void plQtEventTrackEditorWidget::on_AddEventButton_clicked()
 
     FillEventComboBox(name.toUtf8().data());
   }
+}
+
+void plQtEventTrackEditorWidget::on_InsertEventButton_clicked()
+{
+  int curveIdx = 0, cpIdx = 0;
+  double posX = plMath::Max(EventTrackEdit->GetScrubberPosition(), 0.0);
+
+  Q_EMIT InsertCpEvent(m_pData->TickFromTime(plTime::MakeFromSeconds(posX)), ComboType->currentText().toUtf8().data());
 }
 
 void plQtEventTrackEditorWidget::onDeleteControlPoints()

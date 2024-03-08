@@ -43,7 +43,7 @@ plMinWindows::HANDLE plMiniDumpUtils::GetProcessHandleWithNecessaryRights(plUInt
   return hProcess;
 }
 
-plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, struct _EXCEPTION_POINTERS* pExceptionInfo)
+plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, struct _EXCEPTION_POINTERS* pExceptionInfo, plDumpType dumpTypeOverride)
 {
   HMODULE hDLL = ::LoadLibraryA("dbghelp.dll");
 
@@ -62,7 +62,7 @@ plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 
   plUInt32 dumpType = MiniDumpWithHandleData | MiniDumpWithModuleHeaders | MiniDumpWithUnloadedModules | MiniDumpWithProcessThreadData |
                       MiniDumpWithFullMemoryInfo | MiniDumpWithThreadInfo;
 
-  if (opt_FullCrashDumps.GetOptionValue(plCommandLineOption::LogMode::Always))
+  if ((opt_FullCrashDumps.GetOptionValue(plCommandLineOption::LogMode::Always) && dumpTypeOverride == plDumpType::Auto) || dumpTypeOverride == plDumpType::MiniDumpWithFullMemory)
   {
     dumpType |= MiniDumpWithFullMemory;
   }
@@ -98,19 +98,19 @@ plStatus plMiniDumpUtils::WriteProcessMiniDump(plStringView sDumpFile, plUInt32 
   return plStatus(PL_SUCCESS);
 }
 
-plStatus plMiniDumpUtils::WriteOwnProcessMiniDump(plStringView sDumpFile, struct _EXCEPTION_POINTERS* pExceptionInfo)
+plStatus plMiniDumpUtils::WriteOwnProcessMiniDump(plStringView sDumpFile, struct _EXCEPTION_POINTERS* pExceptionInfo, plDumpType dumpTypeOverride)
 {
-  return WriteProcessMiniDump(sDumpFile, GetCurrentProcessId(), GetCurrentProcess(), pExceptionInfo);
+  return WriteProcessMiniDump(sDumpFile, GetCurrentProcessId(), GetCurrentProcess(), pExceptionInfo, dumpTypeOverride);
 }
 
-plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess)
+plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plMinWindows::HANDLE hProcess, plDumpType dumpTypeOverride)
 {
-  return WriteProcessMiniDump(sDumpFile, uiProcessID, hProcess, nullptr);
+  return WriteProcessMiniDump(sDumpFile, uiProcessID, hProcess, nullptr, dumpTypeOverride);
 }
 
 #  endif
 
-plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID)
+plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, plUInt32 uiProcessID, plDumpType dumpTypeOverride)
 {
 #  if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   HANDLE hProcess = plMiniDumpUtils::GetProcessHandleWithNecessaryRights(uiProcessID);
@@ -120,14 +120,14 @@ plStatus plMiniDumpUtils::WriteExternalProcessMiniDump(plStringView sDumpFile, p
     return plStatus("Cannot access process for mini-dump writing (PID invalid or not enough rights).");
   }
 
-  return WriteProcessMiniDump(sDumpFile, uiProcessID, hProcess, nullptr);
+  return WriteProcessMiniDump(sDumpFile, uiProcessID, hProcess, nullptr, dumpTypeOverride);
 
 #  else
   return plStatus("Not implemented on UPW");
 #  endif
 }
 
-plStatus plMiniDumpUtils::LaunchMiniDumpTool(plStringView sDumpFile)
+plStatus plMiniDumpUtils::LaunchMiniDumpTool(plStringView sDumpFile, plDumpType dumpTypeOverride)
 {
 #  if PL_ENABLED(PL_PLATFORM_WINDOWS_DESKTOP)
   plStringBuilder sDumpToolPath = plOSFile::GetApplicationDirectory();
@@ -144,7 +144,7 @@ plStatus plMiniDumpUtils::LaunchMiniDumpTool(plStringView sDumpFile)
   procOpt.m_Arguments.PushBack("-f");
   procOpt.m_Arguments.PushBack(sDumpFile);
 
-  if (opt_FullCrashDumps.GetOptionValue(plCommandLineOption::LogMode::Always))
+  if ((opt_FullCrashDumps.GetOptionValue(plCommandLineOption::LogMode::Always) && dumpTypeOverride == plDumpType::Auto) || dumpTypeOverride == plDumpType::MiniDumpWithFullMemory)
   {
     // forward the '-fullcrashdumps' command line argument
     procOpt.AddArgument("-fullcrashdumps");
@@ -165,5 +165,4 @@ plStatus plMiniDumpUtils::LaunchMiniDumpTool(plStringView sDumpFile)
 }
 
 #endif
-
 
