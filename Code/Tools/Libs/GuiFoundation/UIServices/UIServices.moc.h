@@ -109,7 +109,7 @@ public:
   
   static plStatus OpenIn10X(const char* szPath);
   
-  static plStatus OpenInSublimeText(const QStringList& arguments);
+  static plStatus OpenInVisualStudio(const char* szPath);
 
   /// \brief Attempts to launch Visual Studio Code with the given command line
   static plStatus OpenInVsCode(const QStringList& arguments);

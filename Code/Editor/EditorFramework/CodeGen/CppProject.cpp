@@ -20,11 +20,12 @@
 // clang-format off
 PL_BEGIN_STATIC_REFLECTED_ENUM(plIDE, 1)
   PL_ENUM_CONSTANT(plIDE::Clion),
-  PL_ENUM_CONSTANT(plIDE::Rider),
-  PL_ENUM_CONSTANT(plIDE::_10x),
   PL_ENUM_CONSTANT(plIDE::VisualStudioCode),
 #if PL_ENABLED(PL_PLATFORM_WINDOWS)
+  PL_ENUM_CONSTANT(plIDE::Rider),
+  PL_ENUM_CONSTANT(plIDE::_10x),
   PL_ENUM_CONSTANT(plIDE::VisualStudio),
+  PL_ENUM_CONSTANT(plIDE::SolutionDefault),
 #endif
 PL_END_STATIC_REFLECTED_ENUM;
 
@@ -263,17 +264,16 @@ plStatus plCppProject::OpenSolution(const plCppSettings& cfg)
   {
 #if PL_ENABLED(PL_PLATFORM_WINDOWS)
     case plIDE::VisualStudio:
-      if (!plQtUiServices::OpenFileInDefaultProgram(plCppProject::GetSolutionPath(cfg)))
+      if (plStatus status = plQtUiServices::OpenInVisualStudio(plCppProject::GetSolutionPath(cfg)); status.Failed())
       {
         return plStatus("Opening the solution in Visual Studio failed.");
       }
       break;
-#endif
     case plIDE::Rider:
     {
       if (plStatus status = plQtUiServices::OpenInRider(plCppProject::GetSolutionPath(cfg)); status.Failed())
       {
-        return plStatus("Opening the solution in Visual Studio failed.");
+        return plStatus(plFmt("Opening Rider failed: {}", status.m_sMessage));
       }
       break;
     }
@@ -281,10 +281,19 @@ plStatus plCppProject::OpenSolution(const plCppSettings& cfg)
     {
       if (plStatus status = plQtUiServices::OpenIn10X(plCppProject::GetSolutionPath(cfg)); status.Failed())
       {
-        return plStatus("Opening the solution in Visual Studio failed.");
+        return plStatus(plFmt("Opening 10x failed: {}", status.m_sMessage));
       }
       break;
     }
+    case plIDE::SolutionDefault:
+    {
+      if (!plQtUiServices::OpenFileInDefaultProgram(plCppProject::GetSolutionPath(cfg)))
+      {
+        return plStatus("Opening the solution failed.");
+      }
+      break;
+    }
+#endif
     case plIDE::Clion:
     {
       auto solutionPath = plCppProject::GetTargetSourceDir();
