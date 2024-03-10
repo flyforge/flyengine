@@ -388,6 +388,135 @@ void plQtUiServices::OpenInExplorer(const char* szPath, bool bIsFile)
 #endif
 }
 
+plStatus plQtUiServices::OpenInClion(const QStringList& arguments)
+{
+  QString sClionPath;
+
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+  QSettings settings("\\HKEY_CURRENT_USER\\SOFTWARE\\JetBrains\\Toolbox\\", QSettings::NativeFormat);
+  QString sToolboxKey = settings.value(".", "").value<QString>();
+
+  QString sToolboxPath = sToolboxKey.replace("\\", "/").replace("\"", "");
+  sToolboxPath.append("/../.settings.json");
+
+  if (QFile::exists(sToolboxPath))
+  {
+
+    QFile file(sToolboxPath);
+    file.open(QIODevice::ReadOnly);
+
+    QByteArray rawData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(rawData);
+
+    QJsonObject rootObject = doc.object();
+    QJsonValue shellPathValue = rootObject.value("shell_scripts");
+    QJsonObject shellPathObject = shellPathValue.toObject();
+    sClionPath = shellPathObject.value("location").toString().replace("\\", "/").replace("\"", "");
+    sClionPath.append("/clion.cmd");
+    file.close();
+  }
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+  if (QFile::exists("/opt/clion/bin/clion.sh"))
+  {
+    sClionPath = "/opt/clion/bin/clion.sh";
+  }
+  else
+  {
+    // Maybe its in path????
+    sClionPath = "clion.sh";
+  }
+#else
+  return plStatus("Platform not currently setup to find clion.");
+#endif
+
+  if (!QProcess::startDetached(sClionPath, arguments))
+  {
+    return plStatus("Unable to find Clion. Potentially not installed or install setup not currently supported");
+  }
+  
+  return plStatus(PL_SUCCESS);
+}
+
+plStatus plQtUiServices::OpenInRider(const char* szPath)
+{
+  QString sRiderPath;
+
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+  QSettings settings("\\HKEY_CURRENT_USER\\SOFTWARE\\JetBrains\\Toolbox\\", QSettings::NativeFormat);
+  QString sToolboxKey = settings.value(".", "").value<QString>();
+
+  QString sToolboxPath = sToolboxKey.replace("\\", "/").replace("\"", "");
+  sToolboxPath.append("/../.settings.json");
+
+  if (QFile::exists(sToolboxPath))
+  {
+
+    QFile file(sToolboxPath);
+    file.open(QIODevice::ReadOnly);
+
+    QByteArray rawData = file.readAll();
+    QJsonDocument doc = QJsonDocument::fromJson(rawData);
+
+    QJsonObject rootObject = doc.object();
+    QJsonValue shellPathValue = rootObject.value("shell_scripts");
+    QJsonObject shellPathObject = shellPathValue.toObject();
+    sRiderPath = shellPathObject.value("location").toString().replace("\\", "/").replace("\"", "");
+    sRiderPath.append("/rider.cmd");
+    file.close();
+  }
+#elif PL_ENABLED(PL_PLATFORM_LINUX)
+  if (QFile::exists("/opt/rider/bin/rider.sh"))
+  {
+    sRiderPath = "/opt/clion/bin/rider.sh";
+  }
+  else
+  {
+    // Maybe its in path????
+    sRiderPath = "rider.sh";
+  }
+#else
+  return plStatus("Platform not currently setup to find rider.");
+#endif
+
+  QStringList arguments;
+  arguments.push_back(szPath);
+
+  if (!QProcess::startDetached(sRiderPath, arguments))
+  {
+    return plStatus("Unable to find Clion. Potentially not installed or install setup not currently supported");
+  }
+
+  return plStatus(PL_SUCCESS);
+}
+
+plStatus plQtUiServices::OpenIn10X(const char* szPath)
+{
+  QString s10xExe;
+#if PL_ENABLED(PL_PLATFORM_WINDOWS)
+  QSettings settings("\\HKEY_LOCAL_MACHINE\\SOFTWARE\\Classes\\Applications\\10x.exe\\shell\\open\\command", QSettings::NativeFormat);
+  QString s10xExeKey = settings.value(".", "").value<QString>();
+
+  if (s10xExeKey.length() > 5)
+  {
+    // Remove shell parameter and normalize QT Compatible path, QFile expects the file separator to be '/' regardless of operating system
+    s10xExe = s10xExeKey.left(s10xExeKey.length() - 5).replace("\\", "/").replace("\"", "");
+  }
+#else
+  return plStatus("Platform not currently setup to find 10x.");
+#endif
+
+  QStringList arguments;
+  arguments.push_back(szPath);
+
+  QProcess proc;
+  if (proc.startDetached(s10xExe, arguments) == false)
+  {
+    return plStatus("Failed to launch 10x.");
+  }
+
+  return plStatus(PL_SUCCESS);
+}
+
 plStatus plQtUiServices::OpenInVsCode(const QStringList& arguments)
 {
   QString sVsCodeExe;

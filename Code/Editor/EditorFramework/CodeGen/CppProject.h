@@ -14,6 +14,9 @@ struct PL_EDITORFRAMEWORK_DLL plIDE
 
   enum Enum
   {
+    Clion,
+    Rider,
+    _10x,
     VisualStudioCode,
 #if PL_ENABLED(PL_PLATFORM_WINDOWS)
     VisualStudio,

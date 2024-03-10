@@ -19,6 +19,9 @@
 
 // clang-format off
 PL_BEGIN_STATIC_REFLECTED_ENUM(plIDE, 1)
+  PL_ENUM_CONSTANT(plIDE::Clion),
+  PL_ENUM_CONSTANT(plIDE::Rider),
+  PL_ENUM_CONSTANT(plIDE::_10x),
   PL_ENUM_CONSTANT(plIDE::VisualStudioCode),
 #if PL_ENABLED(PL_PLATFORM_WINDOWS)
   PL_ENUM_CONSTANT(plIDE::VisualStudio),
@@ -266,6 +269,34 @@ plStatus plCppProject::OpenSolution(const plCppSettings& cfg)
       }
       break;
 #endif
+    case plIDE::Rider:
+    {
+      if (plStatus status = plQtUiServices::OpenInRider(plCppProject::GetSolutionPath(cfg)); status.Failed())
+      {
+        return plStatus("Opening the solution in Visual Studio failed.");
+      }
+      break;
+    }
+    case plIDE::_10x:
+    {
+      if (plStatus status = plQtUiServices::OpenIn10X(plCppProject::GetSolutionPath(cfg)); status.Failed())
+      {
+        return plStatus("Opening the solution in Visual Studio failed.");
+      }
+      break;
+    }
+    case plIDE::Clion:
+    {
+      auto solutionPath = plCppProject::GetTargetSourceDir();
+      QStringList args;
+      args.push_back(QString::fromUtf8(solutionPath.GetData(), solutionPath.GetElementCount()));
+
+      if (plStatus status = plQtUiServices::OpenInClion(args); status.Failed())
+      {
+        return plStatus(plFmt("Opening Clion failed: {}", status.m_sMessage));
+      }
+      break;
+    }
     case plIDE::VisualStudioCode:
     {
       auto solutionPath = plCppProject::GetTargetSourceDir();

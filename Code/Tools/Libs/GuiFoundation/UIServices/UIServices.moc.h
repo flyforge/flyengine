@@ -103,6 +103,14 @@ public:
   /// \brief Opens the given file or folder in the Explorer
   static void OpenInExplorer(const char* szPath, bool bIsFile);
 
+  static plStatus OpenInClion(const QStringList& arguments);
+
+  static plStatus OpenInRider(const char* szPath);
+  
+  static plStatus OpenIn10X(const char* szPath);
+  
+  static plStatus OpenInSublimeText(const QStringList& arguments);
+
   /// \brief Attempts to launch Visual Studio Code with the given command line
   static plStatus OpenInVsCode(const QStringList& arguments);
 
