@@ -103,6 +103,7 @@ PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plAssetActions::MapToolBarActions("AssetBrowserToolBar", false);
 
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plFileBrowserAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtFilePropertyWidget(); });
+    plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plExternalFileBrowserAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtExternalFilePropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plAssetBrowserAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtAssetPropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plDynamicEnumAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtDynamicEnumPropertyWidget(); });
     plQtPropertyGridWidget::GetFactory().RegisterCreator(plGetStaticRTTI<plDynamicStringEnumAttribute>(), [](const plRTTI* pRtti)->plQtPropertyWidget* { return new plQtDynamicStringEnumPropertyWidget(); });
@@ -149,6 +150,7 @@ PL_BEGIN_SUBSYSTEM_DECLARATION(EditorFramework, EditorFrameworkMain)
     plCommonAssetActions::UnregisterActions();
 
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plFileBrowserAttribute>());
+    plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plExternalFileBrowserAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plAssetBrowserAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plDynamicEnumAttribute>());
     plQtPropertyGridWidget::GetFactory().UnregisterCreator(plGetStaticRTTI<plDynamicStringEnumAttribute>());

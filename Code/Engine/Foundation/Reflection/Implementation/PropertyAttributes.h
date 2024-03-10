@@ -1074,3 +1074,27 @@ class PL_FOUNDATION_DLL plGroupNextAttribute : public plTypeWidgetAttribute
 public:
   plGroupNextAttribute() = default;
 };
+
+/// \brief Indicates that the string property should allow to browse for an file (or programs) outside the project directories.
+///
+/// Allows to specify the title for the browse dialog and the allowed file types.
+/// Usage: PL_MEMBER_PROPERTY("File", m_sFilePath)->AddAttributes(new plFileBrowserAttribute("Choose a File", "*.exe")),
+class PL_FOUNDATION_DLL plExternalFileBrowserAttribute : public plTypeWidgetAttribute
+{
+  PL_ADD_DYNAMIC_REFLECTION(plExternalFileBrowserAttribute, plTypeWidgetAttribute);
+
+public:
+  plExternalFileBrowserAttribute() = default;
+  plExternalFileBrowserAttribute(plStringView sDialogTitle, plStringView sTypeFilter)
+    : m_sDialogTitle(sDialogTitle)
+    , m_sTypeFilter(sTypeFilter)
+  {
+  }
+
+  plStringView GetDialogTitle() const { return m_sDialogTitle; }
+  plStringView GetTypeFilter() const { return m_sTypeFilter; }
+
+private:
+  plUntrackedString m_sDialogTitle;
+  plUntrackedString m_sTypeFilter;
+};

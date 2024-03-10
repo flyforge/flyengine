@@ -1132,6 +1132,21 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plGroupNextAttribute, 1, plRTTIDefaultAllocator<
 PL_END_DYNAMIC_REFLECTED_TYPE;
 // clang-format on
 
+PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plExternalFileBrowserAttribute, 1, plRTTIDefaultAllocator<plExternalFileBrowserAttribute>)
+{
+  PL_BEGIN_PROPERTIES
+  {
+    PL_MEMBER_PROPERTY("Title", m_sDialogTitle),
+    PL_MEMBER_PROPERTY("Filter", m_sTypeFilter),
+  }
+  PL_END_PROPERTIES;
+  PL_BEGIN_FUNCTIONS
+  {
+    PL_CONSTRUCTOR_PROPERTY(plStringView, plStringView),
+  }
+  PL_END_FUNCTIONS;
+}
+PL_END_DYNAMIC_REFLECTED_TYPE;
 
 //////////////////////////////////////////////////////////////////////////
 

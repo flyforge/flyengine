@@ -22,6 +22,7 @@ struct PL_EDITORFRAMEWORK_DLL plIDE
     VisualStudio,
     SolutionDefault,
 #endif
+    CustomOpenFolder,
 
 #if PL_ENABLED(PL_PLATFORM_WINDOWS)
     Default = VisualStudio
@@ -159,6 +160,7 @@ struct PL_EDITORFRAMEWORK_DLL plCppProject : public plPreferences
 private:
   plEnum<plIDE> m_Ide;
   plCompilerPreferences m_CompilerPreferences;
+  plString m_CustomIDEPath;
 
 
   static plDynamicArray<MachineSpecificCompilerPaths> s_MachineSpecificCompilers;

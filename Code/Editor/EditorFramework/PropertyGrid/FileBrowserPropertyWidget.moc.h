@@ -34,3 +34,29 @@ protected:
   QToolButton* m_pButton = nullptr;
 };
 
+class PL_EDITORFRAMEWORK_DLL plQtExternalFilePropertyWidget : public plQtStandardPropertyWidget
+{
+  Q_OBJECT
+
+public:
+  plQtExternalFilePropertyWidget();
+  bool IsValidFileReference(plStringView sFile) const;
+
+private Q_SLOTS:
+  void on_BrowseFile_clicked();
+
+protected slots:
+  void on_TextFinished_triggered();
+  void on_TextChanged_triggered(const QString& value);
+  void OnOpenExplorer();
+  void OnOpenFile();
+
+protected:
+  virtual void OnInit() override;
+  virtual void InternalSetValue(const plVariant& value) override;
+
+protected:
+  QHBoxLayout* m_pLayout = nullptr;
+  QLineEdit* m_pWidget = nullptr;
+  QToolButton* m_pButton = nullptr;
+};

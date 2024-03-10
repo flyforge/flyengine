@@ -27,6 +27,7 @@ PL_BEGIN_STATIC_REFLECTED_ENUM(plIDE, 1)
   PL_ENUM_CONSTANT(plIDE::VisualStudio),
   PL_ENUM_CONSTANT(plIDE::SolutionDefault),
 #endif
+  PL_ENUM_CONSTANT(plIDE::CustomOpenFolder),
 PL_END_STATIC_REFLECTED_ENUM;
 
 PL_BEGIN_STATIC_REFLECTED_ENUM(plCompiler, 1)
@@ -68,6 +69,7 @@ PL_BEGIN_DYNAMIC_REFLECTED_TYPE(plCppProject, 1, plRTTIDefaultAllocator<plCppPro
   {
     PL_ENUM_MEMBER_PROPERTY("CppIDE", plIDE, m_Ide),
     PL_MEMBER_PROPERTY("CompilerPreferences", m_CompilerPreferences),
+    PL_MEMBER_PROPERTY("CustomIDEPath", m_CustomIDEPath)->AddAttributes(new plExternalFileBrowserAttribute("Select Editor", "*.exe"_plsv)),
   }
   PL_END_PROPERTIES;
 }
@@ -294,6 +296,21 @@ plStatus plCppProject::OpenSolution(const plCppSettings& cfg)
       break;
     }
 #endif
+    case plIDE::CustomOpenFolder:
+    {
+      QString path = plMakeQString(preferences->m_CustomIDEPath);
+
+      auto solutionPath = plCppProject::GetTargetSourceDir();
+      QStringList args;
+      args.push_back(QString::fromUtf8(solutionPath.GetData(), solutionPath.GetElementCount()));
+
+      QProcess proc;
+      if (proc.startDetached(path, args) == false)
+      {
+        return plStatus("Failed open in IDE.");
+      }
+      break;
+    }
     case plIDE::Clion:
     {
       auto solutionPath = plCppProject::GetTargetSourceDir();
