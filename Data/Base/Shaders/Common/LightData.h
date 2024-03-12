@@ -27,12 +27,17 @@ struct PL_SHADER_STRUCT plPerLightData
   UINT1(projectorAtlasOffset); // xy as 16 bit floats
   UINT1(projectorAtlasScale); // xy as 16 bit floats
   FLOAT1(specularMultiplier);
+
+  FLOAT1(length);
+  FLOAT1(width);
+  UINT1(upDirection);
+  FLOAT1(unused2);
 };
 
 #if PL_ENABLED(PLATFORM_SHADER)
   StructuredBuffer<plPerLightData> perLightDataBuffer;
 #else
-  PL_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 48);
+  PL_CHECK_AT_COMPILETIME(sizeof(plPerLightData) == 64);
 #endif
 
 struct PL_SHADER_STRUCT plPointShadowData

@@ -171,7 +171,10 @@ namespace
     ref_perLightData.colorAndType = *reinterpret_cast<plUInt32*>(&lightColor.r);
     ref_perLightData.intensity = pLightRenderData->m_fIntensity;
     ref_perLightData.specularMultiplier = pLightRenderData->m_fSpecularMultiplier;
+    ref_perLightData.width = pLightRenderData->m_fWidth;
+    ref_perLightData.length = pLightRenderData->m_fLength;
     ref_perLightData.shadowDataOffset = pLightRenderData->m_uiShadowDataOffset;
+    ref_perLightData.upDirection = plShaderUtils::Float3ToRGB10(pLightRenderData->m_GlobalTransform.m_qRotation * plVec3(0, 1, 0));
   }
 
   void FillPointLightData(plPerLightData& ref_perLightData, const plPointLightRenderData* pPointLightRenderData)

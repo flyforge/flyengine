@@ -19,7 +19,7 @@ void plLightRenderData::FillBatchIdAndSortingKey(float fScreenSpaceSize)
 //////////////////////////////////////////////////////////////////////////
 
 // clang-format off
-PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 5)
+PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 6)
 {
   PL_BEGIN_PROPERTIES
   {
@@ -28,6 +28,8 @@ PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 5)
     PL_ACCESSOR_PROPERTY("Temperature", GetTemperature, SetTemperature)->AddAttributes(new plImageSliderUiAttribute("LightTemperature"), new plDefaultValueAttribute(6550), new plClampValueAttribute(1000, 15000)),
     PL_ACCESSOR_PROPERTY("Intensity", GetIntensity, SetIntensity)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(10.0f)),
     PL_ACCESSOR_PROPERTY("SpecularMultiplier", GetSpecularMultiplier, SetSpecularMultiplier)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(1.0f)),
+    PL_ACCESSOR_PROPERTY("Width", GetWidth, SetWidth)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f)),
+    PL_ACCESSOR_PROPERTY("Length", GetLength, SetLength)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f)),
     PL_ACCESSOR_PROPERTY("CastShadows", GetCastShadows, SetCastShadows),
     PL_ACCESSOR_PROPERTY("PenumbraSize", GetPenumbraSize, SetPenumbraSize)->AddAttributes(new plClampValueAttribute(0.0f, 0.5f), new plDefaultValueAttribute(0.1f), new plSuffixAttribute(" m")),
     PL_ACCESSOR_PROPERTY("SlopeBias", GetSlopeBias, SetSlopeBias)->AddAttributes(new plClampValueAttribute(0.0f, 10.0f), new plDefaultValueAttribute(0.25f)),
@@ -171,6 +173,30 @@ float plLightComponent::GetConstantBias() const
   return m_fConstantBias;
 }
 
+void plLightComponent::SetWidth(float fWidth)
+{
+  m_fWidth = fWidth;
+
+  InvalidateCachedRenderData();
+}
+
+float plLightComponent::GetWidth() const
+{
+  return m_fWidth;
+}
+
+void plLightComponent::SetLength(float fLength)
+{
+  m_fLength = fLength;
+
+  InvalidateCachedRenderData();
+}
+
+float plLightComponent::GetLength() const
+{
+  return m_fLength;
+}
+
 void plLightComponent::SerializeComponent(plWorldWriter& inout_stream) const
 {
   SUPER::SerializeComponent(inout_stream);
@@ -185,6 +211,8 @@ void plLightComponent::SerializeComponent(plWorldWriter& inout_stream) const
   s << m_bUseColorTemperature;
   s << m_uiTemperature;
   s << m_fSpecularMultiplier;
+  s << m_fWidth;
+  s << m_fLength;
 }
 
 void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
@@ -216,6 +244,12 @@ void plLightComponent::DeserializeComponent(plWorldReader& inout_stream)
     s >> m_bUseColorTemperature;
     s >> m_uiTemperature;
     s >> m_fSpecularMultiplier;
+  }
+
+  if(uiVersion >= 6)
+  {
+    s >> m_fWidth;
+    s >> m_fLength;
   }
 }
 

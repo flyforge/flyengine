@@ -279,7 +279,6 @@ AccumulatedLight DefaultShadingNew(plMaterialData matData, float3 L, float3 V)
  }
 
  #if defined(USE_MATERIAL_SPECULAR_CLEARCOAT)
-   matData.clearcoat = 1.0;
    // Specular clearcoat
    if (matData.clearcoat != 0.0f)
    {

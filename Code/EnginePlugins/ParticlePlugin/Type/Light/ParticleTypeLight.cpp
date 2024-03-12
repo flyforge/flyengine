@@ -178,6 +178,8 @@ void plParticleTypeLight::ExtractTypeRenderData(plMsgExtractRenderData& ref_msg,
     pRenderData->m_LightColor = tintColor * pColor[i].ToLinearFloat();
     pRenderData->m_fIntensity = intensity;
     pRenderData->m_fSpecularMultiplier = 1.0f;
+    pRenderData->m_fWidth = 0.0f;
+    pRenderData->m_fLength = 0.0f;
     pRenderData->m_fRange = pSize[i] * sizeFactor;
     pRenderData->m_uiShadowDataOffset = plInvalidIndex;
 

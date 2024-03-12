@@ -17,6 +17,8 @@ public:
   float m_fIntensity;
   float m_fSpecularMultiplier;
   plUInt32 m_uiShadowDataOffset;
+  float m_fWidth;
+  float m_fLength;
 };
 
 /// \brief Base class for dynamic light components.
@@ -74,6 +76,14 @@ public:
   void SetConstantBias(float fShadowBias); // [ property ]
   float GetConstantBias() const;           // [ property ]
 
+  /// \brief Sets the width of the area light
+  void SetWidth(float fWidth); // [ property ]
+  float GetWidth() const;      // [ property ]
+
+  /// \brief Sets the length of the area light
+  void SetLength(float fLength); // [ property ]
+  float GetLength() const;      // [ property ]
+
   void OnMsgSetColor(plMsgSetColor& ref_msg); // [ msg handler ]
 
   /// \brief Calculates how far a lightsource would shine given the specified range and intensity.
@@ -95,4 +105,6 @@ protected:
   float m_fConstantBias = 0.1f;
   bool m_bCastShadows = false;
   bool m_bUseColorTemperature = false;
+  float m_fWidth;
+  float m_fLength;
 };

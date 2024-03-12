@@ -9,6 +9,7 @@
 #include <Shaders/Common/AmbientCubeBasis.h>
 #include <Shaders/Common/BRDF.h>
 #include <Shaders/Common/AdvancedBRDF.h>
+#include <Shaders/Common/AreaLight.h>
 
 Texture2DArray SSAOTexture;
 
@@ -537,8 +538,22 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
       #endif
 
 
-      AccumulateLight(totalLight, DefaultShadingNew(matData, lightVector, viewVector), lightColor * (attenuation * shadowTerm), lightData.specularMultiplier);
-
+      [branch]
+      if (lightData.length > 0)
+      {
+        float luminanceMultiplier = 1.0;
+        float luminanceModifier = 0.0f;
+        AccumulateLight(totalLight, TubeLightShading(lightData, matData, lightVector, viewVector, attenuation, luminanceMultiplier, luminanceModifier), lightColor * attenuation * shadowTerm + luminanceMultiplier * luminanceModifier, lightData.specularMultiplier);
+      }
+      else if(lightData.width > 0)
+      {
+        float luminance = 0.0f;
+        AccumulateLight(totalLight, SphereLightShading(lightData, matData, lightVector, viewVector, attenuation, luminance), lightColor * attenuation * shadowTerm + luminance, lightData.specularMultiplier);
+      }
+      else
+      {
+        AccumulateLight(totalLight, DefaultShadingNew(matData, lightVector, viewVector), lightColor * (attenuation * shadowTerm), lightData.specularMultiplier);
+      }
 
       #if defined(USE_MATERIAL_SUBSURFACE_COLOR)
         AccumulateLight(totalLight, SubsurfaceShading(matData, lightVector, viewVector), lightColor * (attenuation * subsurfaceShadow));        

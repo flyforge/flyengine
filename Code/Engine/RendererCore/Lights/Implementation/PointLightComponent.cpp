@@ -116,6 +116,8 @@ void plPointLightComponent::OnMsgExtractRenderData(plMsgExtractRenderData& msg) 
   pRenderData->m_LightColor = GetLightColor();
   pRenderData->m_fIntensity = m_fIntensity;
   pRenderData->m_fSpecularMultiplier = m_fSpecularMultiplier;
+  pRenderData->m_fWidth = m_fWidth;
+  pRenderData->m_fLength = m_fLength;
   pRenderData->m_fRange = m_fEffectiveRange;
   // pRenderData->m_hProjectedTexture = m_hProjectedTexture;
   pRenderData->m_uiShadowDataOffset = m_bCastShadows ? plShadowPool::AddPointLight(this, fScreenSpaceSize, msg.m_pView) : plInvalidIndex;
