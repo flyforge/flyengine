@@ -541,14 +541,11 @@ AccumulatedLight CalculateLighting(plMaterialData matData, plPerClusterData clus
       [branch]
       if (lightData.length > 0)
       {
-        float luminanceMultiplier = 1.0;
-        float luminanceModifier = 0.0f;
-        AccumulateLight(totalLight, TubeLightShading(lightData, matData, lightVector, viewVector, attenuation, luminanceMultiplier, luminanceModifier), lightColor * attenuation * shadowTerm + luminanceMultiplier * luminanceModifier, lightData.specularMultiplier);
+        AccumulateLight(totalLight, TubeLightShading(lightData, matData, lightVector, viewVector, attenuation), lightColor * (attenuation * shadowTerm), lightData.specularMultiplier);
       }
       else if(lightData.width > 0)
       {
-        float luminance = 0.0f;
-        AccumulateLight(totalLight, SphereLightShading(lightData, matData, lightVector, viewVector, attenuation, luminance), lightColor * attenuation * shadowTerm + luminance, lightData.specularMultiplier);
+        AccumulateLight(totalLight, SphereLightShading(lightData, matData, lightVector, viewVector, attenuation), lightColor * (attenuation * shadowTerm), lightData.specularMultiplier);
       }
       else
       {

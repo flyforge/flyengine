@@ -39,6 +39,8 @@ PL_BEGIN_ABSTRACT_COMPONENT_TYPE(plLightComponent, 6)
   PL_BEGIN_ATTRIBUTES
   {
     new plCategoryAttribute("Lighting"),
+    new plCapsuleVisualizerAttribute("Length", "Width"),
+    new plCapsuleVisualizerAttribute("Length",  "Width", plColor::Grey),
   }
   PL_END_ATTRIBUTES;
   PL_BEGIN_MESSAGEHANDLERS
@@ -261,10 +263,10 @@ void plLightComponent::OnMsgSetColor(plMsgSetColor& ref_msg)
 }
 
 // static
-float plLightComponent::CalculateEffectiveRange(float fRange, float fIntensity)
+float plLightComponent::CalculateEffectiveRange(float fRange, float fIntensity, float fWidth, float fLength)
 {
   const float fThreshold = 0.10f; // aggressive threshold to prevent large lights
-  const float fEffectiveRange = plMath::Sqrt(plMath::Max(0.0f, fIntensity)) / plMath::Sqrt(fThreshold);
+  const float fEffectiveRange = plMath::Sqrt(plMath::Max(0.0f, fIntensity) * ((1 + fWidth) * (1 + fLength))) / plMath::Sqrt(fThreshold);
 
   PL_ASSERT_DEBUG(!plMath::IsNaN(fEffectiveRange), "Light range is NaN");
 

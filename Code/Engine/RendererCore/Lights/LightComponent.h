@@ -90,7 +90,7 @@ public:
   ///
   /// If fRange is zero, the range needed for the given intensity is returned.
   /// Otherwise the smaller value of that and fRange is returned.
-  static float CalculateEffectiveRange(float fRange, float fIntensity);
+  static float CalculateEffectiveRange(float fRange, float fIntensity, float fWidth = 0.0f, float fLength = 0.0f);
 
   /// \brief Calculates how large on screen (in pixels) the lightsource would be.
   static float CalculateScreenSpaceSize(const plBoundingSphere& sphere, const plCamera& camera);

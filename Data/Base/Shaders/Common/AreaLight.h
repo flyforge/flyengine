@@ -27,7 +27,7 @@ float IlluminanceSphereOrDisk(float cosTheta, float sinSigmaSqr)
   return max(illuminance, 0.0f);
 }
 
-AccumulatedLight SphereLightShading(plPerLightData lightData, plMaterialData matData, float3 L, float3 V, float attenuation, out float luminance)
+AccumulatedLight SphereLightShading(plPerLightData lightData, plMaterialData matData, float3 L, float3 V, float attenuation)
 {
   float3 N = matData.worldNormal;
   float3 lightVector = lightData.position - matData.worldPosition;
@@ -53,12 +53,12 @@ AccumulatedLight SphereLightShading(plPerLightData lightData, plMaterialData mat
 
   float sqrDistance = dot(lightData.position - matData.worldPosition, lightVector);
 
-  float cosTheta = clamp(NoL, -0.999, 0.999); // Clamp to avoid edge case
-                                                            // We need to prevent the object penetrating into the surface
-                                                            // and we must avoid divide by 0, thus the 0.9999f
-  float sqrLightRadius = lightData.width * lightData.width;
-  float sinSigmaSqr = min(sqrLightRadius / sqrDistance, 0.9999f);
-  luminance = IlluminanceSphereOrDisk(cosTheta, sinSigmaSqr);
+  // float cosTheta = clamp(NoL, -0.999, 0.999); // Clamp to avoid edge case
+  //                                                           // We need to prevent the object penetrating into the surface
+  //                                                           // and we must avoid divide by 0, thus the 0.9999f
+  // float sqrLightRadius = lightData.width * lightData.width;
+  // float sinSigmaSqr = min(sqrLightRadius / sqrDistance, 0.9999f);
+  // luminance = IlluminanceSphereOrDisk(cosTheta, sinSigmaSqr);
 
   float3 kS = 1.0f;
   float3 kD = 1.0f;
@@ -145,7 +145,7 @@ float RectangleSolidAngle(float3 worldPos,
   return g0 + g1 + g2 + g3 - 2 * PI;
 }
 
-AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matData, float3 L, float3 V, float attenuation, out float luminanceMultiplier, out float luminanceModifier) {
+AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matData, float3 L, float3 V, float attenuation) {
   float3 N = matData.worldNormal;
   float3 lightVector = lightData.position - matData.worldPosition;
 
@@ -168,21 +168,12 @@ AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matDa
 
   float solidAngle = RectangleSolidAngle(matData.worldPosition, p0, p1, p2, p3);
 
-  if(lightData.width > 0)
-  {
-    luminanceMultiplier = solidAngle * 0.2 * (saturate(dot(normalize(p0 - matData.worldPosition), N)) + saturate(dot(normalize(p1 - matData.worldPosition), N)) + saturate(dot(normalize(p2 - matData.worldPosition), N)) + saturate(dot(normalize(p3 - matData.worldPosition), N)) + saturate(dot(normalize(lightData.position - matData.worldPosition), N)));
-  }
-  else
-  {
-    luminanceMultiplier = 1.0;
-  }
-
-  float3 spherePosition = ClosestPointOnSegment(P0, P1, matData.worldPosition);
-  float3 sphereUnormL = spherePosition - matData.worldPosition;
-  float3 sphereL = normalize(sphereUnormL);
-  float sqrSphereDistance = dot(sphereUnormL, sphereUnormL);
-
-  luminanceModifier = PI * saturate(dot(sphereL, N)) * ((lightData.width * lightData.width) / sqrSphereDistance);
+  // float3 spherePosition = ClosestPointOnSegment(P0, P1, matData.worldPosition);
+  // float3 sphereUnormL = spherePosition - matData.worldPosition;
+  // float3 sphereL = normalize(sphereUnormL);
+  // float sqrSphereDistance = dot(sphereUnormL, sphereUnormL);
+  //
+  // luminanceModifier = PI * saturate(dot(sphereL, N)) * ((lightData.width * lightData.width) / sqrSphereDistance);
 
   float3 R = 2 * dot(V, N) * N - V;
   R = GetSpecularDominantDirArea(N, R, matData.roughness);
@@ -254,11 +245,8 @@ AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matDa
   }
 #endif
 
-  specular /= PI;
-
   // Diffuse
-  diffuse  = BRDF_Diffuse(matData, NoV, NoL, VoH, NoH) * kD * NoL;
-
+  diffuse  = BRDF_Diffuse(matData, NoV, NoL, VoH, NoH) * NoL;
 
   return InitializeLight(diffuse, specular * (attenuation));
 }

@@ -14,7 +14,7 @@ PL_BEGIN_COMPONENT_TYPE(plPointLightComponent, 2, plComponentMode::Static)
 {
   PL_BEGIN_PROPERTIES
   {
-    PL_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(0.0f), new plSuffixAttribute(" m"), new plMinValueTextAttribute("Auto")),
+    PL_ACCESSOR_PROPERTY("Range", GetRange, SetRange)->AddAttributes(new plClampValueAttribute(0.0f, plVariant()), new plDefaultValueAttribute(5.0f), new plSuffixAttribute(" m")),
     //PL_ACCESSOR_PROPERTY("ProjectedTexture", GetProjectedTextureFile, SetProjectedTextureFile)->AddAttributes(new plAssetBrowserAttribute("CompatibleAsset_Texture_Cube")),
   }
   PL_END_PROPERTIES;
@@ -27,6 +27,8 @@ PL_BEGIN_COMPONENT_TYPE(plPointLightComponent, 2, plComponentMode::Static)
   {
     new plSphereManipulatorAttribute("Range"),
     new plPointLightVisualizerAttribute("Range", "Intensity", "LightColor"),
+    new plCapsuleVisualizerAttribute("Length", "Width"),
+    new plCapsuleVisualizerAttribute("Length",  "Width", plColor::Grey),
   }
   PL_END_ATTRIBUTES;
 }
@@ -35,19 +37,18 @@ PL_END_COMPONENT_TYPE
 
 plPointLightComponent::plPointLightComponent()
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
+  m_fEffectiveRange = m_fRange;//CalculateEffectiveRange(m_fRange, m_fIntensity);
 }
 
 plPointLightComponent::~plPointLightComponent() = default;
 
 plResult plPointLightComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
+  m_fEffectiveRange = m_fRange;
 
   ref_bounds = plBoundingSphere::MakeFromCenterAndRadius(plVec3::MakeZero(), m_fEffectiveRange);
   return PL_SUCCESS;
 }
-
 void plPointLightComponent::SetRange(float fRange)
 {
   m_fRange = fRange;

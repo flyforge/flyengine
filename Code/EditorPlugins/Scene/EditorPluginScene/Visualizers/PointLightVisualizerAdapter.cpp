@@ -39,7 +39,7 @@ void plPointLightVisualizerAdapter::Update()
     pObjectAccessor->GetValue(m_pObject, GetProperty(pAttr->GetIntensityProperty()), intensity).AssertSuccess();
     PL_ASSERT_DEBUG(intensity.CanConvertTo<float>(), "Invalid property bound to plPointLightVisualizerAttribute 'intensity'");
 
-    m_fScale = plLightComponent::CalculateEffectiveRange(range.ConvertTo<float>(), intensity.ConvertTo<float>());
+    m_fScale = range.ConvertTo<float>();//plLightComponent::CalculateEffectiveRange(range.ConvertTo<float>(), intensity.ConvertTo<float>());
   }
 
   if (!pAttr->GetColorProperty().IsEmpty())

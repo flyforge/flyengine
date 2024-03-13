@@ -37,6 +37,8 @@ PL_BEGIN_COMPONENT_TYPE(plSpotLightComponent, 2, plComponentMode::Static)
     new plConeLengthManipulatorAttribute("Range"),
     new plConeAngleManipulatorAttribute("OuterSpotAngle", 1.5f),
     new plConeAngleManipulatorAttribute("InnerSpotAngle", 1.5f),
+    new plCapsuleVisualizerAttribute("Length", "Width"),
+    new plCapsuleVisualizerAttribute("Length",  "Width", plColor::Grey),
   }
   PL_END_ATTRIBUTES;
 }
@@ -45,14 +47,14 @@ PL_END_COMPONENT_TYPE
 
 plSpotLightComponent::plSpotLightComponent()
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
+  m_fEffectiveRange = m_fRange;//CalculateEffectiveRange(m_fRange, m_fIntensity);
 }
 
 plSpotLightComponent::~plSpotLightComponent() = default;
 
 plResult plSpotLightComponent::GetLocalBounds(plBoundingBoxSphere& ref_bounds, bool& ref_bAlwaysVisible, plMsgUpdateLocalBounds& ref_msg)
 {
-  m_fEffectiveRange = CalculateEffectiveRange(m_fRange, m_fIntensity);
+  m_fEffectiveRange = m_fRange;//CalculateEffectiveRange(m_fRange, m_fIntensity);
 
   ref_bounds = CalculateBoundingSphere(plTransform::MakeIdentity(), m_fEffectiveRange);
   return PL_SUCCESS;
