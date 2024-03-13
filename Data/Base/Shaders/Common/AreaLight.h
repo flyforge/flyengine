@@ -1,4 +1,5 @@
 #pragma once
+#include "Common.h"
 
 inline float3 GetSpecularDominantDirArea(float3 N, float3 R, float roughness)
 {
@@ -155,26 +156,6 @@ AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matDa
   float3 P0 = lightData.position - lightLeft * lightLength * 0.5f;
   float3 P1 = lightData.position + lightLeft * lightLength * 0.5f;
 
-
-  float3 forward = normalize(ClosestPointOnLine(P0, P1, matData.worldPosition) - matData.worldPosition);
-  float3 left = lightLeft;
-  float3 up = cross(lightLeft, forward);
-
-  float3 p0 = lightData.position - left * (0.5 * lightLength) + lightData.width * up;
-  float3 p1 = lightData.position - left * (0.5 * lightLength) - lightData.width * up;
-  float3 p2 = lightData.position + left * (0.5 * lightLength) - lightData.width * up;
-  float3 p3 = lightData.position + left * (0.5 * lightLength) + lightData.width * up;
-
-
-  float solidAngle = RectangleSolidAngle(matData.worldPosition, p0, p1, p2, p3);
-
-  // float3 spherePosition = ClosestPointOnSegment(P0, P1, matData.worldPosition);
-  // float3 sphereUnormL = spherePosition - matData.worldPosition;
-  // float3 sphereL = normalize(sphereUnormL);
-  // float sqrSphereDistance = dot(sphereUnormL, sphereUnormL);
-  //
-  // luminanceModifier = PI * saturate(dot(sphereL, N)) * ((lightData.width * lightData.width) / sqrSphereDistance);
-
   float3 R = 2 * dot(V, N) * N - V;
   R = GetSpecularDominantDirArea(N, R, matData.roughness);
 
@@ -248,5 +229,5 @@ AccumulatedLight TubeLightShading(plPerLightData lightData, plMaterialData matDa
   // Diffuse
   diffuse  = BRDF_Diffuse(matData, NoV, NoL, VoH, NoH) * NoL;
 
-  return InitializeLight(diffuse, specular * (attenuation));
+  return InitializeLight(diffuse, saturate_11(specular * (attenuation)));
 }
