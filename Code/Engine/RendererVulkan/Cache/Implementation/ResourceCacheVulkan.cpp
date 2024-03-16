@@ -415,6 +415,13 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   vk::PipelineInputAssemblyStateCreateInfo input_assembly;
   input_assembly.topology = plConversionUtilsVulkan::GetPrimitiveTopology(desc.m_topology);
 
+  const bool bTessellation = desc.m_pCurrentShader->GetShader(plGALShaderStage::HullShader) != nullptr;
+  if (bTessellation)
+  {
+    // Tessellation shaders always need to use patch list as the topology.
+    input_assembly.topology = vk::PrimitiveTopology::ePatchList;
+  }
+
   // Specify rasterization state.
   const vk::PipelineRasterizationStateCreateInfo* raster = desc.m_pCurrentRasterizerState->GetRasterizerState();
 
@@ -460,6 +467,12 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
     }
   }
 
+  vk::PipelineTessellationStateCreateInfo tessellationInfo;
+  if (bTessellation)
+  {
+    tessellationInfo.patchControlPoints = desc.m_pCurrentShader->GetDescription().m_ByteCodes[plGALShaderStage::HullShader]->m_uiTessellationPatchControlPoints;
+  }
+
   vk::GraphicsPipelineCreateInfo pipe;
   pipe.renderPass = desc.m_renderPass;
   pipe.layout = desc.m_layout;
@@ -473,6 +486,8 @@ vk::Pipeline plResourceCacheVulkan::RequestGraphicsPipeline(const GraphicsPipeli
   pipe.pViewportState = &viewport;
   pipe.pDepthStencilState = depth_stencil;
   pipe.pDynamicState = &dynamic;
+  if (bTessellation)
+    pipe.pTessellationState = &tessellationInfo;
 
   vk::Pipeline pipeline;
   vk::PipelineCache cache;

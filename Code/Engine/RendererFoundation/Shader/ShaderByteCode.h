@@ -121,6 +121,9 @@ public:
   plHybridArray<plShaderResourceBinding, 8> m_ShaderResourceBindings;
   plHybridArray<plShaderVertexInputAttribute, 8> m_ShaderVertexInput;
 
+  // Only set in the hull shader.
+  plUInt8 m_uiTessellationPatchControlPoints = 0;
+
   // Filled out by compiler base library
   plEnum<plGALShaderStage> m_Stage = plGALShaderStage::ENUM_COUNT;
   bool m_bWasCompiledWithDebug = false;

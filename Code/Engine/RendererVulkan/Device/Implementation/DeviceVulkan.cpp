@@ -816,7 +816,7 @@ void plGALDeviceVulkan::EndPipelinePlatform(plGALSwapChain* pSwapChain)
   m_pDefaultPass->Reset();
 }
 
-vk::Fence plGALDeviceVulkan::Submit()
+vk::Fence plGALDeviceVulkan::Submit(bool bAddSignlSemaphose)
 {
   m_pDefaultPass->SetCurrentCommandBuffer(nullptr, nullptr);
 
@@ -850,8 +850,11 @@ vk::Fence plGALDeviceVulkan::Submit()
     ReclaimLater(m_lastCommandBufferFinished);
   }
 
-  m_lastCommandBufferFinished = plSemaphorePoolVulkan::RequestSemaphore();
-  AddSignalSemaphore(plGALDeviceVulkan::SemaphoreInfo::MakeSignalSemaphore(m_lastCommandBufferFinished));
+  if (bAddSignlSemaphose)
+  {
+    m_lastCommandBufferFinished = plSemaphorePoolVulkan::RequestSemaphore();
+    AddSignalSemaphore(plGALDeviceVulkan::SemaphoreInfo::MakeSignalSemaphore(m_lastCommandBufferFinished));
+  }
 
   vk::Fence renderFence = plFencePoolVulkan::RequestFence();
 
@@ -1436,8 +1439,8 @@ void plGALDeviceVulkan::FlushPlatform()
 
 void plGALDeviceVulkan::WaitIdlePlatform()
 {
-  // Make sure command buffers get flushed.
-  Submit();
+  // Make sure command buffers get flushed. Also, no need to add a wait semaphore if we flush anyway, all commands will be done.
+  Submit(false);
   m_device.waitIdle();
   DestroyDeadObjects();
   for (plUInt32 i = 0; i < PL_ARRAY_SIZE(m_PerFrameData); ++i)

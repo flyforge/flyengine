@@ -35,6 +35,8 @@ plGALCommandEncoderImplDX11::~plGALCommandEncoderImplDX11()
 
 void plGALCommandEncoderImplDX11::SetShaderPlatform(const plGALShader* pShader)
 {
+  m_uiTessellationPatchControlPoints = 0;
+
   ID3D11VertexShader* pVS = nullptr;
   ID3D11HullShader* pHS = nullptr;
   ID3D11DomainShader* pDS = nullptr;
@@ -64,6 +66,7 @@ void plGALCommandEncoderImplDX11::SetShaderPlatform(const plGALShader* pShader)
   {
     m_pDXContext->HSSetShader(pHS, nullptr, 0);
     m_pBoundShaders[plGALShaderStage::HullShader] = pHS;
+    m_uiTessellationPatchControlPoints = pShader->GetDescription().m_ByteCodes[plGALShaderStage::HullShader]->m_uiTessellationPatchControlPoints;
   }
 
   if (pDS != m_pBoundShaders[plGALShaderStage::DomainShader])
@@ -727,7 +730,7 @@ static const D3D11_PRIMITIVE_TOPOLOGY GALTopologyToDX11[plGALPrimitiveTopology::
 
 void plGALCommandEncoderImplDX11::SetPrimitiveTopologyPlatform(plGALPrimitiveTopology::Enum topology)
 {
-  m_pDXContext->IASetPrimitiveTopology(GALTopologyToDX11[topology]);
+  m_Topology = topology;
 }
 
 void plGALCommandEncoderImplDX11::SetBlendStatePlatform(const plGALBlendState* pBlendState, const plColor& blendFactor, plUInt32 uiSampleMask)
@@ -881,6 +884,15 @@ static void SetSamplers(
 // Some state changes are deferred so they can be updated faster
 plResult plGALCommandEncoderImplDX11::FlushDeferredStateChanges()
 {
+  if (m_uiTessellationPatchControlPoints == 0)
+  {
+    m_pDXContext->IASetPrimitiveTopology(GALTopologyToDX11[m_Topology.GetValue()]);
+  }
+  else
+  {
+    m_pDXContext->IASetPrimitiveTopology(static_cast<D3D_PRIMITIVE_TOPOLOGY>(D3D11_PRIMITIVE_TOPOLOGY_1_CONTROL_POINT_PATCHLIST + (m_uiTessellationPatchControlPoints - 1)));
+  }
+
   if (m_BoundVertexBuffersRange.IsValid())
   {
     const plUInt32 uiStartSlot = m_BoundVertexBuffersRange.m_uiMin;

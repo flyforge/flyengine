@@ -745,6 +745,10 @@ plResult plShaderCompilerDXC::ReflectShaderStage(plShaderProgramData& inout_Data
       }
     }
   }
+  else if (Stage == plGALShaderStage::HullShader)
+  {
+    pShader->m_uiTessellationPatchControlPoints = module.entry_points[0].output_vertices;
+  }
 
   // descriptor bindings
   {

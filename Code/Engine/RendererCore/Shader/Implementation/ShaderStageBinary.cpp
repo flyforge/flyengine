@@ -29,6 +29,7 @@ plResult plShaderStageBinary::Write(plStreamWriter& inout_stream) const
   inout_stream << m_uiSourceHash;
 
   // plGALShaderByteCode
+  inout_stream << m_pGALByteCode->m_uiTessellationPatchControlPoints;
   inout_stream << m_pGALByteCode->m_Stage;
   inout_stream << m_pGALByteCode->m_bWasCompiledWithDebug;
 
@@ -111,6 +112,10 @@ plResult plShaderStageBinary::Read(plStreamReader& inout_stream)
   inout_stream >> m_uiSourceHash;
 
   // plGALShaderByteCode
+  if (uiVersion >= plShaderStageBinary::Version::Version7)
+  {
+    inout_stream >> m_pGALByteCode->m_uiTessellationPatchControlPoints;
+  }
   inout_stream >> m_pGALByteCode->m_Stage;
   inout_stream >> m_pGALByteCode->m_bWasCompiledWithDebug;
 

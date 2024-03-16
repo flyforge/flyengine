@@ -132,6 +132,9 @@ private:
   ID3DUserDefinedAnnotation* m_pDXAnnotation = nullptr;
 
   // Bound objects for deferred state flushes
+  plEnum<plGALPrimitiveTopology> m_Topology;
+  plUInt8 m_uiTessellationPatchControlPoints = 0;
+
   ID3D11Buffer* m_pBoundConstantBuffers[PL_GAL_MAX_CONSTANT_BUFFER_COUNT] = {};
   plGAL::ModifiedRange m_BoundConstantBuffersRange[plGALShaderStage::ENUM_COUNT];
 
