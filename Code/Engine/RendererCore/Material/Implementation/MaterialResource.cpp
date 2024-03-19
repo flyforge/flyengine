@@ -891,22 +891,13 @@ void plMaterialResource::UpdateConstantBuffer(plShaderPermutationResource* pShad
   if (pShaderPermutation == nullptr)
     return;
 
+  const plGALShader* pShader = plGALDevice::GetDefaultDevice()->GetShader(pShaderPermutation->GetGALShader());
+  if (pShader == nullptr)
+    return;
+
   plTempHashedString sConstantBufferName("plMaterialConstants");
 
-  const plShaderResourceBinding* pBinding = nullptr;
-  for (int i = 0; i <= plGALShaderStage::PixelShader; i++)
-  {
-    auto shaderStage = pShaderPermutation->GetShaderByteCode(static_cast<plGALShaderStage::Enum>(i));
-    if (shaderStage)
-    {
-      pBinding = shaderStage->GetShaderResourceBinding(sConstantBufferName);
-    }
-  }
-  if (pBinding == nullptr)
-  {
-    pBinding = pShaderPermutation->GetShaderByteCode(plGALShaderStage::VertexShader)->GetShaderResourceBinding(sConstantBufferName);
-  }
-
+  const plShaderResourceBinding* pBinding = pShader->GetShaderResourceBinding(sConstantBufferName);
   const plShaderConstantBufferLayout* pLayout = pBinding != nullptr ? pBinding->m_pLayout : nullptr;
   if (pLayout == nullptr)
     return;

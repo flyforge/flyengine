@@ -102,19 +102,6 @@ public:
   inline plUInt32 GetSize() const;
   inline bool IsValid() const;
 
-  const plShaderResourceBinding* GetShaderResourceBinding(const plTempHashedString& sName) const
-  {
-    for (auto& binding : m_ShaderResourceBindings)
-    {
-      if (binding.m_sName == sName)
-      {
-        return &binding;
-      }
-    }
-
-    return nullptr;
-  }
-
 public:
   // Filled out by Shader Compiler platform implementation
   plDynamicArray<plUInt8> m_ByteCode;

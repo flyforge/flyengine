@@ -816,7 +816,7 @@ void plGALDeviceVulkan::EndPipelinePlatform(plGALSwapChain* pSwapChain)
   m_pDefaultPass->Reset();
 }
 
-vk::Fence plGALDeviceVulkan::Submit(bool bAddSignlSemaphose)
+vk::Fence plGALDeviceVulkan::Submit(bool bAddSignalSemaphore)
 {
   m_pDefaultPass->SetCurrentCommandBuffer(nullptr, nullptr);
 
@@ -850,7 +850,7 @@ vk::Fence plGALDeviceVulkan::Submit(bool bAddSignlSemaphose)
     ReclaimLater(m_lastCommandBufferFinished);
   }
 
-  if (bAddSignlSemaphose)
+  if (bAddSignalSemaphore)
   {
     m_lastCommandBufferFinished = plSemaphorePoolVulkan::RequestSemaphore();
     AddSignalSemaphore(plGALDeviceVulkan::SemaphoreInfo::MakeSignalSemaphore(m_lastCommandBufferFinished));
@@ -1778,6 +1778,7 @@ void plGALDeviceVulkan::FillFormatLookupTable()
       const bool bSampled = static_cast<bool>(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eSampledImage);
       const bool bColorAttachment = static_cast<bool>(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eColorAttachment);
       const bool bDepthAttachment = static_cast<bool>(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eDepthStencilAttachment);
+      const bool bStorageImage = static_cast<bool>(formatProperties.optimalTilingFeatures & vk::FormatFeatureFlagBits::eStorageImage);
 
       const bool bTexel = static_cast<bool>(formatProperties.bufferFeatures & vk::FormatFeatureFlagBits::eUniformTexelBuffer);
       const bool bStorageTexel = static_cast<bool>(formatProperties.bufferFeatures & vk::FormatFeatureFlagBits::eStorageTexelBuffer);
@@ -1786,7 +1787,7 @@ void plGALDeviceVulkan::FillFormatLookupTable()
       plStringBuilder sTemp;
       plReflectionUtils::EnumerationToString(plGetStaticRTTI<plGALResourceFormat>(), i, sTemp, plReflectionUtils::EnumConversionMode::ValueNameOnly);
 
-      plLog::Info("OptTiling S: {}, CA: {}, DA: {}. Buffer: T: {}, ST: {}, V: {}, Format {} -> {}", bSampled ? 1 : 0, bColorAttachment ? 1 : 0, bDepthAttachment ? 1 : 0, bTexel ? 1 : 0, bStorageTexel ? 1 : 0, bVertex ? 1 : 0, sTemp, vk::to_string(entry.m_format).c_str());
+      plLog::Info("OptTiling S: {}, UAV: {}, CA: {}, DA: {}. Buffer: T: {}, ST: {}, V: {}, Format {} -> {}", bSampled ? 1 : 0, bStorageImage ? 1 : 0, bColorAttachment ? 1 : 0, bDepthAttachment ? 1 : 0, bTexel ? 1 : 0, bStorageTexel ? 1 : 0, bVertex ? 1 : 0, sTemp, vk::to_string(entry.m_format).c_str());
     }
   }
 }

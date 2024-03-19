@@ -52,7 +52,7 @@ struct VS_IN
   uint VertexID : SV_VertexID;
 };
 
-#if defined(VERTEX_SHADER)
+#if defined(VERTEX_SHADER) || defined(HULL_SHADER) || defined(DOMAIN_SHADER)
 #  if defined(CAMERA_MODE)
 #    if CAMERA_MODE == CAMERA_MODE_STEREO && defined(VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX)
 #      define RENDER_TARGET_ARRAY_INDEX
@@ -64,16 +64,17 @@ struct VS_IN
 
 #elif defined(GEOMETRY_SHADER)
 #  if defined(CAMERA_MODE)
-#    if CAMERA_MODE == CAMERA_MODE_STEREO && !defined(VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX)
 #      define STAGE_TEMPLATE VS_OUT
 #      include <Shaders/Materials/MaterialInterpolatorTemplate.h>
 #      undef STAGE_TEMPLATE
 
+#    if CAMERA_MODE == CAMERA_MODE_STEREO && !defined(VERTEX_SHADER_RENDER_TARGET_ARRAY_INDEX)
 #      define RENDER_TARGET_ARRAY_INDEX
-#      define STAGE_TEMPLATE GS_OUT
-#      include <Shaders/Materials/MaterialInterpolatorTemplate.h>
-#      undef STAGE_TEMPLATE
 #    endif
+
+#    define STAGE_TEMPLATE GS_OUT
+#    include <Shaders/Materials/MaterialInterpolatorTemplate.h>
+#    undef STAGE_TEMPLATE
 #  endif
 
 #elif defined(PIXEL_SHADER)

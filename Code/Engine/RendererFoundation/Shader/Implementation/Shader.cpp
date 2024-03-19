@@ -12,6 +12,18 @@ plArrayPtr<const plShaderResourceBinding> plGALShader::GetBindingMapping() const
   return m_BindingMapping;
 }
 
+const plShaderResourceBinding* plGALShader::GetShaderResourceBinding(const plTempHashedString& sName) const
+{
+  for (auto& binding : m_BindingMapping)
+  {
+    if (binding.m_sName == sName)
+    {
+      return &binding;
+    }
+  }
+  return nullptr;
+}
+
 plArrayPtr<const plShaderVertexInputAttribute> plGALShader::GetVertexInputAttributes() const
 {
   if (m_Description.HasByteCodeForStage(plGALShaderStage::VertexShader))

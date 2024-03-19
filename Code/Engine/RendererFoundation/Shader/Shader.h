@@ -10,6 +10,8 @@ public:
 
   /// Returns the list of shader resources and their binding information. These must be bound before the shader can be used.
   plArrayPtr<const plShaderResourceBinding> GetBindingMapping() const;
+  /// Convenience function that finds 'sName' in GetBindingMapping and returns it if present.
+  const plShaderResourceBinding* GetShaderResourceBinding(const plTempHashedString& sName) const;
   /// Returns the list of vertex input attributes. Compute shaders return an empty array.
   plArrayPtr<const plShaderVertexInputAttribute> GetVertexInputAttributes() const;
 
